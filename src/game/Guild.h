@@ -19,7 +19,10 @@
 #ifndef MANGOSSERVER_GUILD_H
 #define MANGOSSERVER_GUILD_H
 
-#define GUILD_MAXRANKS 10
+#define WITHDRAW_MONEY_UNLIMITED    0xFFFFFFFF
+#define WITHDRAW_SLOT_UNLIMITED     0xFFFFFFFF
+
+#include "Item.h"
 
 enum GuildDefaultRanks
 {
@@ -46,6 +49,7 @@ enum GuildRankRights
     GR_RIGHT_VIEWOFFNOTE        = 0x00004040,
     GR_RIGHT_EOFFNOTE           = 0x00008040,
     GR_RIGHT_MODIFY_GUILD_INFO  = 0x00010040,
+    GR_RIGHT_REPAIR_FROM_GUILD  = 0x00020000,               // Remove money withdraw capacity
     GR_RIGHT_ALL                = 0x0001F1FF
 };
 
@@ -105,7 +109,7 @@ enum GuildEvents
     GE_SIGNED_ON        = 0x0C,
     GE_SIGNED_OFF       = 0x0D,
     GE_UNK3             = 0x0E,
-    GE_UNK4             = 0x0F,
+    GE_BANKTAB_PURCHASED= 0x0F,
     GE_UNK5             = 0x10,
     GE_UNK6             = 0x11,                             // string 0000000000002710 is 1 gold
     GE_UNK7             = 0x12
@@ -127,6 +131,43 @@ enum PetitionSigns
     PETITION_SIGN_NOT_SERVER        = 4,
 };
 
+enum GuildBankRights
+{
+    GUILD_BANK_RIGHT_VIEW_TAB       = 1,
+    GUILD_BANK_RIGHT_PUT_ITEM       = 2,                    // Need both bits to be able to deposit
+    GUILD_BANK_RIGHT_FULL           = 0xFF,
+};
+
+enum GuildBankLogEntries
+{
+    GUILD_BANK_LOG_DEPOSIT_ITEM     = 1,
+    GUILD_BANK_LOG_WITHDRAW_ITEM    = 2,
+    GUILD_BANK_LOG_MOVE_ITEM        = 3,
+    GUILD_BANK_LOG_DEPOSIT_MONEY    = 4,
+    GUILD_BANK_LOG_WITHDRAW_MONEY   = 5,
+    GUILD_BANK_LOG_REPAIR_MONEY     = 6,
+    GUILD_BANK_LOG_MOVE_ITEM2       = 7,
+};
+
+struct GuildBankEvent
+{
+    uint32 LogGuid;
+    uint8  LogEntry;
+    uint8  TabId;
+    uint32 PlayerGuid;
+    uint32 ItemOrMoney;
+    uint8  ItemStackCount;
+    uint8  DestTabId;
+    uint64 TimeStamp;
+};
+
+struct GuildBankTab
+{
+    Item* Slots[GUILD_BANK_MAX_SLOTS];
+    std::string Name;
+    std::string Icon;
+};
+
 struct MemberSlot
 {
     uint64 logout_time;
@@ -137,14 +178,21 @@ struct MemberSlot
     uint32 zoneId;
     uint8 level;
     uint8 Class;
+    uint32 BankResetTimeMoney;
+    uint32 BankRemMoney;
+    uint32 BankResetTimeTab[GUILD_BANK_MAX_TABS];
+    uint32 BankRemSlotsTab[GUILD_BANK_MAX_TABS];
 };
 
 struct RankInfo
 {
-    RankInfo(std::string _name, uint32 _rights) : name(_name), rights(_rights) {}
+    RankInfo(std::string _name, uint32 _rights, uint32 _money) : name(_name), rights(_rights), BankMoneyPerDay(_money) {}
 
     std::string name;
     uint32 rights;
+    uint32 BankMoneyPerDay;
+    uint32 TabRight[GUILD_BANK_MAX_TABS];
+    uint32 TabSlotPerDay[GUILD_BANK_MAX_TABS];
 };
 
 class Guild
@@ -192,11 +240,13 @@ class Guild
         bool LoadGuildFromDB(uint32 GuildId);
         bool LoadRanksFromDB(uint32 GuildId);
         bool LoadMembersFromDB(uint32 GuildId);
+
         bool FillPlayerData(uint64 guid, MemberSlot* memslot);
         void LoadPlayerStatsByGuid(uint64 guid);
 
         void BroadcastToGuild(WorldSession *session, std::string msg, uint32 language = LANG_UNIVERSAL);
         void BroadcastToOfficers(WorldSession *session, std::string msg, uint32 language = LANG_UNIVERSAL);
+        void BroadcastPacketToRank(WorldPacket *packet, uint32 rankId);
         void BroadcastPacket(WorldPacket *packet);
 
         void CreateRank(std::string name,uint32 rights);
@@ -217,8 +267,48 @@ class Guild
 
         void UpdateLogoutTime(uint64 guid);
 
+        // ** Guild bank **
+        // Content & item deposit/withdraw
+        void   DisplayGuildBankContent(WorldSession *session, uint8 TabId);
+        Item*  StoreItem(uint8 TabId, uint8* SlotId, Item* pItem);
+        Item*  GetItem(uint8 TabId, uint8 SlotId);
+        void   EmptyBankSlot(uint8 TabId, uint8 SlotId);
+        // Tabs
+        void   DisplayGuildBankTabsInfo(WorldSession *session);
+        void   CreateNewBankTab();
+        void   SetGuildBankTabInfo(uint8 TabId, std::string name, std::string icon);
+        void   CreateBankRightForTab(uint32 rankid, uint8 TabId);
+        const  GuildBankTab *GetBankTab(uint8 index) { if(index >= m_TabListMap.size()) return NULL; return m_TabListMap[index]; }
+        const  uint8 GetPurchasedTabs() { return purchased_tabs; }
+        uint8  GetBankRights(uint32 rankId, uint8 TabId);
+        // Load/unload
+        void   LoadGuildBankFromDB();
+        void   UnloadGuildBank();
+        void   IncOnlineMemberCount() { m_onlinemembers++; }
+        // Money deposit/withdraw
+        void   SendMoneyInfo(WorldSession *session, uint32 LowGuid);
+        bool   MemberMoneyWithdraw(uint32 amount, uint32 LowGuid);
+        uint64 GetGuildBankMoney() { return guildbank_money; }
+        void   SetBankMoney(uint64 money);
+        // per days
+        bool   MemberItemWithdraw(uint8 TabId, uint32 LowGuid);
+        uint32 GetMemberSlotWithdrawRem(uint32 LowGuid, uint8 TabId);
+        uint32 GetMemberMoneyWithdrawRem(uint32 LowGuid);
+        void   SetBankMoneyPerDay(uint32 rankId, uint32 money);
+        void   SetBankRightsAndSlots(uint32 rankId, uint8 TabId, uint32 right, uint32 SlotPerDay, bool db);
+        uint32 GetBankMoneyPerDay(uint32 rankId);
+        uint32 GetBankSlotPerDay(uint32 rankId, uint8 TabId);
+        // rights per day
+        void   LoadBankRightsFromDB(uint32 GuildId);
+        // logs
+        void   LoadGuildBankEventLogFromDB();
+        void   UnloadGuildBankEventLog();
+        void   DisplayGuildBankLogs(WorldSession *session, uint8 TabId);
+        void   LogBankEvent(uint8 LogEntry, uint8 TabId, uint32 PlayerGuidLow, uint32 ItemOrMoney, uint8 ItemStackCount=0, uint8 DestTabId=0);
+        void   RenumBankLogs();
+
     protected:
-        void AddRank(std::string name,uint32 rights);
+        void AddRank(std::string name,uint32 rights,uint32 money);
 
         uint32 Id;
         std::string name;
@@ -236,7 +326,21 @@ class Guild
         uint32 BackgroundColor;
 
         RankList m_ranks;
+        uint32 maxrank;
 
         MemberList members;
+
+        typedef std::vector<GuildBankTab*> TabListMap;
+        TabListMap m_TabListMap;
+        typedef std::list<GuildBankEvent*> GuildBankEventLog;
+        GuildBankEventLog m_GuildBankEventLog_Money;
+        GuildBankEventLog m_GuildBankEventLog_Item[GUILD_BANK_MAX_TABS];
+
+        bool m_bankloaded;
+        uint32 m_onlinemembers;
+        uint64 guildbank_money;
+        uint8 purchased_tabs;
+
+        uint32 LogMaxGuid;
 };
 #endif

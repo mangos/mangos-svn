@@ -164,7 +164,7 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
         return;
 
     normalizePlayerName(plName);
-    //CharacterDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
+    //CharacterDatabase.escape_string(plName);              // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -307,7 +307,7 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
         return;
 
     normalizePlayerName(plName);
-    //CharacterDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
+    //CharacterDatabase.escape_string(plName);              // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -390,7 +390,7 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
         return;
 
     normalizePlayerName(plName);
-    //CharacterDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
+    //CharacterDatabase.escape_string(plName);              // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -534,7 +534,7 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
         return;
 
     normalizePlayerName(name);
-    //CharacterDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+    //CharacterDatabase.escape_string(name);                // prevent SQL injection - normal name don't must changed by this call
 
     newLeader = ObjectAccessor::Instance().FindPlayerByName(name.c_str());
     if(newLeader)
@@ -636,7 +636,7 @@ void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
         return;
 
     normalizePlayerName(name);
-    //CharacterDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+    //CharacterDatabase.escape_string(name);                // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(name.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -696,7 +696,7 @@ void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
         return;
 
     normalizePlayerName(plName);
-    //CharacterDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
+    //CharacterDatabase.escape_string(plName);              // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -746,7 +746,9 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
     Guild *guild;
     std::string rankname;
     uint32 rankId;
-    uint32 rights[14];
+    uint32 rights, MoneyPerDay;
+    uint32 BankRights;
+    uint32 BankSlotPerDay;
 
     //sLog.outDebug("WORLD: Received CMSG_GUILD_RANK");
 
@@ -764,18 +766,25 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
     }
 
     recvPacket >> rankId;
-    recvPacket >> rights[0];
+    recvPacket >> rights;
     recvPacket >> rankname;
-    for(uint8 i = 1; i < 14; ++i)
-        recvPacket >> rights[i];
+    recvPacket >> MoneyPerDay;
 
-    sLog.outDebug("WORLD: Changed RankName to %s , Rights to 0x%.4X", rankname.c_str(), rights[0]);
+    for (int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
+    {
+        recvPacket >> BankRights;
+        recvPacket >> BankSlotPerDay;
+        guild->SetBankRightsAndSlots(rankId, uint8(i), uint16(BankRights & 0xFF), uint16(BankSlotPerDay), true);
+    }
+    sLog.outDebug("WORLD: Changed RankName to %s , Rights to 0x%.4X", rankname.c_str(), rights);
 
+    guild->SetBankMoneyPerDay(rankId, MoneyPerDay);
     guild->SetRankName(rankId, rankname);
-    guild->SetRankRights(rankId, rights[0]);
+    guild->SetRankRights(rankId, rights);
 
     guild->Query(this);
     guild->Roster(this);
+
 }
 
 void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
@@ -800,7 +809,7 @@ void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if(guild->GetNrRanks() >= 10)                           // client not let create more 10 ranks
+    if(guild->GetNrRanks() >= GUILD_MAX_RANKS)              // client not let create more 10 than ranks
         return;
 
     recvPacket >> rankname;
@@ -934,14 +943,14 @@ void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildEventLogOpcode(WorldPacket& recvPacket)
 {
-    sLog.outDebug("WORLD: Received MSG_GUILD_EVENT_LOG");   // empty
+    sLog.outDebug("WORLD: Received (MSG_GUILD_EVENT_LOG)"); // empty
     recvPacket.hexlike();
 
     uint8 count = 0,type = 0;
 
     WorldPacket data(MSG_GUILD_EVENT_LOG, 0);
     data << uint8(count);                                   // count, max count == 100
-    for(uint8 i = 0; i < count; ++i)
+    for(int i = 0; i < count; ++i)
     {
 
         data << uint8(type);
@@ -956,4 +965,682 @@ void WorldSession::HandleGuildEventLogOpcode(WorldPacket& recvPacket)
 
     }
     SendPacket(&data);
+    sLog.outDebug("WORLD: Sent (MSG_GUILD_EVENT_LOG)");
+}
+
+/******  GUILD BANK  *******/
+
+void WorldSession::HandleGuildBankGetMoneyAmount( WorldPacket & /* recv_data */ )
+{
+    sLog.outDebug("WORLD: Received (MSG_GUILDBANK_GET_MONEY_AMOUNT)");
+    //recv_data.hexlike();
+
+    uint32 GuildId = GetPlayer()->GetGuildId();
+    if (GuildId == 0)
+        return;
+
+    Guild *pGuild = objmgr.GetGuildById(GuildId);
+    if(!pGuild)
+        return;
+
+    pGuild->SendMoneyInfo(this, GetPlayer()->GetGUIDLow());
+}
+
+void WorldSession::HandleGuildBankGetRights( WorldPacket& /* recv_data */ )
+{
+    sLog.outDebug("WORLD: Received (MSG_GUILDBANK_GET_RIGHTS)");
+
+    uint32 GuildId = GetPlayer()->GetGuildId();
+    if (GuildId == 0)
+        return;
+
+    Guild *pGuild = objmgr.GetGuildById(GuildId);
+    if(!pGuild)
+        return;
+
+    uint32 rankId = GetPlayer()->GetRank();
+
+    WorldPacket data(MSG_GUILD_BANK_GET_RIGHTS, 4*15+1);
+    data << uint32(rankId);                                 // guild rank id
+    data << uint32(pGuild->GetRankRights(rankId));          // rank rights
+    data << uint32(pGuild->GetMemberMoneyWithdrawRem(GetPlayer()->GetGUIDLow())); // money per day left
+    data << uint8(pGuild->GetPurchasedTabs());              // tabs count
+    for(int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
+    {
+        data << uint32(pGuild->GetBankRights(rankId, uint8(i)));
+        data << uint32(pGuild->GetMemberSlotWithdrawRem(GetPlayer()->GetGUIDLow(), uint8(i)));
+    }
+    SendPacket(&data);
+    sLog.outDebug("WORLD: Sent (MSG_GUILD_BANK_GET_RIGHTS)");
+}
+
+/* Called when clicking on Guild bank gameobject */
+void WorldSession::HandleGuildBankQuery( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: Received (CMSG_GUILD_BANK)");
+    CHECK_PACKET_SIZE(recv_data,9);
+    uint64 GoGuid;
+    uint8  unk;
+    recv_data >> GoGuid >> unk;
+
+    if (!objmgr.IsGuildVaultGameObject((uint32)GoGuid))
+        return;
+
+    uint32 GuildId = GetPlayer()->GetGuildId();
+    if (GuildId == 0)
+        return;
+
+    Guild *pGuild = objmgr.GetGuildById(GuildId);
+    if(!pGuild)
+        return;
+
+    pGuild->DisplayGuildBankTabsInfo(this);
+}
+
+/* Called when opening guild bank tab only (first one) */
+void WorldSession::HandleGuildBankTabColon( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: Received (CMSG_GUILDBANK_TAB_COLON)");
+    CHECK_PACKET_SIZE(recv_data,10);
+    uint64 GoGuid;
+    uint8 TabId,unk1;
+    recv_data >> GoGuid >> TabId >> unk1;
+
+    if (!objmgr.IsGuildVaultGameObject((uint32)GoGuid))
+        return;
+
+    uint32 GuildId = GetPlayer()->GetGuildId();
+    if (GuildId == 0)
+        return;
+
+    Guild *pGuild = objmgr.GetGuildById(GuildId);
+    if(!pGuild)
+        return;
+
+    // Let's update the amount of gold the player can withdraw before displaying the content
+    // This is usefull if money withdraw right has changed
+    pGuild->SendMoneyInfo(this, GetPlayer()->GetGUIDLow());
+    pGuild->DisplayGuildBankContent(this, TabId);
+}
+
+void WorldSession::HandleGuildBankDeposit( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: Received (CMSG_GUILDBANK_DEPOSIT)");
+    uint64 GoGuid;
+    uint32 money;
+    recv_data >> GoGuid >> money;
+
+    if (!objmgr.IsGuildVaultGameObject((uint32)GoGuid))
+        return;
+
+    uint32 GuildId = GetPlayer()->GetGuildId();
+    if (GuildId == 0)
+        return;
+    
+    Guild *pGuild = objmgr.GetGuildById(GuildId);
+    if(!pGuild)
+        return;
+
+    if (GetPlayer()->GetMoney() < money)
+        return;
+
+    pGuild->SetBankMoney(pGuild->GetGuildBankMoney()+money);
+    GetPlayer()->ModifyMoney(-int(money));
+
+    // log
+    pGuild->LogBankEvent(GUILD_BANK_LOG_DEPOSIT_MONEY, uint8(0), GetPlayer()->GetGUIDLow(), money);
+
+    pGuild->DisplayGuildBankTabsInfo(this);
+    pGuild->DisplayGuildBankContent(this, 0); // have to send content of tab 0 of will be blank
+}
+
+void WorldSession::HandleGuildBankWithdraw( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: Received (CMSG_GUILDBANK_WITHDRAW)");
+    uint64 GoGuid;
+    uint32 money;
+    recv_data >> GoGuid >> money;
+
+    if (!objmgr.IsGuildVaultGameObject((uint32)GoGuid))
+        return;
+
+    uint32 GuildId = GetPlayer()->GetGuildId();
+    if (GuildId == 0)
+        return;
+    
+    Guild *pGuild = objmgr.GetGuildById(GuildId);
+    if(!pGuild)
+        return;
+
+    if (pGuild->GetGuildBankMoney()<money)                  // not enough money in bank
+        return;
+
+    if (pGuild->GetRankRights(GetPlayer()->GetRank()) & GR_RIGHT_REPAIR_FROM_GUILD)
+        return;
+
+    if (!pGuild->MemberMoneyWithdraw(money, GetPlayer()->GetGUIDLow()))
+        return;
+
+    GetPlayer()->ModifyMoney(money);
+
+    // Log
+    pGuild->LogBankEvent(GUILD_BANK_LOG_WITHDRAW_MONEY, uint8(0), GetPlayer()->GetGUIDLow(), money);
+    
+    pGuild->SendMoneyInfo(this, GetPlayer()->GetGUIDLow());
+    pGuild->DisplayGuildBankTabsInfo(this);
+    pGuild->DisplayGuildBankContent(this, 0); // have to send content of tab 0 of will be blank
+}
+
+void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: Received (CMSG_GUILD_BANK_DEPOSIT_ITEM)");
+    recv_data.hexlike();
+
+    uint64 GoGuid;
+    uint8 BankToBank;
+
+    uint8 BankTab, BankTabSlot, AutoStore, AutoStoreCount, PlayerSlot, PlayerBag, SplitedAmount = 0;
+    uint8 BankTabDst, BankTabSlotDst, unk2, CleanSlot = -1, ToChar = 1;
+    uint32 ItemEntry, unk1;
+    bool BankToChar = false;
+
+    recv_data >> GoGuid >> BankToBank;
+    if (BankToBank)
+    {
+        recv_data >> BankTabDst;
+        recv_data >> BankTabSlotDst;
+        recv_data >> unk1;                                  // always 0
+        recv_data >> BankTab;
+        recv_data >> BankTabSlot;
+        recv_data >> ItemEntry;
+        recv_data >> unk2;                                  // always 0
+        recv_data >> SplitedAmount;
+
+        if (BankTabSlotDst >= GUILD_BANK_MAX_SLOTS)
+            return;
+        if (BankTabDst == BankTab && BankTabSlotDst == BankTabSlot)
+            return;
+    }
+    else
+    {
+        recv_data >> BankTab;
+        recv_data >> BankTabSlot;
+        recv_data >> ItemEntry;
+        recv_data >> AutoStore;
+        if (AutoStore)
+            recv_data >> AutoStoreCount;
+        recv_data >> PlayerBag;
+        recv_data >> PlayerSlot;
+        if (!AutoStore)
+        {
+            recv_data >> ToChar;
+            recv_data >> SplitedAmount;
+        }
+
+        if (BankTabSlot >= GUILD_BANK_MAX_SLOTS && BankTabSlot != 0xFF)
+            return;
+    }
+
+    if (!objmgr.IsGuildVaultGameObject((uint32)GoGuid))
+        return;
+
+    uint32 GuildId = GetPlayer()->GetGuildId();
+    if (GuildId == 0)
+        return;
+
+    Guild *pGuild = objmgr.GetGuildById(GuildId);
+    if(!pGuild)
+        return;
+
+    Player *pl = GetPlayer();
+
+    if (BankToBank)
+    {
+        CharacterDatabase.BeginTransaction();
+        Item *pItemSrc = pGuild->GetItem(BankTab, BankTabSlot);
+        if (!pItemSrc)                                      // may prevent crash
+        {
+            CharacterDatabase.RollbackTransaction();
+            return;
+        }
+        if (SplitedAmount)                                  // Transaction can be done, client has checked
+        {
+            Item *pItemDst = pGuild->GetItem(BankTabDst, BankTabSlotDst);
+            if (SplitedAmount < pItemSrc->GetCount())       // Need to create a new item here
+            {
+                if (!pItemDst)
+                {
+                    uint32 ItemEntry = pItemSrc->GetEntry();
+                    Item *pItemToStore = NewItemOrBag(objmgr.GetItemPrototype(ItemEntry));
+                    uint32 NewGuid = objmgr.GenerateLowGuid(HIGHGUID_ITEM);
+                    pItemToStore->Create(NewGuid, ItemEntry, pl);
+                    pItemToStore->SetCount(SplitedAmount);
+                    pItemToStore->AddToWorld();
+                    pGuild->StoreItem(BankTabDst, &BankTabSlotDst, pItemToStore);
+                    pItemToStore->FSetState(ITEM_NEW);
+                    pItemDst = pItemToStore;
+                }
+                else
+                {
+                    pItemDst->SetCount(pItemDst->GetCount()+SplitedAmount);
+                    pItemDst->FSetState(ITEM_CHANGED);
+                }
+                pItemSrc->SetCount(pItemSrc->GetCount()-SplitedAmount);
+                pItemSrc->SaveToDB();
+                pItemDst->SaveToDB();
+                CharacterDatabase.PExecute("REPLACE INTO `guild_bank_item` (`guildid`,`TabId`,`SlotId`,`item_guid`) "
+                        "VALUES ('%u', '%u', '%u', '%u')", GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemDst->GetGUIDLow());
+                
+            }
+            else                                            // Splited + full stack from source = exist dest item and nothing left in source slot
+            {
+                pGuild->StoreItem(BankTabDst, &BankTabSlotDst, pItemSrc);   // return is null
+                pItemDst->FSetState(ITEM_CHANGED);
+                pGuild->EmptyBankSlot(BankTab, BankTabSlot);// This deletes from DB too
+                pItemSrc->DeleteFromDB();
+                pItemDst->SaveToDB();
+            }
+            pGuild->LogBankEvent(GUILD_BANK_LOG_MOVE_ITEM, BankTab, pl->GetGUIDLow(), pGuild->GetItem(BankTabDst, BankTabSlotDst)->GetEntry(), SplitedAmount, BankTabDst);
+            CharacterDatabase.CommitTransaction();
+            pGuild->DisplayGuildBankContent(this, BankTabDst);
+            return;
+        }                                                   // end Bank to Bank splited
+        // Bank to Bank normal
+        Item *pItemDst = pGuild->StoreItem(BankTabDst, &BankTabSlotDst, pItemSrc);
+
+        if (pItemDst == pItemSrc)                           // Failed
+        {
+            CharacterDatabase.RollbackTransaction();
+            return;
+        }
+        // Whatever an item or not in pItemDst, put it in src bank slot
+        pGuild->StoreItem(BankTab, &BankTabSlot, pItemDst);
+
+        CharacterDatabase.BeginTransaction();
+        if (pItemDst)
+            CharacterDatabase.PExecute("REPLACE INTO `guild_bank_item` (`guildid`,`TabId`,`SlotId`,`item_guid`) "
+                "VALUES ('%u', '%u', '%u', '%u')", GuildId, uint32(BankTab), uint32(BankTabSlot), pItemDst->GetGUIDLow());
+        else
+            CharacterDatabase.PExecute("DELETE FROM `guild_bank_item` WHERE `guildid`='%u' AND `TabId`='%u' AND `SlotId`='%u'",
+                GuildId, uint32(BankTab), uint32(BankTabSlot));
+        if (pItemSrc)
+            CharacterDatabase.PExecute("REPLACE INTO `guild_bank_item` (`guildid`,`TabId`,`SlotId`,`item_guid`) "
+                "VALUES ('%u', '%u', '%u', '%u')", GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemSrc->GetGUIDLow());
+        else
+            CharacterDatabase.PExecute("DELETE FROM `guild_bank_item` WHERE `guildid`='%u' AND `TabId`='%u' AND `SlotId`='%u'",
+                GuildId, uint32(BankTabDst), uint32(BankTabSlotDst));
+        CharacterDatabase.CommitTransaction();
+        // No need to save item instances, they did not change
+
+        pGuild->LogBankEvent(GUILD_BANK_LOG_MOVE_ITEM, BankTab, pl->GetGUIDLow(), pItemSrc->GetEntry(), pItemSrc->GetCount(), BankTabDst);
+        if (pItemDst)
+            pGuild->LogBankEvent(GUILD_BANK_LOG_MOVE_ITEM, BankTabDst, pl->GetGUIDLow(), pItemDst->GetEntry(), pItemDst->GetCount(), BankTab);
+        CharacterDatabase.CommitTransaction();
+        pGuild->DisplayGuildBankContent(this, BankTabDst);
+        return;
+    }
+    else                                                    // Player <-> Bank
+    {
+        CharacterDatabase.BeginTransaction();
+        uint32 remRight = pGuild->GetMemberSlotWithdrawRem(pl->GetGUIDLow(), BankTab);
+        if (ToChar && remRight <= 0)
+            return;
+
+        Item *pItemBank = pGuild->GetItem(BankTab, BankTabSlot);
+        Item *pItemChar = GetPlayer()->GetItemByPos(PlayerBag, PlayerSlot);
+        if (!pItemChar && !pItemBank)                       // Nothing to do
+        {
+            CharacterDatabase.RollbackTransaction();
+            return;
+        }
+        if (!pItemChar && !ToChar)                          // Problem to get item from player
+        {
+            CharacterDatabase.RollbackTransaction();
+            return;
+        }
+        if (!pItemBank && ToChar)                           // Problem to get bank item
+        {
+            CharacterDatabase.RollbackTransaction();
+            return;
+        }
+
+        if (ToChar && AutoStore)                            // bank to char autostore (with right-click)
+        {
+            uint32 Entry = pItemBank->GetEntry();
+            uint32 Count = pItemBank->GetCount();
+            uint16 Dest;
+            uint8 msg;
+            msg = GetPlayer()->CanStoreItem(NULL_BAG, NULL_SLOT, Dest, pItemBank, false);
+            if( msg == EQUIP_ERR_OK )
+            {
+                Item *pItemStacked = GetPlayer()->StoreItem(Dest, pItemBank, true); // This cause item state to change
+                pGuild->EmptyBankSlot(BankTab, BankTabSlot);// Delete from bank table
+                if (pItemStacked == pItemBank)              // In case stacked to player, do not execute
+                {
+                    pItemBank->SaveToDB();
+                    pItemBank->AddToUpdateQueueOf(pl);
+                    pItemBank->SetState(ITEM_NEW);
+                }
+                else
+                {
+                    pItemStacked->SetState(ITEM_CHANGED);
+                }
+                pl->SaveInventoryAndGoldToDB();
+            }
+            else
+            {
+                GetPlayer()->SendEquipError( msg, pItemBank, NULL );
+                CharacterDatabase.RollbackTransaction();
+                return;
+            }
+            pGuild->LogBankEvent(GUILD_BANK_LOG_WITHDRAW_ITEM, BankTab, pl->GetGUIDLow(), Entry, Count);
+            pGuild->MemberItemWithdraw(BankTab, GetPlayer()->GetGUIDLow());
+            CharacterDatabase.CommitTransaction();
+            pGuild->DisplayGuildBankContent(this, BankTab);
+            return;
+        }
+        // BankToChar swap or char to bank remaining
+        // Split subcase for both directions
+
+        if (ToChar)
+        {
+            uint32 ItemEntry = pItemBank->GetEntry();
+            if (!pItemChar)                                 // Put in an empty slot of char
+            {
+                if (SplitedAmount)                          // transaction can be done, client checked it
+                {
+                    if (SplitedAmount == pItemBank->GetCount())
+                    {                                       // Something left on bank slot
+                        sLog.outError("GUILDBANK: Received invalid split request!");
+                        CharacterDatabase.RollbackTransaction();
+                        return;
+                    }
+                    Item *pItemToStore = NewItemOrBag(objmgr.GetItemPrototype(ItemEntry));
+                    uint32 NewGuid = objmgr.GenerateLowGuid(HIGHGUID_ITEM);
+                    pItemToStore->Create(NewGuid, ItemEntry, GetPlayer());
+                    pItemToStore->SetCount(SplitedAmount);
+                    pItemToStore->AddToWorld();
+                    pItemToStore->FSetState(ITEM_NEW);
+                    pItemToStore->SaveToDB();
+
+                    uint16 Dest;
+                    uint8 msg;
+                    msg = pl->CanStoreItem(PlayerBag, PlayerSlot, Dest, pItemToStore, false);
+                    if( msg == EQUIP_ERR_OK )
+                    {
+                        pl->StoreItem(Dest, pItemToStore, true); // Set state updated
+                        pItemBank->SetCount(pItemBank->GetCount()-SplitedAmount);
+                        pItemBank->FSetState(ITEM_CHANGED);
+                        pItemBank->SaveToDB();
+                        pItemToStore->SetState(ITEM_NEW);
+                        pl->SaveInventoryAndGoldToDB();
+                    }
+                    else
+                    {
+                        sLog.outError("GUILDBANK: Failed to store a newly create item (GUID: %u) from split case in an empty character slot!",pItemToStore->GetGUIDLow());
+                        CharacterDatabase.RollbackTransaction();
+                        return;
+                    }
+                }
+                else                                        // No split and char slot empty -> move
+                {
+                    uint16 Dest;
+                    uint8 msg;
+                    msg = pl->CanStoreItem(PlayerBag, PlayerSlot, Dest, pItemBank, false);
+                    if( msg == EQUIP_ERR_OK )
+                    {
+                        pGuild->EmptyBankSlot(BankTab, BankTabSlot);
+                        pl->StoreItem(Dest, pItemBank, true); // Set state updated
+                        pItemBank->SaveToDB();
+                        pItemBank->SetState(ITEM_NEW);
+                        pl->SaveInventoryAndGoldToDB();
+                    }
+                    else
+                    {
+                        pl->SendEquipError( msg, pItemBank, NULL );
+                        sLog.outError("GUILDBANK: Failed to move this item (GUID: %u) to character!",pItemBank->GetGUIDLow());
+                        CharacterDatabase.RollbackTransaction();
+                        return;
+                    }
+                }
+            }
+            else                                            // To bank -> char but char as existing item
+            {
+                if (SplitedAmount)  // just update counts
+                {
+                    pItemChar->SetCount(pItemChar->GetCount()+SplitedAmount);
+                    pItemBank->SetCount(pItemBank->GetCount()-SplitedAmount);
+                    pItemChar->SetState(ITEM_CHANGED);
+                    pItemChar->SaveToDB();
+                    pItemBank->FSetState(ITEM_CHANGED);
+                    if (pItemBank->GetCount() == 0)         // We emptied the bank slot
+                    {
+                        pItemBank->RemoveFromWorld();
+                        pItemBank->DeleteFromDB();
+                        pGuild->EmptyBankSlot(BankTab, BankTabSlot);
+                    }
+                    else
+                        pItemBank->SaveToDB();
+                }
+                else                                        // swap case
+                {
+                    // First be sure the character's item is saved to db
+                    pItemChar->SaveToDB();
+                    Item *pItemBankOld = pGuild->StoreItem(BankTab, &BankTabSlot, pItemChar);
+                    if (pItemBankOld == pItemChar)
+                    {
+                        sLog.outError("GUILDBANK: Impossible to store this item (GUID: %u) to bank!",pItemChar->GetGUIDLow());
+                        CharacterDatabase.RollbackTransaction();
+                        return;
+                    }
+                    pItemChar->RemoveFromUpdateQueueOf(pl);
+                    pItemChar->DestroyForPlayer(pl);
+                    pl->RemoveItem(PlayerBag, PlayerSlot, true);
+                    
+                    CharacterDatabase.PExecute("REPLACE INTO `guild_bank_item` (`guildid`,`TabId`,`SlotId`,`item_guid`) "
+                        "VALUES ('%u', '%u', '%u', '%u')", GuildId, uint32(BankTab), uint32(BankTabSlot), pItemChar->GetGUIDLow());
+                    pItemChar->DeleteFromInventoryDB();
+                    pItemChar->SaveToDB();                  // this item is now in bank
+
+                    uint16 Dest;
+                    uint8 msg;
+                    msg = pl->CanStoreItem(PlayerBag, PlayerSlot, Dest, pItemBankOld, false);
+                    if( msg == EQUIP_ERR_OK )
+                    {
+                        pl->StoreItem(Dest, pItemBankOld, true);
+                        pItemBankOld->SaveToDB();
+                        pItemBankOld->SetState(ITEM_NEW);
+                        pGuild->MemberItemWithdraw(BankTab, pl->GetGUIDLow());
+                        pGuild->LogBankEvent(GUILD_BANK_LOG_WITHDRAW_ITEM, BankTab, pl->GetGUIDLow(), pItemBankOld->GetEntry());
+                        pl->SaveInventoryAndGoldToDB();
+                    }
+                    else
+                    {
+                        CharacterDatabase.RollbackTransaction();
+                        sLog.outError("GUILDBANK: Could not add back item (GUID: %u) to character inventory after swap with item (GUID: %u)!",pItemBankOld->GetGUIDLow(),pItemChar->GetGUIDLow());
+                        return;
+                    }
+                }
+            }
+            pGuild->MemberItemWithdraw(BankTab, pl->GetGUIDLow());
+            pGuild->LogBankEvent(GUILD_BANK_LOG_WITHDRAW_ITEM, BankTab, pl->GetGUIDLow(), ItemEntry, SplitedAmount);
+            CharacterDatabase.CommitTransaction();
+            pGuild->DisplayGuildBankContent(this, BankTab);
+            return;
+        }                                                   // End "To char" part
+        else
+        {                                                   // Char to bank
+            pl->SaveInventoryAndGoldToDB();
+            if (SplitedAmount && SplitedAmount < pItemChar->GetCount())
+            {
+                // No autostore here
+                uint32 ItemEntry = pItemChar->GetEntry();
+                pItemChar->SetCount(pItemChar->GetCount()-SplitedAmount);
+                if (pItemBank)
+                {
+                    pItemBank->SetCount(pItemBank->GetCount()+SplitedAmount);
+                    pItemBank->FSetState(ITEM_CHANGED);
+                    pItemBank->SaveToDB();
+                }
+                else
+                {
+                    Item *pItemToStore = NewItemOrBag(objmgr.GetItemPrototype(ItemEntry));
+                    uint32 NewGuid = objmgr.GenerateLowGuid(HIGHGUID_ITEM);
+                    pItemToStore->Create(NewGuid, ItemEntry, NULL);
+                    pItemToStore->SetCount(SplitedAmount);
+                    
+                    pItemToStore->FSetState(ITEM_NEW);
+                    pItemToStore->SaveToDB();
+
+                    pGuild->StoreItem(BankTab, &BankTabSlot, pItemToStore);
+                    CharacterDatabase.PExecute("INSERT INTO `guild_bank_item` (`guildid`,`TabId`,`SlotId`,`item_guid`) "
+                        "VALUES ('%u', '%u', '%u', '%u')", GuildId, uint32(BankTab), uint32(BankTabSlot), pItemToStore->GetGUIDLow());
+                }
+                pItemChar->SetState(ITEM_CHANGED);
+                pItemChar->SaveToDB();
+                pl->SaveInventoryAndGoldToDB();
+            }
+            else                                            // Not splited or splited with full char stack
+            {
+                //first be sure char item is saved
+                pItemChar->SaveToDB();
+                // autostore can be set or not
+                Item *pItemBankOld = pGuild->StoreItem(BankTab, &BankTabSlot, pItemChar);
+                if (pItemBankOld == pItemChar)
+                {
+                    sLog.outError("GUILDBANK: Impossible to store this item (GUID: %u) to bank!",pItemChar->GetGUIDLow());
+                    CharacterDatabase.RollbackTransaction();
+                    return;
+                }
+                pItemChar->RemoveFromUpdateQueueOf(pl);
+                pItemChar->DestroyForPlayer(pl);
+                pl->RemoveItem(PlayerBag, PlayerSlot, true);
+
+                CharacterDatabase.PExecute("REPLACE INTO `guild_bank_item` (`guildid`,`TabId`,`SlotId`,`item_guid`) "
+                    "VALUES ('%u', '%u', '%u', '%u')", GuildId, uint32(BankTab), uint32(BankTabSlot), pItemChar->GetGUIDLow());
+                pItemChar->DeleteFromInventoryDB();
+                pItemChar->SaveToDB();                      // this item is now in bank
+
+                if (pItemBankOld)                           // Item returned that needs to be stored to player
+                {
+                    uint16 Dest;
+                    uint8 msg;
+                    msg = pl->CanStoreItem(PlayerBag, PlayerSlot, Dest, pItemBankOld, false);
+                    if( msg == EQUIP_ERR_OK )
+                    {
+                        pl->StoreItem(Dest, pItemBankOld, true); // ITEM_CHANGED auto set auto
+                        pItemBankOld->SaveToDB();
+                        pItemBankOld->SetState(ITEM_NEW);
+                        pGuild->MemberItemWithdraw(BankTab, pl->GetGUIDLow());
+                        pGuild->LogBankEvent(GUILD_BANK_LOG_WITHDRAW_ITEM, BankTab, pl->GetGUIDLow(), pItemBankOld->GetEntry());
+                    }
+                    else
+                    {
+                        GetPlayer()->SendEquipError( msg, pItemBankOld, NULL );
+                        sLog.outError("GUILDBANK: Problem to store back bank item (GUID: %u) to char after swap with item (GUID: %u)!",pItemBankOld->GetGUIDLow(),pItemChar->GetGUIDLow());
+                        CharacterDatabase.RollbackTransaction();
+                        return;
+                    }
+                }
+                pl->SaveInventoryAndGoldToDB();
+            }
+            pGuild->LogBankEvent(GUILD_BANK_LOG_DEPOSIT_ITEM, BankTab, pl->GetGUIDLow(), pItemChar->GetEntry(), SplitedAmount);
+            CharacterDatabase.CommitTransaction();
+            pGuild->DisplayGuildBankContent(this, BankTab);
+        }
+    }
+}
+
+void WorldSession::HandleGuildBankBuyTab( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: Received (CMSG_GUILD_BANK_BUY_TAB)");
+    recv_data.hexlike();
+    uint64 GoGuid;
+    uint8 TabId;
+
+    recv_data >> GoGuid;
+    recv_data >> TabId;
+
+    if (!objmgr.IsGuildVaultGameObject((uint32)GoGuid))
+        return;
+
+    uint32 GuildId = GetPlayer()->GetGuildId();
+    if (GuildId==0)
+        return;
+
+    Guild *pGuild = objmgr.GetGuildById(GuildId);
+    if(!pGuild)
+        return;
+
+    uint32 TabCost = objmgr.GetGuildBankTabPrice(TabId) * GOLD;
+    if (!TabCost)
+        return;
+
+    if (pGuild->GetPurchasedTabs() >= GUILD_BANK_MAX_TABS)
+        return;
+
+    if (TabId != pGuild->GetPurchasedTabs())                // purchased_tabs = 0 when buying Tab 0, that is why this check can be made
+    {
+        sLog.outError("Error: trying to buy a tab non contigous to owned ones");
+        return;
+    }
+
+    if (GetPlayer()->GetMoney() < TabCost)                  // Should not happen, this is checked by client
+       return;
+
+    // Go on with creating tab
+    pGuild->CreateNewBankTab();
+    GetPlayer()->ModifyMoney(-int(TabCost));
+    pGuild->SetBankMoneyPerDay(GetPlayer()->GetRank(), WITHDRAW_MONEY_UNLIMITED);
+    pGuild->SetBankRightsAndSlots(GetPlayer()->GetRank(), TabId, GUILD_BANK_RIGHT_FULL, WITHDRAW_SLOT_UNLIMITED, true);
+    pGuild->Roster(this);
+    pGuild->DisplayGuildBankTabsInfo(this);
+}
+
+void WorldSession::HandleGuildBankModifyTab( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: Received (CMSG_GUILD_BANK_MODIFY_TAB)");
+    recv_data.hexlike();
+    uint64 GoGuid;
+    uint8 TabId;
+    std::string Name = "";
+    std::string IconIndex = "";
+
+    recv_data >> GoGuid;
+    recv_data >> TabId;
+    recv_data >> Name;
+    recv_data >> IconIndex;
+
+    if (!objmgr.IsGuildVaultGameObject((uint32)GoGuid))
+        return;
+
+    uint32 GuildId = GetPlayer()->GetGuildId();
+    if (GuildId==0)
+        return;
+
+    Guild *pGuild = objmgr.GetGuildById(GuildId);
+    if(!pGuild)
+        return;
+
+    pGuild->SetGuildBankTabInfo(TabId, Name, IconIndex);
+    pGuild->DisplayGuildBankTabsInfo(this);
+    pGuild->DisplayGuildBankContent(this, TabId);
+}
+
+void WorldSession::HandleGuildBankLog( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: Received (MSG_GUILDBANK_LOG)");
+
+    uint32 GuildId = GetPlayer()->GetGuildId();
+    if (GuildId == 0)
+        return;
+
+    Guild *pGuild = objmgr.GetGuildById(GuildId);
+    if(!pGuild)
+        return;
+
+    uint8 TabId;
+    recv_data >> TabId;
+
+    pGuild->DisplayGuildBankLogs(this, TabId);
 }

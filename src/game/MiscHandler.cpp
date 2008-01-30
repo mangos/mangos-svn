@@ -1630,28 +1630,3 @@ void WorldSession::HandleSetTaxiBenchmarkOpcode( WorldPacket & recv_data )
 
     sLog.outDebug("Client use \"/timetest %d\" command", mode);
 }
-
-void WorldSession::Handle1020( WorldPacket & recv_data )
-{
-    sLog.outDebug("WORLD: MSG_UNKNOWN_1020");
-    recv_data.hexlike();
-
-    WorldPacket data(MSG_UNKNOWN_1020, 4*15+1);
-    data << uint32(0);                                      // 0
-    data << uint32(0);                                      // rights
-    data << uint32(0);
-    data << uint8(0);                                       // 2 (tabs count?)
-    for(uint8 i = 0; i < 12; ++i)
-        data << uint32(0);                                  // tab permissions
-    SendPacket(&data);
-}
-
-void WorldSession::Handle1021( WorldPacket & recv_data )
-{
-    sLog.outDebug("WORLD: MSG_UNKNOWN_1021");
-    recv_data.hexlike();
-
-    WorldPacket data(MSG_UNKNOWN_1021, 4);
-    data << uint32(0);                                      // ??
-    SendPacket(&data);
-}

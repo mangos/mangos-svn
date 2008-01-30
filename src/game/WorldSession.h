@@ -566,10 +566,17 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleChannelVoiceChatQuery(WorldPacket& recv_data);
         void HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data);
 
-        // unknown
-        void Handle1020(WorldPacket& recv_data);
-        void Handle1021(WorldPacket& recv_data);
-
+        // Guild Bank
+        void HandleGuildBankGetRights(WorldPacket& recv_data);
+        void HandleGuildBankGetMoneyAmount(WorldPacket& recv_data);
+        void HandleGuildBankQuery(WorldPacket& recv_data);
+        void HandleGuildBankTabColon(WorldPacket& recv_data);
+        void HandleGuildBankLog(WorldPacket& recv_data);
+        void HandleGuildBankDeposit(WorldPacket& recv_data);
+        void HandleGuildBankWithdraw(WorldPacket& recv_data);
+        void HandleGuildBankDepositItem(WorldPacket& recv_data);
+        void HandleGuildBankModifyTab(WorldPacket& recv_data);
+        void HandleGuildBankBuyTab(WorldPacket& recv_data);
     private:
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);

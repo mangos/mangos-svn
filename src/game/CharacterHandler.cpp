@@ -470,6 +470,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
             data<<pCurrChar->GetGUID();
             guild->BroadcastPacket(&data);
             DEBUG_LOG( "WORLD: Sent guild-signed-on (SMSG_GUILD_EVENT)" );
+
+            // Increment online members of the guild
+            guild->IncOnlineMemberCount();
         }
         else
         {

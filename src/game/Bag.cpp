@@ -77,8 +77,8 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
     SetUInt32Value(OBJECT_FIELD_ENTRY, itemid);
     SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
 
-    SetUInt64Value(ITEM_FIELD_OWNER, owner->GetGUID());
-    SetUInt64Value(ITEM_FIELD_CONTAINED, owner->GetGUID());
+    SetUInt64Value(ITEM_FIELD_OWNER, owner ? owner->GetGUID() : 0);
+    SetUInt64Value(ITEM_FIELD_CONTAINED, owner ? owner->GetGUID() : 0);
 
     SetUInt32Value(ITEM_FIELD_MAXDURABILITY, itemProto->MaxDurability);
     SetUInt32Value(ITEM_FIELD_DURABILITY, itemProto->MaxDurability);
