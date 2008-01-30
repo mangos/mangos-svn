@@ -650,7 +650,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                 }
             }
 
-            if(gso->Option!="" && cantalking )
+            if(!gso->Option.empty() && cantalking )
             {
                 pm->GetGossipMenu()->AddMenuItem((uint8)gso->Icon,gso->Option, gossipid,gso->Action,false);
                 ingso=gso;
@@ -671,23 +671,6 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
             isCanIneractWithBattleMaster(pPlayer,true);     // output error message if need
         }
     }
-
-    /*
-    if(pm->GetGossipMenu()->MenuItemCount()==1 && ingso->Id==8 && GetGossipCount( ingso->GossipId )>0)
-    {
-        pm->ClearMenus();
-
-        for( GossipOptionList::iterator i = m_goptions.begin( ); i != m_goptions.end( ); i++ )
-        {
-            gso=&*i;
-            if(gso->GossipId==ingso->Id)
-            {
-                if(gso->Option!="")
-                    pm->GetGossipMenu()->AddMenuItem((uint8)gso->Icon,gso->Option.c_str(),ingso->GossipId,gso->Action,false);
-            }
-        }
-    }
-    */
 }
 
 void Creature::sendPreparedGossip(Player* player)

@@ -542,7 +542,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
         {
             if(!ExecuteCommandInTable(table[i].ChildCommands, text))
             {
-                if(table[i].Help != "")
+                if(!table[i].Help.empty())
                     SendSysMultilineMessage(table[i].Help.c_str());
                 else if(table[i].Name && table[i].Name[0] != '\0')
                     SendSysMessage(LANG_NO_SUBCMD);
@@ -572,7 +572,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
         }
         else
         {
-            if(table[i].Help != "")
+            if(!table[i].Help.empty())
                 SendSysMultilineMessage(table[i].Help.c_str());
             else
                 SendSysMessage(LANG_CMD_SYNTAX);

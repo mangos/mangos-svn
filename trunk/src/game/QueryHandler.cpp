@@ -314,12 +314,12 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
         {
             data << pGossip->Options[i].Probability;
 
-            if ( Text_0[i] == "" )
+            if ( Text_0[i].empty() )
                 data << Text_1[i];
             else
                 data << Text_0[i];
 
-            if ( Text_1[i] == "" )
+            if ( Text_1[i].empty() )
                 data << Text_0[i];
             else
                 data << Text_1[i];
