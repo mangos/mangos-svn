@@ -519,3 +519,8 @@ Honor.KillLimit = 10
 # Default: 1 (enable, required more CPU for work)
 #          0 (disable, less nice position selection but will less CPU use)
 DetectPosCollision = 1
+
+# Announce starting of events
+# Default: 0 (false)
+#          1 (true)
+Event.Announce = 0

@@ -460,6 +460,8 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_CHATFLOOD_MESSAGE_DELAY] = sConfig.GetIntDefault("ChatFlood.MessageDelay",1);
     m_configs[CONFIG_CHATFLOOD_MUTE_TIME]     = sConfig.GetIntDefault("ChatFlood.MuteTime",10);
 
+    m_configs[CONFIG_EVENT_ANNOUNCE] = sConfig.GetIntDefault("Event.Announce",0);
+
     m_configs[CONFIG_CREATURE_FAMILY_ASSISTEMCE_RADIUS] = sConfig.GetIntDefault("CreatureFamilyAssistenceRadius",10);
 
     // note: disable value (-1) will assigned as 0xFFFFFFF, to prevent overflow at calculations limit it to max possible player level (255)

@@ -17,8 +17,10 @@
  */
 
 #include "GameEvent.h"
+#include "World.h"
 #include "ObjectMgr.h"
 #include "ProgressBar.h"
+#include "Language.h"
 #include "Log.h"
 #include "MapManager.h"
 #include "Policies/SingletonImp.h"
@@ -363,7 +365,18 @@ void GameEvent::UnApplyEvent(uint16 event_id)
 
 void GameEvent::ApplyNewEvent(uint16 event_id)
 {
-    sLog.outString("GameEvent %u \"%s\" started.", event_id, mGameEvent[event_id].description.c_str());
+    switch(sWorld.getConfig(CONFIG_EVENT_ANNOUNCE))
+    {
+        case 0:                                         // disable
+                break;
+        case 1:                                         // announce events
+                char str[1024];
+                sprintf(str, LANG_EVENTMESSAGE " %s", mGameEvent[event_id].description.c_str());
+                sWorld.SendWorldText(str, NULL);
+                break;
+     }
+	
+	sLog.outString("GameEvent %u \"%s\" started.", event_id, mGameEvent[event_id].description.c_str());
     // spawn positive event tagget objects
     GameEventSpawn(event_id);
     // un-spawn negative event tagged objects

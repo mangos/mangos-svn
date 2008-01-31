@@ -22,6 +22,7 @@
 
 // level 0 chat
 #define LANG_SYSTEMMESSAGE               "|cffff0000[System Message]:|r"
+#define LANG_EVENTMESSAGE                "|cffff0000[Event Message]:|r"
 #define LANG_NO_HELP_CMD                 "There is no help for that command"
 #define LANG_NO_CMD                      "There is no such command"
 #define LANG_NO_SUBCMD                   "There is no such subcommand"
