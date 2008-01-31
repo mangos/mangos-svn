@@ -417,6 +417,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 {
+    if(!GetPlayer()->isAlive())
+        return;
+
     CHECK_PACKET_SIZE(recv_data,4+4+8);
 
     uint32 text_emote, emoteNum;
