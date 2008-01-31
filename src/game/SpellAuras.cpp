@@ -2806,6 +2806,13 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
 
 void Aura::HandleAuraModStateImmunity(bool apply, bool Real)
 {
+    if(apply && Real)
+    {
+        Unit::AuraList const& auraList = m_target->GetAurasByType(AuraType(m_modifier.m_miscvalue));
+        while(!auraList.empty())
+            m_target->RemoveAura(auraList.front()->GetId(),auraList.front()->GetEffIndex());
+    }
+
     m_target->ApplySpellImmune(GetId(),IMMUNITY_STATE,m_modifier.m_miscvalue,apply);
 }
 
