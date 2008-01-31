@@ -851,27 +851,21 @@ Item* Guild::StoreItem(uint8 TabId, uint8* SlotId, Item* pItem) //, uint8 StackA
 
     Item *BankItem = m_TabListMap[TabId]->Slots[*SlotId];   // Just get a shorter name for it
 
-    if (pItem->GetEntry() != BankItem->GetEntry())
-    {                                                       // Item swap because different entry
+    if (pItem->GetEntry() != BankItem->GetEntry() || BankItem->GetCount() >= BankItem->GetMaxStackCount())
+    {                                                       // Item swap because different entry or full stack
         m_TabListMap[TabId]->Slots[*SlotId] = pItem;
         pItem->SetUInt64Value(ITEM_FIELD_CONTAINED, 0);
         pItem->SetUInt64Value(ITEM_FIELD_OWNER, 0);
         return BankItem;
     }
-                                                            // Same entry now
-    if (BankItem->GetMaxStackCount() > BankItem->GetCount())
+    
+    // Same entry now with not full stack
     {                                                       // there is a stack possibility
         uint32 StackSpace = BankItem->GetMaxStackCount() - BankItem->GetCount();
         if (StackSpace >= StackNeed)                        // Fully stackable
         {
             BankItem->SetCount(BankItem->GetCount() + StackNeed);
             return NULL;
-        }
-        else if (StackSpace)                                // Let's complete stack
-        { // should never happen!!
-            BankItem->SetCount(BankItem->GetMaxStackCount());
-            pItem->SetCount(pItem->GetCount() - StackSpace);
-            return pItem;
         }
         else                                                // No place
             return pItem;
