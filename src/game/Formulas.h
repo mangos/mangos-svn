@@ -108,7 +108,7 @@ namespace MaNGOS
                 return 1;
             if( lvl == 30 )
                 return 3;
-            if( lvl == 32 )
+            if( lvl == 31 )
                 return 6;
             else
                 return (5*(lvl-30));
@@ -135,14 +135,26 @@ namespace MaNGOS
             }
             else if (lvl == 60)
             {
-                xp = (155 + mxp(lvl) * (1344 - 69 - ((69 - lvl) * (7 + (69 - lvl) * 8 - 1)/2)));
+                xp = (155 + mxp(lvl) * (1344 - 70 - ((69 - lvl) * (7 + (69 - lvl) * 8 - 1)/2)));
             }
+            else if (lvl >= 70)                             // level higher than 70 is not supported, return artificially high xp needed, 
+                return 1000000000;                          // to prevent negative values in some cases
             else
             {
                 xp = (155 + mxp(lvl) * (1344 - ((69-lvl) * (7 + (69 - lvl) * 8 - 1)/2)));
             }
-            // The XP to Level is always rounded to the nearest 100 points (50 rounded to low).
-            return ((xp + 49) / 100) * 100;                 // use additional () for prevent free association operations in C++
+
+            // The XP to Level is always rounded to the nearest 100 points (50 rounded to high).
+            xp = ((xp + 50) / 100) * 100;                   // use additional () for prevent free association operations in C++
+
+            if ((lvl > 10) && (lvl < 60))                   // compute discount added in 2.3.x
+            {
+                uint32 discount = (lvl < 28) ? (lvl - 10) : 18;
+                xp = (xp * (100 - discount)) / 100;         // apply discount
+                xp = (xp / 100) * 100;                      // floor to hundreds
+            }
+
+            return xp;
         }
 
         inline float xp_in_group_rate(uint32 count, bool isRaid)
