@@ -129,7 +129,7 @@ CharLogTimestamp = 0
 # Write character dump before deleting in Char.log
 # CharLogDump: 0 (default) - not include dumping chars to log
 #              1           - include dumping chars to log 
-#                            (for restore cut charcter data from log starting from line == START DUMP == to line == END DUMP == (without its) 
+#                            (for restore cut character data from log starting from line == START DUMP == to line == END DUMP == (without its) 
 #                            in file and load it using loadpdump command)
 CharLogDump = 0
 

@@ -2519,7 +2519,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
                     else
                     {
                         data << uint16(spell_id);
-                        data << uint16(itr->first);
+                        data << uint16(0);                  // spell not listed in spell bar/etc
 
                         // mark new spell as disable (not learned yet for client and will not learned)
                         newspell->active = 0;
