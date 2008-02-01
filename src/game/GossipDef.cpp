@@ -410,28 +410,22 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
 
     data << uint32(pQuest->GetRewOrReqMoney());
 
+    data << uint32(0);                                      // Honor points reward, not impelmented, and possible depricated
+
     // check if RewSpell is teaching another spell
     if(pQuest->GetRewSpell())
     {
         SpellEntry const *rewspell = sSpellStore.LookupEntry(pQuest->GetRewSpell());
-        if(rewspell)
-        {
-            if(rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)
-                data << uint32(rewspell->EffectTriggerSpell[0]);
-            else
-                data << uint32(0);
-        }
+        if(rewspell && rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)
+            data << uint32(rewspell->EffectTriggerSpell[0]);
         else
-        {
-            sLog.outErrorDb("Quest %u have non-existed RewSpell %u, ignored.",pQuest->GetQuestId(),pQuest->GetRewSpell());
             data << uint32(0);
-        }
     }
     else
         data << uint32(0);                                  // reward spell
 
-    data << uint32(pQuest->GetRewSpell());                  // cast spell
-    data << uint32(0);                                      // unk 2.3.0,  Honor points
+    data << uint32(pQuest->GetRewSpell());                  // casted spell
+
     data << uint32(QUEST_EMOTE_COUNT);
     for (uint32 i=0; i < QUEST_EMOTE_COUNT; i++)
     {
@@ -495,24 +489,16 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
     if(pQuest->GetRewSpell())
     {
         SpellEntry const *rewspell = sSpellStore.LookupEntry(pQuest->GetRewSpell());
-        if(rewspell)
-        {
-            if(rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)
-                data << uint32(rewspell->EffectTriggerSpell[0]);
-            else
-                data << uint32(0);
-        }
+        if(rewspell && rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)
+            data << uint32(rewspell->EffectTriggerSpell[0]);
         else
-        {
-            sLog.outErrorDb("Quest %u have non-existed RewSpell %u, ignored.",pQuest->GetQuestId(),pQuest->GetRewSpell());
             data << uint32(0);
-        }
     }
     else
         data << uint32(0);
 
-    data << uint32(pQuest->GetRewSpell());                  // spellid, The following spell will be casted on you spell_name
-    data << uint32(0);                                      // unk 2.3.0, Honor points
+    data << uint32(pQuest->GetRewSpell());                  // casted spell
+    data << uint32(0);                                      // Honor points reward, not impelmented, and possible depricated
     data << uint32(pQuest->GetSrcItemId());
     data << uint32(pQuest->GetFlags() & 0xFFFF);
 
@@ -643,23 +629,16 @@ void PlayerMenu::SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID,
     if(pQuest->GetRewSpell())
     {
         SpellEntry const *rewspell = sSpellStore.LookupEntry(pQuest->GetRewSpell());
-        if(rewspell)
-        {
-            if(rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)
-                data << uint32(rewspell->EffectTriggerSpell[0]);
-            else
-                data << uint32(pQuest->GetRewSpell());
-        }
+        if(rewspell && rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)
+            data << uint32(rewspell->EffectTriggerSpell[0]);
         else
-        {
-            sLog.outErrorDb("Quest %u have non-existed RewSpell %u, ignored.",pQuest->GetQuestId(),pQuest->GetRewSpell());
             data << uint32(0);
-        }
     }
     else
         data << uint32(0);
 
-    data << uint32(0x00);                                   // new 2.0.3
+    data << uint32(pQuest->GetRewSpell());                  // casted spell
+    data << uint32(0);                                      // Honor points reward, not impelmented, and possible depricated
 
     pSession->SendPacket( &data );
     //sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),quest_id );
