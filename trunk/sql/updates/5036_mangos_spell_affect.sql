@@ -22,7 +22,6 @@ DELETE FROM `spell_affect` WHERE `entry` IN (37517);
 INSERT INTO `spell_affect` VALUES
  (37517,0,0,0,0,0,0,0x0000014D2A600CEF,0);
 
-/* target spell removed */
 DELETE FROM `spell_affect` WHERE `entry` IN (12866,12865,12864,12863,12325);
 INSERT INTO `spell_affect` VALUES 
  (12866,0,0,0,0,0,0,0x0000000000000000,0),
@@ -31,7 +30,6 @@ INSERT INTO `spell_affect` VALUES
  (12863,0,0,0,0,0,0,0x0000000000000000,0),
  (12325,0,0,0,0,0,0,0x0000000000000000,0);
 
--- (35446) Improved Mortal Strike (Rank 1)
 DELETE FROM `spell_affect` WHERE `entry` IN (35446,35448,35449,35450,35451);
 INSERT INTO `spell_affect` VALUES
  (35446,0,0,0,0,0,0,0x0000000002000000,0),
