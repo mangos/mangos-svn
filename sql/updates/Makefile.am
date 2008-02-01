@@ -563,6 +563,7 @@ pkgdata_DATA = \
 	5097_mangos_skill_extra_item_template.sql \
 	5106_mangos_spell_chain.sql \
 	5108_characters.sql \
+	5119_mangos_quest_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1106,5 +1107,6 @@ EXTRA_DIST = \
 	5097_mangos_skill_extra_item_template.sql \
 	5106_mangos_spell_chain.sql \
 	5108_characters.sql \
+	5119_mangos_quest_template.sql \
 	README
 

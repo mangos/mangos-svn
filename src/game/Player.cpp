@@ -11054,6 +11054,11 @@ bool Player::CanCompleteQuest( uint32 quest_id )
                 if ( GetMoney() < uint32(-qInfo->GetRewOrReqMoney()) )
                     return false;
             }
+
+            uint32 repFacId = qInfo->GetRepObjectiveFaction();
+            if ( repFacId && GetReputation(repFacId) < qInfo->GetRepObjectiveValue() )
+                return false;
+
             return true;
         }
     }

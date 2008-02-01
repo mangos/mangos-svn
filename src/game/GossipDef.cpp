@@ -470,16 +470,18 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
     WorldPacket data( SMSG_QUEST_QUERY_RESPONSE, 100 );     // guess size
 
     data << uint32(pQuest->GetQuestId());
-    data << uint32(pQuest->GetMinLevel());                  // it's not min lvl in 2.0.1+ (0...2 on official)
+    data << uint32(pQuest->GetMinLevel());                  // not MinLevel. Accepted values: 0, 1 or 2 Possible theory for future dev: 0==cannot in quest log, 1==can in quest log session only(removed on log out), 2==can in quest log always (save to db)
     data << uint32(pQuest->GetQuestLevel());
     data << uint32(pQuest->GetZoneOrSort());
 
     data << uint32(pQuest->GetType());
     data << uint32(pQuest->GetSuggestedPlayers());
-    data << uint32(pQuest->GetRequiredMinRepFaction());
-    data << uint32(pQuest->GetRequiredMinRepValue());
-    data << uint32(pQuest->GetRequiredMaxRepFaction());
-    data << uint32(pQuest->GetRequiredMaxRepValue());
+
+    data << uint32(pQuest->GetRepObjectiveFaction());       // shown in quest log as part of quest objective
+    data << uint32(pQuest->GetRepObjectiveValue());         // shown in quest log as part of quest objective
+
+    data << uint32(0);                                      // unknown, not RequiredMaxRepFaction
+    data << uint32(0);                                      // unknown, not RequiredMaxRepValue
 
     data << uint32(pQuest->GetNextQuestInChain());
     data << uint32(pQuest->GetRewOrReqMoney());

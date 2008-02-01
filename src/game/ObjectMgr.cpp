@@ -2167,31 +2167,31 @@ void ObjectMgr::LoadQuests()
 
     //                                            0       1            2          3            4
     QueryResult *result = WorldDatabase.Query("SELECT `entry`,`ZoneOrSort`,`MinLevel`,`QuestLevel`,`Type`,"
-    //   5               6                    7                       8                     9                       10                    11                 12
-        "`RequiredRaces`,`RequiredSkillValue`,`RequiredMinRepFaction`,`RequiredMinRepValue`,`RequiredMaxRepFaction`,`RequiredMaxRepValue`,`SuggestedPlayers`,`LimitTime`,"
-    //   13           14             15            16               17                 18          19             20            21
+    //   5               6                    7                     8                   9                       10                    11                      12                    13                 14
+        "`RequiredRaces`,`RequiredSkillValue`,`RepObjectiveFaction`,`RepObjectiveValue`,`RequiredMinRepFaction`,`RequiredMinRepValue`,`RequiredMaxRepFaction`,`RequiredMaxRepValue`,`SuggestedPlayers`,`LimitTime`,"
+    //   15           16             17            18            19               20                 21          22             23
         "`QuestFlags`,`SpecialFlags`,`PrevQuestId`,`NextQuestId`,`ExclusiveGroup`,`NextQuestInChain`,`SrcItemId`,`SrcItemCount`,`SrcSpell`,"
-    //   22      23        24           25                26                 27        28               29               30               31
+    //   24      25        26           27                28                 29        30               31               32               33
         "`Title`,`Details`,`Objectives`,`OfferRewardText`,`RequestItemsText`,`EndText`,`ObjectiveText1`,`ObjectiveText2`,`ObjectiveText3`,`ObjectiveText4`,"
-    //   32           33           34           35           36              37              38              39
+    //   34           35           36           37           38              39              40              41
         "`ReqItemId1`,`ReqItemId2`,`ReqItemId3`,`ReqItemId4`,`ReqItemCount1`,`ReqItemCount2`,`ReqItemCount3`,`ReqItemCount4`,"
-    //   40             41             42             43             44                45                46                47                48              49              50              51
+    //   42             43             44             45             46                47                48                49                50              51              52              53
         "`ReqSourceId1`,`ReqSourceId2`,`ReqSourceId3`,`ReqSourceId4`,`ReqSourceCount1`,`ReqSourceCount2`,`ReqSourceCount3`,`ReqSourceCount4`,`ReqSourceRef1`,`ReqSourceRef2`,`ReqSourceRef3`,`ReqSourceRef4`,"
-    //   52                   53                   54                   55                   56                      57                      58                      59
+    //   54                   55                   56                   57                   58                      59                      60                      61
         "`ReqCreatureOrGOId1`,`ReqCreatureOrGOId2`,`ReqCreatureOrGOId3`,`ReqCreatureOrGOId4`,`ReqCreatureOrGOCount1`,`ReqCreatureOrGOCount2`,`ReqCreatureOrGOCount3`,`ReqCreatureOrGOCount4`,"
-    //   60              61              62              63
+    //   62              63              64              65
         "`ReqSpellCast1`,`ReqSpellCast2`,`ReqSpellCast3`,`ReqSpellCast4`,"
-    //   64                 65                 66                 67                 68                 69
+    //   66                 67                 68                 69                 70                 71
         "`RewChoiceItemId1`,`RewChoiceItemId2`,`RewChoiceItemId3`,`RewChoiceItemId4`,`RewChoiceItemId5`,`RewChoiceItemId6`,"
-    //   70                    71                    72                    73                    74                    75
+    //   72                    73                    74                    75                    76                    77
         "`RewChoiceItemCount1`,`RewChoiceItemCount2`,`RewChoiceItemCount3`,`RewChoiceItemCount4`,`RewChoiceItemCount5`,`RewChoiceItemCount6`,"
-    //   76           77           78           79           80              81              82              83
+    //   78           79           80           81           82              83              84              85
         "`RewItemId1`,`RewItemId2`,`RewItemId3`,`RewItemId4`,`RewItemCount1`,`RewItemCount2`,`RewItemCount3`,`RewItemCount4`,"
-    //   84               85               86               87               88               89             90             91             92             93
+    //   86               87               88               89               90               91             92             93             94             95
         "`RewRepFaction1`,`RewRepFaction2`,`RewRepFaction3`,`RewRepFaction4`,`RewRepFaction5`,`RewRepValue1`,`RewRepValue2`,`RewRepValue3`,`RewRepValue4`,`RewRepValue5`,"
-    //   94              95                 96         97           98       99       100        101              102            103             104
+    //   96              97                 98         99           100      101      102        103              104            105             106
         "`RewOrReqMoney`,`RewMoneyMaxLevel`,`RewSpell`,`PointMapId`,`PointX`,`PointY`,`PointOpt`,`DetailsEmote1`,`DetailsEmote2`,`DetailsEmote3`,`DetailsEmote4`,"
-    //   105               106             107                 108                 109                 110                 111           112
+    //   107               108             109                 110                 111                 112                 113           114
         "`IncompleteEmote`,`CompleteEmote`,`OfferRewardEmote1`,`OfferRewardEmote2`,`OfferRewardEmote3`,`OfferRewardEmote4`,`StartScript`,`CompleteScript`"
         " FROM `quest_template`");
     if(result == NULL)
@@ -2229,7 +2229,7 @@ void ObjectMgr::LoadQuests()
 
         if (qinfo->QuestFlags & ~QUEST_MANGOS_FLAGS_DB_ALLOWED)
         {
-            sLog.outErrorDb("Quest %u has `QuestFlags` = %u > max allowed value. Correct `SpecialFlags` to value <= %u",
+            sLog.outErrorDb("Quest %u has `SpecialFlags` = %u > max allowed value. Correct `SpecialFlags` to value <= %u",
                 qinfo->GetQuestId(),qinfo->QuestFlags,QUEST_MANGOS_FLAGS_DB_ALLOWED >> 16);
             qinfo->QuestFlags &= QUEST_MANGOS_FLAGS_DB_ALLOWED;
         }
@@ -2280,6 +2280,13 @@ void ObjectMgr::LoadQuests()
         }
         // else Skill quests can have 0 skill level, this is ok
 
+        if(qinfo->RepObjectiveFaction && !sFactionStore.LookupEntry(qinfo->RepObjectiveFaction))
+        {
+            sLog.outErrorDb("Quest %u has `RepObjectiveFaction` = %u but faction template %u does not exist, quest can't be done.",
+                qinfo->GetQuestId(),qinfo->RepObjectiveFaction,qinfo->RepObjectiveFaction);
+            // no changes, quest can't be done for this requirement
+        }
+
         if(qinfo->RequiredMinRepFaction && !sFactionStore.LookupEntry(qinfo->RequiredMinRepFaction))
         {
             sLog.outErrorDb("Quest %u has `RequiredMinRepFaction` = %u but faction template %u does not exist, quest can't be done.",
@@ -2306,6 +2313,27 @@ void ObjectMgr::LoadQuests()
             sLog.outErrorDb("Quest %u has `RequiredMaxRepValue` = %d and `RequiredMinRepValue` = %d, quest can't be done.",
                 qinfo->GetQuestId(),qinfo->RequiredMaxRepValue,qinfo->RequiredMinRepValue);
             // no changes, quest can't be done for this requirement
+        }
+
+        if(!qinfo->RepObjectiveFaction && qinfo->RepObjectiveValue > 0 )
+        {
+            sLog.outErrorDb("Quest %u has `RepObjectiveValue` = %d but `RepObjectiveFaction` is 0, value has no effect",
+                qinfo->GetQuestId(),qinfo->RepObjectiveValue);
+            // warning
+        }
+
+        if(!qinfo->RequiredMinRepFaction && qinfo->RequiredMinRepValue > 0 )
+        {
+            sLog.outErrorDb("Quest %u has `RequiredMinRepValue` = %d but `RequiredMinRepFaction` is 0, value has no effect",
+                qinfo->GetQuestId(),qinfo->RequiredMinRepValue);
+            // warning
+        }
+
+        if(!qinfo->RequiredMaxRepFaction && qinfo->RequiredMaxRepValue > 0 )
+        {
+            sLog.outErrorDb("Quest %u has `RequiredMaxRepValue` = %d but `RequiredMaxRepFaction` is 0, value has no effect",
+                qinfo->GetQuestId(),qinfo->RequiredMaxRepValue);
+            // warning
         }
 
         if(qinfo->SrcItemId)
