@@ -4784,8 +4784,13 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             }
             return;
         }
-        case 37189:
-        case 37227:
+
+        case 35077:                                         // Band of the Eternal Defender
+        case 35080:                                         // Band of the Eternal Champion
+        case 35083:                                         // Band of the Eternal Sage
+        case 35086:                                         // Band of the Eternal Restorer
+        case 37189:                                         // Recuced Holy Light Cast Time (name not have typos ;) )
+        case 37227:                                         // Improved Healing Wave 
         {
             // hidden cooldown 60sec, check manually for passive spell
             if (GetTypeId() == TYPEID_PLAYER && !((Player*)this)->HasSpellCooldown(auraSpellInfo->Id))

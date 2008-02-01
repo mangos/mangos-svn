@@ -232,22 +232,34 @@ bool ChatHandler::HandleGPSCommand(const char* /*args*/)
 
     Map2ZoneCoordinates(zone_x,zone_y,zone_id);
 
+    Map const *map = MapManager::Instance().GetMap(obj->GetMapId(), obj);
+    float ground_z = map->GetHeight(obj->GetPositionX(), obj->GetPositionY(), MAX_HEIGHT);
+    float floor_z = map->GetHeight(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ());
+
+    GridPair p = MaNGOS::ComputeGridPair(obj->GetPositionX(), obj->GetPositionY());
+
+    int gx=63-p.x_coord;
+    int gy=63-p.y_coord;
+
+    uint32 have_map = Map::ExistMap(obj->GetMapId(),gx,gy) ? 1 : 0;
+    uint32 have_vmap = Map::ExistVMap(obj->GetMapId(),gx,gy) ? 1 : 0;
+
     PSendSysMultilineMessage(LANG_MAP_POSITION,
         obj->GetMapId(), (mapEntry ? mapEntry->name[sWorld.GetDBClang()] : "<unknown>" ),
         zone_id, (zoneEntry ? zoneEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ),
         area_id, (areaEntry ? areaEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ),
-        obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
-        obj->GetOrientation(),cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(),obj->GetInstanceId(),
-        zone_x,zone_y );
+        obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),
+        cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(), obj->GetInstanceId(),
+        zone_x, zone_y, ground_z, floor_z, have_map, have_vmap );
 
     sLog.outDebug("Player %s GPS call %s %u " LANG_MAP_POSITION, m_session->GetPlayer()->GetName(),
         (obj->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), obj->GetGUIDLow(),
         obj->GetMapId(), (mapEntry ? mapEntry->name[sWorld.GetDBClang()] : "<unknown>" ),
         zone_id, (zoneEntry ? zoneEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ),
         area_id, (areaEntry ? areaEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ),
-        obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
-        obj->GetOrientation(), cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(),obj->GetInstanceId(),
-        zone_x,zone_y );
+        obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),
+        cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(), obj->GetInstanceId(),
+        zone_x, zone_y, ground_z, floor_z, have_map, have_vmap );
 
     return true;
 }
