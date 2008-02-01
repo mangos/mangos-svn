@@ -160,8 +160,6 @@ void Creature::RemoveCorpse()
 
     m_deathTimer = 0;
     ObjectAccessor::UpdateObjectVisibility(this);
-    lootForPickPocketed = false;
-    lootForBody         = false;
     loot.clear();
     setDeathState(DEAD);
     m_respawnTime = time(NULL) + m_respawnDelay;
@@ -190,6 +188,8 @@ void Creature::Update(uint32 diff)
             {
                 DEBUG_LOG("Respawning...");
                 m_respawnTime = 0;
+                lootForPickPocketed = false;
+                lootForBody         = false;
 
                 CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(this->GetEntry());
 
