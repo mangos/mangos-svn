@@ -115,7 +115,7 @@
 
 // level 1 chat
 #define LANG_GLOBAL_NOTIFY               "Global notify:\n"
-#define LANG_MAP_POSITION                "Map: %u (%s) Zone: %u (%s) Area: %u (%s)\nX: %f Y: %f Z: %f Orientation: %f grid[%u,%u]cell[%u,%u] InstanceID: %u\n ZoneX: %f ZoneY: %f"
+#define LANG_MAP_POSITION                "Map: %u (%s) Zone: %u (%s) Area: %u (%s)\nX: %f Y: %f Z: %f Orientation: %f\ngrid[%u,%u]cell[%u,%u] InstanceID: %u\n ZoneX: %f ZoneY: %f\nGroundZ: %f FloorZ: %f Have height data (Map: %u VMap: %u)"
 #define LANG_IS_TELEPORTED               "%s is already being teleported."
 #define LANG_CANNOT_SUMMON_TO_INST       "You can summon a player to your instance only if he is in your party with you as leader."
 #define LANG_CANNOT_GO_TO_INST_PARTY     "You cannot go to the player's instance because you are in a party now."
