@@ -2220,9 +2220,8 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
 
             if (name.find(namepart) != std::string::npos)
             {
-                uint16 skill = target->GetPureSkillValue(id);
                 // send skill in "id - [namedlink]" format
-                PSendSysMessage(LANG_SKILL_LIST "%s",id,id,skillInfo->name[sWorld.GetDBClang()],(skill == 0 ? "" : LANG_KNOWN));
+                PSendSysMessage(LANG_SKILL_LIST "%s",id,id,skillInfo->name[sWorld.GetDBClang()],(target->HasSkill(id) ? LANG_KNOWN : ""));
 
                 counter++;
             }

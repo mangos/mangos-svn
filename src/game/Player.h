@@ -48,6 +48,8 @@ class UpdateMask;
 
 typedef std::deque<Mail*> PlayerMails;
 
+#define PLAYER_MAX_SKILLS       127
+
 // Note: SPELLMOD_* values is aura types in fact
 enum SpellModType
 {
@@ -1556,7 +1558,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetFactionVisibleForFactionTemplateId(uint32 FactionTemplateId);
         void UpdateMaxSkills();
         void UpdateSkillsToMaxSkillsForLevel();             // for .levelup
-        void ModifySkillBonus(uint32 skillid,int32 val);
+        void ModifySkillBonus(uint32 skillid,int32 val, bool talent);
 
         /*********************************************************/
         /***                  PVP SYSTEM                       ***/

@@ -125,13 +125,6 @@ enum ShapeshiftForm
 };
 
 #define CREATURE_MAX_SPELLS     4
-#define PLAYER_MAX_SKILLS       127
-
-#define PLAYER_SKILL(x)         (PLAYER_SKILL_INFO_1_1 + ((x)*3))
-// DWORD definitions gathered from windows api
-#define SKILL_VALUE(x)          uint16(x)
-#define SKILL_MAX(x)            uint16((uint32(x) >> 16))
-#define MAKE_SKILL_VALUE(v, m) ((uint32)(((uint16)(v)) | (((uint32)((uint16)(m))) << 16)))
 
 enum Swing
 {

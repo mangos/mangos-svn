@@ -1696,7 +1696,7 @@ void Aura::HandleAuraModSkill(bool apply, bool Real)
     uint32 prot=GetSpellProto()->EffectMiscValue[m_effIndex];
     int32 points = GetModifier()->m_amount;
 
-    ((Player*)m_target)->ModifySkillBonus(prot,(apply ? points: -points));
+    ((Player*)m_target)->ModifySkillBonus(prot,(apply ? points: -points),m_modifier.m_auraname==SPELL_AURA_MOD_SKILL_TALENT);
     if(prot == SKILL_DEFENSE)
         ((Player*)m_target)->UpdateDefenseBonusesMod();
 }
