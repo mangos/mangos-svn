@@ -63,7 +63,7 @@ RemovalState::Update(Map &m, NGridType &grid, GridInfo &info, const uint32 &x, c
         info.UpdateTimeTracker(t_diff);
         if( info.getTimeTracker().Passed() )
         {
-            if( !m.UnloadGrid(x, y) )
+            if( !m.UnloadGrid(x, y, false) )
             {
                 sLog.outDebug("Grid[%u,%u] for map %u differed unloading due to players nearby", x, y, m.GetId());
                 m.ResetGridExpiry(grid);

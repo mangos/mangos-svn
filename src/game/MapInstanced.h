@@ -31,7 +31,7 @@ class MANGOS_DLL_DECL MapInstanced : public Map
         virtual void Update(const uint32&);
         virtual void MoveAllCreaturesInMoveList();
         virtual bool RemoveBones(uint64 guid, float x, float y);
-        virtual void UnloadAll();
+        virtual void UnloadAll(bool pForce);
 
         Map* GetInstance(const WorldObject* obj);
         bool IsValidInstance(uint32 InstanceId);

@@ -199,7 +199,7 @@ void MapManager::LoadGrid(int mapid, float x, float y, const WorldObject* obj, b
 void MapManager::UnloadAll()
 {
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
-        iter->second->UnloadAll();
+        iter->second->UnloadAll(true);
 }
 
 void MapManager::InitMaxInstanceId()

@@ -21,6 +21,11 @@
 #include "Unit.h"
 #include "Database/DBCStructure.h"
 
+HostilRefManager::~HostilRefManager()
+{
+    deleteReferences();
+}
+//=================================================
 // send threat to all my hateres for the pVictim
 // The pVictim is hated than by them as well
 // use for buffs and healing threat functionality
