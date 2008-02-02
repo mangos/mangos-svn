@@ -97,7 +97,7 @@ enum BG_WS_FlagState
     BG_WS_FLAG_STATE_ON_GROUND    = 3
 };
 
-enum BattleGroundGaveyardsWS
+enum BattleGroundGraveyardsWS
 {
     WS_GRAVEYARD_MAIN_ALLIANCE   = 771,
     WS_GRAVEYARD_MAIN_HORDE      = 772

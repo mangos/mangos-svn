@@ -1044,6 +1044,11 @@ void Aura::TriggerSpell()
     // specific code for cases with no trigger spell provided in field
     switch(GetId())
     {
+        // trigger_spell_id not set and unknown effect triggered in this case, ignoring for while
+        case   768:                                         // Cat Form (passive)
+        case 17947:                                         // Firestone Passive
+            return;
+        
         case 29528: trigger_spell_id = 28713; break;        // Inoculation
         case 29602:                                         //Jom Gabbar
         {
@@ -1058,9 +1063,6 @@ void Aura::TriggerSpell()
             break;
         }
         case 29917: trigger_spell_id = 29916; break;        // Feed Captured Animal
-        case   768:                                         // Cat Form (passive)
-            // trigger_spell_id not set and unknown effect triggered in this case, ignoring for while
-            return;
         case  1515:                                         // Tame Beast
         {
             // TODO: currently this used as hack for Tame beast triggered spell,

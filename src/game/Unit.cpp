@@ -4539,6 +4539,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     uint32 originalSpellId = 0;
                     if(procSpell->SpellFamilyName == SPELLFAMILY_PALADIN)
                     {
+                        // at Flash of Light
                         if(procSpell->SpellFamilyFlags & 0x00002000)
                         {
                             switch(procSpell->Id)
@@ -4555,6 +4556,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                                 return;
                             }
                         }
+                        // at Holy Light
                         else if(procSpell->SpellFamilyFlags & 0x00004000)
                         {
                             switch(procSpell->Id)
@@ -4575,6 +4577,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                                 return;
                             }
                         }
+                        // at Holy Shock
                         else if(procSpell->SpellFamilyFlags & 0x00200000)
                         {
                             switch(procSpell->Id)
@@ -4767,6 +4770,12 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
     if(!trigger_spell_id)
     {
         sLog.outError("Unit::HandleProcTriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?",auraSpellInfo->Id,triggeredByAura->GetEffIndex());
+        return;
+    }
+
+    if(!sSpellStore.LookupEntry(trigger_spell_id))
+    {
+        sLog.outError("Unit::HandleProcTriggerSpell: Spell %u have not existed EffectTriggered[%d]=%u, not handled custom case?",auraSpellInfo->Id,triggeredByAura->GetEffIndex(),trigger_spell_id);
         return;
     }
 
