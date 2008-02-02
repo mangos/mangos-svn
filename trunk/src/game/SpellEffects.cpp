@@ -305,6 +305,11 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                     damage += m_caster->GetPower(POWER_ENERGY);
                     m_caster->SetPower(POWER_ENERGY,0);
                 }
+                // Swipe
+                else if(m_spellInfo->SpellFamilyFlags & 0x0010000000000000LL)
+                {
+                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.08f);
+                }
                 break;
             }
             case SPELLFAMILY_HUNTER:
