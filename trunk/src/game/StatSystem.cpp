@@ -184,7 +184,18 @@ void Player::UpdateAttackPowerAndDamage(bool ranged )
             case CLASS_HUNTER: val2 = level * 2.0f + GetStat(STAT_AGILITY) - 10.0f;    break;
             case CLASS_ROGUE:  val2 = level        + GetStat(STAT_AGILITY) - 10.0f;    break;
             case CLASS_WARRIOR:val2 = level        + GetStat(STAT_AGILITY) - 10.0f;    break;
-            default:           val2 = 0.0f;                                            break;
+            case CLASS_DRUID:
+                switch(m_form)
+                {
+                    case FORM_CAT:
+                    case FORM_BEAR:
+                    case FORM_DIREBEAR:
+                        val2 = 0.0f; break;
+                    default:
+                        val2 = GetStat(STAT_AGILITY) - 10.0f; break;
+                }
+                break;
+            default: val2 = GetStat(STAT_AGILITY) - 10.0f; break;
         }
     }
     else
