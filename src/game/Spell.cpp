@@ -926,7 +926,13 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                     break;
 
                 unMaxTargets = m_spellInfo->EffectChainTarget[i];
-                float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
+
+                float max_range;
+                if(m_spellInfo->DmgClass==SPELL_DAMAGE_CLASS_MELEE)
+                    max_range = radius;                     // 
+                else
+                    //FIXME: This very like horrible hack and wrong for most spells
+                    max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
 
                 CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
                 Cell cell(p);
