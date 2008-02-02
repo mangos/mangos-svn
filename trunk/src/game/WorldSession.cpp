@@ -681,7 +681,7 @@ void WorldSession::LogoutPlayer(bool Save)
             data<<(uint8)GE_SIGNED_OFF;
             data<<(uint8)1;
             data<<_player->GetName();
-            data<<(uint8)0<<(uint8)0<<(uint8)0;
+            data<<_player->GetGUID();
             guild->BroadcastPacket(&data);
         }
 

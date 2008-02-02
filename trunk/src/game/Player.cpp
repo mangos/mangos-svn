@@ -61,6 +61,18 @@
 
 #define ZONE_UPDATE_INTERVAL 1000
 
+#define PLAYER_SKILL_INDEX(x)       (PLAYER_SKILL_INFO_1_1 + ((x)*3))
+#define PLAYER_SKILL_VALUE_INDEX(x) (PLAYER_SKILL_INDEX(x)+1)
+#define PLAYER_SKILL_BONUS_INDEX(x) (PLAYER_SKILL_INDEX(x)+2)
+
+#define SKILL_VALUE(x)         (uint16(x))
+#define SKILL_MAX(x)           (uint16(uint32(x) >> 16))
+#define MAKE_SKILL_VALUE(v, m) (uint32(uint32(uint16(v)) | (uint32(uint16(m)) << 16)))
+
+#define SKILL_TEMP_BONUS(x)    (uint16(x))
+#define SKILL_PERM_BONUS(x)    (uint16(uint32(x) >> 16))
+#define MAKE_SKILL_BONUS(t, p) (uint32(uint32(uint16(t)) | (uint32(uint16(p)) << 16)))
+
 const int32 Player::ReputationRank_Length[MAX_REPUTATION_RANK] = {36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000};
 
 UpdateMask Player::updateVisualBits;
@@ -4195,13 +4207,13 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             Item *item = GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
             uint32 skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon()
                 ? item->GetSkill() : SKILL_UNARMED;
-            ModifySkillBonus(skill, (apply ? (int32)RatingChange: -(int32)RatingChange));*/
+            ModifySkillBonus(skill, (apply ? (int32)RatingChange: -(int32)RatingChange),false);*/
         }
         break;
         case PLAYER_FIELD_DEFENCE_RATING:
             //Defense: 1.5
             RatingChange = value/ RatingCoeffecient;
-            ModifySkillBonus(SKILL_DEFENSE,(apply ? (int32)RatingChange: -(int32)RatingChange));
+            ModifySkillBonus(SKILL_DEFENSE,(apply ? (int32)RatingChange: -(int32)RatingChange),false);
             if(affectStats)
                 UpdateDefenseBonusesMod();
             break;
@@ -4347,13 +4359,13 @@ bool Player::UpdateSkill(uint32 skill_id)
 
     uint16 i=0;
     for (; i < PLAYER_MAX_SKILLS; i++)
-        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill_id)
+        if ((GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF) == skill_id)
             break;
 
     if(i>=PLAYER_MAX_SKILLS)
         return false;
 
-    uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
+    uint32 data = GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i));
     uint32 value = SKILL_VALUE(data);
     uint32 max = SKILL_MAX(data);
 
@@ -4362,7 +4374,7 @@ bool Player::UpdateSkill(uint32 skill_id)
 
     if (value*512 < max*urand(0,512))
     {
-        SetUInt32Value(PLAYER_SKILL(i)+1,data+1);
+        SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i),data+MAKE_SKILL_VALUE(1,0));
         return true;
     }
 
@@ -4456,11 +4468,11 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance)
 
     uint16 i=0;
     for (; i < PLAYER_MAX_SKILLS; i++)
-        if ( SKILL_VALUE(GetUInt32Value(PLAYER_SKILL(i))) == SkillId ) break;
+        if ( SKILL_VALUE(GetUInt32Value(PLAYER_SKILL_INDEX(i))) == SkillId ) break;
     if ( i >= PLAYER_MAX_SKILLS )
         return false;
 
-    uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
+    uint32 data = GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i));
     uint16 SkillValue = SKILL_VALUE(data);
     uint16 MaxValue   = SKILL_MAX(data);
 
@@ -4471,7 +4483,7 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance)
 
     if ( Roll <= Chance )
     {
-        SetUInt32Value(PLAYER_SKILL(i)+1,MAKE_SKILL_VALUE(SkillValue+1,MaxValue));
+        SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i),data + MAKE_SKILL_VALUE(1,0));
         sLog.outDebug("Player::UpdateSkillPro Chance=%3.1f%% taken", Chance/10.0);
         return true;
     }
@@ -4567,12 +4579,15 @@ void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHi
         return;
 }
 
-void Player::ModifySkillBonus(uint32 skillid,int32 val)
+void Player::ModifySkillBonus(uint32 skillid,int32 val, bool talent)
 {
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
-        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skillid)
+        if ((GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF) == skillid)
     {
-        SetUInt32Value(PLAYER_SKILL(i)+2,uint16(int16(GetUInt32Value(PLAYER_SKILL(i)+2))+val));
+        if(talent)                                          // permanent bonus stored in high part 
+            SetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i),GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i))+MAKE_SKILL_BONUS(0,val));
+        else                                                // temporary/item bonus stored in low part 
+            SetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i),GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i))+MAKE_SKILL_BONUS(val,0));
         return;
     }
 }
@@ -4582,19 +4597,20 @@ void Player::UpdateMaxSkills()
     uint16 maxconfskill = sWorld.GetConfigMaxSkillValue();
 
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
-        if (GetUInt32Value(PLAYER_SKILL(i)))
+        if (GetUInt32Value(PLAYER_SKILL_INDEX(i)))
     {
-        uint32 pskill = GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF;
+        uint32 pskill = GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF;
         if( IsProfessionSkill(pskill) || pskill == SKILL_RIDING )
             continue;
-        uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
-        uint32 max = data>>16;
+        uint32 data = GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i));
+        uint32 max = SKILL_MAX(data);
+        uint32 val = SKILL_VALUE(data);
 
         // update only level dependent max skill values
         if(max!=1 && max != maxconfskill)
         {
-            uint32 max_Skill = data%0x10000+GetMaxSkillValueForLevel()*0x10000;
-            SetUInt32Value(PLAYER_SKILL(i)+1,max_Skill);
+            uint32 max_Skill = GetMaxSkillValueForLevel();
+            SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i),MAKE_SKILL_VALUE(val,max_Skill));
         }
     }
 }
@@ -4602,20 +4618,18 @@ void Player::UpdateMaxSkills()
 void Player::UpdateSkillsToMaxSkillsForLevel()
 {
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
-        if (GetUInt32Value(PLAYER_SKILL(i)))
+        if (GetUInt32Value(PLAYER_SKILL_INDEX(i)))
     {
-        uint32 pskill = GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF;
+        uint32 pskill = GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF;
         if( IsProfessionSkill(pskill) || pskill == SKILL_RIDING )
             continue;
-        uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
+        uint32 data = GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i));
 
-        uint32 max = data>>16;
+        uint32 max = SKILL_MAX(data);
 
         if(max > 1)
-        {
-            uint32 new_data = max * 0x10000 + max;
-            SetUInt32Value(PLAYER_SKILL(i)+1,new_data);
-        }
+            SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i),MAKE_SKILL_VALUE(max,max));
+
         if(pskill == SKILL_DEFENSE)
         {
             UpdateBlockPercentage();
@@ -4630,16 +4644,19 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
     if(!id) return;
     uint16 i=0;
     for (; i < PLAYER_MAX_SKILLS; i++)
-        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == id) break;
+        if ((GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF) == id) break;
 
     if(i<PLAYER_MAX_SKILLS)                                 //has skill
     {
         if(currVal)
-            SetUInt32Value(PLAYER_SKILL(i)+1,currVal+maxVal*0x10000);
+            SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i),MAKE_SKILL_VALUE(currVal,maxVal));
         else                                                //remove
         {
-            SetUInt64Value(PLAYER_SKILL(i),0);
-            SetUInt32Value(PLAYER_SKILL(i)+2,0);
+            // clear skill fields
+            SetUInt64Value(PLAYER_SKILL_INDEX(i),0);
+            SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i),0);
+            SetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i),0);
+
             // remove spells that depend on this skill when removing the skill
             for (PlayerSpellMap::const_iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end(); itr = next)
             {
@@ -4654,11 +4671,12 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
                 }
             }
         }
-    }else if(currVal)                                       //add
+    }
+    else if(currVal)                                        //add
     {
 
         for (i=0; i < PLAYER_MAX_SKILLS; i++)
-            if (!GetUInt32Value(PLAYER_SKILL(i)))
+            if (!GetUInt32Value(PLAYER_SKILL_INDEX(i)))
         {
             SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(id);
             if(!pSkill)
@@ -4668,18 +4686,21 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
             }
             // enable unlearn button for primary professions only
             if (pSkill->categoryId == SKILL_CATEGORY_PROFESSION)
-                SetUInt32Value(PLAYER_SKILL(i), id | (1 << 16));
+                SetUInt32Value(PLAYER_SKILL_INDEX(i), id | (1 << 16));
             else
-                SetUInt32Value(PLAYER_SKILL(i),id);
-            SetUInt32Value(PLAYER_SKILL(i)+1,maxVal*0x10000+currVal);
-            // apply skill bonuses
-            SetUInt32Value(PLAYER_SKILL(i)+2,0);
+                SetUInt32Value(PLAYER_SKILL_INDEX(i), id);
+            SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i),MAKE_SKILL_VALUE(currVal,maxVal));
 
+            // apply skill bonuses
+            SetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i),0);
+
+            // temporary bonuses
             AuraList const& mModSkill = GetAurasByType(SPELL_AURA_MOD_SKILL);
             for(AuraList::const_iterator i = mModSkill.begin(); i != mModSkill.end(); ++i)
                 if ((*i)->GetModifier()->m_miscvalue == int32(id))
                     (*i)->ApplyModifier(true);
 
+            // permanent bonuses
             AuraList const& mModSkillTalent = GetAurasByType(SPELL_AURA_MOD_SKILL_TALENT);
             for(AuraList::const_iterator i = mModSkillTalent.begin(); i != mModSkillTalent.end(); ++i)
                 if ((*i)->GetModifier()->m_miscvalue == int32(id))
@@ -4695,7 +4716,7 @@ bool Player::HasSkill(uint32 skill) const
     if(!skill)return false;
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
     {
-        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill)
+        if ((GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF) == skill)
         {
             return true;
         }
@@ -4705,12 +4726,17 @@ bool Player::HasSkill(uint32 skill) const
 
 uint16 Player::GetSkillValue(uint32 skill) const
 {
-    if(!skill)return 0;
+    if(!skill)
+        return 0;
+
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
     {
-        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill)
+        if ((GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF) == skill)
         {
-            int16 result = SKILL_VALUE(GetUInt32Value(PLAYER_SKILL(i)+1))+int16(GetUInt32Value(PLAYER_SKILL(i)+2));
+            uint32 bonus = GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i));
+
+            int16 result = int16(SKILL_VALUE(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i)))
+                + SKILL_TEMP_BONUS(bonus) + SKILL_PERM_BONUS(bonus));
             return result < 0 ? 0 : result;
         }
     }
@@ -4722,9 +4748,10 @@ uint16 Player::GetMaxSkillValue(uint32 skill) const
     if(!skill)return 0;
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
     {
-        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill)
+        if ((GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF) == skill)
         {
-            return SKILL_MAX(GetUInt32Value(PLAYER_SKILL(i)+1));
+            return SKILL_MAX(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i)))
+                +SKILL_PERM_BONUS(GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i)));
         }
     }
     return 0;
@@ -4735,9 +4762,10 @@ uint16 Player::GetPureSkillValue(uint32 skill) const
     if(!skill)return 0;
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
     {
-        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill)
+        if ((GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF) == skill)
         {
-            return SKILL_VALUE(GetUInt32Value(PLAYER_SKILL(i)+1));
+            return SKILL_VALUE(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i)))
+                +SKILL_PERM_BONUS(GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i)));
         }
     }
     return 0;
@@ -4750,9 +4778,9 @@ uint16 Player::GetSkillBonusValue(uint32 skill) const
 
     for (int i = 0; i < PLAYER_MAX_SKILLS; i++)
     {
-        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill)
+        if ((GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF) == skill)
         {
-            int16 result = SKILL_VALUE(GetUInt32Value(PLAYER_SKILL(i)+2));
+            int16 result = SKILL_TEMP_BONUS(GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i)));
             return result < 0 ? 0 : result;
         }
     }
@@ -12671,10 +12699,10 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     // reset skill modifiers and set correct unlearn flags
     for (uint32 i = 0; i < PLAYER_MAX_SKILLS; i++)
     {
-        SetUInt32Value(PLAYER_SKILL(i)+2,0);
+        SetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i),0);
 
         // set correct unlearn bit
-        uint32 id = GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF;
+        uint32 id = GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF;
         if(!id) continue;
 
         SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(id);
@@ -12682,9 +12710,9 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
         // enable unlearn button for primary professions only
         if (pSkill->categoryId == SKILL_CATEGORY_PROFESSION)
-            SetUInt32Value(PLAYER_SKILL(i), id | (1 << 16));
+            SetUInt32Value(PLAYER_SKILL_INDEX(i), id | (1 << 16));
         else
-            SetUInt32Value(PLAYER_SKILL(i), id);
+            SetUInt32Value(PLAYER_SKILL_INDEX(i), id);
     }
 
     // make sure the unit is considered out of combat for proper loading
