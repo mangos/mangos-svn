@@ -46,6 +46,7 @@ GridState* si_GridStates[MAX_GRID_STATE];
 
 Map::~Map()
 {
+    UnloadAll(true);
     if(i_data)
     {
         delete i_data;
@@ -553,7 +554,7 @@ void Map::Reset()
 {
     objmgr.DeleteRespawnTimeForInstance(GetInstanceId());
 
-    UnloadAll();
+    UnloadAll(false);
 
     // reinitialize reset time
     InitResetTime();
@@ -1018,13 +1019,13 @@ bool Map::CreatureRespawnRelocation(Creature *c)
         return false;
 }
 
-bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
+bool Map::UnloadGrid(const uint32 &x, const uint32 &y, bool pForce)
 {
     NGridType *grid = getNGrid(x, y);
     assert( grid != NULL);
 
     {
-        if( ObjectAccessor::Instance().PlayersNearGrid(x, y, i_id, i_InstanceId) )
+        if(!pForce && ObjectAccessor::Instance().PlayersNearGrid(x, y, i_id, i_InstanceId) )
             return false;
 
         DEBUG_LOG("Unloading grid[%u,%u] for map %u", x,y, i_id);
@@ -1064,16 +1065,16 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
     return true;
 }
 
-void Map::UnloadAll()
+void Map::UnloadAll(bool pForce)
 {
     // clear all delayed moves, useless anyway do this moves before map unload.
     i_creaturesToMove.clear();
 
-    while(!GridRefManager<NGridType>::isEmpty())
+    for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end(); )
     {
-        GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin();
         NGridType &grid(*i->getSource());
-        UnloadGrid(grid.getX(), grid.getY()); // deleted the grid and removes it from the GridRefManager
+        ++i;
+        UnloadGrid(grid.getX(), grid.getY(), pForce); // deletes the grid and removes it from the GridRefManager
     }
 }
 

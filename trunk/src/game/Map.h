@@ -149,8 +149,8 @@ class MANGOS_DLL_DECL Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         bool GetUnloadFlag(const GridPair &p) const { return getNGrid(p.x_coord, p.y_coord)->getUnloadFlag(); }
         void SetUnloadFlag(const GridPair &p, bool unload) { getNGrid(p.x_coord, p.y_coord)->setUnloadFlag(unload); }
         void LoadGrid(const Cell& cell, bool no_unload = false);
-        bool UnloadGrid(const uint32 &x, const uint32 &y);
-        virtual void UnloadAll();
+        bool UnloadGrid(const uint32 &x, const uint32 &y, bool pForce);
+        virtual void UnloadAll(bool pForce);
 
         void ResetGridExpiry(NGridType &grid, float factor = 1) const
         {
