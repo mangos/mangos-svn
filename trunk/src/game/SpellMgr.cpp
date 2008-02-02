@@ -422,7 +422,7 @@ bool IsSingleTargetSpell(uint32 spellId)
         || (spellInfo->SpellIconID == 96 && spellInfo->SpellVisual == 1305) )
         return true;
 
-    // shaman shilds (only earth shild can be casted at other target, but it's single caster also anyway
+    // shaman shilds (only earth shild can be casted at other target, but it's single caster also anyway)
     if(GetSpellSpecific(spellInfo->Id)==SPELL_ELEMENTAL_SHIELD)
         return true;
 
