@@ -370,6 +370,14 @@ Rate.Creature.Elite.RAREELITE.Damage = 1
 Rate.Creature.Elite.WORLDBOSS.Damage = 1
 Rate.Creature.Elite.RARE.Damage = 1
 
+# Creature Spell Damage Rate.
+# Examples: 2 - creatures will damage with spells 2x, 1.7 - 1.7x.
+Rate.Creature.Normal.SpellDamage = 1
+Rate.Creature.Elite.Elite.SpellDamage = 1
+Rate.Creature.Elite.RAREELITE.SpellDamage = 1
+Rate.Creature.Elite.WORLDBOSS.SpellDamage = 1
+Rate.Creature.Elite.RARE.SpellDamage = 1
+
 # Creature Health Ammount Modifier.
 # Examples: 2 - creatures have 2x health, 1.7 - 1.7x.
 Rate.Creature.Normal.HP = 1

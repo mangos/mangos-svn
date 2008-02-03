@@ -1144,6 +1144,25 @@ float Creature::_GetDamageMod(int32 Rank)
     }
 }
 
+float Creature::GetSpellDamageMod(int32 Rank)
+{
+    switch (Rank)                                           // define rates for each elite rank
+    {
+        case CREATURE_ELITE_NORMAL:
+            return sWorld.getRate(RATE_CREATURE_NORMAL_SPELLDAMAGE);
+        case CREATURE_ELITE_ELITE:
+            return sWorld.getRate(RATE_CREATURE_ELITE_ELITE_SPELLDAMAGE);
+        case CREATURE_ELITE_RAREELITE:
+            return sWorld.getRate(RATE_CREATURE_ELITE_RAREELITE_SPELLDAMAGE);
+        case CREATURE_ELITE_WORLDBOSS:
+            return sWorld.getRate(RATE_CREATURE_ELITE_WORLDBOSS_SPELLDAMAGE);
+        case CREATURE_ELITE_RARE:
+            return sWorld.getRate(RATE_CREATURE_ELITE_RARE_SPELLDAMAGE);
+        default:
+            return sWorld.getRate(RATE_CREATURE_ELITE_ELITE_SPELLDAMAGE);
+    }
+}
+
 bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const CreatureData *data)
 {
     Object::_Create(guidlow, HIGHGUID_UNIT);
