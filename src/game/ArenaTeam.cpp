@@ -74,7 +74,7 @@ bool ArenaTeam::create(uint64 captainGuid, uint32 type, std::string ArenaTeamNam
     CharacterDatabase.PExecute("INSERT INTO `arena_team` (`arenateamid`,`name`,`captainguid`,`type`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`) "
         "VALUES('%u','%s','%u','%u','%u','%u','%u','%u','%u')",
         Id, ArenaTeamName.c_str(), GUID_LOPART(CaptainGuid), Type, EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor);
-    CharacterDatabase.PExecute("INSERT INTO `arena_team_stats` (`arenateamid`, `rating`, `games`, `wins`, `played`, `wins2`, `rank`) VALUES ('%u', '0', '0', '0', '0', '0', '0')", Id);
+    CharacterDatabase.PExecute("INSERT INTO `arena_team_stats` (`arenateamid`, `rating`, `games`, `wins`, `played`, `wins2`, `rank`) VALUES ('%u', '1500', '0', '0', '0', '0', '0')", Id);
     CharacterDatabase.CommitTransaction();
 
     AddMember(CaptainGuid);
@@ -310,8 +310,8 @@ void ArenaTeam::Roster(WorldSession *session)
     Player *pl = NULL;
 
     WorldPacket data(SMSG_ARENA_TEAM_ROSTER, 100);
-    data << GetSlot();                                      // slot
-    data << GetMembersSize();                               // members count
+    data << uint8(GetSlot());                               // slot
+    data << uint32(GetMembersSize());                       // members count
     data << uint32(0);                                      // unknown (may be arena team id?)
 
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
@@ -319,29 +319,31 @@ void ArenaTeam::Roster(WorldSession *session)
         pl = objmgr.GetPlayer(itr->guid);
         if(pl)
         {
-            data << pl->GetGUID();                          // guid
+            data << uint64(pl->GetGUID());                  // guid
             data << uint8(1);                               // online flag
             data << pl->GetName();                          // member name
-            data << pl->GetZoneId();                        // unknown, probably rank or zone (0 and 1 ?)
+            data << uint32(pl->GetZoneId());                // unknown, probably rank or zone (0 and 1 ?)
             data << uint8(pl->getLevel());                  // unknown, probably level
-            data << pl->getClass();                         // class
-            data << itr->played_week;                       // played this week
-            data << itr->wons_week;                         // wins this week
-            data << itr->played_season;                     // played this season
-            data << itr->wons_season;                       // wins this season
+            data << uint8(pl->getClass());                  // class
+            data << uint32(itr->played_week);               // played this week
+            data << uint32(itr->wons_week);                 // wins this week
+            data << uint32(itr->played_season);             // played this season
+            data << uint32(itr->wons_season);               // wins this season
+            data << uint32(0);                              // personal rating?
         }
         else
         {
-            data << itr->guid;                              // guid
+            data << uint64(itr->guid);                      // guid
             data << uint8(0);                               // online flag
             data << itr->name;                              // member name
             data << uint32(0);                              // unknown, zone id?
             data << uint8(0);                               // unknown, level?
-            data << itr->Class;                             // class
-            data << itr->played_week;                       // played this week
-            data << itr->wons_week;                         // wins this week
-            data << itr->played_season;                     // played this season
-            data << itr->wons_season;                       // wins this season
+            data << uint8(itr->Class);                      // class
+            data << uint32(itr->played_week);               // played this week
+            data << uint32(itr->wons_week);                 // wins this week
+            data << uint32(itr->played_season);             // played this season
+            data << uint32(itr->wons_season);               // wins this season
+            data << uint32(0);                              // personal rating?
         }
     }
     session->SendPacket(&data);
@@ -351,14 +353,14 @@ void ArenaTeam::Roster(WorldSession *session)
 void ArenaTeam::Query(WorldSession *session)
 {
     WorldPacket data(SMSG_ARENA_TEAM_QUERY_RESPONSE, 4*7+GetName().size()+1);
-    data << GetId();                                        // team id
+    data << uint32(GetId());                                // team id
     data << GetName();                                      // team name
-    data << GetType();                                      // arena team type (2=2x2, 3=3x3 or 5=5x5)
-    data << EmblemStyle;                                    // emblem style?
-    data << EmblemColor;                                    // emblem color?
-    data << BorderStyle;                                    // border style?
-    data << BorderColor;                                    // border color?
-    data << BackgroundColor;                                // background color?
+    data << uint32(GetType());                              // arena team type (2=2x2, 3=3x3 or 5=5x5)
+    data << uint32(EmblemStyle);                            // emblem style?
+    data << uint32(EmblemColor);                            // emblem color?
+    data << uint32(BorderStyle);                            // border style?
+    data << uint32(BorderColor);                            // border color?
+    data << uint32(BackgroundColor);                        // background color?
     session->SendPacket(&data);
     sLog.outDebug("WORLD: Sent SMSG_ARENA_TEAM_QUERY_RESPONSE");
 }
@@ -366,26 +368,27 @@ void ArenaTeam::Query(WorldSession *session)
 void ArenaTeam::Stats(WorldSession *session)
 {
     WorldPacket data(SMSG_ARENA_TEAM_STATS, 4*7);
-    data << GetId();                                        // arena team id
-    data << stats.rating;                                   // rating
-    data << stats.games;                                    // games
-    data << stats.wins;                                     // wins
-    data << stats.played;                                   // played
-    data << stats.wins2;                                    // wins(again o_O)
-    data << stats.rank;                                     // rank
+    data << uint32(GetId());                                // arena team id
+    data << uint32(stats.rating);                           // rating
+    data << uint32(stats.games);                            // games
+    data << uint32(stats.wins);                             // wins
+    data << uint32(stats.played);                           // played
+    data << uint32(stats.wins2);                            // wins(again o_O)
+    data << uint32(stats.rank);                             // rank
     session->SendPacket(&data);
 }
 
-void ArenaTeam::InspectStats(WorldSession *session)
+void ArenaTeam::InspectStats(WorldSession *session, uint64 guid)
 {
-    WorldPacket data(MSG_INSPECT_ARENA_STATS, 8+1+4*5);
-    data << session->GetPlayer()->GetGUID();                // player guid
-    data << GetSlot();                                      // slot (0...2)
-    data << GetId();                                        // arena team id
-    data << stats.rating;                                   // rating
-    data << stats.games;                                    // games
-    data << stats.wins;                                     // wins
-    data << stats.played;                                   // played (count of all games, that played...)
+    WorldPacket data(MSG_INSPECT_ARENA_STATS, 8+1+4*6);
+    data << uint64(guid);                                   // player guid
+    data << uint8(GetSlot());                               // slot (0...2)
+    data << uint32(GetId());                                // arena team id
+    data << uint32(stats.rating);                           // rating
+    data << uint32(stats.games);                            // games
+    data << uint32(stats.wins);                             // wins
+    data << uint32(stats.played);                           // played (count of all games, that played...)
+    data << uint32(0);                                      // unk, 2.3.3
     session->SendPacket(&data);
 }
 
@@ -464,20 +467,23 @@ void ArenaTeam::BroadcastPacket(WorldPacket *packet)
 }
 
 /*
-arenateam fields (id from 2.1.0 client):
-1405 - arena team id 2v2
-1406 - 0=captain, 1=member?
-1407 - played
-1408 - unk
-1409 - unk
-1410 - arena team id 3v3
-1411 - 0=captain, 1=member?
-1412 - played
-1413 - unk
-1414 - unk
-1415 - arena team id 5v5
-1416 - 0=captain, 1=member?
-1417 - played
+arenateam fields (id from 2.3.3 client):
+1414 - arena team id 2v2
+1415 - 0=captain, 1=member
+1416 - played this season
+1417 - played this week
 1418 - unk
 1419 - unk
+1420 - arena team id 3v3
+1421 - 0=captain, 1=member
+1422 - played this season
+1423 - played this week
+1424 - unk
+1425 - unk
+1426 - arena team id 5v5
+1427 - 0=captain, 1=member
+1428 - played this season
+1429 - played this week
+1430 - unk
+1431 - unk
 */

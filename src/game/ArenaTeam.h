@@ -122,6 +122,7 @@ class ArenaTeam
         std::string GetName() { return Name; }
         ArenaTeamStats GetStats() { return stats; }
         void SetStats(uint32 stat_type, uint32 value);
+        uint32 GetRating() { return stats.rating; }
 
         uint32 GetEmblemStyle(){ return EmblemStyle; }
         uint32 GetEmblemColor(){ return EmblemColor; }
@@ -149,7 +150,7 @@ class ArenaTeam
         void Roster(WorldSession *session);
         void Query(WorldSession *session);
         void Stats(WorldSession *session);
-        void InspectStats(WorldSession *session);
+        void InspectStats(WorldSession *session, uint64 guid);
 
     protected:
 

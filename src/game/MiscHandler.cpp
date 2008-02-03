@@ -1272,7 +1272,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 {
-    CHECK_PACKET_SIZE(recv_data,8);
+    CHECK_PACKET_SIZE(recv_data, 8);
 
     uint64 guid;
     recv_data >> guid;
@@ -1281,17 +1281,17 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
 
     if(!player)
     {
-        sLog.outError("InspectHonorStats: WFT, player not found...");
+        sLog.outError("InspectHonorStats: WTF, player not found...");
         return;
     }
 
-    WorldPacket data( MSG_INSPECT_HONOR_STATS, 13 );
-    data << player->GetGUID();
-    data << (uint8)player->GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY);
-    data << player->GetUInt32Value(PLAYER_FIELD_KILLS);
-    data << player->GetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION);
-    data << player->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
-    data << player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS);
+    WorldPacket data(MSG_INSPECT_HONOR_STATS, 8+1+4*4);
+    data << uint64(player->GetGUID());
+    data << uint8(player->GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY));
+    data << uint32(player->GetUInt32Value(PLAYER_FIELD_KILLS));
+    data << uint32(player->GetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION));
+    data << uint32(player->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION));
+    data << uint32(player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS));
     SendPacket(&data);
 }
 
