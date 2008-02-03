@@ -2962,7 +2962,7 @@ uint8 Spell::CanCast(bool strict)
                     || m_spellInfo->EffectImplicitTargetA[i] == TARGET_GAMEOBJECT && !m_targets.getGOTarget()
                     // we need a go target, or an openable item target in case of TARGET_GAMEOBJECT_ITEM
                     || m_spellInfo->EffectImplicitTargetA[i] == TARGET_GAMEOBJECT_ITEM && !m_targets.getGOTarget() &&
-                    (!m_targets.getItemTarget() || !(m_targets.getItemTarget()->GetProto()->Flags & ITEM_FLAGS_OPENABLE)) )
+                    (!m_targets.getItemTarget() || !(m_targets.getItemTarget()->GetProto()->LockID)) )
                     return SPELL_FAILED_BAD_TARGETS;
 
                 // chance for fail at orange mining/herb/LockPicking gathering attempt

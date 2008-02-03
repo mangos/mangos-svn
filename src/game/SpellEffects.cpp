@@ -3230,33 +3230,29 @@ void Spell::EffectWeaponDmg(uint32 i)
     }
 
     // take ammo
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+    if(attType == RANGED_ATTACK && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        if(m_spellInfo->rangeIndex != 1 && m_spellInfo->rangeIndex != 2 && m_spellInfo->rangeIndex != 7)
-        {
-            Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
-            if(!pItem  || pItem->IsBroken())
-                return;
+        Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
+        if(!pItem  || pItem->IsBroken())
+            return;
 
-            if( pItem->GetProto()->InventoryType == INVTYPE_THROWN )
+        if( pItem->GetProto()->InventoryType == INVTYPE_THROWN )
+        {
+            if(pItem->GetMaxStackCount()==1)
             {
-                if(pItem->GetMaxStackCount()==1)
-                {
-                    // decrease durability for non-stackable throw weapon
-                    ((Player*)m_caster)->DurabilityPointsLoss(EQUIPMENT_SLOT_RANGED,1);
-                }
-                else
-                {
-                    // decrease items amount for stackable throw weapon
-                    uint32 count = 1;
-                    ((Player*)m_caster)->DestroyItemCount( pItem, count, true);
-                }
+                // decrease durability for non-stackable throw weapon
+                ((Player*)m_caster)->DurabilityPointsLoss(EQUIPMENT_SLOT_RANGED,1);
             }
             else
-            if(uint32 ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID))
-                ((Player*)m_caster)->DestroyItemCount(ammo, 1, true);
-            // wand not have ammo
+            {
+                // decrease items amount for stackable throw weapon
+                uint32 count = 1;
+                ((Player*)m_caster)->DestroyItemCount( pItem, count, true);
+            }
         }
+        else if(uint32 ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID))
+            ((Player*)m_caster)->DestroyItemCount(ammo, 1, true);
+        // wand not have ammo
     }
 
     /*if(m_spellInfo->Effect[i] == 121)
