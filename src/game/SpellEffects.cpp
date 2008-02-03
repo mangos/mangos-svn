@@ -2104,7 +2104,7 @@ void Spell::EffectOpenLock(uint32 /*i*/)
         }
 
         // update skill if really known
-        uint32 SkillValue = player->GetPureSkillValue(SkillId);
+        uint32 SkillValue = player->GetBaseSkillValue(SkillId);
         if(SkillValue)                                      // non only item base skill
         {
             if(gameObjTarget)
@@ -2117,7 +2117,7 @@ void Spell::EffectOpenLock(uint32 /*i*/)
             else if(itemTarget)
             {
                 // Do one skill-up
-                uint32 SkillValue = player->GetPureSkillValue(SkillId);
+                uint32 SkillValue = player->GetBaseSkillValue(SkillId);
                 player->UpdateGatherSkill(SkillId, SkillValue, reqSkillValue);
             }
         }
@@ -4107,7 +4107,7 @@ void Spell::EffectSkinning(uint32 /*i*/)
 
     int32 reqValue = targetLevel < 10 ? 0 : targetLevel < 20 ? (targetLevel-10)*10 : targetLevel*5;
 
-    int32 skinningValue = ((Player*)m_caster)->GetPureSkillValue(SKILL_SKINNING);
+    int32 skinningValue = ((Player*)m_caster)->GetBaseSkillValue(SKILL_SKINNING);
 
     // Double chances for elites
     ((Player*)m_caster)->UpdateGatherSkill(SKILL_SKINNING, skinningValue, reqValue, ((Creature*)unitTarget)->isElite() ? 2 : 1 );
@@ -4480,7 +4480,7 @@ void Spell::EffectProspecting(uint32 /*i*/)
 
     if( sWorld.getConfig(CONFIG_SKILL_PROSPECTING))
     {
-        uint32 SkillValue = p_caster->GetPureSkillValue(SKILL_JEWELCRAFTING);
+        uint32 SkillValue = p_caster->GetBaseSkillValue(SKILL_JEWELCRAFTING);
         uint32 reqSkillValue = itemTarget->GetProto()->RequiredSkillRank;
         p_caster->UpdateGatherSkill(SKILL_JEWELCRAFTING, SkillValue, reqSkillValue);
     }

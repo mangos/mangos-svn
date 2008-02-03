@@ -415,7 +415,7 @@
 #define LANG_SPAWNING_SPIRIT_HEAL        "Spawning spirit healers\n"
 #define LANG_NO_SPIRIT_HEAL_DB           "No spirit healers in database, exiting."
 
-#define LANG_SET_SKILL                   "Skill %u (%s) for player %s set to %u and current maximum set to %u."
+#define LANG_SET_SKILL                   "Skill %u (%s) for player %s set to %u and current maximum set to %u (without permanent (talent) bonuses)."
 #define LANG_SET_SKILL_ERROR             "Player %s must have skill %u (%s) before using this command."
 
 #define LANG_INVALID_SKILL_ID            "Invalid skill id (%u)"

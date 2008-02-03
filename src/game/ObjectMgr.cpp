@@ -2234,11 +2234,11 @@ void ObjectMgr::LoadQuests()
             qinfo->QuestFlags &= QUEST_MANGOS_FLAGS_DB_ALLOWED;
         }
 
-        if(qinfo->Type == QUEST_TYPE_DAILY && (qinfo->GetFlags() & QUEST_SPECIAL_FLAGS_DAILY) == 0)
+        if(qinfo->Type == QUEST_TYPE_DAILY && (qinfo->GetFlags() & QUEST_FLAGS_DAILY) == 0)
         {
-            sLog.outErrorDb("Quest %u has `Type` = %u (QUEST_TYPE_DAILY) but does not have `SpecialFlags` set with mask %u (QUEST_SPECIAL_FLAGS_DAILY).",
-                qinfo->GetQuestId(),qinfo->Type,QUEST_SPECIAL_FLAGS_DAILY);
-            qinfo->QuestFlags |= QUEST_SPECIAL_FLAGS_DAILY;
+            sLog.outErrorDb("Quest %u has `Type` = %u (QUEST_TYPE_DAILY) but does not have `QuestFlags` set with mask %u (QUEST_FLAGS_DAILY).",
+                qinfo->GetQuestId(),qinfo->Type,QUEST_FLAGS_DAILY);
+            qinfo->QuestFlags |= QUEST_FLAGS_DAILY;
         }
 
         // zone case
