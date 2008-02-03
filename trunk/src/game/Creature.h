@@ -383,6 +383,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void UpdateDamagePhysical(WeaponAttackType attType);
         uint32 GetCurrentModelId() { return GetUInt32Value(UNIT_FIELD_DISPLAYID); };
         uint32 GetCurrentEquipmentId() { return m_equipmentId; };
+        float GetSpellDamageMod(int32 Rank);
 
         /*********************************************************/
         /***                    VENDOR SYSTEM                  ***/

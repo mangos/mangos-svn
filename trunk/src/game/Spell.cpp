@@ -3119,6 +3119,9 @@ uint8 Spell::CanCast(bool strict)
                 if(m_caster->GetCharmGUID())
                     return SPELL_FAILED_ALREADY_HAVE_CHARM;
 
+                if(m_caster->GetCharmerGUID())
+                    return SPELL_FAILED_CHARMED;
+
                 if(!m_targets.getUnitTarget())
                     return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
 

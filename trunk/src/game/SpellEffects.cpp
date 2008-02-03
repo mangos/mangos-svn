@@ -1100,6 +1100,20 @@ void Spell::EffectDummy(uint32 i)
             return;
         }
 
+        // Nigh Invulnerability Belt
+        case 30458:
+        {
+            if(m_caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            uint32 roll = urand(0, 99);
+
+            uint32 spell_id = roll < 10 ? 30457 : 30456;    // 10% for backfire
+
+            m_caster->CastSpell(m_caster,spell_id,true,m_CastItem);
+            return;
+        }
+
         //Warrior's Wrath
         case 21977:
         {
