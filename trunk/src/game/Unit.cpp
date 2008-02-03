@@ -1879,7 +1879,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
     *absorb = damage - RemainingDamage - *resist;
 }
 
-void Unit::DoAttackDamage (Unit *pVictim, int32 init_damage, float damagePercentMod, uint32 *damage, CleanDamage *cleanDamage, uint32 *blocked_amount, SpellSchools damageType, uint32 *hitInfo, VictimState *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
+void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDamage, uint32 *blocked_amount, SpellSchools damageType, uint32 *hitInfo, VictimState *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
 {
     bool unavoidable = spellCasted && (spellCasted->Attributes & 0x200000);
 
@@ -1933,41 +1933,6 @@ void Unit::DoAttackDamage (Unit *pVictim, int32 init_damage, float damagePercent
 
         if(roll_chance_f(Probability))
             CastSpell(pVictim, 1604, true);
-    }
-
-    int32 white_damage = CalculateDamage (attType);
-
-    if(spellCasted)
-    {
-        // single only spell with 2 weapon white damage apply if have
-        if(GetTypeId()==TYPEID_PLAYER && spellCasted->SpellFamilyName == SPELLFAMILY_WARRIOR && (spellCasted->SpellFamilyFlags & 0x00000400000000LL))
-        {
-            Item* item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-            if (item && item->GetProto()->Class == ITEM_CLASS_WEAPON && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon(false))
-                white_damage += CalculateDamage (OFF_ATTACK);
-        }
-
-        //apply spellmod also to the weapon damage, *damage already have applied mod
-        if(Player* modOwner = GetSpellModOwner())
-        {
-            // SPELLMOD_FLAT already applied in Spell::EffectWeaponDmg
-            modOwner->ApplySpellMod(spellCasted->Id, SPELLMOD_DAMAGE, white_damage, SPELLMOD_PCT);
-        }
-    }
-
-    // calculate full damage (init_damage can be negative)
-    {
-        // full original damage
-        int32 temp_damage = init_damage + white_damage;
-
-        // percent mod applied
-        temp_damage = int32(temp_damage *damagePercentMod);
-
-        // prevent negative damage
-        if(temp_damage < 0)
-            temp_damage = 0;
-
-        *damage = uint32(temp_damage);
     }
 
     //Calculate the damage after armor mitigation if SPELL_SCHOOL_NORMAL
@@ -2239,7 +2204,7 @@ void Unit::DoAttackDamage (Unit *pVictim, int32 init_damage, float damagePercent
     // apply melee damage bonus and absorb only if base damage not fully blocked to prevent negative damage or damage with full block
     if(*victimState != VICTIMSTATE_BLOCKS)
     {
-        MeleeDamageBonus(pVictim, damage,attType);
+        MeleeDamageBonus(pVictim, damage,attType,spellCasted);
         CalcAbsorbResist(pVictim, damageType, DIRECT_DAMAGE, *damage-*blocked_amount, absorbDamage, resistDamage);
     }
 
@@ -2369,7 +2334,6 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
 
     VictimState victimState = VICTIMSTATE_NORMAL;
 
-    uint32   damage = 0;
     CleanDamage cleanDamage = CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
     uint32   blocked_dmg = 0;
     uint32   absorbed_dmg = 0;
@@ -2383,7 +2347,9 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
         return;
     }
 
-    DoAttackDamage (pVictim, 0, 1.0f, &damage, &cleanDamage, &blocked_dmg, meleeSchool, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
+    uint32 damage = CalculateDamage (attType);
+
+    DoAttackDamage (pVictim, &damage, &cleanDamage, &blocked_dmg, meleeSchool, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
 
     if (hitInfo & HITINFO_MISS)
         //send miss
@@ -5945,6 +5911,11 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     float TakenActualBenefit = TakenAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor * DotFactor / 100.0f;
 
     float tmpDamage = (float(pdamage)+DoneActualBenefit)*DoneTotalMod;
+
+    // apply spellmod to Done damage
+    if(Player* modOwner = GetSpellModOwner())
+        modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, tmpDamage);
+
     tmpDamage = (tmpDamage+TakenActualBenefit)*TakenTotalMod;
 
     if( GetTypeId() == TYPEID_UNIT && !((Creature*)this)->isPet() )
@@ -6126,6 +6097,10 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     for(AuraList::const_iterator i = mHealingDonePct.begin();i != mHealingDonePct.end(); ++i)
         heal *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
 
+    // apply spellmod to Done amount
+    if(Player* modOwner = GetSpellModOwner())
+        modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, heal);
+
     // Healing taken percent
     AuraList const& mHealingPct = pVictim->GetAurasByType(SPELL_AURA_MOD_HEALING_PCT);
     for(AuraList::const_iterator i = mHealingPct.begin();i != mHealingPct.end(); ++i)
@@ -6237,7 +6212,7 @@ bool Unit::IsDamageToThreatSpell(SpellEntry const * spellInfo) const
     return false;
 }
 
-void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attType)
+void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attType, SpellEntry const *spellProto)
 {
     if(!pVictim) return;
 
@@ -6347,7 +6322,16 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
             TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
     }
 
-    float tmpDamage = ((int32(*pdamage) + DoneFlatBenefit) + TakenFlatBenefit)*TakenTotalMod;
+    float tmpDamage = float(int32(*pdamage) + DoneFlatBenefit);
+
+    // apply spellmod to Done damage
+    if(spellProto)
+    {
+        if(Player* modOwner = GetSpellModOwner())
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, tmpDamage);
+    }
+
+    tmpDamage = (tmpDamage + TakenFlatBenefit)*TakenTotalMod;
 
     // bonus result can be negative
     *pdamage =  tmpDamage > 0 ? uint32(tmpDamage) : 0;
@@ -7295,8 +7279,6 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
             spellProto->EffectApplyAuraName[effect_index] == SPELL_AURA_PERIODIC_HEAL ||
             spellProto->EffectApplyAuraName[effect_index] == SPELL_AURA_PERIODIC_LEECH) )
             modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DOT, value);
-
-        modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, value);
     }
 
     return value;
