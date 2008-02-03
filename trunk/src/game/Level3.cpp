@@ -586,7 +586,7 @@ bool ChatHandler::HandleSetSkillCommand(const char* args)
         return true;
     }
 
-    int32 max   = max_p ? atol (max_p) : target->GetMaxSkillValue(skill);
+    int32 max   = max_p ? atol (max_p) : target->GetPureMaxSkillValue(skill);
 
     if( level <= 0 || level > max || max <= 0 )
         return false;

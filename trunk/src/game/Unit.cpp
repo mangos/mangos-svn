@@ -2465,7 +2465,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     int32 skillDiff =  GetWeaponSkillValue(attType) - pVictim->GetDefenseSkillValue();
     // bonus from skills is 0.04%
     int32    skillBonus = skillDiff * 4;
-    int32    skillBonus2 = 4 * ( GetWeaponSkillValue(attType) - pVictim->GetPureDefenseSkillValue() );
+    int32    skillBonus2 = 4 * ( GetWeaponSkillValue(attType) - pVictim->GetBaseDefenseSkillValue() );
     int32    sum = 0, tmp = 0;
     int32    roll = urand (0, 10000);
 
@@ -2775,10 +2775,10 @@ uint16 Unit::GetDefenseSkillValue() const
         return GetUnitMeleeSkill();
 }
 
-uint16 Unit::GetPureDefenseSkillValue() const
+uint16 Unit::GetBaseDefenseSkillValue() const
 {
     if(GetTypeId() == TYPEID_PLAYER)
-        return ((Player*)this)->GetPureSkillValue(SKILL_DEFENSE);
+        return ((Player*)this)->GetBaseSkillValue(SKILL_DEFENSE);
     else
         return GetUnitMeleeSkill();
 }
@@ -2913,7 +2913,7 @@ uint16 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
         return GetUnitMeleeSkill();
 }
 
-uint16 Unit::GetPureWeaponSkillValue (WeaponAttackType attType) const
+uint16 Unit::GetBaseWeaponSkillValue (WeaponAttackType attType) const
 {
     if(GetTypeId() == TYPEID_PLAYER)
     {
@@ -2935,7 +2935,7 @@ uint16 Unit::GetPureWeaponSkillValue (WeaponAttackType attType) const
         // in range
         uint32  skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon(attType==BASE_ATTACK)
             ? item->GetSkill() : SKILL_UNARMED;
-        return ((Player*)this)->GetPureSkillValue (skill);
+        return ((Player*)this)->GetBaseSkillValue(skill);
     }
     else
         return GetUnitMeleeSkill();

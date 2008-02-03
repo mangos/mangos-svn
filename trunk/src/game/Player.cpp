@@ -2611,7 +2611,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     if(spellLearnSkill)
     {
         uint32 skill_value = GetPureSkillValue(spellLearnSkill->skill);
-        uint32 skill_max_value = GetMaxSkillValue(spellLearnSkill->skill);
+        uint32 skill_max_value = GetPureMaxSkillValue(spellLearnSkill->skill);
 
         if(skill_value < spellLearnSkill->value)
             skill_value = spellLearnSkill->value;
@@ -2714,7 +2714,7 @@ void Player::removeSpell(uint16 spell_id)
             else                                            // set to prev. skill setting values
             {
                 uint32 skill_value = GetPureSkillValue(prevSkill->skill);
-                uint32 skill_max_value = GetMaxSkillValue(prevSkill->skill);
+                uint32 skill_max_value = GetPureMaxSkillValue(prevSkill->skill);
 
                 if(skill_value >  prevSkill->value)
                     skill_value = prevSkill->value;
@@ -3215,7 +3215,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
         return TRAINER_SPELL_RED;
 
     // check skill requirement
-    if(trainer_spell->reqskill && GetPureSkillValue(trainer_spell->reqskill) < trainer_spell->reqskillvalue)
+    if(trainer_spell->reqskill && GetBaseSkillValue(trainer_spell->reqskill) < trainer_spell->reqskillvalue)
         return TRAINER_SPELL_RED;
 
     // secondary prof. or not prof. spell
@@ -3968,9 +3968,9 @@ void Player::UpdateDefense()
     }
 }
 
-uint16 Player::GetDefenseSkillBonusValue() const
+uint16 Player::GetDefenseSkillTempBonusValue() const
 {
-    return GetSkillBonusValue(SKILL_DEFENSE);
+    return GetSkillTempBonusValue(SKILL_DEFENSE);
 }
 
 void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, float amount, bool apply, bool affectStats)
@@ -4402,7 +4402,7 @@ bool Player::UpdateCraftSkill(uint32 spellid)
     uint32 SkillId = pAbility->skillId;
     if ( !SkillId ) return false;
 
-    uint32 SkillValue = GetPureSkillValue(SkillId);
+    uint32 SkillValue = GetBaseSkillValue(SkillId);
 
     // Alchemy Discoveries here
     SpellEntry const* spellEntry = sSpellStore.LookupEntry(spellid);
@@ -4447,7 +4447,7 @@ bool Player::UpdateFishingSkill()
 {
     sLog.outDebug("UpdateFishingSkill");
 
-    uint32 SkillValue = GetPureSkillValue(SKILL_FISHING);
+    uint32 SkillValue = GetBaseSkillValue(SKILL_FISHING);
 
     int32 chance = SkillValue < 75 ? 100 : 2500/(SkillValue-50);
 
@@ -4555,7 +4555,7 @@ void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHi
     if(lvldif < 3)
         lvldif = 3;
 
-    uint32 skilldif = 5 * plevel - (defence ? GetPureDefenseSkillValue() : GetPureWeaponSkillValue(attType));
+    uint32 skilldif = 5 * plevel - (defence ? GetBaseDefenseSkillValue() : GetBaseWeaponSkillValue(attType));
     if(skilldif <= 0)
         return;
 
@@ -4757,7 +4757,20 @@ uint16 Player::GetMaxSkillValue(uint32 skill) const
     return 0;
 }
 
-uint16 Player::GetPureSkillValue(uint32 skill) const
+uint16 Player::GetPureMaxSkillValue(uint32 skill) const
+{
+    if(!skill)return 0;
+    for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
+    {
+        if ((GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF) == skill)
+        {
+            return SKILL_MAX(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i)));
+        }
+    }
+    return 0;
+}
+
+uint16 Player::GetBaseSkillValue(uint32 skill) const
 {
     if(!skill)return 0;
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
@@ -4771,7 +4784,20 @@ uint16 Player::GetPureSkillValue(uint32 skill) const
     return 0;
 }
 
-uint16 Player::GetSkillBonusValue(uint32 skill) const
+uint16 Player::GetPureSkillValue(uint32 skill) const
+{
+    if(!skill)return 0;
+    for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
+    {
+        if ((GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF) == skill)
+        {
+            return SKILL_VALUE(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i)));
+        }
+    }
+    return 0;
+}
+
+uint16 Player::GetSkillTempBonusValue(uint32 skill) const
 {
     if(!skill)
         return 0;
@@ -11301,7 +11327,7 @@ void Player::RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver
             DestroyItemCount( pQuest->ReqItemId[i], pQuest->ReqItemCount[i], true);
     }
 
-    //if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
+    //if( qInfo->HasSpecialFlag( QUEST_FLAGS_TIMED ) )
     //    SetTimedQuest( 0 );
     m_timedquests.erase(pQuest->GetQuestId());
 

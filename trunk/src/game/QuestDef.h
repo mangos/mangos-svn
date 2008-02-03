@@ -115,19 +115,19 @@ enum __QuestGiverStatus
 enum __QuestFlags
 {
     // Flags used at server and sended to client
-    QUEST_SPECIAL_FLAGS_STAY_ALIVE     = 1,                 // Not used currently
-    QUEST_SPECIAL_FLAGS_EVENT          = 2,                 // Not used currently
-    QUEST_SPECIAL_FLAGS_EXPLORATION    = 4,                 // Not used currently
-    QUEST_SPECIAL_FLAGS_UNK1           = 8,                 // Not used currently
-    //QUEST_SPECIAL_FLAGS_NONE2          = 16,              // Not used currently
-    QUEST_SPECIAL_FLAGS_EPIC           = 32,                // Not used currently: Unsure of content
-    QUEST_SPECIAL_FLAGS_RAID           = 64,                // Not used currently
-    QUEST_SPECIAL_FLAGS_TBC            = 128,               // Not used currently: Available if TBC expension enabled only
-    QUEST_SPECIAL_FLAGS_UNK2           = 256,               // Not used currently: _DELIVER_MORE Quest needs more than normal _q-item_ drops from mobs
-    QUEST_SPECIAL_FLAGS_UNK3           = 512,               // Not used currently: _REWARD_OUTSIDE Item rewards not given like in normal quests, Given somehow outside the quest or created by spell
-    QUEST_SPECIAL_FLAGS_UNK4           = 1024,              // Not used currently: Unknown tbc flag
-    QUEST_SPECIAL_FLAGS_TBC_RACES      = 2048,              // Not used currently: Bloodelf/draenei starting zone quests
-    QUEST_SPECIAL_FLAGS_DAILY          = 4096,              // Used to know quest is Daily one
+    QUEST_FLAGS_STAY_ALIVE     = 1,                         // Not used currently
+    QUEST_FLAGS_EVENT          = 2,                         // Not used currently
+    QUEST_FLAGS_EXPLORATION    = 4,                         // Not used currently
+    QUEST_FLAGS_UNK1           = 8,                         // Not used currently
+    //QUEST_FLAGS_NONE2        = 16,                        // Not used currently
+    QUEST_FLAGS_EPIC           = 32,                        // Not used currently: Unsure of content
+    QUEST_FLAGS_RAID           = 64,                        // Not used currently
+    QUEST_FLAGS_TBC            = 128,                       // Not used currently: Available if TBC expension enabled only
+    QUEST_FLAGS_UNK2           = 256,                       // Not used currently: _DELIVER_MORE Quest needs more than normal _q-item_ drops from mobs
+    QUEST_FLAGS_UNK3           = 512,                       // Not used currently: _REWARD_OUTSIDE Item rewards not given like in normal quests, Given somehow outside the quest or created by spell
+    QUEST_FLAGS_UNK4           = 1024,                      // Not used currently: Unknown tbc flag
+    QUEST_FLAGS_TBC_RACES      = 2048,                      // Not used currently: Bloodelf/draenei starting zone quests
+    QUEST_FLAGS_DAILY          = 4096,                      // Used to know quest is Daily one
 
     // Mangos flags for set SpecialFlags in DB if required but used only at server
     QUEST_MANGOS_FLAGS_REPEATABLE           = 0x010000,     // Set by 1 in SpecialFlags from DB
@@ -207,7 +207,7 @@ class Quest
         bool   IsRepeatable() const { return QuestFlags & QUEST_MANGOS_FLAGS_REPEATABLE; }
         bool   IsAutoComplete() const { return Objectives.empty(); }
         uint32 GetFlags() const { return QuestFlags; }
-        bool   IsDaily() const { return QuestFlags & QUEST_SPECIAL_FLAGS_DAILY; }
+        bool   IsDaily() const { return QuestFlags & QUEST_FLAGS_DAILY; }
 
         // multiple values
         std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];

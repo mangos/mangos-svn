@@ -459,7 +459,7 @@ bool MeetsConditions(Player * owner, LootItem * itm)
             case CONDITION_TEAM:
                 return owner->GetTeam() == itm->cond_value1;
             case CONDITION_SKILL:
-                return owner->HasSkill(itm->cond_value1) && owner->GetPureSkillValue(itm->cond_value1) >= itm->cond_value2;
+                return owner->HasSkill(itm->cond_value1) && owner->GetBaseSkillValue(itm->cond_value1) >= itm->cond_value2;
             case CONDITION_QUESTREWARDED:
                 return owner->GetQuestRewardStatus(itm->cond_value1);
             default:
