@@ -541,9 +541,9 @@ void Aura::Update(uint32 diff)
             else
             {
                 if(Unit* caster = GetCaster())
-                    caster->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier,GetEffIndex());
+                    caster->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier,GetEffIndex(),m_castItemGuid);
                 else
-                    m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier,GetEffIndex());
+                    m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier,GetEffIndex(),m_castItemGuid);
             }
         }
     }
@@ -3254,7 +3254,7 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool Real)
             if(m_target->GetHealth() < m_target->GetMaxHealth())
             {
                 // PeriodicAuraLog can cast triggered spells with stats changes
-                m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier,GetEffIndex());
+                m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier,GetEffIndex(),m_castItemGuid);
             }
         }
     }
@@ -3278,7 +3278,7 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
         if(m_target->GetPower(POWER_MANA) < m_target->GetMaxPower(POWER_MANA))
         {
             // PeriodicAuraLog can cast triggered spells with stats changes
-            m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier,GetEffIndex());
+            m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier,GetEffIndex(),m_castItemGuid);
         }
     }
 

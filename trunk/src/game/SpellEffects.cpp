@@ -262,8 +262,6 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
 {
     if( unitTarget && unitTarget->isAlive())
     {
-        uint32 BTAura = 0;
-
         switch(m_spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_WARRIOR:
@@ -272,19 +270,6 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                 if(m_spellInfo->SpellFamilyFlags & 0x40000000000LL)
                 {
                     damage = uint32(damage * (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) / 100);
-
-                    switch(m_spellInfo->Id)
-                    {
-                    case 23881: BTAura = 23885; break;
-                    case 23892: BTAura = 23886; break;
-                    case 23893: BTAura = 23887; break;
-                    case 23894: BTAura = 23888; break;
-                    case 25251: BTAura = 25252; break;
-                    case 30335: BTAura = 30339; break;
-                    default:
-                        sLog.outError("Spell::EffectSchoolDMG: Spell %u not handled in BTAura",m_spellInfo->Id);
-                        break;
-                    }
                 }
                 // Shield Slam
                 else if(m_spellInfo->SpellFamilyFlags & 0x100000000LL)
@@ -390,10 +375,49 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
 
         if(damage >= 0)
         {
-            m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
+            if(m_originalCaster)                            // m_caster only passive source of cast
+                m_originalCaster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
+            else
+                m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
 
-            if (BTAura)
-                m_caster->CastSpell(m_caster,BTAura,true);
+            // post effects
+            switch(m_spellInfo->SpellFamilyName)
+            {
+                case SPELLFAMILY_WARRIOR:
+                {
+                    // Bloodthirst
+                    if(m_spellInfo->SpellFamilyFlags & 0x40000000000LL)
+                    {
+                        uint32 BTAura = 0;
+                        switch(m_spellInfo->Id)
+                        {
+                        case 23881: BTAura = 23885; break;
+                        case 23892: BTAura = 23886; break;
+                        case 23893: BTAura = 23887; break;
+                        case 23894: BTAura = 23888; break;
+                        case 25251: BTAura = 25252; break;
+                        case 30335: BTAura = 30339; break;
+                        default:
+                            sLog.outError("Spell::EffectSchoolDMG: Spell %u not handled in BTAura",m_spellInfo->Id);
+                            break;
+                        }
+
+                        if (BTAura)
+                            m_caster->CastSpell(m_caster,BTAura,true);
+                    }
+                    break;
+                }
+                case SPELLFAMILY_PALADIN:
+                {
+                    // Judgement of Blood
+                    if((m_spellInfo->SpellFamilyFlags & 0x0000000800000000LL) && m_spellInfo->SpellIconID==153)
+                    {
+                        int32 damagePoint  = damage * 33 / 100;
+                        m_caster->CastCustomSpell(m_caster, 32220, &damagePoint, NULL, NULL, true);
+                    }
+                    break;
+                }
+            }
         }
     }
 
@@ -1720,6 +1744,10 @@ void Spell::EffectHeal( uint32 /*i*/ )
         if(m_caster->GetTypeId()==TYPEID_PLAYER)
             if(BattleGround *bg = ((Player*)m_caster)->GetBattleGround())
                 bg->UpdatePlayerScore(((Player*)m_caster), SCORE_HEALING_DONE, gain);
+
+        // ignore item heals
+        if(m_CastItem)
+            return;
 
         uint32 procHealer = PROC_FLAG_HEAL;
         if (crit)
@@ -3079,6 +3107,8 @@ void Spell::EffectWeaponDmg(uint32 i)
 
         bonus+= sp_bonus*sunder_stacks;
     }
+    // Note: bonus can be negative
+
 
     uint32 hitInfo = 0;
     uint32 nohitMask = HITINFO_ABSORB | HITINFO_RESIST | HITINFO_MISS;
@@ -3099,7 +3129,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     // some melee weapon spells have non-standard spell range
     // FIXME: find better way to select melee/ranged weapon attack sorting
     // FIXME: we also need select OFF_ATTACK if trigering some spell at offhand attack
-    else if(m_spellInfo->SpellVisual==3136)
+    else if(m_spellInfo->SpellVisual==3136 || m_spellInfo->SpellIconID==2293)
         attType = BASE_ATTACK;
     else if(m_spellInfo->rangeIndex != 1 && m_spellInfo->rangeIndex != 2 && m_spellInfo->rangeIndex != 7)
     {
@@ -3130,18 +3160,18 @@ void Spell::EffectWeaponDmg(uint32 i)
         return;
     }
 
-    // bonus can be negative
+    // calculate damage percent modifier
+    float damagePercentMod = 1;
+    for (j = 0; j < 3; j++)
+        if (m_spellInfo->Effect[j] == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE)
+            damagePercentMod *= (float(CalculateDamage(j,unitTarget)) / 100);
 
     //set base eff_damage, total normal hit damage after DoAttackDamage call will be bonus + weapon
     //if miss/parry, no eff=0 automatically by func DoAttackDamage
     //if crit eff = (bonus + weapon) * 2
     //In a word, bonus + weapon will be calculated together in cases of miss, armor reduce, crit, etc.
     uint32 eff_damage = 0;
-    m_caster->DoAttackDamage(unitTarget, bonus, &eff_damage, &cleanDamage, &blocked_dmg, damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType, m_spellInfo, m_IsTriggeredSpell);
-
-    for (j = 0; j < 3; j++)
-        if (m_spellInfo->Effect[j] == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE)
-            eff_damage = uint32(eff_damage * (float(CalculateDamage(j,unitTarget)) / 100));
+    m_caster->DoAttackDamage(unitTarget, bonus, damagePercentMod, &eff_damage, &cleanDamage, &blocked_dmg, damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType, m_spellInfo, m_IsTriggeredSpell);
 
     if ((hitInfo & nohitMask) && attType != RANGED_ATTACK)  // not send ranged miss/etc
         m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, SpellSchools(m_spellInfo->School), eff_damage, absorbed_dmg, resisted_dmg, VICTIMSTATE_NORMAL, blocked_dmg);
