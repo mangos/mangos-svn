@@ -50,11 +50,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #endif
 #include "Ipv4Address.h"
 
-#ifdef _DEBUG
-#define DEB(x) x; fflush(stderr);
-#else
+//#ifdef _DEBUG
+//#define DEB(x) x; fflush(stderr);
+//#else
 #define DEB(x)
-#endif
+//#endif
 
 #ifdef SOCKETS_NAMESPACE
 namespace SOCKETS_NAMESPACE {

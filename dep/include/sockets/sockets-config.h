@@ -84,7 +84,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 
 /* Enabled exceptions. */
-#define ENABLE_EXCEPTIONS
+//#define ENABLE_EXCEPTIONS
 
 
 /* Resolver uses the detach function so either enable both or disable both. */

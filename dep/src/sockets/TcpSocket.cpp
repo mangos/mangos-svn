@@ -57,11 +57,11 @@ namespace SOCKETS_NAMESPACE {
 #endif
 
 
-#ifdef _DEBUG
-#define DEB(x) x
-#else
+//#ifdef _DEBUG
+//#define DEB(x) x
+//#else
 #define DEB(x) 
-#endif
+//#endif
 
 
 // statics

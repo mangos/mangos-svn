@@ -47,11 +47,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 namespace SOCKETS_NAMESPACE {
 #endif
 
-#ifdef _DEBUG
-#define DEB(x) x
-#else
+//#ifdef _DEBUG
+//#define DEB(x) x
+//#else
 #define DEB(x)
-#endif
+//#endif
 
 
 // static
