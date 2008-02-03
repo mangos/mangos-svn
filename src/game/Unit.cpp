@@ -8442,3 +8442,25 @@ Unit* Unit::SelectNearbyTarget() const
 
     return *tIter;
 }
+
+void Unit::ApplyAttackTimePercentMod( WeaponAttackType att,float val, bool apply )
+{
+    if(val > 0)
+    {
+        ApplyPercentModFloatVar(m_modAttackSpeedPct[att], val, !apply);
+        ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME+att,val,!apply);
+    }
+    else
+    {
+        ApplyPercentModFloatVar(m_modAttackSpeedPct[att], -val, apply);
+        ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME+att,-val,apply);
+    }
+}
+
+void Unit::ApplyCastTimePercentMod(float val, bool apply )
+{
+    if(val > 0)
+        ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,val,!apply);
+    else
+        ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,-val,apply);
+}
