@@ -10431,6 +10431,9 @@ void Player::TradeCancel(bool sendback)
 
 void Player::UpdateItemDuration(uint32 time, bool realtimeonly)
 {
+    if(m_itemDuration.empty())
+        return;
+
     sLog.outDebug("Player::UpdateItemDuration(%u,%u)", time,realtimeonly);
 
     for(ItemDurationList::iterator itr = m_itemDuration.begin();itr != m_itemDuration.end(); )

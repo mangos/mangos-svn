@@ -181,95 +181,107 @@
 			Name="Header Files"
 			>
 			<File
-				RelativePath="..\..\dep\src\sockets\Base64.h"
+				RelativePath="..\..\dep\include\sockets\Base64.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\File.h"
+				RelativePath="..\..\dep\include\sockets\Exception.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\IFile.h"
+				RelativePath="..\..\dep\include\sockets\File.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\Ipv4Address.h"
+				RelativePath="..\..\dep\include\sockets\IFile.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\Ipv6Address.h"
+				RelativePath="..\..\dep\include\sockets\Ipv4Address.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\ISocketHandler.h"
+				RelativePath="..\..\dep\include\sockets\Ipv6Address.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\ListenSocket.h"
+				RelativePath="..\..\dep\include\sockets\ISocketHandler.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\Mutex.h"
+				RelativePath="..\..\dep\include\sockets\ListenSocket.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\Parse.h"
+				RelativePath="..\..\dep\include\sockets\Lock.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\ResolvServer.h"
+				RelativePath="..\..\dep\include\sockets\Mutex.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\ResolvSocket.h"
+				RelativePath="..\..\dep\include\sockets\Parse.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\SctpSocket.h"
+				RelativePath="..\..\dep\include\sockets\ResolvServer.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\Socket.h"
+				RelativePath="..\..\dep\include\sockets\ResolvSocket.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\socket_include.h"
+				RelativePath="..\..\dep\include\sockets\SctpSocket.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\SocketAddress.h"
+				RelativePath="..\..\dep\include\sockets\Socket.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\SocketHandler.h"
+				RelativePath="..\..\dep\include\sockets\socket_include.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\sockets-config.h"
+				RelativePath="..\..\dep\include\sockets\SocketAddress.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\StdLog.h"
+				RelativePath="..\..\dep\include\sockets\SocketHandler.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\StdoutLog.h"
+				RelativePath="..\..\dep\include\sockets\sockets-config.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\TcpSocket.h"
+				RelativePath="..\..\dep\include\sockets\StdLog.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\Thread.h"
+				RelativePath="..\..\dep\include\sockets\StdoutLog.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\UdpSocket.h"
+				RelativePath="..\..\dep\include\sockets\StreamSocket.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\Utility.h"
+				RelativePath="..\..\dep\include\sockets\TcpSocket.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\include\sockets\Thread.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\include\sockets\UdpSocket.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\include\sockets\Utility.h"
 				>
 			</File>
 		</Filter>
