@@ -4256,29 +4256,18 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
         case PLAYER_FIELD_MELEE_HASTE_RATING:
             //Haste: 6.67
             RatingChange = value/ RatingCoeffecient;
-            if(RatingChange > 0)
-            {
-                ApplyAttackTimePercentMod(BASE_ATTACK,RatingChange,apply);
-                ApplyAttackTimePercentMod(OFF_ATTACK,RatingChange,apply);
-            }
-            else
-            {
-                ApplyAttackTimePercentMod(BASE_ATTACK,-RatingChange,!apply);
-                ApplyAttackTimePercentMod(OFF_ATTACK,-RatingChange,!apply);
-            }
+            ApplyAttackTimePercentMod(BASE_ATTACK,RatingChange,apply);
+            ApplyAttackTimePercentMod(OFF_ATTACK,RatingChange,apply);
             break;
         case PLAYER_FIELD_RANGED_HASTE_RATING:
             //Haste: 6.67
             RatingChange = value/ RatingCoeffecient;
-            if(RatingChange >= 0)
-                ApplyAttackTimePercentMod(RANGED_ATTACK, RatingChange, apply);
-            else
-                ApplyAttackTimePercentMod(RANGED_ATTACK, -RatingChange, !apply);
+            ApplyAttackTimePercentMod(RANGED_ATTACK, RatingChange, apply);
             break;
         case PLAYER_FIELD_SPELL_HASTE_RATING:
             //Haste: 6.67
             RatingChange = value/ RatingCoeffecient;
-            ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,-RatingChange,apply);
+            ApplyCastTimePercentMod(RatingChange,apply);
             break;
         case PLAYER_FIELD_HIT_RATING:
             //Hit (melee): 10

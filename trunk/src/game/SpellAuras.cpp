@@ -3532,18 +3532,15 @@ void Aura::HandleModSpellCritChanceShool(bool apply, bool Real)
 
 void Aura::HandleModCastingSpeed(bool apply, bool Real)
 {
-    m_target->ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,m_modifier.m_amount,!apply);
+    m_target->ApplyCastTimePercentMod(m_modifier.m_amount,apply);
 }
 
 void Aura::HandleModCombatSpeedPct(bool apply, bool Real)
 {
-    m_target->ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,m_modifier.m_amount,!apply);
+    m_target->ApplyCastTimePercentMod(m_modifier.m_amount,apply);
     m_target->ApplyAttackTimePercentMod(BASE_ATTACK,m_modifier.m_amount,apply);
     m_target->ApplyAttackTimePercentMod(OFF_ATTACK,m_modifier.m_amount,apply);
-    if(m_modifier.m_amount >= 0)
-        m_target->ApplyAttackTimePercentMod(RANGED_ATTACK, m_modifier.m_amount, apply);
-    else
-        m_target->ApplyAttackTimePercentMod(RANGED_ATTACK, -m_modifier.m_amount, !apply);
+    m_target->ApplyAttackTimePercentMod(RANGED_ATTACK, m_modifier.m_amount, apply);
 }
 
 void Aura::HandleModAttackSpeed(bool apply, bool Real)
@@ -3556,30 +3553,14 @@ void Aura::HandleModAttackSpeed(bool apply, bool Real)
 
 void Aura::HandleHaste(bool apply, bool Real)
 {
-    if(m_modifier.m_amount >= 0)
-    {
-        // v*(1+percent/100)
-        m_target->ApplyAttackTimePercentMod(BASE_ATTACK,  m_modifier.m_amount,apply);
-        m_target->ApplyAttackTimePercentMod(OFF_ATTACK,   m_modifier.m_amount,apply);
-
-        m_target->ApplyAttackTimePercentMod(RANGED_ATTACK,m_modifier.m_amount,apply);
-    }
-    else
-    {
-        // v/(1+abs(percent)/100)
-        m_target->ApplyAttackTimePercentMod(BASE_ATTACK,  -m_modifier.m_amount,!apply);
-        m_target->ApplyAttackTimePercentMod(OFF_ATTACK,   -m_modifier.m_amount,!apply);
-
-        m_target->ApplyAttackTimePercentMod(RANGED_ATTACK,-m_modifier.m_amount,!apply);
-    }
+    m_target->ApplyAttackTimePercentMod(BASE_ATTACK,  m_modifier.m_amount,apply);
+    m_target->ApplyAttackTimePercentMod(OFF_ATTACK,   m_modifier.m_amount,apply);
+    m_target->ApplyAttackTimePercentMod(RANGED_ATTACK,m_modifier.m_amount,apply);
 }
 
 void Aura::HandleAuraModRangedHaste(bool apply, bool Real)
 {
-    if(m_modifier.m_amount >= 0)
-        m_target->ApplyAttackTimePercentMod(RANGED_ATTACK, m_modifier.m_amount, apply);
-    else
-        m_target->ApplyAttackTimePercentMod(RANGED_ATTACK, -m_modifier.m_amount, !apply);
+    m_target->ApplyAttackTimePercentMod(RANGED_ATTACK, m_modifier.m_amount, apply);
 }
 
 void Aura::HandleRangedAmmoHaste(bool apply, bool Real)
