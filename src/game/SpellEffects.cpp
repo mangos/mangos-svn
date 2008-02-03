@@ -3184,8 +3184,23 @@ void Spell::EffectWeaponDmg(uint32 i)
     //if miss/parry, no eff=0 automatically by func DoAttackDamage
     //if crit eff = (bonus + weapon) * 2
     //In a word, bonus + weapon will be calculated together in cases of miss, armor reduce, crit, etc.
-    uint32 eff_damage = 0;
-    m_caster->DoAttackDamage(unitTarget, bonus, damagePercentMod, &eff_damage, &cleanDamage, &blocked_dmg, damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType, m_spellInfo, m_IsTriggeredSpell);
+    bonus += m_caster->CalculateDamage (attType);
+
+    // Whirlwind, single only spell with 2 weapon white damage apply if have
+    if(m_caster->GetTypeId()==TYPEID_PLAYER && m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && (m_spellInfo->SpellFamilyFlags & 0x00000400000000LL))
+    {
+        Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+        if (item && item->GetProto()->Class == ITEM_CLASS_WEAPON && !item->IsBroken() && ((Player*)m_caster)->IsUseEquipedWeapon(false))
+            bonus += m_caster->CalculateDamage (OFF_ATTACK);
+    }
+
+    // percent mod applied
+    bonus = int32(bonus *damagePercentMod);
+
+    // prevent negative damage
+    uint32 eff_damage = uint32(bonus > 0 ? bonus : 0);
+
+    m_caster->DoAttackDamage(unitTarget, &eff_damage, &cleanDamage, &blocked_dmg, damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType, m_spellInfo, m_IsTriggeredSpell);
 
     if ((hitInfo & nohitMask) && attType != RANGED_ATTACK)  // not send ranged miss/etc
         m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, SpellSchools(m_spellInfo->School), eff_damage, absorbed_dmg, resisted_dmg, VICTIMSTATE_NORMAL, blocked_dmg);
