@@ -140,7 +140,7 @@ bool IsSealSpell(uint32 spellId)
 
     //Collection of all the seal family flags. No other paladin spell has any of those.
     return spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
-        ( spellInfo->SpellFamilyFlags & 0xA000200 );
+        ( spellInfo->SpellFamilyFlags & 0x4000A000200LL );
 }
 
 SpellSpecific GetSpellSpecific(uint32 spellId)
@@ -806,6 +806,12 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
         case SPELLFAMILY_WARLOCK:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_WARLOCK )
             {
+                //Corruption & Seed of corruption
+                if( spellInfo_1->SpellIconID == 313 && spellInfo_2->SpellIconID == 1932 ||
+                    spellInfo_2->SpellIconID == 313 && spellInfo_1->SpellIconID == 1932 )
+                    if(spellInfo_1->SpellVisual != 0 && spellInfo_2->SpellVisual != 0)
+                        return true;                        // can't be stacked
+
                 // Siphon Life and Drain Life
                 if( spellInfo_1->SpellIconID == 152 && spellInfo_2->SpellIconID == 546 ||
                     spellInfo_2->SpellIconID == 152 && spellInfo_1->SpellIconID == 546 )

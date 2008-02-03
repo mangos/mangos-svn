@@ -1012,6 +1012,9 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 CellLock<GridReadGuard> cell_lock(cell, p);
                 cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
                 cell_lock->Visit(cell_lock, grid_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+
+                // exclude caster (this can be important if this not original caster)
+                TagUnitMap.remove(m_caster);
             }
         }break;
         case TARGET_ALL_PARTY_AROUND_CASTER:
