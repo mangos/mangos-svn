@@ -805,6 +805,17 @@ enum DuelCompleteType
     DUEL_FLED       = 2
 };
 
+/// Type of environmental damages
+enum EnviromentalDamage
+{
+    DAMAGE_EXHAUSTED = 0,
+    DAMAGE_DROWNING  = 1,
+    DAMAGE_FALL      = 2,
+    DAMAGE_LAVA      = 3,
+    DAMAGE_SLIME     = 4,
+    DAMAGE_FIRE      = 5
+};
+
 // used at player loading query list prepering, and later result selection
 enum PlayerLoginQueryIndex
 {
@@ -1714,6 +1725,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***              ENVIROMENTAL SYSTEM                  ***/
         /*********************************************************/
 
+        void EnvironmentalDamage(uint64 guid, EnviromentalDamage type, uint32 damage);
+
         /*********************************************************/
         /***               FLOOD FILTER SYSTEM                 ***/
         /*********************************************************/
@@ -1899,7 +1912,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void StartMirrorTimer(MirrorTimerType Type, uint32 MaxValue);
         void ModifyMirrorTimer(MirrorTimerType Type, uint32 MaxValue, uint32 CurrentValue, uint32 Regen);
         void StopMirrorTimer(MirrorTimerType Type);
-        void EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount);
         uint8 m_isunderwater;
         bool m_isInWater;
 

@@ -608,18 +608,18 @@ void Player::StopMirrorTimer(MirrorTimerType Type)
     GetSession()->SendPacket( &data );
 }
 
-void Player::EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount)
+void Player::EnvironmentalDamage(uint64 guid, EnviromentalDamage type, uint32 damage)
 {
     WorldPacket data(SMSG_ENVIRONMENTALDAMAGELOG, (21));
-    data << Guid;
-    data << (uint8)Type;
-    data << Amount;
+    data << (uint64)guid;
+    data << (uint8)type;
+    data << (uint32)damage;
     data << (uint32)0;
     data << (uint32)0;
     //m_session->SendPacket(&data);
     //Let other players see that you get damage
     SendMessageToSet(&data, true);
-    DealDamage((Unit*)this, Amount, NULL, SELF_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, true);
+    DealDamage(this, damage, NULL, SELF_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, true);
 }
 
 void Player::HandleDrowning(uint32 UnderWaterTime)
@@ -6314,7 +6314,7 @@ void Player::_ApplyWeaponDependentAuraDamageMod(Item *item, uint8 slot, Aura* au
 {
     // ignore spell mods
     Modifier const* modifier = aura->GetModifier();
-    if((modifier->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL) == 0 || (getClassMask() & CLASSMASK_WAND_USERS)!=0)
+    if((modifier->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL) == 0 && (getClassMask() & CLASSMASK_WAND_USERS)==0)
         return;
 
     // generic not weapon specific case processes in aura code
