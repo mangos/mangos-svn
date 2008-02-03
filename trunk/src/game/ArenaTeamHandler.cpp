@@ -36,17 +36,14 @@ void WorldSession::HandleInspectArenaStatsOpcode(WorldPacket & recv_data)
     recv_data >> guid;
     sLog.outDebug("Inspect Arena stats " I64FMTD, guid);
 
-    Player *plr = objmgr.GetPlayer(guid);
-    if(plr)
+    if(Player *plr = objmgr.GetPlayer(guid))
     {
         for (uint8 i = 0; i < 3; i++)
         {
-            uint32 a_id = plr->GetArenaTeamId(i);
-            if(a_id)
+            if(uint32 a_id = plr->GetArenaTeamId(i))
             {
-                ArenaTeam *at = objmgr.GetArenaTeamById(a_id);
-                if(at)
-                    at->InspectStats(this);
+                if(ArenaTeam *at = objmgr.GetArenaTeamById(a_id))
+                    at->InspectStats(this, plr->GetGUID());
             }
         }
     }

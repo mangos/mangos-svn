@@ -2116,11 +2116,13 @@ void Spell::SendCastResult(uint8 result)
                     data << uint32(m_spellInfo->Totem[0]);
                 if(m_spellInfo->Totem[1])
                     data << uint32(m_spellInfo->Totem[1]);
+                break;
             case SPELL_FAILED_TOTEM_CATEGORY:
                 if(m_spellInfo->TotemCategory[0])
                     data << uint32(m_spellInfo->TotemCategory[0]);
                 if(m_spellInfo->TotemCategory[1])
                     data << uint32(m_spellInfo->TotemCategory[1]);
+                break;
         }
         ((Player*)m_caster)->GetSession()->SendPacket(&data);
     }
