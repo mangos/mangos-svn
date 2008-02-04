@@ -1157,8 +1157,8 @@ uint32 Guild::GetMemberMoneyWithdrawRem(uint32 LowGuid)
     if (itr->second.RankId == GR_GUILDMASTER)
         return WITHDRAW_MONEY_UNLIMITED;
 
-    uint32 curTime = uint32(time(NULL)/60);                 // minutes
-    if (curTime - itr->second.BankResetTimeMoney >= 1440)   // 24 hours
+    uint32 curTime = uint32(time(NULL)/MINUTE);             // minutes
+    if (curTime > itr->second.BankResetTimeMoney + 24*HOUR/MINUTE) // 24 hours
     {
         itr->second.BankResetTimeMoney = curTime;
         itr->second.BankRemMoney = GetBankMoneyPerDay(itr->second.RankId);

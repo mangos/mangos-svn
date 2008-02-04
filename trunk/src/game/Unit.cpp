@@ -1354,16 +1354,16 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
     DEBUG_LOG("DealDamageBySchool (AFTER) SCHOOL %u >> DMG:%u", spellInfo->School, *damage);
 }
 
-void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, bool isTriggeredSpell, bool useSpellDamage)
+uint32 Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, bool isTriggeredSpell, bool useSpellDamage)
 {
     if(!this || !pVictim)
-        return;
+        return 0;
     if(!this->isAlive() || !pVictim->isAlive())
-        return;
+        return 0;
 
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellID);
     if(!spellInfo)
-        return;
+        return 0;
 
     CleanDamage cleanDamage = CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL);
     bool crit = false;
@@ -1387,13 +1387,13 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
             if(damage <= absorb + resist && absorb)
             {
                 SendAttackStateUpdate(HITINFO_ABSORB|HITINFO_SWINGNOHITSOUND, pVictim, 1, SpellSchools(spellInfo->School),damage, absorb,resist,VICTIMSTATE_NORMAL,0);
-                return;
+                return 0;
             }
             else if(damage <= resist)                       // If we didn't fully absorb check if we fully resisted
             {
                 ProcDamageAndSpell(pVictim, PROC_FLAG_TARGET_RESISTS, PROC_FLAG_RESIST_SPELL, 0, spellInfo,isTriggeredSpell);
                 SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, SpellSchools(spellInfo->School), damage, absorb,resist,VICTIMSTATE_NORMAL,0);
-                return;
+                return 0;
             }
         }
 
@@ -1404,10 +1404,6 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
 
         // Deal damage done
         DealDamage(pVictim, (damage-absorb-resist), &cleanDamage, SPELL_DIRECT_DAMAGE, SpellSchools(spellInfo->School), spellInfo, true);
-
-        // Shadow Word: Death - deals damage equal to damage done to caster if victim is not killed
-        if( this != pVictim && pVictim->isAlive() && spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && spellInfo->SpellIconID == 1980 && (damage-absorb-resist) > 0 )
-            SpellNonMeleeDamageLog( this, spellID, (damage-absorb-resist), isTriggeredSpell, false);
 
         // Procflags
         uint32 procAttacker = PROC_FLAG_HIT_SPELL;
@@ -1420,6 +1416,8 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
         }
 
         ProcDamageAndSpell(pVictim, procAttacker, procVictim, (damage-absorb-resist), spellInfo, isTriggeredSpell);
+
+        return damage-absorb-resist;
     }
     else
     {
@@ -1430,6 +1428,8 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
             // Rage from damage received.
             if(pVictim->GetTypeId() == TYPEID_PLAYER && (pVictim->getPowerType() == POWER_RAGE))
                 ((Player*)pVictim)->RewardRage(cleanDamage.damage, 0, false);
+
+        return 0;
     }
 }
 
@@ -4270,6 +4270,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             CastSpell(pVictim,37379,true,castItem,triggeredByAura);
             return;
         }
+
         // Shadowflame Hellfire (item set effect)
         case 39437:
         {
@@ -7251,13 +7252,7 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
         value += ((Pet*)this)->GetBonusDamage();        //bonus damage only on spells without fixed basePoints?)
 
     if(comboDamage != 0 && unitPlayer && target && (target->GetGUID() == unitPlayer->GetComboTarget()))
-    {
         value += (int32)(comboDamage * comboPoints);
-
-        // Eviscerate
-        if( spellProto->SpellIconID == 514 && spellProto->SpellFamilyName == SPELLFAMILY_ROGUE)
-            value += (int32)(GetTotalAttackPowerValue(BASE_ATTACK) * comboPoints * 0.03);
-    }
 
     if(Player* modOwner = GetSpellModOwner())
     {
