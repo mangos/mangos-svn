@@ -13781,17 +13781,20 @@ void Player::_SaveAuras()
     AuraMap const& auras = GetAuras();
     for(AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
-        // skip all auras from spell that apply at cast SPELL_AURA_MOD_SHAPESHIFT or SPELL_AURA_MOD_STEALTH auras.
-        // or need a shapeshift
         SpellEntry const *spellInfo = itr->second->GetSpellProto();
+
+        //skip all auras from spells that are passive or need a shapeshift
+        if (itr->second->IsPassive() || itr->second->IsRemovedOnShapeLost())
+            continue;
+
         uint8 i;
+        // or apply at cast SPELL_AURA_MOD_SHAPESHIFT or SPELL_AURA_MOD_STEALTH auras
         for (i = 0; i < 3; i++)
             if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT ||
-            spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STEALTH ||
-            spellInfo->Stances)
+                spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STEALTH)
                 break;
 
-        if (i == 3 && !itr->second->IsPassive())
+        if (i == 3)
         {
             CharacterDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u' and `spell` = '%u' and  `effect_index`= '%u'",GetGUIDLow(),(uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex());
             CharacterDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`caster_guid`,`spell`,`effect_index`,`amount`,`maxduration`,`remaintime`,`remaincharges`) "
