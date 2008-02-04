@@ -234,5 +234,8 @@ AC_CONFIG_FILES([
 ## Disabled Makefiles, until they are ready for a successful make and
 #  make dist run.
 
+## Additional processing
+AC_CONFIG_COMMANDS([svn_revision], [src/shared/gensvnrevision src/shared/svn_revision.h])
+
 ## Output files.
 AC_OUTPUT
