@@ -340,34 +340,63 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                 if((m_spellInfo->SpellFamilyFlags & 0x800000000LL) && m_caster->GetTypeId()==TYPEID_PLAYER)
                 {
                     // consume from stack dozes not more that have combo-points
-                    uint32 combo = ((Player*)m_caster)->GetComboPoints();
-
-                    // count consumed deadly poison doses at target
-                    uint32 doses = 0;
-
-                    // remove consumed poison doses
-                    Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                    for(Unit::AuraList::const_iterator itr = auras.begin(); itr!=auras.end() && combo;)
+                    if(uint32 combo = ((Player*)m_caster)->GetComboPoints())
                     {
-                        // Deadly poison
-                        if((*itr)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_ROGUE && ((*itr)->GetSpellProto()->SpellFamilyFlags & 0x10000) && (*itr)->GetSpellProto()->SpellVisual==5100)
+                        // count consumed deadly poison doses at target
+                        uint32 doses = 0;
+                        uint32 extraDamage = 0;
+
+                        // remove consumed poison doses
+                        Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                        for(Unit::AuraList::const_iterator itr = auras.begin(); itr!=auras.end() && combo;)
                         {
-                            --combo;
-                            ++doses;
+                            // Deadly poison
+                            if((*itr)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_ROGUE && ((*itr)->GetSpellProto()->SpellFamilyFlags & 0x10000) && (*itr)->GetSpellProto()->SpellVisual==5100)
+                            {
+                                --combo;
+                                ++doses;
 
-                            unitTarget->RemoveSingleAuraFromStack((*itr)->GetId(), (*itr)->GetEffIndex());
+                                unitTarget->RemoveSingleAuraFromStack((*itr)->GetId(), (*itr)->GetEffIndex());
 
-                            itr = auras.begin();
+                                itr = auras.begin();
+                            }
+                            else
+                                ++itr;
                         }
-                        else
-                            ++itr;
+
+                        damage *= doses;
+                        damage += int32(((Player*)m_caster)->GetTotalAttackPowerValue(BASE_ATTACK) * 0.03f * doses);
+
+                        Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                        for(Unit::AuraList::const_iterator itr = auraDummy.begin(); itr!=auraDummy.end(); ++itr)
+                        {
+                            // Eviscerate and Envenom Bonus Damage (item set effect)
+                            if((*itr)->GetId()==37169)
+                            {
+                                damage += ((Player*)m_caster)->GetComboPoints()*40;
+                                break;
+                            }
+                        }
                     }
+                }
+                // Eviscerate
+                else if((m_spellInfo->SpellFamilyFlags & 0x00020000LL) && m_caster->GetTypeId()==TYPEID_PLAYER)
+                {
+                    if(uint32 combo = ((Player*)m_caster)->GetComboPoints())
+                    {
+                        damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * combo * 0.03f);
 
-                    damage *= doses;
-                    damage += uint32(((Player*)m_caster)->GetTotalAttackPowerValue(BASE_ATTACK) * 0.03f * doses);
-
-                    // always lost all combo-points independent from used dozes
-                    ((Player*)m_caster)->ClearComboPoints();
+                        Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                        for(Unit::AuraList::const_iterator itr = auraDummy.begin(); itr!=auraDummy.end(); ++itr)
+                        {
+                            // Eviscerate and Envenom Bonus Damage (item set effect)
+                            if((*itr)->GetId()==37169)
+                            {
+                                damage += combo*40;
+                                break;
+                            }
+                        }
+                    }
                 }
                 break;
             }
@@ -375,10 +404,11 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
 
         if(damage >= 0)
         {
+            uint32 finalDamege;
             if(m_originalCaster)                            // m_caster only passive source of cast
-                m_originalCaster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
+                finalDamege = m_originalCaster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
             else
-                m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
+                finalDamege = m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
 
             // post effects
             switch(m_spellInfo->SpellFamilyName)
@@ -407,12 +437,21 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                     }
                     break;
                 }
+                case SPELLFAMILY_PRIEST:
+                {
+                    // Shadow Word: Death
+                    if((m_spellInfo->SpellFamilyFlags & 0x0000000200000000LL) && unitTarget->isAlive())
+                        // deals damage equal to damage done to caster if victim is not killed
+                        m_caster->SpellNonMeleeDamageLog( m_caster, m_spellInfo->Id, finalDamege, m_IsTriggeredSpell, false);
+
+                    break;
+                }
                 case SPELLFAMILY_PALADIN:
                 {
                     // Judgement of Blood
                     if((m_spellInfo->SpellFamilyFlags & 0x0000000800000000LL) && m_spellInfo->SpellIconID==153)
                     {
-                        int32 damagePoint  = damage * 33 / 100;
+                        int32 damagePoint  = finalDamege * 33 / 100;
                         m_caster->CastCustomSpell(m_caster, 32220, &damagePoint, NULL, NULL, true);
                     }
                     break;
