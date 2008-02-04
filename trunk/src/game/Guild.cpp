@@ -1096,8 +1096,10 @@ bool Guild::MemberMoneyWithdraw(uint32 amount, uint32 LowGuid)
     return true;
 }
 
-void Guild::SetBankMoney(uint64 money)
+void Guild::SetBankMoney(int64 money)
 {
+    if (money < 0)                          // I don't know how this happens, it does!!
+        money = 0;
     guildbank_money = money;
 
     CharacterDatabase.PExecute("UPDATE `guild` SET `BankMoney`='" I64FMTD "' WHERE `guildid`='%u'", money, Id);
@@ -1448,6 +1450,9 @@ void Guild::RenumBankLogs()
     delete result;
     CharacterDatabase.CommitTransaction();
 }
+
+
+
 
 
 

@@ -289,7 +289,7 @@ class Guild
         void   SendMoneyInfo(WorldSession *session, uint32 LowGuid);
         bool   MemberMoneyWithdraw(uint32 amount, uint32 LowGuid);
         uint64 GetGuildBankMoney() { return guildbank_money; }
-        void   SetBankMoney(uint64 money);
+        void   SetBankMoney(int64 money);
         // per days
         bool   MemberItemWithdraw(uint8 TabId, uint32 LowGuid);
         uint32 GetMemberSlotWithdrawRem(uint32 LowGuid, uint8 TabId);
