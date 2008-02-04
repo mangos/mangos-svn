@@ -208,17 +208,29 @@ void Player::UpdateAttackPowerAndDamage(bool ranged )
             case CLASS_HUNTER:  val2 = level*2.0f + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20.0f; break;
             case CLASS_SHAMAN:  val2 = level*2.0f + GetStat(STAT_STRENGTH)*2.0f                    - 20.0f; break;
             case CLASS_DRUID:
+            {
+                //Check if Predatory Strikes is skilled
+                Unit::AuraList const& mDummy = GetAurasByType(SPELL_AURA_DUMMY);
+                float mLevelMult = 0.0;
+                if (HasAuraType(SPELL_AURA_DUMMY))
+                {
+                    for(Unit::AuraList::const_iterator itr = mDummy.begin(); itr != mDummy.end(); ++itr)
+                        if ((*itr)->GetSpellProto()->SpellIconID == 1563)
+                            mLevelMult = float((*itr)->GetModifier()->m_amount) / 100.0;
+                }
+
                 switch(m_form)
                 {
                     case FORM_CAT:
-                        val2 =         level*2.0f + GetStat(STAT_STRENGTH)*2 + GetStat(STAT_AGILITY)-20.0f; break;
+                        val2 = getLevel()*(mLevelMult+2.0f) + GetStat(STAT_STRENGTH)*2.0f + GetStat(STAT_AGILITY) - 20.0f; break;
                     case FORM_BEAR:
                     case FORM_DIREBEAR:
-                        val2 =         level*3.0f + GetStat(STAT_STRENGTH)*2                       - 20.0f; break;
+                        val2 = getLevel()*(mLevelMult+3.0f) + GetStat(STAT_STRENGTH)*2.0f - 20.0f; break;
                     default:
-                        val2 =                      GetStat(STAT_STRENGTH)*2                       - 20.0f; break;
+                        val2 = GetStat(STAT_STRENGTH)*2.0f - 20.0f; break;
                 }
-                break;
+            }
+            break;
             case CLASS_MAGE:    val2 =              GetStat(STAT_STRENGTH)                         - 10.0f; break;
             case CLASS_PRIEST:  val2 =              GetStat(STAT_STRENGTH)                         - 10.0f; break;
             case CLASS_WARLOCK: val2 =              GetStat(STAT_STRENGTH)                         - 10.0f; break;

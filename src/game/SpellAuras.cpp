@@ -305,7 +305,7 @@ Aura::Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, U
 m_procCharges(0), m_spellmod(NULL), m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0), m_target(target),
 m_timeCla(1000), m_castItemGuid(castItem?castItem->GetGUID():0), m_auraSlot(MAX_AURAS),
 m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false), m_isPersistent(false),
-m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(false),m_fearMoveAngle(0)
+m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(false),m_fearMoveAngle(0), m_isRemovedOnShapeLost(true)
 {
     assert(target);
 
@@ -393,6 +393,9 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(fals
     }
     else
         m_procCharges = -1;
+
+    m_isRemovedOnShapeLost = (m_caster_guid==m_target->GetGUID() && m_spellProto->Stances &&
+                            !(m_spellProto->AttributesEx2 & 0x80000) && !(m_spellProto->Attributes & 0x10000));
 }
 
 Aura::~Aura()
@@ -3886,7 +3889,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                 if(itr->second->state == PLAYERSPELL_REMOVED) continue;
                 if(itr->first==spellId || itr->first==spellId2) continue;
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
-                if (!spellInfo || !IsPassiveSpell(itr->first)) continue;
+                if (!spellInfo || !(spellInfo->Attributes & ((1<<6) | (1<<7)))) continue;
                 if (spellInfo->Stances & (1<<form))
                     m_target->CastSpell(m_target, itr->first, true, NULL, this);
             }
@@ -3918,17 +3921,14 @@ void Aura::HandleShapeshiftBoosts(bool apply)
         Unit::AuraMap& tAuras = m_target->GetAuras();
         for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
         {
-            // not removed at form lost
-            if(itr->second->GetModifier()->m_auraname==SPELL_AURA_RETAIN_COMBO_POINTS)
+            if (itr->second->IsRemovedOnShapeLost())
+            {
+                m_target->RemoveAura(itr);
+            }
+            else
             {
                 ++itr;
-                continue;
             }
-
-            if (itr->second->GetSpellProto()->Stances & uint32(1<<form))
-                m_target->RemoveAura(itr);
-            else
-                ++itr;
         }
     }
 
