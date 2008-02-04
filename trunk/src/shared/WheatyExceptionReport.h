@@ -3,6 +3,14 @@
 
 #include <dbghelp.h>
 
+#if _MSC_VER < 1400
+#	define countof(array)	(sizeof(array) / sizeof(array[0]))
+#else
+#	include <stdlib.h>
+#	define countof	_countof
+#endif // _MSC_VER < 1400
+
+
 enum BasicType                                              // Stolen from CVCONST.H in the DIA 2.0 SDK
 {
     btNoType = 0,
@@ -76,6 +84,9 @@ class WheatyExceptionReport
 
         // where report info is extracted and generated
         static void GenerateExceptionReport( PEXCEPTION_POINTERS pExceptionInfo );
+		static void PrintSystemInfo();
+		static BOOL _GetWindowsVersion(TCHAR* szVersion, DWORD cntMax);
+		static BOOL _GetProcessorName(TCHAR* sProcessorName, DWORD maxcount);
 
         // Helper functions
         static LPTSTR GetExceptionString( DWORD dwCode );
