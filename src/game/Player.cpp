@@ -16128,6 +16128,10 @@ void Player::SummonIfPossible()
     if(m_summon_expire < time(NULL))
         return;
 
+    // drop flag at summon
+    if(BattleGround *bg = GetBattleGround())
+        bg->HandleDropFlag(this);
+
     m_summon_expire = 0;
 
     TeleportTo(m_summon_mapid, m_summon_x, m_summon_y, m_summon_z,GetOrientation());
