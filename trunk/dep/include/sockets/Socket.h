@@ -312,6 +312,12 @@ public:
 		\return true if connected */
 	bool IsConnected();
 
+	/** Connection lost - error while reading/writing from a socket - TcpSocket only. */
+	void SetLost();
+	/** Check connection lost status flag, used by TcpSocket only.
+		\return true if there was an error while r/w causing the socket to close */
+	bool Lost();
+
 	/** Set flag indicating the socket is being actively deleted by the sockethandler. */
 	void SetErasedByHandler(bool x = true);
 	/** Get value of flag indicating socket is deleted by sockethandler. */
@@ -532,11 +538,6 @@ public:
 	/** Check retain flag.
 		\return true if the socket should be moved to connection pool after use */
 	bool Retain();
-	/** Connection lost - error while reading/writing from a socket - TcpSocket only. */
-	void SetLost();
-	/** Check connection lost status flag, used by TcpSocket only.
-		\return true if there was an error while r/w causing the socket to close */
-	bool Lost();
 	/** Copy connection parameters from sock. */
 	void CopyConnection(Socket *sock);
 	//@}
@@ -691,6 +692,7 @@ private:
 	IFile *m_traffic_monitor;
 	time_t m_timeout_start; ///< Set by SetTimeout
 	time_t m_timeout_limit; ///< Defined by SetTimeout
+	bool m_bLost; ///< connection lost
 
 #ifdef _WIN32
 static	WSAInitializer m_winsock_init; ///< Winsock initialization singleton class
@@ -711,7 +713,6 @@ static	WSAInitializer m_winsock_init; ///< Winsock initialization singleton clas
 	std::string m_socket_protocol; ///< Protocol, from socket() call
 	bool m_bClient; ///< only client connections are pooled
 	bool m_bRetain; ///< keep connection on close
-	bool m_bLost; ///< connection lost
 #endif
 
 #ifdef ENABLE_SOCKS4

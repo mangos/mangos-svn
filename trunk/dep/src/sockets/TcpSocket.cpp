@@ -151,6 +151,13 @@ TcpSocket::~TcpSocket()
 	delete[] m_buf;
 #endif
 	// %! empty m_obuf
+	while (m_obuf.size())
+	{
+		output_l::iterator it = m_obuf.begin();
+		OUTPUT *p = *it;
+		delete p;
+		m_obuf.erase(it);
+	}
 #ifdef HAVE_OPENSSL
 	if (m_ssl)
 	{
@@ -449,18 +456,14 @@ DEB(				fprintf(stderr, "SSL_read() returns zero - closing socket\n");)
 				OnDisconnect();
 				SetCloseAndDelete(true);
 				SetFlushBeforeClose(false);
-#ifdef ENABLE_POOL
 				SetLost();
-#endif
 				break;
 			default:
 DEB(				fprintf(stderr, "SSL read problem, errcode = %d\n",n);)
 				OnDisconnect();
 				SetCloseAndDelete(true);
 				SetFlushBeforeClose(false);
-#ifdef ENABLE_POOL
 				SetLost();
-#endif
 			}
 			return;
 		}
@@ -470,9 +473,7 @@ DEB(				fprintf(stderr, "SSL read problem, errcode = %d\n",n);)
 			OnDisconnect();
 			SetCloseAndDelete(true);
 			SetFlushBeforeClose(false);
-#ifdef ENABLE_POOL
 			SetLost();
-#endif
 			SetShutdown(SHUT_WR);
 			return;
 		}
@@ -504,9 +505,7 @@ DEB(				fprintf(stderr, "SSL read problem, errcode = %d\n",n);)
 			OnDisconnect();
 			SetCloseAndDelete(true);
 			SetFlushBeforeClose(false);
-#ifdef ENABLE_POOL
 			SetLost();
-#endif
 			return;
 		}
 		else
@@ -515,9 +514,7 @@ DEB(				fprintf(stderr, "SSL read problem, errcode = %d\n",n);)
 			OnDisconnect();
 			SetCloseAndDelete(true);
 			SetFlushBeforeClose(false);
-#ifdef ENABLE_POOL
 			SetLost();
-#endif
 			SetShutdown(SHUT_WR);
 			return;
 		}
@@ -735,9 +732,7 @@ int TcpSocket::TryWrite(const char *buf, size_t len)
 				OnDisconnect();
 				SetCloseAndDelete(true);
 				SetFlushBeforeClose(false);
-#ifdef ENABLE_POOL
 				SetLost();
-#endif
 				const char *errbuf = ERR_error_string(errnr, NULL);
 				Handler().LogError(this, "OnWrite/SSL_write", errnr, errbuf, LOG_LEVEL_FATAL);
 			}
@@ -749,9 +744,7 @@ int TcpSocket::TryWrite(const char *buf, size_t len)
 			OnDisconnect();
 			SetCloseAndDelete(true);
 			SetFlushBeforeClose(false);
-#ifdef ENABLE_POOL
 			SetLost();
-#endif
 DEB(			int errnr = SSL_get_error(m_ssl, n);
 			const char *errbuf = ERR_error_string(errnr, NULL);
 			fprintf(stderr, "SSL_write() returns 0: %d : %s\n",errnr, errbuf);)
@@ -776,9 +769,7 @@ DEB(			int errnr = SSL_get_error(m_ssl, n);
 				OnDisconnect();
 				SetCloseAndDelete(true);
 				SetFlushBeforeClose(false);
-#ifdef ENABLE_POOL
 				SetLost();
-#endif
 			}
 			return 0;
 		}
@@ -1334,7 +1325,7 @@ int TcpSocket::Close()
 	}
 	int n;
 	SetNonblocking(true);
-	if (IsConnected() && !(GetShutdown() & SHUT_WR))
+	if (!Lost() && IsConnected() && !(GetShutdown() & SHUT_WR))
 	{
 		if (shutdown(GetSocket(), SHUT_WR) == -1)
 		{
@@ -1344,7 +1335,7 @@ int TcpSocket::Close()
 	}
 	//
 	char tmp[1000];
-	if ((n = recv(GetSocket(),tmp,1000,0)) >= 0)
+	if (!Lost() && (n = recv(GetSocket(),tmp,1000,0)) >= 0)
 	{
 		if (n)
 		{
@@ -1599,9 +1590,6 @@ bool TcpSocket::CircularBuffer::SoftRead(char *s, size_t l)
     }
     return true;
 }
-
-
-
 
 bool TcpSocket::CircularBuffer::Remove(size_t l)
 {

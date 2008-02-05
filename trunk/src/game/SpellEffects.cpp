@@ -440,7 +440,7 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                 case SPELLFAMILY_PRIEST:
                 {
                     // Shadow Word: Death
-                    if((m_spellInfo->SpellFamilyFlags & 0x0000000200000000LL) && unitTarget->isAlive())
+                    if(finalDamege > 0 && (m_spellInfo->SpellFamilyFlags & 0x0000000200000000LL) && unitTarget->isAlive())
                         // deals damage equal to damage done to caster if victim is not killed
                         m_caster->SpellNonMeleeDamageLog( m_caster, m_spellInfo->Id, finalDamege, m_IsTriggeredSpell, false);
 
@@ -449,7 +449,7 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                 case SPELLFAMILY_PALADIN:
                 {
                     // Judgement of Blood
-                    if((m_spellInfo->SpellFamilyFlags & 0x0000000800000000LL) && m_spellInfo->SpellIconID==153)
+                    if(finalDamege > 0 && (m_spellInfo->SpellFamilyFlags & 0x0000000800000000LL) && m_spellInfo->SpellIconID==153)
                     {
                         int32 damagePoint  = finalDamege * 33 / 100;
                         m_caster->CastCustomSpell(m_caster, 32220, &damagePoint, NULL, NULL, true);

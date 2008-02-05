@@ -82,6 +82,7 @@ Socket::Socket(ISocketHandler& h)
 ,m_client_remote_address(NULL)
 ,m_remote_address(NULL)
 ,m_traffic_monitor(NULL)
+,m_bLost(false)
 #ifdef HAVE_OPENSSL
 ,m_b_enable_ssl(false)
 ,m_b_ssl(false)
@@ -94,7 +95,6 @@ Socket::Socket(ISocketHandler& h)
 ,m_socket_type(0)
 ,m_bClient(false)
 ,m_bRetain(false)
-,m_bLost(false)
 #endif
 #ifdef ENABLE_SOCKS4
 ,m_bSocks4(false)
@@ -285,7 +285,7 @@ void Socket::SetRemoteAddress(SocketAddress& ad) //struct sockaddr* sa, socklen_
 
 std::auto_ptr<SocketAddress> Socket::GetRemoteSocketAddress()
 {
-	return std::auto_ptr<SocketAddress>(m_remote_address -> GetCopy());
+	return m_remote_address -> GetCopy();
 }
 
 
@@ -559,6 +559,18 @@ void Socket::OnDisconnect()
 }
 
 
+void Socket::SetLost()
+{
+	m_bLost = true;
+}
+
+
+bool Socket::Lost()
+{
+	return m_bLost;
+}
+
+
 void Socket::SetErasedByHandler(bool x)
 {
 	m_b_erased_by_handler = x;
@@ -593,7 +605,7 @@ std::auto_ptr<SocketAddress> Socket::GetClientRemoteAddress()
 	{
 		Handler().LogError(this, "GetClientRemoteAddress", 0, "remote address not yet set", LOG_LEVEL_ERROR);
 	}
-	return std::auto_ptr<SocketAddress>(m_client_remote_address -> GetCopy());
+	return m_client_remote_address -> GetCopy();
 }
 
 
@@ -730,16 +742,6 @@ bool Socket::Retain()
 }
 
 
-void Socket::SetLost()
-{
-	m_bLost = true;
-}
-
-
-bool Socket::Lost()
-{
-	return m_bLost;
-}
 #endif // ENABLE_POOL
 
 
