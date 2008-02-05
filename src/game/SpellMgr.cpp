@@ -150,6 +150,44 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
 
     switch(spellInfo->SpellFamilyName)
     {
+    case SPELLFAMILY_MAGE:
+        {
+            // family flags 18(Molten), 25(Frost/Ice), 28(Mage)
+            if (spellInfo->SpellFamilyFlags & 0x12040000)
+                return SPELL_MAGE_ARMOR;
+
+            if ((spellInfo->SpellFamilyFlags & 0x1000000) && spellInfo->EffectApplyAuraName[0]==SPELL_AURA_MOD_CONFUSE)
+                return SPELL_MAGE_POLYMORPH;
+
+            break;
+        }
+    case SPELLFAMILY_WARRIOR:
+        {
+            if (spellInfo->SpellFamilyFlags & 0x00008000010000LL)
+                return SPELL_POSITIVE_SHOUT;
+
+            break;
+        }
+    case SPELLFAMILY_WARLOCK:
+        {
+            // only warlock curses have this
+            if (spellInfo->Dispel == IMMUNE_DISPEL_CURSE)
+                return SPELL_CURSE;
+
+            // family flag 37 (only part spells have family name)
+            if (spellInfo->SpellFamilyFlags & 0x2000000000LL)
+                return SPELL_WARLOCK_ARMOR;
+
+            break;
+        }
+    case SPELLFAMILY_HUNTER:
+        {
+            // only hunter stings have this
+            if (spellInfo->Dispel == IMMUNE_DISPEL_POISON)
+                return SPELL_STING;
+
+            break;
+        }
     case SPELLFAMILY_PALADIN:
         {
             if (IsSealSpell(spellId))
@@ -166,42 +204,11 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             }
             break;
         }
-    case SPELLFAMILY_WARLOCK:
-        {
-            // only warlock curses have this
-            if (spellInfo->Dispel == IMMUNE_DISPEL_CURSE)
-                return SPELL_CURSE;
-
-            // family flag 37 (only part spells have family name)
-            if (spellInfo->SpellFamilyFlags & 0x2000000000LL)
-                return SPELL_WARLOCK_ARMOR;
-
-            break;
-        }
-    case SPELLFAMILY_MAGE:
-        {
-            // family flags 18(Molten), 25(Frost/Ice), 28(Mage)
-            if (spellInfo->SpellFamilyFlags & 0x12040000)
-                return SPELL_MAGE_ARMOR;
-
-            if ((spellInfo->SpellFamilyFlags & 0x1000000) && spellInfo->EffectApplyAuraName[0]==SPELL_AURA_MOD_CONFUSE)
-                return SPELL_MAGE_POLYMORPH;
-
-            break;
-        }
     case SPELLFAMILY_SHAMAN:
         {
             // family flags 10 (Lightning), 42 (Earth), 37 (Water)
             if (spellInfo->SpellFamilyFlags & 0x42000000400LL)
                 return SPELL_ELEMENTAL_SHIELD;
-
-            break;
-        }
-    case SPELLFAMILY_HUNTER:
-        {
-            // only hunter stings have this
-            if (spellInfo->Dispel == IMMUNE_DISPEL_POISON)
-                return SPELL_STING;
 
             break;
         }
@@ -221,10 +228,10 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
     }
 
     for(int i = 0; i < 3; i++)
-        if(spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA
-            && (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_TRACK_CREATURES
-            || spellInfo->EffectApplyAuraName[i]  == SPELL_AURA_TRACK_RESOURCES
-            || spellInfo->EffectApplyAuraName[i]  == SPELL_AURA_TRACK_STEALTHED))
+        if( spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA && (
+            spellInfo->EffectApplyAuraName[i] == SPELL_AURA_TRACK_CREATURES ||
+            spellInfo->EffectApplyAuraName[i] == SPELL_AURA_TRACK_RESOURCES ||
+            spellInfo->EffectApplyAuraName[i] == SPELL_AURA_TRACK_STEALTHED ) )
             return SPELL_TRACKER;
 
     return SPELL_NORMAL;
@@ -245,6 +252,7 @@ bool IsSpellSingleEffectPerCaster(uint32 spellId)
     case SPELL_MAGE_ARMOR:
     case SPELL_ELEMENTAL_SHIELD:
     case SPELL_MAGE_POLYMORPH:
+    case SPELL_POSITIVE_SHOUT:
         return true;
     default:
         return false;
