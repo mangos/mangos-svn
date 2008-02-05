@@ -54,6 +54,12 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
     std::string membername;
     recv_data >> membername;
 
+    if(_player->InBattleGround())
+    {
+        SendPartyResult(PARTY_OP_INVITE, membername, PARTY_RESULT_INVITE_RESTRICTED);
+        return;
+    }
+
     // attempt add selected player
 
     // cheating
@@ -169,6 +175,14 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & /*recv_data*/ )
         return;
     }
 
+    Player* leader = objmgr.GetPlayer(group->GetLeaderGUID());
+
+    if(leader && leader->InBattleGround())
+    {
+        SendPartyResult(PARTY_OP_INVITE, "", PARTY_RESULT_INVITE_RESTRICTED);
+        return;
+    }
+
     // everything's fine, do it
     if(!group->AddMember(GetPlayer()->GetGUID(), GetPlayer()->GetName()))
         return;
@@ -212,6 +226,12 @@ void WorldSession::HandleGroupUninviteGuidOpcode(WorldPacket & recv_data)
     uint64 guid;
     recv_data >> guid;
 
+    if(_player->InBattleGround())
+    {
+        SendPartyResult(PARTY_OP_INVITE, "", PARTY_RESULT_INVITE_RESTRICTED);
+        return;
+    }
+
     std::string membername;
     if(!objmgr.GetPlayerNameByGUID(guid, membername))
         return;                                             // not found
@@ -225,8 +245,16 @@ void WorldSession::HandleGroupUninviteNameOpcode(WorldPacket & recv_data)
 
     std::string membername;
     recv_data >> membername;
+
     if(membername.empty())
         return;
+
+    if(_player->InBattleGround())
+    {
+        SendPartyResult(PARTY_OP_INVITE, membername, PARTY_RESULT_INVITE_RESTRICTED);
+        return;
+    }
+
     normalizePlayerName(membername);
 
     uint64 guid = objmgr.GetPlayerGUIDByName(membername);
@@ -242,6 +270,12 @@ void WorldSession::HandleGroupUninvite(uint64 guid, std::string name)
 {
     Group *group = GetPlayer()->GetGroup();
     if(!group) return;
+
+    if(_player->InBattleGround())
+    {
+        SendPartyResult(PARTY_OP_INVITE, "", PARTY_RESULT_INVITE_RESTRICTED);
+        return;
+    }
 
     Player *player = objmgr.GetPlayer(guid);
 
@@ -292,6 +326,12 @@ void WorldSession::HandleGroupDisbandOpcode( WorldPacket & /*recv_data*/ )
 {
     if(!GetPlayer()->GetGroup())
         return;
+
+    if(_player->InBattleGround())
+    {
+        SendPartyResult(PARTY_OP_INVITE, "", PARTY_RESULT_INVITE_RESTRICTED);
+        return;
+    }
 
     /** error handling **/
     /********************/
@@ -439,6 +479,9 @@ void WorldSession::HandleRaidConvertOpcode( WorldPacket & /*recv_data*/ )
 {
     Group *group = GetPlayer()->GetGroup();
     if(!group) return;
+
+    if(_player->InBattleGround())
+        return;
 
     /** error handling **/
     if(!group->IsLeader(GetPlayer()->GetGUID()) || group->GetMembersCount() < 2)
