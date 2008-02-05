@@ -70,7 +70,8 @@ enum SpellSpecific
     SPELL_WARLOCK_ARMOR = 8,
     SPELL_MAGE_ARMOR = 9,
     SPELL_ELEMENTAL_SHIELD = 10,
-    SPELL_MAGE_POLYMORPH = 11
+    SPELL_MAGE_POLYMORPH = 11,
+    SPELL_POSITIVE_SHOUT = 12
 };
 
 SpellSpecific GetSpellSpecific(uint32 spellId);
