@@ -224,8 +224,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //171 SPELL_AURA_MOD_PARTY_SPEED    unused
     &Aura::HandleAuraModIncreaseMountedSpeed,               //172 SPELL_AURA_MOD_PARTY_SPEED_MOUNTED
     &Aura::HandleNULL,                                      //173 SPELL_AURA_ALLOW_CHAMPION_SPELLS  only for Proclaim Champion spell
-    &Aura::HandleNoImmediateEffect,                         //174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_SPIRIT     implemented in Unit::SpellDamageBonus
-    &Aura::HandleNoImmediateEffect,                         //175 SPELL_AURA_MOD_SPELL_HEALING_OF_SPIRIT    implemented in Unit::SpellHealingBonus
+    &Aura::HandleModSpellDamagePercent,                     //174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT  implemented in Unit::SpellDamageBonus (by defeult intelect, dependent from SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT)
+    &Aura::HandleModSpellHealingPercent,                    //175 SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT implemented in Unit::SpellHealingBonus
     &Aura::HandleSpiritOfRedemption,                        //176 SPELL_AURA_SPIRIT_OF_REDEMPTION   only for Spirit of Redemption spell, die at aura end
     &Aura::HandleNULL,                                      //177 SPELL_AURA_AOE_CHARM
     &Aura::HandleNULL,                                      //178 SPELL_AURA_MOD_DEBUFF_RESISTANCE
@@ -244,8 +244,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //191 SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED
     &Aura::HandleNULL,                                      //192 SPELL_AURA_HASTE_MELEE
     &Aura::HandleModCombatSpeedPct,                         //193 SPELL_AURA_MELEE_SLOW (in fact combat (any type attack) speed pct)
-    &Aura::HandleModSpellDamagePercent,                     //194 SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT  implemented in Unit::SpellDamageBonus
-    &Aura::HandleModSpellHealingPercent,                    //195 SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT implemented in Unit::SpellHealingBonu
+    &Aura::HandleNULL,                                      //194 SPELL_AURA_MOD_DEPRICATED_1 not used now (old SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT)
+    &Aura::HandleNULL,                                      //195 SPELL_AURA_MOD_DEPRICATED_1 not used now (old SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT)
     &Aura::HandleNULL,                                      //196
     &Aura::HandleNoImmediateEffect,                         //197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE implemented in Unit::SpellCriticalBonus Unit::GetUnitCriticalChance
     &Aura::HandleNULL,                                      //198 SPELL_AURA_MOD_ALL_WEAPON_SKILLS
@@ -3178,25 +3178,32 @@ void Aura::HandleModPercentStat(bool apply, bool Real)
     }
 }
 
-void Aura::HandleModSpellHealingPercent(bool apply, bool Real)
-{
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    //For ClientSide Display
-    m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS, int32((m_modifier.m_amount/100.00f * m_target->GetStat(STAT_INTELLECT))),apply);
-}
-
 void Aura::HandleModSpellDamagePercent(bool apply, bool Real)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    // stat used dependent from next effect aura SPELL_AURA_MOD_SPELL_HEALING presence and misc value (stat index)
+    Stats usedStat = STAT_INTELLECT;
+    if(m_effIndex < 2 && m_spellProto->EffectApplyAuraName[m_effIndex+1]==SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT)
+        usedStat = Stats(m_spellProto->EffectMiscValue[m_effIndex+1]);
+
     //For ClientSide Display
     for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
     {
-        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i, int32((m_modifier.m_amount/100.00f * m_target->GetStat(STAT_INTELLECT))),apply);
+        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i, int32((m_modifier.m_amount/100.00f * m_target->GetStat(usedStat))),apply);
     }
+}
+
+void Aura::HandleModSpellHealingPercent(bool apply, bool Real)
+{
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    Stats usedStat = Stats(m_spellProto->EffectMiscValue[m_effIndex]);
+
+    //For ClientSide Display
+    m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS, int32((m_modifier.m_amount/100.00f * m_target->GetStat(usedStat))),apply);
 }
 
 void Aura::HandleModHealingDone(bool apply, bool Real)
@@ -3524,7 +3531,7 @@ void Aura::HandleModSpellCritChanceShool(bool apply, bool Real)
 
     for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
     {
-        if(m_modifier.m_miscvalue == -2 || (m_modifier.m_miscvalue & 1<<i) != 0)
+        if(m_modifier.m_miscvalue == -2 || (m_modifier.m_miscvalue & (1<<i)) != 0)
             ((Player*)m_target)->HandleBaseModValue( BaseModGroup(SPELL_CRIT_PERCENTAGE + i), FLAT_MOD, float(m_modifier.m_amount), apply);
     }
 }
@@ -3676,7 +3683,7 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
         {
             for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; i++)
             {
-                if((m_modifier.m_miscvalue & 1<<i) != 0)
+                if((m_modifier.m_miscvalue & (1<<i)) != 0)
                     m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+i,m_modifier.m_amount,apply);
             }
         }
@@ -3684,7 +3691,7 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
         {
             for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; i++)
             {
-                if((m_modifier.m_miscvalue & 1<<i) != 0)
+                if((m_modifier.m_miscvalue & (1<<i)) != 0)
                     m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i,m_modifier.m_amount,apply);
             }
         }
@@ -3770,14 +3777,14 @@ void Aura::HandleModPowerCostPCT(bool apply, bool Real)
 {
     float amount = m_modifier.m_amount/100.0f;
     for(int i = 0; i < MAX_SPELL_SCHOOL; ++i)
-        if(m_modifier.m_miscvalue & 1<<i)
+        if(m_modifier.m_miscvalue & (1<<i))
             m_target->ApplyModSignedFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+i,amount,apply);
 }
 
 void Aura::HandleModPowerCost(bool apply, bool Real)
 {
     for(int i = 0; i < MAX_SPELL_SCHOOL; ++i)
-        if(m_modifier.m_miscvalue & 1<<i)
+        if(m_modifier.m_miscvalue & (1<<i))
             m_target->ApplyModInt32Value(UNIT_FIELD_POWER_COST_MODIFIER+i,m_modifier.m_amount,apply);
 }
 

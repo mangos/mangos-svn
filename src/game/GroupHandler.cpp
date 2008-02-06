@@ -614,7 +614,7 @@ void WorldSession::SendPartyMemberStatsChanged(uint64 Guid, uint32 mask)
 
     uint32 byteCount = 0;
     for (int i=1;i<GROUP_UPDATE_FLAGS_COUNT;++i)
-        if (mask & 1<<i)
+        if (mask & (1<<i))
             byteCount += GroupUpdateLength[i];
 
     WorldPacket data(SMSG_PARTY_MEMBER_STATS, 8+4+byteCount);
