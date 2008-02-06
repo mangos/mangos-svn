@@ -734,6 +734,7 @@ void WorldSession::HandleToggleCloakOpcode( WorldPacket & /*recv_data*/ )
 
 void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
 {
+
     uint64 guid;
     std::string newname;
     std::string oldname;
@@ -741,6 +742,31 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     CHECK_PACKET_SIZE(recv_data, 8+1);
 
     recv_data >> guid;
+
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `at_login` FROM `character` WHERE `guid` ='%u'", GUID_LOPART(guid));
+    if (result)
+    {
+        uint32 at_loginFlags;
+        Field *fields = result->Fetch();
+        at_loginFlags = fields[0].GetUInt32();
+        delete result;
+
+        if (!(at_loginFlags & AT_LOGIN_RENAME))
+        {
+            WorldPacket data(SMSG_CHAR_RENAME, 1);
+            data << (uint8)CHAR_CREATE_ERROR;
+            SendPacket( &data );
+            return;
+        }
+    }
+    else
+    {
+        WorldPacket data(SMSG_CHAR_RENAME, 1);
+        data << (uint8)CHAR_CREATE_ERROR;
+        SendPacket( &data ); 
+        return;
+    }
+
     recv_data >> newname;
 
     if(!objmgr.GetPlayerNameByGUID(guid, oldname))          // character not exist, because we have no name for this guid
@@ -801,7 +827,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     CharacterDatabase.PExecute("UPDATE `character` set `name` = '%s', `at_login` = `at_login` & ~ '%u' WHERE `guid` ='%u'", newname.c_str(), uint32(AT_LOGIN_RENAME),GUID_LOPART(guid));
 
     std::string IP_str = _socket ? _socket->GetRemoteAddress().c_str() : "-";
-    sLog.outChar("Account: %d (IP: %s) Character:[%s] (guid:%u) Changed name to: %p",GetAccountId(),IP_str.c_str(),oldname.c_str(),GUID_LOPART(guid),newname.c_str());
+    sLog.outChar("Account: %d (IP: %s) Character:[%s] (guid:%u) Changed name to: %s",GetAccountId(),IP_str.c_str(),oldname.c_str(),GUID_LOPART(guid),newname.c_str());
 
     WorldPacket data(SMSG_CHAR_RENAME,1+8+(newname.size()+1));
     data << (uint8)RESPONSE_SUCCESS;
