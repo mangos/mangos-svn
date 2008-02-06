@@ -50,9 +50,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"
-                Description="Extract SVN revision"
-                CommandLine="cd ..\&#x0D;&#x0A;svn_revision.js&#x0D;&#x0A;"/>
+				Name="VCPreBuildEventTool"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -106,9 +104,7 @@
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
-				Name="VCPreBuildEventTool"
-                Description="Extract SVN revision"
-                CommandLine="cd ..\&#x0D;&#x0A;svn_revision.js&#x0D;&#x0A;"/>
+				Name="VCPreBuildEventTool"/>
 			<Tool
 				Name="VCPreLinkEventTool"/>
 			<Tool
@@ -425,6 +421,28 @@
 		</File>
 		<File
 			RelativePath="..\..\src\shared\svn_revision.h">
+			<FileConfiguration
+				Name="Release|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="Extract SVN revision"
+					CommandLine="cd ..\&#x0D;&#x0A;cscript.exe svn_revision.js //B //Nologo"
+					AdditionalDependencies=".svn/entries"
+					Outputs="svn_revision.h"
+				/>
+			</FileConfiguration>
+			<FileConfiguration
+				Name="Debug|Win32"
+				>
+				<Tool
+					Name="VCCustomBuildTool"
+					Description="Extract SVN revision"
+					CommandLine="cd ..\&#x0D;&#x0A;cscript.exe svn_revision.js //B //Nologo"
+					AdditionalDependencies=".svn/entries"
+					Outputs="svn_revision.h"
+				/>
+			</FileConfiguration>
 		</File>
 		<File
 			RelativePath="..\..\src\shared\SystemConfig.h.in">
