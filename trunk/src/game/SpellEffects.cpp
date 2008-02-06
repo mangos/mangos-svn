@@ -1583,15 +1583,7 @@ void Spell::EffectApplyAura(uint32 i)
                                                             //Power Word: Shield
         if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && m_spellInfo->SpellFamilyFlags & 1)
             spellId = 6788;                                 // Weakened Soul
-        else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && (
-                                                            //Divine Protection
-            (m_spellInfo->SpellFamilyFlags & 0x800000000000LL) && m_spellInfo->SpellIconID==73  ||
-                                                            //Divine Shield
-            (m_spellInfo->SpellFamilyFlags & 0x000000400000LL)                                  ||
-                                                            //Blessing of Protection 
-            (m_spellInfo->SpellFamilyFlags & 0x000000000080LL)                                  ||
-                                                            //Avenging Wrath
-            (m_spellInfo->SpellFamilyFlags & 0x800000000000LL) && m_spellInfo->SpellIconID==2172 ))
+        else if(IsMechanicInvulnerabilityImmunityToSpell(m_spellInfo))
             spellId = 25771;                                // Forbearance
         else if (m_spellInfo->Mechanic == MECHANIC_BANDAGE) // Bandages
             spellId = 11196;                                // Recently Bandaged

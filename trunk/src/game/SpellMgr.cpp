@@ -1427,3 +1427,20 @@ bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
 
     return true;
 }
+
+// Spell that must be affected by MECHANIC_INVULNERABILITY not have this mechanic, check its by another data
+bool IsMechanicInvulnerabilityImmunityToSpell(SpellEntry const* spellInfo)
+{
+    if(spellInfo->SpellFamilyName != SPELLFAMILY_PALADIN)
+        return false;
+    
+    //Divine Protection
+    if((spellInfo->SpellFamilyFlags & 0x400000000000LL) && spellInfo->SpellIconID==73)
+        return true;
+
+    //Divine Shield or Blessing of Protection or Avenging Wrath
+    if(spellInfo->SpellFamilyFlags & 0x200000400080LL)
+        return true;
+
+    return false;
+}
