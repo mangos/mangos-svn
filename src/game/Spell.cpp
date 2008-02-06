@@ -3314,8 +3314,9 @@ uint8 Spell::CheckCasterAuras() const
             {
                 if(itr->second)
                 {
-                    if( ((1 << itr->second->GetSpellProto()->School) & school_immune) ||
-                        ((1 << itr->second->GetSpellProto()->Mechanic) & mechanic_immune) )
+                    if( ((1 << itr->second->GetSpellProto()->School) & school_immune)     ||
+                        ((1 << itr->second->GetSpellProto()->Mechanic) & mechanic_immune) ||
+                        ((1 << itr->second->GetSpellProto()->EffectMechanic[itr->second->GetEffIndex()]) & mechanic_immune))
                         continue;
 
                     //Make a second check for spell failed so the right SPELL_FAILED message is returned.
