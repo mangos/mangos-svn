@@ -100,6 +100,7 @@ bool IsSingleTargetSpell(uint32 spellId);
 bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellInfo2);
 
 bool CanUsedWhileStealthed(uint32 spellId);
+bool IsMechanicInvulnerabilityImmunityToSpell(SpellEntry const* spellInfo);
 
 // Spell affects related declarations (accessed using SpellMgr functions)
 struct SpellAffection

@@ -6205,15 +6205,7 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo) const
         if(itr->type == spellInfo->Mechanic)
             return true;
         // Spell taht must be affected by MECHANIC_INVULNERABILITY not have this mechanic, check its by another data
-        else if(itr->type == MECHANIC_INVULNERABILITY && spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && (
-                                                            //Divine Protection
-        (spellInfo->SpellFamilyFlags & 0x800000000000LL) && spellInfo->SpellIconID==73      ||
-                                                            //Divine Shield
-        (spellInfo->SpellFamilyFlags & 0x000000400000LL)                                    ||
-                                                            //Blessing of Protection 
-        (spellInfo->SpellFamilyFlags & 0x000000000080LL)                                    ||
-                                                            //Avenging Wrath
-        (spellInfo->SpellFamilyFlags & 0x800000000000LL) && spellInfo->SpellIconID==2172 ))
+        else if(itr->type == MECHANIC_INVULNERABILITY && IsMechanicInvulnerabilityImmunityToSpell(spellInfo))
             return true;
 
     if( !(spellInfo->AttributesEx & 0x10000))               // unaffected by school immunity
