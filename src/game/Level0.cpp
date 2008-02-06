@@ -28,6 +28,7 @@
 #include "ObjectAccessor.h"
 #include "Language.h"
 #include "AccountMgr.h"
+#include "SystemConfig.h"
 
 bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
 {
@@ -160,6 +161,7 @@ bool ChatHandler::HandleInfoCommand(const char* /*args*/)
     uint32 maxClientsNum = sWorld.GetMaxSessionCount();
     std::string str = secsToTimeString(sWorld.GetUptime());
 
+    PSendSysMessage(_FULLVERSION);
     PSendSysMessage(LANG_CONNECTED_USERS, clientsNum, maxClientsNum);
     PSendSysMessage(LANG_UPTIME, str.c_str());
 
