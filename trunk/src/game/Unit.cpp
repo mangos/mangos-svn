@@ -5816,7 +5816,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     // ..done
     AuraList const& mDamageDone = this->GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for(AuraList::const_iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
-        if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0 &&
+        if(((*i)->GetModifier()->m_miscvalue & int32(1<<spellProto->School)) != 0 &&
         (*i)->GetSpellProto()->EquippedItemClass == -1 &&
                                                             // -1 == any item class (not wand then)
         (*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0 )
@@ -5825,17 +5825,23 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
 
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        // Damage bonus of spirit
-        AuraList const& mDamageDonebySpi = GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_SPIRIT);
-        for(AuraList::const_iterator i = mDamageDonebySpi.begin();i != mDamageDonebySpi.end(); ++i)
-            if((*i)->GetModifier()->m_miscvalue & 1 << spellProto->School)
-                DoneAdvertisedBenefit += int32(GetStat(STAT_SPIRIT) * (*i)->GetModifier()->m_amount / 100.0f);
+        // Damage bonus from stats
+        AuraList const& mDamageDoneOfStatPercent = GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT);
+        for(AuraList::const_iterator i = mDamageDoneOfStatPercent.begin();i != mDamageDoneOfStatPercent.end(); ++i)
+        {
+            if((*i)->GetModifier()->m_miscvalue & int32(1 << spellProto->School))
+            {
+                SpellEntry const* iSpellProto = (*i)->GetSpellProto();
+                uint8 eff = (*i)->GetEffIndex();
 
-        // ... and intellect
-        AuraList const& mDamageDonebyInt = GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT);
-        for(AuraList::const_iterator i = mDamageDonebyInt.begin();i != mDamageDonebyInt.end(); ++i)
-            if ((*i)->GetModifier()->m_miscvalue & 1 << spellProto->School)
-                DoneAdvertisedBenefit += int32(GetStat(STAT_INTELLECT) * (*i)->GetModifier()->m_amount / 100.0f);
+                // stat used dependent from next effect aura SPELL_AURA_MOD_SPELL_HEALING presence and misc value (stat index)
+                Stats usedStat = STAT_INTELLECT;
+                if(eff < 2 && iSpellProto->EffectApplyAuraName[eff+1]==SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT)
+                    usedStat = Stats(iSpellProto->EffectMiscValue[eff+1]);
+
+                DoneAdvertisedBenefit += int32(GetStat(usedStat) * (*i)->GetModifier()->m_amount / 100.0f);
+            }
+        }
     }
 
     // ..taken
@@ -6079,9 +6085,14 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     // Healing bonus of spirit, intellect and strength
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        AdvertisedBenefit += int32(GetStat(STAT_SPIRIT) * GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HEALING_OF_SPIRIT) / 100.0f);
-        AdvertisedBenefit += int32(GetStat(STAT_INTELLECT) * GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT) / 100.0f);
-        AdvertisedBenefit += int32(GetStat(STAT_STRENGTH) * GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HEALING_OF_STRENGTH) / 100.0f);
+        // Healing bonus from stats
+        AuraList const& mHealingDoneOfStatPercent = GetAurasByType(SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT);
+        for(AuraList::const_iterator i = mHealingDoneOfStatPercent.begin();i != mHealingDoneOfStatPercent.end(); ++i)
+        {
+            // stat used dependent from misc value (stat index)
+            Stats usedStat = Stats((*i)->GetSpellProto()->EffectMiscValue[(*i)->GetEffIndex()]);
+            AdvertisedBenefit += int32(GetStat(usedStat) * (*i)->GetModifier()->m_amount / 100.0f);
+        }
     }
 
     // Healing Taken
