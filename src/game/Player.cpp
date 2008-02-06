@@ -2815,9 +2815,9 @@ void Player::ResetComboPointsIfNeed(const SpellEntry *spellInfo)
 
     // Check use combo points in damage calculations
     bool comboDamageUsed =
-        spellInfo->EffectPointsPerComboPoint[0] > 0 ||
-        spellInfo->EffectPointsPerComboPoint[1] > 0 ||
-        spellInfo->EffectPointsPerComboPoint[2] > 0;
+        spellInfo->EffectPointsPerComboPoint[0] != 0 ||
+        spellInfo->EffectPointsPerComboPoint[1] != 0 ||
+        spellInfo->EffectPointsPerComboPoint[2] != 0;
 
     if(comboDamageUsed &&  m_attacking && (m_attacking->GetGUID() == GetComboTarget()))
         needClearCombo = true;
