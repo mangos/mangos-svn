@@ -78,7 +78,10 @@ inline void Traveller<Creature>::MoveTo(float x, float y, float z, uint32 t)
 template<>
 inline float Traveller<Player>::Speed()
 {
-    return PLAYER_FLIGHT_SPEED;
+    if (i_traveller.isInFlight())
+        return PLAYER_FLIGHT_SPEED;
+    else
+        return i_traveller.GetSpeed(i_traveller.getMoveRunFlag() ? MOVE_RUN : MOVE_WALK);
 }
 
 template<>
@@ -90,7 +93,7 @@ inline void Traveller<Player>::Relocation(float x, float y, float z, float orien
 template<>
 inline void Traveller<Player>::MoveTo(float x, float y, float z, uint32 t)
 {
-    i_traveller.SendMonsterMove(x, y, z, t, i_traveller.getMoveRunFlag(), 0);
+    i_traveller.SendMonsterMove(x, y, z, 0, i_traveller.getMoveRunFlag(), t);
 }
 
 typedef Traveller<Creature> CreatureTraveller;

@@ -404,11 +404,11 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
 
         if(damage >= 0)
         {
-            uint32 finalDamege;
+            uint32 finalDamage;
             if(m_originalCaster)                            // m_caster only passive source of cast
-                finalDamege = m_originalCaster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
+                finalDamage = m_originalCaster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
             else
-                finalDamege = m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
+                finalDamage = m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
 
             // post effects
             switch(m_spellInfo->SpellFamilyName)
@@ -440,18 +440,18 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                 case SPELLFAMILY_PRIEST:
                 {
                     // Shadow Word: Death
-                    if(finalDamege > 0 && (m_spellInfo->SpellFamilyFlags & 0x0000000200000000LL) && unitTarget->isAlive())
+                    if(finalDamage > 0 && (m_spellInfo->SpellFamilyFlags & 0x0000000200000000LL) && unitTarget->isAlive())
                         // deals damage equal to damage done to caster if victim is not killed
-                        m_caster->SpellNonMeleeDamageLog( m_caster, m_spellInfo->Id, finalDamege, m_IsTriggeredSpell, false);
+                        m_caster->SpellNonMeleeDamageLog( m_caster, m_spellInfo->Id, finalDamage, m_IsTriggeredSpell, false);
 
                     break;
                 }
                 case SPELLFAMILY_PALADIN:
                 {
                     // Judgement of Blood
-                    if(finalDamege > 0 && (m_spellInfo->SpellFamilyFlags & 0x0000000800000000LL) && m_spellInfo->SpellIconID==153)
+                    if(finalDamage > 0 && (m_spellInfo->SpellFamilyFlags & 0x0000000800000000LL) && m_spellInfo->SpellIconID==153)
                     {
-                        int32 damagePoint  = finalDamege * 33 / 100;
+                        int32 damagePoint  = finalDamage * 33 / 100;
                         m_caster->CastCustomSpell(m_caster, 32220, &damagePoint, NULL, NULL, true);
                     }
                     break;
