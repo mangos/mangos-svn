@@ -4616,6 +4616,37 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         }
         case SPELLFAMILY_SHAMAN:
         {
+            // Shaman Tier 6 Trinket
+            if(dummySpell->Id == 40463)
+            {
+                if(GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                if(!castItem)
+                    return;
+
+                uint32 triggerId = 0;
+                float  chance = 0.0f;
+                if (procSpell->SpellFamilyFlags & 0x0000000000000001LL)
+                {
+                    triggerId = 40465; chance = 15.f;       // Lightning Bolt
+                }
+                else if (procSpell->SpellFamilyFlags & 0x0000000000000080LL)
+                {
+                    triggerId = 40465; chance = 10.f;       // Lesser Healing Wave
+                }
+                else if (procSpell->SpellFamilyFlags & 0x0000001000000000LL)
+                {
+                    triggerId = 40466; chance = 50.f;       // Stormstrike
+                }
+                else
+                    return;
+
+                if (roll_chance_f(chance))
+                    CastSpell(this, triggerId, true, castItem, triggeredByAura);
+
+                return;
+            }
             // Earth Shield
             if(dummySpell->SpellFamilyFlags==0x40000000000LL)
             {
@@ -5101,6 +5132,19 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             return;
         }
 
+        // 10s cooldowns
+        case 33746:                                         // Essence Infused Mushroom
+        {
+            // hidden cooldown 10sec, check manually for passive spell
+            if (GetTypeId() == TYPEID_PLAYER && !((Player*)this)->HasSpellCooldown(auraSpellInfo->Id))
+            {
+                CastSpell(this, trigger_spell_id, true, NULL, triggeredByAura);
+                ((Player*)this)->AddSpellCooldown(auraSpellInfo->Id,0,time(NULL) + 10);
+            }
+            return;
+        }
+
+        // 60s cooldowns
         case 35077:                                         // Band of the Eternal Defender
         case 35080:                                         // Band of the Eternal Champion
         case 35083:                                         // Band of the Eternal Sage
