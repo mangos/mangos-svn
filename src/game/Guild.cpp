@@ -1009,7 +1009,7 @@ void Guild::LoadGuildBankFromDB()
     delete result;
 
     //                                        0       1        2
-    result = CharacterDatabase.PQuery("SELECT `TabId`,`SlotId`,`item_guid` FROM `guild_bank_item` WHERE `guildid`='%u' ORDER BY `TabId`", Id);
+    result = CharacterDatabase.PQuery("SELECT `TabId`,`SlotId`,`item_guid`,`item_entry` FROM `guild_bank_item` WHERE `guildid`='%u' ORDER BY `TabId`", Id);
     if(!result)
         return;
 
@@ -1017,15 +1017,31 @@ void Guild::LoadGuildBankFromDB()
     {
         Field *fields = result->Fetch();
         uint8 TabId = fields[0].GetUInt8();
-        if (TabId >= purchased_tabs || TabId >= GUILD_BANK_MAX_TABS)
-            continue;                                       // Problem, we try to load items in a not purshased tab!
-
         uint8 SlotId = fields[1].GetUInt8();
-        if (SlotId >= GUILD_BANK_MAX_SLOTS)
-            continue;                                       // Problem, we try to load item in a not existing slot!
-
         uint32 ItemGuid = fields[2].GetUInt32();
-        Item *pItem = new Item;
+        uint32 ItemEntry = fields[3].GetUInt32();
+
+        if (TabId >= purchased_tabs || TabId >= GUILD_BANK_MAX_TABS)
+        {
+            sLog.outError( "Guild::LoadGuildBankFromDB: Invalid tab for item (GUID: %u id: #%u) in guild bank, skipped.", ItemGuid,ItemEntry);
+            continue;
+        }
+
+        if (SlotId >= GUILD_BANK_MAX_SLOTS)
+        {
+            sLog.outError( "Guild::LoadGuildBankFromDB: Invalid slot for item (GUID: %u id: #%u) in guild bank, skipped.", ItemGuid,ItemEntry);
+            continue;
+        }
+
+        ItemPrototype const *proto = objmgr.GetItemPrototype(ItemEntry);
+
+        if(!proto)
+        {
+            sLog.outError( "Guild::LoadGuildBankFromDB: Unknown item (GUID: %u id: #%u) in guild bank, skipped.", ItemGuid,ItemEntry);
+            continue;
+        }
+
+        Item *pItem = NewItemOrBag(proto);
         if (pItem->LoadFromDB(ItemGuid, 0))
         {
             pItem->AddToWorld();

@@ -731,7 +731,8 @@ CREATE TABLE `guild_bank_eventlog` (
   `ItemStackCount` tinyint(3) unsigned NOT NULL default '0',
   `DestTabId` tinyint(1) unsigned NOT NULL default '0',
   `TimeStamp` bigint(20) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`guildid`,`LogGuid`)
+  PRIMARY KEY  (`guildid`,`LogGuid`),
+  KEY `guildid_key` (`guildid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -753,7 +754,9 @@ CREATE TABLE `guild_bank_item` (
   `TabId` tinyint(1) unsigned NOT NULL default '0',
   `SlotId` tinyint(3) unsigned NOT NULL default '0',
   `item_guid` int(11) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`guildid`,`tabid`,`slotid`)
+  `item_entry` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`guildid`,`tabid`,`slotid`),
+  KEY `guildid_key` (`guildid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -776,7 +779,8 @@ CREATE TABLE `guild_bank_right` (
   `rid` int(11) unsigned NOT NULL default '0',
   `Right` tinyint(3) unsigned NOT NULL default '0',
   `SlotPerDay` int(11) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`guildid`,`TabId`,`rid`)
+  PRIMARY KEY  (`guildid`,`TabId`,`rid`),
+  KEY `guildid_key` (`guildid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -798,7 +802,8 @@ CREATE TABLE `guild_bank_tab` (
   `TabId` tinyint(1) unsigned NOT NULL default '0',
   `TabName` varchar(100) NOT NULL default '',
   `TabIcon` varchar(100) NOT NULL default '',
-  PRIMARY KEY  (`guildid`,`TabId`)
+  PRIMARY KEY  (`guildid`,`TabId`),
+  KEY `guildid_key` (`guildid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -834,7 +839,10 @@ CREATE TABLE `guild_member` (
   `BankResetTimeTab4` int(11) unsigned NOT NULL default '0',
   `BankRemSlotsTab4` int(11) unsigned NOT NULL default '0',
   `BankResetTimeTab5` int(11) unsigned NOT NULL default '0',
-  `BankRemSlotsTab5` int(11) unsigned NOT NULL default '0'
+  `BankRemSlotsTab5` int(11) unsigned NOT NULL default '0',
+  KEY `guildid_key` (`guildid`),
+  KEY `guildid_rank_key` (`guildid`,`rank`),
+  KEY `guid_key` (`guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Guild System';
 
 --
