@@ -54,7 +54,7 @@ void WorldSession::SendNameQueryOpcodeFromDB(uint64 guid)
     uint32 field;
     if(!objmgr.GetPlayerNameByGUID(guid, name))
     {
-        name = LANG_NON_EXIST_CHARACTER;
+        name = objmgr.GetMangosString(LANG_NON_EXIST_CHARACTER,GetSessionLocaleIndex());
         field = 0;
     }
     else

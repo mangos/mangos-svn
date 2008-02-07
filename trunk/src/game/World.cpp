@@ -579,6 +579,12 @@ void World::SetInitialWorldSettings()
         exit(1);
     }
 
+    ///- Loading strings. Getting no records means core load has to be canceled because no error message can be output.
+    sLog.outString( "" );
+    sLog.outString( "Loading MaNGOS strings..." );
+    if (!objmgr.LoadMangosStrings())
+        exit(1);                                            // Error message displayed in function already
+
     ///- Update the realm entry in the database with the realm type from the config file
     //No SQL injection as values are treated as integers
 
@@ -602,12 +608,14 @@ void World::SetInitialWorldSettings()
     objmgr.PackInstances();
 
     sLog.outString( "Loading Localization strings..." );
+    objmgr.LoadMangosStringLocales();
     objmgr.LoadCreatureLocales();
     objmgr.LoadGameObjectLocales();
     objmgr.LoadItemLocales();
     objmgr.LoadQuestLocales();
     objmgr.LoadNpcTextLocales();
     objmgr.LoadPageTextLocales();
+    objmgr.SetDBCLocaleIndex(GetDBClang());                 // Get once for all the locale index of dbc language
 
     sLog.outString( "Loading Game Object Templates..." );
     objmgr.LoadGameobjectInfo();
@@ -616,7 +624,7 @@ void World::SetInitialWorldSettings()
     spellmgr.LoadSpellChains();
 
     sLog.outString( "Loading Spell Learn Skills..." );
-    spellmgr.LoadSpellLearnSkills();                          // must be after LoadSpellChains
+    spellmgr.LoadSpellLearnSkills();                        // must be after LoadSpellChains
 
     sLog.outString( "Loading Spell Learn Spells..." );
     spellmgr.LoadSpellLearnSpells();

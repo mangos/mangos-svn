@@ -271,7 +271,7 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
             if(bidder_security > SEC_PLAYER )               // not do redundant DB requests
             {
                 if(!GetPlayerNameByGUID(bidder_guid,bidder_name))
-                    bidder_name = LANG_UNKNOWN;
+                    bidder_name = GetMangosString(LANG_UNKNOWN);
             }
         }
 
@@ -279,7 +279,7 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
         {
             std::string owner_name;
             if(!GetPlayerNameByGUID(auction->owner,owner_name))
-                owner_name = LANG_UNKNOWN;
+                owner_name = GetMangosString(LANG_UNKNOWN);
 
             uint32 owner_accid = GetPlayerAccountIdByGUID(auction->owner);
 
@@ -5454,4 +5454,110 @@ void ObjectMgr::LoadGameObjectForQuests()
 
     sLog.outString();
     sLog.outString( ">> Loaded %u GameObject for quests", count );
+}
+
+bool ObjectMgr::LoadMangosStrings()
+{
+    QueryResult *result = WorldDatabase.Query("SELECT `entry`,`content_default` FROM `mangos_string`");
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString("");
+        sLog.outErrorDb(">> Loaded 0 mangos strings. DB table `mangos_string` is empty. Cannot continue.");
+        return false;
+    }
+
+    barGoLink bar(result->GetRowCount());
+    uint32 count = 0;
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+        std::string str = fields[1].GetCppString();
+        mMangosStringMap[entry] = str;
+        ++count;
+
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u MaNGOS strings", count );
+    return true;
+}
+
+void ObjectMgr::LoadMangosStringLocales()
+{
+    QueryResult *result = WorldDatabase.Query("SELECT `entry`,`content_loc1`,`content_loc2`,`content_loc3`,`content_loc4`,`content_loc5`,`content_loc6`,`content_loc7` FROM `mangos_string` WHERE "
+        "NOT(`content_loc1` IS NULL AND `content_loc2` IS NULL AND `content_loc3` IS NULL AND `content_loc4` IS NULL AND `content_loc5` IS NULL AND `content_loc6` IS NULL AND `content_loc7` IS NULL)");
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString("");
+        sLog.outString(">> Loaded 0 MaNGOS locale strings. DB table `mangos_string` contains no localization.");
+        return;
+    }
+
+    barGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+
+        MangosStringLocale& data = mMangosStringLocaleMap[entry];
+
+        for(int i = 1; i < 8; ++i)
+        {
+            std::string str = fields[i].GetCppString();
+            if(!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if(idx >= 0)
+                {
+                    if(data.Content.size() <= idx)
+                        data.Content.resize(idx+1);
+
+                    data.Content[idx] = str;
+                }
+            }
+        }
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u MaNGOS locale strings", mMangosStringLocaleMap.size() );
+}
+
+const char *ObjectMgr::GetMangosString(uint32 entry, int locale_idx)
+{
+    const std::string *content;
+    if (locale_idx == -2)
+        locale_idx = DBCLocaleIndex;
+    if (locale_idx >= 0)
+    {
+        MangosStringLocale const *msl = GetMangosStringLocale(entry);
+        if (msl)
+        {
+            if (msl->Content.size() > locale_idx && !msl->Content[locale_idx].empty())
+            {
+                content = &msl->Content[locale_idx];
+                return content->c_str();
+            }
+        }
+    }
+    content = GetMangosStringDefault(entry);
+    return content->c_str();
 }

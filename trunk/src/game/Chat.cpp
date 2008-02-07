@@ -435,6 +435,12 @@ ChatCommand * ChatHandler::getCommandTable()
     return commandTable;
 }
 
+const char *ChatHandler::GetMangosString(uint32 entry)
+{
+    int loc = m_session->GetSessionLocaleIndex();
+    return objmgr.GetMangosString(entry,loc);
+}
+
 bool ChatHandler::hasStringAbbr(const char* s1, const char* s2)
 {
     for(;;)
@@ -487,6 +493,11 @@ void ChatHandler::SendGlobalSysMessage(const char *str)
     sWorld.SendGlobalMessage(&data);
 }
 
+void ChatHandler::SendSysMessage(uint32 entry)
+{
+    SendSysMessage(GetMangosString(entry));
+}
+
 void ChatHandler::SendSysMessage(const char *str)
 {
     WorldPacket data;
@@ -494,11 +505,33 @@ void ChatHandler::SendSysMessage(const char *str)
     m_session->SendPacket(&data);
 }
 
+void ChatHandler::PSendSysMultilineMessage(uint32 entry, ...)
+{
+    const char *format = GetMangosString(entry);
+    va_list ap;
+    char str [1024];
+    va_start(ap, entry);
+    vsnprintf(str,1024,format, ap );
+    va_end(ap);
+    SendSysMultilineMessage(str);
+}
+
 void ChatHandler::PSendSysMultilineMessage(const char *format, ...)
 {
     va_list ap;
     char str [1024];
     va_start(ap, format);
+    vsnprintf(str,1024,format, ap );
+    va_end(ap);
+    SendSysMultilineMessage(str);
+}
+
+void ChatHandler::PSendSysMessage(uint32 entry, ...)
+{
+    const char *format = GetMangosString(entry);
+    va_list ap;
+    char str [1024];
+    va_start(ap, entry);
     vsnprintf(str,1024,format, ap );
     va_end(ap);
     SendSysMultilineMessage(str);

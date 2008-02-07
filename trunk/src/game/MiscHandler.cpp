@@ -545,7 +545,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_ADD_FRIEND"  );
 
-    std::string friendName  = LANG_FRIEND_IGNORE_UNKNOWN;
+    std::string friendName  = objmgr.GetMangosString(LANG_FRIEND_IGNORE_UNKNOWN,GetSessionLocaleIndex());
     uint8 friendResult      = FRIEND_NOT_FOUND;
 
     Player *pFriend     = NULL;
@@ -648,7 +648,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_ADD_IGNORE"  );
 
-    std::string IgnoreName = LANG_FRIEND_IGNORE_UNKNOWN;
+    std::string IgnoreName = objmgr.GetMangosString(LANG_FRIEND_IGNORE_UNKNOWN,GetSessionLocaleIndex());
     unsigned char ignoreResult = FRIEND_IGNORE_NOT_FOUND;
     uint64 IgnoreGuid = 0;
 
@@ -963,7 +963,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             else
             {
                 std::stringstream msgstr;
-                SendAreaTriggerMessage(LANG_LEVEL_MINREQUIRED "%u and have item %s" LANG_LEVEL_MINREQUIRED_END,(uint32)at->requiredLevel,pProto->Name1);
+                SendAreaTriggerMessage(objmgr.GetMangosString(LANG_LEVEL_MINREQUIRED_AND_ITEM,GetSessionLocaleIndex()),(uint32)at->requiredLevel,pProto->Name1);
             }
         }
         else
@@ -972,7 +972,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
                 GetPlayer()->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation,true,false);
             else
             {
-                SendAreaTriggerMessage(LANG_LEVEL_MINREQUIRED "%u" LANG_LEVEL_MINREQUIRED_END,(uint32)at->requiredLevel );
+                SendAreaTriggerMessage(objmgr.GetMangosString(LANG_LEVEL_MINREQUIRED,GetSessionLocaleIndex()),(uint32)at->requiredLevel );
             }
         }
     }

@@ -1454,8 +1454,8 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
         level = plr.getLevel();
     }
 
-    std::string username = LANG_ERROR;
-    std::string last_ip = LANG_ERROR;
+    std::string username = GetMangosString(LANG_ERROR);
+    std::string last_ip = GetMangosString(LANG_ERROR);
     uint32 security = 0;
 
     QueryResult* result = loginDatabase.PQuery("SELECT `username`,`gmlevel`,`last_ip` FROM `account` WHERE `id` = '%u'",accId);
@@ -1472,7 +1472,7 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
         delete result;
     }
 
-    PSendSysMessage(LANG_PINFO_ACCOUNT, (target?"":LANG_OFFLINE), name.c_str(), GUID_LOPART(targetGUID), username.c_str(), accId, security, last_ip.c_str());
+    PSendSysMessage(LANG_PINFO_ACCOUNT, (target?"":GetMangosString(LANG_OFFLINE)), name.c_str(), GUID_LOPART(targetGUID), username.c_str(), accId, security, last_ip.c_str());
 
     std::string timeStr = secsToTimeString(total_player_time,true,true);
     uint32 gold = money /GOLD;
@@ -1511,7 +1511,7 @@ void ChatHandler::ShowTicket(uint64 guid, uint32 category, char const* text)
 {
     std::string name;
     if(!objmgr.GetPlayerNameByGUID(guid,name))
-        name = LANG_UNKNOWN;
+        name = GetMangosString(LANG_UNKNOWN);
 
     PSendSysMessage(LANG_COMMAND_TICKETVIEW, name.c_str(),category,text);
 }
@@ -1527,7 +1527,7 @@ bool ChatHandler::HandleTicketCommand(const char* args)
         QueryResult *result = CharacterDatabase.Query("SELECT `ticket_id` FROM `character_ticket`");
         size_t count = result ? result->GetRowCount() : 0;
 
-        PSendSysMessage(LANG_COMMAND_TICKETCOUNT, count,m_session->GetPlayer()->isAcceptTickets() ?  LANG_ON : LANG_OFF);
+        PSendSysMessage(LANG_COMMAND_TICKETCOUNT, count,m_session->GetPlayer()->isAcceptTickets() ?  GetMangosString(LANG_ON) : GetMangosString(LANG_OFF));
         delete result;
         return true;
     }
@@ -2513,7 +2513,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         else
         {
             PSendSysMessage(LANG_WAYPOINT_NOTHINGTOEXPORT);
-            outfile << LANG_WAYPOINT_NOTHINGTOEXPORT;
+            outfile << GetMangosString(LANG_WAYPOINT_NOTHINGTOEXPORT);
         }
         outfile.close();
 
@@ -3076,7 +3076,7 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     //pGameObj->SetZoneId(chr->GetZoneId());
     pGameObj->SetMapId(chr->GetMapId());
     //pGameObj->SetNameId(id);
-    sLog.outDebug(LANG_GAMEOBJECT_CURRENT, goI->name, lowGUID, x, y, z, o);
+    sLog.outDebug(GetMangosString(LANG_GAMEOBJECT_CURRENT), goI->name, lowGUID, x, y, z, o);
 
     if( spawntimeSecs )
     {

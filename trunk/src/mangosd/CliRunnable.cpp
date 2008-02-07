@@ -170,7 +170,7 @@ void CliDelete(char*command,pPrintf zprintf)
 /// Broadcast a message to the World
 void CliBroadcast(char *text,pPrintf zprintf)
 {
-    std::string str = LANG_SYSTEMMESSAGE;
+    std::string str = objmgr.GetMangosString(LANG_SYSTEMMESSAGE);
     str += text;
     sWorld.SendWorldText(str.c_str(), NULL);
     zprintf("Broadcasting to the world:%s\r\n",str.c_str());
@@ -680,7 +680,7 @@ void CliTele(char*command,pPrintf zprintf)
     QueryResult *result = WorldDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",location.c_str());
     if (!result)
     {
-        zprintf(LANG_COMMAND_TELE_NOTFOUND "\r\n");
+        zprintf(objmgr.GetMangosString(LANG_COMMAND_TELE_NOTFOUND),"\r\n");
         return;
     }
 
@@ -694,7 +694,7 @@ void CliTele(char*command,pPrintf zprintf)
 
     if(!MapManager::IsValidMapCoord(mapid,x,y))
     {
-        zprintf(LANG_INVALID_TARGET_COORD "\r\n",x,y,mapid);
+        zprintf(objmgr.GetMangosString(LANG_INVALID_TARGET_COORD),"\r\n",x,y,mapid);
         return;
     }
 
@@ -704,17 +704,17 @@ void CliTele(char*command,pPrintf zprintf)
 
         if(chr->IsBeingTeleported()==true)
         {
-            zprintf(LANG_IS_TELEPORTED "\r\n",chr->GetName());
+            zprintf(objmgr.GetMangosString(LANG_IS_TELEPORTED),"\r\n",chr->GetName());
             return;
         }
 
         if(chr->isInFlight())
         {
-            zprintf(LANG_CHAR_IN_FLIGHT "\r\n",chr->GetName());
+            zprintf(objmgr.GetMangosString(LANG_CHAR_IN_FLIGHT),"\r\n",chr->GetName());
             return;
         }
 
-        zprintf(LANG_TELEPORTING_TO "\r\n",chr->GetName(),"", location.c_str());
+        zprintf(objmgr.GetMangosString(LANG_TELEPORTING_TO),"\r\n",chr->GetName(),"", location.c_str());
 
         chr->SaveRecallPosition();
 
@@ -722,11 +722,11 @@ void CliTele(char*command,pPrintf zprintf)
     }
     else if (uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str()))
     {
-        zprintf(LANG_TELEPORTING_TO "\r\n",name.c_str(), LANG_OFFLINE, location.c_str());
+        zprintf(objmgr.GetMangosString(LANG_TELEPORTING_TO),"\r\n",name.c_str(), objmgr.GetMangosString(LANG_OFFLINE,sWorld.GetDBClang()), location.c_str());
         Player::SavePositionInDB(mapid,x,y,z,ort,MapManager::Instance().GetZoneId(mapid,x,y),guid);
     }
     else
-        zprintf(LANG_NO_PLAYER "\r\n",name.c_str());
+        zprintf(objmgr.GetMangosString(LANG_NO_PLAYER),"\r\n",name.c_str());
 }
 
 /// Display/Define the 'Message of the day' for the realm

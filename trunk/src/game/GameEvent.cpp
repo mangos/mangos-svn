@@ -368,12 +368,12 @@ void GameEvent::ApplyNewEvent(uint16 event_id)
     switch(sWorld.getConfig(CONFIG_EVENT_ANNOUNCE))
     {
         case 0:                                         // disable
-                break;
+            break;
         case 1:                                         // announce events
-                char str[1024];
-                sprintf(str, LANG_EVENTMESSAGE " %s", mGameEvent[event_id].description.c_str());
-                sWorld.SendWorldText(str, NULL);
-                break;
+            char str[1024];
+            sprintf(str, objmgr.GetMangosString(LANG_EVENTMESSAGE), mGameEvent[event_id].description.c_str());
+            sWorld.SendWorldText(str, NULL);
+            break;
      }
 	
 	sLog.outString("GameEvent %u \"%s\" started.", event_id, mGameEvent[event_id].description.c_str());

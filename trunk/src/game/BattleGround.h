@@ -23,6 +23,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Opcodes.h"
+#include "ObjectMgr.h"
 #include "BattleGroundMgr.h"
 #include "SharedDefines.h"
 
@@ -311,6 +312,7 @@ class BattleGround
         void BlockMovement(Player *plr);
 
         void SendMessageToAll(char const* text);
+        void SendMessageToAll(uint32 entry);
 
         /* Raid Group */
         Group *GetBgRaid(uint32 TeamID) const { return TeamID == ALLIANCE ? m_BgRaids[BG_TEAM_ALLIANCE] : m_BgRaids[BG_TEAM_HORDE]; }
@@ -359,6 +361,7 @@ class BattleGround
         bool AddSpiritGuide(uint32 type, float x, float y, float z, float o, uint32 team);
 
         void DoorOpen(uint32 type);
+        const char *GetMangosString(uint32 entry);
 
     protected:
         //this method is called, when BG cannot spawn its own spirit guide, or something is wrong, It correctly ends BattleGround
