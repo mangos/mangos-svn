@@ -75,7 +75,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         if (!_player->CanSpeak())
         {
             std::string timeStr = secsToTimeString(m_muteTime - time(NULL));
-            SendNotification(LANG_WAIT_BEFORE_SPEAKING,timeStr.c_str());
+            SendNotification(objmgr.GetMangosString(LANG_WAIT_BEFORE_SPEAKING, GetSessionLocaleIndex()),timeStr.c_str());
             return;
         }
 

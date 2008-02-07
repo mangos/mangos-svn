@@ -69,10 +69,15 @@ class ChatHandler
             FillMessageData( data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, 0, message );
         }
 
+        const char *GetMangosString(uint32 entry);
+
         void SendSysMessage(          const char *str);
+        void SendSysMessage(          uint32     entry);
         void SendSysMultilineMessage( const char *str);
         void PSendSysMessage(         const char *format, ...) ATTR_PRINTF(2,3);
+        void PSendSysMessage(         uint32     entry, ...  ) ATTR_PRINTF(2,3);
         void PSendSysMultilineMessage(const char *format, ...) ATTR_PRINTF(2,3);
+        void PSendSysMultilineMessage(uint32     entry, ...  ) ATTR_PRINTF(2,3);
 
         int ParseCommands(const char* text);
 

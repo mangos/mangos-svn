@@ -105,6 +105,13 @@ typedef HM_NAMESPACE::hash_map<uint32/*mapid*/,CellObjectGuidsMap> MapObjectGuid
 
 typedef HM_NAMESPACE::hash_map<uint64/*(instance,guid) pair*/,time_t> RespawnTimes;
 
+struct MangosStringLocale
+{
+    std::vector<std::string> Content;
+};
+
+typedef std::map<uint32,std::string> MangosStringMap;
+
 typedef HM_NAMESPACE::hash_map<uint32,CreatureData> CreatureDataMap;
 typedef HM_NAMESPACE::hash_map<uint32,GameObjectData> GameObjectDataMap;
 typedef HM_NAMESPACE::hash_map<uint32,CreatureLocale> CreatureLocaleMap;
@@ -113,6 +120,7 @@ typedef HM_NAMESPACE::hash_map<uint32,ItemLocale> ItemLocaleMap;
 typedef HM_NAMESPACE::hash_map<uint32,QuestLocale> QuestLocaleMap;
 typedef HM_NAMESPACE::hash_map<uint32,NpcTextLocale> NpcTextLocaleMap;
 typedef HM_NAMESPACE::hash_map<uint32,PageTextLocale> PageTextLocaleMap;
+typedef HM_NAMESPACE::hash_map<uint32,MangosStringLocale> MangosStringLocaleMap;
 
 typedef std::multimap<uint32,uint32> QuestRelations;
 
@@ -395,6 +403,8 @@ class ObjectMgr
         void LoadQuestStartScripts();
         void LoadSpellScripts();
 
+        bool LoadMangosStrings();
+        void LoadMangosStringLocales();
         void LoadPetCreateSpells();
         void LoadCreatureLocales();
         void LoadCreatureTemplates();
@@ -537,6 +547,21 @@ class ObjectMgr
         GameObjectData& NewGOData(uint32 guid) { return mGameObjectDataMap[guid]; }
         void DeleteGOData(uint32 guid);
 
+        std::string const* GetMangosStringDefault(uint32 entry) const
+        {
+            MangosStringMap::const_iterator itr = mMangosStringMap.find(entry);
+            if(itr==mMangosStringMap.end()) return NULL;
+            return &itr->second;
+        }
+        MangosStringLocale const* GetMangosStringLocale(uint32 entry) const
+        {
+            MangosStringLocaleMap::const_iterator itr = mMangosStringLocaleMap.find(entry);
+            if(itr==mMangosStringLocaleMap.end()) return NULL;
+            return &itr->second;
+        }
+        const char *GetMangosString(uint32 entry, int locale_idx = -2);
+        void SetDBCLocaleIndex(uint32 lang) { DBCLocaleIndex = GetIndexForLocale(LocaleConstant(lang)); }
+
         void AddCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid, uint32 instance);
         void DeleteCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid);
 
@@ -628,6 +653,8 @@ class ObjectMgr
         typedef             std::vector<LocaleConstant> LocalToIndex;
         LocalToIndex        m_LocalToIndex;
         int GetOrNewIndexForLocale(LocaleConstant loc);
+
+        int DBCLocaleIndex;
     private:
         void LoadScripts(ScriptMapMap& scripts, char const* tablename);
         void ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* table, char const* guidEntryStr);
@@ -655,6 +682,8 @@ class ObjectMgr
         QuestLocaleMap mQuestLocaleMap;
         NpcTextLocaleMap mNpcTextLocaleMap;
         PageTextLocaleMap mPageTextLocaleMap;
+        MangosStringMap mMangosStringMap;
+        MangosStringLocaleMap mMangosStringLocaleMap;
         RespawnTimes mCreatureRespawnTimes;
         RespawnTimes mGORespawnTimes;
 

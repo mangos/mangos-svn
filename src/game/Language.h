@@ -16,61 +16,515 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-// for chat commands
-#define LANG_SELECT_CHAR_OR_CREATURE     "You should select a character or a creature."
-#define LANG_SELECT_CREATURE             "You should select a creature."
+enum MangosStrings
+{
+    // for chat commands
+    LANG_SELECT_CHAR_OR_CREATURE        = 1,
+    LANG_SELECT_CREATURE                = 2,
 
-// level 0 chat
-#define LANG_SYSTEMMESSAGE               "|cffff0000[System Message]:|r"
-#define LANG_EVENTMESSAGE                "|cffff0000[Event Message]:|r"
-#define LANG_NO_HELP_CMD                 "There is no help for that command"
-#define LANG_NO_CMD                      "There is no such command"
-#define LANG_NO_SUBCMD                   "There is no such subcommand"
-#define LANG_SUBCMDS_LIST                "Command %s have subcommands:%s"
-#define LANG_AVIABLE_CMD                 "Commands available to you:"
-#define LANG_CMD_SYNTAX                  "Incorrect syntax."
-#define LANG_ACCOUNT_LEVEL               "Your account level is: %i"
-#define LANG_CONNECTED_USERS             "Number of users connected: %u (max since last restart: %u)"
-#define LANG_UPTIME                      "Server uptime: %s"
-#define LANG_PLAYER_SAVED                "Player saved."
-#define LANG_PLAYERS_SAVED               "All players saved."
-#define LANG_GMS_ON_SRV                  "There are the following active GMs on this server:"
-#define LANG_GMS_NOT_LOGGED              "There are no GMs currently logged in on this server."
-#define LANG_YOU_IN_FLIGHT               "Cannot do that while flying."
-#define LANG_YOU_IN_BATTLEGROUND         "Cannot do that in Battlegrounds."
-#define LANG_TARGET_IN_FLIGHT            "Target is flying you can't do that."
-#define LANG_CHAR_IN_FLIGHT              "%s is flying command failed."
-#define LANG_CHAR_NON_MOUNTED            "You are not mounted so you can't dismount."
-#define LANG_YOU_IN_COMBAT               "Cannot do that while fighting."
-#define LANG_YOU_USED_IT_RECENTLY        "You used it recently."
-#define LANG_COMMAND_NOTCHANGEPASSWORD   "Your password can't be longer than 16 characters (client limit), password not changed!"
-#define LANG_COMMAND_PASSWORD            "The password was changed"
-#define LANG_COMMAND_WRONGOLDPASSWORD    "The new passwords do not match or the old password is wrong"
-#define LANG_COMMAND_ACCLOCKLOCKED       "Your account is now locked."
-#define LANG_COMMAND_ACCLOCKUNLOCKED     "Your account is now unlocked."
-#define LANG_SPELL_RANK                  ", rank "
-#define LANG_KNOWN                       " [known]"
-#define LANG_LEARN                       " [learn]"
-#define LANG_PASSIVE                     " [passive]"
-#define LANG_TALENT                      " [talent]"
-#define LANG_ACTIVE                      " [active]"
-#define LANG_COMPLETE                    " [complete]"
-#define LANG_OFFLINE                     " (offline)"
-#define LANG_ON                          "on"
-#define LANG_OFF                         "off"
-#define LANG_YOU_ARE                     "You are: %s"
-#define LANG_VISIBLE                     "visible"
-#define LANG_INVISIBLE                   "invisible"
-#define LANG_DONE                        "done"
-#define LANG_YOU                         "You"
-#define LANG_UNKNOWN                     " <unknown> "
-#define LANG_ERROR                       "<error>"
-#define LANG_NON_EXIST_CHARACTER         "<non-existing character>"
-#define LANG_FRIEND_IGNORE_UNKNOWN       "UNKNOWN"
-#define LANG_LEVEL_MINREQUIRED           "You must be at least level "
-#define LANG_LEVEL_MINREQUIRED_END       " to enter."
-#define LANG_NPC_TAINER_HELO             "Hello! Ready for some training?"
+    // level 0 chat
+    LANG_SYSTEMMESSAGE                  = 3,
+    LANG_EVENTMESSAGE                   = 4,
+    LANG_NO_HELP_CMD                    = 5,
+    LANG_NO_CMD                         = 6,
+    LANG_NO_SUBCMD                      = 7,
+    LANG_SUBCMDS_LIST                   = 8,
+    LANG_AVIABLE_CMD                    = 9,
+    LANG_CMD_SYNTAX                     = 10,
+    LANG_ACCOUNT_LEVEL                  = 11,
+    LANG_CONNECTED_USERS                = 12,
+    LANG_UPTIME                         = 13,
+    LANG_PLAYER_SAVED                   = 14,
+    LANG_PLAYERS_SAVED                  = 15,
+    LANG_GMS_ON_SRV                     = 16,
+    LANG_GMS_NOT_LOGGED                 = 17,
+    LANG_YOU_IN_FLIGHT                  = 18,
+    LANG_YOU_IN_BATTLEGROUND            = 19,
+    LANG_TARGET_IN_FLIGHT               = 20,
+    LANG_CHAR_IN_FLIGHT                 = 21,
+    LANG_CHAR_NON_MOUNTED               = 22,
+    LANG_YOU_IN_COMBAT                  = 23,
+    LANG_YOU_USED_IT_RECENTLY           = 24,
+    LANG_COMMAND_NOTCHANGEPASSWORD      = 25,
+    LANG_COMMAND_PASSWORD               = 26,
+    LANG_COMMAND_WRONGOLDPASSWORD       = 27,
+    LANG_COMMAND_ACCLOCKLOCKED          = 28,
+    LANG_COMMAND_ACCLOCKUNLOCKED        = 29,
+    LANG_SPELL_RANK                     = 30,
+    LANG_KNOWN                          = 31,
+    LANG_LEARN                          = 32,
+    LANG_PASSIVE                        = 33,
+    LANG_TALENT                         = 34,
+    LANG_ACTIVE                         = 35,
+    LANG_COMPLETE                       = 36,
+    LANG_OFFLINE                        = 37,
+    LANG_ON                             = 38,
+    LANG_OFF                            = 39,
+    LANG_YOU_ARE                        = 40,
+    LANG_VISIBLE                        = 41,
+    LANG_INVISIBLE                      = 42,
+    LANG_DONE                           = 43,
+    LANG_YOU                            = 44,
+    LANG_UNKNOWN                        = 45,
+    LANG_ERROR                          = 46,
+    LANG_NON_EXIST_CHARACTER            = 47,
+    LANG_FRIEND_IGNORE_UNKNOWN          = 48,
+    LANG_LEVEL_MINREQUIRED              = 49,
+    LANG_LEVEL_MINREQUIRED_AND_ITEM     = 50,
+    LANG_NPC_TAINER_HELLO               = 51,
+// Room for more level 0
 
+    // level 1 chat
+    LANG_GLOBAL_NOTIFY                  = 100,
+    LANG_MAP_POSITION                   = 101,
+    LANG_IS_TELEPORTED                  = 102,
+    LANG_CANNOT_SUMMON_TO_INST          = 103,
+    LANG_CANNOT_GO_TO_INST_PARTY        = 104,
+    LANG_CANNOT_GO_TO_INST_GM           = 105,
+    LANG_CANNOT_GO_INST_INST            = 106,
+    LANG_CANNOT_SUMMON_INST_INST        = 107,
+
+    LANG_SUMMONING                      = 108,
+    LANG_SUMMONED_BY                    = 109,
+    LANG_TELEPORTING_TO                 = 110,
+    LANG_TELEPORTED_TO_BY               = 111,
+    LANG_NO_PLAYER                      = 112,
+    LANG_APPEARING_AT                   = 113,
+    LANG_APPEARING_TO                   = 114,
+
+    LANG_BAD_VALUE                      = 115,
+    LANG_NO_CHAR_SELECTED               = 116,
+    LANG_NOT_IN_GROUP                   = 117,
+
+    LANG_YOU_CHANGE_HP                  = 118,
+    LANG_YOURS_HP_CHANGED               = 119,
+    LANG_YOU_CHANGE_MANA                = 120,
+    LANG_YOURS_MANA_CHANGED             = 121,
+    LANG_YOU_CHANGE_ENERGY              = 122,
+    LANG_YOURS_ENERGY_CHANGED           = 123,
+
+    LANG_CURRENT_ENERGY                 = 124,          //log
+    LANG_YOU_CHANGE_RAGE                = 125,
+    LANG_YOURS_RAGE_CHANGED             = 126,
+    LANG_YOU_CHANGE_LVL                 = 127,
+    LANG_CURRENT_FACTION                = 128,
+    LANG_WRONG_FACTION                  = 129,
+    LANG_YOU_CHANGE_FACTION             = 130,
+    LANG_YOU_CHANGE_SPELLFLATID         = 131,
+    LANG_YOURS_SPELLFLATID_CHANGED      = 132,
+    LANG_YOU_GIVE_TAXIS                 = 133,
+    LANG_YOU_REMOVE_TAXIS               = 134,
+    LANG_YOURS_TAXIS_ADDED              = 135,
+    LANG_YOURS_TAXIS_REMOVED            = 136,
+
+    LANG_YOU_CHANGE_ASPEED              = 137,
+    LANG_YOURS_ASPEED_CHANGED           = 138,
+    LANG_YOU_CHANGE_SPEED               = 139,
+    LANG_YOURS_SPEED_CHANGED            = 140,
+    LANG_YOU_CHANGE_SWIM_SPEED          = 141,
+    LANG_YOURS_SWIM_SPEED_CHANGED       = 142,
+    LANG_YOU_CHANGE_BACK_SPEED          = 143,
+    LANG_YOURS_BACK_SPEED_CHANGED       = 144,
+    LANG_YOU_CHANGE_FLY_SPEED           = 145,
+    LANG_YOURS_FLY_SPEED_CHANGED        = 146,
+
+    LANG_YOU_CHANGE_SIZE                = 147,
+    LANG_YOURS_SIZE_CHANGED             = 148,
+    LANG_NO_MOUNT                       = 149,
+    LANG_YOU_GIVE_MOUNT                 = 150,
+    LANG_MOUNT_GIVED                    = 151,
+
+    LANG_CURRENT_MONEY                  = 152,
+    LANG_YOU_TAKE_ALL_MONEY             = 153,
+    LANG_YOURS_ALL_MONEY_GONE           = 154,
+    LANG_YOU_TAKE_MONEY                 = 155,
+    LANG_YOURS_MONEY_TAKEN              = 156,
+    LANG_YOU_GIVE_MONEY                 = 157,
+    LANG_YOURS_MONEY_GIVEN              = 158,
+    LANG_YOU_HEAR_SOUND                 = 159,
+
+    LANG_NEW_MONEY                      = 160,          // Log
+
+    LANG_REMOVE_BIT                     = 161,
+    LANG_SET_BIT                        = 162,
+    LANG_COMMAND_TELE_TABLEEMPTY        = 163,
+    LANG_COMMAND_TELE_NOTFOUND          = 164,
+    LANG_COMMAND_TELE_PARAMETER         = 165,
+    LANG_COMMAND_TELE_NOREQUEST         = 166,
+    LANG_COMMAND_TELE_NOLOCATION        = 167,
+    LANG_COMMAND_TELE_LOCATION          = 168,
+
+    LANG_MAIL_SENT                      = 169,
+// Room for more level 1
+
+    // level 2 chat
+    LANG_NO_SELECTION                   = 200,
+    LANG_OBJECT_GUID                    = 201,
+    LANG_TOO_LONG_NAME                  = 202,
+    LANG_CHARS_ONLY                     = 203,
+    LANG_TOO_LONG_SUBNAME               = 204,
+    LANG_NOT_IMPLEMENTED                = 205,
+                                                            
+    LANG_ITEM_ADDED_TO_LIST             = 206,
+    LANG_ITEM_NOT_FOUND                 = 207,
+    LANG_ITEM_DELETED_FROM_LIST         = 208,
+    LANG_ITEM_NOT_IN_LIST               = 209,
+    LANG_ITEM_ALREADY_IN_LIST           = 210,
+
+    LANG_RESET_SPELLS_ONLINE            = 211,
+    LANG_RESET_SPELLS_OFFLINE           = 212,
+    LANG_RESET_TALENTS_ONLINE           = 213,
+    LANG_RESET_TALENTS_OFFLINE          = 214,
+    LANG_RESET_SPELLS                   = 215,
+    LANG_RESET_TALENTS                  = 216,
+
+    LANG_RESETALL_UNKNOWN_CASE          = 217,
+    LANG_RESETALL_SPELLS                = 218,
+    LANG_RESETALL_TALENTS               = 219,
+
+    LANG_WAYPOINT_NOTFOUND              = 220,
+    LANG_WAYPOINT_NOTFOUNDLAST          = 221,
+    LANG_WAYPOINT_NOTFOUNDSEARCH        = 222,
+    LANG_WAYPOINT_NOTFOUNDDBPROBLEM     = 223,
+    LANG_WAYPOINT_CREATSELECTED         = 224,
+    LANG_WAYPOINT_CREATNOTFOUND         = 225,
+    LANG_WAYPOINT_VP_SELECT             = 226,
+    LANG_WAYPOINT_VP_NOTFOUND           = 227,
+    LANG_WAYPOINT_VP_NOTCREATED         = 228,
+    LANG_WAYPOINT_VP_ALLREMOVED         = 229,
+    LANG_WAYPOINT_NOTCREATED            = 230,
+    LANG_WAYPOINT_NOGUID                = 231,
+    LANG_WAYPOINT_NOWAYPOINTGIVEN       = 232,
+    LANG_WAYPOINT_ARGUMENTREQ           = 233,
+    LANG_WAYPOINT_ADDED                 = 234,
+    LANG_WAYPOINT_ADDED_NO              = 235,
+    LANG_WAYPOINT_CHANGED               = 236,
+    LANG_WAYPOINT_CHANGED_NO            = 237,
+    LANG_WAYPOINT_EXPORTED              = 238,
+    LANG_WAYPOINT_NOTHINGTOEXPORT       = 239,
+    LANG_WAYPOINT_IMPORTED              = 240,
+    LANG_WAYPOINT_REMOVED               = 241,
+    LANG_WAYPOINT_NOTREMOVED            = 242,
+    LANG_WAYPOINT_TOOFAR1               = 243,
+    LANG_WAYPOINT_TOOFAR2               = 244,
+    LANG_WAYPOINT_TOOFAR3               = 245,
+    LANG_WAYPOINT_INFO_TITLE            = 246,
+    LANG_WAYPOINT_INFO_WAITTIME         = 247,
+    LANG_WAYPOINT_INFO_MODEL            = 248,
+    LANG_WAYPOINT_INFO_EMOTE            = 249,
+    LANG_WAYPOINT_INFO_SPELL            = 250,
+    LANG_WAYPOINT_INFO_TEXT             = 251,
+    LANG_WAYPOINT_INFO_AISCRIPT         = 252,
+
+    LANG_RENAME_PLAYER                  = 253,
+    LANG_RENAME_PLAYER_GUID             = 254,
+
+    LANG_WAYPOINT_WPCREATNOTFOUND       = 255,
+    LANG_WAYPOINT_NPCNOTFOUND           = 256,
+
+    LANG_MOVE_TYPE_SET                  = 257,
+    LANG_MOVE_TYPE_SET_NODEL            = 258,
+    LANG_USE_BOL                        = 259,
+    LANG_VALUE_SAVED                    = 260,
+    LANG_VALUE_SAVED_REJOIN             = 261,
+
+    LANG_COMMAND_GOAREATRNOTFOUND       = 262,
+    LANG_INVALID_TARGET_COORD           = 263,
+    LANG_INVALID_ZONE_COORD             = 264,
+    LANG_INVALID_ZONE_MAP               = 265,
+    LANG_COMMAND_TARGETOBJNOTFOUND      = 266,
+    LANG_COMMAND_GOOBJNOTFOUND          = 267,
+    LANG_COMMAND_GOCREATNOTFOUND        = 268,
+    LANG_COMMAND_GOCREATMULTIPLE        = 269,
+    LANG_COMMAND_DELCREATMESSAGE        = 270,
+    LANG_COMMAND_CREATUREMOVED          = 271,
+    LANG_COMMAND_CREATUREATSAMEMAP      = 272,
+    LANG_COMMAND_OBJNOTFOUND            = 273,
+    LANG_COMMAND_DELOBJREFERCREATURE    = 274,
+    LANG_COMMAND_DELOBJMESSAGE          = 275,
+    LANG_COMMAND_TURNOBJMESSAGE         = 276,
+    LANG_COMMAND_MOVEOBJMESSAGE         = 277,
+    LANG_COMMAND_VENDORSELECTION        = 278,
+    LANG_COMMAND_ADDVENDORITEMSEND      = 279,
+    LANG_COMMAND_ADDVENDORITEMITEMS     = 280,
+    LANG_COMMAND_KICKSELF               = 281,
+    LANG_COMMAND_KICKMESSAGE            = 282,
+    LANG_COMMAND_KICKNOTFOUNDPLAYER     = 283,
+    LANG_COMMAND_WHISPERACCEPTING       = 284,
+    LANG_COMMAND_WHISPERON              = 285,
+    LANG_COMMAND_WHISPEROFF             = 286,
+    LANG_COMMAND_CREATGUIDNOTFOUND      = 287,
+    LANG_COMMAND_TICKETCOUNT            = 288,
+    LANG_COMMAND_TICKETNEW              = 289,
+    LANG_COMMAND_TICKETVIEW             = 290,
+    LANG_COMMAND_TICKETON               = 291,
+    LANG_COMMAND_TICKETOFF              = 292,
+    LANG_COMMAND_TICKENOTEXIST          = 293,
+    LANG_COMMAND_ALLTICKETDELETED       = 294,
+    LANG_COMMAND_TICKETPLAYERDEL        = 295,
+    LANG_COMMAND_TICKETDEL              = 296,
+    LANG_COMMAND_SPAWNDIST              = 297,
+    LANG_COMMAND_SPAWNTIME              = 298,
+    LANG_COMMAND_MODIFY_HONOR           = 299,
+
+    LANG_YOUR_CHAT_DISABLED             = 300,
+    LANG_YOU_DISABLE_CHAT               = 301,
+    LANG_CHAT_ALREADY_ENABLED           = 302,
+    LANG_YOUR_CHAT_ENABLED              = 303,
+    LANG_YOU_ENABLE_CHAT                = 304,
+// Room for more level 2
+
+    // level 3 chat
+    LANG_SCRIPTS_RELOADED               = 400,
+    LANG_YOU_CHANGE_SECURITY            = 401,
+    LANG_YOURS_SECURITY_CHANGED         = 402,
+    LANG_YOURS_SECURITY_IS_LOW          = 403,
+    LANG_CREATURE_MOVE_DISABLED         = 404,
+    LANG_CREATURE_MOVE_ENABLED          = 405,
+    LANG_NO_WEATHER                     = 406,
+    LANG_WEATHER_DISABLED               = 407,
+
+    LANG_BAN_YOUBANNED                  = 408,
+    LANG_BAN_YOUPERMBANNED              = 409,
+    LANG_BAN_NOTFOUND                   = 410,
+
+    LANG_UNBAN_UNBANNED                 = 411,
+    LANG_UNBAN_ERROR                    = 412,
+
+    LANG_BANINFO_NOACCOUNT              = 413,
+    LANG_BANINFO_NOCHARACTER            = 414,
+    LANG_BANINFO_NOIP                   = 415,
+    LANG_BANINFO_NOACCOUNTBAN           = 416,
+    LANG_BANINFO_BANHISTORY             = 417,
+    LANG_BANINFO_HISTORYENTRY           = 418,
+    LANG_BANINFO_INFINITE               = 419,
+    LANG_BANINFO_NEVER                  = 420,
+    LANG_BANINFO_YES                    = 421,
+    LANG_BANINFO_NO                     = 422,
+    LANG_BANINFO_IPENTRY                = 423,
+
+    LANG_BANLIST_NOIP                   = 424,
+    LANG_BANLIST_NOACCOUNT              = 425,
+    LANG_BANLIST_NOCHARACTER            = 426,
+    LANG_BANLIST_MATCHINGIP             = 427,
+    LANG_BANLIST_MATCHINGACCOUNT        = 428,
+
+    LANG_COMMAND_LEARN_MANY_SPELLS      = 429,
+    LANG_COMMAND_LEARN_CLASS_SPELLS     = 430,
+    LANG_COMMAND_LEARN_CLASS_TALENTS    = 431,
+    LANG_COMMAND_LEARN_ALL_LANG         = 432,
+    LANG_COMMAND_LEARN_ALL_CRAFT        = 433,
+    LANG_COMMAND_ADDITEMCOULDNOTFIND    = 434,
+    LANG_COMMAND_ITEMIDINVALID          = 435,
+    LANG_COMMAND_NOITEMFOUND            = 436,
+    LANG_COMMAND_LISTOBJINVALIDID       = 437,
+    LANG_COMMAND_LISTITEMMESSAGE        = 438,
+    LANG_COMMAND_LISTOBJMESSAGE         = 439,
+    LANG_COMMAND_INVALIDCREATUREID      = 440,
+    LANG_COMMAND_LISTCREATUREMESSAGE    = 441,
+    LANG_COMMAND_NOAREAFOUND            = 442,
+    LANG_COMMAND_NOITEMSETFOUND         = 443,
+    LANG_COMMAND_NOSKILLFOUND           = 444,
+    LANG_COMMAND_NOSPELLFOUND           = 445,
+    LANG_COMMAND_NOQUESTFOUND           = 446,
+    LANG_COMMAND_NOCREATUREFOUND        = 447,
+    LANG_COMMAND_NOGAMEOBJECTFOUND      = 448,
+    LANG_COMMAND_GRAVEYARDNOEXIST       = 449,
+    LANG_COMMAND_GRAVEYARDALRLINKED     = 450,
+    LANG_COMMAND_GRAVEYARDLINKED        = 451,
+    LANG_COMMAND_GRAVEYARDWRONGZONE     = 452,
+    LANG_COMMAND_GRAVEYARDWRONGTEAM     = 453,
+    LANG_COMMAND_GRAVEYARDERROR         = 454,
+    LANG_COMMAND_GRAVEYARD_NOTEAM       = 455,
+    LANG_COMMAND_GRAVEYARD_ANY          = 456,
+    LANG_COMMAND_GRAVEYARD_ALLIANCE     = 457,
+    LANG_COMMAND_GRAVEYARD_HORDE        = 458,
+    LANG_COMMAND_GRAVEYARDNEAREST       = 459,
+    LANG_COMMAND_ZONENOGRAVEYARDS       = 460,
+    LANG_COMMAND_ZONENOGRAFACTION       = 461,
+    LANG_COMMAND_TP_ALREADYEXIST        = 462,
+    LANG_COMMAND_TP_ADDED               = 463,
+    LANG_COMMAND_TP_ADDEDERR            = 464,
+    LANG_COMMAND_TP_DELETED             = 465,
+    LANG_COMMAND_TP_DELETEERR           = 466,
+
+    LANG_COMMAND_TARGET_LISTAURAS       = 467,
+    LANG_COMMAND_TARGET_AURADETAIL      = 468,
+    LANG_COMMAND_TARGET_LISTAURATYPE    = 469,
+    LANG_COMMAND_TARGET_AURASIMPLE      = 470,
+
+    LANG_COMMAND_QUEST_NOTFOUND         = 471,
+    LANG_COMMAND_QUEST_STARTFROMITEM    = 472,
+    LANG_COMMAND_QUEST_REMOVED          = 473,
+    LANG_COMMAND_QUEST_REWARDED         = 474,
+    LANG_COMMAND_QUEST_COMPLETE         = 475,
+    LANG_COMMAND_QUEST_ACTIVE           = 476,
+
+    LANG_COMMAND_FLYMODE_STATUS         = 477,
+
+    LANG_COMMAND_OPCODESENT             = 478,
+
+    LANG_COMMAND_IMPORT_SUCCESS         = 479,
+    LANG_COMMAND_IMPORT_FAILED          = 480,
+    LANG_COMMAND_EXPORT_SUCCESS         = 481,
+    LANG_COMMAND_EXPORT_FAILED          = 482,
+
+    LANG_COMMAND_SPELL_BROKEN           = 483,
+
+    LANG_SET_SKILL                      = 484,
+    LANG_SET_SKILL_ERROR                = 485,
+
+    LANG_INVALID_SKILL_ID               = 486,
+    LANG_LEARNING_GM_SKILLS             = 487,
+    LANG_YOU_KNOWN_SPELL                = 488,
+    LANG_TARGET_KNOWN_SPELL             = 489,
+    LANG_UNKNOWN_SPELL                  = 490,
+    LANG_FORGET_SPELL                   = 491,
+    LANG_REMOVEALL_COOLDOWN             = 492,
+    LANG_REMOVE_COOLDOWN                = 493,
+                                                            
+    LANG_ADDITEM                        = 494,          //log
+    LANG_ADDITEMSET                     = 495,          //log
+    LANG_REMOVEITEM                     = 496,
+    LANG_ITEM_CANNOT_CREATE             = 497,
+    LANG_INSERT_GUILD_NAME              = 498,
+    LANG_PLAYER_NOT_FOUND               = 499,
+    LANG_PLAYER_IN_GUILD                = 500,
+    LANG_GUILD_NOT_CREATED              = 501,
+    LANG_NO_ITEMS_FROM_ITEMSET_FOUND    = 502,
+
+    LANG_DISTANCE                       = 503,
+
+    LANG_ITEM_SLOT                      = 504,
+    LANG_ITEM_SLOT_NOT_EXIST            = 505,
+    LANG_ITEM_ADDED_TO_SLOT             = 506,
+    LANG_ITEM_SAVE_FAILED               = 507,
+    LANG_ITEMLIST_SLOT                  = 508,
+    LANG_ITEMLIST_MAIL                  = 509,
+    LANG_ITEMLIST_AUCTION               = 510,
+
+    LANG_WRONG_LINK_TYPE                = 511,
+    LANG_ITEM_LIST                      = 512,
+    LANG_QUEST_LIST                     = 513,
+    LANG_CREATURE_ENTRY_LIST            = 514,
+    LANG_CREATURE_LIST                  = 515,
+    LANG_GO_ENTRY_LIST                  = 516,
+    LANG_GO_LIST                        = 517,
+    LANG_ITEMSET_LIST                   = 518,
+    LANG_TELE_LIST                      = 519,
+    LANG_SPELL_LIST                     = 520,
+    LANG_SKILL_LIST                     = 521,
+
+    LANG_GAMEOBJECT_NOT_EXIST           = 522,
+
+    LANG_GAMEOBJECT_CURRENT             = 523,          //log
+    LANG_GAMEOBJECT_DETAIL              = 524,
+    LANG_GAMEOBJECT_ADD                 = 525,
+
+    LANG_MOVEGENS_LIST                  = 526,
+    LANG_MOVEGENS_IDLE                  = 527,
+    LANG_MOVEGENS_RANDOM                = 528,
+    LANG_MOVEGENS_WAYPOINT              = 529,
+    LANG_MOVEGENS_ANIMAL_RANDOM         = 530,
+    LANG_MOVEGENS_CONFUSED              = 531,
+    LANG_MOVEGENS_TARGETED_PLAYER       = 532,
+    LANG_MOVEGENS_TARGETED_CREATURE     = 533,
+    LANG_MOVEGENS_TARGETED_NULL         = 534,
+    LANG_MOVEGENS_HOME_CREATURE         = 535,
+    LANG_MOVEGENS_HOME_PLAYER           = 536,
+    LANG_MOVEGENS_FLIGHT                = 537,
+    LANG_MOVEGENS_UNKNOWN               = 538,
+
+    LANG_NPCINFO_CHAR                   = 539,
+    LANG_NPCINFO_LEVEL                  = 540,
+    LANG_NPCINFO_HEALTH                 = 541,
+    LANG_NPCINFO_FLAGS                  = 542,
+    LANG_NPCINFO_LOOT                   = 543,
+    LANG_NPCINFO_POSITION               = 544,
+    LANG_NPCINFO_VENDOR                 = 545,
+    LANG_NPCINFO_TRAINER                = 546,
+    LANG_NPCINFO_DUNGEON_ID             = 547,
+
+    LANG_PINFO_ACCOUNT                  = 548,
+    LANG_PINFO_LEVEL                    = 549,
+    LANG_PINFO_NO_REP                   = 550,
+
+    LANG_YOU_SET_EXPLORE_ALL            = 551,
+    LANG_YOU_SET_EXPLORE_NOTHING        = 552,
+    LANG_YOURS_EXPLORE_SET_ALL          = 553,
+    LANG_YOURS_EXPLORE_SET_NOTHING      = 554,
+
+    LANG_HOVER_ENABLED                  = 555,
+    LANG_HOVER_DISABLED                 = 556,
+    LANG_YOURS_LEVEL_UP                 = 557,
+    LANG_YOURS_LEVEL_DOWN               = 558,
+    LANG_YOURS_LEVEL_PROGRESS_RESET     = 559,
+    LANG_EXPLORE_AREA                   = 560,
+    LANG_UNEXPLORE_AREA                 = 561,
+
+    LANG_UPDATE                         = 562,
+    LANG_UPDATE_CHANGE                  = 563,
+    LANG_TOO_BIG_INDEX                  = 564,
+    LANG_SET_UINT                       = 565,          //log
+    LANG_SET_UINT_FIELD                 = 566,
+    LANG_SET_FLOAT                      = 567,          //log
+    LANG_SET_FLOAT_FIELD                = 568,
+    LANG_GET_UINT                       = 569,          //log
+    LANG_GET_UINT_FIELD                 = 570,
+    LANG_GET_FLOAT                      = 571,          //log
+    LANG_GET_FLOAT_FIELD                = 572,
+    LANG_SET_32BIT                      = 573,          //log
+    LANG_SET_32BIT_FIELD                = 574,
+    LANG_CHANGE_32BIT                   = 575,          //log
+    LANG_CHANGE_32BIT_FIELD             = 576,
+
+    LANG_INVISIBLE_INVISIBLE            = 577,
+    LANG_INVISIBLE_VISIBLE              = 578,
+
+    // Battleground
+    LANG_BG_A_WINS                      = 600,
+    LANG_BG_H_WINS                      = 601,
+    LANG_BG_WS_ONE_MINUTE               = 602,
+    LANG_BG_WS_HALF_MINUTE              = 603,
+    LANG_BG_WS_BEGIN                    = 604,
+
+    LANG_BG_WS_CAPTURED_HF              = 605,
+    LANG_BG_WS_CAPTURED_AF              = 606,
+    LANG_BG_WS_DROPPED_HF               = 607,
+    LANG_BG_WS_DROPPED_AF               = 608,
+    LANG_BG_WS_RETURNED_AF              = 609,
+    LANG_BG_WS_RETURNED_HF              = 610,
+    LANG_BG_WS_PICKEDUP_HF              = 611,
+    LANG_BG_WS_PICKEDUP_AF              = 612,
+    LANG_BG_WS_F_PLACED                 = 613,
+
+    LANG_BG_AB_ALLY                     = 650,
+    LANG_BG_AB_HORDE                    = 651,
+    LANG_BG_AB_NODE_STABLES             = 652,
+    LANG_BG_AB_NODE_BLACKSMITH          = 653,
+    LANG_BG_AB_NODE_FARM                = 654,
+    LANG_BG_AB_NODE_LUMBER_MILL         = 655,
+    LANG_BG_AB_NODE_GOLD_MINE           = 656,
+    LANG_BG_AB_NODE_TAKEN               = 657,
+    LANG_BG_AB_NODE_DEFENDED            = 658,
+    LANG_BG_AB_NODE_ASSAULTED           = 659,
+    LANG_BG_AB_NODE_CLAIMED             = 660,
+    LANG_BG_AB_ONEMINTOSTART            = 661,
+    LANG_BG_AB_HALFMINTOSTART           = 662,
+    LANG_BG_AB_STARTED                  = 663,
+    LANG_BG_AB_A_NEAR_VICTORY           = 664,
+    LANG_BG_AB_H_NEAR_VICTORY           = 665,
+
+    LANG_ARENA_ONE_TOOLOW               = 700,
+    LANG_ARENA_ONE_MINUTE               = 701,
+    LANG_ARENA_THIRTY_SECONDS           = 702,
+    LANG_ARENA_FIFTEEN_SECONDS          = 703,
+    LANG_ARENA_BEGUN                    = 704,
+
+    LANG_WAIT_BEFORE_SPEAKING           = 705,
+};
+
+/*  NOT USED VALUES
 // alliance ranks
 #define LANG_ALI_PRIVATE                 "Private "
 #define LANG_ALI_CORPORAL                "Corporal "
@@ -113,465 +567,15 @@
 #define LANG_HONOR_LAST_WEEK             "Last week: [Kills: |c0000ff00%u|r] [Honor: %u] [Standing: %u]"
 #define LANG_HONOR_LIFE                  "Lifetime: [Honorable kills: |c0000ff00%u|r] [Dishonorable kills: |c00ff0000%u|r] [Highest rank %u: %s]"
 
-// level 1 chat
-#define LANG_GLOBAL_NOTIFY               "Global notify:\n"
-#define LANG_MAP_POSITION                "Map: %u (%s) Zone: %u (%s) Area: %u (%s)\nX: %f Y: %f Z: %f Orientation: %f\ngrid[%u,%u]cell[%u,%u] InstanceID: %u\n ZoneX: %f ZoneY: %f\nGroundZ: %f FloorZ: %f Have height data (Map: %u VMap: %u)"
-#define LANG_IS_TELEPORTED               "%s is already being teleported."
-#define LANG_CANNOT_SUMMON_TO_INST       "You can summon a player to your instance only if he is in your party with you as leader."
-#define LANG_CANNOT_GO_TO_INST_PARTY     "You cannot go to the player's instance because you are in a party now."
-#define LANG_CANNOT_GO_TO_INST_GM        "You can go to the player's instance while not being in his party only if your GM mode is on."
-#define LANG_CANNOT_GO_INST_INST         "You can not go to player %s from instance to instance."
-#define LANG_CANNOT_SUMMON_INST_INST     "You can not summon player %s from instance to instance."
-#define LANG_SUMMONING                   "You are summoning %s%s."
-#define LANG_SUMMONED_BY                 "You are being summoned by %s."
-#define LANG_TELEPORTING_TO              "You are teleporting %s%s to %s."
-#define LANG_TELEPORTED_TO_BY            "You are being teleported by %s."
-#define LANG_NO_PLAYER                   "Player (%s) does not exist."
-#define LANG_APPEARING_AT                "Appearing at %s's location."
-#define LANG_APPEARING_TO                "%s is appearing to your location."
-
-#define LANG_BAD_VALUE                   "Incorrect values."
-#define LANG_NO_CHAR_SELECTED            "No character selected."
-#define LANG_NOT_IN_GROUP                "%s is not in a group."
-
-#define LANG_YOU_CHANGE_HP               "You changed HP of %s to %i/%i."
-#define LANG_YOURS_HP_CHANGED            "%s changed your HP to %i/%i."
-#define LANG_YOU_CHANGE_MANA             "You changed MANA of %s to %i/%i."
-#define LANG_YOURS_MANA_CHANGED          "%s changed your MANA to %i/%i."
-#define LANG_YOU_CHANGE_ENERGY           "You changed ENERGY of %s to %i/%i."
-#define LANG_YOURS_ENERGY_CHANGED        "%s changed your ENERGY to %i/%i."
-                                                            //log
-#define LANG_CURRENT_ENERGY              "Current energy: %u"
-#define LANG_YOU_CHANGE_RAGE             "You changed rage of %s to %i/%i."
-#define LANG_YOURS_RAGE_CHANGED          "%s changed your rage to %i/%i."
-#define LANG_YOU_CHANGE_LVL              "You changed level of %s to %i."
-#define LANG_CURRENT_FACTION             "GUID %i, faction is %i, flags is %i, npcflag is %i, DY flag is %i"
-#define LANG_WRONG_FACTION               "Wrong faction: %u (not found in factiontemplate.dbc)."
-#define LANG_YOU_CHANGE_FACTION          "You changed GUID=%i 's Faction to %i, flags to %i, npcflag to %i, dyflag to %i."
-#define LANG_YOU_CHANGE_SPELLFLATID      "You changed the spellflatid=%i, val= %i, mark =%i to %s."
-#define LANG_YOURS_SPELLFLATID_CHANGED   "%s changed your spellflatid=%i, val= %i, mark =%i."
-#define LANG_YOU_GIVE_TAXIS              "%s has access to all taxi nodes now (until logout)."
-#define LANG_YOU_REMOVE_TAXIS            "%s has no more access to all taxi nodes now (only visited accessible)."
-#define LANG_YOURS_TAXIS_ADDED           "%s has given you access to all taxi nodes (until logout)."
-#define LANG_YOURS_TAXIS_REMOVED         "%s has removed access to all taxi nodes (only visited still accessible)."
-
-#define LANG_YOU_CHANGE_ASPEED           "You set all speeds to %2.2f from normal of %s."
-#define LANG_YOURS_ASPEED_CHANGED        "%s set all your speeds to %2.2f from normal."
-#define LANG_YOU_CHANGE_SPEED            "You set the speed to %2.2f from normal of %s."
-#define LANG_YOURS_SPEED_CHANGED         "%s set your speed to %2.2f from normal."
-#define LANG_YOU_CHANGE_SWIM_SPEED       "You set the swim speed to %2.2f from normal of %s."
-#define LANG_YOURS_SWIM_SPEED_CHANGED    "%s set your swim speed to %2.2f from normal."
-#define LANG_YOU_CHANGE_BACK_SPEED       "You set the backwards run speed to %2.2f from normal of %s."
-#define LANG_YOURS_BACK_SPEED_CHANGED    "%s set your backwards run speed to %2.2f from normal."
-#define LANG_YOU_CHANGE_FLY_SPEED       "You set the fly speed to %2.2f from normal of %s."
-#define LANG_YOURS_FLY_SPEED_CHANGED    "%s set your fly speed to %2.2f from normal."
-
-#define LANG_YOU_CHANGE_SIZE             "You set the size %2.2f of %s."
-#define LANG_YOURS_SIZE_CHANGED          "%s set your size to %2.2f."
-#define LANG_NO_MOUNT                    "There is no such mount."
-#define LANG_YOU_GIVE_MOUNT              "You give a mount to %s."
-#define LANG_MOUNT_GIVED                 "%s gave you a mount."
-
-                                                            //log
-#define LANG_CURRENT_MONEY               "USER1: %i, ADD: %i, DIF: %i\n"
-#define LANG_YOU_TAKE_ALL_MONEY          "You take all copper of %s."
-#define LANG_YOURS_ALL_MONEY_GONE        "%s took you all of your copper."
-#define LANG_YOU_TAKE_MONEY              "You take %i copper from %s."
-#define LANG_YOURS_MONEY_TAKEN           "%s took %i copper from you."
-#define LANG_YOU_GIVE_MONEY              "You give %i copper to %s."
-#define LANG_YOURS_MONEY_GIVEN           "%s gave you %i copper."
-#define LANG_YOU_HEAR_SOUND              "You hear sound %u."
-                                                            //log
-#define LANG_NEW_MONEY                   "USER2: %i, ADD: %i, RESULT: %i\n"
-
-#define LANG_REMOVE_BIT                  "Removed bit %i in field %i."
-#define LANG_SET_BIT                     "Set bit %i in field %i."
-#define LANG_COMMAND_TELE_TABLEEMPTY     "Teleport location table is empty!"
-#define LANG_COMMAND_TELE_NOTFOUND       "Teleport location not found!"
-#define LANG_COMMAND_TELE_PARAMETER      "Requires search parameter."
-#define LANG_COMMAND_TELE_NOREQUEST      "There are no teleport locations matching your request."
-#define LANG_COMMAND_TELE_NOLOCATION     "No locations found."
-#define LANG_COMMAND_TELE_LOCATION       "Locations found are:\n"
-
-#define LANG_MAIL_SENT                   "Mail sent to %s"
-
-// level 2 chat
-#define LANG_NO_SELECTION                "No selection."
-#define LANG_OBJECT_GUID                 "Object GUID is: lowpart %u highpart %X"
-#define LANG_TOO_LONG_NAME               "The name was too long by %i characters."
-#define LANG_CHARS_ONLY                  "Error, name can only contain characters A-Z and a-z."
-#define LANG_TOO_LONG_SUBNAME            "The subname was too long by %i characters."
-#define LANG_NOT_IMPLEMENTED             "Not yet implemented"
-                                                            //log
-#define LANG_ADD_OBJ                     "AddObject at Chat.cpp"
+// level 2
+#define LANG_ADD_OBJ                     "AddObject at Chat.cpp" //log
 #define LANG_DEMORPHED                   "Demorphed %s"     //log
 
-#define LANG_ITEM_ADDED_TO_LIST          "Item '%i' '%s' added to list with maxcount '%i' and incrtime '%i'"
-#define LANG_ITEM_NOT_FOUND              "Item '%i' not found in database."
-#define LANG_ITEM_DELETED_FROM_LIST      "Item '%i' '%s' deleted from vendor list"
-#define LANG_ITEM_NOT_IN_LIST            "Item '%i' not found in vendor list."
-#define LANG_ITEM_ALREADY_IN_LIST        "Item '%i' already in vendor list."
-
-#define LANG_RESET_SPELLS_ONLINE         "Spells of %s reset."
-#define LANG_RESET_SPELLS_OFFLINE        "Spells of %s will reset at next login."
-#define LANG_RESET_TALENTS_ONLINE        "Talents of %s reset."
-#define LANG_RESET_TALENTS_OFFLINE       "Talents of %s will reset at next login."
-#define LANG_RESET_SPELLS                "Your spells reset."
-#define LANG_RESET_TALENTS               "Your talents reset."
-
-#define LANG_RESETALL_UNKNOWN_CASE       "Unknown case '%s' for .resetall command. Type full correct case name."
-#define LANG_RESETALL_SPELLS             "Spells will reset for all players at login. Strongly recommend re-login!"
-#define LANG_RESETALL_TALENTS            "Talents will reset for all players at login. Strongly recommend re-login!"
-
-#define LANG_WAYPOINT_NOTFOUND           "Creature (GUID: %u) No waypoint found."
-#define LANG_WAYPOINT_NOTFOUNDLAST       "Creature (GUID: %u) Last waypoint not found."
-#define LANG_WAYPOINT_NOTFOUNDSEARCH     "Creature (GUID: %u) No waypoint found - used 'wpguid'. Now trying to find it by its position..."
-#define LANG_WAYPOINT_NOTFOUNDDBPROBLEM  "Creature (GUID: %u) No waypoints found - This is a MaNGOS db problem (single float)."
-#define LANG_WAYPOINT_CREATSELECTED      "Selected creature is ignored - provided GUID is used"
-#define LANG_WAYPOINT_CREATNOTFOUND      "Creature (GUID: %u) not found"
-#define LANG_WAYPOINT_VP_SELECT          "You must select a visual waypoint."
-#define LANG_WAYPOINT_VP_NOTFOUND        "No visual waypoints found"
-#define LANG_WAYPOINT_VP_NOTCREATED      "Could not create visual waypoint with creatureID: %d"
-#define LANG_WAYPOINT_VP_ALLREMOVED      "All visual waypoints removed"
-#define LANG_WAYPOINT_NOTCREATED         "Could not create waypoint-creature with ID: %d"
-#define LANG_WAYPOINT_NOGUID             "No GUID provided."
-#define LANG_WAYPOINT_NOWAYPOINTGIVEN    "No waypoint number provided."
-#define LANG_WAYPOINT_ARGUMENTREQ        "Argument required for '%s'."
-#define LANG_WAYPOINT_ADDED              "Waypoint %i added to GUID: %d"
-#define LANG_WAYPOINT_ADDED_NO           "Waypoint %d added."
-#define LANG_WAYPOINT_CHANGED            "Waypoint changed."
-#define LANG_WAYPOINT_CHANGED_NO         "Waypoint %s modified."
-#define LANG_WAYPOINT_EXPORTED           "WP export successfull."
-#define LANG_WAYPOINT_NOTHINGTOEXPORT    "No waypoints found inside the database."
-#define LANG_WAYPOINT_IMPORTED           "File imported."
-#define LANG_WAYPOINT_REMOVED            "Waypoint removed."
-#define LANG_WAYPOINT_NOTREMOVED         "Warning: Could not delete WP from the world with ID: %d"
-#define LANG_WAYPOINT_TOOFAR1            "This happens if the waypoint is too far away from your char."
-#define LANG_WAYPOINT_TOOFAR2            "The WP is deleted from the database, but not from the world here."
-#define LANG_WAYPOINT_TOOFAR3            "They will disappear after a server restart."
-#define LANG_WAYPOINT_INFO_TITLE         "Waypoint %d: Info for creature: %s, GUID: %d"
-#define LANG_WAYPOINT_INFO_WAITTIME      "Waittime: %d"
-#define LANG_WAYPOINT_INFO_MODEL         "Model %d: %d"
-#define LANG_WAYPOINT_INFO_EMOTE         "Emote: %d"
-#define LANG_WAYPOINT_INFO_SPELL         "Spell: %d"
-#define LANG_WAYPOINT_INFO_TEXT          "Text %d: %s"
-#define LANG_WAYPOINT_INFO_AISCRIPT      "AIScript: %s"
-
-#define LANG_RENAME_PLAYER               "Forced rename for player %s will be requested at next login."
-#define LANG_RENAME_PLAYER_GUID          "Forced rename for player %s (GUID #%u) will be requested at next login."
-
-#define LANG_WAYPOINT_WPCREATNOTFOUND    "Waypoint-Creature (GUID: %u) Not found"
-#define LANG_WAYPOINT_NPCNOTFOUND        "Could not find NPC..."
-
-#define LANG_MOVE_TYPE_SET               "Creature movement type set to '%s', waypoints removed (if any)."
-#define LANG_MOVE_TYPE_SET_NODEL         "Creature movement type set to '%s', waypoints were not removed."
-#define LANG_USE_BOL                     "Incorrect value, use on or off"
-#define LANG_VALUE_SAVED                 "Value saved."
-#define LANG_VALUE_SAVED_REJOIN          "Value saved, you may need to rejoin or clean your client cache."
-
-#define LANG_COMMAND_GOAREATRNOTFOUND    "Areatrigger ID %u not found!"
-#define LANG_INVALID_TARGET_COORD        "Target map or coordinates is invalid (X: %f Y: %f MapId: %u)"
-#define LANG_INVALID_ZONE_COORD          "Zone coordinates is invalid (X: %f Y: %f AreaId: %u)"
-#define LANG_INVALID_ZONE_MAP            "Zone %u (%s) is part of instanceable map %u (%s)"
-#define LANG_COMMAND_TARGETOBJNOTFOUND   "Nothing found!"
-#define LANG_COMMAND_GOOBJNOTFOUND       "Object not found!"
-#define LANG_COMMAND_GOCREATNOTFOUND     "Creature not found!"
-#define LANG_COMMAND_GOCREATMULTIPLE     "Warning: Mob found more than once - you will be teleported to the first one found in DB."
-#define LANG_COMMAND_DELCREATMESSAGE     "Creature Removed"
-#define LANG_COMMAND_CREATUREMOVED       "Creature moved."
-#define LANG_COMMAND_CREATUREATSAMEMAP   "Creature (GUID:%u) must be on the same map as player!"
-#define LANG_COMMAND_OBJNOTFOUND         "Game Object (GUID: %u) not found"
-#define LANG_COMMAND_DELOBJREFERCREATURE "Game Object (GUID: %u) has references in not found creature %u GO list, can't be deleted."
-#define LANG_COMMAND_DELOBJMESSAGE       "Game Object (GUID: %u) removed"
-#define LANG_COMMAND_TURNOBJMESSAGE      "Game Object (GUID: %u) turned"
-#define LANG_COMMAND_MOVEOBJMESSAGE      "Game Object (GUID: %u) moved"
-#define LANG_COMMAND_VENDORSELECTION     "You must select a vendor"
-#define LANG_COMMAND_ADDVENDORITEMSEND   "You must send id for item"
-#define LANG_COMMAND_ADDVENDORITEMITEMS  "Vendor has too many items (max 128)"
-#define LANG_COMMAND_KICKSELF            "You can't kick self, logout instead"
-#define LANG_COMMAND_KICKMESSAGE         "Player %s kicked."
-#define LANG_COMMAND_KICKNOTFOUNDPLAYER  "Player %s not found."
-#define LANG_COMMAND_WHISPERACCEPTING    "Accepting Whisper: %s"
-#define LANG_COMMAND_WHISPERON           "Accepting Whisper: ON"
-#define LANG_COMMAND_WHISPEROFF          "Accepting Whisper: OFF"
-#define LANG_COMMAND_CREATGUIDNOTFOUND   "Creature (GUID: %u) not found"
-#define LANG_COMMAND_TICKETCOUNT         "Tickets count: %i show new tickets: %s\n"
-#define LANG_COMMAND_TICKETNEW           "New ticket from %s"
-#define LANG_COMMAND_TICKETVIEW          "Ticket of %s (Category: %i):\n%s\n"
-#define LANG_COMMAND_TICKETON            "New ticket show: on"
-#define LANG_COMMAND_TICKETOFF           "New ticket show: off"
-#define LANG_COMMAND_TICKENOTEXIST       "Ticket %i doesn't exist"
-#define LANG_COMMAND_ALLTICKETDELETED    "All tickets deleted."
-#define LANG_COMMAND_TICKETPLAYERDEL     "Character %s ticket deleted."
-#define LANG_COMMAND_TICKETDEL           "Ticket deleted."
-#define LANG_COMMAND_SPAWNDIST           "Spawn distance changed to: %i"
-#define LANG_COMMAND_SPAWNTIME           "Spawn time changed to: %i"
-#define LANG_COMMAND_MODIFY_HONOR        "The honor of %s was set to %u!"
-
-#define LANG_YOUR_CHAT_DISABLED          "Your chat has been disabled for %u minutes."
-#define LANG_YOU_DISABLE_CHAT            "You have disabled %s's chat for %u minutes."
-#define LANG_CHAT_ALREADY_ENABLED        "Player's chat is already enabled."
-#define LANG_YOUR_CHAT_ENABLED           "Your chat has been enabled."
-#define LANG_YOU_ENABLE_CHAT             "You have enabled %s's chat."
-
-// level 3 chat
-#define LANG_SCRIPTS_RELOADED            "|cffff0000[System Message]:|rScripts reloaded"
-#define LANG_YOU_CHANGE_SECURITY         "You change security level of %s to %i."
-#define LANG_YOURS_SECURITY_CHANGED      "%s changed your security level to %i."
-#define LANG_YOURS_SECURITY_IS_LOW       "You have low security level for this."
-#define LANG_CREATURE_MOVE_DISABLED      "Creature movement disabled."
-#define LANG_CREATURE_MOVE_ENABLED       "Creature movement enabled."
-#define LANG_NO_WEATHER                  "Weather can't be changed for this zone."
-#define LANG_WEATHER_DISABLED            "Weather system disabled at server."
-
-#define LANG_BAN_YOUBANNED               "%s is banned for %s. Reason: %s."
-#define LANG_BAN_YOUPERMBANNED           "%s is banned permanently for %s."
-#define LANG_BAN_NOTFOUND                "%s %s not found"
-
-#define LANG_UNBAN_UNBANNED              "%s unbanned."
-#define LANG_UNBAN_ERROR                 "There was an error removing the ban on %s."
-
-#define LANG_BANINFO_NOACCOUNT           "There is no such account."
-#define LANG_BANINFO_NOCHARACTER         "There is no such character."
-#define LANG_BANINFO_NOIP                "There is no such IP in banlist."
-#define LANG_BANINFO_NOACCOUNTBAN        "Account %s has never been banned"
-#define LANG_BANINFO_BANHISTORY          "Ban history for account %s:"
-#define LANG_BANINFO_HISTORYENTRY        "Ban Date: %s Bantime: %s Still active: %s  Reason: %s Set by: %s"
-#define LANG_BANINFO_INFINITE            "Inf."
-#define LANG_BANINFO_NEVER               "Never"
-#define LANG_BANINFO_YES                 "Yes"
-#define LANG_BANINFO_NO                  "No"
-#define LANG_BANINFO_IPENTRY             "IP: %s\nBan Date: %s\nUnban Date: %s\nRemaining: %s\nReason: %s\nSet by: %s"
-
-#define LANG_BANLIST_NOIP                "There is no matching IPban."
-#define LANG_BANLIST_NOACCOUNT           "There is no matching account."
-#define LANG_BANLIST_NOCHARACTER         "There is no banned account owning a character matching this part."
-#define LANG_BANLIST_MATCHINGIP          "The following IPs match your pattern:"
-#define LANG_BANLIST_MATCHINGACCOUNT     "The following accounts match your query:"
-
-#define LANG_COMMAND_LEARN_MANY_SPELLS   "You learned many spells/skills."
-#define LANG_COMMAND_LEARN_CLASS_SPELLS  "You learned all spells for class."
-#define LANG_COMMAND_LEARN_CLASS_TALENTS "You learned all talents for class."
-#define LANG_COMMAND_LEARN_ALL_LANG      "You learned all languages."
-#define LANG_COMMAND_LEARN_ALL_CRAFT     "You learned all craft skills and recipes."
-#define LANG_COMMAND_ADDITEMCOULDNOTFIND "Could not find '%s'"
-#define LANG_COMMAND_ITEMIDINVALID       "Invalid item id: %u"
-#define LANG_COMMAND_NOITEMFOUND         "No items found!"
-#define LANG_COMMAND_LISTOBJINVALIDID    "Invalid gameobject id: %u"
-#define LANG_COMMAND_LISTITEMMESSAGE     "Found items %u: %u ( inventory %u mail %u auction %u )"
-#define LANG_COMMAND_LISTOBJMESSAGE      "Found gameobjects %u: %u "
-#define LANG_COMMAND_INVALIDCREATUREID   "Invalid creature id: %u"
-#define LANG_COMMAND_LISTCREATUREMESSAGE "Found creatures %u: %u "
-#define LANG_COMMAND_NOAREAFOUND         "No area found!"
-#define LANG_COMMAND_NOITEMSETFOUND      "No item sets found!"
-#define LANG_COMMAND_NOSKILLFOUND        "No skills found!"
-#define LANG_COMMAND_NOSPELLFOUND        "No spells found!"
-#define LANG_COMMAND_NOQUESTFOUND        "No quests found!"
-#define LANG_COMMAND_NOCREATUREFOUND     "No creatures found!"
-#define LANG_COMMAND_NOGAMEOBJECTFOUND   "No gameobjects found!"
-#define LANG_COMMAND_GRAVEYARDNOEXIST    "Graveyard #%u doesn't exist."
-#define LANG_COMMAND_GRAVEYARDALRLINKED  "Graveyard #%u already linked to zone #%u (current)."
-#define LANG_COMMAND_GRAVEYARDLINKED     "Graveyard #%u linked to zone #%u (current)."
-#define LANG_COMMAND_GRAVEYARDWRONGZONE  "Graveyard #%u can't be linked to subzone or not existed zone #%u (internal error)."
-#define LANG_COMMAND_GRAVEYARDWRONGTEAM  "Graveyard can be linked to zone at another map only for all factions (no faction value)."
-#define LANG_COMMAND_GRAVEYARDERROR      "No faction in Graveyard with id= #%u , fix your DB"
-#define LANG_COMMAND_GRAVEYARD_NOTEAM    "invalid team, please fix database"
-#define LANG_COMMAND_GRAVEYARD_ANY       "any"
-#define LANG_COMMAND_GRAVEYARD_ALLIANCE  "alliance"
-#define LANG_COMMAND_GRAVEYARD_HORDE     "horde"
-#define LANG_COMMAND_GRAVEYARDNEAREST    "Graveyard #%u (faction: %s) is nearest from linked to zone #%u."
-#define LANG_COMMAND_ZONENOGRAVEYARDS    "Zone #%u doesn't have linked graveyards."
-#define LANG_COMMAND_ZONENOGRAFACTION    "Zone #%u doesn't have linked graveyards for faction: %s."
-#define LANG_COMMAND_TP_ALREADYEXIST     "Teleport location already exists!"
-#define LANG_COMMAND_TP_ADDED            "Teleport location added."
-#define LANG_COMMAND_TP_ADDEDERR         "Teleport location NOT added: database error."
-#define LANG_COMMAND_TP_DELETED          "Teleport location deleted."
-#define LANG_COMMAND_TP_DELETEERR        "Teleport location NOT deleted: database error."
-
-#define LANG_COMMAND_TARGET_LISTAURAS    "Target unit has %d auras:"
-#define LANG_COMMAND_TARGET_AURADETAIL   "id: %d eff: %d type: %d duration: %d maxduration: %d name: %s"
-#define LANG_COMMAND_TARGET_LISTAURATYPE "Target unit has %d auras of type %d:"
-#define LANG_COMMAND_TARGET_AURASIMPLE   "id: %d eff: %d name: %s"
-
-#define LANG_COMMAND_QUEST_NOTFOUND      "Quest %u not found."
-#define LANG_COMMAND_QUEST_STARTFROMITEM "Quest %u started from item. For correct work, please, add item to inventory and start quest in normal way: .additem %u"
-#define LANG_COMMAND_QUEST_REMOVED       "Quest removed."
-#define LANG_COMMAND_QUEST_REWARDED      " [rewarded]"
-#define LANG_COMMAND_QUEST_COMPLETE      " [complete]"
-#define LANG_COMMAND_QUEST_ACTIVE        " [active]"
-
-#define LANG_COMMAND_FLYMODE_STATUS      "%s's Fly Mode %s"
-
-#define LANG_COMMAND_OPCODESENT          "Opcode %u sent to %s"
-
-#define LANG_COMMAND_IMPORT_SUCCESS      "Character loaded successfully!"
-#define LANG_COMMAND_IMPORT_FAILED       "Failed to load the character!"
-#define LANG_COMMAND_EXPORT_SUCCESS      "Character dumped successfully!"
-#define LANG_COMMAND_EXPORT_FAILED       "Character dump failed!"
-
-#define LANG_COMMAND_SPELL_BROKEN        "Spell %u broken and not allowed to cast or learn!"
-
-//log
+// level 3
 #define LANG_SPAWNING_SPIRIT_HEAL        "Spawning spirit healers\n"
 #define LANG_NO_SPIRIT_HEAL_DB           "No spirit healers in database, exiting."
 
-#define LANG_SET_SKILL                   "Skill %u (%s) for player %s set to %u and current maximum set to %u (without permanent (talent) bonuses)."
-#define LANG_SET_SKILL_ERROR             "Player %s must have skill %u (%s) before using this command."
-
-#define LANG_INVALID_SKILL_ID            "Invalid skill id (%u)"
-#define LANG_LEARNING_GM_SKILLS          "You learned default GM spells/skills."
-#define LANG_YOU_KNOWN_SPELL             "You already know that spell."
-#define LANG_TARGET_KNOWN_SPELL          "Target(%s) already know that spell."
-#define LANG_UNKNOWN_SPELL               "%s doesn't know that spell."
-#define LANG_FORGET_SPELL                "You already forgot that spell."
-#define LANG_REMOVEALL_COOLDOWN          "All spell cooldowns removed for %s."
-#define LANG_REMOVE_COOLDOWN             "Spell %u cooldown removed for %s."
-                                                            //log
-#define LANG_ADDITEM                     "Command : Additem, itemId = %i, amount = %i"
-#define LANG_ADDITEMSET                  "Command : Additemset, itemsetId = %i"
-#define LANG_REMOVEITEM                  "Removed itemID = %i, amount = %i from %s"
-#define LANG_ITEM_CANNOT_CREATE          "Cannot create item '%i' (amount: %i)"
-#define LANG_INSERT_GUILD_NAME           "You need to provide a guild name!"
-#define LANG_PLAYER_NOT_FOUND            "Player not found!"
-#define LANG_PLAYER_IN_GUILD             "Player already has a guild!"
-#define LANG_GUILD_NOT_CREATED           "Guild not created! (already exists?)"
-#define LANG_NO_ITEMS_FROM_ITEMSET_FOUND "No items from itemset '%u' found."
-
-#define LANG_DISTANCE                    "The distance is: (3D) %f (2D) %f yards."
-                                                            //log
 #define LANG_ADD_OBJ_LV3                 "AddObject at Level3.cpp line 1176"
 
-#define LANG_ITEM_SLOT                   "Item '%i' '%s' Item Slot %i"
-#define LANG_ITEM_SLOT_NOT_EXIST         "Item '%i' doesn't exist."
-#define LANG_ITEM_ADDED_TO_SLOT          "Item '%i' '%s' Added to Slot %i"
-#define LANG_ITEM_SAVE_FAILED            "Item save failed!"
-#define LANG_ITEMLIST_SLOT               "%d - owner: %s (guid: %u account: %u ) %s"
-#define LANG_ITEMLIST_MAIL               "%d - sender: %s (guid: %u account: %u ) receiver: %s (guid: %u account: %u ) %s"
-#define LANG_ITEMLIST_AUCTION            "%d - owner: %s (guid: %u account: %u ) %s"
 
-#define LANG_WRONG_LINK_TYPE             "Wrong link type!"
-#define LANG_ITEM_LIST                   "%d - |cffffffff|Hitem:%d:0:0:0:0:0:0:0|h[%s]|h|r "
-#define LANG_QUEST_LIST                  "%d - |cffffffff|Hquest:%d|h[%s]|h|r "
-#define LANG_CREATURE_ENTRY_LIST         "%d - |cffffffff|Hcreature_entry:%d|h[%s]|h|r "
-#define LANG_CREATURE_LIST               "%d - |cffffffff|Hcreature:%d|h[%s X:%f Y:%f Z:%f MapId:%d]|h|r "
-#define LANG_GO_ENTRY_LIST               "%d - |cffffffff|Hgameobject_entry:%d|h[%s]|h|r "
-#define LANG_GO_LIST                     "%d - |cffffffff|Hgameobject:%d|h[%s X:%f Y:%f Z:%f MapId:%d]|h|r "
-#define LANG_ITEMSET_LIST                "%d - |cffffffff|Hitemset:%d|h[%s]|h|r "
-#define LANG_TELE_LIST                   "|cffffffff|Htele:%s|h[%s]|h|r "
-#define LANG_SPELL_LIST                  "%d - |cffffffff|Hspell:%d|h[%s]|h|r "
-#define LANG_SKILL_LIST                  "%d - |cffffffff|Hskill:%d|h[%s]|h|r "
-
-#define LANG_GAMEOBJECT_NOT_EXIST        "Game Object (GUID: %u) not found"
-                                                            //log
-#define LANG_GAMEOBJECT_CURRENT          ">> Game Object %s (GUID: %u) at %f %f %f. Orientation %f."
-#define LANG_GAMEOBJECT_DETAIL           "Selected object:\n%s\nGUID: %u ID: %u\nX: %f Y: %f Z: %f MapId: %u\nOrientation: %f"
-#define LANG_GAMEOBJECT_ADD              ">> Add Game Object '%i' (%s) (GUID: %i) added at '%f %f %f'."
-
-#define LANG_MOVEGENS_LIST               "%s (lowguid: %u) movement generators stack:"
-#define LANG_MOVEGENS_IDLE               "Idle"
-#define LANG_MOVEGENS_RANDOM             "Random"
-#define LANG_MOVEGENS_WAYPOINT           "Waypoint"
-#define LANG_MOVEGENS_ANIMAL_RANDOM      "Animal random"
-#define LANG_MOVEGENS_CONFUSED           "Confused"
-#define LANG_MOVEGENS_TARGETED_PLAYER    "Targeted to player %s (lowguid %u)"
-#define LANG_MOVEGENS_TARGETED_CREATURE  "Targeted to creature %s (lowguid %u)"
-#define LANG_MOVEGENS_TARGETED_NULL      "Targeted to <NULL>"
-#define LANG_MOVEGENS_HOME_CREATURE      "Home movement to (X:%f Y:%f Z:%f)"
-#define LANG_MOVEGENS_HOME_PLAYER        "Home movement used for player?!?"
-#define LANG_MOVEGENS_FLIGHT             "Taxi flight"
-#define LANG_MOVEGENS_UNKNOWN            "Unknown movement generator (%u)"
-
-#define LANG_NPCINFO_CHAR                "Player selected NPC\nGUID: %u.\nFaction: %u.\nnpcFlags: %u.\nEntry: %u.\nDisplayID: %u (Native: %u)."
-#define LANG_NPCINFO_LEVEL               "Level: %u."
-#define LANG_NPCINFO_HEALTH              "Health (base): %u. (max): %u. (current): %u."
-#define LANG_NPCINFO_FLAGS               "Field Flags: %u.\nDynamic Flags: %u.\nFaction Template: %u."
-#define LANG_NPCINFO_LOOT                "Loot: %u Pickpocket: %u Skinning: %u"
-#define LANG_NPCINFO_POSITION            "Position: %f %f %f."
-#define LANG_NPCINFO_VENDOR              "*** Is a vendor!"
-#define LANG_NPCINFO_TRAINER             "*** Is a trainer!"
-#define LANG_NPCINFO_DUNGEON_ID          "InstanceID: %u"
-
-#define LANG_PINFO_ACCOUNT               "Player%s %s (guid: %u) Account: %s (id: %u) GMLevel: %u Last IP: %s"
-#define LANG_PINFO_LEVEL                 "Played time: %s Level: %u Money: %ug%us%uc"
-#define LANG_PINFO_NO_REP                "Command .pinfo doesn't support 'rep' option for offline players."
-
-#define LANG_YOU_SET_EXPLORE_ALL         "%s has explored all zones now."
-#define LANG_YOU_SET_EXPLORE_NOTHING     "%s has no more explored zones."
-#define LANG_YOURS_EXPLORE_SET_ALL       "%s has explored all zones for you."
-#define LANG_YOURS_EXPLORE_SET_NOTHING   "%s has hidden all zones from you."
-
-#define LANG_HOVER_ENABLED               "Hover enabled"
-#define LANG_HOVER_DISABLED              "Hover disabled"
-#define LANG_YOURS_LEVEL_UP              "You have been leveled up (%i)"
-#define LANG_YOURS_LEVEL_DOWN            "You have been leveled down (%i)"
-#define LANG_YOURS_LEVEL_PROGRESS_RESET  "Your level progress has been reset."
-#define LANG_EXPLORE_AREA                "The area has been set as explored."
-#define LANG_UNEXPLORE_AREA              "The area has been set as not explored."
-
-#define LANG_UPDATE                      "GUID=%i 's updateIndex: %i, value:  %i."
-#define LANG_UPDATE_CHANGE               "You change GUID=%i 's UpdateIndex: %i value to %i."
-#define LANG_TOO_BIG_INDEX               "The value index %u is too big to %u(count: %u)."
-                                                            //log
-#define LANG_SET_UINT                    "Set %u uint32 Value:[OPCODE]:%u [VALUE]:%u"
-#define LANG_SET_UINT_FIELD              "You Set %u Field:%u to uint32 Value: %u"
-                                                            //log
-#define LANG_SET_FLOAT                   "Set %u float Value:[OPCODE]:%u [VALUE]:%f"
-#define LANG_SET_FLOAT_FIELD             "You Set %u Field:%i to float Value: %f"
-                                                            //log
-#define LANG_GET_UINT                    "Get %u uint32 Value:[OPCODE]:%u [VALUE]:%u"
-#define LANG_GET_UINT_FIELD              "The uint32 value of %u in %u is: %u"
-                                                            //log
-#define LANG_GET_FLOAT                   "Get %u float Value:[OPCODE]:%u [VALUE]:%f"
-#define LANG_GET_FLOAT_FIELD             "The float of %u value in %u is: %f"
-
-                                                            //log
-#define LANG_SET_32BIT                   ".Set32Bit:[OPCODE]:%u [VALUE]:%u"
-#define LANG_SET_32BIT_FIELD             "You set Bit of Field:%u to Value: %u"
-
-                                                            //log
-#define LANG_CHANGE_32BIT                ".Mod32Value:[OPCODE]:%u [VALUE]:%i"
-#define LANG_CHANGE_32BIT_FIELD          "You modified the value of Field:%u to Value: %u"
-
-#define LANG_INVISIBLE_INVISIBLE         "You are now invisible."
-#define LANG_INVISIBLE_VISIBLE           "You are now visible."
-
-#define LANG_BG_A_WINS                   "The Alliance wins!"
-#define LANG_BG_H_WINS                   "The Horde wins!"
-#define LANG_BG_WS_ONE_MINUTE            "The battle for Warsong Gulch begins in 1 minute."
-#define LANG_BG_WS_HALF_MINUTE           "The battle for Warsong Gulch begins in 30 seconds. Prepare yourselves!"
-#define LANG_BG_WS_BEGIN                 "Let the battle for Warsong Gulch begin!"
-
-#define LANG_BG_WS_CAPTURED_HF           "$n captured the Horde flag!"
-#define LANG_BG_WS_CAPTURED_AF           "$n captured the Alliance flag!"
-#define LANG_BG_WS_DROPPED_HF            "The Horde flag was dropped by $n!"
-#define LANG_BG_WS_DROPPED_AF            "The Alliance Flag was dropped by $n!"
-#define LANG_BG_WS_RETURNED_AF           "The Alliance Flag was returned to its base by $n!"
-#define LANG_BG_WS_RETURNED_HF           "The Horde flag was returned to its base by $n!"
-#define LANG_BG_WS_PICKEDUP_HF           "The Horde flag was picked up by $n!"
-#define LANG_BG_WS_PICKEDUP_AF           "The Alliance Flag was picked up by $n!"
-#define LANG_BG_WS_F_PLACED              "The flags are now placed at their bases."
-
-#define LANG_BG_AB_ALLY                  "Alliance"
-#define LANG_BG_AB_HORDE                 "Horde"
-#define LANG_BG_AB_NODE_STABLES          "stables"
-#define LANG_BG_AB_NODE_BLACKSMITH       "blacksmith"
-#define LANG_BG_AB_NODE_FARM             "farm"
-#define LANG_BG_AB_NODE_LUMBER_MILL      "lumber mill"
-#define LANG_BG_AB_NODE_GOLD_MINE        "mine"
-#define LANG_BG_AB_NODE_TAKEN            "The %s has taken the %s"
-#define LANG_BG_AB_NODE_DEFENDED         "$n has defended the %s"
-#define LANG_BG_AB_NODE_ASSAULTED        "$n has assaulted the %s"
-#define LANG_BG_AB_NODE_CLAIMED          "$n claims the %s! If left unchallenged, the %s will control it in 1 minute!"
-#define LANG_BG_AB_ONEMINTOSTART         "The Battle for Arathi Basin begins in 1 minute."
-#define LANG_BG_AB_HALFMINTOSTART        "The Battle for Arathi Basin begins in 30 seconds. Prepare yourselves!"
-#define LANG_BG_AB_STARTED               "The Battle for Arathi Basin has begun!"
-#define LANG_BG_AB_A_NEAR_VICTORY        "The Alliance has gathered $1776W resources, and is near victory!"
-#define LANG_BG_AB_H_NEAR_VICTORY        "The Horde has gathered $1777W resources, and is near victory!"
-
-#define LANG_ARENA_ONE_TOOLOW            "You must be level %u to form an arena team"
-#define LANG_ARENA_ONE_MINUTE            "One minute until the Arena battle begins!"
-#define LANG_ARENA_THIRTY_SECONDS        "Thirty seconds until the Arena battle begins!"
-#define LANG_ARENA_FIFTEEN_SECONDS       "Fifteen seconds until the Arena battle begins!"
-#define LANG_ARENA_BEGUN                 "The Arena battle has begun!"
-
-#define LANG_WAIT_BEFORE_SPEAKING        "You must wait %s before speaking again."
+*/

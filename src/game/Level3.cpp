@@ -429,7 +429,7 @@ bool ChatHandler::HandleLoadScriptsCommand(const char* args)
 {
     if(!LoadScriptingModule(args)) return true;
 
-    sWorld.SendWorldText(LANG_SCRIPTS_RELOADED, NULL);
+    sWorld.SendWorldText(GetMangosString(LANG_SCRIPTS_RELOADED), NULL);
 
     return true;
 }
@@ -499,7 +499,7 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
         {
             WorldPacket data;
             char buf[256];
-            sprintf((char*)buf,LANG_YOURS_SECURITY_CHANGED, m_session->GetPlayer()->GetName(), gm);
+            sprintf((char*)buf,ChatHandler(targetPlayer).GetMangosString(LANG_YOURS_SECURITY_CHANGED), m_session->GetPlayer()->GetName(), gm);
             FillSystemMessageData(&data, buf);
             targetPlayer->GetSession()->SendPacket(&data);
         }
@@ -569,7 +569,7 @@ bool ChatHandler::HandleSetSkillCommand(const char* args)
     Player * target = getSelectedPlayer();
     if(!target)
     {
-        PSendSysMessage(LANG_NO_CHAR_SELECTED);
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
@@ -635,7 +635,7 @@ bool ChatHandler::HandleUnLearnCommand(const char* args)
     Player* target = getSelectedPlayer();
     if(!target)
     {
-        PSendSysMessage(LANG_NO_CHAR_SELECTED);
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
@@ -655,7 +655,7 @@ bool ChatHandler::HandleCooldownCommand(const char* args)
     Player* target = getSelectedPlayer();
     if(!target)
     {
-        PSendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
         return true;
     }
 
@@ -675,7 +675,7 @@ bool ChatHandler::HandleCooldownCommand(const char* args)
 
         if(!sSpellStore.LookupEntry(spell_id))
         {
-            PSendSysMessage(LANG_UNKNOWN_SPELL, target==m_session->GetPlayer() ? LANG_YOU : target->GetName());
+            PSendSysMessage(LANG_UNKNOWN_SPELL, target==m_session->GetPlayer() ? GetMangosString(LANG_YOU) : target->GetName());
             return true;
         }
 
@@ -685,7 +685,7 @@ bool ChatHandler::HandleCooldownCommand(const char* args)
         data << uint32(0);
         target->GetSession()->SendPacket(&data);
         target->RemoveSpellCooldown(spell_id);
-        PSendSysMessage(LANG_REMOVE_COOLDOWN, spell_id, target==m_session->GetPlayer() ? LANG_YOU : target->GetName());
+        PSendSysMessage(LANG_REMOVE_COOLDOWN, spell_id, target==m_session->GetPlayer() ? GetMangosString(LANG_YOU) : target->GetName());
     }
     return true;
 }
@@ -1543,7 +1543,7 @@ bool ChatHandler::HandleLearnCommand(const char* args)
 
     if(!targetPlayer)
     {
-        PSendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
         return true;
     }
 
@@ -1627,7 +1627,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
     if(!plTarget)
         plTarget = pl;
 
-    sLog.outDetail(LANG_ADDITEM, itemId, count);
+    sLog.outDetail(GetMangosString(LANG_ADDITEM), itemId, count);
 
     ItemPrototype const *pProto = objmgr.GetItemPrototype(itemId);
     if(!pProto)
@@ -1771,7 +1771,7 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
     if(!plTarget)
         plTarget = pl;
 
-    sLog.outDetail(LANG_ADDITEMSET, itemsetId);
+    sLog.outDetail(GetMangosString(LANG_ADDITEMSET), itemsetId);
 
     QueryResult *result = WorldDatabase.PQuery("SELECT `entry` FROM `item_template` WHERE `itemset` = %u",itemsetId);
 
@@ -2194,7 +2194,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
     Player* target = getSelectedPlayer();
     if(!target)
     {
-        PSendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
         return true;
     }
 
@@ -2221,7 +2221,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
             if (name.find(namepart) != std::string::npos)
             {
                 // send skill in "id - [namedlink]" format
-                PSendSysMessage(LANG_SKILL_LIST "%s",id,id,skillInfo->name[sWorld.GetDBClang()],(target->HasSkill(id) ? LANG_KNOWN : ""));
+                PSendSysMessage(LANG_SKILL_LIST,id,id,skillInfo->name[sWorld.GetDBClang()],(target->HasSkill(id) ? GetMangosString(LANG_KNOWN) : ""));
 
                 counter++;
             }
@@ -2237,7 +2237,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
     Player* target = getSelectedPlayer();
     if( !target )
     {
-        PSendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
         return true;
     }
 
@@ -2278,18 +2278,18 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
 
                 // include rank in link name
                 if(rank)
-                    ss << LANG_SPELL_RANK << rank;
+                    ss << GetMangosString(LANG_SPELL_RANK) << rank;
 
                 ss << "]|h|r";
 
                 if(talent)
-                    ss << LANG_TALENT;
+                    ss << GetMangosString(LANG_TALENT);
                 if(passive)
-                    ss << LANG_PASSIVE;
+                    ss << GetMangosString(LANG_PASSIVE);
                 if(learn)
-                    ss << LANG_LEARN;
+                    ss << GetMangosString(LANG_LEARN);
                 if(known)
-                    ss << LANG_KNOWN;
+                    ss << GetMangosString(LANG_KNOWN);
 
                 SendSysMessage(ss.str().c_str());
 
@@ -2307,7 +2307,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
     Player* target = getSelectedPlayer();
     if( !target )
     {
-        PSendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
         return true;
     }
 
@@ -2350,14 +2350,14 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
         if(status == QUEST_STATUS_COMPLETE)
         {
             if(target->GetQuestRewardStatus(id))
-                statusStr = LANG_COMMAND_QUEST_REWARDED;
+                statusStr = GetMangosString(LANG_COMMAND_QUEST_REWARDED);
             else
-                statusStr = LANG_COMMAND_QUEST_COMPLETE;
+                statusStr = GetMangosString(LANG_COMMAND_QUEST_COMPLETE);
         }
         else if(status == QUEST_STATUS_INCOMPLETE)
-            statusStr = LANG_COMMAND_QUEST_ACTIVE;
+            statusStr = GetMangosString(LANG_COMMAND_QUEST_ACTIVE);
 
-        PSendSysMessage(LANG_QUEST_LIST "%s",id,id,name.c_str(),(status == QUEST_STATUS_COMPLETE ? LANG_COMPLETE : (status == QUEST_STATUS_INCOMPLETE ? LANG_ACTIVE : "") ));
+        PSendSysMessage(LANG_QUEST_LIST,id,id,name.c_str(),(status == QUEST_STATUS_COMPLETE ? GetMangosString(LANG_COMPLETE) : (status == QUEST_STATUS_INCOMPLETE ? GetMangosString(LANG_ACTIVE) : "") ));
     } while (result->NextRow());
 
     delete result;
@@ -2753,7 +2753,7 @@ bool ChatHandler::HandleReviveCommand(const char* args)
 
     if(!SelectedPlayer)
     {
-        PSendSysMessage(LANG_NO_CHAR_SELECTED);
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
@@ -2918,14 +2918,14 @@ bool ChatHandler::HandleNearGraveCommand(const char* args)
 
         g_team = data->team;
 
-        std::string team_name = LANG_COMMAND_GRAVEYARD_NOTEAM;
+        std::string team_name = GetMangosString(LANG_COMMAND_GRAVEYARD_NOTEAM);
 
         if(g_team == 0)
-            team_name = LANG_COMMAND_GRAVEYARD_ANY;
+            team_name = GetMangosString(LANG_COMMAND_GRAVEYARD_ANY);
         else if(g_team == HORDE)
-            team_name = LANG_COMMAND_GRAVEYARD_HORDE;
+            team_name = GetMangosString(LANG_COMMAND_GRAVEYARD_HORDE);
         else if(g_team == ALLIANCE)
-            team_name = LANG_COMMAND_GRAVEYARD_ALLIANCE;
+            team_name = GetMangosString(LANG_COMMAND_GRAVEYARD_ALLIANCE);
 
         PSendSysMessage(LANG_COMMAND_GRAVEYARDNEAREST, g_id,team_name.c_str(),player->GetZoneId());
     }
@@ -2934,11 +2934,11 @@ bool ChatHandler::HandleNearGraveCommand(const char* args)
         std::string team_name;
 
         if(g_team == 0)
-            team_name = LANG_COMMAND_GRAVEYARD_ANY;
+            team_name = GetMangosString(LANG_COMMAND_GRAVEYARD_ANY);
         else if(g_team == HORDE)
-            team_name = LANG_COMMAND_GRAVEYARD_HORDE;
+            team_name = GetMangosString(LANG_COMMAND_GRAVEYARD_HORDE);
         else if(g_team == ALLIANCE)
-            team_name = LANG_COMMAND_GRAVEYARD_ALLIANCE;
+            team_name = GetMangosString(LANG_COMMAND_GRAVEYARD_ALLIANCE);
 
         if(g_team == ~uint32(0))
             PSendSysMessage(LANG_COMMAND_ZONENOGRAVEYARDS, player->GetZoneId());
@@ -2962,7 +2962,7 @@ bool ChatHandler::HandlePlayEmoteCommand(const char* args)
     Creature* target = getSelectedCreature();
     if(!target)
     {
-        PSendSysMessage(LANG_SELECT_CREATURE);
+        SendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
 
@@ -3016,7 +3016,7 @@ bool ChatHandler::HandleNpcInfoSetCommand(const char* args)
     Creature* target = getSelectedCreature();
     if(!target)
     {
-        PSendSysMessage(LANG_SELECT_CREATURE);
+        SendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
 
@@ -3061,12 +3061,12 @@ bool ChatHandler::HandleExploreCheatCommand(const char* args)
 
     if (flag != 0)
     {
-        sprintf((char*)buf,LANG_YOURS_EXPLORE_SET_ALL,
+        sprintf((char*)buf,ChatHandler(chr).GetMangosString(LANG_YOURS_EXPLORE_SET_ALL),
             m_session->GetPlayer()->GetName());
     }
     else
     {
-        sprintf((char*)buf,LANG_YOURS_EXPLORE_SET_NOTHING,
+        sprintf((char*)buf,ChatHandler(chr).GetMangosString(LANG_YOURS_EXPLORE_SET_NOTHING),
             m_session->GetPlayer()->GetName());
     }
 
@@ -3103,7 +3103,7 @@ bool ChatHandler::HandleHoverCommand(const char* args)
     if (flag)
         SendSysMessage(LANG_HOVER_ENABLED);
     else
-        PSendSysMessage(LANG_HOVER_DISABLED);
+        SendSysMessage(LANG_HOVER_DISABLED);
 
     return true;
 }
@@ -3397,14 +3397,14 @@ bool ChatHandler::HandleSetValue(const char* args)
     if(isint32)
     {
         iValue = (uint32)atoi(py);
-        sLog.outDebug( LANG_SET_UINT, GUID_LOPART(guid), Opcode, iValue);
+        sLog.outDebug(GetMangosString(LANG_SET_UINT), GUID_LOPART(guid), Opcode, iValue);
         target->SetUInt32Value( Opcode , iValue );
         PSendSysMessage(LANG_SET_UINT_FIELD, GUID_LOPART(guid), Opcode,iValue);
     }
     else
     {
         fValue = (float)atof(py);
-        sLog.outDebug( LANG_SET_FLOAT, GUID_LOPART(guid), Opcode, fValue);
+        sLog.outDebug(GetMangosString(LANG_SET_FLOAT), GUID_LOPART(guid), Opcode, fValue);
         target->SetFloatValue( Opcode , fValue );
         PSendSysMessage(LANG_SET_FLOAT_FIELD, GUID_LOPART(guid), Opcode,fValue);
     }
@@ -3447,13 +3447,13 @@ bool ChatHandler::HandleGetValue(const char* args)
     if(isint32)
     {
         iValue = target->GetUInt32Value( Opcode );
-        sLog.outDebug( LANG_GET_UINT, GUID_LOPART(guid), Opcode, iValue);
+        sLog.outDebug(GetMangosString(LANG_GET_UINT), GUID_LOPART(guid), Opcode, iValue);
         PSendSysMessage(LANG_GET_UINT_FIELD, GUID_LOPART(guid), Opcode,    iValue);
     }
     else
     {
         fValue = target->GetFloatValue( Opcode );
-        sLog.outDebug( LANG_GET_FLOAT, GUID_LOPART(guid), Opcode, fValue);
+        sLog.outDebug(GetMangosString(LANG_GET_FLOAT), GUID_LOPART(guid), Opcode, fValue);
         PSendSysMessage(LANG_GET_FLOAT_FIELD, GUID_LOPART(guid), Opcode, fValue);
     }
 
@@ -3476,7 +3476,7 @@ bool ChatHandler::HandleSet32Bit(const char* args)
     if (Value > 32)                                         //uint32 = 32 bits
         return false;
 
-    sLog.outDebug( LANG_SET_32BIT , Opcode, Value);
+    sLog.outDebug(GetMangosString(LANG_SET_32BIT), Opcode, Value);
 
     m_session->GetPlayer( )->SetUInt32Value( Opcode , 2^Value );
 
@@ -3504,7 +3504,7 @@ bool ChatHandler::HandleMod32Value(const char* args)
         return false;
     }
 
-    sLog.outDebug( LANG_CHANGE_32BIT , Opcode, Value);
+    sLog.outDebug(GetMangosString(LANG_CHANGE_32BIT), Opcode, Value);
 
     int CurrentValue = (int)m_session->GetPlayer( )->GetUInt32Value( Opcode );
 
@@ -3862,12 +3862,12 @@ bool ChatHandler::HandleResetAllCommand(const char * args)
     if(casename=="spells")
     {
         atLogin = AT_LOGIN_RESET_SPELLS;
-        sWorld.SendWorldText(LANG_RESETALL_SPELLS);
+        sWorld.SendWorldText(GetMangosString(LANG_RESETALL_SPELLS));
     }
     else if(casename=="talents")
     {
         atLogin = AT_LOGIN_RESET_TALENTS;
-        sWorld.SendWorldText(LANG_RESETALL_TALENTS);
+        sWorld.SendWorldText(GetMangosString(LANG_RESETALL_TALENTS));
     }
     else
     {
@@ -4165,9 +4165,9 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
             if(fields[2].GetBool() && (fields[1].GetUInt64() == (uint64)0 ||unbandate >= time(NULL)) )
                 active = true;
             bool permanent = (fields[1].GetUInt64() == (uint64)0);
-            std::string bantime = permanent?LANG_BANINFO_INFINITE:secsToTimeString(fields[1].GetUInt64(), true);
+            std::string bantime = permanent?GetMangosString(LANG_BANINFO_INFINITE):secsToTimeString(fields[1].GetUInt64(), true);
             PSendSysMessage(LANG_BANINFO_HISTORYENTRY,
-                fields[0].GetString(), bantime.c_str(), active ? LANG_BANINFO_YES:LANG_BANINFO_NO, fields[4].GetString(), fields[5].GetString());
+                fields[0].GetString(), bantime.c_str(), active ? GetMangosString(LANG_BANINFO_YES):GetMangosString(LANG_BANINFO_NO), fields[4].GetString(), fields[5].GetString());
         }while (result->NextRow());
 
         delete result;
@@ -4183,8 +4183,8 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
         fields = result->Fetch();
         bool permanent = (fields[6].GetUInt64()==(uint64)0);
         PSendSysMessage(LANG_BANINFO_IPENTRY,
-            fields[0].GetString(), fields[1].GetString(), permanent ? LANG_BANINFO_NEVER:fields[2].GetString(),
-            permanent ? LANG_BANINFO_INFINITE:secsToTimeString(fields[3].GetUInt64(), true).c_str(), fields[4].GetString(), fields[5].GetString());
+            fields[0].GetString(), fields[1].GetString(), permanent ? GetMangosString(LANG_BANINFO_NEVER):fields[2].GetString(),
+            permanent ? GetMangosString(LANG_BANINFO_INFINITE):secsToTimeString(fields[3].GetUInt64(), true).c_str(), fields[4].GetString(), fields[5].GetString());
         delete result;
     }
     return true;
@@ -4451,11 +4451,11 @@ bool ChatHandler::HandleMovegensCommand(const char* /*args*/)
     {
         switch((*itr)->GetMovementGeneratorType())
         {
-            case IDLE_MOTION_TYPE:          SendSysMessage("   " LANG_MOVEGENS_IDLE);          break;
-            case RANDOM_MOTION_TYPE:        SendSysMessage("   " LANG_MOVEGENS_RANDOM);        break;
-            case WAYPOINT_MOTION_TYPE:      SendSysMessage("   " LANG_MOVEGENS_WAYPOINT);      break;
-            case ANIMAL_RANDOM_MOTION_TYPE: SendSysMessage("   " LANG_MOVEGENS_ANIMAL_RANDOM); break;
-            case CONFUSED_MOTION_TYPE:      SendSysMessage("   " LANG_MOVEGENS_CONFUSED);      break;
+            case IDLE_MOTION_TYPE:          SendSysMessage(LANG_MOVEGENS_IDLE);          break;
+            case RANDOM_MOTION_TYPE:        SendSysMessage(LANG_MOVEGENS_RANDOM);        break;
+            case WAYPOINT_MOTION_TYPE:      SendSysMessage(LANG_MOVEGENS_WAYPOINT);      break;
+            case ANIMAL_RANDOM_MOTION_TYPE: SendSysMessage(LANG_MOVEGENS_ANIMAL_RANDOM); break;
+            case CONFUSED_MOTION_TYPE:      SendSysMessage(LANG_MOVEGENS_CONFUSED);      break;
             case TARGETED_MOTION_TYPE:
             {
                 if(unit->GetTypeId()==TYPEID_PLAYER)
@@ -4463,18 +4463,18 @@ bool ChatHandler::HandleMovegensCommand(const char* /*args*/)
                     TargetedMovementGenerator<Player> const* mgen = static_cast<TargetedMovementGenerator<Player> const*>(*itr);
                     Unit* target = mgen->GetTarget();
                     if(target)
-                        PSendSysMessage("   " LANG_MOVEGENS_TARGETED_PLAYER,target->GetName(),target->GetGUIDLow());
+                        PSendSysMessage(LANG_MOVEGENS_TARGETED_PLAYER,target->GetName(),target->GetGUIDLow());
                     else
-                        SendSysMessage("   " LANG_MOVEGENS_TARGETED_NULL);
+                        SendSysMessage(LANG_MOVEGENS_TARGETED_NULL);
                 }
                 else
                 {
                     TargetedMovementGenerator<Creature> const* mgen = static_cast<TargetedMovementGenerator<Creature> const*>(*itr);
                     Unit* target = mgen->GetTarget();
                     if(target)
-                        PSendSysMessage("   " LANG_MOVEGENS_TARGETED_CREATURE,target->GetName(),target->GetGUIDLow());
+                        PSendSysMessage(LANG_MOVEGENS_TARGETED_CREATURE,target->GetName(),target->GetGUIDLow());
                     else
-                        SendSysMessage("   " LANG_MOVEGENS_TARGETED_NULL);
+                        SendSysMessage(LANG_MOVEGENS_TARGETED_NULL);
                 }
                 break;
             }
@@ -4483,14 +4483,14 @@ bool ChatHandler::HandleMovegensCommand(const char* /*args*/)
                 {
                     float x,y,z;
                     ((Creature*)unit)->GetRespawnCoord(x,y,z);
-                    PSendSysMessage("   " LANG_MOVEGENS_HOME_CREATURE,x,y,z);
+                    PSendSysMessage(LANG_MOVEGENS_HOME_CREATURE,x,y,z);
                 }
                 else
-                    SendSysMessage("   " LANG_MOVEGENS_HOME_PLAYER);
+                    SendSysMessage(LANG_MOVEGENS_HOME_PLAYER);
                 break;
-            case FLIGHT_MOTION_TYPE:        SendSysMessage("   " LANG_MOVEGENS_FLIGHT);  break;
+            case FLIGHT_MOTION_TYPE:        SendSysMessage(LANG_MOVEGENS_FLIGHT);  break;
             default:
-                PSendSysMessage("   " LANG_MOVEGENS_UNKNOWN,(*itr)->GetMovementGeneratorType());
+                PSendSysMessage(LANG_MOVEGENS_UNKNOWN,(*itr)->GetMovementGeneratorType());
                 break;
         }
     }

@@ -20,7 +20,6 @@
 #include "Player.h"
 #include "BattleGround.h"
 #include "Creature.h"
-#include "ObjectMgr.h"
 #include "MapManager.h"
 #include "Language.h"                                       // for chat messages
 #include "Chat.h"
@@ -342,7 +341,7 @@ void BattleGround::EndBattleGround(uint32 winner)
 
     if(winner == ALLIANCE)
     {
-        winmsg = LANG_BG_A_WINS;
+        winmsg = GetMangosString(LANG_BG_A_WINS);
 
         PlaySoundToAll(SOUND_ALLIANCE_WINS);                // alliance wins sound
 
@@ -350,7 +349,7 @@ void BattleGround::EndBattleGround(uint32 winner)
     }
     else
     {
-        winmsg = LANG_BG_H_WINS;
+        winmsg = GetMangosString(LANG_BG_H_WINS);
 
         PlaySoundToAll(SOUND_HORDE_WINS);                   // horde wins sound
 
@@ -909,8 +908,22 @@ void BattleGround::SendMessageToAll(char const* text)
     SendPacketToAll(&data);
 }
 
+void BattleGround::SendMessageToAll(uint32 entry)
+{
+    char const* text = GetMangosString(entry);
+    WorldPacket data;
+    ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, text, NULL);
+    SendPacketToAll(&data);
+}
+
 void BattleGround::EndNow()
 {
     SetStatus(STATUS_WAIT_LEAVE);
     SetEndTime(TIME_TO_AUTOREMOVE);
+}
+
+// Battlegound messages are localized using the dbc lang, they are not client language dependant
+const char *BattleGround::GetMangosString(uint32 entry)
+{
+    return objmgr.GetMangosString(entry);
 }
