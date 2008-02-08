@@ -2411,7 +2411,9 @@ INSERT INTO `mangos_string` VALUES
 (702,'Thirty seconds until the Arena battle begins!',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (703,'Fifteen seconds until the Arena battle begins!',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (704,'The Arena battle has begun!',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(705,'You must wait %s before speaking again.',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+(705,'You must wait %s before speaking again.',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(706,'This item(s) have problems with equipping/storing in inventory.',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+
 /*!40000 ALTER TABLE `mangos_string` ENABLE KEYS */;
 UNLOCK TABLES;
 

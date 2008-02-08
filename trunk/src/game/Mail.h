@@ -21,6 +21,7 @@
 #include <map>
 
 #define MAIL_BODY_ITEM_TEMPLATE 8383                        // - plain letter, A Dusty Unsent Letter: 889
+#define MAX_MAIL_ITEMS 12
 
 enum MAIL_RESPONSE
 {
@@ -46,7 +47,7 @@ enum MAIL_ERRORS
     MAIL_ERR_MAIL_AND_CHAT_SUSPENDED   = 17
 };
 
-enum MAIL_CHECKED
+enum MailCheckedState
 {
     NOT_READ            = 0,
     READ                = 1,
@@ -120,10 +121,11 @@ struct MailItem
 typedef std::map<uint32, MailItem> MailItemMap;
 
 
-struct MailItemsInfo
+class MailItemsInfo
 {
-    MailItemMap i_MailItemMap;                              // Keep the items in a map to avoid duplicate guids (which can happen), store only low part of guid
-
+public:
+    MailItemMap::const_iterator begin() const { return i_MailItemMap.begin(); }
+    MailItemMap::const_iterator end() const { return i_MailItemMap.end(); }
     MailItemMap::iterator begin() { return i_MailItemMap.begin(); }
     MailItemMap::iterator end() { return i_MailItemMap.end(); }
 
@@ -145,7 +147,7 @@ struct MailItemsInfo
         i_MailItemMap[guidlow] = mailItem;
     }
 
-    uint8 size()
+    uint8 size() const
     {
         return i_MailItemMap.size();
     }
@@ -158,6 +160,8 @@ struct MailItemsInfo
             mailItem.deleteItem();
         }
     }
+private:
+    MailItemMap i_MailItemMap;                              // Keep the items in a map to avoid duplicate guids (which can happen), store only low part of guid
 };
 
 struct Mail
@@ -208,7 +212,7 @@ struct Mail
         return false;
     }
 
-    bool HasItems() { return items.empty() ? false : true; }
+    bool HasItems() const { return !items.empty(); }
 };
 
 #endif

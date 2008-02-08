@@ -1703,8 +1703,6 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
 
     uint32 mailId = objmgr.GenerateMailID();
     uint32 sender_guid = m_session->GetPlayer()->GetGUID();
-    time_t dtime = time(NULL);
-    time_t etime = dtime + (30 * DAY);
     uint32 messagetype = MAIL_NORMAL;
     uint32 stationery = MAIL_STATIONERY_GM;
     uint32 itemTextId = 0;
@@ -1714,16 +1712,8 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
     }
 
     Player *receiver = objmgr.GetPlayer((uint32) receiver_guid);
-    if(receiver)
-    {
-        MailItemsInfo mi;
-        receiver->CreateMail(mailId, messagetype, sender_guid, subject.c_str(), itemTextId, &mi, (uint64)etime, (uint64)dtime, 0, 0, 0);
-    }
 
-    CharacterDatabase.escape_string(subject);
-    CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`stationery`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%u', '%u', '%u', '%u', '%s', '%u', '0', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
-        mailId, messagetype, stationery, sender_guid, receiver_guid, subject.c_str(), itemTextId, (uint64)etime, (uint64)dtime, NOT_READ);
+    WorldSession::SendMailTo(receiver,messagetype, stationery, sender_guid, receiver_guid, subject, itemTextId, NULL, 0, 0, NOT_READ);
 
     PSendSysMessage(LANG_MAIL_SENT, name.c_str());
     return true;

@@ -33,7 +33,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     uint64 mailbox;
     std::string receiver, subject, body;
-    uint32 unk1, unk2, unk3, unk4, money, COD, mailId;
+    uint32 unk1, unk2, unk3, unk4, money, COD;
     uint8 unk5;
     recv_data >> mailbox;
     recv_data >> receiver;
@@ -227,32 +227,12 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         needItemDelay = pl->GetSession()->GetAccountId() != rc_account;
     }
 
-    uint32 messagetype = MAIL_NORMAL;
-
-    mailId = objmgr.GenerateMailID();
-
     // If theres is an item, there is a one hour delivery delay if sent to another account's character.
-    time_t dtime = needItemDelay ? time(NULL) + sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY) : time(NULL);
+    uint32 deliver_delay = needItemDelay ? sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY) : 0;
 
-    time_t etime = dtime + DAY * ((COD > 0)? 3 : 30);       //time if COD 3 days, if no COD 30 days
+    // will delete item or place to receiver mail list
+    WorldSession::SendMailTo(receive, MAIL_NORMAL, MAIL_STATIONERY_NORMAL, pl->GetGUIDLow(), GUID_LOPART(rc), subject, itemTextId, &mi, money, COD, NOT_READ, deliver_delay);
 
-    if (receive)
-        receive->CreateMail(mailId, messagetype, pl->GetGUIDLow(), subject, itemTextId, &mi, etime, dtime, money, COD, NOT_READ);
-    else
-        mi.deleteIncludedItems();
-
-    // backslash all '
-    CharacterDatabase.escape_string(subject);
-    //not needed : CharacterDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
-    CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '%u', '" I64FMTD "','" I64FMTD "', '%u', '%u', '%d')",
-        mailId, messagetype, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), itemTextId, items_count ? 1 : 0, (uint64)etime, (uint64)dtime, money, COD, NOT_READ);
-
-    for(MailItemMap::iterator mailItemIter = mi.begin(); mailItemIter != mi.end(); ++mailItemIter)
-    {
-        MailItem& mailItem = mailItemIter->second;
-        CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, mailItem.item_guidlow, mailItem.item_template);
-    }
     CharacterDatabase.BeginTransaction();
     pl->SaveInventoryAndGoldToDB();
     CharacterDatabase.CommitTransaction();
@@ -321,8 +301,6 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     CharacterDatabase.CommitTransaction();
     pl->RemoveMail(mailId);
 
-    uint32 messageID = objmgr.GenerateMailID();
-
     MailItemsInfo mi;
 
     if(m->HasItems())
@@ -341,13 +319,13 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
         }
     }
 
-    SendReturnToSender(messageID, 0, GetAccountId(), m->receiver, m->sender, m->subject, m->itemTextId, &mi, m->money, 0);
+    SendReturnToSender(MAIL_NORMAL, GetAccountId(), m->receiver, m->sender, m->subject, m->itemTextId, &mi, m->money, 0);
 
     delete m;                                               //we can deallocate old mail
     pl->SendMailResult(mailId, MAIL_RETURNED_TO_SENDER, 0);
 }
 
-void WorldSession::SendReturnToSender(uint32 mailId, uint8 messageType, uint32 sender_acc, uint32 sender_guid, uint32 receiver_guid, std::string subject, uint32 itemTextId, MailItemsInfo *mi, uint32 money, uint32 COD)
+void WorldSession::SendReturnToSender(uint8 messageType, uint32 sender_acc, uint32 sender_guid, uint32 receiver_guid, std::string subject, uint32 itemTextId, MailItemsInfo *mi, uint32 money, uint32 COD)
 {
     Player *receiver = objmgr.GetPlayer(MAKE_GUID(receiver_guid, HIGHGUID_PLAYER));
 
@@ -377,29 +355,10 @@ void WorldSession::SendReturnToSender(uint32 mailId, uint8 messageType, uint32 s
         }
 
         // If theres is an item, there is a one hour delivery delay.
-        time_t deliver_time = needItemDelay ? time(NULL) + sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY) : time(NULL);
+        uint32 deliver_delay = needItemDelay ? sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY) : 0;
 
-        time_t expire_time = deliver_time + 30*DAY;
-
-        if(receiver)
-        {
-            receiver->CreateMail(mailId, 0, sender_guid, subject, itemTextId, mi, expire_time, deliver_time, money, 0, RETURNED_CHECKED);
-        }
-        else
-        {
-            mi->deleteIncludedItems();
-        }
-
-        CharacterDatabase.escape_string(subject);           //we cannot forget to delete COD, if returning mail with COD
-        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '0', '%u', '%u', '%s', '%u', '%u', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
-            mailId, sender_guid, receiver_guid, subject.c_str(), itemTextId, mi->size() ? 1 : 0, (uint64)expire_time, (uint64)deliver_time, money,RETURNED_CHECKED);
-
-            for(MailItemMap::iterator mailItemIter = mi->begin(); mailItemIter != mi->end(); ++mailItemIter)
-            {
-                MailItem& mailItem = mailItemIter->second;
-                CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, mailItem.item_guidlow, mailItem.item_template);
-            }
+        // will delete item or place to receiver mail list
+        WorldSession::SendMailTo(receiver, MAIL_NORMAL, MAIL_STATIONERY_NORMAL, sender_guid, receiver_guid, subject, itemTextId, mi, money, 0, RETURNED_CHECKED,deliver_delay);
     }
     else
     {
@@ -480,23 +439,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
             // check player existanse
             if(receive || sender_accId)
             {
-                // If theres is an item, there is a one hour delivery delay.
-                time_t dtime = time(NULL);
-
-                time_t etime = dtime + (30 * DAY);
-                uint32 newMailId = objmgr.GenerateMailID();
-                if (receive)
-                {
-                    MailItemsInfo mi;
-                    receive->CreateMail(newMailId, 0, m->receiver, m->subject, 0, &mi, etime, dtime, m->COD, 0, COD_PAYMENT_CHECKED);
-                }
-
-                //escape apostrophes
-                std::string subject = m->subject;
-                CharacterDatabase.escape_string(subject);
-                CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-                    "VALUES ('%u', '0', '%u', '%u', '%s', '0', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
-                    newMailId, m->receiver, m->sender, subject.c_str(), (uint64)etime, (uint64)dtime, m->COD, COD_PAYMENT_CHECKED);
+                WorldSession::SendMailTo(receive, MAIL_NORMAL, MAIL_STATIONERY_NORMAL, m->receiver, m->sender, m->subject, 0, NULL, m->COD, 0, COD_PAYMENT_CHECKED);
             }
 
             pl->ModifyMoney( -int32(m->COD) );
@@ -618,7 +561,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << (uint32) 0;                                 // unk
         data << (*itr)->subject;                            // Subject string - once 00, when mail type = 3
 
-        uint8 item_count = (*itr)->items.size();            // max count is 12
+        uint8 item_count = (*itr)->items.size();            // max count is MAX_MAIL_ITEMS (12)
 
         if(item_count)
         {
@@ -792,4 +735,70 @@ void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & /*recv_data*/ )
         data << (uint32) 0x00000000;
     }
     SendPacket(&data);
+}
+
+void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 stationery, uint32 sender_guidlow, uint32 receiver_guidlow, std::string subject, uint32 itemTextId, MailItemsInfo* mi, uint32 money, uint32 COD, uint32 checked, uint32 deliver_delay)
+{
+    uint32 mailId = objmgr.GenerateMailID();
+
+    //time if COD 3 days, if no COD 30 days
+    time_t deliver_time = time(NULL) + deliver_delay;
+    time_t expire_time = deliver_time + DAY * ((COD > 0)? 3 : 30);
+
+    if(receiver)
+    {
+        receiver->AddNewMailDeliverTime(deliver_time);
+
+        if ( receiver->IsMailsLoaded() )
+        {
+            Mail * m = new Mail;
+            m->messageID = mailId;
+            m->messageType = messageType;
+            m->stationery = stationery;
+            m->sender = sender_guidlow;
+            m->receiver = receiver->GetGUIDLow();
+            m->subject = subject;
+            m->itemTextId = itemTextId;
+            
+            if(mi)
+                m->AddAllItems(*mi);
+
+            m->expire_time = expire_time;
+            m->deliver_time = deliver_time;
+            m->money = money;
+            m->COD = COD;
+            m->checked = checked;
+            m->state = MAIL_STATE_UNCHANGED;
+
+            receiver->AddMail(m);                           //to insert new mail to beginning of maillist
+
+            if(mi)
+            {
+                for(MailItemMap::iterator mailItemIter = mi->begin(); mailItemIter != mi->end(); ++mailItemIter)
+                {
+                    MailItem& mailItem = mailItemIter->second;
+                    if(mailItem.item)
+                        receiver->AddMItem(mailItem.item);
+                }
+            }
+        }
+        else if(mi)
+            mi->deleteIncludedItems();
+    }
+    else if(mi)
+        mi->deleteIncludedItems();
+
+    CharacterDatabase.escape_string(subject);
+    CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`stationery`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+        "VALUES ('%u', '%u', '%u', '%u', '%u', '%s', '%u', '%u', '" I64FMTD "','" I64FMTD "', '%u', '%u', '%d')",
+        mailId, messageType, stationery, sender_guidlow, receiver_guidlow, subject.c_str(), itemTextId, mi->size() ? 1 : 0, (uint64)expire_time, (uint64)deliver_time, money, COD, checked);
+
+    if(mi)
+    {
+        for(MailItemMap::const_iterator mailItemIter = mi->begin(); mailItemIter != mi->end(); ++mailItemIter)
+        {
+            MailItem const& mailItem = mailItemIter->second;
+            CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, mailItem.item_guidlow, mailItem.item_template);
+        }
+    }
 }

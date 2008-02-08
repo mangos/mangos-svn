@@ -2357,52 +2357,6 @@ void Player::RemoveMail(uint32 id)
     }
 }
 
-//call this function when mail receiver is online
-void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemTextId, MailItemsInfo *mi, time_t expire_time, time_t deliver_time, uint32 money, uint32 COD, uint32 checked)
-{
-    if(deliver_time <= time(NULL))                          // ready now
-    {
-        unReadMails++;
-        SendNewMail();
-    }
-    else                                                    // not ready and no have ready mails
-    {
-        if(!m_nextMailDelivereTime || m_nextMailDelivereTime > deliver_time)
-            m_nextMailDelivereTime =  deliver_time;
-    }
-
-    if ( !m_mailsLoaded )
-    {
-        mi->deleteIncludedItems();
-        return;
-    }
-    Mail * m = new Mail;
-    m->messageID = mailId;
-    m->messageType = messageType;
-    m->sender = sender;
-    m->receiver = this->GetGUIDLow();
-    m->subject = subject;
-    m->itemTextId = itemTextId;
-
-    m->AddAllItems(*mi);
-
-    m->expire_time = expire_time;
-    m->deliver_time = deliver_time;
-    m->money = money;
-    m->COD = COD;
-    m->checked = checked;
-    m->state = MAIL_STATE_UNCHANGED;
-
-    m_mail.push_front(m);                                   //to insert new mail to beginning of maillist
-    if(m->HasItems())
-        for(MailItemMap::iterator mailItemIter = mi->begin(); mailItemIter != mi->end(); ++mailItemIter)
-        {
-            MailItem& mailItem = mailItemIter->second;
-            if(mailItem.item)
-                AddMItem(mailItem.item);
-        }
-}
-
 void Player::SendMailResult(uint32 mailId, uint32 mailAction, uint32 mailError, uint32 equipError, uint32 item_guid, uint32 item_count)
 {
     WorldPacket data(SMSG_SEND_MAIL_RESULT, (12));
@@ -2443,6 +2397,20 @@ void Player::UpdateNextMailTimeAndUnreads()
         }
         if(((*itr)->state & READ) == 0)
             ++unReadMails;
+    }
+}
+
+void Player::AddNewMailDeliverTime(time_t deliver_time)
+{
+    if(deliver_time <= time(NULL))                          // ready now
+    {
+        unReadMails++;
+        SendNewMail();
+    }
+    else                                                    // not ready and no have ready mails
+    {
+        if(!m_nextMailDelivereTime || m_nextMailDelivereTime > deliver_time)
+            m_nextMailDelivereTime =  deliver_time;
     }
 }
 
@@ -3264,7 +3232,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     RemovePetitionsAndSigns(playerguid, 10);
 
     // return back all mails with COD and Item
-    QueryResult *resultMail = CharacterDatabase.PQuery("SELECT `id`,`sender`,`subject`,`itemTextId`,`has_items` FROM `mail` WHERE `receiver`='%u' AND `has_items`<>0 AND `cod`<>0", guid);
+    QueryResult *resultMail = CharacterDatabase.PQuery("SELECT `id`,`sender`,`subject`,`itemTextId`,`money`,`has_items` FROM `mail` WHERE `receiver`='%u' AND `has_items`<>0 AND `cod`<>0", guid);
     if(resultMail)
     {
         do
@@ -3275,7 +3243,8 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             uint32 sender        = fields[1].GetUInt32();
             std::string subject  = fields[2].GetCppString();
             uint32 itemTextId    = fields[3].GetUInt32();
-            bool has_items       = fields[4].GetBool();
+            uint32 money         = fields[4].GetUInt32();
+            bool has_items       = fields[5].GetBool();
 
             //we can return mail now
             //so firstly delete the old one
@@ -3315,10 +3284,9 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
 
             CharacterDatabase.PExecute("DELETE FROM `mail_items` WHERE `mail_id` = '%u'", mail_id);
 
-            uint64 rc_guid = MAKE_GUID(sender, HIGHGUID_PLAYER);
             uint32 pl_account = objmgr.GetPlayerAccountIdByGUID(MAKE_GUID(guid, HIGHGUID_PLAYER));
 
-            WorldSession::SendReturnToSender(mail_id, 0, pl_account, guid, rc_guid, subject, itemTextId, &mi, 0, 0);
+            WorldSession::SendReturnToSender(MAIL_NORMAL, pl_account, guid, sender, subject, itemTextId, &mi, money, 0);
         }
         while (resultMail->NextRow());
 
@@ -13045,6 +13013,8 @@ void Player::_LoadInventory(QueryResult *result, uint32 timediff)
 
     if (result)
     {
+        std::list<Item*> problematicItems;
+
         // prevent items from being added to the queue when stored
         m_itemUpdateQueueBlocked = true;
         do
@@ -13059,7 +13029,9 @@ void Player::_LoadInventory(QueryResult *result, uint32 timediff)
 
             if(!proto)
             {
-                sLog.outError( "Player::_LoadInventory: Player %s has an unknown item (id: #%u) in inventory, skipped.", GetName(),item_id );
+                CharacterDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'", item_guid);
+                CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `quid` = '%u'", item_guid);
+                sLog.outError( "Player::_LoadInventory: Player %s has an unknown item (id: #%u) in inventory, deleted.", GetName(),item_id );
                 continue;
             }
 
@@ -13067,7 +13039,10 @@ void Player::_LoadInventory(QueryResult *result, uint32 timediff)
 
             if(!item->LoadFromDB(item_guid, GetGUID(), result))
             {
-                delete item;
+                sLog.outError( "Player::_LoadInventory: Player %s has broken item (id: #%u) in inventory, deleted.", GetName(),item_id );
+                CharacterDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'", item_guid);
+                item->FSetState(ITEM_REMOVED);
+                item->SaveToDB();                           // it also deletes item object !
                 continue;
             }
 
@@ -13145,13 +13120,33 @@ void Player::_LoadInventory(QueryResult *result, uint32 timediff)
                 item->SetState(ITEM_UNCHANGED, this);
             else
             {
-                sLog.outError("Player::_LoadInventory: Player %s has item (GUID: %u Entry: %u) can't be loaded to inventory (Bag GUID: %u Slot: %u) by some reason, skipped.", GetName(),item_guid, item_id, bag_guid, slot);
-                delete item;
+                sLog.outError("Player::_LoadInventory: Player %s has item (GUID: %u Entry: %u) can't be loaded to inventory (Bag GUID: %u Slot: %u) by some reason, will send by mail.", GetName(),item_guid, item_id, bag_guid, slot);
+                CharacterDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'", item_guid);
+                problematicItems.push_back(item);
             }
         } while (result->NextRow());
 
         delete result;
         m_itemUpdateQueueBlocked = false;
+
+        // send by mail problematic items
+        while(!problematicItems.empty())
+        {
+            // fill mail
+            MailItemsInfo mi;                               // item list prepering
+
+            for(int i = 0; !problematicItems.empty() && i < MAX_MAIL_ITEMS; ++i)
+            {
+                Item* item = problematicItems.front();
+                problematicItems.pop_front();
+
+                mi.AddItem(item->GetGUIDLow(), item->GetEntry(), item);
+            }
+
+            std::string subject = objmgr.GetMangosString(LANG_NOT_EQUIPPED_ITEM, GetSession()->GetSessionLocaleIndex());
+
+            WorldSession::SendMailTo(this, MAIL_NORMAL, MAIL_STATIONERY_GM, GetGUIDLow(), GetGUIDLow(), subject, 0, &mi, 0, 0, NOT_READ);
+        }
     }
     //if(isAlive())
     _ApplyAllItemMods();
@@ -13164,11 +13159,9 @@ void Player::_LoadMailedItems(Mail *mail)
     if(!result)
         return;
 
-    Field *fields;
-
     do
     {
-        fields = result->Fetch();
+        Field *fields = result->Fetch();
         uint32 item_guid_low = fields[0].GetUInt32();
         uint32 item_template = fields[1].GetUInt32();
 

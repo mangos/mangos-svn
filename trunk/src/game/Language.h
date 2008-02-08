@@ -522,6 +522,7 @@ enum MangosStrings
     LANG_ARENA_BEGUN                    = 704,
 
     LANG_WAIT_BEFORE_SPEAKING           = 705,
+    LANG_NOT_EQUIPPED_ITEM              = 706
 };
 
 /*  NOT USED VALUES

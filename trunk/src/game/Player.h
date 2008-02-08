@@ -37,7 +37,6 @@
 #include<vector>
 
 struct Mail;
-struct MailItemsInfo;
 class Channel;
 class DynamicObject;
 class Creature;
@@ -1246,14 +1245,16 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ResetComboPointsIfNeed(const SpellEntry *spellInfo);
         void SendComboPoints();
 
-        void CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemTextId, MailItemsInfo *mi, time_t expire_time, time_t delivery_time, uint32 money, uint32 COD, uint32 checked);
         void SendMailResult(uint32 mailId, uint32 mailAction, uint32 mailError, uint32 equipError = 0, uint32 item_guid = 0, uint32 item_count = 0);
         void SendNewMail();
         void UpdateNextMailTimeAndUnreads();
+        void AddNewMailDeliverTime(time_t deliver_time);
+        bool IsMailsLoaded() const { return m_mailsLoaded; }
 
         //void SetMail(Mail *m);
         void RemoveMail(uint32 id);
 
+        void AddMail(Mail* mail) { m_mail.push_front(mail);}// for call from WorldSession::SendMailTo
         uint32 GetMailSize() { return m_mail.size();};
         Mail* GetMail(uint32 id);
 
