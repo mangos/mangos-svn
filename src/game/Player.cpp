@@ -11337,8 +11337,9 @@ void Player::RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver
     if ( getLevel() < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
         GiveXP( XP , NULL );
     else
-        ModifyMoney( pQuest->GetRewMoneyMaxLevel() );
+        ModifyMoney( int32(pQuest->GetRewMoneyMaxLevel() * sWorld.getRate(RATE_DROP_MONEY)) );
 
+    // Give player extra money if GetRewOrReqMoney > 0 and get ReqMoney if negative
     ModifyMoney( pQuest->GetRewOrReqMoney() );
 
     if(pQuest->IsDaily())
@@ -12283,7 +12284,7 @@ void Player::SendQuestReward( Quest const *pQuest, uint32 XP, Object * questGive
     else
     {
         data << uint32(0);
-        data << uint32(pQuest->GetRewOrReqMoney() + XP);
+        data << uint32(pQuest->GetRewOrReqMoney() + int32(pQuest->GetRewMoneyMaxLevel() * sWorld.getRate(RATE_DROP_MONEY)));
     }
     data << uint32(0);                                      //new 2.3.0, HonorPoints?
     data << uint32( pQuest->GetRewItemsCount() );
@@ -13885,7 +13886,7 @@ void Player::_SaveMail()
         if (m->state == MAIL_STATE_CHANGED)
         {
             CharacterDatabase.PExecute("UPDATE `mail` SET `itemTextId` = '%u',`has_items` = '%u',`expire_time` = '" I64FMTD "', `deliver_time` = '" I64FMTD "',`money` = '%u',`cod` = '%u',`checked` = '%u' WHERE `id` = '%u'",
-                m->itemTextId, m->items.size() ? 1 : 0, (uint64)m->expire_time, (uint64)m->deliver_time, m->money, m->COD, m->checked, m->messageID);
+                m->itemTextId, m->HasItems() ? 1 : 0, (uint64)m->expire_time, (uint64)m->deliver_time, m->money, m->COD, m->checked, m->messageID);
             if(m->removedItems.size())
             {
                 for(std::vector<uint32>::iterator itr2 = m->removedItems.begin(); itr2 != m->removedItems.end(); ++itr2)
