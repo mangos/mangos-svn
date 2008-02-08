@@ -74,8 +74,18 @@ bool Player::UpdateStats(Stats stat)
         default:
             break;
     }
-
+    UpdateSpellDamageAndHealingBonus();
     return true;
+}
+void Player::UpdateSpellDamageAndHealingBonus()
+{
+    // Magic damage modifiers implemented in Unit::SpellDamageBonus
+    // This information for client side use only
+    // Get healing bonus for all schools
+    SetStatInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS, SpellBaseHealingBonus(0xFFFFFFFF));
+    // Get damage bonus for all schools
+    for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; i++)
+        SetStatInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i, SpellBaseDamageBonus(1<<i));
 }
 
 bool Player::UpdateAllStats()
@@ -97,6 +107,7 @@ bool Player::UpdateAllStats()
     UpdateAllCritPercentages();
     UpdateAllSpellCritChances();
     UpdateDefenseBonusesMod();
+    UpdateSpellDamageAndHealingBonus();
 
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; i++)
         UpdateResistances(i);
