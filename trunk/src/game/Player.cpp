@@ -15073,13 +15073,14 @@ void Player::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool app
     Unit::ApplySpeedMod(mtype,rate,forced,apply);
 }
 
-void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint64 bagguid, uint8 slot)
+// Return true is the bought item has a max count to force refresh of window by caller
+bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint64 bagguid, uint8 slot)
 {
     // cheating attempt
     if(count < 1) count = 1;
 
     if(!isAlive())
-        return;
+        return false;
 
     ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
     if( pProto )
@@ -15089,7 +15090,7 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         {
             sLog.outDebug( "WORLD: BuyItemFromVendor - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(vendorguid)) );
             SendBuyError( BUY_ERR_DISTANCE_TOO_FAR, NULL, item, 0);
-            return;
+            return false;
         }
 
         // load vendor items if not yet
@@ -15099,23 +15100,23 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         if(!crItem)
         {
             SendBuyError( BUY_ERR_CANT_FIND_ITEM, pCreature, item, 0);
-            return;
+            return false;
         }
 
         if( crItem->maxcount != 0 && crItem->count < count )
         {
             SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
-            return;
+            return false;
         }
         if( getLevel() < pProto->RequiredLevel )
         {
             SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
-            return;
+            return false;
         }
         if( uint32(GetReputationRank(pProto->RequiredReputationFaction)) < pProto->RequiredReputationRank)
         {
             SendBuyError( BUY_ERR_REPUTATION_REQUIRE, pCreature, item, 0);
-            return;
+            return false;
         }
         if(pProto->ExtendedCost)
         {
@@ -15125,25 +15126,25 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
                 if(GetHonorPoints() < (iece->reqhonorpoints * count))
                 {
                     SendEquipError(EQUIP_ERR_NOT_ENOUGH_HONOR_POINTS, NULL, NULL);
-                    return;
+                    return false;
                 }
                 if(GetArenaPoints() < (iece->reqarenapoints * count))
                 {
                     SendEquipError(EQUIP_ERR_NOT_ENOUGH_ARENA_POINTS, NULL, NULL);
-                    return;
+                    return false;
                 }
                 if( (iece->reqitem1 && !HasItemCount(iece->reqitem1, (iece->reqitemcount1 * count))) ||
                     (iece->reqitem2 && !HasItemCount(iece->reqitem2, (iece->reqitemcount2 * count))) ||
                     (iece->reqitem3 && !HasItemCount(iece->reqitem3, (iece->reqitemcount3 * count))) )
                 {
                     SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
-                    return;
+                    return false;
                 }
             }
             else
             {
                 sLog.outError("Item %u have wrong ExtendedCost field value %u", pProto->ItemId, pProto->ExtendedCost);
-                return;
+                return false;
             }
         }
 
@@ -15155,7 +15156,7 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         if( GetMoney() < price )
         {
             SendBuyError( BUY_ERR_NOT_ENOUGHT_MONEY, pCreature, item, 0);
-            return;
+            return false;
         }
 
         uint8 bag = 0;                                      // init for case invalid bagGUID
@@ -15257,13 +15258,21 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
                 SendNewItem(it, count, true, false, false);
             }
             else
+            {
                 SendEquipError( msg, NULL, NULL );
+                return false;
+            }
         }
         else
+        {
             SendEquipError( EQUIP_ERR_ITEM_DOESNT_GO_TO_SLOT, NULL, NULL );
+            return false;
+        }
+        return crItem->maxcount!=0?true:false;
     }
     else
         SendBuyError( BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);
+    return false;
 }
 
 void Player::_SaveBoundInstances()

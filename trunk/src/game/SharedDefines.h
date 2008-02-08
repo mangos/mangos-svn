@@ -1672,4 +1672,13 @@ enum PetDiet
 #define GUILD_BANK_MAX_SLOTS    98
 #define GUILD_BANK_MAX_LOGS     24
 #define GUILD_MAX_RANKS         10
+
+enum AiReaction
+{
+    AI_REACTION_UNK1    = 1,
+    AI_REACTION_AGGRO   = 2,
+    AI_REACTION_UNK3    = 3,
+    AI_REACTION_UNK4    = 4
+};
+
 #endif
