@@ -147,10 +147,8 @@ public:
         i_MailItemMap[guidlow] = mailItem;
     }
 
-    uint8 size() const
-    {
-        return i_MailItemMap.size();
-    }
+    uint8 size() const { return i_MailItemMap.size(); }
+    bool empty() const { return i_MailItemMap.empty(); }
 
     void deleteIncludedItems()
     {
