@@ -538,7 +538,8 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
 
     recv_data >> vendorguid >> item >> bagguid >> slot >> count;
 
-    GetPlayer()->BuyItemFromVendor(vendorguid,item,count,bagguid,slot);
+    if (GetPlayer()->BuyItemFromVendor(vendorguid,item,count,bagguid,slot))
+        SendListInventory(vendorguid);          // Item was limited in number you can buy, then send list to update count displayed
 }
 
 void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
@@ -552,7 +553,8 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
 
     recv_data >> vendorguid >> item >> count >> unk1;
 
-    GetPlayer()->BuyItemFromVendor(vendorguid,item,count,NULL_BAG,NULL_SLOT);
+    if (GetPlayer()->BuyItemFromVendor(vendorguid,item,count,NULL_BAG,NULL_SLOT))
+        SendListInventory(vendorguid);          // Item was limited in number you can buy, then send list to update count displayed
 }
 
 void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )

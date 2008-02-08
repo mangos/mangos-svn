@@ -5549,6 +5549,14 @@ bool Unit::Attack(Unit *victim, bool playerMeleeAttack)
     if(m_attacking->GetTypeId()==TYPEID_UNIT && ((Creature*)m_attacking)->AI())
         ((Creature*)m_attacking)->AI()->AttackedBy(this);
 
+    if(GetTypeId()==TYPEID_UNIT)
+    {
+        WorldPacket data(SMSG_AI_REACTION, 12);
+        data << GetGUID();
+        data << uint32(AI_REACTION_AGGRO);              // Aggro sound
+        ((WorldObject*)this)->SendMessageToSet(&data, true);
+    }
+
     if( GetTypeId()==TYPEID_UNIT && !(((Creature*)this)->isPet() || isCharmed()) )
     {
         ((Creature*)this)->CallAssistence();
