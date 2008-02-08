@@ -2679,10 +2679,10 @@ uint8 Spell::CanCast(bool strict)
         return SPELL_FAILED_ONLY_BATTLEGROUNDS;
 
     // zone check
-    uint32 zone_id = m_caster->GetAreaId();
+    uint32 zone_id = m_caster->GetZoneId();
 
     // normal case
-    if( m_spellInfo->AreaId != zone_id && m_spellInfo->AreaId && m_spellInfo->AreaId != m_caster->GetAreaId() )
+    if( m_spellInfo->AreaId && m_spellInfo->AreaId != zone_id && m_spellInfo->AreaId != m_caster->GetAreaId() )
         return SPELL_FAILED_REQUIRES_AREA;
 
     // special cases zone check (maps not stored anywhere in DBC)
