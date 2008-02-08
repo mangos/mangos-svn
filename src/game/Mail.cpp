@@ -337,7 +337,7 @@ void WorldSession::SendReturnToSender(uint8 messageType, uint32 sender_acc, uint
     {
         bool needItemDelay = false;
 
-        if(mi->size())
+        if(mi && !mi->empty())
         {
             // if item send to character at another account, then apply item delivery delay
             needItemDelay = sender_acc != rc_account;
@@ -360,7 +360,7 @@ void WorldSession::SendReturnToSender(uint8 messageType, uint32 sender_acc, uint
         // will delete item or place to receiver mail list
         WorldSession::SendMailTo(receiver, MAIL_NORMAL, MAIL_STATIONERY_NORMAL, sender_guid, receiver_guid, subject, itemTextId, mi, money, 0, RETURNED_CHECKED,deliver_delay);
     }
-    else
+    else if(mi)
     {
         for(MailItemMap::iterator mailItemIter = mi->begin(); mailItemIter != mi->end(); ++mailItemIter)
         {
@@ -791,7 +791,7 @@ void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 station
     CharacterDatabase.escape_string(subject);
     CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`stationery`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%u', '%u', '%u', '%u', '%s', '%u', '%u', '" I64FMTD "','" I64FMTD "', '%u', '%u', '%d')",
-        mailId, messageType, stationery, sender_guidlow, receiver_guidlow, subject.c_str(), itemTextId, mi->size() ? 1 : 0, (uint64)expire_time, (uint64)deliver_time, money, COD, checked);
+        mailId, messageType, stationery, sender_guidlow, receiver_guidlow, subject.c_str(), itemTextId, (mi && !mi->empty() ? 1 : 0), (uint64)expire_time, (uint64)deliver_time, money, COD, checked);
 
     if(mi)
     {
