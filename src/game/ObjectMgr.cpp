@@ -303,34 +303,23 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
         sLog.outDebug( "AuctionWon body string : %s", msgAuctionWonBody.str().c_str() );
 
         //prepare mail data... :
-        uint32 mailId = this->GenerateMailID();
         uint32 itemTextId = this->CreateItemText( msgAuctionWonBody.str() );
-        time_t dtime = time(NULL);                          //Will always be instant when from Auction House.
-        time_t etime = dtime + (30 * DAY);
 
         // set owner to bidder (to prevent delete item with sender char deleting)
         // owner in `data` will set at mail receive and item extracting
         CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'",auction->bidder,pItem->GetGUIDLow());
         CharacterDatabase.CommitTransaction();
 
+        MailItemsInfo mi;
+        mi.AddItem(auction->item_guidlow, auction->item_template, pItem);
+
         if (bidder)
-        {
             bidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, bidder_guid, 0, 0, auction->item_template);
-
-            MailItemsInfo mi;
-            mi.AddItem(auction->item_guidlow, auction->item_template, pItem);
-            bidder->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionWonSubject.str(), itemTextId, &mi, etime, dtime, 0, 0, AUCTION_CHECKED);
-        }
         else
-        {
-            objmgr.RemoveAItem(pItem->GetGUIDLow()); // we have to remove the item, before we delete it !!
-            delete pItem;
-        }
+            objmgr.RemoveAItem(pItem->GetGUIDLow());        // we have to remove the item, before we delete it !!
 
-        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '1', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
-            mailId, MAIL_AUCTION, auction->location, auction->bidder, msgAuctionWonSubject.str().c_str(), itemTextId, (uint64)etime, (uint64)dtime, AUCTION_CHECKED);
-        CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, auction->item_guidlow, auction->item_template);
+        // will delete item or place to receiver mail list
+        WorldSession::SendMailTo(bidder, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->bidder, msgAuctionWonSubject.str(), itemTextId, &mi, 0, 0, AUCTION_CHECKED);
     }
     // receiver not exist
     else
@@ -372,23 +361,15 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
 
         uint32 itemTextId = this->CreateItemText( auctionSuccessfulBody.str() );
 
-        uint32 mailId = this->GenerateMailID();
-        time_t dtime = time(NULL);                          //Instant because it's Auction House
-        time_t etime = dtime + (30 * DAY);
         uint32 profit = auction->bid + auction->deposit - auctionCut;
 
         if (owner)
         {
             //send auction owner notification, bidder must be current!
             owner->GetSession()->SendAuctionOwnerNotification( auction );
-
-            MailItemsInfo mi;
-            owner->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionSuccessfulSubject.str(), itemTextId, &mi, etime, dtime, profit, 0, AUCTION_CHECKED);
         }
 
-        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
-            mailId, MAIL_AUCTION, auction->location, auction->owner, msgAuctionSuccessfulSubject.str().c_str(), itemTextId, (uint64)etime, (uint64)dtime, profit, AUCTION_CHECKED);
+        WorldSession::SendMailTo(owner, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->owner, msgAuctionSuccessfulSubject.str(), itemTextId, NULL, profit, 0, AUCTION_CHECKED);
     }
 }
 
@@ -412,29 +393,20 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
     // owner exist
     if(owner || owner_accId)
     {
-        uint32 messageId = objmgr.GenerateMailID();
         std::ostringstream subject;
         subject << auction->item_template << ":0:" << AUCTION_EXPIRED;
-        time_t dtime = time(NULL);                          //Instant since it's Auction House
-        time_t etime = dtime + 30 * DAY;
 
-        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '2', '%u', '%u', '%s', '0', '1', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
-            messageId, auction->location, auction->owner, subject.str().c_str(), (uint64)etime, (uint64)dtime, NOT_READ);
-        CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", messageId, auction->item_guidlow, auction->item_template);
         if ( owner )
-        {
             owner->GetSession()->SendAuctionOwnerNotification( auction );
-
-            MailItemsInfo mi;
-            mi.AddItem(auction->item_guidlow, auction->item_template, pItem);
-            owner->CreateMail(messageId, MAIL_AUCTION, auction->location, subject.str(), 0, &mi, etime, dtime, 0, 0, NOT_READ);
-        }
         else
-        {
-            objmgr.RemoveAItem(pItem->GetGUIDLow()); // we have to remove the item, before we delete it !!
-            delete pItem;
-        }
+            objmgr.RemoveAItem(pItem->GetGUIDLow());        // we have to remove the item, before we delete it !!
+
+        MailItemsInfo mi;
+        mi.AddItem(auction->item_guidlow, auction->item_template, pItem);
+
+        // will delete item or place to receiver mail list
+        WorldSession::SendMailTo(owner, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, owner->GetGUIDLow(), subject.str(), 0, &mi, 0, 0, NOT_READ);
+
     }
     // owner not found
     else
