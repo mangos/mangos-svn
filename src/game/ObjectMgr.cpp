@@ -405,7 +405,7 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
         mi.AddItem(auction->item_guidlow, auction->item_template, pItem);
 
         // will delete item or place to receiver mail list
-        WorldSession::SendMailTo(owner, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, owner->GetGUIDLow(), subject.str(), 0, &mi, 0, 0, NOT_READ);
+        WorldSession::SendMailTo(owner, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, GUID_LOPART(owner_guid), subject.str(), 0, &mi, 0, 0, NOT_READ);
 
     }
     // owner not found
