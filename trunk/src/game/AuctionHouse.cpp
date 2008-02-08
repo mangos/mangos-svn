@@ -440,7 +440,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
             if (auction->bidder > 0)                        // If we have a bidder, we have to send him the money he paid
             {
                 uint32 auctionCut = objmgr.GetAuctionCut( auction->location, auction->bid);
-                if ( pl->GetMoney() < auctionCut )          //player doesn't have enought money, maybe message needed
+                if ( pl->GetMoney() < auctionCut )          //player doesn't have enough money, maybe message needed
                     return;
                 //some auctionBidderNotification would be needed, but don't know that parts..
                 SendAuctionCancelledToBidderMail( auction );
