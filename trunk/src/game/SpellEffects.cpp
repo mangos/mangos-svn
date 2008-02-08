@@ -472,6 +472,19 @@ void Spell::EffectDummy(uint32 i)
     // selection by spell family
     switch(m_spellInfo->SpellFamilyName)
     {
+        case SPELLFAMILY_GENERIC:
+            // Gnomish Poultryizer trinket
+            if(m_spellInfo->Id == 30507) // Poultryizer
+            {
+                if (!m_CastItem)
+                    return;
+                if(roll_chance_i(80))                       // success
+                    m_caster->CastSpell(unitTarget, 30501, true, m_CastItem);
+                else                                        // backfire
+                    m_caster->CastSpell(unitTarget, 30504, true, m_CastItem);
+                return;
+            }
+            break;
         case SPELLFAMILY_WARRIOR:
             // Charge
             if(m_spellInfo->SpellFamilyFlags & 0x1 && m_spellInfo->SpellVisual == 867)
