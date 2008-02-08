@@ -193,8 +193,9 @@ class Quest
         std::string GetOfferRewardText() const { return OfferRewardText; }
         std::string GetRequestItemsText() const { return RequestItemsText; }
         std::string GetEndText() const { return EndText; }
-        int32  GetRewOrReqMoney() const { return RewOrReqMoney; }
+        int32  GetRewOrReqMoney() const;
         uint32 GetRewMoneyMaxLevel() const { return RewMoneyMaxLevel; }
+                                                            // use in XP calculation at client
         uint32 GetRewSpell() const { return RewSpell; }
         uint32 GetPointMapId() const { return PointMapId; }
         float  GetPointX() const { return PointX; }
