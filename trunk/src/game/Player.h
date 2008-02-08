@@ -1433,6 +1433,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateMaxPower(Powers power);
         void UpdateAttackPowerAndDamage(bool ranged = false);
         void UpdateDamagePhysical(WeaponAttackType attType);
+        void UpdateSpellDamageAndHealingBonus();
 
         uint16 GetDefenseSkillTempBonusValue() const;
         void UpdateDefenseBonusesMod();

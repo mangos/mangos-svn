@@ -188,8 +188,10 @@ class MANGOS_DLL_SPEC Aura
         void HandleShieldBlockValue(bool apply, bool Real);
         void HandleModSpellCritChanceShool(bool apply, bool Real);
         void HandleAuraRetainComboPoints(bool apply, bool Real);
-        void HandleModSpellDamagePercent(bool apply, bool Real);
-        void HandleModSpellHealingPercent(bool apply, bool Real);
+        void HandleModSpellDamagePercentFromStat(bool apply, bool Real);
+        void HandleModSpellHealingPercentFromStat(bool apply, bool Real);
+        void HandleModSpellDamagePercentFromAttackPower(bool apply, bool Real);
+        void HandleModSpellHealingPercentFromAttackPower(bool apply, bool Real);
         void HandleAuraModPacifyAndSilence(bool Apply, bool Real);
 
         Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);

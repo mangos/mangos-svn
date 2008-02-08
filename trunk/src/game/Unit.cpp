@@ -5796,7 +5796,10 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     if(!spellProto || !pVictim || damagetype==DIRECT_DAMAGE )
         return pdamage;
 
-    uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
+    // For totems get damage bonus from owner
+    if( GetTypeId()==TYPEID_UNIT && ((Creature*)this)->isTotem())
+        if(Unit* owner = GetOwner())
+            return owner->SpellDamageBonus(pVictim, spellProto, pdamage, damagetype);
 
     // Damage Done
     uint32 CastingTime = GetCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
@@ -5804,51 +5807,8 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     if (CastingTime < 1500) CastingTime = 1500;
 
     // Taken/Done fixed damage bonus auras
-    int32 DoneAdvertisedBenefit = 0;
-    int32 TakenAdvertisedBenefit = 0;
-
-    // ..done (for creature type by mask) in taken
-    AuraList const& mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
-    for(AuraList::const_iterator i = mDamageDoneCreature.begin();i != mDamageDoneCreature.end(); ++i)
-        if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
-            TakenAdvertisedBenefit += (*i)->GetModifier()->m_amount;
-
-    // ..done
-    AuraList const& mDamageDone = this->GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
-    for(AuraList::const_iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
-        if(((*i)->GetModifier()->m_miscvalue & int32(1<<spellProto->School)) != 0 &&
-        (*i)->GetSpellProto()->EquippedItemClass == -1 &&
-                                                            // -1 == any item class (not wand then)
-        (*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0 )
-                                                            // 0 == any inventory type (not wand then)
-            DoneAdvertisedBenefit += (*i)->GetModifier()->m_amount;
-
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
-        // Damage bonus from stats
-        AuraList const& mDamageDoneOfStatPercent = GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT);
-        for(AuraList::const_iterator i = mDamageDoneOfStatPercent.begin();i != mDamageDoneOfStatPercent.end(); ++i)
-        {
-            if((*i)->GetModifier()->m_miscvalue & int32(1 << spellProto->School))
-            {
-                SpellEntry const* iSpellProto = (*i)->GetSpellProto();
-                uint8 eff = (*i)->GetEffIndex();
-
-                // stat used dependent from next effect aura SPELL_AURA_MOD_SPELL_HEALING presence and misc value (stat index)
-                Stats usedStat = STAT_INTELLECT;
-                if(eff < 2 && iSpellProto->EffectApplyAuraName[eff+1]==SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT)
-                    usedStat = Stats(iSpellProto->EffectMiscValue[eff+1]);
-
-                DoneAdvertisedBenefit += int32(GetStat(usedStat) * (*i)->GetModifier()->m_amount / 100.0f);
-            }
-        }
-    }
-
-    // ..taken
-    AuraList const& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
-    for(AuraList::const_iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
-        if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
-            TakenAdvertisedBenefit += (*i)->GetModifier()->m_amount;
+    int32 DoneAdvertisedBenefit  = SpellBaseDamageBonus((int32)(1<<spellProto->School));
+    int32 TakenAdvertisedBenefit = SpellBaseDamageBonusForVictim((int32)(1<<spellProto->School), pVictim);
 
     // Damage over Time spells bonus calculation
     float DotFactor = 1.0f;
@@ -5939,6 +5899,24 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 if(pVictim->isFrozen())                     // and compensate this for frozen target.
                     TakenTotalMod *= 3.0f;
             }
+            // Molten armor
+            else if (spellProto->SpellFamilyFlags & 0x0000000800000000LL)
+                CastingTime = 0;
+            break;
+        case  SPELLFAMILY_SHAMAN:
+            // totem attack
+            if (spellProto->SpellFamilyFlags & 0x000040000000LL)
+            {
+                if (spellProto->SpellIconID == 33)          // Fire Nova totem attack must be 21.4%(untested)  
+                    CastingTime = 749;                      // ignore CastingTime and use as modifier
+                else if (spellProto->SpellIconID == 680)    // Searing Totem attack 8%
+                    CastingTime = 280;                      // ignore CastingTime and use as modifier
+                else if (spellProto->SpellIconID == 37)     // Magma totem attack must be 6.67%(untested)
+                    CastingTime = 234;                      // ignore CastingTimePenalty and use as modifier
+            }
+            // Lighting Shield 33% per charge
+            else if (spellProto->SpellFamilyFlags & 000000400LL)
+                CastingTime = 1155;                         // ignore CastingTimePenalty and use as modifier   
             break;
     }
 
@@ -5974,6 +5952,70 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
 
     return tmpDamage > 0 ? uint32(tmpDamage) : 0;
 }
+
+int32 Unit::SpellBaseDamageBonus(int32 SchoolMask)
+{
+    int32 DoneAdvertisedBenefit = 0;
+
+    // ..done
+    AuraList const& mDamageDone = this->GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
+    for(AuraList::const_iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
+        if(((*i)->GetModifier()->m_miscvalue & SchoolMask) != 0 &&
+        (*i)->GetSpellProto()->EquippedItemClass == -1 &&
+                                                            // -1 == any item class (not wand then)
+        (*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0 )
+                                                            // 0 == any inventory type (not wand then)
+            DoneAdvertisedBenefit += (*i)->GetModifier()->m_amount;
+
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        // Damage bonus from stats
+        AuraList const& mDamageDoneOfStatPercent = GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT);
+        for(AuraList::const_iterator i = mDamageDoneOfStatPercent.begin();i != mDamageDoneOfStatPercent.end(); ++i)
+        {
+            if((*i)->GetModifier()->m_miscvalue & SchoolMask)
+            {
+                SpellEntry const* iSpellProto = (*i)->GetSpellProto();
+                uint8 eff = (*i)->GetEffIndex();
+
+                // stat used dependent from next effect aura SPELL_AURA_MOD_SPELL_HEALING presence and misc value (stat index)
+                Stats usedStat = STAT_INTELLECT;
+                if(eff < 2 && iSpellProto->EffectApplyAuraName[eff+1]==SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT)
+                    usedStat = Stats(iSpellProto->EffectMiscValue[eff+1]);
+
+                DoneAdvertisedBenefit += int32(GetStat(usedStat) * (*i)->GetModifier()->m_amount / 100.0f);
+            }
+        }
+        // ... and attack power
+        AuraList const& mDamageDonebyAP = GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER);
+        for(AuraList::const_iterator i =mDamageDonebyAP.begin();i != mDamageDonebyAP.end(); ++i)
+            if ((*i)->GetModifier()->m_miscvalue & SchoolMask)
+                DoneAdvertisedBenefit += int32(GetTotalAttackPowerValue(BASE_ATTACK) * (*i)->GetModifier()->m_amount / 100.0f);
+
+    }
+    return DoneAdvertisedBenefit;
+}
+
+int32 Unit::SpellBaseDamageBonusForVictim(int32 SchoolMask, Unit *pVictim)
+{
+    uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
+
+    int32 TakenAdvertisedBenefit = 0;
+    // ..done (for creature type by mask) in taken
+    AuraList const& mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
+    for(AuraList::const_iterator i = mDamageDoneCreature.begin();i != mDamageDoneCreature.end(); ++i)
+        if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
+            TakenAdvertisedBenefit += (*i)->GetModifier()->m_amount;
+
+    // ..taken
+    AuraList const& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
+    for(AuraList::const_iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
+        if(((*i)->GetModifier()->m_miscvalue & SchoolMask) != 0)
+            TakenAdvertisedBenefit += (*i)->GetModifier()->m_amount;
+
+    return TakenAdvertisedBenefit;
+}
+
 
 bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 *damage, Unit *pVictim)
 {
@@ -6066,37 +6108,25 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 *damage, Unit
 
 uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, DamageEffectType damagetype, Unit *pVictim)
 {
+    // For totems get healing bonus from owner
+    if( GetTypeId()==TYPEID_UNIT && ((Creature*)this)->isTotem())
+        if(Unit* owner = GetOwner())
+            return owner->SpellHealingBonus(spellProto, healamount, damagetype, pVictim);
+
     // Healing Done
 
     // Vampiric Embrace, Shadowmend - cannot critically heal
-    if(spellProto->Id == 15290 || spellProto->Id == 39373) return healamount;
+    if(spellProto->Id == 15290 || spellProto->Id == 39373)
+        return healamount;
 
-    int32 AdvertisedBenefit = 0;
+    int32 AdvertisedBenefit = SpellBaseHealingBonus(1<<spellProto->School);
     uint32 CastingTime = GetCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
     if (CastingTime > 7000) CastingTime = 7000;
     if (CastingTime < 1500) CastingTime = 1500;
     if (spellProto->Effect[0] == SPELL_EFFECT_APPLY_AURA) CastingTime = 3500;
 
-    AuraList const& mHealingDone = GetAurasByType(SPELL_AURA_MOD_HEALING_DONE);
-    for(AuraList::const_iterator i = mHealingDone.begin();i != mHealingDone.end(); ++i)
-        if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
-            AdvertisedBenefit += (*i)->GetModifier()->m_amount;
-
-    // Healing bonus of spirit, intellect and strength
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
-        // Healing bonus from stats
-        AuraList const& mHealingDoneOfStatPercent = GetAurasByType(SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT);
-        for(AuraList::const_iterator i = mHealingDoneOfStatPercent.begin();i != mHealingDoneOfStatPercent.end(); ++i)
-        {
-            // stat used dependent from misc value (stat index)
-            Stats usedStat = Stats((*i)->GetSpellProto()->EffectMiscValue[(*i)->GetEffIndex()]);
-            AdvertisedBenefit += int32(GetStat(usedStat) * (*i)->GetModifier()->m_amount / 100.0f);
-        }
-    }
-
     // Healing Taken
-    AdvertisedBenefit += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_HEALING);
+    AdvertisedBenefit += SpellBaseHealingBonusForVictim(1<<spellProto->School, pVictim);
 
     //BoL dummy effects
     if (spellProto->SpellFamilyName == SPELLFAMILY_PALADIN && (spellProto->SpellFamilyFlags & 0xC0000000))
@@ -6133,7 +6163,14 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
                 AdvertisedBenefit /= DotTicks;
         }
     }
-
+    // Exception
+    switch (spellProto->SpellFamilyName)
+    {
+        case  SPELLFAMILY_SHAMAN:
+            if (spellProto->SpellFamilyFlags & 0x000000002000LL) // Healing stream from totem (add 6% per tick from hill bonus owner)
+                CastingTime = 210;                               // 
+            break;
+    }
     // Level Factor
     float LvlPenalty = 0.0f;
     if(spellProto->spellLevel < 20)
@@ -6165,6 +6202,46 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     if (heal < 0) heal = 0;
 
     return uint32(heal);
+}
+
+int32 Unit::SpellBaseHealingBonus(int32 SchoolMask)
+{
+    int32 AdvertisedBenefit = 0;
+
+    AuraList const& mHealingDone = GetAurasByType(SPELL_AURA_MOD_HEALING_DONE);
+    for(AuraList::const_iterator i = mHealingDone.begin();i != mHealingDone.end(); ++i)
+        if(((*i)->GetModifier()->m_miscvalue & SchoolMask) != 0)
+            AdvertisedBenefit += (*i)->GetModifier()->m_amount;
+
+    // Healing bonus of spirit, intellect and strength
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        // Healing bonus from stats
+        AuraList const& mHealingDoneOfStatPercent = GetAurasByType(SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT);
+        for(AuraList::const_iterator i = mHealingDoneOfStatPercent.begin();i != mHealingDoneOfStatPercent.end(); ++i)
+        {
+            // stat used dependent from misc value (stat index)
+            Stats usedStat = Stats((*i)->GetSpellProto()->EffectMiscValue[(*i)->GetEffIndex()]);
+            AdvertisedBenefit += int32(GetStat(usedStat) * (*i)->GetModifier()->m_amount / 100.0f);
+        }
+
+        // ... and attack power
+        AuraList const& mHealingDonebyAP = GetAurasByType(SPELL_AURA_MOD_SPELL_HEALING_OF_ATTACK_POWER);
+        for(AuraList::const_iterator i = mHealingDonebyAP.begin();i != mHealingDonebyAP.end(); ++i)
+            if ((*i)->GetModifier()->m_miscvalue & SchoolMask)
+                AdvertisedBenefit += int32(GetTotalAttackPowerValue(BASE_ATTACK) * (*i)->GetModifier()->m_amount / 100.0f);
+    }
+    return AdvertisedBenefit;
+}
+
+int32 Unit::SpellBaseHealingBonusForVictim(int32 SchoolMask, Unit *pVictim)
+{
+    int32 AdvertisedBenefit = 0;
+    AuraList const& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_HEALING);
+    for(AuraList::const_iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
+        if(((*i)->GetModifier()->m_miscvalue & SchoolMask) != 0)
+            AdvertisedBenefit += (*i)->GetModifier()->m_amount;
+    return AdvertisedBenefit;
 }
 
 bool Unit::IsImmunedToPhysicalDamage() const

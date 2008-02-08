@@ -224,8 +224,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //171 SPELL_AURA_MOD_PARTY_SPEED    unused
     &Aura::HandleAuraModIncreaseMountedSpeed,               //172 SPELL_AURA_MOD_PARTY_SPEED_MOUNTED
     &Aura::HandleNULL,                                      //173 SPELL_AURA_ALLOW_CHAMPION_SPELLS  only for Proclaim Champion spell
-    &Aura::HandleModSpellDamagePercent,                     //174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT  implemented in Unit::SpellDamageBonus (by defeult intelect, dependent from SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT)
-    &Aura::HandleModSpellHealingPercent,                    //175 SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT implemented in Unit::SpellHealingBonus
+    &Aura::HandleModSpellDamagePercentFromStat,             //174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_STAT_PERCENT  implemented in Unit::SpellBaseDamageBonus (by defeult intelect, dependent from SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT)
+    &Aura::HandleModSpellHealingPercentFromStat,            //175 SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT implemented in Unit::SpellBaseHealingBonus
     &Aura::HandleSpiritOfRedemption,                        //176 SPELL_AURA_SPIRIT_OF_REDEMPTION   only for Spirit of Redemption spell, die at aura end
     &Aura::HandleNULL,                                      //177 SPELL_AURA_AOE_CHARM
     &Aura::HandleNULL,                                      //178 SPELL_AURA_MOD_DEBUFF_RESISTANCE
@@ -287,8 +287,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //234 SPELL_AURA_MECHANIC_DURATION_MOD imlement in Unit::CalculateSpellDamageAndDuration
     &Aura::HandleNULL,                                      //235
     &Aura::HandleNULL,                                      //236
-    &Aura::HandleNULL,                                      //237
-    &Aura::HandleNULL,                                      //238
+    &Aura::HandleModSpellDamagePercentFromAttackPower,      //237 SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER  implemented in Unit::SpellBaseDamageBonus
+    &Aura::HandleModSpellHealingPercentFromAttackPower,     //238 SPELL_AURA_MOD_SPELL_HEALING_OF_ATTACK_POWER implemented in Unit::SpellBaseHealingBonus
     &Aura::HandleAuraModScale,                              //239 SPELL_AURA_MOD_SCALE_2 only in Noggenfogger Elixir (16595) before 2.3.0 aura 61
     &Aura::HandleNULL,                                      //240
     &Aura::HandleNULL,                                      //241
@@ -3178,7 +3178,7 @@ void Aura::HandleModPercentStat(bool apply, bool Real)
     }
 }
 
-void Aura::HandleModSpellDamagePercent(bool apply, bool Real)
+void Aura::HandleModSpellDamagePercentFromStat(bool apply, bool Real)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -3188,22 +3188,84 @@ void Aura::HandleModSpellDamagePercent(bool apply, bool Real)
     if(m_effIndex < 2 && m_spellProto->EffectApplyAuraName[m_effIndex+1]==SPELL_AURA_MOD_SPELL_HEALING_OF_STAT_PERCENT)
         usedStat = Stats(m_spellProto->EffectMiscValue[m_effIndex+1]);
 
-    //For ClientSide Display
-    for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
+    // Magic damage modifiers implemented in Unit::SpellDamageBonus
+    // This information for client side use only
+
+    // Recalculate bonus
+    ((Player*)m_target)->UpdateSpellDamageAndHealingBonus();
+
+    // On apply aura isn`t on Player so need add manually
+    if (apply)
     {
-        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i, int32((m_modifier.m_amount/100.00f * m_target->GetStat(usedStat))),apply);
+        int32 DamageBonus = m_target->GetStat(usedStat) * m_modifier.m_amount / 100;
+
+        for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; i++)
+        {
+            if((m_modifier.m_miscvalue & (1<<i)) != 0)
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i,DamageBonus,apply);
+        }
     }
+
 }
 
-void Aura::HandleModSpellHealingPercent(bool apply, bool Real)
+void Aura::HandleModSpellHealingPercentFromStat(bool apply, bool Real)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
 
     Stats usedStat = Stats(m_spellProto->EffectMiscValue[m_effIndex]);
 
-    //For ClientSide Display
-    m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS, int32((m_modifier.m_amount/100.00f * m_target->GetStat(usedStat))),apply);
+    // Recalculate bonus
+    ((Player*)m_target)->UpdateSpellDamageAndHealingBonus();
+
+    // On apply aura isn`t on Player so need add manually
+    int32 HealingBonus = 0;
+    if (apply)
+    {
+        int32 HealingBonus = HealingBonus = m_target->GetStat(usedStat) * m_modifier.m_amount / 100;
+        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS,HealingBonus,apply);
+    }
+}
+
+void Aura::HandleModSpellDamagePercentFromAttackPower(bool apply, bool Real)
+{
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    // Magic damage modifiers implemented in Unit::SpellDamageBonus
+    // This information for client side use only
+
+    // Recalculate bonus
+    ((Player*)m_target)->UpdateSpellDamageAndHealingBonus();
+
+    // On apply aura isn`t on Player so need add manually
+    if (apply)
+    {
+        int32 DamageBonus = DamageBonus = m_target->GetTotalAttackPowerValue(BASE_ATTACK) * m_modifier.m_amount/100;
+
+        for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; i++)
+        {
+            if((m_modifier.m_miscvalue & (1<<i)) != 0)
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i,DamageBonus,apply);
+        }
+    }
+
+}
+
+void Aura::HandleModSpellHealingPercentFromAttackPower(bool apply, bool Real)
+{
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    // Recalculate bonus
+    ((Player*)m_target)->UpdateSpellDamageAndHealingBonus();
+
+    // On apply aura isn`t on Player so need add manually
+    if (apply)
+    {
+        int32 HealingBonus = HealingBonus = m_target->GetTotalAttackPowerValue(BASE_ATTACK) * m_modifier.m_amount/100;
+        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS,HealingBonus,apply);
+    }
 }
 
 void Aura::HandleModHealingDone(bool apply, bool Real)
