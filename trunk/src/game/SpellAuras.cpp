@@ -3088,7 +3088,7 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply, bool Real)
     if(m_target->GetTypeId() != TYPEID_PLAYER)
     {
         //pets only have base armor
-        if(((Creature*)m_target)->isPet() && m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
+        if(((Creature*)m_target)->isPet() && (m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL))
         {
             m_target->HandleStatModifier(UNIT_MOD_ARMOR, BASE_PCT, float(m_modifier.m_amount), apply);
         }

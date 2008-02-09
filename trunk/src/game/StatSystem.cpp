@@ -135,9 +135,10 @@ void Player::UpdateArmor()
     float value = 0.0f;
     UnitMods unitMod = UNIT_MOD_ARMOR;
 
-    value  = GetModifierValue(unitMod, BASE_VALUE) + GetStat(STAT_AGILITY) * 2.0f;
-    value *= GetModifierValue(unitMod, BASE_PCT);
-    value += GetModifierValue(unitMod, TOTAL_VALUE);
+    value  = GetModifierValue(unitMod, BASE_VALUE);         // base armor (from items)
+    value *= GetModifierValue(unitMod, BASE_PCT);           // armor percent from items
+    value += GetStat(STAT_AGILITY) * 2.0f;                  // armor bonus from stats
+    value += GetModifierValue(unitMod, TOTAL_VALUE);        
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
     SetArmor(int32(value));
@@ -692,8 +693,9 @@ void Pet::UpdateArmor()
             bonus_armor = 0.35f * float(owner->GetArmor());
     }
 
-    value  = GetModifierValue(unitMod, BASE_VALUE) + GetStat(STAT_AGILITY) * 2.0f;
+    value  = GetModifierValue(unitMod, BASE_VALUE);
     value *= GetModifierValue(unitMod, BASE_PCT);
+    value += GetStat(STAT_AGILITY) * 2.0f;
     value += GetModifierValue(unitMod, TOTAL_VALUE) + bonus_armor;
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
