@@ -460,11 +460,16 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 void WorldSocket::_HandlePing(WorldPacket& recvPacket)
 {
     uint32 ping;
+    uint32 latency;
 
-    CHECK_PACKET_SIZE(recvPacket,4);
+    CHECK_PACKET_SIZE(recvPacket,8);
 
     ///- Get the ping packet content
     recvPacket >> ping;
+    recvPacket >> latency;
+
+    if (_session )
+        _session->SetLatency(latency);
 
     ///- check ping speed for players
     if(_session && _session->GetSecurity() == SEC_PLAYER)

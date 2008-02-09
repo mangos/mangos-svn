@@ -183,6 +183,9 @@ class MANGOS_DLL_SPEC WorldSession
 
         // Locales
         int GetSessionLocaleIndex() { return m_sessionLocaleIndex; }
+
+        uint32 GetLatency() const { return m_latency; }
+        void SetLatency(uint32 latency) { m_latency = latency; }
     protected:
 
         void HandleCharEnumOpcode(WorldPacket& recvPacket);
@@ -594,6 +597,7 @@ class MANGOS_DLL_SPEC WorldSession
         bool m_playerLogout;                                // code processed in LogoutPlayer
         bool m_playerRecentlyLogout;
         int m_sessionLocaleIndex;
+        uint32 m_latency;
 
         void FillOpcodeHandlerHashTable();
 
