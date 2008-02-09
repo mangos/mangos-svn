@@ -196,6 +196,9 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if (spellInfo->SpellFamilyFlags & 0x10000000)
                 return SPELL_BLESSING;
 
+            if ((spellInfo->SpellFamilyFlags & 0x00000820180400LL) && (spellInfo->AttributesEx3 & 0x200))
+                return SPELL_JUDGEMENT;
+
             for (int i = 0; i < 3; i++)
             {
                 // only paladin auras have this
@@ -253,6 +256,7 @@ bool IsSpellSingleEffectPerCaster(uint32 spellId)
     case SPELL_ELEMENTAL_SHIELD:
     case SPELL_MAGE_POLYMORPH:
     case SPELL_POSITIVE_SHOUT:
+    case SPELL_JUDGEMENT:
         return true;
     default:
         return false;
@@ -430,9 +434,15 @@ bool IsSingleTargetSpell(uint32 spellId)
         || (spellInfo->SpellIconID == 96 && spellInfo->SpellVisual == 1305) )
         return true;
 
-    // shaman shilds (only earth shild can be casted at other target, but it's single caster also anyway)
-    if(GetSpellSpecific(spellInfo->Id)==SPELL_ELEMENTAL_SHIELD)
-        return true;
+    // spell with single target specific types
+    switch(GetSpellSpecific(spellInfo->Id))
+    {
+        case SPELL_TRACKER:
+        case SPELL_ELEMENTAL_SHIELD:
+        case SPELL_MAGE_POLYMORPH:
+        case SPELL_JUDGEMENT:
+            return true;
+    }
 
     // all other single target spells have if it has Attributes
     //if ( spellInfo->Attributes & (1<<30) ) return true;
@@ -441,6 +451,7 @@ bool IsSingleTargetSpell(uint32 spellId)
 
 bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellInfo2)
 {
+
     // similar spell
     // FIX ME: this is not very good check for this
     if( spellInfo1->Category       == spellInfo2->Category     &&
@@ -451,10 +462,18 @@ bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellI
         spellInfo1->AttributesExEx == spellInfo2->AttributesExEx )
         return true;
 
-    // polymorph have different data for first check
+    // base at spell specific
     SpellSpecific spec1 = GetSpellSpecific(spellInfo1->Id);
-    if(spec1==SPELL_MAGE_POLYMORPH && GetSpellSpecific(spellInfo2->Id) == SPELL_MAGE_POLYMORPH)
-        return true;
+    // spell with single target specific types
+    switch(spec1)
+    {
+        case SPELL_TRACKER:
+        case SPELL_ELEMENTAL_SHIELD:
+        case SPELL_MAGE_POLYMORPH:
+        case SPELL_JUDGEMENT:
+            if(GetSpellSpecific(spellInfo2->Id) == spec1)
+                return true;
+    }
 
     return false;
 }
