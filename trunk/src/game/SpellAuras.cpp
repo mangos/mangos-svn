@@ -1015,7 +1015,18 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         m_spellmod = mod;
     }
 
+    uint64 spellFamilyMask = m_spellmod->mask;
+
     ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
+
+    // reapply some passive spells after add/remove related spellmods
+    if(spellInfo->SpellFamilyName==SPELLFAMILY_WARRIOR && (spellFamilyMask & 0x0000100000000000LL))
+    {
+        m_target->RemoveAurasDueToSpell(45471);
+
+        if(apply)
+            m_target->CastSpell(m_target,45471,true);
+    }
 }
 
 void Aura::TriggerSpell()
