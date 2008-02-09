@@ -1403,6 +1403,10 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
     if (px)
     {
         name = px;
+
+        if(name.empty())
+            return false;
+
         normalizePlayerName(name);
         target = objmgr.GetPlayer(name.c_str());
         if (target)
@@ -1432,6 +1436,7 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
     uint32 money = 0;
     uint32 total_player_time = 0;
     uint32 level = 0;
+    uint32 latency = 0;
 
     // get additional information from Player object
     if(target)
@@ -1442,6 +1447,7 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
         money = target->GetMoney();
         total_player_time = target->GetTotalPlayedTime();
         level = target->getLevel();
+        latency = target->GetSession()->GetLatency();
     }
     // get additional information from DB
     else
@@ -1472,7 +1478,7 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
         delete result;
     }
 
-    PSendSysMessage(LANG_PINFO_ACCOUNT, (target?"":GetMangosString(LANG_OFFLINE)), name.c_str(), GUID_LOPART(targetGUID), username.c_str(), accId, security, last_ip.c_str());
+    PSendSysMessage(LANG_PINFO_ACCOUNT, (target?"":GetMangosString(LANG_OFFLINE)), name.c_str(), GUID_LOPART(targetGUID), username.c_str(), accId, security, last_ip.c_str(), latency);
 
     std::string timeStr = secsToTimeString(total_player_time,true,true);
     uint32 gold = money /GOLD;
