@@ -290,7 +290,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModSpellDamagePercentFromAttackPower,      //237 SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER  implemented in Unit::SpellBaseDamageBonus
     &Aura::HandleModSpellHealingPercentFromAttackPower,     //238 SPELL_AURA_MOD_SPELL_HEALING_OF_ATTACK_POWER implemented in Unit::SpellBaseHealingBonus
     &Aura::HandleAuraModScale,                              //239 SPELL_AURA_MOD_SCALE_2 only in Noggenfogger Elixir (16595) before 2.3.0 aura 61
-    &Aura::HandleNULL,                                      //240
+    &Aura::HandleAuraModExpertise,                          //240 SPELL_AURA_MOD_EXPERTISE
     &Aura::HandleNULL,                                      //241
     &Aura::HandleNULL,                                      //242
     &Aura::HandleNULL,                                      //243
@@ -3565,7 +3565,8 @@ void Aura::HandleAuraModCritPercent(bool apply, bool Real)
 
 void Aura::HandleModHitChance(bool Apply, bool Real)
 {
-    m_target->m_modHitChance += Apply ? m_modifier.m_amount : (-m_modifier.m_amount);
+    m_target->m_modMeleeHitChance += Apply ? m_modifier.m_amount : (-m_modifier.m_amount);
+    m_target->m_modRangedHitChance += Apply ? m_modifier.m_amount : (-m_modifier.m_amount);
 }
 
 void Aura::HandleModSpellHitChance(bool Apply, bool Real)
@@ -4174,77 +4175,23 @@ void Aura::HandleAuraModSpeedFlightAlways(bool apply, bool Real)
 
 void Aura::HandleModRating(bool apply, bool Real)
 {
-    if(m_target->GetTypeId() == TYPEID_PLAYER)
-    {
-        if (m_modifier.m_miscvalue & SPELL_RATING_SKILL)
-        {
-            /*Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-            if (pItem && pItem->IsFitToSpellRequirements(GetSpellProto()))
-                ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING,m_modifier.m_amount,apply);
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
 
-            pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-            if (pItem && pItem->IsFitToSpellRequirements(GetSpellProto()))
-                ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING,m_modifier.m_amount,apply);
+    for (uint32 rating = 0; rating < MAX_RATING; ++rating)
+        if (m_modifier.m_miscvalue & (1 << rating))
+            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_COMBAT_RATING_1 + rating, m_modifier.m_amount, apply);
+}
 
-            pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-            if (pItem && pItem->IsFitToSpellRequirements(GetSpellProto()))
-                ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING,m_modifier.m_amount,apply);*/
-        }
+void Aura::HandleAuraModExpertise(bool apply, bool Real)
+{
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
 
-        if (m_modifier.m_miscvalue & SPELL_RATING_DEFENCE)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING,m_modifier.m_amount,apply);
-
-        if (m_modifier.m_miscvalue & SPELL_RATING_DODGE)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_DODGE_RATING,m_modifier.m_amount,apply);
-
-        if (m_modifier.m_miscvalue & SPELL_RATING_PARRY)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_PARRY_RATING,m_modifier.m_amount,apply);
-
-        if (m_modifier.m_miscvalue & SPELL_RATING_BLOCK)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING,m_modifier.m_amount,apply);
-
-        if (m_modifier.m_miscvalue & SPELL_RATING_MELEE_HIT)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING,m_modifier.m_amount,apply);
-
-        if (m_modifier.m_miscvalue & SPELL_RATING_RANGED_HIT)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING,m_modifier.m_amount,apply);
-
-        if (m_modifier.m_miscvalue & SPELL_RATING_SPELL_HIT)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING,m_modifier.m_amount,apply);
-
-        if (m_modifier.m_miscvalue & SPELL_RATING_MELEE_CRIT_HIT)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING,m_modifier.m_amount,apply);
-
-        if (m_modifier.m_miscvalue & SPELL_RATING_RANGED_CRIT_HIT)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING,m_modifier.m_amount,apply);
-
-        if (m_modifier.m_miscvalue & SPELL_RATING_SPELL_CRIT_HIT)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING,m_modifier.m_amount,apply);
-
-        if (m_modifier.m_miscvalue & SPELL_RATING_MELEE_HASTE)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_MELEE_HASTE_RATING,m_modifier.m_amount,apply);
-
-        if (m_modifier.m_miscvalue & SPELL_RATING_RANGED_HASTE)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_RANGED_HASTE_RATING,m_modifier.m_amount,apply);
-
-        if (m_modifier.m_miscvalue & SPELL_RATING_SPELL_HASTE)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_SPELL_HASTE_RATING,m_modifier.m_amount,apply);
-
-        if (m_modifier.m_miscvalue & SPELL_RATING_HIT)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_HIT_RATING,m_modifier.m_amount,apply);
-
-        if (m_modifier.m_miscvalue & SPELL_RATING_CRIT_HIT)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_CRIT_RATING,m_modifier.m_amount,apply);
-
-        /*if (m_modifier.m_miscvalue & SPELL_RATING_HIT_AVOIDANCE)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_HIT_AVOIDANCE_RATING,m_modifier.m_amount,apply);
-
-        if (m_modifier.m_miscvalue & SPELL_RATING_CRIT_AVOIDANCE)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_CRIT_AVOIDANCE_RATING,m_modifier.m_amount,apply);*/
-
-        if (m_modifier.m_miscvalue & SPELL_RATING_RESILIENCE)
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_RESILIENCE_RATING,m_modifier.m_amount,apply);
-    }
+    ((Player*)m_target)->UpdateExpertise();
+    // On apply rating aura not exist - need add it manually
+    if (apply)
+        ((Player*)m_target)->ApplyModInt32Value(PLAYER_EXPERTISE, m_modifier.m_amount, apply);
 }
 
 void Aura::HandleModTargetResistance(bool apply, bool Real)

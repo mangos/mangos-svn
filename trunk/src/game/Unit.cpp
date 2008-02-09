@@ -198,10 +198,10 @@ Unit::Unit( WorldObject *instantiator )
         m_createStats[i] = 0.0f;
 
     m_attacking = NULL;
-    m_modHitChance = 0.0f;
-    m_modSpellHitChance = 0.0f;
+    m_modMeleeHitChance = 0.0f;
+    m_modRangedHitChance = 0.0f;
     m_baseSpellCritChance = 5;
-    m_modResilience = 0.0f;
+
     m_CombatTimer = 0;
     //m_victimThreat = 0.0f;
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
@@ -1121,10 +1121,14 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
 
                     *damage += bonusDmg;
 
-                    // Resilience - reduce crit damage by 2x%
-                    uint32 resilienceReduction = uint32(pVictim->m_modResilience * 2/100 * (*damage));
-                    cleanDamage->damage += resilienceReduction;
-                    *damage -=  resilienceReduction;
+                    // Resilience - reduce crit damage
+                    if (pVictim->GetTypeId()==TYPEID_PLAYER)
+                    {
+                        uint32 resilienceReduction = ((Player*)pVictim)->GetMeleeCritDamageReduction(*damage);
+                        cleanDamage->damage += resilienceReduction;
+                        *damage -=  resilienceReduction;
+                    }
+
                     *crit = true;
                     hitInfo |= HITINFO_CRITICALHIT;
 
@@ -1325,10 +1329,13 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                 {
                     *crit = true;
                     *damage *= 2;
-                    // Resilience - reduce crit damage by 2x%
-                    uint32 resilienceReduction = uint32(pVictim->m_modResilience * 2/100 * (*damage));
-                    cleanDamage->damage += resilienceReduction;
-                    *damage -=  resilienceReduction;
+                    // Resilience - reduce crit damage by
+                    if (pVictim->GetTypeId()==TYPEID_PLAYER)
+                    {
+                        uint32 resilienceReduction = ((Player*)pVictim)->GetMeleeCritDamageReduction(*damage);
+                        cleanDamage->damage += resilienceReduction;
+                        *damage -=  resilienceReduction;
+                    }
                 }
             }
             else
@@ -1474,13 +1481,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                 pdamage = uint32(pVictim->GetMaxHealth()*amount/100);
 
             //As of 2.2 resilience reduces damage from DoT ticks as much as the chance to not be critically hit
-            if(m_modResilience)
-            {
-                if(m_modResilience > 100)
-                    pdamage = 0;
-                else
-                    pdamage = uint32(pdamage * (100 - m_modResilience)/100);
-            }
+            // Reduce dot damage from resilience for players
+            if (pVictim->GetTypeId()==TYPEID_PLAYER)
+                pdamage-=((Player*)pVictim)->GetDotDamageReduction(pdamage);
 
             sLog.outDetail("PeriodicAuraLog: %u (TypeId: %u) attacked %u (TypeId: %u) for %u dmg inflicted by %u abs is %u",
                 GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), pdamage, spellProto->Id,absorb);
@@ -1522,13 +1525,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
 
             //As of 2.2 resilience reduces damage from DoT ticks as much as the chance to not be critically hit
-            if(m_modResilience)
-            {
-                if(m_modResilience > 100)
-                    pdamage = 0;
-                else
-                    pdamage = uint32(pdamage * (100 - m_modResilience)/100);
-            }
+            // Reduce dot damage from resilience for players
+            if (pVictim->GetTypeId()==TYPEID_PLAYER)
+                pdamage-=((Player*)pVictim)->GetDotDamageReduction(pdamage);
 
             if(pVictim->GetHealth() < pdamage)
                 pdamage = uint32(pVictim->GetHealth());
@@ -1970,19 +1969,25 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
 
             *damage += crit_bonus;
 
+            uint32 resilienceReduction = 0;
+
             if(attType == RANGED_ATTACK)
             {
                 int32 mod = pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_DAMAGE);
                 *damage = int32((*damage) * float((100.0f + mod)/100.0f));
+                // Resilience - reduce crit damage
+                if (pVictim->GetTypeId()==TYPEID_PLAYER)
+                    resilienceReduction = ((Player*)pVictim)->GetRangedCritDamageReduction(*damage);
             }
             else
             {
                 int32 mod = pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_DAMAGE);
                 *damage = int32((*damage) * float((100.0f + mod)/100.0f));
+                // Resilience - reduce crit damage
+                if (pVictim->GetTypeId()==TYPEID_PLAYER)
+                    resilienceReduction = ((Player*)pVictim)->GetMeleeCritDamageReduction(*damage);
             }
 
-            // Resilience - reduce crit damage by 2x%
-            uint32 resilienceReduction = uint32(pVictim->m_modResilience * 2/100 * (*damage));
             *damage -= resilienceReduction;
             cleanDamage->damage += resilienceReduction;
 
@@ -2384,7 +2389,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
 MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAttackType attType, SpellEntry const *spellInfo)
 {
     // Miss chance based on melee
-    int32 miss_chance = (int32)(MeleeMissChanceCalc(pVictim));
+    int32 miss_chance = MeleeMissChanceCalc(pVictim, attType);
 
     // Critical hit chance
     float crit_chance = GetUnitCriticalChance(attType, pVictim);
@@ -2403,9 +2408,13 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
     if(Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
 
-    DEBUG_LOG("PHYSICAL OUTCOME: hit %f crit %f miss %u",m_modHitChance,crit_chance,miss_chance);
+    float modHitChance = 0.0f;
+    if (attType == RANGED_ATTACK) modHitChance = m_modRangedHitChance;
+    else                          modHitChance = m_modMeleeHitChance;
 
-    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance * 100 ), miss_chance, int32(m_modHitChance));
+    DEBUG_LOG("PHYSICAL OUTCOME: hit %f crit %f miss %u",modHitChance,crit_chance,miss_chance);
+
+    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance * 100 ), miss_chance, int32(modHitChance));
 }
 
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType) const
@@ -2413,14 +2422,19 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     // This is only wrapper
 
     // Miss chance based on melee
-    int32 miss_chance = (int32)(MeleeMissChanceCalc(pVictim));
+    int32 miss_chance = MeleeMissChanceCalc(pVictim, attType);
 
     // Critical hit chance
     float crit_chance = GetUnitCriticalChance(attType, pVictim);
 
+    float modHitChance = 0.0f;
+    if (attType == RANGED_ATTACK) modHitChance = m_modRangedHitChance;
+    else                          modHitChance = m_modMeleeHitChance;
+
     // Useful if want to specify crit & miss chances for melee, else it could be removed
-    DEBUG_LOG("MELEE OUTCOME: hit %f crit %u miss %u", m_modHitChance,crit_chance,miss_chance);
-    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance * 100 ), miss_chance, int32(m_modHitChance));
+    DEBUG_LOG("MELEE OUTCOME: hit %f crit %u miss %u", modHitChance,crit_chance,miss_chance);
+
+    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance * 100 ), miss_chance, int32(modHitChance));
 }
 
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 hit_chance) const
@@ -2429,6 +2443,23 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         return MELEE_HIT_EVADE;
 
     int32 skillDiff =  GetWeaponSkillValue(attType) - pVictim->GetDefenseSkillValue();
+
+    // Add rating bonuses for attacker
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        skillDiff+=((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_ALL_WEAPONS_SKILL_RATING);
+        switch (attType)
+        {
+        case BASE_ATTACK:   skillDiff+=((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING);break;
+        case OFF_ATTACK:    skillDiff+=((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING);break;
+        case RANGED_ATTACK: skillDiff+=((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING);break;
+        }
+    }
+
+    // Add rating bonuses for victim
+    if(pVictim->GetTypeId() == TYPEID_PLAYER)
+       skillDiff-=((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_DEFENCE_RATING);
+
     // bonus from skills is 0.04%
     int32    skillBonus = skillDiff * 4;
     int32    skillBonus2 = 4 * ( GetWeaponSkillValue(attType) - pVictim->GetBaseDefenseSkillValue() );
@@ -2471,7 +2502,12 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     }
 
     // stunned target cannot dodge and this is check in GetUnitDodgeChance()
-    tmp = (int32)(pVictim->GetUnitDodgeChance()*100);
+    float dodge = pVictim->GetUnitDodgeChance();
+
+    // Reduce dodge chance by attacker expertise rating
+    if (GetTypeId() == TYPEID_PLAYER)
+        dodge-=((Player*)this)->GetExpertiseDodgeOrParryReduction();
+    tmp = (int32)(dodge*100.0f);
     if (   (tmp > 0)                                        // check if unit _can_ dodge
         && ((tmp -= skillBonus2) > 0)
         && roll < (sum += tmp))
@@ -2492,7 +2528,11 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     else
     {
         // cannot parry or block attacks from behind, but can from forward
-        tmp = (int32)(pVictim->GetUnitParryChance()*100);
+        float parry = pVictim->GetUnitParryChance();
+        // Reduce parry chance by attacker expertise rating
+        if (GetTypeId() == TYPEID_PLAYER)
+            parry-=((Player*)this)->GetExpertiseDodgeOrParryReduction();
+        int32 tmp = int32(parry * 100.0f);
         if (   (tmp > 0)                                    // check if unit _can_ parry
             && ((tmp -= skillBonus2) > 0)
             && (roll < (sum += tmp)))
@@ -2511,8 +2551,14 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         }
     }
 
-    // Resilience - reduce crit chance by x%
-    modCrit -= int32(pVictim->m_modResilience*100);
+    // reduce crit chance from Rating for players
+    if (pVictim->GetTypeId()==TYPEID_PLAYER)
+    {
+        if (attType==RANGED_ATTACK)
+            modCrit -= int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING)*100);
+        else
+            modCrit -= int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING)*100);
+    }
 
     // Critical chance
     tmp = crit_chance + skillBonus + modCrit;
@@ -2649,6 +2695,9 @@ uint32 Unit::SpellMissChanceCalc(Unit *pVictim) const
     int32 mod = pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE);
     misschance -= mod * 100;
 
+    // Add victim rating bonus
+    if (pVictim->GetTypeId()==TYPEID_PLAYER)
+        misschance += int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_HIT_TAKEN_SPELL_RATING)*100.0f);
     return misschance < 100 ? 100 : misschance;
 }
 
@@ -2688,7 +2737,7 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
     return SPELL_MISS_NONE;
 }
 
-int32 Unit::MeleeMissChanceCalc(const Unit *pVictim) const
+int32 Unit::MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) const
 {
     if(!pVictim)
         return 0;
@@ -2719,17 +2768,32 @@ int32 Unit::MeleeMissChanceCalc(const Unit *pVictim) const
     }
 
     // PvP : PvE melee misschances per leveldif > 2
-    int32 chance = pVictim->GetTypeId() == TYPEID_PLAYER ? 500 : 700;
+    int32 chance = pVictim->GetTypeId() == TYPEID_PLAYER ? 5 : 7;
 
     int32 leveldif = pVictim->getLevel() - getLevel();
     if(leveldif < 0)
         leveldif = 0;
 
-    if(leveldif < 3)
-        misschance += leveldif * 100 - int32(m_modHitChance*100);
+    // Hit chance from attacker based on ratings and auras
+    int32 m_modHitChance;
+    if (attType == RANGED_ATTACK)
+        m_modHitChance = m_modRangedHitChance;
     else
-        misschance += (leveldif - 2) * chance - int32(m_modHitChance*100);
+        m_modHitChance = m_modMeleeHitChance;
 
+    if(leveldif < 3)
+        misschance += (leveldif - m_modHitChance)*100;
+    else
+        misschance += ((leveldif - 2) * chance - m_modHitChance)*100;
+
+    // Hit chance for victim based on ratings
+    if (pVictim->GetTypeId()==TYPEID_PLAYER)
+    {
+        if (attType == RANGED_ATTACK) 
+            misschance += int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_HIT_TAKEN_RANGED_RATING)*100.0f);
+        else                          
+            misschance+=int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_HIT_TAKEN_MELEE_RATING)*100.0f);
+    }
     return misschance > 6000 ? 6000 : misschance;
 }
 
@@ -6063,8 +6127,8 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 *damage, Unit
             if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
                 crit_chance += (*i)->GetModifier()->m_amount;
 
-        // flat: Resilience - reduce crit chance by x%
-        crit_chance -= pVictim->m_modResilience;
+        if (pVictim->GetTypeId() == TYPEID_PLAYER)
+            crit_chance -= ((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING);
 
         // flat: scripted (increase crit chance ... against ... target by x%
         AuraList const& mOverrideClassScript = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
@@ -6103,10 +6167,10 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 *damage, Unit
         if(crit_bonus> 0)
             *damage += crit_bonus;
 
-        // Resilience - reduce crit damage by 2x%
-        if (pVictim)
+        // Resilience - reduce crit damage
+        if (pVictim && pVictim->GetTypeId()==TYPEID_PLAYER)
         {
-            *damage -= uint32(pVictim->m_modResilience * 2/100 * (*damage));
+            *damage -= ((Player *)pVictim)->GetSpellCritDamageReduction(*damage);
         }
 
         return true;

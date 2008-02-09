@@ -76,33 +76,32 @@ enum SpellNotifyPushType
 
 enum Rating
 {
-    SPELL_RATING_SKILL                      = 0x0000001,    // 0
-    SPELL_RATING_DEFENCE                    = 0x0000002,    // 1
-    SPELL_RATING_DODGE                      = 0x0000004,    // 2
-    SPELL_RATING_PARRY                      = 0x0000008,    // 3
-    SPELL_RATING_BLOCK                      = 0x0000010,    // 4
-    SPELL_RATING_MELEE_HIT                  = 0x0000020,    // 5
-    SPELL_RATING_RANGED_HIT                 = 0x0000040,    // 6
-    SPELL_RATING_SPELL_HIT                  = 0x0000080,    // 7
-    SPELL_RATING_MELEE_CRIT_HIT             = 0x0000100,    // 8
-    SPELL_RATING_RANGED_CRIT_HIT            = 0x0000200,    // 9
-    SPELL_RATING_SPELL_CRIT_HIT             = 0x0000400,    // 10
-    //SPELL_RATING_MELEE_HIT_TAKEN            = 0x0000800,    // 11
-    //SPELL_RATING_RANGED_HIT_TAKEN           = 0x0001000,    // 12
-    //SPELL_RATING_SPELL_HIT_TAKEN            = 0x0002000,    // 13
-    //SPELL_RATING_MELEE_CRIT_TAKEN           = 0x0004000,    // 14
-    //SPELL_RATING_RANGED_CRIT_TAKEN          = 0x0008000,    // 15
-    //SPELL_RATING_SPELL_CRIT_TAKEN           = 0x0010000,    // 16
-    SPELL_RATING_MELEE_HASTE                = 0x0020000,    // 17
-    SPELL_RATING_RANGED_HASTE               = 0x0040000,    // 18
-    SPELL_RATING_SPELL_HASTE                = 0x0080000,    // 19
-    SPELL_RATING_HIT                        = 0x0100000,    // 20
-    SPELL_RATING_CRIT_HIT                   = 0x0200000,    // 21
-    SPELL_RATING_HIT_AVOIDANCE              = 0x0400000,    // 22
-    SPELL_RATING_CRIT_AVOIDANCE             = 0x0800000,    // 23
-    SPELL_RATING_RESILIENCE                 = 0x1000000     // 24
-    //SPELL_RATING_EXPERTISE                 = 0x2000000,    // 25
+    RATING_WEAPON_SKILL             = 1,
+    RATING_DEFENSE_SKILL            = 2,
+    RATING_DODGE                    = 3,
+    RATING_PARRY                    = 4,
+    RATING_BLOCK                    = 5,
+    RATING_HIT_MELEE                = 6,
+    RATING_HIT_RANGED               = 7,
+    RATING_HIT_SPELL                = 8,
+    RATING_CRIT_MELEE               = 9,
+    RATING_CRIT_RANGED              = 10,
+    RATING_CRIT_SPELL               = 11,
+    RATING_HIT_TAKEN_MELEE          = 12,
+    RATING_HIT_TAKEN_RANGED         = 13,
+    RATING_HIT_TAKEN_SPELL          = 14,
+    RATING_CRIT_TAKEN_MELEE         = 15,
+    RATING_CRIT_TAKEN_RANGED        = 16,
+    RATING_CRIT_TAKEN_SPELL         = 17,
+    RATING_HASTE_MELEE              = 18,
+    RATING_HASTE_RANGED             = 19,
+    RATING_HASTE_SPELL              = 20,
+    RATING_WEAPON_SKILL_MAINHAND    = 21,
+    RATING_WEAPON_SKILL_OFFHAND     = 22,
+    RATING_WEAPON_SKILL_RANGED      = 23,
+    RATING_EXPERTISE                = 24
 };
+#define MAX_RATING 25
 
 bool IsQuestTameSpell(uint32 spellId);
 
