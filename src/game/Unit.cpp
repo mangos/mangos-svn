@@ -4893,10 +4893,107 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
 
     switch(auraSpellInfo->SpellFamilyName)
     {
+        case SPELLFAMILY_WARRIOR:
+        {
+            //Rampage (overwrite non existing triggered spell call in spell.dbc
+            if((auraSpellInfo->SpellFamilyFlags & 0x100000) && auraSpellInfo->SpellIconID==2006)
+            {
+                //all ranks have effect[0]==AURA (Proc Trigger Spell, non-existed)
+                //and effect[1]==TriggerSpell
+
+                if(auraSpellInfo->Effect[1]!=SPELL_EFFECT_TRIGGER_SPELL)
+                {
+                    sLog.outError("Unit::HandleProcTriggerSpell: Spell %u have wrong effect in RM",triggeredByAura->GetSpellProto()->Id);
+                    return;
+                }
+
+                CastSpell(this, auraSpellInfo->EffectTriggerSpell[1], true, castItem, triggeredByAura);
+                return;
+            }
+            break;
+        }
+        case SPELLFAMILY_PRIEST:
+        {
+            // Priest's "Shadowguard"
+            if((auraSpellInfo->SpellFamilyFlags & 0x80000000LL) && auraSpellInfo->SpellVisual==7958)
+            {
+                if(!pVictim || !pVictim->isAlive())
+                    return;
+
+                uint32 spell = 0;
+                switch(triggeredByAura->GetSpellProto()->Id)
+                {
+                    case 18137: spell = 28377; break;       // Rank 1
+                    case 19308: spell = 28378; break;       // Rank 2
+                    case 19309: spell = 28379; break;       // Rank 3
+                    case 19310: spell = 28380; break;       // Rank 4
+                    case 19311: spell = 28381; break;       // Rank 5
+                    case 19312: spell = 28382; break;       // Rank 6
+                    case 25477: spell = 28385; break;       // Rank 7
+                    default:
+                        sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in SG",triggeredByAura->GetSpellProto()->Id);
+                        return;
+                }
+                CastSpell(pVictim, spell, true, castItem, triggeredByAura);
+                return;
+            }
+            break;
+        }
+        case SPELLFAMILY_PALADIN:
+        {
+            if(auraSpellInfo->SpellFamilyFlags & 0x00080000)
+            {
+                switch(auraSpellInfo->SpellIconID)
+                {
+                    //Judgement of Wisdom (overwrite non existing triggered spell call in spell.dbc
+                    case 206:
+                    {
+                        if(!pVictim || !pVictim->isAlive())
+                            return;
+
+                        uint32 spell = 0;
+                        switch(triggeredByAura->GetSpellProto()->Id)
+                        {
+                        case 20186: spell = 20268; break;   // Rank 1
+                        case 20354: spell = 20352; break;   // Rank 2
+                        case 20355: spell = 20353; break;   // Rank 3
+                        case 27164: spell = 27165; break;   // Rank 4
+                        default:
+                            sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in JoW",triggeredByAura->GetSpellProto()->Id);
+                            return;
+                        }
+                        pVictim->CastSpell(pVictim, spell, true, castItem, triggeredByAura);
+                        return;
+                    }
+                    //Judgement of Light (overwrite non existing triggered spell call in spell.dbc
+                    case 299:
+                    {
+                        if(!pVictim || !pVictim->isAlive())
+                            return;
+
+                        uint32 spell = 0;
+                        switch(triggeredByAura->GetSpellProto()->Id)
+                        {
+                        case 20185: spell = 20267; break;   // Rank 1
+                        case 20344: spell = 20341; break;   // Rank 2
+                        case 20345: spell = 20342; break;   // Rank 3
+                        case 20346: spell = 20343; break;   // Rank 4
+                        case 27162: spell = 27163; break;   // Rank 5
+                        default:
+                            sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in JoL",triggeredByAura->GetSpellProto()->Id);
+                            return;
+                        }
+                        pVictim->CastSpell(pVictim, spell, true, castItem, triggeredByAura);
+                        return;
+                    }
+                }
+            }
+            break;
+        }
         case SPELLFAMILY_SHAMAN:
         {
             //Lightning Shield (overwrite non existing triggered spell call in spell.dbc
-            if(auraSpellInfo->SpellFamilyFlags==0x00000400 && auraSpellInfo->SpellVisual==37)
+            if((auraSpellInfo->SpellFamilyFlags & 0x00000400) && auraSpellInfo->SpellVisual==37)
             {
                 if(!pVictim || !pVictim->isAlive())
                     return;
@@ -4915,33 +5012,6 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     case 25472: spell = 26372; break;       // Rank 9
                     default:
                         sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in LShield",triggeredByAura->GetSpellProto()->Id);
-                        return;
-                }
-                CastSpell(pVictim, spell, true, castItem, triggeredByAura);
-                return;
-            }
-            break;
-        }
-        case SPELLFAMILY_PRIEST:
-        {
-            // Priest's "Shadowguard"
-            if(auraSpellInfo->SpellFamilyFlags==0x100080000000LL && auraSpellInfo->SpellVisual==7958)
-            {
-                if(!pVictim || !pVictim->isAlive())
-                    return;
-
-                uint32 spell = 0;
-                switch(triggeredByAura->GetSpellProto()->Id)
-                {
-                    case 18137: spell = 28377; break;       // Rank 1
-                    case 19308: spell = 28378; break;       // Rank 2
-                    case 19309: spell = 28379; break;       // Rank 3
-                    case 19310: spell = 28380; break;       // Rank 4
-                    case 19311: spell = 28381; break;       // Rank 5
-                    case 19312: spell = 28382; break;       // Rank 6
-                    case 25477: spell = 28385; break;       // Rank 7
-                    default:
-                        sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in SG",triggeredByAura->GetSpellProto()->Id);
                         return;
                 }
                 CastSpell(pVictim, spell, true, castItem, triggeredByAura);
@@ -5116,32 +5186,6 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             int32 BRHealBasePoints0 = heal_amount/3-1;
             CastCustomSpell(this, EffectId, &BRHealBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
             return;
-        }
-        case 2006:
-        {
-            switch(auraSpellInfo->SpellFamilyName)
-            {
-                case SPELLFAMILY_WARRIOR:
-                {
-                    //Rampage (overwrite non existing triggered spell call in spell.dbc
-                    if(auraSpellInfo->SpellFamilyFlags==0x100000)
-                    {
-                        //all ranks have effect[0]==AURA (Proc Trigger Spell, non-existed)
-                        //and effect[1]==TriggerSpell
-
-                        if(auraSpellInfo->Effect[1]!=SPELL_EFFECT_TRIGGER_SPELL)
-                        {
-                            sLog.outError("Unit::HandleProcTriggerSpell: Spell %u have wrong effect in RM",triggeredByAura->GetSpellProto()->Id);
-                            return;
-                        }
-
-                        CastSpell(this, auraSpellInfo->EffectTriggerSpell[1], true, castItem, triggeredByAura);
-                        return;
-                    }
-                    break;
-                }
-            }
-            break;
         }
         case 2013:
         {
