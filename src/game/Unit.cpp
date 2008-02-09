@@ -1812,8 +1812,6 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
         *resist = 0;
 
     int32 RemainingDamage = damage - *resist;
-    int32 currentAbsorb, manaReduction, maxAbsorb;
-    float manaMultiplier;
 
     // absorb without mana cost
     AuraList const& vSchoolAbsorb = pVictim->GetAurasByType(SPELL_AURA_SCHOOL_ABSORB);
@@ -1824,6 +1822,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
         if (((*i)->GetModifier()->m_miscvalue & int32(1<<school))==0)
             continue;
 
+        int32 currentAbsorb;
         if (RemainingDamage >= (*i)->GetModifier()->m_amount)
         {
             currentAbsorb = (*i)->GetModifier()->m_amount;
@@ -1849,16 +1848,17 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
         if(((*i)->GetModifier()->m_miscvalue & int32(1<< school))==0)
             continue;
 
+        int32 currentAbsorb;
         if (RemainingDamage >= (*i)->GetModifier()->m_amount)
             currentAbsorb = (*i)->GetModifier()->m_amount;
         else
             currentAbsorb = RemainingDamage;
 
-        manaMultiplier = (*i)->GetSpellProto()->EffectMultipleValue[(*i)->GetEffIndex()];
+        float manaMultiplier = (*i)->GetSpellProto()->EffectMultipleValue[(*i)->GetEffIndex()];
         if(Player *modOwner = GetSpellModOwner())
             modOwner->ApplySpellMod((*i)->GetId(), SPELLMOD_MULTIPLE_VALUE, manaMultiplier);
 
-        maxAbsorb = int32(pVictim->GetPower(POWER_MANA) / manaMultiplier);
+        int32 maxAbsorb = int32(pVictim->GetPower(POWER_MANA) / manaMultiplier);
         if (currentAbsorb > maxAbsorb)
             currentAbsorb = maxAbsorb;
 
@@ -1869,10 +1869,62 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
             next = vManaShield.begin();
         }
 
-        manaReduction = int32(currentAbsorb * manaMultiplier);
+        int32 manaReduction = int32(currentAbsorb * manaMultiplier);
         pVictim->ApplyPowerMod(POWER_MANA, manaReduction, false);
 
         RemainingDamage -= currentAbsorb;
+    }
+
+    AuraList const& vSplitDamageFlat = pVictim->GetAurasByType(SPELL_AURA_SPLIT_DAMAGE_FLAT);
+    for(AuraList::const_iterator i = vSplitDamageFlat.begin(), next; i != vSplitDamageFlat.end() && RemainingDamage >= 0; i = next)
+    {
+        next = i; next++;
+
+        // check damage school mask
+        if(((*i)->GetModifier()->m_miscvalue & int32(1<< school))==0)
+            continue;
+
+        // Damage can be splitted only if aura has an alive caster
+        Unit *caster = (*i)->GetCaster();
+        if(!caster || caster == pVictim || !caster->IsInWorld() || !caster->isAlive())
+            continue;
+
+        int32 currentAbsorb;
+        if (RemainingDamage >= (*i)->GetModifier()->m_amount)
+            currentAbsorb = (*i)->GetModifier()->m_amount;
+        else
+            currentAbsorb = RemainingDamage;
+
+        RemainingDamage -= currentAbsorb;
+
+        pVictim->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, currentAbsorb, SpellSchools((*i)->GetSpellProto()->School), 0, 0, false, 0, false);
+
+        CleanDamage cleanDamage = CleanDamage(currentAbsorb, BASE_ATTACK, MELEE_HIT_NORMAL);
+        pVictim->DealDamage(caster, currentAbsorb, &cleanDamage, DIRECT_DAMAGE, SpellSchools((*i)->GetSpellProto()->School), (*i)->GetSpellProto(), false);
+    }
+
+    AuraList const& vSplitDamagePct = pVictim->GetAurasByType(SPELL_AURA_SPLIT_DAMAGE_PCT);
+    for(AuraList::const_iterator i = vSplitDamagePct.begin(), next; i != vSplitDamagePct.end() && RemainingDamage >= 0; i = next)
+    {
+        next = i; next++;
+
+        // check damage school mask
+        if(((*i)->GetModifier()->m_miscvalue & int32(1<< school))==0)
+            continue;
+
+        // Damage can be splitted only if aura has an alive caster
+        Unit *caster = (*i)->GetCaster();
+        if(!caster || caster == pVictim || !caster->IsInWorld() || !caster->isAlive())
+            continue;
+
+        int32 splitted = int32(RemainingDamage * (*i)->GetModifier()->m_amount / 100.0f);
+
+        RemainingDamage -= splitted;
+
+        pVictim->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, splitted, SpellSchools((*i)->GetSpellProto()->School), 0, 0, false, 0, false);
+
+        CleanDamage cleanDamage = CleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL);
+        pVictim->DealDamage(caster, splitted, &cleanDamage, DIRECT_DAMAGE, SpellSchools((*i)->GetSpellProto()->School), (*i)->GetSpellProto(), false);
     }
 
     *absorb = damage - RemainingDamage - *resist;

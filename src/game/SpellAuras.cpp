@@ -131,7 +131,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraMounted,                               // 78 SPELL_AURA_MOUNTED
     &Aura::HandleModDamagePercentDone,                      // 79 SPELL_AURA_MOD_DAMAGE_PERCENT_DONE
     &Aura::HandleModPercentStat,                            // 80 SPELL_AURA_MOD_PERCENT_STAT
-    &Aura::HandleNULL,                                      // 81 SPELL_AURA_SPLIT_DAMAGE
+    &Aura::HandleNoImmediateEffect,                         // 81 SPELL_AURA_SPLIT_DAMAGE_PCT
     &Aura::HandleWaterBreathing,                            // 82 SPELL_AURA_WATER_BREATHING
     &Aura::HandleModBaseResistance,                         // 83 SPELL_AURA_MOD_BASE_RESISTANCE
     &Aura::HandleModRegen,                                  // 84 SPELL_AURA_MOD_REGEN
@@ -203,7 +203,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleShieldBlockValue,                          //150 SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT
     &Aura::HandleAuraTrackStealthed,                        //151 SPELL_AURA_TRACK_STEALTHED
     &Aura::HandleNULL,                                      //152 SPELL_AURA_MOD_DETECTED_RANGE
-    &Aura::HandleNULL,                                      //153 SPELL_AURA_SPLIT_DAMAGE_FLAT
+    &Aura::HandleNoImmediateEffect,                         //153 SPELL_AURA_SPLIT_DAMAGE_FLAT
     &Aura::HandleNoImmediateEffect,                         //154 SPELL_AURA_MOD_STEALTH_LEVEL
     &Aura::HandleNoImmediateEffect,                         //155 SPELL_AURA_MOD_WATER_BREATHING
     &Aura::HandleNoImmediateEffect,                         //156 SPELL_AURA_MOD_REPUTATION_GAIN
