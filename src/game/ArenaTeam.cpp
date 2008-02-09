@@ -34,7 +34,7 @@ ArenaTeam::ArenaTeam()
     stats.games     = 0;
     stats.played    = 0;
     stats.rank      = 0;
-    stats.rating    = 0;
+    stats.rating    = 1500;
     stats.wins      = 0;
     stats.wins2     = 0;
 }
@@ -74,7 +74,9 @@ bool ArenaTeam::create(uint64 captainGuid, uint32 type, std::string ArenaTeamNam
     CharacterDatabase.PExecute("INSERT INTO `arena_team` (`arenateamid`,`name`,`captainguid`,`type`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`) "
         "VALUES('%u','%s','%u','%u','%u','%u','%u','%u','%u')",
         Id, ArenaTeamName.c_str(), GUID_LOPART(CaptainGuid), Type, EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor);
-    CharacterDatabase.PExecute("INSERT INTO `arena_team_stats` (`arenateamid`, `rating`, `games`, `wins`, `played`, `wins2`, `rank`) VALUES ('%u', '1500', '0', '0', '0', '0', '0')", Id);
+    CharacterDatabase.PExecute("INSERT INTO `arena_team_stats` (`arenateamid`, `rating`, `games`, `wins`, `played`, `wins2`, `rank`) VALUES "
+        "('%u', '%u', '%u', '%u', '%u', '%u', '%u')", Id,stats.rating,stats.games,stats.wins,stats.played,stats.wins2,stats.rank);
+
     CharacterDatabase.CommitTransaction();
 
     AddMember(CaptainGuid);
