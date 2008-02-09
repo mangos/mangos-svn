@@ -639,7 +639,7 @@ int ChatHandler::ParseCommands(const char* text)
     text++;
 
     if(!ExecuteCommandInTable(getCommandTable(), text))
-        SendSysMessage("There is no such command.");
+        SendSysMessage(LANG_NO_CMD);
 
     return 1;
 }
