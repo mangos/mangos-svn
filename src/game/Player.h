@@ -1444,12 +1444,19 @@ class MANGOS_DLL_SPEC Player : public Unit
         float OCTRegenMPPerSpirit();
         float GetRatingCoefficient(uint16 index) const;
         float GetRatingBonusValue(uint16 index) const;
+        uint32 GetMeleeCritDamageReduction(uint32 damage) const;
+        uint32 GetRangedCritDamageReduction(uint32 damage) const;
+        uint32 GetSpellCritDamageReduction(uint32 damage) const;
+        uint32 GetDotDamageReduction(uint32 damage) const;
+
+        float GetExpertiseDodgeOrParryReduction() const;
         void UpdateBlockPercentage();
         void UpdateCritPercentage(WeaponAttackType attType);
         void UpdateAllCritPercentages();
         void UpdateParryPercentage();
         void UpdateDodgePercentage();
         void UpdateAllSpellCritChances();
+        void UpdateExpertise();
         void UpdateManaRegen();
         void UpdateSpellCritChance(uint32 school);
         uint32 GetSpellSchoolByBaseGroup(BaseModGroup baseGroup) const;

@@ -455,6 +455,13 @@ void Player::UpdateAllSpellCritChances()
         UpdateSpellCritChance(i);
 }
 
+void Player::UpdateExpertise()
+{
+    uint32 expertise = GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE);
+    expertise+= uint32(GetRatingBonusValue(PLAYER_FIELD_EXPERTISE_RATING));
+    SetUInt32Value(PLAYER_EXPERTISE, expertise);
+}
+
 void Player::UpdateManaRegen()
 {
     float Intellect = GetStat(STAT_INTELLECT);

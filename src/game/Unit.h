@@ -681,7 +681,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void HandleEmoteCommand(uint32 anim_id);
         void AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType = BASE_ATTACK, bool isTriggered = false);
         uint32 SpellMissChanceCalc(Unit *pVictim) const;
-        int32 MeleeMissChanceCalc(const Unit *pVictim) const;
+        int32 MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) const;
         SpellMissInfo SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool canReflect = false);
 
         float GetUnitDodgeChance()    const;
@@ -867,10 +867,11 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 m_invisibilityMask;
         uint32 m_ShapeShiftForm;
         uint32 m_form;
-        float m_modHitChance;
+        float m_modMeleeHitChance;
+        float m_modRangedHitChance;
         float m_modSpellHitChance;
         int32 m_baseSpellCritChance;
-        float m_modResilience;
+
         float m_threatModifier[MAX_SPELL_SCHOOL];
         float m_modAttackSpeedPct[3];
 
