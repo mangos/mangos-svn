@@ -59,7 +59,7 @@ namespace VMAP
                 iNumberOfValues = pNValues;
             }
 
-            bool hasChilds() const { return(iChilds > 0 || iChilds > 0); }
+            bool hasChilds() const { return(iChilds[0] >= 0 || iChilds[1] >= 0); }
 
             TreeNode const* getChild(TreeNode const* pValueArray, int pNo) const;
             // pChildNo = 0 or 1
