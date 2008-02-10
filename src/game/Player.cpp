@@ -9634,18 +9634,16 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
         if(pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED))
             CharacterDatabase.PExecute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", pItem->GetGUIDLow());
 
-        //pItem->SetOwnerGUID(0);
-        pItem->SetSlot( NULL_SLOT );
-        pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
         ItemPrototype const *pProto = pItem->GetProto();
 
         RemoveEnchantmentDurations(pItem);
         RemoveItemDurations(pItem);
 
+        ItemRemovedQuestCheck( pItem->GetEntry(), pItem->GetCount() );
+
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
-            ItemRemovedQuestCheck( pItem->GetEntry(), pItem->GetCount() );
-
+ 
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
             if ( slot < INVENTORY_SLOT_BAG_END )            // equipment and equipped bags can have applied bonuses
@@ -9657,31 +9655,19 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
             }
 
             m_items[slot] = NULL;
-
-            if( IsInWorld() && update )
-            {
-                pItem->RemoveFromWorld();
-                pItem->DestroyForPlayer( this );
-            }
         }
-        else
+        else if(Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, bag ))
+            pBag->RemoveItem(slot, update);
+
+        if( IsInWorld() && update )
         {
-            Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, bag );
-            if( pBag )
-            {
-                if( pProto && pProto->Class == ITEM_CLASS_QUEST )
-                    ItemRemovedQuestCheck( pItem->GetEntry(), pItem->GetCount() );
-
-                pBag->RemoveItem(slot, update);
-
-                if( IsInWorld() && update )
-                {
-                    pItem->RemoveFromWorld();
-                    pItem->DestroyForPlayer(this);
-                }
-            }
+            pItem->RemoveFromWorld();
+            pItem->DestroyForPlayer(this);
         }
 
+        //pItem->SetOwnerGUID(0);
+        pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
+        pItem->SetSlot( NULL_SLOT );
         pItem->SetState(ITEM_REMOVED, this);
     }
 }
