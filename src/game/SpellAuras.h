@@ -181,6 +181,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleModTargetResistance(bool apply, bool Real);
         void HandleAuraModAttackPowerPercent(bool apply, bool Real);
         void HandleAuraModRangedAttackPowerPercent(bool apply, bool Real);
+        void HandleAuraModRangedAttackPowerOfStatPercent(bool apply, bool Real);
         void HandleSpiritOfRedemption(bool apply, bool Real);
         void HandleAuraHealingPct(bool apply, bool Real);
         void HandleModManaRegen(bool apply, bool Real);
@@ -194,6 +195,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleModSpellHealingPercentFromAttackPower(bool apply, bool Real);
         void HandleAuraModPacifyAndSilence(bool Apply, bool Real);
         void HandleAuraModExpertise(bool apply, bool Real);
+        void HandleAuraModResistenceOfIntellectPercent(bool apply, bool Real);
 
         Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         virtual ~Aura();
