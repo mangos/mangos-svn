@@ -133,8 +133,10 @@ enum PetitionSigns
 
 enum GuildBankRights
 {
-    GUILD_BANK_RIGHT_VIEW_TAB       = 1,
-    GUILD_BANK_RIGHT_PUT_ITEM       = 2,                    // Need both bits to be able to deposit
+    GUILD_BANK_RIGHT_VIEW_TAB       = 0x01,
+    GUILD_BANK_RIGHT_PUT_ITEM       = 0x02,
+
+    GUILD_BANK_RIGHT_DEPOSIT_ITEM   = GUILD_BANK_RIGHT_VIEW_TAB | GUILD_BANK_RIGHT_PUT_ITEM,
     GUILD_BANK_RIGHT_FULL           = 0xFF,
 };
 
@@ -279,8 +281,9 @@ class Guild
         void   SetGuildBankTabInfo(uint8 TabId, std::string name, std::string icon);
         void   CreateBankRightForTab(uint32 rankid, uint8 TabId);
         const  GuildBankTab *GetBankTab(uint8 index) { if(index >= m_TabListMap.size()) return NULL; return m_TabListMap[index]; }
-        const  uint8 GetPurchasedTabs() { return purchased_tabs; }
-        uint8  GetBankRights(uint32 rankId, uint8 TabId);
+        const  uint8 GetPurchasedTabs() const { return purchased_tabs; }
+        uint8  GetBankRights(uint32 rankId, uint8 TabId) const;
+        bool   CanMemberDepositTo(uint32 LowGuid, uint8 TabId) const;
         // Load/unload
         void   LoadGuildBankFromDB();
         void   UnloadGuildBank();
