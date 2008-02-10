@@ -3232,12 +3232,38 @@ void Spell::EffectWeaponDmg(uint32 i)
     //In a word, bonus + weapon will be calculated together in cases of miss, armor reduce, crit, etc.
     bonus += m_caster->CalculateDamage (attType);
 
-    // Whirlwind, single only spell with 2 weapon white damage apply if have
-    if(m_caster->GetTypeId()==TYPEID_PLAYER && m_spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && (m_spellInfo->SpellFamilyFlags & 0x00000400000000LL))
+    switch(m_spellInfo->SpellFamilyName)
     {
-        Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-        if (item && item->GetProto()->Class == ITEM_CLASS_WEAPON && !item->IsBroken() && ((Player*)m_caster)->IsUseEquipedWeapon(false))
-            bonus += m_caster->CalculateDamage (OFF_ATTACK);
+        case SPELLFAMILY_WARRIOR:
+        {
+            // Whirlwind, single only spell with 2 weapon white damage apply if have
+            if(m_caster->GetTypeId()==TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags & 0x00000400000000LL))
+            {
+                Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+                if (item && item->GetProto()->Class == ITEM_CLASS_WEAPON && !item->IsBroken() && ((Player*)m_caster)->IsUseEquipedWeapon(false))
+                    bonus += m_caster->CalculateDamage (OFF_ATTACK);
+            }
+            break;
+        }
+        case SPELLFAMILY_ROGUE:
+        {
+            // Mutilate (for each hand)
+            if(m_spellInfo->SpellFamilyFlags & 0xC00000000LL)
+            {
+                Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                for(Unit::AuraList::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
+                {
+                    // Deadly poison
+                    if((*itr)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_ROGUE && ((*itr)->GetSpellProto()->SpellFamilyFlags & 0x10000) && (*itr)->GetSpellProto()->SpellVisual==5100)
+                    {
+                        // 150% damage
+                        damagePercentMod *= 1.5f;
+                        break;
+                    }
+                }
+            }
+            break;
+        }
     }
 
     // percent mod applied
