@@ -2499,18 +2499,18 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     // Add rating bonuses for attacker
     if(GetTypeId() == TYPEID_PLAYER)
     {
-        skillDiff+=((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_ALL_WEAPONS_SKILL_RATING);
+        skillDiff+=int32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_ALL_WEAPONS_SKILL_RATING));
         switch (attType)
         {
-        case BASE_ATTACK:   skillDiff+=((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING);break;
-        case OFF_ATTACK:    skillDiff+=((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING);break;
-        case RANGED_ATTACK: skillDiff+=((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING);break;
+        case BASE_ATTACK:   skillDiff+=int32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING));break;
+        case OFF_ATTACK:    skillDiff+=int32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING));break;
+        case RANGED_ATTACK: skillDiff+=int32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING));break;
         }
     }
 
     // Add rating bonuses for victim
     if(pVictim->GetTypeId() == TYPEID_PLAYER)
-       skillDiff-=((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_DEFENCE_RATING);
+       skillDiff-=int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_DEFENCE_RATING));
 
     // bonus from skills is 0.04%
     int32    skillBonus = skillDiff * 4;
@@ -2829,9 +2829,9 @@ int32 Unit::MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) c
     // Hit chance from attacker based on ratings and auras
     int32 m_modHitChance;
     if (attType == RANGED_ATTACK)
-        m_modHitChance = m_modRangedHitChance;
+        m_modHitChance = int32(m_modRangedHitChance);
     else
-        m_modHitChance = m_modMeleeHitChance;
+        m_modHitChance = int32(m_modMeleeHitChance);
 
     if(leveldif < 3)
         misschance += (leveldif - m_modHitChance)*100;
