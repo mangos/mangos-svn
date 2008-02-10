@@ -232,7 +232,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //179 SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE implemented in Unit::SpellCriticalBonus
     &Aura::HandleNULL,                                      //180 SPELL_AURA_MOD_SPELL_DAMAGE_VS_UNDEAD,
     &Aura::HandleNULL,                                      //181 unused
-    &Aura::HandleNULL,                                      //182 SPELL_AURA_MOD_ARMOR_OF_INTELLECT
+    &Aura::HandleAuraModResistenceOfIntellectPercent,       //182 SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT
     &Aura::HandleNULL,                                      //183 SPELL_AURA_MOD_CRITICAL_THREAT
     &Aura::HandleNoImmediateEffect,                         //184 SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE  implemented in Unit::RollMeleeOutcomeAgainst
     &Aura::HandleNoImmediateEffect,                         //185 SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE implemented in Unit::RollMeleeOutcomeAgainst
@@ -262,7 +262,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModSpeedFlightAlways,                  //209 SPELL_AURA_MOD_SPEED_FLIGHT_ALWAYS
     &Aura::HandleNULL,                                      //210
     &Aura::HandleNULL,                                      //211
-    &Aura::HandleNULL,                                      //212 SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_INTELLECT
+    &Aura::HandleAuraModRangedAttackPowerOfStatPercent,     //212 SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT
     &Aura::HandleNoImmediateEffect,                         //213 SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT implemented in Player::RewardRage
     &Aura::HandleNULL,                                      //214
     &Aura::HandleNULL,                                      //215
@@ -2621,7 +2621,7 @@ void Aura::HandleModTaunt(bool apply, bool Real)
 }
 
 /*********************************************************/
-/***                  MODIDY SPEED                     ***/
+/***                  MODIFY SPEED                     ***/
 /*********************************************************/
 
 void Aura::HandleAuraModIncreaseSpeedAlways(bool apply, bool Real)
@@ -3309,6 +3309,30 @@ void Aura::HandleModTotalPercentStat(bool apply, bool Real)
     }
 }
 
+void Aura::HandleAuraModResistenceOfIntellectPercent(bool apply, bool Real)
+{
+    if(m_target->GetTypeId() != TYPEID_PLAYER) 
+        return;
+
+    if(m_modifier.m_miscvalue != (1<<SPELL_SCHOOL_NORMAL))
+    {
+        // support required adding replace UpdateArmor by loop by UpdateResistence at intelect update
+        // and include in UpdateResistence same code as in UpdateArmor for aura mod apply.
+        sLog.outError("Aura SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT(182) need adding support for non-armor resistences!"); 
+        return;
+    }
+    
+    // Recalculate Armor 
+    m_target->UpdateArmor();
+    
+    // On apply aura isn`t on Player so need add manually 
+     if (apply) 
+     { 
+         int32 ArmorBonus = m_target->GetStat(STAT_INTELLECT) * m_modifier.m_amount/100;
+         m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES + SPELL_SCHOOL_NORMAL,ArmorBonus,apply); 
+    }
+}
+
 /********************************/
 /***      HEAL & ENERGIZE     ***/
 /********************************/
@@ -3684,6 +3708,29 @@ void Aura::HandleAuraModRangedAttackPowerPercent(bool apply, bool Real)
 
     //UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = multiplier - 1
     m_target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_PCT, float(m_modifier.m_amount), apply);
+}
+
+void Aura::HandleAuraModRangedAttackPowerOfStatPercent(bool apply, bool Real)
+{
+    if(m_target->GetTypeId() == TYPEID_PLAYER && (m_target->getClassMask() & CLASSMASK_WAND_USERS)!=0)
+        return;
+
+    if(m_modifier.m_miscvalue != STAT_INTELLECT)
+    {
+        // support required adding UpdateAttackPowerAndDamage calls at stat update
+        sLog.outError("Aura SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT (212) need support non-intelect stats!");
+        return;
+    }
+    
+    // Recalculate bonus 
+    ((Player*)m_target)->UpdateAttackPowerAndDamage(true); 
+      
+     // On apply aura isn`t on Player so need add manually 
+     if (apply) 
+     { 
+         int32 RAPBonus = m_target->GetStat(Stats(m_modifier.m_miscvalue)) * m_modifier.m_amount / 100.0f; 
+         m_target->ApplyModUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,RAPBonus,apply); 
+    }
 }
 
 /********************************/
