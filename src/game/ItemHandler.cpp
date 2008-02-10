@@ -133,11 +133,13 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
                 else if( _player->IsEquipmentPos ( srcbag, srcslot ) )
                     _player->EquipItem( src, pItem2, true);
                 _player->EquipItem( dest, pItem, true );
+                _player->AutoUnequipOffhandIfNeed();
             }
             else
             {
                 _player->RemoveItem( srcbag, srcslot, true );
                 _player->EquipItem( dest, pItem, true );
+                _player->AutoUnequipOffhandIfNeed();
             }
         }
         else

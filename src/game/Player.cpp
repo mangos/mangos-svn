@@ -8746,7 +8746,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                 // offhand item must can be stored in inventitory for offhand item and it also must be unequipped
                 Item *offItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND );
                 uint16 off_dest;
-                if( offItem && (
+                if( offItem && (!not_loading ||
                     CanUnequipItem(uint16(INVENTORY_SLOT_BAG_0) << 8 | EQUIPMENT_SLOT_OFFHAND,false) !=  EQUIP_ERR_OK ||
                     CanStoreItem( NULL_BAG, NULL_SLOT, off_dest, offItem, false ) !=  EQUIP_ERR_OK ) )
                     return EQUIP_ERR_ITEMS_CANT_BE_SWAPPED;
@@ -9332,25 +9332,6 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
 {
     if( pItem )
     {
-        // special case (need unequip offhand item, already must allowed by CanEquip)
-        if(pItem->GetProto()->InventoryType == INVTYPE_2HWEAPON)
-        {
-            if(Item *offItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND ))
-            {
-                uint16 off_dest;
-                uint8 off_msg = CanStoreItem( NULL_BAG, NULL_SLOT, off_dest, offItem, false );
-                if( off_msg == EQUIP_ERR_OK )
-                {
-                    RemoveItem(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND, true);
-                    StoreItem( off_dest, offItem, true );
-                }
-                else
-                {
-                    sLog.outError("Player::EquipItem: Can's store offhand item at 2hand item equip for player (GUID: %u).",GetGUIDLow());
-                }
-            }
-        }
-
         AddEnchantmentDurations(pItem);
 
         uint8 bag = pos >> 8;
@@ -9985,6 +9966,7 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
                             pSrcItem->SendUpdateToPlayer( this );
                         pSrcItem->SetState(ITEM_CHANGED, this);
                         EquipItem( dest, pNewItem, true);
+                        AutoUnequipOffhandIfNeed();
                     }
                     else
                     {
@@ -10082,6 +10064,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
                 {
                     RemoveItem(srcbag, srcslot, true);
                     EquipItem( dest, pSrcItem, true);
+                    AutoUnequipOffhandIfNeed();
                     return;
                 }
                 else
@@ -10146,6 +10129,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
                     {
                         RemoveItem(srcbag, srcslot, true);
                         EquipItem( dest, pSrcItem, true);
+                        AutoUnequipOffhandIfNeed();
                     }
                     else
                     {
@@ -10220,6 +10204,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
                     BankItem(dest2, pDstItem, true);
                 else if( IsEquipmentPos( src ) )
                     EquipItem(dest2, pDstItem, true);
+                AutoUnequipOffhandIfNeed();
                 return;
             }
             else
@@ -16202,5 +16187,33 @@ void Player::AddItemDurations( Item *item )
     {
         m_itemDuration.push_back(item);
         item->SendTimeUpdate(this);
+    }
+}
+
+void Player::AutoUnequipOffhandIfNeed()
+{
+    Item *offItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND );
+    if(!offItem)
+        return;
+
+    ItemPrototype const* offProto = offItem->GetProto();
+    if(offProto->Class != ITEM_CLASS_WEAPON && offProto->InventoryType != INVTYPE_SHIELD)
+        return;
+
+    Item *mainItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND );
+
+    if(!mainItem || mainItem->GetProto()->InventoryType != INVTYPE_2HWEAPON)
+        return;
+
+    uint16 off_dest;
+    uint8 off_msg = CanStoreItem( NULL_BAG, NULL_SLOT, off_dest, offItem, false );
+    if( off_msg == EQUIP_ERR_OK )
+    {
+        RemoveItem(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND, true);
+        StoreItem( off_dest, offItem, true );
+    }
+    else
+    {
+        sLog.outError("Player::EquipItem: Can's store offhand item at 2hand item equip for player (GUID: %u).",GetGUIDLow());
     }
 }

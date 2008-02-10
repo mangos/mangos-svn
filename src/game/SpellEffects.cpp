@@ -2226,6 +2226,7 @@ void Spell::EffectSummonChangeItem(uint32 i)
         {
             player->DestroyItem(m_CastItem->GetBagSlot(), m_CastItem->GetSlot(),true);
             player->EquipItem( dest, pNewItem, true);
+            player->AutoUnequipOffhandIfNeed();
             return;
         }
     }

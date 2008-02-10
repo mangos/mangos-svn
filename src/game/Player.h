@@ -1021,6 +1021,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* StoreItem( uint16 pos, Item *pItem, bool update );
         Item* EquipNewItem( uint16 pos, uint32 item, uint32 count, bool update );
         Item* EquipItem( uint16 pos, Item *pItem, bool update );
+        void AutoUnequipOffhandIfNeed();
 
         void ApplyEquipCooldown( Item * pItem );
         void SetAmmo( uint32 item );
