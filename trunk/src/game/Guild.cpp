@@ -963,7 +963,7 @@ void Guild::CreateBankRightForTab(uint32 rankId, uint8 TabId)
     CharacterDatabase.PExecute("REPLACE INTO `guild_bank_right` (`guildid`,`TabId`,`rid`) VALUES ('%u','%u','%u')", Id, uint32(TabId), rankId);
 }
 
-uint8 Guild::GetBankRights(uint32 rankId, uint8 TabId)
+uint8 Guild::GetBankRights(uint32 rankId, uint8 TabId) const
 {
     if(rankId >= m_ranks.size() || TabId >= GUILD_BANK_MAX_TABS)
         return 0;
@@ -1143,6 +1143,18 @@ bool Guild::MemberItemWithdraw(uint8 TabId, uint32 LowGuid)
     return true;
 }
 
+bool Guild::CanMemberDepositTo(uint32 LowGuid, uint8 TabId) const
+{
+    MemberList::const_iterator itr = members.find(LowGuid);
+    if (itr == members.end() )
+        return false;
+
+    if (itr->second.RankId == GR_GUILDMASTER)
+        return true;
+
+    return (GetBankRights(itr->second.RankId,TabId) & GUILD_BANK_RIGHT_DEPOSIT_ITEM)==GUILD_BANK_RIGHT_DEPOSIT_ITEM;
+}
+
 uint32 Guild::GetMemberSlotWithdrawRem(uint32 LowGuid, uint8 TabId)
 {
     MemberList::iterator itr = members.find(LowGuid);
@@ -1152,8 +1164,11 @@ uint32 Guild::GetMemberSlotWithdrawRem(uint32 LowGuid, uint8 TabId)
     if (itr->second.RankId == GR_GUILDMASTER)
         return WITHDRAW_SLOT_UNLIMITED;
 
-    uint32 curTime = uint32(time(NULL)/60);                     // minutes
-    if (curTime - itr->second.BankResetTimeTab[TabId] >= 1440)  // 24 hours
+    if((GetBankRights(itr->second.RankId,TabId) & GUILD_BANK_RIGHT_VIEW_TAB)!=GUILD_BANK_RIGHT_VIEW_TAB)
+        return 0;
+
+    uint32 curTime = uint32(time(NULL)/MINUTE);
+    if (curTime - itr->second.BankResetTimeTab[TabId] >= 24*HOUR/MINUTE)
     {
         itr->second.BankResetTimeTab[TabId] = curTime;
         itr->second.BankRemSlotsTab[TabId] = GetBankSlotPerDay(itr->second.RankId, TabId);

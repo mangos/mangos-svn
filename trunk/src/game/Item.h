@@ -114,8 +114,9 @@ enum InventoryChangeFailure
     EQUIP_ERR_ITEM_MAX_COUNT_EQUIPPED_SOCKETED   = 75,
     EQUIP_ERR_ITEM_UNIQUE_EQUIPPABLE_SOCKETED    = 76,
     EQUIP_ERR_TOO_MUCH_GOLD                      = 77,
-    EQUIP_ERR_NOT_DURING_ARENA_MATCH             = 78
-
+    EQUIP_ERR_NOT_DURING_ARENA_MATCH             = 78,
+    EQUIP_ERR_CANNOT_TRADE_THAT                  = 79,
+    EQUIP_ERR_PERSONAL_ARENA_RATING_TOO_LOW      = 80
 };
 
 enum BuyFailure

@@ -1146,7 +1146,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
     uint8 BankToBank;
 
     uint8 BankTab, BankTabSlot, AutoStore, AutoStoreCount, PlayerSlot, PlayerBag, SplitedAmount = 0;
-    uint8 BankTabDst, BankTabSlotDst, unk2, CleanSlot = -1, ToChar = 1;
+    uint8 BankTabDst, BankTabSlotDst, unk2, ToChar = 1;
     uint32 ItemEntry, unk1;
     bool BankToChar = false;
 
@@ -1202,16 +1202,29 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
 
     if (BankToBank)
     {
-        CharacterDatabase.BeginTransaction();
+        // empty operation
+        if(BankTab==BankTabDst && BankTabSlot==BankTabSlotDst)
+            return;
+
         Item *pItemSrc = pGuild->GetItem(BankTab, BankTabSlot);
         if (!pItemSrc)                                      // may prevent crash
-        {
-            CharacterDatabase.RollbackTransaction();
             return;
-        }
 
         Item *pItemDst = pGuild->GetItem(BankTabDst, BankTabSlotDst);
 
+        if(BankTab!=BankTabDst)
+        {
+            // check dest pos rights (if different tabs)
+            if(!pGuild->CanMemberDepositTo(pl->GetGUIDLow(), BankTabDst))
+                return;
+
+            // check source pos rights (if different tabs)
+            uint32 remRight = pGuild->GetMemberSlotWithdrawRem(pl->GetGUIDLow(), BankTab);
+            if(remRight <= 0)
+                return;
+        }
+
+        CharacterDatabase.BeginTransaction();
         if (!pItemDst)
         {
             if (SplitedAmount && SplitedAmount < pItemSrc->GetCount())
@@ -1232,8 +1245,6 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemDst->GetGUIDLow(), pItemDst->GetEntry());
 
                 pGuild->LogBankEvent(GUILD_BANK_LOG_MOVE_ITEM, BankTab, pl->GetGUIDLow(), pGuild->GetItem(BankTabDst, BankTabSlotDst)->GetEntry(), SplitedAmount, BankTabDst);
-                CharacterDatabase.CommitTransaction();
-                pGuild->DisplayGuildBankContent(this, BankTabDst);
             }
             else                                            // Bank -> Bank swap item with empty slot case (move)
             {
@@ -1249,8 +1260,6 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                 // No need to save item instances, they did not change
 
                 pGuild->LogBankEvent(GUILD_BANK_LOG_MOVE_ITEM, BankTab, pl->GetGUIDLow(), pItemSrc->GetEntry(), pItemSrc->GetCount(), BankTabDst);
-                CharacterDatabase.CommitTransaction();
-                pGuild->DisplayGuildBankContent(this, BankTabDst);
             }
         }
         else                                                // ItemDst != NULL case
@@ -1263,6 +1272,8 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
 
             if (SplitedAmount)                              // Bank -> Bank split to another item (partly move)
             {
+                // dst right check not required
+
                 pItemDst->SetCount(pItemDst->GetCount()+SplitedAmount);
                 pItemDst->FSetState(ITEM_CHANGED);
                 pItemDst->SaveToDB();
@@ -1287,11 +1298,27 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemDst->GetGUIDLow(), pItemDst->GetEntry());
 
                 pGuild->LogBankEvent(GUILD_BANK_LOG_MOVE_ITEM, BankTab, pl->GetGUIDLow(), pGuild->GetItem(BankTabDst, BankTabSlotDst)->GetEntry(), SplitedAmount, BankTabDst);
-                CharacterDatabase.CommitTransaction();
-                pGuild->DisplayGuildBankContent(this, BankTabDst);
             }
             else                                            // Bank to Bank swap case
             {
+                if(BankTab!=BankTabDst)
+                {
+                    // check source pos rights (item swapped to src)
+                    if(!pGuild->CanMemberDepositTo(pl->GetGUIDLow(), BankTab))
+                    {
+                        CharacterDatabase.RollbackTransaction();
+                        return;
+                    }
+
+                    // check dest pos rights (item swapped to src)
+                    uint32 remRightDst = pGuild->GetMemberSlotWithdrawRem(pl->GetGUIDLow(), BankTabDst);
+                    if(remRightDst <= 0)
+                    {
+                        CharacterDatabase.RollbackTransaction();
+                        return;
+                    }
+                }
+
                 pGuild->EmptyBankSlot(BankTab, BankTabSlot);// Or next will merge stacks
                 pGuild->StoreItem(BankTab, &BankTabSlot, pItemDst);
                 // pItemDst moved to BankTabSlot
@@ -1311,35 +1338,38 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
 
                 pGuild->LogBankEvent(GUILD_BANK_LOG_MOVE_ITEM, BankTab, pl->GetGUIDLow(), pItemSrc->GetEntry(), pItemSrc->GetCount(), BankTabDst);
                 pGuild->LogBankEvent(GUILD_BANK_LOG_MOVE_ITEM, BankTabDst, pl->GetGUIDLow(), pItemDst->GetEntry(), pItemDst->GetCount(), BankTab);
-                CharacterDatabase.CommitTransaction();
-                pGuild->DisplayGuildBankContent(this, BankTabDst);
             }
         }
+
+        CharacterDatabase.CommitTransaction();
+        pGuild->DisplayGuildBankContent(this, BankTabDst);
         return;
     }
     else                                                    // Player <-> Bank
     {
-        CharacterDatabase.BeginTransaction();
-        uint32 remRight = pGuild->GetMemberSlotWithdrawRem(pl->GetGUIDLow(), BankTab);
-        if (ToChar && remRight <= 0)
-            return;
-
         Item *pItemBank = pGuild->GetItem(BankTab, BankTabSlot);
         Item *pItemChar = GetPlayer()->GetItemByPos(PlayerBag, PlayerSlot);
         if (!pItemChar && !pItemBank)                       // Nothing to do
-        {
-            CharacterDatabase.RollbackTransaction();
             return;
-        }
+
         if (!pItemChar && !ToChar)                          // Problem to get item from player
-        {
-            CharacterDatabase.RollbackTransaction();
             return;
-        }
+
         if (!pItemBank && ToChar)                           // Problem to get bank item
-        {
-            CharacterDatabase.RollbackTransaction();
             return;
+
+        if(ToChar)
+        {
+            // check source pos rights (item moved to inventory)
+            uint32 remRight = pGuild->GetMemberSlotWithdrawRem(pl->GetGUIDLow(), BankTab);
+            if(remRight <= 0)
+                return;
+        }
+        else
+        {
+            // check source pos rights (item moved to bank)
+            if(!pGuild->CanMemberDepositTo(pl->GetGUIDLow(), BankTab))
+                return;
         }
 
         if (ToChar && AutoStore)                            // bank to char autostore (with right-click)
@@ -1349,30 +1379,30 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
             uint16 Dest;
             uint8 msg;
             msg = pl->CanStoreItem(NULL_BAG, NULL_SLOT, Dest, pItemBank, false);
-            if( msg == EQUIP_ERR_OK )
+            if( msg != EQUIP_ERR_OK )
             {
-                Item *pItemStacked = pl->StoreItem(Dest, pItemBank, true); // This cause item state to change
-                pGuild->EmptyBankSlot(BankTab, BankTabSlot);// Delete from bank table
-                if (pItemStacked == pItemBank)              // In case stacked to player, do not execute
-                {
-                    pItemBank->SaveToDB();
-                    pItemBank->AddToUpdateQueueOf(pl);
-                    pItemBank->SetState(ITEM_NEW);
-                }
-                else
-                {
-                    pItemStacked->SetState(ITEM_CHANGED);
-                }
-                pl->SaveInventoryAndGoldToDB();
+                pl->SendEquipError( msg, pItemBank, NULL );
+                return;
+            }
+
+            CharacterDatabase.BeginTransaction();
+
+            Item *pItemStacked = pl->StoreItem(Dest, pItemBank, true); // This cause item state to change
+            pGuild->EmptyBankSlot(BankTab, BankTabSlot);// Delete from bank table
+            if (pItemStacked == pItemBank)              // In case stacked to player, do not execute
+            {
+                pItemBank->SaveToDB();
+                pItemBank->AddToUpdateQueueOf(pl);
+                pItemBank->SetState(ITEM_NEW);
             }
             else
             {
-                pl->SendEquipError( msg, pItemBank, NULL );
-                CharacterDatabase.RollbackTransaction();
-                return;
+                pItemStacked->SetState(ITEM_CHANGED);
             }
+            pl->SaveInventoryAndGoldToDB();
             pGuild->LogBankEvent(GUILD_BANK_LOG_WITHDRAW_ITEM, BankTab, pl->GetGUIDLow(), Entry, Count);
             pGuild->MemberItemWithdraw(BankTab, pl->GetGUIDLow());
+
             CharacterDatabase.CommitTransaction();
             pGuild->DisplayGuildBankContent(this, BankTab);
             return;
@@ -1382,6 +1412,8 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
 
         if (ToChar)                                         // Bank -> Char cases
         {
+            CharacterDatabase.BeginTransaction();
+
             uint32 ItemEntry = pItemBank->GetEntry();
             if (!pItemChar)
             {
@@ -1397,6 +1429,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     msg = pl->CanStoreItem(PlayerBag, PlayerSlot, Dest, pItemToStore, false);
                     if( msg != EQUIP_ERR_OK )
                     {
+                        pl->SendEquipError( msg, pItemToStore, NULL );
                         delete pItemToStore;
                         sLog.outError("GUILDBANK: Failed to store a newly create item (GUID: %u) from split case in an empty character slot!",pItemToStore->GetGUIDLow());
                         CharacterDatabase.RollbackTransaction();
@@ -1445,6 +1478,9 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
 
                 if (SplitedAmount)                          // Bank -> Char split in existed item (partly move)
                 {                                           // just update counts
+
+                    // not right check required 
+
                     pItemChar->SetCount(pItemChar->GetCount()+SplitedAmount);
                     pItemBank->SetCount(pItemBank->GetCount()-SplitedAmount);
                     pItemChar->SetState(ITEM_CHANGED);
@@ -1463,6 +1499,13 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                 }
                 else                                        // Bank <-> Char swap items
                 {
+                    // check source pos rights (item swapped to bank)
+                    if(!pGuild->CanMemberDepositTo(pl->GetGUIDLow(), BankTab))
+                    {
+                        CharacterDatabase.RollbackTransaction();
+                        return;
+                    }
+
                     // First be sure the character's item is saved to db
                     pItemChar->SaveToDB();
 
@@ -1502,12 +1545,16 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
             }
             pGuild->MemberItemWithdraw(BankTab, pl->GetGUIDLow());
             pGuild->LogBankEvent(GUILD_BANK_LOG_WITHDRAW_ITEM, BankTab, pl->GetGUIDLow(), pItemBank->GetEntry(), SplitedAmount);
+
             CharacterDatabase.CommitTransaction();
+
             pGuild->DisplayGuildBankContent(this, BankTab);
             return;
         }                                                   // End "To char" part
         else
         {                                                   // Char -> Bank cases
+            CharacterDatabase.BeginTransaction();
+
             pl->SaveInventoryAndGoldToDB();
             if (!pItemBank)
             {
@@ -1558,12 +1605,6 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
             }
             else
             {
-                if (pGuild->GetMemberSlotWithdrawRem(pl->GetGUIDLow(), BankTab)==0)
-                {
-                    sLog.outDebug("GUILDBANK: Player tried to swap an item with no withdraw right!!");
-                    CharacterDatabase.RollbackTransaction();
-                    return;
-                }
                 if(pItemChar->GetEntry()==pItemBank->GetEntry() && pItemBank->GetCount() < pItemBank->GetMaxStackCount())
                 {
                     if(SplitedAmount + pItemBank->GetCount() >  pItemBank->GetMaxStackCount())
@@ -1572,6 +1613,8 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
 
                 if (SplitedAmount)                          // Char -> Bank split to existed item (patly move)
                 {
+                    // additionl right check not required
+
                     // No autostore here
                     uint32 ItemEntry = pItemChar->GetEntry();
                     pItemChar->SetCount(pItemChar->GetCount()-SplitedAmount);
@@ -1592,6 +1635,14 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                 }
                 else                                        // Char <-> Bank swap items
                 {
+                    // check bank pos rights (item swapped with inventory)
+                    uint32 remRight = pGuild->GetMemberSlotWithdrawRem(pl->GetGUIDLow(), BankTab);
+                    if(remRight <= 0)
+                    {
+                        CharacterDatabase.RollbackTransaction();
+                        return;
+                    }
+
                     //first be sure char item is saved
                     pItemChar->SaveToDB();
                     // autostore can be set or not
