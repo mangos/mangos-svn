@@ -3208,7 +3208,7 @@ void Aura::HandleModSpellDamagePercentFromStat(bool apply, bool Real)
     // On apply aura isn`t on Player so need add manually
     if (apply)
     {
-        int32 DamageBonus = m_target->GetStat(usedStat) * m_modifier.m_amount / 100;
+        int32 DamageBonus = int32(m_target->GetStat(usedStat) * m_modifier.m_amount / 100.0f);
 
         for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; i++)
         {
@@ -3233,7 +3233,7 @@ void Aura::HandleModSpellHealingPercentFromStat(bool apply, bool Real)
     int32 HealingBonus = 0;
     if (apply)
     {
-        int32 HealingBonus = HealingBonus = m_target->GetStat(usedStat) * m_modifier.m_amount / 100;
+        int32 HealingBonus = int32(m_target->GetStat(usedStat) * m_modifier.m_amount / 100.0f);
         m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS,HealingBonus,apply);
     }
 }
@@ -3252,7 +3252,7 @@ void Aura::HandleModSpellDamagePercentFromAttackPower(bool apply, bool Real)
     // On apply aura isn`t on Player so need add manually
     if (apply)
     {
-        int32 DamageBonus = DamageBonus = m_target->GetTotalAttackPowerValue(BASE_ATTACK) * m_modifier.m_amount/100;
+        int32 DamageBonus = int32(m_target->GetTotalAttackPowerValue(BASE_ATTACK) * m_modifier.m_amount/100.0f);
 
         for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; i++)
         {
@@ -3274,7 +3274,7 @@ void Aura::HandleModSpellHealingPercentFromAttackPower(bool apply, bool Real)
     // On apply aura isn`t on Player so need add manually
     if (apply)
     {
-        int32 HealingBonus = HealingBonus = m_target->GetTotalAttackPowerValue(BASE_ATTACK) * m_modifier.m_amount/100;
+        int32 HealingBonus = int32(m_target->GetTotalAttackPowerValue(BASE_ATTACK) * m_modifier.m_amount/100.0f);
         m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS,HealingBonus,apply);
     }
 }
@@ -3328,7 +3328,7 @@ void Aura::HandleAuraModResistenceOfIntellectPercent(bool apply, bool Real)
     // On apply aura isn`t on Player so need add manually 
      if (apply) 
      { 
-         int32 ArmorBonus = m_target->GetStat(STAT_INTELLECT) * m_modifier.m_amount/100;
+         int32 ArmorBonus = int32(m_target->GetStat(STAT_INTELLECT) * m_modifier.m_amount/100.0f);
          m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES + SPELL_SCHOOL_NORMAL,ArmorBonus,apply); 
     }
 }
@@ -3728,7 +3728,7 @@ void Aura::HandleAuraModRangedAttackPowerOfStatPercent(bool apply, bool Real)
      // On apply aura isn`t on Player so need add manually 
      if (apply) 
      { 
-         int32 RAPBonus = m_target->GetStat(Stats(m_modifier.m_miscvalue)) * m_modifier.m_amount / 100.0f; 
+         int32 RAPBonus = int32(m_target->GetStat(Stats(m_modifier.m_miscvalue)) * m_modifier.m_amount / 100.0f); 
          m_target->ApplyModUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,RAPBonus,apply); 
     }
 }
