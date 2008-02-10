@@ -1464,12 +1464,12 @@ void Guild::LogBankEvent(uint8 LogEntry, uint8 TabId, uint32 PlayerGuidLow, uint
 // This will renum guids used at load to prevent always going up until infinit
 void Guild::RenumBankLogs()
 {
-    QueryResult *result = CharacterDatabase.PQuery("SELECT `LogGuid` FROM `guild_bank_eventlog` WHERE `guildid` = '%u' ORDER BY `LogGuid`", Id);
+    LogMaxGuid = 1;
 
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `LogGuid` FROM `guild_bank_eventlog` WHERE `guildid` = '%u' ORDER BY `LogGuid`", Id);
     if(!result)
         return;
 
-    LogMaxGuid = 1;
     CharacterDatabase.BeginTransaction();
     do
     {
@@ -1481,14 +1481,3 @@ void Guild::RenumBankLogs()
     delete result;
     CharacterDatabase.CommitTransaction();
 }
-
-
-
-
-
-
-
-
-
-
-
