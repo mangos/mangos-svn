@@ -542,6 +542,10 @@ class Spell
         void SetDelayStart(uint64 m_time) { m_delayStart = m_time; }
         uint64 GetDelayMoment() const { return m_delayMoment; }
 
+        bool IsNeedSendToClient() const {
+            return m_spellInfo->SpellVisual!=0 || m_spellInfo->ChannelInterruptFlags!=0 || m_spellInfo->speed > 0.0f || !m_triggeredByAuraSpell && !m_IsTriggeredSpell;
+        }
+
         CurrentSpellTypes GetCurrentContainer();
 
         Unit* GetCaster() { return m_caster; }
