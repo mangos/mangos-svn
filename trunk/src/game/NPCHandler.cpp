@@ -212,7 +212,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     if(!trainer_spell)
         return;
 
-    // can't be learn, cheat?
+    // can't be learn, cheat? Or double learn with lags...
     if(_player->GetTrainerSpellState(trainer_spell) != TRAINER_SPELL_GREEN)
         return;
 
@@ -232,6 +232,9 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         _player->addSpell(spellId,4);                       // active = 4 for spell book of hunter's pet
         return;
     }
+
+    // learn explicitly to prevent lost money at lags, learning spell will be only show spell anumation
+    _player->learnSpell(spellInfo->Id);
 
     Unit* caster = (trainer_spell->spell->SpellVisual == 222) ? (Unit*)_player : (Unit*)unit;
 
