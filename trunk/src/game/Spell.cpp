@@ -1685,7 +1685,7 @@ void Spell::_handle_immediate_phase()
     // handle some immediate features of the spell here
     HandleThreatSpells(m_spellInfo->Id);
 
-    m_needSpellLog = true;
+    m_needSpellLog = IsNeedSendToClient();
     for(uint32 j = 0;j<3;j++)
     {
         if(m_spellInfo->Effect[j]==0)
@@ -2137,6 +2137,9 @@ void Spell::SendCastResult(uint8 result)
 
 void Spell::SendSpellStart()
 {
+    if(!IsNeedSendToClient())
+        return;
+
     sLog.outDebug("Sending SMSG_SPELL_START id=%u",m_spellInfo->Id);
 
     m_castFlags = CAST_FLAG_UNKNOWN1;
@@ -2172,6 +2175,10 @@ void Spell::SendSpellStart()
 
 void Spell::SendSpellGo()
 {
+    // not send invisible spell casting
+    if(!IsNeedSendToClient())
+        return;
+
     sLog.outDebug("Sending SMSG_SPELL_GO id=%u",m_spellInfo->Id);
 
     Unit * target;
