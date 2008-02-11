@@ -13383,7 +13383,6 @@ void Player::_LoadQuestStatus(QueryResult *result)
 
 void Player::_LoadDailyQuestStatus(QueryResult *result)
 {
-
     for(uint32 quest_daily_idx = 0; quest_daily_idx < 10; ++quest_daily_idx)
         SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx,0);
 
