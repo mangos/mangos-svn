@@ -547,7 +547,7 @@ class ObjectMgr
         GameObjectData& NewGOData(uint32 guid) { return mGameObjectDataMap[guid]; }
         void DeleteGOData(uint32 guid);
 
-        std::string GetMangosStringDefault(uint32 entry) const
+        char const* GetMangosStringDefault(uint32 entry) const
         {
             MangosStringMap::const_iterator itr = mMangosStringMap.find(entry);
             if(itr==mMangosStringMap.end())
@@ -556,7 +556,7 @@ class ObjectMgr
                 return "<error>";
             }
 
-            return itr->second;
+            return itr->second.c_str();
         }
         MangosStringLocale const* GetMangosStringLocale(uint32 entry) const
         {
