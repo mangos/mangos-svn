@@ -547,11 +547,16 @@ class ObjectMgr
         GameObjectData& NewGOData(uint32 guid) { return mGameObjectDataMap[guid]; }
         void DeleteGOData(uint32 guid);
 
-        std::string const* GetMangosStringDefault(uint32 entry) const
+        std::string GetMangosStringDefault(uint32 entry) const
         {
             MangosStringMap::const_iterator itr = mMangosStringMap.find(entry);
-            if(itr==mMangosStringMap.end()) return NULL;
-            return &itr->second;
+            if(itr==mMangosStringMap.end())
+            {
+                sLog.outErrorDb("Entry %u not found in `mangos_string` table.",entry);
+                return "<error>";
+            }
+
+            return itr->second;
         }
         MangosStringLocale const* GetMangosStringLocale(uint32 entry) const
         {

@@ -5515,21 +5515,13 @@ void ObjectMgr::LoadMangosStringLocales()
 
 const char *ObjectMgr::GetMangosString(uint32 entry, int locale_idx)
 {
-    const std::string *content;
     if (locale_idx == -2)
         locale_idx = DBCLocaleIndex;
     if (locale_idx >= 0)
     {
-        MangosStringLocale const *msl = GetMangosStringLocale(entry);
-        if (msl)
-        {
-            if (msl->Content.size() > locale_idx && !msl->Content[locale_idx].empty())
-            {
-                content = &msl->Content[locale_idx];
-                return content->c_str();
-            }
-        }
+        if(MangosStringLocale const *msl = GetMangosStringLocale(entry))
+            if(msl->Content.size() > locale_idx && !msl->Content[locale_idx].empty())
+                return msl->Content[locale_idx].c_str();
     }
-    content = GetMangosStringDefault(entry);
-    return content->c_str();
+    return GetMangosStringDefault(entry).c_str();
 }
