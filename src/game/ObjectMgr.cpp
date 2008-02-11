@@ -5523,5 +5523,5 @@ const char *ObjectMgr::GetMangosString(uint32 entry, int locale_idx)
             if(msl->Content.size() > locale_idx && !msl->Content[locale_idx].empty())
                 return msl->Content[locale_idx].c_str();
     }
-    return GetMangosStringDefault(entry).c_str();
+    return GetMangosStringDefault(entry);
 }
