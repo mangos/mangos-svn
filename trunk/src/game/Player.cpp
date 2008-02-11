@@ -1845,6 +1845,9 @@ bool Player::IsUnderWater() const
 
 void Player::SetInWater(bool apply)
 {
+    if(m_isInWater==apply)
+        return;
+
     //define player in water by opcodes
     //move player's guid into HateOfflineList of those mobs
     //which can't swim and move guid back into ThreatList when
