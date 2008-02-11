@@ -266,7 +266,11 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     }
 
     if(((movementInfo.flags & MOVEMENTFLAG_SWIMMING) != 0) != GetPlayer()->IsInWater())
-        GetPlayer()->SetInWater( !GetPlayer()->IsInWater() );
+    {
+        // now client not include swimming flag in case juming under water
+        GetPlayer()->SetInWater( !GetPlayer()->IsInWater() || GetPlayer()->GetBaseMap()->IsUnderWater(movementInfo.x, movementInfo.y, movementInfo.z) );
+    }
+
     /*----------------------*/
 
     /* process position-change */
