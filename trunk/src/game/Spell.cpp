@@ -701,7 +701,14 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
         {
             HandleEffects(unit,NULL,NULL,effectNumber,m_damageMultipliers[effectNumber]);
             if ( m_applyMultiplier[effectNumber] )
-                m_damageMultipliers[effectNumber] *= m_spellInfo->DmgMultiplier[effectNumber];
+            {
+                // Get multiplier
+                float multiplier = m_spellInfo->DmgMultiplier[effectNumber];
+                // Apply multiplier mods
+                if(Player* modOwner = m_originalCaster->GetSpellModOwner())
+                    modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_EFFECT_PAST_FIRST, multiplier);
+                m_damageMultipliers[effectNumber] *= multiplier;
+            }
         }
     }
 }

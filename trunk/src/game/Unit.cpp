@@ -200,6 +200,7 @@ Unit::Unit( WorldObject *instantiator )
     m_attacking = NULL;
     m_modMeleeHitChance = 0.0f;
     m_modRangedHitChance = 0.0f;
+    m_modSpellHitChance = 0.0f;
     m_baseSpellCritChance = 5;
 
     m_CombatTimer = 0;
