@@ -1522,8 +1522,13 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                     uint32 FurorChance = 0;
                     Unit::AuraList const& mDummy = m_target->GetAurasByType(SPELL_AURA_DUMMY);
                     for(Unit::AuraList::const_iterator i = mDummy.begin(); i != mDummy.end(); ++i)
+                    {
                         if ((*i)->GetSpellProto()->SpellIconID == 238)
+                        {
                             FurorChance = (*i)->GetModifier()->m_amount;
+                            break;
+                        }
+                    }
 
                     if (m_modifier.m_miscvalue == FORM_CAT)
                     {

@@ -1453,6 +1453,10 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         case SPELL_AURA_PERIODIC_DAMAGE:
         case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
         {
+            if( spellProto->Effect[effect_idx]==SPELL_EFFECT_PERSISTENT_AREA_AURA &&
+                SpellHitResult(pVictim,spellProto,false)!=SPELL_MISS_NONE)
+                return;
+
             uint32 absorb=0;
             uint32 resist=0;
             CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
@@ -1474,9 +1478,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                     pdamage = pdamageReductedArmor;
                 }
 
-                CalcAbsorbResist(pVictim, SpellSchools(spellProto->School), DOT, pdamage, &absorb, &resist);
-
                 pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
+
+                CalcAbsorbResist(pVictim, SpellSchools(spellProto->School), DOT, pdamage, &absorb, &resist);
             }
             else
                 pdamage = uint32(pVictim->GetMaxHealth()*amount/100);
@@ -1507,6 +1511,10 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         }
         case SPELL_AURA_PERIODIC_LEECH:
         {
+            if( spellProto->Effect[effect_idx]==SPELL_EFFECT_PERSISTENT_AREA_AURA &&
+                SpellHitResult(pVictim,spellProto,false)!=SPELL_MISS_NONE)
+                return;
+
             uint32 absorb=0;
             uint32 resist=0;
             CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
@@ -1521,9 +1529,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                 pdamage = pdamageReductedArmor;
             }
 
-            CalcAbsorbResist(pVictim, SpellSchools(spellProto->School), DOT, pdamage, &absorb, &resist);
-
             pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
+
+            CalcAbsorbResist(pVictim, SpellSchools(spellProto->School), DOT, pdamage, &absorb, &resist);
 
             //As of 2.2 resilience reduces damage from DoT ticks as much as the chance to not be critically hit
             // Reduce dot damage from resilience for players
@@ -1629,6 +1637,10 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         }
         case SPELL_AURA_PERIODIC_MANA_LEECH:
         {
+            if( spellProto->Effect[effect_idx]==SPELL_EFFECT_PERSISTENT_AREA_AURA &&
+                SpellHitResult(pVictim,spellProto,false)!=SPELL_MISS_NONE)
+                return;
+
             // ignore non positive values (can be result apply spellmods to aura damage
             uint32 pdamage = mod->m_amount > 0 ? mod->m_amount : 0;
 
