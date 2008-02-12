@@ -8736,11 +8736,6 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                     if(mainItem->GetProto()->InventoryType == INVTYPE_2HWEAPON)
                         return EQUIP_ERR_CANT_EQUIP_WITH_TWOHANDED;
                 }
-                else if(type != INVTYPE_HOLDABLE)
-                {
-                    // not let equip offhand non-holdable item if mainhand not equipped
-                    return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
-                }
             }
 
             // equip two-hand weapon case (with possible unequip 2 items)
@@ -8791,24 +8786,6 @@ uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
 
     if(!swap && pItem->IsBag() && !((Bag*)pItem)->IsEmpty())
         return EQUIP_ERR_CAN_ONLY_DO_WITH_EMPTY_BAGS;
-
-    // All equipped items can swapped (not in combat case)
-    if(swap)
-        return EQUIP_ERR_OK;
-
-    uint8 slot = pos & 255;
-
-    // can't unequip mainhand item if offhand item equipped (weapon or shield)
-    if(slot == EQUIPMENT_SLOT_MAINHAND)
-    {
-        Item * offhand = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-        if(offhand)
-        {
-            ItemPrototype const *offProto = offhand->GetProto();
-            if(offProto && (offProto->Class == ITEM_CLASS_WEAPON || offProto->InventoryType == INVTYPE_SHIELD))
-                return EQUIP_ERR_CANT_DO_RIGHT_NOW;
-        }
-    }
 
     return EQUIP_ERR_OK;
 }
@@ -16199,10 +16176,6 @@ void Player::AutoUnequipOffhandIfNeed()
 {
     Item *offItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND );
     if(!offItem)
-        return;
-
-    ItemPrototype const* offProto = offItem->GetProto();
-    if(offProto->Class != ITEM_CLASS_WEAPON && offProto->InventoryType != INVTYPE_SHIELD)
         return;
 
     Item *mainItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND );
