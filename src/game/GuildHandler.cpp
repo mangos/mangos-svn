@@ -1331,7 +1331,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                 // pItemSrc moved to BankTabSlotDst
 
                 CharacterDatabase.PExecute("REPLACE INTO `guild_bank_item` (`guildid`,`TabId`,`SlotId`,`item_guid`,`item_entry`) "
-                    "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemSrc->GetEntry());
+                    "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemSrc->GetGUIDLow(), pItemSrc->GetEntry());
 
                 CharacterDatabase.CommitTransaction();
                 // No need to save item instances, they did not change

@@ -476,8 +476,10 @@ void Player::UpdateAllSpellCritChances()
 
 void Player::UpdateExpertise()
 {
-    uint32 expertise = GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE);
-    expertise+= uint32(GetRatingBonusValue(PLAYER_FIELD_EXPERTISE_RATING));
+    int32 expertise = GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE);
+    expertise+= int32(GetRatingBonusValue(PLAYER_FIELD_EXPERTISE_RATING));
+    if(expertise < 0)
+        expertise = 0;
     SetUInt32Value(PLAYER_EXPERTISE, expertise);
 }
 
