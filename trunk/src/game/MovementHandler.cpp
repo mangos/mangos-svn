@@ -226,7 +226,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             !target->HasAuraType(SPELL_AURA_HOVER) && !target->HasAuraType(SPELL_AURA_FEATHER_FALL))
         {
             //Safe fall, fall time reduction
-            uint32 safe_fall = target->GetTotalAuraModifier(SPELL_AURA_SAFE_FALL);
+            int32 safe_fall = target->GetTotalAuraModifier(SPELL_AURA_SAFE_FALL);
             uint32 fall_time = (movementInfo.fallTime > (safe_fall*10)) ? movementInfo.fallTime - (safe_fall*10) : 0;
 
             if(fall_time > 1100)                            //Prevent damage if fall time < 1100
