@@ -4549,10 +4549,14 @@ void Player::ModifySkillBonus(uint32 skillid,int32 val, bool talent)
     for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
         if ((GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF) == skillid)
     {
+        uint32 bonus_val = GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i));
+        uint16 temp_bonus = SKILL_TEMP_BONUS(bonus_val);
+        uint16 perm_bonus = SKILL_PERM_BONUS(bonus_val);
+
         if(talent)                                          // permanent bonus stored in high part 
-            SetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i),GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i))+MAKE_SKILL_BONUS(0,val));
+            SetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i),MAKE_SKILL_BONUS(temp_bonus,perm_bonus+val));
         else                                                // temporary/item bonus stored in low part 
-            SetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i),GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i))+MAKE_SKILL_BONUS(val,0));
+            SetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i),MAKE_SKILL_BONUS(temp_bonus+val,perm_bonus));
         return;
     }
 }
