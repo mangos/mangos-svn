@@ -691,10 +691,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         virtual uint32 GetShieldBlockValue() const =0;
         uint32 GetUnitMeleeSkill() const { return getLevel() * 5; }
-        uint16 GetDefenseSkillValue() const;
-        uint16 GetBaseDefenseSkillValue() const;
-        uint16 GetWeaponSkillValue(WeaponAttackType attType) const;
-        uint16 GetBaseWeaponSkillValue(WeaponAttackType attType) const;
+        uint32 GetDefenseSkillValue() const;
+        uint32 GetBaseDefenseSkillValue() const;
+        uint32 GetWeaponSkillValue(WeaponAttackType attType) const;
+        uint32 GetBaseWeaponSkillValue(WeaponAttackType attType) const;
         float GetWeaponProcChance() const;
         float GetPPMProcChance(uint32 WeaponSpeed, float PPM) const;
         MeleeHitOutcome RollPhysicalOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, SpellEntry const *spellInfo);

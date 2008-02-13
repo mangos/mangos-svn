@@ -2862,7 +2862,7 @@ int32 Unit::MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) c
     return misschance > 6000 ? 6000 : misschance;
 }
 
-uint16 Unit::GetDefenseSkillValue() const
+uint32 Unit::GetDefenseSkillValue() const
 {
     if(GetTypeId() == TYPEID_PLAYER)
         return ((Player*)this)->GetSkillValue (SKILL_DEFENSE);
@@ -2870,7 +2870,7 @@ uint16 Unit::GetDefenseSkillValue() const
         return GetUnitMeleeSkill();
 }
 
-uint16 Unit::GetBaseDefenseSkillValue() const
+uint32 Unit::GetBaseDefenseSkillValue() const
 {
     if(GetTypeId() == TYPEID_PLAYER)
         return ((Player*)this)->GetBaseSkillValue(SKILL_DEFENSE);
@@ -2980,7 +2980,7 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
     return crit;
 }
 
-uint16 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
+uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
 {
     if(GetTypeId() == TYPEID_PLAYER)
     {
@@ -3008,7 +3008,7 @@ uint16 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
         return GetUnitMeleeSkill();
 }
 
-uint16 Unit::GetBaseWeaponSkillValue (WeaponAttackType attType) const
+uint32 Unit::GetBaseWeaponSkillValue (WeaponAttackType attType) const
 {
     if(GetTypeId() == TYPEID_PLAYER)
     {
