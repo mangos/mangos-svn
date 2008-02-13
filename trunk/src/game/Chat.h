@@ -327,6 +327,7 @@ class ChatHandler
         bool HandleWritePDumpCommand(const char *args);
         bool HandleCastCommand(const char *args);
         bool HandleCastBackCommand(const char *args);
+        bool HandleCastTargetCommand(const char *args);
 
         //! Development Commands
         bool HandleSetValue(const char* args);

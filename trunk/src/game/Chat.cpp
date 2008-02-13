@@ -385,6 +385,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "movegens",    SEC_ADMINISTRATOR, &ChatHandler::HandleMovegensCommand,         "",   NULL },
         { "cast",        SEC_ADMINISTRATOR, &ChatHandler::HandleCastCommand,             "",   NULL },
         { "castback",    SEC_ADMINISTRATOR, &ChatHandler::HandleCastBackCommand,         "",   NULL },
+        { "casttarget",  SEC_ADMINISTRATOR, &ChatHandler::HandleCastTargetCommand,       "",   NULL },
 
         //! Development Commands
         { "setvalue",    SEC_ADMINISTRATOR, &ChatHandler::HandleSetValue,                "",   NULL },
