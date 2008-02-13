@@ -44,6 +44,7 @@ typedef bool(MANGOS_IMPORT * scriptCallGossipSelectWithCode)( Player *player, Cr
 typedef bool(MANGOS_IMPORT * scriptCallQuestSelect)( Player *player, Creature *_Creature, Quest const* );
 typedef bool(MANGOS_IMPORT * scriptCallQuestComplete)(Player *player, Creature *_Creature, Quest const*);
 typedef uint32(MANGOS_IMPORT * scriptCallNPCDialogStatus)( Player *player, Creature *_Creature);
+typedef uint32(MANGOS_IMPORT * scriptCallGODialogStatus)( Player *player, GameObject * _GO);
 typedef bool(MANGOS_IMPORT * scriptCallChooseReward)( Player *player, Creature *_Creature, Quest const*, uint32 opt );
 typedef bool(MANGOS_IMPORT * scriptCallItemHello)( Player *player, Item *, Quest const*);
 typedef bool(MANGOS_IMPORT * scriptCallGOHello)( Player *player, GameObject * );
@@ -69,6 +70,7 @@ typedef struct
     scriptCallQuestSelect QuestSelect;
     scriptCallQuestComplete QuestComplete;
     scriptCallNPCDialogStatus NPCDialogStatus;
+    scriptCallGODialogStatus GODialogStatus;
     scriptCallChooseReward ChooseReward;
     scriptCallItemHello ItemHello;
     scriptCallGOHello GOHello;

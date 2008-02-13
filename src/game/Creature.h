@@ -433,8 +433,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         CreatureInfo const *GetCreatureInfo() const;
         CreatureDataAddon const* GetCreatureAddon() const;
 
-        uint32 getDialogStatus(Player *pPlayer, uint32 defstatus);
-
         void prepareGossipMenu( Player *pPlayer,uint32 gossipid );
         void sendPreparedGossip( Player* player);
         void OnGossipSelect(Player* player, uint32 option);
