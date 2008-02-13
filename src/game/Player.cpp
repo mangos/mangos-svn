@@ -2991,11 +2991,19 @@ void Player::InitVisibleBits()
     updateVisualBits.SetBit(OBJECT_FIELD_TYPE);
     updateVisualBits.SetBit(OBJECT_FIELD_SCALE_X);
 
+    updateVisualBits.SetBit(UNIT_FIELD_CHARM);
+    updateVisualBits.SetBit(UNIT_FIELD_CHARM+1);
+
     updateVisualBits.SetBit(UNIT_FIELD_SUMMON);
     updateVisualBits.SetBit(UNIT_FIELD_SUMMON+1);
 
+    updateVisualBits.SetBit(UNIT_FIELD_CHARMEDBY);
+
     updateVisualBits.SetBit(UNIT_FIELD_TARGET);
     updateVisualBits.SetBit(UNIT_FIELD_TARGET+1);
+
+    updateVisualBits.SetBit(UNIT_FIELD_CHANNEL_OBJECT);
+    updateVisualBits.SetBit(UNIT_FIELD_CHANNEL_OBJECT+1);
 
     updateVisualBits.SetBit(UNIT_FIELD_HEALTH);
     updateVisualBits.SetBit(UNIT_FIELD_POWER1);
@@ -3032,11 +3040,9 @@ void Player::InitVisibleBits()
     updateVisualBits.SetBit(UNIT_FIELD_PETNUMBER);
     updateVisualBits.SetBit(UNIT_FIELD_PET_NAME_TIMESTAMP);
     updateVisualBits.SetBit(UNIT_DYNAMIC_FLAGS);
+    updateVisualBits.SetBit(UNIT_CHANNEL_SPELL);
     updateVisualBits.SetBit(UNIT_MOD_CAST_SPEED);
     updateVisualBits.SetBit(UNIT_FIELD_BYTES_2);
-
-    updateVisualBits.SetBit(UNIT_FIELD_CHANNEL_OBJECT);
-    updateVisualBits.SetBit(UNIT_CHANNEL_SPELL);
 
     updateVisualBits.SetBit(PLAYER_FLAGS);
     updateVisualBits.SetBit(PLAYER_BYTES);
