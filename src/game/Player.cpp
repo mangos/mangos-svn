@@ -3949,7 +3949,7 @@ void Player::UpdateDefense()
 
 uint16 Player::GetDefenseSkillTempBonusValue() const
 {
-    return GetSkillTempBonusValue(SKILL_DEFENSE);
+    return GetSkillTempBonusValue(SKILL_DEFENSE) + uint32(GetRatingBonusValue(PLAYER_FIELD_DEFENCE_RATING));
 }
 
 void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, float amount, bool apply, bool affectStats)
@@ -4209,6 +4209,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
     {
         case PLAYER_FIELD_ALL_WEAPONS_SKILL_RATING:         // Implemended in Unit::RollMeleeOutcomeAgainst
         case PLAYER_FIELD_DEFENCE_RATING:
+            UpdateDefenseBonusesMod();
             break;
         case PLAYER_FIELD_DODGE_RATING:
             UpdateDodgePercentage();
@@ -4469,6 +4470,12 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
     Unit *pVictim = getVictim();
     if(pVictim && pVictim->GetTypeId() == TYPEID_PLAYER)
         return;
+
+    if(IsInFeralForm())
+        return;                                             // always maximized SKILL_FERAL_COMBAT in fact
+
+    if(m_form == FORM_TREE)
+        return;                                             // use weapon but not skill up
 
     switch(attType)
     {
