@@ -4615,3 +4615,41 @@ bool ChatHandler::HandleCastBackCommand(const char* args)
 
     return true;
 }
+
+bool ChatHandler::HandleCastTargetCommand(const char* args)
+{
+    Unit* caster = getSelectedUnit();
+
+    if(!caster)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
+    }
+
+    if(!caster->getVictim())
+    {
+        SendSysMessage(LANG_SELECTED_TARGET_NOT_HAVE_VICTIM);
+        return true;
+    }
+
+    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hspell");
+    if(!cId)
+        return false;
+
+    uint32 spell = (uint32)atol((char*)cId);
+    if(!spell || !sSpellStore.LookupEntry(spell))
+        return false;
+
+    // update orientation at server
+    caster->SetOrientation(caster->GetAngle(m_session->GetPlayer()));
+
+    // and client
+    WorldPacket data;
+    caster->BuildHeartBeatMsg(&data);
+    caster->SendMessageToSet(&data,true);
+
+    caster->CastSpell(caster->getVictim(),spell,false);
+
+    return true;
+}

@@ -480,6 +480,7 @@ enum MangosStrings
 
     LANG_INVISIBLE_INVISIBLE            = 577,
     LANG_INVISIBLE_VISIBLE              = 578,
+    LANG_SELECTED_TARGET_NOT_HAVE_VICTIM = 579,
 
     // Battleground
     LANG_BG_A_WINS                      = 600,
