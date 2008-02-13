@@ -357,7 +357,7 @@ void Player::UpdateBlockPercentage()
 {
     BaseModGroup modGroup = BLOCK_PERCENTAGE;
 
-    float chance = 5 - (int32(getLevel()*5) - int32(GetBaseDefenseSkillValue())) * 0.04f;
+    float chance = 5 - (int32(GetMaxSkillValueForLevel()) - int32(GetBaseDefenseSkillValue())) * 0.04f;
     chance = chance < 0.0f ? 0.0f : chance;
 
     SetBaseModValue(BLOCK_PERCENTAGE, PCT_MOD, chance);

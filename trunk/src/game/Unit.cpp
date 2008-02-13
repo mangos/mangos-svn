@@ -2521,10 +2521,6 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         }
     }
 
-    // Add rating bonuses for victim
-    if(pVictim->GetTypeId() == TYPEID_PLAYER)
-       skillDiff-=int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_DEFENCE_RATING));
-
     // bonus from skills is 0.04%
     int32    skillBonus = skillDiff * 4;
     int32    skillBonus2 = 4 * ( GetWeaponSkillValue(attType) - pVictim->GetBaseDefenseSkillValue() );
@@ -2865,7 +2861,8 @@ int32 Unit::MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) c
 uint32 Unit::GetDefenseSkillValue() const
 {
     if(GetTypeId() == TYPEID_PLAYER)
-        return ((Player*)this)->GetSkillValue (SKILL_DEFENSE);
+        return ((Player*)this)->GetSkillValue (SKILL_DEFENSE)+
+            uint32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_DEFENCE_RATING));
     else
         return GetUnitMeleeSkill();
 }
@@ -2998,6 +2995,9 @@ uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
         if(slot != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() ||
             item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon(false) ))
             return 0;
+
+        if(((Player*)this)->IsInFeralForm())
+            return GetMaxSkillValueForLevel();              // always maximized SKILL_FERAL_COMBAT in fact
 
         // in range
         uint32  skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon(attType==BASE_ATTACK)
