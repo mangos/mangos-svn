@@ -325,85 +325,96 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
 
     AuctionEntry *auction = mAuctions->GetAuction(auctionId);
     Player *pl = GetPlayer();
-    if ((auction) && (auction->owner != pl->GetGUIDLow()))
-    {
-        if (price < (auction->bid + objmgr.GetAuctionOutBid(auction->bid)))
-        {
-            //auction has already higher bid, client tests it!
-            //SendAuctionCommandResult(auction->auctionId, AUCTION_PLACE_BID, ???);
-            return;
-        }
-        if (price > pl->GetMoney())
-        {
-            //you don't have enought money!, client tests!
-            //SendAuctionCommandResult(auction->auctionId, AUCTION_PLACE_BID, ???);
-            return;
-        }
-        if ((price < auction->buyout) || (auction->buyout == 0))
-        {
-            if (auction->bidder > 0)
-            {
-                if ( auction->bidder == pl->GetGUIDLow() )
-                {
-                    pl->ModifyMoney( -int32(price - auction->bid));
-                }
-                else
-                {
-                    // mail to last bidder and return money
-                    SendAuctionOutbiddedMail( auction , price );
-                    pl->ModifyMoney( -int32(price) );
-                }
-            }
-            else
-            {
-                pl->ModifyMoney( -int32(price) );
-            }
-            auction->bidder = pl->GetGUIDLow();
-            auction->bid = price;
 
-            // after this update we should save player's money ...
-            CharacterDatabase.PExecute("UPDATE `auctionhouse` SET `buyguid` = '%u',`lastbid` = '%u' WHERE `id` = '%u'", auction->bidder, auction->bid, auction->Id);
-
-            SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, AUCTION_OK, 0 );
-        }
-        else
-        {
-            //buyout:
-            if (pl->GetGUIDLow() == auction->bidder )
-            {
-                pl->ModifyMoney(-int32(auction->buyout - auction->bid));
-            }
-            else
-            {
-                pl->ModifyMoney(-int32(auction->buyout));
-                if ( auction->bidder )                      //buyout for bidded auction ..
-                {
-                    SendAuctionOutbiddedMail( auction, auction->buyout );
-                }
-            }
-            auction->bidder = pl->GetGUIDLow();
-            auction->bid = auction->buyout;
-
-            objmgr.SendAuctionSuccessfulMail( auction );
-            objmgr.SendAuctionWonMail( auction );
-
-            SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, AUCTION_OK);
-
-            objmgr.RemoveAItem(auction->item_guidlow);
-            mAuctions->RemoveAuction(auction->Id);
-            CharacterDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
-
-            delete auction;
-        }
-        CharacterDatabase.BeginTransaction();
-        pl->SaveInventoryAndGoldToDB();
-        CharacterDatabase.CommitTransaction();
-    }
-    else
+    if( !auction || auction->owner == pl->GetGUIDLow() )
     {
         //you cannot bid your own auction:
         SendAuctionCommandResult( 0, AUCTION_PLACE_BID, CANNOT_BID_YOUR_AUCTION_ERROR );
+        return;
     }
+
+    // impossible have online own another character (use this for speedup check in case online owner)
+    Player* auction_owner = objmgr.GetPlayer(MAKE_GUID(auction->owner,HIGHGUID_PLAYER));
+    if( !auction_owner && objmgr.GetPlayerAccountIdByGUID(MAKE_GUID(auction->owner,HIGHGUID_PLAYER)) == pl->GetSession()->GetAccountId())
+    {
+        //you cannot bid your another character auction:
+        SendAuctionCommandResult( 0, AUCTION_PLACE_BID, CANNOT_BID_YOUR_AUCTION_ERROR );
+        return;
+    }
+
+    if (price < (auction->bid + objmgr.GetAuctionOutBid(auction->bid)))
+    {
+        //auction has already higher bid, client tests it!
+        //SendAuctionCommandResult(auction->auctionId, AUCTION_PLACE_BID, ???);
+        return;
+    }
+
+    if (price > pl->GetMoney())
+    {
+        //you don't have enought money!, client tests!
+        //SendAuctionCommandResult(auction->auctionId, AUCTION_PLACE_BID, ???);
+        return;
+    }
+
+    if ((price < auction->buyout) || (auction->buyout == 0))
+    {
+        if (auction->bidder > 0)
+        {
+            if ( auction->bidder == pl->GetGUIDLow() )
+            {
+                pl->ModifyMoney( -int32(price - auction->bid));
+            }
+            else
+            {
+                // mail to last bidder and return money
+                SendAuctionOutbiddedMail( auction , price );
+                pl->ModifyMoney( -int32(price) );
+            }
+        }
+        else
+        {
+            pl->ModifyMoney( -int32(price) );
+        }
+        auction->bidder = pl->GetGUIDLow();
+        auction->bid = price;
+
+        // after this update we should save player's money ...
+        CharacterDatabase.PExecute("UPDATE `auctionhouse` SET `buyguid` = '%u',`lastbid` = '%u' WHERE `id` = '%u'", auction->bidder, auction->bid, auction->Id);
+
+        SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, AUCTION_OK, 0 );
+    }
+    else
+    {
+        //buyout:
+        if (pl->GetGUIDLow() == auction->bidder )
+        {
+            pl->ModifyMoney(-int32(auction->buyout - auction->bid));
+        }
+        else
+        {
+            pl->ModifyMoney(-int32(auction->buyout));
+            if ( auction->bidder )                      //buyout for bidded auction ..
+            {
+                SendAuctionOutbiddedMail( auction, auction->buyout );
+            }
+        }
+        auction->bidder = pl->GetGUIDLow();
+        auction->bid = auction->buyout;
+
+        objmgr.SendAuctionSuccessfulMail( auction );
+        objmgr.SendAuctionWonMail( auction );
+
+        SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, AUCTION_OK);
+
+        objmgr.RemoveAItem(auction->item_guidlow);
+        mAuctions->RemoveAuction(auction->Id);
+        CharacterDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
+
+        delete auction;
+    }
+    CharacterDatabase.BeginTransaction();
+    pl->SaveInventoryAndGoldToDB();
+    CharacterDatabase.CommitTransaction();
 }
 
 //this void is called when auction_owner cancels his auction
