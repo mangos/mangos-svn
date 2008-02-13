@@ -79,7 +79,7 @@ extern uint32 GetSkillLevel(Player *player,uint32 skill);
 #define SEND_POI(a,b,c,d,e,f)      PlayerTalkClass->SendPointOfInterest(a,b,c,d,e,f)
 #define CLOSE_GOSSIP_MENU()        PlayerTalkClass->CloseGossip();
 
-#define QUEST_DIALOG_STATUS(a,b)     getDialogStatus(a,b)
+#define QUEST_DIALOG_STATUS(a,b,c)   GetSession()->getDialogStatus(a,b,c)
 #define SEND_QUEST_DETAILS(a,b,c)    PlayerTalkClass->SendQuestDetails(a,b,c)
 #define SEND_REQUESTEDITEMS(a,b,c,d) PlayerTalkClass->SendRequestedItems(a,b,c,d)
 

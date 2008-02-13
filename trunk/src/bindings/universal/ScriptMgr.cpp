@@ -171,6 +171,18 @@ uint32 NPCDialogStatus( Player *player, Creature *_Creature )
 }
 
 MANGOS_DLL_EXPORT
+uint32 GODialogStatus( Player *player, GameObject *_GO )
+{
+    Script *tmpscript = NULL;
+
+    tmpscript = GetScriptByName(_GO->GetGOInfo()->ScriptName);
+    if(!tmpscript || !tmpscript->pGODialogStatus) return 100;
+
+    player->PlayerTalkClass->ClearMenus();
+    return tmpscript->pGODialogStatus(player,_GO);
+}
+
+MANGOS_DLL_EXPORT
 bool ItemHello( Player *player, Item *_Item, Quest *_Quest )
 {
     Script *tmpscript = NULL;

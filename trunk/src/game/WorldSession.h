@@ -31,6 +31,7 @@ struct AuctionEntry;
 
 class Creature;
 class Item;
+class Object;
 class Player;
 class Unit;
 class WorldPacket;
@@ -186,8 +187,8 @@ class MANGOS_DLL_SPEC WorldSession
 
         uint32 GetLatency() const { return m_latency; }
         void SetLatency(uint32 latency) { m_latency = latency; }
+        uint32 getDialogStatus(Player *pPlayer, Object* questgiver, uint32 defstatus);
     protected:
-
         void HandleCharEnumOpcode(WorldPacket& recvPacket);
         void HandleCharDeleteOpcode(WorldPacket& recvPacket);
         void HandleCharCreateOpcode(WorldPacket& recvPacket);
