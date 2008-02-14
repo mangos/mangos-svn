@@ -364,6 +364,12 @@ bool ChatHandler::HandleGonameCommand(const char* args)
     Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
     {
+        if(chr->isInFlight())
+        {
+            PSendSysMessage(LANG_CHAR_IN_FLIGHT, chr->GetName());
+            return true;
+        }
+
         Map* cMap = MapManager::Instance().GetMap(chr->GetMapId(),chr);
         if(cMap->Instanceable())
         {
@@ -427,8 +433,15 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         // to point where player stay (if loaded)
         float x,y,z,o;
         uint32 map;
-        if(Player::LoadPositionFromDB(map,x,y,z,o,guid))
+        bool in_flight;
+        if(Player::LoadPositionFromDB(map,x,y,z,o,in_flight,guid))
         {
+            if(in_flight)
+            {
+                PSendSysMessage(LANG_CHAR_IN_FLIGHT, name.c_str());
+                return true;
+            }
+
             _player->SaveRecallPosition();
             _player->TeleportTo(map, x, y, z,_player->GetOrientation());
             return true;

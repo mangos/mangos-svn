@@ -116,8 +116,6 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_zoneUpdateId = 0;
     m_zoneUpdateTimer = 0;
 
-    m_dismountCost = 0;
-
     m_nextSave = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
 
     // randomize first save time in range [CONFIG_INTERVAL_SAVE] around [CONFIG_INTERVAL_SAVE]
@@ -5955,7 +5953,6 @@ void Player::DuelComplete(DuelCompleteType type)
 void Player::FlightComplete()
 {
     clearUnitState(UNIT_STAT_IN_FLIGHT);
-    SetMoney( m_dismountCost);
     Unmount();
     getHostilRefManager().setOnlineOfflineState(true);
     if(pvpInfo.inHostileArea)
@@ -12413,7 +12410,7 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
     bool delete_result = true;
     if(!result)
     {
-        //                                0      1      2            3            4            5     6           7           8
+        //                                        0      1      2            3            4            5     6           7           8
         result = CharacterDatabase.PQuery("SELECT `data`,`name`,`position_x`,`position_y`,`position_z`,`map`,`totaltime`,`leveltime`,`at_login` FROM `character` WHERE `guid` = '%u'",guid);
         if(!result) return false;
     }
@@ -12458,9 +12455,9 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
     return true;
 }
 
-bool Player::LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, uint64 guid)
+bool Player::LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, bool& in_flight, uint64 guid)
 {
-    QueryResult *result = CharacterDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `character` WHERE `guid` = '%u'",GUID_LOPART(guid));
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`taxi_path` FROM `character` WHERE `guid` = '%u'",GUID_LOPART(guid));
     if(!result)
         return false;
 
@@ -12471,6 +12468,7 @@ bool Player::LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float&
     z = fields[2].GetFloat();
     o = fields[3].GetFloat();
     mapid = fields[4].GetUInt32();
+    in_flight = !fields[5].GetCppString().empty();
 
     delete result;
     return true;
@@ -12528,8 +12526,8 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 
 bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 {
-    ////                                                     0      1         2      3      4      5       6            7            8            9     10            11         12          13          14          15           16            17                  18                  19                  20        21        22        23         24          25        26             27         [28]   [29]     30              31                32
-    //QueryResult *result = CharacterDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`at_login`,`zone`,`online`,`pending_honor`,`last_honor_date`,`last_kill_date` FROM `character` WHERE `guid` = '%u'", guid);
+    ////                                                     0      1         2      3      4      5       6            7            8            9     10            11         12          13          14          15           16            17                  18                  19                  20        21        22        23         24          25        26             27         [28]   [29]     30              31                32               33
+    //QueryResult *result = CharacterDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`at_login`,`zone`,`online`,`pending_honor`,`last_honor_date`,`last_kill_date`,`taxi_path` FROM `character` WHERE `guid` = '%u'", guid);
     QueryResult *result = holder->GetResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
     if(!result)
@@ -12691,6 +12689,8 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     m_lastHonorDate = fields[31].GetUInt32();
     m_lastKillDate = fields[32].GetUInt32();
 
+    std::string taxi_nodes = fields[33].GetCppString();
+
     delete result;
 
     // clear channel spell data (if saved at channel spell casting)
@@ -12783,6 +12783,47 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     if(!_LoadHomeBind(holder->GetResult(PLAYER_LOGIN_QUERY_LOADHOMEBIND)))
         return false;
+
+    // Not finish taxi flight path
+    if(!LoadTaxiDestinationsFromString(taxi_nodes))
+    {
+        // problems with taxi path loading
+        TaxiNodesEntry const* nodeEntry = NULL;
+        if(!m_TaxiDestinations.empty())
+        {
+            uint32 node_id = m_TaxiDestinations[0];
+            nodeEntry = sTaxiNodesStore.LookupEntry(node_id);
+        }
+
+        if(!nodeEntry)                      // don't know taxi start node, to homebind
+        {
+            sLog.outError("Character %u have wrong data in taxi destination list, teleport to homebind.",GetGUIDLow());
+            SetMapId(m_homebindMapId);
+            Relocate( m_homebindX, m_homebindY, m_homebindZ);
+            SaveRecallPosition();                           // save as recall also to prevent recall and fall from sky
+        }
+        else                                                // have start node, to it
+        {
+            sLog.outError("Character %u have too short taxi destination list, teleport to original node.",GetGUIDLow());
+            SetMapId(nodeEntry->map_id);
+            Relocate(nodeEntry->x, nodeEntry->y, nodeEntry->z);
+            SaveRecallPosition();                           // save as recall also to prevent recall and fall from sky
+        }
+        ClearTaxiDestinations();
+    }
+    else if(!m_TaxiDestinations.empty())
+    {
+        // save source node as recall coord to prevent recall and fall from sky
+        uint32 node_id = m_TaxiDestinations[0];
+        TaxiNodesEntry const* nodeEntry = sTaxiNodesStore.LookupEntry(node_id);
+
+        m_recallMap = nodeEntry->map_id;
+        m_recallX = nodeEntry->x;
+        m_recallY = nodeEntry->y;
+        m_recallZ = nodeEntry->z;
+
+        // flight will started later
+    }
 
     _LoadSpellCooldowns(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS));
 
@@ -13611,10 +13652,6 @@ void Player::SaveToDB()
     // delay auto save at any saves (manual, in code, or autosave)
     m_nextSave = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
 
-    // saved before flight
-    if (isInFlight())
-        return;
-
     // Must saved before enter into BattleGround
     if(InBattleGround())
         return;
@@ -13648,7 +13685,7 @@ void Player::SaveToDB()
         "`taximask`,`online`,`cinematic`,"
         "`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,"
         "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`, `gmstate`, `stable_slots`,`at_login`,`zone`,"
-        "`pending_honor`, `last_honor_date`, `last_kill_date`) VALUES ("
+        "`pending_honor`, `last_honor_date`, `last_kill_date`,`taxi_path`) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -13725,8 +13762,9 @@ void Player::SaveToDB()
     ss << m_lastHonorDate;
     ss << ", ";
     ss << m_lastKillDate;
-
-    ss << " )";
+    ss << ", '";
+    ss << SaveTaxiDestinationsToString();
+    ss << "' )";
 
     CharacterDatabase.Execute( ss.str().c_str() );
 
@@ -14947,7 +14985,10 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
     // clean not finished taxi path if any
     ClearTaxiDestinations();
 
-    // fill destinations path
+    // 0 element current node
+    AddTaxiDestination(sourcenode);
+
+    // fill destinations path tail
     uint32 sourcepath = 0;
     uint32 totalcost = 0;
 
@@ -14962,7 +15003,10 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
         objmgr.GetTaxiPath(prevnode, lastnode, path, cost);
 
         if(!path)
-            break;
+        {
+            ClearTaxiDestinations();
+            return false;
+        }
 
         totalcost += cost;
 
@@ -14995,11 +15039,8 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
         return false;
     }
 
-    // Save before flight (player must loaded in start taxinode if disconnected at flight,etc)
-    SaveToDB();
-
     //Checks and preparations done, DO FLIGHT
-    setDismountCost(money - totalcost);
+    ModifyMoney(-(int32)totalcost);
 
     // prevent stealth flight
     RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
@@ -16211,4 +16252,61 @@ void Player::AutoUnequipOffhandIfNeed()
     {
         sLog.outError("Player::EquipItem: Can's store offhand item at 2hand item equip for player (GUID: %u).",GetGUIDLow());
     }
+}
+
+bool Player::LoadTaxiDestinationsFromString( std::string values )
+{
+    ClearTaxiDestinations();
+
+    Tokens tokens = StrSplit(values," ");
+
+    for(Tokens::iterator iter = tokens.begin(); iter != tokens.end(); ++iter)
+    {
+        uint32 node = uint32(atol(iter->c_str()));
+        AddTaxiDestination(node);
+    }
+
+    if(m_TaxiDestinations.empty())
+        return true;
+
+    // Check integrity
+    if(m_TaxiDestinations.size() < 2)
+        return false;
+
+    for(size_t i = 1; i < m_TaxiDestinations.size(); ++i)
+    {
+        uint32 cost;
+        uint32 path;
+        objmgr.GetTaxiPath(m_TaxiDestinations[i-1],m_TaxiDestinations[i],path,cost);
+        if(!path)
+            return false;
+    }
+
+    return true;
+}
+
+std::string Player::SaveTaxiDestinationsToString()
+{
+    if(m_TaxiDestinations.empty())
+        return "";
+
+    std::ostringstream ss;
+
+    for(size_t i=0; i < m_TaxiDestinations.size(); ++i)
+        ss << m_TaxiDestinations[i] << " ";
+
+    return ss.str();
+}
+
+uint32 Player::GetCurrentTaxiPath() const
+{
+    if(m_TaxiDestinations.size() < 2)
+        return 0;
+
+    uint32 path;
+    uint32 cost;
+
+    objmgr.GetTaxiPath(m_TaxiDestinations[0],m_TaxiDestinations[1],path,cost);
+
+    return path;
 }

@@ -181,6 +181,7 @@ CREATE TABLE `character` (
   `last_honor_date` int(11) unsigned NOT NULL default '0',
   `pending_honor` float NOT NULL default '0',
   `last_kill_date` int(11) unsigned NOT NULL default '0',
+  `taxi_path` text,
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`)
