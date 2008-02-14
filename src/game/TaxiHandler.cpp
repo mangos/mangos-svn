@@ -142,24 +142,7 @@ void WorldSession::SendDoFlight( uint16 MountId, uint32 path )
     FlightPathMovementGenerator *flight = new FlightPathMovementGenerator(path);
     GetPlayer()->GetMotionMaster()->Mutate(flight);
 
-    Path &pathnodes = flight->GetPath();
-    assert( !pathnodes.Empty() );
-
-    uint32 traveltime = uint32(pathnodes.GetTotalLength( ) * 32);
-    WorldPacket data( SMSG_MONSTER_MOVE, (8+4+4+4+4+1+4+4+4+pathnodes.Size()*4*3) );
-    data.append(GetPlayer()->GetPackGUID());
-    data << GetPlayer( )->GetPositionX( )
-        << GetPlayer( )->GetPositionY( )
-        << GetPlayer( )->GetPositionZ( );
-    data << GetPlayer( )->GetOrientation( );
-    data << uint8( 0 );
-    data << uint32( 0x00000300 );
-    data << uint32( traveltime );
-    data << uint32( pathnodes.Size( ) );
-    data.append( (char*)pathnodes.GetNodes( ), pathnodes.Size( ) * 4 * 3 );
-
-    //WPAssert( data.size() == 37 + pathnodes.Size( ) * 4 * 3 );
-    GetPlayer()->SendMessageToSet(&data, true);
+    SendPath(flight->GetPath(),flight->GetCurrentNode(),flight->GetPathAtMapEnd());
 }
 
 bool WorldSession::SendLearnNewTaxiNode( uint64 guid )
@@ -277,4 +260,26 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXI from %d to %d" ,nodes[0],nodes[1]);
 
     GetPlayer()->ActivateTaxiPathTo(nodes);
+}
+
+void WorldSession::SendPath(Path const& path, uint32 start, uint32 end)
+{
+    uint32 traveltime = uint32(path.GetTotalLength(start,end) * 32);
+
+    uint32 pathSize = end-start;
+
+    WorldPacket data( SMSG_MONSTER_MOVE, (8+4+4+4+4+1+4+4+4+pathSize*4*3) );
+    data.append(GetPlayer()->GetPackGUID());
+    data << GetPlayer( )->GetPositionX( )
+        << GetPlayer( )->GetPositionY( )
+        << GetPlayer( )->GetPositionZ( );
+    data << GetPlayer( )->GetOrientation( );
+    data << uint8( 0 );
+    data << uint32( 0x00000300 );
+    data << uint32( traveltime );
+    data << uint32( pathSize );
+    data.append( (char*)path.GetNodes(start), pathSize * 4 * 3 );
+
+    //WPAssert( data.size() == 37 + pathnodes.Size( ) * 4 * 3 );
+    GetPlayer()->SendMessageToSet(&data, true);
 }

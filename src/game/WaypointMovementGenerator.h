@@ -124,8 +124,9 @@ class MANGOS_DLL_DECL FlightPathMovementGenerator
 public PathMovementBase<Player>
 {
     uint32 i_pathId;
+    std::vector<uint32> i_mapIds;
     public:
-        FlightPathMovementGenerator(uint32 id) : i_pathId(id) {}
+        explicit FlightPathMovementGenerator(uint32 id, uint32 startNode = 0) : i_pathId(id) { i_currentNode = startNode; }
         void Initialize(Player &);
         void Finalize(Player &) {}
         void Reset(Player &) {}
@@ -137,7 +138,8 @@ public PathMovementBase<Player>
         void LoadPath(Player &);
         void ReloadPath(Player &) { /* don't reload flight path */ }
 
-        Path& GetPath(void) { return i_path; }
-        inline bool HasArrived(void) const { return (i_currentNode >= i_path.Size()); }
+        Path& GetPath() { return i_path; }
+        uint32 GetPathAtMapEnd() const;
+        inline bool HasArrived() const { return (i_currentNode >= i_path.Size()); }
 };
 #endif

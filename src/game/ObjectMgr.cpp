@@ -3467,19 +3467,18 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
                 delete resultItems;
             }
 
-            if (m->checked < 4)
+            if (m->checked & (AUCTION_CHECKED | COD_PAYMENT_CHECKED | RETURNED_CHECKED))
             {
-                //mail will be returned:
-                CharacterDatabase.PExecute("UPDATE `mail` SET `sender` = '%u', `receiver` = '%u', `expire_time` = '" I64FMTD "', `deliver_time` = '" I64FMTD "',`cod` = '0', `checked` = '16' WHERE `id` = '%u'", m->receiver, m->sender, (uint64)(basetime + 30*DAY), (uint64)basetime, m->messageID);
-                delete m;
-                continue;
+                // mail open and then not returned
+                for(std::vector<MailItemInfo>::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
+                    CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", itr2->item_guid);
             }
             else
             {
-                //deleteitem = true;
-                //delitems << m->item_guid << ", ";
-                for(std::vector<MailItemInfo>::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
-                    CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", itr2->item_guid);
+                //mail will be returned:
+                CharacterDatabase.PExecute("UPDATE `mail` SET `sender` = '%u', `receiver` = '%u', `expire_time` = '" I64FMTD "', `deliver_time` = '" I64FMTD "',`cod` = '0', `checked` = '%u' WHERE `id` = '%u'", m->receiver, m->sender, (uint64)(basetime + 30*DAY), (uint64)basetime, RETURNED_CHECKED, m->messageID);
+                delete m;
+                continue;
             }
         }
         if (m->itemTextId)
@@ -3692,7 +3691,7 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id, uint32 team )
     return mount_id;
 }
 
-void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
+void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes, std::vector<uint32>& mapIds)
 {
     if(path >= sTaxiPathNodesByPath.size())
         return;
@@ -3700,12 +3699,15 @@ void ObjectMgr::GetTaxiPathNodes( uint32 path, Path &pathnodes )
     TaxiPathNodeList& nodeList = sTaxiPathNodesByPath[path];
 
     pathnodes.Resize(nodeList.size());
+    mapIds.resize(nodeList.size());
 
     for(size_t i = 0; i < nodeList.size(); ++i)
     {
         pathnodes[ i ].x = nodeList[i].x;
         pathnodes[ i ].y = nodeList[i].y;
         pathnodes[ i ].z = nodeList[i].z;
+
+        mapIds[i] = nodeList[i].mapid;
     }
 }
 
