@@ -2708,14 +2708,11 @@ uint32 Unit::CalculateDamage (WeaponAttackType attType)
 
 void Unit::SendAttackStart(Unit* pVictim)
 {
-    if(GetTypeId()!=TYPEID_PLAYER || !pVictim)
-        return;
-
     WorldPacket data( SMSG_ATTACKSTART, 16 );
     data << GetGUID();
     data << pVictim->GetGUID();
 
-    ((Player*)this)->SendMessageToSet(&data, true);
+    SendMessageToSet(&data, true);
     DEBUG_LOG( "WORLD: Sent SMSG_ATTACKSTART" );
 }
 
@@ -5684,11 +5681,11 @@ bool Unit::Attack(Unit *victim, bool playerMeleeAttack)
     if(!victim || victim == this)
         return false;
 
-    // player don't must attack in mount state
+    // player cannot attack in mount state
     if(GetTypeId()==TYPEID_PLAYER && IsMounted())
         return false;
 
-    // anyone don't must attack GM in GM-mode
+    // nobody can attack GM in GM-mode
     if(victim->GetTypeId()==TYPEID_PLAYER)
     {
         if(((Player*)victim)->isGameMaster())
@@ -5739,7 +5736,7 @@ bool Unit::Attack(Unit *victim, bool playerMeleeAttack)
     if(haveOffhandWeapon())
         resetAttackTimer(OFF_ATTACK);
 
-    if(playerMeleeAttack)
+    if(GetTypeId()!=TYPEID_PLAYER || playerMeleeAttack)
         SendAttackStart(victim);
 
     return true;
