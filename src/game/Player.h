@@ -914,12 +914,17 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ClearTaxiDestinations() { m_TaxiDestinations.clear(); }
         void AddTaxiDestination(uint32 dest) { m_TaxiDestinations.push_back(dest); }
         uint32 GetTaxiSource() const { return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front(); }
+        uint32 GetTaxiDestination() const { return m_TaxiDestinations.size() < 2 ? 0 : m_TaxiDestinations[1]; }
+        uint32 GetCurrentTaxiPath() const;
         uint32 NextTaxiDestination()
         {
             m_TaxiDestinations.pop_front();
-            return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front();
+            return GetTaxiDestination();
         }
+
         bool ActivateTaxiPathTo(std::vector<uint32> const& nodes );
+        bool LoadTaxiDestinationsFromString(std::string values);
+        std::string SaveTaxiDestinationsToString();
 
         bool isAcceptTickets() const;
         void SetAcceptTicket(bool on) { if(on) m_GMFlags |= GM_ACCEPT_TICKETS; else m_GMFlags &= ~GM_ACCEPT_TICKETS; }
@@ -935,8 +940,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void GiveXP(uint32 xp, Unit* victim);
         void GiveLevel(uint32 level);
         void InitStatsForLevel(bool reapplyMods = false);
-
-        void setDismountCost(uint32 money) { m_dismountCost = money; };
 
         // Played Time Stuff
         time_t m_logintime;
@@ -1171,7 +1174,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         static uint32 GetUInt32ValueFromDB(uint16 index, uint64 guid);
         static float  GetFloatValueFromDB(uint16 index, uint64 guid);
         static uint32 GetZoneIdFromDB(uint64 guid);
-        static bool   LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, uint64 guid);
+        static bool   LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, bool& in_flight, uint64 guid);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -1942,7 +1945,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_race;
         uint32 m_class;
         uint32 m_team;
-        uint32 m_dismountCost;
         uint32 m_nextSave;
         time_t m_speakTime;
         uint32 m_speakCount;

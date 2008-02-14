@@ -58,7 +58,7 @@ bool LoginQueryHolder::Initialize()
 
     // NOTE: all fields in `character` must be read to prevent lost character data at next save in case wrong DB structure.
     // !!! NOTE: including unused `zone`,`online`
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADFROM,            "SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`at_login`,`zone`,`online`,`pending_honor`,`last_honor_date`,`last_kill_date` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADFROM,            "SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`at_login`,`zone`,`online`,`pending_honor`,`last_honor_date`,`last_kill_date`,`taxi_path` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGROUP,           "SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES,  "SELECT `map`,`instance`,`leader` FROM `character_instance` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADAURAS,           "SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`maxduration`,`remaintime`,`remaincharges` FROM `character_aura` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
@@ -578,8 +578,59 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         pCurrChar->SetMovement(MOVE_WATER_WALK);
     }
 
-    // Load pet if any and player is alive
-    if(pCurrChar->isAlive())
+    if(uint32 sourceNode = pCurrChar->GetTaxiSource())
+    {
+
+        sLog.outDebug( "WORLD: Restart chaarcter %u taxi flight", pCurrChar->GetGUIDLow() );
+
+        uint32 MountId = objmgr.GetTaxiMount(sourceNode, pCurrChar->GetTeam());
+        uint32 path = pCurrChar->GetCurrentTaxiPath();
+
+        // search appropriate start path node
+        uint32 startNode = 0;
+
+        TaxiPathNodeList const& nodeList = sTaxiPathNodesByPath[path];
+
+        float distPrev = MAP_SIZE*MAP_SIZE;
+        float distNext = 
+            (nodeList[0].x-pCurrChar->GetPositionX())*(nodeList[0].x-pCurrChar->GetPositionX())+
+            (nodeList[0].y-pCurrChar->GetPositionY())*(nodeList[0].y-pCurrChar->GetPositionY())+
+            (nodeList[0].z-pCurrChar->GetPositionZ())*(nodeList[0].z-pCurrChar->GetPositionZ());
+
+
+        for(uint32 i = 1; i < nodeList.size(); ++i)
+        {
+            TaxiPathNode const& node = nodeList[i];
+            TaxiPathNode const& prevNode = nodeList[i-1];
+
+            // skip nodes at another map
+            if(node.mapid != pCurrChar->GetMapId())
+                continue;
+
+            distPrev = distNext;
+
+            distNext =
+                (node.x-pCurrChar->GetPositionX())*(node.x-pCurrChar->GetPositionX())+
+                (node.y-pCurrChar->GetPositionY())*(node.y-pCurrChar->GetPositionY())+
+                (node.z-pCurrChar->GetPositionZ())*(node.z-pCurrChar->GetPositionZ());
+
+            float distNodes =
+                (node.x-prevNode.x)*(node.x-prevNode.x)+
+                (node.y-prevNode.y)*(node.y-prevNode.y)+
+                (node.z-prevNode.z)*(node.z-prevNode.z);
+
+            if(distNext + distPrev < distNodes)
+            {
+                startNode = i;
+                break;
+            }
+        }
+
+        SendDoFlight( MountId, path, startNode );
+    }
+
+    // Load pet if any and player is alive and not in taxi flight
+    if(pCurrChar->isAlive() && pCurrChar->GetTaxiSource()==0)
         pCurrChar->LoadPet();
 
     // Set FFA PvP for non GM in non-rest mode

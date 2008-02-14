@@ -135,11 +135,14 @@ void WorldSession::SendTaxiMenu( uint64 guid )
     sLog.outDebug( "WORLD: Sent SMSG_SHOWTAXINODES" );
 }
 
-void WorldSession::SendDoFlight( uint16 MountId, uint32 path )
+void WorldSession::SendDoFlight( uint16 MountId, uint32 path, uint32 pathNode )
 {
     GetPlayer()->Mount( MountId, true );
 
-    FlightPathMovementGenerator *flight = new FlightPathMovementGenerator(path);
+    while(GetPlayer()->GetMotionMaster()->top()->GetMovementGeneratorType()==FLIGHT_MOTION_TYPE)
+        GetPlayer()->GetMotionMaster()->MovementExpired(false);
+
+    FlightPathMovementGenerator *flight = new FlightPathMovementGenerator(path,pathNode);
     GetPlayer()->GetMotionMaster()->Mutate(flight);
 
     SendPath(flight->GetPath(),flight->GetCurrentNode(),flight->GetPathAtMapEnd());
@@ -208,17 +211,27 @@ void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
     GetPlayer()->ActivateTaxiPathTo(nodes);
 }
 
-void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& /*recvPacket*/)
+void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& /*recv_data*/)
 {
-    uint32 sourcenode,destinationnode;
-    uint16 MountId;
-    uint32 path, cost;
-
     sLog.outDebug( "WORLD: Received CMSG_MOVE_SPLINE_DONE" );
 
-    sourcenode      = GetPlayer()->GetTaxiSource();
-    if ( sourcenode > 0 )                                   // if more destinations to go
+    // in taxi flight packet received in 2 case:
+    // 1) end taxi path in far (multi-node) flight
+    // 2) switch from one map to other in case multim-map taxi path
+    // we need proccess only (1)
+    uint32 curDest = GetPlayer()->GetTaxiDestination();
+    if(!curDest)
+        return;
+
+    TaxiNodesEntry const* curDestNode = sTaxiNodesStore.LookupEntry(curDest);
+    if(curDestNode && curDestNode->map_id!=GetPlayer()->GetMapId())
+        return;
+
+    uint32 destinationnode = GetPlayer()->NextTaxiDestination();   
+    if ( destinationnode > 0 )                              // if more destinations to go
     {
+        uint32 sourcenode = GetPlayer()->GetTaxiSource();   // current source node for next destination
+
         // Add to taximask middle hubs in taxicheat mode (to prevent having player with disabled taxicheat and not having back flight path)
         if (GetPlayer()->isTaxiCheater())
         {
@@ -233,17 +246,20 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& /*recvPacket*/)
             }
         }
 
-        destinationnode = GetPlayer()->NextTaxiDestination();
-        if ( destinationnode > 0 )
-        {
-            sLog.outDebug( "WORLD: Taxi has to go from %u to %u", sourcenode, destinationnode );
+        sLog.outDebug( "WORLD: Taxi has to go from %u to %u", sourcenode, destinationnode );
 
-            MountId = objmgr.GetTaxiMount(sourcenode, GetPlayer()->GetTeam());
-            objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
+        uint16 MountId = objmgr.GetTaxiMount(sourcenode, GetPlayer()->GetTeam());
 
+        uint32 path, cost;
+        objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
+
+        if(path && MountId)
             SendDoFlight( MountId, path );
-        }
+        else
+            GetPlayer()->ClearTaxiDestinations();           // clear problematic path and next
     }
+    else
+        GetPlayer()->ClearTaxiDestinations();               // not destinations, clear source node
 }
 
 void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )

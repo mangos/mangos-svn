@@ -56,7 +56,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
     GetPlayer()->SendInitialPacketsAfterAddToMap();
 
-    // flight fat teleport case
+    // flight fast teleport case
     if(GetPlayer()->GetMotionMaster()->top()->GetMovementGeneratorType()==FLIGHT_MOTION_TYPE)
     {
         // short preparations to continue flight
@@ -231,7 +231,8 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         movementInfo.t_time = 0;
     }
 
-    if (recv_data.GetOpcode() == MSG_MOVE_FALL_LAND)
+    // fall damage generation (ignore in flight case that can be triggred also at lags in moment teleportation to another map).
+    if (recv_data.GetOpcode() == MSG_MOVE_FALL_LAND && !GetPlayer()->isInFlight())
     {
         Player *target = GetPlayer();
 
