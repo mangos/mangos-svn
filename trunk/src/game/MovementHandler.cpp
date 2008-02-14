@@ -27,6 +27,7 @@
 #include "MapManager.h"
 #include "Transports.h"
 #include "BattleGround.h"
+#include "WaypointMovementGenerator.h"
 
 void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
 {
@@ -54,6 +55,19 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
     GetPlayer()->SendInitialPacketsAfterAddToMap();
+
+    // flight fat teleport case
+    if(GetPlayer()->GetMotionMaster()->top()->GetMovementGeneratorType()==FLIGHT_MOTION_TYPE)
+    {
+        // short preparations to continue flight
+        FlightPathMovementGenerator* flight = (FlightPathMovementGenerator*)(GetPlayer()->GetMotionMaster()->top());
+        flight->Initialize(*GetPlayer());
+
+        SendPath(flight->GetPath(),flight->GetCurrentNode(),flight->GetPathAtMapEnd());
+
+        GetPlayer()->SetDontMove(false);
+        return;
+    }
 
     // resurrect character at enter into instance where his corpse exist after add to map
     Corpse *corpse = GetPlayer()->GetCorpse();

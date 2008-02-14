@@ -40,6 +40,7 @@ class WorldSession;
 class QueryResult;
 class LoginQueryHolder;
 class CharacterHandler;
+class Path;
 
 #define CHECK_PACKET_SIZE(P,S) if((P).size() < (S)) return SizeError((P),(S));
 
@@ -82,6 +83,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendLfgResult(uint32 type, uint32 entry, uint8 lfg_type);
         void SendPartyResult(PartyOperation operation, std::string member, PartyResult res);
         void SendAreaTriggerMessage(const char* Text, ...) ATTR_PRINTF(2,3);
+        void SendPath(Path const& path, uint32 start, uint32 end);
 
         uint32 GetSecurity() const { return _security; }
         uint32 GetAccountId() const { return _accountId; }
