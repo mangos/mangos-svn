@@ -575,8 +575,8 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
             }
 
             if(!gso->Option.empty() && cantalking )
-            {
-                pm->GetGossipMenu()->AddMenuItem((uint8)gso->Icon,gso->Option, gossipid,gso->Action,false);
+            {                                               //note for future dev: should have database fields for BoxMessage & BoxMoney
+                pm->GetGossipMenu()->AddMenuItem((uint8)gso->Icon,gso->Option, gossipid,gso->Action,"",0,false);
                 ingso=gso;
             }
         }

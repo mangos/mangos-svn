@@ -800,9 +800,9 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_OBJECTS].SetInterval(0);
     m_timers[WUPDATE_SESSIONS].SetInterval(0);
     m_timers[WUPDATE_WEATHERS].SetInterval(1000);
-    m_timers[WUPDATE_AUCTIONS].SetInterval(60000);          //set auction update interval to 1 minute
-    m_timers[WUPDATE_UPTIME].SetInterval(10*60000);         //Update "uptime" table every 10 minutes
-    m_timers[WUPDATE_CORPSES].SetInterval(20*60000);        //erase corpses every 20 minutes
+    m_timers[WUPDATE_AUCTIONS].SetInterval(MINUTE*1000);    //set auction update interval to 1 minute
+    m_timers[WUPDATE_UPTIME].SetInterval(10*MINUTE*1000);   //Update "uptime" table every 10 minutes
+    m_timers[WUPDATE_CORPSES].SetInterval(20*MINUTE*1000);  //erase corpses every 20 minutes
 
     //to set mailtimer to return mails every day between 4 and 5 am
     //mailtimer is increased when updating auctions

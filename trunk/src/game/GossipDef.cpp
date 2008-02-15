@@ -34,24 +34,26 @@ GossipMenu::~GossipMenu()
     ClearMenu();
 }
 
-void GossipMenu::AddMenuItem(uint8 Icon, std::string Message, uint32 dtSender, uint32 dtAction, bool Coded)
+void GossipMenu::AddMenuItem(uint8 Icon, std::string Message, uint32 dtSender, uint32 dtAction, std::string BoxMessage, uint32 BoxMoney, bool Coded)
 {
     ASSERT( m_gItems.size() <= GOSSIP_MAX_MENU_ITEMS  );
 
     GossipMenuItem gItem;
 
-    gItem.m_gIcon     = Icon;
-    gItem.m_gMessage  = Message;
-    gItem.m_gCoded    = Coded;
-    gItem.m_gSender   = dtSender;
-    gItem.m_gAction   = dtAction;
+    gItem.m_gIcon       = Icon;
+    gItem.m_gMessage    = Message;
+    gItem.m_gCoded      = Coded;
+    gItem.m_gSender     = dtSender;
+    gItem.m_gAction     = dtAction;
+    gItem.m_gBoxMessage = BoxMessage;
+    gItem.m_gBoxMoney   = BoxMoney;
 
     m_gItems.push_back(gItem);
 }
 
 void GossipMenu::AddMenuItem(uint8 Icon, std::string Message, bool Coded)
 {
-    AddMenuItem( Icon, Message, 0, 0, Coded);
+    AddMenuItem( Icon, Message, 0, 0, "", 0, Coded);
 }
 
 void GossipMenu::AddMenuItem(uint8 Icon, char const* Message, bool Coded)
@@ -59,9 +61,9 @@ void GossipMenu::AddMenuItem(uint8 Icon, char const* Message, bool Coded)
     AddMenuItem(Icon, std::string(Message ? Message : ""),Coded);
 }
 
-void GossipMenu::AddMenuItem(uint8 Icon, char const* Message, uint32 dtSender, uint32 dtAction, bool Coded)
+void GossipMenu::AddMenuItem(uint8 Icon, char const* Message, uint32 dtSender, uint32 dtAction, char const* BoxMessage, uint32 BoxMoney, bool Coded)
 {
-    AddMenuItem(Icon, std::string(Message ? Message : ""), dtSender, dtAction, Coded);
+    AddMenuItem(Icon, std::string(Message ? Message : ""), dtSender, dtAction, std::string(BoxMessage ? BoxMessage : ""), BoxMoney, Coded);
 }
 
 uint32 GossipMenu::MenuItemSender( unsigned int ItemId )
@@ -130,10 +132,10 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
         // 2 taxi
         // 3 trainer
         // 9 BG/arena
-        data << uint8( gItem.m_gCoded );
-        data << uint32(0);                                  // req money to open menu, 2.0.3
-        data << gItem.m_gMessage;
-        data << uint8(0);                                   // unknown, 2.0.3
+        data << uint8( gItem.m_gCoded );                    // makes pop up box password
+        data << uint32(gItem.m_gBoxMoney);                  // money required to open menu, 2.0.3
+        data << gItem.m_gMessage;                           // text for gossip item
+        data << gItem.m_gBoxMessage;                        // accept text (related to money) pop up box, 2.0.3
     }
 
     data << uint32( pQuestMenu->MenuItemCount() );
