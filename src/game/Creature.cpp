@@ -1381,7 +1381,7 @@ void Creature::DeleteFromDB()
     WorldDatabase.CommitTransaction();
 }
 
-float Creature::GetAttackDistance(Unit *pl) const
+float Creature::GetAttackDistance(Unit const* pl) const
 {
     float aggroRate = sWorld.getRate(RATE_CREATURE_AGGRO);
     if(aggroRate==0)

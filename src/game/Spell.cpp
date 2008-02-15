@@ -2978,6 +2978,7 @@ uint8 Spell::CanCast(bool strict)
 
                 break;
             }
+            case SPELL_EFFECT_OPEN_LOCK_ITEM:
             case SPELL_EFFECT_OPEN_LOCK:
             {
                 if( m_spellInfo->EffectImplicitTargetA[i] != TARGET_GAMEOBJECT &&
@@ -2992,20 +2993,82 @@ uint8 Spell::CanCast(bool strict)
                     (!m_targets.getItemTarget() || !(m_targets.getItemTarget()->GetProto()->LockID)) )
                     return SPELL_FAILED_BAD_TARGETS;
 
+                // get the lock entry
+                LockEntry const *lockInfo = NULL;
+                if (GameObject* go=m_targets.getGOTarget())
+                {
+                    switch(go->GetGoType())
+                    {
+                    case GAMEOBJECT_TYPE_CHEST:
+                        lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->data0); break;
+                    case GAMEOBJECT_TYPE_DOOR:
+                        lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->data1); break;
+                    }
+                }
+                else if(Item* itm=m_targets.getItemTarget())
+                    lockInfo = sLockStore.LookupEntry(itm->GetProto()->LockID);
+
+                // check lock compatibility
+                if (lockInfo)
+                {
+                    // check for lock - key pair (checked by client also, just prevent cheating
+                    bool ok_key = false;                   
+                    for(int it = 0; it < 5; ++it)
+                    {
+                        switch(lockInfo->keytype[it])
+                        {
+                            case LOCK_KEY_NONE:
+                                break;
+                            case LOCK_KEY_ITEM:
+                            {
+                                if(lockInfo->key[it])
+                                {
+                                    if(m_CastItem && m_CastItem->GetEntry()==lockInfo->key[it])
+                                        ok_key =true;
+                                    break;
+                                }
+                            }
+                            case LOCK_KEY_SKILL:
+                            {
+                                if(m_spellInfo->EffectMiscValue[i]!=lockInfo->key[it])
+                                    break;
+
+                                switch(lockInfo->key[it])
+                                {
+                                    case LOCKTYPE_HERBALISM:
+                                        if(((Player*)m_caster)->HasSkill(SKILL_HERBALISM))
+                                            ok_key =true;
+                                        break;
+                                    case LOCKTYPE_MINING:
+                                        if(((Player*)m_caster)->HasSkill(SKILL_MINING))
+                                            ok_key =true;
+                                        break;
+                                    default:
+                                        ok_key =true;
+                                        break;
+                                }
+                            }
+                        }
+                        if(ok_key)
+                            break;
+                    }
+
+                    if(!ok_key)
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
+
                 // chance for fail at orange mining/herb/LockPicking gathering attempt
                 if (!m_selfContainer || ((*m_selfContainer) != this))
                     break;
 
                 // get the skill value of the player
-                int32 SkillValue;
+                int32 SkillValue = 0;
                 if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_HERBALISM)
                     SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM);
                 else if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_MINING)
                     SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_MINING);
                 else if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_PICKLOCK)
                     SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_LOCKPICKING);
-                else
-                    break;
 
                 // castitem check: rogue using skeleton keys. the skill values should not be added in this case.
                 if(m_CastItem)
@@ -3014,38 +3077,29 @@ uint8 Spell::CanCast(bool strict)
                 // add the damage modifier from the spell casted (cheat lock / skeleton key etc.) (use m_currentBasePoints, CalculateDamage returns wrong value)
                 SkillValue += m_currentBasePoints[i]+1;
 
-                // get the lock entry
-                LockEntry const *lockInfo = NULL;
-                if (GameObject* go=m_targets.getGOTarget())
-                {
-                    switch(go->GetGoType())
-                    {
-                        case GAMEOBJECT_TYPE_CHEST:
-                            lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->data0); break;
-                        case GAMEOBJECT_TYPE_DOOR:
-                            lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->data1); break;
-                    }
-                }
-                else if(Item* itm=m_targets.getItemTarget())
-                    lockInfo = sLockStore.LookupEntry(itm->GetProto()->LockID);
-
                 // get the required lock value
                 int32 ReqValue=0;
                 if (lockInfo)
                 {
                     // check for lock - key pair
+                    bool ok = false;
                     for(int it = 0; it < 5; ++it)
-                        // type==1 This means lockInfo->key[i] is an item
-                        if(lockInfo->type[it]==1 && lockInfo->key[it] && m_CastItem && m_CastItem->GetEntry()==lockInfo->key[it])
+                    {
+                        if(lockInfo->keytype[it]==LOCK_KEY_ITEM && lockInfo->key[it] && m_CastItem && m_CastItem->GetEntry()==lockInfo->key[it])
+                        {
                             // if so, we're good to go
+                            ok = true;
                             break;
+                        }
+                    }
+                    if(ok)
+                        break;
+
                     if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_PICKLOCK)
                         ReqValue = lockInfo->requiredlockskill;
                     else
                         ReqValue = lockInfo->requiredminingskill;
                 }
-                else
-                    break;
 
                 // skill doesn't meet the required value
                 if (ReqValue > SkillValue)

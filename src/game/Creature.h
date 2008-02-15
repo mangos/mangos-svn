@@ -472,7 +472,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         CreatureSpellCooldowns m_CreatureCategoryCooldowns;
         uint32 m_GlobalCooldown;
 
-        float GetAttackDistance(Unit *pl) const;
+        float GetAttackDistance(Unit const* pl) const;
 
         void CallAssistence();
         void SetNoCallAssistence(bool val) { m_AlreadyCallAssistence = val; }

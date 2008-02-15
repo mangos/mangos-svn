@@ -335,7 +335,7 @@ struct ItemSetEntry
 struct LockEntry
 {
     uint32      ID;                                         // 0
-    uint32      type[5];                                    // 1-5
+    uint32      keytype[5];                                 // 1-5
                                                             // 6-8, not used
     uint32      key[5];                                     // 9-13
                                                             // 14-16, not used
