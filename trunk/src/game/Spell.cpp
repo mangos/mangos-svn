@@ -316,21 +316,26 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
 
     // determine reflection
     m_canReflect = false;
-    for(int j=0;j<3;j++)
+
+    if(m_spellInfo->DmgClass == SPELL_DAMAGE_CLASS_MAGIC && (m_spellInfo->AttributesEx2 & 0x4)==0)
     {
-        if (m_spellInfo->Effect[j]==0)
-            continue;
+        for(int j=0;j<3;j++)
+        {
+            if (m_spellInfo->Effect[j]==0)
+                continue;
 
-        if(!IsPositiveTarget(m_spellInfo->EffectImplicitTargetA[j],m_spellInfo->EffectImplicitTargetB[j]))
-            m_canReflect = true;
-        else
-            m_canReflect = (m_spellInfo->AttributesEx & (1<<7)) ? true : false;
+            if(!IsPositiveTarget(m_spellInfo->EffectImplicitTargetA[j],m_spellInfo->EffectImplicitTargetB[j]))
+                m_canReflect = true;
+            else
+                m_canReflect = (m_spellInfo->AttributesEx & (1<<7)) ? true : false;
 
-        if(m_canReflect)
-            continue;
-        else
-            break;
+            if(m_canReflect)
+                continue;
+            else
+                break;
+        }
     }
+
     CleanupTargetList();
 }
 
