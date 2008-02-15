@@ -1050,7 +1050,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 m_removedAuras;
 
         AuraList m_modAuras[TOTAL_AURAS];
-        long m_AuraModifiers[TOTAL_AURAS];
         float m_auraModifiersGroup[UNIT_MOD_END][MODIFIER_TYPE_END];
         float m_weaponDamage[3][2];
         bool m_canModifyStats;

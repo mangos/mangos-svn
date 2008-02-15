@@ -1801,7 +1801,7 @@ void Player::RegenerateHealth()
                 addvalue *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
         }
         else if(HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT))
-            addvalue *= m_AuraModifiers[SPELL_AURA_MOD_REGEN_DURING_COMBAT] / 100.0f;
+            addvalue *= GetTotalAuraModifier(SPELL_AURA_MOD_REGEN_DURING_COMBAT) / 100.0f;
 
         if(!IsStandState())
             addvalue *= 1.5;
