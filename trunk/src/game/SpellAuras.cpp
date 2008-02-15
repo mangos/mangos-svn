@@ -1146,7 +1146,24 @@ void Aura::TriggerSpell()
         }
     }
 
-    caster->CastSpell(target,trigger_spell_id,true,NULL,this,originalCasterGUID);
+    SpellEntry const *triggredSpellInfo = sSpellStore.LookupEntry(trigger_spell_id);
+
+    if(!triggredSpellInfo)
+    {
+        sLog.outError("WORLD: unknown aura triggered spell id %i\n", trigger_spell_id);
+        return;
+    }
+
+    Spell *spell = new Spell(caster, triggredSpellInfo, true, originalCasterGUID );
+
+    SpellCastTargets targets;
+    targets.setUnitTarget( target );
+
+    // if spell create dynamic object extract area from it
+    if(DynamicObject* dynObj = caster->GetDynObject(GetId()))
+        targets.setDestination(dynObj->GetPositionX(),dynObj->GetPositionY(),dynObj->GetPositionZ());
+
+    spell->prepare(&targets, this);
 }
 
 /*********************************************************/
