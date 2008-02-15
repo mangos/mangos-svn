@@ -89,7 +89,15 @@ void SpellCastTargets::setUnitTarget(Unit *target)
     m_destZ = target->GetPositionZ();
     m_unitTarget = target;
     m_unitTargetGUID = target->GetGUID();
-    m_targetMask |= TARGET_FLAG_UNIT | TARGET_FLAG_DEST_LOCATION;
+    m_targetMask |= TARGET_FLAG_UNIT;
+}
+
+void SpellCastTargets::setDestination(float x, float y, float z)
+{
+    m_destX = x;
+    m_destY = y;
+    m_destZ = z;
+    m_targetMask |= TARGET_FLAG_DEST_LOCATION;
 }
 
 void SpellCastTargets::setGOTarget(GameObject *target)
@@ -1331,9 +1339,6 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 }
             }
         }break;
-        default:
-        {
-        }break;
         case TARGET_AREAEFFECT_PARTY_AND_CLASS:
         {
             Player* targetPlayer = m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER
@@ -1357,7 +1362,10 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             }
             else if(m_targets.getUnitTarget())
                 TagUnitMap.push_back(m_targets.getUnitTarget());
-        }break;
+            break;
+        }
+        default:
+            break;
     }
 
     if (unMaxTargets && TagUnitMap.size() > unMaxTargets)

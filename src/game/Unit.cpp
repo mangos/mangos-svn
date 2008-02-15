@@ -3994,6 +3994,24 @@ DynamicObject * Unit::GetDynObject(uint32 spellId, uint32 effIndex)
     return NULL;
 }
 
+DynamicObject * Unit::GetDynObject(uint32 spellId)
+{
+    for (DynObjectGUIDs::iterator i = m_dynObjGUIDs.begin(); i != m_dynObjGUIDs.end();)
+    {
+        DynamicObject* dynObj = ObjectAccessor::GetDynamicObject(*this,*m_dynObjGUIDs.begin());
+        if(!dynObj)
+        {
+            i = m_dynObjGUIDs.erase(i);
+            continue;
+        }
+
+        if (dynObj->GetSpellId() == spellId)
+            return dynObj;
+        ++i;
+    }
+    return NULL;
+}
+
 void Unit::AddGameObject(GameObject* gameObj)
 {
     assert(gameObj && gameObj->GetOwnerGUID()==0);
