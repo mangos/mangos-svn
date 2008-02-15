@@ -160,6 +160,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "areatrigger_teleport",        SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAreaTriggerTeleportCommand,     "", NULL },
         { "areatrigger_involvedrelation",SEC_ADMINISTRATOR, &ChatHandler::HandleReloadQuestAreaTriggersCommand,       "", NULL },
         { "button_scripts",              SEC_ADMINISTRATOR, &ChatHandler::HandleReloadButtonScriptsCommand,           "", NULL },
+        { "gameobject_scripts",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadGameobjectScriptsCommand,       "", NULL },
         { "command",                     SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCommandCommand,                 "", NULL },
         { "creature_involvedrelation",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCreatureQuestInvRelationsCommand,"",NULL },
         { "creature_loot_template",      SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesCreatureCommand,   "", NULL },

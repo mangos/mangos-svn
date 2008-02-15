@@ -44,6 +44,7 @@ ScriptMapMap sQuestEndScripts;
 ScriptMapMap sQuestStartScripts;
 ScriptMapMap sSpellScripts;
 ScriptMapMap sButtonScripts;
+ScriptMapMap sGameobjectScripts;
 
 ObjectMgr::ObjectMgr()
 {
@@ -3142,6 +3143,30 @@ void ObjectMgr::LoadSpellScripts()
 
         if(!found)
             sLog.outErrorDb("Table `spell_scripts` has unsupported spell (Id: %u) without SPELL_EFFECT_SCRIPT_EFFECT (%u) or SPELL_EFFECT_SEND_EVENT (%u) spell effect",itr->first,SPELL_EFFECT_SCRIPT_EFFECT,SPELL_EFFECT_SEND_EVENT);
+    }
+}
+
+void ObjectMgr::LoadGameobjectScripts()
+{
+    objmgr.LoadScripts(sGameobjectScripts,"gameobject_scripts");
+
+    std::set<uint32> go_scripts;
+    QueryResult *result = WorldDatabase.PQuery("SELECT DISTINCT `data2` FROM `gameobject_template` WHERE `type`=%u AND `data2`>0 UNION SELECT DISTINCT `data6` FROM `gameobject_template` WHERE `type`=%u AND `data6`>0",GAMEOBJECT_TYPE_GOOBER,GAMEOBJECT_TYPE_CHEST);
+    if( result )
+    {
+        Field* fields;
+        do
+        {
+            fields = result->Fetch();
+            go_scripts.insert(fields[0].GetUInt32());
+        } while ( result->NextRow() );
+        delete result;
+    }
+    for(ScriptMapMap::const_iterator itr = sGameobjectScripts.begin(); itr != sGameobjectScripts.end(); ++itr)
+    {
+        std::set<uint32>::const_iterator itr2 = go_scripts.find(itr->first);
+        if (itr2 == go_scripts.end())
+            sLog.outErrorDb("Table `gameobject_scripts` has script (Id: %u) not refering to any gameobject_template type 10 data2 field or type 3 data6 field",itr->first);
     }
 }
 

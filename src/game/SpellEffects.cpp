@@ -2022,6 +2022,12 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                 return;
 
             case GAMEOBJECT_TYPE_GOOBER:
+                // goober_scripts can be triggered if the player dont have the quest
+                if (gameObjTarget->GetGOInfo()->data2)
+                {
+                    sLog.outDebug("Goober ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->data2,gameObjTarget->GetGUIDLow());
+                    sWorld.ScriptsStart(sGameobjectScripts, gameObjTarget->GetGOInfo()->data2, player, gameObjTarget);
+                }
                 // cast goober spell
                 if (gameObjTarget->GetGOInfo()->data1)      ///Quest (entry = data1) require to be active for GO using
                     if(player->GetQuestStatus(gameObjTarget->GetGOInfo()->data1) != QUEST_STATUS_INCOMPLETE)
@@ -2031,6 +2037,14 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                 gameObjTarget->SetLootState(GO_LOOTED);
                 player->CastedCreatureOrGO(gameObjTarget->GetEntry(), gameObjTarget->GetGUID(), 0);
                 return;
+
+            case GAMEOBJECT_TYPE_CHEST:
+                if (gameObjTarget->GetGOInfo()->data6)
+                {
+                    sLog.outDebug("Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->data6,gameObjTarget->GetGUIDLow());
+                    sWorld.ScriptsStart(sGameobjectScripts, gameObjTarget->GetGOInfo()->data6, player, gameObjTarget);
+                }
+                // Don't return, let loots been taken
         }
     }
 

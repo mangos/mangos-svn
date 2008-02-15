@@ -777,6 +777,7 @@ void World::SetInitialWorldSettings()
     objmgr.LoadQuestEndScripts();                           // must be after load Creature/Gameobject(Template/Data) and QuestTemplate
     objmgr.LoadSpellScripts();                              // must be after load Creature/Gameobject(Template/Data)
     objmgr.LoadButtonScripts();                             // must be after load Creature/Gameobject(Template/Data)
+    objmgr.LoadGameobjectScripts();                         // must be after load Creature/Gameobject(Template/Data)
 
     sLog.outString( "Initializing Scripts..." );
     if(!LoadScriptingModule())
@@ -1289,8 +1290,8 @@ void World::ScriptsProcess()
                 if(summoner->isType(TYPE_UNIT))
                 {
                     Unit* unitSummoner = (Unit *)summoner;
-                    if( pCreature->Attack(unitSummoner) )
-                        pCreature->GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*unitSummoner));
+                    if (pCreature->AI())
+                        pCreature->AI()->AttackStart(unitSummoner);
                 }
                 break;
             }

@@ -102,6 +102,7 @@ bool ChatHandler::HandleReloadAllScriptsCommand(const char*)
 
     sLog.outString( "Re-Loading Scripts..." );
     HandleReloadButtonScriptsCommand("a");
+    HandleReloadGameobjectScriptsCommand("a");
     HandleReloadQuestEndScriptsCommand("a");
     HandleReloadQuestStartScriptsCommand("a");
     HandleReloadSpellScriptsCommand("a");
@@ -353,6 +354,25 @@ bool ChatHandler::HandleReloadButtonScriptsCommand(const char* arg)
 
     if(*arg!='a')
         SendGlobalSysMessage("DB table `button_scripts` reloaded.");
+
+    return true;
+}
+
+bool ChatHandler::HandleReloadGameobjectScriptsCommand(const char* arg)
+{
+    if(sWorld.IsScriptScheduled())
+    {
+        SendSysMessage("DB scripts used currently, please attempt reload later.");
+        return true;
+    }
+
+    if(*arg!='a')
+        sLog.outString( "Re-Loading Scripts from `gameobject_scripts`...");
+
+    objmgr.LoadGameobjectScripts();
+
+    if(*arg!='a')
+        SendGlobalSysMessage("DB table `gameobject_scripts` reloaded.");
 
     return true;
 }
