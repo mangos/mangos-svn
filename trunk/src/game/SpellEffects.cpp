@@ -1524,6 +1524,8 @@ void Spell::EffectApplyAura(uint32 i)
             if( Aur->GetTarget()->GetTypeId() == TYPEID_UNIT && !Aur->GetTarget()->isInCombat() &&
                 ((Creature*)Aur->GetTarget())->AI() )
                 ((Creature*)Aur->GetTarget())->AI()->AttackStart(m_caster);
+
+            Aur->GetTarget()->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         }
     }
 
@@ -3250,11 +3252,10 @@ void Spell::EffectWeaponDmg(uint32 i)
             // Mutilate (for each hand)
             if(m_spellInfo->SpellFamilyFlags & 0xC00000000LL)
             {
-                Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                for(Unit::AuraList::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
+                Unit::AuraMap const& auras = unitTarget->GetAuras();
+                for(Unit::AuraMap::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
                 {
-                    // Deadly poison
-                    if((*itr)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_ROGUE && ((*itr)->GetSpellProto()->SpellFamilyFlags & 0x10000) && (*itr)->GetSpellProto()->SpellVisual==5100)
+                    if(itr->second->GetSpellProto()->Dispel==IMMUNE_DISPEL_POISON)
                     {
                         // 150% damage
                         damagePercentMod *= 1.5f;

@@ -9236,6 +9236,7 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
         uint8 slot = pos & 255;
 
         if( pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP ||
+            pItem->GetProto()->Bonding == BIND_QUEST_ITEM ||
             pItem->GetProto()->Bonding == BIND_WHEN_EQUIPED && IsBankBagPos(bag,slot) )
             pItem->SetBinding( true );
 
@@ -9409,8 +9410,8 @@ void Player::VisualizeItem( uint16 pos, Item *pItem)
     if(!pItem)
         return;
 
-    // check also  BIND_WHEN_PICKED_UP for .additem or .additemset case by GM (not binded at adding to inventory)
-    if( pItem->GetProto()->Bonding == BIND_WHEN_EQUIPED || pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP )
+    // check also  BIND_WHEN_PICKED_UP and BIND_QUEST_ITEM for .additem or .additemset case by GM (not binded at adding to inventory)
+    if( pItem->GetProto()->Bonding == BIND_WHEN_USE || pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP || pItem->GetProto()->Bonding == BIND_QUEST_ITEM )
         pItem->SetBinding( true );
 
     uint8 bag = pos >> 8;
