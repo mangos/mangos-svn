@@ -819,7 +819,7 @@ void Spell::EffectDummy(uint32 i)
             return;
         }
 
-        //Preparation Rogue - immediately finishes the cooldown on other Rogue abilities
+        //Preparation Rogue - immediately finishes the cooldown on certain Rogue abilities
         case 14185:
         {
             if(m_caster->GetTypeId()!=TYPEID_PLAYER)
@@ -831,7 +831,7 @@ void Spell::EffectDummy(uint32 i)
                 uint32 classspell = itr->first;
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
 
-                if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->Id != 14185 && GetRecoveryTime(spellInfo) > 0)
+                if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && (spellInfo->SpellFamilyFlags & 0x26000000860LL))
                 {
                     ((Player*)m_caster)->RemoveSpellCooldown(classspell);
 
