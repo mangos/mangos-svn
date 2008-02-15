@@ -2105,7 +2105,7 @@ void Spell::EffectOpenLock(uint32 /*i*/)
     for(int i = 0; i < 5; ++i)
     {
         // type==1 This means lockInfo->key[i] is an item
-        if(lockInfo->type[i]==1 && lockInfo->key[i] && m_CastItem && m_CastItem->GetEntry()==lockInfo->key[i])
+        if(lockInfo->keytype[i]==LOCK_KEY_ITEM && lockInfo->key[i] && m_CastItem && m_CastItem->GetEntry()==lockInfo->key[i])
         {
             SendLoot(guid, loottype);
             return;

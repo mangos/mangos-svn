@@ -1359,7 +1359,8 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
         CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(displayId);
         if(!minfo)
         {
-            sLog.outErrorDb("Creature (Entry: %u) has model %u not found in table `creature_model_info`, can't load. ", m_modifier.m_miscvalue, displayId);
+            sLog.outErrorDb("Mount (Entry: %u) has model %u not found in table `creature_model_info`, can't load. ", 
+                m_modifier.m_miscvalue, displayId);
             return;
         }
         else

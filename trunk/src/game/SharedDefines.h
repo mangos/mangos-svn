@@ -1134,6 +1134,13 @@ enum Anim
     ANIM_StealthRun                = 223
 };
 
+enum LockKeyType
+{
+    LOCK_KEY_NONE  = 0,
+    LOCK_KEY_ITEM  = 1,
+    LOCK_KEY_SKILL = 2
+};
+
 enum LockType
 {
     LOCKTYPE_PICKLOCK              = 1,

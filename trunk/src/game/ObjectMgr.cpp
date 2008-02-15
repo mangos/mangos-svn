@@ -3661,6 +3661,7 @@ void ObjectMgr::GetTaxiPath( uint32 source, uint32 destination, uint32 &path, ui
 
 uint16 ObjectMgr::GetTaxiMount( uint32 id, uint32 team )
 {
+    uint16 mount_entry = 0;
     uint16 mount_id = 0;
 
     TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(id);
@@ -3668,21 +3669,26 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id, uint32 team )
     {
         if (team == ALLIANCE)
         {
-            CreatureInfo const *ci = objmgr.GetCreatureTemplate(node->alliance_mount_type);
+            mount_entry = node->alliance_mount_type;
+            CreatureInfo const *ci = objmgr.GetCreatureTemplate(mount_entry);
             if(ci)
                 mount_id = ci->DisplayID_A;
         }
         if (team == HORDE)
         {
-            CreatureInfo const *ci = objmgr.GetCreatureTemplate(node->horde_mount_type);
+            mount_entry = node->horde_mount_type;
+            CreatureInfo const *ci = objmgr.GetCreatureTemplate(mount_entry);
             if(ci)
                 mount_id = ci->DisplayID_H;
         }
     }
+
     CreatureModelInfo const *minfo = objmgr.GetCreatureModelInfo(mount_id);
     if(!minfo)
     {
-        sLog.outErrorDb("Creature (Entry: %u) has model %u not found in table `creature_model_info`, can't load. ",id,mount_id);
+        sLog.outErrorDb("Taxi mount (Entry: %u) for taxi node (Id: %u) for team %u has model %u not found in table `creature_model_info`, can't load. ",
+            mount_entry,id,team,mount_id);
+
         return false;
     }
     if(minfo->modelid_other_gender!=0)
