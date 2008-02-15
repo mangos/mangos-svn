@@ -7566,10 +7566,7 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
 
     uint8 comboPoints = unitPlayer ? unitPlayer->GetComboPoints() : 0;
 
-    int32 value = 0;
-    uint32 level = 0;
-
-    level = getLevel() - spellProto->spellLevel;
+    int32 level = int32(getLevel()) - int32(spellProto->spellLevel);
     if (level > spellProto->maxLevel && spellProto->maxLevel > 0)
         level = spellProto->maxLevel;
 
@@ -7579,7 +7576,7 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
     int32 randomPoints = int32(spellProto->EffectDieSides[effect_index] + level * randomPointsPerLevel);
     float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
 
-    value = basePoints + rand32(spellProto->EffectBaseDice[effect_index], randomPoints);
+    int32 value = basePoints + rand32(spellProto->EffectBaseDice[effect_index], randomPoints);
     //random damage
     if(int32(spellProto->EffectBaseDice[effect_index]) != randomPoints && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->isPet())
         value += ((Pet*)this)->GetBonusDamage();        //bonus damage only on spells without fixed basePoints?)
