@@ -859,6 +859,15 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     return false;
             }
             break;
+        case SPELLFAMILY_WARRIOR:
+            if( spellInfo_2->SpellFamilyName == SPELLFAMILY_WARRIOR )
+            {
+                // Rend and Deep Wound
+                if( (spellInfo_1->SpellFamilyFlags & 0x20) && (spellInfo_2->SpellFamilyFlags & 0x1000000000LL) ||
+                    (spellInfo_2->SpellFamilyFlags & 0x20) && (spellInfo_1->SpellFamilyFlags & 0x1000000000LL) )
+                    return false;
+            }
+            break;
         default:
             break;
     }
