@@ -175,8 +175,6 @@ Unit::Unit( WorldObject *instantiator )
     m_ShapeShiftForm = 0;
     m_canModifyStats = false;
 
-    for (int i = 0; i < TOTAL_AURAS; i++)
-        m_AuraModifiers[i] = 0;
     for (int i = 0; i < IMMUNITY_MECHANIC; i++)
         m_spellImmune[i].clear();
     for (int i = 0; i < UNIT_MOD_END; i++)
@@ -3497,7 +3495,6 @@ bool Unit::AddAura(Aura *Aur)
     if (Aur->GetModifier()->m_auraname < TOTAL_AURAS)
     {
         m_modAuras[Aur->GetModifier()->m_auraname].push_back(Aur);
-        m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount);
     }
 
     // auras code that need applied _after_ aura add to list
@@ -3829,7 +3826,6 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
     }
     if ((*i).second->GetModifier()->m_auraname < TOTAL_AURAS)
     {
-        m_AuraModifiers[(*i).second->GetModifier()->m_auraname] -= ((*i).second->GetModifier()->m_amount);
         m_modAuras[(*i).second->GetModifier()->m_auraname].remove((*i).second);
     }
     (*i).second->SetRemoveOnDeath(onDeath);
@@ -6500,6 +6496,11 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo) const
             && (itr->type & (1 << spellInfo->School)))
                 return true;
     }
+
+    // Handle dummy aura of Hyptohermia to make immune to Ice Block
+    if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->SpellFamilyFlags & 0x8000000000LL &&
+        HasAura(SPELLID_MAGE_HYPOTHERMIA,0))
+        return true;
 
     int32 chance = 0;
     AuraList const& mModMechanicRes = GetAurasByType(SPELL_AURA_MOD_MECHANIC_RESISTANCE);

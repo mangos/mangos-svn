@@ -1602,6 +1602,8 @@ void Spell::EffectApplyAura(uint32 i)
             spellId = 25771;                                // Forbearance
         else if (m_spellInfo->Mechanic == MECHANIC_BANDAGE) // Bandages
             spellId = 11196;                                // Recently Bandaged
+        else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && m_spellInfo->SpellFamilyFlags & 0x8000000000LL) // Ice Block
+            spellId = SPELLID_MAGE_HYPOTHERMIA;             // Hypothermia
 
         SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);
         if (AdditionalSpellInfo)
