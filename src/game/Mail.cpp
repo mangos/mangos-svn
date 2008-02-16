@@ -184,7 +184,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     bool needItemDelay = false;
 
-    if (items_count)
+    if(items_count > 0 || money > 0)
     {
         uint32 rc_account = 0;
         if(receive)
@@ -192,39 +192,48 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         else
             rc_account = objmgr.GetPlayerAccountIdByGUID(rc);
 
-        for(MailItemMap::iterator mailItemIter = mi.begin(); mailItemIter != mi.end(); ++mailItemIter)
+        if (items_count > 0)
         {
-            MailItem& mailItem = mailItemIter->second;
-            if(!mailItem.item)
-                continue;
-
-            mailItem.item_template = mailItem.item ? mailItem.item->GetEntry() : 0;
-
-            if( GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+            for(MailItemMap::iterator mailItemIter = mi.begin(); mailItemIter != mi.end(); ++mailItemIter)
             {
-                sLog.outCommand("GM %s (Account: %u) mail item: %s (Entry: %u Count: %u) and money: %u to player: %s (Account: %u)",
-                    GetPlayerName(), GetAccountId(), mailItem.item->GetProto()->Name1, mailItem.item->GetEntry(), mailItem.item->GetCount(), money, receiver.c_str(), rc_account);
+                MailItem& mailItem = mailItemIter->second;
+                if(!mailItem.item)
+                    continue;
+
+                mailItem.item_template = mailItem.item ? mailItem.item->GetEntry() : 0;
+
+                if( GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+                {
+                    sLog.outCommand("GM %s (Account: %u) mail item: %s (Entry: %u Count: %u) to player: %s (Account: %u)",
+                        GetPlayerName(), GetAccountId(), mailItem.item->GetProto()->Name1, mailItem.item->GetEntry(), mailItem.item->GetCount(), receiver.c_str(), rc_account);
+                }
+
+                pl->RemoveItem( mailItem.item->GetBagSlot(), mailItem.item->GetSlot(), true );
+                mailItem.item->RemoveFromUpdateQueueOf( pl );
+                //item reminds in item_instance table already, used it in mail now
+                if(mailItem.item->IsInWorld())
+                {
+                    mailItem.item->RemoveFromWorld();
+                    mailItem.item->DestroyForPlayer( pl );
+                }
+
+                CharacterDatabase.BeginTransaction();
+                mailItem.item->DeleteFromInventoryDB();           //deletes item from character's inventory
+                mailItem.item->SaveToDB();                        // recursive and not have transaction guard into self
+                // owner in `data` will set at mail receive and item extracting
+                CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'", GUID_LOPART(rc), mailItem.item->GetGUIDLow());
+                CharacterDatabase.CommitTransaction();
             }
 
-            pl->RemoveItem( mailItem.item->GetBagSlot(), mailItem.item->GetSlot(), true );
-            mailItem.item->RemoveFromUpdateQueueOf( pl );
-            //item reminds in item_instance table already, used it in mail now
-            if(mailItem.item->IsInWorld())
-            {
-                mailItem.item->RemoveFromWorld();
-                mailItem.item->DestroyForPlayer( pl );
-            }
-
-            CharacterDatabase.BeginTransaction();
-            mailItem.item->DeleteFromInventoryDB();           //deletes item from character's inventory
-            mailItem.item->SaveToDB();                        // recursive and not have transaction guard into self
-            // owner in `data` will set at mail receive and item extracting
-            CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'", GUID_LOPART(rc), mailItem.item->GetGUIDLow());
-            CharacterDatabase.CommitTransaction();
+            // if item send to character at another account, then apply item delivery delay
+            needItemDelay = pl->GetSession()->GetAccountId() != rc_account;
         }
 
-        // if item send to character at another account, then apply item delivery delay
-        needItemDelay = pl->GetSession()->GetAccountId() != rc_account;
+        if(money > 0 &&  GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE))
+        {
+            sLog.outCommand("GM %s (Account: %u) mail money: %u to player: %s (Account: %u)",
+                GetPlayerName(), GetAccountId(), money, receiver.c_str(), rc_account);
+        }
     }
 
     // If theres is an item, there is a one hour delivery delay if sent to another account's character.
