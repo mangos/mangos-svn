@@ -87,7 +87,7 @@ protected:
 		unsigned long ByteCounter(bool clear = false);
 
 	private:
-		CircularBuffer(const CircularBuffer& s) {}
+		CircularBuffer(const CircularBuffer& /*s*/) {}
 		CircularBuffer& operator=(const CircularBuffer& ) { return *this; }
 		char *buf;
 		size_t m_max;

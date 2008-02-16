@@ -5304,6 +5304,15 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
     // custom check for proc spell
     switch(auraSpellInfo->Id)
     {
+        // Enlightenment
+        case 29601:
+        {
+            // only for cast with mana price
+            if(!procSpell || procSpell->powerType!=POWER_MANA || procSpell->manaCost==0 && procSpell->ManaCostPercentage==0 && procSpell->manaCostPerlevel==0)
+                return;
+
+            break;                                          // normal cast
+        }
         // Mystical Skyfire Diamond trigger (Spell Focus Trigger)
         case 32837:
         {
@@ -6497,7 +6506,7 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo) const
                 return true;
     }
 
-    // Handle dummy aura of Hyptohermia to make immune to Ice Block
+    // Handle dummy aura of Hypothermia to make immune to Ice Block
     if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->SpellFamilyFlags & 0x8000000000LL &&
         HasAura(SPELLID_MAGE_HYPOTHERMIA,0))
         return true;

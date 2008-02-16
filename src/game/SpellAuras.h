@@ -128,6 +128,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraModSchoolImmunity(bool Apply, bool Real);
         void HandleAuraModDmgImmunity(bool Apply, bool Real);
         void HandleAuraModDispelImmunity(bool Apply, bool Real);
+        void HandleAuraProcTriggerSpell(bool Apply, bool Real);
         void HandleAuraTrackCreatures(bool Apply, bool Real);
         void HandleAuraTrackResources(bool Apply, bool Real);
         void HandleAuraModParryPercent(bool Apply, bool Real);
@@ -297,6 +298,8 @@ class MANGOS_DLL_SPEC Aura
         bool m_removeOnDeath;
     private:
         void UpdateSlotCounterAndDuration(bool add);
+        void CleanupTriggeredSpells();
+
         float m_fearMoveAngle;
 };
 
