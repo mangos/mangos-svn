@@ -24,8 +24,6 @@
 
 #include "NodeValueAccess.h"
 
-using namespace G3D;
-
 /**
 The Class is mainly taken from G3D/AABSPTree.h but modified to be able to use our internal data structure.
 This is an iterator that helps us analysing the BSP-Trees.
@@ -39,21 +37,21 @@ namespace VMAP
     {
         public:
             static bool collisionLocationForMovingPointFixedAABox(
-                const Vector3&          origin,
-                const Vector3&          dir,
-                const AABox&            box,
-                Vector3&                location,
+                const G3D::Vector3&     origin,
+                const G3D::Vector3&     dir,
+                const G3D::AABox&       box,
+                G3D::Vector3&           location,
                 bool&                   Inside,
-                Vector3&                normal)
+                G3D::Vector3&           normal)
             {
 
                 // Integer representation of a floating-point value.
-            #define IR(x)   ((uint32&)x)
+            #define IR(x)   ((G3D::uint32&)x)
 
                 Inside = true;
-                const Vector3& MinB = box.low();
-                const Vector3& MaxB = box.high();
-                Vector3 MaxT(-1.0f, -1.0f, -1.0f);
+                const G3D::Vector3& MinB = box.low();
+                const G3D::Vector3& MaxB = box.high();
+                G3D::Vector3 MaxT(-1.0f, -1.0f, -1.0f);
 
                 // Find candidate planes.
                 for (int i = 0; i < 3; ++i)
@@ -124,7 +122,7 @@ namespace VMAP
                 }
 
                 // Choose the normal to be the plane normal facing into the ray
-                normal = Vector3::zero();
+                normal = G3D::Vector3::zero();
                 normal[WhichPlane] = (dir[WhichPlane] > 0) ? -1.0 : 1.0;
 
                 return true;
@@ -134,8 +132,8 @@ namespace VMAP
     };
 
     #ifdef _DEBUG_VMAPS
-    extern Vector3 p1,p2,p3,p4,p5,p6,p7;
-    extern Array<AABox>gBoxArray;
+    extern G3D::Vector3 p1,p2,p3,p4,p5,p6,p7;
+    extern G3D::Array<G3D::AABox>gBoxArray;
     extern int gCount1, gCount2, gCount3, gCount4;
     extern bool myfound;
     #endif
@@ -174,16 +172,16 @@ namespace VMAP
 
                 /** cache intersection values when they're checked on the preSide,
                 split so they don't need to be checked again after the split. */
-                Array<float> intersectionCache;
+                G3D::Array<float> intersectionCache;
 
                 NodeValueAccess<TNode, TValue>* iNodeValueAccess;
 
-                void init(NodeValueAccess<TNode, TValue>* pNodeValueAccess, const TNode* inNode, const Ray& ray, float inMinTime, float inMaxTime)
+                void init(NodeValueAccess<TNode, TValue>* pNodeValueAccess, const TNode* inNode, const G3D::Ray& ray, float inMinTime, float inMaxTime)
                 {
                     node     = inNode;
                     minTime  = inMinTime;
                     maxTime  = inMaxTime;
-                    minTime2 = square(minTime);
+                    minTime2 = G3D::square(minTime);
                     valIndex = -1;
 
                     iNodeValueAccess = pNodeValueAccess;
@@ -193,7 +191,7 @@ namespace VMAP
                     {
                         startTime = minTime;
                         endTime   = maxTime;
-                        endTime2  = square(maxTime);
+                        endTime2  = G3D::square(maxTime);
                         nextChild = -1;
                         return;
                     }
@@ -215,15 +213,15 @@ namespace VMAP
                     t2 = inf();
                     }
                     }
-                    double inMaxTime2 = square(inMaxTime);
+                    double inMaxTime2 = G3D::square(inMaxTime);
                     if(t2 > inMaxTime2 || t2 < -inMaxTime2) {
                     // The box is too far of to be hit
                     valIndex = INT_MAX-1;
                     }
                     */
 
-                    Vector3::Axis splitAxis     = node->getSplitAxis();
-                    double        splitLocation = node->getSplitLocation();
+                    G3D::Vector3::Axis splitAxis     = node->getSplitAxis();
+                    double             splitLocation = node->getSplitLocation();
 
                     // this is the time along the ray until the split.
                     // could be negative if the split is behind.
@@ -239,12 +237,12 @@ namespace VMAP
                     // the correct child is gone too.
                     if (splitTime <= minTime)
                     {
-                        splitTime = inf();
+                        splitTime = G3D::inf();
                     }
 
                     startTime = minTime;
-                    endTime   = min((double)maxTime, splitTime);
-                    endTime2  = square(endTime);
+                    endTime   = G3D::min((double)maxTime, splitTime);
+                    endTime2  = G3D::square(endTime);
 
                     double rayLocation = ray.origin[splitAxis] +
                         ray.direction[splitAxis] * minTime;
@@ -297,11 +295,11 @@ namespace VMAP
             int debugCounter;
 
         private:
-            Ray                 ray;
-            Ray                 reverseRay;
+            G3D::Ray            ray;
+            G3D::Ray            reverseRay;
             bool                isEnd;
 
-            Array<StackFrame>   stack;
+            G3D::Array<StackFrame> stack;
             int                 stackLength;
             int                 stackIndex;
             int                 breakFrameIndex;
@@ -311,15 +309,15 @@ namespace VMAP
             double              boxMaxDist;
 
         public:
-            RayIntersectionIterator(const NodeValueAccess<TNode, TValue> pNodeValueAccess, const Ray& r, const TNode* root,  double pMaxTime, bool skip)
-                : minDistance(0), maxDistance(inf()), debugCounter(0),
+            RayIntersectionIterator(const NodeValueAccess<TNode, TValue> pNodeValueAccess, const G3D::Ray& r, const TNode* root,  double pMaxTime, bool skip)
+                : minDistance(0), maxDistance(G3D::inf()), debugCounter(0),
                 ray(r), isEnd(root == NULL),
                 stackLength(20), stackIndex(0), breakFrameIndex(-1),
                 skipAABoxTests(skip)
             {
                 iNodeValueAccess = pNodeValueAccess;
                 stack.resize(stackLength);
-                stack[stackIndex].init(&iNodeValueAccess, root, ray, 0, inf());
+                stack[stackIndex].init(&iNodeValueAccess, root, ray, 0, G3D::inf());
                 //stack[stackIndex].init(&iNodeValueAccess, root, ray, 0, pMaxTime);
                 boxMaxDist2 = pMaxTime*pMaxTime;
                 boxMaxDist = pMaxTime;
@@ -414,7 +412,7 @@ namespace VMAP
                             s->valIndex  = -1;
                             s->startTime = s->endTime;
                             s->endTime   = s->maxTime;
-                            s->endTime2  = square(s->maxTime);
+                            s->endTime2  = G3D::square(s->maxTime);
                             s->nextChild = (s->nextChild >= 0) ? (1 - s->nextChild) : -1;
 
                             // this could be changed somehow,
@@ -481,15 +479,15 @@ namespace VMAP
                         if (s->startTime == s->minTime)
                         {
                             bool insiteOk;
-                            Vector3 mynormal;
-                            Vector3 location;
+                            G3D::Vector3 mynormal;
+                            G3D::Vector3 location;
                             TValue currValue = iNodeValueAccess.getValue(s->valIndex+ s->node->getStartPosition());
 
                         #ifdef _DEBUG_VMAPS
                             if(gCount2 >= gCount1)
                             {
-                                AABox testbox = currValue.getAABoxBounds();
-                                gBoxArray.append(AABox(testbox.low() + currValue.getBasePosition(), testbox.high() + currValue.getBasePosition()));
+                                G3D::AABox testbox = currValue.getAABoxBounds();
+                                gBoxArray.append(G3D::AABox(testbox.low() + currValue.getBasePosition(), testbox.high() + currValue.getBasePosition()));
                             }
                             ++gCount2;
                         #endif
@@ -506,10 +504,10 @@ namespace VMAP
                             }
                             else
                             {
-                                t2 = inf();
+                                t2 = G3D::inf();
                             }
                             if(t2 > boxMaxDist2)
-                                t2=inf();                   // too far off
+                                t2=G3D::inf();                   // too far off
                             s->intersectionCache[s->valIndex] = t2;
                             ++debugCounter;
                         }

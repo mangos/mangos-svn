@@ -21,7 +21,6 @@
 
 #include <G3D/Vector3.h>
 
-using namespace G3D;
 namespace VMAP
 {
     /**
@@ -57,9 +56,9 @@ namespace VMAP
             {
                 float fv;
                 if(sv >= maxvalue)
-                    fv=inf();
+                    fv=G3D::inf();
                 else if(sv <= minvalue)
-                    fv=-inf();
+                    fv=-G3D::inf();
                 else
                     fv = ((float)sv) / fixpointdiv;
                 return fv;
@@ -70,7 +69,7 @@ namespace VMAP
             inline float getFZ() const { return(short2Float(iZ)); }
         public:
             inline ShortVector() {}
-            inline ShortVector(const Vector3& pVector)
+            inline ShortVector(const G3D::Vector3& pVector)
             {
                 iX = float2Short(pVector.x);
                 iY = float2Short(pVector.y);
@@ -100,7 +99,7 @@ namespace VMAP
             inline float getY() const { return(iY);        }
             inline float getZ() const { return(iZ);        }
 
-            inline Vector3 getVector3() const  { return(Vector3(getFX(), getFY(), getFZ())); }
+            inline G3D::Vector3 getVector3() const  { return(G3D::Vector3(getFX(), getFY(), getFZ())); }
 
             inline ShortVector min(const ShortVector pShortVector)
             {

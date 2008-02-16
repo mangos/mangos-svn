@@ -18,6 +18,8 @@
 
 #include "TreeNode.h"
 
+using namespace G3D;
+
 namespace VMAP
 {
 

@@ -22,8 +22,6 @@
 #include <G3D/Table.h>
 #include <G3D/Array.h>
 
-using namespace G3D;
-
 /**
 This Class is a helper Class to convert the raw vector data into BSP-Trees.
 We read the directory file of the raw data output and build logical groups.
@@ -42,8 +40,8 @@ namespace VMAP
     class NameCollection
     {
         public:
-            Array<std::string> iMainFiles;
-            Array<std::string> iSingeFiles;
+            G3D::Array<std::string> iMainFiles;
+            G3D::Array<std::string> iSingeFiles;
 
             void appendToMain(std::string pStr) { iMainFiles.append(pStr); }
             void appendToSingle(std::string pStr) { iSingeFiles.append(pStr); }
@@ -59,7 +57,7 @@ namespace VMAP
             int xPos;
             int yPos;
             unsigned int iMapId;
-            Array<std::string> iFilenames;
+            G3D::Array<std::string> iFilenames;
 
         public:
             CMappingEntry() { };
@@ -72,7 +70,7 @@ namespace VMAP
 
             void addFilename(char *pName);
             const std::string getKeyString() const;
-            inline const Array<std::string>& getFilenames() const { return(iFilenames); }
+            inline const G3D::Array<std::string>& getFilenames() const { return(iFilenames); }
 
             static const std::string getKeyString(unsigned int pMapId, int pXPos, int pYPos)
             {
@@ -88,10 +86,10 @@ namespace VMAP
     class CoordModelMapping
     {
         private:
-            Table<std::string, CMappingEntry *> iMapObjectFiles;
-            Table<std::string, std::string> iProcesseSingleFiles;
-            Array<unsigned int> iMapIds;
-            Array<unsigned int> iWorldAreaGroups;
+            G3D::Table<std::string, CMappingEntry *> iMapObjectFiles;
+            G3D::Table<std::string, std::string> iProcesseSingleFiles;
+            G3D::Array<unsigned int> iMapIds;
+            G3D::Array<unsigned int> iWorldAreaGroups;
             bool (*iFilterMethod)(char *pName);
 
             inline void addCMappingEntry(CMappingEntry* pCMappingEntry)
@@ -127,7 +125,7 @@ namespace VMAP
                 return(mapId);
             }
 
-            const Array<unsigned int>& getMaps() const { return iMapIds; }
+            const G3D::Array<unsigned int>& getMaps() const { return iMapIds; }
             inline bool isAlreadyProcessedSingleFile(std::string pName) { return(iProcesseSingleFiles.containsKey(pName)); }
             inline void addAlreadyProcessedSingleFile(std::string pName) { iProcesseSingleFiles.set(pName,pName); }
 

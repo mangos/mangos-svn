@@ -25,8 +25,6 @@
 #include <G3D/Vector3.h>
 #include <G3D/AABox.h>
 
-using namespace G3D;
-
 namespace VMAP
 {
     /**
@@ -46,8 +44,8 @@ namespace VMAP
             int iChilds[2];
             //Position within the TriangleBox array
             unsigned int iStartPosition;
-            Vector3::Axis iSplitAxis;
-            AABox iBounds;
+            G3D::Vector3::Axis iSplitAxis;
+            G3D::AABox iBounds;
             unsigned short iNumberOfValues;
         public:
             TreeNode() {}
@@ -65,16 +63,16 @@ namespace VMAP
             // pChildNo = 0 or 1
             inline void setChildPos(int pChildNo, int pChildPosInTreeNodeArray) { iChilds[pChildNo] = pChildPosInTreeNodeArray; }
 
-            inline Vector3::Axis getSplitAxis() const { return(iSplitAxis); }
+            inline G3D::Vector3::Axis getSplitAxis() const { return(iSplitAxis); }
 
-            inline void setSplitAxis(Vector3::Axis a) { iSplitAxis = a; }
+            inline void setSplitAxis(G3D::Vector3::Axis a) { iSplitAxis = a; }
             inline void setSplitLocation(float l) { iSplitLocation = l; }
 
-            inline void setBounds(const AABox& pBox) { iBounds = pBox; }
+            inline void setBounds(const G3D::AABox& pBox) { iBounds = pBox; }
 
-            inline void setBounds(const Vector3& lo, const Vector3& hi) { iBounds.set(lo,hi); }
+            inline void setBounds(const G3D::Vector3& lo, const G3D::Vector3& hi) { iBounds.set(lo,hi); }
 
-            inline void getBounds(AABox& pBox) const { pBox.set(iBounds.low(),iBounds.high()); }
+            inline void getBounds(G3D::AABox& pBox) const { pBox.set(iBounds.low(),iBounds.high()); }
 
             inline float getSplitLocation() const { return(iSplitLocation); }
 

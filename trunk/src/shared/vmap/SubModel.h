@@ -44,34 +44,34 @@ namespace VMAP
             bool iHasInternalMemAlloc;
             ShortBox iBox;
         #ifdef _DEBUG_VIEW
-            Array<TriangleBox *> iDrawBox;
+            G3D::Array<TriangleBox *> iDrawBox;
         #endif
         public:
             SubModel() : BaseModel(){ };
 
             SubModel(unsigned int pNTriangles, TriangleBox *pTriangles, unsigned int pTrianglesPos, unsigned int pNNodes, TreeNode *pTreeNodes, unsigned int pNodesPos);
-            SubModel(AABSPTree<Triangle> *pTree);
+            SubModel(G3D::AABSPTree<G3D::Triangle> *pTree);
             ~SubModel(void);
             //Gets a 50 byte binary block
             void initFromBinBlock(void *pBinBlock);
 
-            RayIntersectionIterator<TreeNode, TriangleBox> beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests = false) const;
+            RayIntersectionIterator<TreeNode, TriangleBox> beginRayIntersection(const G3D::Ray& ray, double pMaxTime, bool skipAABoxTests = false) const;
 
             RayIntersectionIterator<TreeNode, TriangleBox> endRayIntersection() const;
 
-            void fillRenderArray(Array<TriangleBox> &pArray, const TreeNode* pTreeNode);
+            void fillRenderArray(G3D::Array<TriangleBox> &pArray, const TreeNode* pTreeNode);
 
-            RealTime getIntersectionTime(const Ray& pRay, bool pExitAtFirst, float pMaxDist) const;
+            G3D::RealTime getIntersectionTime(const G3D::Ray& pRay, bool pExitAtFirst, float pMaxDist) const;
 
-            void countNodesAndTriangles(AABSPTree<Triangle>::Node& pNode, int &pNNodes, int &pNTriabgles);
+            void countNodesAndTriangles(G3D::AABSPTree<G3D::Triangle>::Node& pNode, int &pNNodes, int &pNTriabgles);
 
-            void fillContainer(const AABSPTree<Triangle>::Node& pNode, int &pTreeNodePos, int &pTrianglePos, Vector3& pLo, Vector3& pHi);
+            void fillContainer(const G3D::AABSPTree<G3D::Triangle>::Node& pNode, int &pTreeNodePos, int &pTrianglePos, G3D::Vector3& pLo, G3D::Vector3& pHi);
 
             inline const ShortBox& getReletiveBounds() const { return(iBox); }
 
             inline void setReletiveBounds(const ShortVector& lo, const ShortVector& hi) { iBox.setLo(lo); iBox.setHi(hi); }
 
-            inline const AABox getAABoxBounds() const { return(AABox(iBox.getLo().getVector3() + getBasePosition(), iBox.getHi().getVector3()+ getBasePosition())); }
+            inline const G3D::AABox getAABoxBounds() const { return(G3D::AABox(iBox.getLo().getVector3() + getBasePosition(), iBox.getHi().getVector3()+ getBasePosition())); }
 
             // get start pos bases on the global array
             inline TriangleBox const* getTriangles() const { return &BaseModel::getTriangle(iTrianglesPos); }

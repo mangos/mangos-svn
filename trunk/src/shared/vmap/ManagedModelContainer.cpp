@@ -18,6 +18,8 @@
 
 #include "ManagedModelContainer.h"
 
+using namespace G3D;
+
 namespace VMAP
 {
 

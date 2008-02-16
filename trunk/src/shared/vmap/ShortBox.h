@@ -42,8 +42,8 @@ namespace VMAP
             inline const ShortVector& getHi() const { return(iV2); }
             inline void setLo(const ShortVector& pV){ iV1 = pV; }
             inline void setHi(const ShortVector& pV){ iV2 = pV; }
-            inline void setLo(const Vector3& pV){ iV1 = ShortVector(pV); }
-            inline void setHi(const Vector3& pV){ iV2 = ShortVector(pV); }
+            inline void setLo(const G3D::Vector3& pV){ iV1 = ShortVector(pV); }
+            inline void setHi(const G3D::Vector3& pV){ iV2 = ShortVector(pV); }
 
             inline bool operator==(const ShortBox& b) const
             {
@@ -58,7 +58,7 @@ namespace VMAP
 
     //=====================================================================
 
-    static const Vector3 dummyZeroPosition = Vector3(0,0,0);
+    static const G3D::Vector3 dummyZeroPosition = G3D::Vector3(0,0,0);
 
     class TriangleBox
     {
@@ -95,9 +95,9 @@ namespace VMAP
                 box.setHi(hi);
                 return(box);
             }
-            inline const Vector3& getBasePosition() { return(dummyZeroPosition); }
+            inline const G3D::Vector3& getBasePosition() { return(dummyZeroPosition); }
 
-            inline const AABox getAABoxBounds() const { ShortBox box = getBounds(); return(AABox(box.getLo().getVector3(), box.getHi().getVector3())); }
+            inline const G3D::AABox getAABoxBounds() const { ShortBox box = getBounds(); return(G3D::AABox(box.getLo().getVector3(), box.getHi().getVector3())); }
 
             inline bool operator==(const TriangleBox& t) const
             {
