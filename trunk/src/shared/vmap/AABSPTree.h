@@ -1536,7 +1536,7 @@ namespace G3D {
             // Set iterator
             typename Table<T, Node*>::Iterator it;
 
-            Iterator(const typename Table<T, Node*>::Iterator& it) : it(it) {}
+            Iterator(const typename Table<T, Node*>::Iterator& _it) : it(_it) {}
 
         public:
             inline bool operator!=(const Iterator& other) const {

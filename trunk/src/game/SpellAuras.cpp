@@ -92,7 +92,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModSchoolImmunity,                     // 39 SPELL_AURA_SCHOOL_IMMUNITY
     &Aura::HandleAuraModDmgImmunity,                        // 40 SPELL_AURA_DAMAGE_IMMUNITY
     &Aura::HandleAuraModDispelImmunity,                     // 41 SPELL_AURA_DISPEL_IMMUNITY
-    &Aura::HandleNoImmediateEffect,                         // 42 SPELL_AURA_PROC_TRIGGER_SPELL  implemented in Unit::ProcDamageAndSpellFor and Unit::HandleProcTriggerSpell
+    &Aura::HandleAuraProcTriggerSpell,                      // 42 SPELL_AURA_PROC_TRIGGER_SPELL  implemented in Unit::ProcDamageAndSpellFor and Unit::HandleProcTriggerSpell
     &Aura::HandleNoImmediateEffect,                         // 43 SPELL_AURA_PROC_TRIGGER_DAMAGE implemented in Unit::ProcDamageAndSpellFor
     &Aura::HandleAuraTrackCreatures,                        // 44 SPELL_AURA_TRACK_CREATURES
     &Aura::HandleAuraTrackResources,                        // 45 SPELL_AURA_TRACK_RESOURCES
@@ -845,6 +845,9 @@ void Aura::_AddAura()
 
 void Aura::_RemoveAura()
 {
+    // Remove all triggered by aura spells vs unlimited duration
+    CleanupTriggeredSpells();
+
     sLog.outDebug("Aura %u now is remove", m_modifier.m_auraname);
     ApplyModifier(false,true);
 
@@ -1072,18 +1075,6 @@ void Aura::TriggerSpell()
         }
 
         case 29528: trigger_spell_id = 28713; break;        // Inoculation
-        case 29602:                                         //Jom Gabbar
-        {
-            // remove at last tick instead cast
-            if(!m_duration)
-            {
-                m_target->RemoveAurasDueToSpell(trigger_spell_id);
-                return;
-            }
-
-            // continue stacking
-            break;
-        }
 
         case 29917: trigger_spell_id = 29916; break;        // Feed Captured Animal
         case  1515:                                         // Tame Beast
@@ -2925,6 +2916,22 @@ void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
     }
 }
 
+void Aura::HandleAuraProcTriggerSpell(bool Apply, bool Real)
+{
+    if(!Real)
+        return;
+
+    if(Apply)
+    {
+        // some spell have charges by functionality not have its in spell data
+        switch (m_spellId)
+        {
+            case 28200: m_procCharges = 6; break;           // Ascendance (Talisman of Ascendance trinket
+            default: break;
+        }
+    }
+}
+
 /*********************************************************/
 /***                  MANA SHIELD                      ***/
 /*********************************************************/
@@ -4363,4 +4370,20 @@ void Aura::HandleSpiritOfRedemption( bool apply, bool Real )
     // die at aura end
     else
         m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, GetSpellProto(), false);
+}
+
+void Aura::CleanupTriggeredSpells()
+{
+    uint32 tSpellId = m_spellProto->EffectTriggerSpell[GetEffIndex()];
+    if(!tSpellId)
+        return;
+
+    SpellEntry const* tProto = sSpellStore.LookupEntry(tSpellId);
+    if(!tProto)
+        return;
+
+    if(GetDuration(tProto) != -1)
+        return;
+
+    m_target->RemoveAurasDueToSpell(tSpellId);
 }

@@ -291,7 +291,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
             // angle to face `obj` to `this` using distance includes size of `obj`
             GetNearPoint(obj,x,y,z,distance2d,GetAngle( obj ));
         }
-        const float GetObjectSize() const
+        float GetObjectSize() const
         {
             return ( m_valuesCount > UNIT_FIELD_BOUNDINGRADIUS ) ? m_floatValues[UNIT_FIELD_BOUNDINGRADIUS] : 0.39f;
         }

@@ -70,9 +70,9 @@ namespace VMAP
             inline const TreeNode& getTreeNode(int pPos) const { return(getTreeNodes()[pPos]); }
             inline       TreeNode& getTreeNode(int pPos)       { return(getTreeNodes()[pPos]); }
 
-            inline const void setTreeNode(const TreeNode& pTreeNode, int pPos) { getTreeNodes()[pPos] = pTreeNode; }
+            inline void setTreeNode(const TreeNode& pTreeNode, int pPos) { getTreeNodes()[pPos] = pTreeNode; }
 
-            inline const void setBasePosition(const G3D::Vector3& pBasePosition) { iBasePosition = pBasePosition; }
+            inline void setBasePosition(const G3D::Vector3& pBasePosition) { iBasePosition = pBasePosition; }
 
             inline const G3D::Vector3& getBasePosition() const { return(iBasePosition); }
 
