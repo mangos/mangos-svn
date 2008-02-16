@@ -35,7 +35,7 @@
 #elif defined(__MINGW32__)
     #define G3D_WIN32 
     #define G3D_MINGW32 
-#elif defined(__linux___)
+#elif defined(__linux__)
     #define G3D_LINUX
 #elif defined(__OpenBSD__)
     #define G3D_LINUX
