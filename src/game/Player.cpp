@@ -116,6 +116,8 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_zoneUpdateId = 0;
     m_zoneUpdateTimer = 0;
 
+    m_areaUpdateId = 0;
+
     m_nextSave = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
 
     // randomize first save time in range [CONFIG_INTERVAL_SAVE] around [CONFIG_INTERVAL_SAVE]
@@ -939,9 +941,17 @@ void Player::Update( uint32 p_time )
         {
             uint32 newzone = GetZoneId();
             if( m_zoneUpdateId != newzone )
-                UpdateZone(newzone);
+                UpdateZone(newzone);                        // also update area
             else
+            {
+                // use area updates as well
+                // needed for free far all arenas for example
+                uint32 newarea = GetAreaId();
+                if( m_areaUpdateId != newarea )
+                    UpdateArea(newarea);
+
                 m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
+            }
         }
         else
             m_zoneUpdateTimer -= p_time;
@@ -5699,10 +5709,34 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
     return zone;
 }
 
+void Player::UpdateArea(uint32 newArea)
+{
+    // FFA_PVP flags are area and not zone id dependent
+    // so apply them accordingly
+    m_areaUpdateId    = newArea;
+
+    AreaTableEntry const* area = GetAreaEntryByAreaID(newArea);
+
+    if(area && (area->flags & 0x80))
+    {
+        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+    }
+    else
+    {
+        // remove ffa flag only if not ffapvp realm
+        // removal in sanctuaries and capitals is handled in zone update
+        if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP) && !sWorld.IsFFAPvPRealm())
+            RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+    }
+}
+
 void Player::UpdateZone(uint32 newZone)
 {
     m_zoneUpdateId    = newZone;
     m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
+
+    // zone changed, so area changed as well, update it
+    UpdateArea(GetAreaId());
 
     AreaTableEntry const* zone = GetAreaEntryByAreaID(newZone);
     if(!zone)

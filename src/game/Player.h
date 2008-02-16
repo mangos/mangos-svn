@@ -1380,6 +1380,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         PvPInfo pvpInfo;
         void UpdatePvP(bool state, bool ovrride=false);
         void UpdateZone(uint32 newZone);
+        void UpdateArea(uint32 newArea);
         void UpdatePvPFlag(time_t currTime);
 
         /** todo: -maybe move UpdateDuelFlag+DuelComplete to independent DuelHandler.. **/
@@ -2022,6 +2023,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_zoneUpdateId;
         uint32 m_zoneUpdateTimer;
+        uint32 m_areaUpdateId;
 
         uint32 m_deathTimer;
         time_t m_resurrectingSicknessExpire;
