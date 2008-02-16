@@ -80,7 +80,7 @@ extern ScriptMapMap sQuestEndScripts;
 extern ScriptMapMap sQuestStartScripts;
 extern ScriptMapMap sSpellScripts;
 extern ScriptMapMap sButtonScripts;
-extern ScriptMapMap sGameobjectScripts;
+extern ScriptMapMap sEventScripts;
 
 struct AreaTrigger
 {
@@ -402,8 +402,8 @@ class ObjectMgr
         void LoadButtonScripts();
         void LoadQuestEndScripts();
         void LoadQuestStartScripts();
+        void LoadEventScripts();
         void LoadSpellScripts();
-        void LoadGameobjectScripts();
 
         bool LoadMangosStrings();
         void LoadMangosStringLocales();

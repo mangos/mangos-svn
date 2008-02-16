@@ -777,7 +777,7 @@ void World::SetInitialWorldSettings()
     objmgr.LoadQuestEndScripts();                           // must be after load Creature/Gameobject(Template/Data) and QuestTemplate
     objmgr.LoadSpellScripts();                              // must be after load Creature/Gameobject(Template/Data)
     objmgr.LoadButtonScripts();                             // must be after load Creature/Gameobject(Template/Data)
-    objmgr.LoadGameobjectScripts();                         // must be after load Creature/Gameobject(Template/Data)
+    objmgr.LoadEventScripts();                              // must be after load Creature/Gameobject(Template/Data)
 
     sLog.outString( "Initializing Scripts..." );
     if(!LoadScriptingModule())

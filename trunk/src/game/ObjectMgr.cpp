@@ -44,7 +44,7 @@ ScriptMapMap sQuestEndScripts;
 ScriptMapMap sQuestStartScripts;
 ScriptMapMap sSpellScripts;
 ScriptMapMap sButtonScripts;
-ScriptMapMap sGameobjectScripts;
+ScriptMapMap sEventScripts;
 
 ObjectMgr::ObjectMgr()
 {
@@ -3113,7 +3113,7 @@ void ObjectMgr::LoadQuestStartScripts()
 
 void ObjectMgr::LoadSpellScripts()
 {
-    objmgr.LoadScripts(sSpellScripts,     "spell_scripts");
+    objmgr.LoadScripts(sSpellScripts, "spell_scripts");
 
     // check ids
     for(ScriptMapMap::const_iterator itr = sSpellScripts.begin(); itr != sSpellScripts.end(); ++itr)
@@ -3134,7 +3134,7 @@ void ObjectMgr::LoadSpellScripts()
             if( !spellInfo->Effect[i] )
                 continue;
             
-            if( spellInfo->Effect[i] == SPELL_EFFECT_SEND_EVENT || spellInfo->Effect[i] == SPELL_EFFECT_SCRIPT_EFFECT )
+            if( spellInfo->Effect[i] == SPELL_EFFECT_SCRIPT_EFFECT )
             {
                 found =  true;
                 break;
@@ -3142,31 +3142,49 @@ void ObjectMgr::LoadSpellScripts()
         }
 
         if(!found)
-            sLog.outErrorDb("Table `spell_scripts` has unsupported spell (Id: %u) without SPELL_EFFECT_SCRIPT_EFFECT (%u) or SPELL_EFFECT_SEND_EVENT (%u) spell effect",itr->first,SPELL_EFFECT_SCRIPT_EFFECT,SPELL_EFFECT_SEND_EVENT);
+            sLog.outErrorDb("Table `spell_scripts` has unsupported spell (Id: %u) without SPELL_EFFECT_SCRIPT_EFFECT (%u) spell effect",itr->first,SPELL_EFFECT_SCRIPT_EFFECT);
     }
 }
 
-void ObjectMgr::LoadGameobjectScripts()
+void ObjectMgr::LoadEventScripts()
 {
-    objmgr.LoadScripts(sGameobjectScripts,"gameobject_scripts");
+    objmgr.LoadScripts(sEventScripts, "event_scripts");
 
-    std::set<uint32> go_scripts;
-    QueryResult *result = WorldDatabase.PQuery("SELECT DISTINCT `data2` FROM `gameobject_template` WHERE `type`=%u AND `data2`>0 UNION SELECT DISTINCT `data6` FROM `gameobject_template` WHERE `type`=%u AND `data6`>0",GAMEOBJECT_TYPE_GOOBER,GAMEOBJECT_TYPE_CHEST);
-    if( result )
+    std::set<uint32> evt_scripts;
+    // Load all possible script entries from gameobjects
+    for(uint32 i = 1; i < sGOStorage.MaxEntry; ++i)
     {
-        Field* fields;
-        do
+        GameObjectInfo const * go = sGOStorage.LookupEntry<GameObjectInfo>(i);
+        if (go)
         {
-            fields = result->Fetch();
-            go_scripts.insert(fields[0].GetUInt32());
-        } while ( result->NextRow() );
-        delete result;
+            if (go->type == GAMEOBJECT_TYPE_GOOBER && go->data2)
+                evt_scripts.insert(go->data2);
+            else if (go->type == GAMEOBJECT_TYPE_CHEST && go->data6)
+                evt_scripts.insert(go->data6);
+        }
     }
-    for(ScriptMapMap::const_iterator itr = sGameobjectScripts.begin(); itr != sGameobjectScripts.end(); ++itr)
+    // Load all possible script entries from spells
+    for(uint32 i = 1; i < sSpellStore.nCount; ++i)
     {
-        std::set<uint32>::const_iterator itr2 = go_scripts.find(itr->first);
-        if (itr2 == go_scripts.end())
-            sLog.outErrorDb("Table `gameobject_scripts` has script (Id: %u) not refering to any gameobject_template type 10 data2 field or type 3 data6 field",itr->first);
+        SpellEntry const * spell = sSpellStore.LookupEntry(i);
+        if (spell)
+        {
+            for(int j=0; j<3; ++j)
+            {
+                if( spell->Effect[j] == SPELL_EFFECT_SEND_EVENT )
+                {
+                    if (spell->EffectMiscValue[j])
+                         evt_scripts.insert(spell->EffectMiscValue[j]);
+                }
+            }
+        }
+    }
+    // Then check if all scripts are in above list of possible script entries
+    for(ScriptMapMap::const_iterator itr = sEventScripts.begin(); itr != sEventScripts.end(); ++itr)
+    {
+        std::set<uint32>::const_iterator itr2 = evt_scripts.find(itr->first);
+        if (itr2 == evt_scripts.end())
+            sLog.outErrorDb("Table `event_scripts` has script (Id: %u) not refering to any gameobject_template type 10 data2 field or type 3 data6 field or any spell effect %u", itr->first, SPELL_EFFECT_SEND_EVENT);
     }
 }
 

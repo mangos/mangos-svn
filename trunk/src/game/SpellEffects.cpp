@@ -1682,7 +1682,7 @@ void Spell::EffectManaDrain(uint32 i)
     }
 }
 
-void Spell::EffectSendEvent(uint32 /*i*/)
+void Spell::EffectSendEvent(uint32 EffectIndex)
 {
     if (m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->InBattleGround())
     {
@@ -1730,8 +1730,8 @@ void Spell::EffectSendEvent(uint32 /*i*/)
             }
         }
     }
-
-    sWorld.ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, focusObject);
+    sLog.outDebug("Spell ScriptStart %u for spellid %u in EffectSendEvent ", m_spellInfo->EffectMiscValue[EffectIndex], m_spellInfo->Id);
+    sWorld.ScriptsStart(sEventScripts, m_spellInfo->EffectMiscValue[EffectIndex], m_caster, focusObject);
 }
 
 void Spell::EffectPowerBurn(uint32 i)
@@ -2026,7 +2026,7 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                 if (gameObjTarget->GetGOInfo()->data2)
                 {
                     sLog.outDebug("Goober ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->data2,gameObjTarget->GetGUIDLow());
-                    sWorld.ScriptsStart(sGameobjectScripts, gameObjTarget->GetGOInfo()->data2, player, gameObjTarget);
+                    sWorld.ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->data2, player, gameObjTarget);
                 }
                 // cast goober spell
                 if (gameObjTarget->GetGOInfo()->data1)      ///Quest (entry = data1) require to be active for GO using
@@ -2042,7 +2042,7 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                 if (gameObjTarget->GetGOInfo()->data6)
                 {
                     sLog.outDebug("Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->data6,gameObjTarget->GetGUIDLow());
-                    sWorld.ScriptsStart(sGameobjectScripts, gameObjTarget->GetGOInfo()->data6, player, gameObjTarget);
+                    sWorld.ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->data6, player, gameObjTarget);
                 }
                 // Don't return, let loots been taken
         }
