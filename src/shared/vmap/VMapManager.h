@@ -53,7 +53,7 @@ namespace VMAP
     {
         private:
             int iRefCount;
-            Array<std::string> iFiles;
+            G3D::Array<std::string> iFiles;
         public:
 
             FilesInDir() { iRefCount = 0; }
@@ -61,7 +61,7 @@ namespace VMAP
             void incRefCount() { iRefCount++; }
             void decRefCount() { if(iRefCount > 0) iRefCount--; }
             int getRefCount() { return iRefCount; }
-            const Array<std::string>& getFiles() const { return iFiles; }
+            const G3D::Array<std::string>& getFiles() const { return iFiles; }
     };
 
     //===========================================================
@@ -72,24 +72,24 @@ namespace VMAP
     class MapTree
     {
         private:
-            AABSPTree<ModelContainer *> *iTree;
+            G3D::AABSPTree<ModelContainer *> *iTree;
 
             // Key: filename, value ModelContainer
-            Table<std::string, ManagedModelContainer *> iLoadedModelContainer;
+            G3D::Table<std::string, ManagedModelContainer *> iLoadedModelContainer;
 
             // Key: dir file name, value FilesInDir
-            Table<std::string, FilesInDir> iLoadedDirFiles;
+            G3D::Table<std::string, FilesInDir> iLoadedDirFiles;
 
             // Store all the map tile idents that are loaded for that map
             // some maps are not splitted into tiles and we have to make sure, not removing the map before all tiles are removed
-            Table<unsigned int, bool> iLoadedMapTiles;
+            G3D::Table<unsigned int, bool> iLoadedMapTiles;
             std::string iBasePath;
 
         private:
-            float getIntersectionTime(const Ray& pRay, float pMaxDist, bool pStopAtFirstHit);
+            float getIntersectionTime(const G3D::Ray& pRay, float pMaxDist, bool pStopAtFirstHit);
             bool isAlreadyLoaded(const std::string& pName) { return(iLoadedModelContainer.containsKey(pName)); }
-            RayIntersectionIterator<AABSPTree<ModelContainer*>::Node, ModelContainer*> beginRayIntersection(const Ray& ray, bool skipAABoxTests = false) const;
-            RayIntersectionIterator<AABSPTree<ModelContainer*>::Node, ModelContainer*> endRayIntersection() const;
+            RayIntersectionIterator<G3D::AABSPTree<ModelContainer*>::Node, ModelContainer*> beginRayIntersection(const G3D::Ray& ray, bool skipAABoxTests = false) const;
+            RayIntersectionIterator<G3D::AABSPTree<ModelContainer*>::Node, ModelContainer*> endRayIntersection() const;
             void setLoadedMapTile(unsigned int pTileIdent) { iLoadedMapTiles.set(pTileIdent, true); }
             void removeLoadedMapTile(unsigned int pTileIdent) { iLoadedMapTiles.remove(pTileIdent); }
             bool hasLoadedMapTiles() { return(iLoadedMapTiles.size() > 0); }
@@ -102,15 +102,15 @@ namespace VMAP
             MapTree(const char *pBasePath);
             ~MapTree();
 
-            bool isInLineOfSight(const Vector3& pos1, const Vector3& pos2);
-            bool getObjectHitPos(const Vector3& pos1, const Vector3& pos2, Vector3& pResultHitPos, float pModifyDist);
-            float getHeight(const Vector3& pPos);
+            bool isInLineOfSight(const G3D::Vector3& pos1, const G3D::Vector3& pos2);
+            bool getObjectHitPos(const G3D::Vector3& pos1, const G3D::Vector3& pos2, G3D::Vector3& pResultHitPos, float pModifyDist);
+            float getHeight(const G3D::Vector3& pPos);
 
             bool loadMap(const std::string& pDirFileName, unsigned int pMapTileIdent);
             void addModelConatiner(const std::string& pName, ManagedModelContainer *pMc);
             void unloadMap(const std::string& dirFileName, unsigned int pMapTileIdent, bool pForce=false);
 
-            void getModelContainer(Array<ModelContainer *>& pArray ) { iTree->getMembers(pArray); }
+            void getModelContainer(G3D::Array<ModelContainer *>& pArray ) { iTree->getMembers(pArray); }
             const void addDirFile(const std::string& pDirName, const FilesInDir& pFilesInDir) { iLoadedDirFiles.set(pDirName, pFilesInDir); }
             int size() { return(iTree->size()); }
     };
@@ -128,9 +128,9 @@ namespace VMAP
     {
         private:
             // Tree to check collision
-            Table<unsigned int , MapTree *> iInstanceMapTrees;
-            Table<unsigned int , bool> iMapsSplitIntoTiles;
-            Table<unsigned int , bool> iIgnoreMapIds;
+            G3D::Table<unsigned int , MapTree *> iInstanceMapTrees;
+            G3D::Table<unsigned int , bool> iMapsSplitIntoTiles;
+            G3D::Table<unsigned int , bool> iIgnoreMapIds;
 
             CommandFileRW iCommandLogger;
         private:
@@ -140,8 +140,8 @@ namespace VMAP
 
         public:
             // public for debug
-            Vector3 convertPositionToInternalRep(float x, float y, float z) const;
-            Vector3 convertPositionToMangosRep(float x, float y, float z) const;
+            G3D::Vector3 convertPositionToInternalRep(float x, float y, float z) const;
+            G3D::Vector3 convertPositionToMangosRep(float x, float y, float z) const;
             std::string getDirFileName(unsigned int pMapId) const;
             std::string getDirFileName(unsigned int pMapId, int x, int y) const;
             MapTree* getInstanceMapTree(int pMapId) { return(iInstanceMapTrees.get(pMapId)); }

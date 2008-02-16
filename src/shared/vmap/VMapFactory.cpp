@@ -20,6 +20,8 @@
 #include "VMapFactory.h"
 #include "VMapManager.h"
 
+using namespace G3D;
+
 namespace VMAP
 {
     extern void chompAndTrim(std::string& str);

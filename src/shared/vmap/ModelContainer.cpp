@@ -24,6 +24,8 @@
 #include "ModelContainer.h"
 #include "VMapDefinitions.h"
 
+using namespace G3D;
+
 namespace VMAP
 {
     //==========================================================

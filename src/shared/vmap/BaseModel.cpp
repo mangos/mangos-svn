@@ -18,6 +18,8 @@
 
 #include "BaseModel.h"
 
+using namespace G3D;
+
 namespace VMAP
 {
     //==========================================================

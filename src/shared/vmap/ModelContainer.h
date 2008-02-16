@@ -51,7 +51,7 @@ namespace VMAP
             unsigned int iNSubModel;
             SubModel *iSubModel;
             //Vector3 iDirection;
-            AABox iBox;
+            G3D::AABox iBox;
 
         public:
             ModelContainer() : BaseModel() { iNSubModel =0; iSubModel = 0; };
@@ -59,11 +59,11 @@ namespace VMAP
             // for the mainnode
             ModelContainer(unsigned int pNTriangles, unsigned int pNNodes, unsigned int pNSubModel);
 
-            ModelContainer(AABSPTree<SubModel *> *pTree);
+            ModelContainer(G3D::AABSPTree<SubModel *> *pTree);
 
             ~ModelContainer(void);
 
-            RayIntersectionIterator<TreeNode, SubModel> beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests = false) const;
+            RayIntersectionIterator<TreeNode, SubModel> beginRayIntersection(const G3D::Ray& ray, double pMaxTime, bool skipAABoxTests = false) const;
 
             RayIntersectionIterator<TreeNode, SubModel> endRayIntersection() const;
 
@@ -73,17 +73,17 @@ namespace VMAP
 
             inline unsigned int getNSubModel() const { return(iNSubModel); }
 
-            RealTime getIntersectionTime(const Ray&, bool pExitAtFirst, float pMaxDist) const;
+            G3D::RealTime getIntersectionTime(const G3D::Ray&, bool pExitAtFirst, float pMaxDist) const;
 
-            void countSubModelsAndNodesAndTriangles(AABSPTree<SubModel *>::Node& pNode, int& nSubModels, int& nNodes, int& nTriangles);
+            void countSubModelsAndNodesAndTriangles(G3D::AABSPTree<SubModel *>::Node& pNode, int& nSubModels, int& nNodes, int& nTriangles);
 
-            void fillContainer(const AABSPTree<SubModel *>::Node& pNode, int &pSubModelPos, int &pTreeNodePos, int &pTrianglePos, Vector3& pLo, Vector3& pHi, Vector3& pFinalLo, Vector3& pFinalHi);
+            void fillContainer(const G3D::AABSPTree<SubModel *>::Node& pNode, int &pSubModelPos, int &pTreeNodePos, int &pTrianglePos, G3D::Vector3& pLo, G3D::Vector3& pHi, G3D::Vector3& pFinalLo, G3D::Vector3& pFinalHi);
 
             bool readRawFile(const char *name);
 
-            inline const AABox& getAABoxBounds() const { return(iBox); }
+            inline const G3D::AABox& getAABoxBounds() const { return(iBox); }
 
-            inline void setBounds(const Vector3& lo, const Vector3& hi) { iBox.set(lo,hi); }
+            inline void setBounds(const G3D::Vector3& lo, const G3D::Vector3& hi) { iBox.set(lo,hi); }
 
             bool writeFile(const char *filename);
 

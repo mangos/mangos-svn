@@ -19,6 +19,8 @@
 #include "VMapManager.h"
 #include "VMapDefinitions.h"
 
+using namespace G3D;
+
 namespace VMAP
 {
 

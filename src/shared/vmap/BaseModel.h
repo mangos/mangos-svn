@@ -45,7 +45,7 @@ namespace VMAP
             TreeNode *iTreeNodes;
             unsigned int iNTriangles;
             unsigned int iNNodes;
-            Vector3 iBasePosition;
+            G3D::Vector3 iBasePosition;
         public:
             BaseModel() { iNTriangles = 0; iNNodes = 0; iTriangles = 0; iTreeNodes = 0;};
             BaseModel(unsigned int pNNodes  , TreeNode* pTreeNode, unsigned int  pNTriangles, TriangleBox* pTriangleBox)
@@ -60,7 +60,7 @@ namespace VMAP
             void free();
             void init(unsigned int pNNodes, unsigned int  pNTriangles);
 
-            void getMember(Array<TriangleBox>& pMembers);
+            void getMember(G3D::Array<TriangleBox>& pMembers);
 
             inline const TriangleBox& getTriangle(int pPos) const { return(iTriangles[pPos]); }
             inline       TriangleBox& getTriangle(int pPos)       { return(iTriangles[pPos]); }
@@ -72,9 +72,9 @@ namespace VMAP
 
             inline const void setTreeNode(const TreeNode& pTreeNode, int pPos) { getTreeNodes()[pPos] = pTreeNode; }
 
-            inline const void setBasePosition(const Vector3& pBasePosition) { iBasePosition = pBasePosition; }
+            inline const void setBasePosition(const G3D::Vector3& pBasePosition) { iBasePosition = pBasePosition; }
 
-            inline const Vector3& getBasePosition() const { return(iBasePosition); }
+            inline const G3D::Vector3& getBasePosition() const { return(iBasePosition); }
 
             inline unsigned int getNNodes() const { return(iNNodes); }
             inline unsigned int getNTriangles() const { return(iNTriangles); }

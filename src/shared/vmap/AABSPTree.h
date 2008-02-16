@@ -1127,7 +1127,7 @@ namespace G3D {
                         node     = inNode;
                         minTime  = inMinTime;
                         maxTime  = inMaxTime;
-                        minTime2 = square(minTime);
+                        minTime2 = G3D::square(minTime);
                         valIndex = -1;
 
                         intersectionCache.resize(node->valueArray.length());
@@ -1135,7 +1135,7 @@ namespace G3D {
                         if (node->child[0] == NULL && node->child[1] == NULL) {
                             startTime = minTime;
                             endTime   = maxTime;
-                            endTime2  = square(maxTime);
+                            endTime2  = G3D::square(maxTime);
                             nextChild = -1;
                             return;
                         }
@@ -1161,7 +1161,7 @@ namespace G3D {
 
                         startTime = minTime;
                         endTime   = min((double)maxTime, splitTime);
-                        endTime2  = square(endTime);
+                        endTime2  = G3D::square(endTime);
 
                         double rayLocation = ray.origin[splitAxis] +
                             ray.direction[splitAxis] * minTime;
@@ -1299,7 +1299,7 @@ namespace G3D {
                             s->valIndex  = -1;
                             s->startTime = s->endTime;
                             s->endTime   = s->maxTime;
-                            s->endTime2  = square(s->maxTime);
+                            s->endTime2  = G3D::square(s->maxTime);
                             s->nextChild = (s->nextChild >= 0) ?
                                 (1 - s->nextChild) : -1;
 
@@ -1603,4 +1603,5 @@ namespace G3D {
 }
 
 #endif
+
 

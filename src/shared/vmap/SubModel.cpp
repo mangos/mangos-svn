@@ -22,6 +22,8 @@
 extern FILE *::g_df;
 #endif
 
+using namespace G3D;
+
 namespace VMAP
 {
 
