@@ -1062,7 +1062,15 @@ void Aura::TriggerSpell()
         case   768:                                         // Cat Form (passive)
         case 17947:                                         // Firestone Passive
             return;
-        
+
+        case 66:
+        {
+            // Invisibility - overwrite non existing triggered spell call in spell.dbc
+            if(!m_duration)
+                m_target->CastSpell(m_target, 32612, true, NULL, this);
+            return;
+        }
+
         case 29528: trigger_spell_id = 28713; break;        // Inoculation
         case 29602:                                         //Jom Gabbar
         {
@@ -1076,6 +1084,7 @@ void Aura::TriggerSpell()
             // continue stacking
             break;
         }
+
         case 29917: trigger_spell_id = 29916; break;        // Feed Captured Animal
         case  1515:                                         // Tame Beast
         {
