@@ -3514,6 +3514,9 @@ void Spell::EffectScriptEffect(uint32 i)
         case 35376:
         case 35727:
         {
+            if(!unitTarget)
+                return;
+
             uint32 spellid;
             switch(m_spellInfo->Id)
             {
@@ -3528,6 +3531,7 @@ void Spell::EffectScriptEffect(uint32 i)
                 default:
                     return;
             }
+
             unitTarget->CastSpell(unitTarget,spellid,false);
             return;
         }
@@ -3563,15 +3567,20 @@ void Spell::EffectScriptEffect(uint32 i)
 
         //Summon Black Qiraji Battle Tank
         case 26656:
+        {
+            if(!unitTarget)
+                return;
 
             //Prevent stacking of mounts
-            m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+            unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
             //Two seperate mounts depending on area id (allows use both in and out of specefic instance)
-            if (m_caster->GetAreaId() == 3428)
-                m_caster->CastSpell(m_caster, 25863, true);
-            else m_caster->CastSpell(m_caster, 26655, true);
+            if (unitTarget->GetAreaId() == 3428)
+                unitTarget->CastSpell(unitTarget, 25863, true);
+            else 
+                unitTarget->CastSpell(unitTarget, 26655, true);
             break;
+        }
     }
 
     // paladin's holy light / flash of light
