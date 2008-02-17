@@ -4284,6 +4284,44 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             return;
         }
 
+        // Windfury Weapon (Passive) 1-5 Ranks
+        case 33757:
+        {
+            if(GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            if(!castItem || !castItem->IsEquipped())
+                return;
+
+            uint32 windfurySpellId;
+            switch (castItem->GetEnchantmentId(EnchantmentSlot(TEMP_ENCHANTMENT_SLOT)))
+            {
+                case 283: windfurySpellId = 33757;break;    //1 Rank
+                case 284: windfurySpellId = 33756;break;    //2 Rank
+                case 525: windfurySpellId = 33755;break;    //3 Rank
+                case 1669:windfurySpellId = 33754;break;    //4 Rank
+                case 2636:windfurySpellId = 33727;break;    //5 Rank
+                default: 
+                {
+                    sLog.outError("Unit::HandleDummyAuraProc: non handled item enchantment (rank?) %u for spell id: %u (Windfury)",
+                        castItem->GetEnchantmentId(EnchantmentSlot(TEMP_ENCHANTMENT_SLOT)),dummySpell->Id);
+                    return;
+                }
+            }
+            if( ((Player*)this)->HasSpellCooldown(32910)) 
+                return;
+
+            SpellEntry const* windfurySpellEntry = sSpellStore.LookupEntry(windfurySpellId);
+
+            int32 addvalue = windfurySpellEntry->EffectBasePoints[0];
+            
+            CastCustomSpell(this, 32910, &addvalue, NULL, NULL, true, castItem, triggeredByAura);
+            
+            ((Player*)this)->AddSpellCooldown(32910,0,time(NULL) + 3);
+
+            return;
+        }
+
         // Combustion
         case 11129:
         {
