@@ -536,7 +536,7 @@ void ChatHandler::PSendSysMessage(uint32 entry, ...)
     va_start(ap, entry);
     vsnprintf(str,1024,format, ap );
     va_end(ap);
-    SendSysMultilineMessage(str);
+    SendSysMessage(str);
 }
 
 void ChatHandler::PSendSysMessage(const char *format, ...)
