@@ -876,6 +876,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     spellInfo_1->SpellFamilyFlags != spellInfo_2->SpellFamilyFlags )
                     return false;
             }
+            break;
         default:
             break;
     }
