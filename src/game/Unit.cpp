@@ -6418,7 +6418,16 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     if(LvlFactor > 1.0f)
         LvlFactor = 1.0f;
 
-    float ActualBenefit = (float)AdvertisedBenefit * ((float)CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor * DotFactor / 100.0f;
+
+    // Spellmod SpellDamage
+    float SpellModSpellDamage = 100.0f;
+
+    if(Player* modOwner = GetSpellModOwner())
+        modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_SPELL_DAMAGE,SpellModSpellDamage);
+
+    SpellModSpellDamage /= 100.0f;
+
+    float ActualBenefit = (float)AdvertisedBenefit * ((float)CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor * DotFactor / 100.0f * SpellModSpellDamage;
 
     // use float as more appropriate for negative values and percent applying
     float heal = healamount + ActualBenefit;
