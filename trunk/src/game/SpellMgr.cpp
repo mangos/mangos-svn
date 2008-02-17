@@ -868,6 +868,14 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     return false;
             }
             break;
+        case SPELLFAMILY_SHAMAN:
+            // Windfury weapon 
+            if( spellInfo_2->SpellFamilyName == SPELLFAMILY_SHAMAN )
+            {
+                if( spellInfo_1->SpellIconID==220 && spellInfo_2->SpellIconID==220 &&
+                    spellInfo_1->SpellFamilyFlags != spellInfo_2->SpellFamilyFlags )
+                    return false;
+            }
         default:
             break;
     }

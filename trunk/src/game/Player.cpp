@@ -6462,6 +6462,13 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target, WeaponAttackType attTy
             if(pEnchant->type[s]!=ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
                 continue;
 
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(pEnchant->spellid[s]);
+            if (!spellInfo)
+            {
+                sLog.outError("Player::CastItemCombatSpell Enchant %i, cast unknown spell %i", pEnchant->ID, pEnchant->spellid[s]);
+                continue;
+            }
+
             float chance = pEnchant->amount[s] != 0 ? float(pEnchant->amount[s]) : GetWeaponProcChance();
             if (roll_chance_f(chance))
             {
