@@ -91,6 +91,7 @@ struct CreatureMover
 struct InstanceTemplate
 {
     uint32 map;
+    uint32 parent;
     uint32 levelMin;
     uint32 levelMax;
     uint32 maxPlayers;
