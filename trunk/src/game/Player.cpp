@@ -9645,7 +9645,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
         sLog.outDebug( "STORAGE: DestroyItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
 
         // start from destroy contained items (only equipped bag can have its)
-        if (pItem->IsBag())
+        if (pItem->IsBag() && pItem->IsEquipped())          // this also prevent infinity loop if empty bag stored in bag==slot
         {
             for (int i = 0; i < MAX_BAG_SIZE; i++)
                 DestroyItem(slot,i,update);
@@ -9667,8 +9667,10 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
             if ( slot < INVENTORY_SLOT_BAG_END )            // equipment and equipped bags can have applied bonuses
-            {
                 _ApplyItemMods(pItem, slot, false);
+
+            if ( slot < EQUIPMENT_SLOT_END )                // equipment visual show
+            {
                 int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
                 for (int i = VisibleBase; i < VisibleBase + 12; ++i)
                     SetUInt32Value(i, 0);
