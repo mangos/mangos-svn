@@ -1302,6 +1302,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `instance_template`;
 CREATE TABLE `instance_template` (
   `map` int(11) unsigned NOT NULL,
+  `parent` int(11) unsigned NOT NULL,
   `levelMin` int(11) unsigned NOT NULL default '0',
   `levelMax` int(11) unsigned NOT NULL default '0',
   `maxPlayers` int(11) unsigned NOT NULL default '0',

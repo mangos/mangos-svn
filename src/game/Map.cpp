@@ -562,7 +562,8 @@ void Map::Reset()
 
 bool Map::CanEnter(Player* player) const
 {
-    if (!Instanceable()) return(true);
+    if( !Instanceable() )
+        return true;
 
     // GMs can avoid raid limitations
     if (IsRaid() && (!player->isGameMaster() && !sWorld.getConfig(CONFIG_INSTANCE_IGNORE_RAID)))
@@ -573,7 +574,7 @@ bool Map::CanEnter(Player* player) const
             // probably there must be special opcode, because client has this string constant in GlobalStrings.lua
             player->GetSession()->SendAreaTriggerMessage("You must be in a raid group to enter %s instance", GetMapName());
             sLog.outDebug("MAP: Player '%s' must be in a raid group to enter instance of '%s'", player->GetName(), GetMapName());
-            return(false);
+            return false;
         }
     }
 
@@ -581,11 +582,23 @@ bool Map::CanEnter(Player* player) const
     {
         if(Corpse *corpse = player->GetCorpse())
         {
-            if (corpse->GetMapId() != GetId())
+            // let enter in ghost mode in instance that connected to inner instance with corpse
+            uint32 instance_map = corpse->GetMapId();
+            do 
+            {
+                if(instance_map==GetId())
+                    break;
+
+                InstanceTemplate const* instance = objmgr.GetInstanceTemplate(instance_map);
+                instance_map = instance ? instance->parent : 0;
+            }
+            while (instance_map);
+
+            if (!instance_map)
             {
                 player->GetSession()->SendAreaTriggerMessage("You cannot enter %s while in a ghost mode", GetMapName());
                 sLog.outDebug("MAP: Player '%s' doesn't has a corpse in instance '%s' and can't enter", player->GetName(), GetMapName());
-                return(false);
+                return false;
             }
             sLog.outDebug("MAP: Player '%s' has corpse in instance '%s' and can enter", player->GetName(), GetMapName());
         }
