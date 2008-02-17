@@ -162,20 +162,8 @@ void WorldSession::HandleTalentWipeOpcode( WorldPacket & recv_data )
         return;
     }
 
-    // send spell 14867
-    WorldPacket data(SMSG_SPELL_START, (2+2+2+4+2+8+8));
-    data.append(_player->GetPackGUID());
-    data.append(unit->GetPackGUID());
-    data << uint16(14867) << uint8(0);
-    data << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
-    SendPacket( &data );
+    unit->CastSpell(_player, 14867, true);                  //spell: "Untalent Visual Effect"
 
-    data.Initialize(SMSG_SPELL_GO, (2+2+1+1+1+8+4+2+2+8+8));
-    data.append(_player->GetPackGUID());
-    data.append(unit->GetPackGUID());
-    data << uint16(14867) << uint16(0x00) << uint8(0x0D) <<  uint8(0x01)<< uint8(0x01) << _player->GetGUID();
-    data << uint32(0x00) << uint16(0x0200) << uint16(0x00);
-    SendPacket( &data );
 }
 
 void WorldSession::HandleUnlearnSkillOpcode(WorldPacket & recv_data)

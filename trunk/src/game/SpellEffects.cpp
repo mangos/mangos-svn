@@ -1861,10 +1861,10 @@ void Spell::EffectHealthLeach(uint32 i)
 
 void Spell::DoCreateItem(uint32 i, uint32 itemtype)
 {
-    if (m_caster->GetTypeId() != TYPEID_PLAYER)
+    if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    Player* player = (Player*)m_caster;
+    Player* player = (Player*)unitTarget;
 
     uint32 newitemid = itemtype;
     ItemPrototype const *pProto = objmgr.GetItemPrototype( newitemid );
@@ -1927,7 +1927,8 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
         if( msg != EQUIP_ERR_OK )
         {
             // send equip error if not
-            player->SendEquipError( msg, NULL, NULL );
+            if( msg != EQUIP_ERR_CANT_CARRY_MORE_OF_THIS )
+                player->SendEquipError( msg, NULL, NULL );
             break;
         }
 

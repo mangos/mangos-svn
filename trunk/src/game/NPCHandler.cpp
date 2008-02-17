@@ -405,7 +405,7 @@ void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
 
 void WorldSession::SendBindPoint(Creature *npc)
 {
-    uint32 bindspell = 3286, hearthstone_itemid = 6948;
+    uint32 bindspell = 3286;
 
     // update sql homebind
     CharacterDatabase.PExecute("UPDATE `character_homebind` SET `map` = '%u', `zone` = '%u', `position_x` = '%f', `position_y` = '%f', `position_z` = '%f' WHERE `guid` = '%u'", _player->GetMapId(), _player->GetZoneId(), _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), _player->GetGUIDLow());
@@ -415,47 +415,10 @@ void WorldSession::SendBindPoint(Creature *npc)
     _player->m_homebindY = _player->GetPositionY();
     _player->m_homebindZ = _player->GetPositionZ();
 
-    // if a player lost/dropped hist hearthstone, he will get a new one
-    if ( !_player->HasItemCount(hearthstone_itemid, 1) && _player->GetBankItemCount(hearthstone_itemid) <1)
-    {
-        uint16 dest;
-        uint8 msg = _player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, hearthstone_itemid, 1, false );
-        if( msg == EQUIP_ERR_OK )
-        {
-            Item* newitem = _player->StoreNewItem( dest, hearthstone_itemid, 1, true);
-            _player->SendNewItem(newitem, 1, true, false);
-        }
-        else
-        {
-            _player->SendEquipError( msg, NULL, NULL );
-        }
-    }
-
     // send spell for bind 3286 bind magic
-    WorldPacket data(SMSG_SPELL_START, (8+8+4+2+4+2+8) );
-    data.append(npc->GetPackGUID());
-    data.append(npc->GetPackGUID());
-    data << bindspell;                                      // spell id
-    data << uint8(0);                                       // unk 2.3.0
-    data << uint16(0);                                      // cast flags
-    data << uint32(0);                                      // time
-    data << uint16(0x0002);                                 // target mask
-    data.append(_player->GetPackGUID());                    // target's packed guid
-    SendPacket( &data );
+    npc->CastSpell(_player, bindspell, true);
 
-    data.Initialize(SMSG_SPELL_GO, (8+8+4+2+1+8+1+2+8));
-    data.append(npc->GetPackGUID());
-    data.append(npc->GetPackGUID());
-    data << bindspell;                                      // spell id
-    data << uint16(0x0100);                                 // cast flags
-    data << uint8(0x01);                                    // targets count
-    data << _player->GetGUID();                             // target's full guid
-    data << uint8(0x00);                                    // ?
-    data << uint16(0x0002);                                 // target mask
-    data.append(_player->GetPackGUID());                    // target's packed guid
-    SendPacket( &data );
-
-    data.Initialize( SMSG_TRAINER_BUY_SUCCEEDED, (8+4));
+    WorldPacket data( SMSG_TRAINER_BUY_SUCCEEDED, (8+4));
     data << npc->GetGUID();
     data << bindspell;
     SendPacket( &data );
