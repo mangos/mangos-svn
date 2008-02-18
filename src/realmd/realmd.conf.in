@@ -19,6 +19,8 @@ MaxPingTime = 30
 
 # Default RealmServerPort
 RealmServerPort = 3724
+# Bind Realm Server to IP/hostname
+BindIP = "0.0.0.0"
 
 # realmd daemon PID file
 # Default: ""             - do not create PID file

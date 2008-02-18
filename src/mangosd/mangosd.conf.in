@@ -499,9 +499,11 @@ PlayerSaveInterval = 900000
 
 # Default WorldServerPort
 WorldServerPort = 8085
+# Bind World Server to IP/hostname
+BindIP = "0.0.0.0"
 
 # Beep at mangosd start finished (mostly work only at Unix/Linux systems)
-# Default: 1 
+# Default: 1
 BeepAtStart = 1
 
 # Enable/Disable VMmap support for line of sight and height calculation

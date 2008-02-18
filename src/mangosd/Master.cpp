@@ -103,14 +103,14 @@ void Master::Run()
 
     ///- Launch the world listener socket
     port_t wsport = sWorld.getConfig(CONFIG_PORT_WORLD);
+    std::string bind_ip = sConfig.GetStringDefault("BindIP", "0.0.0.0");
 
     SocketHandler h;
-
     ListenSocket<WorldSocket> worldListenSocket(h);
-    if (worldListenSocket.Bind(wsport))
+    if (worldListenSocket.Bind(bind_ip.c_str(),wsport))
     {
         clearOnlineAccounts();
-        sLog.outError("MaNGOS cannot bind to port %d", wsport);
+        sLog.outError("MaNGOS cannot bind to %s:%d",bind_ip.c_str(), wsport);
         return;
     }
 
@@ -432,6 +432,7 @@ void Master::_UnhookSignals()
     signal(SIGBREAK, 0);
     #endif
 }
+
 
 
 

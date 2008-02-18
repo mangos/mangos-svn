@@ -184,12 +184,13 @@ extern int main(int argc, char **argv)
 
     ///- Launch the listening network socket
     port_t rmport = sConfig.GetIntDefault( "RealmServerPort", DEFAULT_REALMSERVER_PORT );
+    std::string bind_ip = sConfig.GetStringDefault("BindIP", "0.0.0.0");
 
     SocketHandler h;
     ListenSocket<AuthSocket> authListenSocket(h);
-    if ( authListenSocket.Bind(rmport))
+    if ( authListenSocket.Bind(bind_ip.c_str(),rmport))
     {
-        sLog.outError( "MaNGOS realmd can not bind to port %d", rmport );
+        sLog.outError( "MaNGOS realmd can not bind to %s:%d",bind_ip.c_str(), rmport );
         return 1;
     }
 
