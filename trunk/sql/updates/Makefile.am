@@ -599,7 +599,7 @@ pkgdata_DATA = \
 	5233_mangos_event_scripts.sql \
 	5234_mangos_spell_proc_event.sql \
 	5238_mangos_spell_proc_event.sql \
-	5242_instance_template.sql \
+	5242_mangos_instance_template.sql \
 	5243_mangos_spell_affect.sql \
 	README
 
@@ -1180,6 +1180,6 @@ EXTRA_DIST = \
 	5233_mangos_event_scripts.sql \
 	5234_mangos_spell_proc_event.sql \
 	5238_mangos_spell_proc_event.sql \
-	5242_instance_template.sql \
+	5242_mangos_instance_template.sql \
 	5243_mangos_spell_affect.sql \
 	README
