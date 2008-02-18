@@ -142,6 +142,9 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
     size_t count_pos = data.wpos();
     data << uint32(trainer_spells.size());
 
+    // reputation discount
+    float fDiscountMod = _player->GetReputationPriceDiscount(unit);
+
     uint32 count = 0;
     for(Creature::SpellsList::const_iterator itr = trainer_spells.begin(); itr != trainer_spells.end(); ++itr)
     {
@@ -154,7 +157,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
         data << uint32(itr->spell->Id);
         data << uint8(_player->GetTrainerSpellState(&*itr));
-        data << uint32(itr->spellcost);
+        data << uint32(itr->spellcost * fDiscountMod);
 
         data << uint32(primary_prof_first_rank ? 1 : 0);    // primary prof. learn confirmation dialog
         data << uint32(primary_prof_first_rank ? 1 : 0);    // must be equal prev. field to have learn button in enabled state
@@ -216,8 +219,11 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     if(_player->GetTrainerSpellState(trainer_spell) != TRAINER_SPELL_GREEN)
         return;
 
+    // apply reputation discount
+    uint32 nSpellCost = uint32(trainer_spell->spellcost * _player->GetReputationPriceDiscount(unit));
+
     // check money requirement
-    if(_player->GetMoney() < trainer_spell->spellcost )
+    if(_player->GetMoney() < nSpellCost )
         return;
 
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(trainer_spell->spell->EffectTriggerSpell[0]);
@@ -226,7 +232,8 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     data << guid << spellId;
     SendPacket( &data );
 
-    _player->ModifyMoney( -int32(trainer_spell->spellcost) );
+    _player->ModifyMoney( -int32(nSpellCost) );
+
     if(spellInfo->powerType == 2)
     {
         _player->addSpell(spellId,4);                       // active = 4 for spell book of hunter's pet
