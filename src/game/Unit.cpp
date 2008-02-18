@@ -601,7 +601,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
         DEBUG_LOG("DealDamage: victim just died");
 
         DEBUG_LOG("DealDamageAttackStop");
-        AttackStop();
         pVictim->CombatStop();
 
         // if talent known but not triggered (check priest class for speedup check)
