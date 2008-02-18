@@ -264,6 +264,15 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
     {
         switch(m_spellInfo->SpellFamilyName)
         {
+            case SPELLFAMILY_MAGE:
+            {
+                // Arcane Blast
+                if(m_spellInfo->SpellFamilyFlags & 0x20000000LL)
+                {
+                    m_caster->CastSpell(m_caster,36032,true);
+                }
+                break;
+            }
             case SPELLFAMILY_WARRIOR:
             {
                 // Bloodthirst
@@ -294,43 +303,6 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                 else if(m_spellInfo->SpellFamilyFlags & 0x0010000000000000LL)
                 {
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.08f);
-                }
-                break;
-            }
-            case SPELLFAMILY_HUNTER:
-            {
-                // Mongoose Bite
-                if((m_spellInfo->SpellFamilyFlags & 0x000000002) && m_spellInfo->SpellVisual==342)
-                {
-                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.2);
-                }
-                // Arcane Shot
-                else if((m_spellInfo->SpellFamilyFlags & 0x00000800) && m_spellInfo->maxLevel > 0)
-                {
-                    damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.15);
-                }
-                // Steady Shot
-                else if((m_spellInfo->SpellFamilyFlags & 0x100000000LL))
-                {
-                    damage += m_caster->CalculateDamage(RANGED_ATTACK)+int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.2);
-                }
-                break;
-            }
-            case SPELLFAMILY_PALADIN:
-            {
-                //Judgement of Vengeance
-                if((m_spellInfo->SpellFamilyFlags & 0x800000000LL) && m_spellInfo->SpellIconID==2040)
-                {
-                    uint32 stacks = 0;
-                    Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                    for(Unit::AuraList::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
-                        if((*itr)->GetId() == 31803)
-                            stacks++;
-                    if(!stacks)
-                        //No damage if the target isn't affected by this
-                        damage = -1;
-                    else
-                        damage *= stacks;
                 }
                 break;
             }
@@ -397,6 +369,43 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                             }
                         }
                     }
+                }
+                break;
+            }
+            case SPELLFAMILY_HUNTER:
+            {
+                // Mongoose Bite
+                if((m_spellInfo->SpellFamilyFlags & 0x000000002) && m_spellInfo->SpellVisual==342)
+                {
+                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.2);
+                }
+                // Arcane Shot
+                else if((m_spellInfo->SpellFamilyFlags & 0x00000800) && m_spellInfo->maxLevel > 0)
+                {
+                    damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.15);
+                }
+                // Steady Shot
+                else if((m_spellInfo->SpellFamilyFlags & 0x100000000LL))
+                {
+                    damage += m_caster->CalculateDamage(RANGED_ATTACK)+int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.2);
+                }
+                break;
+            }
+            case SPELLFAMILY_PALADIN:
+            {
+                //Judgement of Vengeance
+                if((m_spellInfo->SpellFamilyFlags & 0x800000000LL) && m_spellInfo->SpellIconID==2040)
+                {
+                    uint32 stacks = 0;
+                    Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                    for(Unit::AuraList::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
+                        if((*itr)->GetId() == 31803)
+                            stacks++;
+                    if(!stacks)
+                        //No damage if the target isn't affected by this
+                        damage = -1;
+                    else
+                        damage *= stacks;
                 }
                 break;
             }
