@@ -559,35 +559,47 @@ void Channel::Invite(uint64 p, const char *newname)
         WorldPacket data;
         MakeNotMember(&data);
         SendToOne(&data, p);
+        return;
     }
-    else
+
+    Player *newp = objmgr.GetPlayer(newname);
+    if(!newp)
     {
-        Player *newp = objmgr.GetPlayer(newname);
-        if(!newp)
-        {
-            WorldPacket data;
-            MakePlayerNotFound(&data, newname);
-            SendToOne(&data, p);
-        }
-        else if(IsOn(newp->GetGUID()))
-        {
-            WorldPacket data;
-            MakePlayerAlreadyMember(&data, newp->GetGUID());
-            SendToOne(&data, p);
-        }
-        else
-        {
-            WorldPacket data;
-            if(!newp->HasInIgnoreList(p))
-            {
-                MakeInvite(&data, p);
-                SendToOne(&data, newp->GetGUID());
-                data.clear();
-            }
-            MakePlayerInvited(&data, newp->GetGUID());
-            SendToOne(&data, p);
-        }
+        WorldPacket data;
+        MakePlayerNotFound(&data, newname);
+        SendToOne(&data, p);
+        return;
+    } 
+
+    Player *plr = objmgr.GetPlayer(p);
+    if (!plr)
+        return;
+
+    if (newp->GetTeam() != plr->GetTeam() && !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
+    {
+        WorldPacket data;
+        MakeInviteWrongFaction(&data);
+        SendToOne(&data, p);
+        return;
     }
+
+    if(IsOn(newp->GetGUID()))
+    {
+        WorldPacket data;
+        MakePlayerAlreadyMember(&data, newp->GetGUID());
+        SendToOne(&data, p);
+        return;
+    }
+
+    WorldPacket data;
+    if(!newp->HasInIgnoreList(p))
+    {
+        MakeInvite(&data, p);
+        SendToOne(&data, newp->GetGUID());
+        data.clear();
+    }
+    MakePlayerInvited(&data, newp->GetGUID());
+    SendToOne(&data, p);
 }
 
 void Channel::SetOwner(uint64 guid, bool exclaim)
