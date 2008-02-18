@@ -15259,7 +15259,7 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         // reputation discount
         uint32 price  = pProto->BuyPrice * count;
 
-        price = uint32(price * GetReputationPriceDiscount(pCreature));
+        price = uint32(floor(price * GetReputationPriceDiscount(pCreature)));
 
         if( GetMoney() < price )
         {

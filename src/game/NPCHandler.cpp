@@ -157,7 +157,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
         data << uint32(itr->spell->Id);
         data << uint8(_player->GetTrainerSpellState(&*itr));
-        data << uint32(itr->spellcost * fDiscountMod);
+        data << uint32(floor(itr->spellcost * fDiscountMod));
 
         data << uint32(primary_prof_first_rank ? 1 : 0);    // primary prof. learn confirmation dialog
         data << uint32(primary_prof_first_rank ? 1 : 0);    // must be equal prev. field to have learn button in enabled state
@@ -220,7 +220,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         return;
 
     // apply reputation discount
-    uint32 nSpellCost = uint32(trainer_spell->spellcost * _player->GetReputationPriceDiscount(unit));
+    uint32 nSpellCost = uint32(floor(trainer_spell->spellcost * _player->GetReputationPriceDiscount(unit)));
 
     // check money requirement
     if(_player->GetMoney() < nSpellCost )
