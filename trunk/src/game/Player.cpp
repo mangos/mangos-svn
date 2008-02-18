@@ -14954,9 +14954,6 @@ void Player::HandleStealthedUnitsDetection()
 
         ++i;
     }
-
-    if(stealthedUnits.empty())
-        m_DetectInvTimer = 0;
 }
 
 bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
@@ -15730,13 +15727,6 @@ void Player::UpdateVisibilityOf(WorldObject* target)
             if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
                 sLog.outDebug("Object %u (Type: %u) out of range for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),GetDistance(target));
             #endif
-
-            // activate stealth detection system
-            if(m_DetectInvTimer==0 && target->isType(TYPE_UNIT) && (
-                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_STEALTH ||
-                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_NO_DETECT ) &&
-                IsWithinDistInMap(target,DETECT_DISTANCE) )
-                m_DetectInvTimer = 1;
         }
     }
     else
@@ -15757,16 +15747,7 @@ void Player::UpdateVisibilityOf(WorldObject* target)
             if(target!=this && target->isType(TYPE_UNIT))
                 SendAuraDurationsForTarget((Unit*)target);
         }
-        else
-        {
-            // activate stealth detection system
-            if(m_DetectInvTimer==0 && target->isType(TYPE_UNIT) && (
-                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_STEALTH ||
-                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_NO_DETECT ) &&
-                IsWithinDistInMap(target,DETECT_DISTANCE) )
-                m_DetectInvTimer = 1;
         }
-    }
 }
 
 template<class T>
@@ -15796,12 +15777,6 @@ void Player::UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& 
             if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
                 sLog.outDebug("Object %u (Type: %u) is out of range for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),GetDistance(target));
             #endif
-
-            // activate invisibility detection system
-            if(m_DetectInvTimer==0 && target->isType(TYPE_UNIT) && (
-                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_STEALTH ||
-                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_NO_DETECT ) )
-                m_DetectInvTimer = 1;
         }
     }
     else

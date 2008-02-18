@@ -7114,8 +7114,8 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
 
     // NOW ONLY STEALTH CASE
 
-    // stealth and detected
-    if (u->GetTypeId() == TYPEID_PLAYER && ((Player*)u)->HaveAtClient(this) )
+    // stealth and detected and visible for some seconds
+    if (u->GetTypeId() == TYPEID_PLAYER  && ((Player*)u)->m_DetectInvTimer > 300 && ((Player*)u)->HaveAtClient(this))
         return true;
 
     //if in non-detect mode then invisible for unit
@@ -7123,164 +7123,62 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
         return false;
 
     // Special cases
-    bool IsVisible = true;
-    bool isInFront = u->isInFront(this,World::GetMaxVisibleDistanceForObject());
-    float distance = GetDistance(u);
 
     // If is attacked then stealth is lost, some creature can use stealth too
-    if (this->isAttacked())
-        return IsVisible;
+    if(this->isAttacked())
+        return true;
 
     // If there is collision rogue is seen regardless of level difference
     // TODO: check sizes in DB
+    float distance = GetDistance(u);
     if (distance < 0.24f)
-        return IsVisible;
+        return true;
 
     //If a mob or player is stunned he will not be able to detect stealth
     if (u->hasUnitState(UNIT_STAT_STUNDED) && (u != this))
+        return false;
+
+    // Creature can detect target only in aggro radius
+    if(u->GetTypeId() != TYPEID_PLAYER)
     {
-        IsVisible=false;
-        return IsVisible;
+        //Always invisible from back and out of aggro range
+        bool isInFront = u->isInFront(this,((Creature const*)u)->GetAttackDistance(this));
+        if(!isInFront)
+            return false;
+    }
+    else
+    {
+        //Always invisible from back
+        bool isInFront = u->isInFront(this,(GetTypeId()==TYPEID_PLAYER || GetCharmerOrOwnerGUID()) ? World::GetMaxVisibleDistanceForPlayer() : World::GetMaxVisibleDistanceForCreature());
+        if(!isInFront)
+            return false;
     }
 
-    // Cases based on level difference and position
-    int32 levelDiff = u->getLevel() - this->getLevel();
+    //Calculation if target is in front
 
-    //If mob is 5 levels more than player he gets detected automaticly
-    if (u->GetTypeId()!=TYPEID_PLAYER && levelDiff > 5)
-        return IsVisible;
+    //Visible distance based on stealth value (stealth rank 4 300MOD, 10.5 - 3 = 7.5)
+    float visibleDistance = 10.5f - (m_stealthvalue/100.0f);
 
-    // If victim has more than 5 lvls above caster
-    if ((this->GetTypeId() == TYPEID_UNIT)&& ( levelDiff > 5 ))
-        return IsVisible;
+    //Visible distance is modified by 
+    //-Level Diff (every level diff = 1.0f in visible distance)
+    visibleDistance += int32(u->getLevel()) - int32(this->getLevel()); 
 
-    // If caster has more than 5 levels above victim
-    if ((this->GetTypeId() == TYPEID_UNIT)&& ( levelDiff < -5 ))
-    {
-        IsVisible=false;
-        return IsVisible;
-    }
-
-    float modifier = 1.0f;                                  // 100 pct
-    float pvpMultiplier = 0.0f;
-    float distanceFormula = 0.0f;
-    int32 rank = 0;
     //This allows to check talent tree and will add addition stealth dependant on used points)
     int32 stealthMod = GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_LEVEL);
     if(stealthMod < 0)
         stealthMod = 0;
-    //****************************************************************************************
-                                                            // Stealth detection calculation
-    int32 x = (((u->m_detectStealth+1) / 5) - (((m_stealthvalue+1) / 5) + (stealthMod/5) + 59));
 
-    if (x<0) x = 1;
-    // Check rank if mob is not a player otherwise rank = 1 and there is no modifier when in pvp
-    if (u->GetTypeId() != TYPEID_PLAYER)
-        rank = ((Creature const*)u)->GetCreatureInfo()->rank;
+    //-Stealth Mod(positive like Master of Deception) and Stealth Detection(negative like paranoia)
+    //based on wowwiki every 5 mod we have 1 more level diff in calculation
+    visibleDistance += (int32(u->m_detectStealth) - stealthMod)/5.0f; 
 
-    // Probabilty of being seen
-    if (levelDiff < 0)
-        distanceFormula = ((sWorld.getRate(RATE_CREATURE_AGGRO) * 16) / (abs(levelDiff) + 1.5)) * 2;
-    if (levelDiff >= 0)
-        distanceFormula = (((sWorld.getRate(RATE_CREATURE_AGGRO) * 16)) / 2) * (levelDiff + 1);
+    if(distance > visibleDistance)
+        return false;
 
-    // Original probability values
-    // removed level of mob in calculation as it should not affect the detection, it is mainly dependant on level difference
-                                                            //at this distance, the detector has to be a 15% prob of detect
-    float averageDist = 1.0f - 0.11016949f * x + 0.00301637f * x * x;
-    if (averageDist < 1.0f) averageDist = 1.0f;
-
-    float prob = 0.0f;
-    if (distance > averageDist)
-                                                            //prob between 10% and 0%
-        prob = (averageDist - 200 + 9 * distance) / (averageDist - 20);
-    else
-        prob = 75 - (60 / averageDist) * distance;          //prob between 15% and 75% (75% max prob)
-
-    // If is not in front, probability floor
-    if (!isInFront)
-        prob = prob / 100.0f;
-    if (prob < 0.1f)
-        prob = 0.1f;
-
-    // Mob rank affects modifier
-    modifier = rank <= 4 ? 1 + rank * 0.2f : 1;
-
-    if (distance < 0.24f)
-    {
-        return IsVisible;
-    }
-
-    // PVP distance assigned depending on level
-    if (this->GetTypeId() == TYPEID_UNIT)
-    {
-        // Level diff floor/ceiling <-5,5>
-        pvpMultiplier = levelDiff > 5 ? 12 : levelDiff < 5 ? 2 : 7 + levelDiff;
-        pvpMultiplier = pvpMultiplier - (x / 100);
-    }
-
-    // PVP stealth handler
-    if (this->GetTypeId() == TYPEID_PLAYER)
-    {
-        // Do not loose stealth when coming from back
-        if (!isInFront)
-        {
-            IsVisible=false;
-            return IsVisible;
-        }
-
-        // If comes in front
-        if (isInFront && (distance >= pvpMultiplier))
-        {
-            IsVisible=false;
-            return IsVisible;
-        }
-
-        if (isInFront && (distance < pvpMultiplier))
-        {
-            return IsVisible;
-        }
-    }
-    else
-    {
-        // PVE stealth handler
-        // Distance of approch player stays stealth 100% is dependant of level. No probabiliy or detection is rolled
-        // This establishes a buffer zone in between mob start to see you and mob start to roll probabilities or detect you
-        if ((distance < 100.0f) && (distance > ((distanceFormula * 2) * modifier)) && (distance > 0.24f))
-        {
-            IsVisible=false;
-            return IsVisible;
-
-        }
-        //If victim is level lower or more probability of detection drops
-        if ((levelDiff < 0) && (distance > 0.24f))
-        {
-            if (abs(levelDiff ) > 4)
-                IsVisible = false;
-            else
-            {
-                if (rand_chance() > ( prob * modifier / (30 + levelDiff * 5)))
-                    IsVisible = false;
-            }
-            return IsVisible;
-        }
-        // Level detection based on level, the higher the mob level the higher the chance of detection.
-        if ((distance > 0.24f) && (levelDiff < 5) && (levelDiff >= 0))
-        {
-            if (rand_chance() > ((prob * modifier) / (30 - levelDiff * 5) ))
-                IsVisible = false;
-            else
-                IsVisible = true;
-
-            return IsVisible;
-        }
-    }
-
-    // Didn't match any criteria ?
-    DEBUG_LOG("Unit::isVisibleForFor unhandled result, dist %f levelDiff %i target_type %u prob %u modifier %u",distance,levelDiff,u->GetTypeId(),prob, modifier);
-
-    // Safety return
-    return IsVisible;
+    // Now check is target visible with LoS
+    float ox,oy,oz;
+    u->GetPosition(ox,oy,oz);
+    return IsWithinLOS(ox,oy,oz);
 }
 
 void Unit::SetVisibility(UnitVisibility x)
