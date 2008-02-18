@@ -630,7 +630,7 @@ void WorldSession::SendListInventory( uint64 vendorguid )
                 uint32 price = pProto->BuyPrice;
 
                 // reputation discount
-                price = uint32(pProto->BuyPrice * discountMod);
+                price = uint32(floor(pProto->BuyPrice * discountMod));
 
                 data << price;
                 data << pProto->MaxDurability;
