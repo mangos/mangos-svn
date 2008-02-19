@@ -797,6 +797,7 @@ UNLOCK TABLES;
 -- Table structure for table `event_scripts`
 --
 
+DROP TABLE IF EXISTS `event_scripts`;
 CREATE TABLE `event_scripts` (
   `id` int(11) unsigned NOT NULL default '0',
   `delay` int(11) unsigned NOT NULL default '0',
