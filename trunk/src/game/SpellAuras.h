@@ -107,7 +107,6 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraModResistanceExclusive(bool Apply, bool Real);
         void HandleAuraDamageShield(bool Apply, bool Real);
         void HandleModStealth(bool Apply, bool Real);
-        void HandleModStealthDetect(bool Apply, bool Real);
         void HandleInvisibility(bool Apply, bool Real);
         void HandleInvisibilityDetect(bool Apply, bool Real);
         void HandleAuraModTotalHealthPercentRegen(bool Apply, bool Real);

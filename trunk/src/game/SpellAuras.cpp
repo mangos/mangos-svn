@@ -67,7 +67,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         // 14 SPELL_AURA_MOD_DAMAGE_TAKEN implemented in Unit::MeleeDamageBonus and Unit::SpellDamageBonus
     &Aura::HandleAuraDamageShield,                          // 15 SPELL_AURA_DAMAGE_SHIELD
     &Aura::HandleModStealth,                                // 16 SPELL_AURA_MOD_STEALTH
-    &Aura::HandleModStealthDetect,                          // 17 SPELL_AURA_MOD_STEALTH_DETECT
+    &Aura::HandleNoImmediateEffect,                         // 17 SPELL_AURA_MOD_STEALTH_DETECT
     &Aura::HandleInvisibility,                              // 18 SPELL_AURA_MOD_INVISIBILITY
     &Aura::HandleInvisibilityDetect,                        // 19 SPELL_AURA_MOD_INVISIBILITY_DETECTION
     &Aura::HandleAuraModTotalHealthPercentRegen,            // 20 SPELL_AURA_OBS_MOD_HEALTH
@@ -2348,8 +2348,6 @@ void Aura::HandleModStealth(bool apply, bool Real)
 {
     if(apply)
     {
-        m_target->m_stealthvalue = m_modifier.m_amount;
-
         // drop flag at stealth in bg
         if(Real && m_target->GetTypeId()==TYPEID_PLAYER && ((Player*)m_target)->InBattleGround())
             if(BattleGround *bg = ((Player*)m_target)->GetBattleGround())
@@ -2391,7 +2389,6 @@ void Aura::HandleModStealth(bool apply, bool Real)
                 reallyRemove = false;                       // vanish it timed out, but we have stealth active as well
             if(reallyRemove)
             {
-                m_target->m_stealthvalue = 0;
                 m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_CREEP);
 
                 // apply only if not in GM invisibility
@@ -2408,18 +2405,6 @@ void Aura::HandleModStealth(bool apply, bool Real)
                 }
             }
         }
-    }
-}
-
-void Aura::HandleModStealthDetect(bool apply, bool Real)
-{
-    if(apply)
-    {
-        m_target->m_detectStealth = m_modifier.m_amount;
-    }
-    else
-    {
-        m_target->m_detectStealth = 0;
     }
 }
 

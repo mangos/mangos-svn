@@ -167,9 +167,7 @@ Unit::Unit( WorldObject *instantiator )
 
     m_Visibility = VISIBILITY_ON;
 
-    m_detectStealth = 0;
     m_detectInvisibilityMask = 0;
-    m_stealthvalue = 0;
     m_invisibilityMask = 0;
     m_transform = 0;
     m_ShapeShiftForm = 0;
@@ -7161,7 +7159,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
     //Calculation if target is in front
 
     //Visible distance based on stealth value (stealth rank 4 300MOD, 10.5 - 3 = 7.5)
-    float visibleDistance = 10.5f - (m_stealthvalue/100.0f);
+    float visibleDistance = 10.5f - (GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH)/100.0f);
 
     //Visible distance is modified by 
     //-Level Diff (every level diff = 1.0f in visible distance)
@@ -7174,7 +7172,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
 
     //-Stealth Mod(positive like Master of Deception) and Stealth Detection(negative like paranoia)
     //based on wowwiki every 5 mod we have 1 more level diff in calculation
-    visibleDistance += (int32(u->m_detectStealth) - stealthMod)/5.0f; 
+    visibleDistance += (int32(u->GetTotalAuraModifier(SPELL_AURA_MOD_DETECT)) - stealthMod)/5.0f; 
 
     if(distance > visibleDistance)
         return false;
