@@ -1571,11 +1571,18 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 case FORM_BERSERKERSTANCE:
                 {
                     uint32 Rage_val = 0;
-                    // Stance mastery + Tactical mastery
-                    Unit::AuraList const& xDummy = m_target->GetAurasByType(SPELL_AURA_DUMMY);
-                    for(Unit::AuraList::const_iterator i = xDummy.begin(); i != xDummy.end(); ++i)
-                        if((*i)->GetSpellProto()->SpellIconID == 139)
-                            Rage_val += ( (*i)->GetModifier()->m_amount * 10 );
+                    // Stance mastery + Tactical mastery (both passive, and last have aura only in defence stance, but need apply at any stance switch)
+                    if(m_target->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        PlayerSpellMap const& sp_list = ((Player *)m_target)->GetSpellMap();
+                        for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+                        {
+                            if(itr->second->state == PLAYERSPELL_REMOVED) continue;
+                            SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
+                            if (spellInfo && spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && spellInfo->SpellIconID == 139)
+                                Rage_val += m_target->CalculateSpellDamage(spellInfo,0,spellInfo->EffectBasePoints[0],m_target) * 10;
+                        }
+                    }
 
                     if (unit_target->GetPower(POWER_RAGE) > Rage_val)
                         unit_target->SetPower(POWER_RAGE,Rage_val);
