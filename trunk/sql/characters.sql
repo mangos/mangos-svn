@@ -184,7 +184,8 @@ CREATE TABLE `character` (
   `taxi_path` text,
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
-  KEY `idx_online` (`online`)
+  KEY `idx_online` (`online`),
+  KEY `idx_name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
