@@ -1476,8 +1476,6 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                 }
 
                 pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
-
-                CalcAbsorbResist(pVictim, SpellSchools(spellProto->School), DOT, pdamage, &absorb, &resist);
             }
             else
                 pdamage = uint32(pVictim->GetMaxHealth()*amount/100);
@@ -1486,6 +1484,8 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             // Reduce dot damage from resilience for players
             if (pVictim->GetTypeId()==TYPEID_PLAYER)
                 pdamage-=((Player*)pVictim)->GetDotDamageReduction(pdamage);
+
+            CalcAbsorbResist(pVictim, SpellSchools(spellProto->School), DOT, pdamage, &absorb, &resist);
 
             sLog.outDetail("PeriodicAuraLog: %u (TypeId: %u) attacked %u (TypeId: %u) for %u dmg inflicted by %u abs is %u",
                 GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), pdamage, spellProto->Id,absorb);
@@ -1528,12 +1528,12 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
 
             pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
 
-            CalcAbsorbResist(pVictim, SpellSchools(spellProto->School), DOT, pdamage, &absorb, &resist);
-
             //As of 2.2 resilience reduces damage from DoT ticks as much as the chance to not be critically hit
             // Reduce dot damage from resilience for players
             if (pVictim->GetTypeId()==TYPEID_PLAYER)
                 pdamage-=((Player*)pVictim)->GetDotDamageReduction(pdamage);
+
+            CalcAbsorbResist(pVictim, SpellSchools(spellProto->School), DOT, pdamage, &absorb, &resist);
 
             if(pVictim->GetHealth() < pdamage)
                 pdamage = uint32(pVictim->GetHealth());
