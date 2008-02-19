@@ -2208,53 +2208,52 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER,0.0f);
 
     // Base crit values (will be recalculated in UpdateAllStats() at loading and in _ApplyAllStatBonuses() at reset
-    SetFloatValue(PLAYER_CRIT_PERCENTAGE,0);
-    SetFloatValue(PLAYER_OFFHAND_CRIT_PERCENTAGE,0);
-    SetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE,0);
+    SetFloatValue(PLAYER_CRIT_PERCENTAGE,0.0f);
+    SetFloatValue(PLAYER_OFFHAND_CRIT_PERCENTAGE,0.0f);
+    SetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE,0.0f);
 
-    // Base spell crit values
-    float base_spell_crit[MAX_CLASSES] = {0,0,3.70,0,0,2.97,0,3.54,3.70,3.18,0,3.33};
+    // Init spell schools (will be recalculated in UpdateAllStats() at loading and in _ApplyAllStatBonuses() at reset
     for (uint8 i = 0; i < 7; ++i)
-        SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1+i, base_spell_crit[getClass()]);
+        SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1+i, 0.0f);
 
     // Base parry percents
-    SetFloatValue(PLAYER_PARRY_PERCENTAGE, 5);
+    SetFloatValue(PLAYER_PARRY_PERCENTAGE, 5.0f);
 
     //Base block percentage
-    SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5);
+    SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5.0f);
 
     // Base dodge values
     switch(getClass())
     {
-        case CLASS_PALADIN: SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.75); break;
-        case CLASS_HUNTER:  SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.64); break;
-        case CLASS_PRIEST:  SetFloatValue(PLAYER_DODGE_PERCENTAGE, 3.0 ); break;
-        case CLASS_SHAMAN:  SetFloatValue(PLAYER_DODGE_PERCENTAGE, 1.75); break;
-        case CLASS_MAGE:    SetFloatValue(PLAYER_DODGE_PERCENTAGE, 3.25); break;
-        case CLASS_WARLOCK: SetFloatValue(PLAYER_DODGE_PERCENTAGE, 2.0 ); break;
-        case CLASS_DRUID:   SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.75); break;
+        case CLASS_PALADIN: SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.75f); break;
+        case CLASS_HUNTER:  SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.64f); break;
+        case CLASS_PRIEST:  SetFloatValue(PLAYER_DODGE_PERCENTAGE, 3.0f ); break;
+        case CLASS_SHAMAN:  SetFloatValue(PLAYER_DODGE_PERCENTAGE, 1.75f); break;
+        case CLASS_MAGE:    SetFloatValue(PLAYER_DODGE_PERCENTAGE, 3.25f); break;
+        case CLASS_WARLOCK: SetFloatValue(PLAYER_DODGE_PERCENTAGE, 2.0f ); break;
+        case CLASS_DRUID:   SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.75f); break;
         case CLASS_ROGUE:
         case CLASS_WARRIOR:
-        default:            SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.0 ); break;
+        default:            SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.0f ); break;
     }
 
     // set armor (resistance 0) to original value (create_agility*2)
     SetArmor(int32(m_createStats[STAT_AGILITY]*2));
-    SetResistanceBuffMods(SpellSchools(0), true, 0);
-    SetResistanceBuffMods(SpellSchools(0), false, 0);
+    SetResistanceBuffMods(SpellSchools(0), true, 0.0f);
+    SetResistanceBuffMods(SpellSchools(0), false, 0.0f);
     // set other resistance to original value (0)
     for (int i = 1; i < MAX_SPELL_SCHOOL; i++)
     {
         SetResistance(SpellSchools(i), 0);
-        SetResistanceBuffMods(SpellSchools(i), true, 0);
-        SetResistanceBuffMods(SpellSchools(i), false, 0);
+        SetResistanceBuffMods(SpellSchools(i), true, 0.0f);
+        SetResistanceBuffMods(SpellSchools(i), false, 0.0f);
     }
 
     SetUInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE,0);
     for(int i = 0; i < MAX_SPELL_SCHOOL; ++i)
     {
-        SetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER+i,0);
-        SetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+i,0);
+        SetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER+i,0.0f);
+        SetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+i,0.0f);
     }
     InitDataForForm();
 
