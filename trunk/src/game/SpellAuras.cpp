@@ -1483,7 +1483,10 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             modelid = 4613;
             break;
         case FORM_FLIGHT:
-            modelid = 20013;                                //test it !! (20857, 20872, 20013)
+            if(unit_target->getRace() == RACE_NIGHTELF)
+                modelid = 20857;
+            else if(unit_target->getRace() == RACE_TAUREN)
+                modelid = 20872;
             break;
         case FORM_MOONKIN:
             if(unit_target->getRace() == RACE_NIGHTELF)
