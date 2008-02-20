@@ -200,7 +200,7 @@ class MANGOS_DLL_SPEC Group
             return (mslot1->group==slot2->group);
         }
 
-        bool SameSubGroup(Player *member1, Player *member2) const;
+        bool SameSubGroup(Player const* member1, Player const* member2) const;
 
         MemberSlotList const& GetMemberSlots() const { return m_memberSlots; }
         GroupReference* GetFirstMember() { return m_memberMgr.getFirst(); }

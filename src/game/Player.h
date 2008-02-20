@@ -1843,7 +1843,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         const Group * GetGroup() const { return (const Group*)m_group.getTarget(); }
         GroupReference& GetGroupRef() { return m_group; }
         void SetGroup(Group *group, int8 subgroup = -1);
-        uint8 GetSubGroup() { return m_group.getSubGroup(); }
+        uint8 GetSubGroup() const { return m_group.getSubGroup(); }
         void SetGroupUpdateFlag(uint32 flag) { m_groupUpdateMask |= flag;}
 
         GridReference<Player> &GetGridRef() { return m_gridRef; }

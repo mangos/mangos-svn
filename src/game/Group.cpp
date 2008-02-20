@@ -1087,7 +1087,7 @@ bool Group::_setMainAssistant(const uint64 &guid)
     return true;
 }
 
-bool Group::SameSubGroup(Player *member1, Player *member2) const
+bool Group::SameSubGroup(Player const* member1, Player const* member2) const
 {
     if(!member1 || !member2) return false;
     if (member1->GetGroup() != this || member2->GetGroup() != this) return false;
