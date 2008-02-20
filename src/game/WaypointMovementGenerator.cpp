@@ -398,20 +398,9 @@ FlightPathMovementGenerator::Update(Player &player, const uint32 &diff)
                 ++i_currentNode;
                 if( MovementInProgress() )
                 {
-                    // teleport to new map
-                    if(i_mapIds[i_currentNode] != player.GetMapId())
+                    DEBUG_LOG("loading node %u for player %s", i_currentNode, player.GetName());
+                    if(i_mapIds[i_currentNode]==curMap)
                     {
-                        Path::PathNode const& node = i_path[i_currentNode];
-                        curMap = i_mapIds[i_currentNode];
-
-                        ++i_currentNode;                    // skip first node (current after teleport)
-
-                        player.TeleportTo(curMap,node.x,node.y,node.z,player.GetOrientation(),true,true);
-                    }
-                    // continue to next node at same map
-                    else
-                    {
-                        DEBUG_LOG("loading node %u for player %s", i_currentNode, player.GetName());
                         // do not send movement, it was sent already
                         i_destinationHolder.SetDestination(traveller, i_path[i_currentNode].x, i_path[i_currentNode].y, i_path[i_currentNode].z, false);
                     }
@@ -440,6 +429,24 @@ FlightPathMovementGenerator::EndFlight(Player &player)
 
     player.FlightComplete();
 }
+
+void
+FlightPathMovementGenerator::SetCurrentNodeAfterTeleport()
+{
+    if(i_mapIds.empty())
+        return;
+
+    uint32 map0 = i_mapIds[0];
+    for(int i = 1; i < i_mapIds.size(); ++i)
+    {
+        if(i_mapIds[i]!=map0)
+        {
+            i_currentNode = i;
+            return;
+        }
+    }
+}
+
 
 //
 // Unique1's ASTAR Pathfinding Code... For future use & reference...
