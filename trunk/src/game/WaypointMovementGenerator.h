@@ -63,10 +63,7 @@ class MANGOS_DLL_DECL PathMovementBase
         // template pattern, not defined .. override required
         void LoadPath(T &);
         void ReloadPath(T &);
-        uint32 GetCurrentNode()
-        {
-            return i_currentNode;
-        }
+        uint32 GetCurrentNode() const { return i_currentNode; }
 
     protected:
         uint32 i_currentNode;
@@ -141,5 +138,7 @@ public PathMovementBase<Player>
         Path& GetPath() { return i_path; }
         uint32 GetPathAtMapEnd() const;
         inline bool HasArrived() const { return (i_currentNode >= i_path.Size()); }
+        void SetCurrentNodeAfterTeleport();
+        void SkipCurrentNode() { ++i_currentNode; }
 };
 #endif

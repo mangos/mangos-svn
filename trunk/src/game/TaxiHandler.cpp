@@ -224,8 +224,23 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& /*recv_data*/)
         return;
 
     TaxiNodesEntry const* curDestNode = sTaxiNodesStore.LookupEntry(curDest);
-    if(curDestNode && curDestNode->map_id!=GetPlayer()->GetMapId())
+
+    // far teleport case
+    if(curDestNode && curDestNode->map_id != GetPlayer()->GetMapId())
+    {
+        if(GetPlayer()->GetMotionMaster()->top()->GetMovementGeneratorType()==FLIGHT_MOTION_TYPE)
+        {
+            // short preparations to continue flight
+            FlightPathMovementGenerator* flight = (FlightPathMovementGenerator*)(GetPlayer()->GetMotionMaster()->top());
+
+            flight->SetCurrentNodeAfterTeleport();
+            Path::PathNode const& node = flight->GetPath()[flight->GetCurrentNode()];
+            flight->SkipCurrentNode();
+
+            GetPlayer()->TeleportTo(curDestNode->map_id,node.x,node.y,node.z,GetPlayer()->GetOrientation(),true,true);
+        }
         return;
+    }
 
     uint32 destinationnode = GetPlayer()->NextTaxiDestination();   
     if ( destinationnode > 0 )                              // if more destinations to go
@@ -254,7 +269,7 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& /*recv_data*/)
         objmgr.GetTaxiPath( sourcenode, destinationnode, path, cost);
 
         if(path && MountId)
-            SendDoFlight( MountId, path );
+            SendDoFlight( MountId, path, 1 );               // skip start fly node
         else
             GetPlayer()->ClearTaxiDestinations();           // clear problematic path and next
     }
