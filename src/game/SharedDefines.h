@@ -609,6 +609,17 @@ enum GameobjectTypes
     MAX_GAMEOBJECT_TYPE                    = 35             // sending to client this or greater value can crash client.
 };
 
+enum GameObjectFlags
+{
+    GO_FLAG_IN_USE          = 0x01,                         //disables interaction while animated
+    GO_FLAG_LOCKED          = 0x02,                         //require key, spell, event, etc to be opened. Makes "Locked" appear in tooltip
+    GO_FLAG_INTERACT_COND   = 0x04,                         //cannot interact (condition to interact)
+    GO_FLAG_TRANSPORT       = 0x08,                         //any kind of transport? Object can transport (elevator, boat, car)
+    GO_FLAG_UNK1            = 0x10,                         //
+    GO_FLAG_NODESPAWN       = 0x20,                         //never despawn, typically for doors, they just change state
+    GO_FLAG_TRIGGERED       = 0x40,                         //typically, summoned objects. Triggered by spell or other events
+};
+
 enum TextEmotes
 {
     TEXTEMOTE_AGREE                = 1,

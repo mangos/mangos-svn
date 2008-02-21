@@ -776,7 +776,7 @@ void World::SetInitialWorldSettings()
     objmgr.LoadQuestStartScripts();                         // must be after load Creature/Gameobject(Template/Data) and QuestTemplate
     objmgr.LoadQuestEndScripts();                           // must be after load Creature/Gameobject(Template/Data) and QuestTemplate
     objmgr.LoadSpellScripts();                              // must be after load Creature/Gameobject(Template/Data)
-    objmgr.LoadButtonScripts();                             // must be after load Creature/Gameobject(Template/Data)
+    objmgr.LoadGameObjectScripts();                         // must be after load Creature/Gameobject(Template/Data)
     objmgr.LoadEventScripts();                              // must be after load Creature/Gameobject(Template/Data)
 
     sLog.outString( "Initializing Scripts..." );
@@ -1408,14 +1408,14 @@ void World::ScriptsProcess()
                 if( !door->GetUInt32Value(GAMEOBJECT_STATE) )
                     break;                                  //door already  open
 
-                door->SetUInt32Value(GAMEOBJECT_FLAGS,33);
+                door->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_NODESPAWN);
                 door->SetUInt32Value(GAMEOBJECT_STATE,0);   //open door
                 door->SetLootState(GO_CLOSED);
                 door->SetRespawnTime(time_to_close);        //close door in ? seconds
 
                 if(target && target->isType(TYPE_GAMEOBJECT) && ((GameObject*)target)->GetGoType()==GAMEOBJECT_TYPE_BUTTON)
                 {
-                    ((GameObject*)target)->SetUInt32Value(GAMEOBJECT_FLAGS,33);
+                    ((GameObject*)target)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_NODESPAWN);
 
                     //push button
                     ((GameObject*)target)->SetUInt32Value(GAMEOBJECT_STATE,0);
@@ -1423,6 +1423,75 @@ void World::ScriptsProcess()
 
                     //return button in ? seconds
                     ((GameObject*)target)->SetRespawnTime(time_to_close);
+                }
+
+                break;
+            }
+            case SCRIPT_COMMAND_CLOSE_DOOR:
+            {
+                if(!step.script->datalong)                  // guid for door not specified
+                {
+                    sLog.outError("SCRIPT_COMMAND_CLOSE_DOOR call for NULL door.");
+                    break;
+                }
+
+                if(!source)
+                {
+                    sLog.outError("SCRIPT_COMMAND_CLOSE_DOOR call for NULL unit.");
+                    break;
+                }
+
+                if(!source->isType(TYPE_UNIT))              // must be any Unit (creature or player)
+                {
+                    sLog.outError("SCRIPT_COMMAND_CLOSE_DOOR call for non-unit (TypeId: %u), skipping.",source->GetTypeId());
+                    break;
+                }
+
+                Unit* caster = (Unit*)source;
+
+                GameObject *door = NULL;
+                int32 time_to_open = step.script->datalong2<5 ? 5 : (int32)step.script->datalong2;
+
+                CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(), caster->GetPositionY()));
+                Cell cell(p);
+                cell.data.Part.reserved = ALL_DISTRICT;
+
+                MaNGOS::GameObjectWithDbGUIDCheck go_check(*caster,step.script->datalong);
+                MaNGOS::GameObjectSearcher<MaNGOS::GameObjectWithDbGUIDCheck> checker(door,go_check);
+
+                TypeContainerVisitor<MaNGOS::GameObjectSearcher<MaNGOS::GameObjectWithDbGUIDCheck>, GridTypeMapContainer > object_checker(checker);
+                CellLock<GridReadGuard> cell_lock(cell, p);
+                cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(caster->GetMapId(), (Unit*)source));
+
+                if ( !door )
+                {
+                    sLog.outError("SCRIPT_COMMAND_CLOSE_DOOR failed for gameobject(guid: %u).", step.script->datalong);
+                    break;
+                }
+                if ( door->GetGoType() != GAMEOBJECT_TYPE_DOOR )
+                {
+                    sLog.outError("SCRIPT_COMMAND_CLOSE_DOOR failed for non-door(GoType: %u).", door->GetGoType());
+                    break;
+                }
+
+                if( door->GetUInt32Value(GAMEOBJECT_STATE) )
+                    break;                                  //door already closed
+
+                door->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_NODESPAWN);
+                door->SetUInt32Value(GAMEOBJECT_STATE,1);   //close door
+                door->SetLootState(GO_CLOSED);
+                door->SetRespawnTime(time_to_open);         //open door in ? seconds
+
+                if(target && target->isType(TYPE_GAMEOBJECT) && ((GameObject*)target)->GetGoType()==GAMEOBJECT_TYPE_BUTTON)
+                {
+                    ((GameObject*)target)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_NODESPAWN);
+
+                    //push button
+                    ((GameObject*)target)->SetUInt32Value(GAMEOBJECT_STATE,0);
+                    ((GameObject*)target)->SetLootState(GO_CLOSED);
+
+                    //return button in ? seconds
+                    ((GameObject*)target)->SetRespawnTime(time_to_open);
                 }
 
                 break;

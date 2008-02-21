@@ -139,33 +139,6 @@ LOCK TABLES `battlemaster_entry` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `button_scripts`
---
-
-DROP TABLE IF EXISTS `button_scripts`;
-CREATE TABLE `button_scripts` (
-  `id` int(11) unsigned NOT NULL default '0',
-  `delay` int(11) unsigned NOT NULL default '0',
-  `command` int(11) unsigned NOT NULL default '0',
-  `datalong` int(11) unsigned NOT NULL default '0',
-  `datalong2` int(11) unsigned NOT NULL default '0',
-  `datatext` text NOT NULL,
-  `x` float NOT NULL default '0',
-  `y` float NOT NULL default '0',
-  `z` float NOT NULL default '0',
-  `o` float NOT NULL default '0'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `button_scripts`
---
-
-LOCK TABLES `button_scripts` WRITE;
-/*!40000 ALTER TABLE `button_scripts` DISABLE KEYS */;
-/*!40000 ALTER TABLE `button_scripts` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `command`
 --
 
@@ -1245,6 +1218,33 @@ LOCK TABLES `gameobject_respawn` WRITE;
 /*!40000 ALTER TABLE `gameobject_respawn` DISABLE KEYS */;
 /*!40000 ALTER TABLE `gameobject_respawn` ENABLE KEYS */;
 UNLOCK TABLES;
+
+-- 
+-- Table structure for table `gameobject_scripts`
+--
+
+DROP TABLE IF EXISTS `gameobject_scripts`;
+CREATE TABLE `gameobject_scripts` (
+`id` int(11) unsigned NOT NULL default '0',
+`delay` int(11) unsigned NOT NULL default '0',
+`command` int(11) unsigned NOT NULL default '0',
+`datalong` int(11) unsigned NOT NULL default '0',
+`datalong2` int(11) unsigned NOT NULL default '0',
+`datatext` text NOT NULL,
+`x` float NOT NULL default '0',
+`y` float NOT NULL default '0',
+`z` float NOT NULL default '0',
+`o` float NOT NULL default '0'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+-- 
+-- Dumping data for table `gameobject_scripts`
+-- 
+
+LOCK TABLES `gameobject_scripts` WRITE;
+/*!40000 ALTER TABLE `gameobject_scripts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `gameobject_scripts` ENABLE KEYS */;
+UNLOCK TABLES; 
 
 --
 -- Table structure for table `gameobject_template`
