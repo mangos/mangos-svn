@@ -823,13 +823,18 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
     if((spellInfo_1->Id == 15007) != (spellInfo_2->Id==15007))
         return false;
 
-    // Paladin Seals
-    if( IsSealSpell(spellId_1) && IsSealSpell(spellId_2) )
-        return true;
-
     // Specific spell family spells
     switch(spellInfo_1->SpellFamilyName)
     {
+        case SPELLFAMILY_MAGE:
+            if( spellInfo_2->SpellFamilyName == SPELLFAMILY_MAGE )
+            {
+                // Blizzard & Chilled (and some other stacked with blizzard spells
+                if( (spellInfo_1->SpellFamilyFlags & 0x80) && (spellInfo_2->SpellFamilyFlags & 0x100000) ||
+                    (spellInfo_2->SpellFamilyFlags & 0x80) && (spellInfo_1->SpellFamilyFlags & 0x100000) )
+                    return false;
+            }
+            break;
         case SPELLFAMILY_WARLOCK:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_WARLOCK )
             {
@@ -850,15 +855,6 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     return false;
             }
             break;
-        case SPELLFAMILY_PRIEST:
-            if( spellInfo_2->SpellFamilyName == SPELLFAMILY_PRIEST )
-            {
-                //Devouring Plague and Shadow Vulnerability
-                if( (spellInfo_1->SpellFamilyFlags & 0x2000000) && (spellInfo_2->SpellFamilyFlags & 0x800000000LL) ||
-                    (spellInfo_2->SpellFamilyFlags & 0x2000000) && (spellInfo_1->SpellFamilyFlags & 0x800000000LL) )
-                    return false;
-            }
-            break;
         case SPELLFAMILY_WARRIOR:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_WARRIOR )
             {
@@ -868,10 +864,27 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     return false;
             }
             break;
+        case SPELLFAMILY_PRIEST:
+            if( spellInfo_2->SpellFamilyName == SPELLFAMILY_PRIEST )
+            {
+                //Devouring Plague and Shadow Vulnerability
+                if( (spellInfo_1->SpellFamilyFlags & 0x2000000) && (spellInfo_2->SpellFamilyFlags & 0x800000000LL) ||
+                    (spellInfo_2->SpellFamilyFlags & 0x2000000) && (spellInfo_1->SpellFamilyFlags & 0x800000000LL) )
+                    return false;
+            }
+            break;
+        case SPELLFAMILY_PALADIN:
+            if( spellInfo_2->SpellFamilyName == SPELLFAMILY_PALADIN )
+            {
+                // Paladin Seals
+                if( IsSealSpell(spellId_1) && IsSealSpell(spellId_2) )
+                    return true;
+            }
+            break;
         case SPELLFAMILY_SHAMAN:
-            // Windfury weapon 
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_SHAMAN )
             {
+                // Windfury weapon 
                 if( spellInfo_1->SpellIconID==220 && spellInfo_2->SpellIconID==220 &&
                     spellInfo_1->SpellFamilyFlags != spellInfo_2->SpellFamilyFlags )
                     return false;

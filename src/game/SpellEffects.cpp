@@ -271,6 +271,28 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                 {
                     m_caster->CastSpell(m_caster,36032,true);
                 }
+                // Blizzard
+                else if(m_spellInfo->SpellFamilyFlags & 0x80LL)
+                {
+                    Aura* aura = NULL;
+                    uint32 spell_id = 0;
+                    Unit::AuraList const& mOverrideClassScript = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                    for(Unit::AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
+                    {
+                        switch((*i)->GetModifier()->m_miscvalue)
+                        {
+                            //Improved Blizzard
+                            case 836: spell_id = 12484; aura = *i; break;
+                            case 988: spell_id = 12485; aura = *i; break;
+                            case 989: spell_id = 12486; aura = *i; break;
+                        }
+                        if(aura)
+                            break;
+                    }
+
+                    if(aura)
+                        unitTarget->CastSpell(unitTarget,spell_id,true,NULL,aura);
+                }
                 break;
             }
             case SPELLFAMILY_WARRIOR:
