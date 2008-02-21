@@ -387,9 +387,14 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg;
             recv_data >> msg;
 
-            _player->afkMsg = msg;
             if((msg.empty() || !_player->isAFK()) && !_player->isInCombat() )
             {
+                if(!_player->isAFK())
+                {
+                    if(msg.empty())
+                        msg  = objmgr.GetMangosString(LANG_PLAYER_AFK_DEFAULT,GetSessionLocaleIndex());
+                    _player->afkMsg = msg;
+                }
                 _player->ToggleAFK();
                 if(_player->isAFK() && _player->isDND())
                     _player->ToggleDND();
@@ -401,12 +406,17 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg;
             recv_data >> msg;
 
-            GetPlayer()->dndMsg = msg;
-            if(msg.empty() || !GetPlayer()->isDND())
+            if(msg.empty() || !_player->isDND())
             {
-                GetPlayer()->ToggleDND();
-                if(GetPlayer()->isDND() && GetPlayer()->isAFK())
-                    GetPlayer()->ToggleAFK();
+                if(!_player->isDND())
+                {
+                    if(msg.empty())
+                        msg  = objmgr.GetMangosString(LANG_PLAYER_DND_DEFAULT,GetSessionLocaleIndex());
+                    _player->dndMsg = msg;
+                }
+                _player->ToggleDND();
+                if(_player->isDND() && _player->isAFK())
+                    _player->ToggleAFK();
             }
         } break;
 
