@@ -45,7 +45,7 @@ enum SpellInterruptFlags
     SPELL_INTERRUPT_FLAG_DAMAGE       = 0x02,
     SPELL_INTERRUPT_FLAG_INTURRUPT    = 0x04,
     SPELL_INTERRUPT_FLAG_AUTOATTACK   = 0x08,
-    SPELL_INTERRUPT_FLAG_TURNING      = 0x10
+    //SPELL_INTERRUPT_FLAG_TURNING      = 0x10              // unknown, not turning
 };
 
 enum SpellChannelInterruptFlags

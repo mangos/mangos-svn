@@ -1924,15 +1924,6 @@ void Spell::update(uint32 difftime)
         }
     }
 
-    // spells interrupted by turning
-    if( (m_caster->GetTypeId() == TYPEID_PLAYER && m_timer != 0) &&
-        (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_TURNING) &&
-        m_castOrientation != m_caster->GetOrientation() )
-    {
-        cancel();
-        return;
-    }
-
     // check if the player caster has moved before the spell finished
     if ((m_caster->GetTypeId() == TYPEID_PLAYER && m_timer != 0) &&
         (m_castPositionX != m_caster->GetPositionX() || m_castPositionY != m_caster->GetPositionY() || m_castPositionZ != m_caster->GetPositionZ()) &&
