@@ -56,6 +56,7 @@
 #include "ArenaTeam.h"
 #include "Chat.h"
 #include "Database/DatabaseImpl.h"
+#include "Spell.h"
 
 #include <cmath>
 
@@ -14746,13 +14747,22 @@ int32 Player::GetTotalPctMods(uint32 spellId, uint8 op)
     return total;
 }
 
-bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mod)
+bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mod, Spell const* spell)
 {
     if (!mod || !spellInfo)
         return false;
 
-    if ((mod->charges == -1) && (mod->lastAffected != spellInfo->Id))
-        return false;
+    if(mod->charges == -1 && mod->lastAffected )            // marked as expired but locked until spell casting finish
+    {
+        // prevent apply to any spell except spell that trigger expire
+        if(spell)
+        {
+            if(mod->lastAffected != spell)
+                return false;
+        }
+        else if(mod->lastAffected != FindCurrentSpellBySpellId(spellInfo->Id))
+            return false;
+    }
 
     return spellmgr.IsAffectedBySpell(spellInfo,mod->spellId,mod->effectId,mod->mask);
 }
@@ -14791,24 +14801,26 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
     }
 }
 
-void Player::RemoveSpellMods(uint32 spellId)
+void Player::RemoveSpellMods(Spell const* spell)
 {
-    if(!spellId || (m_SpellModRemoveCount == 0))
+    if(!spell || (m_SpellModRemoveCount == 0))
         return;
 
     for(int i=0;i<MAX_SPELLMOD;++i)
-        for (SpellModList::iterator itr = m_spellMods[i].begin(), next; itr != m_spellMods[i].end(); itr = next)
     {
-        next = itr;
-        next++;
-        SpellModifier *mod = *itr;
-        if (mod && mod->charges == -1 && mod->lastAffected == spellId)
+        for (SpellModList::iterator itr = m_spellMods[i].begin(); itr != m_spellMods[i].end();)
         {
-            RemoveAurasDueToSpell(mod->spellId);
-            if (m_spellMods[i].empty())
-                break;
-            else
-                next = m_spellMods[i].begin();
+            SpellModifier *mod = *itr;
+            ++itr;
+
+            if (mod && mod->charges == -1 && (mod->lastAffected == spell || mod->lastAffected==NULL))
+            {
+                RemoveAurasDueToSpell(mod->spellId);
+                if (m_spellMods[i].empty())
+                    break;
+                else
+                    itr = m_spellMods[i].begin();
+            }
         }
     }
 }

@@ -1001,7 +1001,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         mod->type = SpellModType(m_modifier.m_auraname);    // SpellModType value == spell aura types
         mod->spellId = m_spellId;
         mod->effectId = m_effIndex;
-        mod->lastAffected = 0;
+        mod->lastAffected = NULL;
 
         SpellAffection const *spellAffect = spellmgr.GetSpellAffection(m_spellId, m_effIndex);
 
@@ -1194,7 +1194,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             mod->type = SPELLMOD_PCT;
             mod->spellId = m_spellId;
             mod->effectId = m_effIndex;
-            mod->lastAffected = 0;
+            mod->lastAffected = NULL;
             mod->mask = 0x00008000 | 0x00001000;
             mod->charges = 0;
 
@@ -1216,7 +1216,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             mod->type = SPELLMOD_FLAT;
             mod->spellId = m_spellId;
             mod->effectId = m_effIndex;
-            mod->lastAffected = 0;
+            mod->lastAffected = NULL;
             mod->mask = 0x4000000000000LL;
             mod->charges = 0;
 

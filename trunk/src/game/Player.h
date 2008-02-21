@@ -80,7 +80,7 @@ struct SpellModifier
     uint64 mask;
     uint32 spellId;
     uint32 effectId;
-    uint32 lastAffected;
+    Spell const* lastAffected;
 };
 
 typedef HM_NAMESPACE::hash_map<uint16, PlayerSpell*> PlayerSpellMap;
@@ -1332,9 +1332,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddSpellMod(SpellModifier* mod, bool apply);
         int32 GetTotalFlatMods(uint32 spellId, uint8 op);
         int32 GetTotalPctMods(uint32 spellId, uint8 op);
-        bool IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mod);
-        template <class T> T ApplySpellMod(uint32 spellId, uint8 op, T &basevalue);
-        void RemoveSpellMods(uint32 spellId);
+        bool IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mod, Spell const* spell = NULL);
+        template <class T> T ApplySpellMod(uint32 spellId, uint8 op, T &basevalue, Spell const* spell = NULL);
+        void RemoveSpellMods(Spell const* spell);
 
         bool HasSpellCooldown(uint32 spell_id) const
         {
@@ -2079,7 +2079,7 @@ void AddItemsSetItem(Player*player,Item *item);
 void RemoveItemsSetItem(Player*player,ItemPrototype const *proto);
 
 // "the bodies of template functions must be made available in a header file"
-template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalue)
+template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalue, Spell const* spell)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo) return 0;
@@ -2089,7 +2089,7 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
     {
         SpellModifier *mod = *itr;
 
-        if(!IsAffectedBySpellmod(spellInfo,mod))
+        if(!IsAffectedBySpellmod(spellInfo,mod,spell))
             continue;
         if (mod->type == SPELLMOD_FLAT)
             totalflat += mod->value;
@@ -2101,7 +2101,9 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
             if (mod->charges == 0)
             {
                 mod->charges = -1;
-                mod->lastAffected = spellId;
+                mod->lastAffected = spell;
+                if(!mod->lastAffected)
+                    mod->lastAffected = FindCurrentSpellBySpellId(spellId);
                 m_SpellModRemoveCount++;
             }
         }

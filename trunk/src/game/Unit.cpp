@@ -3359,6 +3359,14 @@ void Unit::InterruptNonMeleeSpells(bool withDelayed)
     }
 }
 
+Spell* Unit::FindCurrentSpellBySpellId(uint32 spell_id) const
+{
+    for (uint32 i = 0; i < CURRENT_MAX_SPELL; i++)
+        if(m_currentSpells[i] && m_currentSpells[i]->m_spellInfo->Id==spell_id)
+            return m_currentSpells[i];
+    return NULL;
+}
+
 bool Unit::isInFront(Unit const* target, float radius) const
 {
     return IsWithinDistInMap(target, radius) && HasInArc( M_PI, target );
@@ -5045,7 +5053,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 mod->type = SPELLMOD_PCT;
                 mod->spellId = 0;
                 mod->effectId = 0;
-                mod->lastAffected = 0;
+                mod->lastAffected = NULL;
                 mod->mask = 0x0000000000000003LL;
                 mod->charges = 0;
                 ((Player*)this)->AddSpellMod(mod, true);
