@@ -988,9 +988,10 @@ void World::Update(time_t diff)
     if (m_timers[WUPDATE_UPTIME].Passed())
     {
         uint32 tmpDiff = (m_gameTime - m_startTime);
-
+        uint32 maxClientsNum = sWorld.GetMaxSessionCount();
+        
         m_timers[WUPDATE_UPTIME].Reset();
-        WorldDatabase.PExecute("update `uptime` set `uptime` = %d where `starttime` = %ld", tmpDiff, m_startTime);
+        WorldDatabase.PExecute("UPDATE `uptime` SET `uptime` = %d, `maxplayers` = %d WHERE `starttime` = " I64FMTD, tmpDiff, maxClientsNum, uint64(m_startTime));
     }
 
     /// <li> Handle all other objects
