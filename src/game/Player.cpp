@@ -14524,32 +14524,49 @@ void Player::Whisper(const uint64 receiver, const std::string text, uint32 langu
 
     Player *rPlayer = objmgr.GetPlayer(receiver);
 
-    WorldPacket data(SMSG_MESSAGECHAT, 200);
-    data << (uint8)CHAT_MSG_WHISPER;
-    data << (uint32)language;
-    data << (uint64)GetGUID();
-    data << (uint32)0;
-    data << (uint64)GetGUID();
-    data << (uint32)(text.length()+1);
-    data << text;
-    data << (uint8)chatTag();
-    rPlayer->GetSession()->SendPacket(&data);
+    // when player you are whispering to is dnd, he cannot receive your message, unless you are in gm mode
+    if(!rPlayer->isDND() || isGameMaster())
+    {
+        WorldPacket data(SMSG_MESSAGECHAT, 200);
+        data << (uint8)CHAT_MSG_WHISPER;
+        data << (uint32)language;
+        data << (uint64)GetGUID();
+        data << (uint32)0;
+        data << (uint64)GetGUID();
+        data << (uint32)(text.length()+1);
+        data << text;
+        data << (uint8)chatTag();
+        rPlayer->GetSession()->SendPacket(&data);
 
-    data.Initialize(SMSG_MESSAGECHAT, 200);
-    data << (uint8)CHAT_MSG_WHISPER_INFORM;
-    data << (uint32)language;
-    data << (uint64)rPlayer->GetGUID();
-    data << (uint32)0;
-    data << (uint64)rPlayer->GetGUID();
-    data << (uint32)(text.length()+1);
-    data << text;
-    data << (uint8)rPlayer->chatTag();
-    GetSession()->SendPacket(&data);
+        data.Initialize(SMSG_MESSAGECHAT, 200);
+        data << (uint8)CHAT_MSG_WHISPER_INFORM;
+        data << (uint32)language;
+        data << (uint64)rPlayer->GetGUID();
+        data << (uint32)0;
+        data << (uint64)rPlayer->GetGUID();
+        data << (uint32)(text.length()+1);
+        data << text;
+        data << (uint8)rPlayer->chatTag();
+        GetSession()->SendPacket(&data);
+    }
+    else
+        // announce to player that player he is whispering to is dnd and cannot receive his message
+        ChatHandler(this).PSendSysMessage(LANG_PLAYER_DND, rPlayer->GetName(), rPlayer->dndMsg.c_str());
 
     if(!isAcceptWhispers())
     {
         SetAcceptWhispers(true);
         ChatHandler(this).SendSysMessage(LANG_COMMAND_WHISPERON);
+    }
+
+    // announce to player that player he is whispering to is afk
+    if(rPlayer->isAFK())
+        ChatHandler(this).PSendSysMessage(LANG_PLAYER_AFK, rPlayer->GetName(), rPlayer->afkMsg.c_str());
+    
+    // if player whisper someone, auto turn of dnd to be able to receive an answer
+    if(isDND() && !rPlayer->isGameMaster())
+    {
+        ToggleDND();
     }
 }
 
