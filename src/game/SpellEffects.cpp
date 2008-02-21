@@ -625,7 +625,7 @@ void Spell::EffectDummy(uint32 i)
                     mod->type = SPELLMOD_PCT;
                     mod->spellId = 0;
                     mod->effectId = 0;
-                    mod->lastAffected = 0;
+                    mod->lastAffected = NULL;
                     mod->mask = 0x20800000000LL;
                     mod->charges = 0;
 
@@ -716,7 +716,7 @@ void Spell::EffectDummy(uint32 i)
                 float cost = m_currentBasePoints[0]+1;
 
                 if(Player* modOwner = m_caster->GetSpellModOwner())
-                    modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, cost);
+                    modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, cost,this);
 
                 uint32 dmg = m_caster->SpellDamageBonus(m_caster, m_spellInfo,uint32(cost > 0 ? cost : 0), SPELL_DIRECT_DAMAGE);
 

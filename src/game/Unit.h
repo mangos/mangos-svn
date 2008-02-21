@@ -857,7 +857,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         // delayed+channeled spells are always interrupted
         void InterruptNonMeleeSpells(bool withDelayed);
 
+        Spell* FindCurrentSpellBySpellId(uint32 spell_id) const;
+
         Spell* m_currentSpells[CURRENT_MAX_SPELL];
+
         uint32 m_addDmgOnce;
         uint64 m_TotemSlot[4];
         uint64 m_ObjectSlot[4];

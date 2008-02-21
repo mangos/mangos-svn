@@ -298,7 +298,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
     casttime = GetCastTime(sCastTimesStore.LookupEntry(m_spellInfo->CastingTimeIndex));
 
     if(Player* modOwner = m_caster->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_CASTING_TIME, casttime);
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_CASTING_TIME, casttime,this);
 
     casttime = int32(casttime*m_caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
 
@@ -719,7 +719,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
                 float multiplier = m_spellInfo->DmgMultiplier[effectNumber];
                 // Apply multiplier mods
                 if(Player* modOwner = m_originalCaster->GetSpellModOwner())
-                    modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_EFFECT_PAST_FIRST, multiplier);
+                    modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_EFFECT_PAST_FIRST, multiplier,this);
                 m_damageMultipliers[effectNumber] *= multiplier;
             }
         }
@@ -835,7 +835,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 
     if(m_originalCaster)
         if(Player* modOwner = m_originalCaster->GetSpellModOwner())
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius);
+            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius,this);
 
     uint32 unMaxTargets = m_spellInfo->MaxAffectedTargets;
     switch(cur)
@@ -1565,7 +1565,7 @@ void Spell::cast(bool skipCheck)
         return;
     }
 
-    if(m_caster->GetTypeId() != TYPEID_PLAYER && m_targets.getUnitTarget())
+    if(m_caster->GetTypeId() != TYPEID_PLAYER && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
         m_caster->SetInFront(m_targets.getUnitTarget());
 
     castResult = CheckMana( &mana);
@@ -1795,7 +1795,7 @@ void Spell::_handle_finish_phase()
 
     //remove spell mods
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)m_caster)->RemoveSpellMods(m_spellInfo->Id);
+        ((Player*)m_caster)->RemoveSpellMods(this);
 }
 
 void Spell::SendSpellCooldown()
@@ -1847,10 +1847,10 @@ void Spell::SendSpellCooldown()
 
     // Now we have cooldown data (if found any), time to apply mods
     if(rec > 0)
-        _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, rec);
+        _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, rec, this);
 
     if(catrec > 0)
-        _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, catrec);
+        _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, catrec, this);
 
     // replace negative cooldowns by 0
     if (rec < 0) rec = 0;
@@ -3513,7 +3513,7 @@ uint8 Spell::CheckRange(bool strict)
     float min_range = GetMinRange(srange);
 
     if(Player* modOwner = m_caster->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range);
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range, this);
 
     Unit *target = m_targets.getUnitTarget();
 
@@ -3585,7 +3585,7 @@ uint8 Spell::CheckMana(uint32 *mana)
     manaCost+= m_caster->GetInt32Value(UNIT_FIELD_POWER_COST_MODIFIER+m_spellInfo->School);
 
     if(Player* modOwner = m_caster->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost);
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost, this);
 
     manaCost*= (1.0f+m_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+m_spellInfo->School));
     if (manaCost < 0)
@@ -3913,7 +3913,7 @@ void Spell::Delayed(int32 delaytime)
 
     //check resist chance
     int32 resistChance = 100;                               //must be initialized to 100 for percent modifiers
-    ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id,SPELLMOD_NOT_LOSE_CASTING_TIME,resistChance);
+    ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id,SPELLMOD_NOT_LOSE_CASTING_TIME,resistChance, this);
     resistChance += m_caster->GetTotalAuraModifier(SPELL_AURA_RESIST_PUSHBACK) - 100;
     if (roll_chance_f(resistChance))
         return;
@@ -3937,7 +3937,7 @@ void Spell::DelayedChannel(int32 delaytime)
 
     //check resist chance
     int32 resistChance = 100;                               //must be initialized to 100 for percent modifiers
-    ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id,SPELLMOD_NOT_LOSE_CASTING_TIME,resistChance);
+    ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id,SPELLMOD_NOT_LOSE_CASTING_TIME,resistChance, this);
     resistChance += m_caster->GetTotalAuraModifier(SPELL_AURA_RESIST_PUSHBACK) - 100;
     if (roll_chance_f(resistChance))
         return;
