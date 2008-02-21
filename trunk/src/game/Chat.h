@@ -147,12 +147,12 @@ class ChatHandler
 
         bool HandleReloadAreaTriggerTavernCommand(const char* args);
         bool HandleReloadAreaTriggerTeleportCommand(const char* args);
-        bool HandleReloadButtonScriptsCommand(const char* args);
         bool HandleReloadEventScriptsCommand(const char* args);
         bool HandleReloadCommandCommand(const char* args);
         bool HandleReloadCreatureQuestRelationsCommand(const char* args);
         bool HandleReloadCreatureQuestInvRelationsCommand(const char* args);
         bool HandleReloadGameGraveyardZoneCommand(const char* args);
+        bool HandleReloadGameObjectScriptsCommand(const char* args);
         bool HandleReloadGOQuestRelationsCommand(const char* args);
         bool HandleReloadGOQuestInvRelationsCommand(const char* args);
         bool HandleReloadLootTemplatesCreatureCommand(const char* args);

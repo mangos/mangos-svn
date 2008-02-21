@@ -198,6 +198,7 @@ enum BanReturn
 #define SCRIPT_COMMAND_RESPAWN_GAMEOBJECT    9
 #define SCRIPT_COMMAND_TEMP_SUMMON_CREATURE 10
 #define SCRIPT_COMMAND_OPEN_DOOR            11
+#define SCRIPT_COMMAND_CLOSE_DOOR           12
 
 /// CLI related stuff, define here to prevent cyclic dependancies
 

@@ -79,7 +79,7 @@ typedef std::map<uint32, ScriptMap > ScriptMapMap;
 extern ScriptMapMap sQuestEndScripts;
 extern ScriptMapMap sQuestStartScripts;
 extern ScriptMapMap sSpellScripts;
-extern ScriptMapMap sButtonScripts;
+extern ScriptMapMap sGameObjectScripts;
 extern ScriptMapMap sEventScripts;
 
 struct AreaTrigger
@@ -399,7 +399,7 @@ class ObjectMgr
         QuestRelations mCreatureQuestRelations;
         QuestRelations mCreatureQuestInvolvedRelations;
 
-        void LoadButtonScripts();
+        void LoadGameObjectScripts();
         void LoadQuestEndScripts();
         void LoadQuestStartScripts();
         void LoadEventScripts();

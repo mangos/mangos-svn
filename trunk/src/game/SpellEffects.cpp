@@ -2047,6 +2047,24 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
     {
         switch (gameObjTarget->GetGoType())
         {
+            case GAMEOBJECT_TYPE_DOOR:
+            case GAMEOBJECT_TYPE_BUTTON:
+                gameObjTarget->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_NODESPAWN);
+                if(gameObjTarget->GetUInt32Value(GAMEOBJECT_STATE))
+                {
+                    gameObjTarget->SetUInt32Value(GAMEOBJECT_STATE,0);    //if closed/inactive -> open/activate it
+                }
+                else
+                {
+                    gameObjTarget->SetUInt32Value(GAMEOBJECT_STATE,1);    //if open/active -> close/deactivate it
+                }
+
+                gameObjTarget->SetLootState(GO_CLOSED);
+                gameObjTarget->SetRespawnTime(6);
+
+                sWorld.ScriptsStart(sGameObjectScripts, gameObjTarget->GetDBTableGUIDLow(), player, gameObjTarget);
+                return;
+
             case GAMEOBJECT_TYPE_QUESTGIVER:
                 // start or end quest
                 player->PrepareQuestMenu(guid);
@@ -2057,7 +2075,7 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                 // goober_scripts can be triggered if the player dont have the quest
                 if (gameObjTarget->GetGOInfo()->data2)
                 {
-                    sLog.outDebug("Goober ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->data2,gameObjTarget->GetGUIDLow());
+                    sLog.outDebug("Goober ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->data2,gameObjTarget->GetDBTableGUIDLow());
                     sWorld.ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->data2, player, gameObjTarget);
                 }
                 // cast goober spell
@@ -2073,7 +2091,7 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
             case GAMEOBJECT_TYPE_CHEST:
                 if (gameObjTarget->GetGOInfo()->data6)
                 {
-                    sLog.outDebug("Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->data6,gameObjTarget->GetGUIDLow());
+                    sLog.outDebug("Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->data6,gameObjTarget->GetDBTableGUIDLow());
                     sWorld.ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->data6, player, gameObjTarget);
                 }
                 // Don't return, let loots been taken

@@ -223,7 +223,10 @@ void GameObject::Update(uint32 /*p_time*/)
                         case GAMEOBJECT_TYPE_DOOR:
                         case GAMEOBJECT_TYPE_BUTTON:
                             SetUInt32Value (GAMEOBJECT_FLAGS, m_flags);
-                            SetUInt32Value (GAMEOBJECT_STATE, 1);
+                            if(GetUInt32Value(GAMEOBJECT_STATE))
+                                SetUInt32Value (GAMEOBJECT_STATE, 0);
+                            else
+                                SetUInt32Value (GAMEOBJECT_STATE, 1);
                             break;
                         case GAMEOBJECT_TYPE_TRAP:
                             break;
