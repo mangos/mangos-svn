@@ -9,6 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "shared", "VC71\shared.vcpro
 	ProjectSection(ProjectDependencies) = postProject
 		{BF6F5D0E-33A5-4E23-9E7D-DD481B7B5B9E} = {BF6F5D0E-33A5-4E23-9E7D-DD481B7B5B9E}
 		{DE0380F9-C910-4E99-A841-93550D0E61D7} = {DE0380F9-C910-4E99-A841-93550D0E61D7}
+		{803F488E-4C5A-4866-8D5C-1E6C03C007C2} = {803F488E-4C5A-4866-8D5C-1E6C03C007C2}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mangosd", "VC71\mangosd.vcproj", "{A3A04E47-43A2-4C08-90B3-029CEF558594}"
@@ -54,6 +55,8 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "sockets", "VC71\sockets.vcproj", "{04BAF755-0D67-46F8-B1C6-77AE5368F3CB}"
 	ProjectSection(ProjectDependencies) = postProject
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "gensvnrevision", "VC71\gensvnrevision.vcproj", "{803F488E-4C5A-4866-8D5C-1E6C03C007C2}"
 EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
@@ -103,6 +106,10 @@ Global
 		{04BAF755-0D67-46F8-B1C6-77AE5368F3CB}.Debug.Build.0 = Debug|Win32
 		{04BAF755-0D67-46F8-B1C6-77AE5368F3CB}.Release.ActiveCfg = Release|Win32
 		{04BAF755-0D67-46F8-B1C6-77AE5368F3CB}.Release.Build.0 = Release|Win32
+		{803F488E-4C5A-4866-8D5C-1E6C03C007C2}.Debug|Win32.ActiveCfg = Debug|Win32
+		{803F488E-4C5A-4866-8D5C-1E6C03C007C2}.Debug|Win32.Build.0 = Debug|Win32
+		{803F488E-4C5A-4866-8D5C-1E6C03C007C2}.Release|Win32.ActiveCfg = Release|Win32
+		{803F488E-4C5A-4866-8D5C-1E6C03C007C2}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
