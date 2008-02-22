@@ -25,8 +25,6 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Extract SVN revision"
-				CommandLine="cd ..\&#x0D;&#x0A;svn_revision.js&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -106,8 +104,6 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-				Description="Extract SVN revision"
-				CommandLine="cd ..\&#x0D;&#x0A;svn_revision.js&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
