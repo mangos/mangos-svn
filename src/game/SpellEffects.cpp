@@ -3918,7 +3918,7 @@ void Spell::EffectSummonTotem(uint32 i)
 
     Totem* pTotem = new Totem(m_caster);
 
-    if(!pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT),
+    if(!pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
         m_caster->GetMapId(), x, y, z, m_caster->GetOrientation(),
         m_spellInfo->EffectMiscValue[i], team ))
     {
