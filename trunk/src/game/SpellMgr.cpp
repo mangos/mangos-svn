@@ -370,6 +370,19 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                         break;
                     }
                 }   break;
+            case SPELL_AURA_ADD_FLAT_MODIFIER:              // mods
+            case SPELL_AURA_ADD_PCT_MODIFIER:
+                {
+                    // non-positive mods
+                    switch(spellproto->EffectMiscValue[effIndex])
+                    {
+                    case SPELLMOD_COST:
+                        if(spellproto->EffectBasePoints[effIndex]+spellproto->EffectBaseDice[effIndex] > 0)
+                            return false;
+                    default:
+                        break;
+                    }
+                }   break;
             default:
                 break;
             }
