@@ -2094,8 +2094,19 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
         if (mod->type == SPELLMOD_FLAT)
             totalflat += mod->value;
         else if (mod->type == SPELLMOD_PCT)
+        {
+            // skip percent mods for null basevalue (most important for spell mods with charges )
+            if(basevalue == T(0))
+                continue;
+
+            // special case (skip >10sec spell casts for instant cast setting)
+            if( mod->op==SPELLMOD_CASTING_TIME  && basevalue >= T(10000) && mod->value <= -100)
+                continue;
+
             totalpct += mod->value;
-        if (mod->charges > 0)
+        }
+
+        if (mod->charges > 0 )
         {
             mod->charges--;
             if (mod->charges == 0)

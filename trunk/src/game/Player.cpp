@@ -14800,16 +14800,11 @@ bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mo
 
 void Player::AddSpellMod(SpellModifier* mod, bool apply)
 {
-    uint64 shiftdata=0x01, Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
-
-    if (mod->type == SPELLMOD_FLAT)
-        Opcode = SMSG_SET_FLAT_SPELL_MODIFIER;
-    else if (mod->type == SPELLMOD_PCT)
-        Opcode = SMSG_SET_PCT_SPELL_MODIFIER;
+    uint64 Opcode= (mod->type == SPELLMOD_FLAT) ? SMSG_SET_FLAT_SPELL_MODIFIER : SMSG_SET_PCT_SPELL_MODIFIER;
 
     for(int eff=0;eff<64;++eff)
     {
-        if ( mod->mask & shiftdata )
+        if ( mod->mask & (uint64(1) << eff) )
         {
             m_totalSpellMod[mod->op][eff] += apply ? mod->value : -(mod->value);
             WorldPacket data(Opcode, (1+1+4));
@@ -14818,7 +14813,6 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
             data << int32(m_totalSpellMod[mod->op][eff]);
             SendDirectMessage(&data);
         }
-        shiftdata=shiftdata<<1;
     }
 
     if (apply)
