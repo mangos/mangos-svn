@@ -1640,6 +1640,11 @@ void Spell::cast(bool skipCheck)
     // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
     if (m_spellInfo->speed > 0.0f)
     {
+
+        // Remove used for cast item if need (it can be already NULL after TakeReagents call
+        // in case delayed spell remove item at cast delay start
+        TakeCastItem();
+
         // Okay, maps created, now prepare flags
         m_immediateHandled = false;
         m_spellState = SPELL_STATE_DELAYED;
@@ -1669,6 +1674,9 @@ void Spell::handle_immediate()
 
     for(std::list<GOTargetInfo>::iterator ihit= m_UniqeGOTargetInfo.begin();ihit != m_UniqeGOTargetInfo.end();++ihit)
         DoAllEffectOnTarget(&(*ihit));
+
+    // Remove used for cast item if need (it can be already NULL after TakeReagents call
+    TakeCastItem();
 
     // spell is finished, perform some last features of the spell here
     _handle_finish_phase();
@@ -1786,9 +1794,6 @@ void Spell::_handle_immediate_phase()
 
 void Spell::_handle_finish_phase()
 {
-    // Remove used for cast item if need (it can be already NULL after TakeReagents call
-    TakeCastItem();
-
     // spell log
     if(m_needSpellLog)
         SendLogExecute();
