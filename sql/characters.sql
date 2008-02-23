@@ -376,7 +376,6 @@ CREATE TABLE `character_pet` (
   `PetType` tinyint(3) unsigned NOT NULL default '0',
   `level` int(11) unsigned NOT NULL default '1',
   `exp` int(11) unsigned NOT NULL default '0',
-  `nextlvlexp` int(11) unsigned NOT NULL default '100',
   `Reactstate` tinyint(1) unsigned NOT NULL default '0',
   `Commandstate` tinyint(1) unsigned NOT NULL default '1',
   `loyaltypoints` int(11) NOT NULL default '0',
