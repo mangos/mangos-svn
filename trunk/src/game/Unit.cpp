@@ -8553,7 +8553,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                 continue;
 
             // Check if current equipment allows aura to proc
-            if(!isVictim && GetTypeId() == TYPEID_PLAYER && ((Player*)this)->IsUseEquipedWeapon(attType==BASE_ATTACK))
+            if(!isVictim && GetTypeId() == TYPEID_PLAYER )
             {
                 if(spellProto->EquippedItemClass == ITEM_CLASS_WEAPON)
                 {
@@ -8564,6 +8564,9 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                         item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
                     else
                         item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+
+                    if (!((Player*)this)->IsUseEquipedWeapon(attType==BASE_ATTACK))
+                        continue;
 
                     if(!item || item->IsBroken() || item->GetProto()->Class != ITEM_CLASS_WEAPON || !((1<<item->GetProto()->SubClass) & spellProto->EquippedItemSubClassMask))
                         continue;

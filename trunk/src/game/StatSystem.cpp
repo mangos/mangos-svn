@@ -330,8 +330,8 @@ void Player::UpdateDamagePhysical(WeaponAttackType attType)
 
     if(!IsUseEquipedWeapon(attType==BASE_ATTACK))           //check if player is druid and in cat or bear forms
     {
-        weapon_mindamage = 0.9 * GetTotalAuraModValue(attPower)/ 14.0f * att_speed;
-        weapon_maxdamage = 1.1 * GetTotalAuraModValue(attPower)/ 14.0f * att_speed;
+        weapon_mindamage = BASE_MINDAMAGE;
+        weapon_maxdamage = BASE_MAXDAMAGE;
     }
     else if(attType == RANGED_ATTACK)                       //add ammo DPS to ranged damage
     {
