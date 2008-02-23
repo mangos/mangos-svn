@@ -103,6 +103,10 @@ ObjectAccessor::GetNPCIfCanInteractWith(Player const &player, uint64 guid, uint3
     if(!unit->isAlive() && (!unit->isSpiritService() || player.isAlive() ))
         return NULL;
 
+    // not allow interaction under control
+    if(unit->GetCharmerOrOwnerGUID())
+        return NULL;
+
     // not enemy
     if( unit->IsHostileTo(&player))
         return NULL;
