@@ -953,7 +953,7 @@ void Guild::SetGuildBankTabInfo(uint8 TabId, std::string Name, std::string Icon)
 
 void Guild::CreateBankRightForTab(uint32 rankId, uint8 TabId)
 {
-    sLog.outErrorDb("CreateBankRightForTab. rank: %u, TabId: %u", rankId, uint32(TabId));
+    sLog.outDebug("CreateBankRightForTab. rank: %u, TabId: %u", rankId, uint32(TabId));
     if (rankId >= m_ranks.size() || TabId >= GUILD_BANK_MAX_TABS)
         return;
   
