@@ -1893,8 +1893,7 @@ void Player::SetGameMaster(bool on)
         setFaction(35);
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
 
-        if(sWorld.IsFFAPvPRealm())
-            RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
+        RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
 
         getHostilRefManager().setOnlineOfflineState(false);
         CombatStop();
@@ -1905,8 +1904,12 @@ void Player::SetGameMaster(bool on)
         setFactionForRace(getRace());
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
 
+        // restore FFA PvP Server state
         if(sWorld.IsFFAPvPRealm())
             SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
+
+        // restore FFA PvP area state
+        UpdateArea(m_areaUpdateId);
 
         getHostilRefManager().setOnlineOfflineState(true);
     }
@@ -5719,7 +5722,8 @@ void Player::UpdateArea(uint32 newArea)
 
     if(area && (area->flags & 0x80))
     {
-        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+        if(!isGameMaster())
+            SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
     }
     else
     {

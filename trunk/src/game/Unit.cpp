@@ -5753,6 +5753,10 @@ bool Unit::IsHostileTo(Unit const* unit) const
     if(unit==this)
         return false;
 
+    // always non-hostile to GM in GM mode
+    if(unit->GetTypeId()==TYPEID_PLAYER && ((Player*)unit)->isGameMaster())
+        return false;
+
     // always hostile to enemy
     if(getVictim()==unit || unit->getVictim()==this)
         return true;
@@ -5854,6 +5858,10 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
 {
     // always friendly to self
     if(unit==this)
+        return true;
+
+    // always friendly to GM in GM mode
+    if(unit->GetTypeId()==TYPEID_PLAYER && ((Player*)unit)->isGameMaster())
         return true;
 
     // always non-friendly to enemy

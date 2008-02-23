@@ -1973,7 +1973,7 @@ void World::InitDailyQuestResetTime()
     // current day reset time
     time_t curDayResetTime = mktime(&localTm);
 
-    // last rest time before current moment
+    // last reset time before current moment
     time_t resetTime = (curTime < curDayResetTime) ? curDayResetTime - 24*HOUR : curDayResetTime;
 
     // need reset (if we have quest time before last reset time (not processed by some reason)

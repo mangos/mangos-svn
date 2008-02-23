@@ -131,19 +131,19 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     QueryResult *result;
 
     if(petnumber)
-        // known petnumber entry           0    1       2       3         4       5     6            7            8              9               10        11           12     13     14        15          16        17             18        19              20         21                  22                  23               24
-        result = CharacterDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType` FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'",ownerid, petnumber);
+        // known petnumber entry                  0    1       2       3         4       5     6            7              8               9         10           11     12     13        14          15        16             17       18               19         20                  21                  22               23
+        result = CharacterDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType` FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'",ownerid, petnumber);
     else if(current)
-        // current pet (slot 0)            0    1       2       3         4       5     6            7            8              9               10        11           12     13     14        15          16        17             18        19              20         21                  22                  23               24
-        result = CharacterDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType` FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '0'",ownerid );
+        // current pet (slot 0)                   0    1       2       3         4       5     6            7              8               9         10           11     12     13        14          15        16             17       18               19         20                  21                  22               23
+        result = CharacterDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType` FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '0'",ownerid );
     else if(petentry)
         // known petentry entry (unique for summoned pet, but non unique for hunter pet (only from current or not stabled pets)
-        //                                 0    1       2       3         4       5     6            7            8              9               10        11           12     13     14        15          16        17             18        19              20         21                  22                  23               24
-        result = CharacterDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType` FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u' AND (`slot` = '0' OR `slot` = '3') ",ownerid, petentry );
+        //                                        0    1       2       3         4       5     6            7              8               9         10           11     12     13        14          15        16             17       18               19         20                  21                  22               23
+        result = CharacterDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType` FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u' AND (`slot` = '0' OR `slot` = '3') ",ownerid, petentry );
     else
         // any current or other non-stabled pet (for hunter "call pet")
-        //                                 0    1       2       3         4       5     6            7            8              9               10        11           12     13     14        15          16        17             18        19              20         21                  22                  23               24
-        result = CharacterDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType` FROM `character_pet` WHERE `owner` = '%u' AND (`slot` = '0' OR `slot` = '3') ",ownerid);
+        //                                        0    1       2       3         4       5     6            7              8               9         10           11     12     13        14          15        16             17       18               19         20                  21                  22               23
+        result = CharacterDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType` FROM `character_pet` WHERE `owner` = '%u' AND (`slot` = '0' OR `slot` = '3') ",ownerid);
 
     if(!result)
         return false;
@@ -158,7 +158,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
         return false;
     }
 
-    uint32 summon_spell_id = fields[23].GetUInt32();
+    uint32 summon_spell_id = fields[22].GetUInt32();
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(summon_spell_id);
 
     bool is_temporary_summoned = spellInfo && GetDuration(spellInfo) > 0;
@@ -179,7 +179,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
         return false;
     }
 
-    setPetType(PetType(fields[24].GetUInt8()));
+    setPetType(PetType(fields[23].GetUInt8()));
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,owner->getFaction());
     SetUInt32Value(UNIT_CREATED_BY_SPELL, summon_spell_id);
 
@@ -200,7 +200,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     SetUInt64Value(UNIT_FIELD_NATIVEDISPLAYID, fields[3].GetUInt32());
     uint32 petlevel=fields[4].GetUInt32();
     SetUInt32Value(UNIT_NPC_FLAGS , 0);
-    SetName(fields[13].GetString());
+    SetName(fields[12].GetString());
 
     switch(getPetType())
     {
@@ -214,14 +214,14 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
             break;
         case HUNTER_PET:
             SetUInt32Value(UNIT_FIELD_BYTES_0, 0x2020100);  //??
-            SetUInt32Value(UNIT_FIELD_BYTES_1,(fields[10].GetUInt32()<<8));
+            SetUInt32Value(UNIT_FIELD_BYTES_1,(fields[9].GetUInt32()<<8));
             SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00022801); // can't be renamed (byte (0x02))
                                                             // + UNIT_FLAG_RESTING);
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);
                                                             // this enables popup window (pet abandon, cancel)
 
             // pet not renamed yet, let rename if wont
-            if(!fields[14].GetBool())
+            if(!fields[13].GetBool())
             {
                 //SetUInt32Value(UNIT_FIELD_BYTES_2, uint32(0x03 << 16)); // check it...
                                                             // 0x03
@@ -229,9 +229,9 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
                 //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME); // old, not working...
             }
 
-            SetTP(fields[11].GetInt32());
+            SetTP(fields[10].GetInt32());
             SetMaxPower(POWER_HAPPINESS,GetCreatePowers(POWER_HAPPINESS));
-            SetPower(   POWER_HAPPINESS,fields[17].GetUInt32());
+            SetPower(   POWER_HAPPINESS,fields[16].GetUInt32());
             setPowerType(POWER_FOCUS);
             break;
         default:
@@ -240,18 +240,17 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     InitStatsForLevel( petlevel);
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, time(NULL));
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE, fields[5].GetUInt32());
-    SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, fields[6].GetUInt32());
     SetUInt64Value(UNIT_FIELD_CREATEDBY, owner->GetGUID());
 
-    m_charmInfo->SetReactState( ReactStates( fields[7].GetUInt8() ));
-    m_charmInfo->SetCommandState( CommandStates( fields[8].GetUInt8() ));
-    m_loyaltyPoints = fields[9].GetInt32();
+    m_charmInfo->SetReactState( ReactStates( fields[6].GetUInt8() ));
+    m_charmInfo->SetCommandState( CommandStates( fields[7].GetUInt8() ));
+    m_loyaltyPoints = fields[8].GetInt32();
 
-    uint32 savedhealth = fields[15].GetUInt32();
-    uint32 savedmana = fields[16].GetUInt32();
+    uint32 savedhealth = fields[14].GetUInt32();
+    uint32 savedmana = fields[15].GetUInt32();
 
     // set current pet as current
-    if(fields[12].GetUInt32() != 0)
+    if(fields[11].GetUInt32() != 0)
     {
         CharacterDatabase.BeginTransaction();
         CharacterDatabase.PExecute("UPDATE `character_pet` SET `slot` = '3' WHERE `owner` = '%u' AND `slot` = '0' AND `id` <> '%u'",ownerid, m_charmInfo->GetPetNumber());
@@ -268,7 +267,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     else
     {
         // permanent controlled pets store state in DB
-        Tokens tokens = StrSplit(fields[18].GetString(), " ");
+        Tokens tokens = StrSplit(fields[17].GetString(), " ");
 
         if(tokens.size() != 20)
         {
@@ -286,7 +285,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
         }
 
         //init teach spells
-        tokens = StrSplit(fields[19].GetString(), " ");
+        tokens = StrSplit(fields[18].GetString(), " ");
         for (iter = tokens.begin(), index = 0; index < 4; ++iter, ++index)
         {
             uint32 tmp = atol((*iter).c_str());
@@ -301,7 +300,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     }
 
     // since last save (in seconds)
-    uint32 timediff = (time(NULL) - fields[20].GetUInt32());
+    uint32 timediff = (time(NULL) - fields[19].GetUInt32());
 
     delete result;
 
@@ -395,7 +394,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
                 CharacterDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND (`slot` = '0' OR `slot` = '3')", owner );
             // save pet
             std::ostringstream ss;
-            ss  << "INSERT INTO `character_pet` (`id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType`) "
+            ss  << "INSERT INTO `character_pet` (`id`,`entry`,`owner`,`modelid`,`level`,`exp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType`) "
                 << "VALUES ("
                 << m_charmInfo->GetPetNumber() << ", "
                 << GetEntry() << ", "
@@ -403,7 +402,6 @@ void Pet::SavePetToDB(PetSaveMode mode)
                 << GetUInt32Value(UNIT_FIELD_DISPLAYID) << ", "
                 << getLevel() << ", "
                 << GetUInt32Value(UNIT_FIELD_PETEXPERIENCE) << ", "
-                << GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP) << ", "
                 << uint32(m_charmInfo->GetReactState()) << ", "
                 << uint32(m_charmInfo->GetCommandState()) << ", "
                 << m_loyaltyPoints << ", "
@@ -876,7 +874,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     setPowerType(POWER_FOCUS);
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
-    SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32((MaNGOS::XP::xp_to_level(creature->getLevel()+1))/4));
+    SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32((MaNGOS::XP::xp_to_level(creature->getLevel()))/4));
     SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);
     SetUInt32Value(UNIT_NPC_FLAGS , 0);
     SetName(creature->GetName());
@@ -923,7 +921,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
 
     uint32 createResistance[MAX_SPELL_SCHOOL] = {0,0,0,0,0,0,0};
 
-    if(cinfo && !(getPetType() == HUNTER_PET))
+    if(cinfo && getPetType() != HUNTER_PET)
     {
         createResistance[SPELL_SCHOOL_HOLY]   = cinfo->resistance1;
         createResistance[SPELL_SCHOOL_FIRE]   = cinfo->resistance2;
@@ -975,6 +973,8 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
     {
         case HUNTER_PET:
         {
+            SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32((MaNGOS::XP::xp_to_level(petlevel))/4));
+
             //these formula may not be correct; however, it is designed to be close to what it should be
                                                             //this makes dps 0.5 of pets level
             SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)) );
