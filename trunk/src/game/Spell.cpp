@@ -691,6 +691,11 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     // Call scripted function for AI if this spell is casted upon a creature
     if(GUID_HIPART(target->targetGUID)==HIGHGUID_UNIT)
     {
+        // cast at creature (or GO) quest objectives update at succesful cast finished (+channel finished)
+        // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
+        if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsMeleeSpell() && !IsChannelActive() )
+            ((Player*)m_caster)->CastedCreatureOrGO(unit->GetEntry(),unit->GetGUID(),m_spellInfo->Id);
+
         if(((Creature*)unit)->AI())
            ((Creature*)unit)->AI()->SpellHit(m_caster ,m_spellInfo);
     }
@@ -739,6 +744,11 @@ void Spell::DoAllEffectOnTarget(GOTargetInfo *target)
     for(uint32 effectNumber=0;effectNumber<3;effectNumber++)
         if (effectMask & (1<<effectNumber))
             HandleEffects(NULL,NULL,go,effectNumber);
+
+    // cast at creature (or GO) quest objectives update at succesful cast finished (+channel finished)
+    // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
+    if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsMeleeSpell() && !IsChannelActive() )
+        ((Player*)m_caster)->CastedCreatureOrGO(go->GetEntry(),go->GetGUID(),m_spellInfo->Id);
 }
 
 void Spell::DoAllEffectOnTarget(ItemTargetInfo *target)
@@ -2013,89 +2023,9 @@ void Spell::finish(bool ok)
 
     m_spellState = SPELL_STATE_FINISHED;
 
-    /*std::vector<DynamicObject*>::iterator i;
-    for(i = m_dynObjToDel.begin() ; i != m_dynObjToDel.end() ; i++)
-    {
-        data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
-        data << (*i)->GetGUID();
-        m_caster->SendMessageToSet(&data, true);
-
-        data.Initialize(SMSG_DESTROY_OBJECT);
-        data << (*i)->GetGUID();
-        m_caster->SendMessageToSet(&data, true);
-        ObjectAccessor::Instance().AddObjectToRemoveList(*i);
-        m_AreaAura = false;
-    }
-    m_dynObjToDel.clear();
-
-    std::list<GameObject*>::iterator k;
-    for(k = m_ObjToDel.begin() ; k != m_ObjToDel.end() ; k++)
-    {
-        data.Initialize(SMSG_GAMEOBJECT_DESPAWN_ANIM);
-        data << (*k)->GetGUID();
-        m_caster->SendMessageToSet(&data, true);
-
-        data.Initialize(SMSG_DESTROY_OBJECT);
-        data << (*k)->GetGUID();
-        m_caster->SendMessageToSet(&data, true);
-        ObjectAccessor::Instance().AddObjectToRemoveList(*k);
-    }
-
-    m_ObjToDel.clear();*/
-
     // other code related only to successfully finished spells
     if(!ok)
         return;
-
-    // cast at creature (or GO) quest objectives update at succesful cast finished (+channel finished)
-    // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
-    if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsMeleeSpell() && !IsChannelActive() )
-    {
-        if( m_targets.getUnitTargetGUID() && GUID_HIPART(m_targets.getUnitTargetGUID())==HIGHGUID_UNIT )
-        {
-            // Some Script Spell Destroy the target or something and the target is always the player
-            // then re-find it in grids if this creature
-            Creature* creature = ObjectAccessor::GetCreature(*m_caster,m_targets.getUnitTargetGUID());
-            if( creature )
-                ((Player*)m_caster)->CastedCreatureOrGO(creature->GetEntry(),creature->GetGUID(),m_spellInfo->Id);
-        }
-        else
-        {
-            uint32 mask = 0;
-            for(uint8 j = 0; j < 3; j++)
-                if( m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT || m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT )
-                    mask |= (1<<j);
-            
-            if (mask)
-            {
-                // always single target in first effect
-                for(std::list<TargetInfo>::iterator ihit = m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
-                {
-                    if( ihit->effectMask & mask )
-                    {
-                        Creature* creature = ObjectAccessor::GetCreature(*m_caster, ihit->targetGUID);
-                        if( creature )
-                            ((Player*)m_caster)->CastedCreatureOrGO(creature->GetEntry(),creature->GetGUID(),m_spellInfo->Id);
-                        break;
-                    }
-                }
-
-                for(std::list<GOTargetInfo>::iterator ihitGO = m_UniqeGOTargetInfo.begin();ihitGO != m_UniqeGOTargetInfo.end();++ihitGO)
-                if( ihitGO->effectMask & mask)
-                {
-                    GameObject* go = ObjectAccessor::GetGameObject(*m_caster, ihitGO->targetGUID);
-                    if( go )
-                        ((Player*)m_caster)->CastedCreatureOrGO(go->GetEntry(),go->GetGUID(),m_spellInfo->Id);
-                    break;
-                }
-            }
-        }
-
-        if( m_targets.getGOTarget() )
-            ((Player*)m_caster)->CastedCreatureOrGO( m_targets.getGOTarget()->GetEntry(), m_targets.getGOTarget()->GetGUID(), m_spellInfo->Id );
-        else if( focusObject )
-            ((Player*)m_caster)->CastedCreatureOrGO( focusObject->GetEntry(), focusObject->GetGUID(), m_spellInfo->Id );
-    }
 
     // call triggered spell only at successful cast
     if(!m_TriggerSpells.empty())
@@ -2777,6 +2707,12 @@ uint8 Spell::CanCast(bool strict)
                 if(lower==upper)
                     sLog.outErrorDb("Spell (ID: %u) has effect EffectImplicitTargetA/EffectImplicitTargetB = %u (TARGET_SCRIPT), but does not have record in `spell_script_target`",m_spellInfo->Id,TARGET_SCRIPT);
 
+                SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
+                float range = GetMaxRange(srange);
+
+                Creature* creatureScriptTarget = NULL;
+                GameObject* goScriptTarget = NULL;
+
                 for(SpellScriptTarget::const_iterator i_spellST = lower; i_spellST != upper; ++i_spellST)
                 {
                     switch(i_spellST->second.type)
@@ -2791,10 +2727,7 @@ uint8 Spell::CanCast(bool strict)
                                 Cell cell(p);
                                 cell.data.Part.reserved = ALL_DISTRICT;
 
-                                SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
-                                float max_range = GetMaxRange(srange);
-
-                                MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*m_caster,i_spellST->second.targetEntry,max_range);
+                                MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*m_caster,i_spellST->second.targetEntry,range);
                                 MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> checker(p_GameObject,go_check);
 
                                 TypeContainerVisitor<MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck>, GridTypeMapContainer > object_checker(checker);
@@ -2803,14 +2736,21 @@ uint8 Spell::CanCast(bool strict)
 
                                 if(p_GameObject)
                                 {
-                                    AddGOTarget(p_GameObject, j);
-                                    okDoo = true;
+                                    // remember found target and range, next attempt will find more near target with another entry
+                                    creatureScriptTarget = NULL;
+                                    goScriptTarget = p_GameObject;
+                                    range = go_check.GetLastRange();
                                 }
                             }
                             else if( focusObject )              //Focus Object
                             {
-                                AddGOTarget(focusObject, j);
-                                okDoo = true;
+                                float frange = m_caster->GetDistance(focusObject);
+                                if(range >= frange)
+                                {
+                                    creatureScriptTarget = NULL;
+                                    goScriptTarget = focusObject;
+                                    range = frange;
+                                }
                             }
                             break;
                         }
@@ -2825,10 +2765,7 @@ uint8 Spell::CanCast(bool strict)
                             cell.data.Part.reserved = ALL_DISTRICT;
                             cell.SetNoCreate();                 // Really don't know what is that???
 
-                            SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
-                            float max_range = GetMaxRange(srange);
-
-                            MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_caster,i_spellST->second.targetEntry,i_spellST->second.type!=SPELL_TARGET_TYPE_DEAD,max_range);
+                            MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_caster,i_spellST->second.targetEntry,i_spellST->second.type!=SPELL_TARGET_TYPE_DEAD,range);
                             MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(p_Creature, u_check);
 
                             TypeContainerVisitor<MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck>, GridTypeMapContainer >  grid_creature_searcher(searcher);
@@ -2838,17 +2775,21 @@ uint8 Spell::CanCast(bool strict)
 
                             if(p_Creature )
                             {
-                                AddUnitTarget(p_Creature, j);
-                                okDoo = true;
+                                creatureScriptTarget = p_Creature;
+                                goScriptTarget = NULL;
+                                range = u_check.GetLastRange();
                             }
                             break;
                         }
                     }
-                    if(okDoo)                                   //Found and Set Target
-                        break;
                 }
-                if(!okDoo)
-                    return SPELL_FAILED_BAD_TARGETS;            //Missing DB Entry or targets for this spellEffect.
+
+                if(creatureScriptTarget)
+                    AddUnitTarget(creatureScriptTarget, j);
+                else if(goScriptTarget)
+                    AddGOTarget(goScriptTarget, j);
+                else
+                    return SPELL_FAILED_BAD_TARGETS;        //Missing DB Entry or targets for this spellEffect.
             }
         }
     }
