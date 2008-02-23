@@ -80,6 +80,13 @@ uint32 GossipMenu::MenuItemAction( unsigned int ItemId )
     return m_gItems[ ItemId ].m_gAction;
 }
 
+bool GossipMenu::MenuItemCoded( unsigned int ItemId )
+{
+    if ( ItemId >= m_gItems.size() ) return 0;
+
+    return m_gItems[ ItemId ].m_gCoded;
+}
+
 void GossipMenu::ClearMenu()
 {
     m_gItems.clear();
@@ -112,6 +119,11 @@ uint32 PlayerMenu::GossipOptionSender( unsigned int Selection )
 uint32 PlayerMenu::GossipOptionAction( unsigned int Selection )
 {
     return pGossipMenu->MenuItemAction( Selection );
+}
+
+bool PlayerMenu::GossipOptionCoded( unsigned int Selection )
+{
+    return pGossipMenu->MenuItemCoded( Selection );
 }
 
 void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )

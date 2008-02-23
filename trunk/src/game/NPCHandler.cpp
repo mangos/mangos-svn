@@ -305,8 +305,18 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
     uint32 option;
     uint64 guid;
+    std::string code = "";
 
     recv_data >> guid >> option;
+
+    if(_player->PlayerTalkClass->GossipOptionCoded( option ))
+    {
+        // recheck
+        CHECK_PACKET_SIZE(recv_data,8+4+1);
+        sLog.outBasic("reading string");
+        recv_data >> code;
+        sLog.outBasic("string read: %s", code.c_str());
+    }
 
     Creature *unit = ObjectAccessor::GetNPCIfCanInteractWith(*_player, guid, UNIT_NPC_FLAG_NONE);
     if (!unit)
@@ -315,8 +325,16 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if(!Script->GossipSelect( _player, unit, _player->PlayerTalkClass->GossipOptionSender( option ), _player->PlayerTalkClass->GossipOptionAction( option )) )
-        unit->OnGossipSelect( _player, option );
+    if(!code.empty())
+    {
+
+        if(!Script->GossipSelectWithCode( _player, unit, _player->PlayerTalkClass->GossipOptionSender( option ), _player->PlayerTalkClass->GossipOptionAction( option ), code.c_str()) )
+            unit->OnGossipSelect( _player, option );
+    }
+    else
+
+        if(!Script->GossipSelect( _player, unit, _player->PlayerTalkClass->GossipOptionSender( option ), _player->PlayerTalkClass->GossipOptionAction( option )) )
+            unit->OnGossipSelect( _player, option );
 }
 
 void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )

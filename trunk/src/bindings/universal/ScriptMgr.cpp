@@ -99,7 +99,7 @@ bool GossipSelect( Player *player, Creature *_Creature,uint32 sender, uint32 act
 }
 
 MANGOS_DLL_EXPORT
-bool GossipSelectWithCode( Player *player, Creature *_Creature, uint32 sender, uint32 action, char* sCode )
+bool GossipSelectWithCode( Player *player, Creature *_Creature, uint32 sender, uint32 action, const char* sCode )
 {
     Script *tmpscript = NULL;
 

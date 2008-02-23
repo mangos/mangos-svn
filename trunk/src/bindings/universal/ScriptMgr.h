@@ -50,7 +50,7 @@ struct Script
     bool (*pGossipHello         )(Player *player, Creature *_Creature);
     bool (*pQuestAccept         )(Player *player, Creature *_Creature, Quest const*_Quest );
     bool (*pGossipSelect        )(Player *player, Creature *_Creature, uint32 sender, uint32 action );
-    bool (*pGossipSelectWithCode)(Player *player, Creature *_Creature, uint32 sender, uint32 action, char* sCode );
+    bool (*pGossipSelectWithCode)(Player *player, Creature *_Creature, uint32 sender, uint32 action, const char* sCode );
     bool (*pQuestSelect         )(Player *player, Creature *_Creature, Quest const*_Quest );
     bool (*pQuestComplete       )(Player *player, Creature *_Creature, Quest const*_Quest );
     uint32 (*pNPCDialogStatus   )(Player *player, Creature *_Creature );
