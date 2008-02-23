@@ -2682,7 +2682,7 @@ uint8 Spell::CanCast(bool strict)
         return SPELL_FAILED_REQUIRES_AREA;
 
     // special cases zone check (maps not stored anywhere in DBC)
-    if( (m_spellInfo->Id==41618 || m_spellInfo->Id==41620) && zone_id != 3846 && zone_id != 3847 && zone_id != 3842 && zone_id != 3849 )
+    if( (m_spellInfo->Id==41618 || m_spellInfo->Id==41620) && zone_id != 3845 && zone_id != 3847 && zone_id != 3848 && zone_id != 3849 )
         return SPELL_FAILED_REQUIRES_AREA;
     if( (m_spellInfo->Id==41617 || m_spellInfo->Id==41619) && zone_id != 3717 && zone_id != 3607 && zone_id != 3715 && zone_id != 3716 )
         return SPELL_FAILED_REQUIRES_AREA;
