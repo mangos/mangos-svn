@@ -2270,6 +2270,10 @@ void Aura::HandleAuraModDisarm(bool Apply, bool Real)
     if (m_target->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    // main-hand attack speed already set to special value for feral form already and don't must chnage and reset at remove.
+    if (((Player *)m_target)->IsInFeralForm())
+        return;
+
     if (Apply)
         m_target->SetAttackTime(BASE_ATTACK,BASE_ATTACK_TIME);
     else
