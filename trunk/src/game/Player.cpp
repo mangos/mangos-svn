@@ -5988,6 +5988,9 @@ void Player::FlightComplete()
 {
     clearUnitState(UNIT_STAT_IN_FLIGHT);
     Unmount();
+
+    RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT );
+
     getHostilRefManager().setOnlineOfflineState(true);
     if(pvpInfo.inHostileArea)
         CastSpell(this, 2479, true);
@@ -15006,7 +15009,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
         return false;
     }
 
-    if( m_ShapeShiftForm && m_form != FORM_BATTLESTANCE && m_form != FORM_BERSERKERSTANCE && m_form != FORM_DEFENSIVESTANCE )
+    if( m_ShapeShiftForm && m_form != FORM_BATTLESTANCE && m_form != FORM_BERSERKERSTANCE && m_form != FORM_DEFENSIVESTANCE && m_form != FORM_SHADOW )
     {
         WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
         data << uint32(ERR_TAXIPLAYERSHAPESHIFTED);

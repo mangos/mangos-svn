@@ -137,10 +137,12 @@ void WorldSession::SendTaxiMenu( uint64 guid )
 
 void WorldSession::SendDoFlight( uint16 MountId, uint32 path, uint32 pathNode )
 {
-    GetPlayer()->Mount( MountId, true );
+    GetPlayer()->Mount( MountId );
 
     while(GetPlayer()->GetMotionMaster()->top()->GetMovementGeneratorType()==FLIGHT_MOTION_TYPE)
         GetPlayer()->GetMotionMaster()->MovementExpired(false);
+
+    _player->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
 
     FlightPathMovementGenerator *flight = new FlightPathMovementGenerator(path,pathNode);
     GetPlayer()->GetMotionMaster()->Mutate(flight);

@@ -2574,22 +2574,25 @@ uint8 Spell::CanCast(bool strict)
 
     if(target)
     {
-        // Not allow casting on flying player
-        if (target->isInFlight())
-            return SPELL_FAILED_BAD_TARGETS;
-
-        if(VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
-            return SPELL_FAILED_LINE_OF_SIGHT;
-
-        // auto selection spell rank implemented in WorldSession::HandleCastSpellOpcode
-        // this case can be triggered if rank not found (too low-level target for first rank)
-        if(m_caster->GetTypeId() == TYPEID_PLAYER && !IsPassiveSpell(m_spellInfo->Id) && !m_CastItem)
+        if(target != m_caster)
         {
-            for(int i=0;i<3;i++)
+            // Not allow casting on flying player
+            if (target->isInFlight())
+                return SPELL_FAILED_BAD_TARGETS;
+
+            if(VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
+                return SPELL_FAILED_LINE_OF_SIGHT;
+
+            // auto selection spell rank implemented in WorldSession::HandleCastSpellOpcode
+            // this case can be triggered if rank not found (too low-level target for first rank)
+            if(m_caster->GetTypeId() == TYPEID_PLAYER && !IsPassiveSpell(m_spellInfo->Id) && !m_CastItem)
             {
-                if(IsPositiveEffect(m_spellInfo->Id, i) && m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA)
-                    if(target->getLevel() + 10 < m_spellInfo->spellLevel)
-                        return SPELL_FAILED_LOWLEVEL;
+                for(int i=0;i<3;i++)
+                {
+                    if(IsPositiveEffect(m_spellInfo->Id, i) && m_spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA)
+                        if(target->getLevel() + 10 < m_spellInfo->spellLevel)
+                            return SPELL_FAILED_LOWLEVEL;
+                }
             }
         }
 

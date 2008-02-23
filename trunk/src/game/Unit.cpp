@@ -7023,18 +7023,14 @@ float Unit::GetPPMProcChance(uint32 WeaponSpeed, float PPM) const
     return result;
 }
 
-void Unit::Mount(uint32 mount, bool taxi)
+void Unit::Mount(uint32 mount)
 {
     if(!mount)
         return;
 
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, mount);
 
-    uint32 flag = UNIT_FLAG_MOUNT;
-    if(taxi)
-        flag |= UNIT_FLAG_DISABLE_MOVE;
-
-    SetFlag( UNIT_FIELD_FLAGS, flag );
+    SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
 
     // unsummon pet
     if(GetTypeId() == TYPEID_PLAYER)
@@ -7063,7 +7059,7 @@ void Unit::Unmount()
         return;
 
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
-    RemoveFlag( UNIT_FIELD_FLAGS ,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_MOUNT );
+    RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
 
     if(GetTypeId() == TYPEID_PLAYER && ((Player*)this)->GetOldPetNumber() && isAlive())
     {
