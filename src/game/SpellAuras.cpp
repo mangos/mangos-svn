@@ -2266,12 +2266,20 @@ void Aura::HandleAuraModDisarm(bool Apply, bool Real)
     else
         m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED);
 
+    // only at real add/remove aura
+    if (m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    if (Apply)
+        m_target->SetAttackTime(BASE_ATTACK,BASE_ATTACK_TIME);
+    else
+        ((Player *)m_target)->SetRegularAttackTime();
+
     m_target->UpdateDamagePhysical(BASE_ATTACK);
 }
 
 void Aura::HandleAuraModStun(bool apply, bool Real)
 {
-    // only at real add/remove aura
     if(!Real)
         return;
 
