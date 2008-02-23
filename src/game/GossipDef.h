@@ -120,6 +120,7 @@ class MANGOS_DLL_SPEC GossipMenu
 
         uint32 MenuItemSender( unsigned int ItemId );
         uint32 MenuItemAction( unsigned int ItemId );
+        bool MenuItemCoded( unsigned int ItemId );
 
         void ClearMenu();
 
@@ -168,6 +169,7 @@ class MANGOS_DLL_SPEC PlayerMenu
         void ClearMenus();
         uint32 GossipOptionSender( unsigned int Selection );
         uint32 GossipOptionAction( unsigned int Selection );
+        bool GossipOptionCoded( unsigned int Selection );
 
         void SendGossipMenu( uint32 TitleTextId, uint64 npcGUID );
         void CloseGossip();
