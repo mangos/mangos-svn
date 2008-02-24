@@ -528,6 +528,7 @@ enum Targets
     TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER = 30,           // in TargetB used only with TARGET_ALL_AROUND_CASTER and in self casting range in TargetA
     TARGET_MINION                      = 32,
     TARGET_ALL_PARTY                   = 33,
+    TARGET_ALL_PARTY_AROUND_CASTER_2   = 34,                // used in Tranquility
     TARGET_SINGLE_PARTY                = 35,
     TARGET_AREAEFFECT_PARTY            = 37,
     TARGET_SCRIPT                      = 38,
