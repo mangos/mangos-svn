@@ -2690,7 +2690,12 @@ uint8 Spell::CanCast(bool strict)
 
     // not let players cast spells at mount (and let do it to creatures)
     if(m_caster->IsMounted() && m_caster->GetTypeId()==TYPEID_PLAYER && !m_IsTriggeredSpell && !IsPassiveSpell(m_spellInfo->Id) && !(m_spellInfo->Attributes & 0x1000000))
-        return SPELL_FAILED_NOT_MOUNTED;
+    {
+        if(m_caster->isInFlight())
+            return SPELL_FAILED_NOT_FLYING;
+        else
+            return SPELL_FAILED_NOT_MOUNTED;
+    }
 
     // always (except passive spells) check items (focus object can be required for any type casts)
     if(!IsPassiveSpell(m_spellInfo->Id))

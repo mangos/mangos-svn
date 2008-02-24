@@ -4365,6 +4365,10 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             if(!pVictim || !pVictim->isAlive())
                 return;
 
+            // prevent damage back from weapon special attacks
+            if (!procSpell || procSpell->DmgClass != SPELL_DAMAGE_CLASS_MAGIC )
+                return;
+
             // return damage % to attacker but < 50% own total health
             uint32 backDamage = triggeredByAura->GetModifier()->m_amount*damage/100;
             if(backDamage > GetMaxHealth()/2)
@@ -4691,7 +4695,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
 
                 if (Unit *pet = GetPet())
                 {
-                    int32 healamount = damage * triggeredByAura->GetModifier()->m_amount / 100;
+                    int32 healamount = damage * triggeredByAura->GetModifier()->m_amount / 100 -1;
                     CastCustomSpell(pet, 37382, &healamount, NULL, NULL, true, castItem, triggeredByAura);
                 }
                 return;
