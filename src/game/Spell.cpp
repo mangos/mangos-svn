@@ -3249,10 +3249,13 @@ uint8 Spell::CanCast(bool strict)
             case SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT:
             case SPELL_AURA_FLY:
             {
-                // not allow cast fly spells at old maps
-                MapEntry const* mEntry = sMapStore.LookupEntry(m_caster->GetMapId());
-                if(!IsExpansionMap(mEntry))
-                    return SPELL_FAILED_NOT_HERE;
+                // not allow cast fly spells at old maps by players (all spells is self target)
+                if(m_caster->GetTypeId()==TYPEID_PLAYER)
+                {
+                    MapEntry const* mEntry = sMapStore.LookupEntry(m_caster->GetMapId());
+                    if(!IsExpansionMap(mEntry))
+                        return SPELL_FAILED_NOT_HERE;
+                }
             };break;
             default:break;
         }
