@@ -1048,6 +1048,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             }
         }break;
         case TARGET_ALL_PARTY_AROUND_CASTER:
+        case TARGET_ALL_PARTY_AROUND_CASTER_2:
         case TARGET_ALL_PARTY:
         {
             Unit* owner = m_caster->GetCharmerOrOwner();
