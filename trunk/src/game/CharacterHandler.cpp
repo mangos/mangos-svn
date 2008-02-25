@@ -56,32 +56,32 @@ bool LoginQueryHolder::Initialize()
 
     bool res = true;
 
-    // NOTE: all fields in `character` must be read to prevent lost character data at next save in case wrong DB structure.
+    // NOTE: all fields in `characters` must be read to prevent lost character data at next save in case wrong DB structure.
     // !!! NOTE: including unused `zone`,`online`
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADFROM,            "SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`at_login`,`zone`,`online`,`pending_honor`,`last_honor_date`,`last_kill_date`,`taxi_path` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGROUP,           "SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u'", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES,  "SELECT `map`,`instance`,`leader` FROM `character_instance` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADAURAS,           "SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`maxduration`,`remaintime`,`remaincharges` FROM `character_aura` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSPELLS,          "SELECT `spell`,`slot`,`active` FROM `character_spell` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADQUESTSTATUS,     "SELECT `quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADDAILYQUESTSTATUS,"SELECT `quest`,`time` FROM `character_queststatus_daily` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADTUTORIALS,       "SELECT `tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7` FROM `character_tutorial` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADREPUTATION,      "SELECT `faction`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADINVENTORY,       "SELECT `data`,`bag`,`slot`,`item`,`item_template` FROM `character_inventory` JOIN `item_instance` ON `character_inventory`.`item` = `item_instance`.`guid` WHERE `character_inventory`.`guid` = '%u' ORDER BY `bag`,`slot`", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADACTIONS,         "SELECT `button`,`action`,`type`,`misc` FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADMAILCOUNT,       "SELECT COUNT(id) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0 AND `deliver_time` <= '" I64FMTD "'", GUID_LOPART(m_guid),(uint64)time(NULL));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADMAILDATE,        "SELECT MIN(`deliver_time`) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADIGNORELIST,      "SELECT `friend` FROM `character_social` WHERE `guid` = '%u' AND `flags` = 1", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADFRIENDLIST,      "SELECT `friend` FROM `character_social` WHERE `guid` = '%u' AND `flags` = 0 LIMIT 255", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADHOMEBIND,        "SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS,  "SELECT `spell`,`item`,`time` FROM `character_spell_cooldown` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADFROM,            "SELECT guid,account,data,name,race,class,position_x,position_y,position_z,map,orientation,taximask,cinematic,totaltime,leveltime,rest_bonus,logout_time,is_logout_resting,resettalents_cost,resettalents_time,trans_x,trans_y,trans_z,trans_o, transguid,gmstate,stable_slots,at_login,zone,online,pending_honor,last_honor_date,last_kill_date,taxi_path FROM characters WHERE guid = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGROUP,           "SELECT leaderGuid FROM group_member WHERE memberGuid='%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES,  "SELECT map,instance,leader FROM character_instance WHERE guid = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADAURAS,           "SELECT caster_guid,spell,effect_index,amount,maxduration,remaintime,remaincharges FROM character_aura WHERE guid = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSPELLS,          "SELECT spell,slot,active FROM character_spell WHERE guid = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADQUESTSTATUS,     "SELECT quest,status,rewarded,explored,timer,mobcount1,mobcount2,mobcount3,mobcount4,itemcount1,itemcount2,itemcount3,itemcount4 FROM character_queststatus WHERE guid = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADDAILYQUESTSTATUS,"SELECT quest,time FROM character_queststatus_daily WHERE guid = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADTUTORIALS,       "SELECT tut0,tut1,tut2,tut3,tut4,tut5,tut6,tut7 FROM character_tutorial WHERE guid = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADREPUTATION,      "SELECT faction,standing,flags FROM character_reputation WHERE guid = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADINVENTORY,       "SELECT data,bag,slot,item,item_template FROM character_inventory JOIN item_instance ON character_inventory.item = item_instance.guid WHERE character_inventory.guid = '%u' ORDER BY bag,slot", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADACTIONS,         "SELECT button,action,type,misc FROM character_action WHERE guid = '%u' ORDER BY button", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADMAILCOUNT,       "SELECT COUNT(id) FROM mail WHERE receiver = '%u' AND checked = 0 AND deliver_time <= '" I64FMTD "'", GUID_LOPART(m_guid),(uint64)time(NULL));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADMAILDATE,        "SELECT MIN(deliver_time) FROM mail WHERE receiver = '%u' AND checked = 0", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADIGNORELIST,      "SELECT friend FROM character_social WHERE guid = '%u' AND flags = 1", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADFRIENDLIST,      "SELECT friend FROM character_social WHERE guid = '%u' AND flags = 0 LIMIT 255", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADHOMEBIND,        "SELECT map,zone,position_x,position_y,position_z FROM character_homebind WHERE guid = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS,  "SELECT spell,item,time FROM character_spell_cooldown WHERE guid = '%u'", GUID_LOPART(m_guid));
 
     if(sWorld.getConfig(CONFIG_HONOR_KILL_LIMIT))
-        res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADHONOR,       "SELECT `victim_guid`,`count` FROM `character_kill` WHERE `guid`='%u'", GUID_LOPART(m_guid));
+        res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADHONOR,       "SELECT victim_guid,count FROM character_kill WHERE guid='%u'", GUID_LOPART(m_guid));
     // in other case still be dummy query
 
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGUILD,           "SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_BROADCASTTOFRIENDLISTERS,"SELECT `guid` FROM `character_social` WHERE `friend` = '%u' AND `flags` = 0", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGUILD,           "SELECT guildid,rank FROM guild_member WHERE guid = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_BROADCASTTOFRIENDLISTERS,"SELECT guid FROM character_social WHERE friend = '%u' AND flags = 0", GUID_LOPART(m_guid));
 
     return res;
 }
@@ -118,7 +118,7 @@ class CharacterHandler
 void WorldSession::HandleCharEnum(QueryResult * result)
 {
     // keys can be non cleared if player open realm list and close it by 'cancel'
-    loginDatabase.PExecute("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `id` = '%u'", GetAccountId());
+    loginDatabase.PExecute("UPDATE account SET v = '0', s = '0' WHERE id = '%u'", GetAccountId());
 
     WorldPacket data(SMSG_CHAR_ENUM, 100);                  // we guess size
 
@@ -154,12 +154,12 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & /*recv_data*/ )
 {
     /// get all the data necesary for loading all characters (along with their pets) on the account
     CharacterDatabase.AsyncPQuery(&chrHandler, &CharacterHandler::HandleCharEnumCallback, GetAccountId(),
-    //          0                   1                   2                         3                         4                         5                   6                       7                        8
-        "SELECT `character`.`data`, `character`.`name`, `character`.`position_x`, `character`.`position_y`, `character`.`position_z`, `character`.`map`, `character`.`totaltime`, `character`.`leveltime`, `character`.`at_login`,"
-    //   9                       10                        11
-        "`character_pet`.`entry`,`character_pet`.`modelid`,`character_pet`.`level`"
-        "FROM `character` LEFT JOIN `character_pet` ON `character`.`guid`=`character_pet`.`owner` AND `character_pet`.`slot`='0'"
-        "WHERE `character`.`account` = '%u' ORDER BY `character`.`guid`", GetAccountId());
+    //          0                1                2                      3                      4                      5               6                     7                     8
+        "SELECT characters.data, characters.name, characters.position_x, characters.position_y, characters.position_z, characters.map, characters.totaltime, characters.leveltime, characters.at_login, "
+    //   9                    10                     11
+        "character_pet.entry, character_pet.modelid, character_pet.level "
+        "FROM characters LEFT JOIN character_pet ON characters.guid=character_pet.owner AND character_pet.slot='0' "
+        "WHERE characters.account = '%u' ORDER BY characters.guid", GetAccountId());
 }
 
 void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
@@ -237,7 +237,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetAccountId());
+    QueryResult *result = CharacterDatabase.PQuery("SELECT COUNT(guid) FROM characters WHERE account = '%d'", GetAccountId());
     uint8 charcount = 0;
     if ( result )
     {
@@ -256,7 +256,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     bool AllowTwoSideAccounts = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_ACCOUNTS);
     if(sWorld.IsPvPRealm()&&!AllowTwoSideAccounts)
     {
-        QueryResult *result2 = CharacterDatabase.PQuery("SELECT `race` FROM `character` WHERE `account` = '%u' LIMIT 1", GetAccountId());
+        QueryResult *result2 = CharacterDatabase.PQuery("SELECT race FROM characters WHERE account = '%u' LIMIT 1", GetAccountId());
         if(result2)
         {
             Field * field = result2->Fetch();
@@ -288,7 +288,9 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         pNewChar->SaveToDB();
         charcount+=1;
 
-        loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE `numchars` = '%d'", charcount, GetAccountId(), realmID, charcount);
+        loginDatabase.PExecute("DELETE FROM realmcharacters WHERE acctid= '%d' AND realmid = '%d'", GetAccountId(), realmID);
+        loginDatabase.PExecute("INSERT INTO realmcharacters (numchars, acctid, realmid) VALUES (%u, %u, %u)",  charcount, GetAccountId(), realmID);
+
         delete pNewChar;
     }
     else
@@ -324,7 +326,7 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
     uint32 accountId = 0;
     std::string name;
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT `account`,`name` FROM `character` WHERE `guid`='%u'", GUID_LOPART(guid));
+    QueryResult *result = CharacterDatabase.PQuery("SELECT account,name FROM characters WHERE guid='%u'", GUID_LOPART(guid));
     if(result)
     {
         Field *fields = result->Fetch();
@@ -499,7 +501,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         }
     }
 
-    //QueryResult *result = CharacterDatabase.PQuery("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'",pCurrChar->GetGUIDLow());
+    //QueryResult *result = CharacterDatabase.PQuery("SELECT guildid,rank FROM guild_member WHERE guid = '%u'",pCurrChar->GetGUIDLow());
     QueryResult *resultGuild = holder->GetResult(PLAYER_LOGIN_QUERY_LOADGUILD);
 
     if(resultGuild)
@@ -526,8 +528,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
     pCurrChar->SendInitialPacketsAfterAddToMap();
 
-    CharacterDatabase.PExecute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u'", pCurrChar->GetGUIDLow());
-    loginDatabase.PExecute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u'", GetAccountId());
+    CharacterDatabase.PExecute("UPDATE characters SET online = 1 WHERE guid = '%u'", pCurrChar->GetGUIDLow());
+    loginDatabase.PExecute("UPDATE account SET online = 1 WHERE id = '%u'", GetAccountId());
     pCurrChar->SetInGameTime( getMSTime() );
 
     // announce group about member online (must be after add to player list to receive announce to self)
@@ -794,7 +796,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
 
     recv_data >> guid;
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT `at_login` FROM `character` WHERE `guid` ='%u'", GUID_LOPART(guid));
+    QueryResult *result = CharacterDatabase.PQuery("SELECT at_login FROM characters WHERE guid ='%u'", GUID_LOPART(guid));
     if (result)
     {
         uint32 at_loginFlags;
@@ -875,7 +877,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     // we have to check character at_login_flag & AT_LOGIN_RENAME also (fake packets hehe)
 
     CharacterDatabase.escape_string(newname);
-    CharacterDatabase.PExecute("UPDATE `character` set `name` = '%s', `at_login` = `at_login` & ~ '%u' WHERE `guid` ='%u'", newname.c_str(), uint32(AT_LOGIN_RENAME),GUID_LOPART(guid));
+    CharacterDatabase.PExecute("UPDATE characters set name = '%s', at_login = at_login & ~ '%u' WHERE guid ='%u'", newname.c_str(), uint32(AT_LOGIN_RENAME),GUID_LOPART(guid));
 
     std::string IP_str = _socket ? _socket->GetRemoteAddress().c_str() : "-";
     sLog.outChar("Account: %d (IP: %s) Character:[%s] (guid:%u) Changed name to: %s",GetAccountId(),IP_str.c_str(),oldname.c_str(),GUID_LOPART(guid),newname.c_str());

@@ -143,11 +143,11 @@ LOCK TABLES `bugreport` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `character`
+-- Table structure for table `characters`
 --
 
-DROP TABLE IF EXISTS `character`;
-CREATE TABLE `character` (
+DROP TABLE IF EXISTS `characters`;
+CREATE TABLE `characters` (
   `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `account` int(11) unsigned NOT NULL default '0' COMMENT 'Account Identifier',
   `data` longtext,
@@ -189,12 +189,12 @@ CREATE TABLE `character` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
--- Dumping data for table `character`
+-- Dumping data for table `characters`
 --
 
-LOCK TABLES `character` WRITE;
-/*!40000 ALTER TABLE `character` DISABLE KEYS */;
-/*!40000 ALTER TABLE `character` ENABLE KEYS */;
+LOCK TABLES `characters` WRITE;
+/*!40000 ALTER TABLE `characters` DISABLE KEYS */;
+/*!40000 ALTER TABLE `characters` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -390,8 +390,8 @@ CREATE TABLE `character_pet` (
   `savetime` bigint(20) unsigned NOT NULL default '0',
   `resettalents_cost` int(11) unsigned NOT NULL default '0',
   `resettalents_time` bigint(20) unsigned NOT NULL default '0',
-  `ABData` longtext,
-  `TeachSpelldata` longtext,
+  `abdata` longtext,
+  `teachspelldata` longtext,
   PRIMARY KEY  (`id`),
   KEY `owner` (`owner`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet System';
@@ -633,11 +633,11 @@ LOCK TABLES `corpse` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `group`
+-- Table structure for table `groups`
 --
 
-DROP TABLE IF EXISTS `group`;
-CREATE TABLE `group` (
+DROP TABLE IF EXISTS `groups`;
+CREATE TABLE `groups` (
   `leaderGuid` int(11) unsigned NOT NULL,
   `mainTank` int(11) unsigned NOT NULL,
   `mainAssistant` int(11) unsigned NOT NULL,
@@ -657,12 +657,12 @@ CREATE TABLE `group` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Groups';
 
 --
--- Dumping data for table `group`
+-- Dumping data for table `groups`
 --
 
-LOCK TABLES `group` WRITE;
-/*!40000 ALTER TABLE `group` DISABLE KEYS */;
-/*!40000 ALTER TABLE `group` ENABLE KEYS */;
+LOCK TABLES `groups` WRITE;
+/*!40000 ALTER TABLE `groups` DISABLE KEYS */;
+/*!40000 ALTER TABLE `groups` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -702,7 +702,7 @@ CREATE TABLE `guild` (
   `BorderColor` int(5) NOT NULL default '0',
   `BackgroundColor` int(5) NOT NULL default '0',
   `info` text NOT NULL,
-  `MOTD` varchar(255) NOT NULL default '',
+  `motd` varchar(255) NOT NULL default '',
   `createdate` datetime default NULL,
   `BankMoney` bigint(20) NOT NULL default '0',
   PRIMARY KEY  (`guildid`)
@@ -778,7 +778,7 @@ CREATE TABLE `guild_bank_right` (
   `guildid` int(11) unsigned NOT NULL default '0',
   `TabId` tinyint(1) unsigned NOT NULL default '0',
   `rid` int(11) unsigned NOT NULL default '0',
-  `Right` tinyint(3) unsigned NOT NULL default '0',
+  `gbright` tinyint(3) unsigned NOT NULL default '0',
   `SlotPerDay` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guildid`,`TabId`,`rid`),
   KEY `guildid_key` (`guildid`)
@@ -825,8 +825,8 @@ CREATE TABLE `guild_member` (
   `guildid` int(6) unsigned NOT NULL default '0',
   `guid` int(11) unsigned NOT NULL default '0',
   `rank` tinyint(2) unsigned NOT NULL default '0',
-  `Pnote` varchar(255) NOT NULL default '',
-  `OFFnote` varchar(255) NOT NULL default '',
+  `pnote` varchar(255) NOT NULL default '',
+  `offnote` varchar(255) NOT NULL default '',
   `BankResetTimeMoney` int(11) unsigned NOT NULL default '0',
   `BankRemMoney` int(11) unsigned NOT NULL default '0',
   `BankResetTimeTab0` int(11) unsigned NOT NULL default '0',

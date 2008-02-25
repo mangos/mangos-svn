@@ -99,7 +99,7 @@ void Corpse::SaveToDB()
     DeleteFromDB();
 
     std::ostringstream ss;
-    ss  << "INSERT INTO `corpse` (`guid`,`player`,`position_x`,`position_y`,`position_z`,`orientation`,`zone`,`map`,`data`,`time`,`bones_flag`,`instance`) VALUES ("
+    ss  << "INSERT INTO corpse (guid,player,position_x,position_y,position_z,orientation,zone,map,data,time,bones_flag,instance) VALUES ("
         << GetGUIDLow() << ", " << GUID_LOPART(GetOwnerGUID()) << ", " << GetPositionX() << ", " << GetPositionY() << ", " << GetPositionZ() << ", "
         << GetOrientation() << ", "  << GetZoneId() << ", "  << GetMapId() << ", '";
     for(uint16 i = 0; i < m_valuesCount; i++ )
@@ -127,17 +127,17 @@ void Corpse::DeleteFromDB()
 {
     if(GetType() == CORPSE_BONES)
         // only specific bones
-        CharacterDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%d'", GetGUIDLow());
+        CharacterDatabase.PExecute("DELETE FROM corpse WHERE guid = '%d'", GetGUIDLow());
     else
         // all corpses (not bones)
-        CharacterDatabase.PExecute("DELETE FROM `corpse` WHERE `player` = '%d' AND `bones_flag` = '0'",  GUID_LOPART(GetOwnerGUID()));
+        CharacterDatabase.PExecute("DELETE FROM corpse WHERE player = '%d' AND bones_flag = '0'",  GUID_LOPART(GetOwnerGUID()));
 }
 
 bool Corpse::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
 {
     bool external = (result != NULL);
     if (!external)
-        result = CharacterDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag`,`instance` FROM `corpse` WHERE `guid` = '%u'",guid);
+        result = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,data,bones_flag,instance FROM corpse WHERE guid = '%u'",guid);
 
     if( ! result )
     {
@@ -159,7 +159,7 @@ bool Corpse::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
 
 bool Corpse::LoadFromDB(uint32 guid, Field *fields)
 {
-    // SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag`,`instance` FROM `corpse`
+    // SELECT position_x,position_y,position_z,orientation,map,data,bones_flag,instance FROM corpse
     float positionX = fields[0].GetFloat();
     float positionY = fields[1].GetFloat();
     float positionZ = fields[2].GetFloat();

@@ -124,7 +124,7 @@ void Master::Run()
     t.setPriority ((ZThread::Priority )2);
 
     // set server online
-    loginDatabase.PExecute("UPDATE `realmlist` SET `color` = 0, `population` = 0 WHERE `id` = '%d'",realmID);
+    loginDatabase.PExecute("UPDATE realmlist SET color = 0, population = 0 WHERE id = '%d'",realmID);
 
 #ifdef WIN32
     if (sConfig.GetBoolDefault("Console.Enable", true) && (m_ServiceStatus == -1)/* need disable console in service mode*/)
@@ -229,14 +229,14 @@ void Master::Run()
         {
             loopCounter = 0;
             sLog.outDetail("Ping MySQL to keep connection alive");
-            delete WorldDatabase.Query("SELECT 1 FROM `command` LIMIT 1");
-            delete loginDatabase.Query("SELECT 1 FROM `realmlist` LIMIT 1");
-            delete CharacterDatabase.Query("SELECT 1 FROM `bugreport` LIMIT 1");
+            delete WorldDatabase.Query("SELECT 1 FROM command LIMIT 1");
+            delete loginDatabase.Query("SELECT 1 FROM realmlist LIMIT 1");
+            delete CharacterDatabase.Query("SELECT 1 FROM bugreport LIMIT 1");
         }
     }
 
     // set server offline
-    loginDatabase.PExecute("UPDATE `realmlist` SET `color` = 2 WHERE `id` = '%d'",realmID);
+    loginDatabase.PExecute("UPDATE realmlist SET color = 2 WHERE id = '%d'",realmID);
 
     ///- Remove signal handling before leaving
     _UnhookSignals();
@@ -362,7 +362,7 @@ bool Master::_StartDB()
     ///- Clean the database before starting
     clearOnlineAccounts();
 
-    QueryResult* result = WorldDatabase.Query("SELECT `version` FROM `db_version` LIMIT 1");
+    QueryResult* result = WorldDatabase.Query("SELECT version FROM db_version LIMIT 1");
     if(result)
     {
         Field* fields = result->Fetch();
@@ -382,11 +382,11 @@ void Master::clearOnlineAccounts()
     // Cleanup online status for characters hosted at current realm
     /// \todo Only accounts with characters logged on *this* realm should have online status reset. Move the online column from 'account' to 'realmcharacters'?
     loginDatabase.PExecute(
-        "UPDATE `account`,`realmcharacters` SET `account`.`online` = 0 "
-        "WHERE `account`.`online` > 0 AND `account`.`id` = `realmcharacters`.`acctid` "
-        "  AND `realmcharacters`.`realmid` = '%d'",realmID);
+        "UPDATE account SET online = 0 WHERE online > 0 "
+        "AND id IN (SELECT acctid FROM realmcharacters WHERE realmid = '%d')",realmID);
+    
 
-    CharacterDatabase.Execute("UPDATE `character` SET `online` = 0");
+    CharacterDatabase.Execute("UPDATE characters SET online = 0");
 }
 
 /// Handle termination signals
@@ -432,6 +432,7 @@ void Master::_UnhookSignals()
     signal(SIGBREAK, 0);
     #endif
 }
+
 
 
 

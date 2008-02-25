@@ -435,7 +435,7 @@ void GameObject::SaveToDB()
 
     // updated in DB
     std::ostringstream ss;
-    ss << "INSERT INTO `gameobject` VALUES ( "
+    ss << "INSERT INTO gameobject VALUES ( "
         << m_DBTableGuid << ", "
         << GetUInt32Value (OBJECT_FIELD_ENTRY) << ", "
         << GetMapId() << ", "
@@ -452,7 +452,7 @@ void GameObject::SaveToDB()
         << GetUInt32Value (GAMEOBJECT_STATE) << ")";
 
     WorldDatabase.BeginTransaction();
-    WorldDatabase.PExecuteLog("DELETE FROM `gameobject` WHERE `guid` = '%u'", m_DBTableGuid);
+    WorldDatabase.PExecuteLog("DELETE FROM gameobject WHERE guid = '%u'", m_DBTableGuid);
     WorldDatabase.PExecuteLog( ss.str( ).c_str( ) );
     WorldDatabase.CommitTransaction();
 }
@@ -517,7 +517,7 @@ void GameObject::DeleteFromDB()
 {
     objmgr.SaveGORespawnTime(m_DBTableGuid,GetInstanceId(),0);
     objmgr.DeleteGOData(m_DBTableGuid);
-    WorldDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", m_DBTableGuid);
+    WorldDatabase.PExecute("DELETE FROM gameobject WHERE guid = '%u'", m_DBTableGuid);
 }
 
 GameObjectInfo const *GameObject::GetGOInfo() const

@@ -33,6 +33,7 @@ class AccountMgr
         int DeleteAccount(uint32 accid);
         int ChangeUsername(uint32 accid, std::string new_uname, std::string new_passwd);
         int ChangePassword(uint32 accid, std::string new_passwd);
+        bool CheckPassword(uint32 accid, std::string passwd);
 
         uint32 GetId(std::string username);
 };

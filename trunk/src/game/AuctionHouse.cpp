@@ -288,7 +288,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     CharacterDatabase.BeginTransaction();
     it->DeleteFromInventoryDB();
     it->SaveToDB();                                         // recursive and not have transaction guard into self
-    CharacterDatabase.PExecute("INSERT INTO `auctionhouse` (`id`,`auctioneerguid`,`itemguid`,`item_template`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`startbid`,`deposit`,`location`) "
+    CharacterDatabase.PExecute("INSERT INTO auctionhouse (id,auctioneerguid,itemguid,item_template,itemowner,buyoutprice,time,buyguid,lastbid,startbid,deposit,location) "
         "VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u', '%u', '%u')",
         AH->Id, AH->auctioneer, AH->item_guidlow, AH->item_template, AH->owner, AH->buyout, (uint64)AH->time, AH->bidder, AH->bid, AH->startbid, AH->deposit, AH->location);
     pl->SaveInventoryAndGoldToDB();
@@ -379,7 +379,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
         auction->bid = price;
 
         // after this update we should save player's money ...
-        CharacterDatabase.PExecute("UPDATE `auctionhouse` SET `buyguid` = '%u',`lastbid` = '%u' WHERE `id` = '%u'", auction->bidder, auction->bid, auction->Id);
+        CharacterDatabase.PExecute("UPDATE auctionhouse SET buyguid = '%u',lastbid = '%u' WHERE id = '%u'", auction->bidder, auction->bid, auction->Id);
 
         SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, AUCTION_OK, 0 );
     }
@@ -408,7 +408,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
 
         objmgr.RemoveAItem(auction->item_guidlow);
         mAuctions->RemoveAuction(auction->Id);
-        CharacterDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
+        CharacterDatabase.PExecute("DELETE FROM auctionhouse WHERE id = '%u'",auction->Id);
 
         delete auction;
     }
@@ -486,7 +486,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
     SendAuctionCommandResult( auction->Id, AUCTION_CANCEL, AUCTION_OK );
     // Now remove the auction
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
+    CharacterDatabase.PExecute("DELETE FROM auctionhouse WHERE id = '%u'",auction->Id);
     pl->SaveInventoryAndGoldToDB();
     CharacterDatabase.CommitTransaction();
     objmgr.RemoveAItem( auction->item_guidlow );

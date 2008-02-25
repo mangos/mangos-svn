@@ -51,8 +51,8 @@ void LoadSkillDiscoveryTable()
 
     uint32 count = 0;
 
-    //                                                 0          1           2
-    QueryResult *result = WorldDatabase.PQuery("SELECT `spellId`, `reqSpell`, `chance` FROM `skill_discovery_template`");
+    //                                                 0        1         2
+    QueryResult *result = WorldDatabase.PQuery("SELECT spellId, reqSpell, chance FROM skill_discovery_template"); 
 
     if (result)
     {

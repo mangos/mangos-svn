@@ -1241,8 +1241,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                 pItemSrc->FSetState(ITEM_CHANGED);
                 pItemSrc->SaveToDB();
                 pItemDst->SaveToDB();
-                CharacterDatabase.PExecute("REPLACE INTO `guild_bank_item` (`guildid`,`TabId`,`SlotId`,`item_guid`,`item_entry`) "
-                    "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemDst->GetGUIDLow(), pItemDst->GetEntry());
+                pGuild->AddGBankItemToDB(GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemDst->GetGUIDLow(), pItemDst->GetEntry());
 
                 pGuild->LogBankEvent(GUILD_BANK_LOG_MOVE_ITEM, BankTab, pl->GetGUIDLow(), pGuild->GetItem(BankTabDst, BankTabSlotDst)->GetEntry(), SplitedAmount, BankTabDst);
             }
@@ -1252,9 +1251,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
 
                 pGuild->StoreItem(BankTabDst, &BankTabSlotDst, pItemSrc);
                 // pItemSrc moved to BankTabSlotDst
-
-                CharacterDatabase.PExecute("REPLACE INTO `guild_bank_item` (`guildid`,`TabId`,`SlotId`,`item_guid`,`item_entry`) "
-                    "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemSrc->GetGUIDLow(), pItemSrc->GetEntry());
+                pGuild->AddGBankItemToDB(GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemSrc->GetGUIDLow(), pItemSrc->GetEntry());
 
                 CharacterDatabase.CommitTransaction();
                 // No need to save item instances, they did not change
@@ -1285,7 +1282,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     pItemSrc->DeleteFromDB();
                     pGuild->EmptyBankSlot(BankTab, BankTabSlot);
 
-                    CharacterDatabase.PExecute("DELETE FROM `guild_bank_item` WHERE `guildid`='%u' AND `TabId`='%u' AND `SlotId`='%u'",
+                    CharacterDatabase.PExecute("DELETE FROM guild_bank_item WHERE guildid='%u' AND TabId='%u' AND SlotId='%u'",
                         GuildId, uint32(BankTab), uint32(BankTabSlot));
                 }
                 else
@@ -1293,8 +1290,8 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     pItemSrc->FSetState(ITEM_CHANGED);
                     pItemSrc->SaveToDB();
                 }
-
-                CharacterDatabase.PExecute("REPLACE INTO `guild_bank_item` (`guildid`,`TabId`,`SlotId`,`item_guid`,`item_entry`) "
+                CharacterDatabase.PExecute("DELETE FROM guild_bank_item WHERE guildid = '%u' AND TabId='%u' AND SlotId ='%u'",GuildId, uint32(BankTabDst), uint32(BankTabSlotDst));
+                CharacterDatabase.PExecute("INSERT INTO guild_bank_item (guildid,TabId,SlotId,item_guid,item_entry) "
                     "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemDst->GetGUIDLow(), pItemDst->GetEntry());
 
                 pGuild->LogBankEvent(GUILD_BANK_LOG_MOVE_ITEM, BankTab, pl->GetGUIDLow(), pGuild->GetItem(BankTabDst, BankTabSlotDst)->GetEntry(), SplitedAmount, BankTabDst);
@@ -1323,15 +1320,13 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                 pGuild->StoreItem(BankTab, &BankTabSlot, pItemDst);
                 // pItemDst moved to BankTabSlot
 
-                CharacterDatabase.PExecute("REPLACE INTO `guild_bank_item` (`guildid`,`TabId`,`SlotId`,`item_guid`,`item_entry`) "
+                CharacterDatabase.PExecute("INS guild_bank_item (guildid,TabId,SlotId,item_guid,item_entry) "
                     "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, uint32(BankTab), uint32(BankTabSlot), pItemDst->GetGUIDLow(), pItemDst->GetEntry());
 
                 pGuild->EmptyBankSlot(BankTabDst, BankTabSlotDst);// Or next will merge stacks
                 pGuild->StoreItem(BankTabDst, &BankTabSlotDst, pItemSrc);
                 // pItemSrc moved to BankTabSlotDst
-
-                CharacterDatabase.PExecute("REPLACE INTO `guild_bank_item` (`guildid`,`TabId`,`SlotId`,`item_guid`,`item_entry`) "
-                    "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemSrc->GetGUIDLow(), pItemSrc->GetEntry());
+                pGuild->AddGBankItemToDB(GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemSrc->GetGUIDLow(), pItemSrc->GetEntry());
 
                 CharacterDatabase.CommitTransaction();
                 // No need to save item instances, they did not change
@@ -1530,9 +1525,8 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     pItemChar->RemoveFromUpdateQueueOf(pl);
                     pItemChar->DestroyForPlayer(pl);
                     pl->RemoveItem(PlayerBag, PlayerSlot, true);
-                    
-                    CharacterDatabase.PExecute("REPLACE INTO `guild_bank_item` (`guildid`,`TabId`,`SlotId`,`item_guid`,`item_entry`) "
-                        "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, uint32(BankTab), uint32(BankTabSlot), pItemChar->GetGUIDLow(), pItemChar->GetEntry());
+
+                    pGuild->AddGBankItemToDB(GuildId, uint32(BankTab), uint32(BankTabSlot), pItemChar->GetGUIDLow(), pItemChar->GetEntry());
 
                     pItemChar->DeleteFromInventoryDB();
                     pItemChar->SaveToDB();                  // this item is now in bank
@@ -1571,7 +1565,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     pItemToStore->SaveToDB();
 
                     pGuild->StoreItem(BankTab, &BankTabSlot, pItemToStore);
-                    CharacterDatabase.PExecute("INSERT INTO `guild_bank_item` (`guildid`,`TabId`,`SlotId`,`item_guid`,`item_entry`) "
+                    CharacterDatabase.PExecute("INSERT INTO guild_bank_item (guildid,TabId,SlotId,item_guid,item_entry) "
                         "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, uint32(BankTab), uint32(BankTabSlot), pItemToStore->GetGUIDLow(), pItemToStore->GetEntry());
                     pItemChar->SetState(ITEM_CHANGED);
                     pItemChar->SaveToDB();
@@ -1593,8 +1587,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     pItemChar->DestroyForPlayer(pl);
                     pl->RemoveItem(PlayerBag, PlayerSlot, true);
 
-                    CharacterDatabase.PExecute("REPLACE INTO `guild_bank_item` (`guildid`,`TabId`,`SlotId`,`item_guid`,`item_entry`) "
-                        "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, uint32(BankTab), uint32(BankTabSlot), pItemChar->GetGUIDLow(), pItemChar->GetEntry());
+                    pGuild->AddGBankItemToDB(GuildId, uint32(BankTab), uint32(BankTabSlot), pItemChar->GetGUIDLow(), pItemChar->GetEntry());
 
                     pItemChar->DeleteFromInventoryDB();
                     pItemChar->FSetState(ITEM_CHANGED);
@@ -1669,8 +1662,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     pItemChar->DestroyForPlayer(pl);
                     pl->RemoveItem(PlayerBag, PlayerSlot, true);
 
-                    CharacterDatabase.PExecute("REPLACE INTO `guild_bank_item` (`guildid`,`TabId`,`SlotId`,`item_guid`,`item_entry`) "
-                        "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, uint32(BankTab), uint32(BankTabSlot), pItemChar->GetGUIDLow(), pItemChar->GetEntry());
+                    pGuild->AddGBankItemToDB(GuildId, uint32(BankTab), uint32(BankTabSlot), pItemChar->GetGUIDLow(), pItemChar->GetEntry());
 
                     pItemChar->DeleteFromInventoryDB();
                     pItemChar->SaveToDB();                  // this item is now in bank

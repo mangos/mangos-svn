@@ -74,17 +74,17 @@ void SQLStorage::Load ()
 {
     uint32 maxi;
     Field *fields;
-    QueryResult *result  = WorldDatabase.PQuery("SELECT MAX(`%s`) FROM `%s`",entry_field,table);
+    QueryResult *result  = WorldDatabase.PQuery("SELECT MAX(%s) FROM %s",entry_field,table);
     if(!result)
     {
-        sLog.outError("Error loading `%s` table (not exist?)\n",table);
+        sLog.outError("Error loading %s table (not exist?)\n",table);
         exit(1);                                            // Stop server at loading non exited table or not accessable table
     }
 
     maxi= (*result)[0].GetUInt32()+1;
     delete result;
 
-    result = WorldDatabase.PQuery("SELECT COUNT(*) FROM `%s`",table);
+    result = WorldDatabase.PQuery("SELECT COUNT(*) FROM %s",table);
     if(result)
     {
         fields = result->Fetch();
@@ -94,11 +94,11 @@ void SQLStorage::Load ()
     else
         RecordCount = 0;
 
-    result = WorldDatabase.PQuery("SELECT * FROM `%s`",table);
+    result = WorldDatabase.PQuery("SELECT * FROM %s",table);
 
     if(!result)
     {
-        sLog.outError("`%s` table is empty!\n",table);
+        sLog.outError("%s table is empty!\n",table);
         RecordCount = 0;
         return;
     }
@@ -109,7 +109,7 @@ void SQLStorage::Load ()
     if(iNumFields!=result->GetFieldCount())
     {
         RecordCount = 0;
-        sLog.outError("Error in `%s` table, probably sql file format was updated (there should be %d fields in sql).\n",table,iNumFields);
+        sLog.outError("Error in %s table, probably sql file format was updated (there should be %d fields in sql).\n",table,iNumFields);
         delete result;
         exit(1);                                            // Stop server at loading broken or non-compatiable table.
     }

@@ -312,7 +312,7 @@ void AuthSocket::_SetVSFields(std::string rI)
     const char *v_hex, *s_hex;
     v_hex = v.AsHexStr();
     s_hex = s.AsHexStr();
-    dbRealmServer.PExecute("UPDATE `account` SET `v` = '%s', `s` = '%s' WHERE UPPER(`username`)= UPPER('%s')",v_hex,s_hex, _safelogin.c_str() );
+    dbRealmServer.PExecute("UPDATE account SET v = '%s', s = '%s' WHERE UPPER(username)= UPPER('%s')",v_hex,s_hex, _safelogin.c_str() );
     OPENSSL_free((void*)v_hex);
     OPENSSL_free((void*)s_hex);
 }
@@ -372,8 +372,8 @@ bool AuthSocket::_HandleLogonChallenge()
 
         ///- Verify that this IP is not in the ip_banned table
         // No SQL injection possible (paste the IP address as passed by the socket)
-        dbRealmServer.Execute("DELETE FROM `ip_banned` WHERE `unbandate`<=UNIX_TIMESTAMP() AND `unbandate`<>`bandate`");
-        QueryResult *result = dbRealmServer.PQuery(  "SELECT * FROM `ip_banned` WHERE `ip` = '%s'",GetRemoteAddress().c_str());
+        dbRealmServer.Execute("DELETE FROM ip_banned WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
+        QueryResult *result = dbRealmServer.PQuery(  "SELECT * FROM ip_banned WHERE ip = '%s'",GetRemoteAddress().c_str());
         if(result)
         {
             pkt << (uint8)REALM_AUTH_ACCOUNT_BANNED;
@@ -385,7 +385,7 @@ bool AuthSocket::_HandleLogonChallenge()
             ///- Get the account details from the account table
             // No SQL injection (escaped user name)
 
-            result = dbRealmServer.PQuery("SELECT `I`,`id`,`locked`,`last_ip`,`gmlevel` FROM `account` WHERE `username` = '%s'",_safelogin.c_str ());
+            result = dbRealmServer.PQuery("SELECT sha_pass_hash,id,locked,last_ip,gmlevel FROM account WHERE UPPER(username) = '%s'",_safelogin.c_str ());
             if( result )
             {
                 ///- If the IP is 'locked', check that the player comes indeed from the correct IP address
@@ -413,9 +413,9 @@ bool AuthSocket::_HandleLogonChallenge()
                 if (!locked)
                 {
                     //set expired bans to inactive
-                    dbRealmServer.Execute("UPDATE `account_banned` SET `active` = 0 WHERE `unbandate`<=UNIX_TIMESTAMP() AND `unbandate`<>`bandate`");
+                    dbRealmServer.Execute("UPDATE account_banned SET active = 0 WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
                     ///- If the account is banned, reject the logon attempt
-                    QueryResult *banresult = dbRealmServer.PQuery("SELECT `bandate`,`unbandate` FROM `account_banned` WHERE `id` = %u AND `active` = 1", (*result)[1].GetUInt32());
+                    QueryResult *banresult = dbRealmServer.PQuery("SELECT bandate,unbandate FROM account_banned WHERE id = %u AND active = 1", (*result)[1].GetUInt32());
                     if(banresult)
                     {
                         if((*banresult)[0].GetUInt64() == (*banresult)[1].GetUInt64())
@@ -463,7 +463,7 @@ bool AuthSocket::_HandleLogonChallenge()
                         uint8 secLevel = (*result)[4].GetUInt8();
                         _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
 
-                        QueryResult *localeresult = dbRealmServer.PQuery("SELECT `locale` FROM `localization` WHERE `string` = '%c%c'",ch->country[3],ch->country[2]);
+                        QueryResult *localeresult = dbRealmServer.PQuery("SELECT locale FROM localization WHERE string = '%c%c'",ch->country[3],ch->country[2]);
                         if( localeresult )
                         {
                             _localization=(*localeresult)[0].GetUInt8();
@@ -624,7 +624,7 @@ bool AuthSocket::_HandleLogonProof()
         ///- Update the sessionkey, last_ip and last login time in the account table for this account
         // No SQL injection (escaped user name) and IP address as received by socket
         const char* K_hex = K.AsHexStr();
-        dbRealmServer.PExecute("UPDATE `account` SET `sessionkey` = '%s', `last_ip` = '%s', `last_login` = NOW(), `locale` = '%u' WHERE `username` = '%s'", K_hex, GetRemoteAddress().c_str(),  _localization, _safelogin.c_str() );
+        dbRealmServer.PExecute("UPDATE account SET sessionkey = '%s', last_ip = '%s', last_login = NOW(), locale = '%u' WHERE UPPER(username) = '%s'", K_hex, GetRemoteAddress().c_str(),  _localization, _safelogin.c_str() );
         OPENSSL_free((void*)K_hex);
 
         ///- Finish SRP6 and send the final result to the client
@@ -664,7 +664,7 @@ bool AuthSocket::_HandleRealmList()
     ///- Get the user id (else close the connection)
     // No SQL injection (escaped user name)
 
-    QueryResult *result = dbRealmServer.PQuery("SELECT `id`,`I` FROM `account` WHERE `username` = '%s'",_safelogin.c_str());
+    QueryResult *result = dbRealmServer.PQuery("SELECT id,sha_pass_hash FROM account WHERE UPPER(username) = '%s'",_safelogin.c_str());
     if(!result)
     {
         sLog.outError("[ERROR] user %s tried to login and we cannot find him in the database.",_login.c_str());
@@ -689,7 +689,7 @@ bool AuthSocket::_HandleRealmList()
         uint8 AmountOfCharacters;
 
         // No SQL injection. id of realm is controlled by the database.
-        result = dbRealmServer.PQuery( "SELECT `numchars` FROM `realmcharacters` WHERE `realmid` = '%d' AND `acctid`='%u'",i->second.m_ID,id);
+        result = dbRealmServer.PQuery( "SELECT numchars FROM realmcharacters WHERE realmid = '%d' AND acctid='%u'",i->second.m_ID,id);
         if( result )
         {
             Field *fields = result->Fetch();

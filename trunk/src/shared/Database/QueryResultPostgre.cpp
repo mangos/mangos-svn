@@ -21,7 +21,7 @@
 #include "DatabaseEnv.h"
 
 QueryResultPostgre::QueryResultPostgre(PGresult *result, uint64 rowCount, uint32 fieldCount) :
-QueryResult(rowCount, fieldCount), mResult(result)
+QueryResult(rowCount, fieldCount), mResult(result),  mTableIndex(0)
 {
 
     mCurrentRow = new Field[mFieldCount];
@@ -30,8 +30,7 @@ QueryResult(rowCount, fieldCount), mResult(result)
     for (uint32 i = 0; i < mFieldCount; i++)
     {
         mCurrentRow[i].SetName(PQfname(result, i));
-        //mCurrentRow[i].SetType(ConvertNativeType(PQftype( result, i )));
-        mCurrentRow[i].SetType(Field::DB_TYPE_UNKNOWN);
+        mCurrentRow[i].SetType(ConvertNativeType(PQftype( result, i )));
     }
 }
 
@@ -55,6 +54,7 @@ bool QueryResultPostgre::NextRow()
     {
         mCurrentRow[j].SetValue(PQgetvalue(mResult, mTableIndex, j));
     }
+    mTableIndex++;
 
     return true;
 }
@@ -77,34 +77,37 @@ void QueryResultPostgre::EndQuery()
 // dummy -> all is set to "uknown"
 enum Field::DataTypes QueryResultPostgre::ConvertNativeType(Oid  pOid ) const
 {
+
+    /// TODO: need Fix This!!!
+    /*
     switch (pOid)
     {
-
-        // temporarry commented out until proper resolution found
-        //        case FIELD_TYPE_DATE:
-        //        case FIELD_TYPE_TIME:
-        //        case FIELD_TYPE_DATETIME:
-        //        case FIELD_TYPE_YEAR:
-        //        case FIELD_TYPE_STRING:
-        //        case FIELD_TYPE_VAR_STRING:
-        //        case FIELD_TYPE_BLOB:
-        //        case FIELD_TYPE_SET:
-        //        case FIELD_TYPE_NULL:
-        //            return Field::DB_TYPE_STRING;
-        //        case FIELD_TYPE_TINY:
-
-        //        case FIELD_TYPE_SHORT:
-        //        case FIELD_TYPE_LONG:
-        //        case FIELD_TYPE_INT24:
-        //        case FIELD_TYPE_LONGLONG:
-        //        case FIELD_TYPE_ENUM:
-        //           return Field::DB_TYPE_INTEGER;
-        //        case FIELD_TYPE_DECIMAL:
-        //        case FIELD_TYPE_FLOAT:
-        //        case FIELD_TYPE_DOUBLE:
-        //            return Field::DB_TYPE_FLOAT;
+        // see types in #include <postgre/pg_type.h>
+        case BOOLOID:
+        case NUMERICOID:
+        case INT8OID:
+        case INT4OID:
+        case INT2OID:
+        case OIDOID:
+        case TEXTOID:
+        case BYTEAOID:
+        case CHAROID:
+        case NAMEOID:
+        case CSTRINGARRAYOID:
+        case BPCHAROID:
+        case VARCHAROID:
+        case FLOAT4OID:
+        case FLOAT8OID:
+        case DATEOID:
+        case TIMEOID:
+        case TIMESTAMPOID:
+        case TIMESTAMPTZOID:
+        case UNKNOWNOID:
         default:
             return Field::DB_TYPE_UNKNOWN;
+
     }
+    */
+    return Field::DB_TYPE_UNKNOWN;
 }
 #endif

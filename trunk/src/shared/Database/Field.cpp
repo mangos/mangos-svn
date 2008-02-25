@@ -66,8 +66,11 @@ Field::~Field()
 void Field::SetValue(const char *value)
 {
     if(mValue) delete [] mValue;
-
+#ifndef DO_POSTGRESQL
     if (value)
+#else
+    if (*value)
+#endif
     {
         mValue = new char[strlen(value) + 1];
         strcpy(mValue, value);
@@ -80,7 +83,11 @@ void Field::SetName(const char *name)
 {
     if(mName) delete [] mName;
 
+#ifndef DO_POSTGRESQL
     if (name)
+#else
+    if (*name)
+#endif
     {
         mName = new char[strlen(name) + 1];
         strcpy(mName, name);

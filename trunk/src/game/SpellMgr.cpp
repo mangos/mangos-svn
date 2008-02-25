@@ -505,8 +505,8 @@ void SpellMgr::LoadSpellTeleports()
 
     uint32 count = 0;
 
-    //                                            0    1            2                   3                   4                   5
-    QueryResult *result = WorldDatabase.Query("SELECT `id`,`target_map`,`target_position_x`,`target_position_y`,`target_position_z`,`target_orientation` FROM `spell_teleport`");
+    //                                                0   1           2                  3                  4                  5
+    QueryResult *result = WorldDatabase.Query("SELECT id, target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM spell_teleport");
     if( !result )
     {
 
@@ -542,7 +542,7 @@ void SpellMgr::LoadSpellTeleports()
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(Spell_ID);
         if(!spellInfo)
         {
-            sLog.outErrorDb("Spell (ID:%u) listed in `spell_teleport` does not exist`.",Spell_ID);
+            sLog.outErrorDb("Spell (ID:%u) listed in `spell_teleport` does not exist.",Spell_ID);
             continue;
         }
 
@@ -590,8 +590,8 @@ void SpellMgr::LoadSpellAffects()
 
     uint32 count = 0;
 
-    //                                            0        1          2         3            4          5         6             7                 8
-    QueryResult *result = WorldDatabase.Query("SELECT `entry`,`effectId`,`SpellId`,`SchoolMask`,`Category`,`SkillID`,`SpellFamily`,`SpellFamilyMask`,`Charges` FROM `spell_affect`");
+    //                                                0      1         2        3           4         5        6            7                8
+    QueryResult *result = WorldDatabase.Query("SELECT entry, effectId, SpellId, SchoolMask, Category, SkillID, SpellFamily, SpellFamilyMask, Charges FROM spell_affect");
     if( !result )
     {
 
@@ -698,8 +698,8 @@ void SpellMgr::LoadSpellProcEvents()
 
     uint32 count = 0;
 
-    //                                            0       1            2          3         4          5      6                 7           8
-    QueryResult *result = WorldDatabase.Query("SELECT `entry`,`SchoolMask`,`Category`,`SkillID`,`SpellFamilyName`,`SpellFamilyMask`,`procFlags`,`ppmRate` FROM `spell_proc_event`");
+    //                                                0      1           2         3        4                5                6          7
+    QueryResult *result = WorldDatabase.Query("SELECT entry, SchoolMask, Category, SkillID, SpellFamilyName, SpellFamilyMask, procFlags, ppmRate FROM spell_proc_event");
     if( !result )
     {
 
@@ -1031,7 +1031,7 @@ void SpellMgr::LoadSpellChains()
 {
     mSpellChains.clear();                                   // need for reload case
 
-    QueryResult *result = WorldDatabase.PQuery("SELECT `spell_id`, `prev_spell`, `first_spell`, `rank` FROM `spell_chain`");
+    QueryResult *result = WorldDatabase.PQuery("SELECT spell_id, prev_spell, first_spell, rank FROM spell_chain");
     if(result == NULL)
     {
         barGoLink bar( 1 );
@@ -1124,7 +1124,7 @@ void SpellMgr::LoadSpellLearnSkills()
 {
     mSpellLearnSkills.clear();                              // need for reload case
 
-    QueryResult *result = WorldDatabase.PQuery("SELECT `entry`, `SkillID`, `Value`, `MaxValue` FROM `spell_learn_skill`");
+    QueryResult *result = WorldDatabase.PQuery("SELECT entry, SkillID, Value, MaxValue FROM spell_learn_skill");
     if(!result)
     {
         barGoLink bar( 1 );
@@ -1218,7 +1218,7 @@ void SpellMgr::LoadSpellLearnSpells()
 {
     mSpellLearnSpells.clear();                              // need for reload case
 
-    QueryResult *result = WorldDatabase.PQuery("SELECT `entry`, `SpellID`,`IfNoSpell` FROM `spell_learn_spell`");
+    QueryResult *result = WorldDatabase.PQuery("SELECT entry, SpellID,IfNoSpell FROM spell_learn_spell");
     if(!result)
     {
         barGoLink bar( 1 );
@@ -1322,7 +1322,7 @@ void SpellMgr::LoadSpellScriptTarget()
 
     uint32 count = 0;
 
-    QueryResult *result = WorldDatabase.Query("SELECT `entry`,`type`,`targetEntry` FROM `spell_script_target`");
+    QueryResult *result = WorldDatabase.Query("SELECT entry,type,targetEntry FROM spell_script_target");
 
     if(!result)
     {

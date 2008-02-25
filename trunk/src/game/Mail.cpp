@@ -125,7 +125,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     else
     {
         rc_team = objmgr.GetPlayerTeamByGUID(rc);
-        QueryResult* result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM `mail` WHERE `receiver` = '%u'", GUID_LOPART(rc));
+        QueryResult* result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM mail WHERE receiver = '%u'", GUID_LOPART(rc));
         if(result)
         {
             Field *fields = result->Fetch();
@@ -220,8 +220,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
                 CharacterDatabase.BeginTransaction();
                 mailItem.item->DeleteFromInventoryDB();           //deletes item from character's inventory
                 mailItem.item->SaveToDB();                        // recursive and not have transaction guard into self
-                // owner in `data` will set at mail receive and item extracting
-                CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'", GUID_LOPART(rc), mailItem.item->GetGUIDLow());
+                // owner in data will set at mail receive and item extracting
+                CharacterDatabase.PExecute("UPDATE item_instance SET owner_guid = '%u' WHERE guid='%u'", GUID_LOPART(rc), mailItem.item->GetGUIDLow());
                 CharacterDatabase.CommitTransaction();
             }
 
@@ -304,9 +304,9 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     //we can return mail now
     //so firstly delete the old one
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mailId);
+    CharacterDatabase.PExecute("DELETE FROM mail WHERE id = '%u'", mailId);
                                                             // needed?
-    CharacterDatabase.PExecute("DELETE FROM `mail_items` WHERE `mail_id` = '%u'", mailId);
+    CharacterDatabase.PExecute("DELETE FROM mail_items WHERE mail_id = '%u'", mailId);
     CharacterDatabase.CommitTransaction();
     pl->RemoveMail(mailId);
 
@@ -357,8 +357,8 @@ void WorldSession::SendReturnToSender(uint8 messageType, uint32 sender_acc, uint
             {
                 MailItem& mailItem = mailItemIter->second;
                 mailItem.item->SaveToDB();
-                // owner in `data` will set at mail receive and item extracting
-                CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'", receiver_guid, mailItem.item->GetGUIDLow());
+                // owner in data will set at mail receive and item extracting
+                CharacterDatabase.PExecute("UPDATE item_instance SET owner_guid = '%u' WHERE guid='%u'", receiver_guid, mailItem.item->GetGUIDLow());
             }
             CharacterDatabase.CommitTransaction();
         }
@@ -374,7 +374,7 @@ void WorldSession::SendReturnToSender(uint8 messageType, uint32 sender_acc, uint
         for(MailItemMap::iterator mailItemIter = mi->begin(); mailItemIter != mi->end(); ++mailItemIter)
         {
             MailItem& mailItem = mailItemIter->second;
-            CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'", mailItem.item->GetGUIDLow());
+            CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid='%u'", mailItem.item->GetGUIDLow());
             mailItem.deleteItem();
         }
     }
@@ -798,7 +798,7 @@ void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 station
         mi->deleteIncludedItems();
 
     CharacterDatabase.escape_string(subject);
-    CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`stationery`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+    CharacterDatabase.PExecute("INSERT INTO mail (id,messageType,stationery,sender,receiver,subject,itemTextId,has_items,expire_time,deliver_time,money,cod,checked) "
         "VALUES ('%u', '%u', '%u', '%u', '%u', '%s', '%u', '%u', '" I64FMTD "','" I64FMTD "', '%u', '%u', '%d')",
         mailId, messageType, stationery, sender_guidlow, receiver_guidlow, subject.c_str(), itemTextId, (mi && !mi->empty() ? 1 : 0), (uint64)expire_time, (uint64)deliver_time, money, COD, checked);
 
@@ -807,7 +807,7 @@ void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 station
         for(MailItemMap::const_iterator mailItemIter = mi->begin(); mailItemIter != mi->end(); ++mailItemIter)
         {
             MailItem const& mailItem = mailItemIter->second;
-            CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, mailItem.item_guidlow, mailItem.item_template);
+            CharacterDatabase.PExecute("INSERT INTO mail_items (mail_id,item_guid,item_template) VALUES ('%u', '%u', '%u')", mailId, mailItem.item_guidlow, mailItem.item_template);
         }
     }
 }

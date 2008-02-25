@@ -260,14 +260,11 @@ bool ChatHandler::HandlePasswordCommand(const char* args)
     loginDatabase.escape_string(password_old);
     loginDatabase.escape_string(password_new);
     loginDatabase.escape_string(password_new_c);
-    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE `id`='%d' AND `I`=SHA1(CONCAT(UPPER(`username`),':',UPPER('%s')))", m_session->GetAccountId(), password_old.c_str());
-    if(!result || password_new != password_new_c)
+
+    if(!accmgr.CheckPassword(m_session->GetAccountId(), password_old) || password_new != password_new_c)
         SendSysMessage(LANG_COMMAND_WRONGOLDPASSWORD);
     else if(accmgr.ChangePassword(m_session->GetAccountId(), password_new) == 0)
         SendSysMessage(LANG_COMMAND_PASSWORD);
-
-    if(result)
-        delete result;
 
     return true;
 }
@@ -283,14 +280,14 @@ bool ChatHandler::HandleLockAccountCommand(const char* args)
     std::string argstr = (char*)args;
     if (argstr == "on")
     {
-        loginDatabase.PExecute( "UPDATE `account` SET `locked` = '1' WHERE `id` = '%d'",m_session->GetAccountId());
+        loginDatabase.PExecute( "UPDATE account SET locked = '1' WHERE id = '%d'",m_session->GetAccountId());
         PSendSysMessage(LANG_COMMAND_ACCLOCKLOCKED);
         return true;
     }
 
     if (argstr == "off")
     {
-        loginDatabase.PExecute( "UPDATE `account` SET `locked` = '0' WHERE `id` = '%d'",m_session->GetAccountId());
+        loginDatabase.PExecute( "UPDATE account SET locked = '0' WHERE id = '%d'",m_session->GetAccountId());
         PSendSysMessage(LANG_COMMAND_ACCLOCKUNLOCKED);
         return true;
     }
