@@ -255,7 +255,7 @@ void CliShutdown(char* command,pPrintf zprintf)
 void CliInfo(char*,pPrintf zprintf)
 {
     ///- Get the list of accounts ID logged to the realm
-    QueryResult *resultDB = CharacterDatabase.Query("SELECT name,account FROM character WHERE online > 0");
+    QueryResult *resultDB = CharacterDatabase.Query("SELECT name,account FROM characters WHERE online > 0");
 
     if (!resultDB)
     {
