@@ -1826,9 +1826,7 @@ void Player::RegenerateHealth()
     }
 
     // always regeneration bonus (including combat)
-    AuraList const& mModHealthRegenFlat = GetAurasByType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT);
-    for(AuraList::const_iterator i = mModHealthRegenFlat.begin(); i != mModHealthRegenFlat.end(); ++i)
-        addvalue += (*i)->GetModifier()->m_amount;
+    addvalue += GetTotalAuraModifier(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT);
 
     if(addvalue < 0)
         addvalue = 0;
@@ -5407,11 +5405,7 @@ int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep, bo
     // for grey creature kill received 20%, in other case 100.
     int32 percent = (!for_quest && (creatureOrQuestLevel <= MaNGOS::XP::GetGrayLevel(getLevel()))) ? 20 : 100;
 
-    int32 repMod = 0;
-
-    AuraList const& mReputationGain = GetAurasByType(SPELL_AURA_MOD_REPUTATION_GAIN);
-    for(AuraList::const_iterator i = mReputationGain.begin();i != mReputationGain.end(); ++i)
-        repMod += ((*i)->GetModifier()->m_amount);
+    int32 repMod = GetTotalAuraModifier(SPELL_AURA_MOD_REPUTATION_GAIN);
 
     percent += rep > 0 ? repMod : -repMod;
 
