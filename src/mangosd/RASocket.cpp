@@ -26,7 +26,6 @@
 #include "RASocket.h"
 #include "World.h"
 #include "Config/ConfigEnv.h"
-#include "AccountMgr.h"
 
 /// \todo Make this thread safe if in the future 2 admins should be able to log at the same time.
 SOCKET r;
