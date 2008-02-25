@@ -775,18 +775,21 @@ void Guild::DisplayGuildBankContent(WorldSession *session, uint8 TabId)
         data << entry;
         if (entry)
         {
-            data << (uint32) pItem->GetItemRandomPropertyId();  // random item property id +8
+                                                            // random item property id +8
+            data << (uint32) pItem->GetItemRandomPropertyId();
             if (pItem->GetItemRandomPropertyId())
-                data << (uint32) pItem->GetItemSuffixFactor();  // SuffixFactor +4
-            data << (uint8)GetBankTab(TabId)->Slots[i]->GetCount(); // +12 // ITEM_FIELD_STACK_COUNT
-            data << uint32(0);                                  // +16 // Unknown value
-            //data << uint8(0);                                 
+                                                            // SuffixFactor +4
+                    data << (uint32) pItem->GetItemSuffixFactor();
+                                                            // +12 // ITEM_FIELD_STACK_COUNT
+            data << (uint8)GetBankTab(TabId)->Slots[i]->GetCount();
+            data << uint32(0);                              // +16 // Unknown value
+            //data << uint8(0);
             uint32 Enchant0 = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + PERM_ENCHANTMENT_SLOT + ENCHANTMENT_ID_OFFSET);
             if (Enchant0)
             {
-                data << uint8(1);                               // nb of enchantements (max 3)
-                data << uint8(0);                               // enchantment slot (range: 0:2)
-                data << (uint32)Enchant0;                       // enchantment id
+                data << uint8(1);                           // nb of enchantements (max 3)
+                data << uint8(0);                           // enchantment slot (range: 0:2)
+                data << (uint32)Enchant0;                   // enchantment id
             }
             else
                 data << uint8(0);
@@ -797,7 +800,8 @@ void Guild::DisplayGuildBankContent(WorldSession *session, uint8 TabId)
 }
 
 // If same is return: failed or just modified, if different: player has to store, null: stored
-Item* Guild::StoreItem(uint8 TabId, uint8* SlotId, Item* pItem) //, uint8 StackAmount)
+                                                            //, uint8 StackAmount)
+Item* Guild::StoreItem(uint8 TabId, uint8* SlotId, Item* pItem)
 {
     if (TabId >= m_TabListMap.size() || ((*SlotId) >= GUILD_BANK_MAX_SLOTS && (*SlotId) != 0xFF))
         return pItem;
@@ -858,7 +862,7 @@ Item* Guild::StoreItem(uint8 TabId, uint8* SlotId, Item* pItem) //, uint8 StackA
         pItem->SetUInt64Value(ITEM_FIELD_OWNER, 0);
         return BankItem;
     }
-    
+
     // Same entry now with not full stack
     {                                                       // there is a stack possibility
         uint32 StackSpace = BankItem->GetMaxStackCount() - BankItem->GetCount();
@@ -956,7 +960,7 @@ void Guild::CreateBankRightForTab(uint32 rankId, uint8 TabId)
     sLog.outDebug("CreateBankRightForTab. rank: %u, TabId: %u", rankId, uint32(TabId));
     if (rankId >= m_ranks.size() || TabId >= GUILD_BANK_MAX_TABS)
         return;
-  
+
     m_ranks[rankId].TabRight[TabId]=0;
     m_ranks[rankId].TabSlotPerDay[TabId]=0;
     CharacterDatabase.BeginTransaction();
@@ -989,7 +993,7 @@ void Guild::LoadGuildBankFromDB()
     QueryResult *result = CharacterDatabase.PQuery("SELECT TabId, TabName, TabIcon FROM guild_bank_tab WHERE guildid='%u' ORDER BY TabId", Id);
     if(!result)
     {
-        purchased_tabs = 0;     
+        purchased_tabs = 0;
         return;
     }
 
@@ -1001,7 +1005,7 @@ void Guild::LoadGuildBankFromDB()
 
         GuildBankTab *NewTab = new GuildBankTab;
         memset(NewTab->Slots, 0, GUILD_BANK_MAX_SLOTS * sizeof(Item*));
-    
+
         NewTab->Name = fields[1].GetCppString();
         NewTab->Icon = fields[2].GetCppString();
 
@@ -1077,7 +1081,7 @@ void Guild::UnloadGuildBank()
         delete m_TabListMap[i];
     }
     m_TabListMap.clear();
-    
+
     UnloadGuildBankEventLog();
     m_bankloaded = false;
 }
@@ -1116,7 +1120,7 @@ bool Guild::MemberMoneyWithdraw(uint32 amount, uint32 LowGuid)
 
 void Guild::SetBankMoney(int64 money)
 {
-    if (money < 0)                          // I don't know how this happens, it does!!
+    if (money < 0)                                          // I don't know how this happens, it does!!
         money = 0;
     guildbank_money = money;
 
@@ -1186,12 +1190,12 @@ uint32 Guild::GetMemberMoneyWithdrawRem(uint32 LowGuid)
     if (itr == members.end() )
         return 0;
 
-
     if (itr->second.RankId == GR_GUILDMASTER)
         return WITHDRAW_MONEY_UNLIMITED;
 
     uint32 curTime = uint32(time(NULL)/MINUTE);             // minutes
-    if (curTime > itr->second.BankResetTimeMoney + 24*HOUR/MINUTE) // 24 hours
+                                                            // 24 hours
+    if (curTime > itr->second.BankResetTimeMoney + 24*HOUR/MINUTE)
     {
         itr->second.BankResetTimeMoney = curTime;
         itr->second.BankRemMoney = GetBankMoneyPerDay(itr->second.RankId);
@@ -1244,7 +1248,7 @@ void Guild::SetBankRightsAndSlots(uint32 rankId, uint8 TabId, uint32 right, uint
 
         CharacterDatabase.PExecute("DELETE FROM guild_bank_right WHERE guildid='%u' AND TabId='%u' AND rid='%u'", Id, uint32(TabId), rankId);
         CharacterDatabase.PExecute("INSERT INTO guild_bank_right (guildid,TabId,rid,gbright,SlotPerDay) VALUES "
-            "'%u','%u','%u','%u','%u'", Id, uint32(TabId), rankId, m_ranks[rankId].TabRight[TabId], m_ranks[rankId].TabSlotPerDay[TabId]);
+            "('%u','%u','%u','%u','%u')", Id, uint32(TabId), rankId, m_ranks[rankId].TabRight[TabId], m_ranks[rankId].TabSlotPerDay[TabId]);
         CharacterDatabase.PExecute("UPDATE guild_member SET BankResetTimeTab%u='0' WHERE guildid='%u' AND rank='%u'", uint32(TabId), Id, rankId);
     }
 }
@@ -1288,7 +1292,7 @@ void Guild::LoadBankRightsFromDB(uint32 GuildId)
         uint16 right = fields[2].GetUInt16();
         uint16 SlotPerDay = fields[3].GetUInt16();
         SetBankRightsAndSlots(rankId, TabId, right, SlotPerDay, false);
-        
+
     }while( result->NextRow() );
     delete result;
 
@@ -1309,7 +1313,7 @@ void Guild::LoadGuildBankEventLogFromDB()
     {
         Field *fields = result->Fetch();
         GuildBankEvent *NewEvent = new GuildBankEvent;
-        
+
         NewEvent->LogGuid = fields[0].GetUInt32();
         NewEvent->LogEntry = fields[1].GetUInt8();
         uint8 TabId = fields[2].GetUInt8();
@@ -1318,8 +1322,8 @@ void Guild::LoadGuildBankEventLogFromDB()
         NewEvent->ItemStackCount = fields[5].GetUInt8();
         NewEvent->DestTabId = fields[6].GetUInt8();
         NewEvent->TimeStamp = fields[7].GetUInt64();
-        if (NewEvent->LogEntry == GUILD_BANK_LOG_DEPOSIT_MONEY || 
-            NewEvent->LogEntry == GUILD_BANK_LOG_WITHDRAW_MONEY || 
+        if (NewEvent->LogEntry == GUILD_BANK_LOG_DEPOSIT_MONEY ||
+            NewEvent->LogEntry == GUILD_BANK_LOG_WITHDRAW_MONEY ||
             NewEvent->LogEntry == GUILD_BANK_LOG_REPAIR_MONEY)
             m_GuildBankEventLog_Money.push_front(NewEvent);
         else
@@ -1336,7 +1340,7 @@ void Guild::LoadGuildBankEventLogFromDB()
         {
             GuildBankEvent *EventLogEntry = *(m_GuildBankEventLog_Money.begin());
             m_GuildBankEventLog_Money.pop_front();
-            CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid='%u' AND LogGuid='%u'", 
+            CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid='%u' AND LogGuid='%u'",
                 Id, uint32(EventLogEntry->LogEntry), EventLogEntry->LogGuid);
             delete EventLogEntry;
         }while( m_GuildBankEventLog_Money.size() > GUILD_BANK_MAX_LOGS );
@@ -1349,7 +1353,7 @@ void Guild::LoadGuildBankEventLogFromDB()
             {
                 GuildBankEvent *EventLogEntry = *(m_GuildBankEventLog_Item[i].begin());
                 m_GuildBankEventLog_Item[i].pop_front();
-                CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid='%u' AND LogGuid='%u'", 
+                CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid='%u' AND LogGuid='%u'",
                     Id, uint32(EventLogEntry->LogEntry), EventLogEntry->LogGuid);
                 delete EventLogEntry;
             }while( m_GuildBankEventLog_Item[i].size() > GUILD_BANK_MAX_LOGS );
@@ -1409,7 +1413,8 @@ void Guild::DisplayGuildBankLogs(WorldSession *session, uint8 TabId)
         // here we display current tab logs
         WorldPacket data(MSG_GUILD_BANK_LOG, m_GuildBankEventLog_Item[TabId].size()*(4*4+1+1)+1+1);
         data << uint8(TabId);                               // Here a real Tab Id
-        data << uint8(m_GuildBankEventLog_Item[TabId].size());     // number of log entries
+                                                            // number of log entries
+        data << uint8(m_GuildBankEventLog_Item[TabId].size());
         for (GuildBankEventLog::const_iterator itr = m_GuildBankEventLog_Item[TabId].begin(); itr != m_GuildBankEventLog_Item[TabId].end(); ++itr)
         {
             data << uint8((*itr)->LogEntry);
@@ -1438,7 +1443,7 @@ void Guild::LogBankEvent(uint8 LogEntry, uint8 TabId, uint32 PlayerGuidLow, uint
     NewEvent->DestTabId = DestTabId;
     NewEvent->TimeStamp = uint32(time(NULL));
 
-    if (LogEntry == GUILD_BANK_LOG_DEPOSIT_MONEY || 
+    if (LogEntry == GUILD_BANK_LOG_DEPOSIT_MONEY ||
         LogEntry == GUILD_BANK_LOG_WITHDRAW_MONEY ||
         LogEntry == GUILD_BANK_LOG_REPAIR_MONEY)
     {
@@ -1457,7 +1462,7 @@ void Guild::LogBankEvent(uint8 LogEntry, uint8 TabId, uint32 PlayerGuidLow, uint
         {
             GuildBankEvent *OldEvent = *(m_GuildBankEventLog_Item[TabId].begin());
             m_GuildBankEventLog_Item[TabId].pop_front();
-            CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid='%u' AND LogGuid='%u'", Id, OldEvent->LogGuid);         
+            CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid='%u' AND LogGuid='%u'", Id, OldEvent->LogGuid);
             delete OldEvent;
         }
         m_GuildBankEventLog_Item[TabId].push_back(NewEvent);
