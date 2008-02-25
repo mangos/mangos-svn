@@ -137,11 +137,14 @@ namespace MaNGOS
             {
                 xp = (155 + mxp(lvl) * (1344 - 70 - ((69 - lvl) * (7 + (69 - lvl) * 8 - 1)/2)));
             }
-            else if (lvl >= 70)                             // level higher than 70 is not supported, return artificially high xp needed, 
-                return 1000000000;                          // to prevent negative values in some cases
-            else
+            else if (lvl < 70)
             {
                 xp = (155 + mxp(lvl) * (1344 - ((69-lvl) * (7 + (69 - lvl) * 8 - 1)/2)));
+            }else 
+            {
+                // level higher than 70 is not supported
+                xp = (uint32)(779700 * (pow(sWorld.getRate(RATE_XP_PAST_70), (int32)lvl - 69)));
+                return ((xp < 0x7fffffff) ? xp : 0x7fffffff);
             }
 
             // The XP to Level is always rounded to the nearest 100 points (50 rounded to high).

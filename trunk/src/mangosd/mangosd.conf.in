@@ -363,6 +363,9 @@ Rate.XP.Kill    = 1
 Rate.XP.Quest   = 1
 Rate.XP.Explore = 1
 
+# XP needed per level past 70 (Rates below 1 not recommended)
+Rate.XP.PastLevel70 = 1
+
 # Creature Damage Rate.
 # Examples: 2 - creatures will damage 2x, 1.7 - 1.7x.
 Rate.Creature.Normal.Damage = 1
