@@ -157,15 +157,34 @@ void Player::UpdateArmor()
         pet->UpdateArmor();
 }
 
+float Player::GetHealthBonusFromStamina()
+{
+    float stamina = GetStat(STAT_STAMINA);
+
+    float baseStam = stamina < 20 ? stamina : 20;
+    float moreStam = stamina - baseStam;
+
+    return baseStam + (moreStam*10.0f);
+}
+
+float Player::GetManaBonusFromIntellect()
+{
+    float intellect = GetStat(STAT_INTELLECT);
+
+    float baseInt = intellect < 20 ? intellect : 20;
+    float moreInt = intellect - baseInt;
+
+    return baseInt + (moreInt*15.0f);
+}
+
 void Player::UpdateMaxHealth()
 {
     UnitMods unitMod = UNIT_MOD_HEALTH;
-    float stamina = GetStat(STAT_STAMINA) - GetCreateStat(STAT_STAMINA);
 
-    float value   = GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
-    value  *= GetModifierValue(unitMod, BASE_PCT);
-    value  += GetModifierValue(unitMod, TOTAL_VALUE) + stamina * 10.0f;
-    value  *= GetModifierValue(unitMod, TOTAL_PCT);
+    float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
+    value *= GetModifierValue(unitMod, BASE_PCT);
+    value += GetModifierValue(unitMod, TOTAL_VALUE) + GetHealthBonusFromStamina();
+    value *= GetModifierValue(unitMod, TOTAL_PCT);
 
     SetMaxHealth((uint32)value);
 }
@@ -173,11 +192,12 @@ void Player::UpdateMaxHealth()
 void Player::UpdateMaxPower(Powers power)
 {
     UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
-    float addValue = (power == POWER_MANA) ? GetStat(STAT_INTELLECT) - GetCreateStat(STAT_INTELLECT) : 0.0f;
 
-    float value  = GetModifierValue(unitMod, BASE_VALUE) + GetCreatePowers(power);
+    float bonusPower = (power == POWER_MANA) ? GetManaBonusFromIntellect() : 0;
+
+    float value = GetModifierValue(unitMod, BASE_VALUE) + GetCreatePowers(power);
     value *= GetModifierValue(unitMod, BASE_PCT);
-    value += GetModifierValue(unitMod, TOTAL_VALUE) +  addValue * 15.0f;
+    value += GetModifierValue(unitMod, TOTAL_VALUE) +  bonusPower;
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
     SetMaxPower(power, uint32(value));

@@ -1795,8 +1795,8 @@ void ObjectMgr::LoadPlayerInfo()
 
     // Loading levels data
     {
-        //                                                 0     1      2      3   4     5    6    7    8     9
-        QueryResult *result  = WorldDatabase.Query("SELECT race, class, level, hp, mana, str, agi, sta, inte, spi FROM player_levelstats");
+        //                                                 0     1      2      3       4         5    6    7    8     9
+        QueryResult *result  = WorldDatabase.Query("SELECT race, class, level, basehp, basemana, str, agi, sta, inte, spi FROM player_levelstats");
 
         uint32 count = 0;
 
@@ -1847,8 +1847,8 @@ void ObjectMgr::LoadPlayerInfo()
 
             PlayerLevelInfo* pLevelInfo = &pInfo->levelInfo[current_level-1];
 
-            pLevelInfo->health = fields[3].GetUInt16();
-            pLevelInfo->mana   = fields[4].GetUInt16();
+            pLevelInfo->basehealth = fields[3].GetUInt16();
+            pLevelInfo->basemana   = fields[4].GetUInt16();
 
             for (int i = 0; i < MAX_STATS; i++)
             {
@@ -1890,7 +1890,7 @@ void ObjectMgr::LoadPlayerInfo()
                 continue;
 
             // fatal error if no level 1 data
-            if(!pInfo->levelInfo || pInfo->levelInfo[0].health == 0 )
+            if(!pInfo->levelInfo || pInfo->levelInfo[0].basehealth == 0 )
             {
                 sLog.outErrorDb("Race %i Class %i Level 1 does not have stats data!",race,class_);
                 exit(1);
@@ -1899,7 +1899,7 @@ void ObjectMgr::LoadPlayerInfo()
             // fill level gaps
             for (uint32 level = 1; level < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL); ++level)
             {
-                if(pInfo->levelInfo[level].health == 0)
+                if(pInfo->levelInfo[level].basehealth == 0)
                 {
                     sLog.outErrorDb("Race %i Class %i Level %i does not have stats data. Using stats data of level %i.",race,class_,level+1, level);
                     pInfo->levelInfo[level] = pInfo->levelInfo[level-1];
@@ -1996,8 +1996,8 @@ void ObjectMgr::BuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, Play
                 info->stats[STAT_SPIRIT]    += (lvl > 38 ? 3: (lvl > 5 ? 1: 0));
         }
 
-        info->mana   += (_class == CLASS_WARRIOR || _class == CLASS_ROGUE) ? 0 : info->stats[STAT_SPIRIT] / 2;
-        info->health += info->stats[STAT_STAMINA] / 2;
+        info->basemana   += (_class == CLASS_WARRIOR || _class == CLASS_ROGUE) ? 0 : info->stats[STAT_SPIRIT] / 2;
+        info->basehealth += info->stats[STAT_STAMINA] / 2;
     }
 }
 
