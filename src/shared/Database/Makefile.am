@@ -44,6 +44,7 @@ libmangosdatabase_a_SOURCES = \
 	Field.cpp \
 	Field.h \
 	MySQLDelayThread.h \
+	PGSQLDelayThread.h \
 	QueryResult.h \
 	QueryResultMysql.cpp \
 	QueryResultMysql.h \

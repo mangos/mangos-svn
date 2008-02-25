@@ -75,16 +75,16 @@ bool Group::Create(const uint64 &guid, const char * name)
 
     // store group in database
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
-    CharacterDatabase.PExecute("DELETE FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
-    CharacterDatabase.PExecute("INSERT INTO `group`(`leaderGuid`,`mainTank`,`mainAssistant`,`lootMethod`,`looterGuid`,`lootThreshold`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`,`isRaid`) "
+    CharacterDatabase.PExecute("DELETE FROM group WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("DELETE FROM group_member WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("INSERT INTO group(leaderGuid,mainTank,mainAssistant,lootMethod,looterGuid,lootThreshold,icon1,icon2,icon3,icon4,icon5,icon6,icon7,icon8,isRaid) "
         "VALUES('%u','%u','%u','%u','%u','%u','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "',0)",
         GUID_LOPART(m_leaderGuid), GUID_LOPART(m_mainTank), GUID_LOPART(m_mainAssistant), uint32(m_lootMethod),
         GUID_LOPART(m_looterGuid), uint32(m_lootThreshold), m_targetIcons[0], m_targetIcons[1], m_targetIcons[2], m_targetIcons[3], m_targetIcons[4], m_targetIcons[5], m_targetIcons[6], m_targetIcons[7]);
 
     for(Group::member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
     {
-        CharacterDatabase.PExecute("INSERT INTO `group_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')",
+        CharacterDatabase.PExecute("INSERT INTO group_member(leaderGuid,memberGuid,assistant,subgroup) VALUES('%u','%u','%u','%u')",
             GUID_LOPART(m_leaderGuid), GUID_LOPART(itr->guid), (itr->assistant==1)?1:0, itr->group);
     }
     CharacterDatabase.CommitTransaction();
@@ -94,8 +94,8 @@ bool Group::Create(const uint64 &guid, const char * name)
 
 bool Group::LoadGroupFromDB(const uint64 &leaderGuid)
 {
-    //                                             0          1               2            3            4               5       6       7       8       9       10      11      12      13
-    QueryResult *result = CharacterDatabase.PQuery("SELECT `mainTank`,`mainAssistant`,`lootMethod`,`looterGuid`,`lootThreshold`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`,`isRaid` FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));
+    //                                                     0         1              2           3           4              5      6      7      8      9      10     11     12     13
+    QueryResult *result = CharacterDatabase.PQuery("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid FROM group WHERE leaderGuid='%u'", GUID_LOPART(leaderGuid));
     if(!result)
         return false;
 
@@ -119,7 +119,7 @@ bool Group::LoadGroupFromDB(const uint64 &leaderGuid)
         m_targetIcons[i] = (*result)[5+i].GetUInt64();
     delete result;
 
-    result = CharacterDatabase.PQuery("SELECT `memberGuid`,`assistant`,`subgroup` FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));
+    result = CharacterDatabase.PQuery("SELECT memberGuid,assistant,subgroup FROM group_member WHERE leaderGuid='%u'", GUID_LOPART(leaderGuid));
     if(!result)
         return false;
 
@@ -281,8 +281,8 @@ void Group::Disband(bool hideDestroy)
     m_invitees.clear();
 
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
-    CharacterDatabase.PExecute("DELETE FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("DELETE FROM group WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("DELETE FROM group_member WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
     CharacterDatabase.CommitTransaction();
 
     m_leaderGuid = 0;
@@ -883,7 +883,7 @@ bool Group::_addMember(const uint64 &guid, const char* name, bool isAssistant, u
     }
 
     // insert into group table
-    CharacterDatabase.PExecute("INSERT INTO `group_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')", GUID_LOPART(m_leaderGuid), GUID_LOPART(member.guid), ((member.assistant==1)?1:0), member.group);
+    CharacterDatabase.PExecute("INSERT INTO group_member(leaderGuid,memberGuid,assistant,subgroup) VALUES('%u','%u','%u','%u')", GUID_LOPART(m_leaderGuid), GUID_LOPART(member.guid), ((member.assistant==1)?1:0), member.group);
 
     return true;
 }
@@ -904,7 +904,7 @@ bool Group::_removeMember(const uint64 &guid)
     if (slot != m_memberSlots.end())
         m_memberSlots.erase(slot);
 
-    CharacterDatabase.PExecute("DELETE FROM `group_member` WHERE `memberGuid`='%u'", GUID_LOPART(guid));
+    CharacterDatabase.PExecute("DELETE FROM group_member WHERE memberGuid='%u'", GUID_LOPART(guid));
 
     if(m_leaderGuid == guid)                                // leader was removed
     {
@@ -939,7 +939,7 @@ void Group::_setLeader(const uint64 &guid)
         if (GetMembersCount() > 0)
         {
             std::ostringstream ss;
-            ss << "SELECT DISTINCT(`map`) FROM `character_instance` WHERE (`guid` IN (";
+            ss << "SELECT DISTINCT(map) FROM character_instance WHERE (guid IN (";
 
             for(member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); )
             {
@@ -960,7 +960,7 @@ void Group::_setLeader(const uint64 &guid)
                 ++citr;
                 if (citr != m_memberSlots.end()) ss << ", ";
             }
-            ss << ")) AND (`leader` = '" << GUID_LOPART(old_guid) << "')";
+            ss << ")) AND (leader = '" << GUID_LOPART(old_guid) << "')";
             QueryResult* result = CharacterDatabase.Query(ss.str().c_str());
             if (result)
             {
@@ -988,7 +988,7 @@ void Group::_setLeader(const uint64 &guid)
         if (!changed_bindings.empty())
         {
             std::ostringstream ss;
-            ss << "UPDATE `character_instance` SET `leader` = '" << GUID_LOPART(new_guid) << "' WHERE (`map` IN (";
+            ss << "UPDATE character_instance SET leader = '" << GUID_LOPART(new_guid) << "' WHERE (map IN (";
             {
                 std::set< uint32 >::iterator i = changed_bindings.begin();
                 while (i != changed_bindings.end())
@@ -998,14 +998,14 @@ void Group::_setLeader(const uint64 &guid)
                     if (i != changed_bindings.end()) ss << ", ";
                 }
             }
-            ss << ")) AND (`leader` = '" << GUID_LOPART(old_guid) << "')";
+            ss << ")) AND (leader = '" << GUID_LOPART(old_guid) << "')";
             CharacterDatabase.Execute(ss.str().c_str());
         }
     }
 
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("UPDATE `group` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
-    CharacterDatabase.PExecute("UPDATE `group_member` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("UPDATE group SET leaderGuid='%u' WHERE leaderGuid='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("UPDATE group_member SET leaderGuid='%u' WHERE leaderGuid='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
     CharacterDatabase.CommitTransaction();
 
     m_leaderGuid = slot->guid;
@@ -1036,7 +1036,7 @@ void Group::_convertToRaid()
 {
     m_groupType = GROUPTYPE_RAID;
 
-    CharacterDatabase.PExecute("UPDATE `group` SET `isRaid` = 1 WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("UPDATE group SET isRaid = 1 WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
 }
 
 bool Group::_setMembersGroup(const uint64 &guid, const uint8 &group)
@@ -1046,7 +1046,7 @@ bool Group::_setMembersGroup(const uint64 &guid, const uint8 &group)
         return false;
 
     slot->group = group;
-    CharacterDatabase.PExecute("UPDATE `group_member` SET `subgroup`='%u' WHERE `memberGuid`='%u'", group, GUID_LOPART(guid));
+    CharacterDatabase.PExecute("UPDATE group_member SET subgroup='%u' WHERE memberGuid='%u'", group, GUID_LOPART(guid));
     return true;
 }
 
@@ -1057,7 +1057,7 @@ bool Group::_setAssistantFlag(const uint64 &guid, const bool &state)
         return false;
 
     slot->assistant = state;
-    CharacterDatabase.PExecute("UPDATE `group_member` SET `assistant`='%u' WHERE `memberGuid`='%u'", (state==true)?1:0, GUID_LOPART(guid));
+    CharacterDatabase.PExecute("UPDATE group_member SET assistant='%u' WHERE memberGuid='%u'", (state==true)?1:0, GUID_LOPART(guid));
     return true;
 }
 
@@ -1070,7 +1070,7 @@ bool Group::_setMainTank(const uint64 &guid)
     if(m_mainAssistant == guid)
         _setMainAssistant(0);
     m_mainTank = guid;
-    CharacterDatabase.PExecute("UPDATE `group` SET `mainTank`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_mainTank), GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("UPDATE group SET mainTank='%u' WHERE leaderGuid='%u'", GUID_LOPART(m_mainTank), GUID_LOPART(m_leaderGuid));
     return true;
 }
 
@@ -1083,7 +1083,7 @@ bool Group::_setMainAssistant(const uint64 &guid)
     if(m_mainTank == guid)
         _setMainTank(0);
     m_mainAssistant = guid;
-    CharacterDatabase.PExecute("UPDATE `group` SET `mainAssistant`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_mainAssistant), GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("UPDATE group SET mainAssistant='%u' WHERE leaderGuid='%u'", GUID_LOPART(m_mainAssistant), GUID_LOPART(m_leaderGuid));
     return true;
 }
 

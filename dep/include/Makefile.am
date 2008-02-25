@@ -154,6 +154,12 @@ EXTRA_DIST += \
 	openssl/x509v3.h \
 	openssl/x509_vfy.h
 
+#  PostgreSQL header files for Win32 builds
+EXTRA_DIST += \
+	postgre/libpq-fe.h \
+	postgre/pg_type.h \
+	postgre/postgres_ext.h
+
 #  SQLite header files for Win32 builds
 EXTRA_DIST += \
 	sqlite/sqlite.h
@@ -184,8 +190,7 @@ EXTRA_DIST += \
 	sockets\Thread.h \
 	sockets\UdpSocket.h \
 	sockets\Uid.h \
-	sockets\Utility.h \
-	sqlite/sqlite.h
+	sockets\Utility.h
 
 #  VLD header files for Win32 builds
 EXTRA_DIST += \

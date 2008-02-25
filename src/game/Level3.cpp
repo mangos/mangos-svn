@@ -528,7 +528,7 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_SECURITY, targetName.c_str(), gm);
-    loginDatabase.PExecute("UPDATE `account` SET `gmlevel` = '%i' WHERE `id` = '%u'", gm, targetAccountId);
+    loginDatabase.PExecute("UPDATE account SET gmlevel = '%i' WHERE id = '%u'", gm, targetAccountId);
 
     return true;
 }
@@ -1793,7 +1793,7 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
 
     sLog.outDetail(GetMangosString(LANG_ADDITEMSET), itemsetId);
 
-    QueryResult *result = WorldDatabase.PQuery("SELECT `entry` FROM `item_template` WHERE `itemset` = %u",itemsetId);
+    QueryResult *result = WorldDatabase.PQuery("SELECT entry FROM item_template WHERE itemset = %u",itemsetId);
 
     if(!result)
     {
@@ -1863,7 +1863,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
 
     // inventory case
     uint32 inv_count = 0;
-    result=CharacterDatabase.PQuery("SELECT COUNT(`item_template`) FROM `character_inventory` WHERE `item_template`='%u'",item_id);
+    result=CharacterDatabase.PQuery("SELECT COUNT(item_template) FROM character_inventory WHERE item_template='%u'",item_id);
     if(result)
     {
         inv_count = (*result)[0].GetUInt32();
@@ -1871,10 +1871,10 @@ bool ChatHandler::HandleListItemCommand(const char* args)
     }
 
     result=CharacterDatabase.PQuery(
-    //           0              1           2           3                  4                     5
-        "SELECT `ci`.`item`,`cibag`.`slot` AS `bag`,`ci`.`slot`,`ci`.`guid`,`character`.`account`,`character`.`name` "
-        "FROM `character_inventory` AS `ci` LEFT JOIN `character_inventory` AS `cibag` ON (`cibag`.`item`=`ci`.`bag`),`character` "
-        "WHERE `ci`.`item_template`='%u' AND `ci`.`guid` = `character`.`guid` LIMIT %u ",
+    //          0        1             2             3        4                  5
+        "SELECT ci.item, cibag.slot AS bag, ci.slot, ci.guid, characters.account,characters.name "
+        "FROM character_inventory AS ci LEFT JOIN character_inventory AS cibag ON (cibag.item=ci.bag),characters "
+        "WHERE ci.item_template='%u' AND ci.guid = characters.guid LIMIT %u ",
         item_id,uint32(count));
 
     if(result)
@@ -1915,7 +1915,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
 
     // mail case
     uint32 mail_count = 0;
-    result=CharacterDatabase.PQuery("SELECT COUNT(`item_template`) FROM `mail_items` WHERE `item_template`='%u'", item_id);
+    result=CharacterDatabase.PQuery("SELECT COUNT(item_template) FROM mail_items WHERE item_template='%u'", item_id);
     if(result)
     {
         mail_count = (*result)[0].GetUInt32();
@@ -1925,10 +1925,10 @@ bool ChatHandler::HandleListItemCommand(const char* args)
     if(count > 0)
     {
         result=CharacterDatabase.PQuery(
-            //             0                  1               2                   3                  4               5                  6
-            "SELECT `mail_items`.`item_guid`,`mail`.`sender`,`mail`.`receiver`,`char_s`.`account`,`char_s`.`name`,`char_r`.`account`,`char_r`.`name` "
-            "FROM `mail`,`mail_items`,`character` as `char_s`,`character` as `char_r` "
-            "WHERE `mail_items`.`item_template`='%u' AND `char_s`.`guid` = `mail`.`sender` AND `char_r`.`guid` = `mail`.`receiver` AND `mail`.`id`=`mail_items`.`mail_id` LIMIT %u",
+        //          0                     1            2              3               4            5               6
+            "SELECT mail_items.item_guid, mail.sender, mail.receiver, char_s.account, char_s.name, char_r.account, char_r.name "
+            "FROM mail,mail_items,characters as char_s,characters as char_r "
+            "WHERE mail_items.item_template='%u' AND char_s.guid = mail.sender AND char_r.guid = mail.receiver AND mail.id=mail_items.mail_id LIMIT %u",
             item_id,uint32(count));
     }
     else
@@ -1965,7 +1965,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
 
     // auction case
     uint32 auc_count = 0;
-    result=CharacterDatabase.PQuery("SELECT COUNT(`item_template`) FROM `auctionhouse` WHERE `item_template`='%u'",item_id);
+    result=CharacterDatabase.PQuery("SELECT COUNT(item_template) FROM auctionhouse WHERE item_template='%u'",item_id);
     if(result)
     {
         auc_count = (*result)[0].GetUInt32();
@@ -1975,9 +1975,9 @@ bool ChatHandler::HandleListItemCommand(const char* args)
     if(count > 0)
     {
         result=CharacterDatabase.PQuery(
-        //                     0                         1                       2                     3
-            "SELECT `auctionhouse`.`itemguid`,`auctionhouse`.`itemowner`,`character`.`account`,`character`.`name` "
-            "FROM `auctionhouse`,`character` WHERE `auctionhouse`.`item_template`='%u' AND `character`.`guid` = `auctionhouse`.`itemowner` LIMIT %u",
+        //           0                      1                       2                   3
+            "SELECT  auctionhouse.itemguid, auctionhouse.itemowner, characters.account, characters.name "
+            "FROM auctionhouse,characters WHERE auctionhouse.item_template='%u' AND characters.guid = auctionhouse.itemowner LIMIT %u",
             item_id,uint32(count));
     }
     else
@@ -2042,14 +2042,14 @@ bool ChatHandler::HandleListObjectCommand(const char* args)
     QueryResult *result;
 
     uint32 obj_count = 0;
-    result=WorldDatabase.PQuery("SELECT COUNT(`guid`) FROM `gameobject` WHERE `id`='%u'",go_id);
+    result=WorldDatabase.PQuery("SELECT COUNT(guid) FROM gameobject WHERE id='%u'",go_id);
     if(result)
     {
         obj_count = (*result)[0].GetUInt32();
         delete result;
     }
 
-    result = WorldDatabase.PQuery("SELECT `guid`, `position_x`, `position_y`, `position_z`, `map`, (POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) as `order` FROM `gameobject` WHERE `id` = '%u' ORDER BY `order` ASC LIMIT %u",
+    result = WorldDatabase.PQuery("SELECT guid, position_x, position_y, position_z, map, (POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) as order FROM gameobject WHERE id = '%u' ORDER BY order ASC LIMIT %u",
         pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(),go_id,uint32(count));
 
     if (result)
@@ -2103,14 +2103,14 @@ bool ChatHandler::HandleListCreatureCommand(const char* args)
     QueryResult *result;
 
     uint32 cr_count = 0;
-    result=WorldDatabase.PQuery("SELECT COUNT(`guid`) FROM `creature` WHERE `id`='%u'",cr_id);
+    result=WorldDatabase.PQuery("SELECT COUNT(guid) FROM creature WHERE id='%u'",cr_id);
     if(result)
     {
         cr_count = (*result)[0].GetUInt32();
         delete result;
     }
 
-    result = WorldDatabase.PQuery("SELECT `guid`, `position_x`, `position_y`, `position_z`, `map`, (POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) as `order` FROM `creature` WHERE `id` = '%u' ORDER BY `order` ASC LIMIT %u",
+    result = WorldDatabase.PQuery("SELECT guid, position_x, position_y, position_z, map, (POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) as order FROM creature WHERE id = '%u' ORDER BY order ASC LIMIT %u",
         pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), cr_id,uint32(count));
 
     if (result)
@@ -2146,13 +2146,13 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
     int loc = objmgr.GetLocalForIndex( m_session->GetSessionLocaleIndex() );
     if ( loc == LOCALE_ENG )
     {
-        result = WorldDatabase.PQuery("SELECT `entry`,`name` FROM `item_template` WHERE `name` LIKE \"%%%s%%\" ORDER BY `entry` ",namepart.c_str());
+        result = WorldDatabase.PQuery("SELECT entry,name FROM item_template WHERE name "_LIKE_" '%%s%' ORDER BY entry ",namepart.c_str());
     }
     else
     {
         result = WorldDatabase.PQuery(
-            "( SELECT `entry`,`name_loc%u` FROM `locales_item` WHERE `name_loc%u` LIKE \"%%%s%%\" ) UNION "
-            "( SELECT `entry`,`name` FROM `item_template` WHERE `name` LIKE \"%%%s%%\" ) ORDER BY `entry`",
+            "( SELECT entry,name_loc%u FROM locales_item WHERE name_loc%u "_LIKE_" '%%s%' ) UNION "
+            "( SELECT entry,name FROM item_template WHERE name "_LIKE_" '%%s%' ) ORDER BY entry",
             loc,loc,namepart.c_str(),namepart.c_str());
     }
 
@@ -2204,7 +2204,7 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
             }
         }
     }
-    if (counter == 0)                                       // if counter == 0 then we found nth
+    if (counter == 0)                                      // if counter == 0 then we found nth
         SendSysMessage(LANG_COMMAND_NOITEMSETFOUND);
     return true;
 }
@@ -2247,7 +2247,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
             }
         }
     }
-    if (counter == 0)                                       // if counter == 0 then we found nth
+    if (counter == 0)                                      // if counter == 0 then we found nth
         SendSysMessage(LANG_COMMAND_NOSKILLFOUND);
     return true;
 }
@@ -2317,7 +2317,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
             }
         }
     }
-    if (counter == 0)                                       // if counter == 0 then we found nth
+    if (counter == 0)                                      // if counter == 0 then we found nth
         SendSysMessage(LANG_COMMAND_NOSPELLFOUND);
     return true;
 }
@@ -2342,13 +2342,13 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
     int loc = objmgr.GetLocalForIndex( m_session->GetSessionLocaleIndex() );
     if ( loc == LOCALE_ENG )
     {
-        result = WorldDatabase.PQuery("SELECT `entry`,`Title` FROM `quest_template` WHERE `Title` LIKE \"%%%s%%\" ORDER BY `entry`",namepart.c_str());
+        result = WorldDatabase.PQuery("SELECT entry,Title FROM quest_template WHERE Title "_LIKE_" '%%s%' ORDER BY entry",namepart.c_str());
     }
     else
     {
         result = WorldDatabase.PQuery(
-            "( SELECT `entry`,`Title_loc%u` FROM `locales_quest` WHERE `Title_loc%u` LIKE \"%%%s%%\" ) UNION "
-            "( SELECT `entry`,`Title` FROM `quest_template` WHERE `Title` LIKE \"%%%s%%\" ) ORDER BY `entry`",
+            "( SELECT entry,Title_loc%u FROM locales_quest WHERE Title_loc%u "_LIKE_" '%%s%' ) UNION "
+            "( SELECT entry,Title FROM quest_template WHERE Title "_LIKE_" '%%s%' ) ORDER BY entry",
             loc,loc,namepart.c_str(),namepart.c_str());
     }
 
@@ -2397,13 +2397,13 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
     int loc = objmgr.GetLocalForIndex( m_session->GetSessionLocaleIndex() );
     if ( loc == LOCALE_ENG )
     {
-        result = WorldDatabase.PQuery("SELECT `entry`,`name` FROM `creature_template` WHERE `name` LIKE \"%%%s%%\" ORDER BY `entry`",namepart.c_str());
+        result = WorldDatabase.PQuery("SELECT entry,name FROM creature_template WHERE name "_LIKE_" '%%s%' ORDER BY entry",namepart.c_str());
     }
     else
     {
         result = WorldDatabase.PQuery(
-            "( SELECT `entry`,`name_loc%u` FROM `locales_creature` WHERE `name_loc%u` LIKE \"%%%s%%\" ) UNION "
-            "( SELECT `entry`,`name` FROM `creature_template` WHERE `name` LIKE \"%%%s%%\" ) ORDER BY `entry`",
+            "( SELECT entry,name_loc%u FROM locales_creature WHERE name_loc%u "_LIKE_" '%%s%' ) UNION "
+            "( SELECT entry,name FROM creature_template WHERE name "_LIKE_" '%%s%' ) ORDER BY entry",
             loc,loc,namepart.c_str(),namepart.c_str());
     }
 
@@ -2438,13 +2438,13 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
     int loc = objmgr.GetLocalForIndex( m_session->GetSessionLocaleIndex() );
     if ( loc == LOCALE_ENG )
     {
-        result = WorldDatabase.PQuery("SELECT `entry`,`name` FROM `gameobject_template` WHERE `name` LIKE \"%%%s%%\" ORDER BY `entry`",namepart.c_str());
+        result = WorldDatabase.PQuery("SELECT entry,name FROM gameobject_template WHERE name "_LIKE_" '%%s%' ORDER BY entry",namepart.c_str());
     }
     else
     {
         result = WorldDatabase.PQuery(
-            "( SELECT `entry`,`name_loc%u` FROM `locales_gameobject` WHERE `name_loc%u` LIKE \"%%%s%%\" ) UNION "
-            "( SELECT `entry`,`name` FROM `gameobject_template` WHERE `name` LIKE \"%%%s%%\" ) ORDER BY `entry`",
+            "( SELECT entry,name_loc%u FROM locales_gameobject WHERE name_loc%u "_LIKE_" '%%s%' ) UNION "
+            "( SELECT entry,name FROM gameobject_template WHERE name "_LIKE_" '%%s%' ) ORDER BY entry",
             loc,loc,namepart.c_str(),namepart.c_str());
     }
 
@@ -2467,13 +2467,13 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
 }
 
 /** \brief GM command level 3 - Create a guild.
-*
-* This command allows a GM (level 3) to create a guild.
-*
-* The "args" parameter contains the name of the guild leader
-* and then the name of the guild.
-*
-*/
+ *
+ * This command allows a GM (level 3) to create a guild.
+ *
+ * The "args" parameter contains the name of the guild leader
+ * and then the name of the guild.
+ *
+ */
 bool ChatHandler::HandleGuildCreateCommand(const char* args)
 {
 
@@ -3220,7 +3220,7 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
         Player::SaveValuesArrayInDB(values,chr_guid);
     }
 
-    if(m_session->GetPlayer() != chr)                                  // including chr==NULL
+    if(m_session->GetPlayer() != chr)                       // including chr==NULL
         PSendSysMessage(LANG_YOU_CHANGE_LVL,name.c_str(),newlevel);
     return true;
 }
@@ -3361,8 +3361,8 @@ bool ChatHandler::HandleChangeWeather(const char* args)
     if (!px || !py)
         return false;
 
-    uint32 type = (uint32)atoi(px);                         //0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
-    float grade = (float)atof(py);                          //0 to 1, sending -1 is instand good weather
+    uint32 type = (uint32)atoi(px);                        //0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
+    float grade = (float)atof(py);                         //0 to 1, sending -1 is instand good weather
 
     Player *player = m_session->GetPlayer();
     uint32 zoneid = player->GetZoneId();
@@ -3493,7 +3493,7 @@ bool ChatHandler::HandleSet32Bit(const char* args)
 
     uint32 Opcode = (uint32)atoi(px);
     uint32 Value = (uint32)atoi(py);
-    if (Value > 32)                                         //uint32 = 32 bits
+    if (Value > 32)                                        //uint32 = 32 bits
         return false;
 
     sLog.outDebug(GetMangosString(LANG_SET_32BIT), Opcode, Value);
@@ -3546,7 +3546,7 @@ bool ChatHandler::HandleAddTeleCommand(const char * args)
 
     std::string name = args;
     WorldDatabase.escape_string(name);
-    result = WorldDatabase.PQuery("SELECT `id` FROM `game_tele` WHERE `name` = '%s'",name.c_str());
+    result = WorldDatabase.PQuery("SELECT id FROM game_tele WHERE name = '%s'",name.c_str());
     if (result)
     {
         SendSysMessage(LANG_COMMAND_TP_ALREADYEXIST);
@@ -3560,7 +3560,7 @@ bool ChatHandler::HandleAddTeleCommand(const char * args)
     float ort = player->GetOrientation();
     int mapid = player->GetMapId();
 
-    if(WorldDatabase.PExecuteLog("INSERT INTO `game_tele` (`position_x`,`position_y`,`position_z`,`orientation`,`map`,`name`) VALUES (%f,%f,%f,%f,%d,'%s')",x,y,z,ort,mapid,name.c_str()))
+    if(WorldDatabase.PExecuteLog("INSERT INTO game_tele (position_x,position_y,position_z,orientation,map,name) VALUES (%f,%f,%f,%f,%d,'%s')",x,y,z,ort,mapid,name.c_str()))
     {
         SendSysMessage(LANG_COMMAND_TP_ADDED);
     }
@@ -3578,7 +3578,7 @@ bool ChatHandler::HandleDelTeleCommand(const char * args)
     std::string name = args;
     WorldDatabase.escape_string(name);
 
-    QueryResult *result=WorldDatabase.PQuery("SELECT `id` FROM `game_tele` WHERE `name` = '%s'",name.c_str());
+    QueryResult *result=WorldDatabase.PQuery("SELECT id FROM game_tele WHERE name = '%s'",name.c_str());
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_TELE_NOTFOUND);
@@ -3586,7 +3586,7 @@ bool ChatHandler::HandleDelTeleCommand(const char * args)
     }
     delete result;
 
-    if(WorldDatabase.PExecuteLog("DELETE FROM `game_tele` WHERE `name` = '%s'",name.c_str()))
+    if(WorldDatabase.PExecuteLog("DELETE FROM game_tele WHERE name = '%s'",name.c_str()))
     {
         SendSysMessage(LANG_COMMAND_TP_DELETED);
     }
@@ -3822,7 +3822,7 @@ bool ChatHandler::HandleResetSpellsCommand(const char * args)
     }
     else
     {
-        CharacterDatabase.PExecute("UPDATE `character` SET `at_login` = `at_login` | '%u' WHERE `guid` = '%u'",uint32(AT_LOGIN_RESET_SPELLS), GUID_LOPART(playerGUID));
+        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid = '%u'",uint32(AT_LOGIN_RESET_SPELLS), GUID_LOPART(playerGUID));
         PSendSysMessage(LANG_RESET_SPELLS_OFFLINE,pName);
     }
 
@@ -3862,7 +3862,7 @@ bool ChatHandler::HandleResetTalentsCommand(const char * args)
     }
     else
     {
-        CharacterDatabase.PExecute("UPDATE `character` SET `at_login` = `at_login` | '%u' WHERE `guid` = '%u'",uint32(AT_LOGIN_RESET_TALENTS), GUID_LOPART(playerGUID) );
+        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid = '%u'",uint32(AT_LOGIN_RESET_TALENTS), GUID_LOPART(playerGUID) );
         PSendSysMessage(LANG_RESET_TALENTS_OFFLINE,pName);
     }
 
@@ -3895,7 +3895,7 @@ bool ChatHandler::HandleResetAllCommand(const char * args)
         return true;
     }
 
-    CharacterDatabase.PExecute("UPDATE `character` SET `at_login` = `at_login` | '%u'",atLogin);
+    CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u'",atLogin);
     HashMapHolder<Player>::MapType const& plist = ObjectAccessor::Instance().GetPlayers();
     for(HashMapHolder<Player>::MapType::const_iterator itr = plist.begin(); itr != plist.end(); ++itr)
         itr->second->SetAtLoginFlag(atLogin);
@@ -3973,7 +3973,7 @@ bool ChatHandler::HandleAddQuest(const char* args)
     }
 
     // check item starting quest (it can work incorrectly if added without item in inventory)
-    QueryResult *result = WorldDatabase.PQuery("SELECT `entry` FROM `item_template` WHERE `startquest` = '%u' LIMIT 1",entry);
+    QueryResult *result = WorldDatabase.PQuery("SELECT entry FROM item_template WHERE startquest = '%u' LIMIT 1",entry);
     if(result)
     {
         Field* fields = result->Fetch();
@@ -4132,7 +4132,7 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
         std::string accountname;
         if(type == "account")
         {
-            QueryResult *result = loginDatabase.PQuery("SELECT `id`, `username` FROM `account` WHERE `username` = '%s' ",nameOrIP.c_str());
+            QueryResult *result = loginDatabase.PQuery("SELECT id, username FROM account WHERE username = '%s' ",nameOrIP.c_str());
             if (!result)
             {
                 PSendSysMessage(LANG_BANINFO_NOACCOUNT);
@@ -4143,10 +4143,10 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
             accountname = fields[1].GetCppString();
             delete result;
         }
-        else if(type == "character")
+        else if(type == "characters")
         {
             normalizePlayerName(nameOrIP);
-            QueryResult *result = CharacterDatabase.PQuery("SELECT `account` FROM `character` WHERE `name` = '%s')", nameOrIP.c_str());
+            QueryResult *result = CharacterDatabase.PQuery("SELECT account FROM characters WHERE name = '%s')", nameOrIP.c_str());
             if (!result)
             {
                 PSendSysMessage(LANG_BANINFO_NOCHARACTER);
@@ -4155,7 +4155,7 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
             fields = result->Fetch();
             accountid = fields[0].GetUInt32();
             delete result;
-            result = loginDatabase.PQuery("SELECT `username` FROM `account` WHERE `id` = '%u'", accountid);
+            result = loginDatabase.PQuery("SELECT username FROM account WHERE id = '%u'", accountid);
             if (!result)
             {
                 PSendSysMessage(LANG_BANINFO_NOCHARACTER);
@@ -4168,7 +4168,7 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
         else
             return false;
 
-        QueryResult *result = loginDatabase.PQuery("SELECT FROM_UNIXTIME(`bandate`), `unbandate`-`bandate`, `active`, `unbandate`,`banreason`,`bannedby` FROM `account_banned` WHERE `id` = '%u' ORDER BY `bandate` ASC",accountid);
+        QueryResult *result = loginDatabase.PQuery("SELECT FROM_UNIXTIME(bandate), unbandate-bandate, active, unbandate,banreason,bannedby FROM account_banned WHERE id = '%u' ORDER BY bandate ASC",accountid);
         if(!result)
         {
             PSendSysMessage(LANG_BANINFO_NOACCOUNTBAN, accountname.c_str());
@@ -4194,7 +4194,7 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
     }
     else
     {
-        QueryResult *result = loginDatabase.PQuery("SELECT `ip`, FROM_UNIXTIME(`bandate`), FROM_UNIXTIME(`unbandate`), `unbandate`-UNIX_TIMESTAMP(), `banreason`,`bannedby`,`unbandate`-`bandate` FROM `ip_banned` WHERE `ip` = '%s'",nameOrIP.c_str());
+        QueryResult *result = loginDatabase.PQuery("SELECT ip, FROM_UNIXTIME(bandate), FROM_UNIXTIME(unbandate), unbandate-UNIX_TIMESTAMP(), banreason,bannedby,unbandate-bandate FROM ip_banned WHERE ip = '%s'",nameOrIP.c_str());
         if(!result)
         {
             PSendSysMessage(LANG_BANINFO_NOIP);
@@ -4212,7 +4212,7 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
 
 bool ChatHandler::HandleBanListCommand(const char* args)
 {
-    loginDatabase.Execute("DELETE FROM `ip_banned` WHERE `unbandate`<=UNIX_TIMESTAMP() AND `unbandate`<>`bandate`");
+    loginDatabase.Execute("DELETE FROM ip_banned WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
     if(!*args)
         return false;
     char* cType = strtok((char*)args, " ");
@@ -4227,7 +4227,7 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     Field *fields = NULL;
     if(Type == "ip")
     {
-        result = loginDatabase.PQuery("SELECT `ip` FROM `ip_banned` WHERE `ip` LIKE \"%%%s%%\"",Filter.c_str());
+        result = loginDatabase.PQuery("SELECT ip FROM ip_banned WHERE ip "_LIKE_" '%%s%'",Filter.c_str());
         if(!result)
         {
             PSendSysMessage(LANG_BANLIST_NOIP);
@@ -4246,7 +4246,7 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     //lookup accountid
     if(Type == "account")
     {
-        result = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` LIKE \"%%%s%%\" ",Filter.c_str());
+        result = loginDatabase.PQuery("SELECT id FROM account WHERE username "_LIKE_" '%%s%' ",Filter.c_str());
         if (!result)
         {
             PSendSysMessage(LANG_BANLIST_NOACCOUNT);
@@ -4254,9 +4254,9 @@ bool ChatHandler::HandleBanListCommand(const char* args)
         }
         //do not delete result
     }
-    else if(Type == "character")
+    else if(Type == "characters")
     {
-        result = CharacterDatabase.PQuery("SELECT `account` FROM `character`, WHERE name LIKE \"%%%s%%\" ",Filter.c_str());
+        result = CharacterDatabase.PQuery("SELECT account FROM characters, WHERE name "_LIKE_" '%%s%' ",Filter.c_str());
         if (!result)
         {
             PSendSysMessage(LANG_BANLIST_NOCHARACTER);
@@ -4271,7 +4271,7 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     {
         fields = result->Fetch();
         uint32 accountid = fields[0].GetUInt32();
-        QueryResult* banresult = loginDatabase.PQuery("SELECT `account`.`username` FROM `account`,`account_banned` WHERE `account_banned`.`id`='%u' AND `account_banned`.`active` = '1' AND `account_banned`.`id`=`account`.`id`",accountid);
+        QueryResult* banresult = loginDatabase.PQuery("SELECT account.username FROM account,account_banned WHERE account_banned.id='%u' AND account_banned.active = '1' AND account_banned.id=account.id",accountid);
         if(banresult)
         {
             Field* fields2 = banresult->Fetch();
@@ -4358,7 +4358,7 @@ bool ChatHandler::HandleSendOpcodeCommand(const char* args)
 
     WorldPacket data(opcode, 8);
     data << uint64(value1);
-    ((Player*)unit)->GetSession()->SendPacket(&data);
+     ((Player*)unit)->GetSession()->SendPacket(&data);
 
     PSendSysMessage(LANG_COMMAND_OPCODESENT, opcode, unit->GetName());
     return true;
@@ -4502,7 +4502,7 @@ bool ChatHandler::HandleMovegensCommand(const char* /*args*/)
                 if(unit->GetTypeId()==TYPEID_UNIT)
                 {
                     float x,y,z;
-                    ((Creature*)unit)->GetRespawnCoord(x,y,z);
+                     ((Creature*)unit)->GetRespawnCoord(x,y,z);
                     PSendSysMessage(LANG_MOVEGENS_HOME_CREATURE,x,y,z);
                 }
                 else

@@ -255,7 +255,7 @@ void CliShutdown(char* command,pPrintf zprintf)
 void CliInfo(char*,pPrintf zprintf)
 {
     ///- Get the list of accounts ID logged to the realm
-    QueryResult *resultDB = CharacterDatabase.Query("SELECT `name`,`account` FROM `character` WHERE `online` > 0");
+    QueryResult *resultDB = CharacterDatabase.Query("SELECT name,account FROM character WHERE online > 0");
 
     if (!resultDB)
     {
@@ -278,8 +278,8 @@ void CliInfo(char*,pPrintf zprintf)
 
         ///- Get the username, last IP and GM level of each account
         // No SQL injection. account is uint32.
-        //                                                      0          1         2         3
-        QueryResult *resultLogin = loginDatabase.PQuery("SELECT `username`,`last_ip`,`gmlevel`,`tbc` FROM `account` WHERE `id` = '%u'",account);
+        //                                                      0         1        2        3
+        QueryResult *resultLogin = loginDatabase.PQuery("SELECT username, last_ip, gmlevel, tbc FROM account WHERE id = '%u'",account);
 
         if(resultLogin)
         {
@@ -315,7 +315,7 @@ void CliBanList(char*,pPrintf zprintf)
 {
     ///- Get the list of banned accounts and display them
     Field *fields;
-    QueryResult *result = loginDatabase.Query("SELECT `id`,`username` FROM `account` WHERE `id` IN (SELECT `id` FROM `account_banned` WHERE `active` = 1)");
+    QueryResult *result = loginDatabase.Query("SELECT id,username FROM account WHERE id IN (SELECT id FROM account_banned WHERE active = 1)");
     if(result)
     {
         zprintf("Actual Banned Accounts:\r\n");
@@ -327,7 +327,7 @@ void CliBanList(char*,pPrintf zprintf)
             zprintf("-------------------------------------------------------------------------------\r\n");
             fields = result->Fetch();
             // No SQL injection. id is uint32.
-            QueryResult *banInfo = loginDatabase.PQuery("SELECT `bandate`,`unbandate`,`bannedby`,`banreason` FROM `account_banned` WHERE `id` = %u AND `active` = 1 ORDER BY `unbandate`", fields[0].GetUInt32());
+            QueryResult *banInfo = loginDatabase.PQuery("SELECT bandate,unbandate,bannedby,banreason FROM account_banned WHERE id = %u AND active = 1 ORDER BY unbandate", fields[0].GetUInt32());
             if (banInfo)
             {
                 fields2 = banInfo->Fetch();
@@ -355,7 +355,7 @@ void CliBanList(char*,pPrintf zprintf)
     }
 
     ///- Get the list of banned IP addresses and display them
-    result = loginDatabase.Query( "SELECT `ip`,`bandate`,`unbandate`,`bannedby`,`banreason` FROM `ip_banned` WHERE (`bandate`=`unbandate` OR `unbandate`>UNIX_TIMESTAMP()) ORDER BY `unbandate`" );
+    result = loginDatabase.Query( "SELECT ip,bandate,unbandate,bannedby,banreason FROM ip_banned WHERE (bandate=unbandate OR unbandate>UNIX_TIMESTAMP()) ORDER BY unbandate" );
     if(result)
     {
         zprintf("Actual Banned IPs:\r\n");
@@ -453,7 +453,7 @@ void CliListGM(char*,pPrintf zprintf)
     ///- Get the accounts with GM Level >0
     Field *fields;
 
-    QueryResult *result = loginDatabase.Query( "SELECT `username`,`gmlevel` FROM `account` WHERE `gmlevel` > 0" );
+    QueryResult *result = loginDatabase.Query( "SELECT username,gmlevel FROM account WHERE gmlevel > 0" );
     if(result)
     {
 
@@ -501,7 +501,7 @@ void CliSetGM(char *command,pPrintf zprintf)
 
     ///- Try to find the account, then update the GM level
     // No SQL injection (account name is escaped)
-    QueryResult *result = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
+    QueryResult *result = loginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'",safe_account_name.c_str());
 
     if (result)
     {
@@ -514,7 +514,7 @@ void CliSetGM(char *command,pPrintf zprintf)
             session->SetSecurity(lev);
 
         // No SQL injection (account name is escaped)
-        loginDatabase.PExecute("UPDATE `account` SET `gmlevel` = '%d' WHERE `username` = '%s'",lev,safe_account_name.c_str());
+        loginDatabase.PExecute("UPDATE account SET gmlevel = '%d' WHERE username = '%s'",lev,safe_account_name.c_str());
         zprintf("We added %s gmlevel %d\r\n",szAcc,lev);
     }
     else
@@ -677,7 +677,7 @@ void CliTele(char*command,pPrintf zprintf)
     std::string location = locName;
 
     WorldDatabase.escape_string(location);
-    QueryResult *result = WorldDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",location.c_str());
+    QueryResult *result = WorldDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map FROM game_tele WHERE name = '%s'",location.c_str());
     if (!result)
     {
         zprintf(objmgr.GetMangosString(LANG_COMMAND_TELE_NOTFOUND),"\r\n");
@@ -798,12 +798,12 @@ void CliSetTBC(char *command,pPrintf zprintf)
     loginDatabase.escape_string(safe_account_name);
 
     // No SQL injection (account name is escaped)
-    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
+    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM account WHERE username = '%s'",safe_account_name.c_str());
 
     if (result)
     {
         // No SQL injection (account name is escaped)
-        loginDatabase.PExecute("UPDATE `account` SET `tbc` = '%d' WHERE `username` = '%s'",lev,safe_account_name.c_str());
+        loginDatabase.PExecute("UPDATE account SET tbc = '%d' WHERE username = '%s'",lev,safe_account_name.c_str());
         zprintf("We added %s to expansion allowed %d\r\n",szAcc,lev);
 
         delete result;

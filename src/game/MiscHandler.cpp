@@ -315,7 +315,7 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & /*recv_data*/ )
     Field *fields;
     guid = GetPlayer()->GetGUID();
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT COUNT(`ticket_id`) FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
+    QueryResult *result = CharacterDatabase.PQuery("SELECT COUNT(ticket_id) FROM character_ticket WHERE guid = '%u'", GUID_LOPART(guid));
 
     if (result)
     {
@@ -326,7 +326,7 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & /*recv_data*/ )
 
         if ( cnt > 0 )
         {
-            QueryResult *result2 = CharacterDatabase.PQuery("SELECT `ticket_text` FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
+            QueryResult *result2 = CharacterDatabase.PQuery("SELECT ticket_text FROM character_ticket WHERE guid = '%u'", GUID_LOPART(guid));
             if(result2)
             {
                 Field *fields2 = result2->Fetch();
@@ -347,14 +347,14 @@ void WorldSession::HandleGMTicketUpdateTextOpcode( WorldPacket & recv_data )
     recv_data >> ticketText;
 
     CharacterDatabase.escape_string(ticketText);
-    CharacterDatabase.PExecute("UPDATE `character_ticket` SET `ticket_text` = '%s' WHERE `guid` = '%u'", ticketText.c_str(), _player->GetGUIDLow());
+    CharacterDatabase.PExecute("UPDATE character_ticket SET ticket_text = '%s' WHERE guid = '%u'", ticketText.c_str(), _player->GetGUIDLow());
 }
 
 void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & /*recv_data*/ )
 {
     uint32 guid = GetPlayer()->GetGUIDLow();
 
-    CharacterDatabase.PExecute("DELETE FROM `character_ticket` WHERE `guid` = '%u' LIMIT 1",guid);
+    CharacterDatabase.PExecute("DELETE FROM character_ticket WHERE guid = '%u' LIMIT 1",guid);
 
     WorldPacket data( SMSG_GMTICKET_DELETETICKET, 8 );
     data << uint32(9);
@@ -380,7 +380,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 
     CharacterDatabase.escape_string(ticketText);
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM `character_ticket` WHERE `guid` = '%u'", _player->GetGUIDLow());
+    QueryResult *result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM character_ticket WHERE guid = '%u'", _player->GetGUIDLow());
 
     if (result)
     {
@@ -397,7 +397,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
         }
         else
         {
-            CharacterDatabase.PExecute("INSERT INTO `character_ticket` (`guid`,`ticket_text`,`ticket_category`) VALUES ('%u', '%s', '%u')", _player->GetGUIDLow(), ticketText.c_str(), category);
+            CharacterDatabase.PExecute("INSERT INTO character_ticket (guid,ticket_text,ticket_category) VALUES ('%u', '%s', '%u')", _player->GetGUIDLow(), ticketText.c_str(), category);
 
             WorldPacket data( SMSG_QUERY_TIME_RESPONSE, 4+4 );
             data << (uint32)time(NULL);
@@ -751,7 +751,7 @@ void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
 
     CharacterDatabase.escape_string(type);
     CharacterDatabase.escape_string(content);
-    CharacterDatabase.PExecute ("INSERT INTO `bugreport` (`type`,`content`) VALUES('%s', '%s')", type.c_str( ), content.c_str( ));
+    CharacterDatabase.PExecute ("INSERT INTO bugreport (type,content) VALUES('%s', '%s')", type.c_str( ), content.c_str( ));
 }
 
 void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
@@ -1372,7 +1372,7 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
         return;
     }
 
-    QueryResult *result = loginDatabase.PQuery("SELECT `username`,`email`,`last_ip` FROM `account` WHERE `id`=%u", accid);
+    QueryResult *result = loginDatabase.PQuery("SELECT username,email,last_ip FROM account WHERE id=%u", accid);
     if(result)
     {
         fields = result->Fetch();

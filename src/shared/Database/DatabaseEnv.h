@@ -34,6 +34,8 @@
 extern DatabasePostgre WorldDatabase;
 extern DatabasePostgre CharacterDatabase;
 extern DatabasePostgre loginDatabase;
+#define _LIKE_          "ILIKE"
+#define _TABLE_SIM_     "\""
 #else
 #include "Database/QueryResultMysql.h"
 #include "Database/QueryResultSqlite.h"
@@ -43,5 +45,7 @@ extern DatabasePostgre loginDatabase;
 extern DatabaseMysql WorldDatabase;
 extern DatabaseMysql CharacterDatabase;
 extern DatabaseMysql loginDatabase;
+#define _LIKE_          "LIKE"
+#define _TABLE_SIM_     "`"
 #endif
 #endif

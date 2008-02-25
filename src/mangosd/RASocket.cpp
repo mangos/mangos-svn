@@ -26,6 +26,7 @@
 #include "RASocket.h"
 #include "World.h"
 #include "Config/ConfigEnv.h"
+#include "AccountMgr.h"
 
 /// \todo Make this thread safe if in the future 2 admins should be able to log at the same time.
 SOCKET r;
@@ -146,7 +147,7 @@ void RASocket::OnRead()
                     loginDatabase.escape_string(login);
                     // No SQL injection (escaped login)
 
-                    QueryResult* result = loginDatabase.PQuery("SELECT `gmlevel` FROM `account` WHERE UPPER(`username`) = UPPER('%s')",login.c_str());
+                    QueryResult* result = loginDatabase.PQuery("SELECT gmlevel FROM account WHERE UPPER(username) = UPPER('%s')",login.c_str());
 
                     ///- If the user is not found, deny access
                     if(!result)
@@ -184,7 +185,7 @@ void RASocket::OnRead()
                     std::string pw = &buff[5];
                     loginDatabase.escape_string(login);
                     loginDatabase.escape_string(pw);
-                    QueryResult *check = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE UPPER(`username`)=UPPER('%s') AND `I`=SHA1(CONCAT(UPPER(`username`),':',UPPER('%s')))", login.c_str(), pw.c_str());
+                    QueryResult *check = loginDatabase.PQuery("SELECT 1 FROM account WHERE UPPER(username)=UPPER('%s') AND sha_pass_hash=SHA1(CONCAT(UPPER(username),':',UPPER('%s')))", login.c_str(), pw.c_str());
                     if(check)
                     {
                         delete check;

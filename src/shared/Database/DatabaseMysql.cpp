@@ -141,7 +141,7 @@ bool DatabaseMysql::Initialize(const char *infoString)
 
     if (mMysql)
     {
-        sLog.outDetail( "Connected to MySQL database at %s\r\n",
+        sLog.outDetail( "Connected to MySQL database at %s",
             host.c_str());
         sLog.outString( "MySQL client library: %s", mysql_get_client_info());
         sLog.outString( "MySQL server ver: %s ", mysql_get_server_info( mMysql));

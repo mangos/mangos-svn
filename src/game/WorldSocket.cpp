@@ -257,8 +257,8 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     std::string safe_account=account;                       // Duplicate, else will screw the SHA hash verification below
     loginDatabase.escape_string(safe_account);
     //No SQL injection, username escaped.
-    //                                                 0    1         2            3         4         5    6    7    8     9          10
-    QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey`,`last_ip`,`locked`, `I`, `v`, `s`, `tbc`,`mutetime`,`locale` FROM `account` WHERE `username` = '%s'", safe_account.c_str());
+    //                                                 0   1        2           3        4       5              6  7  8    9         10
+    QueryResult *result = loginDatabase.PQuery("SELECT id, gmlevel, sessionkey, last_ip, locked, sha_pass_hash, v, s, tbc, mutetime, locale FROM account WHERE UPPER(username) = '%s'", safe_account.c_str());
 
     ///- Stop if the account is not found
     if ( !result )
@@ -296,7 +296,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     const char* sStr = s.AsHexStr();                        //Must be freed by OPENSSL_free()
     const char* vStr = v.AsHexStr();                        //Must be freed by OPENSSL_free()
     sLog.outDebug("SOCKET: (s,v) check s: %s v_old: %s v_new: %s", sStr, fields[6].GetString(), vStr );
-    loginDatabase.PExecute("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `username` = '%s'", safe_account.c_str());
+    loginDatabase.PExecute("UPDATE account SET v = '0', s = '0' WHERE UPPER(username) = '%s'", safe_account.c_str());
     if ( strcmp(vStr,fields[6].GetString() ) )
     {
         packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
@@ -338,7 +338,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     delete result;
 
     ///- Re-check account ban (same check as in realmd) /// TO DO: why on earth do 2 checks for same thing?
-    QueryResult *banresult = loginDatabase.PQuery("SELECT `bandate`,`unbandate` FROM `account_banned` WHERE `id` = '%u' AND `active` = 1", id);
+    QueryResult *banresult = loginDatabase.PQuery("SELECT bandate,unbandate FROM account_banned WHERE id = '%u' AND active = 1", id);
     if(banresult)                                           // if account banned
     {
         packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
@@ -415,7 +415,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     ///- Update the last_ip in the database
     //No SQL injection, username escaped.
-    loginDatabase.PExecute("UPDATE `account` SET `last_ip` = '%s' WHERE `username` = '%s'",GetRemoteAddress().c_str(), safe_account.c_str());
+    loginDatabase.PExecute("UPDATE account SET last_ip = '%s' WHERE UPPER(username) = '%s'",GetRemoteAddress().c_str(), safe_account.c_str());
 
     // do small delay (10ms) at accepting successful authed connection to prevent droping packets by client
     // don't must harm anyone (let login ~100 accounts in 1 sec ;) )
@@ -449,7 +449,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         float popu = sWorld.GetActiveSessionCount();        //updated number of users on the server
         popu /= pLimit;
         popu *= 2;
-        loginDatabase.PExecute("UPDATE `realmlist` SET `population` = '%f' WHERE `id` = '%d'",popu,realmID);
+        loginDatabase.PExecute("UPDATE realmlist SET population = '%f' WHERE id = '%d'",popu,realmID);
         sLog.outDetail( "Server Population (%f).",popu);
     }
 

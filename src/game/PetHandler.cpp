@@ -385,7 +385,7 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     pet->SetUInt32Value(UNIT_FIELD_BYTES_2, uint32(2 << 16));
 
     CharacterDatabase.escape_string(name);
-    CharacterDatabase.PExecute("UPDATE `character_pet` SET `name` = '%s', `renamed` = '1' WHERE `owner` = '%u' AND `id` = '%u'", name.c_str(),_player->GetGUIDLow(),pet->GetCharmInfo()->GetPetNumber() );
+    CharacterDatabase.PExecute("UPDATE character_pet SET name = '%s', renamed = '1' WHERE owner = '%u' AND id = '%u'", name.c_str(),_player->GetGUIDLow(),pet->GetCharmInfo()->GetPetNumber() );
 
     pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, time(NULL));
 }

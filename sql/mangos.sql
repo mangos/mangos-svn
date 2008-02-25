@@ -921,8 +921,8 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `game_event`;
 CREATE TABLE `game_event` (
   `entry` mediumint(8) unsigned NOT NULL COMMENT 'Entry of the game event',
-  `start` timestamp NOT NULL default '0000-00-00 00:00:00' COMMENT 'Absolute start date, the event will never start before',
-  `end` timestamp NOT NULL default '0000-00-00 00:00:00' COMMENT 'Absolute end date, the event will never start afler',
+  `start_time` timestamp NOT NULL default '0000-00-00 00:00:00' COMMENT 'Absolute start date, the event will never start before',
+  `end_time` timestamp NOT NULL default '0000-00-00 00:00:00' COMMENT 'Absolute end date, the event will never start afler',
   `occurence` bigint(20) unsigned NOT NULL default '86400' COMMENT 'Delay in hours between occurences of the event',
   `length` bigint(20) unsigned NOT NULL default '43200' COMMENT 'Length in hours of the event',
   `description` varchar(255) default NULL COMMENT 'Description of the event displayed in console',
@@ -2507,7 +2507,7 @@ CREATE TABLE `npc_option` (
   `npcflag` int(11) unsigned NOT NULL default '0',
   `icon` int(11) unsigned NOT NULL default '0',
   `action` int(11) unsigned NOT NULL default '0',
-  `option` text,
+  `option_text` text,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -2700,7 +2700,7 @@ CREATE TABLE `pet_levelstats` (
   `str` smallint(5) unsigned NOT NULL,
   `agi` smallint(5) unsigned NOT NULL,
   `sta` smallint(5) unsigned NOT NULL,
-  `int` smallint(5) unsigned NOT NULL,
+  `inte` smallint(5) unsigned NOT NULL,
   `spi` smallint(5) unsigned NOT NULL,
   PRIMARY KEY  (`creature_entry`,`level`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 PACK_KEYS=0 COMMENT='Stores pet levels stats.';
@@ -3001,7 +3001,7 @@ CREATE TABLE `player_levelstats` (
   `str` tinyint(3) unsigned NOT NULL,
   `agi` tinyint(3) unsigned NOT NULL,
   `sta` tinyint(3) unsigned NOT NULL,
-  `int` tinyint(3) unsigned NOT NULL,
+  `inte` tinyint(3) unsigned NOT NULL,
   `spi` tinyint(3) unsigned NOT NULL,
   PRIMARY KEY  (`race`,`class`,`level`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 PACK_KEYS=0 COMMENT='Stores levels stats.';

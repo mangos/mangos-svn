@@ -22,8 +22,8 @@
 DROP TABLE IF EXISTS `account`;
 CREATE TABLE `account` (
   `id` bigint(20) unsigned NOT NULL auto_increment COMMENT 'Identifier',
-  `username` varchar(32) NOT NULL default '',
-  `I` varchar(40) NOT NULL default '',
+  `username`      varchar(32) NOT NULL default '',
+  `sha_pass_hash` varchar(40) NOT NULL default '',
   `gmlevel` tinyint(3) unsigned NOT NULL default '0',
   `sessionkey` longtext,
   `v` longtext,

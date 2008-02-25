@@ -1515,7 +1515,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     std::string name = cId;
     WorldDatabase.escape_string(name);
 
-    QueryResult *result = WorldDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",name.c_str());
+    QueryResult *result = WorldDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map FROM game_tele WHERE name = '%s'",name.c_str());
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_TELE_NOTFOUND);
@@ -1595,7 +1595,7 @@ bool ChatHandler::HandleLookupTeleCommand(const char * args)
 
     std::string namepart = str;
     WorldDatabase.escape_string(namepart);
-    QueryResult *result = WorldDatabase.PQuery("SELECT `name` FROM `game_tele` WHERE `name` LIKE '%%%s%%'",namepart.c_str());
+    QueryResult *result = WorldDatabase.PQuery("SELECT name FROM game_tele WHERE name "_LIKE_" '%%s%'",namepart.c_str());
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_TELE_NOREQUEST);
@@ -1758,7 +1758,7 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
     normalizePlayerName(name);
 
     WorldDatabase.escape_string(location);
-    QueryResult *result = WorldDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",location.c_str());
+    QueryResult *result = WorldDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map FROM game_tele WHERE name = '%s'",location.c_str());
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_TELE_NOTFOUND);
@@ -1835,7 +1835,7 @@ bool ChatHandler::HandleGroupTeleCommand(const char * args)
     std::string location = cId;
 
     WorldDatabase.escape_string(location);
-    QueryResult *result = WorldDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",location.c_str());
+    QueryResult *result = WorldDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map FROM game_tele WHERE name = '%s'",location.c_str());
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_TELE_NOTFOUND);

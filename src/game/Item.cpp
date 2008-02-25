@@ -213,34 +213,35 @@ void Item::SaveToDB()
     {
         case ITEM_NEW:
         {
+
+            CharacterDatabase.PExecute( "DELETE FROM item_instance WHERE guid = '%u'", guid );
             std::ostringstream ss;
-            ss << "REPLACE INTO `item_instance` (`guid`,`owner_guid`,`data`) VALUES (" << guid << "," << GUID_LOPART(GetOwnerGUID()) << ",'";
+            ss << "INSERT INTO item_instance (guid,owner_guid,data) VALUES (" << guid << "," << GUID_LOPART(GetOwnerGUID()) << ",'";
             for(uint16 i = 0; i < m_valuesCount; i++ )
                 ss << GetUInt32Value(i) << " ";
             ss << "' )";
-
             CharacterDatabase.Execute( ss.str().c_str() );
         } break;
         case ITEM_CHANGED:
         {
             std::ostringstream ss;
-            ss << "UPDATE `item_instance` SET `data` = '";
+            ss << "UPDATE item_instance SET data = '";
             for(uint16 i = 0; i < m_valuesCount; i++ )
                 ss << GetUInt32Value(i) << " ";
-            ss << "', `owner_guid` = '" << GUID_LOPART(GetOwnerGUID()) << "' WHERE `guid` = '" << guid << "'";
+            ss << "', owner_guid = '" << GUID_LOPART(GetOwnerGUID()) << "' WHERE guid = '" << guid << "'";
 
             CharacterDatabase.Execute( ss.str().c_str() );
 
             if(HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED))
-                CharacterDatabase.PExecute("UPDATE `character_gifts` SET `guid` = '%u' WHERE `item_guid` = '%u'", GUID_LOPART(GetOwnerGUID()),GetGUIDLow());
+                CharacterDatabase.PExecute("UPDATE character_gifts SET guid = '%u' WHERE item_guid = '%u'", GUID_LOPART(GetOwnerGUID()),GetGUIDLow());
         } break;
         case ITEM_REMOVED:
         {
             if (GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID) > 0 )
-                CharacterDatabase.PExecute("DELETE FROM `item_text` WHERE `id` = '%u'", GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID));
-            CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", guid);
+                CharacterDatabase.PExecute("DELETE FROM item_text WHERE id = '%u'", GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID));
+            CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid = '%u'", guid);
             if(HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED))
-                CharacterDatabase.PExecute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", GetGUIDLow());
+                CharacterDatabase.PExecute("DELETE FROM character_gifts WHERE item_guid = '%u'", GetGUIDLow());
             delete this;
             return;
         }
@@ -255,7 +256,7 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
     bool delete_result = false;
     if(!result)
     {
-        result = CharacterDatabase.PQuery("SELECT `data` FROM `item_instance` WHERE `guid` = '%u'", guid);
+        result = CharacterDatabase.PQuery("SELECT data FROM item_instance WHERE guid = '%u'", guid);
         delete_result = true;
     }
 
@@ -289,12 +290,12 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
 
 void Item::DeleteFromDB()
 {
-    CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
+    CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid = '%u'",GetGUIDLow());
 }
 
 void Item::DeleteFromInventoryDB()
 {
-    CharacterDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'",GetGUIDLow());
+    CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE item = '%u'",GetGUIDLow());
 }
 
 ItemPrototype const *Item::GetProto() const
@@ -394,7 +395,7 @@ int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
     // item can have not null only one from field values
     if((itemProto->RandomProperty) && (itemProto->RandomSuffix))
     {
-        sLog.outErrorDb("Item template %u have `RandomProperty`==%u and `RandomSuffix`==%u, but must have one from field =0",itemProto->ItemId,itemProto->RandomProperty,itemProto->RandomSuffix);
+        sLog.outErrorDb("Item template %u have RandomProperty==%u and RandomSuffix==%u, but must have one from field =0",itemProto->ItemId,itemProto->RandomProperty,itemProto->RandomSuffix);
         return 0;
     }
 
@@ -774,6 +775,7 @@ void Item::SendTimeUpdate(Player* owner)
     data << (uint32)GetUInt32Value(ITEM_FIELD_DURATION);
     owner->GetSession()->SendPacket(&data);
 }
+
 
 
 

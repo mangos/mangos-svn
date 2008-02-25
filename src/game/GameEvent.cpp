@@ -65,7 +65,7 @@ uint32 GameEvent::NextCheck(uint16 entry)
 
 void GameEvent::LoadFromDB()
 {
-    QueryResult *result = WorldDatabase.Query("SELECT MAX(`entry`) FROM `game_event`");
+    QueryResult *result = WorldDatabase.Query("SELECT MAX(entry) FROM game_event");
     if( !result )
     {
         sLog.outString(">> Table game_event is empty.");
@@ -81,7 +81,7 @@ void GameEvent::LoadFromDB()
 
     mGameEvent.resize(max_event_id + 1);
 
-    result = WorldDatabase.Query("SELECT `entry`,UNIX_TIMESTAMP(`start`),UNIX_TIMESTAMP(`end`),`occurence`,`length`,`description` FROM `game_event`");
+    result = WorldDatabase.Query("SELECT entry,UNIX_TIMESTAMP(start_time),UNIX_TIMESTAMP(end_time),occurence,length,description FROM game_event");
     if( !result )
     {
         mGameEvent.clear();
@@ -118,9 +118,9 @@ void GameEvent::LoadFromDB()
     delete result;
 
     mGameEventCreatureGuids.resize((max_event_id * 2) + 1);
-    //                               1                 2
-    result = WorldDatabase.Query("SELECT `creature`.`guid`,`game_event_creature`.`event` "
-        "FROM `creature` JOIN `game_event_creature` ON `creature`.`guid` = `game_event_creature`.`guid`");
+    //                                   1              2
+    result = WorldDatabase.Query("SELECT creature.guid, game_event_creature.event "
+        "FROM creature JOIN game_event_creature ON creature.guid = game_event_creature.guid");
 
     count = 0;
     if( !result )
@@ -161,9 +161,9 @@ void GameEvent::LoadFromDB()
     }
 
     mGameEventGameobjectGuids.resize((max_event_id * 2) + 1);
-    //                               1                   2
-    result = WorldDatabase.Query("SELECT `gameobject`.`guid`,`game_event_gameobject`.`event` "
-        "FROM `gameobject` JOIN `game_event_gameobject` ON `gameobject`.`guid`=`game_event_gameobject`.`guid`");
+    //                                   1                2
+    result = WorldDatabase.Query("SELECT gameobject.guid, game_event_gameobject.event "
+        "FROM gameobject JOIN game_event_gameobject ON gameobject.guid=game_event_gameobject.guid");
 
     count = 0;
     if( !result )
@@ -205,11 +205,11 @@ void GameEvent::LoadFromDB()
     }
 
     mGameEventModelEquip.resize(max_event_id + 1);
-    //                               0                 1                                2
-    result = WorldDatabase.Query("SELECT `creature`.`guid`,`game_event_model_equip`.`event`,`game_event_model_equip`.`modelid`,"
+    //                                   0              1                             2
+    result = WorldDatabase.Query("SELECT creature.guid, game_event_model_equip.event, game_event_model_equip.modelid,"
     //   3
-        "`game_event_model_equip`.`equipment_id` "
-        "FROM `creature` JOIN `game_event_model_equip` ON `creature`.`guid`=`game_event_model_equip`.`guid`");
+        "game_event_model_equip.equipment_id "
+        "FROM creature JOIN game_event_model_equip ON creature.guid=game_event_model_equip.guid");
 
     count = 0;
     if( !result )
@@ -255,8 +255,8 @@ void GameEvent::LoadFromDB()
     }
 
     mGameEventQuests.resize(max_event_id + 1);
-    //                               0    1       2
-    result = WorldDatabase.Query("SELECT `id`,`quest`,`event` FROM `game_event_creature_quest`");
+    //                                   0   1      2
+    result = WorldDatabase.Query("SELECT id, quest, event FROM game_event_creature_quest");
 
     count = 0;
     if( !result )
