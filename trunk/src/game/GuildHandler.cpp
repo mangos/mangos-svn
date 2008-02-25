@@ -1290,9 +1290,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     pItemSrc->FSetState(ITEM_CHANGED);
                     pItemSrc->SaveToDB();
                 }
-                CharacterDatabase.PExecute("DELETE FROM guild_bank_item WHERE guildid = '%u' AND TabId='%u' AND SlotId ='%u'",GuildId, uint32(BankTabDst), uint32(BankTabSlotDst));
-                CharacterDatabase.PExecute("INSERT INTO guild_bank_item (guildid,TabId,SlotId,item_guid,item_entry) "
-                    "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemDst->GetGUIDLow(), pItemDst->GetEntry());
+                pGuild->AddGBankItemToDB(GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemDst->GetGUIDLow(), pItemDst->GetEntry());
 
                 pGuild->LogBankEvent(GUILD_BANK_LOG_MOVE_ITEM, BankTab, pl->GetGUIDLow(), pGuild->GetItem(BankTabDst, BankTabSlotDst)->GetEntry(), SplitedAmount, BankTabDst);
             }
@@ -1320,8 +1318,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                 pGuild->StoreItem(BankTab, &BankTabSlot, pItemDst);
                 // pItemDst moved to BankTabSlot
 
-                CharacterDatabase.PExecute("INS guild_bank_item (guildid,TabId,SlotId,item_guid,item_entry) "
-                    "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, uint32(BankTab), uint32(BankTabSlot), pItemDst->GetGUIDLow(), pItemDst->GetEntry());
+                pGuild->AddGBankItemToDB(GuildId, uint32(BankTab), uint32(BankTabSlot), pItemDst->GetGUIDLow(), pItemDst->GetEntry() );
 
                 pGuild->EmptyBankSlot(BankTabDst, BankTabSlotDst);// Or next will merge stacks
                 pGuild->StoreItem(BankTabDst, &BankTabSlotDst, pItemSrc);
@@ -1565,8 +1562,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     pItemToStore->SaveToDB();
 
                     pGuild->StoreItem(BankTab, &BankTabSlot, pItemToStore);
-                    CharacterDatabase.PExecute("INSERT INTO guild_bank_item (guildid,TabId,SlotId,item_guid,item_entry) "
-                        "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, uint32(BankTab), uint32(BankTabSlot), pItemToStore->GetGUIDLow(), pItemToStore->GetEntry());
+                    pGuild->AddGBankItemToDB(GuildId, uint32(BankTab), uint32(BankTabSlot), pItemToStore->GetGUIDLow(), pItemToStore->GetEntry());
                     pItemChar->SetState(ITEM_CHANGED);
                     pItemChar->SaveToDB();
                 }
