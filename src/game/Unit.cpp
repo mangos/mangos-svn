@@ -2960,9 +2960,7 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
         crit = 5.0f;
 
     // flat
-    AuraList const& mAttackerSWCrit = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
-    for(AuraList::const_iterator i = mAttackerSWCrit.begin(); i != mAttackerSWCrit.end(); ++i)
-        crit += (*i)->GetModifier()->m_amount;
+    crit += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
 
     if (crit < 0.0f)
         crit = 0.0f;
@@ -6571,9 +6569,7 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 *damage, Unit
         }
 
         // flat
-        AuraList const& mAttackerSWCrit = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
-        for(AuraList::const_iterator i = mAttackerSWCrit.begin(); i != mAttackerSWCrit.end(); ++i)
-            crit_chance += (*i)->GetModifier()->m_amount;
+        crit_chance += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
     }
 
     crit_chance = crit_chance > 0.0f ? crit_chance : 0.0f;
@@ -6898,21 +6894,17 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
     int32 APbonus = 0;
     if(attType == RANGED_ATTACK)
     {
-        AuraList const& mRangedAttackPowerAttackerBonus = pVictim->GetAurasByType(SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS);
-        for(AuraList::const_iterator i = mRangedAttackPowerAttackerBonus.begin();i != mRangedAttackPowerAttackerBonus.end(); ++i)
-            APbonus += (*i)->GetModifier()->m_amount;
+        APbonus += pVictim->GetTotalAuraModifier(SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS);
 
         // ..done (base at attack power and creature type)
         AuraList const& mCreatureAttackPower = GetAurasByType(SPELL_AURA_MOD_RANGED_ATTACK_POWER_VERSUS);
         for(AuraList::const_iterator i = mCreatureAttackPower.begin();i != mCreatureAttackPower.end(); ++i)
-          if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
-            APbonus += (*i)->GetModifier()->m_amount;
+            if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
+                APbonus += (*i)->GetModifier()->m_amount;
     }
     else
     {
-        AuraList const& mMeleeAttackPowerAttackerBonus = pVictim->GetAurasByType(SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS);
-        for(AuraList::const_iterator i = mMeleeAttackPowerAttackerBonus.begin();i != mMeleeAttackPowerAttackerBonus.end(); ++i)
-            APbonus += (*i)->GetModifier()->m_amount;
+        APbonus += pVictim->GetTotalAuraModifier(SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS);
 
         // ..done (base at attack power and creature type)
         AuraList const& mCreatureAttackPower = GetAurasByType(SPELL_AURA_MOD_MELEE_ATTACK_POWER_VERSUS);
@@ -6931,17 +6923,9 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
             TakenFlatBenefit += (*i)->GetModifier()->m_amount;
 
     if(attType!=RANGED_ATTACK)
-    {
-        AuraList const& mModMeleeDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN);
-        for(AuraList::const_iterator i = mModMeleeDamageTaken.begin(); i != mModMeleeDamageTaken.end(); ++i)
-            TakenFlatBenefit += (*i)->GetModifier()->m_amount;
-    }
+        TakenFlatBenefit += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN);
     else
-    {
-        AuraList const& mModRangedDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN);
-        for(AuraList::const_iterator i = mModRangedDamageTaken.begin(); i != mModRangedDamageTaken.end(); ++i)
-            TakenFlatBenefit += (*i)->GetModifier()->m_amount;
-    }
+        TakenFlatBenefit += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN);
 
     // Done/Taken total percent damage auras
     float TakenTotalMod = 1;
