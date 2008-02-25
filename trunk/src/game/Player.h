@@ -146,11 +146,11 @@ typedef std::list<PlayerCreateInfoItem> PlayerCreateInfoItems;
 
 struct PlayerLevelInfo
 {
-    PlayerLevelInfo() : health(0), mana(0) { for(int i=0; i < MAX_STATS; ++i ) stats[i] = 0; }
+    PlayerLevelInfo() : basehealth(0), basemana(0) { for(int i=0; i < MAX_STATS; ++i ) stats[i] = 0; }
 
     uint8 stats[MAX_STATS];
-    uint16 health;
-    uint16 mana;
+    uint16 basehealth;
+    uint16 basemana;
 };
 
 struct PlayerInfo
@@ -1429,6 +1429,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool UpdateFishingSkill();
 
         uint32 GetSpellByProto(ItemPrototype *proto);
+
+        float GetHealthBonusFromStamina();
+        float GetManaBonusFromIntellect();
 
         bool UpdateStats(Stats stat);
         bool UpdateAllStats();

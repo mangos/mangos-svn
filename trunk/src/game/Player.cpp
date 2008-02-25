@@ -447,6 +447,13 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     InitPrimaryProffesions();                               // to max set before any spell added
 
     // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
+    UpdateMaxHealth();                                      // Update max Health (for add bonus from stamina)
+    SetHealth(GetMaxHealth());
+    if (getPowerType()==POWER_MANA)
+    {
+        UpdateMaxPower(POWER_MANA);                         // Update max Mana (for add bonus from intelect)
+        SetPower(POWER_MANA,GetMaxPower(POWER_MANA)); 
+    }
 
     uint32 titem_id;
     uint32 titem_amount;
@@ -2057,8 +2064,8 @@ void Player::GiveLevel(uint32 level)
     // send levelup info to client
     WorldPacket data(SMSG_LEVELUP_INFO, (7*4+(MAX_STATS-STAT_STRENGTH)+4));
     data << uint32(level);
-    data << uint32(int32(info.health) - int32(GetCreateHealth()));
-    data << uint32(int32(info.mana)   - int32(GetCreateMana()));
+    data << uint32(int32(info.basehealth) - int32(GetCreateHealth()));
+    data << uint32(int32(info.basemana)   - int32(GetCreateMana()));
     data << uint32(0);
     data << uint32(0);
     data << uint32(0);
@@ -2081,8 +2088,8 @@ void Player::GiveLevel(uint32 level)
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetCreateStat(Stats(i), info.stats[i]);
 
-    SetCreateHealth(info.health);
-    SetCreateMana(info.mana);
+    SetCreateHealth(info.basehealth);
+    SetCreateMana(info.basemana);
 
     InitTalentForLevel();
 
@@ -2164,10 +2171,10 @@ void Player::InitStatsForLevel(bool reapplyMods)
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetStat(Stats(i), info.stats[i]);
 
-    SetCreateHealth(info.health);
+    SetCreateHealth(info.basehealth);
 
     //set create powers
-    SetCreateMana(info.mana);
+    SetCreateMana(info.basemana);
 
     // restore if need some important flags
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );
@@ -2265,7 +2272,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     for (int i = POWER_MANA; i < MAX_POWERS; i++)
         SetMaxPower(Powers(i),  uint32(GetCreatePowers(Powers(i))));
 
-    SetMaxHealth(info.health);
+    SetMaxHealth(info.basehealth);                          // stamina bonus will applied later
 
     // cleanup mounted state (it will set correctly at aura loading if player saved at mount.
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
