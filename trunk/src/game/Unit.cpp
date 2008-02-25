@@ -6556,15 +6556,15 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 *damage, Unit
             switch((*i)->GetModifier()->m_miscvalue)
             {
                                                             //Shatter Rank 1
-                case 849: if(pVictim->isFrozen()) crit_chance+= 10; break;
+                case 849: if(pVictim->isFrozen()) crit_chance+= 10.0f; break;
                                                             //Shatter Rank 2
-                case 910: if(pVictim->isFrozen()) crit_chance+= 20; break;
+                case 910: if(pVictim->isFrozen()) crit_chance+= 20.0f; break;
                                                             //Shatter Rank 3
-                case 911: if(pVictim->isFrozen()) crit_chance+= 30; break;
+                case 911: if(pVictim->isFrozen()) crit_chance+= 30.0f; break;
                                                             //Shatter Rank 4
-                case 912: if(pVictim->isFrozen()) crit_chance+= 40; break;
+                case 912: if(pVictim->isFrozen()) crit_chance+= 40.0f; break;
                                                             //Shatter Rank 5
-                case 913: if(pVictim->isFrozen()) crit_chance+= 50; break;
+                case 913: if(pVictim->isFrozen()) crit_chance+= 50.0f; break;
             }
         }
 
