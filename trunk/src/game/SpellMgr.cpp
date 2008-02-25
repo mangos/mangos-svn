@@ -377,8 +377,9 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                     switch(spellproto->EffectMiscValue[effIndex])
                     {
                     case SPELLMOD_COST:
-                        if(spellproto->EffectBasePoints[effIndex]+spellproto->EffectBaseDice[effIndex] > 0)
+                        if(spellproto->EffectBasePoints[effIndex]+int32(spellproto->EffectBaseDice[effIndex]) > 0)
                             return false;
+                        break;
                     default:
                         break;
                     }
