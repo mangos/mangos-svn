@@ -75,7 +75,7 @@ bool Group::Create(const uint64 &guid, const char * name)
 
     // store group in database
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM group WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("DELETE FROM groups WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
     CharacterDatabase.PExecute("DELETE FROM group_member WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
     CharacterDatabase.PExecute("INSERT INTO group(leaderGuid,mainTank,mainAssistant,lootMethod,looterGuid,lootThreshold,icon1,icon2,icon3,icon4,icon5,icon6,icon7,icon8,isRaid) "
         "VALUES('%u','%u','%u','%u','%u','%u','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "',0)",
@@ -95,7 +95,7 @@ bool Group::Create(const uint64 &guid, const char * name)
 bool Group::LoadGroupFromDB(const uint64 &leaderGuid)
 {
     //                                                     0         1              2           3           4              5      6      7      8      9      10     11     12     13
-    QueryResult *result = CharacterDatabase.PQuery("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid FROM group WHERE leaderGuid='%u'", GUID_LOPART(leaderGuid));
+    QueryResult *result = CharacterDatabase.PQuery("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid FROM groups WHERE leaderGuid='%u'", GUID_LOPART(leaderGuid));
     if(!result)
         return false;
 
@@ -281,7 +281,7 @@ void Group::Disband(bool hideDestroy)
     m_invitees.clear();
 
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM group WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("DELETE FROM groups WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
     CharacterDatabase.PExecute("DELETE FROM group_member WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
     CharacterDatabase.CommitTransaction();
 
@@ -1004,7 +1004,7 @@ void Group::_setLeader(const uint64 &guid)
     }
 
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("UPDATE group SET leaderGuid='%u' WHERE leaderGuid='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("UPDATE groups SET leaderGuid='%u' WHERE leaderGuid='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
     CharacterDatabase.PExecute("UPDATE group_member SET leaderGuid='%u' WHERE leaderGuid='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
     CharacterDatabase.CommitTransaction();
 
@@ -1036,7 +1036,7 @@ void Group::_convertToRaid()
 {
     m_groupType = GROUPTYPE_RAID;
 
-    CharacterDatabase.PExecute("UPDATE group SET isRaid = 1 WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("UPDATE groups SET isRaid = 1 WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
 }
 
 bool Group::_setMembersGroup(const uint64 &guid, const uint8 &group)
@@ -1070,7 +1070,7 @@ bool Group::_setMainTank(const uint64 &guid)
     if(m_mainAssistant == guid)
         _setMainAssistant(0);
     m_mainTank = guid;
-    CharacterDatabase.PExecute("UPDATE group SET mainTank='%u' WHERE leaderGuid='%u'", GUID_LOPART(m_mainTank), GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("UPDATE groups SET mainTank='%u' WHERE leaderGuid='%u'", GUID_LOPART(m_mainTank), GUID_LOPART(m_leaderGuid));
     return true;
 }
 
@@ -1083,7 +1083,7 @@ bool Group::_setMainAssistant(const uint64 &guid)
     if(m_mainTank == guid)
         _setMainTank(0);
     m_mainAssistant = guid;
-    CharacterDatabase.PExecute("UPDATE group SET mainAssistant='%u' WHERE leaderGuid='%u'", GUID_LOPART(m_mainAssistant), GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("UPDATE groups SET mainAssistant='%u' WHERE leaderGuid='%u'", GUID_LOPART(m_mainAssistant), GUID_LOPART(m_leaderGuid));
     return true;
 }
 
