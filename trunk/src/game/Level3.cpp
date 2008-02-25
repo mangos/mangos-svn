@@ -2146,13 +2146,13 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
     int loc = objmgr.GetLocalForIndex( m_session->GetSessionLocaleIndex() );
     if ( loc == LOCALE_ENG )
     {
-        result = WorldDatabase.PQuery("SELECT entry,name FROM item_template WHERE name "_LIKE_" '%%s%' ORDER BY entry ",namepart.c_str());
+        result = WorldDatabase.PQuery("SELECT entry,name FROM item_template WHERE name "_LIKE_" '""%%%s%%""' ORDER BY entry ",namepart.c_str());
     }
     else
     {
         result = WorldDatabase.PQuery(
-            "( SELECT entry,name_loc%u FROM locales_item WHERE name_loc%u "_LIKE_" '%%s%' ) UNION "
-            "( SELECT entry,name FROM item_template WHERE name "_LIKE_" '%%s%' ) ORDER BY entry",
+            "( SELECT entry,name_loc%u FROM locales_item WHERE name_loc%u "_LIKE_" '""%%%s%%""' ) UNION "
+            "( SELECT entry,name FROM item_template WHERE name "_LIKE_" '""%%%s%%""' ) ORDER BY entry",
             loc,loc,namepart.c_str(),namepart.c_str());
     }
 
@@ -2342,13 +2342,13 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
     int loc = objmgr.GetLocalForIndex( m_session->GetSessionLocaleIndex() );
     if ( loc == LOCALE_ENG )
     {
-        result = WorldDatabase.PQuery("SELECT entry,Title FROM quest_template WHERE Title "_LIKE_" '%%s%' ORDER BY entry",namepart.c_str());
+        result = WorldDatabase.PQuery("SELECT entry,Title FROM quest_template WHERE Title "_LIKE_" '""%%%s%%""' ORDER BY entry",namepart.c_str());
     }
     else
     {
         result = WorldDatabase.PQuery(
-            "( SELECT entry,Title_loc%u FROM locales_quest WHERE Title_loc%u "_LIKE_" '%%s%' ) UNION "
-            "( SELECT entry,Title FROM quest_template WHERE Title "_LIKE_" '%%s%' ) ORDER BY entry",
+            "( SELECT entry,Title_loc%u FROM locales_quest WHERE Title_loc%u "_LIKE_" '""%%%s%%""' ) UNION "
+            "( SELECT entry,Title FROM quest_template WHERE Title "_LIKE_" '""%%%s%%""' ) ORDER BY entry",
             loc,loc,namepart.c_str(),namepart.c_str());
     }
 
@@ -2397,13 +2397,13 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
     int loc = objmgr.GetLocalForIndex( m_session->GetSessionLocaleIndex() );
     if ( loc == LOCALE_ENG )
     {
-        result = WorldDatabase.PQuery("SELECT entry,name FROM creature_template WHERE name "_LIKE_" '%%s%' ORDER BY entry",namepart.c_str());
+        result = WorldDatabase.PQuery("SELECT entry,name FROM creature_template WHERE name "_LIKE_" '""%%%s%%""' ORDER BY entry",namepart.c_str());
     }
     else
     {
         result = WorldDatabase.PQuery(
-            "( SELECT entry,name_loc%u FROM locales_creature WHERE name_loc%u "_LIKE_" '%%s%' ) UNION "
-            "( SELECT entry,name FROM creature_template WHERE name "_LIKE_" '%%s%' ) ORDER BY entry",
+            "( SELECT entry,name_loc%u FROM locales_creature WHERE name_loc%u "_LIKE_" '""%%%s%%""' ) UNION "
+            "( SELECT entry,name FROM creature_template WHERE name "_LIKE_" '""%%%s%%""' ) ORDER BY entry",
             loc,loc,namepart.c_str(),namepart.c_str());
     }
 
@@ -2438,13 +2438,13 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
     int loc = objmgr.GetLocalForIndex( m_session->GetSessionLocaleIndex() );
     if ( loc == LOCALE_ENG )
     {
-        result = WorldDatabase.PQuery("SELECT entry,name FROM gameobject_template WHERE name "_LIKE_" '%%s%' ORDER BY entry",namepart.c_str());
+        result = WorldDatabase.PQuery("SELECT entry,name FROM gameobject_template WHERE name "_LIKE_" '""%%%s%%""' ORDER BY entry",namepart.c_str());
     }
     else
     {
         result = WorldDatabase.PQuery(
-            "( SELECT entry,name_loc%u FROM locales_gameobject WHERE name_loc%u "_LIKE_" '%%s%' ) UNION "
-            "( SELECT entry,name FROM gameobject_template WHERE name "_LIKE_" '%%s%' ) ORDER BY entry",
+            "( SELECT entry,name_loc%u FROM locales_gameobject WHERE name_loc%u "_LIKE_" '""%%%s%%""' ) UNION "
+            "( SELECT entry,name FROM gameobject_template WHERE name "_LIKE_" '""%%%s%%""' ) ORDER BY entry",
             loc,loc,namepart.c_str(),namepart.c_str());
     }
 
@@ -4227,7 +4227,7 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     Field *fields = NULL;
     if(Type == "ip")
     {
-        result = loginDatabase.PQuery("SELECT ip FROM ip_banned WHERE ip "_LIKE_" '%%s%'",Filter.c_str());
+        result = loginDatabase.PQuery("SELECT ip FROM ip_banned WHERE ip "_LIKE_" '""%%%s%%""'",Filter.c_str());
         if(!result)
         {
             PSendSysMessage(LANG_BANLIST_NOIP);
@@ -4246,7 +4246,7 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     //lookup accountid
     if(Type == "account")
     {
-        result = loginDatabase.PQuery("SELECT id FROM account WHERE username "_LIKE_" '%%s%' ",Filter.c_str());
+        result = loginDatabase.PQuery("SELECT id FROM account WHERE username "_LIKE_" '""%%%s%%""' ",Filter.c_str());
         if (!result)
         {
             PSendSysMessage(LANG_BANLIST_NOACCOUNT);
@@ -4256,7 +4256,7 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     }
     else if(Type == "characters")
     {
-        result = CharacterDatabase.PQuery("SELECT account FROM characters, WHERE name "_LIKE_" '%%s%' ",Filter.c_str());
+        result = CharacterDatabase.PQuery("SELECT account FROM characters, WHERE name "_LIKE_" '""%%%s%%""' ",Filter.c_str());
         if (!result)
         {
             PSendSysMessage(LANG_BANLIST_NOCHARACTER);
