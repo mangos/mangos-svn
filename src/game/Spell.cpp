@@ -457,6 +457,15 @@ void Spell::FillTargetMap()
                     if(m_targets.getItemTarget())
                         AddItemTarget(m_targets.getItemTarget(), i);
                     break;
+                case SPELL_EFFECT_APPLY_AURA:
+                    switch(m_spellInfo->EffectApplyAuraName[i])
+                    {
+                        case SPELL_AURA_ADD_FLAT_MODIFIER:  // some spell mods auras have 0 target modes instead expected TRAGET_SELF(1) (and present for other ranks for same spell for example)
+                        case SPELL_AURA_ADD_PCT_MODIFIER:
+                            tmpUnitMap.push_back(m_caster);
+                            break;
+                    }
+                    break;
                 case SPELL_EFFECT_APPLY_AREA_AURA:
                                                             // AreaAura
                     if(m_spellInfo->Attributes == 0x9050000 || m_spellInfo->Attributes == 0x10000)
