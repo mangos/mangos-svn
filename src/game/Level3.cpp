@@ -2049,7 +2049,7 @@ bool ChatHandler::HandleListObjectCommand(const char* args)
         delete result;
     }
 
-    result = WorldDatabase.PQuery("SELECT guid, position_x, position_y, position_z, map, (POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) as order FROM gameobject WHERE id = '%u' ORDER BY order ASC LIMIT %u",
+    result = WorldDatabase.PQuery("SELECT guid, position_x, position_y, position_z, map, (POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) AS order_ FROM gameobject WHERE id = '%u' ORDER BY order_ ASC LIMIT %u",
         pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(),go_id,uint32(count));
 
     if (result)
@@ -2110,7 +2110,7 @@ bool ChatHandler::HandleListCreatureCommand(const char* args)
         delete result;
     }
 
-    result = WorldDatabase.PQuery("SELECT guid, position_x, position_y, position_z, map, (POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) as order FROM creature WHERE id = '%u' ORDER BY order ASC LIMIT %u",
+    result = WorldDatabase.PQuery("SELECT guid, position_x, position_y, position_z, map, (POW(position_x - '%f', 2) + POW(position_y - '%f', 2) + POW(position_z - '%f', 2)) AS order_ FROM creature WHERE id = '%u' ORDER BY order_ ASC LIMIT %u",
         pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), cr_id,uint32(count));
 
     if (result)
@@ -2204,7 +2204,7 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
             }
         }
     }
-    if (counter == 0)                                      // if counter == 0 then we found nth
+    if (counter == 0)                                       // if counter == 0 then we found nth
         SendSysMessage(LANG_COMMAND_NOITEMSETFOUND);
     return true;
 }
@@ -2247,7 +2247,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
             }
         }
     }
-    if (counter == 0)                                      // if counter == 0 then we found nth
+    if (counter == 0)                                       // if counter == 0 then we found nth
         SendSysMessage(LANG_COMMAND_NOSKILLFOUND);
     return true;
 }
@@ -2317,7 +2317,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
             }
         }
     }
-    if (counter == 0)                                      // if counter == 0 then we found nth
+    if (counter == 0)                                       // if counter == 0 then we found nth
         SendSysMessage(LANG_COMMAND_NOSPELLFOUND);
     return true;
 }
@@ -3361,8 +3361,8 @@ bool ChatHandler::HandleChangeWeather(const char* args)
     if (!px || !py)
         return false;
 
-    uint32 type = (uint32)atoi(px);                        //0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
-    float grade = (float)atof(py);                         //0 to 1, sending -1 is instand good weather
+    uint32 type = (uint32)atoi(px);                         //0 to 3, 0: fine, 1: rain, 2: snow, 3: sand
+    float grade = (float)atof(py);                          //0 to 1, sending -1 is instand good weather
 
     Player *player = m_session->GetPlayer();
     uint32 zoneid = player->GetZoneId();
@@ -3493,7 +3493,7 @@ bool ChatHandler::HandleSet32Bit(const char* args)
 
     uint32 Opcode = (uint32)atoi(px);
     uint32 Value = (uint32)atoi(py);
-    if (Value > 32)                                        //uint32 = 32 bits
+    if (Value > 32)                                         //uint32 = 32 bits
         return false;
 
     sLog.outDebug(GetMangosString(LANG_SET_32BIT), Opcode, Value);
@@ -4358,7 +4358,7 @@ bool ChatHandler::HandleSendOpcodeCommand(const char* args)
 
     WorldPacket data(opcode, 8);
     data << uint64(value1);
-     ((Player*)unit)->GetSession()->SendPacket(&data);
+    ((Player*)unit)->GetSession()->SendPacket(&data);
 
     PSendSysMessage(LANG_COMMAND_OPCODESENT, opcode, unit->GetName());
     return true;
@@ -4502,7 +4502,7 @@ bool ChatHandler::HandleMovegensCommand(const char* /*args*/)
                 if(unit->GetTypeId()==TYPEID_UNIT)
                 {
                     float x,y,z;
-                     ((Creature*)unit)->GetRespawnCoord(x,y,z);
+                    ((Creature*)unit)->GetRespawnCoord(x,y,z);
                     PSendSysMessage(LANG_MOVEGENS_HOME_CREATURE,x,y,z);
                 }
                 else
