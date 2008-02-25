@@ -609,6 +609,7 @@ pkgdata_DATA = \
 	5272_mangos_mangos_string.sql \
 	5286_characters_character_pet.sql \
 	5292_mangos_spell_proc_event.sql \
+	5295_mangos_creature_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
