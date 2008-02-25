@@ -13,4 +13,4 @@ ALTER TABLE `guild_member`
     CHANGE COLUMN `OFFnote` `offnote` varchar(255) NOT NULL default '';
 
 ALTER TABLE `guild_bank_right` 
-    `Right` `gbright` tinyint(3) unsigned NOT NULL default '0';
+    CHANGE COLUMN `Right` `gbright` tinyint(3) unsigned NOT NULL default '0';
