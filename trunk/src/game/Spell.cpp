@@ -2014,6 +2014,37 @@ void Spell::update(uint32 difftime)
             if(m_timer == 0)
             {
                 SendChannelUpdate(0);
+
+                // channeled spell processed independently for quest targeting
+                // cast at creature (or GO) quest objectives update at succesful cast channel finished
+                // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
+                if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsMeleeSpell() )
+                {
+                    for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
+                    {
+                        TargetInfo* target = &*ihit;
+                        if(GUID_HIPART(target->targetGUID)!=HIGHGUID_UNIT)
+                            continue;
+
+                        Unit* unit = m_caster->GetGUID()==target->targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster,target->targetGUID);
+                        if (unit==NULL)
+                            continue;
+
+                        ((Player*)m_caster)->CastedCreatureOrGO(unit->GetEntry(),unit->GetGUID(),m_spellInfo->Id);
+                    }
+
+                    for(std::list<GOTargetInfo>::iterator ihit= m_UniqeGOTargetInfo.begin();ihit != m_UniqeGOTargetInfo.end();++ihit)
+                    {
+                        GOTargetInfo* target = &*ihit;
+
+                        GameObject* go = ObjectAccessor::GetGameObject(*m_caster, target->targetGUID);
+                        if(!go)
+                            continue;
+
+                        ((Player*)m_caster)->CastedCreatureOrGO(go->GetEntry(),go->GetGUID(),m_spellInfo->Id);
+                    }
+                }
+
                 finish();
             }
         } break;
