@@ -594,11 +594,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         TaxiPathNodeList const& nodeList = sTaxiPathNodesByPath[path];
 
         float distPrev = MAP_SIZE*MAP_SIZE;
-        float distNext = 
+        float distNext =
             (nodeList[0].x-pCurrChar->GetPositionX())*(nodeList[0].x-pCurrChar->GetPositionX())+
             (nodeList[0].y-pCurrChar->GetPositionY())*(nodeList[0].y-pCurrChar->GetPositionY())+
             (nodeList[0].z-pCurrChar->GetPositionZ())*(nodeList[0].z-pCurrChar->GetPositionZ());
-
 
         for(uint32 i = 1; i < nodeList.size(); ++i)
         {
@@ -816,7 +815,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
         data << (uint8)CHAR_CREATE_ERROR;
-        SendPacket( &data ); 
+        SendPacket( &data );
         return;
     }
 

@@ -543,7 +543,8 @@ class Spell
         void SetDelayStart(uint64 m_time) { m_delayStart = m_time; }
         uint64 GetDelayMoment() const { return m_delayMoment; }
 
-        bool IsNeedSendToClient() const {
+        bool IsNeedSendToClient() const
+        {
             return m_spellInfo->SpellVisual!=0 || m_spellInfo->ChannelInterruptFlags!=0 || m_spellInfo->speed > 0.0f || !m_triggeredByAuraSpell && !m_IsTriggeredSpell;
         }
 
@@ -604,20 +605,20 @@ class Spell
         uint32 m_countOfMiss;
         struct TargetInfo
         {
-             uint64 targetGUID;
-             uint64 timeDelay;
-             SpellMissInfo missCondition;
-             SpellMissInfo reflectResult;
-             uint8  effectMask;
+            uint64 targetGUID;
+            uint64 timeDelay;
+            SpellMissInfo missCondition;
+            SpellMissInfo reflectResult;
+            uint8  effectMask;
         };
         std::list<TargetInfo> m_UniqueTargetInfo;
         uint8 m_needAliveTargetMask;                        // Mask req. alive targets
 
         struct GOTargetInfo
         {
-             uint64 targetGUID;
-             uint64 timeDelay;
-             uint8  effectMask;
+            uint64 targetGUID;
+            uint64 timeDelay;
+            uint8  effectMask;
         };
         std::list<GOTargetInfo> m_UniqeGOTargetInfo;
 

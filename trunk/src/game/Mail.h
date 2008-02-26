@@ -120,46 +120,45 @@ struct MailItem
 
 typedef std::map<uint32, MailItem> MailItemMap;
 
-
 class MailItemsInfo
 {
-public:
-    MailItemMap::const_iterator begin() const { return i_MailItemMap.begin(); }
-    MailItemMap::const_iterator end() const { return i_MailItemMap.end(); }
-    MailItemMap::iterator begin() { return i_MailItemMap.begin(); }
-    MailItemMap::iterator end() { return i_MailItemMap.end(); }
+    public:
+        MailItemMap::const_iterator begin() const { return i_MailItemMap.begin(); }
+        MailItemMap::const_iterator end() const { return i_MailItemMap.end(); }
+        MailItemMap::iterator begin() { return i_MailItemMap.begin(); }
+        MailItemMap::iterator end() { return i_MailItemMap.end(); }
 
-    void AddItem(uint32 guidlow, uint32 _template, Item *item, uint8 slot = 0)
-    {
-        MailItem mailItem;
-        mailItem.item_slot = slot;
-        mailItem.item_guidlow = guidlow;
-        mailItem.item_template = _template;
-        mailItem.item = item;
-        i_MailItemMap[guidlow] = mailItem;
-    }
-
-    void AddItem(uint32 guidlow, uint8 slot = 0)
-    {
-        MailItem mailItem;
-        mailItem.item_guidlow = guidlow;
-        mailItem.item_slot = slot;
-        i_MailItemMap[guidlow] = mailItem;
-    }
-
-    uint8 size() const { return i_MailItemMap.size(); }
-    bool empty() const { return i_MailItemMap.empty(); }
-
-    void deleteIncludedItems()
-    {
-        for(MailItemMap::iterator mailItemIter = begin(); mailItemIter != end(); ++mailItemIter)
+        void AddItem(uint32 guidlow, uint32 _template, Item *item, uint8 slot = 0)
         {
-            MailItem& mailItem = mailItemIter->second;
-            mailItem.deleteItem();
+            MailItem mailItem;
+            mailItem.item_slot = slot;
+            mailItem.item_guidlow = guidlow;
+            mailItem.item_template = _template;
+            mailItem.item = item;
+            i_MailItemMap[guidlow] = mailItem;
         }
-    }
-private:
-    MailItemMap i_MailItemMap;                              // Keep the items in a map to avoid duplicate guids (which can happen), store only low part of guid
+
+        void AddItem(uint32 guidlow, uint8 slot = 0)
+        {
+            MailItem mailItem;
+            mailItem.item_guidlow = guidlow;
+            mailItem.item_slot = slot;
+            i_MailItemMap[guidlow] = mailItem;
+        }
+
+        uint8 size() const { return i_MailItemMap.size(); }
+        bool empty() const { return i_MailItemMap.empty(); }
+
+        void deleteIncludedItems()
+        {
+            for(MailItemMap::iterator mailItemIter = begin(); mailItemIter != end(); ++mailItemIter)
+            {
+                MailItem& mailItem = mailItemIter->second;
+                mailItem.deleteItem();
+            }
+        }
+    private:
+        MailItemMap i_MailItemMap;                          // Keep the items in a map to avoid duplicate guids (which can happen), store only low part of guid
 };
 
 struct Mail
@@ -212,5 +211,4 @@ struct Mail
 
     bool HasItems() const { return !items.empty(); }
 };
-
 #endif

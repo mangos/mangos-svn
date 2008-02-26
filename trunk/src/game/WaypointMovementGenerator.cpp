@@ -447,7 +447,6 @@ FlightPathMovementGenerator::SetCurrentNodeAfterTeleport()
     }
 }
 
-
 //
 // Unique1's ASTAR Pathfinding Code... For future use & reference...
 //

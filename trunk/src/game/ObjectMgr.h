@@ -204,6 +204,8 @@ class ObjectMgr
         typedef std::set< Guild * > GuildSet;
         typedef std::set< ArenaTeam * > ArenaTeamSet;
 
+        typedef HM_NAMESPACE::hash_map<uint32, Quest*> QuestMap;
+
         typedef HM_NAMESPACE::hash_map<uint32, AreaTrigger> AreaTriggerMap;
 
         typedef HM_NAMESPACE::hash_map<uint32, ReputationOnKillEntry> RepOnKillMap;
@@ -381,6 +383,8 @@ class ObjectMgr
                 return &itr->second;
             return NULL;
         }
+
+        QuestMap const& GetQuestTremplates() const { return mQuestTemplates; }
 
         void LoadGuilds();
         void LoadArenaTeams();
@@ -600,7 +604,7 @@ class ObjectMgr
         LocaleConstant GetLocalForIndex(int);
         // guild bank tabs
         const uint32 GetGuildBankTabPrice(uint8 Index) { return Index < GUILD_BANK_MAX_TABS ? mGuildBankTabPrice[Index] : 0; }
-        
+
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
@@ -615,7 +619,7 @@ class ObjectMgr
 
         uint32 m_hiPetNumber;
 
-        typedef HM_NAMESPACE::hash_map<uint32, Quest*> QuestMap;
+
         QuestMap mQuestTemplates;
 
         typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;

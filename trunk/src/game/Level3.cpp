@@ -2138,40 +2138,60 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
 {
     if(!*args)
         return false;
+
     std::string namepart = args;
-    WorldDatabase.escape_string(namepart);
+    uint32 counter = 0;
 
-    QueryResult *result = NULL;
+    // converting string that we try to find to lower case
+    std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
 
-    int loc = objmgr.GetLocalForIndex( m_session->GetSessionLocaleIndex() );
-    if ( loc == LOCALE_ENG )
+    // Search in `item_template`
+    for (uint32 id = 0; id < sItemStorage.MaxEntry; id++)
     {
-        result = WorldDatabase.PQuery("SELECT entry,name FROM item_template WHERE name "_LIKE_" '""%%%s%%""' ORDER BY entry ",namepart.c_str());
+        ItemPrototype const *pProto = sItemStorage.LookupEntry<ItemPrototype >(id);
+        if(!pProto)
+            continue;
+
+        std::string Name = pProto->Name1;
+
+        int loc_idx = m_session->GetSessionLocaleIndex();
+        if ( loc_idx >= 0 )
+        {
+            ItemLocale const *il = objmgr.GetItemLocale(pProto->ItemId);
+            if (il)
+            {
+                if (il->Name.size() > loc_idx && !il->Name[loc_idx].empty())
+                {
+                    Name = il->Name[loc_idx];
+
+                    // converting Name to lower case
+                    std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
+
+                    if (Name.find(namepart) != std::string::npos)
+                    {
+                        PSendSysMessage(LANG_ITEM_LIST, id, id, il->Name[loc_idx].c_str());
+                        counter++;
+                        continue;
+                    }
+                }
+            }
+        }
+
+        Name = pProto->Name1;
+
+        // converting Name to lower case
+        std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
+
+        if (Name.find(namepart) != std::string::npos)
+        {
+            PSendSysMessage(LANG_ITEM_LIST, id, id, pProto->Name1);
+            counter++;
+        }
     }
-    else
-    {
-        result = WorldDatabase.PQuery(
-            "( SELECT entry,name_loc%u FROM locales_item WHERE name_loc%u "_LIKE_" '""%%%s%%""' ) UNION "
-            "( SELECT entry,name FROM item_template WHERE name "_LIKE_" '""%%%s%%""' ) ORDER BY entry",
-            loc,loc,namepart.c_str(),namepart.c_str());
-    }
 
-    if(!result)
-    {
+    if (counter==0)
         SendSysMessage(LANG_COMMAND_NOITEMFOUND);
-        return true;
-    }
 
-    do
-    {
-        Field *fields = result->Fetch();
-        uint32 id = fields[0].GetUInt32();
-        std::string name = fields[1].GetCppString();
-        // send item in "id - id [name]" format (??)
-        PSendSysMessage(LANG_ITEM_LIST, id,id,name.c_str());
-    } while (result->NextRow());
-
-    delete result;
     return true;
 }
 
@@ -2181,6 +2201,9 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
         return false;
     std::string namepart = args;
     uint32 counter = 0;                                     // Counter for figure out that we found smth.
+
+    // converting string that we try to find to lower case
+    std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
 
     // Search in ItemSet.dbc
     for (uint32 id = 0; id < sItemSetStore.GetNumRows(); id++)
@@ -2192,9 +2215,6 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
 
             // converting name to lower case
             std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-
-            // converting string that we try to find to lower case
-            std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
 
             if (name.find(namepart) != std::string::npos)
             {
@@ -2224,6 +2244,9 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
     std::string namepart = args;
     uint32 counter = 0;                                     // Counter for figure out that we found smth.
 
+    // converting string that we try to find to lower case
+    std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+
     // Search in SkillLine.dbc
     for (uint32 id = 0; id < sSkillLineStore.GetNumRows(); id++)
     {
@@ -2235,8 +2258,6 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
 
             // converting SkillName to lower case
             std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-            // converting string that we try to find to lower case
-            std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
 
             if (name.find(namepart) != std::string::npos)
             {
@@ -2266,6 +2287,9 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
     std::string namepart = args;
     uint32 counter = 0;                                     // Counter for figure out that we found smth.
 
+    // converting string that we try to find to lower case
+    std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+
     // Search in Spell.dbc
     for (uint32 id = 0; id < sSpellStore.GetNumRows(); id++)
     {
@@ -2277,9 +2301,6 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
 
             // converting SpellName to lower case
             std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-
-            // converting string that we try to find to lower case
-            std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
 
             if (name.find(namepart) != std::string::npos)
             {
@@ -2335,52 +2356,81 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
         return false;
 
     std::string namepart = args;
-    WorldDatabase.escape_string(namepart);
+    uint32 counter = 0 ;
 
-    QueryResult *result = NULL;
+    // converting string that we try to find to lower case
+    std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
 
-    int loc = objmgr.GetLocalForIndex( m_session->GetSessionLocaleIndex() );
-    if ( loc == LOCALE_ENG )
+    for (ObjectMgr::QuestMap::const_iterator iter = objmgr.GetQuestTremplates().begin(); iter != objmgr.GetQuestTremplates().end(); ++iter)
     {
-        result = WorldDatabase.PQuery("SELECT entry,Title FROM quest_template WHERE Title "_LIKE_" '""%%%s%%""' ORDER BY entry",namepart.c_str());
-    }
-    else
-    {
-        result = WorldDatabase.PQuery(
-            "( SELECT entry,Title_loc%u FROM locales_quest WHERE Title_loc%u "_LIKE_" '""%%%s%%""' ) UNION "
-            "( SELECT entry,Title FROM quest_template WHERE Title "_LIKE_" '""%%%s%%""' ) ORDER BY entry",
-            loc,loc,namepart.c_str(),namepart.c_str());
-    }
+        Quest * qinfo = iter->second;
 
-    if(!result)
-    {
-        SendSysMessage(LANG_COMMAND_NOQUESTFOUND);
-        return true;
-    }
+        std::string Title = qinfo->GetTitle();
 
-    do
-    {
-        Field *fields = result->Fetch();
-        uint32 id = fields[0].GetUInt32();
-        std::string name = fields[1].GetCppString();
-
-        QuestStatus status = target->GetQuestStatus(id);
-
-        char const* statusStr = "";
-        if(status == QUEST_STATUS_COMPLETE)
+        int loc_idx = m_session->GetSessionLocaleIndex();
+        if ( loc_idx >= 0 )
         {
-            if(target->GetQuestRewardStatus(id))
-                statusStr = GetMangosString(LANG_COMMAND_QUEST_REWARDED);
-            else
-                statusStr = GetMangosString(LANG_COMMAND_QUEST_COMPLETE);
+            QuestLocale const *il = objmgr.GetQuestLocale(qinfo->GetQuestId());
+            if (il)
+            {
+                if (il->Title.size() > loc_idx && !il->Title[loc_idx].empty())
+                {
+                    std::string Title = il->Title[loc_idx];
+
+                    // converting string that we try to find to lower case
+                    std::transform( Title.begin(), Title.end(), Title.begin(), ::tolower );
+
+                    if (Title.find(namepart) != std::string::npos)
+                    {
+                        QuestStatus status = target->GetQuestStatus(qinfo->GetQuestId());
+
+                        char const* statusStr = "";
+                        if(status == QUEST_STATUS_COMPLETE)
+                        {
+                            if(target->GetQuestRewardStatus(qinfo->GetQuestId()))
+                                statusStr = GetMangosString(LANG_COMMAND_QUEST_REWARDED);
+                            else
+                                statusStr = GetMangosString(LANG_COMMAND_QUEST_COMPLETE);
+                        }
+                        else if(status == QUEST_STATUS_INCOMPLETE)
+                            statusStr = GetMangosString(LANG_COMMAND_QUEST_ACTIVE);
+
+                        PSendSysMessage(LANG_QUEST_LIST,qinfo->GetQuestId(),qinfo->GetQuestId(),il->Title[loc_idx].c_str(),(status == QUEST_STATUS_COMPLETE ? GetMangosString(LANG_COMPLETE) : (status == QUEST_STATUS_INCOMPLETE ? GetMangosString(LANG_ACTIVE) : "") ));
+                        counter++;
+                        continue;
+                    }
+                }
+            }
         }
-        else if(status == QUEST_STATUS_INCOMPLETE)
-            statusStr = GetMangosString(LANG_COMMAND_QUEST_ACTIVE);
 
-        PSendSysMessage(LANG_QUEST_LIST,id,id,name.c_str(),(status == QUEST_STATUS_COMPLETE ? GetMangosString(LANG_COMPLETE) : (status == QUEST_STATUS_INCOMPLETE ? GetMangosString(LANG_ACTIVE) : "") ));
-    } while (result->NextRow());
+        Title = qinfo->GetTitle();
 
-    delete result;
+        // converting string that we try to find to lower case
+        std::transform( Title.begin(), Title.end(), Title.begin(), ::tolower );
+
+        if (Title.find(namepart) != std::string::npos)
+        {
+            QuestStatus status = target->GetQuestStatus(qinfo->GetQuestId());
+
+            char const* statusStr = "";
+            if(status == QUEST_STATUS_COMPLETE)
+            {
+                if(target->GetQuestRewardStatus(qinfo->GetQuestId()))
+                    statusStr = GetMangosString(LANG_COMMAND_QUEST_REWARDED);
+                else
+                    statusStr = GetMangosString(LANG_COMMAND_QUEST_COMPLETE);
+            }
+            else if(status == QUEST_STATUS_INCOMPLETE)
+                statusStr = GetMangosString(LANG_COMMAND_QUEST_ACTIVE);
+
+            PSendSysMessage(LANG_QUEST_LIST,qinfo->GetQuestId(),qinfo->GetQuestId(), qinfo->GetTitle().c_str(),(status == QUEST_STATUS_COMPLETE ? GetMangosString(LANG_COMPLETE) : (status == QUEST_STATUS_INCOMPLETE ? GetMangosString(LANG_ACTIVE) : "") ));
+            counter++;
+        }
+    }
+
+    if (counter==0)
+        SendSysMessage(LANG_COMMAND_NOQUESTFOUND);
+
     return true;
 }
 
@@ -2390,38 +2440,57 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
         return false;
 
     std::string namepart = args;
-    WorldDatabase.escape_string(namepart);
+    uint32 counter = 0;
 
-    QueryResult *result = NULL;
+    // converting string that we try to find to lower case
+    std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
 
-    int loc = objmgr.GetLocalForIndex( m_session->GetSessionLocaleIndex() );
-    if ( loc == LOCALE_ENG )
+    for (uint32 id = 0; id< sCreatureStorage.MaxEntry; id++ )
     {
-        result = WorldDatabase.PQuery("SELECT entry,name FROM creature_template WHERE name "_LIKE_" '""%%%s%%""' ORDER BY entry",namepart.c_str());
+        CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(id);
+        if(!cInfo)
+            continue;
+
+        std::string Name = cInfo->Name;
+
+        int loc_idx = m_session->GetSessionLocaleIndex();
+        if ( loc_idx >= 0 )
+        {
+            CreatureLocale const *cl = objmgr.GetCreatureLocale(id);
+            if (cl)
+            {
+                if (cl->Name.size() > loc_idx && !cl->Name[loc_idx].empty())
+                {
+                    Name = cl->Name[loc_idx];
+
+                    // converting Name to lower case
+                    std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
+
+                    if (Name.find(namepart) != std::string::npos)
+                    {
+                        PSendSysMessage(LANG_CREATURE_ENTRY_LIST, id, id, cl->Name[loc_idx].c_str());
+                        counter++;
+                        continue;
+                    }
+                }
+            }
+        }
+
+        Name = cInfo->Name;
+
+        // converting Name to lower case
+        std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
+
+        if (Name.find(namepart) != std::string::npos)
+        {
+            PSendSysMessage(LANG_CREATURE_ENTRY_LIST,id,id,cInfo->Name);
+            counter++;
+        }
     }
-    else
-    {
-        result = WorldDatabase.PQuery(
-            "( SELECT entry,name_loc%u FROM locales_creature WHERE name_loc%u "_LIKE_" '""%%%s%%""' ) UNION "
-            "( SELECT entry,name FROM creature_template WHERE name "_LIKE_" '""%%%s%%""' ) ORDER BY entry",
-            loc,loc,namepart.c_str(),namepart.c_str());
-    }
 
-    if(!result)
-    {
+    if (counter==0)
         SendSysMessage(LANG_COMMAND_NOCREATUREFOUND);
-        return true;
-    }
 
-    do
-    {
-        Field *fields = result->Fetch();
-        uint32 id = fields[0].GetUInt32();
-        std::string name = fields[1].GetCppString();
-        PSendSysMessage(LANG_CREATURE_ENTRY_LIST,id,id,name.c_str());
-    } while (result->NextRow());
-
-    delete result;
     return true;
 }
 
@@ -2431,38 +2500,56 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
         return false;
 
     std::string namepart = args;
-    WorldDatabase.escape_string(namepart);
+    uint32 counter = 0;
 
-    QueryResult *result = NULL;
+    // converting string that we try to find to lower case
+    std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
 
-    int loc = objmgr.GetLocalForIndex( m_session->GetSessionLocaleIndex() );
-    if ( loc == LOCALE_ENG )
+    for (uint32 id = 0; id< sGOStorage.MaxEntry; id++ )
     {
-        result = WorldDatabase.PQuery("SELECT entry,name FROM gameobject_template WHERE name "_LIKE_" '""%%%s%%""' ORDER BY entry",namepart.c_str());
+        GameObjectInfo const* gInfo = sGOStorage.LookupEntry<GameObjectInfo>(id);
+        if(!gInfo)
+            continue;
+
+        std::string Name = gInfo->name;
+
+        int loc_idx = m_session->GetSessionLocaleIndex();
+        if ( loc_idx >= 0 )
+        {
+            GameObjectLocale const *gl = objmgr.GetGameObjectLocale(id);
+            if (gl)
+            {
+                if (gl->Name.size() > loc_idx && !gl->Name[loc_idx].empty())
+                {
+                    Name = gl->Name[loc_idx];
+                    // converting Name to lower case
+                    std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
+
+                    if (Name.find(namepart) != std::string::npos)
+                    {
+                        PSendSysMessage(LANG_GO_ENTRY_LIST, id, id, gl->Name[loc_idx].c_str());
+                        counter++;
+                        continue;
+                    }
+                }
+            }
+        }
+
+        Name = gInfo->name;
+
+        // converting Name to lower case
+        std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
+
+        if (Name.find(namepart) != std::string::npos)
+        {
+            PSendSysMessage(LANG_GO_ENTRY_LIST, id, id, gInfo->name);
+            counter++;
+        }
     }
-    else
-    {
-        result = WorldDatabase.PQuery(
-            "( SELECT entry,name_loc%u FROM locales_gameobject WHERE name_loc%u "_LIKE_" '""%%%s%%""' ) UNION "
-            "( SELECT entry,name FROM gameobject_template WHERE name "_LIKE_" '""%%%s%%""' ) ORDER BY entry",
-            loc,loc,namepart.c_str(),namepart.c_str());
-    }
 
-    if(!result)
-    {
+    if(counter==0)
         SendSysMessage(LANG_COMMAND_NOGAMEOBJECTFOUND);
-        return true;
-    }
 
-    do
-    {
-        Field *fields = result->Fetch();
-        uint32 id = fields[0].GetUInt32();
-        std::string name = fields[1].GetCppString();
-        PSendSysMessage(LANG_GO_ENTRY_LIST,id,id,name.c_str());
-    } while (result->NextRow());
-
-    delete result;
     return true;
 }
 

@@ -393,7 +393,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
         else
         {
             pl->ModifyMoney(-int32(auction->buyout));
-            if ( auction->bidder )                      //buyout for bidded auction ..
+            if ( auction->bidder )                          //buyout for bidded auction ..
             {
                 SendAuctionOutbiddedMail( auction, auction->buyout );
             }

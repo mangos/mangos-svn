@@ -173,7 +173,7 @@ struct GuildBankTab
 struct MemberSlot
 {
     uint64 logout_time;
-    std::string name; 
+    std::string name;
     std::string Pnote;
     std::string OFFnote;
     uint32 RankId;

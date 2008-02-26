@@ -59,7 +59,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     uint8 items_count;
     recv_data >> items_count;                               // attached items count
 
-    if(items_count > 12)                                 // client limit
+    if(items_count > 12)                                    // client limit
         return;
 
     if(items_count)
@@ -77,7 +77,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     recv_data >> money >> COD;                              // then there are two (uint32) 0;
     recv_data >> unk3 >> unk4 >> unk5;                      // unknown 2.3.0 (zero's)
 
-    items_count = mi.size(); // this is the real size after the duplicates have been removed
+    items_count = mi.size();                                // this is the real size after the duplicates have been removed
 
     if (receiver.empty())
         return;
@@ -218,8 +218,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
                 }
 
                 CharacterDatabase.BeginTransaction();
-                mailItem.item->DeleteFromInventoryDB();           //deletes item from character's inventory
-                mailItem.item->SaveToDB();                        // recursive and not have transaction guard into self
+                mailItem.item->DeleteFromInventoryDB();     //deletes item from character's inventory
+                mailItem.item->SaveToDB();                  // recursive and not have transaction guard into self
                 // owner in data will set at mail receive and item extracting
                 CharacterDatabase.PExecute("UPDATE item_instance SET owner_guid = '%u' WHERE guid='%u'", GUID_LOPART(rc), mailItem.item->GetGUIDLow());
                 CharacterDatabase.CommitTransaction();
@@ -768,7 +768,7 @@ void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 station
             m->receiver = receiver->GetGUIDLow();
             m->subject = subject;
             m->itemTextId = itemTextId;
-            
+
             if(mi)
                 m->AddAllItems(*mi);
 

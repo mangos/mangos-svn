@@ -238,7 +238,7 @@ class SpellMgr
         SpellMgr();
         ~SpellMgr();
 
-    // Accessors (const or static functions)
+        // Accessors (const or static functions)
     public:
         // Spell affects
         SpellAffection const* GetSpellAffection(uint16 spellId, uint8 effectId) const
@@ -371,11 +371,10 @@ class SpellMgr
             return mSpellScriptTarget.upper_bound(spell_id);
         }
 
-
         // Spell correctess for client using
         static bool IsSpellValid(SpellEntry const * spellInfo, Player* pl = NULL, bool msg = true);
 
-    // Modifiers
+        // Modifiers
     public:
         static SpellMgr& Instance();
 
@@ -400,5 +399,4 @@ class SpellMgr
 };
 
 #define spellmgr SpellMgr::Instance()
-
 #endif

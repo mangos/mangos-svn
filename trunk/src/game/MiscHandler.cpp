@@ -1210,7 +1210,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
         // find class talent tabs (all players have 3 talent tabs)
         uint32 const* talentTabIds = GetTalentTabPages(plr->getClass());
 
-        uint32 talentTabPos = 0;                                // pos of first talent rank in tab including all prev tabs
+        uint32 talentTabPos = 0;                            // pos of first talent rank in tab including all prev tabs
         for(uint32 i = 0; i < 3; ++i)
         {
             uint32 talentTabId = talentTabIds[i];
@@ -1624,7 +1624,7 @@ void WorldSession::HandleRequestPetInfoOpcode( WorldPacket & /*recv_data */)
 void WorldSession::HandleSetTaxiBenchmarkOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 1);
-    
+
     uint8 mode;
     recv_data >> mode;
 

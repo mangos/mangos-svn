@@ -172,7 +172,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectDurabilityDamage,                         //111 SPELL_EFFECT_DURABILITY_DAMAGE
     &Spell::EffectSummonDemon,                              //112 SPELL_EFFECT_SUMMON_DEMON
     &Spell::EffectResurrectNew,                             //113 SPELL_EFFECT_RESURRECT_NEW
-    &Spell::EffectTaunt,                                 //114 SPELL_EFFECT_ATTACK_ME
+    &Spell::EffectTaunt,                                    //114 SPELL_EFFECT_ATTACK_ME
     &Spell::EffectDurabilityDamagePCT,                      //115 SPELL_EFFECT_DURABILITY_DAMAGE_PCT
     &Spell::EffectSkinPlayerCorpse,                         //116 SPELL_EFFECT_SKIN_PLAYER_CORPSE       one spell: Remove Insignia, bg usage, required special corpse flags...
     &Spell::EffectSpiritHeal,                               //117 SPELL_EFFECT_SPIRIT_HEAL              one spell: Spirit Heal
@@ -452,15 +452,15 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                         uint32 BTAura = 0;
                         switch(m_spellInfo->Id)
                         {
-                        case 23881: BTAura = 23885; break;
-                        case 23892: BTAura = 23886; break;
-                        case 23893: BTAura = 23887; break;
-                        case 23894: BTAura = 23888; break;
-                        case 25251: BTAura = 25252; break;
-                        case 30335: BTAura = 30339; break;
-                        default:
-                            sLog.outError("Spell::EffectSchoolDMG: Spell %u not handled in BTAura",m_spellInfo->Id);
-                            break;
+                            case 23881: BTAura = 23885; break;
+                            case 23892: BTAura = 23886; break;
+                            case 23893: BTAura = 23887; break;
+                            case 23894: BTAura = 23888; break;
+                            case 25251: BTAura = 25252; break;
+                            case 30335: BTAura = 30339; break;
+                            default:
+                                sLog.outError("Spell::EffectSchoolDMG: Spell %u not handled in BTAura",m_spellInfo->Id);
+                                break;
                         }
 
                         if (BTAura)
@@ -505,7 +505,7 @@ void Spell::EffectDummy(uint32 i)
     {
         case SPELLFAMILY_GENERIC:
             // Gnomish Poultryizer trinket
-            if(m_spellInfo->Id == 30507) // Poultryizer
+            if(m_spellInfo->Id == 30507)                    // Poultryizer
             {
                 if (!m_CastItem)
                     return;
@@ -1328,7 +1328,7 @@ void Spell::EffectDummy(uint32 i)
             GameObject* pGameObj = new GameObject(m_caster);
 
             if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179644 ,creatureTarget->GetMapId(),
-                creatureTarget->GetPositionX(), creatureTarget->GetPositionY(), creatureTarget->GetPositionZ(), 
+                creatureTarget->GetPositionX(), creatureTarget->GetPositionY(), creatureTarget->GetPositionZ(),
                 creatureTarget->GetOrientation(), 0, 0, 0, 0, 100, 1) )
             {
                 delete pGameObj;
@@ -1633,7 +1633,8 @@ void Spell::EffectApplyAura(uint32 i)
             spellId = 25771;                                // Forbearance
         else if (m_spellInfo->Mechanic == MECHANIC_BANDAGE) // Bandages
             spellId = 11196;                                // Recently Bandaged
-        else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && m_spellInfo->SpellFamilyFlags & 0x8000000000LL) // Ice Block
+                                                            // Ice Block
+        else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && m_spellInfo->SpellFamilyFlags & 0x8000000000LL)
             spellId = SPELLID_MAGE_HYPOTHERMIA;             // Hypothermia
 
         SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);
@@ -2052,11 +2053,13 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                 gameObjTarget->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_NODESPAWN);
                 if(gameObjTarget->GetUInt32Value(GAMEOBJECT_STATE))
                 {
-                    gameObjTarget->SetUInt32Value(GAMEOBJECT_STATE,0);    //if closed/inactive -> open/activate it
+                                                            //if closed/inactive -> open/activate it
+                    gameObjTarget->SetUInt32Value(GAMEOBJECT_STATE,0);
                 }
                 else
                 {
-                    gameObjTarget->SetUInt32Value(GAMEOBJECT_STATE,1);    //if open/active -> close/deactivate it
+                                                            //if open/active -> close/deactivate it
+                    gameObjTarget->SetUInt32Value(GAMEOBJECT_STATE,1);
                 }
 
                 gameObjTarget->SetLootState(GO_CLOSED);
@@ -2452,10 +2455,10 @@ void Spell::EffectDispel(uint32 i)
 
     for(int n = 0 ; n < damage; ++n)
         if(unitTarget->RemoveFirstAuraByDispel(m_spellInfo->EffectMiscValue[i], m_caster))
-            sLog.outDebug("Spell: Removed aura type %u from %s %u (removed by %s %u)", 
-                m_spellInfo->EffectMiscValue[i], 
+            sLog.outDebug("Spell: Removed aura type %u from %s %u (removed by %s %u)",
+                m_spellInfo->EffectMiscValue[i],
                 unitTarget->GetTypeId()==TYPEID_PLAYER ? "player" : "creature", unitTarget->GetGUIDLow(),
-                m_caster->GetTypeId()==TYPEID_PLAYER ? "player" : "creature", m_caster->GetGUIDLow() );
+        m_caster->GetTypeId()==TYPEID_PLAYER ? "player" : "creature", m_caster->GetGUIDLow() );
 }
 
 void Spell::EffectDualWield(uint32 /*i*/)
@@ -3237,7 +3240,6 @@ void Spell::EffectWeaponDmg(uint32 i)
     }
     // Note: bonus can be negative
 
-
     uint32 hitInfo = 0;
     uint32 nohitMask = HITINFO_ABSORB | HITINFO_RESIST | HITINFO_MISS;
     SpellSchools damageType = SPELL_SCHOOL_NORMAL;
@@ -3251,7 +3253,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     // select weapon attack type...
     WeaponAttackType attType;
 
-    // offhand hand weapon required (not used with mainhand required (spellInfo->AttributesEx3 & 0x0000000000000400) in spell with damage effect 
+    // offhand hand weapon required (not used with mainhand required (spellInfo->AttributesEx3 & 0x0000000000000400) in spell with damage effect
     if(m_spellInfo->AttributesEx3 & 0x0000000001000000)
         attType = OFF_ATTACK;
     // some melee weapon spells have non-standard spell range
@@ -3626,7 +3628,7 @@ void Spell::EffectScriptEffect(uint32 i)
             //Two seperate mounts depending on area id (allows use both in and out of specefic instance)
             if (unitTarget->GetAreaId() == 3428)
                 unitTarget->CastSpell(unitTarget, 25863, true);
-            else 
+            else
                 unitTarget->CastSpell(unitTarget, 26655, true);
             break;
         }
@@ -3671,19 +3673,19 @@ void Spell::EffectScriptEffect(uint32 i)
                 int spell_id = 0;
                 switch(m_spellInfo->Id)
                 {
-                case   635: spell_id = 19982; break;        // Rank 1
-                case   639: spell_id = 19981; break;        // Rank 2
-                case   647: spell_id = 19980; break;        // Rank 3
-                case  1026: spell_id = 19968; break;        // Rank 4
-                case  1042: spell_id = 35217; break;        // Rank 5
-                case  3472: spell_id = 35218; break;        // Rank 6
-                case 10328: spell_id = 35219; break;        // Rank 7
-                case 10329: spell_id = 35220; break;        // Rank 8
-                case 25292: spell_id = 35221; break;        // Rank 9
-                case 27135: spell_id = 35222; break;        // Rank 10
-                case 27136: spell_id = 35223; break;        // Rank 11
-                default:
-                    sLog.outError("Spell::EffectScriptEffect: Spell %u not handled in HL",m_spellInfo->Id);
+                    case   635: spell_id = 19982; break;    // Rank 1
+                    case   639: spell_id = 19981; break;    // Rank 2
+                    case   647: spell_id = 19980; break;    // Rank 3
+                    case  1026: spell_id = 19968; break;    // Rank 4
+                    case  1042: spell_id = 35217; break;    // Rank 5
+                    case  3472: spell_id = 35218; break;    // Rank 6
+                    case 10328: spell_id = 35219; break;    // Rank 7
+                    case 10329: spell_id = 35220; break;    // Rank 8
+                    case 25292: spell_id = 35221; break;    // Rank 9
+                    case 27135: spell_id = 35222; break;    // Rank 10
+                    case 27136: spell_id = 35223; break;    // Rank 11
+                    default:
+                        sLog.outError("Spell::EffectScriptEffect: Spell %u not handled in HL",m_spellInfo->Id);
                 }
 
                 int32 basePoint0 = damage-1;
@@ -4167,7 +4169,7 @@ void Spell::EffectMomentMove(uint32 i)
         unitTarget->GetClosePoint(fx,fy,fz,dis);
         float ox,oy,oz;
         unitTarget->GetPosition(ox,oy,oz);
-        
+
         float fx2,fy2,fz2;                                  // getObjectHitPos overwrite last args in any result case
         if(VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(mapid, ox,oy,oz+0.5, fx,fy,oz+0.5,fx2,fy2,fz2, -0.5))
         {

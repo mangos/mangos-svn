@@ -103,24 +103,24 @@ static const uint8 GroupUpdateLength[GROUP_UPDATE_FLAGS_COUNT] = { 0, 1, 2, 2, 1
 
 class Roll : public LootValidatorRef
 {
-public:
-    Roll(): itemGUID(0), itemid(0), itemRandomPropId(0), totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), itemSlot(0) {}
-    ~Roll() { }
-    void setLoot(Loot *pLoot) { link(pLoot, this); }
-    Loot *getLoot() { return getTarget(); }
-    void targetObjectBuildLink();
+    public:
+        Roll(): itemGUID(0), itemid(0), itemRandomPropId(0), totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), itemSlot(0) {}
+        ~Roll() { }
+        void setLoot(Loot *pLoot) { link(pLoot, this); }
+        Loot *getLoot() { return getTarget(); }
+        void targetObjectBuildLink();
 
-    uint64 itemGUID;
-    uint32 itemid;
-    uint32 itemRandomSuffix;
-    int32  itemRandomPropId;
-    typedef std::map<uint64, RollVote> PlayerVote;
-    PlayerVote playerVote;                          //vote position correspond with player position (in group)
-    uint8 totalPlayersRolling;
-    uint8 totalNeed;
-    uint8 totalGreed;
-    uint8 totalPass;
-    uint8 itemSlot;
+        uint64 itemGUID;
+        uint32 itemid;
+        uint32 itemRandomSuffix;
+        int32  itemRandomPropId;
+        typedef std::map<uint64, RollVote> PlayerVote;
+        PlayerVote playerVote;                              //vote position correspond with player position (in group)
+        uint8 totalPlayersRolling;
+        uint8 totalNeed;
+        uint8 totalGreed;
+        uint8 totalPass;
+        uint8 itemSlot;
 };
 
 /** request member stats checken **/

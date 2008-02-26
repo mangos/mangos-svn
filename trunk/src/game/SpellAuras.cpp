@@ -596,7 +596,7 @@ void AreaAura::Update(uint32 diff)
                     // apply aura to players in range that dont have it yet
                     if (!t_aura)
                     {
-                        // if rank not found 
+                        // if rank not found
                         if(SpellEntry const *actualSpellInfo = spellmgr.SelectAuraRankForPlayerLevel(GetSpellProto(),Target->getLevel()))
                         {
                             int32 actualBasePoints = m_currentBasePoints;
@@ -1133,7 +1133,6 @@ void Aura::TriggerSpell()
     if(!caster || !target)
         return;
 
-
     // custom points code
     switch(GetId())
     {
@@ -1359,7 +1358,7 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
         CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(displayId);
         if(!minfo)
         {
-            sLog.outErrorDb("Mount (Entry: %u) has model %u not found in table `creature_model_info`, can't load. ", 
+            sLog.outErrorDb("Mount (Entry: %u) has model %u not found in table `creature_model_info`, can't load. ",
                 m_modifier.m_miscvalue, displayId);
             return;
         }
@@ -2121,8 +2120,8 @@ void Aura::HandleModConfuse(bool apply, bool Real)
         {
             //This fixes blind so it doesn't continue to attack
             // TODO: may other spells casted confuse aura (but not all) stop attack
-            if(caster && caster->GetTypeId() == TYPEID_PLAYER && 
-                GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && 
+            if(caster && caster->GetTypeId() == TYPEID_PLAYER &&
+                GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE &&
                 (GetSpellProto()->Mechanic == MECHANIC_CONFUSED || GetSpellProto()->EffectMechanic[GetEffIndex()] == MECHANIC_CONFUSED))
                 caster->AttackStop();
 
@@ -2792,7 +2791,7 @@ void Aura::HandleAuraModIncreaseSwimSpeed(bool apply, bool Real)
 void Aura::HandleModMechanicImmunity(bool apply, bool Real)
 {
     uint32 mechanic = 1 << m_modifier.m_miscvalue;
-    
+
     //immune movement impairement and loss of control
     if(GetId()==42292)
         mechanic=0x9967da6;
@@ -2805,8 +2804,8 @@ void Aura::HandleModMechanicImmunity(bool apply, bool Real)
             next = iter;
             next++;
             SpellEntry const *spell = iter->second->GetSpellProto();
-            if (!( spell->Attributes & 0x20000000)	//spells unaffected by invulnerability
-                && !iter->second->IsPositive()		//only remove negative spells
+            if (!( spell->Attributes & 0x20000000)          //spells unaffected by invulnerability
+                && !iter->second->IsPositive()              //only remove negative spells
                 && spell->Id != GetId())
             {
                 //check for mechanic mask
@@ -2817,7 +2816,7 @@ void Aura::HandleModMechanicImmunity(bool apply, bool Real)
                         break;
                     else
                         next = Auras.begin();
-                } 
+                }
             }
         }
     }
@@ -3380,25 +3379,25 @@ void Aura::HandleModTotalPercentStat(bool apply, bool Real)
 
 void Aura::HandleAuraModResistenceOfIntellectPercent(bool apply, bool Real)
 {
-    if(m_target->GetTypeId() != TYPEID_PLAYER) 
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
 
     if(m_modifier.m_miscvalue != (1<<SPELL_SCHOOL_NORMAL))
     {
         // support required adding replace UpdateArmor by loop by UpdateResistence at intelect update
         // and include in UpdateResistence same code as in UpdateArmor for aura mod apply.
-        sLog.outError("Aura SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT(182) need adding support for non-armor resistences!"); 
+        sLog.outError("Aura SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT(182) need adding support for non-armor resistences!");
         return;
     }
-    
-    // Recalculate Armor 
+
+    // Recalculate Armor
     m_target->UpdateArmor();
-    
-    // On apply aura isn`t on Player so need add manually 
-     if (apply) 
-     { 
-         int32 ArmorBonus = int32(m_target->GetStat(STAT_INTELLECT) * m_modifier.m_amount/100.0f);
-         m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES + SPELL_SCHOOL_NORMAL,ArmorBonus,apply); 
+
+    // On apply aura isn`t on Player so need add manually
+    if (apply)
+    {
+        int32 ArmorBonus = int32(m_target->GetStat(STAT_INTELLECT) * m_modifier.m_amount/100.0f);
+        m_target->ApplyModUInt32Value(UNIT_FIELD_RESISTANCES + SPELL_SCHOOL_NORMAL,ArmorBonus,apply);
     }
 }
 
@@ -3790,15 +3789,15 @@ void Aura::HandleAuraModRangedAttackPowerOfStatPercent(bool apply, bool Real)
         sLog.outError("Aura SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT (212) need support non-intelect stats!");
         return;
     }
-    
-    // Recalculate bonus 
-    ((Player*)m_target)->UpdateAttackPowerAndDamage(true); 
-      
-     // On apply aura isn`t on Player so need add manually 
-     if (apply) 
-     { 
-         int32 RAPBonus = int32(m_target->GetStat(Stats(m_modifier.m_miscvalue)) * m_modifier.m_amount / 100.0f); 
-         m_target->ApplyModUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,RAPBonus,apply); 
+
+    // Recalculate bonus
+    ((Player*)m_target)->UpdateAttackPowerAndDamage(true);
+
+    // On apply aura isn`t on Player so need add manually
+    if (apply)
+    {
+        int32 RAPBonus = int32(m_target->GetStat(Stats(m_modifier.m_miscvalue)) * m_modifier.m_amount / 100.0f);
+        m_target->ApplyModUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,RAPBonus,apply);
     }
 }
 

@@ -326,7 +326,7 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
     else
     {
         CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid='%u'", pItem->GetGUIDLow());
-        objmgr.RemoveAItem(pItem->GetGUIDLow()); // we have to remove the item, before we delete it !!
+        objmgr.RemoveAItem(pItem->GetGUIDLow());            // we have to remove the item, before we delete it !!
         delete pItem;
     }
 }
@@ -413,7 +413,7 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
     else
     {
         CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid='%u'",pItem->GetGUIDLow());
-        objmgr.RemoveAItem(pItem->GetGUIDLow()); // we have to remove the item, before we delete it !!
+        objmgr.RemoveAItem(pItem->GetGUIDLow());            // we have to remove the item, before we delete it !!
         delete pItem;
     }
 }
@@ -3136,7 +3136,7 @@ void ObjectMgr::LoadSpellScripts()
             // skip empty effects
             if( !spellInfo->Effect[i] )
                 continue;
-            
+
             if( spellInfo->Effect[i] == SPELL_EFFECT_SCRIPT_EFFECT )
             {
                 found =  true;
@@ -3177,7 +3177,7 @@ void ObjectMgr::LoadEventScripts()
                 if( spell->Effect[j] == SPELL_EFFECT_SEND_EVENT )
                 {
                     if (spell->EffectMiscValue[j])
-                         evt_scripts.insert(spell->EffectMiscValue[j]);
+                        evt_scripts.insert(spell->EffectMiscValue[j]);
                 }
             }
         }
@@ -4908,7 +4908,7 @@ bool DumpPlayerTable(std::string& dump, uint32 guid, char const*tableFrom, char 
     char const* wherestr = "";
     uint32 whereguid = 0;
     QueryResult *result_pet = NULL;
-    
+
     switch ( type )
     {
         case 3:
@@ -4922,7 +4922,7 @@ bool DumpPlayerTable(std::string& dump, uint32 guid, char const*tableFrom, char 
         case 5:
             wherestr  = "guid";
             whereguid = guid;
-        
+
             result_pet = CharacterDatabase.PQuery("SELECT id FROM character_pet WHERE owner = '%d'", whereguid);
             if(!result_pet)
                 return false;
@@ -5175,7 +5175,7 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
 
     std::map<uint32, uint32> items;
     char buf[32000] = "";
-    
+
     typedef std::map<uint32, uint32> PetIds;                // old->new petid relation
     typedef PetIds::value_type PetIdsPair;
     PetIds petids;
@@ -5243,7 +5243,8 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
                     if (result)
                     {
                         delete result;
-                        if(!changenth(line, 29, "1")) ROLLBACK; // rename on login
+                                                            // rename on login
+                        if(!changenth(line, 29, "1")) ROLLBACK;
                     }
                 }
                 else if(!changenth(line, 4, name.c_str())) ROLLBACK;
@@ -5273,17 +5274,19 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
                 //store a map of old pet id to new inserted pet id for use by type 5 tables
                 snprintf(currpetid, 20, "%s", getnth(line, 1).c_str());
                 if(lastpetid == "") snprintf(lastpetid, 20, "%s", currpetid);
-                if(lastpetid != currpetid) {
+                if(lastpetid != currpetid)
+                {
                     snprintf(newpetid, 20, "%d", ObjectMgr::GeneratePetNumber());
                     snprintf(lastpetid, 20, "%s", currpetid);
                 }
-                
+
                 std::map<uint32, uint32> :: const_iterator petids_iter = petids.find(atoi(currpetid));
-                
-                if(petids_iter == petids.end()){
+
+                if(petids_iter == petids.end())
+                {
                     petids.insert(PetIdsPair(atoi(currpetid), atoi(newpetid)));
                 }
-                
+
                 // item, entry, owner, ...
                 if(!changenth(line, 1, newpetid)) ROLLBACK;
                 if(!changenth(line, 3, newguid)) ROLLBACK;
@@ -5293,13 +5296,13 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
             case 5:                                         // pet_aura, pet_spell, pet_spell_cooldown t
             {
                 snprintf(currpetid, 20, "%s", getnth(line, 1).c_str());
-                
+
                 // lookup currpetid and match to new inserted pet id
                 std::map<uint32, uint32> :: const_iterator petids_iter = petids.find(atoi(currpetid));
                 if(petids_iter == petids.end()) ROLLBACK;   // couldn't find new inserted id
 
                 snprintf(newpetid, 20, "%d", petids_iter->second);
-                    
+
                 if(!changenth(line, 1, newpetid)) ROLLBACK;
 
                 break;

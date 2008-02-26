@@ -529,7 +529,7 @@ uint32 GameObject::GetLootId(GameObjectInfo const* ginfo)
 {
     if (!ginfo)
         return 0;
-        
+
     switch(ginfo->type)
     {
         case GAMEOBJECT_TYPE_CHEST:
@@ -615,7 +615,7 @@ bool GameObject::ActivateToQuest( Player *pTarget)const
                 for(LootStoreItemList::iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
                 {
                     if(pTarget->HasQuestForItem(item_iter->itemid))
-                    return true;
+                        return true;
                 }
             }
             break;

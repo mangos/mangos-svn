@@ -45,14 +45,14 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
         sLog.outDetail("Error in CMSG_QUESTGIVER_STATUS_QUERY, called for not found questgiver (Typeid: %u GUID: %u)",GuidHigh2TypeId(GUID_HIPART(guid)),GUID_LOPART(guid));
         return;
     }
-    
+
     switch(questgiver->GetTypeId())
     {
         case TYPEID_UNIT:
         {
             sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_STATUS_QUERY for npc, guid = %u",uint32(GUID_LOPART(guid)) );
             Creature* cr_questgiver=(Creature*)questgiver;
-            if( !cr_questgiver->IsHostileTo(_player))               // not show quest status to enemies
+            if( !cr_questgiver->IsHostileTo(_player))       // not show quest status to enemies
             {
                 questStatus = Script->NPCDialogStatus(_player, cr_questgiver);
                 if( questStatus > 6 )
@@ -75,7 +75,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
     }
 
     //inform client about status of quest
-   _player->PlayerTalkClass->SendQuestGiverStatus(questStatus, guid);
+    _player->PlayerTalkClass->SendQuestGiverStatus(questStatus, guid);
 }
 
 void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
@@ -533,7 +533,7 @@ uint32 WorldSession::getDialogStatus(Player *pPlayer, Object* questgiver, uint32
             //its imposible, but check ^)
             sLog.outError("Warning: GetDialogStatus called for unexpected type %u", questgiver->GetTypeId());
             return DIALOG_STATUS_NONE;
-    } 
+    }
 
     for(QuestRelations::const_iterator i = qir->lower_bound(questgiver->GetEntry()); i != qir->upper_bound(questgiver->GetEntry()); ++i )
     {
