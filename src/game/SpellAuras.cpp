@@ -1443,9 +1443,9 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     switch(m_modifier.m_miscvalue)
     {
         case FORM_CAT:
-            if(unit_target->getRace() == RACE_NIGHTELF)
+            if(Player::TeamForRace(unit_target->getRace())==ALLIANCE)
                 modelid = 892;
-            else if(unit_target->getRace() == RACE_TAUREN)
+            else
                 modelid = 8571;
             PowerType = POWER_ENERGY;
             break;
@@ -1453,26 +1453,26 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             modelid = 632;
             break;
         case FORM_AQUA:
-            if(unit_target->getRace() == RACE_NIGHTELF)
+            if(Player::TeamForRace(unit_target->getRace())==ALLIANCE)
                 modelid = 2428;
-            else if(unit_target->getRace() == RACE_TAUREN)
+            else
                 modelid = 2428;
             break;
         case FORM_BEAR:
-            if(unit_target->getRace() == RACE_NIGHTELF)
+            if(Player::TeamForRace(unit_target->getRace())==ALLIANCE)
                 modelid = 2281;
-            else if(unit_target->getRace() == RACE_TAUREN)
+            else
                 modelid = 2289;
             PowerType = POWER_RAGE;
             break;
         case FORM_GHOUL:
-            if(unit_target->getRace() == RACE_NIGHTELF)
+            if(Player::TeamForRace(unit_target->getRace())==ALLIANCE)
                 modelid = 10045;
             break;
         case FORM_DIREBEAR:
-            if(unit_target->getRace() == RACE_NIGHTELF)
+            if(Player::TeamForRace(unit_target->getRace())==ALLIANCE)
                 modelid = 2281;
-            else if(unit_target->getRace() == RACE_TAUREN)
+            else
                 modelid = 2289;
             PowerType = POWER_RAGE;
             break;
@@ -1483,21 +1483,21 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             modelid = 4613;
             break;
         case FORM_FLIGHT:
-            if(unit_target->getRace() == RACE_NIGHTELF)
+            if(Player::TeamForRace(unit_target->getRace())==ALLIANCE)
                 modelid = 20857;
-            else if(unit_target->getRace() == RACE_TAUREN)
+            else
                 modelid = 20872;
             break;
         case FORM_MOONKIN:
-            if(unit_target->getRace() == RACE_NIGHTELF)
+            if(Player::TeamForRace(unit_target->getRace())==ALLIANCE)
                 modelid = 15374;
-            else if(unit_target->getRace() == RACE_TAUREN)
+            else
                 modelid = 15375;
             break;
         case FORM_SWIFT_FLIGHT:
-            if(unit_target->getRace() == RACE_NIGHTELF)
+            if(Player::TeamForRace(unit_target->getRace())==ALLIANCE)
                 modelid = 21243;
-            else if(unit_target->getRace() == RACE_TAUREN)
+            else
                 modelid = 21244;
             break;
         case FORM_AMBIENT:
@@ -1598,6 +1598,29 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
         unit_target->m_ShapeShiftForm = m_spellId;
         unit_target->m_form = m_modifier.m_miscvalue;
+
+        switch ( unit_target->m_form )
+        {
+            case FORM_CAT:
+            case FORM_TREE:
+            case FORM_TRAVEL:
+            case FORM_AQUA:
+            case FORM_BEAR:
+            case FORM_DIREBEAR:
+            case FORM_SWIFT_FLIGHT:
+            case FORM_FLIGHT:
+            case FORM_MOONKIN:
+                // remove movement affects
+                unit_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);           
+                unit_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
+
+                // and polymorphic affects
+                if(unit_target->IsPolymorphed())
+                    unit_target->RemoveAurasDueToSpell(unit_target->getTransForm());
+                break;
+            default:
+               break;
+        }
     }
     else
     {
