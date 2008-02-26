@@ -3151,7 +3151,6 @@ uint8 Spell::CanCast(bool strict)
             case SPELL_EFFECT_SUMMON:
                 //case SPELL_EFFECT_SUMMON_WILD:                //not store in pet field
                 //case SPELL_EFFECT_SUMMON_GUARDIAN:            //not store in pet field
-            case SPELL_EFFECT_SUMMON_PET:
             case SPELL_EFFECT_SUMMON_POSSESSED:
             case SPELL_EFFECT_SUMMON_PHANTASM:
             case SPELL_EFFECT_SUMMON_CRITTER:               //not store in pet field
@@ -3159,6 +3158,28 @@ uint8 Spell::CanCast(bool strict)
             {
                 if(m_caster->GetPetGUID())
                     return SPELL_FAILED_ALREADY_HAVE_SUMMON;
+
+                if(m_caster->GetCharmGUID())
+                    return SPELL_FAILED_ALREADY_HAVE_CHARM;
+
+                break;
+            }
+            case SPELL_EFFECT_SUMMON_PET:
+            {
+
+                if(m_caster->GetPetGUID())                  //let warlock do a replacement summon
+                {
+
+                    Pet* pet = ((Player*)m_caster)->GetPet();
+
+                    if (m_caster->GetTypeId()==TYPEID_PLAYER && m_caster->getClass()==CLASS_WARLOCK)
+                    {
+                        if (strict)                         //starting cast, trigger pet stun (cast by pet so it doesn't attack player)
+                            pet->CastSpell(pet, 32752, true, NULL, NULL, m_caster->GetGUID());
+                    }
+                    else
+                        return SPELL_FAILED_ALREADY_HAVE_SUMMON;
+                }
 
                 if(m_caster->GetCharmGUID())
                     return SPELL_FAILED_ALREADY_HAVE_CHARM;
