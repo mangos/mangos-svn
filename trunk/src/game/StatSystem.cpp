@@ -348,7 +348,15 @@ void Player::UpdateDamagePhysical(WeaponAttackType attType)
     float weapon_mindamage = GetWeaponDamageRange(attType, MINDAMAGE);
     float weapon_maxdamage = GetWeaponDamageRange(attType, MAXDAMAGE);
 
-    if(!IsUseEquipedWeapon(attType==BASE_ATTACK))           //check if player is druid and in cat or bear forms
+    if ( IsInFeralForm() )                                  //check if player is druid and in cat or bear forms
+    {
+        uint32 lvl = getLevel();
+        if ( lvl > 60 ) lvl = 60;
+
+        weapon_mindamage = lvl*0.85*att_speed;
+        weapon_maxdamage = lvl*1.25*att_speed;
+    }
+    else if(!IsUseEquipedWeapon(attType==BASE_ATTACK))      //check if player not in form but still can't use weapon (broken/etc)
     {
         weapon_mindamage = BASE_MINDAMAGE;
         weapon_maxdamage = BASE_MAXDAMAGE;
