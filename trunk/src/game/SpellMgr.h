@@ -81,13 +81,13 @@ enum SpellSpecific
 SpellSpecific GetSpellSpecific(uint32 spellId);
 
 // Different spell properties
-float GetRadius(SpellRadiusEntry const *radius);
-uint32 GetCastTime(SpellCastTimesEntry const*time);
-float GetMinRange(SpellRangeEntry const *range);
-float GetMaxRange(SpellRangeEntry const *range);
-int32 GetDuration(SpellEntry const *spellInfo);
-int32 GetMaxDuration(SpellEntry const *spellInfo);
-inline uint32 GetRecoveryTime(SpellEntry const *spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
+float GetSpellRadius(SpellRadiusEntry const *radius);
+uint32 GetSpellCastTime(SpellCastTimesEntry const*time);
+float GetSpellMinRange(SpellRangeEntry const *range);
+float GetSpellMaxRange(SpellRangeEntry const *range);
+int32 GetSpellDuration(SpellEntry const *spellInfo);
+int32 GetSpellMaxDuration(SpellEntry const *spellInfo);
+inline uint32 GetSpellRecoveryTime(SpellEntry const *spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
 
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
 bool IsSealSpell(uint32 spellId);

@@ -410,7 +410,7 @@ Unit *caster, Item* castItem) : Aura(spellproto, eff, currentBasePoints, target,
     // caster==NULL in constructor args if target==caster in fact
     Unit* caster_ptr = caster ? caster : target;
 
-    m_radius = GetRadius(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
+    m_radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
     if(Player* modOwner = caster_ptr->GetSpellModOwner())
         modOwner->ApplySpellMod(GetSpellProto()->Id, SPELLMOD_RADIUS, m_radius);
 }
@@ -930,8 +930,8 @@ void Aura::_RemoveAura()
         }
 
         // reset cooldown state for spells infinity/long aura (it's all self applied (?))
-        int32 duration = GetDuration(GetSpellProto());
-        if( caster==m_target && ( duration < 0 || uint32(duration) > GetRecoveryTime(GetSpellProto()) ))
+        int32 duration = GetSpellDuration(GetSpellProto());
+        if( caster==m_target && ( duration < 0 || uint32(duration) > GetSpellRecoveryTime(GetSpellProto()) ))
             SendCoolDownEvent();
     }
     else                                                    // decrease count for spell
@@ -2254,7 +2254,7 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
         data << m_target->GetGUID();
         data << uint8(0x0);
         data << uint32(GetSpellProto()->Id);
-        data << uint32(GetRecoveryTime(GetSpellProto()));
+        data << uint32(GetSpellRecoveryTime(GetSpellProto()));
         ((Player*)m_target)->GetSession()->SendPacket(&data);
 
     }
@@ -4411,7 +4411,7 @@ void Aura::CleanupTriggeredSpells()
     if(!tProto)
         return;
 
-    if(GetDuration(tProto) != -1)
+    if(GetSpellDuration(tProto) != -1)
         return;
 
     m_target->RemoveAurasDueToSpell(tSpellId);

@@ -38,7 +38,7 @@ SpellMgr& SpellMgr::Instance()
     return spellMgr;
 }
 
-float GetRadius(SpellRadiusEntry const *radius)
+float GetSpellRadius(SpellRadiusEntry const *radius)
 {
     if(radius)
         return radius->Radius;
@@ -46,7 +46,7 @@ float GetRadius(SpellRadiusEntry const *radius)
         return 0;
 }
 
-uint32 GetCastTime(SpellCastTimesEntry const *time)
+uint32 GetSpellCastTime(SpellCastTimesEntry const *time)
 {
     if(time)
         return time->CastTime;
@@ -54,7 +54,7 @@ uint32 GetCastTime(SpellCastTimesEntry const *time)
         return 0;
 }
 
-float GetMaxRange(SpellRangeEntry const *range)
+float GetSpellMaxRange(SpellRangeEntry const *range)
 {
     if(range)
         return range->maxRange;
@@ -62,7 +62,7 @@ float GetMaxRange(SpellRangeEntry const *range)
         return 0;
 }
 
-float GetMinRange(SpellRangeEntry const *range)
+float GetSpellMinRange(SpellRangeEntry const *range)
 {
     if(range)
         return range->minRange;
@@ -70,7 +70,7 @@ float GetMinRange(SpellRangeEntry const *range)
         return 0;
 }
 
-int32 GetDuration(SpellEntry const *spellInfo)
+int32 GetSpellDuration(SpellEntry const *spellInfo)
 {
     if(!spellInfo)
         return 0;
@@ -80,7 +80,7 @@ int32 GetDuration(SpellEntry const *spellInfo)
     return (du->Duration[0] == -1) ? -1 : abs(du->Duration[0]);
 }
 
-int32 GetMaxDuration(SpellEntry const *spellInfo)
+int32 GetSpellMaxDuration(SpellEntry const *spellInfo)
 {
     if(!spellInfo)
         return 0;
@@ -433,8 +433,8 @@ bool IsSingleTargetSpell(uint32 spellId)
         return true;
 
     // cannot be cast on another target while not cooled down anyway
-    int32 duration = GetDuration(spellInfo);
-    if ( duration >= 0 && duration < int32(GetRecoveryTime(spellInfo)))
+    int32 duration = GetSpellDuration(spellInfo);
+    if ( duration >= 0 && duration < int32(GetSpellRecoveryTime(spellInfo)))
         return false;
 
     // all other single target spells have if it has AttributesEx

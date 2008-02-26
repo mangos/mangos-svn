@@ -150,7 +150,7 @@ Unit *Totem::GetOwner()
 void Totem::SetTypeBySummonSpell(SpellEntry const * spellProto)
 {
     //now, spellId is the spell of EffectSummonTotem , not the spell1 of totem!
-    if (GetDuration(sSpellStore.LookupEntry(GetSpell())) != -1)
+    if (GetSpellDuration(sSpellStore.LookupEntry(GetSpell())) != -1)
         m_type = TOTEM_ACTIVE;
 
     if(spellProto->SpellIconID==2056)

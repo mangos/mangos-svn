@@ -295,13 +295,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
     if( m_spellInfo->AttributesEx2 == 0x000020 )            //Auto Shot & Shoot
         m_autoRepeat = true;
 
-    casttime = GetCastTime(sCastTimesStore.LookupEntry(m_spellInfo->CastingTimeIndex));
-
-    if(Player* modOwner = m_caster->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_CASTING_TIME, casttime,this);
-
-    casttime = int32(casttime*m_caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
-
+    m_casttime = 0;                                         // setup to correct value in Spell::prepare, don't must be used before.
     m_timer = 0;                                            // will set to castime in preper
 
     m_needAliveTargetMask = 0;
@@ -848,9 +842,9 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 {
     float radius;
     if (m_spellInfo->EffectRadiusIndex[i])
-        radius = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+        radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
     else
-        radius = GetMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
+        radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
 
     if(m_originalCaster)
         if(Player* modOwner = m_originalCaster->GetSpellModOwner())
@@ -1477,8 +1471,6 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
     if(triggeredByAura)
         m_triggeredByAuraSpell  = triggeredByAura->GetSpellProto();
 
-    ReSetTimer();
-
     // create and add update event for this spell
     SpellEvent* Event = new SpellEvent(this);
     m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
@@ -1503,6 +1495,17 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
         finish(false);
         return;
     }
+
+    // calculate cast time (calculated after first CanCast check to prevent charge counting for first CanCast fail)
+    m_casttime = GetSpellCastTime(sCastTimesStore.LookupEntry(m_spellInfo->CastingTimeIndex));
+
+    if(Player* modOwner = m_caster->GetSpellModOwner())
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_CASTING_TIME, m_casttime,this);
+
+    m_casttime = int32(m_casttime*m_caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+
+    // set timer base at cast time
+    ReSetTimer();
 
     // stealth must be removed at cast starting (at show channel bar)
     // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
@@ -1682,7 +1685,7 @@ void Spell::handle_immediate()
     if(IsChanneledSpell())
     {
         m_spellState = SPELL_STATE_CASTING;
-        SendChannelStart(GetDuration(m_spellInfo));
+        SendChannelStart(GetSpellDuration(m_spellInfo));
     }
 
     // process immediate effects (items, ground, etc.) also initialize some variables
@@ -1816,10 +1819,6 @@ void Spell::_handle_finish_phase()
     // spell log
     if(m_needSpellLog)
         SendLogExecute();
-
-    //remove spell mods
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)m_caster)->RemoveSpellMods(this);
 }
 
 void Spell::SendSpellCooldown()
@@ -2055,13 +2054,16 @@ void Spell::update(uint32 difftime)
 
 void Spell::finish(bool ok)
 {
-
     if(!m_caster) return;
 
     if(m_spellState == SPELL_STATE_FINISHED)
         return;
 
     m_spellState = SPELL_STATE_FINISHED;
+
+    //remove spell mods
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        ((Player*)m_caster)->RemoveSpellMods(this);
 
     // other code related only to successfully finished spells
     if(!ok)
@@ -2758,7 +2760,7 @@ uint8 Spell::CanCast(bool strict)
                     sLog.outErrorDb("Spell (ID: %u) has effect EffectImplicitTargetA/EffectImplicitTargetB = %u (TARGET_SCRIPT), but does not have record in `spell_script_target`",m_spellInfo->Id,TARGET_SCRIPT);
 
                 SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
-                float range = GetMaxRange(srange);
+                float range = GetSpellMaxRange(srange);
 
                 Creature* creatureScriptTarget = NULL;
                 GameObject* goScriptTarget = NULL;
@@ -3213,7 +3215,7 @@ uint8 Spell::CanCast(bool strict)
             case SPELL_EFFECT_LEAP:
             case SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER:
             {
-                float dis = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+                float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
                 float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
                 float fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
                 // teleport a bit above terrainlevel to avoid falling below it
@@ -3520,8 +3522,8 @@ uint8 Spell::CheckRange(bool strict)
         range_mod = 6.25;
 
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
-    float max_range = GetMaxRange(srange) + range_mod;
-    float min_range = GetMinRange(srange);
+    float max_range = GetSpellMaxRange(srange) + range_mod;
+    float min_range = GetSpellMinRange(srange);
 
     if(Player* modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range, this);
@@ -3536,8 +3538,15 @@ uint8 Spell::CheckRange(bool strict)
         if(dist < min_range * min_range)
             return SPELL_FAILED_TOO_CLOSE;
         if( !m_IsTriggeredSpell && !m_caster->isInFront( target, max_range) )
-            if (m_rangedShoot || !IsPositiveSpell(m_spellInfo->Id) && casttime != 0 && !IsSingleTargetSpell(m_spellInfo->Id))
+        {
+            if (m_rangedShoot)
                 return SPELL_FAILED_UNIT_NOT_INFRONT;
+
+            uint32 original_casttime = GetSpellCastTime(sCastTimesStore.LookupEntry(m_spellInfo->CastingTimeIndex));
+
+            if (original_casttime!= 0 && !IsPositiveSpell(m_spellInfo->Id) && !IsSingleTargetSpell(m_spellInfo->Id))
+                return SPELL_FAILED_UNIT_NOT_INFRONT;
+        }
     }
 
     if(m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_destX != 0 && m_targets.m_destY != 0 && m_targets.m_destZ != 0)
@@ -3931,7 +3940,7 @@ void Spell::Delayed(int32 delaytime)
 
     m_timer += delaytime;
 
-    if(int32(m_timer) > casttime)
+    if(int32(m_timer) > m_casttime)
         ReSetTimer();
 
     WorldPacket data(SMSG_SPELL_DELAYED, 8+4);
