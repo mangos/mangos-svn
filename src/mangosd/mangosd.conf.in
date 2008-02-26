@@ -341,6 +341,10 @@ Visibility.Distance.Grey.Object = 10
 # Default: 3600 sec (1 hour)
 MailDeliveryDelay = 3600
 
+# Update realm uptime period in minutes (for save data in 'uptime' table). Must be > 0 
+# Default: 10 minutes
+UpdateUptimeInterval = 10
+
 # Message of the Day. Displayed at worldlogin for every user ('@' for a newline).
 Motd = "Welcome to the Massive Network Game Object Server."
 
