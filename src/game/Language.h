@@ -72,7 +72,7 @@ enum MangosStrings
     LANG_LEVEL_MINREQUIRED              = 49,
     LANG_LEVEL_MINREQUIRED_AND_ITEM     = 50,
     LANG_NPC_TAINER_HELLO               = 51,
-// Room for more level 0
+    // Room for more level 0
 
     // level 1 chat
     LANG_GLOBAL_NOTIFY                  = 100,
@@ -103,7 +103,7 @@ enum MangosStrings
     LANG_YOU_CHANGE_ENERGY              = 122,
     LANG_YOURS_ENERGY_CHANGED           = 123,
 
-    LANG_CURRENT_ENERGY                 = 124,          //log
+    LANG_CURRENT_ENERGY                 = 124,              //log
     LANG_YOU_CHANGE_RAGE                = 125,
     LANG_YOURS_RAGE_CHANGED             = 126,
     LANG_YOU_CHANGE_LVL                 = 127,
@@ -143,7 +143,7 @@ enum MangosStrings
     LANG_YOURS_MONEY_GIVEN              = 158,
     LANG_YOU_HEAR_SOUND                 = 159,
 
-    LANG_NEW_MONEY                      = 160,          // Log
+    LANG_NEW_MONEY                      = 160,              // Log
 
     LANG_REMOVE_BIT                     = 161,
     LANG_SET_BIT                        = 162,
@@ -155,7 +155,7 @@ enum MangosStrings
     LANG_COMMAND_TELE_LOCATION          = 168,
 
     LANG_MAIL_SENT                      = 169,
-// Room for more level 1
+    // Room for more level 1
 
     // level 2 chat
     LANG_NO_SELECTION                   = 200,
@@ -164,7 +164,7 @@ enum MangosStrings
     LANG_CHARS_ONLY                     = 203,
     LANG_TOO_LONG_SUBNAME               = 204,
     LANG_NOT_IMPLEMENTED                = 205,
-                                                            
+
     LANG_ITEM_ADDED_TO_LIST             = 206,
     LANG_ITEM_NOT_FOUND                 = 207,
     LANG_ITEM_DELETED_FROM_LIST         = 208,
@@ -272,7 +272,7 @@ enum MangosStrings
     LANG_CHAT_ALREADY_ENABLED           = 302,
     LANG_YOUR_CHAT_ENABLED              = 303,
     LANG_YOU_ENABLE_CHAT                = 304,
-// Room for more level 2
+    // Room for more level 2
 
     // level 3 chat
     LANG_SCRIPTS_RELOADED               = 400,
@@ -382,9 +382,9 @@ enum MangosStrings
     LANG_FORGET_SPELL                   = 491,
     LANG_REMOVEALL_COOLDOWN             = 492,
     LANG_REMOVE_COOLDOWN                = 493,
-                                                            
-    LANG_ADDITEM                        = 494,          //log
-    LANG_ADDITEMSET                     = 495,          //log
+
+    LANG_ADDITEM                        = 494,              //log
+    LANG_ADDITEMSET                     = 495,              //log
     LANG_REMOVEITEM                     = 496,
     LANG_ITEM_CANNOT_CREATE             = 497,
     LANG_INSERT_GUILD_NAME              = 498,
@@ -417,7 +417,7 @@ enum MangosStrings
 
     LANG_GAMEOBJECT_NOT_EXIST           = 522,
 
-    LANG_GAMEOBJECT_CURRENT             = 523,          //log
+    LANG_GAMEOBJECT_CURRENT             = 523,              //log
     LANG_GAMEOBJECT_DETAIL              = 524,
     LANG_GAMEOBJECT_ADD                 = 525,
 
@@ -465,17 +465,17 @@ enum MangosStrings
     LANG_UPDATE                         = 562,
     LANG_UPDATE_CHANGE                  = 563,
     LANG_TOO_BIG_INDEX                  = 564,
-    LANG_SET_UINT                       = 565,          //log
+    LANG_SET_UINT                       = 565,              //log
     LANG_SET_UINT_FIELD                 = 566,
-    LANG_SET_FLOAT                      = 567,          //log
+    LANG_SET_FLOAT                      = 567,              //log
     LANG_SET_FLOAT_FIELD                = 568,
-    LANG_GET_UINT                       = 569,          //log
+    LANG_GET_UINT                       = 569,              //log
     LANG_GET_UINT_FIELD                 = 570,
-    LANG_GET_FLOAT                      = 571,          //log
+    LANG_GET_FLOAT                      = 571,              //log
     LANG_GET_FLOAT_FIELD                = 572,
-    LANG_SET_32BIT                      = 573,          //log
+    LANG_SET_32BIT                      = 573,              //log
     LANG_SET_32BIT_FIELD                = 574,
-    LANG_CHANGE_32BIT                   = 575,          //log
+    LANG_CHANGE_32BIT                   = 575,              //log
     LANG_CHANGE_32BIT_FIELD             = 576,
 
     LANG_INVISIBLE_INVISIBLE            = 577,
@@ -582,6 +582,5 @@ enum MangosStrings
 #define LANG_NO_SPIRIT_HEAL_DB           "No spirit healers in database, exiting."
 
 #define LANG_ADD_OBJ_LV3                 "AddObject at Level3.cpp line 1176"
-
 
 */

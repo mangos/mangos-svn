@@ -79,6 +79,7 @@ bool Player::UpdateStats(Stats stat)
     UpdateSpellDamageAndHealingBonus();
     return true;
 }
+
 void Player::UpdateSpellDamageAndHealingBonus()
 {
     // Magic damage modifiers implemented in Unit::SpellDamageBonus
@@ -140,13 +141,13 @@ void Player::UpdateArmor()
     value  = GetModifierValue(unitMod, BASE_VALUE);         // base armor (from items)
     value *= GetModifierValue(unitMod, BASE_PCT);           // armor percent from items
     value += GetStat(STAT_AGILITY) * 2.0f;                  // armor bonus from stats
-    value += GetModifierValue(unitMod, TOTAL_VALUE);        
+    value += GetModifierValue(unitMod, TOTAL_VALUE);
 
     //add dynamic flat mods
-    AuraList const& mResbyIntellect = GetAurasByType(SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT); 
-    for(AuraList::const_iterator i = mResbyIntellect.begin();i != mResbyIntellect.end(); ++i) 
+    AuraList const& mResbyIntellect = GetAurasByType(SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT);
+    for(AuraList::const_iterator i = mResbyIntellect.begin();i != mResbyIntellect.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue & (1<<SPELL_SCHOOL_NORMAL))
-            value += int32(GetStat(STAT_INTELLECT) * (*i)->GetModifier()->m_amount / 100.0f); 
+            value += int32(GetStat(STAT_INTELLECT) * (*i)->GetModifier()->m_amount / 100.0f);
 
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
@@ -282,13 +283,13 @@ void Player::UpdateAttackPowerAndDamage(bool ranged )
 
     float base_attPower  = GetModifierValue(unitMod, BASE_VALUE) * GetModifierValue(unitMod, BASE_PCT);
     float attPowerMod = GetModifierValue(unitMod, TOTAL_VALUE);
-    
+
     //add dynamic flat mods
     if( ranged && (getClassMask() & CLASSMASK_WAND_USERS)==0)
     {
-        AuraList const& mRAPbyIntellect = GetAurasByType(SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT); 
-        for(AuraList::const_iterator i = mRAPbyIntellect.begin();i != mRAPbyIntellect.end(); ++i) 
-            attPowerMod += int32(GetStat(Stats((*i)->GetModifier()->m_miscvalue)) * (*i)->GetModifier()->m_amount / 100.0f); 
+        AuraList const& mRAPbyIntellect = GetAurasByType(SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT);
+        for(AuraList::const_iterator i = mRAPbyIntellect.begin();i != mRAPbyIntellect.end(); ++i)
+            attPowerMod += int32(GetStat(Stats((*i)->GetModifier()->m_miscvalue)) * (*i)->GetModifier()->m_amount / 100.0f);
     }
 
     float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;

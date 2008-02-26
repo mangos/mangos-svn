@@ -560,7 +560,7 @@ void Group::EndRoll()
 void Group::CountTheRoll(Rolls::iterator rollI, uint32 NumberOfPlayers)
 {
     Roll* roll = *rollI;
-    if(!roll->isValid()) // is loot already deleted ?
+    if(!roll->isValid())                                    // is loot already deleted ?
     {
         RollId.erase(rollI);
         delete roll;

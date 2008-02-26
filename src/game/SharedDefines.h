@@ -52,9 +52,9 @@ enum Races
 
 #define RACEMASK_ALL_PLAYABLE \
     ((1<<(RACE_HUMAN-1))   |(1<<(RACE_ORC-1))          |(1<<(RACE_DWARF-1))   | \
-     (1<<(RACE_NIGHTELF-1))|(1<<(RACE_UNDEAD_PLAYER-1))|(1<<(RACE_TAUREN-1))  | \
-     (1<<(RACE_GNOME-1))   |(1<<(RACE_TROLL-1))        |(1<<(RACE_BLOODELF-1))| \
-     (1<<(RACE_DRAENEI-1)) )
+    (1<<(RACE_NIGHTELF-1))|(1<<(RACE_UNDEAD_PLAYER-1))|(1<<(RACE_TAUREN-1))  | \
+    (1<<(RACE_GNOME-1))   |(1<<(RACE_TROLL-1))        |(1<<(RACE_BLOODELF-1))| \
+    (1<<(RACE_DRAENEI-1)) )
 
 // Class value is index in ChrClasses.dbc
 enum Classes
@@ -75,8 +75,8 @@ enum Classes
 
 #define CLASSMASK_ALL_PLAYABLE \
     ((1<<(CLASS_WARRIOR-1))|(1<<(CLASS_PALADIN-1))|(1<<(CLASS_HUNTER-1))| \
-     (1<<(CLASS_ROGUE-1))  |(1<<(CLASS_PRIEST-1)) |(1<<(CLASS_SHAMAN-1))| \
-     (1<<(CLASS_MAGE-1))   |(1<<(CLASS_WARLOCK-1))|(1<<(CLASS_DRUID-1))   )
+    (1<<(CLASS_ROGUE-1))  |(1<<(CLASS_PRIEST-1)) |(1<<(CLASS_SHAMAN-1))| \
+    (1<<(CLASS_MAGE-1))   |(1<<(CLASS_WARLOCK-1))|(1<<(CLASS_DRUID-1))   )
 
 #define CLASSMASK_WAND_USERS ((1<<(CLASS_PRIEST-1))|(1<<(CLASS_MAGE-1))|(1<<(CLASS_WARLOCK-1)))
 
@@ -492,14 +492,14 @@ inline SpellSchools immuneToSchool(ImmuneToSchool immune)
 {
     switch(immune)
     {
-    case IMMUNE_SCHOOL_PHYSICAL: return SPELL_SCHOOL_NORMAL;
-    case IMMUNE_SCHOOL_HOLY:     return SPELL_SCHOOL_HOLY;
-    case IMMUNE_SCHOOL_FIRE:     return SPELL_SCHOOL_FIRE;
-    case IMMUNE_SCHOOL_NATURE:   return SPELL_SCHOOL_NATURE;
-    case IMMUNE_SCHOOL_FROST:    return SPELL_SCHOOL_FROST;
-    case IMMUNE_SCHOOL_SHADOW:   return SPELL_SCHOOL_SHADOW;
-    case IMMUNE_SCHOOL_ARCANE:   return SPELL_SCHOOL_ARCANE;
-    case IMMUNE_SCHOOL_MAGIC:    break;
+        case IMMUNE_SCHOOL_PHYSICAL: return SPELL_SCHOOL_NORMAL;
+        case IMMUNE_SCHOOL_HOLY:     return SPELL_SCHOOL_HOLY;
+        case IMMUNE_SCHOOL_FIRE:     return SPELL_SCHOOL_FIRE;
+        case IMMUNE_SCHOOL_NATURE:   return SPELL_SCHOOL_NATURE;
+        case IMMUNE_SCHOOL_FROST:    return SPELL_SCHOOL_FROST;
+        case IMMUNE_SCHOOL_SHADOW:   return SPELL_SCHOOL_SHADOW;
+        case IMMUNE_SCHOOL_ARCANE:   return SPELL_SCHOOL_ARCANE;
+        case IMMUNE_SCHOOL_MAGIC:    break;
     }
 
     assert(false);
@@ -1699,5 +1699,4 @@ enum AiReaction
     AI_REACTION_UNK3    = 3,
     AI_REACTION_UNK4    = 4
 };
-
 #endif

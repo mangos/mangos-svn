@@ -39,7 +39,6 @@ void BattleGroundRL::Update(time_t diff)
 {
     BattleGround::Update(diff);
 
-
     if (GetStatus() == STATUS_WAIT_JOIN && GetPlayersSize())
     {
         ModifyStartDelayTime(diff);

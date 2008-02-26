@@ -233,7 +233,6 @@ class MANGOS_DLL_SPEC Object
 
         uint16 m_valuesCount;
 
-
         bool m_objectUpdated;
 
     private:

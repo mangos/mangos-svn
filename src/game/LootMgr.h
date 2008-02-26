@@ -142,7 +142,6 @@ struct QuestItem
         : index(_index), is_looted(_islooted) {}
 };
 
-
 typedef std::vector<QuestItem> QuestItemList;
 typedef std::map<uint32, QuestItemList *> QuestItemMap;
 typedef std::vector<LootStoreItem> LootStoreItemList;
@@ -153,10 +152,10 @@ typedef HM_NAMESPACE::hash_map<uint32, LootStoreItemList > LootStore;
 struct Loot;
 class LootValidatorRef :  public Reference<Loot, LootValidatorRef>
 {
-public:
-    LootValidatorRef() {}
-    void targetObjectDestroyLink() {}
-    void sourceObjectDestroyLink() {}
+    public:
+        LootValidatorRef() {}
+        void targetObjectDestroyLink() {}
+        void sourceObjectDestroyLink() {}
 };
 
 //=====================================================
@@ -200,7 +199,7 @@ struct Loot
         i_LootValidatorRefManager.insertFirst(pLootValidatorRef);
     }
 
-   // void clear();
+    // void clear();
     void clear()
     {
         items.clear(); gold = 0; PlayersLooting.clear();

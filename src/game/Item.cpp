@@ -184,7 +184,7 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player* owner)
         SetSpellCharges(i,itemProto->Spells[i].SpellCharges);
 
     SetUInt32Value(ITEM_FIELD_FLAGS, itemProto->Flags);
-    SetUInt32Value(ITEM_FIELD_DURATION, abs(itemProto->Duration)); 
+    SetUInt32Value(ITEM_FIELD_DURATION, abs(itemProto->Duration));
 
     return true;
 }
@@ -775,7 +775,3 @@ void Item::SendTimeUpdate(Player* owner)
     data << (uint32)GetUInt32Value(ITEM_FIELD_DURATION);
     owner->GetSession()->SendPacket(&data);
 }
-
-
-
-

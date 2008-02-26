@@ -2779,7 +2779,8 @@ void Player::_LoadSpellCooldowns(QueryResult *result)
 }
 
 void Player::_SaveSpellCooldowns()
-{    CharacterDatabase.PExecute("DELETE FROM character_spell_cooldown WHERE guid = '%u'", GetGUIDLow());
+{
+    CharacterDatabase.PExecute("DELETE FROM character_spell_cooldown WHERE guid = '%u'", GetGUIDLow());
 
     time_t curTime = time(NULL);
 
@@ -3767,7 +3768,7 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
                     return TotalCost;
                 }
 
-				if (pGuild->GetGuildBankMoney() < costs)
+                if (pGuild->GetGuildBankMoney() < costs)
                 {
                     DEBUG_LOG("There is not enough money in bank");
                     return TotalCost;
@@ -3849,10 +3850,10 @@ void Player::CleanupChannels()
     while(!m_channels.empty())
     {
         Channel* ch = *m_channels.begin();
-        m_channels.erase(m_channels.begin());           // remove from player's channel list
-        ch->Leave(GetGUID(), false);                    // not send to client, not remove from player's channel list
+        m_channels.erase(m_channels.begin());               // remove from player's channel list
+        ch->Leave(GetGUID(), false);                        // not send to client, not remove from player's channel list
         if (ChannelMgr* cMgr = channelMgr(GetTeam()))
-            cMgr->LeftChannel(ch->GetName());           // deleted channel if empty
+            cMgr->LeftChannel(ch->GetName());               // deleted channel if empty
 
     }
     sLog.outDebug("Player: channels cleaned up!");
@@ -3918,7 +3919,6 @@ void Player::LeaveLFGChannel()
         }
     }
 }
-
 
 void Player::BroadcastPacketToFriendListers(WorldPacket *packet, bool extern_result, QueryResult *result)
 {
@@ -4252,7 +4252,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             if(affectStats)
             {
                 UpdateCritPercentage(BASE_ATTACK);
-                UpdateCritPercentage(OFF_ATTACK); 
+                UpdateCritPercentage(OFF_ATTACK);
             }
             break;
         case PLAYER_FIELD_RANGED_CRIT_RATING:
@@ -4268,7 +4268,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             break;
         case PLAYER_FIELD_HIT_TAKEN_SPELL_RATING:           // Implemended in Unit::SpellMissChanceCalc
             break;
-        case PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING:          // Implemended in Unit::RollMeleeOutcomeAgainst (only for chance to crit) 
+        case PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING:          // Implemended in Unit::RollMeleeOutcomeAgainst (only for chance to crit)
         case PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING:
             break;
         case PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING:          // Implemented in Unit::SpellCriticalBonus (only for chance to crit)
@@ -4286,7 +4286,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             RatingChange = value / RatingCoeffecient;
             ApplyCastTimePercentMod(RatingChange,apply);
             break;
-        case PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING:       // Implemended in Unit::RollMeleeOutcomeAgainst
+        case PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING:        // Implemended in Unit::RollMeleeOutcomeAgainst
         case PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING:
         case PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING:
             break;
@@ -4582,9 +4582,9 @@ void Player::ModifySkillBonus(uint32 skillid,int32 val, bool talent)
         uint16 temp_bonus = SKILL_TEMP_BONUS(bonus_val);
         uint16 perm_bonus = SKILL_PERM_BONUS(bonus_val);
 
-        if(talent)                                          // permanent bonus stored in high part 
+        if(talent)                                          // permanent bonus stored in high part
             SetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i),MAKE_SKILL_BONUS(temp_bonus,perm_bonus+val));
-        else                                                // temporary/item bonus stored in low part 
+        else                                                // temporary/item bonus stored in low part
             SetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i),MAKE_SKILL_BONUS(temp_bonus+val,perm_bonus));
         return;
     }
@@ -8769,7 +8769,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                     {
                         if( ItemPrototype const* pBagProto = pBag->GetProto() )
                         {
-                            if( pBagProto->Class==pProto->Class && pBagProto->SubClass==pProto->SubClass && 
+                            if( pBagProto->Class==pProto->Class && pBagProto->SubClass==pProto->SubClass &&
                                 (!swap || pBag->GetSlot() != eslot ) )
                             {
                                 if(pBagProto->SubClass == ITEM_SUBCLASS_AMMO_POUCH)
@@ -8781,7 +8781,6 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                     }
                 }
             }
-
 
             uint32 type = pProto->InventoryType;
 
@@ -9671,7 +9670,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
 
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
- 
+
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
             if ( slot < INVENTORY_SLOT_BAG_END )            // equipment and equipped bags can have applied bonuses
@@ -10814,7 +10813,6 @@ void Player::SendItemDurations()
     }
 }
 
-
 void Player::ReducePoisonCharges(uint32 enchantId)
 {
     if(!enchantId)
@@ -11914,7 +11912,7 @@ bool Player::CanShareQuest(uint32 quest_id)
         QuestStatusMap::iterator itr = mQuestStatus.find( quest_id );
         if( itr != mQuestStatus.end() )
             return itr->second.m_status == QUEST_STATUS_NONE ||
-                   itr->second.m_status == QUEST_STATUS_INCOMPLETE;
+                itr->second.m_status == QUEST_STATUS_INCOMPLETE;
     }
 
     return false;
@@ -12494,7 +12492,6 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID,MAKE_GUID(guid,HIGHGUID_PLAYER));
 
-
     m_name = fields[1].GetCppString();
 
     Relocate(fields[2].GetFloat(),fields[3].GetFloat(),fields[4].GetFloat());
@@ -12626,7 +12623,6 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID,MAKE_GUID(guid,HIGHGUID_PLAYER));
-
 
     // cleanup inventory related item value fields (its will be filled correctly in _LoadInventory)
     for(uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
@@ -12861,7 +12857,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
             nodeEntry = sTaxiNodesStore.LookupEntry(node_id);
         }
 
-        if(!nodeEntry)                      // don't know taxi start node, to homebind
+        if(!nodeEntry)                                      // don't know taxi start node, to homebind
         {
             sLog.outError("Character %u have wrong data in taxi destination list, teleport to homebind.",GetGUIDLow());
             SetMapId(m_homebindMapId);
@@ -13915,7 +13911,7 @@ void Player::_SaveAuras()
         // or apply at cast SPELL_AURA_MOD_SHAPESHIFT or SPELL_AURA_MOD_STEALTH auras
         for (i = 0; i < 3; i++)
             if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT ||
-                spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STEALTH)
+            spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STEALTH)
                 break;
 
         if (i == 3)
@@ -14571,7 +14567,7 @@ void Player::Whisper(const uint64 receiver, const std::string text, uint32 langu
     // announce to player that player he is whispering to is afk
     if(rPlayer->isAFK())
         ChatHandler(this).PSendSysMessage(LANG_PLAYER_AFK, rPlayer->GetName(), rPlayer->afkMsg.c_str());
-    
+
     // if player whisper someone, auto turn of dnd to be able to receive an answer
     if(isDND() && !rPlayer->isGameMaster())
     {
@@ -15792,7 +15788,7 @@ void Player::UpdateVisibilityOf(WorldObject* target)
             if(target!=this && target->isType(TYPE_UNIT))
                 SendAuraDurationsForTarget((Unit*)target);
         }
-        }
+    }
 }
 
 template<class T>

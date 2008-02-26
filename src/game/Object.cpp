@@ -539,7 +539,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
             }
         }
     }
-    else            //case UPDATETYPE_VALUES
+    else                                                    //case UPDATETYPE_VALUES
     {
         if (isType(TYPE_GAMEOBJECT) && !((GameObject*)this)->IsTransport())
         {

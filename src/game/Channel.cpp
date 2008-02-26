@@ -569,7 +569,7 @@ void Channel::Invite(uint64 p, const char *newname)
         MakePlayerNotFound(&data, newname);
         SendToOne(&data, p);
         return;
-    } 
+    }
 
     Player *plr = objmgr.GetPlayer(p);
     if (!plr)

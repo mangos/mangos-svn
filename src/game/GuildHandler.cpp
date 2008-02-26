@@ -1003,7 +1003,8 @@ void WorldSession::HandleGuildBankGetRights( WorldPacket& /* recv_data */ )
     WorldPacket data(MSG_GUILD_BANK_GET_RIGHTS, 4*15+1);
     data << uint32(rankId);                                 // guild rank id
     data << uint32(pGuild->GetRankRights(rankId));          // rank rights
-    data << uint32(pGuild->GetMemberMoneyWithdrawRem(GetPlayer()->GetGUIDLow())); // money per day left
+                                                            // money per day left
+    data << uint32(pGuild->GetMemberMoneyWithdrawRem(GetPlayer()->GetGUIDLow()));
     data << uint8(pGuild->GetPurchasedTabs());              // tabs count
     for(int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
     {
@@ -1079,7 +1080,7 @@ void WorldSession::HandleGuildBankDeposit( WorldPacket & recv_data )
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (GuildId == 0)
         return;
-    
+
     Guild *pGuild = objmgr.GetGuildById(GuildId);
     if(!pGuild)
         return;
@@ -1094,7 +1095,7 @@ void WorldSession::HandleGuildBankDeposit( WorldPacket & recv_data )
     pGuild->LogBankEvent(GUILD_BANK_LOG_DEPOSIT_MONEY, uint8(0), GetPlayer()->GetGUIDLow(), money);
 
     pGuild->DisplayGuildBankTabsInfo(this);
-    pGuild->DisplayGuildBankContent(this, 0); // have to send content of tab 0 of will be blank
+    pGuild->DisplayGuildBankContent(this, 0);               // have to send content of tab 0 of will be blank
 }
 
 void WorldSession::HandleGuildBankWithdraw( WorldPacket & recv_data )
@@ -1113,7 +1114,7 @@ void WorldSession::HandleGuildBankWithdraw( WorldPacket & recv_data )
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (GuildId == 0)
         return;
-    
+
     Guild *pGuild = objmgr.GetGuildById(GuildId);
     if(!pGuild)
         return;
@@ -1131,10 +1132,10 @@ void WorldSession::HandleGuildBankWithdraw( WorldPacket & recv_data )
 
     // Log
     pGuild->LogBankEvent(GUILD_BANK_LOG_WITHDRAW_MONEY, uint8(0), GetPlayer()->GetGUIDLow(), money);
-    
+
     pGuild->SendMoneyInfo(this, GetPlayer()->GetGUIDLow());
     pGuild->DisplayGuildBankTabsInfo(this);
-    pGuild->DisplayGuildBankContent(this, 0); // have to send content of tab 0 of will be blank
+    pGuild->DisplayGuildBankContent(this, 0);               // have to send content of tab 0 of will be blank
 }
 
 void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
@@ -1320,7 +1321,8 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
 
                 pGuild->AddGBankItemToDB(GuildId, uint32(BankTab), uint32(BankTabSlot), pItemDst->GetGUIDLow(), pItemDst->GetEntry() );
 
-                pGuild->EmptyBankSlot(BankTabDst, BankTabSlotDst);// Or next will merge stacks
+                                                            // Or next will merge stacks
+                pGuild->EmptyBankSlot(BankTabDst, BankTabSlotDst);
                 pGuild->StoreItem(BankTabDst, &BankTabSlotDst, pItemSrc);
                 // pItemSrc moved to BankTabSlotDst
                 pGuild->AddGBankItemToDB(GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemSrc->GetGUIDLow(), pItemSrc->GetEntry());
@@ -1379,9 +1381,10 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
 
             CharacterDatabase.BeginTransaction();
 
-            Item *pItemStacked = pl->StoreItem(Dest, pItemBank, true); // This cause item state to change
-            pGuild->EmptyBankSlot(BankTab, BankTabSlot);// Delete from bank table
-            if (pItemStacked == pItemBank)              // In case stacked to player, do not execute
+                                                            // This cause item state to change
+            Item *pItemStacked = pl->StoreItem(Dest, pItemBank, true);
+            pGuild->EmptyBankSlot(BankTab, BankTabSlot);    // Delete from bank table
+            if (pItemStacked == pItemBank)                  // In case stacked to player, do not execute
             {
                 pItemBank->SaveToDB();
                 pItemBank->AddToUpdateQueueOf(pl);
@@ -1431,7 +1434,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     pItemToStore->AddToWorld();
                     pItemToStore->FSetState(ITEM_NEW);
                     pItemToStore->SaveToDB();
-                    pl->StoreItem(Dest, pItemToStore, true); // Set state updated
+                    pl->StoreItem(Dest, pItemToStore, true);// Set state updated
                     pItemBank->SetCount(pItemBank->GetCount()-SplitedAmount);
                     pItemBank->FSetState(ITEM_CHANGED);
                     pItemBank->SaveToDB();
@@ -1446,7 +1449,8 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     if( msg == EQUIP_ERR_OK )
                     {
                         pGuild->EmptyBankSlot(BankTab, BankTabSlot);
-                        pl->StoreItem(Dest, pItemBank, true); // Set state updated
+                                                            // Set state updated
+                        pl->StoreItem(Dest, pItemBank, true);
                         pItemBank->SaveToDB();
                         pItemBank->SetState(ITEM_NEW);
                         pl->SaveInventoryAndGoldToDB();
@@ -1471,7 +1475,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                 if (SplitedAmount)                          // Bank -> Char split in existed item (partly move)
                 {                                           // just update counts
 
-                    // not right check required 
+                    // not right check required
 
                     pItemChar->SetCount(pItemChar->GetCount()+SplitedAmount);
                     pItemBank->SetCount(pItemBank->GetCount()-SplitedAmount);
@@ -1511,10 +1515,10 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                         sLog.outError("GUILDBANK: Could not add back item (GUID: %u) to character inventory after swap with item (GUID: %u)!",pItemBank->GetGUIDLow(),pItemChar->GetGUIDLow() );
                         return;
                     }
-                        
-                    // if can store in inventory 
+
+                    // if can store in inventory
                     // check possibility store in bank
-                    
+
                     // prevent unexpected merge in bank item
                     pGuild->EmptyBankSlot(BankTab, BankTabSlot);
                     pGuild->StoreItem(BankTab, &BankTabSlot, pItemChar);
@@ -1587,7 +1591,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
 
                     pItemChar->DeleteFromInventoryDB();
                     pItemChar->FSetState(ITEM_CHANGED);
-                    pItemChar->SaveToDB();                      // this item is now in bank
+                    pItemChar->SaveToDB();                  // this item is now in bank
                 }
                 pl->SaveInventoryAndGoldToDB();
                 pGuild->LogBankEvent(GUILD_BANK_LOG_DEPOSIT_ITEM, BankTab, pl->GetGUIDLow(), pItemChar->GetEntry(), SplitedAmount ? SplitedAmount : pItemChar->GetCount());
@@ -1663,7 +1667,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     pItemChar->DeleteFromInventoryDB();
                     pItemChar->SaveToDB();                  // this item is now in bank
 
-                    pl->StoreItem(Dest, pItemBank, true); // ITEM_CHANGED auto set auto
+                    pl->StoreItem(Dest, pItemBank, true);   // ITEM_CHANGED auto set auto
                     pItemBank->SaveToDB();
                     pItemBank->SetState(ITEM_NEW);
                     pGuild->MemberItemWithdraw(BankTab, pl->GetGUIDLow());
@@ -1714,7 +1718,7 @@ void WorldSession::HandleGuildBankBuyTab( WorldPacket & recv_data )
     }
 
     if (GetPlayer()->GetMoney() < TabCost)                  // Should not happen, this is checked by client
-       return;
+        return;
 
     // Go on with creating tab
     pGuild->CreateNewBankTab();

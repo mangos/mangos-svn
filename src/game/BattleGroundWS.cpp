@@ -152,7 +152,8 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
     if(Source->GetTeam() == ALLIANCE)
     {
         SetHordeFlagPicker(0);                              // must be before aura remove to prevent 2 events (drop+capture) at the same time
-        m_FlagState[BG_TEAM_HORDE] = BG_WS_FLAG_STATE_WAIT_RESPAWN;           // horde flag in base (but not respawned yet)
+                                                            // horde flag in base (but not respawned yet)
+        m_FlagState[BG_TEAM_HORDE] = BG_WS_FLAG_STATE_WAIT_RESPAWN;
         Source->RemoveAurasDueToSpell(23333);               // Drop Horde Flag from Player
         message = GetMangosString(LANG_BG_WS_CAPTURED_HF);
         type = CHAT_MSG_BG_SYSTEM_ALLIANCE;
@@ -166,7 +167,8 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
     else
     {
         SetAllianceFlagPicker(0);                           // must be before aura remove to prevent 2 events (drop+capture) at the same time
-        m_FlagState[BG_TEAM_ALLIANCE] = BG_WS_FLAG_STATE_WAIT_RESPAWN;           // alliance flag in base (but not respawned yet)
+                                                            // alliance flag in base (but not respawned yet)
+        m_FlagState[BG_TEAM_ALLIANCE] = BG_WS_FLAG_STATE_WAIT_RESPAWN;
         Source->RemoveAurasDueToSpell(23335);               // Drop Alliance Flag from Player
         message = GetMangosString(LANG_BG_WS_CAPTURED_AF);
         type = CHAT_MSG_BG_SYSTEM_HORDE;
@@ -225,7 +227,8 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
             {
                 SetHordeFlagPicker(0);
                 Source->RemoveAurasDueToSpell(23333);
-                m_FlagState[BG_TEAM_HORDE] = BG_WS_FLAG_STATE_ON_GROUND;      // horde flag dropped
+                                                            // horde flag dropped
+                m_FlagState[BG_TEAM_HORDE] = BG_WS_FLAG_STATE_ON_GROUND;
                 message = GetMangosString(LANG_BG_WS_DROPPED_HF);
                 type = CHAT_MSG_BG_SYSTEM_HORDE;
                 Source->CastSpell(Source, 23334, true);
@@ -241,7 +244,8 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
             {
                 SetAllianceFlagPicker(0);
                 Source->RemoveAurasDueToSpell(23335);
-                m_FlagState[BG_TEAM_ALLIANCE] = BG_WS_FLAG_STATE_ON_GROUND;      // alliance flag dropped
+                                                            // alliance flag dropped
+                m_FlagState[BG_TEAM_ALLIANCE] = BG_WS_FLAG_STATE_ON_GROUND;
                 message = GetMangosString(LANG_BG_WS_DROPPED_AF);
                 type = CHAT_MSG_BG_SYSTEM_ALLIANCE;
                 Source->CastSpell(Source, 23336, true);
@@ -313,7 +317,8 @@ void BattleGroundWS::EventPlayerPickedUpFlag(Player *Source)
         PlaySoundToAll(8212);
         SpawnBGObject(BG_WS_OBJECT_H_FLAG, RESPAWN_ONE_DAY);
         SetHordeFlagPicker(Source->GetGUID());              // pick up Horde Flag
-        m_FlagState[BG_TEAM_HORDE] = BG_WS_FLAG_STATE_ON_PLAYER;              // horde flag pickedup
+                                                            // horde flag pickedup
+        m_FlagState[BG_TEAM_HORDE] = BG_WS_FLAG_STATE_ON_PLAYER;
     }
     else
     {
@@ -322,7 +327,8 @@ void BattleGroundWS::EventPlayerPickedUpFlag(Player *Source)
         PlaySoundToAll(8174);
         SpawnBGObject(BG_WS_OBJECT_A_FLAG, RESPAWN_ONE_DAY);
         SetAllianceFlagPicker(Source->GetGUID());           // pick up Alliance Flag
-        m_FlagState[BG_TEAM_ALLIANCE] = BG_WS_FLAG_STATE_ON_PLAYER;              // alliance flag pickedup
+                                                            // alliance flag pickedup
+        m_FlagState[BG_TEAM_ALLIANCE] = BG_WS_FLAG_STATE_ON_PLAYER;
     }
 
     WorldPacket data;
@@ -448,7 +454,7 @@ void BattleGroundWS::HandleAreaTrigger(Player *Source, uint32 Trigger)
 
 bool BattleGroundWS::SetupBattleGround()
 {
-        // flags
+    // flags
     if(    !AddObject(BG_WS_OBJECT_A_FLAG, BG_OBJECT_A_FLAG_WS_ENTRY, 1540.423, 1481.325, 351.8284, 3.089233, 0, 0, 0.9996573, 0.02617699, BG_WS_FLAG_RESPAWN_TIME/1000)
         || !AddObject(BG_WS_OBJECT_H_FLAG, BG_OBJECT_H_FLAG_WS_ENTRY, 916.0226, 1434.405, 345.413, 0.01745329, 0, 0, 0.008726535, 0.9999619, BG_WS_FLAG_RESPAWN_TIME/1000)
         // buffs

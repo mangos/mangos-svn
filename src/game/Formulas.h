@@ -140,7 +140,7 @@ namespace MaNGOS
             else if (lvl < 70)
             {
                 xp = (155 + mxp(lvl) * (1344 - ((69-lvl) * (7 + (69 - lvl) * 8 - 1)/2)));
-            }else 
+            }else
             {
                 // level higher than 70 is not supported
                 xp = (uint32)(779700 * (pow(sWorld.getRate(RATE_XP_PAST_70), (int32)lvl - 69)));

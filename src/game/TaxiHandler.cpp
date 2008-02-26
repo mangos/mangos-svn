@@ -244,7 +244,7 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& /*recv_data*/)
         return;
     }
 
-    uint32 destinationnode = GetPlayer()->NextTaxiDestination();   
+    uint32 destinationnode = GetPlayer()->NextTaxiDestination();
     if ( destinationnode > 0 )                              // if more destinations to go
     {
         uint32 sourcenode = GetPlayer()->GetTaxiSource();   // current source node for next destination

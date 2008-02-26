@@ -686,7 +686,7 @@ bool ChatHandler::HandleModifyRageCommand(const char* args)
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_RAGE, chr->GetName(), rage/10, ragem/10);
-                                                                // Special case: I use GetMangosString here to get local of destination char ;)
+                                                            // Special case: I use GetMangosString here to get local of destination char ;)
     ChatHandler(chr).PSendSysMessage(ChatHandler(chr).GetMangosString(LANG_YOURS_RAGE_CHANGED), m_session->GetPlayer()->GetName(), rage/10, ragem/10);
 
     chr->SetMaxPower(POWER_RAGE,ragem );
@@ -868,7 +868,7 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args)
         PSendSysMessage(LANG_YOU_GIVE_TAXIS, chr->GetName());
 
         if(chr != m_session->GetPlayer())
-                                                        // to send localized data to target
+            // to send localized data to target
             ChatHandler(chr).PSendSysMessage(ChatHandler(chr).GetMangosString(LANG_YOURS_TAXIS_ADDED), m_session->GetPlayer()->GetName());
         return true;
     }
@@ -1549,6 +1549,9 @@ bool ChatHandler::HandleLookupAreaCommand(const char* args)
     std::string namepart = args;
     uint32 counter = 0;                                     // Counter for figure out that we found smth.
 
+    // converting string that we try to find to lower case
+    std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+
     // Search in AreaTable.dbc
     for (uint32 areaflag = 0; areaflag < sAreaStore.GetNumRows(); ++areaflag)
     {
@@ -1560,9 +1563,6 @@ bool ChatHandler::HandleLookupAreaCommand(const char* args)
 
             // converting SpellName to lower case
             std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-
-            // converting string that we try to find to lower case
-            std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
 
             if (name.find(namepart) != std::string::npos)
             {

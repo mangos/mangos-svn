@@ -27,5 +27,4 @@ class Player;
 bool canCreateExtraItems(Player * player, uint32 spellId, float &additionalChance, uint8 &additionalMax);
 // function to load the extra item creation info from DB
 void LoadSkillExtraItemTable();
-
 #endif
