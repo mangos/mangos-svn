@@ -562,7 +562,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << (uint32) (*itr)->COD;                       // COD
         data << (uint32) (*itr)->itemTextId;                // sure about this
         data << (uint32) 0;                                 // unknown
-        data << (uint32) (uint32)(*itr)->stationery;        // stationery (Stationery.dbc)
+        data << (uint32) (*itr)->stationery;                // stationery (Stationery.dbc)
         data << (uint32) (*itr)->money;                     // Gold
         data << (uint32) 0x04;                              // unknown, 0x4 - auction, 0x10 - normal
                                                             // Time

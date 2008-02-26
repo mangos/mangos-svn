@@ -1262,9 +1262,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             m_target->ApplyAuraProcTriggerDamage(this,apply);
     }
 
-    if(GetSpellProto()->SpellVisual == 7395 && GetSpellProto()->SpellIconID == 278 && caster->GetTypeId() == TYPEID_PLAYER)
-        m_target->ApplyAuraProcTriggerDamage(this,apply);
-
     // soulstone resurrection (only at real add/remove and can overwrite reincarnation spell setting)
     if(GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92 &&
         caster && caster->GetTypeId() == TYPEID_PLAYER && m_target && m_target->GetTypeId() == TYPEID_PLAYER)
