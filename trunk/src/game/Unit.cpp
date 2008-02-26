@@ -4639,6 +4639,19 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             }
             break;
         }
+        case SPELLFAMILY_WARRIOR:
+        {
+            if(dummySpell->SpellFamilyFlags==0x0000000800000000LL) // Retaliation
+            {
+                // check attack comes not from behind
+                if (HasInArc(M_PI, pVictim))
+                    CastSpell(pVictim, 22858,true,NULL,triggeredByAura);
+                else
+                    triggeredByAura->m_procCharges++;       // Prevent drop charges
+                return;
+            }
+            break;
+        }
         case SPELLFAMILY_WARLOCK:
         {
             // Seed of Corruption
