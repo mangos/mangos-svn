@@ -2811,8 +2811,8 @@ void Player::ResetComboPointsIfNeed(const SpellEntry *spellInfo)
         needClearCombo = true;
 
     // Check in duration calculations
-    int32 minduration = GetDuration(spellInfo);
-    if(minduration != 1 && minduration != GetMaxDuration(spellInfo))
+    int32 minduration = GetSpellDuration(spellInfo);
+    if(minduration != 1 && minduration != GetSpellMaxDuration(spellInfo))
         needClearCombo = true;
     // overpower - need reset combopoints
     else if(spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && (spellInfo->SpellFamilyFlags & 0x4))

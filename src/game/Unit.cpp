@@ -933,8 +933,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
                     uint32 channelInterruptFlags = pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->ChannelInterruptFlags;
                     if( channelInterruptFlags & CHANNEL_FLAG_DELAY )
                     {
-                        sLog.outDetail("Spell %u delayed (%d) at damage!",pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->Id,(int32)(0.25f * GetDuration(pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo)));
-                        pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->DelayedChannel((int32)(0.25f * GetDuration(pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo)));
+                        int32 delay = int32(0.25f * GetSpellDuration(pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo));
+                        sLog.outDetail("Spell %u delayed (%d) at damage!",pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->Id,delay);
+                        pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->DelayedChannel(delay);
                     }
                     else if( (channelInterruptFlags & (CHANNEL_FLAG_DAMAGE | CHANNEL_FLAG_DAMAGE2)) )
                     {
@@ -2335,8 +2336,9 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
 
             if(pVictim->m_currentSpells[i])
             {
-                sLog.outDetail("Spell Delayed!%d",(int32)(0.25f * pVictim->m_currentSpells[i]->casttime));
-                pVictim->m_currentSpells[i]->Delayed((int32)(0.25f * pVictim->m_currentSpells[i]->casttime));
+                int32 delay = int32(0.25f * pVictim->m_currentSpells[i]->GetCastTime());
+                sLog.outDetail("Spell Delayed!%d",delay);
+                pVictim->m_currentSpells[i]->Delayed(delay);
             }
         }
 
@@ -2348,8 +2350,9 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
                 uint32 channelInterruptFlags = pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->ChannelInterruptFlags;
                 if( channelInterruptFlags & CHANNEL_FLAG_DELAY )
                 {
-                    sLog.outDetail("Spell Delayed!%d",(int32)(0.25f * GetDuration(pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo)));
-                    pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->DelayedChannel((int32)(0.25f * GetDuration(pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo)));
+                    int32 delay = int32(0.25f * GetSpellDuration(pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo));
+                    sLog.outDetail("Spell Delayed!%d",delay);
+                    pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->DelayedChannel(delay);
                     return;
                 }
                 else if( !(channelInterruptFlags & (CHANNEL_FLAG_DAMAGE | CHANNEL_FLAG_DAMAGE2)) )
@@ -6302,7 +6305,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             return owner->SpellDamageBonus(pVictim, spellProto, pdamage, damagetype);
 
     // Damage Done
-    uint32 CastingTime = GetCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
+    uint32 CastingTime = GetSpellCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
     if (CastingTime > 7000) CastingTime = 7000;             // Plus Damage efficient maximum 200% ( 7.0 seconds )
     if (CastingTime < 1500) CastingTime = 1500;
 
@@ -6315,7 +6318,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     if(damagetype == DOT)
     {
         CastingTime = 3500;
-        int32 DotDuration = GetDuration(spellProto);
+        int32 DotDuration = GetSpellDuration(spellProto);
         // 200% limit
         if(DotDuration > 0)
         {
@@ -6617,7 +6620,7 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
         return healamount;
 
     int32 AdvertisedBenefit = SpellBaseHealingBonus(1<<spellProto->School);
-    uint32 CastingTime = GetCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
+    uint32 CastingTime = GetSpellCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
     if (CastingTime > 7000) CastingTime = 7000;
     if (CastingTime < 1500) CastingTime = 1500;
     if (spellProto->Effect[0] == SPELL_EFFECT_APPLY_AURA) CastingTime = 3500;
@@ -6648,7 +6651,7 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     if(damagetype == DOT)
     {
         CastingTime = 3500;
-        int32 DotDuration = GetDuration(spellProto);
+        int32 DotDuration = GetSpellDuration(spellProto);
         if(DotDuration > 0)
         {
             // 200% limit
@@ -7816,8 +7819,8 @@ int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto)
 
     uint8 comboPoints = unitPlayer ? unitPlayer->GetComboPoints() : 0;
 
-    int32 minduration = GetDuration(spellProto);
-    int32 maxduration = GetMaxDuration(spellProto);
+    int32 minduration = GetSpellDuration(spellProto);
+    int32 maxduration = GetSpellMaxDuration(spellProto);
 
     int32 duration;
 

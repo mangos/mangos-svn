@@ -329,7 +329,7 @@ void GameObject::Update(uint32 /*p_time*/)
 
         Unit* ok = NULL;                                    // pointer to appropriate target if found any
 
-        float radius = GetRadius(sSpellRadiusStore.LookupEntry(createSpell->EffectRadiusIndex[i]));
+        float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(createSpell->EffectRadiusIndex[i]));
         MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, owner, radius);
         MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(ok, u_check);
 

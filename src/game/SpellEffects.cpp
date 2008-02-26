@@ -887,7 +887,7 @@ void Spell::EffectDummy(uint32 i)
                 uint32 classspell = itr->first;
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
 
-                if (spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && spellInfo->Id != 23989 && GetRecoveryTime(spellInfo) > 0 )
+                if (spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && spellInfo->Id != 23989 && GetSpellRecoveryTime(spellInfo) > 0 )
                 {
                     ((Player*)m_caster)->RemoveSpellCooldown(classspell);
 
@@ -916,7 +916,7 @@ void Spell::EffectDummy(uint32 i)
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
 
                 if( spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->School == SPELL_SCHOOL_FROST &&
-                    spellInfo->Id != 11958 && GetRecoveryTime(spellInfo) > 0 )
+                    spellInfo->Id != 11958 && GetSpellRecoveryTime(spellInfo) > 0 )
                 {
                     ((Player*)m_caster)->RemoveSpellCooldown(classspell);
 
@@ -934,7 +934,7 @@ void Spell::EffectDummy(uint32 i)
         {
             // non-standard cast requirement check
             SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
-            float max_range = GetMaxRange(srange);
+            float max_range = GetSpellMaxRange(srange);
 
             CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
             Cell cell(p);
@@ -1997,12 +1997,12 @@ void Spell::EffectCreateItem(uint32 i)
 
 void Spell::EffectPersistentAA(uint32 i)
 {
-    float radius = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+    float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
 
     if(Player* modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius);
 
-    int32 duration = GetDuration(m_spellInfo);
+    int32 duration = GetSpellDuration(m_spellInfo);
     DynamicObject* dynObj = new DynamicObject(m_caster);
     if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, i, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, duration, radius))
     {
@@ -2357,7 +2357,7 @@ void Spell::EffectSummon(uint32 i)
     if(spawnCreature->LoadPetFromDB(m_caster,pet_entry))
     {
         // set timer for unsummon
-        int32 duration = GetDuration(m_spellInfo);
+        int32 duration = GetSpellDuration(m_spellInfo);
         if(duration > 0)
             spawnCreature->SetDuration(duration);
 
@@ -2378,7 +2378,7 @@ void Spell::EffectSummon(uint32 i)
     }
 
     // set timer for unsummon
-    int32 duration = GetDuration(m_spellInfo);
+    int32 duration = GetSpellDuration(m_spellInfo);
     if(duration > 0)
         spawnCreature->SetDuration(duration);
 
@@ -2533,8 +2533,8 @@ void Spell::EffectPickPocket(uint32 /*i*/)
 
 void Spell::EffectAddFarsight(uint32 i)
 {
-    float radius = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
-    int32 duration = GetDuration(m_spellInfo);
+    float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+    int32 duration = GetSpellDuration(m_spellInfo);
     DynamicObject* dynObj = new DynamicObject(m_caster);
     if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, i, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, duration, radius))
     {
@@ -2578,7 +2578,7 @@ void Spell::EffectSummonWild(uint32 i)
     if (center_x == 0 || center_y == 0 || center_z == 0)
         m_caster->GetClosePoint(center_x, center_y, center_z);
 
-    float radius = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+    float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
 
     int32 amount = damage > 0 ? damage : 1;
 
@@ -2587,7 +2587,7 @@ void Spell::EffectSummonWild(uint32 i)
         float px, py, pz;
         m_caster->GetRandomPoint(center_x,center_y,center_z,radius,px,py,pz);
 
-        int32 duration = GetDuration(m_spellInfo);
+        int32 duration = GetSpellDuration(m_spellInfo);
 
         TempSummonType summonType = (duration == 0) ? TEMPSUMMON_DEAD_DESPAWN : TEMPSUMMON_TIMED_OR_DEAD_DESPAWN;
 
@@ -2654,7 +2654,7 @@ void Spell::EffectSummonGuardian(uint32 i)
         if (center_x == 0 || center_y == 0 || center_z == 0)
             m_caster->GetClosePoint(center_x, center_y, center_z);
 
-        float radius = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+        float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
 
         int32 amount = damage > 0 ? damage : 1;
 
@@ -2675,7 +2675,7 @@ void Spell::EffectSummonGuardian(uint32 i)
             }
 
             // set timer for unsummon
-            int32 duration = GetDuration(m_spellInfo);
+            int32 duration = GetSpellDuration(m_spellInfo);
             if(duration > 0)
                 spawnCreature->SetDuration(duration);
 
@@ -2713,7 +2713,7 @@ void Spell::EffectTeleUnitsFaceCaster(uint32 i)
         return;
 
     uint32 mapid = m_caster->GetMapId();
-    float dis = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+    float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
 
     float fx,fy,fz;
     m_caster->GetClosePoint(fx,fy,fz,unitTarget->GetObjectSize() + dis);
@@ -3229,7 +3229,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             SpellEntry const *proto = (*itr)->GetSpellProto();
             if(proto->SpellVisual == 406 && proto->SpellIconID == 565)
             {
-                int32 duration = GetDuration(proto);
+                int32 duration = GetSpellDuration(proto);
                 (*itr)->SetAuraDuration(duration);
                 (*itr)->UpdateAuraDuration();
                 sunder_stacks++;
@@ -3450,7 +3450,7 @@ void Spell::EffectInterruptCast(uint32 /*i*/)
             // check if we can interrupt spell
             if ( unitTarget->m_currentSpells[i]->m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_INTURRUPT )
             {
-                unitTarget->ProhibitSpellScholl(SpellSchools(unitTarget->m_currentSpells[i]->m_spellInfo->School), GetDuration(m_spellInfo));
+                unitTarget->ProhibitSpellScholl(SpellSchools(unitTarget->m_currentSpells[i]->m_spellInfo->School), GetSpellDuration(m_spellInfo));
                 unitTarget->InterruptSpell(i);
             }
         }
@@ -3478,7 +3478,7 @@ void Spell::EffectSummonObjectWild(uint32 i)
         return;
     }
 
-    int32 duration = GetDuration(m_spellInfo);
+    int32 duration = GetSpellDuration(m_spellInfo);
     pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
 
     if(pGameObj->GetGoType() != GAMEOBJECT_TYPE_FLAGDROP)   // make dropped flag clickable for other players (not set owner guid (created by) for this)...
@@ -3805,7 +3805,7 @@ void Spell::EffectDuel(uint32 i)
 
     pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, m_caster->getFaction() );
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel()+1 );
-    int32 duration = GetDuration(m_spellInfo);
+    int32 duration = GetSpellDuration(m_spellInfo);
     pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
     pGameObj->SetSpellId(m_spellInfo->Id);
 
@@ -3934,7 +3934,7 @@ void Spell::EffectSummonTotem(uint32 i)
     pTotem->SetOwner(m_caster->GetGUID());
     pTotem->SetTypeBySummonSpell(m_spellInfo);              // must be after Create call where m_spells initilized
 
-    int32 duration=GetDuration(m_spellInfo);
+    int32 duration=GetSpellDuration(m_spellInfo);
     if(Player* modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id,SPELLMOD_DURATION, duration);
     pTotem->SetDuration(duration);
@@ -3964,7 +3964,7 @@ void Spell::EffectEnchantHeldItem(uint32 i)
     if (m_spellInfo->EffectMiscValue[i])
     {
         uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
-        int32 duration = GetDuration(m_spellInfo);          //Try duration index first ..
+        int32 duration = GetSpellDuration(m_spellInfo);          //Try duration index first ..
         if(!duration)
             duration = m_currentBasePoints[i]+1;            //Base points after ..
         if(!duration)
@@ -4100,7 +4100,7 @@ void Spell::EffectSummonObject(uint32 i)
     }
 
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL,m_caster->getLevel());
-    int32 duration = GetDuration(m_spellInfo);
+    int32 duration = GetSpellDuration(m_spellInfo);
     pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
     pGameObj->SetSpellId(m_spellInfo->Id);
     pGameObj->SetLootState(GO_CLOSED);
@@ -4162,7 +4162,7 @@ void Spell::EffectMomentMove(uint32 i)
     if( m_spellInfo->rangeIndex== 1)                        //self range
     {
         uint32 mapid = m_caster->GetMapId();
-        float dis = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+        float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
 
         // before caster
         float fx,fy,fz;
@@ -4542,8 +4542,8 @@ void Spell::EffectTransmitted(uint32 i)
     }
     else
     {
-        float min_dis = GetMinRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
-        float max_dis = GetMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
+        float min_dis = GetSpellMinRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
+        float max_dis = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
         float dis = rand_norm() * (max_dis - min_dis) + min_dis;
 
         m_caster->GetClosePoint(fx,fy,fz,dis);
@@ -4589,7 +4589,7 @@ void Spell::EffectTransmitted(uint32 i)
 
             // end time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))
             // start time == fish-FISHING_BOBBER_READY_TIME (0..GetDuration(m_spellInfo)-FISHING_BOBBER_READY_TIME)
-            uint32 fish = urand(FISHING_BOBBER_READY_TIME,GetDuration(m_spellInfo)/1000);
+            uint32 fish = urand(FISHING_BOBBER_READY_TIME,GetSpellDuration(m_spellInfo)/1000);
             pGameObj->SetRespawnTime(fish);
             break;
         }
@@ -4597,7 +4597,7 @@ void Spell::EffectTransmitted(uint32 i)
         {
             pGameObj->Relocate(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
 
-            int32 duration = GetDuration(m_spellInfo);
+            int32 duration = GetSpellDuration(m_spellInfo);
             pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
             break;
         }
@@ -4605,7 +4605,7 @@ void Spell::EffectTransmitted(uint32 i)
         case GAMEOBJECT_TYPE_CHEST:
         default:
         {
-            int32 duration = GetDuration(m_spellInfo);
+            int32 duration = GetSpellDuration(m_spellInfo);
             pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
             break;
         }
