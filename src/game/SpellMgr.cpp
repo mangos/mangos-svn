@@ -293,6 +293,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
     {
         case 23333:                                         // BG spell
         case 23335:                                         // BG spell
+        case 34976:                                         // BG spell
             return true;
         case 28441:                                         // not possitive dummy spell
             return false;
