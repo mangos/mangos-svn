@@ -2152,8 +2152,6 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
         if(!pProto)
             continue;
 
-        std::string Name = pProto->Name1;
-
         int loc_idx = m_session->GetSessionLocaleIndex();
         if ( loc_idx >= 0 )
         {
@@ -2162,7 +2160,7 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
             {
                 if (il->Name.size() > loc_idx && !il->Name[loc_idx].empty())
                 {
-                    Name = il->Name[loc_idx];
+                    std::string Name = il->Name[loc_idx];
 
                     // converting Name to lower case
                     std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
@@ -2177,7 +2175,7 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
             }
         }
 
-        Name = pProto->Name1;
+        std::string Name = pProto->Name1;
 
         // converting Name to lower case
         std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
@@ -2365,8 +2363,6 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
     {
         Quest * qinfo = iter->second;
 
-        std::string Title = qinfo->GetTitle();
-
         int loc_idx = m_session->GetSessionLocaleIndex();
         if ( loc_idx >= 0 )
         {
@@ -2403,7 +2399,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
             }
         }
 
-        Title = qinfo->GetTitle();
+        std::string Title = qinfo->GetTitle();
 
         // converting string that we try to find to lower case
         std::transform( Title.begin(), Title.end(), Title.begin(), ::tolower );
@@ -2451,8 +2447,6 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
         if(!cInfo)
             continue;
 
-        std::string Name = cInfo->Name;
-
         int loc_idx = m_session->GetSessionLocaleIndex();
         if ( loc_idx >= 0 )
         {
@@ -2461,7 +2455,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
             {
                 if (cl->Name.size() > loc_idx && !cl->Name[loc_idx].empty())
                 {
-                    Name = cl->Name[loc_idx];
+                    std::string Name = cl->Name[loc_idx];
 
                     // converting Name to lower case
                     std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
@@ -2476,7 +2470,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
             }
         }
 
-        Name = cInfo->Name;
+        std::string Name = cInfo->Name;
 
         // converting Name to lower case
         std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
@@ -2511,8 +2505,6 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
         if(!gInfo)
             continue;
 
-        std::string Name = gInfo->name;
-
         int loc_idx = m_session->GetSessionLocaleIndex();
         if ( loc_idx >= 0 )
         {
@@ -2521,7 +2513,7 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
             {
                 if (gl->Name.size() > loc_idx && !gl->Name[loc_idx].empty())
                 {
-                    Name = gl->Name[loc_idx];
+                    std::string Name = gl->Name[loc_idx];
                     // converting Name to lower case
                     std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
 
@@ -2535,7 +2527,7 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
             }
         }
 
-        Name = gInfo->name;
+        std::string Name = gInfo->name;
 
         // converting Name to lower case
         std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
