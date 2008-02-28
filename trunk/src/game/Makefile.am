@@ -157,7 +157,6 @@ libmangosgame_a_SOURCES = \
 	MovementGenerator.h \
 	MovementGeneratorImpl.h \
 	MovementHandler.cpp \
-	NameTables.h \
 	NPCHandler.cpp \
 	NPCHandler.h \
 	NullCreatureAI.cpp \
