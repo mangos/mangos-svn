@@ -3868,6 +3868,12 @@ void Spell::EffectSummonPlayer(uint32 /*i*/)
     if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    // Evil Twin (ignore player summon, but hide this for summoner)
+    Unit::AuraList const& mDummy = unitTarget->GetAurasByType(SPELL_AURA_DUMMY);
+    for(Unit::AuraList::const_iterator itr = mDummy.begin(); itr != mDummy.end(); ++itr)
+        if ((*itr)->GetId() == 23445)
+            return;
+
     float x,y,z;
     m_caster->GetClosePoint(x,y,z);
 
