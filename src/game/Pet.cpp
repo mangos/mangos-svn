@@ -931,11 +931,12 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
         createResistance[SPELL_SCHOOL_ARCANE] = cinfo->resistance6;
     }
 
-    if(owner->GetTypeId() == TYPEID_PLAYER)
+    switch(getPetType())
     {
-        switch(getPetType())
+        case SUMMON_PET:
         {
-            case SUMMON_PET:
+            if(owner->GetTypeId() == TYPEID_PLAYER)
+            {
                 switch(owner->getClass())
                 {
                     case CLASS_WARLOCK:
@@ -962,57 +963,8 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
                     default:
                         break;
                 }
-                break;
-
-            default:
-                break;
-        }
-    }
-
-    switch(getPetType())
-    {
-        case HUNTER_PET:
-        {
-            SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32((MaNGOS::XP::xp_to_level(petlevel))/4));
-
-            //these formula may not be correct; however, it is designed to be close to what it should be
-                                                            //this makes dps 0.5 of pets level
-            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)) );
-                                                            //damage range is then petlevel / 2
-            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)) );
-            //damage is increased afterwards as strength and pet scaling modify attack power
-
-                                                            //stored standart pet stats are entry 1 in pet_levelinfo
-            PetLevelInfo const* pInfo = objmgr.GetPetLevelInfo(creature_ID, petlevel);
-            if(pInfo)                                       // exist in DB
-            {
-                SetCreateHealth(pInfo->health);
-                SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(pInfo->armor));
-                //SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cinfo->attackpower));
-
-                for( int i = STAT_STRENGTH; i < MAX_STATS; i++)
-                {
-                    SetCreateStat(Stats(i),  float(pInfo->stats[i]));
-                }
             }
-            else                                            // not exist in DB, use some default fake data
-            {
-                sLog.outErrorDb("Hunter pet levelstats missing in DB");
 
-                // remove elite bonuses included in DB values
-                SetCreateHealth( uint32(((float(cinfo->maxhealth) / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel) );
-
-                SetCreateStat(STAT_STRENGTH,22);
-                SetCreateStat(STAT_AGILITY,22);
-                SetCreateStat(STAT_STAMINA,25);
-                SetCreateStat(STAT_INTELLECT,28);
-                SetCreateStat(STAT_SPIRIT,27);
-            }
-        };
-        break;
-
-        case SUMMON_PET:
-        {
             SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)) );
             SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)) );
 
@@ -1043,10 +995,49 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
                 SetCreateStat(STAT_INTELLECT,28);
                 SetCreateStat(STAT_SPIRIT,27);
             }
-        };
-        break;
+            break;
+        }
+        case HUNTER_PET:
+        {
+            SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32((MaNGOS::XP::xp_to_level(petlevel))/4));
 
-        default:            sLog.outError("Pet have incorrect type (%u) for levelup.",getPetType());            break;
+            //these formula may not be correct; however, it is designed to be close to what it should be
+            //this makes dps 0.5 of pets level
+            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)) );
+            //damage range is then petlevel / 2
+            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)) );
+            //damage is increased afterwards as strength and pet scaling modify attack power
+
+            //stored standart pet stats are entry 1 in pet_levelinfo
+            PetLevelInfo const* pInfo = objmgr.GetPetLevelInfo(creature_ID, petlevel);
+            if(pInfo)                                       // exist in DB
+            {
+                SetCreateHealth(pInfo->health);
+                SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(pInfo->armor));
+                //SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cinfo->attackpower));
+
+                for( int i = STAT_STRENGTH; i < MAX_STATS; i++)
+                {
+                    SetCreateStat(Stats(i),  float(pInfo->stats[i]));
+                }
+            }
+            else                                            // not exist in DB, use some default fake data
+            {
+                sLog.outErrorDb("Hunter pet levelstats missing in DB");
+
+                // remove elite bonuses included in DB values
+                SetCreateHealth( uint32(((float(cinfo->maxhealth) / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel) );
+
+                SetCreateStat(STAT_STRENGTH,22);
+                SetCreateStat(STAT_AGILITY,22);
+                SetCreateStat(STAT_STAMINA,25);
+                SetCreateStat(STAT_INTELLECT,28);
+                SetCreateStat(STAT_SPIRIT,27);
+            }
+            break;
+        }
+        default:
+            sLog.outError("Pet have incorrect type (%u) for levelup.",getPetType());            break;
     }
 
     for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
