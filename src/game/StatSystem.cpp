@@ -252,13 +252,24 @@ void Player::UpdateAttackPowerAndDamage(bool ranged )
             case CLASS_DRUID:
             {
                 //Check if Predatory Strikes is skilled
-                Unit::AuraList const& mDummy = GetAurasByType(SPELL_AURA_DUMMY);
                 float mLevelMult = 0.0;
-                if (HasAuraType(SPELL_AURA_DUMMY))
+                switch(m_form)
                 {
-                    for(Unit::AuraList::const_iterator itr = mDummy.begin(); itr != mDummy.end(); ++itr)
-                        if ((*itr)->GetSpellProto()->SpellIconID == 1563)
-                            mLevelMult = float((*itr)->GetModifier()->m_amount) / 100.0;
+                    case FORM_CAT:
+                    case FORM_BEAR:
+                    case FORM_DIREBEAR:
+                    {
+                        Unit::AuraList const& mDummy = GetAurasByType(SPELL_AURA_DUMMY);
+                        for(Unit::AuraList::const_iterator itr = mDummy.begin(); itr != mDummy.end(); ++itr)
+                        {
+                            if ((*itr)->GetSpellProto()->SpellIconID == 1563)
+                            {
+                                mLevelMult = (*itr)->GetModifier()->m_amount / 100.0f;
+                                break;
+                            }
+                        }
+                        break;
+                    }
                 }
 
                 switch(m_form)
