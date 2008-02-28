@@ -3417,23 +3417,12 @@ uint8 Spell::CheckCasterAuras() const
 
     //Check if the spell grants school or mechanic immunity.
     //We use bitmasks so the loop is done only once and not on every aura check below.
-    for(std::list<TargetInfo>::const_iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
+    for(int i = 0;i < 3; i ++)
     {
-        if (!ihit->targetGUID || ihit->targetGUID != m_caster->GetGUID())
-            continue;
-
-        for(int i = 0;i < 3; i ++)
-        {
-            if(ihit->effectMask & (1<<i))
-            {
-                if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_SCHOOL_IMMUNITY)
-                    school_immune |= m_spellInfo->EffectMiscValue[i];
-                else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
-                    mechanic_immune |= 1 << m_spellInfo->EffectMiscValue[i];
-            }
-        }
-
-        break;                                              // this is unique targets list and we find caster already.
+        if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_SCHOOL_IMMUNITY)
+            school_immune |= m_spellInfo->EffectMiscValue[i];
+        else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
+            mechanic_immune |= 1 << m_spellInfo->EffectMiscValue[i];
     }
     //immune movement impairement and loss of control
     if(m_spellInfo->Id==(uint32)42292)mechanic_immune=0x9967da6;
