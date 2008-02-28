@@ -1502,6 +1502,13 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                         return;
                     }
 
+                    if(!pItemChar->CanBeTraded())
+                    {
+                        _player->SendEquipError( EQUIP_ERR_ITEMS_CANT_BE_SWAPPED, pItemChar, NULL );
+                        CharacterDatabase.RollbackTransaction();
+                        return;
+                    }
+
                     // First be sure the character's item is saved to db
                     pItemChar->SaveToDB();
 
@@ -1548,6 +1555,12 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
         }                                                   // End "To char" part
         else
         {                                                   // Char -> Bank cases
+            if(!pItemChar->CanBeTraded())
+            {
+                _player->SendEquipError( EQUIP_ERR_ITEMS_CANT_BE_SWAPPED, pItemChar, NULL );
+                return;
+            }
+
             CharacterDatabase.BeginTransaction();
 
             pl->SaveInventoryAndGoldToDB();
