@@ -724,9 +724,6 @@
 				RelativePath="..\..\src\game\GlobalEvents.h">
 			</File>
 			<File
-				RelativePath="..\..\src\game\NameTables.h">
-			</File>
-			<File
 				RelativePath="..\..\src\game\Opcodes.cpp">
 			</File>
 			<File

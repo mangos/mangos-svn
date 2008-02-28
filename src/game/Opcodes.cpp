@@ -21,13 +21,12 @@
 */
 
 #include "Opcodes.h"
-#include "NameTables.h"
 
 /// Correspondance between opcodes and their names
 // this is an string array, for more opcode comments look to opcodes.h
 // do not change order of lines!
 // when renaming opcodes, replace old name by the new one
-const char* g_worldOpcodeNames[] =
+const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
 {
     "MSG_NULL_ACTION",                                      // MSG_NULL_ACTION
     "CMSG_BOOTME",                                          // CMSG_BOOTME

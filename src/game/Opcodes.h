@@ -23,6 +23,8 @@
 #ifndef _OPCODES_H
 #define _OPCODES_H
 
+#include "Common.h"
+
 /// List of OpCodes
 enum OpCodes
 {
@@ -1117,5 +1119,16 @@ enum NPCFlags
     UNIT_NPC_FLAG_UNK3                  = 0x01000000,       // cause client to send 1015 opcode
     UNIT_NPC_FLAG_GUARD                 = 0x10000000,       // custom flag for guards
 };
+
+extern const char* g_worldOpcodeNames[];
+
+/// Lookup opcode name for human understandable logging
+inline const char* LookupOpcodeName(uint16 id)
+{
+    if (id >= MAX_OPCODE_ID)
+        return "UNKNOWN OPCODE_CODE received, it is more than max!";
+    return g_worldOpcodeNames[id];
+}
+
 #endif
 /// @}
