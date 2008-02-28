@@ -30,7 +30,6 @@
 #include "WorldSession.h"
 #include "World.h"
 #include "WorldSocketMgr.h"
-#include "NameTables.h"
 #include "Policies/SingletonImp.h"
 #include "WorldLog.h"
 #include "AddonHandler.h"
@@ -154,7 +153,7 @@ void WorldSocket::OnRead()
             sWorldLog.Log("CLIENT:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
                 (uint32)GetSocket(),
                 packet.size(),
-                LookupName(packet.GetOpcode(), g_worldOpcodeNames),
+                LookupOpcodeName(packet.GetOpcode()),
                 packet.GetOpcode());
 
             uint32 p = 0;
@@ -521,7 +520,7 @@ void WorldSocket::SendSinglePacket()
             sWorldLog.Log("SERVER:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
                 (uint32)GetSocket(),
                 packet->size(),
-                LookupName(packet->GetOpcode(), g_worldOpcodeNames),
+                LookupOpcodeName(packet->GetOpcode()),
                 packet->GetOpcode());
 
             uint32 p = 0;
@@ -588,7 +587,7 @@ void WorldSocket::Update(time_t diff)
                 sWorldLog.Log("SERVER:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
                     (uint32)GetSocket(),
                     packetSize,
-                    LookupName(packet->GetOpcode(), g_worldOpcodeNames),
+                    LookupOpcodeName(packet->GetOpcode()),
                     packet->GetOpcode());
 
                 uint32 p = 0;
@@ -645,5 +644,5 @@ void WorldSocket::SendAuthWaitQue(uint32 position)
 void WorldSocket::SizeError(WorldPacket const& packet, uint32 size) const
 {
     sLog.outError("Client send packet %s (%u) with size %u but expected %u (attempt crash server?), skipped",
-        LookupName(packet.GetOpcode(),g_worldOpcodeNames),packet.GetOpcode(),packet.size(),size);
+        LookupOpcodeName(packet.GetOpcode()),packet.GetOpcode(),packet.size(),size);
 }

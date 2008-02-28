@@ -32,7 +32,6 @@
 #include "Group.h"
 #include "Guild.h"
 #include "World.h"
-#include "NameTables.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "BattleGroundMgr.h"
@@ -476,7 +475,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
 {
     sLog.outError("Client (account %u) send packet %s (%u) with size %u but expected %u (attempt crash server?), skipped",
-        GetAccountId(),LookupName(packet.GetOpcode(),g_worldOpcodeNames),packet.GetOpcode(),packet.size(),size);
+        GetAccountId(),LookupOpcodeName(packet.GetOpcode()),packet.GetOpcode(),packet.size(),size);
 }
 
 /// Get the player name
@@ -554,7 +553,7 @@ bool WorldSession::Update(uint32 /*diff*/)
 
         /*#if 1
         sLog.outError( "MOEP: %s (0x%.4X)",
-                        LookupName(packet->GetOpcode(), g_worldOpcodeNames),
+                        LookupOpcodeName(packet->GetOpcode()),
                         packet->GetOpcode());
         #endif*/
         OpcodeTableMap::const_iterator iter = objmgr.opcodeTable.find( packet->GetOpcode() );
@@ -562,7 +561,7 @@ bool WorldSession::Update(uint32 /*diff*/)
         if (iter == objmgr.opcodeTable.end())
         {
             sLog.outError( "SESSION: received unhandled opcode %s (0x%.4X)",
-                LookupName(packet->GetOpcode(), g_worldOpcodeNames),
+                LookupOpcodeName(packet->GetOpcode()),
                 packet->GetOpcode());
         }
         else
@@ -581,7 +580,7 @@ bool WorldSession::Update(uint32 /*diff*/)
             if(!m_playerRecentlyLogout)
             {
                 sLog.outError( "SESSION: received unexpected opcode %s (0x%.4X)",
-                    LookupName(packet->GetOpcode(), g_worldOpcodeNames),
+                    LookupOpcodeName(packet->GetOpcode()),
                     packet->GetOpcode());
             }
         }

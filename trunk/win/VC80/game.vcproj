@@ -974,10 +974,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\NameTables.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\Opcodes.cpp"
 				>
 			</File>
