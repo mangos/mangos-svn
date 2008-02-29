@@ -71,9 +71,11 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
             return;
         }
 
-        // battleground state preper, stop flight
-        GetPlayer()->ClearTaxiDestinations();
+        // battleground state prepre, stop flight
         GetPlayer()->GetMotionMaster()->MovementExpired();
+        GetPlayer()->FlightComplete();
+        GetPlayer()->ClearTaxiDestinations();
+        GetPlayer()->StopMoving();
     }
 
     // resurrect character at enter into instance where his corpse exist after add to map
