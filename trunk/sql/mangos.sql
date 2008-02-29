@@ -2010,7 +2010,7 @@ INSERT INTO `mangos_string` VALUES
 (9,'Commands available to you:',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (10,'Incorrect syntax.',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (11,'Your account level is: %i',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(12,'Number of users connected: %u (max since last restart: %u)',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(12,'Online players: %u (max: %u) Queued players: %u (max: %u)',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (13,'Server uptime: %s',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (14,'Player saved.',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (15,'All players saved.',NULL,NULL,NULL,NULL,NULL,NULL,NULL),

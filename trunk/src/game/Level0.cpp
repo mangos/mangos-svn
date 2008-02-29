@@ -157,12 +157,14 @@ bool ChatHandler::HandleStartCommand(const char* /*args*/)
 
 bool ChatHandler::HandleInfoCommand(const char* /*args*/)
 {
-    uint32 clientsNum = sWorld.GetActiveSessionCount();
-    uint32 maxClientsNum = sWorld.GetMaxSessionCount();
+    uint32 activeClientsNum = sWorld.GetActiveSessionCount();
+    uint32 queuedClientsNum = sWorld.GetQueuedSessionCount();
+    uint32 maxActiveClientsNum = sWorld.GetMaxActiveSessionCount();
+    uint32 maxQueuedClientsNum = sWorld.GetMaxQueuedSessionCount();
     std::string str = secsToTimeString(sWorld.GetUptime());
 
     PSendSysMessage(_FULLVERSION);
-    PSendSysMessage(LANG_CONNECTED_USERS, clientsNum, maxClientsNum);
+    PSendSysMessage(LANG_CONNECTED_USERS, activeClientsNum, maxActiveClientsNum, queuedClientsNum, maxQueuedClientsNum);
     PSendSysMessage(LANG_UPTIME, str.c_str());
 
     return true;

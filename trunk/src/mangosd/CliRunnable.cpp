@@ -254,16 +254,19 @@ void CliShutdown(char* command,pPrintf zprintf)
 /// Display info on users currently in the realm
 void CliInfo(char*,pPrintf zprintf)
 {
+    uint32 activeClientsNum = sWorld.GetActiveSessionCount();
+    uint32 queuedClientsNum = sWorld.GetQueuedSessionCount();
+    uint32 maxActiveClientsNum = sWorld.GetMaxActiveSessionCount();
+    uint32 maxQueuedClientsNum = sWorld.GetMaxQueuedSessionCount();
+    std::string timeStr = secsToTimeString(sWorld.GetUptime(),true);
+
+    zprintf("Online players: %u (max: %u) queued: %u (max: %u) Uptime: %s\r\n",activeClientsNum,maxActiveClientsNum,queuedClientsNum,maxQueuedClientsNum,timeStr.c_str());
+
     ///- Get the list of accounts ID logged to the realm
     QueryResult *resultDB = CharacterDatabase.Query("SELECT name,account FROM characters WHERE online > 0");
 
     if (!resultDB)
-    {
-        int maxUsers = sWorld.GetMaxSessionCount();
-        std::string timeStr = secsToTimeString(sWorld.GetUptime(),true);
-        zprintf("Online users: 0 (max: %d) Uptime: %s\r\n",maxUsers,timeStr.c_str());
         return;
-    }
 
     int linesize = 1+15+2+20+3+15+2+4+1+5+3;                // see format string
     char* buf = new char[resultDB->GetRowCount()*linesize+1];
@@ -297,9 +300,6 @@ void CliInfo(char*,pPrintf zprintf)
     *bufPos = '\0';
 
     ///- Display the list of account/characters online
-    std::string timeStr = secsToTimeString(sWorld.GetUptime(),true);
-    uint32 maxUsers = sWorld.GetMaxSessionCount();
-    zprintf("Online users: %u (max: %u) Uptime: %s\r\n",uint32(resultDB->GetRowCount()),maxUsers,timeStr.c_str());
     zprintf("=====================================================================\r\n");
     zprintf("|    Account    |       Character      |       IP        | GM | TBC |\r\n");
     zprintf("=====================================================================\r\n");

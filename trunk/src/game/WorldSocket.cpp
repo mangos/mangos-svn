@@ -438,9 +438,12 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     {
         sWorld.AddQueuedPlayer(this);
         SendAuthWaitQue(sWorld.GetQueuePos(this));
+        sWorld.UpdateMaxSessionCounters();
         sLog.outDetail( "PlayerQueue: %s is in Queue Position (%u).",safe_account.c_str(),++QueueSize);
         return;
     }
+
+    sWorld.UpdateMaxSessionCounters();
 
     // Updates the population
     if (pLimit > 0)
