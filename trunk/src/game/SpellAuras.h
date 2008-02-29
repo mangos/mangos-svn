@@ -62,6 +62,8 @@ typedef void(Aura::*pAuraHandler)(bool Apply, bool Real);
 
 class MANGOS_DLL_SPEC Aura
 {
+    friend Aura* CreateAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem);
+
     public:
         //aura handlers
         void HandleNULL(bool, bool)
@@ -197,7 +199,6 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraModExpertise(bool apply, bool Real);
         void HandleAuraModResistenceOfIntellectPercent(bool apply, bool Real);
 
-        Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         virtual ~Aura();
 
         void SetModifier(AuraType t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2);
@@ -261,9 +262,13 @@ class MANGOS_DLL_SPEC Aura
 
         int32 m_procCharges;
 
+        virtual Unit* GetTriggerTarget() const { return m_target; }
+
         // add/remove SPELL_AURA_MOD_SHAPESHIFT (36) linked auras
         void HandleShapeshiftBoosts(bool apply);
     protected:
+        Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
+
         Modifier m_modifier;
         SpellModifier *m_spellmod;
         uint32 m_spellId;
@@ -319,4 +324,20 @@ class MANGOS_DLL_SPEC PersistentAreaAura : public Aura
         ~PersistentAreaAura();
         void Update(uint32 diff);
 };
+
+class MANGOS_DLL_SPEC SingleEnemyTargetAura : public Aura
+{
+    friend Aura* CreateAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem);
+
+    public:
+        ~SingleEnemyTargetAura();
+        Unit* GetTriggerTarget() const;
+
+    protected:
+        SingleEnemyTargetAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster  = NULL, Item* castItem = NULL);
+        uint64 m_casters_target_guid;
+};
+
+Aura* CreateAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
+
 #endif
