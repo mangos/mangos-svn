@@ -13019,11 +13019,7 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
             else
                 remaincharges = -1;
 
-            Aura* aura;
-            if(spellproto->Effect[effindex] == SPELL_EFFECT_APPLY_AREA_AURA)
-                aura = new AreaAura(spellproto, effindex, NULL, this, NULL);
-            else
-                aura = new Aura(spellproto, effindex, NULL, this, NULL);
+            Aura* aura = CreateAura(spellproto, effindex, NULL, this, NULL);
             if(!damage)
                 damage = aura->GetModifier()->m_amount;
             aura->SetLoadedState(caster_guid,damage,maxduration,remaintime,remaincharges);

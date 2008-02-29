@@ -720,7 +720,7 @@ void BattleGround::AddPlayerToResurrectQueue(uint64 npc_guid, uint64 player_guid
     SpellEntry const *spellInfo = sSpellStore.LookupEntry( SPELL_WAITING_FOR_RESURRECT );
     if(spellInfo)
     {
-        Aura *Aur = new Aura(spellInfo, 0, NULL, plr);
+        Aura *Aur = CreateAura(spellInfo, 0, NULL, plr);
         plr->AddAura(Aur);
     }
 }

@@ -1520,7 +1520,7 @@ void Spell::EffectApplyAura(uint32 i)
 
     sLog.outDebug("Spell: Aura is: %u", m_spellInfo->EffectApplyAuraName[i]);
 
-    Aura* Aur = new Aura(m_spellInfo, i, &m_currentBasePoints[i], unitTarget,m_caster, m_CastItem);
+    Aura* Aur = CreateAura(m_spellInfo, i, &m_currentBasePoints[i], unitTarget,m_caster, m_CastItem);
 
     if (!Aur->IsPositive() && Aur->GetCasterGUID() != Aur->GetTarget()->GetGUID())
     {
@@ -1640,29 +1640,9 @@ void Spell::EffectApplyAura(uint32 i)
         SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);
         if (AdditionalSpellInfo)
         {
-            Aura* AdditionalAura = new Aura(AdditionalSpellInfo, 0, &m_currentBasePoints[0], unitTarget,m_caster, 0);
+            Aura* AdditionalAura = CreateAura(AdditionalSpellInfo, 0, &m_currentBasePoints[0], unitTarget,m_caster, 0);
             unitTarget->AddAura(AdditionalAura);
             sLog.outDebug("Spell: Additional Aura is: %u", AdditionalSpellInfo->EffectApplyAuraName[0]);
-        }
-    }
-
-    // arcane missiles, do not affect tame beast
-    if(Aur->IsTrigger() && m_spellInfo->Id != 1515)
-    {
-        SpellEntry const *spellInfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
-        if (!spellInfo) return;
-        if (m_caster->GetTypeId() == TYPEID_PLAYER && spellInfo->EffectImplicitTargetA[0] == TARGET_SINGLE_ENEMY)
-        {
-            Unit *target = ObjectAccessor::GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
-            if (target)
-            {
-                if (!m_caster->IsFriendlyTo(target))
-                    Aur->SetTarget(target);
-                else
-                    cancel();
-            }
-            else
-                cancel();
         }
     }
 }
@@ -4799,7 +4779,7 @@ void Spell::EffectStealBeneficialBuff(uint32 /*i*/)
             int32 basePoints = aur->GetBasePoints();
 
             // construct the new aura for the attacker
-            Aura * new_aur = new Aura(aur->GetSpellProto(), i, &basePoints, m_caster);
+            Aura * new_aur = CreateAura(aur->GetSpellProto(), i, &basePoints, m_caster);
 
             if(!new_aur)
                 continue;

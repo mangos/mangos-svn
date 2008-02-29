@@ -429,6 +429,38 @@ PersistentAreaAura::~PersistentAreaAura()
 {
 }
 
+SingleEnemyTargetAura::SingleEnemyTargetAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target,
+Unit *caster, Item* castItem) : Aura(spellproto, eff, currentBasePoints, target, caster, castItem)
+{
+    if (caster)
+        m_casters_target_guid = caster->GetUInt64Value(UNIT_FIELD_TARGET);
+}
+
+SingleEnemyTargetAura::~SingleEnemyTargetAura()
+{
+}
+
+Unit* SingleEnemyTargetAura::GetTriggerTarget() const
+{
+    return ObjectAccessor::GetUnit(*m_target, m_casters_target_guid);
+}
+
+Aura* CreateAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem)
+{
+    if (spellproto->Effect[eff] == SPELL_EFFECT_APPLY_AREA_AURA)
+        return new AreaAura(spellproto, eff, currentBasePoints, target, caster, castItem);
+
+    uint32 triggeredSpellId = spellproto->EffectTriggerSpell[eff];
+
+    SpellEntry const* triggredSpellInfo = sSpellStore.LookupEntry(triggeredSpellId);
+    if (triggredSpellInfo)
+        for (int i = 0; i < 3; ++i)
+            if (triggredSpellInfo->EffectImplicitTargetA[i] == TARGET_SINGLE_ENEMY)
+                return new SingleEnemyTargetAura(spellproto, eff, currentBasePoints, target, caster, castItem);
+
+    return new Aura(spellproto, eff, currentBasePoints, target, caster, castItem);
+}
+
 Unit* Aura::GetCaster() const
 {
     if(m_caster_guid==m_target->GetGUID())
@@ -1055,7 +1087,7 @@ void Aura::TriggerSpell()
     // generic casting code with custom spells and target/caster customs
     uint32 trigger_spell_id = GetSpellProto()->EffectTriggerSpell[m_effIndex];
     Unit* caster = GetCaster();
-    Unit* target = m_target;
+    Unit* target = GetTriggerTarget();
     uint64 originalCasterGUID = GetCasterGUID();
 
     // specific code for cases with no trigger spell provided in field
@@ -1077,14 +1109,6 @@ void Aura::TriggerSpell()
         case 29528: trigger_spell_id = 28713; break;        // Inoculation
 
         case 29917: trigger_spell_id = 29916; break;        // Feed Captured Animal
-        case  1515:                                         // Tame Beast
-        {
-            // TODO: currently this used as hack for Tame beast triggered spell,
-            // BUT this can be correct way to provide target for ALL this function calls
-            // in case m_target==caster (or GetSpellProto()->EffectImplicitTargetA[m_effIndex]==TARGET_SELF )
-            target = ObjectAccessor::GetUnit(*m_target, m_target->GetUInt64Value(UNIT_FIELD_TARGET));
-            break;
-        }
         case 1010:                                          // Curse of Idiocy
         {
             // TODO: spell casted by result in correct way mostly
