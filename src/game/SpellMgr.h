@@ -106,8 +106,6 @@ bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellI
 bool CanUsedWhileStealthed(uint32 spellId);
 bool IsMechanicInvulnerabilityImmunityToSpell(SpellEntry const* spellInfo);
 
-bool IsTargetSingleEnemyAura(SpellEntry const* spellInfo, uint8 effectId);
-
 // Spell affects related declarations (accessed using SpellMgr functions)
 struct SpellAffection
 {

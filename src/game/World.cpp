@@ -94,7 +94,8 @@ World::World()
     m_ShutdownTimer = 0;
     m_gameTime=time(NULL);
     m_startTime=m_gameTime;
-    m_maxSessionsCount = 0;
+    m_maxActiveSessionCount = 0;
+    m_maxQueuedSessionCount = 0;
     m_resultQueue = NULL;
     m_NextDailyQuestReset = 0;
 }
@@ -174,7 +175,6 @@ void World::AddSession(WorldSession* s)
 
     WorldSession* old = m_sessions[s->GetAccountId()];
     m_sessions[s->GetAccountId()] = s;
-    m_maxSessionsCount = std::max(m_maxSessionsCount,uint32(m_sessions.size()));
 
     // if session already exist, prepare to it deleting at next world update
     if(old)
@@ -997,7 +997,7 @@ void World::Update(time_t diff)
     if (m_timers[WUPDATE_UPTIME].Passed())
     {
         uint32 tmpDiff = (m_gameTime - m_startTime);
-        uint32 maxClientsNum = sWorld.GetMaxSessionCount();
+        uint32 maxClientsNum = sWorld.GetMaxActiveSessionCount();
 
         m_timers[WUPDATE_UPTIME].Reset();
         WorldDatabase.PExecute("UPDATE uptime SET uptime = %d, maxplayers = %d WHERE starttime = " I64FMTD, tmpDiff, maxClientsNum, uint64(m_startTime));
@@ -2017,4 +2017,10 @@ void World::SetPlayerLimit( int32 limit, bool needUpdate )
 
     if(db_update_need)
         loginDatabase.PExecute("UPDATE realmlist SET allowedSecurityLevel = '%u' WHERE id = '%d'",uint8(GetPlayerSecurityLimit()),realmID);
+}
+
+void World::UpdateMaxSessionCounters()
+{
+    m_maxActiveSessionCount = std::max(m_maxActiveSessionCount,uint32(m_sessions.size()-m_QueuedPlayer.size()));
+    m_maxQueuedSessionCount = std::max(m_maxQueuedSessionCount,uint32(m_QueuedPlayer.size()));
 }
