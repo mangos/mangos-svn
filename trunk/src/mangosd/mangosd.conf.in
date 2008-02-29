@@ -605,6 +605,10 @@ CreatureFamilyAssistenceRadius = 10
 #        XP rates
 #        Default: 1
 #
+#    Rate.XP.PastLevel70
+#        XP needed per level past 70 (Rates below 1 not recommended)
+#        Default: 1
+#
 #    Rate.Creature.Normal.Damage
 #    Rate.Creature.Elite.Elite.Damage
 #    Rate.Creature.Elite.RAREELITE.Damage
@@ -684,6 +688,7 @@ Rate.Drop.Money = 1
 Rate.XP.Kill    = 1
 Rate.XP.Quest   = 1
 Rate.XP.Explore = 1
+Rate.XP.PastLevel70 = 1
 Rate.Creature.Normal.Damage = 1
 Rate.Creature.Elite.Elite.Damage = 1
 Rate.Creature.Elite.RAREELITE.Damage = 1
