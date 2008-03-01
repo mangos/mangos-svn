@@ -541,7 +541,8 @@ namespace MaNGOS
             }
             bool operator()(Unit* u)
             {
-                if (!u->isAlive() || ( u->GetTypeId() == TYPEID_PLAYER && ((Player*)u)->isInFlight() ))
+                // Check contains checks for: live, non-selectable, non-attackable flags, flight check and GM check
+                if (!u->isTargetableForAttack())
                     return false;
                 if(( i_targetForPlayer ? !i_funit->IsFriendlyTo(u) : i_funit->IsHostileTo(u) )&& i_obj->IsWithinDistInMap(u, i_range))
                     return true;
