@@ -54,6 +54,10 @@ void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
         return;
     }
 
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     SendTabardVendorActivate(guid);
 }
 
@@ -80,6 +84,10 @@ void WorldSession::HandleBankerActivateOpcode( WorldPacket & recv_data )
         sLog.outDebug( "WORLD: HandleBankerActivateOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
+
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     SendShowBank(guid);
 }
@@ -117,6 +125,10 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         sLog.outDebug( "WORLD: SendTrainerList - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
+
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     // Lazy loading at first access
     unit->LoadTrainerSpells();
@@ -191,6 +203,10 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         sLog.outDebug( "WORLD: HandleTrainerBuySpellOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
+
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     // Lazy loading at first access
     unit->LoadTrainerSpells();
@@ -271,6 +287,10 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
         return;
     }
 
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     if( unit->isArmorer() || unit->isCivilian() || unit->isQuestGiver() || unit->isServiceProvider())
     {
         unit->StopMoving();
@@ -325,6 +345,10 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
         return;
     }
 
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     if(!code.empty())
     {
 
@@ -353,6 +377,10 @@ void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
         sLog.outDebug( "WORLD: HandleSpiritHealerActivateOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
+
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     SendSpiritResurrect();
 }
@@ -425,6 +453,10 @@ void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
         return;
     }
 
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     SendBindPoint(unit);
 }
 
@@ -488,6 +520,10 @@ void WorldSession::HandleListStabledPetsOpcode( WorldPacket & recv_data )
         sLog.outDebug( "WORLD: HandleListStabledPetsOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(npcGUID)) );
         return;
     }
+
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     SendStablePet(npcGUID);
 }
@@ -563,6 +599,10 @@ void WorldSession::HandleStablePet( WorldPacket & recv_data )
         return;
     }
 
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     Pet *pet = _player->GetPet();
 
     WorldPacket data(SMSG_STABLE_RESULT, 200);              // guess size
@@ -620,6 +660,10 @@ void WorldSession::HandleUnstablePet( WorldPacket & recv_data )
         return;
     }
 
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     WorldPacket data(SMSG_STABLE_RESULT, 200);              // guess size
 
     Pet* pet = _player->GetPet();
@@ -675,6 +719,10 @@ void WorldSession::HandleBuyStableSlot( WorldPacket & recv_data )
         return;
     }
 
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     WorldPacket data(SMSG_STABLE_RESULT, 200);
 
     if(GetPlayer()->m_stableSlots < 2)                      // max slots amount = 2
@@ -716,6 +764,10 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
         sLog.outDebug( "WORLD: HandleStableSwapPet - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(npcGUID)) );
         return;
     }
+
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     WorldPacket data(SMSG_STABLE_RESULT, 200);              // guess size
 
@@ -768,6 +820,10 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
         sLog.outDebug( "WORLD: HandleRepairItemOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(npcGUID)) );
         return;
     }
+
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     // reputation discount
     float discountMod = _player->GetReputationPriceDiscount(unit);

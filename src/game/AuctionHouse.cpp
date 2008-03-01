@@ -44,6 +44,10 @@ void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
         return;
     }
 
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     SendAuctionHello(guid, unit);
 }
 
@@ -214,6 +218,10 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
         return;
     }
 
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     Item *it = pl->GetItemByGuid( item );
     //do not allow to sell already auctioned items
     if(objmgr.GetAItem(GUID_LOPART(item)))
@@ -317,6 +325,10 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
         sLog.outDebug( "WORLD: HandleAuctionPlaceBid - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(auctioneer)) );
         return;
     }
+
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
 
@@ -435,6 +447,10 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
         return;
     }
 
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
 
     AuctionHouseObject * mAuctions;
@@ -519,6 +535,10 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
         return;
     }
 
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
 
     AuctionHouseObject * mAuctions;
@@ -575,6 +595,10 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
         return;
     }
 
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
 
     AuctionHouseObject * mAuctions;
@@ -626,6 +650,10 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
         sLog.outDebug( "WORLD: HandleAuctionListItems - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
+
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     location = AuctioneerFactionToLocation(pCreature->getFaction());
     AuctionHouseObject * mAuctions;

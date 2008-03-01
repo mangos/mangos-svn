@@ -412,6 +412,10 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
         return;
     }
 
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     Item *pItem = _player->GetItemByGuid( itemguid );
     if( pItem )
     {
@@ -502,6 +506,10 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
         return;
     }
 
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     Item *pItem = _player->GetItemFromBuyBackSlot( slot );
     if( pItem )
     {
@@ -585,6 +593,10 @@ void WorldSession::SendListInventory( uint64 vendorguid )
         _player->SendSellError( SELL_ERR_CANT_FIND_VENDOR, NULL, 0, 0);
         return;
     }
+
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     // load vendor items if not yet
     pCreature->LoadGoods();
