@@ -1352,6 +1352,29 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 caster->CastSpell(m_target,finalSpelId,true,NULL,this);
         }
     }
+
+    // lifebloom
+    if ( Real && GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID && (GetSpellProto()->SpellFamilyFlags & 0x1000000000LL) )
+    {
+        if ( apply )
+        {
+            if ( caster )
+                m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
+        }
+        else
+        {
+            // have a look if there is still some other lifebloom dummy aura
+            Unit::AuraList auras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
+            for(Unit::AuraList::iterator itr = auras.begin(); itr!=auras.end(); itr++)
+                if((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
+                    (*itr)->GetSpellProto()->SpellFamilyFlags & 0x1000000000LL)
+                    return;
+
+            // final heal
+            int32 healBasePoints0 = m_modifier.m_amount-1;
+            m_target->CastCustomSpell(m_target,33778,&healBasePoints0,NULL,NULL,true);
+        }
+    }
 }
 
 void Aura::HandleAuraMounted(bool apply, bool Real)
