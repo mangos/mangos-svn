@@ -671,6 +671,12 @@ void Group::SetTargetIcon(uint8 id, uint64 guid)
     if(id >= TARGETICONCOUNT)
         return;
 
+    // clean other icons
+    if( guid != 0 )
+        for(int i=0; i<TARGETICONCOUNT; i++)
+            if( m_targetIcons[i] == guid )
+                SetTargetIcon(i, 0);
+
     m_targetIcons[id] = guid;
 
     WorldPacket data(MSG_RAID_ICON_TARGET, (2+8));
