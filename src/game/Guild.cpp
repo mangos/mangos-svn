@@ -642,7 +642,6 @@ void Guild::Disband()
 
 void Guild::Roster(WorldSession *session)
 {
-    Player *pl;
                                                             // we can only guess size
     WorldPacket data(SMSG_GUILD_ROSTER, (4+MOTD.length()+1+GINFO.length()+1+4+6*8+m_ranks.size()*4+members.size()*50));
     data << (uint32)members.size();
@@ -662,8 +661,7 @@ void Guild::Roster(WorldSession *session)
     }
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        pl = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
-        if (pl)
+        if (Player *pl = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER)))
         {
             data << pl->GetGUID();
             data << (uint8)1;
@@ -689,7 +687,7 @@ void Guild::Roster(WorldSession *session)
             data << itr->second.OFFnote;
         }
     }
-    BroadcastPacket(&data);
+    session->SendPacket(&data);;
     sLog.outDebug( "WORLD: Sent (SMSG_GUILD_ROSTER)" );
 }
 
