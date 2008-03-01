@@ -749,24 +749,26 @@ namespace MaNGOS
                 switch (i_TargetType)
                 {
                     case SPELL_TARGETS_HOSTILE:
-                        if (!i_originalCaster->IsHostileTo( itr->getSource() ))
+                        if (!itr->getSource()->isTargetableForAttack() || !i_originalCaster->IsHostileTo( itr->getSource() ))
                             continue;
                         break;
                     case SPELL_TARGETS_NOT_FRIENDLY:
-                        if (i_originalCaster->IsFriendlyTo( itr->getSource() ))
+                        if (!itr->getSource()->isTargetableForAttack() || i_originalCaster->IsFriendlyTo( itr->getSource() ))
                             continue;
                         break;
                     case SPELL_TARGETS_NOT_HOSTILE:
-                        if (i_originalCaster->IsHostileTo( itr->getSource() ))
+                        if (!itr->getSource()->isTargetableForAttack() || i_originalCaster->IsHostileTo( itr->getSource() ))
                             continue;
                         break;
                     case SPELL_TARGETS_FRIENDLY:
-                        if (!i_originalCaster->IsFriendlyTo( itr->getSource() ))
+                        if (!itr->getSource()->isTargetableForAttack() || !i_originalCaster->IsFriendlyTo( itr->getSource() ))
                             continue;
                         break;
                     case SPELL_TARGETS_AOE_DAMAGE:
                     {
                         if(itr->getSource()->GetTypeId()==TYPEID_UNIT && ((Creature*)itr->getSource())->isTotem())
+                            continue;
+                        if(!itr->getSource()->isTargetableForAttack())
                             continue;
 
                         Unit* check = i_originalCaster;
