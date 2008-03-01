@@ -6628,8 +6628,8 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
 
     // Healing Done
 
-    // Vampiric Embrace, Shadowmend - cannot critically heal
-    if(spellProto->Id == 15290 || spellProto->Id == 39373)
+    // Vampiric Embrace, Shadowmend, Lifebloom final heal - cannot critically heal
+    if(spellProto->Id == 15290 || spellProto->Id == 39373 || spellProto->Id == 33778)
         return healamount;
 
     int32 AdvertisedBenefit = SpellBaseHealingBonus(1<<spellProto->School);
@@ -6687,6 +6687,11 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
                                                             // Healing stream from totem (add 6% per tick from hill bonus owner)
             if (spellProto->SpellFamilyFlags & 0x000000002000LL)
                 CastingTime = 210;                          //
+            break;
+        case  SPELLFAMILY_DRUID:
+            // Lifebloom final heal
+            if (spellProto->SpellFamilyFlags & 0x1000000000LL && damagetype != DOT)
+                CastingTime = 1500;
             break;
     }
     // Level Factor
