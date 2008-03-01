@@ -1652,7 +1652,12 @@ void Spell::EffectUnlearnSpecialization( uint32 i )
     if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    ((Player*)unitTarget)->removeSpell(m_spellInfo->EffectTriggerSpell[i]);
+    Player *_player = (Player*)unitTarget;
+    uint32 spellToUnlearn = m_spellInfo->EffectTriggerSpell[i];
+
+    _player->removeSpell(spellToUnlearn);
+
+    sLog.outDebug( "Spell: Player %u have unlearned spell %u from NpcGUID: %u", _player->GetGUIDLow(), spellToUnlearn, m_caster->GetGUIDLow() );
 }
 
 void Spell::EffectManaDrain(uint32 i)
@@ -4174,10 +4179,10 @@ void Spell::EffectMomentMove(uint32 i)
 
 void Spell::EffectReputation(uint32 i)
 {
-    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    Player *_player = (Player*)m_caster;
+    Player *_player = (Player*)unitTarget;
 
     int32  rep_change = m_currentBasePoints[i]+1;           // field store reputation change -1
 
