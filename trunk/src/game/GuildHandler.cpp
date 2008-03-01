@@ -900,6 +900,10 @@ void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     recvPacket >> EmblemStyle;
     recvPacket >> EmblemColor;
     recvPacket >> BorderStyle;

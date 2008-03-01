@@ -94,6 +94,10 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
         return;
     }
 
+    // remove fake death
+    if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     if(Script->GossipHello( _player, pCreature ) )
         return;
 
