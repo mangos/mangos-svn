@@ -10058,6 +10058,7 @@ CREATE TABLE `spell_affect` (
 LOCK TABLES `spell_affect` WRITE;
 /*!40000 ALTER TABLE `spell_affect` DISABLE KEYS */;
 INSERT INTO `spell_affect` (`entry`,`effectId`,`SpellId`,`SchoolMask`,`Category`,`SkillID`,`SpellFamily`,`SpellFamilyMask`,`Charges`) VALUES
+(5420,2,0,0,0,0,0,0x00000010000000F0,0),
 (11069,0,0,0,0,0,0,0x0000000000000001,0),
 (11070,0,0,0,0,0,0,0x0000000000000020,0),
 (11071,0,0,0,0,0,0,0x0000000000100000,0),
