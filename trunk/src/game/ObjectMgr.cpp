@@ -2937,6 +2937,16 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
         // generic command args check
         switch(tmp.command)
         {
+            case SCRIPT_COMMAND_TALK:
+            {
+                if(tmp.datalong > 2)
+                {
+                    sLog.outErrorDb("Table `%s` has invalid talk type (datalong = %u) in SCRIPT_COMMAND_TALK for script id %u",tablename,tmp.datalong,tmp.id);
+                    continue;
+                }
+                break;
+            }
+
             case SCRIPT_COMMAND_TELEPORT_TO:
             {
                 if(!sMapStore.LookupEntry(tmp.datalong))

@@ -189,7 +189,7 @@ enum BanReturn
 };
 
 // DB scripting commands
-#define SCRIPT_COMMAND_SAY                   0
+#define SCRIPT_COMMAND_TALK                  0
 #define SCRIPT_COMMAND_EMOTE                 1
 #define SCRIPT_COMMAND_FIELD_SET             2
 #define SCRIPT_COMMAND_MOVE_TO               3
