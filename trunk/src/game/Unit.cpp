@@ -1739,6 +1739,22 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             getHostilRefManager().threatAssist(this, float(gain) * 0.5f, spellProto);
             break;
         }
+        case SPELL_AURA_POWER_BURN_MANA:
+        {
+            int32 pdamage = mod->m_amount > 0 ? mod->m_amount : 0;
+
+            Powers powerType = Powers(mod->m_miscvalue);
+            
+            if(!pVictim->isAlive() || pVictim->getPowerType() != powerType)
+                return;
+
+            uint32 gain = - pVictim->ModifyPower(powerType, -pdamage);
+
+            gain *= spellProto->EffectMultipleValue[effect_idx];
+
+            //maybe has to be sent different to client, but not by SMSG_PERIODICAURALOG
+            SpellNonMeleeDamageLog(pVictim, spellProto->Id, gain);
+        }
     }
 }
 
@@ -2043,6 +2059,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             else
             {
                 int32 mod = pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_DAMAGE);
+                mod += GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_DAMAGE_BONUS_MELEE);
                 *damage = int32((*damage) * float((100.0f + mod)/100.0f));
                 // Resilience - reduce crit damage
                 if (pVictim->GetTypeId()==TYPEID_PLAYER)

@@ -5534,7 +5534,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
 
     if(honor <= 0)
     {
-        if(!uVictim || uVictim == this || uVictim->GetAura(2479, 0))
+        if(!uVictim || uVictim == this || uVictim->HasAuraType(SPELL_AURA_NO_PVP_CREDIT))
             return false;
 
         victim_guid = uVictim->GetGUID();

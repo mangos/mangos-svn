@@ -70,6 +70,10 @@ class MANGOS_DLL_SPEC Aura
         {
             // NOT IMPLEMENTED
         }
+        void HandleUnused(bool, bool)
+        {
+            // NOT USED BY ANY SPELL OR USELESS
+        }
         void HandleNoImmediateEffect(bool, bool)
         {
             // aura not have immediate effect at add/remove and handled by ID in other code place
@@ -198,6 +202,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraModPacifyAndSilence(bool Apply, bool Real);
         void HandleAuraModExpertise(bool apply, bool Real);
         void HandleAuraModResistenceOfIntellectPercent(bool apply, bool Real);
+        void HandleAuraPowerBurn(bool apply, bool Real);
 
         virtual ~Aura();
 
