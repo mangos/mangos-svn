@@ -1149,21 +1149,50 @@ void World::ScriptsProcess()
 
         switch (step.script->command)
         {
-            case SCRIPT_COMMAND_SAY:
+            case SCRIPT_COMMAND_TALK:
+            {
                 if(!source)
                 {
-                    sLog.outError("SCRIPT_COMMAND_SAY call for NULL creature.");
+                    sLog.outError("SCRIPT_COMMAND_TALK call for NULL creature.");
                     break;
                 }
 
                 if(source->GetTypeId()!=TYPEID_UNIT)
                 {
-                    sLog.outError("SCRIPT_COMMAND_SAY call for non-creature (TypeId: %u), skipping.",source->GetTypeId());
+                    sLog.outError("SCRIPT_COMMAND_TALK call for non-creature (TypeId: %u), skipping.",source->GetTypeId());
+                    break;
+                }
+                if(step.script->datalong > 2)
+                {
+                    sLog.outError("SCRIPT_COMMAND_TALK invalid chat type (%u), skipping.",step.script->datalong);
                     break;
                 }
 
-                ((Creature *)source)->Say(step.script->datatext.c_str(), 0, 0);
+                uint64 unit_target = target!=NULL ? target->GetGUID() : 0;
+
+                //datalong 0=normal say, datalong 1=whisper, datalong 2=yell
+                switch(step.script->datalong)
+                {
+                    case 0:                                 // SAY
+                        ((Creature *)source)->Say(step.script->datatext.c_str(), 0, unit_target);
+                        break;
+                    case 1:                                 // WHISPER
+                        if(!unit_target)
+                        {
+                            sLog.outError("SCRIPT_COMMAND_TALK attempt to whisper (%u) NULL, skipping.",step.script->datalong);
+                            break;
+                        }
+                        ((Creature *)source)->Whisper(unit_target, step.script->datatext.c_str());
+                        break;
+                    case 2:                                 // YELL
+                        ((Creature *)source)->Yell(step.script->datatext.c_str(), 0, unit_target);
+                        break;
+                    default:
+                        break;                              // must be already checked at load
+                }
                 break;
+            }
+
             case SCRIPT_COMMAND_EMOTE:
                 if(!source)
                 {

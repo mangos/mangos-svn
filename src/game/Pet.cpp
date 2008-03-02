@@ -1588,6 +1588,9 @@ bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float 
     SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, minfo->modelid);
     SetUInt32Value(UNIT_FIELD_BYTES_2, 1);                  // let creature used equiped weapon in fight
 
+    if(getPetType() == MINI_PET)                            // always non-attackable
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE);
+
     SetName(GetCreatureInfo()->Name);
 
     CreatureDisplayInfoEntry const* ScaleEntry = sCreatureDisplayInfoStore.LookupEntry(minfo->modelid);

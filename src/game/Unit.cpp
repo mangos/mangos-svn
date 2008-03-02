@@ -5630,8 +5630,21 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             return;
         }
 
+        // Thundering Skyfire Diamond trigger (Skyfire Swiftness)
+        case 39958:
+        {
+            // hidden cooldown 40sec, check manually for passive spell
+            if (GetTypeId() == TYPEID_PLAYER && !((Player*)this)->HasSpellCooldown(auraSpellInfo->Id))
+            {
+                CastSpell(this, trigger_spell_id, true, castItem, triggeredByAura);
+                ((Player*)this)->AddSpellCooldown(auraSpellInfo->Id,0,time(NULL) + 40);
+            }
+            return;
+        }
+
         // 10s cooldowns
         case 33746:                                         // Essence Infused Mushroom
+        case 33759:                                         // Power Infused Mushroom
         {
             // hidden cooldown 10sec, check manually for passive spell
             if (GetTypeId() == TYPEID_PLAYER && !((Player*)this)->HasSpellCooldown(auraSpellInfo->Id))
