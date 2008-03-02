@@ -1545,9 +1545,17 @@ void Spell::EffectApplyAura(uint32 i)
                 if(!(spellEntry->SpellFamilyName == SPELLFAMILY_ROGUE && spellEntry->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_SAP))
                     attack=true;
                 break;
+            case SPELL_AURA_DUMMY:
+                //Don't attack on Arcane Missiles Dummy Aura, attack at hit
+                if(spellEntry->SpellFamilyName == SPELLFAMILY_MAGE && (spellEntry->SpellFamilyFlags & 0x800LL))
+                    break;
+
+                //If Aura is applied to monster then attack caster
+                attack=true;
+                break;
             default:
                 //If Aura is applied to monster then attack caster
-                attack = true;
+                attack=true;
                 break;
         }
         if(attack)
