@@ -351,7 +351,7 @@ class ByteBuffer
                     {
                         sLog.outDebugInLine("| %X ", read<uint8>(i) );
                     }
-                    j++;
+                    ++j;
                 }
                 else if (i == (k*16))
                 {
@@ -372,8 +372,8 @@ class ByteBuffer
                         sLog.outDebugInLine("%X ", read<uint8>(i) );
                     }
 
-                    k++;
-                    j++;
+                    ++k;
+                    ++j;
                 }
                 else
                 {

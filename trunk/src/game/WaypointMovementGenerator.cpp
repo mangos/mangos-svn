@@ -487,7 +487,7 @@ int ShortenASTARRoute(short int *pathlist, int number)
                     {
                         temppathlist[count] = pathlist[temp2];
                         temp = temp2;
-                        count++;
+                        ++count;
                         shortened = qtrue;
                     }
                 }
@@ -497,7 +497,7 @@ int ShortenASTARRoute(short int *pathlist, int number)
         if (!shortened)
         {
             temppathlist[count] = pathlist[temp];
-            count++;
+            ++count;
         }
     }
 
@@ -506,7 +506,7 @@ int ShortenASTARRoute(short int *pathlist, int number)
     for (temp = 0; temp < count; temp++)
     {
         pathlist[temp] = temppathlist[upto];
-        upto--;
+        --upto;
     }
 
     G_Printf("ShortenASTARRoute: Path size reduced from %i to %i nodes...n", number, count);
@@ -554,7 +554,7 @@ int CreatePathAStar(gentity_t *bot, int from, int to, short int *pathlist)
         return -1;
 
     openlist[1] = from;                                     //add the starting node to the open list
-    numOpen++;
+    ++numOpen;
     gcost[from] = 0;                                        //its f and g costs are obviously 0
     fcost[from] = 0;
 
@@ -565,7 +565,7 @@ int CreatePathAStar(gentity_t *bot, int from, int to, short int *pathlist)
             //pop the top item off of the list
             atNode = openlist[1];
             list[atNode] = 2;                               //put the node on the closed list so we don't check it again
-            numOpen--;
+            --numOpen;
 
             openlist[1] = openlist[numOpen+1];              //move the last item in the list to the top position
             v = 1;

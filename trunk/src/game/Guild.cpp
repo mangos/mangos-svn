@@ -736,7 +736,7 @@ void Guild::UpdateLogoutTime(uint64 guid)
     itr->second.logout_time = time(NULL);
 
     if (m_onlinemembers > 0)
-        m_onlinemembers--;
+        --m_onlinemembers;
     else
         UnloadGuildBank();
 }
@@ -925,7 +925,7 @@ void Guild::CreateNewBankTab()
     if (purchased_tabs >= GUILD_BANK_MAX_TABS)
         return;
 
-    purchased_tabs++;
+    ++purchased_tabs;
 
     GuildBankTab* AnotherTab = new GuildBankTab;
     memset(AnotherTab->Slots, 0, GUILD_BANK_MAX_SLOTS * sizeof(Item*));
@@ -1140,7 +1140,7 @@ bool Guild::MemberItemWithdraw(uint8 TabId, uint32 LowGuid)
         MemberList::iterator itr = members.find(LowGuid);
         if (itr == members.end() )
             return false;
-        itr->second.BankRemSlotsTab[TabId]--;
+        --itr->second.BankRemSlotsTab[TabId];
         CharacterDatabase.PExecute("UPDATE guild_member SET BankRemSlotsTab%u='%u' WHERE guildid='%u' AND guid='%u'",
             uint32(TabId), itr->second.BankRemSlotsTab[TabId], Id, LowGuid);
     }

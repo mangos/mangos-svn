@@ -91,7 +91,7 @@ namespace VMAP
 
         if(!iUniqueNameIds.containsKey(pName))
         {
-            iCurrentUniqueNameId++;
+            ++iCurrentUniqueNameId;
             iUniqueNameIds.set(pName, iCurrentUniqueNameId);
         }
         result = iUniqueNameIds.get(pName);
@@ -491,7 +491,7 @@ namespace VMAP
                             {
                                 Triangle t = Triangle(tempVertexArray[tempIndexArray[i+2]], tempVertexArray[tempIndexArray[i+1]], tempVertexArray[tempIndexArray[i+0]] );
                                 i+=3;
-                                trianglecount++;
+                                ++trianglecount;
                                 if(g>= startgroup && g <= endgroup)
                                 {
                                     gtree->insert(t);

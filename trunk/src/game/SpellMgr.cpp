@@ -536,7 +536,7 @@ void SpellMgr::LoadSpellTeleports()
 
         bar.step();
 
-        count++;
+        ++count;
 
         uint32 Spell_ID = fields[0].GetUInt32();
 
@@ -659,7 +659,7 @@ void SpellMgr::LoadSpellAffects()
 
         mSpellAffectMap.insert(SpellAffectMap::value_type((entry<<8) + effectId,sa));
 
-        count++;
+        ++count;
     } while( result->NextRow() );
 
     delete result;
@@ -749,7 +749,7 @@ void SpellMgr::LoadSpellProcEvents()
 
         mSpellProcEventMap[entry] = spe;
 
-        count++;
+        ++count;
     } while( result->NextRow() );
 
     delete result;
@@ -1425,7 +1425,7 @@ void SpellMgr::LoadSpellScriptTarget()
 
         mSpellScriptTarget.insert(SpellScriptTarget::value_type(spellId,SpellTargetEntry(SpellTargetType(type),targetEntry)));
 
-        count++;
+        ++count;
     } while (result->NextRow());
 
     delete result;
@@ -1525,3 +1525,4 @@ bool IsMechanicInvulnerabilityImmunityToSpell(SpellEntry const* spellInfo)
 
     return false;
 }
+

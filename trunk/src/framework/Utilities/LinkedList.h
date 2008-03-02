@@ -122,8 +122,8 @@ class LinkedListHead
                 return iSize;
         }
 
-        void incSize() { iSize++; }
-        void decSize() { iSize--; }
+        void incSize() { ++iSize; }
+        void decSize() { --iSize; }
 
         template<class _Ty>
             class Iterator

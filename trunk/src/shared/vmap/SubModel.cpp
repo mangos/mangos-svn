@@ -115,7 +115,7 @@ namespace VMAP
 
     void SubModel::countNodesAndTriangles(AABSPTree<Triangle>::Node& pNode, int &pNNodes, int &pNTriabgles)
     {
-        pNNodes++;
+        ++pNNodes;
         pNTriabgles += pNode.valueArray.size();
 
         #ifdef _ASSEMBLER_DEBUG

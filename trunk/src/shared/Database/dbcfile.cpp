@@ -150,7 +150,7 @@ void * DBCFile::AutoProduceData(const char * format, uint32 * records, char *&_d
             if(ind>maxi)maxi=ind;
         }
 
-        maxi++;
+        ++maxi;
         *records=maxi;
         table=new ptr[maxi];
         memset(table,0,maxi*sizeof(ptr));

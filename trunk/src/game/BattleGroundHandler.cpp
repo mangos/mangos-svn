@@ -201,7 +201,7 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket & /*recv
             data << ap->GetGUID();
             data << ap->GetPositionX();
             data << ap->GetPositionY();
-            count2++;
+            ++count2;
         }
         Player *hp = objmgr.GetPlayer(((BattleGroundWS*)bg)->GetHordeFlagPickerGUID());
         if(hp)
@@ -209,7 +209,7 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket & /*recv
             data << hp->GetGUID();
             data << hp->GetPositionX();
             data << hp->GetPositionY();
-            count2++;
+            ++count2;
         }
         data.put<uint32>(4, count2);
 

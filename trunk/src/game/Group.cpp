@@ -418,7 +418,7 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
                     if (member->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
                     {
                         r->playerVote[member->GetGUID()] = NOT_EMITED_YET;
-                        r->totalPlayersRolling++;
+                        ++r->totalPlayersRolling;
                     }
                 }
             }
@@ -473,7 +473,7 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
                     if (playerToRoll->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
                     {
                         r->playerVote[playerToRoll->GetGUID()] = NOT_EMITED_YET;
-                        r->totalPlayersRolling++;
+                        ++r->totalPlayersRolling;
                     }
                 }
             }
@@ -520,21 +520,21 @@ void Group::CountRollVote(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers
         case 0:                                             //Player choose pass
         {
             SendLootRoll(0, playerGUID, 128, 128, *roll);
-            roll->totalPass++;
+            ++roll->totalPass;
             itr->second = PASS;
         }
         break;
         case 1:                                             //player choose Need
         {
             SendLootRoll(0, playerGUID, 1, 1, *roll);
-            roll->totalNeed++;
+            ++roll->totalNeed;
             itr->second = NEED;
         }
         break;
         case 2:                                             //player choose Greed
         {
             SendLootRoll(0, playerGUID, 2, 2, *roll);
-            roll->totalGreed++;
+            ++roll->totalGreed;
             itr->second = GREED;
         }
         break;
@@ -600,7 +600,7 @@ void Group::CountTheRoll(Rolls::iterator rollI, uint32 NumberOfPlayers)
                 {
                     item->is_looted = true;
                     roll->getLoot()->NotifyItemRemoved(roll->itemSlot);
-                    roll->getLoot()->unlootedCount--;
+                    --roll->getLoot()->unlootedCount;
                     player->StoreNewItem( dest, roll->itemid, item->count, true, item->randomPropertyId);
                 }
                 else
@@ -645,7 +645,7 @@ void Group::CountTheRoll(Rolls::iterator rollI, uint32 NumberOfPlayers)
                 {
                     item->is_looted = true;
                     roll->getLoot()->NotifyItemRemoved(roll->itemSlot);
-                    roll->getLoot()->unlootedCount--;
+                    --roll->getLoot()->unlootedCount;
                     player->StoreNewItem( dest, roll->itemid, item->count, true, item->randomPropertyId);
                 }
                 else
@@ -743,7 +743,7 @@ void Group::GetDataForXPAtKill(Unit const* victim, uint32& count,uint32& sum_lev
             data << citr->guid;
             data << (uint8)(objmgr.GetPlayer(citr->guid)?1:0);
             data << (uint8)(citr->group | (citr->assistant?0x80:0));
-            count++;
+            ++count;
 
             if(count >= i)
                 break;
@@ -852,9 +852,9 @@ bool Group::_addMember(const uint64 &guid, const char* name, bool isAssistant)
     for(member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
     {
         if (itr->group >= temp.size()) continue;
-        temp[itr->group]++;
+        ++temp[itr->group];
         if(temp[groupid] >= MAXGROUPSIZE)
-            groupid++;
+            ++groupid;
     }
 
     return _addMember(guid, name, isAssistant, groupid);
@@ -1000,7 +1000,7 @@ void Group::_setLeader(const uint64 &guid)
                 while (i != changed_bindings.end())
                 {
                     ss << "'" << *i << "'";
-                    i++;
+                    ++i;
                     if (i != changed_bindings.end()) ss << ", ";
                 }
             }
@@ -1027,10 +1027,10 @@ void Group::_removeRolls(const uint64 &guid)
         if(itr2 == roll->playerVote.end())
             continue;
 
-        if (itr2->second == GREED) roll->totalGreed--;
-        if (itr2->second == NEED) roll->totalNeed--;
-        if (itr2->second == PASS) roll->totalPass--;
-        if (itr2->second != NOT_VALID) roll->totalPlayersRolling--;
+        if (itr2->second == GREED) --roll->totalGreed;
+        if (itr2->second == NEED) --roll->totalNeed;
+        if (itr2->second == PASS) --roll->totalPass;
+        if (itr2->second != NOT_VALID) --roll->totalPlayersRolling;
 
         roll->playerVote.erase(itr2);
 

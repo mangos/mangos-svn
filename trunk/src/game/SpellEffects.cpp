@@ -422,7 +422,7 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                     Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
                     for(Unit::AuraList::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
                         if((*itr)->GetId() == 31803)
-                            stacks++;
+                            ++stacks;
                     if(!stacks)
                         //No damage if the target isn't affected by this
                         damage = -1;
@@ -1096,7 +1096,7 @@ void Spell::EffectDummy(uint32 i)
             {
                 if(!roll_chance_f(chance))
                     continue;
-                count++;
+                ++count;
                 AddUnitTarget((*aItr), 1);
             }
 
@@ -3217,7 +3217,7 @@ void Spell::EffectWeaponDmg(uint32 i)
                 int32 duration = GetSpellDuration(proto);
                 (*itr)->SetAuraDuration(duration);
                 (*itr)->UpdateAuraDuration();
-                sunder_stacks++;
+                ++sunder_stacks;
             }
         }
 
@@ -4406,7 +4406,7 @@ void Spell::EffectDispelMechanic(uint32 i)
     for(Unit::AuraMap::iterator iter = Auras.begin(), next; iter != Auras.end(); iter = next)
     {
         next = iter;
-        next++;
+        ++next;
         SpellEntry const *spell = sSpellStore.LookupEntry(iter->second->GetSpellProto()->Id);
         if(spell->Mechanic == mechanic || spell->EffectMechanic[iter->second->GetEffIndex()] == mechanic)
         {

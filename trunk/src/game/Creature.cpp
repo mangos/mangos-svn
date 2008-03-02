@@ -791,7 +791,7 @@ uint32 Creature::GetGossipCount( uint32 gossipid )
     for( GossipOptionList::iterator i = m_goptions.begin( ); i != m_goptions.end( ); i++ )
     {
         if(i->GossipId == gossipid )
-            count++;
+            ++count;
     }
     return count;
 }

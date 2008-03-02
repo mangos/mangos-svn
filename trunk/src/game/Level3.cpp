@@ -2168,7 +2168,7 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
                     if (Name.find(namepart) != std::string::npos)
                     {
                         PSendSysMessage(LANG_ITEM_LIST, id, id, il->Name[loc_idx].c_str());
-                        counter++;
+                        ++counter;
                         continue;
                     }
                 }
@@ -2183,7 +2183,7 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
         if (Name.find(namepart) != std::string::npos)
         {
             PSendSysMessage(LANG_ITEM_LIST, id, id, pProto->Name1);
-            counter++;
+            ++counter;
         }
     }
 
@@ -2218,7 +2218,7 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
             {
                 // send item set in "id - [namedlink]" format
                 PSendSysMessage(LANG_ITEMSET_LIST,id,id,set->name[sWorld.GetDBClang()]);
-                counter++;
+                ++counter;
             }
         }
     }
@@ -2262,7 +2262,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
                 // send skill in "id - [namedlink]" format
                 PSendSysMessage(LANG_SKILL_LIST,id,id,skillInfo->name[sWorld.GetDBClang()],(target->HasSkill(id) ? GetMangosString(LANG_KNOWN) : ""));
 
-                counter++;
+                ++counter;
             }
         }
     }
@@ -2392,7 +2392,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
                             statusStr = GetMangosString(LANG_COMMAND_QUEST_ACTIVE);
 
                         PSendSysMessage(LANG_QUEST_LIST,qinfo->GetQuestId(),qinfo->GetQuestId(),il->Title[loc_idx].c_str(),(status == QUEST_STATUS_COMPLETE ? GetMangosString(LANG_COMPLETE) : (status == QUEST_STATUS_INCOMPLETE ? GetMangosString(LANG_ACTIVE) : "") ));
-                        counter++;
+                        ++counter;
                         continue;
                     }
                 }
@@ -2420,7 +2420,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
                 statusStr = GetMangosString(LANG_COMMAND_QUEST_ACTIVE);
 
             PSendSysMessage(LANG_QUEST_LIST,qinfo->GetQuestId(),qinfo->GetQuestId(), qinfo->GetTitle().c_str(),(status == QUEST_STATUS_COMPLETE ? GetMangosString(LANG_COMPLETE) : (status == QUEST_STATUS_INCOMPLETE ? GetMangosString(LANG_ACTIVE) : "") ));
-            counter++;
+            ++counter;
         }
     }
 
@@ -2463,7 +2463,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
                     if (Name.find(namepart) != std::string::npos)
                     {
                         PSendSysMessage(LANG_CREATURE_ENTRY_LIST, id, id, cl->Name[loc_idx].c_str());
-                        counter++;
+                        ++counter;
                         continue;
                     }
                 }
@@ -2478,7 +2478,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
         if (Name.find(namepart) != std::string::npos)
         {
             PSendSysMessage(LANG_CREATURE_ENTRY_LIST,id,id,cInfo->Name);
-            counter++;
+            ++counter;
         }
     }
 
@@ -2520,7 +2520,7 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
                     if (Name.find(namepart) != std::string::npos)
                     {
                         PSendSysMessage(LANG_GO_ENTRY_LIST, id, id, gl->Name[loc_idx].c_str());
-                        counter++;
+                        ++counter;
                         continue;
                     }
                 }
@@ -2535,7 +2535,7 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
         if (Name.find(namepart) != std::string::npos)
         {
             PSendSysMessage(LANG_GO_ENTRY_LIST, id, id, gInfo->name);
-            counter++;
+            ++counter;
         }
     }
 

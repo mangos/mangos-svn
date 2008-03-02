@@ -89,7 +89,7 @@ void MapManager::checkAndCorrectGridStatesArray()
         #endif
     }
     if(!ok)
-        i_GridStateErrorCount++;
+        ++i_GridStateErrorCount;
     if(i_GridStateErrorCount > 2)
         assert(false);                                      // force a crash. Too many errors
 }

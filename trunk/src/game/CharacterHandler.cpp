@@ -136,7 +136,7 @@ void WorldSession::HandleCharEnum(QueryResult * result)
             if(plr->MinimalLoadFromDB( result, (*result)[0].GetUInt32() ))
             {
                 plr->BuildEnumData( result, &data );
-                num++;
+                ++num;
             }
         }
         while( result->NextRow() );
@@ -436,7 +436,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
             if (nextpos != pos)
             {
                 data << str_motd.substr(pos,nextpos-pos);
-                linecount++;
+                ++linecount;
             }
             pos = nextpos+1;
         }
@@ -444,7 +444,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         if (pos<str_motd.length())
         {
             data << str_motd.substr(pos);
-            linecount++;
+            ++linecount;
         }
 
         data.put(0, linecount);

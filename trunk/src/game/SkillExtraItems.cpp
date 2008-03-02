@@ -104,7 +104,7 @@ void LoadSkillExtraItemTable()
             skillExtraItemEntry.additionalCreateChance = additionalCreateChance;
             skillExtraItemEntry.additionalMaxNum       = additionalMaxNum;
 
-            count++;
+            ++count;
         } while (result->NextRow());
 
         delete result;

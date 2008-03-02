@@ -432,7 +432,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     uint32 Sessions  = sWorld.GetActiveAndQueuedSessionCount();
     uint32 pLimit    = sWorld.GetPlayerAmountLimit();
     uint32 QueueSize = sWorld.GetQueueSize();               //number of players in the queue
-    Sessions--;                                             //so we don't count the user trying to login as a session and queue the socket that we are using
+    --Sessions;                                             //so we don't count the user trying to login as a session and queue the socket that we are using
 
     if( pLimit >  0 && Sessions >= pLimit && security == SEC_PLAYER )
     {

@@ -58,8 +58,8 @@ namespace VMAP
 
             FilesInDir() { iRefCount = 0; }
             void append(const std::string& pName) { iFiles.append(pName); }
-            void incRefCount() { iRefCount++; }
-            void decRefCount() { if(iRefCount > 0) iRefCount--; }
+            void incRefCount() { ++iRefCount; }
+            void decRefCount() { if(iRefCount > 0) --iRefCount; }
             int getRefCount() { return iRefCount; }
             const G3D::Array<std::string>& getFiles() const { return iFiles; }
     };

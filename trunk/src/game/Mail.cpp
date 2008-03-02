@@ -261,7 +261,7 @@ void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
     if (m)
     {
         if (pl->unReadMails)
-            pl->unReadMails--;
+            --pl->unReadMails;
         m->checked = m->checked | READ;
         // m->expire_time = time(NULL) + (30 * DAY);  // Expire time do not change at reading mail
         pl->m_mailsUpdated = true;
@@ -540,7 +540,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         if ((*itr)->state == MAIL_STATE_DELETED || (*itr)->HasItems() && cur_time < (*itr)->deliver_time)
             continue;
 
-        mails_count++;
+        ++mails_count;
         data << (uint16) 0x0040;                            // unknown 2.3.0, different values
         data << (uint32) (*itr)->messageID;                 // Message ID
         data << (uint8) (*itr)->messageType;                // Message Type
@@ -607,7 +607,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
                 data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0);
                 // durability
                 data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0);
-                i++;
+                ++i;
             }
         }
         else
@@ -710,7 +710,7 @@ void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & /*recv_data*/ )
             // not checked yet, already must be delivered
             if((m->checked = NOT_READ) && (m->deliver_time <= time(NULL)))
             {
-                count++;
+                ++count;
 
                 if(count > 2)
                 {

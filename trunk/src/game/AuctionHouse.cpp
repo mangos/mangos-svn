@@ -551,14 +551,14 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
     uint32 totalcount = 0;
     while ( outbiddedCount > 0)                             //add all data, which client requires
     {
-        outbiddedCount--;
+        --outbiddedCount;
         uint32 outbiddedAuctionId;
         recv_data >> outbiddedAuctionId;
         AuctionEntry * auction = mAuctions->GetAuction( outbiddedAuctionId );
         if ( auction && SendAuctionInfo(data, auction))
         {
-            totalcount++;
-            count++;
+            ++totalcount;
+            ++count;
         }
     }
     for (AuctionHouseObject::AuctionEntryMap::iterator itr = mAuctions->GetAuctionsBegin();itr != mAuctions->GetAuctionsEnd();++itr)
@@ -567,8 +567,8 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
         if( Aentry && Aentry->bidder == pl->GetGUIDLow() )
         {
             if ((count < 50) && (totalcount >= listfrom) && SendAuctionInfo(data, itr->second))
-                count++;
-            totalcount++;
+                ++count;
+            ++totalcount;
         }
     }
     data.put( 0, count );                                   // add count to placeholder
@@ -614,8 +614,8 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
         if( Aentry && Aentry->owner == _player->GetGUIDLow() )
         {
             if ((count < 50) && (totalcount >= listfrom) && SendAuctionInfo(data, itr->second))
-                count++;
-            totalcount++;
+                ++count;
+            ++totalcount;
         }
     }
     data.put<uint32>(0, count);
@@ -708,10 +708,10 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                                         {
                                             if ((count < 50) && (totalcount >= listfrom))
                                             {
-                                                count++;
+                                                ++count;
                                                 SendAuctionInfo( data, Aentry);
                                             }
-                                            totalcount++;
+                                            ++totalcount;
                                         }
                                     }
                                 }

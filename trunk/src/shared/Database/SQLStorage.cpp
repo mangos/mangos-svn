@@ -123,9 +123,9 @@ void SQLStorage::Load ()
         uint32 bo=0;
         for(uint32 x=0;x<iNumFields;x++)
             if(format[x]==FT_STRING)
-                sc++;
+                ++sc;
             else if (format[x]==FT_LOGIC)
-                bo++;
+                ++bo;
         recordsize=(iNumFields-sc-bo)*4+sc*sizeof(char*)+bo*sizeof(bool);
     }
 
@@ -176,7 +176,7 @@ void SQLStorage::Load ()
                     offset+=sizeof(char*);
                     break;
             }
-        count++;
+        ++count;
     }while( result->NextRow() );
 
     delete result;

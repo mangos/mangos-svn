@@ -252,8 +252,8 @@ class BattleGround
         void AddToBGFreeSlotQueue();                            //this queue will be useful when more battlegrounds instances will be available
         void RemoveFromBGFreeSlotQueue();                       //this method could delete whole BG instance, if another free is available
 
-        void DecreaseInvitedCount(uint32 team)      { (team == ALLIANCE) ? m_InvitedAlliance-- : m_InvitedHorde--; }
-        void IncreaseInvitedCount(uint32 team)      { (team == ALLIANCE) ? m_InvitedAlliance++ : m_InvitedHorde++; }
+        void DecreaseInvitedCount(uint32 team)      { (team == ALLIANCE) ? --m_InvitedAlliance : --m_InvitedHorde; }
+        void IncreaseInvitedCount(uint32 team)      { (team == ALLIANCE) ? ++m_InvitedAlliance : ++m_InvitedHorde; }
         uint32 GetInvitedCount(uint32 team) const
         {
             if (team == ALLIANCE)
@@ -331,9 +331,9 @@ class BattleGround
         void UpdatePlayersCountByTeam(uint32 Team, bool remove)
         {
             if(remove)
-                m_PlayersCount[GetTeamIndexByTeamId(Team)]--;
+                --m_PlayersCount[GetTeamIndexByTeamId(Team)];
             else
-                m_PlayersCount[GetTeamIndexByTeamId(Team)]++;
+                ++m_PlayersCount[GetTeamIndexByTeamId(Team)];
         }
 
         /* Triggers handle */

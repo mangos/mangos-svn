@@ -751,7 +751,7 @@ uint8 Item::GetGemCountWithID(uint32 GemID) const
             continue;
 
         if(GemID == enchantEntry->GemID)
-            count++;
+            ++count;
     }
     return count;
 }

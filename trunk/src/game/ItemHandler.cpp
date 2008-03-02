@@ -623,7 +623,7 @@ void WorldSession::SendListInventory( uint64 vendorguid )
             {
                 if((pProto->AllowableClass & _player->getClassMask()) == 0 && pProto->Bonding == BIND_WHEN_PICKED_UP && !_player->isGameMaster())
                     continue;
-                count++;
+                ++count;
                 if( crItem->incrtime != 0 && (crItem->lastincr + crItem->incrtime <= ptime) )
                 {
                     diff = uint32((ptime - crItem->lastincr)/crItem->incrtime);
