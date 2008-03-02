@@ -4978,8 +4978,17 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             // Earth Shield
             if(dummySpell->SpellFamilyFlags==0x40000000000LL)
             {
-                int32 HealBasePoints0 = dummySpell->EffectBasePoints[0];
-                CastCustomSpell(this,379,&HealBasePoints0,NULL,NULL,true,castItem,triggeredByAura);
+                if(GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                if (((Player*)this)->HasSpellCooldown(379))
+                    ++triggeredByAura->m_procCharges;       // restore charges for cooldown time proc
+                else
+                {
+                    int32 HealBasePoints0 = dummySpell->EffectBasePoints[0];
+                    CastCustomSpell(this,379,&HealBasePoints0,NULL,NULL,true,castItem,triggeredByAura);
+                    ((Player*)this)->AddSpellCooldown(379,0,time(NULL) + 3);
+                }
                 return;
             }
             // Lesser Healing Wave (Totem of Flowing Water Relic)
@@ -5343,7 +5352,23 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                         sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in LShield",triggeredByAura->GetSpellProto()->Id);
                         return;
                 }
-                CastSpell(pVictim, spell, true, castItem, triggeredByAura);
+
+                if (GetTypeId() == TYPEID_PLAYER)
+                {
+                    if(((Player*)this)->HasSpellCooldown(spell))
+                    {
+                        ++triggeredByAura->m_procCharges;   // restore charges for proc triggered in cooldown time
+                        return;
+                    }
+
+                    CastSpell(pVictim, spell, true, castItem, triggeredByAura);
+
+                    // 3 secs cooldown
+                    ((Player*)this)->AddSpellCooldown(spell,0,time(NULL) + 3);
+                }
+                else
+                    CastSpell(pVictim, spell, true, castItem, triggeredByAura);
+
                 return;
             }
             break;
@@ -6443,9 +6468,12 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 else if (spellProto->SpellIconID == 37)     // Magma totem attack must be 6.67%(untested)
                     CastingTime = 234;                      // ignore CastingTimePenalty and use as modifier
             }
-            // Lighting Shield 33% per charge
-            else if (spellProto->SpellFamilyFlags & 000000400LL)
+            // Lightning Shield 33% per charge
+            else if (spellProto->SpellFamilyFlags & 0x00000000400LL)
                 CastingTime = 1155;                         // ignore CastingTimePenalty and use as modifier
+            // Earth Shield 30% per charge
+            else if (spellProto->SpellFamilyFlags & 0x40000000000LL)
+                CastingTime = 1050;
             break;
     }
 
