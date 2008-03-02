@@ -190,7 +190,7 @@ void RASocket::OnRead()
                         delete check;
                         r=GetSocket();
                         stage=OK;
-                        iUsers++;
+                        ++iUsers;
 
                         Sendf("+Logged in.\r\n");
                         sLog.outRALog("User %s has logged in.\n",szLogin.c_str());

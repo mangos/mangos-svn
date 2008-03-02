@@ -2111,14 +2111,14 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
 
         if (mod->charges > 0 )
         {
-            mod->charges--;
+            --mod->charges;
             if (mod->charges == 0)
             {
                 mod->charges = -1;
                 mod->lastAffected = spell;
                 if(!mod->lastAffected)
                     mod->lastAffected = FindCurrentSpellBySpellId(spellId);
-                m_SpellModRemoveCount++;
+                ++m_SpellModRemoveCount;
             }
         }
     }

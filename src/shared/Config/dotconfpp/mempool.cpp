@@ -42,7 +42,7 @@ int AsyncDNSMemPool::initialize()
 
 void AsyncDNSMemPool::addNewChunk(size_t size)
 {
-    chunksCount++;
+    ++chunksCount;
     chunks = (PoolChunk**)::realloc(chunks, chunksCount*sizeof(PoolChunk*));
     if(size <= defaultSize)
         chunks[chunksCount-1] = new PoolChunk(defaultSize);
@@ -69,7 +69,7 @@ void AsyncDNSMemPool::free()
 {
     size_t pu = 0;
     size_t psz = 0;
-    poolUsageCounter++;
+    ++poolUsageCounter;
 
     for(size_t i = 0; i<chunksCount; i++){
         pu += chunks[i]->pos;
@@ -81,7 +81,7 @@ void AsyncDNSMemPool::free()
     if(poolUsageCounter >= 10 && chunksCount > 1){
         psz -= chunks[chunksCount-1]->size;
         if(poolUsage < psz){
-            chunksCount--;
+            --chunksCount;
             delete chunks[chunksCount];
         }
         poolUsage = 0;

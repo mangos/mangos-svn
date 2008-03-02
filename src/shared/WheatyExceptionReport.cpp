@@ -74,7 +74,7 @@ PEXCEPTION_POINTERS pExceptionInfo )
     if(!pos)
         return 0;
     pos[0] = '\0';
-    pos++;
+    ++pos;
 
     TCHAR crash_folder_path[MAX_PATH];
     sprintf(crash_folder_path, "%s\\%s", module_folder_name, CrashFolder);

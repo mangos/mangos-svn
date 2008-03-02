@@ -225,7 +225,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
 
             lootstore[entry].push_back( LootStoreItem(item, displayid, chanceOrRef, questchance, freeforall, condition, cond_value1, cond_value2, mincount, maxcount) );
 
-            count++;
+            ++count;
         } while (result->NextRow());
 
         delete result;
@@ -400,7 +400,7 @@ void FillLoot(Loot* loot, uint32 loot_id, LootStore& store, Player* loot_owner, 
                 // free for all items are counted in FillFFALoot(),
                 // non-ffa conditionals are counted in FillNonQuestNonFFAConditionalLoot()
                 if( ! LootedItem->freeforall && ! LootedItem->condition)
-                    loot->unlootedCount++;
+                    ++loot->unlootedCount;
             }
         }
     }
@@ -481,7 +481,7 @@ QuestItemList* FillFFALoot(Player* player, Loot *loot)
         if(!item.is_looted && item.freeforall && MeetsConditions(player, &item))
         {
             ql->push_back(QuestItem(i));
-            loot->unlootedCount++;
+            ++loot->unlootedCount;
         }
     }
     if (ql->empty())
@@ -511,7 +511,7 @@ QuestItemList* FillQuestLoot(Player* player, Loot *loot)
             //
             // increase once if one looter only, looter-times if free for all
             if (item.freeforall || !item.is_blocked)
-                loot->unlootedCount++;
+                ++loot->unlootedCount;
 
             item.is_blocked = true;
 
@@ -541,7 +541,7 @@ QuestItemList* FillNonQuestNonFFAConditionalLoot(Player* player, Loot *loot)
             ql->push_back(QuestItem(i));
             if(!item.is_counted)
             {
-                loot->unlootedCount++;
+                ++loot->unlootedCount;
                 item.is_counted=true;
             }
         }
@@ -660,7 +660,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
     if (lv.qlist)
     {
         for (uint8 i = 0; i < lv.qlist->size(); ++i)
-            if (!lv.qlist->at(i).is_looted) itemsShown++;
+            if (!lv.qlist->at(i).is_looted) ++itemsShown;
     }
 
     switch (lv.permission)
@@ -679,7 +679,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
             b << l.gold;                                    //gold
             for (uint8 i = 0; i < l.items.size(); ++i)
                 if (!l.items[i].is_looted && (l.items[i].is_blocked || l.items[i].is_underthreshold || l.items[i].freeforall) && (!l.items[i].condition || MeetsConditions(lv.viewer, &l.items[i])))
-                    itemsShown++;
+                    ++itemsShown;
             b << itemsShown;                                //send the number of items shown
 
             for (uint8 i = 0; i < l.items.size(); ++i)
@@ -692,7 +692,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
             b << l.gold;
             for (uint8 i = 0; i < l.items.size(); ++i)
                 if (!l.items[i].is_looted && (!l.items[i].condition || MeetsConditions(lv.viewer, &l.items[i])))
-                    itemsShown++;
+                    ++itemsShown;
             b << itemsShown;
 
             for (uint8 i = 0; i < l.items.size(); ++i)

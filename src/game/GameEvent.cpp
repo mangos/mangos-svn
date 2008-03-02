@@ -95,7 +95,7 @@ void GameEvent::LoadFromDB()
     barGoLink bar( result->GetRowCount() );
     do
     {
-        count++;
+        ++count;
         Field *fields = result->Fetch();
 
         bar.step();
@@ -150,7 +150,7 @@ void GameEvent::LoadFromDB()
                 continue;
             }
 
-            count++;
+            ++count;
             GuidList& crelist = mGameEventCreatureGuids[max_event_id + event_id];
             crelist.push_back(guid);
 
@@ -193,7 +193,7 @@ void GameEvent::LoadFromDB()
                 continue;
             }
 
-            count++;
+            ++count;
             GuidList& golist = mGameEventGameobjectGuids[max_event_id + event_id];
             golist.push_back(guid);
 
@@ -238,7 +238,7 @@ void GameEvent::LoadFromDB()
                 continue;
             }
 
-            count++;
+            ++count;
             ModelEquipList& equiplist = mGameEventModelEquip[event_id];
             ModelEquip newModelEquipSet;
             newModelEquipSet.modelid = fields[2].GetUInt32();
@@ -286,7 +286,7 @@ void GameEvent::LoadFromDB()
                 continue;
             }
 
-            count++;
+            ++count;
             QuestRelList& questlist = mGameEventQuests[event_id];
             questlist.push_back(QuestRelation(id, quest));
 

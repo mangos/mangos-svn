@@ -109,7 +109,7 @@ void LoadSkillDiscoveryTable()
 
             SkillDiscoveryStore[reqSkillOrSpell].push_back( SkillDiscoveryEntry(spellId, chance) );
 
-            count++;
+            ++count;
         } while (result->NextRow());
 
         delete result;

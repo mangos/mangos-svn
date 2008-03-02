@@ -453,7 +453,7 @@ bool ChatHandler::hasStringAbbr(const char* s1, const char* s2)
             return false;
         else if( tolower( *s1 ) != tolower( *s2 ) )
             return false;
-        s1++; s2++;
+        ++s1; ++s2;
     }
 }
 
@@ -558,10 +558,10 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
     while (*text != ' ' && *text != '\0')
     {
         cmd += *text;
-        text++;
+        ++text;
     }
 
-    while (*text == ' ') text++;
+    while (*text == ' ') ++text;
 
     if(!cmd.length())
         return false;
@@ -638,7 +638,7 @@ int ChatHandler::ParseCommands(const char* text)
     if(text[0] == '.' && text[1] == '.' || text[0] == '!' && text[1] == '!')
         return 0;
 
-    text++;
+    ++text;
 
     if(!ExecuteCommandInTable(getCommandTable(), text))
         SendSysMessage(LANG_NO_CMD);

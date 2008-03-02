@@ -94,7 +94,7 @@ namespace VMAP
     void ModelContainer::countSubModelsAndNodesAndTriangles(AABSPTree<SubModel *>::Node& pNode, int& nSubModels, int& nNodes, int& nTriangles)
     {
         // For this node we will need a TreeNode as well as for the internal nodes
-        nNodes++;
+        ++nNodes;
 
         nSubModels += pNode.valueArray.size();
         for(int i=0;i<pNode.valueArray.size(); i++)

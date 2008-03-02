@@ -75,9 +75,9 @@ void BattleGroundQueue::AddPlayer(Player *plr, uint32 bgTypeId)
     m_PlayersSortedByWaitTime[queue_id].push_back(plr->GetGUID());
 
     if(plr->GetTeam() == ALLIANCE)
-        m_QueuedPlayers[queue_id].Alliance++;
+        ++m_QueuedPlayers[queue_id].Alliance;
     else
-        m_QueuedPlayers[queue_id].Horde++;
+        ++m_QueuedPlayers[queue_id].Horde;
 
     /* temporary BG queue status message
     std::ostringstream str;
@@ -125,9 +125,9 @@ void BattleGroundQueue::RemovePlayer(uint64 guid, bool decreaseInvitedCount)
         if (!itr->second.IsInvitedToBGInstanceGUID)
         {
             if(itr->second.Team == ALLIANCE)
-                m_QueuedPlayers[queue_id].Alliance--;
+                --m_QueuedPlayers[queue_id].Alliance;
             else
-                m_QueuedPlayers[queue_id].Horde--;
+                --m_QueuedPlayers[queue_id].Horde;
         }
         else
         {
@@ -207,9 +207,9 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
                             itrPlayerStatus->second.InviteTime = getMSTime();
                             itrPlayerStatus->second.LastInviteTime = getMSTime();
                             if(itrPlayerStatus->second.Team == ALLIANCE)
-                                m_QueuedPlayers[queue_id].Alliance--;
+                                --m_QueuedPlayers[queue_id].Alliance;
                             else
-                                m_QueuedPlayers[queue_id].Horde--;
+                                --m_QueuedPlayers[queue_id].Horde;
                             sBattleGroundMgr.InvitePlayer(plr, bg->GetInstanceID());
 
                             WorldPacket data;
@@ -292,9 +292,9 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
                     itrPlayerStatus->second.LastInviteTime = getMSTime();
 
                     if(itrPlayerStatus->second.Team == ALLIANCE)
-                        m_QueuedPlayers[queue_id].Alliance--;
+                        --m_QueuedPlayers[queue_id].Alliance;
                     else
-                        m_QueuedPlayers[queue_id].Horde--;
+                        --m_QueuedPlayers[queue_id].Horde;
 
                     sBattleGroundMgr.InvitePlayer(plr, bg2->GetInstanceID());
 
@@ -797,7 +797,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
         if(!CreateBattleGround(bgTypeID, MinPlayersPerTeam, MaxPlayersPerTeam, MinLvl, MaxLvl, bl->name[sWorld.GetDBClang()], bl->mapid[0], AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]))
             continue;
 
-        count++;
+        ++count;
     } while (result->NextRow());
 
     delete result;
@@ -834,7 +834,7 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, uint64 guid
             if(itr->second->GetTypeID() == bgTypeId && (PlayerLevel >= itr->second->GetMinLevel()) && (PlayerLevel <= itr->second->GetMaxLevel()))
             {
                 *data << uint32(itr->second->GetInstanceID());
-                count++;
+                ++count;
             }
         }
         data->put<uint32>( count_pos , count);

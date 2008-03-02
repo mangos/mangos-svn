@@ -42,7 +42,7 @@ void UpdateData::AddOutOfRangeGUID(const uint64 &guid)
 void UpdateData::AddUpdateBlock(const ByteBuffer &block)
 {
     m_data.append(block);
-    m_blockCount++;
+    ++m_blockCount;
 }
 
 void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)

@@ -84,7 +84,7 @@ void PacketLog::HexDump(const unsigned char* data, size_t length, const char* fi
             line[bi++] = makehexchar(*data & 0x0f);
             line[bi++] = ' ';
             line[char_offset+(ci++)]=(isprint(*data) ? *data : '.');
-            data++;
+            ++data;
         }
 
         while (bi<16*3)

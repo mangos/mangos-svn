@@ -125,7 +125,7 @@ void BattleGroundBE::HandleKillPlayer(Player *player, Player *killer)
 
     uint32 killer_team_index = GetTeamIndexByTeamId(killer->GetTeam());
 
-    m_TeamKills[killer_team_index]++;                       // add kills to killer's team
+    ++m_TeamKills[killer_team_index];                       // add kills to killer's team
 
     if(m_TeamKills[killer_team_index] >= GetPlayersCountByTeam(player->GetTeam()))
     {

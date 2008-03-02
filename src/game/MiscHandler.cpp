@@ -177,7 +177,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
             (itr->second->GetSession()->GetSecurity() == SEC_PLAYER || gmInWhoList && itr->second->IsVisibleGloballyFor(_player) ) &&
             clientcount < 49)
         {
-            clientcount++;
+            ++clientcount;
 
             data << pname;                                  // player name
             data << gname;                                  // guild name

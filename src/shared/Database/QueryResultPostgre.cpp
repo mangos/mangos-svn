@@ -59,7 +59,7 @@ bool QueryResultPostgre::NextRow()
 
         mCurrentRow[j].SetValue(pPQgetvalue);
     }
-    mTableIndex++;
+    ++mTableIndex;
 
     return true;
 }

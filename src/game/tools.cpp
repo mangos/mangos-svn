@@ -64,49 +64,49 @@ void  writeGUID(WorldPacket & data, uint64 & guid)
     {
         PackedGuid[j] = *test;
         RAWmask |= 1;
-        j++;
+        ++j;
     }
     if (*(test+1))
     {
         PackedGuid[j] = *(test+1);
         RAWmask |= 2;
-        j++;
+        ++j;
     }
     if (*(test+2))
     {
         PackedGuid[j] = *(test+2);
         RAWmask |= 4;
-        j++;
+        ++j;
     }
     if (*(test+3))
     {
         PackedGuid[j] = *(test+3);
         RAWmask |= 8;
-        j++;
+        ++j;
     }
     if (*(test+4))
     {
         PackedGuid[j] = *(test+4);
         RAWmask |= 16;
-        j++;
+        ++j;
     }
     if (*(test+5))
     {
         PackedGuid[j] = *(test+5);
         RAWmask |= 32;
-        j++;
+        ++j;
     }
     if (*(test+6))
     {
         PackedGuid[j] = *(test+6);
         RAWmask |= 64;
-        j++;
+        ++j;
     }
     if (*(test+7))
     {
         PackedGuid[j] = *(test+7);
         RAWmask |= 128;
-        j++;
+        ++j;
     }
     PackedGuid[0] = RAWmask;
 

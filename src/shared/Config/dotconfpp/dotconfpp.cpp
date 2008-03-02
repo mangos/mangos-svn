@@ -26,7 +26,7 @@ DOTCONFDocumentNode::~DOTCONFDocumentNode()
 
 void DOTCONFDocumentNode::pushValue(char * _value)
 {
-    valuesCount++;
+    ++valuesCount;
     values = (char**)realloc(values, valuesCount*sizeof(char*));
     values[valuesCount-1] = strdup(_value);
 }
@@ -136,7 +136,7 @@ int DOTCONFDocument::cleanupLine(char * line)
         }
         if(*line == '"' || *line == '\''){
             quoted = !quoted;
-            line++; continue;
+            ++line; continue;
         }
         if(isspace(*line) && !quoted){
             *bg++ = 0;
@@ -200,7 +200,7 @@ int DOTCONFDocument::parseLine()
             bool closed = true;
             if(*nodeName == '<'){
                 if(*(nodeName+1) != '/'){
-                    nodeName++;
+                    ++nodeName;
                     closed = false;
                 } else {
                     nodeName+=2;
@@ -261,7 +261,7 @@ int DOTCONFDocument::parseFile(DOTCONFDocumentNode * _parent)
     size_t slen = 0;
 
     while(fgets(str, 511, file)){
-        curLine++;
+        ++curLine;
     slen = strlen(str);
         if( slen >= 510 ){
             error(curLine, fileName, "warning: line too long");
@@ -311,7 +311,7 @@ int DOTCONFDocument::checkConfig(const std::list<DOTCONFDocumentNode*>::iterator
                     break;
                 }
             }
-            vi++;
+            ++vi;
         }
         if(ret == -1){
             break;
@@ -387,7 +387,7 @@ int DOTCONFDocument::setContent(const char * _fileName)
                     }
 
                     fileName = strdup(realpathBuf);
-                    from = nodeTree.end(); from--;
+                    from = nodeTree.end(); --from;
 
                     ret = parseFile();
                     (void) fclose(file);
@@ -396,7 +396,7 @@ int DOTCONFDocument::setContent(const char * _fileName)
                     if(checkConfig(++from) == -1){
                         return -1;
                     }
-                    vi++;
+                    ++vi;
                 }
             }
         }
@@ -466,9 +466,9 @@ char * DOTCONFDocument::getSubstitution(char * macro, int lineNum)
             error(lineNum, fileName, "incorrect macro substitution syntax");
             return NULL;
         }
-        defaultValue++;
+        ++defaultValue;
         if(*defaultValue == '"' || *defaultValue == '\''){
-            defaultValue++;
+            ++defaultValue;
             defaultValue[strlen(defaultValue)-1] = 0;
         }
     } else {
@@ -556,9 +556,9 @@ const DOTCONFDocumentNode * DOTCONFDocument::findNode(const char * nodeName, con
 
     if(startNode != NULL){
         while( i != nodeTree.end() && (*i) != startNode ){
-            i++;
+            ++i;
         }
-        if( i != nodeTree.end() ) i++;
+        if( i != nodeTree.end() ) ++i;
     }
 
     for(; i!=nodeTree.end(); i++){
@@ -577,6 +577,6 @@ void DOTCONFDocument::setRequiredOptionNames(const char ** requiredOptionNames)
 {
     while(*requiredOptionNames){
         requiredOptions.push_back(strdup( *requiredOptionNames ));
-        requiredOptionNames++;
+        ++requiredOptionNames;
     }
 }

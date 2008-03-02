@@ -924,7 +924,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 
                 if(!prev->IsWithinLOSInMap(*next))
                 {
-                    next++;
+                    ++next;
                     continue;
                 }
 
@@ -1009,7 +1009,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 
                         if(!prev->IsWithinLOSInMap(*next))
                         {
-                            next++;
+                            ++next;
                             continue;
                         }
 
@@ -1349,7 +1349,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 
                     if(!prev->IsWithinLOSInMap(*next))
                     {
-                        next++;
+                        ++next;
                         continue;
                     }
 
@@ -1428,7 +1428,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         for (std::list<Unit*>::iterator itr = TagUnitMap.begin(), next; itr != TagUnitMap.end(); itr = next)
         {
             next = itr;
-            next++;
+            ++next;
             if (!*itr) continue;
             if ((*itr) == m_targets.getUnitTarget())
             {
@@ -2438,7 +2438,7 @@ void Spell::TakeCastItem()
                 // item has charges left
                 if (charges)
                 {
-                    (charges > 0) ? charges-- : charges++;  // abs(charges) less at 1 after use
+                    (charges > 0) ? --charges : ++charges;  // abs(charges) less at 1 after use
                     if (proto->Stackable < 2)
                         m_CastItem->SetSpellCharges(i, charges);
                     m_CastItem->SetState(ITEM_CHANGED, (Player*)m_caster);
@@ -2517,7 +2517,7 @@ void Spell::TakeReagents()
                     int32 charges = m_CastItem->GetSpellCharges(s);
                     if (proto->Spells[s].SpellCharges < 0 && abs(charges) < 2)
                     {
-                        itemcount++;
+                        ++itemcount;
                         break;
                     }
                 }
@@ -3717,7 +3717,7 @@ uint8 Spell::CheckItems()
                 int32 charges = m_CastItem->GetSpellCharges(s);
                 if (proto->Spells[s].SpellCharges < 0 && abs(charges) < 2)
                 {
-                    itemcount++;
+                    ++itemcount;
                     break;
                 }
             }

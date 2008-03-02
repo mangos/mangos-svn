@@ -695,7 +695,7 @@ bool Pet::CanTakeMoreActiveSpells(uint32 spellid)
 
         if(x == activecount)                                //spellchain not yet saved -> add active count
         {
-            activecount++;
+            ++activecount;
             if(activecount > ACTIVE_SPELLS_MAX)
                 return false;
             chainstartstore[x] = chainstart;
@@ -1180,7 +1180,7 @@ void Pet::_SaveSpells()
 {
     for (PetSpellMap::const_iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end(); itr = next)
     {
-        next++;
+        ++next;
         if (itr->second->state == PETSPELL_REMOVED || itr->second->state == PETSPELL_CHANGED)
             CharacterDatabase.PExecute("DELETE FROM pet_spell WHERE guid = '%u' and spell = '%u'", m_charmInfo->GetPetNumber(), itr->first);
         if (itr->second->state == PETSPELL_NEW || itr->second->state == PETSPELL_CHANGED)

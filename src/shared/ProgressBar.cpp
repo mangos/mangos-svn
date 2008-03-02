@@ -55,7 +55,7 @@ void barGoLink::step( void )
     int i, n;
 
     if ( num_rec == 0 ) return;
-    rec_no++;
+    ++rec_no;
     n = rec_no * indic_len / num_rec;
     if ( n != rec_pos )
     {

@@ -545,7 +545,7 @@ void ObjectMgr::ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* 
     {
         while (p[0]!=0)
         {
-            p++;
+            ++p;
             if (p[0]==' ')
             {
                 val.push_back(atoi(s));
@@ -771,7 +771,7 @@ void ObjectMgr::LoadCreatures()
 
         if (gameEvent==0)                                   // if not this is to be managed by GameEvent System
             AddCreatureToGrid(guid, &data);
-        count++;
+        ++count;
 
     } while (result->NextRow());
 
@@ -848,7 +848,7 @@ void ObjectMgr::LoadGameobjects()
 
         if (gameEvent==0)                                   // if not this is to be managed by GameEvent System
             AddGameobjectToGrid(guid, &data);
-        count++;
+        ++count;
 
     } while (result->NextRow());
 
@@ -909,7 +909,7 @@ void ObjectMgr::LoadCreatureRespawnTimes()
 
         mCreatureRespawnTimes[MAKE_GUID(loguid,instance)] = time_t(respawn_time);
 
-        count++;
+        ++count;
     } while (result->NextRow());
 
     delete result;
@@ -951,7 +951,7 @@ void ObjectMgr::LoadGameobjectRespawnTimes()
 
         mGORespawnTimes[MAKE_GUID(loguid,instance)] = time_t(respawn_time);
 
-        count++;
+        ++count;
     } while (result->NextRow());
 
     delete result;
@@ -1460,7 +1460,7 @@ void ObjectMgr::LoadPetLevelInfo()
             }
 
             bar.step();
-            count++;
+            ++count;
         }
         while (result->NextRow());
 
@@ -1568,7 +1568,7 @@ void ObjectMgr::LoadPlayerInfo()
             }
 
             bar.step();
-            count++;
+            ++count;
         }
         while (result->NextRow());
 
@@ -1620,7 +1620,7 @@ void ObjectMgr::LoadPlayerInfo()
                 pInfo->item.push_back(PlayerCreateInfoItem( fields[2].GetUInt32(), fields[3].GetUInt32()));
 
                 bar.step();
-                count++;
+                ++count;
             }
             while(result->NextRow());
 
@@ -1672,7 +1672,7 @@ void ObjectMgr::LoadPlayerInfo()
                 pInfo->spell.push_back(CreateSpellPair(fields[2].GetUInt16(), fields[3].GetBool()));
 
                 bar.step();
-                count++;
+                ++count;
             }
             while( result->NextRow() );
 
@@ -1727,7 +1727,7 @@ void ObjectMgr::LoadPlayerInfo()
                 pInfo->skill.push_back(skill);
 
                 bar.step();
-                count++;
+                ++count;
             }
             while( result->NextRow() );
 
@@ -1782,7 +1782,7 @@ void ObjectMgr::LoadPlayerInfo()
                 pInfo->action[3].push_back(fields[5].GetUInt16());
 
                 bar.step();
-                count++;
+                ++count;
             }
             while( result->NextRow() );
 
@@ -1856,7 +1856,7 @@ void ObjectMgr::LoadPlayerInfo()
             }
 
             bar.step();
-            count++;
+            ++count;
         }
         while (result->NextRow());
 
@@ -2027,7 +2027,7 @@ void ObjectMgr::LoadGuilds()
         Field *fields = result->Fetch();
 
         bar.step();
-        count++;
+        ++count;
 
         newguild = new Guild;
         if(!newguild->LoadGuildFromDB(fields[0].GetUInt32()))
@@ -2071,7 +2071,7 @@ void ObjectMgr::LoadArenaTeams()
         Field *fields = result->Fetch();
 
         bar.step();
-        count++;
+        ++count;
 
         ArenaTeam *newarenateam = new ArenaTeam;
         if(!newarenateam->LoadArenaTeamFromDB(fields[0].GetUInt32()))
@@ -2111,7 +2111,7 @@ void ObjectMgr::LoadGroups()
     do
     {
         bar.step();
-        count++;
+        ++count;
 
         group = new Group;
         if(!group->LoadGroupFromDB(MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER)))
@@ -2882,7 +2882,7 @@ void ObjectMgr::LoadPetCreateSpells()
 
         mPetCreateSpell[creature_id] = PetCreateSpell;
 
-        count++;
+        ++count;
     }
     while (result->NextRow());
 
@@ -3079,7 +3079,7 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
         }
         scripts[tmp.id].insert(std::pair<uint32, ScriptInfo>(tmp.delay, tmp));
 
-        count++;
+        ++count;
     } while( result->NextRow() );
 
     delete result;
@@ -3354,7 +3354,7 @@ void ObjectMgr::LoadGossipText()
 
     do
     {
-        count++;
+        ++count;
         cic = 0;
 
         Field *fields = result->Fetch();
@@ -4004,7 +4004,7 @@ void ObjectMgr::LoadAreaTriggerTeleports()
 
         bar.step();
 
-        count++;
+        ++count;
 
         uint32 Trigger_ID = fields[0].GetUInt32();
 
@@ -4350,7 +4350,7 @@ void ObjectMgr::LoadPetNames()
             PetHalfName1[entry].push_back(word);
         else
             PetHalfName0[entry].push_back(word);
-        count++;
+        ++count;
     }
     while (result->NextRow());
     delete result;
@@ -4435,7 +4435,7 @@ void ObjectMgr::LoadCorpses()
 
         ObjectAccessor::Instance().AddCorpse(corpse);
 
-        count++;
+        ++count;
     }
     while (result->NextRow());
     delete result;
@@ -4507,7 +4507,7 @@ void ObjectMgr::LoadReputationOnKill()
 
         mRepOnKill[creature_id] = repOnKill;
 
-        count++;
+        ++count;
     } while (result->NextRow());
 
     delete result;
@@ -4593,7 +4593,7 @@ void ObjectMgr::CleanupInstances()
             if (InstanceSet.find(fields[0].GetUInt32()) != InstanceSet.end())
             {
                 InstanceSet.erase(fields[0].GetUInt32());
-                okcount++;
+                ++okcount;
             }
         }
         while (result->NextRow());
@@ -4658,7 +4658,7 @@ void ObjectMgr::PackInstances()
             CharacterDatabase.PExecute("UPDATE instance SET id = '%u' WHERE id = '%u'", InstanceNumber, *i);
         }
 
-        InstanceNumber++;
+        ++InstanceNumber;
         bar.step();
     }
 
@@ -4720,7 +4720,7 @@ void ObjectMgr::LoadWeatherZoneChances()
             }
         }
 
-        count++;
+        ++count;
     } while (result->NextRow());
 
     delete result;
@@ -4852,7 +4852,7 @@ void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map,char const* table)
 
         map.insert(QuestRelations::value_type(id,quest));
 
-        count++;
+        ++count;
     } while (result->NextRow());
 
     delete result;
@@ -5071,7 +5071,7 @@ bool findtoknth(std::string &str, int n, std::string::size_type &s, std::string:
 {
     int i; s = e = 0;
     std::string::size_type size = str.size();
-    for(i = 1; s < size && i < n; s++) if(str[s] == ' ') i++;
+    for(i = 1; s < size && i < n; s++) if(str[s] == ' ') ++i;
     if (i < n)
         return false;
 
@@ -5329,7 +5329,7 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
     m_hiItemGuid += items.size();
 
     if(incHighest)
-        m_hiCharGuid++;
+        ++m_hiCharGuid;
 
     fclose(fin);
 
@@ -5480,7 +5480,7 @@ void ObjectMgr::LoadGameObjectForQuests()
                     if(item_i->questChanceOrGroup > 0)
                     {
                         mGameObjectForQuestSet.insert(go_entry);
-                        count++;
+                        ++count;
                         break;
                     }
                 }

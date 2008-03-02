@@ -906,7 +906,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
         for (AuraMap::iterator i = vAuras.begin(), next; i != vAuras.end(); i = next)
         {
             const SpellEntry *se = i->second->GetSpellProto();
-            next = i; next++;
+            next = i; ++next;
             if( se->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE )
             {
                 bool remove = true;
@@ -1806,7 +1806,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
         {
             Binom += 2400 *( powf(tmpvalue2, i) * powf( (1-tmpvalue2), (4-i)))/faq[i];
             if (ran > Binom )
-                m++;
+                ++m;
             else
                 break;
         }
@@ -1826,7 +1826,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
     AuraList const& vSchoolAbsorb = pVictim->GetAurasByType(SPELL_AURA_SCHOOL_ABSORB);
     for(AuraList::const_iterator i = vSchoolAbsorb.begin(), next; i != vSchoolAbsorb.end() && RemainingDamage > 0; i = next)
     {
-        next = i; next++;
+        next = i; ++next;
 
         if (((*i)->GetModifier()->m_miscvalue & int32(1<<school))==0)
             continue;
@@ -1851,7 +1851,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
     AuraList const& vManaShield = pVictim->GetAurasByType(SPELL_AURA_MANA_SHIELD);
     for(AuraList::const_iterator i = vManaShield.begin(), next; i != vManaShield.end() && RemainingDamage > 0; i = next)
     {
-        next = i; next++;
+        next = i; ++next;
 
         // check damage school mask
         if(((*i)->GetModifier()->m_miscvalue & int32(1<< school))==0)
@@ -1887,7 +1887,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
     AuraList const& vSplitDamageFlat = pVictim->GetAurasByType(SPELL_AURA_SPLIT_DAMAGE_FLAT);
     for(AuraList::const_iterator i = vSplitDamageFlat.begin(), next; i != vSplitDamageFlat.end() && RemainingDamage >= 0; i = next)
     {
-        next = i; next++;
+        next = i; ++next;
 
         // check damage school mask
         if(((*i)->GetModifier()->m_miscvalue & int32(1<< school))==0)
@@ -1915,7 +1915,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
     AuraList const& vSplitDamagePct = pVictim->GetAurasByType(SPELL_AURA_SPLIT_DAMAGE_PCT);
     for(AuraList::const_iterator i = vSplitDamagePct.begin(), next; i != vSplitDamagePct.end() && RemainingDamage >= 0; i = next)
     {
-        next = i; next++;
+        next = i; ++next;
 
         // check damage school mask
         if(((*i)->GetModifier()->m_miscvalue & int32(1<< school))==0)
@@ -2313,7 +2313,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
     AuraList const& vDamageShields = pVictim->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
     for(AuraList::const_iterator i = vDamageShields.begin(), next = vDamageShields.begin(); i != vDamageShields.end(); i = next)
     {
-        next++;
+        ++next;
         if (alreadyDone.find(*i) == alreadyDone.end())
         {
             alreadyDone.insert(*i);
@@ -3053,7 +3053,7 @@ void Unit::_UpdateSpells( uint32 time )
     for (AuraMap::iterator i = m_Auras.begin(), next; i != m_Auras.end(); i = next)
     {
         next = i;
-        next++;
+        ++next;
         if ((*i).second)
         {
             // prevent double update
@@ -3541,7 +3541,7 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
     for (i = m_Auras.begin(); i != m_Auras.end(); i = next)
     {
         next = i;
-        next++;
+        ++next;
         uint32 i_spellId = (*i).second->GetId();
         if((*i).second && i_spellId && i_spellId != spellId)
         {
@@ -3574,7 +3574,7 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
     for (i = m_Auras.begin(); i != m_Auras.end(); i = next)
     {
         next = i;
-        next++;
+        ++next;
         if (!(*i).second) continue;
 
         if (!(*i).second->GetSpellProto())
@@ -3854,7 +3854,7 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
     // some ShapeshiftBoosts at remove trigger removing other auras including parent Shapeshift aura
     // remove aura from list before to prevent deleting it before
     m_Auras.erase(i);
-    m_removedAuras++;                                       // internal count used by unit update
+    ++m_removedAuras;                                       // internal count used by unit update
 
     // remove the shapeshift aura's boosts
     if(Aur->GetModifier()->m_auraname == SPELL_AURA_MOD_SHAPESHIFT)
@@ -4647,7 +4647,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 if (HasInArc(M_PI, pVictim))
                     CastSpell(pVictim, 22858,true,NULL,triggeredByAura);
                 else
-                    triggeredByAura->m_procCharges++;       // Prevent drop charges
+                    ++triggeredByAura->m_procCharges;       // Prevent drop charges
                 return;
             }
             break;
@@ -7016,7 +7016,7 @@ void Unit::ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply)
     {
         for (SpellImmuneList::iterator itr = m_spellImmune[op].begin(), next; itr != m_spellImmune[op].end(); itr = next)
         {
-            next = itr; next++;
+            next = itr; ++next;
             if(itr->type == type)
             {
                 m_spellImmune[op].erase(itr);
@@ -8560,7 +8560,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
         AuraList const& auras = GetAurasByType(*aur);
         for(AuraList::const_iterator i = auras.begin(), next; i != auras.end(); i = next)
         {
-            next = i; next++;
+            next = i; ++next;
 
             SpellEntry const *spellProto = (*i)->GetSpellProto();
             if(!spellProto)

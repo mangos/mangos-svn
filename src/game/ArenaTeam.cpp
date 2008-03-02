@@ -293,7 +293,7 @@ void ArenaTeam::Disband(WorldSession *session)
     for(itr = members.begin(); itr != members.end(); itr++)
     {
         memberGuids[i] = itr->guid;
-        i++;
+        ++i;
     }
 
     for(uint32 j = 0; j < count; j++)

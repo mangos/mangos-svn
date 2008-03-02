@@ -228,7 +228,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
         }
         else
         {
-            mapChange--;
+            --mapChange;
         }
     }
 
@@ -421,7 +421,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
 Transport::WayPointMap::iterator Transport::GetNextWayPoint()
 {
     WayPointMap::iterator iter = m_curr;
-    iter++;
+    ++iter;
     if (iter == m_WayPoints.end())
         iter = m_WayPoints.begin();
     return iter;

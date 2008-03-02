@@ -982,7 +982,7 @@ void World::Update(time_t diff)
         for (itr = m_weathers.begin(); itr != m_weathers.end(); itr = next)
         {
             next = itr;
-            next++;
+            ++next;
 
             ///- and remove Weather objects for zones with no player
                                                             //As interval > WorldTick
@@ -1924,7 +1924,7 @@ void World::UpdateSessions( time_t diff )
     for (SessionMap::iterator itr = m_sessions.begin(), next; itr != m_sessions.end(); itr = next)
     {
         next = itr;
-        next++;
+        ++next;
 
         if(!itr->second)
             continue;

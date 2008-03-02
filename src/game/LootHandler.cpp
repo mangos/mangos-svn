@@ -181,7 +181,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         if (!item->freeforall)
             item->is_looted = true;
 
-        loot->unlootedCount--;
+        --loot->unlootedCount;
 
         player->SendNewItem(newitem, uint32(item->count), false, false, true);
     }
