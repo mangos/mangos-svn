@@ -1748,9 +1748,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             if(!pVictim->isAlive() || pVictim->getPowerType() != powerType)
                 return;
 
-            uint32 gain = - pVictim->ModifyPower(powerType, -pdamage);
+            uint32 gain = uint32(- pVictim->ModifyPower(powerType, -pdamage));
 
-            gain *= spellProto->EffectMultipleValue[effect_idx];
+            gain = uint32(gain * spellProto->EffectMultipleValue[effect_idx]);
 
             //maybe has to be sent different to client, but not by SMSG_PERIODICAURALOG
             SpellNonMeleeDamageLog(pVictim, spellProto->Id, gain);
