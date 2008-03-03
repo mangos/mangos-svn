@@ -598,7 +598,20 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
                 if ( index == GAMEOBJECT_DYN_FLAGS )
                 {
                     if(IsActivateToQuest )
-                        *data << uint32(9);                 // enable quest object. Represent 9, but 1 for client before 2.3.0
+                    {
+                        switch(((GameObject*)this)->GetGoType())
+                        {
+                            case GAMEOBJECT_TYPE_CHEST:
+                                *data << uint32(9);         // enable quest object. Represent 9, but 1 for client before 2.3.0
+                                break;
+                            case GAMEOBJECT_TYPE_GOOBER:
+                                *data << uint32(1);
+                                break;
+                            default:
+                                *data << uint32(0);         //unknown. not happen.
+                                break;
+                        }
+                    }
                     else
                         *data << uint32(0);                 // disable quest object
                 }

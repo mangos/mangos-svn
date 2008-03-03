@@ -2082,6 +2082,38 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                 gameObjTarget->AddUse(player);
                 gameObjTarget->SetLootState(GO_LOOTED);
                 player->CastedCreatureOrGO(gameObjTarget->GetEntry(), gameObjTarget->GetGUID(), 0);
+
+                // triggering linked GO
+                if(uint32 trapEntry = gameObjTarget->GetGOInfo()->data12)
+                {
+                    if(GameObjectInfo const* trapInfo = sGOStorage.LookupEntry<GameObjectInfo>(trapEntry))
+                    {
+                        SpellEntry const* trapSpell = sSpellStore.LookupEntry(trapInfo->data3);
+                        if(trapInfo->type==GAMEOBJECT_TYPE_TRAP && trapSpell)
+                        {
+                            float range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(trapSpell->rangeIndex));
+
+                            // search nearest linked GO
+                            GameObject* trapGO = NULL;
+                            {
+                                CellPair p(MaNGOS::ComputeCellPair(gameObjTarget->GetPositionX(), gameObjTarget->GetPositionY()));
+                                Cell cell(p);
+                                cell.data.Part.reserved = ALL_DISTRICT;
+
+                                MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*m_caster,trapEntry,range);
+                                MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> checker(trapGO,go_check);
+
+                                TypeContainerVisitor<MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck>, GridTypeMapContainer > object_checker(checker);
+                                CellLock<GridReadGuard> cell_lock(cell, p);
+                                cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                            }
+
+                            // found correct GO
+                            if(trapGO)
+                                m_caster->CastSpell(m_caster,trapSpell,true);
+                        }
+                    }
+                }
                 return;
 
             case GAMEOBJECT_TYPE_CHEST:
