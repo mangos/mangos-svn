@@ -102,7 +102,6 @@ Player::Player (WorldSession *session): Unit( 0 )
     if(GetSession()->GetSecurity() == SEC_PLAYER || sWorld.getConfig(CONFIG_GM_WISPERING_TO))
         SetAcceptWhispers(true);
 
-    m_curTarget = 0;
     m_curSelection = 0;
     m_lootGuid = 0;
 
@@ -485,7 +484,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
             SetSkill(tskill, 5, 5);                         // (5,5) is default values for skill pages
         }
 
-        skill_itr++;
+        ++skill_itr;
     }
 
     for(i=0; i<4; i++)
@@ -499,7 +498,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         addActionButton((uint8)taction[0], taction[1], (uint8)taction[2], (uint8)taction[3]);
 
         for( i=0; i<4 ;i++)
-            action_itr[i]++;
+            ++action_itr[i];
     }
 
     UpdateBlockPercentage();
@@ -2423,7 +2422,7 @@ void Player::AddNewMailDeliverTime(time_t deliver_time)
 {
     if(deliver_time <= time(NULL))                          // ready now
     {
-        unReadMails++;
+        ++unReadMails;
         SendNewMail();
     }
     else                                                    // not ready and no have ready mails
@@ -4658,7 +4657,7 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
             // remove spells that depend on this skill when removing the skill
             for (PlayerSpellMap::const_iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end(); itr = next)
             {
-                next++;
+                ++next;
                 if(itr->second->state == PLAYERSPELL_REMOVED) continue;
                 SkillLineAbilityEntry const *ability = sSkillLineAbilityStore.LookupEntry(itr->first);
                 if (ability && ability->skillId == id)
@@ -5129,7 +5128,7 @@ void Player::SendInitialReputations()
         data << uint8  (itr->second.Flags);
         data << uint32 (itr->second.Standing);
 
-        a++;
+        ++a;
     }
 
     // fill in absent fields
@@ -5581,7 +5580,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
 
                 // count the number of times a certain player was killed in one day
                 if(info.count < limit)
-                    info.count++;
+                    ++info.count;
             }
 
             // count the number of playerkills in one day
@@ -14103,7 +14102,7 @@ void Player::_SaveSpells()
 {
     for (PlayerSpellMap::const_iterator itr = m_spells.begin(), next = m_spells.begin(); itr != m_spells.end(); itr = next)
     {
-        next++;
+        ++next;
         if (itr->second->state == PLAYERSPELL_REMOVED || itr->second->state == PLAYERSPELL_CHANGED)
             CharacterDatabase.PExecute("DELETE FROM character_spell WHERE guid = '%u' and spell = '%u'", GetGUIDLow(), itr->first);
         if (itr->second->state == PLAYERSPELL_NEW || itr->second->state == PLAYERSPELL_CHANGED)
@@ -14589,7 +14588,7 @@ void Player::PetSpellInitialize()
             {
                 if(itr->second->state == PETSPELL_REMOVED)
                     continue;
-                addlist++;
+                ++addlist;
             }
         }
 
@@ -14821,7 +14820,7 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
     else
     {
         if (mod->charges == -1)
-            m_SpellModRemoveCount--;
+            --m_SpellModRemoveCount;
         m_spellMods[mod->op].remove(mod);
         delete mod;
     }
@@ -15552,7 +15551,7 @@ bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
                 for(uint8 b = 0, tmpcolormask = 1; b < 4; b++, tmpcolormask <<= 1)
                 {
                     if(tmpcolormask & GemColor)
-                        curcount[b]++;
+                        ++curcount[b];
                 }
             }
         }
