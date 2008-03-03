@@ -255,7 +255,7 @@ void GameObject::Update(uint32 /*p_time*/)
 
         case GO_LOOTED:
         {
-            //if Gamebject should cast spell, then this, but some GOs (type = 10) should be destroyed
+            //if Gameobject should cast spell, then this, but some GOs (type = 10) should be destroyed
             if (GetGoType() == GAMEOBJECT_TYPE_GOOBER)
             {
                 uint32 spellId = GetGOInfo()->data10;
@@ -618,6 +618,12 @@ bool GameObject::ActivateToQuest( Player *pTarget)const
                         return true;
                 }
             }
+            break;
+        }
+        case GAMEOBJECT_TYPE_GOOBER:
+        {
+            if(pTarget->GetQuestStatus(GetGOInfo()->data1) == QUEST_STATUS_INCOMPLETE)
+                return true;
             break;
         }
         default:
