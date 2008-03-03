@@ -2079,7 +2079,7 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                     if(player->GetQuestStatus(gameObjTarget->GetGOInfo()->data1) != QUEST_STATUS_INCOMPLETE)
                         return;
 
-                gameObjTarget->AddUse(player);
+                gameObjTarget->AddUse();
                 gameObjTarget->SetLootState(GO_LOOTED);
                 player->CastedCreatureOrGO(gameObjTarget->GetEntry(), gameObjTarget->GetGUID(), 0);
 
@@ -3505,6 +3505,7 @@ void Spell::EffectSummonObjectWild(uint32 i)
 
     int32 duration = GetSpellDuration(m_spellInfo);
     pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
+    pGameObj->SetSpellId(m_spellInfo->Id);
 
     if(pGameObj->GetGoType() != GAMEOBJECT_TYPE_FLAGDROP)   // make dropped flag clickable for other players (not set owner guid (created by) for this)...
         m_caster->AddGameObject(pGameObj);

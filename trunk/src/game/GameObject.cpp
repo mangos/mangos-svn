@@ -49,6 +49,7 @@ GameObject::GameObject( WorldObject *instantiator ) : WorldObject( instantiator 
     m_spawnedByDefault = true;
     m_usetimes = 0;
     m_spellId = 0;
+    m_charges = 5;
 }
 
 GameObject::~GameObject()
@@ -136,6 +137,10 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
     SetUInt32Value (GAMEOBJECT_TYPE_ID, goinfo->type);
 
     SetUInt32Value (GAMEOBJECT_ANIMPROGRESS, animprogress);
+
+    // Spell charges for GAMEOBJECT_TYPE_SPELLCASTER (22)
+    if (goinfo->type == GAMEOBJECT_TYPE_SPELLCASTER)
+        m_charges = goinfo->data1;
 
     //Notify the map's instance data.
     //Only works if you create the object in it, not if it is moves to that map.
@@ -356,7 +361,7 @@ void GameObject::Update(uint32 /*p_time*/)
         }
     }
 
-    if (m_usetimes >= 5)
+    if (m_usetimes >= m_charges)
     {
         m_respawnTime = 0;                                  // to prevent save respawn timer
         Delete();
@@ -376,7 +381,7 @@ void GameObject::Refresh()
         MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
 }
 
-void GameObject::AddUse(Player* player)
+void GameObject::AddUniqueUse(Player* player)
 {
     ++m_usetimes;
     m_unique_users.insert(player->GetGUIDLow());

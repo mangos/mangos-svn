@@ -316,7 +316,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
                     float min_amount = go_min*amount_rate;
                     float max_amount = go_max*amount_rate;
 
-                    go->AddUse(player);
+                    go->AddUse();
                     float uses = float(go->GetUseCount());
 
                     if(uses < max_amount)

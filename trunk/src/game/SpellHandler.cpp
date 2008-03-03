@@ -295,7 +295,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
                 //guid=_player->GetGUID();
             }
-
+            obj->AddUse();
             break;
         case GAMEOBJECT_TYPE_CAMERA:                        //13
             info = obj->GetGOInfo();
@@ -386,7 +386,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             if(((Player*)caster)==GetPlayer() || !((Player*)caster)->IsInSameGroupWith(GetPlayer()))
                 return;
 
-            obj->AddUse(GetPlayer());
+            obj->AddUniqueUse(GetPlayer());
 
             // must 2 group members use GO, or only 1 when it is meeting stone summon
             if(obj->GetUniqueUseCount() < (info->data0 == 2 ? 1 : 2))
