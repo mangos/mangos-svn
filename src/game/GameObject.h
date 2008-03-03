@@ -180,7 +180,9 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         }
         void ClearSkillupList() { m_SkillupList.clear(); }
 
-        void AddUse(Player* player);
+        void AddUniqueUse(Player* player);
+        void AddUse() { ++m_usetimes; }
+        
         uint32 GetUseCount() const { return m_usetimes; }
         uint32 GetUniqueUseCount() const { return m_unique_users.size(); }
 
@@ -196,6 +198,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         GridReference<GameObject> &GetGridRef() { return m_gridRef; }
     protected:
+        uint32      m_charges;                              // Spell charges for GAMEOBJECT_TYPE_SPELLCASTER (22)
         uint32      m_spellId;
         time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
         uint32      m_respawnDelayTime;                     // (secs) if 0 then current GO state no dependent from timer
