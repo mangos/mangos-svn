@@ -5002,7 +5002,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     ++triggeredByAura->m_procCharges;       // restore charges for cooldown time proc
                 else
                 {
-                    int32 HealBasePoints0 = dummySpell->EffectBasePoints[0];
+                    int32 HealBasePoints0 = triggeredByAura->GetModifier()->m_amount;
                     CastCustomSpell(this,379,&HealBasePoints0,NULL,NULL,true,castItem,triggeredByAura);
                     ((Player*)this)->AddSpellCooldown(379,0,time(NULL) + 3);
                 }
@@ -6488,9 +6488,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             // Lightning Shield 33% per charge
             else if (spellProto->SpellFamilyFlags & 0x00000000400LL)
                 CastingTime = 1155;                         // ignore CastingTimePenalty and use as modifier
-            // Earth Shield 30% per charge
-            else if (spellProto->SpellFamilyFlags & 0x40000000000LL)
-                CastingTime = 1050;
             break;
     }
 
@@ -6686,8 +6683,8 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
 
     // Healing Done
 
-    // Vampiric Embrace, Shadowmend, Lifebloom final heal - cannot critically heal
-    if(spellProto->Id == 15290 || spellProto->Id == 39373 || spellProto->Id == 33778)
+    // These Spells are doing fixed amount of healing (TODO reuse dmgClass2 from Spell.DBC )
+    if(spellProto->Id == 15290 || spellProto->Id == 39373 || spellProto->Id == 33778 || spellProto->Id == 379)
         return healamount;
 
     int32 AdvertisedBenefit = SpellBaseHealingBonus(1<<spellProto->School);
