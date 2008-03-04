@@ -384,7 +384,7 @@ void GameObject::Update(uint32 /*p_time*/)
         }
     }
 
-    if (m_usetimes >= m_charges)
+    if (m_charges && m_usetimes >= m_charges)
     {
         m_respawnTime = 0;                                  // to prevent save respawn timer
         Delete();
