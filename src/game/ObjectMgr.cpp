@@ -2648,7 +2648,16 @@ void ObjectMgr::LoadQuests()
 
         // fill additional data stores
         if(qinfo->PrevQuestId)
-            qinfo->prevQuests.push_back(qinfo->PrevQuestId);
+        {
+            if (mQuestTemplates.find(abs(qinfo->GetPrevQuestId())) == mQuestTemplates.end())
+            {
+                sLog.outErrorDb("Quest %d has PrevQuestId %i, but no such quest", qinfo->GetQuestId(), qinfo->GetPrevQuestId());
+            }
+            else
+            {
+                qinfo->prevQuests.push_back(qinfo->PrevQuestId);
+            }
+        }
 
         if(qinfo->NextQuestId)
         {
@@ -4293,7 +4302,34 @@ void ObjectMgr::LoadGameobjectInfo()
 
         switch(goInfo->type)
         {
-            case GAMEOBJECT_TYPE_TRAP:
+            case GAMEOBJECT_TYPE_DOOR:                      //0
+            {
+                if(goInfo->door.lockId)
+                {
+                    if(!sLockStore.LookupEntry(goInfo->door.lockId))
+                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data1=%u but lock (Id: %u) not found.",id,goInfo->type,goInfo->door.lockId,goInfo->door.lockId);
+                }
+                break;
+            }
+            case GAMEOBJECT_TYPE_BUTTON:                    //1
+            {
+                if(goInfo->button.lockId)
+                {
+                    if(!sLockStore.LookupEntry(goInfo->button.lockId))
+                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data1=%u but lock (Id: %u) not found.",id,goInfo->type,goInfo->button.lockId,goInfo->button.lockId);
+                }
+                break;
+            }
+            case GAMEOBJECT_TYPE_CHEST:                     //3
+                {
+                    if(goInfo->chest.lockId)
+                    {
+                        if(!sLockStore.LookupEntry(goInfo->chest.lockId))
+                            sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data0=%u but lock (Id: %u) not found.",id,goInfo->type,goInfo->chest.lockId,goInfo->chest.lockId);
+                    }
+                    break;
+                }
+            case GAMEOBJECT_TYPE_TRAP:                      //6
             {
                 /* disable check for while 
                 if(goInfo->trap.spellId)                    // spell
@@ -4304,7 +4340,18 @@ void ObjectMgr::LoadGameobjectInfo()
                 */
                 break;
             }
-            case GAMEOBJECT_TYPE_GOOBER:
+            case GAMEOBJECT_TYPE_SPELL_FOCUS:               //8
+            {
+                /* disabled, spell focus not loaded at startup currently
+                if(goInfo->spellFocus.focusId)
+                {
+                    if(!sSpellFocusStore.LookupEntry(goInfo->spellFocus.focusId))
+                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data0=%u but SpellFocus (Id: %u) not exist.",id,goInfo->type,goInfo->spellFocus.focusId,goInfo->spellFocus.focusId);
+                }
+                */
+                break;
+            }
+            case GAMEOBJECT_TYPE_GOOBER:                    //10
             {
                 /* disable check for while 
                 if(goInfo->goober.spellId)                  // spell
@@ -4327,7 +4374,27 @@ void ObjectMgr::LoadGameobjectInfo()
                 }
                 break;
             }
-            case GAMEOBJECT_TYPE_SPELLCASTER:
+            case GAMEOBJECT_TYPE_MO_TRANSPORT:              //15
+            {
+                if(goInfo->moTransport.taxiPathId)
+                {
+                    if(goInfo->moTransport.taxiPathId >= sTaxiPathNodesByPath.size() || sTaxiPathNodesByPath[goInfo->moTransport.taxiPathId].empty())
+                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data0=%u but TaxiPath (Id: %u) not exist.",id,goInfo->type,goInfo->moTransport.taxiPathId,goInfo->moTransport.taxiPathId);
+                }
+                break;
+            }
+            case GAMEOBJECT_TYPE_SUMMONING_RITUAL:          //18
+            {
+                /* disabled 
+                if(goInfo->summoningRitual.spellId)
+                {
+                    if(!sSpellStore.LookupEntry(goInfo->summoningRitual.spellId))
+                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data1=%u but Spell (Entry %u) not exist.",id,goInfo->type,goInfo->summoningRitual.spellId,goInfo->summoningRitual.spellId);
+                }
+                */
+                break;
+            }
+            case GAMEOBJECT_TYPE_SPELLCASTER:               //22
             {
                 if(goInfo->spellcaster.spellId)             // spell
                 {
