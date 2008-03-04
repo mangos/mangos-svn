@@ -3167,13 +3167,22 @@ void ObjectMgr::LoadEventScripts()
     // Load all possible script entries from gameobjects
     for(uint32 i = 1; i < sGOStorage.MaxEntry; ++i)
     {
-        GameObjectInfo const * go = sGOStorage.LookupEntry<GameObjectInfo>(i);
-        if (go)
+        GameObjectInfo const * goInfo = sGOStorage.LookupEntry<GameObjectInfo>(i);
+        if (goInfo)
         {
-            if (go->type == GAMEOBJECT_TYPE_GOOBER && go->data2)
-                evt_scripts.insert(go->data2);
-            else if (go->type == GAMEOBJECT_TYPE_CHEST && go->data6)
-                evt_scripts.insert(go->data6);
+            switch(goInfo->type)
+            {
+                case GAMEOBJECT_TYPE_GOOBER:
+                    if(goInfo->goober.eventId)
+                        evt_scripts.insert(goInfo->goober.eventId);
+                    break;
+                case GAMEOBJECT_TYPE_CHEST:
+                    if(goInfo->chest.eventId)
+                        evt_scripts.insert(goInfo->chest.eventId);
+                    break;
+                default:
+                    break;
+            }
         }
     }
     // Load all possible script entries from spells
@@ -4287,10 +4296,10 @@ void ObjectMgr::LoadGameobjectInfo()
             case GAMEOBJECT_TYPE_TRAP:
             {
                 /* disable check for while 
-                if(goInfo->data3)                           // spell
+                if(goInfo->trap.spellId)                    // spell
                 {
-                    if(!sSpellStore.LookupEntry(goInfo->data3))
-                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data3=%u but Spell (Entry %u) not exist.",id,goInfo->type,goInfo->data3,goInfo->data3);
+                    if(!sSpellStore.LookupEntry(goInfo->trap.spellId))
+                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data3=%u but Spell (Entry %u) not exist.",id,goInfo->type,goInfo->trap.spellId,goInfo->trap.spellId);
                 }
                 */
                 break;
@@ -4298,32 +4307,37 @@ void ObjectMgr::LoadGameobjectInfo()
             case GAMEOBJECT_TYPE_GOOBER:
             {
                 /* disable check for while 
-                if(goInfo->data10)                          // spell
+                if(goInfo->goober.spellId)                  // spell
                 {
-                    if(!sSpellStore.LookupEntry(goInfo->data10))
-                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data2=%u but Spell (Entry %u) not exist.",id,goInfo->type,goInfo->data10,goInfo->data10);
+                    if(!sSpellStore.LookupEntry(goInfo->goober.spellId))
+                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data2=%u but Spell (Entry %u) not exist.",id,goInfo->type,goInfo->goober.spellId,goInfo->goober.spellId);
                 }
                 */
-                if(goInfo->data12)                          // linked trap
+                if(goInfo->goober.linkedTrapId)                 // linked trap
                 {
-                    if(GameObjectInfo const* trapInfo = sGOStorage.LookupEntry<GameObjectInfo>(goInfo->data12))
+                    if(GameObjectInfo const* trapInfo = sGOStorage.LookupEntry<GameObjectInfo>(goInfo->goober.linkedTrapId))
                     {
                         if(trapInfo->type!=GAMEOBJECT_TYPE_TRAP)
-                            sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data12=%u but GO (Entry %u) have not GAMEOBJECT_TYPE_TRAP (%) type.",id,goInfo->type,goInfo->data12,GAMEOBJECT_TYPE_TRAP);
+                            sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data12=%u but GO (Entry %u) have not GAMEOBJECT_TYPE_TRAP (%) type.",id,goInfo->type,goInfo->goober.linkedTrapId,GAMEOBJECT_TYPE_TRAP);
                     }
                     /* disable check for while 
                     else
-                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data12=%u but trap GO (Entry %u) not exist in `gameobject_tamplete`.",id,goInfo->type,goInfo->data12,goInfo->data12);
+                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data12=%u but trap GO (Entry %u) not exist in `gameobject_tamplete`.",id,goInfo->type,goInfo->goober.linkedTrapId,goInfo->goober.linkedTrapId);
                     */
                 }
                 break;
             }
             case GAMEOBJECT_TYPE_SPELLCASTER:
             {
-                if(goInfo->data3)                           // spell
+                if(goInfo->spellcaster.spellId)             // spell
                 {
-                    if(!sSpellStore.LookupEntry(goInfo->data3))
-                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data3=%u but Spell (Entry %u) not exist.",id,goInfo->type,goInfo->data3,goInfo->data3);
+                    if(!sSpellStore.LookupEntry(goInfo->spellcaster.spellId))
+                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data3=%u but Spell (Entry %u) not exist.",id,goInfo->type,goInfo->spellcaster.spellId,goInfo->spellcaster.spellId);
+                }
+                if(goInfo->spellcaster.spellId2)            // spell2
+                {
+                    if(!sSpellStore.LookupEntry(goInfo->spellcaster.spellId2))
+                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data3=%u but Spell (Entry %u) not exist.",id,goInfo->type,goInfo->spellcaster.spellId2,goInfo->spellcaster.spellId2);
                 }
                 break;
             }
@@ -5543,7 +5557,7 @@ void ObjectMgr::LoadGameObjectForQuests()
             }
             case GAMEOBJECT_TYPE_GOOBER:
             {
-                if(goInfo->data1)    //quests objects
+                if(goInfo->goober.questId)                  //quests objects
                 {
                     mGameObjectForQuestSet.insert(go_entry);
                     count++;

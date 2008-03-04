@@ -927,3 +927,24 @@ const char *BattleGround::GetMangosString(uint32 entry)
 {
     return objmgr.GetMangosString(entry);
 }
+
+void BattleGround::HandleTriggerBuff(uint64 const& go_guid,Player* source)
+{
+    GameObject *obj = HashMapHolder<GameObject>::Find(go_guid);
+    if(!obj)
+        return;
+
+    if(obj->GetGoType()!=GAMEOBJECT_TYPE_TRAP)
+    {
+        sLog.outError("Battleground (Type: %u) have buff gameobject (Entry: %u Type:%u) as trap gameobject.",GetTypeID(),obj->GetEntry(),obj->GetGoType());
+        return;
+    }
+
+    if(!obj->isSpawned())
+        return;                                             // buff not spawned yet
+
+    obj->SetRespawnTime(BUFF_RESPAWN_TIME);
+    obj->SetLootState(GO_LOOTED);
+    if(uint32 spellId = obj->GetGOInfo()->trap.spellId)
+        source->CastSpell(source, spellId, true);
+}

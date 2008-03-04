@@ -417,10 +417,10 @@ namespace MaNGOS
                 if(go->GetGOInfo()->type != GAMEOBJECT_TYPE_SPELL_FOCUS)
                     return false;
 
-                if(go->GetGOInfo()->data0 != i_focusId)
+                if(go->GetGOInfo()->spellFocus.focusId != i_focusId)
                     return false;
 
-                float dist = go->GetGOInfo()->data1;
+                float dist = go->GetGOInfo()->spellFocus.dist;
 
                 return go->IsWithinDistInMap(i_unit, dist);
             }
@@ -475,10 +475,10 @@ namespace MaNGOS
             AnyUnfriendlyUnitInObjectRangeCheck(WorldObject const* obj, Unit const* funit, float range) : i_obj(obj), i_funit(funit), i_range(range) {}
             bool operator()(Unit* u)
             {
-                if(u->isAlive() && !i_funit->IsFriendlyTo(u) && i_obj->IsWithinDistInMap(u, i_range))
+                if(u->isAlive() && i_obj->IsWithinDistInMap(u, i_range) && !i_funit->IsFriendlyTo(u))
                     return true;
-
-                return false;
+                else
+                    return false;
             }
         private:
             WorldObject const* i_obj;

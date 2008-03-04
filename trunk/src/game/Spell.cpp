@@ -372,6 +372,14 @@ void Spell::FillTargetMap()
                 {
                     SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
                 }
+                // Note: this hack with search required until GO casting not implemented
+                // enviromenment damage spells already have around enemies targeting but this not help in case not existed GO casting support
+                // currently each eanemy selected explicitly and self cast damage
+                else if(m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_ENEMY_IN_AREA && m_spellInfo->Effect[i]==SPELL_EFFECT_ENVIRONMENTAL_DAMAGE)
+                {
+                    if(m_targets.getUnitTarget())
+                        tmpUnitMap.push_back(m_targets.getUnitTarget());
+                }
                 else
                 {
                     SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
@@ -3025,15 +3033,7 @@ uint8 Spell::CanCast(bool strict)
                 // get the lock entry
                 LockEntry const *lockInfo = NULL;
                 if (GameObject* go=m_targets.getGOTarget())
-                {
-                    switch(go->GetGoType())
-                    {
-                        case GAMEOBJECT_TYPE_CHEST:
-                            lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->data0); break;
-                        case GAMEOBJECT_TYPE_DOOR:
-                            lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->data1); break;
-                    }
-                }
+                    lockInfo = sLockStore.LookupEntry(go->GetLockId());
                 else if(Item* itm=m_targets.getItemTarget())
                     lockInfo = sLockStore.LookupEntry(itm->GetProto()->LockID);
 

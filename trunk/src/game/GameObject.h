@@ -20,6 +20,7 @@
 #define MANGOSSERVER_GAMEOBJECT_H
 
 #include "Common.h"
+#include "SharedDefines.h"
 #include "Object.h"
 #include "LootMgr.h"
 #include "Database/DatabaseEnv.h"
@@ -41,30 +42,103 @@ struct GameObjectInfo
     uint32  faction;
     uint32  flags;
     float   size;
-    uint32  data0;
-    uint32  data1;
-    uint32  data2;
-    uint32  data3;
-    uint32  data4;
-    uint32  data5;
-    uint32  data6;
-    uint32  data7;
-    uint32  data8;
-    uint32  data9;
-    uint32  data10;
-    uint32  data11;
-    uint32  data12;
-    uint32  data13;
-    uint32  data14;
-    uint32  data15;
-    uint32  data16;
-    uint32  data17;
-    uint32  data18;
-    uint32  data19;
-    uint32  data20;
-    uint32  data21;
-    uint32  data22;
-    uint32  data23;
+    union                                                   // different GO types have different data field
+    {
+        //0 GAMEOBJECT_TYPE_DOOR
+        struct
+        {
+            uint32 _data0;
+            uint32 lockId;                                  //1
+        } door;
+        //1 GAMEOBJECT_TYPE_BUTTON
+        struct
+        {
+            uint32 _data0;
+            uint32 lockId;                                  //1
+            uint32 _data2[2];
+            uint32 isBattlegroundObject;                    //4
+        } button;
+        //3 GAMEOBJECT_TYPE_CHEST
+        struct
+        {
+            uint32 lockId;                                  //0
+            uint32 lootId;                                  //1
+            uint32 _data2[2];
+            uint32 minSuccessOpens;                         //4
+            uint32 maxSuccessOpens;                         //5
+            uint32 eventId;                                 //6
+        } chest;
+        //6 GAMEOBJECT_TYPE_TRAP
+        struct
+        {
+            uint32 _data0[2];
+            uint32 radius;                                  //2
+            uint32 spellId;                                 //3
+            uint32 isNeedDespawn;                           //4 (if >0)
+        } trap;
+        //8 GAMEOBJECT_TYPE_SPELL_FOCUS
+        struct
+        {
+            uint32 focusId;                                 //0
+            uint32 dist;                                    //1
+        } spellFocus;
+        //10 GAMEOBJECT_TYPE_GOOBER
+        struct
+        {
+            uint32 _data0;
+            uint32 questId;                                 //1
+            uint32 eventId;                                 //2
+            uint32 _data3[7];
+            uint32 spellId;                                 //10
+            uint32 _data11;
+            uint32 linkedTrapId;                            //12
+            uint32 _data13[3];
+            uint32 isBattlegroundObject;                    //16
+        } goober;
+        //13 GAMEOBJECT_TYPE_CAMERA
+        struct
+        {
+            uint32 _data0;
+            uint32 cinematicId;                             //1
+        } camera;
+        //15 GAMEOBJECT_TYPE_MO_TRANSPORT
+        struct
+        {
+            uint32 taxiPathId;                              //0
+        } moTransport;
+        //17 GAMEOBJECT_TYPE_FISHINGNODE
+        struct
+        {
+            uint32 _data0;
+            uint32 lootId;                                  //1
+        } fishnode;
+        //18 GAMEOBJECT_TYPE_SUMMONING_RITUAL
+        struct
+        {
+            uint32 reqParticipants;                         //0
+            uint32 spellId;                                 //1
+        } summoningRitual;
+        //22 GAMEOBJECT_TYPE_SPELLCASTER
+        struct
+        {
+            uint32 spellId;                                 //0
+            uint32 charges;                                 //1
+            uint32 _data2;
+            uint32 spellId2;                                //3 (is it used in this way?)
+        } spellcaster;
+        //23 GAMEOBJECT_TYPE_MEETINGSTONE
+        struct
+        {
+            uint32 minLevel;                                //0
+            uint32 maxLevel;                                //1
+        } meetingstone;
+
+        // not use for specific field access (only for output with loop by all filed), also this determinate max union size
+        struct                                              // GAMEOBJECT_TYPE_SPELLCASTER
+        {
+            uint32 data[24];
+        } raw;
+    };
     char   *ScriptName;
 };
 
@@ -149,6 +223,16 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void SetLootState(LootState s) { m_lootState = s; }
         static uint32 GetLootId(GameObjectInfo const* info);
         uint32 GetLootId() const { return GetLootId(GetGOInfo()); }
+        uint32 GetLockId() const
+        {
+            switch(GetGoType())
+            {
+                case GAMEOBJECT_TYPE_DOOR: return GetGOInfo()->door.lockId;
+                case GAMEOBJECT_TYPE_CHEST: return GetGOInfo()->chest.lockId;
+                default: return 0;
+            }
+        }
+
         void SetRespawnTime(int32 respawn)
         {
             m_respawnTime = respawn > 0 ? time(NULL) + respawn : 0;
@@ -205,6 +289,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         uint32      m_flags;
         LootState   m_lootState;
         bool        m_spawnedByDefault;
+        uint32      m_environmentcastTime;
         std::list<uint32> m_SkillupList;
 
         std::set<uint32> m_unique_users;
