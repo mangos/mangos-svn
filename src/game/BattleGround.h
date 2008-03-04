@@ -347,7 +347,6 @@ class BattleGround
         virtual void AddPlayer(Player *plr);                // must be implemented in BG subclass
         virtual void RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPacket);
                                                             // can be extended in in BG subclass
-
         // TODO: make this protected:
         typedef std::vector<uint64> BGObjects;
         typedef std::vector<uint64> BGCreatures;
@@ -366,6 +365,9 @@ class BattleGround
     protected:
         //this method is called, when BG cannot spawn its own spirit guide, or something is wrong, It correctly ends BattleGround
         void EndNow();
+
+        void HandleTriggerBuff(uint64 const& go_guid,Player* source);
+
         /* Scorekeeping */
         std::map<uint64, BattleGroundScore*>    m_PlayerScores;// Player scores
         // must be implemented in BG subclass

@@ -157,19 +157,7 @@ void BattleGroundBE::HandleAreaTrigger(Player *Source, uint32 Trigger)
     }
 
     if(buff_guid)
-    {
-        GameObject *obj = HashMapHolder<GameObject>::Find(buff_guid);
-        if(obj)
-        {
-            if(!obj->isSpawned())
-                return;                                     // buff not spawned yet
-            obj->SetRespawnTime(BUFF_RESPAWN_TIME);
-            obj->SetLootState(GO_LOOTED);
-            SpellId = obj->GetGOInfo()->data3;
-            if(SpellId)
-                Source->CastSpell(Source, SpellId, true);
-        }
-    }
+        HandleTriggerBuff(buff_guid,Source);
 }
 
 void BattleGroundBE::ResetBGSubclass()

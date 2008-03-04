@@ -607,8 +607,10 @@ enum GameobjectTypes
     GAMEOBJECT_TYPE_DO_NOT_USE_YET         = 32,
     GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING  = 33,
     GAMEOBJECT_TYPE_GUILD_BANK             = 34,
-    MAX_GAMEOBJECT_TYPE                    = 35             // sending to client this or greater value can crash client.
 };
+
+#define MAX_GAMEOBJECT_TYPE                  35             // sending to client this or greater value can crash client.
+
 
 enum GameObjectFlags
 {

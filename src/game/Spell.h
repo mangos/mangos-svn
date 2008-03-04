@@ -379,6 +379,7 @@ class Spell
         void EffectDistract(uint32 i);
         void EffectPull(uint32 i);
         void EffectSchoolDMG(uint32 i);
+        void EffectEnvirinmentalDMG(uint32 i);
         void EffectInstaKill(uint32 i);
         void EffectDummy(uint32 i);
         void EffectTeleportUnits(uint32 i);

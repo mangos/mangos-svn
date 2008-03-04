@@ -279,33 +279,17 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             //big gun, its a spell/aura
         case GAMEOBJECT_TYPE_GOOBER:                        //10
             info = obj->GetGOInfo();
-            spellId = info ? info->data10 : 0;
+            spellId = info ? info->goober.spellId : 0;
             break;
 
-        case GAMEOBJECT_TYPE_SPELLCASTER:                   //22
-
-            obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
-
-            info = obj->GetGOInfo();
-            if(info)
-            {
-                spellId = info->data0;
-                if (spellId == 0)
-                    spellId = info->data3;
-
-                //guid=_player->GetGUID();
-            }
-            obj->AddUse();
-            break;
         case GAMEOBJECT_TYPE_CAMERA:                        //13
             info = obj->GetGOInfo();
             if(info)
             {
-                uint32 cinematic_id = info->data1;
-                if(cinematic_id)
+                if(info->camera.cinematicId)
                 {
                     WorldPacket data(SMSG_TRIGGER_CINEMATIC, 4);
-                    data << cinematic_id;
+                    data << info->camera.cinematicId;
                     _player->GetSession()->SendPacket(&data);
                 }
                 return;
@@ -373,7 +357,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             return;
         }
 
-        case GAMEOBJECT_TYPE_SUMMONING_RITUAL:
+        case GAMEOBJECT_TYPE_SUMMONING_RITUAL:              //18
         {
             Unit* caster = obj->GetOwner();
 
@@ -388,8 +372,8 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
             obj->AddUniqueUse(GetPlayer());
 
-            // must 2 group members use GO, or only 1 when it is meeting stone summon
-            if(obj->GetUniqueUseCount() < (info->data0 == 2 ? 1 : 2))
+            // full ammount unique participants including original summoner
+            if(obj->GetUniqueUseCount() < info->summoningRitual.reqParticipants)
                 return;
 
             // in case summoning ritual caster is GO creator
@@ -398,7 +382,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             if(!caster->m_currentSpells[CURRENT_CHANNELED_SPELL])
                 return;
 
-            spellId = info->data1;
+            spellId = info->summoningRitual.spellId;
 
             // finish spell
             caster->m_currentSpells[CURRENT_CHANNELED_SPELL]->SendChannelUpdate(0);
@@ -408,6 +392,23 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             obj->SetLootState(GO_LOOTED);
 
             // go to end function to spell casting
+            break;
+        }
+        case GAMEOBJECT_TYPE_SPELLCASTER:                   //22
+        {
+
+            obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
+
+            info = obj->GetGOInfo();
+            if(info)
+            {
+                spellId = info->spellcaster.spellId;
+                if (spellId == 0)
+                    spellId = info->spellcaster.spellId2;
+
+                //guid=_player->GetGUID();
+            }
+            obj->AddUse();
             break;
         }
         case GAMEOBJECT_TYPE_MEETINGSTONE:                  //23
@@ -422,10 +423,10 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
             //required lvl checks!
             uint8 level = _player->getLevel();
-            if (level < info->data0 || level > info->data1)
+            if (level < info->meetingstone.minLevel || level > info->meetingstone.maxLevel)
                 return;
             level = targetPlayer->getLevel();
-            if (level < info->data0 || level > info->data1)
+            if (level < info->meetingstone.minLevel || level > info->meetingstone.maxLevel)
                 return;
 
             spellId = 23598;

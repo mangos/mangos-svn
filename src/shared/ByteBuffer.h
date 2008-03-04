@@ -269,6 +269,11 @@ class ByteBuffer
         {
             return append((const uint8 *)src, cnt);
         }
+        template<class T>
+        void append(const T *src, size_t cnt)
+        {
+            return append((const uint8 *)src, cnt*sizeof(T));
+        }
         void append(const uint8 *src, size_t cnt)
         {
             if (!cnt) return;

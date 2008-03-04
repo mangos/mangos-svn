@@ -65,7 +65,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //  4 SPELL_EFFECT_PORTAL_TELEPORT          unused
     &Spell::EffectTeleportUnits,                            //  5 SPELL_EFFECT_TELEPORT_UNITS
     &Spell::EffectApplyAura,                                //  6 SPELL_EFFECT_APPLY_AURA
-    &Spell::EffectSchoolDMG,                                //  7 SPELL_EFFECT_ENVIRONMENTAL_DAMAGE
+    &Spell::EffectEnvirinmentalDMG,                         //  7 SPELL_EFFECT_ENVIRONMENTAL_DAMAGE
     &Spell::EffectManaDrain,                                //  8 SPELL_EFFECT_MANA_DRAIN
     &Spell::EffectHealthLeach,                              //  9 SPELL_EFFECT_HEALTH_LEECH
     &Spell::EffectHeal,                                     // 10 SPELL_EFFECT_HEAL
@@ -256,6 +256,23 @@ void Spell::EffectInstaKill(uint32 /*i*/)
 
     uint32 health = unitTarget->GetHealth();
     m_caster->DealDamage(unitTarget, health, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, false);
+}
+
+void Spell::EffectEnvirinmentalDMG(uint32 i)
+{
+    uint32 absorb = 0;
+    uint32 resist = 0;
+
+    // Note: this hack with damage replace required until GO casting not implemented
+    // enviromenment damage spells already have around enemies targeting but this not help in case not existed GO casting support
+    // currently each eanemy selected explicitly and self cast damage, we prevent apply self casted spell bonuses/etc
+    damage = m_spellInfo->EffectBasePoints[i]+m_spellInfo->EffectBaseDice[i];
+
+    m_caster->CalcAbsorbResist(m_caster,SpellSchools(m_spellInfo->School), SPELL_DIRECT_DAMAGE, damage, &absorb, &resist);
+
+    m_caster->SendSpellNonMeleeDamageLog(m_caster, m_spellInfo->Id, damage, SpellSchools(m_spellInfo->School), absorb, resist, false, 0, false);
+    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+        ((Player*)m_caster)->EnvironmentalDamage(m_caster->GetGUID(),DAMAGE_FIRE,damage);
 }
 
 void Spell::EffectSchoolDMG(uint32 /*i*/)
@@ -2069,14 +2086,15 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
 
             case GAMEOBJECT_TYPE_GOOBER:
                 // goober_scripts can be triggered if the player dont have the quest
-                if (gameObjTarget->GetGOInfo()->data2)
+                if (gameObjTarget->GetGOInfo()->goober.eventId)
                 {
-                    sLog.outDebug("Goober ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->data2,gameObjTarget->GetDBTableGUIDLow());
-                    sWorld.ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->data2, player, gameObjTarget);
+                    sLog.outDebug("Goober ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->goober.eventId,gameObjTarget->GetDBTableGUIDLow());
+                    sWorld.ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->goober.eventId, player, gameObjTarget);
                 }
                 // cast goober spell
-                if (gameObjTarget->GetGOInfo()->data1)      ///Quest (entry = data1) require to be active for GO using
-                    if(player->GetQuestStatus(gameObjTarget->GetGOInfo()->data1) != QUEST_STATUS_INCOMPLETE)
+                if (gameObjTarget->GetGOInfo()->goober.questId)
+                    ///Quest require to be active for GO using
+                    if(player->GetQuestStatus(gameObjTarget->GetGOInfo()->goober.questId) != QUEST_STATUS_INCOMPLETE)
                         return;
 
                 gameObjTarget->AddUse();
@@ -2084,11 +2102,11 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                 player->CastedCreatureOrGO(gameObjTarget->GetEntry(), gameObjTarget->GetGUID(), 0);
 
                 // triggering linked GO
-                if(uint32 trapEntry = gameObjTarget->GetGOInfo()->data12)
+                if(uint32 trapEntry = gameObjTarget->GetGOInfo()->goober.linkedTrapId)
                 {
                     if(GameObjectInfo const* trapInfo = sGOStorage.LookupEntry<GameObjectInfo>(trapEntry))
                     {
-                        SpellEntry const* trapSpell = sSpellStore.LookupEntry(trapInfo->data3);
+                        SpellEntry const* trapSpell = sSpellStore.LookupEntry(trapInfo->trap.spellId);
                         if(trapInfo->type==GAMEOBJECT_TYPE_TRAP && trapSpell)
                         {
                             float range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(trapSpell->rangeIndex));
@@ -2117,10 +2135,10 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                 return;
 
             case GAMEOBJECT_TYPE_CHEST:
-                if (gameObjTarget->GetGOInfo()->data6)
+                if (gameObjTarget->GetGOInfo()->chest.eventId)
                 {
-                    sLog.outDebug("Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->data6,gameObjTarget->GetDBTableGUIDLow());
-                    sWorld.ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->data6, player, gameObjTarget);
+                    sLog.outDebug("Chest ScriptStart id %u for GO %u", gameObjTarget->GetGOInfo()->chest.eventId,gameObjTarget->GetDBTableGUIDLow());
+                    sWorld.ScriptsStart(sEventScripts, gameObjTarget->GetGOInfo()->chest.eventId, player, gameObjTarget);
                 }
                 // Don't return, let loots been taken
         }
@@ -2148,8 +2166,8 @@ void Spell::EffectOpenLock(uint32 /*i*/)
     if(gameObjTarget)
     {
         // Arathi Basin banner opening !
-        if (gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_BUTTON && gameObjTarget->GetGOInfo()->data4 == 1 ||
-            gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_GOOBER && gameObjTarget->GetGOInfo()->data16 == 1 )
+        if (gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_BUTTON && gameObjTarget->GetGOInfo()->button.isBattlegroundObject ||
+            gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_GOOBER && gameObjTarget->GetGOInfo()->goober.isBattlegroundObject )
         {
             if( player->InBattleGround() &&                 // in battleground
                 !player->IsMounted() &&                     // not mounted
@@ -2164,7 +2182,7 @@ void Spell::EffectOpenLock(uint32 /*i*/)
                 return;
             }
         }
-        lockId = gameObjTarget->GetGOInfo()->data0;
+        lockId = gameObjTarget->GetLockId();
         guid = gameObjTarget->GetGUID();
     }
     else if(itemTarget)
@@ -4633,6 +4651,9 @@ void Spell::EffectTransmitted(uint32 i)
 
             int32 duration = GetSpellDuration(m_spellInfo);
             pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
+
+            if(m_caster->GetTypeId()==TYPEID_PLAYER)
+                pGameObj->AddUniqueUse((Player*)m_caster);
             break;
         }
         case GAMEOBJECT_TYPE_FISHINGHOLE:
