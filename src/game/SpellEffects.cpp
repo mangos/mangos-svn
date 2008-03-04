@@ -1413,6 +1413,26 @@ void Spell::EffectTriggerSpell(uint32 i)
             m_caster->CastSpell(unitTarget, 31790, true);
             return;
         }
+        // Cloak of Shadows
+        case 35729 :
+        {
+            Unit::AuraMap& Auras = m_caster->GetAuras();
+            for(Unit::AuraMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
+            {
+                // remove all harmful spells on you... 
+                if( // ignore positive and passive auras
+                    !iter->second->IsPositive() && !iter->second->IsPassive()    &&
+                    // ignore physical auras
+                    iter->second->GetSpellProto()->School != SPELL_SCHOOL_NORMAL &&
+                    // ignore immunity persistent spells
+                    !( iter->second->GetSpellProto()->AttributesEx & 0x10000 ) )
+                {
+                    m_caster->RemoveAurasDueToSpell(iter->second->GetSpellProto()->Id);
+                    iter = Auras.begin();
+                }
+            }
+            return;
+        }
     }
 
     // normal case
