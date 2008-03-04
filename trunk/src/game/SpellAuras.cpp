@@ -1382,6 +1382,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             m_target->CastCustomSpell(m_target,33778,&healBasePoints0,NULL,NULL,true);
         }
     }
+
+    // Earth Shield
+    if ( Real && caster && apply && GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && (GetSpellProto()->SpellFamilyFlags & 0x40000000000LL))
+        m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
 }
 
 void Aura::HandleAuraMounted(bool apply, bool Real)
