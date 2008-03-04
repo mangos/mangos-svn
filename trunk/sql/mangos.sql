@@ -637,6 +637,7 @@ CREATE TABLE `creature_template` (
   `faction_H` int(4) unsigned NOT NULL default '0',
   `npcflag` int(4) unsigned default '0',
   `speed` float default '0',
+  `scale` float default '0',  
   `rank` tinyint(3) unsigned default '0',
   `mindmg` float default '0',
   `maxdmg` float default '0',
@@ -689,8 +690,8 @@ CREATE TABLE `creature_template` (
 
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
-INSERT INTO `creature_template` (`entry`,`modelid_A`,`modelid_A2`,`modelid_H`,`modelid_H2`,`name`,`subname`,`minlevel`,`maxlevel`,`minhealth`,`maxhealth`,`minmana`,`maxmana`,`armor`,`faction_A`,`faction_H`,`npcflag`,`speed`,`rank`,`mindmg`,`maxdmg`,`dmgschool`,`attackpower`,`baseattacktime`,`rangeattacktime`,`flags`,`dynamicflags`,`family`,`trainer_type`,`trainer_spell`,`class`,`race`,`minrangedmg`,`maxrangedmg`,`rangedattackpower`,`type`,`civilian`,`flag1`,`lootid`,`pickpocketloot`,`skinloot`,`resistance1`,`resistance2`,`resistance3`,`resistance4`,`resistance5`,`resistance6`,`spell1`,`spell2`,`spell3`,`spell4`,`mingold`,`maxgold`,`AIName`,`MovementType`,`InhabitType`,`RacialLeader`,`RegenHealth`,`equipment_id`,`ScriptName`) VALUES
-(1,10045,0,10045,0,'Waypoint (Only GM can see it)','Visual',1,1,64,64,0,0,0,35,35,0,0.91,0,14,15,0,100,2000,2200,4096,0,8,0,0,0,0,1.76,2.42,100,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,1,0,'');
+INSERT INTO `creature_template` (`entry`,`modelid_A`,`modelid_A2`,`modelid_H`,`modelid_H2`,`name`,`subname`,`minlevel`,`maxlevel`,`minhealth`,`maxhealth`,`minmana`,`maxmana`,`armor`,`faction_A`,`faction_H`,`npcflag`,`speed`,`scale`,`rank`,`mindmg`,`maxdmg`,`dmgschool`,`attackpower`,`baseattacktime`,`rangeattacktime`,`flags`,`dynamicflags`,`family`,`trainer_type`,`trainer_spell`,`class`,`race`,`minrangedmg`,`maxrangedmg`,`rangedattackpower`,`type`,`civilian`,`flag1`,`lootid`,`pickpocketloot`,`skinloot`,`resistance1`,`resistance2`,`resistance3`,`resistance4`,`resistance5`,`resistance6`,`spell1`,`spell2`,`spell3`,`spell4`,`mingold`,`maxgold`,`AIName`,`MovementType`,`InhabitType`,`RacialLeader`,`RegenHealth`,`equipment_id`,`ScriptName`) VALUES
+(1,10045,0,10045,0,'Waypoint (Only GM can see it)','Visual',1,1,64,64,0,0,0,35,35,0,0.91,0.0,0,14,15,0,100,2000,2200,4096,0,8,0,0,0,0,1.76,2.42,100,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,1,0,'');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 

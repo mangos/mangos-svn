@@ -1168,8 +1168,7 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
     SetCanModifyStats(true);
     UpdateAllStats();
 
-    CreatureDisplayInfoEntry const* ScaleEntry = sCreatureDisplayInfoStore.LookupEntry(display_id);
-    SetFloatValue(OBJECT_FIELD_SCALE_X, ScaleEntry ? ScaleEntry->scale : 1);
+    SetFloatValue(OBJECT_FIELD_SCALE_X, cinfo->scale);
 
     FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cinfo->faction_A);
     if (factionTemplate)                                    // check and error show at loading templates
@@ -1190,8 +1189,8 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
     SetSpeed(MOVE_WALK,     cinfo->speed );
     SetSpeed(MOVE_RUN,      cinfo->speed );
     SetSpeed(MOVE_WALKBACK, cinfo->speed );
-    SetSpeed(MOVE_SWIM,     cinfo->speed);
-    SetSpeed(MOVE_SWIMBACK, cinfo->speed);
+    SetSpeed(MOVE_SWIM,     cinfo->speed );
+    SetSpeed(MOVE_SWIMBACK, cinfo->speed );
 
     // checked at loading
     m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
