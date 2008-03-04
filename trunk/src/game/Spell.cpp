@@ -2368,13 +2368,34 @@ void Spell::SendChannelUpdate(uint32 time)
 
 void Spell::SendChannelStart(uint32 duration)
 {
-    Unit* target = 0;
+    WorldObject* target = NULL;
+
+    // select first not rsusted target from target list for _0_ effect
+    if(!m_UniqueTargetInfo.empty())
+    {
+        for(std::list<TargetInfo>::iterator itr= m_UniqueTargetInfo.begin();itr != m_UniqueTargetInfo.end();++itr)
+        {
+            if( (itr->effectMask & (1<<0)) && itr->reflectResult==SPELL_MISS_NONE && itr->targetGUID != m_caster->GetGUID())
+            {
+                target = ObjectAccessor::GetUnit(*m_caster, itr->targetGUID);
+                break;
+            }
+        }
+    }
+    else if(!m_UniqeGOTargetInfo.empty())
+    {
+        for(std::list<GOTargetInfo>::iterator itr= m_UniqeGOTargetInfo.begin();itr != m_UniqeGOTargetInfo.end();++itr)
+        {
+            if(itr->effectMask & (1<<0) )
+            {
+                target = ObjectAccessor::GetGameObject(*m_caster, itr->targetGUID);
+                break;
+            }
+        }
+    }
 
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-
-        target = ObjectAccessor::GetUnit(*m_caster, ((Player *)m_caster)->GetSelection());
-
         WorldPacket data( MSG_CHANNEL_START, (8+4+4) );
         data.append(m_caster->GetPackGUID());
         data << m_spellInfo->Id;
