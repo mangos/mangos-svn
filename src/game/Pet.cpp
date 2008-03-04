@@ -1593,8 +1593,7 @@ bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float 
 
     SetName(GetCreatureInfo()->Name);
 
-    CreatureDisplayInfoEntry const* ScaleEntry = sCreatureDisplayInfoStore.LookupEntry(minfo->modelid);
-    SetFloatValue(OBJECT_FIELD_SCALE_X, ScaleEntry ? ScaleEntry->scale : 1 );
+    SetFloatValue(OBJECT_FIELD_SCALE_X, cinfo->scale );
 
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
     SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );

@@ -161,6 +161,7 @@ struct CreatureInfo
     uint32  faction_H;
     uint32  npcflag;
     float   speed;
+    float   scale;    
     uint32  rank;
     float   mindmg;
     float   maxdmg;
