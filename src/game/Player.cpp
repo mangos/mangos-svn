@@ -5006,7 +5006,7 @@ void Player::CheckExploreSystem()
             }
             else
             {
-                int32 diff = getLevel() - p->area_level;
+                int32 diff = int32(getLevel()) - p->area_level;
                 uint32 XP = 0;
                 if (diff < -5)
                 {
@@ -5559,7 +5559,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
             if(v_level<=k_grey)
                 return false;
 
-            float diff_level = (k_level == k_grey) ? 1 : ((float)(v_level - k_grey)) / ((float)(k_level - k_grey));
+            float diff_level = (k_level == k_grey) ? 1 : ((float(v_level) - float(k_grey)) / (float(k_level) - float(k_grey)));
 
             int32 v_rank =1;                                //need more info
 
@@ -9344,15 +9344,15 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
                 pItem->DestroyForPlayer( this );
             }
 
+            RemoveEnchantmentDurations(pItem);
+            RemoveItemDurations(pItem);
+            // AddItemDurations(pItem2); - pItem2 already have duration listed for player
+            AddEnchantmentDurations(pItem2);
+
             pItem->SetOwnerGUID(GetGUID());                 // prevent error at next SetState in case trade/mail/buy from vendor
             pItem->SetState(ITEM_REMOVED, this);
             pItem2->SetState(ITEM_CHANGED, this);
 
-            RemoveEnchantmentDurations(pItem);
-            RemoveItemDurations(pItem);
-
-            AddEnchantmentDurations(pItem2);
-            // AddItemDurations(pItem2); - pItem2 already have duration listed for player
             return pItem2;
         }
     }
@@ -9424,12 +9424,13 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
                 pItem->DestroyForPlayer( this );
             }
 
+            RemoveEnchantmentDurations(pItem);
+            // AddItemDurations(pItem2); - pItem2 already have duration listed for player
+
             pItem->SetOwnerGUID(GetGUID());                 // prevent error at next SetState in case trade/mail/buy from vendor
             pItem->SetState(ITEM_REMOVED, this);
             pItem2->SetState(ITEM_CHANGED, this);
 
-            RemoveEnchantmentDurations(pItem);
-            AddEnchantmentDurations(pItem2);
             ApplyEquipCooldown(pItem2);
             return pItem2;
         }
@@ -16254,6 +16255,15 @@ void Player::SummonIfPossible()
     // expire and auto declined
     if(m_summon_expire < time(NULL))
         return;
+
+    // stop taxi flight at summon
+    if(isInFlight())
+    {
+        GetMotionMaster()->MovementExpired();
+        FlightComplete();
+        ClearTaxiDestinations();
+        StopMoving();
+    }
 
     // drop flag at summon
     if(BattleGround *bg = GetBattleGround())
