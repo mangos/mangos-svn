@@ -1306,7 +1306,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
         case SPELL_SCHOOL_ARCANE:
 
             //Spell miss (sends resist message)
-            if( SpellMissChanceCalc(pVictim) > urand(0,10000) )
+            if( int32(SpellMissChanceCalc(pVictim)*100.0f) > irand(0,10000) )
             {
                 cleanDamage->damage = 0;
                 *damage = 0;
@@ -2469,10 +2469,13 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
 MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAttackType attType, SpellEntry const *spellInfo)
 {
     // Miss chance based on melee
-    int32 miss_chance = MeleeMissChanceCalc(pVictim, attType);
+    float miss_chance = MeleeMissChanceCalc(pVictim, attType);
 
     // Critical hit chance
     float crit_chance = GetUnitCriticalChance(attType, pVictim);
+
+    // stunned target cannot dodge and this is check in GetUnitDodgeChance()
+    float dodge_chance = pVictim->GetUnitDodgeChance();
 
     // Only players can have Talent&Spell bonuses
     if (GetTypeId() == TYPEID_PLAYER)
@@ -2482,6 +2485,19 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
         for(AuraList::const_iterator i = mSpellCritSchool.begin(); i != mSpellCritSchool.end(); ++i)
             if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellInfo->School)) != 0)
                 crit_chance += (*i)->GetModifier()->m_amount;
+
+        AuraList const& mCanNotBeDodge = GetAurasByType(SPELL_AURA_CANNOT_BE_DODGED);
+        for(AuraList::const_iterator i = mCanNotBeDodge.begin(); i != mCanNotBeDodge.end(); ++i)
+        {
+            if((*i)->GetModifier()->m_miscvalue == 2)       // can't be dodged rogue finishing move
+            {
+                if(spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE && (spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE__FINISHING_MOVE))
+                {
+                    dodge_chance = 0.0f;
+                    break;
+                }
+            }
+        }
     }
 
     // Spellmods
@@ -2492,17 +2508,17 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
     if (attType == RANGED_ATTACK) modHitChance = m_modRangedHitChance;
     else                          modHitChance = m_modMeleeHitChance;
 
-    DEBUG_LOG("PHYSICAL OUTCOME: hit %f crit %f miss %u",modHitChance,crit_chance,miss_chance);
+    DEBUG_LOG("PHYSICAL OUTCOME: hit %f crit %f miss %f dodge %f",modHitChance,crit_chance,miss_chance,dodge_chance);
 
-    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance * 100 ), miss_chance, int32(modHitChance));
+    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance*100), int32(miss_chance*100), int32(modHitChance),int32(dodge_chance*100));
 }
 
-MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType) const
+MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit *pVictim, WeaponAttackType attType) const
 {
     // This is only wrapper
 
     // Miss chance based on melee
-    int32 miss_chance = MeleeMissChanceCalc(pVictim, attType);
+    float miss_chance = MeleeMissChanceCalc(pVictim, attType);
 
     // Critical hit chance
     float crit_chance = GetUnitCriticalChance(attType, pVictim);
@@ -2511,13 +2527,16 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     if (attType == RANGED_ATTACK) modHitChance = m_modRangedHitChance;
     else                          modHitChance = m_modMeleeHitChance;
 
-    // Useful if want to specify crit & miss chances for melee, else it could be removed
-    DEBUG_LOG("MELEE OUTCOME: hit %f crit %u miss %u", modHitChance,crit_chance,miss_chance);
+    // stunned target cannot dodge and this is check in GetUnitDodgeChance() (returned 0 in this case)
+    float dodge_chance = pVictim->GetUnitDodgeChance();
 
-    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance * 100 ), miss_chance, int32(modHitChance));
+    // Useful if want to specify crit & miss chances for melee, else it could be removed
+    DEBUG_LOG("MELEE OUTCOME: hit %f crit %f miss %f dodge %f", modHitChance,crit_chance,miss_chance,dodge_chance);
+
+    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance*100), int32(miss_chance*100), int32(modHitChance),int32(dodge_chance*100));
 }
 
-MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 hit_chance) const
+MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 hit_chance, int32 dodge_chance) const
 {
     if(pVictim->GetTypeId()==TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
         return MELEE_HIT_EVADE;
@@ -2577,13 +2596,13 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         return MELEE_HIT_CRIT;
     }
 
-    // stunned target cannot dodge and this is check in GetUnitDodgeChance()
-    float dodge = pVictim->GetUnitDodgeChance();
+    // Dodge chance
 
     // Reduce dodge chance by attacker expertise rating
     if (GetTypeId() == TYPEID_PLAYER)
-        dodge-=((Player*)this)->GetExpertiseDodgeOrParryReduction();
-    tmp = (int32)(dodge*100.0f);
+        dodge_chance -= int32(((Player*)this)->GetExpertiseDodgeOrParryReduction()*100);
+
+    tmp = dodge_chance;
     if (   (tmp > 0)                                        // check if unit _can_ dodge
         && ((tmp -= skillBonus2) > 0)
         && roll < (sum += tmp))
@@ -2747,31 +2766,30 @@ void Unit::SendAttackStop(Unit* victim)
     ((Creature*)victim)->AI().EnterEvadeMode(this);*/
 }
 
-uint32 Unit::SpellMissChanceCalc(Unit *pVictim) const
+float Unit::SpellMissChanceCalc(Unit *pVictim) const
 {
     if(!pVictim)
-        return 0;
+        return 0.0f;
 
     // PvP : PvE spell misschances per leveldif > 2
-    int32 chance = pVictim->GetTypeId() == TYPEID_PLAYER ? 700 : 1100;
+    float chance = pVictim->GetTypeId() == TYPEID_PLAYER ? 7.0f : 11.0f;
 
-    int32 leveldif = pVictim->getLevel() - getLevel();
+    int32 leveldif = int32(pVictim->getLevel()) - int32(getLevel());
     if(leveldif < 0)
         leveldif = 0;
 
-    int32 misschance = 400 - int32(m_modSpellHitChance*100);
+    float misschance = 4.0f - m_modSpellHitChance;
     if(leveldif < 3)
-        misschance += leveldif * 100;
+        misschance += leveldif;
     else
         misschance += (leveldif - 2) * chance;
 
-    int32 mod = pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE);
-    misschance -= mod * 100;
+    misschance -= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE);;
 
     // Add victim rating bonus
     if (pVictim->GetTypeId()==TYPEID_PLAYER)
-        misschance += int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_HIT_TAKEN_SPELL_RATING)*100.0f);
-    return misschance < 100 ? 100 : misschance;
+        misschance += ((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_HIT_TAKEN_SPELL_RATING);
+    return misschance < 1.0f ? 1.0f : misschance;
 }
 
 SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool CanReflect)
@@ -2810,13 +2828,13 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
     return SPELL_MISS_NONE;
 }
 
-int32 Unit::MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) const
+float Unit::MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) const
 {
     if(!pVictim)
-        return 0;
+        return 0.0f;
 
     // Base misschance 5%
-    int32 misschance = 500;
+    float misschance = 5.0f;
 
     // DualWield - Melee spells and physical dmg spells - 5% , white damage 24%
     if (haveOffhandWeapon())
@@ -2832,42 +2850,42 @@ int32 Unit::MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) c
         }
         if (isNormal || m_currentSpells[CURRENT_MELEE_SPELL])
         {
-            misschance = 500;
+            misschance = 5.0f;
         }
         else
         {
-            misschance = 2400;
+            misschance = 24.0f;
         }
     }
 
     // PvP : PvE melee misschances per leveldif > 2
     int32 chance = pVictim->GetTypeId() == TYPEID_PLAYER ? 5 : 7;
 
-    int32 leveldif = pVictim->getLevel() - getLevel();
+    int32 leveldif = int32(pVictim->getLevel()) - int32(getLevel());
     if(leveldif < 0)
         leveldif = 0;
 
     // Hit chance from attacker based on ratings and auras
-    int32 m_modHitChance;
+    float m_modHitChance;
     if (attType == RANGED_ATTACK)
-        m_modHitChance = int32(m_modRangedHitChance);
+        m_modHitChance = m_modRangedHitChance;
     else
-        m_modHitChance = int32(m_modMeleeHitChance);
+        m_modHitChance = m_modMeleeHitChance;
 
     if(leveldif < 3)
-        misschance += (leveldif - m_modHitChance)*100;
+        misschance += (leveldif - m_modHitChance);
     else
-        misschance += ((leveldif - 2) * chance - m_modHitChance)*100;
+        misschance += ((leveldif - 2) * chance - m_modHitChance);
 
     // Hit chance for victim based on ratings
     if (pVictim->GetTypeId()==TYPEID_PLAYER)
     {
         if (attType == RANGED_ATTACK)
-            misschance += int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_HIT_TAKEN_RANGED_RATING)*100.0f);
+            misschance += ((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_HIT_TAKEN_RANGED_RATING);
         else
-            misschance+=int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_HIT_TAKEN_MELEE_RATING)*100.0f);
+            misschance += ((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_HIT_TAKEN_MELEE_RATING);
     }
-    return misschance > 6000 ? 6000 : misschance;
+    return misschance > 60.f ? 60.f : misschance;
 }
 
 uint32 Unit::GetDefenseSkillValue() const
@@ -2890,15 +2908,15 @@ uint32 Unit::GetBaseDefenseSkillValue() const
 float Unit::GetUnitDodgeChance() const
 {
     if(hasUnitState(UNIT_STAT_STUNDED))
-        return 0;
+        return 0.0f;
     if( GetTypeId() == TYPEID_PLAYER )
         return GetFloatValue(PLAYER_DODGE_PERCENTAGE);
     else
     {
         if(((Creature const*)this)->isTotem())
-            return 0;
+            return 0.0f;
         else
-            return 5;
+            return 5.0f;
     }
 }
 
@@ -5199,7 +5217,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
 
             // only rogue's finishing moves (maybe need additional checks)
             if( procSpell->SpellFamilyName!=SPELLFAMILY_ROGUE ||
-                (procSpell->SpellFamilyFlags & (0x40000 | 0x80000 | 0x100000 | 0x200000 | 0x800000000LL | 0x20000)) == 0)
+                (procSpell->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE__FINISHING_MOVE) == 0)
                 return;
 
             int32 QREnegyCostSave = procSpell->manaCost * triggeredByAura->GetModifier()->m_amount/100;
