@@ -3221,9 +3221,6 @@ uint8 Spell::CanCast(bool strict)
                 if( !target || !target->IsInSameGroupWith((Player*)m_caster) )
                     return SPELL_FAILED_BAD_TARGETS;
 
-                if( target->isInFlight() )
-                    return SPELL_FAILED_FIZZLE;
-
                 if( target->isInCombat() )
                     return SPELL_FAILED_TARGET_IN_COMBAT;
 
