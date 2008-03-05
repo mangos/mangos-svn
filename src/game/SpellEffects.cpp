@@ -2544,7 +2544,7 @@ void Spell::EffectDistract(uint32 /*i*/)
     #if 0
     ToDo
         Dont use Relocate here !!!
-        int32 levelDiff = m_caster->getLevel() - unitTarget->getLevel();
+        int32 levelDiff = int32(m_caster->getLevel()) - int32(unitTarget->getLevel());
 
     //If there is a victim to distract
     if ((levelDiff > -5) && unitTarget->IsHostileTo(m_caster))
@@ -2576,7 +2576,7 @@ void Spell::EffectPickPocket(uint32 /*i*/)
     //victim have to be alive and humanoid or undead
     if( unitTarget->isAlive() && (unitTarget->GetCreatureTypeMask() &CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) != 0)
     {
-        int32 chance = 10 + m_caster->getLevel() - unitTarget->getLevel();
+        int32 chance = 10 + int32(m_caster->getLevel()) - int32(unitTarget->getLevel());
 
         if (chance > irand(0, 19))
         {

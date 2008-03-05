@@ -598,7 +598,7 @@ void Pet::ModifyLoyalty(int32 addvalue)
             --loyaltylevel;
             SetLoyaltyLevel(LoyaltyLevel(loyaltylevel));
             m_loyaltyPoints = GetStartLoyaltyPoints(loyaltylevel);
-            SetTP(m_TrainingPoints - getLevel());
+            SetTP(m_TrainingPoints - int32(getLevel()));
         }
         else
         {
