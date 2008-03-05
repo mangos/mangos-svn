@@ -844,6 +844,7 @@ enum PlayerLoginQueryIndex
 
 // Player summoning auto-decline time (in secs)
 #define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
+#define MAX_MONEY_AMOUNT                       (0x7FFFFFFF-1)
 
 class MANGOS_DLL_SPEC Player : public Unit
 {
@@ -1209,7 +1210,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             if(d < 0)
                 SetMoney (GetMoney() > uint32(-d) ? GetMoney() + d : 0);
             else
-                SetMoney (GetMoney() < 0xFFFFFFFF - d ? GetMoney() + d : 0xFFFFFFFF);
+                SetMoney (GetMoney() < MAX_MONEY_AMOUNT - d ? GetMoney() + d : MAX_MONEY_AMOUNT);
         }
         void SetMoney( uint32 value )
         {

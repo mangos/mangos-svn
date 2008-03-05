@@ -12640,6 +12640,10 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         }
     }
 
+    // update money limits
+    if(GetMoney() > MAX_MONEY_AMOUNT)
+        SetMoney(MAX_MONEY_AMOUNT);
+
     // set value, including drunk invisibility detection
     SetDrunkValue(GetUInt32Value(PLAYER_BYTES_3) & 0xFFFE);
 
