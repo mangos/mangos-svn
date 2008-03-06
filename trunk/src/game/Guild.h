@@ -272,6 +272,9 @@ class Guild
         // ** Guild bank **
         // Content & item deposit/withdraw
         void   DisplayGuildBankContent(WorldSession *session, uint8 TabId);
+        void   DisplayGuildBankContentUpdate(uint8 TabId, int32 slot1, int32 slot2 = -1);
+        void   DisplayGuildBankMoneyUpdate();
+
         Item*  StoreItem(uint8 TabId, uint8* SlotId, Item* pItem);
         Item*  GetItem(uint8 TabId, uint8 SlotId);
         void   EmptyBankSlot(uint8 TabId, uint8 SlotId);
@@ -282,8 +285,9 @@ class Guild
         void   CreateBankRightForTab(uint32 rankid, uint8 TabId);
         const  GuildBankTab *GetBankTab(uint8 index) { if(index >= m_TabListMap.size()) return NULL; return m_TabListMap[index]; }
         const  uint8 GetPurchasedTabs() const { return purchased_tabs; }
-        uint8  GetBankRights(uint32 rankId, uint8 TabId) const;
-        bool   CanMemberDepositTo(uint32 LowGuid, uint8 TabId) const;
+        uint32 GetBankRights(uint32 rankId, uint8 TabId) const;
+        bool   IsMemberHaveRights(uint32 LowGuid, uint8 TabId,uint32 rights) const;
+        bool   CanMemberViewTab(uint32 LowGuid, uint8 TabId) const;
         // Load/unload
         void   LoadGuildBankFromDB();
         void   UnloadGuildBank();
@@ -313,6 +317,7 @@ class Guild
 
     protected:
         void AddRank(std::string name,uint32 rights,uint32 money);
+        void AppentDisplayGuildBankSlot( WorldPacket& data, GuildBankTab const *tab, int32 slot );
 
         uint32 Id;
         std::string name;

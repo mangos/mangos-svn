@@ -745,12 +745,15 @@ void Guild::UpdateLogoutTime(uint64 guid)
 // Guild Bank part
 // *************************************************
 // Bank content related
-
 void Guild::DisplayGuildBankContent(WorldSession *session, uint8 TabId)
 {
     WorldPacket data(SMSG_GUILD_BANK_LIST,1200);
 
-    if (!GetBankTab(TabId))
+    GuildBankTab const* tab = GetBankTab(TabId);
+    if (!tab)
+        return;
+
+    if(!IsMemberHaveRights(session->GetPlayer()->GetGUIDLow(),TabId,GUILD_BANK_RIGHT_VIEW_TAB))
         return;
 
     data << uint64(GetGuildBankMoney());
@@ -762,40 +765,89 @@ void Guild::DisplayGuildBankContent(WorldSession *session, uint8 TabId)
     data << uint8(GUILD_BANK_MAX_SLOTS);
 
     for (int i=0; i<GUILD_BANK_MAX_SLOTS; ++i)
-    {
-        Item *pItem = GetBankTab(TabId)->Slots[i];
-        uint32 entry;
-        if (pItem)
-            entry = pItem->GetEntry();
-        else
-            entry = 0;
-        data << uint8(i);
-        data << entry;
-        if (entry)
-        {
-                                                            // random item property id +8
-            data << (uint32) pItem->GetItemRandomPropertyId();
-            if (pItem->GetItemRandomPropertyId())
-                                                            // SuffixFactor +4
-                    data << (uint32) pItem->GetItemSuffixFactor();
-                                                            // +12 // ITEM_FIELD_STACK_COUNT
-            data << (uint8)GetBankTab(TabId)->Slots[i]->GetCount();
-            data << uint32(0);                              // +16 // Unknown value
-            //data << uint8(0);
-            uint32 Enchant0 = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + PERM_ENCHANTMENT_SLOT + ENCHANTMENT_ID_OFFSET);
-            if (Enchant0)
-            {
-                data << uint8(1);                           // nb of enchantements (max 3)
-                data << uint8(0);                           // enchantment slot (range: 0:2)
-                data << (uint32)Enchant0;                   // enchantment id
-            }
-            else
-                data << uint8(0);
-        }
-    }
+        AppentDisplayGuildBankSlot(data, tab, i);
+
     session->SendPacket(&data);
+
     sLog.outDebug("WORLD: Sent (SMSG_GUILD_BANK_LIST)");
 }
+
+void Guild::DisplayGuildBankMoneyUpdate()
+{
+    WorldPacket data(SMSG_GUILD_BANK_LIST,1200);
+
+    data << uint64(GetGuildBankMoney());
+    data << uint8(0);
+    // remaining slots for today
+
+    size_t rempos = data.wpos();
+    data << uint32(0);                                      // will be filled later
+    data << uint8(0);                                       // Tell client this is a tab content packet
+
+    data << uint8(0);                                       // not send items
+
+    for(MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
+    {
+        Player *player = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
+        if(!player)
+            continue;
+
+        player->GetSession()->SendPacket(&data);
+    }
+
+    sLog.outDebug("WORLD: Sent (SMSG_GUILD_BANK_LIST)");
+}
+
+void Guild::DisplayGuildBankContentUpdate(uint8 TabId, int32 slot1, int32 slot2)
+{
+    GuildBankTab const* tab = GetBankTab(TabId);
+    if (!tab)
+        return;
+
+    WorldPacket data(SMSG_GUILD_BANK_LIST,1200);
+
+    data << uint64(GetGuildBankMoney());
+    data << uint8(TabId);
+    // remaining slots for today
+
+    size_t rempos = data.wpos();
+    data << uint32(0);                                      // will be filled later
+    data << uint8(0);                                       // Tell client this is a tab content packet
+
+    if(slot2==-1)                                           // single item in slot1
+    {
+        data << uint8(1);
+
+        AppentDisplayGuildBankSlot(data, tab, slot1);
+    }
+    else                                                    // 2 items (in slot1 and slot2)
+    {
+        data << uint8(2);
+
+        if(slot1 > slot2)
+            std::swap(slot1,slot2);
+
+        AppentDisplayGuildBankSlot(data, tab, slot1);
+        AppentDisplayGuildBankSlot(data, tab, slot2);
+    }
+
+    for(MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
+    {
+        Player *player = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
+        if(!player)
+            continue;
+
+        if(!IsMemberHaveRights(itr->first,TabId,GUILD_BANK_RIGHT_VIEW_TAB))
+            continue;
+
+        data.put<uint32>(rempos,uint32(GetMemberSlotWithdrawRem(player->GetGUIDLow(), TabId)));
+
+        player->GetSession()->SendPacket(&data);
+    }
+
+    sLog.outDebug("WORLD: Sent (SMSG_GUILD_BANK_LIST)");
+}
+
 
 // If same is return: failed or just modified, if different: player has to store, null: stored
                                                             //, uint8 StackAmount)
@@ -967,7 +1019,7 @@ void Guild::CreateBankRightForTab(uint32 rankId, uint8 TabId)
     CharacterDatabase.CommitTransaction();
 }
 
-uint8 Guild::GetBankRights(uint32 rankId, uint8 TabId) const
+uint32 Guild::GetBankRights(uint32 rankId, uint8 TabId) const
 {
     if(rankId >= m_ranks.size() || TabId >= GUILD_BANK_MAX_TABS)
         return 0;
@@ -1147,7 +1199,7 @@ bool Guild::MemberItemWithdraw(uint8 TabId, uint32 LowGuid)
     return true;
 }
 
-bool Guild::CanMemberDepositTo(uint32 LowGuid, uint8 TabId) const
+bool Guild::IsMemberHaveRights(uint32 LowGuid, uint8 TabId, uint32 rights) const
 {
     MemberList::const_iterator itr = members.find(LowGuid);
     if (itr == members.end() )
@@ -1156,7 +1208,7 @@ bool Guild::CanMemberDepositTo(uint32 LowGuid, uint8 TabId) const
     if (itr->second.RankId == GR_GUILDMASTER)
         return true;
 
-    return (GetBankRights(itr->second.RankId,TabId) & GUILD_BANK_RIGHT_DEPOSIT_ITEM)==GUILD_BANK_RIGHT_DEPOSIT_ITEM;
+    return (GetBankRights(itr->second.RankId,TabId) & rights)==rights;
 }
 
 uint32 Guild::GetMemberSlotWithdrawRem(uint32 LowGuid, uint8 TabId)
@@ -1497,4 +1549,35 @@ bool Guild::AddGBankItemToDB(uint32 GuildId, uint32 BankTab , uint32 BankTabSlot
     CharacterDatabase.PExecute("INSERT INTO guild_bank_item (guildid,TabId,SlotId,item_guid,item_entry) "
         "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, BankTab, BankTabSlot, GUIDLow, Entry);
     return true;
+}
+
+void Guild::AppentDisplayGuildBankSlot( WorldPacket& data, GuildBankTab const *tab, int slot )
+{
+    Item *pItem = tab->Slots[slot];
+    uint32 entry = pItem ? pItem->GetEntry() : 0;
+
+    data << uint8(slot);
+    data << uint32(entry);
+    if (entry)
+    {
+        // random item property id +8
+        data << (uint32) pItem->GetItemRandomPropertyId();
+        if (pItem->GetItemRandomPropertyId())
+            // SuffixFactor +4
+            data << (uint32) pItem->GetItemSuffixFactor();
+        // +12 // ITEM_FIELD_STACK_COUNT
+        data << (uint8)pItem->GetCount();
+        data << uint32(0);                                  // +16 // Unknown value
+        //data << uint8(0);
+        uint32 Enchant0 = pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT);
+        if (Enchant0)
+        {
+            data << uint8(1);                               // nb of enchantements (max 3)
+            data << uint8(PERM_ENCHANTMENT_SLOT);           // enchantment slot (range: 0:2)
+            data << (uint32)Enchant0;                       // enchantment id
+        }
+        else
+            data << uint8(0);
+    }
+
 }
