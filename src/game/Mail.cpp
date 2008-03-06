@@ -533,7 +533,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     time_t cur_time = time(NULL);
     std::deque<Mail*>::iterator itr;
 
-    // client have limitation (~217) mail to show in mail box and can crash i receive more
+    // client have limitation (~217) mail to show in mail box and can crash if receive more
     for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd() && mails_count < 217; itr++)
     {
         // skip deleted or not delivered (deliver delay not expired) mails
@@ -547,8 +547,8 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
 
         switch((*itr)->messageType)
         {
-            case MAIL_NORMAL:
-                data << (uint64) (*itr)->sender;            // sender guid
+            case MAIL_NORMAL:                               // sender guid
+                data << uint64(MAKE_GUID((*itr)->sender,HIGHGUID_PLAYER));
                 break;
             case MAIL_CREATURE:
             case MAIL_GAMEOBJECT:
