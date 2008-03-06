@@ -143,6 +143,16 @@ bool IsSealSpell(uint32 spellId)
         ( spellInfo->SpellFamilyFlags & 0x4000A000200LL );
 }
 
+bool IsElementalShield(uint32 spellId)
+{
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
+
+    // family flags 10 (Lightning), 42 (Earth), 37 (Water)
+    if (spellInfo->SpellFamilyFlags & 0x42000000400LL)
+        return SPELL_ELEMENTAL_SHIELD;
+    return false;
+}
+
 SpellSpecific GetSpellSpecific(uint32 spellId)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
@@ -209,8 +219,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         }
         case SPELLFAMILY_SHAMAN:
         {
-            // family flags 10 (Lightning), 42 (Earth), 37 (Water)
-            if (spellInfo->SpellFamilyFlags & 0x42000000400LL)
+            if (IsElementalShield(spellId))
                 return SPELL_ELEMENTAL_SHIELD;
 
             break;
@@ -253,7 +262,6 @@ bool IsSpellSingleEffectPerCaster(uint32 spellId)
         case SPELL_TRACKER:
         case SPELL_WARLOCK_ARMOR:
         case SPELL_MAGE_ARMOR:
-        case SPELL_ELEMENTAL_SHIELD:
         case SPELL_MAGE_POLYMORPH:
         case SPELL_POSITIVE_SHOUT:
         case SPELL_JUDGEMENT:
@@ -490,11 +498,18 @@ bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellI
     switch(spec1)
     {
         case SPELL_TRACKER:
-        case SPELL_ELEMENTAL_SHIELD:
         case SPELL_MAGE_POLYMORPH:
         case SPELL_JUDGEMENT:
             if(GetSpellSpecific(spellInfo2->Id) == spec1)
                 return true;
+            break;
+        case SPELL_ELEMENTAL_SHIELD:
+            // only Earth shield
+            if( IsElementalShield(spellInfo2->Id) && 
+                spellInfo1->SpellFamilyFlags & 0x40000000000LL &&
+                spellInfo2->SpellFamilyFlags & 0x40000000000LL )
+                    return true;
+            break;
     }
 
     return false;
@@ -915,6 +930,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
         case SPELLFAMILY_SHAMAN:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_SHAMAN )
             {
+                // shaman shields
+                if( IsElementalShield(spellId_1) && IsElementalShield(spellId_2) )
+                    return true;
+
                 // Windfury weapon
                 if( spellInfo_1->SpellIconID==220 && spellInfo_2->SpellIconID==220 &&
                     spellInfo_1->SpellFamilyFlags != spellInfo_2->SpellFamilyFlags )

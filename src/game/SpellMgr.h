@@ -93,6 +93,7 @@ inline uint32 GetSpellRecoveryTime(SpellEntry const *spellInfo) { return spellIn
 
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
 bool IsSealSpell(uint32 spellId);
+bool IsElementalShield(uint32 spellId);
 int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
 bool IsSpellSingleEffectPerCaster(uint32 spellId);
 bool IsPassiveSpell(uint32 spellId);
