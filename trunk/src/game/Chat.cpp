@@ -549,10 +549,9 @@ void ChatHandler::PSendSysMessage(const char *format, ...)
     SendSysMessage(str);
 }
 
-bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
+bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text, std::string fullcmd)
 {
     char const* oldtext = text;
-    std::string fullcmd = text;                             // original `text` can't be used. It content destroyed in command code processing.
     std::string cmd = "";
 
     while (*text != ' ' && *text != '\0')
@@ -575,7 +574,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
         // select subcommand from child commands list
         if(table[i].ChildCommands != NULL)
         {
-            if(!ExecuteCommandInTable(table[i].ChildCommands, text))
+            if(!ExecuteCommandInTable(table[i].ChildCommands, text, fullcmd))
             {
                 if(!table[i].Help.empty())
                     SendSysMultilineMessage(table[i].Help.c_str());
@@ -640,7 +639,9 @@ int ChatHandler::ParseCommands(const char* text)
 
     ++text;
 
-    if(!ExecuteCommandInTable(getCommandTable(), text))
+    std::string fullcmd = text;                             // original `text` can't be used. It content destroyed in command code processing.
+
+    if(!ExecuteCommandInTable(getCommandTable(), text, fullcmd))
         SendSysMessage(LANG_NO_CMD);
 
     return 1;
