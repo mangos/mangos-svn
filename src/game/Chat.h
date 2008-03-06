@@ -85,7 +85,7 @@ class ChatHandler
         bool hasStringAbbr(const char* s1, const char* s2);
         void SendGlobalSysMessage(const char *str);
 
-        bool ExecuteCommandInTable(ChatCommand *table, const char* text);
+        bool ExecuteCommandInTable(ChatCommand *table, const char* text, std::string fullcommand);
         bool ShowHelpForCommand(ChatCommand *table, const char* cmd);
 
         ChatCommand* getCommandTable();
