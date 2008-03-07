@@ -60,7 +60,7 @@ enum Typecommand
     GUILD_QUIT_S    = 0x03,
     GUILD_FOUNDER_S = 0x0E,
     GUILD_UNK1      = 0x10,
-    GUILD_UNK2      = 0x15,                                 // guild bank?
+    GUILD_BANK_S    = 0x15,
     GUILD_UNK3      = 0x16
 };
 
