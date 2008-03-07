@@ -863,6 +863,23 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
     // Specific spell family spells
     switch(spellInfo_1->SpellFamilyName)
     {
+        case SPELLFAMILY_GENERIC:
+            if( spellInfo_2->SpellFamilyName == SPELLFAMILY_GENERIC )
+            {
+                // Thunderfury
+                if( spellInfo_1->Id == 21992 && spellInfo_2->Id == 27648 || spellInfo_2->Id == 21992 && spellInfo_1->Id == 27648 )
+                    return false;
+            }
+
+            // Improved Hamstring -> Hamstring (multi-family check)
+            if( (spellInfo_2->SpellFamilyName == SPELLFAMILY_WARRIOR && (spellInfo_2->SpellFamilyFlags & 2) && spellInfo_1->Id == 23694) ) 
+                return false;
+
+            // Garrote-Silence -> Garrote (multi-family check)
+            if( spellInfo_1->SpellIconID == 498 && spellInfo_1->SpellVisual == 0 && 
+                spellInfo_2->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo_1->SpellIconID == 498  )
+                return false;
+            break;
         case SPELLFAMILY_MAGE:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_MAGE )
             {
@@ -900,6 +917,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     (spellInfo_2->SpellFamilyFlags & 0x20) && (spellInfo_1->SpellFamilyFlags & 0x1000000000LL) )
                     return false;
             }
+
+            // Hamstring -> Improved Hamstring (multi-family check)
+            if( (spellInfo_1->SpellFamilyFlags & 2) && spellInfo_2->Id == 23694 ) 
+                return false;
+
             break;
         case SPELLFAMILY_PRIEST:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_PRIEST )
@@ -918,6 +940,15 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     (spellInfo_2->SpellFamilyFlags == 0x0 && spellInfo_2->SpellIconID == 108) && (spellInfo_1->SpellFamilyFlags & 0x20000000000000LL) )
                     return false;
             }
+            break;
+        case SPELLFAMILY_ROGUE:
+            //if( spellInfo_2->SpellFamilyName == SPELLFAMILY_DRUID )
+            //{
+            //}
+
+            // Garrote -> Garrote-Silence (multi-family check)
+            if( spellInfo_1->SpellIconID == 498 && spellInfo_2->SpellIconID == 498 && spellInfo_2->SpellVisual == 0 )
+                return false;
             break;
         case SPELLFAMILY_PALADIN:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_PALADIN )
@@ -943,16 +974,6 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
         default:
             break;
     }
-
-    // Garrote and Garrote-Silence
-    if( spellInfo_1->SpellIconID == 498 && spellInfo_2->SpellIconID == 498 && (
-        spellInfo_1->SpellVisual == 0 && spellInfo_2->SpellVisual == 757 ||
-        spellInfo_2->SpellVisual == 0 && spellInfo_1->SpellVisual == 757 ) )
-        return false;
-
-    // Thunderfury
-    if( spellInfo_1->Id == 21992 && spellInfo_2->Id == 27648 || spellInfo_2->Id == 21992 && spellInfo_1->Id == 27648 )
-        return false;
 
     // more generic checks
     if (spellInfo_1->SpellIconID == spellInfo_2->SpellIconID &&
@@ -1544,4 +1565,5 @@ bool IsMechanicInvulnerabilityImmunityToSpell(SpellEntry const* spellInfo)
 
     return false;
 }
+
 
