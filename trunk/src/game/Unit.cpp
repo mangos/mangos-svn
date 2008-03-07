@@ -6806,6 +6806,9 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
             // Lifebloom final heal
             if (spellProto->SpellFamilyFlags & 0x1000000000LL && damagetype != DOT)
                 CastingTime = 1500;
+            // Earth Shield 30% per charge
+            else if (spellProto->SpellFamilyFlags & 0x40000000000LL)
+                CastingTime = 1050;
             break;
     }
     // Level Factor
