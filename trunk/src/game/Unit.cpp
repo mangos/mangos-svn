@@ -6801,14 +6801,14 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
                                                             // Healing stream from totem (add 6% per tick from hill bonus owner)
             if (spellProto->SpellFamilyFlags & 0x000000002000LL)
                 CastingTime = 210;                          //
+            // Earth Shield 30% per charge
+            else if (spellProto->SpellFamilyFlags & 0x40000000000LL)
+                CastingTime = 1050;
             break;
         case  SPELLFAMILY_DRUID:
             // Lifebloom final heal
             if (spellProto->SpellFamilyFlags & 0x1000000000LL && damagetype != DOT)
                 CastingTime = 1500;
-            // Earth Shield 30% per charge
-            else if (spellProto->SpellFamilyFlags & 0x40000000000LL)
-                CastingTime = 1050;
             break;
     }
     // Level Factor

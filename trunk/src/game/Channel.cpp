@@ -317,30 +317,48 @@ void Channel::SetMode(uint64 p, const char *p2n, bool mod, bool set)
     {
         Player *newp = objmgr.GetPlayer(p2n);
         if(!newp)
-            return;
-
-        PlayerInfo inf = players[newp->GetGUID()];
-        if(p == m_ownerGUID && newp->GetGUID() == m_ownerGUID && mod)
-            return;
-        if(newp == NULL || !IsOn(newp->GetGUID()))
         {
             WorldPacket data;
             MakePlayerNotFound(&data, p2n);
             SendToOne(&data, p);
+            return;
         }
-        else if(m_ownerGUID == newp->GetGUID() && m_ownerGUID != p)
+
+        PlayerInfo inf = players[newp->GetGUID()];
+        if(p == m_ownerGUID && newp->GetGUID() == m_ownerGUID && mod)
+            return;
+
+        if(!IsOn(newp->GetGUID()))
+        {
+            WorldPacket data;
+            MakePlayerNotFound(&data, p2n);
+            SendToOne(&data, p);
+            return;
+        }
+
+        // allow make moderator from another team only if both is GMs 
+        // at this moment this only way to show channel post for GM from another team
+        if( (plr->GetSession()->GetSecurity() < SEC_GAMEMASTER || newp->GetSession()->GetSecurity() < SEC_GAMEMASTER) &&
+            plr->GetTeam() != newp->GetTeam() )
+        {
+            WorldPacket data;
+            MakePlayerNotFound(&data, p2n);
+            SendToOne(&data, p);
+            return;
+        }
+
+        if(m_ownerGUID == newp->GetGUID() && m_ownerGUID != p)
         {
             WorldPacket data;
             MakeNotOwner(&data);
             SendToOne(&data, p);
+            return;
         }
+
+        if(mod)
+            SetModerator(newp->GetGUID(), set);
         else
-        {
-            if(mod)
-                SetModerator(newp->GetGUID(), set);
-            else
-                SetMute(newp->GetGUID(), set);
-        }
+            SetMute(newp->GetGUID(), set);
     }
 }
 
