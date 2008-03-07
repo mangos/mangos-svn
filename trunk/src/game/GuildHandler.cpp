@@ -1033,7 +1033,10 @@ void WorldSession::HandleGuildBankQuery( WorldPacket & recv_data )
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (GuildId == 0)
+    {
+        SendGuildCommandResult(GUILD_BANK_S, "", GUILD_PLAYER_NOT_IN_GUILD);
         return;
+    }
 
     Guild *pGuild = objmgr.GetGuildById(GuildId);
     if(!pGuild)
