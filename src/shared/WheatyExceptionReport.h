@@ -90,7 +90,7 @@ class WheatyExceptionReport
         // Helper functions
         static LPTSTR GetExceptionString( DWORD dwCode );
         static BOOL GetLogicalAddress(  PVOID addr, PTSTR szModule, DWORD len,
-            DWORD& section, DWORD& offset );
+            DWORD& section, DWORD_PTR& offset );
 
         static void WriteStackDetails( PCONTEXT pContext, bool bWriteVariables );
 
