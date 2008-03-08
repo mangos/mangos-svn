@@ -44,14 +44,14 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib"
-				OutputFile="..\..\bin\release\mangosd.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\mangosd.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\..\dep\lib\release"
+				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="..\..\bin\$(ConfigurationName)\mangosd.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\mangosd.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName="..\..\bin\$(ConfigurationName)\mangosd.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\mangosd.map"
 				SubSystem="1"
 				ImportLibrary="$(OutDir)\mangosd.lib"/>
 			<Tool
@@ -59,7 +59,7 @@
 				TypeLibraryName=".\mangosd__$(PlatformName)_$(ConfigurationName)\mangosd.tlb"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\dep\lib\release\*.dll ..\..\bin\release"/>
+				CommandLine="copy ..\..\dep\lib\$(PlatformName)_$(ConfigurationName)\*.dll ..\..\bin\$(PlatformName)_$(ConfigurationName)"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
@@ -111,15 +111,15 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib"
-				OutputFile="..\..\bin\debug\mangosd.exe"
+				OutputFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\mangosd.exe"
 				Version=""
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\..\dep\lib\debug"
+				AdditionalLibraryDirectories="..\..\dep\lib\$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="..\..\bin\$(ConfigurationName)\mangosd.pdb"
+				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\mangosd.pdb"
 				GenerateMapFile="TRUE"
-				MapFileName="..\..\bin\$(ConfigurationName)\mangosd.map"
+				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\mangosd.map"
 				SubSystem="1"
 				LinkTimeCodeGeneration="FALSE"
 				ImportLibrary="$(OutDir)/mangosd.lib"

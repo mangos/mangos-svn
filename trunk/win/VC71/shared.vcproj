@@ -427,7 +427,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Extract SVN revision"
-					CommandLine="cd $(SolutionDir)\..\src\shared&#x0D;&#x0A;gensvnrevision.exe&#x0D;&#x0A;"
+					CommandLine="cd $(SolutionDir)\..\src\shared&#x0D;&#x0A;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&#x0D;&#x0A;"
 					AdditionalDependencies=".svn/entries"
 					Outputs="svn_revision.h"
 				/>
@@ -438,7 +438,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Extract SVN revision"
-					CommandLine="cd $(SolutionDir)\..\src\shared&#x0D;&#x0A;gensvnrevision.exe&#x0D;&#x0A;"
+					CommandLine="cd $(SolutionDir)\..\src\shared&#x0D;&#x0A;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&#x0D;&#x0A;"
 					AdditionalDependencies=".svn/entries"
 					Outputs="svn_revision.h"
 				/>
