@@ -588,6 +588,7 @@ pkgdata_DATA = \
 	5172_mangos_mangos_string.sql \
 	5180_mangos_spell_affect.sql \
 	5181_mangos_mangos_string.sql \
+	5185_mangos_spell_proc_event.sql \
 	5191_mangos_spell_threat.sql \
 	5197_mangos_spell_affect.sql \
 	5199_characters_guild_bank_eventlog.sql \
@@ -604,8 +605,10 @@ pkgdata_DATA = \
 	5249_mangos_spell_learn_skill.sql \
 	5254_mangos_spell_affect.sql \
 	5254_mangos_spell_proc_event.sql \
+	5258_characters_character.sql \
 	5265_mangos_spell_proc_event.sql \
 	5269_mangos_uptime.sql \
+	5270_mangos_gameobject_scripts.sql \
 	5272_mangos_mangos_string.sql \
 	5286_characters_character_pet.sql \
 	5292_mangos_spell_proc_event.sql \
@@ -613,6 +616,7 @@ pkgdata_DATA = \
 	5297_characters.sql \
 	5297_mangos.sql \
 	5297_realmd_account.sql \
+	5302_mangos_player_levelstats.sql \
 	5311_mangos_spell_affect.sql \
 	5326_mangos_spell_affect.sql \
 	5335_mangos_mangos_string.sql \
@@ -1195,6 +1199,7 @@ EXTRA_DIST = \
 	5172_mangos_mangos_string.sql \
 	5180_mangos_spell_affect.sql \
 	5181_mangos_mangos_string.sql \
+	5185_mangos_spell_proc_event.sql \
 	5191_mangos_spell_threat.sql \
 	5197_mangos_spell_affect.sql \
 	5199_characters_guild_bank_eventlog.sql \
@@ -1214,6 +1219,7 @@ EXTRA_DIST = \
 	5258_characters_character.sql \
 	5265_mangos_spell_proc_event.sql \
 	5269_mangos_uptime.sql \
+	5270_mangos_gameobject_scripts.sql \
 	5272_mangos_mangos_string.sql \
 	5286_characters_character_pet.sql \
 	5292_mangos_spell_proc_event.sql \
@@ -1221,6 +1227,7 @@ EXTRA_DIST = \
 	5297_characters.sql \
 	5297_mangos.sql \
 	5297_realmd_account.sql \
+	5302_mangos_player_levelstats.sql \
 	5311_mangos_spell_affect.sql \
 	5326_mangos_spell_affect.sql \
 	5335_mangos_mangos_string.sql \
