@@ -204,6 +204,10 @@ void Creature::Update(uint32 diff)
                 clearUnitState(UNIT_STAT_ALL_STATE);
                 i_motionMaster.Clear();
                 LoadCreaturesAddon(true);
+
+                //Call AI respawn virtual function
+                i_AI->JustRespawned();
+
                 MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
             }
             break;
@@ -1203,7 +1207,6 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
     {
         map->GetInstanceData()->OnCreatureCreate(this, Entry);
     }
-
     return true;
 }
 
