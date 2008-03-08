@@ -210,8 +210,8 @@ UpdateUptimeInterval = 10
 #    LogFilter_CreatureMoves
 #    LogFilter_VisibilityChanges
 #        Log filters
-#        Default: 0 - include in log if log level permit
-#                 1 - not include with any log level
+#        Default: 1 - not include with any log level
+#                 0 - include in log if log level permit
 #
 #    WorldLogFile
 #        Packet logging file for the worldserver
@@ -263,9 +263,9 @@ LogTime = 0
 LogFile = "Server.log"
 LogTimestamp = 0
 LogFileLevel = 0
-LogFilter_TransportMoves = 0
-LogFilter_CreatureMoves = 0
-LogFilter_VisibilityChanges = 0
+LogFilter_TransportMoves = 1
+LogFilter_CreatureMoves = 1
+LogFilter_VisibilityChanges = 1
 WorldLogFile = "world.log"
 DBErrorLogFile = "DBErrors.log"
 CharLogFile = "Char.log"

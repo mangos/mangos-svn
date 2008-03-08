@@ -314,16 +314,16 @@ void WheatyExceptionReport::PrintSystemInfo()
     TCHAR sString[1024];
     _tprintf(_T("//=====================================================\r\n"));
     if (_GetProcessorName(sString, countof(sString)))
-        _tprintf(_T("*** Hardware ***\n\rProcessor: %s\n\rNumber Of Processors: %d\n\rPhysical Memory: %d KB (Available: %d KB)\n\rCommit Charge Limit: %d KB\n\r"),
+        _tprintf(_T("*** Hardware ***\r\nProcessor: %s\r\nNumber Of Processors: %d\r\nPhysical Memory: %d KB (Available: %d KB)\r\nCommit Charge Limit: %d KB\r\n"),
             sString, SystemInfo.dwNumberOfProcessors, MemoryStatus.dwTotalPhys/0x400, MemoryStatus.dwAvailPhys/0x400, MemoryStatus.dwTotalPageFile/0x400);
     else
-        _tprintf(_T("*** Hardware ***\n\rProcessor: <unknown>\n\rNumber Of Processors: %d\n\rPhysical Memory: %d KB (Available: %d KB)\n\rCommit Charge Limit: %d KB\n\r"),
+        _tprintf(_T("*** Hardware ***\r\nProcessor: <unknown>\r\nNumber Of Processors: %d\r\nPhysical Memory: %d KB (Available: %d KB)\r\nCommit Charge Limit: %d KB\r\n"),
             SystemInfo.dwNumberOfProcessors, MemoryStatus.dwTotalPhys/0x400, MemoryStatus.dwAvailPhys/0x400, MemoryStatus.dwTotalPageFile/0x400);
 
     if(_GetWindowsVersion(sString, countof(sString)))
-        _tprintf(_T("\n\r*** Operation System ***\n\r%s\n\r"), sString);
+        _tprintf(_T("\r\n*** Operation System ***\r\n%s\r\n"), sString);
     else
-        _tprintf(_T("\n\r*** Operation System:\n\r<unknown>\n\r"));
+        _tprintf(_T("\r\n*** Operation System:\r\n<unknown>\r\n"));
 }
 
 //===========================================================================
@@ -350,15 +350,23 @@ PEXCEPTION_POINTERS pExceptionInfo )
 
     // Now print information about where the fault occured
     TCHAR szFaultingModule[MAX_PATH];
-    DWORD section, offset;
+    DWORD section;
+    DWORD_PTR offset;
     GetLogicalAddress(  pExceptionRecord->ExceptionAddress,
         szFaultingModule,
         sizeof( szFaultingModule ),
         section, offset );
 
+#ifdef _M_IX86
     _tprintf( _T("Fault address:  %08X %02X:%08X %s\r\n"),
         pExceptionRecord->ExceptionAddress,
         section, offset, szFaultingModule );
+#endif
+#ifdef _M_X64
+    _tprintf( _T("Fault address:  %016I64X %02X:%016I64X %s\r\n"),
+        pExceptionRecord->ExceptionAddress,
+        section, offset, szFaultingModule );
+#endif
 
     PCONTEXT pCtx = pExceptionInfo->ContextRecord;
 
@@ -378,6 +386,20 @@ PEXCEPTION_POINTERS pExceptionInfo )
     _tprintf( _T("Flags:%08X\r\n"), pCtx->EFlags );
     #endif
 
+    #ifdef _M_X64
+    _tprintf( _T("\r\nRegisters:\r\n") );
+    _tprintf(_T("RAX:%016I64X\r\nRBX:%016I64X\r\nRCX:%016I64X\r\nRDX:%016I64X\r\nRSI:%016I64X\r\nRDI:%016I64X\r\n")
+        _T("R8: %016I64X\r\nR9: %016I64X\r\nR10:%016I64X\r\nR11:%016I64X\r\nR12:%016I64X\r\nR13:%016I64X\r\nR14:%016I64X\r\nR15:%016I64X\r\n")
+        ,pCtx->Rax, pCtx->Rbx, pCtx->Rcx, pCtx->Rdx,
+        pCtx->Rsi, pCtx->Rdi ,pCtx->R9,pCtx->R10,pCtx->R11,pCtx->R12,pCtx->R13,pCtx->R14,pCtx->R15);
+    _tprintf( _T("CS:RIP:%04X:%016I64X\r\n"), pCtx->SegCs, pCtx->Rip );
+    _tprintf( _T("SS:RSP:%04X:%016X  RBP:%08X\r\n"),
+        pCtx->SegSs, pCtx->Rsp, pCtx->Rbp );
+    _tprintf( _T("DS:%04X  ES:%04X  FS:%04X  GS:%04X\r\n"),
+        pCtx->SegDs, pCtx->SegEs, pCtx->SegFs, pCtx->SegGs );
+    _tprintf( _T("Flags:%08X\r\n"), pCtx->EFlags );
+    #endif
+
     SymSetOptions( SYMOPT_DEFERRED_LOADS );
 
     // Initialize DbgHelp
@@ -391,7 +413,7 @@ PEXCEPTION_POINTERS pExceptionInfo )
 
     WriteStackDetails( &trashableContext, false );
 
-    #ifdef _M_IX86                                          // X86 Only!
+//    #ifdef _M_IX86                                          // X86 Only!
 
     _tprintf( _T("========================\r\n") );
     _tprintf( _T("Local Variables And Parameters\r\n") );
@@ -405,7 +427,7 @@ PEXCEPTION_POINTERS pExceptionInfo )
     SymEnumSymbols( GetCurrentProcess(),
         (DWORD64)GetModuleHandle(szFaultingModule),
         0, EnumerateSymbolsCallback, 0 );
-    #endif                                                  // X86 Only!
+  //  #endif                                                  // X86 Only!
 
     SymCleanup( GetCurrentProcess() );
 
@@ -466,14 +488,14 @@ LPTSTR WheatyExceptionReport::GetExceptionString( DWORD dwCode )
 // by the len parameter (in characters!)
 //=============================================================================
 BOOL WheatyExceptionReport::GetLogicalAddress(
-PVOID addr, PTSTR szModule, DWORD len, DWORD& section, DWORD& offset )
+PVOID addr, PTSTR szModule, DWORD len, DWORD& section, DWORD_PTR& offset )
 {
     MEMORY_BASIC_INFORMATION mbi;
 
     if ( !VirtualQuery( addr, &mbi, sizeof(mbi) ) )
         return FALSE;
 
-    DWORD hMod = (DWORD)mbi.AllocationBase;
+    DWORD_PTR hMod = (DWORD_PTR)mbi.AllocationBase;
 
     if ( !GetModuleFileName( (HMODULE)hMod, szModule, len ) )
         return FALSE;
@@ -482,11 +504,11 @@ PVOID addr, PTSTR szModule, DWORD len, DWORD& section, DWORD& offset )
     PIMAGE_DOS_HEADER pDosHdr = (PIMAGE_DOS_HEADER)hMod;
 
     // From the DOS header, find the NT (PE) header
-    PIMAGE_NT_HEADERS pNtHdr = (PIMAGE_NT_HEADERS)(hMod + pDosHdr->e_lfanew);
+    PIMAGE_NT_HEADERS pNtHdr = (PIMAGE_NT_HEADERS)(hMod + DWORD_PTR(pDosHdr->e_lfanew));
 
     PIMAGE_SECTION_HEADER pSection = IMAGE_FIRST_SECTION( pNtHdr );
 
-    DWORD rva = (DWORD)addr - hMod;                         // RVA is offset from module load address
+    DWORD_PTR rva = (DWORD_PTR)addr - hMod;                         // RVA is offset from module load address
 
     // Iterate through the section table, looking for the one that encompasses
     // the linear address.
@@ -494,9 +516,9 @@ PVOID addr, PTSTR szModule, DWORD len, DWORD& section, DWORD& offset )
         i < pNtHdr->FileHeader.NumberOfSections;
         i++, pSection++ )
     {
-        DWORD sectionStart = pSection->VirtualAddress;
-        DWORD sectionEnd = sectionStart
-            + max(pSection->SizeOfRawData, pSection->Misc.VirtualSize);
+        DWORD_PTR sectionStart = pSection->VirtualAddress;
+        DWORD_PTR sectionEnd = sectionStart
+            + DWORD_PTR(max(pSection->SizeOfRawData, pSection->Misc.VirtualSize));
 
         // Is the address in this section???
         if ( (rva >= sectionStart) && (rva <= sectionEnd) )
@@ -538,7 +560,7 @@ bool bWriteVariables )                                      // true if local/par
     DWORD dwMachineType = 0;
     // Could use SymSetOptions here to add the SYMOPT_DEFERRED_LOADS flag
 
-    STACKFRAME sf;
+    STACKFRAME64 sf;
     memset( &sf, 0, sizeof(sf) );
 
     #ifdef _M_IX86
@@ -554,24 +576,37 @@ bool bWriteVariables )                                      // true if local/par
     dwMachineType = IMAGE_FILE_MACHINE_I386;
     #endif
 
+#ifdef _M_X64
+    sf.AddrPC.Offset    = pContext->Rip;
+    sf.AddrPC.Mode = AddrModeFlat;
+    sf.AddrStack.Offset    = pContext->Rsp;
+    sf.AddrStack.Mode      = AddrModeFlat;
+    sf.AddrFrame.Offset    = pContext->Rbp;
+    sf.AddrFrame.Mode      = AddrModeFlat;
+    dwMachineType = IMAGE_FILE_MACHINE_AMD64;
+#endif
+
     while ( 1 )
     {
         // Get the next stack frame
-        if ( ! StackWalk(  dwMachineType,
+        if ( ! StackWalk64(  dwMachineType,
             m_hProcess,
             GetCurrentThread(),
             &sf,
             pContext,
             0,
-            SymFunctionTableAccess,
-            SymGetModuleBase,
+            SymFunctionTableAccess64,
+            SymGetModuleBase64,
             0 ) )
             break;
-
         if ( 0 == sf.AddrFrame.Offset )                     // Basic sanity check to make sure
             break;                                          // the frame is OK.  Bail if not.
-
+#ifdef _M_IX86
         _tprintf( _T("%08X  %08X  "), sf.AddrPC.Offset, sf.AddrFrame.Offset );
+#endif
+#ifdef _M_X64
+        _tprintf( _T("%016I64X  %016I64X  "), sf.AddrPC.Offset, sf.AddrFrame.Offset );
+#endif
 
         DWORD64 symDisplacement = 0;                        // Displacement of the input address,
         // relative to the start of the symbol
@@ -591,18 +626,23 @@ bool bWriteVariables )                                      // true if local/par
         else                                                // No symbol found.  Print out the logical address instead.
         {
             TCHAR szModule[MAX_PATH] = _T("");
-            DWORD section = 0, offset = 0;
+            DWORD section = 0;
+            DWORD_PTR offset = 0;
 
             GetLogicalAddress(  (PVOID)sf.AddrPC.Offset,
                 szModule, sizeof(szModule), section, offset );
-
+#ifdef _M_IX86
             _tprintf( _T("%04X:%08X %s"), section, offset, szModule );
+#endif
+#ifdef _M_X64
+            _tprintf( _T("%04X:%016I64X %s"), section, offset, szModule );
+#endif
         }
 
         // Get the source line for this stack frame entry
-        IMAGEHLP_LINE lineInfo = { sizeof(IMAGEHLP_LINE) };
+        IMAGEHLP_LINE64 lineInfo = { sizeof(IMAGEHLP_LINE) };
         DWORD dwLineDisplacement;
-        if ( SymGetLineFromAddr( m_hProcess, sf.AddrPC.Offset,
+        if ( SymGetLineFromAddr64( m_hProcess, sf.AddrPC.Offset,
             &dwLineDisplacement, &lineInfo ) )
         {
             _tprintf(_T("  %s line %u"),lineInfo.FileName,lineInfo.LineNumber);
