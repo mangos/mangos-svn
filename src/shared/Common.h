@@ -65,7 +65,7 @@
 #include <errno.h>
 #include <signal.h>
 
-#if PLATFORM == PLATFORM_WIN32
+#if PLATFORM == PLATFORM_WINDOWS
 #define STRCASECMP stricmp
 #else
 #define STRCASECMP strcasecmp
@@ -84,7 +84,7 @@
 #include <zthread/Runnable.h>
 #include <zthread/Thread.h>
 
-#if PLATFORM == PLATFORM_WIN32
+#if PLATFORM == PLATFORM_WINDOWS
 #  define FD_SETSIZE 1024
 #  include <winsock2.h>
 // XP winver - needed to compile with standard leak check in MemoryLeaks.h

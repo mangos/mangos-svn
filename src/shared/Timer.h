@@ -21,7 +21,7 @@
 
 #include "Platform/CompilerDefs.h"
 
-#if PLATFORM == PLATFORM_WIN32
+#if PLATFORM == PLATFORM_WINDOWS
 #   include <windows.h>
 #   include <mmsystem.h>
 #   include <time.h>
@@ -33,7 +33,7 @@
 #   include <sys/timeb.h>
 #endif
 
-#if PLATFORM == PLATFORM_WIN32
+#if PLATFORM == PLATFORM_WINDOWS
 inline uint32 getMSTime() { return GetTickCount(); }
 #else
 inline uint32 getMSTime()

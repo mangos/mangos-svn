@@ -23,7 +23,7 @@
 #include "svn_revision.h"
 
 #ifndef _VERSION
-#if PLATFORM == PLATFORM_WIN32
+#if PLATFORM == PLATFORM_WINDOWS
 # define _VERSION "0.10.0-SVN" " (Revision " SVN_REVISION ")"
 #else
 # define _VERSION "@VERSION@" " (Revision " SVN_REVISION ")"
@@ -39,8 +39,12 @@
 # define _REALMDCONFVERSION 2007062001
 #endif
 
-#if PLATFORM == PLATFORM_WIN32
-# define _FULLVERSION "/" _VERSION " (Win32)"
+#if PLATFORM == PLATFORM_WINDOWS
+# ifdef _WIN64
+#  define _FULLVERSION "/" _VERSION " (Win64)"
+# else
+#  define _FULLVERSION "/" _VERSION " (Win32)"
+# endif
 # define _MANGOSD_CONFIG  "mangosd.conf"
 # define _REALMD_CONFIG   "realmd.conf"
 #else
