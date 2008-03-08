@@ -339,7 +339,7 @@ void Channel::SetMode(uint64 p, const char *p2n, bool mod, bool set)
         // allow make moderator from another team only if both is GMs 
         // at this moment this only way to show channel post for GM from another team
         if( (plr->GetSession()->GetSecurity() < SEC_GAMEMASTER || newp->GetSession()->GetSecurity() < SEC_GAMEMASTER) &&
-            plr->GetTeam() != newp->GetTeam() )
+            plr->GetTeam() != newp->GetTeam() && !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL) )
         {
             WorldPacket data;
             MakePlayerNotFound(&data, p2n);
@@ -374,28 +374,36 @@ void Channel::SetOwner(uint64 p, const char *newname)
         WorldPacket data;
         MakeNotMember(&data);
         SendToOne(&data, p);
+        return;
     }
-    else if(sec < SEC_GAMEMASTER && p != m_ownerGUID)
+
+    if(sec < SEC_GAMEMASTER && p != m_ownerGUID)
     {
         WorldPacket data;
         MakeNotOwner(&data);
         SendToOne(&data, p);
+        return;
     }
-    else
+
+    Player *newp = objmgr.GetPlayer(newname);
+    if(newp == NULL || !IsOn(newp->GetGUID()))
     {
-        Player *newp = objmgr.GetPlayer(newname);
-        if(newp == NULL || !IsOn(newp->GetGUID()))
-        {
-            WorldPacket data;
-            MakePlayerNotFound(&data, newname);
-            SendToOne(&data, p);
-        }
-        else
-        {
-            players[newp->GetGUID()].SetModerator(true);
-            SetOwner(newp->GetGUID());
-        }
+        WorldPacket data;
+        MakePlayerNotFound(&data, newname);
+        SendToOne(&data, p);
+        return;
     }
+
+    if(newp->GetTeam() != plr->GetTeam() && !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL))
+    {
+        WorldPacket data;
+        MakePlayerNotFound(&data, newname);
+        SendToOne(&data, p);
+        return;
+    }
+
+    players[newp->GetGUID()].SetModerator(true);
+    SetOwner(newp->GetGUID());
 }
 
 void Channel::SendWhoOwner(uint64 p)
