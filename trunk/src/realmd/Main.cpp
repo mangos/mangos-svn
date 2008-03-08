@@ -207,12 +207,12 @@ extern int main(int argc, char **argv)
         uint32 Aff = sConfig.GetIntDefault("UseProcessors", 0);
         if(Aff > 0)
         {
-            DWORD appAff;
-            DWORD sysAff;
+            ULONG_PTR appAff;
+            ULONG_PTR sysAff;
 
             if(GetProcessAffinityMask(hProcess,&appAff,&sysAff))
             {
-                DWORD curAff = Aff & appAff;                // remove non accessible processors
+                ULONG_PTR curAff = Aff & appAff;            // remove non accessible processors
 
                 if(!curAff )
                 {

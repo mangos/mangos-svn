@@ -22,7 +22,7 @@
 #include "Platform/CompilerDefs.h"
 #include <sys/types.h>
 
-#ifdef WIN32
+#if PLATFORM == PLATFORM_WINDOWS
 #define MANGOS_EXPORT __declspec(dllexport)
 #define MANGOS_LIBRARY_HANDLE HMODULE
 #define MANGOS_LOAD_LIBRARY(a) LoadLibrary(a)
@@ -97,7 +97,7 @@ typedef uint32      DWORD;
 #endif
 typedef uint64      OBJECT_HANDLE;
 
-#if PLATFORM == PLATFORM_WIN32
+#if PLATFORM == PLATFORM_WINDOWS
 #  define MANGOS_DLL_SPEC __declspec(dllexport)
 #  ifndef DECLSPEC_NORETURN
 #    define DECLSPEC_NORETURN __declspec(noreturn)

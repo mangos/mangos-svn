@@ -25,7 +25,7 @@
 #  define MANGOS_PTHREAD_MUTEX_RECURSIVE PTHREAD_MUTEX_RECURSIVE_NP
 #endif
 
-#ifndef WIN32
+#if PLATFORM != PLATFORM_WINDOWS
 
 MThread::MThread ()
 {
@@ -41,22 +41,6 @@ MThread::~MThread ()
         pthread_join (tid, NULL);
     }
 }
-
-#if PLATFORM == PLATFORM_WIN32
-
-bool MThread::SetPriority (ThreadPriority prio)
-{
-    int p;
-    int min = sched_get_priority_min (SCHED_OTHER);
-    int max = sched_get_priority_max (SCHED_OTHER);
-
-    p=min+((prio)(max-min))/(REALTIME-IDLE);
-
-    sched_param schedparams;
-    schedparams.sched_priority = p;
-    return (pthread_setschedparam (tid, SCHED_OTHER, &schedparams) == 0);
-}
-#endif
 
 static void *thread_start_routine (void *arg)
 {

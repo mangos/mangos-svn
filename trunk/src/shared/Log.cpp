@@ -66,7 +66,7 @@ void Log::InitColors(std::string str)
 
 void Log::SetColor(bool stdout_stream, Color color)
 {
-    #if PLATFORM == PLATFORM_WIN32
+    #if PLATFORM == PLATFORM_WINDOWS
 
     static WORD WinColorFG[Color_count] =
     {
@@ -142,7 +142,7 @@ void Log::SetColor(bool stdout_stream, Color color)
 
 void Log::ResetColor(bool stdout_stream)
 {
-    #if PLATFORM == PLATFORM_WIN32
+    #if PLATFORM == PLATFORM_WINDOWS
     HANDLE hConsole = GetStdHandle(stdout_stream ? STD_OUTPUT_HANDLE : STD_ERROR_HANDLE );
     SetConsoleTextAttribute(hConsole, FOREGROUND_BLUE | FOREGROUND_GREEN | FOREGROUND_RED );
     #else

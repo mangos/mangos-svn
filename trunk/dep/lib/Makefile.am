@@ -19,18 +19,28 @@
 ## Sub-directories to parse
 
 ## Additional files to include when running 'make dist'
-#  Debug libraries for Win32 builds.
+#  Debug libraries for Win32/win64 builds.
 EXTRA_DIST = \
-	debug/libeay32.dll \
-	debug/libeay32.lib \
-	debug/libmySQL.dll \
-	debug/libmySQL.lib \
-	debug/sqlite.lib
+	win32_debug/libeay32.dll \
+	win32_debug/libeay32.lib \
+	win32_debug/libmySQL.dll \
+	win32_debug/libmySQL.lib \
+	win32_debug/sqlite.lib   \
+	x64_debug/libeay32.dll   \
+	x64_debug/libeay32.lib   \
+	x64_debug/libmySQL.dll   \
+	x64_debug/libmySQL.lib   \
+	x64_debug/sqlite.lib
 
 # Release libraries for Win32 builds.
 EXTRA_DIST += \
-	release/libeay32.dll \
-	release/libeay32.lib \
-	release/libmySQL.dll \
-	release/libmySQL.lib \
-	release/sqlite.lib
+	win32_release/libeay32.dll \
+	win32_release/libeay32.lib \
+	win32_release/libmySQL.dll \
+	win32_release/libmySQL.lib \
+	win32_release/sqlite.lib   \
+	x64_debug/libeay32.dll     \
+	x64_debug/libeay32.lib     \
+	x64_debug/libmySQL.dll     \
+	x64_debug/libmySQL.lib     \
+	x64_debug/sqlite.lib
