@@ -78,6 +78,9 @@ class MANGOS_DLL_SPEC CreatureAI
 
         // Called when the creature is attacked
         virtual void AttackedBy(Unit * /*attacker*/) {}
+
+        // Called when creature is spawned or respawned (for reseting variables)
+        virtual void JustRespawned() {}
 };
 
 struct SelectableAI : public FactoryHolder<CreatureAI>, public Permissible<Creature>
