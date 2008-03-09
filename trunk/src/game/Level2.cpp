@@ -903,13 +903,13 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
         return true;
     }
 
-    char* pitem = strtok((char*)args, " ");
-    uint32 itemId = atol(pitem);
+    char* pitem  = extractKeyFromLink((char*)args,"Hitem");
     if (!pitem)
     {
-        SendSysMessage(LANG_COMMAND_ADDVENDORITEMSEND);
+        SendSysMessage(LANG_COMMAND_NEEDITEMSEND);
         return true;
     }
+    uint32 itemId = atol(pitem);
 
     char* fmaxcount = strtok(NULL, " ");                    //add maxcount, default: 0
     uint32 maxcount = 0;
@@ -947,7 +947,7 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
     WorldDatabase.PExecuteLog("INSERT INTO npc_vendor (entry,item,maxcount,incrtime) VALUES('%u','%u','%u','%u')",vendor->GetEntry(), itemId, maxcount,incrtime);
     vendor->AddItem(itemId,maxcount,incrtime);
     PSendSysMessage(LANG_ITEM_ADDED_TO_LIST,itemId,pProto->Name1,maxcount,incrtime);
-    return false;
+    return true;
 }
 
 //del item from vendor list
@@ -963,7 +963,12 @@ bool ChatHandler::HandleDelVendorItemCommand(const char* args)
         return true;
     }
 
-    char* pitem = strtok((char*)args, " ");
+    char* pitem  = extractKeyFromLink((char*)args,"Hitem");
+    if (!pitem)
+    {
+        SendSysMessage(LANG_COMMAND_NEEDITEMSEND);
+        return true;
+    }
     uint32 itemId = atol(pitem);
 
     ItemPrototype const *pProto = objmgr.GetItemPrototype(itemId);
