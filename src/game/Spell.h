@@ -564,6 +564,7 @@ class Spell
     protected:
 
         void SendLoot(uint64 guid, LootType loottype);
+
         Unit* m_caster;
 
         uint64 m_originalCasterGUID;                        // real source of cast (aura caster/etc), used for spell targets selection

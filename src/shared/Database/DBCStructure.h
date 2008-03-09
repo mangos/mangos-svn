@@ -515,14 +515,12 @@ struct SpellCastTimesEntry
     uint32    CastTime;
 };
 
-/* unused
 struct SpellFocusObjectEntry
 {
     uint32    ID;                                           // 0
-    char*     Name[16];                                     // 1-15 unused
+    //char*     Name[16];                                   // 1-15 unused
                                                             // 16 string flags, unused
 };
-*/
 
 // stored in SQL table
 struct SpellThreatEntry
