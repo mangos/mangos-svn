@@ -81,6 +81,7 @@ struct GameObjectInfo
         {
             uint32 focusId;                                 //0
             uint32 dist;                                    //1
+            uint32 linkedTrapId;                            //2
         } spellFocus;
         //10 GAMEOBJECT_TYPE_GOOBER
         struct
@@ -278,6 +279,17 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         bool hasInvolvedQuest(uint32 quest_id) const;
         bool ActivateToQuest(Player *pTarget) const;
 
+        uint32 GetLinkedGameObjectEntry() const
+        {
+            switch(GetGoType())
+            {
+                case GAMEOBJECT_TYPE_SPELL_FOCUS: return GetGOInfo()->spellFocus.linkedTrapId;
+                case GAMEOBJECT_TYPE_GOOBER:      return GetGOInfo()->goober.linkedTrapId;
+                default: return 0;
+            }
+        }
+        void TriggeringLinkedGameObject( uint32 trapEntry, Unit* target);
+
         bool isVisibleForInState(Player const* u, bool inVisibleList) const;
 
         GridReference<GameObject> &GetGridRef() { return m_gridRef; }
@@ -289,7 +301,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         uint32      m_flags;
         LootState   m_lootState;
         bool        m_spawnedByDefault;
-        uint32      m_environmentcastTime;
+        time_t      m_environmentcastTime;
         std::list<uint32> m_SkillupList;
 
         std::set<uint32> m_unique_users;

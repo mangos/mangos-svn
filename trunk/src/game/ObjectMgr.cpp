@@ -4351,13 +4351,24 @@ void ObjectMgr::LoadGameobjectInfo()
             }
             case GAMEOBJECT_TYPE_SPELL_FOCUS:               //8
             {
-                /* disabled, spell focus not loaded at startup currently
                 if(goInfo->spellFocus.focusId)
                 {
-                    if(!sSpellFocusStore.LookupEntry(goInfo->spellFocus.focusId))
+                    if(!sSpellFocusObjectStore.LookupEntry(goInfo->spellFocus.focusId))
                         sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data0=%u but SpellFocus (Id: %u) not exist.",id,goInfo->type,goInfo->spellFocus.focusId,goInfo->spellFocus.focusId);
                 }
-                */
+
+                if(goInfo->spellFocus.linkedTrapId)         // linked trap
+                {
+                    if(GameObjectInfo const* trapInfo = sGOStorage.LookupEntry<GameObjectInfo>(goInfo->spellFocus.linkedTrapId))
+                    {
+                        if(trapInfo->type!=GAMEOBJECT_TYPE_TRAP)
+                            sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data2=%u but GO (Entry %u) have not GAMEOBJECT_TYPE_TRAP (%) type.",id,goInfo->type,goInfo->spellFocus.linkedTrapId,GAMEOBJECT_TYPE_TRAP);
+                    }
+                    /* disable check for while 
+                    else
+                    sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data2=%u but trap GO (Entry %u) not exist in `gameobject_tamplete`.",id,goInfo->type,goInfo->spellFocus.linkedTrapId,goInfo->spellFocus.linkedTrapId);
+                    */
+                }
                 break;
             }
             case GAMEOBJECT_TYPE_GOOBER:                    //10

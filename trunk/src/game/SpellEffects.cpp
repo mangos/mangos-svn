@@ -2104,6 +2104,12 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                 player->SendPreparedQuest(guid);
                 return;
 
+            case GAMEOBJECT_TYPE_SPELL_FOCUS:
+                // triggering linked GO
+                if(uint32 trapEntry = gameObjTarget->GetGOInfo()->spellFocus.linkedTrapId)
+                    gameObjTarget->TriggeringLinkedGameObject(trapEntry,m_caster);
+                return;
+
             case GAMEOBJECT_TYPE_GOOBER:
                 // goober_scripts can be triggered if the player dont have the quest
                 if (gameObjTarget->GetGOInfo()->goober.eventId)
@@ -2123,35 +2129,8 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
 
                 // triggering linked GO
                 if(uint32 trapEntry = gameObjTarget->GetGOInfo()->goober.linkedTrapId)
-                {
-                    if(GameObjectInfo const* trapInfo = sGOStorage.LookupEntry<GameObjectInfo>(trapEntry))
-                    {
-                        SpellEntry const* trapSpell = sSpellStore.LookupEntry(trapInfo->trap.spellId);
-                        if(trapInfo->type==GAMEOBJECT_TYPE_TRAP && trapSpell)
-                        {
-                            float range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(trapSpell->rangeIndex));
+                    gameObjTarget->TriggeringLinkedGameObject(trapEntry,m_caster);
 
-                            // search nearest linked GO
-                            GameObject* trapGO = NULL;
-                            {
-                                CellPair p(MaNGOS::ComputeCellPair(gameObjTarget->GetPositionX(), gameObjTarget->GetPositionY()));
-                                Cell cell(p);
-                                cell.data.Part.reserved = ALL_DISTRICT;
-
-                                MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*m_caster,trapEntry,range);
-                                MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> checker(trapGO,go_check);
-
-                                TypeContainerVisitor<MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck>, GridTypeMapContainer > object_checker(checker);
-                                CellLock<GridReadGuard> cell_lock(cell, p);
-                                cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-                            }
-
-                            // found correct GO
-                            if(trapGO)
-                                m_caster->CastSpell(m_caster,trapSpell,true);
-                        }
-                    }
-                }
                 return;
 
             case GAMEOBJECT_TYPE_CHEST:
@@ -3548,6 +3527,26 @@ void Spell::EffectSummonObjectWild(uint32 i)
     if(pGameObj->GetGoType() != GAMEOBJECT_TYPE_FLAGDROP)   // make dropped flag clickable for other players (not set owner guid (created by) for this)...
         m_caster->AddGameObject(pGameObj);
     MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
+
+    if(uint32 linkedEntry = pGameObj->GetLinkedGameObjectEntry())
+    {
+        GameObject* linkedGO = new GameObject(m_caster);
+        if(linkedGO->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), linkedEntry, target->GetMapId(),
+            x, y, z, target->GetOrientation(), 0, 0, 0, 0, 100, 1))
+        {
+            linkedGO->SetRespawnTime(duration > 0 ? duration/1000 : 0);
+            linkedGO->SetSpellId(m_spellInfo->Id);
+
+            m_caster->AddGameObject(linkedGO);
+            MapManager::Instance().GetMap(linkedGO->GetMapId(), linkedGO)->Add(linkedGO);
+        }
+        else
+        {
+            delete linkedGO;
+            linkedGO = NULL;
+            return;
+        }
+    }
 }
 
 void Spell::EffectScriptEffect(uint32 i)
@@ -4623,6 +4622,13 @@ void Spell::EffectTransmitted(uint32 i)
 
     uint32 cMap = m_caster->GetMapId();
     uint32 name_id = m_spellInfo->EffectMiscValue[i];
+    GameObjectInfo const* goinfo = objmgr.GetGameObjectInfo(name_id);
+
+    if (!goinfo)
+    {
+        sLog.outErrorDb("Gameobject (Entry: %u) not exist and not created at spell (ID: %u) cast",name_id, m_spellInfo->Id);
+        return;
+    }
 
     if(name_id==35591)
     {
@@ -4637,6 +4643,11 @@ void Spell::EffectTransmitted(uint32 i)
         // replace by water level in this case
         fz = map->GetWaterLevel(fx,fy);
     }
+    //if gameobject is summoning object, it should be spawned right on caster's position
+    else if(goinfo->type==GAMEOBJECT_TYPE_SUMMONING_RITUAL)
+    {
+        m_caster->GetPosition(fx,fy,fz);
+    }
 
     GameObject* pGameObj = new GameObject(m_caster);
 
@@ -4647,7 +4658,9 @@ void Spell::EffectTransmitted(uint32 i)
         return;
     }
 
-    switch(pGameObj->GetGOInfo()->type)
+    int32 duration = GetSpellDuration(m_spellInfo);
+
+    switch(goinfo->type)
     {
         case GAMEOBJECT_TYPE_FISHINGNODE:
         {
@@ -4661,17 +4674,11 @@ void Spell::EffectTransmitted(uint32 i)
 
             // end time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))
             // start time == fish-FISHING_BOBBER_READY_TIME (0..GetDuration(m_spellInfo)-FISHING_BOBBER_READY_TIME)
-            uint32 fish = urand(FISHING_BOBBER_READY_TIME,GetSpellDuration(m_spellInfo)/1000);
-            pGameObj->SetRespawnTime(fish);
+            duration = urand(FISHING_BOBBER_READY_TIME*1000,duration);
             break;
         }
-        case GAMEOBJECT_TYPE_SUMMONING_RITUAL:              //if gameobject is summoning object, it should be spawned right on caster's position
+        case GAMEOBJECT_TYPE_SUMMONING_RITUAL:
         {
-            pGameObj->Relocate(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
-
-            int32 duration = GetSpellDuration(m_spellInfo);
-            pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
-
             if(m_caster->GetTypeId()==TYPEID_PLAYER)
                 pGameObj->AddUniqueUse((Player*)m_caster);
             break;
@@ -4680,11 +4687,11 @@ void Spell::EffectTransmitted(uint32 i)
         case GAMEOBJECT_TYPE_CHEST:
         default:
         {
-            int32 duration = GetSpellDuration(m_spellInfo);
-            pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
             break;
         }
     }
+
+    pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
 
     pGameObj->SetOwnerGUID(m_caster->GetGUID() );
 
@@ -4700,6 +4707,27 @@ void Spell::EffectTransmitted(uint32 i)
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);
     data << uint64(pGameObj->GetGUID());
     m_caster->SendMessageToSet(&data,true);
+
+    if(uint32 linkedEntry = pGameObj->GetLinkedGameObjectEntry())
+    {
+        GameObject* linkedGO = new GameObject(m_caster);
+        if(linkedGO->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), linkedEntry, cMap,
+            fx, fy, fz, m_caster->GetOrientation(), 0, 0, 0, 0, 100, 1))
+        {
+            linkedGO->SetRespawnTime(duration > 0 ? duration/1000 : 0);
+            linkedGO->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel() );
+            linkedGO->SetSpellId(m_spellInfo->Id);
+            linkedGO->SetOwnerGUID(m_caster->GetGUID() );
+
+            MapManager::Instance().GetMap(linkedGO->GetMapId(), linkedGO)->Add(linkedGO);
+        }
+        else
+        {
+            delete linkedGO;
+            linkedGO = NULL;
+            return;
+        }
+    }
 }
 
 void Spell::EffectProspecting(uint32 /*i*/)

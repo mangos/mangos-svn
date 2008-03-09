@@ -84,7 +84,7 @@ SpellCategoryStore sSpellCategoryStore;
 
 DBCStorage <SpellCastTimesEntry> sCastTimesStore(SpellCastTimefmt);
 DBCStorage <SpellDurationEntry> sSpellDurationStore(SpellDurationfmt);
-//DBCStorage <SpellFocusObjectEntry> sSpellFocusObjectStore(SpellFocusObjectfmt);
+DBCStorage <SpellFocusObjectEntry> sSpellFocusObjectStore(SpellFocusObjectfmt);
 DBCStorage <SpellRadiusEntry> sSpellRadiusStore(SpellRadiusfmt);
 DBCStorage <SpellRangeEntry> sSpellRangeStore(SpellRangefmt);
 DBCStorage <StableSlotPricesEntry> sStableSlotPricesStore(StableSlotPricesfmt);
@@ -170,7 +170,7 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 48;
+    const uint32 DBCFilesCount = 49;
 
     barGoLink bar( DBCFilesCount );
 
@@ -248,7 +248,7 @@ void LoadDBCStores(std::string dataPath)
 
     LoadDBC(bar,bad_dbc_files,sCastTimesStore,           dataPath+"dbc/SpellCastTimes.dbc");
     LoadDBC(bar,bad_dbc_files,sSpellDurationStore,       dataPath+"dbc/SpellDuration.dbc");
-    //LoadDBC(bar,bad_dbc_files,sSpellFocusObjectStore,    dataPath+"dbc/SpellFocusObject.dbc");
+    LoadDBC(bar,bad_dbc_files,sSpellFocusObjectStore,    dataPath+"dbc/SpellFocusObject.dbc");
     LoadDBC(bar,bad_dbc_files,sSpellItemEnchantmentStore,dataPath+"dbc/SpellItemEnchantment.dbc");
     LoadDBC(bar,bad_dbc_files,sSpellItemEnchantmentConditionStore,dataPath+"dbc/SpellItemEnchantmentCondition.dbc");
     LoadDBC(bar,bad_dbc_files,sSpellRadiusStore,         dataPath+"dbc/SpellRadius.dbc");

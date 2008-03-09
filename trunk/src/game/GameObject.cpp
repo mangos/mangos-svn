@@ -50,6 +50,8 @@ GameObject::GameObject( WorldObject *instantiator ) : WorldObject( instantiator 
     m_usetimes = 0;
     m_spellId = 0;
     m_charges = 5;
+
+    m_environmentcastTime = 0;
 }
 
 GameObject::~GameObject()
@@ -197,8 +199,8 @@ void GameObject::Update(uint32 /*p_time*/)
             m_lootState = GO_CLOSED;                        // for not bobber is same as GO_CLOSED
             // NO BREAK
         case GO_CLOSED:
-            if (m_respawnTime > 0)
-                                                            // timer on
+        {
+            if (m_respawnTime > 0)                          // timer on
             {
                 if (m_respawnTime <= time(NULL))            // timer expired
                 {
@@ -233,18 +235,10 @@ void GameObject::Update(uint32 /*p_time*/)
                             else
                                 SetUInt32Value (GAMEOBJECT_STATE, 1);
                             break;
-                        case GAMEOBJECT_TYPE_TRAP:
-                            break;
                         default:
                             if(!m_spawnedByDefault)         // despawn timer
                             {
-                                if(GetOwnerGUID())
-                                {
-                                    Delete();
-                                    return;
-                                }
-
-                                SetLootState(GO_LOOTED);    // can be despawned
+                                SetLootState(GO_LOOTED);    // can be despawned or destroyed
                                 return;
                             }
                                                             // respawn timer
@@ -253,8 +247,83 @@ void GameObject::Update(uint32 /*p_time*/)
                     }
                 }
             }
-            break;
 
+            // traps can have time and can not have
+            GameObjectInfo const* goInfo = GetGOInfo();
+            if(goInfo->type == GAMEOBJECT_TYPE_TRAP)
+            {
+                // traps
+                Unit* owner = GetOwner();
+                Unit* ok = NULL;                            // pointer to appropriate target if found any
+
+                if(m_environmentcastTime >= time(NULL))
+                    return;
+
+                float radius = goInfo->trap.radius;
+                if(!radius)                                 // cast in other case (at some triggering/linked go/etc explicit call)
+                    return;
+
+                bool NeedDespawn = (goInfo->trap.isNeedDespawn != 0);
+
+                CellPair p(MaNGOS::ComputeCellPair(GetPositionX(),GetPositionY()));
+                Cell cell(p);
+                cell.data.Part.reserved = ALL_DISTRICT;
+
+                // Note: this hack with search required until GO casting not implemented
+                // search unfriendly creature
+                if(owner && NeedDespawn)                    // hunter trap
+                {
+                    MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, owner, radius);
+                    MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(ok, u_check);
+
+                    CellLock<GridReadGuard> cell_lock(cell, p);
+
+                    TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, GridTypeMapContainer > grid_object_checker(checker);
+                    cell_lock->Visit(cell_lock, grid_object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
+
+                    // or unfriendly player/pet
+                    if(!ok)
+                    {
+                        TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_object_checker(checker);
+                        cell_lock->Visit(cell_lock, world_object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
+                    }
+                }
+                else                                        // environmental trap
+                {
+                    // environmental damage spells already have around enemies targeting but this not help in case not existed GO casting support
+                    MaNGOS::AnyUnitInObjectRangeCheck u_check(this, radius);
+                    MaNGOS::UnitSearcher<MaNGOS::AnyUnitInObjectRangeCheck> checker(ok, u_check);
+
+                    CellLock<GridReadGuard> cell_lock(cell, p);
+
+                    TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnitInObjectRangeCheck>, GridTypeMapContainer > grid_object_checker(checker);
+                    cell_lock->Visit(cell_lock, grid_object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
+
+                    // or player/pet
+                    if(!ok)
+                    {
+                        TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_object_checker(checker);
+                        cell_lock->Visit(cell_lock, world_object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
+                    }
+                }
+
+                if (ok)
+                {
+                    Unit *caster =  owner ? owner : ok;
+
+                    caster->CastSpell(ok, goInfo->trap.spellId, true);
+                    m_environmentcastTime = time(NULL) + 4; // 4 seconds
+
+                    if(NeedDespawn)
+                        SetLootState(GO_LOOTED);            // can be despawned or destroyed
+                }
+            }
+
+            if (m_charges && m_usetimes >= m_charges)
+                SetLootState(GO_LOOTED);                    // can be despawned or destroyed
+
+            break;
+        }
         case GO_OPEN:
             break;
 
@@ -309,87 +378,6 @@ void GameObject::Update(uint32 /*p_time*/)
             break;
         }
     }
-
-    if(GetGOInfo()->type == GAMEOBJECT_TYPE_TRAP)
-    {
-        // traps
-        Unit* owner = GetOwner();
-        Unit* ok = NULL;                                    // pointer to appropriate target if found any
-        if(!owner && m_respawnTime > 0)
-            return;
-
-        if(m_environmentcastTime && m_environmentcastTime >= time(NULL))
-            return;
-
-        float radius = GetGOInfo()->trap.radius;
-        if(!radius)                                         // cast in other case (at some triggring/linked go/etc explicit call)
-            return;
-
-        bool NeedDespawn = (GetGOInfo()->trap.isNeedDespawn != 0);
-
-        CellPair p(MaNGOS::ComputeCellPair(GetPositionX(),GetPositionY()));
-        Cell cell(p);
-        cell.data.Part.reserved = ALL_DISTRICT;
-
-        // search unfriedly creature
-        if(owner)                                           // hunter trap
-        {
-            MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, owner, radius);
-            MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> checker(ok, u_check);
-
-            CellLock<GridReadGuard> cell_lock(cell, p);
-
-            TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, GridTypeMapContainer > grid_object_checker(checker);
-            cell_lock->Visit(cell_lock, grid_object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
-
-            // or unfriendly player/pet
-            if(!ok)
-            {
-                TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_object_checker(checker);
-                cell_lock->Visit(cell_lock, world_object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
-            }
-        }
-        else                                                // enviromental trap
-        {
-            // Note: this hack with search required until GO casting not implemented
-            // enviromenment damage spells already have around enemies targeting but this not help in case not existed GO casting support
-            MaNGOS::AnyUnitInObjectRangeCheck u_check(this, radius);
-            MaNGOS::UnitSearcher<MaNGOS::AnyUnitInObjectRangeCheck> checker(ok, u_check);
-
-            CellLock<GridReadGuard> cell_lock(cell, p);
-
-            TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnitInObjectRangeCheck>, GridTypeMapContainer > grid_object_checker(checker);
-            cell_lock->Visit(cell_lock, grid_object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
-
-            // or unfriendly player/pet
-            if(!ok)
-            {
-                TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_object_checker(checker);
-                cell_lock->Visit(cell_lock, world_object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
-            }
-        }
-        
-        if (ok)
-        {
-            Unit *caster =  owner ? owner : ok;
-
-            caster->CastSpell(ok, GetGOInfo()->trap.spellId, true);
-            m_environmentcastTime = time(NULL) + 4;             // 4 seconds
-
-            if(NeedDespawn)
-            {
-                m_respawnTime = 0;                              // to prevent save respawn timer
-                Delete();
-            }
-        }
-    }
-
-    if (m_charges && m_usetimes >= m_charges)
-    {
-        m_respawnTime = 0;                                  // to prevent save respawn timer
-        Delete();
-    }
-
 }
 
 void GameObject::Refresh()
@@ -660,4 +648,38 @@ bool GameObject::ActivateToQuest( Player *pTarget)const
     }
 
     return false;
+}
+
+void GameObject::TriggeringLinkedGameObject( uint32 trapEntry, Unit* target)
+{
+    GameObjectInfo const* trapInfo = sGOStorage.LookupEntry<GameObjectInfo>(trapEntry);
+    if(!trapInfo || trapInfo->type!=GAMEOBJECT_TYPE_TRAP)
+        return;
+
+    SpellEntry const* trapSpell = sSpellStore.LookupEntry(trapInfo->trap.spellId);
+    if(!trapSpell)                                          // checked at load already
+        return;
+    
+    float range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(trapSpell->rangeIndex));
+
+    // search nearest linked GO
+    GameObject* trapGO = NULL;
+    {
+        // using original GO distance
+        CellPair p(MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY()));
+        Cell cell(p);
+        cell.data.Part.reserved = ALL_DISTRICT;
+
+        MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*target,trapEntry,range);
+        MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> checker(trapGO,go_check);
+
+        TypeContainerVisitor<MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck>, GridTypeMapContainer > object_checker(checker);
+        CellLock<GridReadGuard> cell_lock(cell, p);
+        cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
+    }
+
+    // found correct GO
+    // FIXME: when GO casting will be implemented trap must cast spell to target
+    if(trapGO)
+        target->CastSpell(target,trapSpell,true);
 }
