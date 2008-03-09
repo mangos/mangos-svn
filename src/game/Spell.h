@@ -624,14 +624,14 @@ class Spell
             uint64 timeDelay;
             uint8  effectMask;
         };
-        std::list<GOTargetInfo> m_UniqeGOTargetInfo;
+        std::list<GOTargetInfo> m_UniqueGOTargetInfo;
 
         struct ItemTargetInfo
         {
             Item  *item;
             uint8 effectMask;
         };
-        std::list<ItemTargetInfo> m_UniqeItemInfo;
+        std::list<ItemTargetInfo> m_UniqueItemInfo;
 
         void CleanupTargetList();
         void AddUnitTarget(Unit* target, uint32 effIndex);

@@ -527,8 +527,8 @@ void Spell::FillTargetMap()
 void Spell::CleanupTargetList()
 {
     m_UniqueTargetInfo.clear();
-    m_UniqeGOTargetInfo.clear();
-    m_UniqeItemInfo.clear();
+    m_UniqueGOTargetInfo.clear();
+    m_UniqueItemInfo.clear();
     m_countOfHit = 0;
     m_countOfMiss = 0;
     m_delayMoment = 0;
@@ -536,7 +536,7 @@ void Spell::CleanupTargetList()
 
 void Spell::AddUnitTarget(Unit* pVictim, uint32 effIndex)
 {
-    if( m_spellInfo->Effect[effIndex]==0 || m_spellInfo->Effect[effIndex] == SPELL_EFFECT_SEND_EVENT )
+    if( m_spellInfo->Effect[effIndex]==0 )
         return;
 
     uint64 targetGUID = pVictim->GetGUID();
@@ -608,13 +608,13 @@ void Spell::AddUnitTarget(uint64 unitGUID, uint32 effIndex)
 
 void Spell::AddGOTarget(GameObject* pVictim, uint32 effIndex)
 {
-    if( m_spellInfo->Effect[effIndex]==0 || m_spellInfo->Effect[effIndex] == SPELL_EFFECT_SEND_EVENT )
+    if( m_spellInfo->Effect[effIndex]==0 )
         return;
 
     uint64 targetGUID = pVictim->GetGUID();
 
     // Lookup target in already in list
-    for(std::list<GOTargetInfo>::iterator ihit= m_UniqeGOTargetInfo.begin();ihit != m_UniqeGOTargetInfo.end();++ihit)
+    for(std::list<GOTargetInfo>::iterator ihit= m_UniqueGOTargetInfo.begin();ihit != m_UniqueGOTargetInfo.end();++ihit)
     {
         if (targetGUID == ihit->targetGUID)                 // Found in list
         {
@@ -645,7 +645,7 @@ void Spell::AddGOTarget(GameObject* pVictim, uint32 effIndex)
     ++m_countOfHit;
 
     // Add target to list
-    m_UniqeGOTargetInfo.push_back(target);
+    m_UniqueGOTargetInfo.push_back(target);
 }
 
 void Spell::AddGOTarget(uint64 goGUID, uint32 effIndex)
@@ -657,11 +657,11 @@ void Spell::AddGOTarget(uint64 goGUID, uint32 effIndex)
 
 void Spell::AddItemTarget(Item* pitem, uint32 effIndex)
 {
-    if( m_spellInfo->Effect[effIndex]==0 || m_spellInfo->Effect[effIndex] == SPELL_EFFECT_SEND_EVENT )
+    if( m_spellInfo->Effect[effIndex]==0 )
         return;
 
     // Lookup target in already in list
-    for(std::list<ItemTargetInfo>::iterator ihit= m_UniqeItemInfo.begin();ihit != m_UniqeItemInfo.end();++ihit)
+    for(std::list<ItemTargetInfo>::iterator ihit= m_UniqueItemInfo.begin();ihit != m_UniqueItemInfo.end();++ihit)
     {
         if (pitem == ihit->item)                            // Found in list
         {
@@ -675,7 +675,7 @@ void Spell::AddItemTarget(Item* pitem, uint32 effIndex)
     ItemTargetInfo target;
     target.item       = pitem;
     target.effectMask = 1<<effIndex;
-    m_UniqeItemInfo.push_back(target);
+    m_UniqueItemInfo.push_back(target);
 }
 
 void Spell::DoAllEffectOnTarget(TargetInfo *target)
@@ -1702,7 +1702,7 @@ void Spell::handle_immediate()
     for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
         DoAllEffectOnTarget(&(*ihit));
 
-    for(std::list<GOTargetInfo>::iterator ihit= m_UniqeGOTargetInfo.begin();ihit != m_UniqeGOTargetInfo.end();++ihit)
+    for(std::list<GOTargetInfo>::iterator ihit= m_UniqueGOTargetInfo.begin();ihit != m_UniqueGOTargetInfo.end();++ihit)
         DoAllEffectOnTarget(&(*ihit));
 
     // Remove used for cast item if need (it can be already NULL after TakeReagents call
@@ -1745,14 +1745,14 @@ uint64 Spell::handle_delayed(uint64 t_offset)
 
     // now recheck gameobject targeting correctness
     std::list<GOTargetInfo>::iterator ignext;
-    for(std::list<GOTargetInfo>::iterator ighit= m_UniqeGOTargetInfo.begin(); ighit != m_UniqeGOTargetInfo.end();ighit = ignext)
+    for(std::list<GOTargetInfo>::iterator ighit= m_UniqueGOTargetInfo.begin(); ighit != m_UniqueGOTargetInfo.end();ighit = ignext)
     {
         ignext = ighit;
         ++ignext;
         if( ighit->timeDelay <= t_offset )
         {
             DoAllEffectOnTarget(&(*ighit));
-            m_UniqeGOTargetInfo.erase(ighit);
+            m_UniqueGOTargetInfo.erase(ighit);
         }
         else
         {
@@ -1761,7 +1761,7 @@ uint64 Spell::handle_delayed(uint64 t_offset)
         }
     }
 
-    if (m_UniqueTargetInfo.empty() && m_UniqeGOTargetInfo.empty())
+    if (m_UniqueTargetInfo.empty() && m_UniqueGOTargetInfo.empty())
     {
         // spell is finished, perform some last features of the spell here
         _handle_finish_phase();
@@ -1789,7 +1789,9 @@ void Spell::_handle_immediate_phase()
         if(m_spellInfo->Effect[j]==0)
             continue;
 
-        if(m_spellInfo->Effect[j] == SPELL_EFFECT_SEND_EVENT)
+        // apply Send Event effect to ground in case empty target lists
+        if( m_spellInfo->Effect[j] == SPELL_EFFECT_SEND_EVENT && 
+            m_UniqueTargetInfo.empty() && m_UniqueGOTargetInfo.empty() && m_UniqueItemInfo.empty() )
         {
             HandleEffects(NULL,NULL,NULL, j);
             continue;
@@ -1807,15 +1809,12 @@ void Spell::_handle_immediate_phase()
     }
 
     // process items
-    for(std::list<ItemTargetInfo>::iterator ihit= m_UniqeItemInfo.begin();ihit != m_UniqeItemInfo.end();++ihit)
+    for(std::list<ItemTargetInfo>::iterator ihit= m_UniqueItemInfo.begin();ihit != m_UniqueItemInfo.end();++ihit)
         DoAllEffectOnTarget(&(*ihit));
 
     // process ground
     for(uint32 j = 0;j<3;j++)
     {
-        if ((m_spellInfo->Effect[j]==0) || (m_spellInfo->Effect[j] == SPELL_EFFECT_SEND_EVENT))
-            continue;
-
         // persistent area auras target only the ground
         if(m_spellInfo->Effect[j] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
             HandleEffects(NULL,NULL,NULL, j);
@@ -2039,7 +2038,7 @@ void Spell::update(uint32 difftime)
                         ((Player*)m_caster)->CastedCreatureOrGO(unit->GetEntry(),unit->GetGUID(),m_spellInfo->Id);
                     }
 
-                    for(std::list<GOTargetInfo>::iterator ihit= m_UniqeGOTargetInfo.begin();ihit != m_UniqeGOTargetInfo.end();++ihit)
+                    for(std::list<GOTargetInfo>::iterator ihit= m_UniqueGOTargetInfo.begin();ihit != m_UniqueGOTargetInfo.end();++ihit)
                     {
                         GOTargetInfo* target = &*ihit;
 
@@ -2288,7 +2287,7 @@ void Spell::WriteSpellGoTargets( WorldPacket * data )
         if ((*ihit).missCondition == SPELL_MISS_NONE)       // Add only hits
             *data << uint64(ihit->targetGUID);
 
-    for(std::list<GOTargetInfo>::iterator ighit= m_UniqeGOTargetInfo.begin();ighit != m_UniqeGOTargetInfo.end();++ighit)
+    for(std::list<GOTargetInfo>::iterator ighit= m_UniqueGOTargetInfo.begin();ighit != m_UniqueGOTargetInfo.end();++ighit)
         *data << uint64(ighit->targetGUID);                 // Always hits
 
     *data << (uint8)m_countOfMiss;
@@ -2382,9 +2381,9 @@ void Spell::SendChannelStart(uint32 duration)
             }
         }
     }
-    else if(!m_UniqeGOTargetInfo.empty())
+    else if(!m_UniqueGOTargetInfo.empty())
     {
-        for(std::list<GOTargetInfo>::iterator itr= m_UniqeGOTargetInfo.begin();itr != m_UniqeGOTargetInfo.end();++itr)
+        for(std::list<GOTargetInfo>::iterator itr= m_UniqueGOTargetInfo.begin();itr != m_UniqueGOTargetInfo.end();++itr)
         {
             if(itr->effectMask & (1<<0) )
             {
