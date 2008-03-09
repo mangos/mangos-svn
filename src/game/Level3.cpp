@@ -1615,7 +1615,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
             QueryResult *result = WorldDatabase.PQuery("SELECT entry FROM item_template WHERE name = '%s'", itemName.c_str());
             if (!result)
             {
-                PSendSysMessage(LANG_COMMAND_ADDITEMCOULDNOTFIND, citemName+1);
+                PSendSysMessage(LANG_COMMAND_COULDNOTFIND, citemName+1);
                 return true;
             }
             itemId = result->Fetch()->GetUInt16();
