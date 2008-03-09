@@ -67,14 +67,21 @@ struct GameObjectInfo
             uint32 minSuccessOpens;                         //4
             uint32 maxSuccessOpens;                         //5
             uint32 eventId;                                 //6
+            uint32 _data7;
+            uint32 _data8;                                  //8 questId???
+            uint32 _data9[5];
+            uint32 _data14;                                 //14 something == trap.data12 == goober.data14 ???
         } chest;
         //6 GAMEOBJECT_TYPE_TRAP
         struct
         {
-            uint32 _data0[2];
+            uint32 _data0;                                  //0 lockid???
+            uint32 _data1;
             uint32 radius;                                  //2
             uint32 spellId;                                 //3
             uint32 isNeedDespawn;                           //4 (if >0)
+            uint32 _data5[7];
+            uint32 _data12;                                 //12 something == chest.data14 == goober.data14 ???
         } trap;
         //8 GAMEOBJECT_TYPE_SPELL_FOCUS
         struct
@@ -86,14 +93,16 @@ struct GameObjectInfo
         //10 GAMEOBJECT_TYPE_GOOBER
         struct
         {
-            uint32 _data0;
+            uint32 _data0;                                  //0 lockid ???
             uint32 questId;                                 //1
             uint32 eventId;                                 //2
             uint32 _data3[7];
             uint32 spellId;                                 //10
             uint32 _data11;
             uint32 linkedTrapId;                            //12
-            uint32 _data13[3];
+            uint32 _data13;
+            uint32 _data14;                                 //14 something == trap.data12 == chest.data14 ???
+            uint32 _data15;
             uint32 isBattlegroundObject;                    //16
         } goober;
         //13 GAMEOBJECT_TYPE_CAMERA
