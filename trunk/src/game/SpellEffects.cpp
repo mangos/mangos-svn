@@ -428,6 +428,11 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                 {
                     damage += m_caster->CalculateDamage(RANGED_ATTACK)+int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.2);
                 }
+                //Explosive Trap Effect
+                else if((m_spellInfo->SpellFamilyFlags & 0x00000004))
+                {
+                    damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.1);
+                }
                 break;
             }
             case SPELLFAMILY_PALADIN:
