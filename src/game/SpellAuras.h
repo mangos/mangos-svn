@@ -200,6 +200,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleModSpellDamagePercentFromAttackPower(bool apply, bool Real);
         void HandleModSpellHealingPercentFromAttackPower(bool apply, bool Real);
         void HandleAuraModPacifyAndSilence(bool Apply, bool Real);
+        void HandleAuraModIncreaseMaxHealth(bool apply, bool Real);
         void HandleAuraModExpertise(bool apply, bool Real);
         void HandleAuraModResistenceOfIntellectPercent(bool apply, bool Real);
         void HandleAuraPowerBurn(bool apply, bool Real);
