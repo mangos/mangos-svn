@@ -6931,6 +6931,13 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo) const
     if (!spellInfo)
         return false;
 
+    // don't get feared if stunned
+    if (spellInfo->Mechanic == MECHANIC_FEAR )
+    {
+        if ( hasUnitState(UNIT_STAT_STUNDED) )
+            return true;
+    }
+
     SpellImmuneList const& dispelList = m_spellImmune[IMMUNITY_DISPEL];
     for(SpellImmuneList::const_iterator itr = dispelList.begin(); itr != dispelList.end(); ++itr)
         if(itr->type == spellInfo->Dispel)

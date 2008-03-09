@@ -280,7 +280,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //227
     &Aura::HandleNULL,                                      //228 stealth detection
     &Aura::HandleNULL,                                      //229 avoidance (reduce damage from area of effect attacks)
-    &Aura::HandleAuraModIncreaseHealth,                     //230 Commanding Shout
+    &Aura::HandleAuraModIncreaseMaxHealth,                  //230 Commanding Shout
     &Aura::HandleNULL,                                      //231
     &Aura::HandleUnused,                                    //232 used by only one test spell
     &Aura::HandleNULL,                                      //233 set model id to the one of the creature with id m_modifier.m_miscvalue
@@ -2371,6 +2371,9 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
 
+        // remove fears (after unit state update to prevent attack back/etc)
+        m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_FEAR);
+
         if (caster)
         {
             // Stop attack if spell has knockout effect
@@ -3622,6 +3625,24 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 
     // generic case
     m_target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
+}
+
+void  Aura::HandleAuraModIncreaseMaxHealth(bool apply, bool Real)
+{
+    uint32 oldhealth = m_target->GetHealth();
+    double healthPercentage = (double)oldhealth / (double)m_target->GetMaxHealth();
+
+    m_target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
+
+    // refresh percentage
+    if(oldhealth > 0)
+    {
+        uint32 newhealth = uint32(ceil((double)m_target->GetMaxHealth() * healthPercentage));
+        if(newhealth==0)
+            newhealth = 1;
+
+        m_target->SetHealth(newhealth);
+    }
 }
 
 void Aura::HandleAuraModIncreaseEnergy(bool apply, bool Real)
