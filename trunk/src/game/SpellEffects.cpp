@@ -542,7 +542,7 @@ void Spell::EffectDummy(uint32 i)
             // Charge
             if(m_spellInfo->SpellFamilyFlags & 0x1 && m_spellInfo->SpellVisual == 867)
             {
-                int32 chargeBasePoints0 = damage-1;         //34846 have EffBaseDice=1
+                int32 chargeBasePoints0 = damage;
                 m_caster->CastCustomSpell(m_caster,34846,&chargeBasePoints0,NULL,NULL,true);
                 return;
             }
@@ -780,9 +780,9 @@ void Spell::EffectDummy(uint32 i)
             if (healthPerc < 100 && healthPerc > 40)
                 melee_mod = 10+(100-healthPerc)/3;
 
-            int32 hasteModBasePoints0 = melee_mod-1;        // (EffectBasePoints[0]+1)-1+(5-melee_mod) = (melee_mod-1+1)-1+5-melee_mod = 5-1
-            int32 hasteModBasePoints1 = (5-melee_mod)-1;
-            int32 hasteModBasePoints2 = 5-1;
+            int32 hasteModBasePoints0 = melee_mod;          // (EffectBasePoints[0]+1)-1+(5-melee_mod) = (melee_mod-1+1)-1+5-melee_mod = 5-1
+            int32 hasteModBasePoints1 = (5-melee_mod);
+            int32 hasteModBasePoints2 = 5;
             m_caster->CastCustomSpell(m_caster,26635,&hasteModBasePoints0,&hasteModBasePoints1,&hasteModBasePoints2,true,NULL);
             return;
         }
@@ -792,7 +792,7 @@ void Spell::EffectDummy(uint32 i)
             if(!unitTarget)
                 return;
 
-            int32 basePoints0 = damage+int32(m_caster->GetPower(POWER_RAGE) * m_spellInfo->DmgMultiplier[i])-1;
+            int32 basePoints0 = damage+int32(m_caster->GetPower(POWER_RAGE) * m_spellInfo->DmgMultiplier[i]);
             m_caster->CastCustomSpell(unitTarget, 20647, &basePoints0, NULL, NULL, true, 0);
             m_caster->SetPower(POWER_RAGE,0);
             return;
@@ -834,8 +834,7 @@ void Spell::EffectDummy(uint32 i)
         {
             // Tree of Life area effect
             int32 health_mod = int32(m_caster->GetStat(STAT_SPIRIT)/4);
-            int32 treeHealthBasePoints0 = health_mod-1;
-            m_caster->CastCustomSpell(m_caster,34123,&treeHealthBasePoints0,NULL,NULL,true,NULL);
+            m_caster->CastCustomSpell(m_caster,34123,&health_mod,NULL,NULL,true,NULL);
             return;
         }
 
@@ -1023,7 +1022,7 @@ void Spell::EffectDummy(uint32 i)
                     return;
             };
 
-            int32 deepWoundsDotBasePoints0 = int32(damage / 4) - 1;
+            int32 deepWoundsDotBasePoints0 = int32(damage / 4);
             m_caster->CastCustomSpell(unitTarget, 12721, &deepWoundsDotBasePoints0, NULL, NULL, true, NULL);
             return;
         }
@@ -1302,8 +1301,8 @@ void Spell::EffectDummy(uint32 i)
             if(!unitTarget || unitTarget->getPowerType() != POWER_MANA)
                 return;
 
-            //regen 6% of Total Mana Every 3 secs (-1 stored)
-            int32 EffectBasePoints0 = unitTarget->GetMaxPower(POWER_MANA)  * damage / 100 -1;
+            //regen 6% of Total Mana Every 3 secs
+            int32 EffectBasePoints0 = unitTarget->GetMaxPower(POWER_MANA)  * damage / 100;
             m_caster->CastCustomSpell(unitTarget,39609,&EffectBasePoints0,NULL,NULL,true,NULL,NULL,m_originalCasterGUID);
             return;
         }
@@ -1417,8 +1416,7 @@ void Spell::EffectTriggerSpellWithValue(uint32 i)
         return;
     }
 
-    int32 bp = damage - int32(spellInfo->EffectBaseDice[i]);
-
+    int32 bp = damage;
     m_caster->CastCustomSpell(unitTarget,triggered_spell_id,&bp,&bp,&bp,true,NULL,NULL,m_originalCasterGUID);
 }
 
@@ -3758,8 +3756,7 @@ void Spell::EffectScriptEffect(uint32 i)
                         sLog.outError("Spell::EffectScriptEffect: Spell %u not handled in FoL",m_spellInfo->Id);
                 }
 
-                int32 basePoint0 = damage-1;
-
+                int32 basePoint0 = damage;
                 m_caster->CastCustomSpell(unitTarget, spell_id, &basePoint0, NULL, NULL, true);
                 return;
             }
@@ -3787,8 +3784,7 @@ void Spell::EffectScriptEffect(uint32 i)
                         sLog.outError("Spell::EffectScriptEffect: Spell %u not handled in HL",m_spellInfo->Id);
                 }
 
-                int32 basePoint0 = damage-1;
-
+                int32 basePoint0 = damage;
                 m_caster->CastCustomSpell(unitTarget, spell_id, &basePoint0, NULL, NULL, true);
                 return;
             }
@@ -4148,8 +4144,7 @@ void Spell::EffectFeedPet(uint32 i)
     _player->DestroyItemCount(itemTarget,count,true);
     // TODO: fix crash when a spell has two effects, both pointed at the same item target
 
-    int32 feedCustomBasePoints0 = benefit-1;
-    m_caster->CastCustomSpell(m_caster,m_spellInfo->EffectTriggerSpell[i],&feedCustomBasePoints0,NULL,NULL,true);
+    m_caster->CastCustomSpell(m_caster,m_spellInfo->EffectTriggerSpell[i],&benefit,NULL,NULL,true);
 }
 
 void Spell::EffectDismissPet(uint32 /*i*/)

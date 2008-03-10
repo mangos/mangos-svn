@@ -981,7 +981,7 @@ void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castIte
 
     if(!spellInfo)
     {
-        sLog.outError("WORLD: unknown spell id %i\n", spellId);
+        sLog.outError("CastSpell: unknown spell id %i\n", spellId);
         return;
     }
 
@@ -992,7 +992,7 @@ void Unit::CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, I
 {
     if(!spellInfo)
     {
-        sLog.outError("WORLD: unknown spell ");
+        sLog.outError("CastSpell: unknown spell ");
         return;
     }
 
@@ -1016,7 +1016,7 @@ void Unit::CastCustomSpell(Unit* Victim,uint32 spellId, int32 const* bp0, int32 
 
     if(!spellInfo)
     {
-        sLog.outError("WORLD: unknown spell id %i\n", spellId);
+        sLog.outError("CastCustomSpell: unknown spell id %i\n", spellId);
         return;
     }
 
@@ -1027,7 +1027,7 @@ void Unit::CastCustomSpell(Unit* Victim,SpellEntry const *spellInfo, int32 const
 {
     if(!spellInfo)
     {
-        sLog.outError("WORLD: unknown spell ");
+        sLog.outError("CastCustomSpell: unknown spell ");
         return;
     }
 
@@ -1040,13 +1040,13 @@ void Unit::CastCustomSpell(Unit* Victim,SpellEntry const *spellInfo, int32 const
     Spell *spell = new Spell(this, spellInfo, triggered, originalCaster);
 
     if(bp0)
-        spell->m_currentBasePoints[0] = *bp0;
+        spell->m_currentBasePoints[0] = *bp0-int32(spellInfo->EffectBaseDice[0]);
 
     if(bp1)
-        spell->m_currentBasePoints[1] = *bp1;
+        spell->m_currentBasePoints[1] = *bp1-int32(spellInfo->EffectBaseDice[1]);
 
     if(bp2)
-        spell->m_currentBasePoints[2] = *bp2;
+        spell->m_currentBasePoints[2] = *bp2-int32(spellInfo->EffectBaseDice[2]);
 
     SpellCastTargets targets;
     targets.setUnitTarget( Victim );
@@ -4312,11 +4312,11 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
 
             switch (dummySpell->Id)
             {
-                case 11119: igniteDotBasePoints0=int32(0.04f*damage)-1; break;
-                case 11120: igniteDotBasePoints0=int32(0.08f*damage)-1; break;
-                case 12846: igniteDotBasePoints0=int32(0.12f*damage)-1; break;
-                case 12847: igniteDotBasePoints0=int32(0.16f*damage)-1; break;
-                case 12848: igniteDotBasePoints0=int32(0.20f*damage)-1; break;
+                case 11119: igniteDotBasePoints0=int32(0.04f*damage); break;
+                case 11120: igniteDotBasePoints0=int32(0.08f*damage); break;
+                case 12846: igniteDotBasePoints0=int32(0.12f*damage); break;
+                case 12847: igniteDotBasePoints0=int32(0.16f*damage); break;
+                case 12848: igniteDotBasePoints0=int32(0.20f*damage); break;
                 default:
                     sLog.outError("Unit::HandleDummyAuraProc: non handled spell id: %u (IG)",dummySpell->Id);
                     return;
@@ -4354,7 +4354,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
 
             SpellEntry const* windfurySpellEntry = sSpellStore.LookupEntry(windfurySpellId);
 
-            int32 addvalue = windfurySpellEntry->EffectBasePoints[0];
+            int32 addvalue = windfurySpellEntry->EffectBasePoints[0]+windfurySpellEntry->EffectBaseDice[0];
 
             CastCustomSpell(this, 32910, &addvalue, NULL, NULL, true, castItem, triggeredByAura);
 
@@ -4388,7 +4388,6 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
 
             if(triggeredByAura->GetCasterGUID() == pVictim->GetGUID())
             {
-                                                            //VEHeal has a BaseDice of 0, so no decrement needed
                 int32 VEHealBasePoints0 = triggeredByAura->GetModifier()->m_amount*damage/100;
                 pVictim->CastCustomSpell(pVictim, 15290, &VEHealBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
             }
@@ -4406,12 +4405,11 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 return;
 
             // return damage % to attacker but < 50% own total health
-            uint32 backDamage = triggeredByAura->GetModifier()->m_amount*damage/100;
+            int32 backDamage = triggeredByAura->GetModifier()->m_amount*int32(damage)/100;
             if(backDamage > GetMaxHealth()/2)
                 backDamage = GetMaxHealth()/2;
 
-            int32 YYDamageBasePoints0 = backDamage-1;
-            CastCustomSpell(pVictim, 25997, &YYDamageBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
+            CastCustomSpell(pVictim, 25997, &backDamage, NULL, NULL, true, castItem, triggeredByAura);
 
             return;
         }
@@ -4423,7 +4421,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         {
             if(!procSpell)
                 return;
-            int32 HealthBasePoints0 = int32(damage*triggeredByAura->GetModifier()->m_amount/100)-1;
+            int32 HealthBasePoints0 = int32(damage*triggeredByAura->GetModifier()->m_amount/100);
             CastCustomSpell(this,30294,&HealthBasePoints0,NULL,NULL,true,castItem,triggeredByAura);
             return;
         }
@@ -4452,7 +4450,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             // if healed by another unit (pVictim)
             if(this != pVictim)
             {
-                int32 SAHealBasePoints0 = triggeredByAura->GetModifier()->m_amount*damage/100-1;
+                int32 SAHealBasePoints0 = triggeredByAura->GetModifier()->m_amount*damage/100;
                 CastCustomSpell(this, 31786, &SAHealBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
             }
 
@@ -4593,7 +4591,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     // Vampiric Aura (boss spell)
                 case 38196:
                 {
-                    int32 basePoint = 3 * damage -1;        // 300%
+                    int32 basePoint = 3 * damage;           // 300%
                     if (basePoint >= 0)
                         CastCustomSpell(this, 31285, &basePoint, NULL, NULL, true, castItem, triggeredByAura);
                     return;
@@ -4668,7 +4666,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             {
                 if (getPowerType() != POWER_MANA)
                     return;
-                int32 manaReward = (triggeredByAura->GetModifier()->m_amount * GetMaxPower(POWER_MANA) / 100)-1;
+                int32 manaReward = (triggeredByAura->GetModifier()->m_amount * GetMaxPower(POWER_MANA) / 100);
                 CastCustomSpell(this, 29442, &manaReward, NULL, NULL, true, castItem, triggeredByAura);
                 return;
             }
@@ -4744,7 +4742,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
 
                 if (Unit *pet = GetPet())
                 {
-                    int32 healamount = damage * triggeredByAura->GetModifier()->m_amount / 100 -1;
+                    int32 healamount = damage * triggeredByAura->GetModifier()->m_amount/100;
                     CastCustomSpell(pet, 37382, &healamount, NULL, NULL, true, castItem, triggeredByAura);
                 }
                 return;
@@ -4787,7 +4785,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     if(!castItem)
                         return;
 
-                    int32 healamount = int32(damage * 10/100) - 1;
+                    int32 healamount = int32(damage * 10/100);
                     CastCustomSpell(this, 26170, &healamount, NULL, NULL, true, castItem, triggeredByAura);
                     return;
                 }
@@ -4812,7 +4810,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             //Prayer of Mending
             if(dummySpell->SpellFamilyFlags & 0x00002000000000LL)
             {
-                int32 heal = triggeredByAura->GetModifier()->m_amount - 1;
+                int32 heal = triggeredByAura->GetModifier()->m_amount;
 
                 // heal
                 CastCustomSpell(this,33110,&heal,NULL,NULL,true,castItem,triggeredByAura,triggeredByAura->GetCasterGUID());
@@ -4887,7 +4885,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     if(!castItem)
                         return;
 
-                    int32 manaback = int32(procSpell->manaCost * 30 / 100) - 1;
+                    int32 manaback = int32(procSpell->manaCost * 30 / 100);
                     CastCustomSpell(this, 28742, &manaback, NULL, NULL, true, castItem, triggeredByAura);
                     return;
                 }
@@ -5200,7 +5198,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 if(!additionalTarget)
                     return;
 
-                int32 basePoint0 = damage;                  // EffBaseDice = 0
+                int32 basePoint0 = damage;
                 CastCustomSpell(additionalTarget, 22482, &basePoint0, 0, 0, true, castItem, triggeredByAura);
                 return;
             }
@@ -5218,8 +5216,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             int32 MEManaCostSave = procSpell->manaCost * triggeredByAura->GetModifier()->m_amount/100;
             if(MEManaCostSave <= 0)
                 return;
-            int32 MEManaRestoreBasePoints0 = MEManaCostSave-1;
-            CastCustomSpell(this,29077,&MEManaRestoreBasePoints0,NULL,NULL,true,castItem, triggeredByAura);
+            CastCustomSpell(this,29077,&MEManaCostSave,NULL,NULL,true,castItem, triggeredByAura);
 
             return;
         }
@@ -5231,7 +5228,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
 
             if(triggeredByAura->GetCasterGUID() == pVictim->GetGUID())
             {
-                int32 VTEnergizeBasePoints0 = triggeredByAura->GetModifier()->m_amount*damage/100 - 1;
+                int32 VTEnergizeBasePoints0 = triggeredByAura->GetModifier()->m_amount*damage/100;
                 pVictim->CastCustomSpell(pVictim,34919,&VTEnergizeBasePoints0,NULL,NULL,true,castItem, triggeredByAura);
             }
             return;
@@ -5253,8 +5250,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             int32 QREnegyCostSave = procSpell->manaCost * triggeredByAura->GetModifier()->m_amount/100;
             if(QREnegyCostSave <= 0)
                 return;
-            int32 QREnergizeBasePoints0 = QREnegyCostSave-1;
-            CastCustomSpell(this,31663,&QREnergizeBasePoints0,NULL,NULL,true,castItem, triggeredByAura);
+            CastCustomSpell(this,31663,&QREnegyCostSave,NULL,NULL,true,castItem, triggeredByAura);
 
             return;
         }
@@ -5270,8 +5266,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             int32 THManaCostSave = procSpell->manaCost * 40/100;
             if(THManaCostSave <= 0)
                 return;
-            int32 THEnergizeBasePoints0 = THManaCostSave-1;
-            CastCustomSpell(this,34720,&THEnergizeBasePoints0,NULL,NULL,true,castItem, triggeredByAura);
+            CastCustomSpell(this,34720,&THManaCostSave,NULL,NULL,true,castItem, triggeredByAura);
 
             return;
         }
@@ -5395,7 +5390,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 }
 
                 int32 heal_amount = damage * triggeredByAura->GetModifier()->m_amount / 100;
-                int32 BRHealBasePoints0 = heal_amount/3-1;
+                int32 BRHealBasePoints0 = heal_amount/3;
                 CastCustomSpell(this, EffectId, &BRHealBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
                 return;
             }
@@ -5432,7 +5427,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             {
                 if (triggeredByAura->GetModifier()->m_amount == 0)
                     break;
-                int32 improvedLotPBasePoints0 = triggeredByAura->GetModifier()->m_amount * GetMaxHealth() / 100 - 1;
+                int32 improvedLotPBasePoints0 = triggeredByAura->GetModifier()->m_amount * GetMaxHealth() / 100;
                 CastCustomSpell(this, 34299, &improvedLotPBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
                 if (GetTypeId() == TYPEID_PLAYER)
                     ((Player*)this)->AddSpellCooldown(34299,0,time(NULL) + 6);
@@ -5695,7 +5690,6 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     // percent stored in effect 1 (class scripts) base points
                     int32 percent = auraSpellInfo->EffectBasePoints[1]+1;
 
-                    // BasePoints = val -1 not required (EffectBaseDice==0)
                     int32 ILManaSpellBasePoints0 = originalSpell->manaCost*percent/100;
                     CastCustomSpell(this, 20272, &ILManaSpellBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
                     return;
@@ -5843,7 +5837,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             // Shamanistic Rage triggered spell
         case 30824:
         {
-            int32 SRBasePoints0 = int32(GetTotalAttackPowerValue(BASE_ATTACK)*triggeredByAura->GetModifier()->m_amount/100) -1;
+            int32 SRBasePoints0 = int32(GetTotalAttackPowerValue(BASE_ATTACK)*triggeredByAura->GetModifier()->m_amount/100);
             CastCustomSpell(this, 30824, &SRBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
             return;
         }
