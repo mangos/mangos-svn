@@ -200,7 +200,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //139 SPELL_EFFECT_139 unused
     &Spell::EffectNULL,                                     //140 SPELL_EFFECT_140
     &Spell::EffectNULL,                                     //141 SPELL_EFFECT_141
-    &Spell::EffectNULL,                                     //142 SPELL_EFFECT_142
+    &Spell::EffectTriggerSpellWithValue,                    //142 SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE
     &Spell::EffectNULL,                                     //143 SPELL_EFFECT_143 probably apply aura again :)
     &Spell::EffectNULL,                                     //144 SPELL_EFFECT_144
     &Spell::EffectNULL,                                     //145 SPELL_EFFECT_145
@@ -758,8 +758,7 @@ void Spell::EffectDummy(uint32 i)
                     }
 
                     m_caster->ModifyPower(POWER_MANA,mana);
-                    if(m_caster->GetTypeId() == TYPEID_PLAYER)
-                        m_caster->SendHealSpellOnPlayerPet(m_caster, m_spellInfo->Id, mana, POWER_MANA,false);
+                    m_caster->SendEnergizeSpellLog(m_caster, m_spellInfo->Id, mana, POWER_MANA,false);
                 }
                 else
                     SendCastResult(SPELL_FAILED_FIZZLE);
@@ -1405,6 +1404,24 @@ void Spell::EffectDummy(uint32 i)
     }
 }
 
+void Spell::EffectTriggerSpellWithValue(uint32 i)
+{
+    uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[i];
+
+    // normal case
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry( triggered_spell_id );
+
+    if(!spellInfo)
+    {
+        sLog.outError("EffectTriggerSpellWithValue of spell %u: triggering unknown spell id %i\n", m_spellInfo->Id,triggered_spell_id);
+        return;
+    }
+
+    int32 bp = damage - int32(spellInfo->EffectBaseDice[i]);
+
+    m_caster->CastCustomSpell(unitTarget,triggered_spell_id,&bp,&bp,&bp,true,NULL,NULL,m_originalCasterGUID);
+}
+
 void Spell::EffectTriggerSpell(uint32 i)
 {
     uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[i];
@@ -1415,7 +1432,7 @@ void Spell::EffectTriggerSpell(uint32 i)
         // Righteous Defense
         case 31980:
         {
-            m_caster->CastSpell(unitTarget, 31790, true);
+            m_caster->CastSpell(unitTarget, 31790, true,m_CastItem,NULL,m_originalCasterGUID);
             return;
         }
         // Cloak of Shadows
@@ -1445,7 +1462,7 @@ void Spell::EffectTriggerSpell(uint32 i)
 
     if(!spellInfo)
     {
-        sLog.outError("WORLD: unknown spell id %i\n", triggered_spell_id);
+        sLog.outError("EffectTriggerSpell of spell %u: triggering unknown spell id %i", m_spellInfo->Id,triggered_spell_id);
         return;
     }
 
@@ -1498,7 +1515,7 @@ void Spell::EffectTriggerSpell(uint32 i)
     {
         // in case multi-targets, spell must be casted one time, at last target in list)
         if (unitTarget && m_UniqueTargetInfo.back().targetGUID==unitTarget->GetGUID())
-            m_caster->CastSpell(unitTarget,spellInfo,true,NULL,NULL,m_originalCasterGUID);
+            m_caster->CastSpell(unitTarget,spellInfo,true,m_CastItem,NULL,m_originalCasterGUID);
     }
     else
         m_TriggerSpells.push_back(spellInfo);
@@ -1560,9 +1577,13 @@ void Spell::EffectApplyAura(uint32 i)
         (unitTarget->GetTypeId()!=TYPEID_PLAYER || !((Player*)unitTarget)->GetSession()->PlayerLoading()) )
         return;
 
+    Unit* caster = m_originalCasterGUID ? m_originalCaster : m_caster;
+    if(!caster)
+        return;
+
     sLog.outDebug("Spell: Aura is: %u", m_spellInfo->EffectApplyAuraName[i]);
 
-    Aura* Aur = CreateAura(m_spellInfo, i, &m_currentBasePoints[i], unitTarget,m_caster, m_CastItem);
+    Aura* Aur = CreateAura(m_spellInfo, i, &m_currentBasePoints[i], unitTarget, caster, m_CastItem);
 
     if (!Aur->IsPositive() && Aur->GetCasterGUID() != Aur->GetTarget()->GetGUID())
     {
@@ -1604,7 +1625,7 @@ void Spell::EffectApplyAura(uint32 i)
         {
             if( Aur->GetTarget()->GetTypeId() == TYPEID_UNIT && !Aur->GetTarget()->isInCombat() &&
                 ((Creature*)Aur->GetTarget())->AI() )
-                ((Creature*)Aur->GetTarget())->AI()->AttackStart(m_caster);
+                ((Creature*)Aur->GetTarget())->AI()->AttackStart(caster);
 
             Aur->GetTarget()->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         }
@@ -1645,7 +1666,7 @@ void Spell::EffectApplyAura(uint32 i)
 
         int32 duration = Aur->GetAuraMaxDuration();
 
-        unitTarget->ApplyDiminishingToDuration(mech,duration,m_caster);
+        unitTarget->ApplyDiminishingToDuration(mech,duration,caster);
 
         // if Aura removed and deleted, do not continue.
         if(duration== 0 && !(Aur->IsPermanent()))
@@ -1690,7 +1711,7 @@ void Spell::EffectApplyAura(uint32 i)
         SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);
         if (AdditionalSpellInfo)
         {
-            Aura* AdditionalAura = CreateAura(AdditionalSpellInfo, 0, &m_currentBasePoints[0], unitTarget,m_caster, 0);
+            Aura* AdditionalAura = CreateAura(AdditionalSpellInfo, 0, &m_currentBasePoints[0], unitTarget,caster, 0);
             unitTarget->AddAura(AdditionalAura);
             sLog.outDebug("Spell: Additional Aura is: %u", AdditionalSpellInfo->EffectApplyAuraName[0]);
         }
@@ -1829,6 +1850,13 @@ void Spell::EffectHeal( uint32 /*i*/ )
 {
     if( unitTarget && unitTarget->isAlive() && damage >= 0)
     {
+        // Try to get original caster
+        Unit *caster = m_originalCasterGUID ? m_originalCaster : m_caster;
+
+        // Skip if m_originalCaster not avaiable
+        if (!caster)
+            return;
+
         //Swiftmend - consumes Regrowth or Rejuvenation
         if (m_spellInfo->TargetAuraState == AURA_STATE_SWIFTMEND)
         {
@@ -1862,18 +1890,16 @@ void Spell::EffectHeal( uint32 /*i*/ )
                 }
             }
         }
-
-        uint32 addhealth = m_caster->SpellHealingBonus(m_spellInfo, uint32(damage),HEAL, unitTarget);
-        bool crit = m_caster->SpellCriticalBonus(m_spellInfo, &addhealth, NULL);
-        if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-            m_caster->SendHealSpellOnPlayer(unitTarget, m_spellInfo->Id, addhealth, crit);
+        uint32 addhealth = caster->SpellHealingBonus(m_spellInfo, uint32(damage),HEAL, unitTarget);
+        bool crit = caster->SpellCriticalBonus(m_spellInfo, &addhealth, NULL);
+        caster->SendHealSpellLog(unitTarget, m_spellInfo->Id, addhealth, crit);
 
         int32 gain = unitTarget->ModifyHealth( int32(addhealth) );
         unitTarget->getHostilRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
 
-        if(m_caster->GetTypeId()==TYPEID_PLAYER)
-            if(BattleGround *bg = ((Player*)m_caster)->GetBattleGround())
-                bg->UpdatePlayerScore(((Player*)m_caster), SCORE_HEALING_DONE, gain);
+        if(caster->GetTypeId()==TYPEID_PLAYER)
+            if(BattleGround *bg = ((Player*)caster)->GetBattleGround())
+                bg->UpdatePlayerScore(((Player*)caster), SCORE_HEALING_DONE, gain);
 
         // ignore item heals
         if(m_CastItem)
@@ -1917,10 +1943,7 @@ void Spell::EffectHealthLeach(uint32 i)
         int32 tmpvalue = int32(new_damage*multiplier);
 
         m_caster->ModifyHealth(tmpvalue);
-
-        if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            m_caster->SendHealSpellOnPlayer(m_caster, m_spellInfo->Id, uint32(tmpvalue));
-
+        m_caster->SendHealSpellLog(m_caster, m_spellInfo->Id, uint32(tmpvalue));
     }
 
     m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage, m_IsTriggeredSpell, true);
@@ -2070,7 +2093,7 @@ void Spell::EffectEnergize(uint32 i)
         return;
 
     unitTarget->ModifyPower(power,damage);
-    m_caster->SendHealSpellOnPlayerPet(unitTarget, m_spellInfo->Id, damage, power);
+    m_caster->SendEnergizeSpellLog(unitTarget, m_spellInfo->Id, damage, power);
 }
 
 void Spell::SendLoot(uint64 guid, LootType loottype)
@@ -3486,8 +3509,7 @@ void Spell::EffectHealMaxHealth(uint32 /*i*/)
     int32 gain = unitTarget->ModifyHealth(heal);
     unitTarget->getHostilRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
 
-    if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-        m_caster->SendHealSpellOnPlayer(unitTarget, m_spellInfo->Id, heal);
+    m_caster->SendHealSpellLog(unitTarget, m_spellInfo->Id, heal);
 }
 
 void Spell::EffectInterruptCast(uint32 /*i*/)
@@ -4561,8 +4583,7 @@ void Spell::EffectDestroyAllTotems(uint32 /*i*/)
     }
 
     int32 gain = m_caster->ModifyPower(POWER_MANA,int32(mana));
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        m_caster->SendHealSpellOnPlayerPet(m_caster, m_spellInfo->Id, gain, POWER_MANA);
+    m_caster->SendEnergizeSpellLog(m_caster, m_spellInfo->Id, gain, POWER_MANA);
 }
 
 void Spell::EffectDurabilityDamage(uint32 i)

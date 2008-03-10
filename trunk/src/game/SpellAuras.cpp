@@ -275,7 +275,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleUnused,                                    //222 unused
     &Aura::HandleNULL,                                      //223 Cold Stare
     &Aura::HandleUnused,                                    //224 unused
-    &Aura::HandleNULL,                                      //225 Prayer of Mending
+    &Aura::HandleNoImmediateEffect,                         //225 SPELL_AURA_DUMMY_3 Prayer of Mending
     &Aura::HandleNoImmediateEffect,                         //226 SPELL_AURA_DUMMY_2 dummy like aura, but at this moment only no immediate effect cases
     &Aura::HandleNULL,                                      //227
     &Aura::HandleNULL,                                      //228 stealth detection
@@ -1208,6 +1208,76 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
     Unit* caster = GetCaster();
 
+    // AT APPLAY
+    if(apply)
+    {
+        // Tame beast
+        if( GetId()==1515 && caster && m_target->CanHaveThreatList())
+        {
+            // FIX_ME: this is 2.0.12 threat effect relaced in 2.1.x by dummy aura, must be checked for correctness
+            m_target->AddThreat(caster, 10.0f);
+        }
+
+        // net-o-matic
+        if (GetId() == 13139 && caster)
+        {
+            // root to self part of (root_target->charge->root_self sequence
+            caster->CastSpell(caster,13138,true,NULL,this);
+        }
+
+        // Earth Shield
+        if ( caster && GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && (GetSpellProto()->SpellFamilyFlags & 0x40000000000LL))
+            m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
+
+        // Prayer of Mending (jump animation)
+        if( caster && GetSpellProto()->SpellFamilyName == SPELLFAMILY_PRIEST && (GetSpellProto()->SpellFamilyFlags & 0x00002000000000LL))
+            caster->CastSpell(m_target,41637,true,NULL,this);
+    }
+    // AT REMOVE
+    else
+    {
+        if( m_target->GetTypeId() == TYPEID_PLAYER &&
+            ( GetSpellProto()->Effect[0]==72 || GetSpellProto()->Effect[0]==6 &&
+            ( GetSpellProto()->EffectApplyAuraName[0]==1 || GetSpellProto()->EffectApplyAuraName[0]==128 ) ) )
+        {
+            // spells with SpellEffect=72 and aura=4: 6196, 6197, 21171, 21425
+            m_target->SetUInt64Value(PLAYER_FARSIGHT, 0);
+            WorldPacket data(SMSG_CLEAR_FAR_SIGHT_IMMEDIATE, 0);
+            ((Player*)m_target)->GetSession()->SendPacket(&data);
+        }
+
+        if( (IsQuestTameSpell(GetId())) && caster && caster->isAlive() && m_target->isAlive())
+        {
+            uint32 finalSpelId = 0;
+            switch(GetId())
+            {
+                case 19548: finalSpelId = 19597; break;
+                case 19674: finalSpelId = 19677; break;
+                case 19687: finalSpelId = 19676; break;
+                case 19688: finalSpelId = 19678; break;
+                case 19689: finalSpelId = 19679; break;
+                case 19692: finalSpelId = 19680; break;
+                case 19693: finalSpelId = 19684; break;
+                case 19694: finalSpelId = 19681; break;
+                case 19696: finalSpelId = 19682; break;
+                case 19697: finalSpelId = 19683; break;
+                case 19699: finalSpelId = 19685; break;
+                case 19700: finalSpelId = 19686; break;
+                case 30646: finalSpelId = 30647; break;
+                case 30653: finalSpelId = 30648; break;
+                case 30654: finalSpelId = 30652; break;
+                case 30099: finalSpelId = 30100; break;
+                case 30102: finalSpelId = 30103; break;
+                case 30105: finalSpelId = 30104; break;
+            }
+
+            if(finalSpelId)
+                caster->CastSpell(m_target,finalSpelId,true,NULL,this);
+        }
+    }
+
+    // AT APPLAY & REMOVE
+
     // Mangle (Cat) combo && damage
     if( m_spellProto->SpellFamilyName==SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags == 0x40000000000LL &&
         caster && caster->GetTypeId()==TYPEID_PLAYER )
@@ -1262,30 +1332,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 const_cast<int32&>((*i)->GetModifier()->m_amount) += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
     }
 
-    // Tame beast
-    if( GetId()==1515 && apply && caster && m_target->CanHaveThreatList())
-    {
-        // FIX_ME: this is 2.0.12 threat effect relaced in 2.1.x by dummy aura, must be checked for correctness
-        m_target->AddThreat(caster, 10.0f);
-    }
-
-    if( m_target->GetTypeId() == TYPEID_PLAYER && !apply &&
-        ( GetSpellProto()->Effect[0]==72 || GetSpellProto()->Effect[0]==6 &&
-        ( GetSpellProto()->EffectApplyAuraName[0]==1 || GetSpellProto()->EffectApplyAuraName[0]==128 ) ) )
-    {
-        // spells with SpellEffect=72 and aura=4: 6196, 6197, 21171, 21425
-        m_target->SetUInt64Value(PLAYER_FARSIGHT, 0);
-        WorldPacket data(SMSG_CLEAR_FAR_SIGHT_IMMEDIATE, 0);
-        ((Player*)m_target)->GetSession()->SendPacket(&data);
-    }
-
-    // net-o-matic
-    if (GetId() == 13139 && apply && caster)
-    {
-        // root to self part of (root_target->charge->root_self sequence
-        caster->CastSpell(caster,13138,true,NULL,this);
-    }
-
     // seal of righteousness
     if(GetSpellProto()->SpellVisual == 7986 && caster && caster->GetTypeId() == TYPEID_PLAYER)
     {
@@ -1328,40 +1374,8 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     if(GetId()==32216 && m_target->getClass()==CLASS_WARRIOR)
         m_target->ModifyAuraState(AURA_STATE_WARRIOR_VICTORY_RUSH, apply);
 
-    if(!apply)
-    {
-        if( (IsQuestTameSpell(GetId())) && caster && caster->isAlive() && m_target && m_target->isAlive())
-        {
-            uint32 finalSpelId = 0;
-            switch(GetId())
-            {
-                case 19548: finalSpelId = 19597; break;
-                case 19674: finalSpelId = 19677; break;
-                case 19687: finalSpelId = 19676; break;
-                case 19688: finalSpelId = 19678; break;
-                case 19689: finalSpelId = 19679; break;
-                case 19692: finalSpelId = 19680; break;
-                case 19693: finalSpelId = 19684; break;
-                case 19694: finalSpelId = 19681; break;
-                case 19696: finalSpelId = 19682; break;
-                case 19697: finalSpelId = 19683; break;
-                case 19699: finalSpelId = 19685; break;
-                case 19700: finalSpelId = 19686; break;
-                case 30646: finalSpelId = 30647; break;
-                case 30653: finalSpelId = 30648; break;
-                case 30654: finalSpelId = 30652; break;
-                case 30099: finalSpelId = 30100; break;
-                case 30102: finalSpelId = 30103; break;
-                case 30105: finalSpelId = 30104; break;
-            }
-
-            if(finalSpelId)
-                caster->CastSpell(m_target,finalSpelId,true,NULL,this);
-        }
-    }
-
     // lifebloom
-    if ( Real && GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID && (GetSpellProto()->SpellFamilyFlags & 0x1000000000LL) )
+    if ( GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID && (GetSpellProto()->SpellFamilyFlags & 0x1000000000LL) )
     {
         if ( apply )
         {
@@ -1379,13 +1393,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
             // final heal
             int32 healBasePoints0 = m_modifier.m_amount-1;
-            m_target->CastCustomSpell(m_target,33778,&healBasePoints0,NULL,NULL,true);
+            m_target->CastCustomSpell(m_target,33778,&healBasePoints0,NULL,NULL,true,NULL,this,GetCasterGUID());
         }
     }
-
-    // Earth Shield
-    if ( Real && caster && apply && GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && (GetSpellProto()->SpellFamilyFlags & 0x40000000000LL))
-        m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
 }
 
 void Aura::HandleAuraMounted(bool apply, bool Real)

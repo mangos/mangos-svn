@@ -368,7 +368,8 @@ void Spell::FillTargetMap()
         {
             case TARGET_ALL_AROUND_CASTER:
                 if( m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_PARTY ||
-                    m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER )
+                    m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER ||
+                    m_spellInfo->EffectImplicitTargetB[i]==TARGET_RANDOM_RAID_MEMBER )
                 {
                     SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
                 }
@@ -1102,6 +1103,36 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             }
             else
                 TagUnitMap.push_back(m_caster);
+        }break;
+        case TARGET_RANDOM_RAID_MEMBER:
+        {
+            Player *pTarget = NULL;
+
+            if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                pTarget = (Player*)m_caster;
+
+            Group *pGroup = pTarget ? pTarget->GetGroup() : NULL;
+
+            if(pGroup)
+            {
+                std::vector<Player*> nearMembers;
+                nearMembers.reserve(pGroup->GetMembersCount());
+
+                for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+                {
+                    Player* Target = itr->getSource();
+
+                    // IsHostileTo check duel and controlled by enemy
+                    if( Target && Target != pTarget && !m_caster->IsHostileTo(Target) && m_caster->IsWithinDistInMap(Target, radius) )
+                        nearMembers.push_back(Target);
+                }
+
+                if (!nearMembers.empty())
+                {
+                    uint32 randTarget = urand(0,nearMembers.size()-1);
+                    TagUnitMap.push_back(nearMembers[randTarget]);
+                }
+            }
         }break;
         case TARGET_SINGLE_FRIEND:
         case TARGET_SINGLE_FRIEND_2:
