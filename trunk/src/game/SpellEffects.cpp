@@ -424,12 +424,12 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                     damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.15);
                 }
                 // Steady Shot
-                else if((m_spellInfo->SpellFamilyFlags & 0x100000000LL))
+                else if(m_spellInfo->SpellFamilyFlags & 0x100000000LL)
                 {
                     damage += m_caster->CalculateDamage(RANGED_ATTACK)+int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.2);
                 }
                 //Explosive Trap Effect
-                else if((m_spellInfo->SpellFamilyFlags & 0x00000004))
+                else if(m_spellInfo->SpellFamilyFlags & 0x00000004)
                 {
                     damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.1);
                 }
@@ -3377,6 +3377,15 @@ void Spell::EffectWeaponDmg(uint32 i)
                         break;
                     }
                 }
+            }
+            break;
+        }
+        case SPELLFAMILY_PALADIN:
+        {
+            // Seal of Command - receive benefit from Spell Damage and Healing
+            if(m_spellInfo->SpellFamilyFlags & 0x00000002000000LL)
+            {
+                bonus = m_caster->SpellDamageBonus(unitTarget, m_spellInfo, bonus, SPELL_DIRECT_DAMAGE);
             }
             break;
         }

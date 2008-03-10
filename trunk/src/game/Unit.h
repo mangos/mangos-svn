@@ -964,6 +964,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, DamageEffectType damagetype, Unit *pVictim);
         bool SpellCriticalBonus(SpellEntry const *spellProto, uint32 *damage, Unit *pVictim);
         void MeleeDamageBonus(Unit *pVictim, uint32 *damage, WeaponAttackType attType, SpellEntry const *spellProto = NULL);
+        uint32 GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectType damagetype, uint32 CastingTime );
+
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
         virtual bool IsImmunedToSpell(SpellEntry const* spellInfo) const;
                                                             // redefined in Creature

@@ -493,7 +493,7 @@ void Spell::FillTargetMap()
                     break;
             }
         }
-        if(IsChanneledSpell() && !tmpUnitMap.empty())
+        if(IsChanneledSpell(m_spellInfo) && !tmpUnitMap.empty())
             m_needAliveTargetMask  |= (1<<i);
 
         if(m_caster->GetTypeId() == TYPEID_PLAYER && (!m_caster->IsPvP() || ((Player*)m_caster)->pvpInfo.endTimer != 0))
@@ -1690,7 +1690,7 @@ void Spell::cast(bool skipCheck)
 void Spell::handle_immediate()
 {
     // start channeling if applicable
-    if(IsChanneledSpell())
+    if(IsChanneledSpell(m_spellInfo))
     {
         m_spellState = SPELL_STATE_CASTING;
         SendChannelStart(GetSpellDuration(m_spellInfo));
@@ -4064,7 +4064,7 @@ CurrentSpellTypes Spell::GetCurrentContainer()
         return(CURRENT_MELEE_SPELL);
     else if (IsAutoRepeat())
         return(CURRENT_AUTOREPEAT_SPELL);
-    else if (IsChanneledSpell())
+    else if (IsChanneledSpell(m_spellInfo))
         return(CURRENT_CHANNELED_SPELL);
     else
         return(CURRENT_GENERIC_SPELL);
@@ -4138,6 +4138,12 @@ Unit* Spell::SelectMagnetTarget()
     return target;
 }
 
+bool Spell::IsNeedSendToClient() const
+{
+    return m_spellInfo->SpellVisual!=0 || IsChanneledSpell(m_spellInfo) || 
+        m_spellInfo->speed > 0.0f || !m_triggeredByAuraSpell && !m_IsTriggeredSpell;
+}
+
 SpellEvent::SpellEvent(Spell* spell) : BasicEvent()
 {
     m_Spell = spell;
@@ -4193,7 +4199,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
             {
                 // no, we aren't, do the typical update
                 // check, if we have channeled spell on our hands
-                if (m_Spell->IsChanneledSpell())
+                if (IsChanneledSpell(m_Spell->m_spellInfo))
                 {
                     // evented channeled spell is processed separately, casted once after delay, and not destroyed till finish
                     // check, if we have casting anything else except this channeled spell and autorepeat
