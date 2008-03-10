@@ -1821,8 +1821,7 @@ void Spell::_handle_immediate_phase()
             continue;
 
         // apply Send Event effect to ground in case empty target lists
-        if( m_spellInfo->Effect[j] == SPELL_EFFECT_SEND_EVENT && 
-            m_UniqueTargetInfo.empty() && m_UniqueGOTargetInfo.empty() && m_UniqueItemInfo.empty() )
+        if( m_spellInfo->Effect[j] == SPELL_EFFECT_SEND_EVENT && !HaveTargetsForEffect(j) )
         {
             HandleEffects(NULL,NULL,NULL, j);
             continue;
@@ -4173,6 +4172,23 @@ bool Spell::IsNeedSendToClient() const
 {
     return m_spellInfo->SpellVisual!=0 || IsChanneledSpell(m_spellInfo) || 
         m_spellInfo->speed > 0.0f || !m_triggeredByAuraSpell && !m_IsTriggeredSpell;
+}
+
+bool Spell::HaveTargetsForEffect( uint8 effect ) const
+{
+    for(std::list<TargetInfo>::const_iterator itr= m_UniqueTargetInfo.begin();itr != m_UniqueTargetInfo.end();++itr)
+        if(itr->effectMask & (1<<effect))
+            return true;
+
+    for(std::list<GOTargetInfo>::const_iterator itr= m_UniqueGOTargetInfo.begin();itr != m_UniqueGOTargetInfo.end();++itr)
+        if(itr->effectMask & (1<<effect))
+            return true;
+
+    for(std::list<ItemTargetInfo>::const_iterator itr= m_UniqueItemInfo.begin();itr != m_UniqueItemInfo.end();++itr)
+        if(itr->effectMask & (1<<effect))
+            return true;
+
+    return false;
 }
 
 SpellEvent::SpellEvent(Spell* spell) : BasicEvent()
