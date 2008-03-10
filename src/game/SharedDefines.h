@@ -375,7 +375,7 @@ enum SpellEffects
     SPELL_EFFECT_139                       = 139,
     SPELL_EFFECT_140                       = 140,
     SPELL_EFFECT_141                       = 141,
-    SPELL_EFFECT_142                       = 142,
+    SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE  = 142,
     SPELL_EFFECT_143                       = 143,
     SPELL_EFFECT_144                       = 144,
     SPELL_EFFECT_145                       = 145,
@@ -541,6 +541,7 @@ enum Targets
     TARGET_DYNAMIC_OBJECT              = 47,
     TARGET_AREAEFFECT_CUSTOM_2         = 52,
     TARGET_CURRENT_SELECTED_ENEMY      = 53,                // if used in A and B==16 then enemy and nearest enemies, in B no visible affect different from provided A
+    TARGET_RANDOM_RAID_MEMBER          = 56,
     TARGET_SINGLE_FRIEND_2             = 57,
     TARGET_AREAEFFECT_PARTY_AND_CLASS  = 61,
     TARGET_SINGLE_ENEMY                = 77,

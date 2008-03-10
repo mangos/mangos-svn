@@ -73,6 +73,7 @@ static Unit::AuraTypeSet GenerateVictimProcCastAuraTypes()
 {
     static Unit::AuraTypeSet auraTypes;
     auraTypes.insert(SPELL_AURA_DUMMY);
+    auraTypes.insert(SPELL_AURA_DUMMY_3);
     auraTypes.insert(SPELL_AURA_PROC_TRIGGER_SPELL);
     return auraTypes;
 }
@@ -1560,8 +1561,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             int32 gain = ModifyHealth(int32(pdamage * multiplier));
             getHostilRefManager().threatAssist(this, float(gain) * 0.5f, spellProto);
 
-            if(GetTypeId() == TYPEID_PLAYER)
-                SendHealSpellOnPlayer(this, spellProto->Id, uint32(pdamage * multiplier));
+            SendHealSpellLog(this, spellProto->Id, uint32(pdamage * multiplier));
             break;
         }
         case SPELL_AURA_PERIODIC_HEAL:
@@ -4808,6 +4808,36 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     return;
                 }
             }
+
+            //Prayer of Mending
+            if(dummySpell->SpellFamilyFlags & 0x00002000000000LL)
+            {
+                int32 heal = triggeredByAura->GetModifier()->m_amount - 1;
+
+                // heal
+                CastCustomSpell(this,33110,&heal,NULL,NULL,true,castItem,triggeredByAura,triggeredByAura->GetCasterGUID());
+
+                // jump
+                uint32 spellId;
+                switch (dummySpell->Id)
+                {
+                    case 41635: spellId=33280; break;       // 1 jump
+                    case 33280: spellId=35092; break;       // 2 jump
+                    case 35092: spellId=35093; break;       // 3 jump
+                    case 35093: spellId=35094; break;       // 4 jump
+                    case 35094: return;                     // no jump
+                    default:
+                        sLog.outError("Unit::HandleDummyAuraProc: non handled spell id: %u (PoM)", dummySpell->Id);
+                        return;
+                }
+
+                CastCustomSpell(this,spellId,&heal,NULL,NULL,true,castItem,triggeredByAura,triggeredByAura->GetCasterGUID());
+
+                // aura expire
+                triggeredByAura->m_procCharges = 0;         // will removed
+                return;
+            }
+
             break;
         }
         case SPELLFAMILY_DRUID:
@@ -6397,7 +6427,7 @@ void Unit::UnsummonAllTotems()
     }
 }
 
-void Unit::SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage, bool critical)
+void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, bool critical)
 {
     // we guess size
     WorldPacket data(SMSG_HEALSPELL_ON_PLAYER_OBSOLETE, (8+8+4+4+1));
@@ -6409,7 +6439,7 @@ void Unit::SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage, b
     SendMessageToSet(&data, true);
 }
 
-void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage,Powers powertype, bool critical)
+void Unit::SendEnergizeSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage,Powers powertype, bool critical)
 {
     WorldPacket data(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE, (8+8+4+4+4+1));
     data.append(pVictim->GetPackGUID());
@@ -8927,6 +8957,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                 {
                     case SPELL_AURA_PROC_TRIGGER_SPELL: i_spell_param = procFlag;    break;
                     case SPELL_AURA_DUMMY:
+                    case SPELL_AURA_DUMMY_3:
                     case SPELL_AURA_MOD_HASTE:          i_spell_param = i_spell_eff; break;
                     default: i_spell_param = (*i)->GetModifier()->m_amount;          break;
                 }
@@ -8984,6 +9015,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                     break;
                 }
                 case SPELL_AURA_DUMMY:
+                case SPELL_AURA_DUMMY_3:
                 {
                     sLog.outDebug("ProcDamageAndSpell: casting spell id %u (triggered by %s dummy aura of spell %u)", i->spellInfo->Id,(isVictim?"a victim's":"an attacker's"),i->triggeredByAura->GetId());
                     HandleDummyAuraProc(pTarget, i->spellInfo, i->spellParam, damage, i->triggeredByAura, procSpell, procFlag);
