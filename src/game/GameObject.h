@@ -142,6 +142,15 @@ struct GameObjectInfo
             uint32 minLevel;                                //0
             uint32 maxLevel;                                //1
         } meetingstone;
+        //25 GAMEOBJECT_TYPE_FISHINGHOLE                    // not implemented yet
+        struct
+        {
+            uint32 radius;                                  //0 how close bobber must land for sending loot
+            uint32 lootId;                                  //1
+            uint32 minSuccessOpens;                         //2
+            uint32 maxSuccessOpens;                         //3
+            uint32 lockId;                                  //4 possibly 1628 for all?
+        } fishinghole;
 
         // not use for specific field access (only for output with loop by all filed), also this determinate max union size
         struct                                              // GAMEOBJECT_TYPE_SPELLCASTER
