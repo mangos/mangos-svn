@@ -1086,7 +1086,7 @@ void Aura::TriggerSpell()
 
         m_target->ModifyPower(POWER_RAGE, -lRage);
 
-        int32 FRTriggerBasePoints = int32(lRage*LifePerRage/10)-1;
+        int32 FRTriggerBasePoints = int32(lRage*LifePerRage/10);
         m_target->CastCustomSpell(m_target,22845,&FRTriggerBasePoints,NULL,NULL,true,NULL,this);
         return;
     }
@@ -1170,8 +1170,7 @@ void Aura::TriggerSpell()
         // Mana Tide
         case 16191:
         {
-            int32 MTBasePoints = GetModifier()->m_amount-1;
-            caster->CastCustomSpell(target,trigger_spell_id,&MTBasePoints,NULL,NULL,true,NULL,this,originalCasterGUID);
+            caster->CastCustomSpell(target,trigger_spell_id,&m_modifier.m_amount,NULL,NULL,true,NULL,this,originalCasterGUID);
             return;
         }
     }
@@ -1392,8 +1391,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     return;
 
             // final heal
-            int32 healBasePoints0 = m_modifier.m_amount-1;
-            m_target->CastCustomSpell(m_target,33778,&healBasePoints0,NULL,NULL,true,NULL,this,GetCasterGUID());
+            m_target->CastCustomSpell(m_target,33778,&m_modifier.m_amount,NULL,NULL,true,NULL,this,GetCasterGUID());
         }
     }
 }
