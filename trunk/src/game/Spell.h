@@ -493,6 +493,7 @@ class Spell
 
         int32 CalculateDamage(uint8 i, Unit* target) { return m_caster->CalculateSpellDamage(m_spellInfo,i,m_currentBasePoints[i],target); }
 
+        bool HaveTargetsForEffect(uint8 effect) const;
         void Delayed(int32 delaytime);
         void DelayedChannel(int32 delaytime);
         inline uint32 getState() const { return m_spellState; }
