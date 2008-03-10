@@ -5806,7 +5806,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         }
         // Seal of Command
         case 20424:
-            // prevent chain of triggred spell from same triggred spell
+            // prevent chain of triggered spell from same triggered spell
             if(procSpell && procSpell->Id==20424)
                 return;
             break;
@@ -6431,6 +6431,8 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         if(Unit* owner = GetOwner())
             return owner->SpellDamageBonus(pVictim, spellProto, pdamage, damagetype);
 
+    bool Channeled = IsChanneledSpell(spellProto);
+
     // Damage Done
     uint32 CastingTime = GetSpellCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
     if (CastingTime > 7000) CastingTime = 7000;             // Plus Damage efficient maximum 200% ( 7.0 seconds )
@@ -6444,13 +6446,15 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     float DotFactor = 1.0f;
     if(damagetype == DOT)
     {
-        CastingTime = 3500;
+        if ( !Channeled )
+            CastingTime = 3500;
+
         int32 DotDuration = GetSpellDuration(spellProto);
         // 200% limit
         if(DotDuration > 0)
         {
             if(DotDuration > 30000) DotDuration = 30000;
-            DotFactor = DotDuration / 15000.0f;
+            if(!Channeled) DotFactor = DotDuration / 15000.0f;
             int x = 0;
             for(int j = 0; j < 3; j++)
                 if(spellProto->Effect[j] == 6) x = j;
@@ -6501,10 +6505,54 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                     TakenTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f; break;
         }
     }
+    
+    // Distribute Damage over multiple effects, reduce by AoE
+    CastingTime = GetCastingTimeForBonus( spellProto, damagetype, CastingTime );   
 
-    // Exceptions
     switch(spellProto->SpellFamilyName)
     {
+        case SPELLFAMILY_MAGE:
+            // Ignite - 8%
+            if(spellProto->Id==12654)
+            {
+                DotFactor = 0.08f;
+                break;
+            }
+            // Ice Lance
+            else if((spellProto->SpellFamilyFlags & 0x20000LL) && spellProto->SpellIconID == 186)
+            {
+                CastingTime /= 3;                           // applied 1/3 bonuses in case generic target
+                if(pVictim->isFrozen())                     // and compensate this for frozen target.
+                    TakenTotalMod *= 3.0f;
+            }
+            // Pyroblast - 115% of Fire Damage, DoT - 20% of Fire Damage
+            else if((spellProto->SpellFamilyFlags & 0x400000LL) && spellProto->SpellIconID == 184 )
+            {
+                DotFactor = damagetype == DOT ? 0.2f : 1.0f;
+                CastingTime = damagetype == DOT ? 3500 : 4025;
+            }
+            // Fireball - 100% of Fire Damage, DoT - 0% of Fire Damage
+            else if((spellProto->SpellFamilyFlags & 0x1LL) && spellProto->SpellIconID == 185)
+            {
+                CastingTime = 3500;
+                DotFactor = damagetype == DOT ? 0 : 1.0f;
+            }
+            // Molten armor
+            else if (spellProto->SpellFamilyFlags & 0x0000000800000000LL)
+            {
+                CastingTime = 0;
+            }
+            // Arcane Missiles triggered spell
+            else if ((spellProto->SpellFamilyFlags & 0x200000LL) && spellProto->SpellIconID == 225)
+            {
+                CastingTime = 1000;
+            }
+            // Blizzard triggered spell
+            else if ((spellProto->SpellFamilyFlags & 0x80080LL) && spellProto->SpellIconID == 285)
+            {
+                CastingTime = 500;
+            }
+            break;
         case SPELLFAMILY_WARLOCK:
             // Life Tap
             if((spellProto->SpellFamilyFlags & 0x40000LL) && spellProto->SpellIconID == 208)
@@ -6520,18 +6568,93 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 DoneTotalMod = 1.0f;
                 TakenTotalMod = 1.0f;
             }
-            break;
-        case SPELLFAMILY_MAGE:
-            // Ice Lance
-            if((spellProto->SpellFamilyFlags & 0x20000LL) && spellProto->SpellIconID == 186)
+            // Soul Fire - 115% of Fire Damage
+            else if((spellProto->SpellFamilyFlags & 0x8000000000LL) && spellProto->SpellIconID == 184)
             {
-                CastingTime /= 3;                           // applied 1/3 bonuses in case generic target
-                if(pVictim->isFrozen())                     // and compensate this for frozen target.
-                    TakenTotalMod *= 3.0f;
+                CastingTime = 4025;
             }
-            // Molten armor
-            else if (spellProto->SpellFamilyFlags & 0x0000000800000000LL)
+            // Death Coil - 21.4% of Shadow Damage
+            else if((spellProto->SpellFamilyFlags & 0x80000LL) && spellProto->SpellIconID == 88)
+            {
+                CastingTime = 749;
+            } 
+            // Curse of Agony - 120% of Shadow Damage
+            else if((spellProto->SpellFamilyFlags & 0x0000000400LL) && spellProto->SpellIconID == 544)
+            {
+                DotFactor = 1.2f;
+            }
+            // Siphon Life - 100% of Shadow Damage
+            else if((spellProto->SpellFamilyFlags & 0x0100000000LL) && spellProto->SpellIconID == 152)
+            {
+                DotFactor = 1.0f; 
+            }
+            // Drain Life 
+            else if((spellProto->SpellFamilyFlags & 0x8LL) && spellProto->SpellIconID == 546)
+            {
+                CastingTime = 2500; 
+            }
+            // Drain Mana - 0% of Shadow Damage
+            else if((spellProto->SpellFamilyFlags & 0x10LL) && spellProto->SpellIconID == 548)
+            {
                 CastingTime = 0;
+            } 
+            // Drain Soul 214.3%
+            else if ((spellProto->SpellFamilyFlags & 0x4000LL) && spellProto->SpellIconID == 113 )
+            {
+                CastingTime = 7500;
+            }
+            // Hellfire
+            else if ((spellProto->SpellFamilyFlags & 0x40LL) && spellProto->SpellIconID == 937)
+            {
+                CastingTime = damagetype == DOT ? 5000 : 500; // self damage seems to be so
+            }
+            break;
+        case SPELLFAMILY_PALADIN:
+            // Seal of Command - 20% of Done Holy Damage, 29% of Taken Holy Damage
+            if(spellProto->Id==20424)
+            {
+                CastingTime = 3500; 
+                DoneAdvertisedBenefit  = int32(0.20f*DoneAdvertisedBenefit);
+                TakenAdvertisedBenefit = int32(0.29f*TakenAdvertisedBenefit);
+            }
+            // Consecration - 95% of Holy Damage
+            else if((spellProto->SpellFamilyFlags & 0x20LL) && spellProto->SpellIconID == 51)
+            {
+                DotFactor = 0.95f; 
+                CastingTime = 3500; 
+            }
+            // Seal of Righteousness - 10.2%/9.8% ( based on weapon type ) of Holy Damage, multiplied by weapon speed
+            else if((spellProto->SpellFamilyFlags & 0x8000000LL) && spellProto->SpellIconID == 25)
+            {
+                Item *item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                float wspeed = GetAttackTime(BASE_ATTACK)/1000;
+
+                if( item && item->GetProto()->InventoryType == INVTYPE_2HWEAPON) 
+                   CastingTime = (uint32)wspeed*3500*0.102f; 
+                else
+                   CastingTime = (uint32)wspeed*3500*0.098f; 
+            }
+            // Judgement of Righteousness - 73%
+            else if ((spellProto->SpellFamilyFlags & 1024) && spellProto->SpellIconID == 25)
+            {
+                CastingTime = 2555; 
+            }
+            // Seal of Vengeance - 17% per Fully Stacked Tick - 5 Applications
+            else if ((spellProto->SpellFamilyFlags & 0x80000000000LL) && spellProto->SpellIconID == 2040)
+            {
+                DotFactor = 0.136;
+                CastingTime = 3500;
+            } 
+            // Holy shield - 5% of Holy Damage
+            else if ((spellProto->SpellFamilyFlags & 0x4000000000LL) && spellProto->SpellIconID == 453)
+            {
+                CastingTime = 175; 
+            }
+            // Blessing of Sanctuary - 0%
+            else if ((spellProto->SpellFamilyFlags & 0x10000000LL) && spellProto->SpellIconID == 29)
+            {
+                CastingTime = 0; 
+            }
             break;
         case  SPELLFAMILY_SHAMAN:
             // totem attack
@@ -6547,6 +6670,53 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             // Lightning Shield 33% per charge
             else if (spellProto->SpellFamilyFlags & 0x00000000400LL)
                 CastingTime = 1155;                         // ignore CastingTimePenalty and use as modifier
+            break;
+        case SPELLFAMILY_PRIEST:
+            // Mana Burn - 0% of Shadow Damage
+            if((spellProto->SpellFamilyFlags & 0x10LL) && spellProto->SpellIconID == 212)
+            {
+                CastingTime = 0;
+            }
+            // Mind Flay - 59% of Shadow Damage
+            else if((spellProto->SpellFamilyFlags & 0x800000LL) && spellProto->SpellIconID == 548)
+            {
+                CastingTime = 2065;
+            }
+            // Holy Fire - 86.71%, DoT - 16.5% 
+            else if ((spellProto->SpellFamilyFlags & 0x100000LL) && spellProto->SpellIconID == 156) 
+            {
+                DotFactor = damagetype == DOT ? 0.165f : 1.0f;
+                CastingTime = damagetype == DOT ? 3500 : 3035;
+            }
+            // Shadowguard - 28% per charge
+            else if ((spellProto->SpellFamilyFlags & 0x2000000LL) && spellProto->SpellIconID == 19) 
+            {
+                CastingTime = 980;
+            }
+            // Touch of Weakeness - 10%
+            else if ((spellProto->SpellFamilyFlags & 0x80000LL) && spellProto->SpellIconID == 1591) 
+            {
+                CastingTime = 350;
+            }
+            // Devouring Plague - 80%
+            else if ((spellProto->SpellFamilyFlags & 0x2000000000LL) && spellProto->SpellIconID == 9) 
+            {
+                DotFactor = 0.8f;
+            }
+            break;
+        case SPELLFAMILY_DRUID:
+            // Hurricane triggered spell
+            if((spellProto->SpellFamilyFlags & 0x400000LL) && spellProto->SpellIconID == 220)
+            {
+                CastingTime = 500;
+            }
+            break;
+        case SPELLFAMILY_WARRIOR:
+        case SPELLFAMILY_HUNTER:
+        case SPELLFAMILY_ROGUE:
+            CastingTime = 0;
+            break;
+        default:
             break;
     }
 
@@ -6794,6 +6964,10 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
                 AdvertisedBenefit /= DotTicks;
         }
     }
+
+    // distribute healing to all effects, reduce AoE damage
+    CastingTime = GetCastingTimeForBonus( spellProto, damagetype, CastingTime );   
+
     // Exception
     switch (spellProto->SpellFamilyName)
     {
@@ -6809,6 +6983,14 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
             // Lifebloom final heal
             if (spellProto->SpellFamilyFlags & 0x1000000000LL && damagetype != DOT)
                 CastingTime = 1500;
+            // Earth Shield 30% per charge
+            else if (spellProto->SpellFamilyFlags & 0x40000000000LL)
+                CastingTime = 1050;
+            break;
+        case SPELLFAMILY_WARRIOR:
+        case SPELLFAMILY_HUNTER:
+        case SPELLFAMILY_ROGUE:
+            CastingTime = 0;
             break;
     }
     // Level Factor
@@ -9120,3 +9302,71 @@ void Unit::ApplyCastTimePercentMod(float val, bool apply )
     else
         ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,-val,apply);
 }
+
+
+uint32 Unit::GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectType damagetype, uint32 CastingTime )
+{
+    int32 overTime    = 0;
+    bool DirectDamage = false;
+    bool AreaEffect   = false;
+
+    for ( uint32 i=0; i<3;i++)
+    {
+        switch ( spellProto->Effect[i] )
+        {
+            case SPELL_EFFECT_SCHOOL_DAMAGE:
+            case SPELL_EFFECT_MANA_DRAIN:
+            case SPELL_EFFECT_HEALTH_LEECH:
+            case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
+            case SPELL_EFFECT_POWER_BURN:
+            case SPELL_EFFECT_HEAL:
+                DirectDamage = true;
+                break;
+            case SPELL_EFFECT_APPLY_AURA:
+                switch ( spellProto->EffectApplyAuraName[i] )
+                {
+                    case SPELL_AURA_PERIODIC_DAMAGE:
+                    case SPELL_AURA_PERIODIC_HEAL:
+                    case SPELL_AURA_PERIODIC_LEECH:
+                        if ( GetSpellDuration(spellProto) )
+                            overTime = GetSpellDuration(spellProto);
+                        break;
+                    default: 
+                        // -5% per additional effect
+                        CastingTime *= 0.95f;
+                        break;
+                }
+            default: 
+                break;
+        }
+
+        AreaEffect = 
+            IsAreaEffectTarget(Targets(spellProto->EffectImplicitTargetA[i])) || 
+            IsAreaEffectTarget(Targets(spellProto->EffectImplicitTargetB[i]));
+    }
+
+    // Combined Spells with Both Over Time and Direct Damage
+    if ( overTime > 0 && CastingTime > 0 && DirectDamage )
+    {
+        // mainly for DoTs which are 3500 here otherwise
+        uint32 OriginalCastTime = GetSpellCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
+        if (OriginalCastTime > 7000) OriginalCastTime = 7000;
+        if (OriginalCastTime < 1500) OriginalCastTime = 1500;
+        // Portion to Over Time
+        float PtOT = (overTime / 15000.f) / ((overTime / 15000.f) + (OriginalCastTime / 3500.f));
+
+        if ( damagetype == DOT )
+            CastingTime *= PtOT;
+        else if ( PtOT < 1.0f )
+            CastingTime *= 1 - PtOT;
+        else 
+            CastingTime = 0;
+    }
+
+    // Area Effect Spells receive only half of bonus
+    if ( AreaEffect )
+        CastingTime *= 0.5f;
+
+    return CastingTime;
+}
+

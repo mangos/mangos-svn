@@ -534,7 +534,6 @@ class Spell
         void SetAutoRepeat(bool rep) { m_autoRepeat = rep; }
         void ReSetTimer() { m_timer = m_casttime > 0 ? m_casttime : 0; }
         bool IsMeleeSpell() const { return m_meleeSpell; }
-        bool IsChanneledSpell() const { return m_spellInfo->ChannelInterruptFlags != 0; }
         bool IsChannelActive() const { return m_caster->GetUInt32Value(UNIT_CHANNEL_SPELL) != 0; }
         bool IsMeleeAttackResetSpell() const { return !m_IsTriggeredSpell && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_AUTOATTACK);  }
 
@@ -544,10 +543,7 @@ class Spell
         void SetDelayStart(uint64 m_time) { m_delayStart = m_time; }
         uint64 GetDelayMoment() const { return m_delayMoment; }
 
-        bool IsNeedSendToClient() const
-        {
-            return m_spellInfo->SpellVisual!=0 || m_spellInfo->ChannelInterruptFlags!=0 || m_spellInfo->speed > 0.0f || !m_triggeredByAuraSpell && !m_IsTriggeredSpell;
-        }
+        bool IsNeedSendToClient() const;
 
         CurrentSpellTypes GetCurrentContainer();
 

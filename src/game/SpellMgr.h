@@ -106,8 +106,40 @@ bool IsPositiveTarget(uint32 targetA, uint32 targetB);
 bool IsSingleTargetSpell(uint32 spellId);
 bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellInfo2);
 
+inline
+bool IsAreaEffectTarget( Targets target )
+{
+    switch (target )
+    {
+        case TARGET_AREAEFFECT_CUSTOM:
+        case TARGET_ALL_ENEMY_IN_AREA:
+        case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
+        case TARGET_ALL_PARTY_AROUND_CASTER:
+        case TARGET_ALL_AROUND_CASTER:
+        case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
+        case TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER:
+        case TARGET_ALL_PARTY:
+        case TARGET_ALL_PARTY_AROUND_CASTER_2:
+        case TARGET_AREAEFFECT_PARTY:
+        case TARGET_AREAEFFECT_CUSTOM_2:
+        case TARGET_AREAEFFECT_PARTY_AND_CLASS:
+            return true;
+        default:
+            break;
+    }
+    return false;
+}
+
+
 bool CanUsedWhileStealthed(uint32 spellId);
 bool IsMechanicInvulnerabilityImmunityToSpell(SpellEntry const* spellInfo);
+
+inline
+bool IsChanneledSpell(SpellEntry const* spellInfo)
+{
+    return spellInfo->ChannelInterruptFlags!=0;
+}
+
 
 // Spell affects related declarations (accessed using SpellMgr functions)
 struct SpellAffection
