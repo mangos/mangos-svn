@@ -333,6 +333,8 @@ enum WeaponAttackType
     RANGED_ATTACK = 2
 };
 
+#define MAX_ATTACK  3
+
 enum DamageEffectType
 {
     DIRECT_DAMAGE           = 0,                            // used for normal weapon damage (not for class abilities or spells)
@@ -1031,9 +1033,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void _UpdateAutoRepeatSpell();
         bool m_AutoRepeatFirstCast;
 
-        uint32 m_attackTimer[3];
+        uint32 m_attackTimer[MAX_ATTACK];
 
-        float m_createStats[5];
+        float m_createStats[MAX_STATS];
 
         AttackerSet m_attackers;
         Unit* m_attacking;
@@ -1054,7 +1056,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         AuraList m_modAuras[TOTAL_AURAS];
         float m_auraModifiersGroup[UNIT_MOD_END][MODIFIER_TYPE_END];
-        float m_weaponDamage[3][2];
+        float m_weaponDamage[MAX_ATTACK][2];
         bool m_canModifyStats;
         //std::list< spellEffectPair > AuraSpells[TOTAL_AURAS];  // TODO: use this if ok for mem
 
