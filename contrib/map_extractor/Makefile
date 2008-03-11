@@ -134,7 +134,7 @@ LDFLAGS =
 LIBOBJS = 
 LIBS = -lz -lpthread 
 LIBTOOL = $(SHELL) $(top_builddir)/libtool
-LINKER_OPTIONS =
+LINKER_OPTIONS = -static
 LN_S = ln -s
 LTLIBOBJS = 
 LT_AGE = 2
@@ -215,10 +215,10 @@ ad_SOURCES = \
     mpq_libmpq.cpp \
     mpq_libmpq.h
 
-ad_LDADD = libmpq/libmpq.so
+ad_LDADD = libmpq/libmpq.a
 add_LDFLAGS = -L$(srcdir) -L$(srcdir)/libmpq
 
-all: all-am
+all: create-dir all-am
 
 .SUFFIXES:
 .SUFFIXES: .cpp .lo .o .obj
@@ -372,7 +372,7 @@ distdir: $(DISTFILES)
 	done
 check-am: all-am
 check: check-am
-all-am: Makefile $(PROGRAMS)
+all-am: Makefile $(PROGRAMS);
 installdirs:
 	for dir in "$(DESTDIR)$(bindir)"; do \
 	  test -z "$$dir" || $(mkdir_p) "$$dir"; \
@@ -449,6 +449,9 @@ ps: ps-am
 ps-am:
 
 uninstall-am: uninstall-binPROGRAMS uninstall-info-am
+
+create-dir:
+	mkdir -p ".deps"
 
 .PHONY: CTAGS GTAGS all all-am check check-am clean clean-binPROGRAMS \
 	clean-generic clean-libtool ctags distclean distclean-compile \

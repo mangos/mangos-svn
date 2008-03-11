@@ -107,42 +107,23 @@ int main(int argc, char * arg[])
 
     std::vector<MPQArchive*> archives;
 
-    char LANG[5];
-    LANG[0]='e'; LANG[1]='n'; LANG[2]='G'; LANG[3]='B'; LANG[4]='\0'; // enGB by default...
+    char* LANG;
+    LANG="ERro";
 
-    pDatei=fopen("./Data/deDE/locale-deDE.MPQ", "rb"); 
-    if (pDatei!=NULL)
-    {
-        LANG[0]='d'; LANG[1]='e'; LANG[2]='D'; LANG[3]='E';
-        fclose(pDatei);
+    char* langs[]={"deDE", "enUS", "enGB", "frFR", "esES"};
+    for (size_t i = 0; i < 5; i++) {
+        sprintf(tmp1, "%s/Data/%s/locale-%s.MPQ", input_path, langs[i], langs[i]);
+        pDatei=fopen(tmp1, "rb");
+        if (pDatei!=NULL) {
+            LANG = langs[i];
+            fclose(pDatei);
+            break;
+        }
     }
 
-    pDatei=fopen("./Data/enUS/locale-enUS.MPQ", "rb");
-    if (pDatei!=NULL)
-    {
-        LANG[0]='e'; LANG[1]='n'; LANG[2]='U'; LANG[3]='S';
-        fclose(pDatei);
-    }
-
-    pDatei=fopen("./Data/enGB/locale-enGB.MPQ", "rb");
-    if (pDatei!=NULL)
-    {
-        LANG[0]='e'; LANG[1]='n'; LANG[2]='G'; LANG[3]='B';
-        fclose(pDatei);
-    }
-
-    pDatei=fopen("./Data/frFR/locale-frFR.MPQ", "rb");
-    if (pDatei!=NULL)
-    {
-        LANG[0]='f'; LANG[1]='r'; LANG[2]='F'; LANG[3]='R';
-        fclose(pDatei);
-    }
-
-    pDatei=fopen("./Data/esES/locale-esES.MPQ", "rb");
-    if (pDatei!=NULL)
-    {
-        LANG[0]='e'; LANG[1]='s'; LANG[2]='E'; LANG[3]='S';
-        fclose(pDatei);
+    if(LANG == "ERro") {
+        printf("Error can't find the files in: %s/Data/\n", input_path);
+        exit(1);
     }
 
     sprintf(tmp1,"%s/locale-%s.MPQ",LANG,LANG);
