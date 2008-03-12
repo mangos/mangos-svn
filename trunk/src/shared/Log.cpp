@@ -236,11 +236,11 @@ void Log::Initialize()
 
     m_logFilter = 0;
 
-    if(sConfig.GetBoolDefault("LogFilter_TransportMoves", false))
+    if(sConfig.GetBoolDefault("LogFilter_TransportMoves", true))
         m_logFilter |= LOG_FILTER_TRANSPORT_MOVES;
-    if(sConfig.GetBoolDefault("LogFilter_CreatureMoves", false))
+    if(sConfig.GetBoolDefault("LogFilter_CreatureMoves", true))
         m_logFilter |= LOG_FILTER_CREATURE_MOVES;
-    if(sConfig.GetBoolDefault("LogFilter_VisibilityChanges", false))
+    if(sConfig.GetBoolDefault("LogFilter_VisibilityChanges", true))
         m_logFilter |= LOG_FILTER_VISIBILITY_CHANGES;
 
     m_charLog_Dump = sConfig.GetBoolDefault("CharLogDump", false);
