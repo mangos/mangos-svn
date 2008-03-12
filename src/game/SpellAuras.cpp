@@ -3096,7 +3096,8 @@ void Aura::HandlePeriodicHeal(bool apply, bool Real)
     // only at real apply
     if (Real && apply && GetSpellProto()->Mechanic == MECHANIC_BANDAGE)
     {
-        m_target->CastSpell(m_target,11196,true,NULL,this);
+        // provided m_target as original caster to prevent apply aura caster selection for this negative buff
+        m_target->CastSpell(m_target,11196,true,NULL,this,m_target->GetGUID());
     }
 }
 

@@ -1709,7 +1709,8 @@ void Spell::EffectApplyAura(uint32 i)
         SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);
         if (AdditionalSpellInfo)
         {
-            Aura* AdditionalAura = CreateAura(AdditionalSpellInfo, 0, &m_currentBasePoints[0], unitTarget,caster, 0);
+            // applied at target by target
+            Aura* AdditionalAura = CreateAura(AdditionalSpellInfo, 0, &m_currentBasePoints[0], unitTarget,unitTarget, 0);
             unitTarget->AddAura(AdditionalAura);
             sLog.outDebug("Spell: Additional Aura is: %u", AdditionalSpellInfo->EffectApplyAuraName[0]);
         }
