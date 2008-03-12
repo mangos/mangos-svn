@@ -74,8 +74,16 @@ void BattleGroundWS::Update(time_t diff)
         else if(GetStartDelayTime() < 0 && !(m_Events & 0x10))
         {
             m_Events |= 0x10;
-            for(uint32 i = BG_WS_OBJECT_DOOR_A_1; i <= BG_WS_OBJECT_DOOR_H_4; i++)
-                SpawnBGObject(i, RESPAWN_ONE_DAY);
+            for(uint32 i = BG_WS_OBJECT_DOOR_A_1; i <= BG_WS_OBJECT_DOOR_A_4; i++)
+                DoorOpen(i);
+
+            for(uint32 i = BG_WS_OBJECT_DOOR_H_1; i <= BG_WS_OBJECT_DOOR_H_2; i++)
+                DoorOpen(i);
+
+            SpawnBGObject(BG_WS_OBJECT_DOOR_A_5, RESPAWN_ONE_DAY);
+            SpawnBGObject(BG_WS_OBJECT_DOOR_A_6, RESPAWN_ONE_DAY);
+            SpawnBGObject(BG_WS_OBJECT_DOOR_H_3, RESPAWN_ONE_DAY);
+            SpawnBGObject(BG_WS_OBJECT_DOOR_H_4, RESPAWN_ONE_DAY);
 
             for(uint32 i = BG_WS_OBJECT_A_FLAG; i <= BG_WS_OBJECT_BERSERKBUFF_2; i++)
                 SpawnBGObject(i, RESPAWN_IMMEDIATELY);
@@ -541,4 +549,38 @@ void BattleGroundWS::UpdatePlayerScore(Player* Source, uint32 type, uint32 value
             BattleGround::UpdatePlayerScore(Source, type, value);
             break;
     }
+}
+
+void BattleGroundWS::FillInitialWorldStates(WorldPacket& data)
+{
+    data << uint32(BG_WS_FLAG_CAPTURES_ALLIANCE) << uint32(GetTeamScore(ALLIANCE));
+    data << uint32(BG_WS_FLAG_CAPTURES_HORDE) << uint32(GetTeamScore(HORDE));
+
+    if(m_FlagState[BG_TEAM_ALLIANCE] == BG_WS_FLAG_STATE_ON_GROUND)
+        data << uint32(BG_WS_FLAG_UNK_ALLIANCE) << uint32(-1);
+    else if (m_FlagState[BG_TEAM_ALLIANCE] == BG_WS_FLAG_STATE_ON_PLAYER)
+        data << uint32(BG_WS_FLAG_UNK_ALLIANCE) << uint32(1);
+    else
+        data << uint32(BG_WS_FLAG_UNK_ALLIANCE) << uint32(0);
+    
+    if(m_FlagState[BG_TEAM_HORDE] == BG_WS_FLAG_STATE_ON_GROUND)
+        data << uint32(BG_WS_FLAG_UNK_HORDE) << uint32(-1);
+    else if (m_FlagState[BG_TEAM_HORDE] == BG_WS_FLAG_STATE_ON_PLAYER)
+        data << uint32(BG_WS_FLAG_UNK_HORDE) << uint32(1);
+    else
+        data << uint32(BG_WS_FLAG_UNK_HORDE) << uint32(0);
+    
+
+    data << uint32(BG_WS_FLAG_CAPTURES_MAX) << uint32(BG_WS_MAX_TEAM_SCORE);
+    
+    if (m_FlagState[BG_TEAM_HORDE] == BG_WS_FLAG_STATE_ON_PLAYER)
+        data << uint32(BG_WS_FLAG_STATE_HORDE) << uint32(2);
+    else
+        data << uint32(BG_WS_FLAG_STATE_HORDE) << uint32(1);
+
+    if (m_FlagState[BG_TEAM_ALLIANCE] == BG_WS_FLAG_STATE_ON_PLAYER)
+        data << uint32(BG_WS_FLAG_STATE_ALLIANCE) << uint32(2);
+    else
+        data << uint32(BG_WS_FLAG_STATE_ALLIANCE) << uint32(1);
+
 }

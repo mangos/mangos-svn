@@ -339,7 +339,7 @@ bool BGQueueInviteEvent::Execute(uint64 /*e_time*/, uint32 p_time)
             if (qItr != qpMap.end() && qItr->second.IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
             {
                 WorldPacket data;
-                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, plr->GetTeam(), queueSlot, STATUS_WAIT_JOIN, BG_REMIND_INVITE_TIME, 0);
+                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, plr->GetTeam(), queueSlot, STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME/2, 0);
                 plr->GetSession()->SendPacket(&data);
             }
         }
@@ -633,9 +633,9 @@ void BattleGroundMgr::InvitePlayer(Player* plr, uint32 bgInstanceGUID)
     // create invite events:
     //add events to player's counters ---- this is not good way - there should be something like global event processor, where we should add those events
     BGQueueInviteEvent* inviteEvent = new BGQueueInviteEvent(plr->GetGUID(), bgInstanceGUID);
-    plr->m_Events.AddEvent(inviteEvent, plr->m_Events.CalculateTime(BG_REMIND_INVITE_TIME));
+    plr->m_Events.AddEvent(inviteEvent, plr->m_Events.CalculateTime(INVITE_ACCEPT_WAIT_TIME/2));
     BGQueueRemoveEvent* removeEvent = new BGQueueRemoveEvent(plr->GetGUID(), bgInstanceGUID, plr->GetTeam());
-    plr->m_Events.AddEvent(removeEvent, plr->m_Events.CalculateTime(2*BG_REMIND_INVITE_TIME));
+    plr->m_Events.AddEvent(removeEvent, plr->m_Events.CalculateTime(INVITE_ACCEPT_WAIT_TIME));
 }
 
 uint32 BattleGroundMgr::CreateBattleGround(uint32 bgTypeId, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, char* BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO)
