@@ -4919,6 +4919,44 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         }
         case SPELLFAMILY_PALADIN:
         {
+            // Seal of Righteousness - melee proc dummy
+            if (dummySpell->SpellFamilyFlags&0x000000008000000LL && triggeredByAura->GetEffIndex()==0)
+            {
+                if(GetTypeId() == TYPEID_PLAYER)
+                {
+                    uint32 spellId;
+                    switch (triggeredByAura->GetId())
+                    {
+                        case 21084: spellId = 25742; break; // Rank 1
+                        case 20287: spellId = 25740; break; // Rank 2
+                        case 20288: spellId = 25739; break; // Rank 3
+                        case 20289: spellId = 25738; break; // Rank 4
+                        case 20290: spellId = 25737; break; // Rank 5
+                        case 20291: spellId = 25736; break; // Rank 6
+                        case 20292: spellId = 25735; break; // Rank 7
+                        case 20293: spellId = 25713; break; // Rank 8
+                        case 27155: spellId = 27156; break; // Rank 9
+                        default:
+                            sLog.outError("Unit::HandleDummyAuraProc: non handled possibly Seal of Righteousness (Id = %u)", triggeredByAura->GetId());
+                            return;
+                    }
+                    Item *item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                    float speed = (item ? item->GetProto()->Delay : BASE_ATTACK_TIME)/1000.0f;
+
+                    float damageBasePoints;
+                    if(item && item->GetProto()->InventoryType == INVTYPE_2HWEAPON) 
+                        // two hand weapon
+                        damageBasePoints=1.20f*triggeredByAura->GetModifier()->m_amount * 1.2f * 1.03f * speed/100.0f + 1;
+                    else                                            
+                        // one hand weapon/no weapon
+                        damageBasePoints=0.85f*ceil(triggeredByAura->GetModifier()->m_amount * 1.2f * 1.03f * speed/100.0f) - 1;
+
+                    int32 damagePoint = int32(damageBasePoints + 0.03f * (GetWeaponDamageRange(BASE_ATTACK,MINDAMAGE)+GetWeaponDamageRange(BASE_ATTACK,MAXDAMAGE))/2.0f) + 1;
+
+                    CastCustomSpell(pVictim,spellId,&damagePoint,NULL,NULL,true,NULL, triggeredByAura);
+                }
+                return;
+            }
             // Seal of Blood do damage trigger
             if(dummySpell->SpellFamilyFlags & 0x0000040000000000LL)
             {
@@ -9002,9 +9040,6 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                 {
                     sLog.outDebug("ProcDamageAndSpell: doing %u damage from spell id %u (triggered by %s aura of spell %u)", i->spellParam, i->spellInfo->Id,(isVictim?"a victim's":"an attacker's"),i->triggeredByAura->GetId());
                     uint32 damage = i->spellParam;
-                    // TODO: remove hack for Seal of Righteousness. That should not be there
-                    if(!isVictim && i->spellInfo->SpellVisual == 7986)
-                        damage = (damage * GetAttackTime(BASE_ATTACK))/60/1000;
                     SpellNonMeleeDamageLog(pTarget, i->spellInfo->Id, damage, true, true);
                     break;
                 }

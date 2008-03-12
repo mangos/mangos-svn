@@ -1331,13 +1331,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 const_cast<int32&>((*i)->GetModifier()->m_amount) += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
     }
 
-    // seal of righteousness
-    if(GetSpellProto()->SpellVisual == 7986 && caster && caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        if(GetEffIndex() == 0)
-            m_target->ApplyAuraProcTriggerDamage(this,apply);
-    }
-
     // soulstone resurrection (only at real add/remove and can overwrite reincarnation spell setting)
     if(GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92 &&
         caster && caster->GetTypeId() == TYPEID_PLAYER && m_target && m_target->GetTypeId() == TYPEID_PLAYER)
