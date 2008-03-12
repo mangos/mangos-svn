@@ -34,8 +34,6 @@ typedef std::deque<BattleGround*> BGFreeSlotQueueType;
 
 #define MAX_BATTLEGROUND_TYPES 9                            // each BG type will be in array
 
-#define BG_REMIND_INVITE_TIME 60000                         // when this time pass, player get invitation request again
-
 struct PlayerQueueInfo
 {
     uint32  InviteTime;                                     // first invite time
