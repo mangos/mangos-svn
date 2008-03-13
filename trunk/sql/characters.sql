@@ -985,6 +985,7 @@ CREATE TABLE `mail_items` (
   `mail_id` int(11) NOT NULL default '0',
   `item_guid` int(11) NOT NULL default '0',
   `item_template` int(11) NOT NULL default '0',
+  `receiver` int(11) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
   PRIMARY KEY  (`mail_id`,`item_guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 

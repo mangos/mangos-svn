@@ -22,6 +22,7 @@
 #include "WorldSession.h"
 #include "World.h"
 #include "ObjectMgr.h"
+#include "PlayerDump.h"
 #include "SpellMgr.h"
 #include "Player.h"
 #include "Opcodes.h"
@@ -4502,7 +4503,7 @@ bool ChatHandler::HandleLoadPDumpCommand(const char *args)
     char * name = strtok(NULL, " ");
     char * guid = name ? strtok(NULL, " ") : NULL;
 
-    if(objmgr.LoadPlayerDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0))
+    if(PlayerDumpReader().LoadDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0))
         PSendSysMessage(LANG_COMMAND_IMPORT_SUCCESS);
     else
         PSendSysMessage(LANG_COMMAND_IMPORT_FAILED);
@@ -4520,7 +4521,7 @@ bool ChatHandler::HandleWritePDumpCommand(const char *args)
 
     if(!file || !guid) return false;
 
-    if (objmgr.WritePlayerDump(file, atoi(guid)))
+    if (PlayerDumpWriter().WriteDump(file, atoi(guid)))
         PSendSysMessage(LANG_COMMAND_EXPORT_SUCCESS);
     else
         PSendSysMessage(LANG_COMMAND_EXPORT_FAILED);

@@ -192,8 +192,12 @@ struct GraveYardData
 };
 typedef std::multimap<uint32,GraveYardData> GraveYardMap;
 
+class PlayerDumpReader;
+
 class ObjectMgr
 {
+    friend class PlayerDumpReader;
+
     public:
         ObjectMgr();
         ~ObjectMgr();
@@ -581,11 +585,6 @@ class ObjectMgr
         time_t GetGORespawnTime(uint32 loguid, uint32 instance) { return mGORespawnTimes[MAKE_GUID(loguid,instance)]; }
         void SaveGORespawnTime(uint32 loguid, uint32 instance, time_t t);
         void DeleteRespawnTimeForInstance(uint32 instance);
-
-        // player Dumps
-        std::string GetPlayerDump(uint32 guid);
-        bool WritePlayerDump(std::string file, uint32 guid);
-        bool LoadPlayerDump(std::string file, uint32 account, std::string name = "", uint32 newGuid = 0);
 
         // grid objects
         void AddCreatureToGrid(uint32 guid, CreatureData const* data);

@@ -527,15 +527,39 @@ void Spell::EffectDummy(uint32 i)
     {
         case SPELLFAMILY_GENERIC:
             // Gnomish Poultryizer trinket
-            if(m_spellInfo->Id == 30507)                    // Poultryizer
+            switch(m_spellInfo->Id )
             {
-                if (!m_CastItem)
+                // Different item engineering summons
+                case 23074:                                 // Arc. Dragonling
+                    if (!m_CastItem) return;
+                    m_caster->CastSpell(m_caster,19804,true,m_CastItem);
                     return;
-                if(roll_chance_i(80))                       // success
-                    m_caster->CastSpell(unitTarget, 30501, true, m_CastItem);
-                else                                        // backfire
-                    m_caster->CastSpell(unitTarget, 30504, true, m_CastItem);
-                return;
+                case 23075:                                 // Mithril Mechanical Dragonling
+                    if (!m_CastItem) return;
+                    m_caster->CastSpell(m_caster,12749,true,m_CastItem);
+                    return;
+                case 23076:                                 // Mechanical Dragonling
+                    if (!m_CastItem) return;
+                    m_caster->CastSpell(m_caster,4073,true,m_CastItem);
+                    return;
+                case 23133:                                 // Gnomish Battle Chicken
+                    if (!m_CastItem) return;
+                    m_caster->CastSpell(m_caster,13166,true,m_CastItem);
+                    return;
+                case 30507:                                 // Poultryizer
+                    if (!m_CastItem) return;
+                    if(roll_chance_i(80))                   // success
+                        m_caster->CastSpell(unitTarget, 30501, true, m_CastItem);
+                    else                                    // backfire 20%
+                        m_caster->CastSpell(unitTarget, 30504, true, m_CastItem);
+                    return;
+                case 30458:                                 // Nigh Invulnerability
+                    if (!m_CastItem) return;
+                    if(roll_chance_i(86))                   // success
+                        m_caster->CastSpell(m_caster, 30456, true, m_CastItem);
+                    else                                    // backfire in 14% casts
+                        m_caster->CastSpell(m_caster, 30457, true, m_CastItem);
+                    return;
             }
             break;
         case SPELLFAMILY_WARRIOR:
@@ -1027,29 +1051,6 @@ void Spell::EffectDummy(uint32 i)
             return;
         }
 
-        // Different item engineering summons
-        case 23074:                                         // Arc. Dragonling
-        case 23075:                                         // Mithril Mechanical Dragonling
-        case 23076:                                         // Mechanical Dragonling
-        case 23133:                                         // Gnomish Battle Chicken
-        {
-            // TODO: why dummy effect required? some animation or other...
-            uint32 spell_id = 0;
-            switch(m_spellInfo->Id)
-            {
-                case 23074: spell_id = 19804; break;
-                case 23075: spell_id = 12749; break;
-                case 23076: spell_id =  4073; break;
-                case 23133: spell_id = 13166; break;
-                default:
-                    sLog.outError("Spell::EffectDummy: Spell %u not handled in ES",m_spellInfo->Id);
-                    return;
-            }
-
-            m_caster->CastSpell(m_caster,spell_id,true,NULL);
-            return;
-        }
-
         // Touch of Weakness triggered spell
         case 28598:
         {
@@ -1200,20 +1201,6 @@ void Spell::EffectDummy(uint32 i)
                 spell_id = 13099;
 
             m_caster->CastSpell(unitTarget,spell_id,true,NULL);
-            return;
-        }
-
-        // Nigh Invulnerability Belt
-        case 30458:
-        {
-            if(m_caster->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            uint32 roll = urand(0, 99);
-
-            uint32 spell_id = roll < 10 ? 30457 : 30456;    // 10% for backfire
-
-            m_caster->CastSpell(m_caster,spell_id,true,m_CastItem);
             return;
         }
 

@@ -34,6 +34,7 @@
 #include "AccountMgr.h"
 #include "CliRunnable.h"
 #include "MapManager.h"
+#include "PlayerDump.h"
 
 //CliCommand and CliCommandHolder are defined in World.h to avoid cyclic deps
 
@@ -112,7 +113,7 @@ void CliWritePlayerDump(char*command,pPrintf zprintf)
         zprintf("Syntax is: writepdump $filename $playerGUID\r\n");
         return;
     }
-    objmgr.WritePlayerDump(file, atoi(p2));
+    PlayerDumpWriter().WriteDump(file, atoi(p2));
 }
 
 /// Load a character from a dump file
@@ -127,7 +128,7 @@ void CliLoadPlayerDump(char*command,pPrintf zprintf)
     }
     char * name = strtok(NULL, " ");
     char * guid = name ? strtok(NULL, " ") : NULL;
-    if(objmgr.LoadPlayerDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0))
+    if(PlayerDumpReader().LoadDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0))
         zprintf("Character loaded successfully!");
     else
         zprintf("Failed to load the character!");
