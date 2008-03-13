@@ -3061,7 +3061,9 @@ uint8 Spell::CanCast(bool strict)
                     return SPELL_FAILED_LOW_CASTLEVEL;
 
                 // chance for fail at orange skinning attempt
-                if ((m_selfContainer && (*m_selfContainer) == this) && (ReqValue < 0 ? 0 : ReqValue) > irand(SkinningValue-25, SkinningValue+37) )
+                if( (m_selfContainer && (*m_selfContainer) == this) && 
+                    SkinningValue < sWorld.GetConfigMaxSkillValue() &&
+                    (ReqValue < 0 ? 0 : ReqValue) > irand(SkinningValue-25, SkinningValue+37) )
                     return SPELL_FAILED_TRY_AGAIN;
 
                 break;
@@ -3143,10 +3145,17 @@ uint8 Spell::CanCast(bool strict)
 
                 // get the skill value of the player
                 int32 SkillValue = 0;
+                bool canFailAtMax = true;
                 if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_HERBALISM)
+                {
                     SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM);
+                    canFailAtMax = false;
+                }
                 else if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_MINING)
+                {
                     SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_MINING);
+                    canFailAtMax = false;
+                }
                 else if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_PICKLOCK)
                     SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_LOCKPICKING);
 
@@ -3185,8 +3194,8 @@ uint8 Spell::CanCast(bool strict)
                 if (ReqValue > SkillValue)
                     return SPELL_FAILED_LOW_CASTLEVEL;
 
-                // chance for failure in orange gather / lockpick
-                if (ReqValue > irand(SkillValue-25, SkillValue+37))
+                // chance for failure in orange gather / lockpick (gathering skill can't fail at maxskill)
+                if((canFailAtMax || SkillValue < sWorld.GetConfigMaxSkillValue()) && ReqValue > irand(SkillValue-25, SkillValue+37))
                     return SPELL_FAILED_TRY_AGAIN;
 
                 break;
