@@ -426,7 +426,8 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                 // Steady Shot
                 else if(m_spellInfo->SpellFamilyFlags & 0x100000000LL)
                 {
-                    damage += m_caster->CalculateDamage(RANGED_ATTACK)+int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.2);
+                    int32 base =rand32(uint32(m_caster->GetWeaponDamageRange(RANGED_ATTACK, MINDAMAGE)),uint32(m_caster->GetWeaponDamageRange(RANGED_ATTACK, MAXDAMAGE)));
+                    damage += int32(base/m_caster->GetAttackTime(RANGED_ATTACK)*2800 + m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.2f);
                 }
                 //Explosive Trap Effect
                 else if(m_spellInfo->SpellFamilyFlags & 0x00000004)
