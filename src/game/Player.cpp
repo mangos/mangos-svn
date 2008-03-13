@@ -5603,11 +5603,10 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
         }
     }
 
-    if(groupsize < 1)
-        groupsize = 1;
-
-    honor *= sWorld.getRate(RATE_HONOR);
-    honor /= groupsize;
+    if (uVictim != NULL)
+        honor *= sWorld.getRate(RATE_HONOR);
+    if(groupsize > 1)
+        honor /= groupsize;
 
     float approx_honor = honor * (((float)urand(8,12))/10); // approx honor: 80% - 120% of real honor
 
