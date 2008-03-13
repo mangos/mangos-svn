@@ -6908,11 +6908,9 @@ int32 Unit::SpellBaseDamageBonusForVictim(int32 SchoolMask, Unit *pVictim)
 
 bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 *damage, Unit *pVictim)
 {
-    // Chance to crit is computed from INT and LEVEL as follows:
-    //   chance = base + INT / (rate0 + rate1 * LEVEL)
-    // The formula keeps the crit chance at %5 on every level unless the player
-    // increases his intelligence by other means (enchants, buffs, talents, ...)
-    if(spellProto->Id == 15290 || spellProto->Id == 39373) return false;
+    // not criting spell
+    if((spellProto->AttributesEx2 & 0x20000000LL))
+        return false;
 
     float crit_chance = 0.0f;
 
