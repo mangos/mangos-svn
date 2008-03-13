@@ -3298,7 +3298,7 @@ void Spell::EffectWeaponDmg(uint32 i)
 
     uint32 hitInfo = 0;
     uint32 nohitMask = HITINFO_ABSORB | HITINFO_RESIST | HITINFO_MISS;
-    SpellSchools damageType = SPELL_SCHOOL_NORMAL;
+    SpellSchools damageSchool =  SpellSchools(m_spellInfo->School);
     VictimState victimState = VICTIMSTATE_NORMAL;
     uint32 blocked_dmg = 0;
     uint32 absorbed_dmg = 0;
@@ -3334,13 +3334,13 @@ void Spell::EffectWeaponDmg(uint32 i)
             if( unitTarget->IsImmunedToSpellDamage(m_spellInfo) )
                 return;
 
-            damageType = SpellSchools(pItem->GetProto()->Damage->DamageType);
+            damageSchool = SpellSchools(pItem->GetProto()->Damage->DamageType);
         }
     }
     else
         attType = BASE_ATTACK;
 
-    if(damageType==SPELL_SCHOOL_NORMAL && unitTarget->IsImmunedToPhysicalDamage() )
+    if(damageSchool==SPELL_SCHOOL_NORMAL && unitTarget->IsImmunedToPhysicalDamage() )
     {
         m_caster->SendAttackStateUpdate (HITINFO_MISS, unitTarget, 1, SPELL_SCHOOL_NORMAL, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
         return;
@@ -3406,15 +3406,15 @@ void Spell::EffectWeaponDmg(uint32 i)
     // prevent negative damage
     uint32 eff_damage = uint32(bonus > 0 ? bonus : 0);
 
-    m_caster->DoAttackDamage(unitTarget, &eff_damage, &cleanDamage, &blocked_dmg, damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType, m_spellInfo, m_IsTriggeredSpell);
+    m_caster->DoAttackDamage(unitTarget, &eff_damage, &cleanDamage, &blocked_dmg, damageSchool, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType, m_spellInfo, m_IsTriggeredSpell);
 
     if ((hitInfo & nohitMask) && attType != RANGED_ATTACK)  // not send ranged miss/etc
-        m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, SpellSchools(m_spellInfo->School), eff_damage, absorbed_dmg, resisted_dmg, VICTIMSTATE_NORMAL, blocked_dmg);
+        m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, damageSchool, eff_damage, absorbed_dmg, resisted_dmg, VICTIMSTATE_NORMAL, blocked_dmg);
 
     if(hitInfo & HITINFO_CRITICALHIT)
         criticalhit = true;
 
-    m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, eff_damage, (damageType==SPELL_SCHOOL_NORMAL ? SpellSchools(m_spellInfo->School) : damageType), absorbed_dmg, resisted_dmg, false, blocked_dmg, criticalhit);
+    m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, eff_damage, damageSchool, absorbed_dmg, resisted_dmg, false, blocked_dmg, criticalhit);
 
     if (eff_damage > (absorbed_dmg + resisted_dmg + blocked_dmg))
     {
@@ -3426,6 +3426,7 @@ void Spell::EffectWeaponDmg(uint32 i)
         eff_damage = 0;
     }
 
+    // SPELL_SCHOOL_NORMAL use for weapon-like threat and rage calculation
     m_caster->DealDamage(unitTarget, eff_damage, &cleanDamage, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, true);
 
     // Hemorrhage
@@ -3460,13 +3461,6 @@ void Spell::EffectWeaponDmg(uint32 i)
             ((Player*)m_caster)->DestroyItemCount(ammo, 1, true);
         // wand not have ammo
     }
-
-    /*if(m_spellInfo->Effect[i] == 121)
-    {
-        m_caster->resetAttackTimer(BASE_ATTACK);
-        m_caster->resetAttackTimer(OFF_ATTACK);
-        m_caster->resetAttackTimer(RANGED_ATTACK);
-    }*/
 }
 
 void Spell::EffectThreat(uint32 /*i*/)
