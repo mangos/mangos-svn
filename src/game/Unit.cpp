@@ -448,6 +448,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
 
         if(pVictim != this)
             RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
+
+        if(pVictim->GetTypeId() == TYPEID_PLAYER && !pVictim->IsStandState() && !pVictim->hasUnitState(UNIT_STAT_STUNDED))
+            ((Player*)pVictim)->SetStandState(PLAYER_STATE_NONE); 
     }
 
     //Script Event damage Deal
