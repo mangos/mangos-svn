@@ -1388,6 +1388,32 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             m_target->CastCustomSpell(m_target,33778,&m_modifier.m_amount,NULL,NULL,true,NULL,this,GetCasterGUID());
         }
     }
+
+    //Fire Elemental Totem
+    if (GetId() == 40133 && caster)
+    {
+        Unit *owner = caster->GetOwner();
+        if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+        {
+            if(apply)
+                owner->CastSpell(owner,8985,true);
+            else
+                ((Player*)owner)->RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
+        }
+    }
+
+    //Earth Elemental Totem
+    if (GetId() == 40132 && caster)
+    {
+        Unit *owner = caster->GetOwner();
+        if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+        {
+            if(apply)
+                owner->CastSpell(owner,19704,true);
+            else
+                ((Player*)owner)->RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
+        }
+    }
 }
 
 void Aura::HandleAuraMounted(bool apply, bool Real)

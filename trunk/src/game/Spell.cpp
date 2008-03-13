@@ -440,6 +440,7 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_SKILL:
                 case SPELL_EFFECT_SUMMON_CHANGE_ITEM:
                 case SPELL_EFFECT_SUMMON_GUARDIAN:
+                case SPELL_EFFECT_SUMMON:
                 case SPELL_EFFECT_SUMMON_WILD:
                 case SPELL_EFFECT_STUCK:
                 case SPELL_EFFECT_ADD_FARSIGHT:
