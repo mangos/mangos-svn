@@ -875,6 +875,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             if( (spellInfo_2->SpellFamilyName == SPELLFAMILY_WARRIOR && (spellInfo_2->SpellFamilyFlags & 2) && spellInfo_1->Id == 23694) ) 
                 return false;
 
+            // Improved Wing Clip -> Wing Clip (multi-family check)
+            if( (spellInfo_2->SpellFamilyName == SPELLFAMILY_HUNTER && (spellInfo_2->SpellFamilyFlags & 0x40) && spellInfo_1->Id == 19229) ) 
+                return false;
+
             // Garrote-Silence -> Garrote (multi-family check)
             if( spellInfo_1->SpellIconID == 498 && spellInfo_1->SpellVisual == 0 && 
                 spellInfo_2->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo_1->SpellIconID == 498  )
@@ -949,6 +953,12 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             // Garrote -> Garrote-Silence (multi-family check)
             if( spellInfo_1->SpellIconID == 498 && spellInfo_2->SpellIconID == 498 && spellInfo_2->SpellVisual == 0 )
                 return false;
+            break;
+        case SPELLFAMILY_HUNTER:
+            // Wing Clip -> Improved Wing Clip (multi-family check)
+            if( (spellInfo_1->SpellFamilyFlags & 0x40) && spellInfo_2->Id == 19229 ) 
+                return false;
+
             break;
         case SPELLFAMILY_PALADIN:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_PALADIN )
@@ -1565,5 +1575,6 @@ bool IsMechanicInvulnerabilityImmunityToSpell(SpellEntry const* spellInfo)
 
     return false;
 }
+
 
 
