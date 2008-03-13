@@ -183,6 +183,8 @@ libmangosgame_a_SOURCES = \
 	PetitionsHandler.cpp \
 	Player.cpp \
 	Player.h \
+	PlayerDump.cpp \
+	PlayerDump.h \
 	QueryHandler.cpp \
 	QuestDef.cpp \
 	QuestDef.h \

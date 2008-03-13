@@ -807,7 +807,7 @@ void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 station
         for(MailItemMap::const_iterator mailItemIter = mi->begin(); mailItemIter != mi->end(); ++mailItemIter)
         {
             MailItem const& mailItem = mailItemIter->second;
-            CharacterDatabase.PExecute("INSERT INTO mail_items (mail_id,item_guid,item_template) VALUES ('%u', '%u', '%u')", mailId, mailItem.item_guidlow, mailItem.item_template);
+            CharacterDatabase.PExecute("INSERT INTO mail_items (mail_id,item_guid,item_template,receiver) VALUES ('%u', '%u', '%u','%u')", mailId, mailItem.item_guidlow, mailItem.item_template,receiver_guidlow);
         }
     }
 }

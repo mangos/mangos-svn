@@ -33,6 +33,7 @@
 #include "ObjectAccessor.h"
 #include "Group.h"
 #include "Database/DatabaseImpl.h"
+#include "PlayerDump.h"
 
 // check used symbols in player name at creating and rename
 std::string notAllowedChars = "\t\v\b\f\a\n\r\\\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789\0";
@@ -345,7 +346,7 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
 
     if(sLog.IsOutCharDump())                                // optimize GetPlayerDump call
     {
-        std::string dump = objmgr.GetPlayerDump(GUID_LOPART(guid));
+        std::string dump = PlayerDumpWriter().GetDump(GUID_LOPART(guid));
         sLog.outCharDump(dump.c_str(),GetAccountId(),GUID_LOPART(guid),name.c_str());
     }
 

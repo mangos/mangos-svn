@@ -1113,9 +1113,10 @@ void Aura::TriggerSpell()
             return;
         }
 
+        case 9712: trigger_spell_id = 21029; break;         // Thaumaturgy Channel
         case 29528: trigger_spell_id = 28713; break;        // Inoculation
-
         case 29917: trigger_spell_id = 29916; break;        // Feed Captured Animal
+
         case 1010:                                          // Curse of Idiocy
         {
             // TODO: spell casted by result in correct way mostly
