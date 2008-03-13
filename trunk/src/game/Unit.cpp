@@ -1848,6 +1848,34 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
             continue;
 
         int32 currentAbsorb;
+
+        //Reflective Shield
+        if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_PRIEST && (*i)->GetSpellProto()->SpellFamilyFlags == 0x1)
+        {
+            AuraList const& vOverRideCS = pVictim->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+            for(AuraList::const_iterator k = vOverRideCS.begin(); k != vOverRideCS.end(); ++k)
+            {
+                int32 reflect_damage = 0;
+                switch((*k)->GetModifier()->m_miscvalue)
+                {
+                    case 5065:                              // Rank 1
+                    case 5064:                              // Rank 2
+                    case 5063:                              // Rank 3
+                    case 5062:                              // Rank 4
+                    case 5061:                              // Rank 5
+                    {
+                        if(RemainingDamage >= (*i)->GetModifier()->m_amount)
+                            reflect_damage = (*i)->GetModifier()->m_amount * (*k)->GetModifier()->m_amount/100;
+                        else
+                            reflect_damage = (*k)->GetModifier()->m_amount * RemainingDamage/100;
+                        pVictim->CastCustomSpell(this, 33619, &reflect_damage, NULL, NULL, true, NULL, *i);
+
+                    } break;
+                    default: break;
+                }
+            }
+        }
+
         if (RemainingDamage >= (*i)->GetModifier()->m_amount)
         {
             currentAbsorb = (*i)->GetModifier()->m_amount;
@@ -9427,4 +9455,5 @@ uint32 Unit::GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectT
 
     return CastingTime;
 }
+
 
