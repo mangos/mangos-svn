@@ -2689,7 +2689,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     if (!pVictim->HasInArc(M_PI,this))
     {
         DEBUG_LOG ("RollMeleeOutcomeAgainst: attack came from behind.");
-    }    
+    }
     else
     {
         // Reduce parry chance by attacker expertise rating
@@ -2886,13 +2886,42 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
     // Try victim reflect spell
     if (CanReflect)
     {
-        int32 reflectchance = pVictim->GetTotalAuraModifier(SPELL_AURA_REFLECT_SPELLS);
+        // specialized first
         Unit::AuraList const& mReflectSpellsSchool = pVictim->GetAurasByType(SPELL_AURA_REFLECT_SPELLS_SCHOOL);
         for(Unit::AuraList::const_iterator i = mReflectSpellsSchool.begin(); i != mReflectSpellsSchool.end(); ++i)
+        {
             if((*i)->GetModifier()->m_miscvalue & int32(1 << spell->School))
-                reflectchance += (*i)->GetModifier()->m_amount;
-        if (reflectchance > 0 && roll_chance_i(reflectchance))
-            return SPELL_MISS_REFLECT;
+            {
+                int32 reflectchance = (*i)->GetModifier()->m_amount;
+                if (reflectchance > 0 && roll_chance_i(reflectchance))
+                {
+                    if((*i)->m_procCharges > 0)
+                    {
+                        --(*i)->m_procCharges;
+                        if((*i)->m_procCharges==0)
+                            pVictim->RemoveAurasDueToSpell((*i)->GetId());
+                    }
+                    return SPELL_MISS_REFLECT;
+                }
+            }
+        }
+
+        // generic reflection
+        Unit::AuraList const& mReflectSpells = pVictim->GetAurasByType(SPELL_AURA_REFLECT_SPELLS);
+        for(Unit::AuraList::const_iterator i = mReflectSpells.begin(); i != mReflectSpells.end(); ++i)
+        {
+            int32 reflectchance = (*i)->GetModifier()->m_amount;
+            if (reflectchance > 0 && roll_chance_i(reflectchance))
+            {
+                if((*i)->m_procCharges > 0)
+                {
+                    --(*i)->m_procCharges;
+                    if((*i)->m_procCharges==0)
+                        pVictim->RemoveAurasDueToSpell((*i)->GetId());
+                }
+                return SPELL_MISS_REFLECT;
+            }
+        }
     }
 
     // TODO need add here hit result calculation for spells
