@@ -76,8 +76,6 @@ class MANGOS_DLL_SPEC HostilReference : public Reference<Unit, ThreatManager>
         // in this case online = true, but accessable = false
         bool isAccessable() const { return iAccessible; }
 
-        void addThreatToSource(float threat, uint8 school, SpellEntry const *threatSpell, bool singletarget);
-
         // used for temporary setting a threat and reducting it later again.
         // the threat modification is stored
         void setTempThreat(float pThreat) { iTempThreatModifyer = pThreat - getThreat(); if(iTempThreatModifyer != 0.0f) addThreat(iTempThreatModifyer);  }

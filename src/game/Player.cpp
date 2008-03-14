@@ -9521,7 +9521,36 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
             {
                 _ApplyItemMods(pItem, slot, false);
 
-                // and remove held enchantments
+                // remove item dependent auras (only weapon and armor slots)
+                if(slot < EQUIPMENT_SLOT_END)
+                {
+                    AuraMap& auras = GetAuras();
+                    for(AuraMap::iterator itr = auras.begin(); itr != auras.end(); )
+                    {
+                        Aura* aura = itr->second;
+
+                        // skip persistent and not item class dependent and not self applied auras
+                        SpellEntry const* spellInfo = aura->GetSpellProto();
+                        if(aura->IsPermanent() ||  aura->GetCasterGUID()!=GetGUID())
+                        {
+                            ++itr;
+                            continue;
+                        }
+
+                        // skip if have alternative item
+                        if(HasItemFitToSpellReqirements(spellInfo,pItem))
+                        {
+                            ++itr;
+                            continue;
+                        }
+
+                        // no alt item, remove aura, restart check
+                        RemoveAurasDueToSpell(aura->GetId());
+                        itr = auras.begin();
+                    }
+                }
+
+                // remove held enchantments
                 if ( slot == EQUIPMENT_SLOT_MAINHAND )
                 {
                     if (pItem->GetItemSuffixFactor())
@@ -16384,4 +16413,49 @@ uint32 Player::GetCurrentTaxiPath() const
     objmgr.GetTaxiPath(m_TaxiDestinations[0],m_TaxiDestinations[1],path,cost);
 
     return path;
+}
+
+bool Player::HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item const* ignoreItem)
+{
+    if(spellInfo->EquippedItemClass < 0)
+        return true;
+
+    // scan other equipped items for same requirements (mostly 2 daggers/etc)
+    // for optimize check 2 used cases only
+    switch(spellInfo->EquippedItemClass)
+    {
+        case ITEM_CLASS_WEAPON:
+        {
+            for(int i= EQUIPMENT_SLOT_MAINHAND; i < EQUIPMENT_SLOT_TABARD; ++i)
+                if(Item *item = GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+                    if(item!=ignoreItem && item->IsFitToSpellRequirements(spellInfo))
+                        return true;
+            break;
+        }
+        case ITEM_CLASS_ARMOR:
+        {
+            // tabard not have dependent spells
+            for(int i= EQUIPMENT_SLOT_START; i< EQUIPMENT_SLOT_MAINHAND; ++i)
+                if(Item *item = GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+                    if(item!=ignoreItem && item->IsFitToSpellRequirements(spellInfo))
+                        return true;
+
+            // shields can be equipped to offhand slot
+            if(Item *item = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+                if(item!=ignoreItem && item->IsFitToSpellRequirements(spellInfo))
+                    return true;
+
+            // ranged slot can have some armor subclasses
+            if(Item *item = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
+                if(item!=ignoreItem && item->IsFitToSpellRequirements(spellInfo))
+                    return true;
+
+            break;
+        }
+        default:
+            sLog.outError("HasItemFitToSpellReqirements: Not handeled spell reqirement for item class %u",spellInfo->EquippedItemClass);
+            break;
+    }
+
+    return false;
 }
