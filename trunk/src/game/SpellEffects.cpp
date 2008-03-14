@@ -3712,6 +3712,14 @@ void Spell::EffectScriptEffect(uint32 i)
                 unitTarget->CastSpell(unitTarget, 26655, true);
             break;
         }
+        //Piccolo of the Flaming Fire
+        case 17512:
+        {
+            if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                return;
+            unitTarget->HandleEmoteCommand(EMOTE_STATE_DANCE);
+            break;
+        }
     }
 
     // paladin's holy light / flash of light
