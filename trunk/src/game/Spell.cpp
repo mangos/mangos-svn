@@ -2189,6 +2189,11 @@ void Spell::SendCastResult(uint8 result)
                 if(m_spellInfo->TotemCategory[1])
                     data << uint32(m_spellInfo->TotemCategory[1]);
                 break;
+            case SPELL_FAILED_EQUIPPED_ITEM_CLASS:
+                data << uint32(m_spellInfo->EquippedItemClass);
+                data << uint32(m_spellInfo->EquippedItemSubClassMask);
+                data << uint32(m_spellInfo->EquippedItemInventoryTypeMask);
+                break;
         }
         ((Player*)m_caster)->GetSession()->SendPacket(&data);
     }
@@ -3728,11 +3733,25 @@ uint8 Spell::CheckItems()
             }
         }
     }
-    if(m_targets.getItemTarget())
+
+    if(m_targets.getItemTargetGUID())
     {
-        if(m_caster->GetTypeId() == TYPEID_PLAYER && !m_targets.getItemTarget()->IsFitToSpellRequirements(m_spellInfo))
+        if(m_caster->GetTypeId() != TYPEID_PLAYER)
             return SPELL_FAILED_BAD_TARGETS;
+
+        if(!m_targets.getItemTarget())
+            return SPELL_FAILED_ITEM_GONE;
+
+        if(!m_targets.getItemTarget()->IsFitToSpellRequirements(m_spellInfo))
+            return SPELL_FAILED_EQUIPPED_ITEM_CLASS;
     }
+    // if not item target then required item must be equipped
+    else
+    {
+        if(m_caster->GetTypeId() == TYPEID_PLAYER && !((Player*)m_caster)->HasItemFitToSpellReqirements(m_spellInfo))
+            return SPELL_FAILED_EQUIPPED_ITEM_CLASS;
+    }
+
 
     if(m_spellInfo->RequiresSpellFocus)
     {
