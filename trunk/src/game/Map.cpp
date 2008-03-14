@@ -496,7 +496,7 @@ bool Map::AddInstanced(Player *player)
         Guard guard(*this);
 
         // GMs can avoid player limits
-        if (i_maxPlayers && (i_Players.size() >= i_maxPlayers) && (!player->isGameMaster()))
+        if (i_maxPlayers && (GetPlayersCountExceptGMs() >= i_maxPlayers) && !player->isGameMaster())
         {
             sLog.outDetail("MAP: Instance '%u' of map '%s' cannot have more than '%u' players. Player '%s' rejected", GetInstanceId(), GetMapName(), i_maxPlayers, player->GetName());
             player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAX_PLAYERS);
@@ -1453,6 +1453,16 @@ void Map::SendRemoveTransports( Player * player )
     transData.BuildPacket(&packet);
     player->GetSession()->SendPacket(&packet);
 }
+
+uint32 Map::GetPlayersCountExceptGMs() const
+{
+    uint32 count = 0;
+    for(PlayerList::const_iterator itr = i_Players.begin(); itr != i_Players.end(); ++itr)
+        if(!(*itr)->isGameMaster())
+            ++count;
+    return count;
+}
+
 
 template void Map::Add(Corpse *);
 template void Map::Add(Creature *);

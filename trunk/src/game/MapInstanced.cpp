@@ -42,7 +42,7 @@ void MapInstanced::Update(const uint32& t)
     {
         if (i->second->NeedsReset())
         {
-            if (i->second->GetPlayersCount() == 0)
+            if (!i->second->HavePlayers())
             {
                 i->second->Reset();
                 // avoid doing ++ on invalid data
@@ -330,7 +330,8 @@ bool MapInstanced::IsValidInstance(uint32 InstanceId)
     if (m && m->NeedsReset())
     {
         // check for real reset need (can only reset if no players)
-        if (m->GetPlayersCount() == 0) return(false);       // map exists, but needs reset
+        if (!m->HavePlayers())
+            return false;                                   // map exists, but needs reset
         // shift reset time of the map to a bit later
         m->InitResetTime();
     }

@@ -202,7 +202,8 @@ class MANGOS_DLL_DECL Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         InstanceData* GetInstanceData() { return i_data; }
         uint32 GetInstanceId() { return i_InstanceId; }
         bool NeedsReset() { return Instanceable() && ( i_resetTime == 0 || i_resetTime <= time(NULL)); }
-        uint32 GetPlayersCount() const { return i_Players.size(); }
+        uint32 GetPlayersCountExceptGMs() const;
+        uint32 HavePlayers() const { return !i_Players.empty(); }
         void Reset();
         bool CanEnter(Player* player) const;
         const char* GetMapName() const;
