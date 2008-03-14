@@ -4530,6 +4530,7 @@ void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHi
         case MELEE_HIT_DODGE:
         case MELEE_HIT_PARRY:
         case MELEE_HIT_BLOCK:
+        case MELEE_HIT_BLOCK_CRIT:
             return;
 
         default:

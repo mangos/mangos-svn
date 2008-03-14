@@ -1112,6 +1112,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
             // Classify outcome
             switch (outcome)
             {
+                case MELEE_HIT_BLOCK_CRIT:
                 case MELEE_HIT_CRIT:
                 {
                     uint32 bonusDmg = *damage;
@@ -1142,18 +1143,30 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                         StartReactiveTimer( REACTIVE_HUNTER_CRIT );
                     }
 
+                    if ( outcome == MELEE_HIT_BLOCK_CRIT )
+                    {
+                        blocked_amount = uint32(pVictim->GetShieldBlockValue());
+                        if (blocked_amount >= *damage)
+                        {
+                            hitInfo |= HITINFO_SWINGNOHITSOUND;
+                            victimState = VICTIMSTATE_BLOCKS;
+                            cleanDamage->damage += *damage; // To Help Calculate Rage
+                            *damage = 0;
+                        }
+                        else
+                        {
+                            // To Help Calculate Rage
+                            cleanDamage->damage += blocked_amount;
+                            *damage = *damage - blocked_amount;
+                        }
+
+                        pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
+                        pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
+                    }
                     break;
                 }
                 case MELEE_HIT_PARRY:
                 {
-                    // this special attack can't be parryed
-                    if ( spellInfo->Attributes & 0x200000 )
-                    {
-                        outcome = MELEE_HIT_NORMAL;
-                        cleanDamage->hitOutCome = MELEE_HIT_NORMAL;
-                        break;
-                    }
-
                     cleanDamage->damage += *damage;         // To Help Calculate Rage
                     *damage = 0;
                     victimState = VICTIMSTATE_PARRY;
@@ -1217,14 +1230,6 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                 }
                 case MELEE_HIT_DODGE:
                 {
-                    // this special attack can't be dodged
-                    if ( spellInfo->Attributes & 0x200000 )
-                    {
-                        outcome = MELEE_HIT_NORMAL;
-                        cleanDamage->hitOutCome = MELEE_HIT_NORMAL;
-                        break;
-                    }
-
                     if(pVictim->GetTypeId() == TYPEID_PLAYER)
                         ((Player*)pVictim)->UpdateDefense();
 
@@ -1253,14 +1258,6 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                 }
                 case MELEE_HIT_BLOCK:
                 {
-                    // this special attack can't be blocked
-                    if ( spellInfo->Attributes & 0x200000 )
-                    {
-                        outcome = MELEE_HIT_NORMAL;
-                        cleanDamage->hitOutCome = MELEE_HIT_NORMAL;
-                        break;
-                    }
-
                     blocked_amount = uint32(pVictim->GetShieldBlockValue());
                     if (blocked_amount >= *damage)
                     {
@@ -1988,7 +1985,6 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
 
 void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDamage, uint32 *blocked_amount, SpellSchools damageType, uint32 *hitInfo, VictimState *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
 {
-    bool unavoidable = spellCasted && (spellCasted->Attributes & 0x200000);
 
     MeleeHitOutcome outcome;
 
@@ -2058,6 +2054,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
 
     switch (outcome)
     {
+        case MELEE_HIT_BLOCK_CRIT:
         case MELEE_HIT_CRIT:
         {
             //*hitInfo = 0xEA;
@@ -2112,11 +2109,36 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
                 StartReactiveTimer( REACTIVE_HUNTER_CRIT );
             }
 
+            if ( outcome == MELEE_HIT_BLOCK_CRIT )
+            {
+                *blocked_amount = pVictim->GetShieldBlockValue();
+
+                if (pVictim->GetUnitBlockChance())
+                    pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
+                else
+                    pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+
+                //Only set VICTIMSTATE_BLOCK on a full block
+                if (*blocked_amount >= uint32(*damage))
+                {
+                    *victimState = VICTIMSTATE_BLOCKS;
+                    *blocked_amount = uint32(*damage);
+                }
+
+                if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                    ((Player*)pVictim)->UpdateDefense();
+
+                pVictim->ModifyAuraState(AURA_STATE_DEFENSE,true);
+                pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
+                break;
+            }
+
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
             break;
         }
         case MELEE_HIT_PARRY:
-            if(attType == RANGED_ATTACK || unavoidable)     //range attack - no parry
+        {
+            if(attType == RANGED_ATTACK)                    //range attack - no parry
             {
                 outcome = MELEE_HIT_NORMAL;
                 break;
@@ -2187,9 +2209,10 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
 
             CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
             return;
-
+        }
         case MELEE_HIT_DODGE:
-            if(attType == RANGED_ATTACK || unavoidable )    //range attack - no dodge
+        {
+            if(attType == RANGED_ATTACK)                    //range attack - no dodge
             {
                 outcome = MELEE_HIT_NORMAL;
                 break;
@@ -2219,14 +2242,9 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
 
             CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
             return;
-
+        }
         case MELEE_HIT_BLOCK:
-            if( unavoidable )
-            {
-                outcome = MELEE_HIT_NORMAL;
-                break;
-            }
-
+        {
             *blocked_amount = pVictim->GetShieldBlockValue();
 
             if (pVictim->GetUnitBlockChance())
@@ -2248,7 +2266,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
 
             break;
-
+        }
         case MELEE_HIT_GLANCING:
         {
             float reducePercent = 1.0f;                     //damage factor
@@ -2531,6 +2549,19 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
         }
     }
 
+    // pary can be avoided only by some abilites
+    float parry_chance = pVictim->GetUnitParryChance();
+    // block might be bypassed by it as well
+    float block_chance = pVictim->GetUnitBlockChance();
+
+    // cannot be dodged/parried/blocked
+    if(spellInfo->Attributes & 0x200000)
+    {
+        block_chance = 0.0f;
+        parry_chance = 0.0f;
+        dodge_chance = 0.0f;
+    }
+
     // Spellmods
     if(Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
@@ -2539,9 +2570,9 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
     if (attType == RANGED_ATTACK) modHitChance = m_modRangedHitChance;
     else                          modHitChance = m_modMeleeHitChance;
 
-    DEBUG_LOG("PHYSICAL OUTCOME: hit %f crit %f miss %f dodge %f",modHitChance,crit_chance,miss_chance,dodge_chance);
+    DEBUG_LOG("PHYSICAL OUTCOME: hit %f crit %f miss %f dodge %f parry %f block %f",modHitChance,crit_chance,miss_chance,dodge_chance,parry_chance, block_chance);
 
-    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance*100), int32(miss_chance*100), int32(modHitChance),int32(dodge_chance*100));
+    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance*100), int32(miss_chance*100), int32(modHitChance),int32(dodge_chance*100),int32(parry_chance*100),int32(block_chance*100), true);
 }
 
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit *pVictim, WeaponAttackType attType) const
@@ -2560,14 +2591,16 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit *pVictim, WeaponAttackT
 
     // stunned target cannot dodge and this is check in GetUnitDodgeChance() (returned 0 in this case)
     float dodge_chance = pVictim->GetUnitDodgeChance();
+    float block_chance = pVictim->GetUnitBlockChance();
+    float parry_chance = pVictim->GetUnitParryChance();
 
     // Useful if want to specify crit & miss chances for melee, else it could be removed
-    DEBUG_LOG("MELEE OUTCOME: hit %f crit %f miss %f dodge %f", modHitChance,crit_chance,miss_chance,dodge_chance);
+    DEBUG_LOG("MELEE OUTCOME: hit %f crit %f miss %f dodge %f parry %f block %f", modHitChance,crit_chance,miss_chance,dodge_chance,parry_chance,block_chance);
 
-    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance*100), int32(miss_chance*100), int32(modHitChance),int32(dodge_chance*100));
+    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance*100), int32(miss_chance*100), int32(modHitChance),int32(dodge_chance*100),int32(parry_chance*100),int32(block_chance*100), false);
 }
 
-MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 hit_chance, int32 dodge_chance) const
+MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 hit_chance, int32 dodge_chance, int32 parry_chance, int32 block_chance, bool SpellCasted ) const
 {
     if(pVictim->GetTypeId()==TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
         return MELEE_HIT_EVADE;
@@ -2643,22 +2676,26 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     }
 
     int32   modCrit = 0;
+    // reduce crit chance from Rating for players
+    if (pVictim->GetTypeId()==TYPEID_PLAYER)
+    {
+        if (attType==RANGED_ATTACK)
+            modCrit -= int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING)*100);
+        else
+            modCrit -= int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING)*100);
+    }
 
     // check if attack comes from behind
     if (!pVictim->HasInArc(M_PI,this))
     {
-        // ASSUME +10% crit from behind
         DEBUG_LOG ("RollMeleeOutcomeAgainst: attack came from behind.");
-        modCrit += 1000;
-    }
+    }    
     else
     {
-        // cannot parry or block attacks from behind, but can from forward
-        float parry = pVictim->GetUnitParryChance();
         // Reduce parry chance by attacker expertise rating
         if (GetTypeId() == TYPEID_PLAYER)
-            parry-=((Player*)this)->GetExpertiseDodgeOrParryReduction();
-        int32 tmp = int32(parry * 100.0f);
+            parry_chance-=((Player*)this)->GetExpertiseDodgeOrParryReduction();
+        int32 tmp = int32(parry_chance * 100.0f);
         if (   (tmp > 0)                                    // check if unit _can_ parry
             && ((tmp -= skillBonus2) > 0)
             && (roll < (sum += tmp)))
@@ -2667,23 +2704,24 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
             return MELEE_HIT_PARRY;
         }
 
-        tmp = (int32)(pVictim->GetUnitBlockChance()*100);
+        tmp = block_chance;
         if (   (tmp > 0)                                    // check if unit _can_ block
             && ((tmp -= skillBonus2) > 0)
             && (roll < (sum += tmp)))
         {
+            // Critical chance
+            tmp = crit_chance + skillBonus + modCrit;
+            if ( GetTypeId() == TYPEID_PLAYER && SpellCasted && tmp > 0 )
+            {
+                if ( roll_chance_f(tmp/100))
+                {
+                    DEBUG_LOG ("RollMeleeOutcomeAgainst: BLOCKED CRIT");
+                    return MELEE_HIT_BLOCK_CRIT;
+                }
+            } 
             DEBUG_LOG ("RollMeleeOutcomeAgainst: BLOCK <%d, %d)", sum-tmp, sum);
             return MELEE_HIT_BLOCK;
         }
-    }
-
-    // reduce crit chance from Rating for players
-    if (pVictim->GetTypeId()==TYPEID_PLAYER)
-    {
-        if (attType==RANGED_ATTACK)
-            modCrit -= int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING)*100);
-        else
-            modCrit -= int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING)*100);
     }
 
     // Critical chance
@@ -2696,7 +2734,10 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     }
 
     // Max 40% chance to score a glancing blow against mobs that are higher level (can do only players and pets and not with ranged weapon)
-    if( attType != RANGED_ATTACK && (GetTypeId() == TYPEID_PLAYER || ((Creature*)this)->isPet()) && pVictim->GetTypeId() != TYPEID_PLAYER && getLevel() < pVictim->getLevel() )
+    if( attType != RANGED_ATTACK && !SpellCasted &&
+        (GetTypeId() == TYPEID_PLAYER || ((Creature*)this)->isPet()) &&
+        pVictim->GetTypeId() != TYPEID_PLAYER && !((Creature*)pVictim)->isPet() &&
+        getLevel() < pVictim->getLevel() )
     {
         // cap possible value (with bonuses > max skill)
         int32 skill = GetWeaponSkillValue(attType);
@@ -2720,7 +2761,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     tmp = tmp > tmpmax ? tmpmax : tmp;
     // tmp = mob's level * 5 - player's current defense skill
     tmp = GetMaxSkillValueForLevel() - tmp;
-    if (GetTypeId() != TYPEID_PLAYER && (tmp >= 15))
+    if (GetTypeId() != TYPEID_PLAYER && !((Creature*)this)->isPet() && (tmp >= 15))
     {
         // add 2% chance per lacking skill point, min. is 15%
         tmp = tmp * 200 - 1500;
@@ -4260,11 +4301,17 @@ void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttac
                 procAttacker = PROC_FLAG_MISS;
             }
             break;
+        case MELEE_HIT_BLOCK_CRIT:
         case MELEE_HIT_CRIT:
             if(spellCasted && attType == BASE_ATTACK)
             {
                 procAttacker |= PROC_FLAG_CRIT_SPELL;
                 procVictim   |= PROC_FLAG_STRUCK_CRIT_SPELL;
+                if ( outcome == MELEE_HIT_BLOCK_CRIT )
+                {
+                    procVictim |= PROC_FLAG_BLOCK;
+                    procAttacker |= PROC_FLAG_TARGET_BLOCK;
+                }
             }
             else if(attType == BASE_ATTACK || attType == OFF_ATTACK)
             {

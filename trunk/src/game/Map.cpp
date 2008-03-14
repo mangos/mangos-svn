@@ -1463,7 +1463,6 @@ uint32 Map::GetPlayersCountExceptGMs() const
     return count;
 }
 
-
 template void Map::Add(Corpse *);
 template void Map::Add(Creature *);
 template void Map::Add(GameObject *);
