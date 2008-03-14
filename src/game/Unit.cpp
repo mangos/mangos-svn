@@ -2694,8 +2694,8 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     {
         // Reduce parry chance by attacker expertise rating
         if (GetTypeId() == TYPEID_PLAYER)
-            parry_chance-=((Player*)this)->GetExpertiseDodgeOrParryReduction();
-        int32 tmp = int32(parry_chance * 100.0f);
+            parry_chance-= int32(((Player*)this)->GetExpertiseDodgeOrParryReduction()*100);
+        int32 tmp = int32(parry_chance);
         if (   (tmp > 0)                                    // check if unit _can_ parry
             && ((tmp -= skillBonus2) > 0)
             && (roll < (sum += tmp)))
