@@ -86,7 +86,6 @@ void Totem::Summon(Unit* owner)
 void Totem::UnSummon()
 {
     SendObjectDeSpawnAnim(GetGUID());
-    SendDestroyObject(GetGUID());
 
     CombatStop();
     RemoveAurasDueToSpell(GetSpell());

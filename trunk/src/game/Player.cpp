@@ -10614,7 +10614,29 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
                 if(enchant_spell_id)
                 {
                     if(apply)
-                        CastSpell(this,enchant_spell_id,true,item);
+                    {
+                        ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
+                        if (item_rand)
+                        {
+                            // Search enchant_amount
+                            if (!enchant_amount)
+                            {
+                                for (int k=0; k<3; k++)
+                                {
+                                    if(item_rand->enchant_id[k] == enchant_id)
+                                    {
+                                        enchant_amount = uint32((item_rand->prefix[k]*item->GetItemSuffixFactor()) / 10000 );
+                                        break;
+                                    }
+                                }
+                            }
+                            // Cast custom spell vs all equal basepoints getted from enchant_amount
+                            int32 basepoints = int32(enchant_amount);
+                            CastCustomSpell(this,enchant_spell_id,&basepoints,&basepoints,&basepoints,true,item);
+                        }
+                        else
+                            CastSpell(this,enchant_spell_id,true,item);
+                    }
                     else
                         RemoveAurasDueToItem(item);
                 }
@@ -14485,8 +14507,6 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
     }
 
     pet->SavePetToDB(mode);
-
-    SendDestroyObject(pet->GetGUID());
 
     pet->CleanupsBeforeDelete();
     ObjectAccessor::Instance().AddObjectToRemoveList(pet);

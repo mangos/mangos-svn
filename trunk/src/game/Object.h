@@ -106,7 +106,13 @@ class MANGOS_DLL_SPEC Object
             // synchronize values mirror with values array (changes will send in updatecreate opcode any way
             ClearUpdateMask(true);
         }
-        virtual void RemoveFromWorld() { m_inWorld = false; }
+        virtual void RemoveFromWorld()
+        {
+            // if we remove from world then sending changes not required
+            if(m_uint32Values)
+                ClearUpdateMask(true);
+            m_inWorld = false;
+        }
 
         const uint64& GetGUID() const { return GetUInt64Value(0); }
         const uint32& GetGUIDLow() const { return GetUInt32Value(0); }
@@ -339,7 +345,6 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         void MonsterTextEmote(const char* text, const uint64 TargetGuid);
         void MonsterWhisper(const uint64 receiver, const char* text);
 
-        void SendDestroyObject(uint64 guid);
         void SendObjectDeSpawnAnim(uint64 guid);
 
         virtual void SaveRespawnTime() {}
