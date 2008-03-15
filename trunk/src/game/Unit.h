@@ -969,10 +969,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectType damagetype, uint32 CastingTime );
 
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
-        virtual bool IsImmunedToSpell(SpellEntry const* spellInfo) const;
+        virtual bool IsImmunedToSpell(SpellEntry const* spellInfo, bool useCharges = false, bool useChances = false);
                                                             // redefined in Creature
         bool IsImmunedToPhysicalDamage() const;
-        bool IsImmunedToSpellDamage(SpellEntry const* spellInfo) const;
+        bool IsImmunedToSpellDamage(SpellEntry const* spellInfo, bool useCharges = false);
         virtual bool IsImmunedToSpellEffect(uint32 effect, uint32 mechanic) const;
                                                             // redefined in Creature
 

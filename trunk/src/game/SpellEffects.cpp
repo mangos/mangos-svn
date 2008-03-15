@@ -3332,7 +3332,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             if (!pItem)
                 return;
 
-            if( unitTarget->IsImmunedToSpellDamage(m_spellInfo) )
+            if( unitTarget->IsImmunedToSpellDamage(m_spellInfo,false) )
                 return;
 
             damageSchool = SpellSchools(pItem->GetProto()->Damage->DamageType);
