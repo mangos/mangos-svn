@@ -272,7 +272,7 @@ void Log::outTime()
     printf("%02d:%02d:%02d ",aTm->tm_hour,aTm->tm_min,aTm->tm_sec);
 }
 
-std::string Log::GetTimestampStr() const
+std::string Log::GetTimestampStr()
 {
     time_t t = time(NULL);
     tm* aTm = localtime(&t);

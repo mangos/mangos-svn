@@ -386,8 +386,6 @@ void GameObject::Refresh()
     if(m_respawnTime > 0 && m_spawnedByDefault)
         return;
 
-    SendDestroyObject(GetGUID());
-
     if(isSpawned())
         MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
 }
@@ -405,7 +403,6 @@ void GameObject::Delete()
     SetUInt32Value(GAMEOBJECT_STATE, 1);
     SetUInt32Value(GAMEOBJECT_FLAGS, m_flags);
 
-    SendDestroyObject(GetGUID());
     //TODO: set timestamp
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }

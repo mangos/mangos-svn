@@ -1178,13 +1178,6 @@ void WorldObject::SendMessageToSet(WorldPacket *data, bool /*bToSelf*/)
     MapManager::Instance().GetMap(m_mapId, this)->MessageBroadcast(this, data);
 }
 
-void WorldObject::SendDestroyObject(uint64 guid)
-{
-    WorldPacket data(SMSG_DESTROY_OBJECT, 8);
-    data << guid;
-    SendMessageToSet(&data, true);
-}
-
 void WorldObject::SendObjectDeSpawnAnim(uint64 guid)
 {
     WorldPacket data(SMSG_GAMEOBJECT_DESPAWN_ANIM, 8);
