@@ -433,7 +433,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value( PLAYER_FIELD_TODAY_CONTRIBUTION, 0 );
     SetUInt32Value( PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0 );
 
-    SetUInt32Value( UNIT_FIELD_LEVEL, 1 );                  //set level = 1 for created characters
+    // set starting level
+    SetUInt32Value( UNIT_FIELD_LEVEL, sWorld.getConfig(CONFIG_START_PLAYER_LEVEL) );
 
     // Played time
     m_Last_tick = time(NULL);
