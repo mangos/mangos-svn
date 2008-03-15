@@ -31,7 +31,7 @@ char* GetPetName(uint32 petfamily, uint32 dbclang);
 uint32 GetTalentSpellCost(uint32 spellId);
 
 AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
-AreaTableEntry const* GetAreaEntryByAreaFlag(uint32 area_flag);
+AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag,uint32 map_id);
 uint32 GetAreaFlagByMapId(uint32 mapid);
 inline bool IsNoDamageXPArea(uint32 area_id) { return area_id==3712 || area_id==3803; }
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id);
