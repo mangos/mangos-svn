@@ -302,6 +302,10 @@ LogColors = ""
 #        Change not recommended
 #        Default: 70
 #
+#    StartPlayerLevel
+#        Staring level that have character at creating (in range 1 to MaxPlayerLevel)
+#        Default: 1
+#
 #    ActivateWeather
 #        Activate weather system
 #        Default: 1 (true)
@@ -380,6 +384,7 @@ GameType = 1
 Expansion = 1
 DBC.Locale = 255
 MaxPlayerLevel = 70
+StartPlayerLevel = 1
 ActivateWeather = 1
 Battleground.CastDeserter = 1
 Instance.IgnoreLevel = 0
