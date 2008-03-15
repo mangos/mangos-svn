@@ -719,8 +719,8 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
     if(!unit || !effectMask)
         return;
 
-    // Recheck immune (only for delayed spells)
-    if (m_spellInfo->speed && (unit->IsImmunedToSpell(m_spellInfo) || unit->IsImmunedToSpellDamage(m_spellInfo)))
+    // Recheck immune (only for delayed spells), and now including chances immunity
+    if (m_spellInfo->speed && (unit->IsImmunedToSpellDamage(m_spellInfo,true) || unit->IsImmunedToSpell(m_spellInfo,true,true)))
     {
         m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
         return;
@@ -2753,7 +2753,7 @@ uint8 Spell::CanCast(bool strict)
 
         if(IsPositiveSpell(m_spellInfo->Id))
         {
-            if(target->IsImmunedToSpell(m_spellInfo))
+            if(target->IsImmunedToSpell(m_spellInfo,false,false))
                 return SPELL_FAILED_TARGET_AURASTATE;
         }
 

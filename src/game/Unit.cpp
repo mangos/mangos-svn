@@ -2870,8 +2870,8 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
     if (pVictim->GetTypeId()==TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
         return SPELL_MISS_EVADE;
 
-    // Check for immune
-    if (pVictim->IsImmunedToSpell(spell))
+    // Check for immune (use charges, but not use chances for delayed spells, this will checked later)
+    if (pVictim->IsImmunedToSpell(spell,true,spell->speed==0))
         return SPELL_MISS_IMMUNE;
 
     // All positive spells can`t miss
@@ -2879,8 +2879,8 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
     if (IsPositiveSpell(spell->Id))
         return SPELL_MISS_NONE;
 
-    // Immune check
-    if (pVictim->IsImmunedToSpellDamage(spell))
+    // Check for immune (use charges, no chance dependent auras)
+    if (pVictim->IsImmunedToSpellDamage(spell,true))
         return SPELL_MISS_IMMUNE;
 
     // Try victim reflect spell
@@ -7255,13 +7255,9 @@ bool Unit::IsImmunedToPhysicalDamage() const
     return false;
 }
 
-bool Unit::IsImmunedToSpellDamage(SpellEntry const* spellInfo) const
+bool Unit::IsImmunedToSpellDamage(SpellEntry const* spellInfo, bool useCharges)
 {
-    //If m_immuneToDamage type contain magic, IMMUNE damage.
-    SpellImmuneList const& damageList = m_spellImmune[IMMUNITY_DAMAGE];
-    for (SpellImmuneList::const_iterator itr = damageList.begin(); itr != damageList.end(); ++itr)
-        if(itr->type & uint32(1<<spellInfo->School))
-            return true;
+    // no charges dependent checks
 
     //If m_immuneToSchool type contain this school type, IMMUNE damage.
     SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
@@ -7269,13 +7265,44 @@ bool Unit::IsImmunedToSpellDamage(SpellEntry const* spellInfo) const
         if(itr->type & uint32(1<<spellInfo->School))
             return true;
 
+    // charges dependent checks
+
+    //If m_immuneToDamage type contain magic, IMMUNE damage.
+    SpellImmuneList const& damageList = m_spellImmune[IMMUNITY_DAMAGE];
+    for (SpellImmuneList::const_iterator itr = damageList.begin(); itr != damageList.end(); ++itr)
+    {
+        if(itr->type & uint32(1<<spellInfo->School))
+        {
+            if(useCharges)
+            {
+                AuraList const& auraDamageImmunity = GetAurasByType(SPELL_AURA_DAMAGE_IMMUNITY);
+                for(AuraList::const_iterator auraItr = auraDamageImmunity.begin(); auraItr != auraDamageImmunity.end(); ++auraItr)
+                {
+                    if((*auraItr)->GetId()==itr->spellId)
+                    {
+                        if((*auraItr)->m_procCharges > 0)
+                        {
+                            --(*auraItr)->m_procCharges;
+                            if((*auraItr)->m_procCharges==0)
+                                RemoveAurasDueToSpell(itr->spellId);
+                        }
+                        break;
+                    }
+                }
+            }
+            return true;
+        }
+    }
+
     return false;
 }
 
-bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo) const
+bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, bool useCharges, bool useChances)
 {
     if (!spellInfo)
         return false;
+
+    // no charges first
 
     // don't get feared if stunned
     if (spellInfo->Mechanic == MECHANIC_FEAR )
@@ -7284,40 +7311,77 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo) const
             return true;
     }
 
-    SpellImmuneList const& dispelList = m_spellImmune[IMMUNITY_DISPEL];
-    for(SpellImmuneList::const_iterator itr = dispelList.begin(); itr != dispelList.end(); ++itr)
-        if(itr->type == spellInfo->Dispel)
-            return true;
-
-    SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
-    for(SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
-        if(itr->type == spellInfo->Mechanic)
-            return true;
-        // Spell taht must be affected by MECHANIC_INVULNERABILITY not have this mechanic, check its by another data
-        else if(itr->type == MECHANIC_INVULNERABILITY && IsMechanicInvulnerabilityImmunityToSpell(spellInfo))
-            return true;
-
-    if( !(spellInfo->AttributesEx & 0x10000))               // unaffected by school immunity
-    {
-        SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
-        for(SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
-            if(!(IsPositiveSpell(itr->spellId) && IsPositiveSpell(spellInfo->Id))
-            && (itr->type & (1 << spellInfo->School)))
-                return true;
-    }
-
     // Handle dummy aura of Hypothermia to make immune to Ice Block
     if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->SpellFamilyFlags & 0x8000000000LL &&
         HasAura(SPELLID_MAGE_HYPOTHERMIA,0))
         return true;
 
-    int32 chance = 0;
-    AuraList const& mModMechanicRes = GetAurasByType(SPELL_AURA_MOD_MECHANIC_RESISTANCE);
-    for(AuraList::const_iterator i = mModMechanicRes.begin();i != mModMechanicRes.end(); ++i)
-        if((*i)->GetModifier()->m_miscvalue == int32(spellInfo->Mechanic))
-            chance+= (*i)->GetModifier()->m_amount;
-    if(roll_chance_i(chance))
-        return true;
+    // not have spells with charges currently
+    SpellImmuneList const& dispelList = m_spellImmune[IMMUNITY_DISPEL];
+    for(SpellImmuneList::const_iterator itr = dispelList.begin(); itr != dispelList.end(); ++itr)
+        if(itr->type == spellInfo->Dispel)
+            return true;
+
+    if( !(spellInfo->AttributesEx & 0x10000))               // unaffected by school immunity
+    {
+        // not have spells with charges currently
+        SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
+        for(SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
+            if(!(IsPositiveSpell(itr->spellId) && IsPositiveSpell(spellInfo->Id))
+                && (itr->type & (1 << spellInfo->School)))
+                return true;
+    }
+
+    // charges dependent checks
+
+    SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
+    for(SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
+    {
+        // Spell taht must be affected by MECHANIC_INVULNERABILITY not have this mechanic, check its by another data
+        if(itr->type == spellInfo->Mechanic || itr->type == MECHANIC_INVULNERABILITY && IsMechanicInvulnerabilityImmunityToSpell(spellInfo))
+        {
+            if(useCharges)
+            {
+                AuraList const& auraMechImmunity = GetAurasByType(SPELL_AURA_MECHANIC_IMMUNITY);
+                for(AuraList::const_iterator auraItr = auraMechImmunity.begin(); auraItr != auraMechImmunity.end(); ++auraItr)
+                {
+                    if((*auraItr)->GetId()==itr->spellId)
+                    {
+                        if((*auraItr)->m_procCharges > 0)
+                        {
+                            --(*auraItr)->m_procCharges;
+                            if((*auraItr)->m_procCharges==0)
+                                RemoveAurasDueToSpell(itr->spellId);
+                        }
+                        break;
+                    }
+                }
+            }
+            return true;
+        }
+    }
+
+    if(useChances)                                          // to prevent double chnaces check for same spell
+    {
+        AuraList const& mModMechanicRes = GetAurasByType(SPELL_AURA_MOD_MECHANIC_RESISTANCE);
+        for(AuraList::const_iterator i = mModMechanicRes.begin();i != mModMechanicRes.end(); ++i)
+        {
+            if((*i)->GetModifier()->m_miscvalue == int32(spellInfo->Mechanic))
+            {
+                int32 chance = (*i)->GetModifier()->m_amount;
+                if(roll_chance_i(chance))
+                {
+                    if(useCharges && (*i)->m_procCharges > 0)
+                    {
+                        --(*i)->m_procCharges;
+                        if((*i)->m_procCharges==0)
+                            RemoveAurasDueToSpell((*i)->GetId());
+                    }
+                    return true;
+                }
+            }
+        }
+    }
 
     return false;
 }
