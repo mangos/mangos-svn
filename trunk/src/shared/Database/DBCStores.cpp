@@ -447,9 +447,15 @@ AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id)
     return sAreaStore.LookupEntry(i->second);
 }
 
-AreaTableEntry const* GetAreaEntryByAreaFlag(uint32 area_flag)
+AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag,uint32 map_id)
 {
-    return sAreaStore.LookupEntry(area_flag);
+    if(area_flag)
+        return sAreaStore.LookupEntry(area_flag);
+
+    if(MapEntry const* mapEntry = sMapStore.LookupEntry(map_id))
+        return GetAreaEntryByAreaID(mapEntry->linked_zone);
+
+    return NULL;
 }
 
 uint32 GetAreaFlagByMapId(uint32 mapid)

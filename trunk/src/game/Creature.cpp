@@ -723,7 +723,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption const *gossip)
         uint32 mapid=GetMapId();
         Map const* map=MapManager::Instance().GetBaseMap( mapid );
         uint16 areaflag=map->GetAreaFlag(GetPositionX(),GetPositionY());
-        uint32 zoneid=map->GetZoneId(areaflag);
+        uint32 zoneid=Map::GetZoneId(areaflag,mapid);
         std::string areaname= gossip->Option;
         uint16 pflag;
 

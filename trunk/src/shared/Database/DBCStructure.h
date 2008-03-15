@@ -353,7 +353,8 @@ struct MapEntry
     char*       name[16];                                   // 4-19
                                                             // 20 name flags, unused
                                                             // 21-23 unused (something PvPZone related - levels?)
-                                                            // 24-27
+                                                            // 24-26
+    uint32      linked_zone;                                // 27 common zone for instance and continent map
     //char*     hordeIntro                                  // 28-43 text for PvP Zones
                                                             // 44 intro text flags
     //char*     allianceIntro                               // 45-60 text for PvP Zones
