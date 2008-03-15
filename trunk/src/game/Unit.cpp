@@ -2675,16 +2675,6 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         return MELEE_HIT_DODGE;
     }
 
-    int32   modCrit = 0;
-    // reduce crit chance from Rating for players
-    if (pVictim->GetTypeId()==TYPEID_PLAYER)
-    {
-        if (attType==RANGED_ATTACK)
-            modCrit -= int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING)*100);
-        else
-            modCrit -= int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING)*100);
-    }
-
     // check if attack comes from behind
     if (!pVictim->HasInArc(M_PI,this))
     {
@@ -2710,7 +2700,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
             && (roll < (sum += tmp)))
         {
             // Critical chance
-            tmp = crit_chance + skillBonus + modCrit;
+            tmp = crit_chance + skillBonus;
             if ( GetTypeId() == TYPEID_PLAYER && SpellCasted && tmp > 0 )
             {
                 if ( roll_chance_f(tmp/100))
@@ -2725,7 +2715,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     }
 
     // Critical chance
-    tmp = crit_chance + skillBonus + modCrit;
+    tmp = crit_chance + skillBonus;
 
     if (tmp > 0 && roll < (sum += tmp))
     {
@@ -2856,7 +2846,7 @@ float Unit::SpellMissChanceCalc(Unit *pVictim) const
     else
         misschance += (leveldif - 2) * chance;
 
-    misschance -= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE);;
+    misschance -= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE);
 
     // Add victim rating bonus
     if (pVictim->GetTypeId()==TYPEID_PLAYER)
@@ -3100,6 +3090,15 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
 
     // flat
     crit += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
+
+    // reduce crit chance from Rating for players
+    if (pVictim->GetTypeId()==TYPEID_PLAYER)
+    {
+        if (attackType==RANGED_ATTACK)
+            crit -= ((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING);
+        else
+            crit -= ((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING);
+    }
 
     if (crit < 0.0f)
         crit = 0.0f;
