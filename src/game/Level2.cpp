@@ -1535,11 +1535,17 @@ bool ChatHandler::HandleTicketCommand(const char* args)
     // ticket<end>
     if (!px)
     {
-        QueryResult *result = CharacterDatabase.Query("SELECT ticket_id FROM character_ticket");
-        size_t count = result ? result->GetRowCount() : 0;
+        size_t count;
+        QueryResult *result = CharacterDatabase.Query("SELECT COUNT(ticket_id) FROM character_ticket");
+        if(result)
+        {
+            count = (*result)[0].GetUInt32();
+            delete result;
+        }
+        else
+            count = 0;
 
-        PSendSysMessage(LANG_COMMAND_TICKETCOUNT, count,m_session->GetPlayer()->isAcceptTickets() ?  GetMangosString(LANG_ON) : GetMangosString(LANG_OFF));
-        delete result;
+        PSendSysMessage(LANG_COMMAND_TICKETCOUNT, count, m_session->GetPlayer()->isAcceptTickets() ?  GetMangosString(LANG_ON) : GetMangosString(LANG_OFF));
         return true;
     }
 
