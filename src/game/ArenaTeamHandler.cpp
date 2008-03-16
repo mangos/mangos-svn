@@ -111,7 +111,7 @@ void WorldSession::HandleArenaTeamAddMemberOpcode(WorldPacket & recv_data)
         return;
     }
 
-    if(player->getLevel() != 70)
+    if(player->getLevel() < 70)
     {
         //SendArenaTeamCommandResult(ARENA_TEAM_INVITE_SS,"",Invitedname,ARENA_TEAM_PLAYER_NOT_FOUND_S);
                                                             // can't find related opcode
@@ -145,6 +145,14 @@ void WorldSession::HandleArenaTeamAddMemberOpcode(WorldPacket & recv_data)
     if(player->GetArenaTeamIdInvited())
     {
         SendArenaTeamCommandResult(ERR_ARENA_TEAM_INVITE_SS, player->GetName(), "", ERR_ALREADY_INVITED_TO_ARENA_TEAM_S);
+        return;
+    }
+
+    if(arenateam->GetMembersSize() >= arenateam->GetType() * 2)
+    {
+        // should send an "arena team is full" or the likes message, I just don't know the proper values so... ERR_INTERNAL
+//        SendArenaTeamCommandResult(ERR_ARENA_TEAM_INVITE_SS, "", "", ERR_ARENA_TEAM_INTERNAL);
+        SendNotification("Your arena team is full, %s cannot join it.", player->GetName());
         return;
     }
 
