@@ -530,6 +530,14 @@ void Spell::EffectDummy(uint32 i)
             // Gnomish Poultryizer trinket
             switch(m_spellInfo->Id )
             {
+                // Symbol of life (restore creature to life)
+                case 8593:
+                {
+                    if(!unitTarget || unitTarget->GetTypeId()!=TYPEID_UNIT)
+                        return;
+                    ((Creature*)unitTarget)->setDeathState(JUST_ALIVED);
+                    return;
+                }
                 // Different item engineering summons
                 case 23074:                                 // Arc. Dragonling
                     if (!m_CastItem) return;
@@ -562,6 +570,27 @@ void Spell::EffectDummy(uint32 i)
                         m_caster->CastSpell(m_caster, 30457, true, m_CastItem);
                     return;
             }
+
+            //All IconID Check in there
+            switch(m_spellInfo->SpellIconID)
+            {
+                // Berserking (troll racial traits)
+                case 1661:
+                {
+                    uint32 healthPerc = uint32((float(m_caster->GetHealth())/m_caster->GetMaxHealth())*100);
+                    int32 melee_mod = 10;
+                    if (healthPerc <= 40)
+                        melee_mod = 30;
+                    if (healthPerc < 100 && healthPerc > 40)
+                        melee_mod = 10+(100-healthPerc)/3;
+
+                    int32 hasteModBasePoints0 = melee_mod;          // (EffectBasePoints[0]+1)-1+(5-melee_mod) = (melee_mod-1+1)-1+5-melee_mod = 5-1
+                    int32 hasteModBasePoints1 = (5-melee_mod);
+                    int32 hasteModBasePoints2 = 5;
+                    m_caster->CastCustomSpell(m_caster,26635,&hasteModBasePoints0,&hasteModBasePoints1,&hasteModBasePoints2,true,NULL);
+                    return;
+                }
+            }
             break;
         case SPELLFAMILY_WARRIOR:
             // Charge
@@ -569,6 +598,51 @@ void Spell::EffectDummy(uint32 i)
             {
                 int32 chargeBasePoints0 = damage;
                 m_caster->CastCustomSpell(m_caster,34846,&chargeBasePoints0,NULL,NULL,true);
+                return;
+            }
+            // Execute
+            if(m_spellInfo->SpellFamilyFlags & 0x20000000)
+            {
+                if(!unitTarget)
+                    return;
+
+                int32 basePoints0 = damage+int32(m_caster->GetPower(POWER_RAGE) * m_spellInfo->DmgMultiplier[i]);
+                m_caster->CastCustomSpell(unitTarget, 20647, &basePoints0, NULL, NULL, true, 0);
+                m_caster->SetPower(POWER_RAGE,0);
+                return;
+            }
+            break;
+        case SPELLFAMILY_WARLOCK:
+            //Life Tap (only it have this with dummy effect)
+            if (m_spellInfo->SpellFamilyFlags == 0x40000)
+            {
+                float cost = m_currentBasePoints[0]+1;
+
+                if(Player* modOwner = m_caster->GetSpellModOwner())
+                    modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, cost,this);
+
+                uint32 dmg = m_caster->SpellDamageBonus(m_caster, m_spellInfo,uint32(cost > 0 ? cost : 0), SPELL_DIRECT_DAMAGE);
+
+                if(int32(m_caster->GetHealth()) > dmg)
+                {
+                    m_caster->SendSpellNonMeleeDamageLog(m_caster, m_spellInfo->Id, dmg, SpellSchools(m_spellInfo->School), 0, 0, false, 0, false);
+                    m_caster->DealDamage(m_caster,dmg,NULL,DIRECT_DAMAGE,SpellSchools(m_spellInfo->School),m_spellInfo,false);
+
+                    int32 mana = dmg;
+
+                    Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                    for(Unit::AuraList::const_iterator itr = auraDummy.begin(); itr != auraDummy.end(); ++itr)
+                    {
+                        // only Imp. Life Tap have this in combination with dummy aura
+                        if((*itr)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->SpellIconID == 208)
+                            mana = ((*itr)->GetModifier()->m_amount + 100)* mana / 100;
+                    }
+
+                    m_caster->ModifyPower(POWER_MANA,mana);
+                    m_caster->SendEnergizeSpellLog(m_caster, m_spellInfo->Id, mana, POWER_MANA,false);
+                }
+                else
+                    SendCastResult(SPELL_FAILED_FIZZLE);
                 return;
             }
             break;
@@ -594,6 +668,32 @@ void Spell::EffectDummy(uint32 i)
 
                 if(found)
                     m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
+                return;
+            }
+            // Kill command
+            if(m_spellInfo->SpellFamilyFlags & 0x00080000000000LL)
+            {
+                if(m_caster->getClass()!=CLASS_HUNTER)
+                    return;
+
+                // clear hunter crit aura state
+                m_caster->ModifyAuraState(AURA_STATE_HUNTER_CRIT_STRIKE,false);
+
+                // additional damage from pet to pet target
+                Pet* pet = m_caster->GetPet();
+                if(!pet || !pet->getVictim())
+                    return;
+
+                uint32 spell_id = 0;
+                switch (m_spellInfo->Id)
+                {
+                case 34026: spell_id = 34027; break;        // rank 1
+                default:
+                    sLog.outError("Spell::EffectDummy: Spell %u not handled in KC",m_spellInfo->Id);
+                    return;
+                }
+
+                pet->CastSpell(pet->getVictim(), spell_id, true);
                 return;
             }
             //Focused Fire (flags have more spells but only this have dummy effect)
@@ -756,99 +856,6 @@ void Spell::EffectDummy(uint32 i)
                 return;
             }
             break;
-        case SPELLFAMILY_WARLOCK:
-            //Life Tap (only it have this with dummy effect)
-            if (m_spellInfo->SpellFamilyFlags == 0x40000)
-            {
-                float cost = m_currentBasePoints[0]+1;
-
-                if(Player* modOwner = m_caster->GetSpellModOwner())
-                    modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, cost,this);
-
-                uint32 dmg = m_caster->SpellDamageBonus(m_caster, m_spellInfo,uint32(cost > 0 ? cost : 0), SPELL_DIRECT_DAMAGE);
-
-                if(int32(m_caster->GetHealth()) > dmg)
-                {
-                    m_caster->SendSpellNonMeleeDamageLog(m_caster, m_spellInfo->Id, dmg, SpellSchools(m_spellInfo->School), 0, 0, false, 0, false);
-                    m_caster->DealDamage(m_caster,dmg,NULL,DIRECT_DAMAGE,SpellSchools(m_spellInfo->School),m_spellInfo,false);
-
-                    int32 mana = dmg;
-
-                    Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-                    for(Unit::AuraList::const_iterator itr = auraDummy.begin(); itr != auraDummy.end(); ++itr)
-                    {
-                        // only Imp. Life Tap have this in combination with dummy aura
-                        if((*itr)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->SpellIconID == 208)
-                            mana = ((*itr)->GetModifier()->m_amount + 100)* mana / 100;
-                    }
-
-                    m_caster->ModifyPower(POWER_MANA,mana);
-                    m_caster->SendEnergizeSpellLog(m_caster, m_spellInfo->Id, mana, POWER_MANA,false);
-                }
-                else
-                    SendCastResult(SPELL_FAILED_FIZZLE);
-                return;
-            }
-            break;
-    }
-
-    //All IconID Check in there
-    switch(m_spellInfo->SpellIconID)
-    {
-        // Berserking (troll racial traits)
-        case 1661:
-        {
-            uint32 healthPerc = uint32((float(m_caster->GetHealth())/m_caster->GetMaxHealth())*100);
-            int32 melee_mod = 10;
-            if (healthPerc <= 40)
-                melee_mod = 30;
-            if (healthPerc < 100 && healthPerc > 40)
-                melee_mod = 10+(100-healthPerc)/3;
-
-            int32 hasteModBasePoints0 = melee_mod;          // (EffectBasePoints[0]+1)-1+(5-melee_mod) = (melee_mod-1+1)-1+5-melee_mod = 5-1
-            int32 hasteModBasePoints1 = (5-melee_mod);
-            int32 hasteModBasePoints2 = 5;
-            m_caster->CastCustomSpell(m_caster,26635,&hasteModBasePoints0,&hasteModBasePoints1,&hasteModBasePoints2,true,NULL);
-            return;
-        }
-
-        case 1648:
-        {
-            if(!unitTarget)
-                return;
-
-            int32 basePoints0 = damage+int32(m_caster->GetPower(POWER_RAGE) * m_spellInfo->DmgMultiplier[i]);
-            m_caster->CastCustomSpell(unitTarget, 20647, &basePoints0, NULL, NULL, true, 0);
-            m_caster->SetPower(POWER_RAGE,0);
-            return;
-        }
-
-        // Kill command
-        case 2226:
-        {
-            if(m_caster->getClass()!=CLASS_HUNTER)
-                return;
-
-            // clear hunter crit aura state
-            m_caster->ModifyAuraState(AURA_STATE_HUNTER_CRIT_STRIKE,false);
-
-            // additional damage from pet to pet target
-            Pet* pet = m_caster->GetPet();
-            if(!pet || !pet->getVictim())
-                return;
-
-            uint32 spell_id = 0;
-            switch (m_spellInfo->Id)
-            {
-                case 34026: spell_id = 34027; break;        // rank 1
-                default:
-                    sLog.outError("Spell::EffectDummy: Spell %u not handled in KC",m_spellInfo->Id);
-                    return;
-            }
-
-            pet->CastSpell(pet->getVictim(), spell_id, true);
-            return;
-        }
     }
 
     //All SpellID Check in there
