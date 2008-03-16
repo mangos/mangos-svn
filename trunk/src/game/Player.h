@@ -1037,6 +1037,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void VisualizeItem( uint16 pos, Item *pItem);
         Item* BankItem( uint16 pos, Item *pItem, bool update );
         void RemoveItem( uint8 bag, uint8 slot, bool update );
+        void RemoveItemDependentAurasAndCasts( Item * pItem );
         void RemoveItemCount( uint32 item, uint32 count, bool update );
         void DestroyItem( uint8 bag, uint8 slot, bool update );
         void DestroyItemCount( uint32 item, uint32 count, bool update, bool unequip_check = false);

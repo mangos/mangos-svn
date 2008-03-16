@@ -1693,6 +1693,8 @@ void Spell::EffectApplyAura(uint32 i)
                                                             // Ice Block
         else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && m_spellInfo->SpellFamilyFlags & 0x8000000000LL)
             spellId = SPELLID_MAGE_HYPOTHERMIA;             // Hypothermia
+        else if( (m_spellInfo->AttributesEx & 0x20) && (m_spellInfo->AttributesEx2 & 0x24000) )
+            spellId = 23230;                                // Blood Fury - Healing Reduction
 
         SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);
         if (AdditionalSpellInfo)

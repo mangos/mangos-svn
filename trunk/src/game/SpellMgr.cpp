@@ -400,6 +400,10 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                             break;
                     }
                 }   break;
+                case SPELL_AURA_MOD_HEALING_PCT:
+                    if(spellproto->EffectBasePoints[effIndex]+int32(spellproto->EffectBaseDice[effIndex]) < 0)
+                        return false;
+                    break;
                 default:
                     break;
             }
