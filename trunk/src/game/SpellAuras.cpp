@@ -1332,37 +1332,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 const_cast<int32&>((*i)->GetModifier()->m_amount) += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
     }
 
-    // soulstone resurrection (only at real add/remove and can overwrite reincarnation spell setting)
-    if(GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92 &&
-        caster && caster->GetTypeId() == TYPEID_PLAYER && m_target && m_target->GetTypeId() == TYPEID_PLAYER)
-    {
-        Player * player = (Player*)m_target;
-
-        uint32 spellid = 0;
-        switch(GetId())
-        {
-            case 20707:spellid =  3026;break;
-            case 20762:spellid = 20758;break;
-            case 20763:spellid = 20759;break;
-            case 20764:spellid = 20760;break;
-            case 20765:spellid = 20761;break;
-            case 27239:spellid = 27240;break;
-            default: return;
-        }
-
-        if(apply)
-        {
-            // overwrite any
-            player->SetUInt32Value(PLAYER_SELF_RES_SPELL, spellid);
-        }
-        else
-        {
-            // remove only own spell
-            if(player->GetUInt32Value(PLAYER_SELF_RES_SPELL)==spellid)
-                player->SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
-        }
-    }
-
     // Victorious
     if(GetId()==32216 && m_target->getClass()==CLASS_WARRIOR)
         m_target->ModifyAuraState(AURA_STATE_WARRIOR_VICTORY_RUSH, apply);
