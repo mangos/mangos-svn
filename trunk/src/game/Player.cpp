@@ -620,7 +620,7 @@ void Player::EnvironmentalDamage(uint64 guid, EnviromentalDamage type, uint32 da
 {
     WorldPacket data(SMSG_ENVIRONMENTALDAMAGELOG, (21));
     data << (uint64)guid;
-    data << (uint8)type;
+    data << (uint8)(type!=DAMAGE_FALL_TO_VOID ? type : DAMAGE_FALL);
     data << (uint32)damage;
     data << (uint32)0;
     data << (uint32)0;
@@ -628,6 +628,15 @@ void Player::EnvironmentalDamage(uint64 guid, EnviromentalDamage type, uint32 da
     //Let other players see that you get damage
     SendMessageToSet(&data, true);
     DealDamage(this, damage, NULL, SELF_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, true);
+
+    if(type==DAMAGE_FALL)
+    {
+        DEBUG_LOG("We are fall to death, loosing 10 percents durability");
+        DurabilityLossAll(0.10);
+        // durability lost message
+        WorldPacket data(SMSG_DURABILITY_DAMAGE_DEATH, 0);
+        GetSession()->SendPacket(&data);
+    }
 }
 
 void Player::HandleDrowning(uint32 UnderWaterTime)
@@ -2503,30 +2512,33 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
             {
                 if(itr->second->active)
                 {
-                    WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
+                    uint8 spell_id_rank = spellmgr.GetSpellRank(spell_id);
+                    uint8 itr_rank = spellmgr.GetSpellRank(itr->first);
 
-                    if(spellmgr.GetSpellRank(spell_id) >= spellmgr.GetSpellRank(itr->first))
+                    if(spell_id_rank > itr_rank)
                     {
+                        WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
                         data << uint16(itr->first);
                         data << uint16(spell_id);
+                        GetSession()->SendPacket( &data );
 
                         // mark old spell as disable (SMSG_SUPERCEDED_SPELL replace it in client by new)
                         itr->second->active = 0;
                         itr->second->state = PLAYERSPELL_CHANGED;
                         superceded_old = true;              // new spell replace old in action bars and spell book.
                     }
-                    else
+                    else if(spell_id_rank < itr_rank)
                     {
+                        WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
                         data << uint16(spell_id);
-                        data << uint16(0);                  // spell not listed in spell bar/etc
+                        data << uint16(itr->first);
+                        GetSession()->SendPacket( &data );
 
                         // mark new spell as disable (not learned yet for client and will not learned)
                         newspell->active = 0;
                         if(newspell->state != PLAYERSPELL_NEW)
                             newspell->state = PLAYERSPELL_CHANGED;
                     }
-
-                    GetSession()->SendPacket( &data );
                 }
             }
         }

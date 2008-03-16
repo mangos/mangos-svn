@@ -310,6 +310,14 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     if(GetPlayer()->isMovingOrTurning())
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
+    if(movementInfo.z < -500.0f)
+    {
+        if(GetPlayer()->isAlive())
+            GetPlayer()->EnvironmentalDamage(GetPlayer()->GetGUID(),DAMAGE_FALL_TO_VOID, GetPlayer()->GetMaxHealth());
+        GetPlayer()->BuildPlayerRepop();
+        GetPlayer()->RepopAtGraveyard();
+    }
 }
 
 void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
