@@ -48,8 +48,8 @@ lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGrou
 m_itemsLoaded(false), m_trainerSpellsLoaded(false), m_trainer_type(0), m_lootMoney(0), m_lootRecipient(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0f),
 m_gossipOptionLoaded(false),m_NPCTextId(0), m_emoteState(0), m_isPet(false), m_isTotem(false),
-m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_regenHealth(true), m_equipmentId(0),
-m_AI_locked(false)
+m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0), 
+m_AlreadyCallAssistence(false), m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false)
 {
     m_valuesCount = UNIT_END;
 
@@ -61,8 +61,6 @@ m_AI_locked(false)
     m_CreatureSpellCooldowns.clear();
     m_CreatureCategoryCooldowns.clear();
     m_GlobalCooldown = 0;
-
-    m_AlreadyCallAssistence = false;
 }
 
 Creature::~Creature()
@@ -155,13 +153,13 @@ void Creature::LoadTrainerSpells()
 
 void Creature::RemoveCorpse()
 {
-    if(getDeathState()!=CORPSE)
+    if( getDeathState()!=CORPSE && !m_isDeadByDefault || getDeathState()!=ALIVE && m_isDeadByDefault )
         return;
 
     m_deathTimer = 0;
+    setDeathState(DEAD);
     ObjectAccessor::UpdateObjectVisibility(this);
     loot.clear();
-    setDeathState(DEAD);
     m_respawnTime = time(NULL) + m_respawnDelay;
 
     float x,y,z;
@@ -178,6 +176,10 @@ void Creature::Update(uint32 diff)
 
     switch( m_deathState )
     {
+        case JUST_ALIVED:
+            // Dont must be called, see Creature::setDeathState JUST_ALIVED -> ALIVE promoting.
+            sLog.outError("Creature (GUIDLow: %u Entry: %u ) in wrong state: JUST_ALIVED (4)",GetGUIDLow(),GetEntry());
+            break;
         case JUST_DIED:
             // Dont must be called, see Creature::setDeathState JUST_DIED -> CORPSE promoting.
             sLog.outError("Creature (GUIDLow: %u Entry: %u ) in wrong state: JUST_DEAD (1)",GetGUIDLow(),GetEntry());
@@ -195,12 +197,19 @@ void Creature::Update(uint32 diff)
 
                 SelectLevel(cinfo);
                 SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
-                RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-                setMoveRunFlag(false);
+                if (m_isDeadByDefault){
+                    setDeathState(JUST_DIED);
+                    SetHealth(0);
+                }
+                else
+                {
+                    RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+                    setMoveRunFlag(false);
 
-                SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
-                SetHealth(GetMaxHealth());
-                setDeathState( ALIVE );
+                    SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
+                    SetHealth(GetMaxHealth());
+                    setDeathState( ALIVE );
+                }
                 clearUnitState(UNIT_STAT_ALL_STATE);
                 i_motionMaster.Clear();
                 LoadCreaturesAddon(true);
@@ -214,6 +223,9 @@ void Creature::Update(uint32 diff)
         }
         case CORPSE:
         {
+            if (m_isDeadByDefault)
+                break;
+
             if( m_deathTimer <= diff )
             {
                 RemoveCorpse();
@@ -243,6 +255,19 @@ void Creature::Update(uint32 diff)
         }
         case ALIVE:
         {
+            if (m_isDeadByDefault)
+            {
+                if( m_deathTimer <= diff )
+                {
+                    RemoveCorpse();
+                    DEBUG_LOG("Removing alive corpse... %u ", GetUInt32Value(OBJECT_FIELD_ENTRY));
+                }
+                else 
+                {
+                    m_deathTimer -= diff;
+                }
+            }
+
             Unit::Update( diff );
 
             // creature can be dead after Unit::Update call
@@ -951,7 +976,7 @@ void Creature::SaveToDB()
     data.spawn_orientation = GetOrientation();
     data.curhealth = GetHealth();
     data.curmana = GetPower(POWER_MANA);
-    data.deathState = m_deathState;
+    data.is_dead = m_isDeadByDefault;
     data.movementType = GetDefaultMovementType();
 
     // updated in DB
@@ -979,8 +1004,8 @@ void Creature::SaveToDB()
         << (float)(0) << ","                                //spawn_orientation
         << GetHealth() << ","                               //curhealth
         << GetPower(POWER_MANA) << ","                      //curmana
-        << (uint32)(m_deathState) << ","                    //DeathState (0 or 65)
-        << GetDefaultMovementType() << ")";                 // default movement generator type
+        << (m_isDeadByDefault ? 1 : 0) << ","               //is_dead
+        << GetDefaultMovementType() << ")";                 //default movement generator type
 
     WorldDatabase.PExecuteLog( ss.str( ).c_str( ) );
 
@@ -1234,35 +1259,14 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
     if(GetCreatureInfo()->rank > 0)
         this->m_corpseDelay *= 3;                           //if creature is elite, then remove corpse later
 
-    uint32 curhealth = data->curhealth;
-    if(curhealth)
-    {
-        curhealth = uint32(curhealth*_GetHealthMod(GetCreatureInfo()->rank));
-        if(curhealth < 1)
-            curhealth = 1;
-    }
-
-    SetHealth(curhealth);
-    SetPower(POWER_MANA,data->curmana);
-
     m_respawnradius = data->spawndist;
     respawn_cord[0] = data->spawn_posX;
     respawn_cord[1] = data->spawn_posY;
     respawn_cord[2] = data->spawn_posZ;
 
     m_respawnDelay = data->spawntimesecs;
-    m_deathState = (DeathState)data->deathState;
-    if(m_deathState == JUST_DIED)                           // Don't must be set to JUST_DEAD, see Creature::setDeathState JUST_DIED -> CORPSE promoting.
-    {
-        sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) in wrong state: JUST_DEAD (1). State set to ALIVE.",GetGUIDLow(),GetEntry());
-        m_deathState = ALIVE;
-    }
-    else
-    if(m_deathState < ALIVE || m_deathState > DEAD)
-    {
-        sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) in wrong state: %d. State set to ALIVE.",GetGUIDLow(),GetEntry(),m_deathState);
-        m_deathState = ALIVE;
-    }
+    m_isDeadByDefault = data->is_dead;
+    m_deathState = m_isDeadByDefault ? DEAD : ALIVE;
 
     m_respawnTime  = objmgr.GetCreatureRespawnTime(m_DBTableGuid,GetInstanceId());
     if(m_respawnTime > time(NULL))                          // not ready to respawn
@@ -1272,6 +1276,17 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
         m_respawnTime = 0;
         objmgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),0);
     }
+
+    uint32 curhealth = data->curhealth;
+    if(curhealth)
+    {
+        curhealth = uint32(curhealth*_GetHealthMod(GetCreatureInfo()->rank));
+        if(curhealth < 1)
+            curhealth = 1;
+    }
+
+    SetHealth(m_deathState == ALIVE ? curhealth : 0);
+    SetPower(POWER_MANA,data->curmana);
 
     // checked at creature_template loading
     m_defaultMovementType = MovementGeneratorType(data->movementType);
@@ -1428,7 +1443,7 @@ CreatureInfo const *Creature::GetCreatureInfo() const
 
 void Creature::setDeathState(DeathState s)
 {
-    if(s == JUST_DIED)
+    if((s == JUST_DIED && !m_isDeadByDefault)||(s == JUST_ALIVED && m_isDeadByDefault))
     {
         m_deathTimer = m_corpseDelay*1000;
 
@@ -1436,7 +1451,8 @@ void Creature::setDeathState(DeathState s)
         if(sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY) || isWorldBoss())
             SaveRespawnTime();
 
-        if(!IsStopped()) StopMoving();
+        if(!IsStopped())
+            StopMoving();
     }
     Unit::setDeathState(s);
 
@@ -1453,11 +1469,23 @@ void Creature::setDeathState(DeathState s)
         }
         Unit::setDeathState(CORPSE);
     }
+    if(s == JUST_ALIVED)
+    {
+        SetHealth(GetMaxHealth());
+        Unit::setDeathState(ALIVE);
+        CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(this->GetEntry());
+        SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
+        RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+        setMoveRunFlag(false);
+        SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);       
+        clearUnitState(UNIT_STAT_ALL_STATE);
+        i_motionMaster.Clear();
+    }
 }
 
 void Creature::Respawn()
 {
-    if(getDeathState()==CORPSE)
+    if(getDeathState()==CORPSE && !m_isDeadByDefault ||getDeathState()==ALIVE && m_isDeadByDefault)
     {
         m_deathTimer = 0;
         Update(0);                                          // despawn corpse
@@ -1591,7 +1619,7 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
     {
         if( GetEntry() == VISUAL_WAYPOINT && !pl->isGameMaster() )
             return false;
-        return isAlive() || m_deathTimer > 0;
+        return isAlive() || m_deathTimer > 0 || m_isDeadByDefault && m_deathState==CORPSE;
     }
 
     // Dead player see live creatures near own corpse

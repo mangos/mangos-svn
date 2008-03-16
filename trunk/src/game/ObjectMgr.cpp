@@ -774,7 +774,7 @@ void ObjectMgr::LoadCreatures()
         data.spawn_orientation = fields[15].GetFloat();
         data.curhealth      = fields[16].GetUInt32();
         data.curmana        = fields[17].GetUInt32();
-        data.deathState     = fields[18].GetUInt8();
+        data.is_dead        = fields[18].GetBool();
         data.movementType   = fields[19].GetUInt8();
         int16 gameEvent     = fields[20].GetInt16();
 

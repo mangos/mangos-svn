@@ -241,7 +241,7 @@ struct CreatureData
     float spawn_orientation;
     uint32 curhealth;
     uint32 curmana;
-    uint8 deathState;
+    bool  is_dead;
     uint8 movementType;
 };
 
@@ -553,12 +553,13 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 m_regenTimer;
         MovementGeneratorType m_defaultMovementType;
         Cell m_currentCell;                                 // store current cell where creature listed
-        bool m_AlreadyCallAssistence;
-
         uint32 m_DBTableGuid;
+        uint32 m_equipmentId;
+
+        bool m_AlreadyCallAssistence;
         bool m_regenHealth;
         bool m_AI_locked;
-        uint32 m_equipmentId;
+        bool m_isDeadByDefault;
     private:
         GridReference<Creature> m_gridRef;
 };

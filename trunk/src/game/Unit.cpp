@@ -8133,7 +8133,7 @@ void Unit::SetHover(bool on)
 
 void Unit::setDeathState(DeathState s)
 {
-    if (s != ALIVE)
+    if (s != ALIVE && s!= JUST_ALIVED)
     {
         CombatStop();
         ClearComboPointHolders();                           // any combo points pointed to unit lost at it death
