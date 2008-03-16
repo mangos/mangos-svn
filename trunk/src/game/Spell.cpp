@@ -4165,17 +4165,34 @@ bool Spell::CheckTarget( Unit* target, uint32 eff, bool hitPhase )
     }
 
     //Check targets for LOS visibility (except spells without range limitations )
-    bool skipLOS = false;
     switch(m_spellInfo->Effect[eff])
     {
-        case SPELL_EFFECT_SUMMON_PLAYER:
-            skipLOS = true;
+        case SPELL_EFFECT_SUMMON_PLAYER:                    // from anywhere
+            break;
+        case SPELL_EFFECT_RESURRECT_NEW:
+            if(!target->IsWithinLOSInMap(m_caster))         // player far away, maybe his corpse near?
+            {
+                if(!m_targets.getCorpseTargetGUID())
+                    return false;
+
+                Corpse *corpse = ObjectAccessor::GetCorpse(*m_caster,m_targets.getCorpseTargetGUID());
+                if(!corpse)
+                    return false;
+
+                if(target->GetGUID()!=corpse->GetOwnerGUID())
+                    return false;
+
+                if(!corpse->IsWithinLOSInMap(m_caster))
+                    return false;
+            }
+
+            // all ok by some way or another, skip normal check
+            break;
+        default:                                            // normal case
+            if(!target->IsWithinLOSInMap(m_caster))
+                return false;
             break;
     }
-
-    //Check targets for LOS visibility (except spells without range limitations )
-    if(!skipLOS && !target->IsWithinLOSInMap(m_caster))
-        return false;
 
     return true;
 }
