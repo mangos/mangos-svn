@@ -9522,34 +9522,9 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
             {
                 _ApplyItemMods(pItem, slot, false);
 
-                // remove item dependent auras (only weapon and armor slots)
+                // remove item dependent auras and casts (only weapon and armor slots)
                 if(slot < EQUIPMENT_SLOT_END)
-                {
-                    AuraMap& auras = GetAuras();
-                    for(AuraMap::iterator itr = auras.begin(); itr != auras.end(); )
-                    {
-                        Aura* aura = itr->second;
-
-                        // skip persistent and not item class dependent and not self applied auras
-                        SpellEntry const* spellInfo = aura->GetSpellProto();
-                        if(aura->IsPermanent() ||  aura->GetCasterGUID()!=GetGUID())
-                        {
-                            ++itr;
-                            continue;
-                        }
-
-                        // skip if have alternative item
-                        if(HasItemFitToSpellReqirements(spellInfo,pItem))
-                        {
-                            ++itr;
-                            continue;
-                        }
-
-                        // no alt item, remove aura, restart check
-                        RemoveAurasDueToSpell(aura->GetId());
-                        itr = auras.begin();
-                    }
-                }
+                    RemoveItemDependentAurasAndCasts(pItem);
 
                 // remove held enchantments
                 if ( slot == EQUIPMENT_SLOT_MAINHAND )
@@ -9709,11 +9684,16 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
 
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
-            if ( slot < INVENTORY_SLOT_BAG_END )            // equipment and equipped bags can have applied bonuses
+            // equipment and equipped bags can have applied bonuses
+            if ( slot < INVENTORY_SLOT_BAG_END )
                 _ApplyItemMods(pItem, slot, false);
 
-            if ( slot < EQUIPMENT_SLOT_END )                // equipment visual show
+            if ( slot < EQUIPMENT_SLOT_END )
             {
+                // remove item dependent auras and casts (only weapon and armor slots)
+                RemoveItemDependentAurasAndCasts(pItem);
+
+                // equipment visual show
                 int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
                 for (int i = VisibleBase; i < VisibleBase + 12; ++i)
                     SetUInt32Value(i, 0);
@@ -16479,4 +16459,40 @@ bool Player::HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item cons
     }
 
     return false;
+}
+
+void Player::RemoveItemDependentAurasAndCasts( Item * pItem )
+{
+    AuraMap& auras = GetAuras();
+    for(AuraMap::iterator itr = auras.begin(); itr != auras.end(); )
+    {
+        Aura* aura = itr->second;
+
+        // skip persistent and not item class dependent and not self applied auras
+        SpellEntry const* spellInfo = aura->GetSpellProto();
+        if(aura->IsPermanent() ||  aura->GetCasterGUID()!=GetGUID())
+        {
+            ++itr;
+            continue;
+        }
+
+        // skip if have alternative item
+        if(HasItemFitToSpellReqirements(spellInfo,pItem))
+        {
+            ++itr;
+            continue;
+        }
+
+        // no alt item, remove aura, restart check
+        RemoveAurasDueToSpell(aura->GetId());
+        itr = auras.begin();
+    }
+
+    // currently casted spells can be dependent from item
+    for (uint32 i = 0; i < CURRENT_MAX_SPELL; i++)
+    {
+        if( m_currentSpells[i] && m_currentSpells[i]->getState()!=SPELL_STATE_DELAYED &&
+            !HasItemFitToSpellReqirements(m_currentSpells[i]->m_spellInfo,pItem) )
+            InterruptSpell(i);
+    }
 }
