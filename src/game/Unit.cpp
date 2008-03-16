@@ -631,6 +631,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
         {
             // save value before aura remove
             uint32 ressSpellId = pVictim->GetUInt32Value(PLAYER_SELF_RES_SPELL);
+            if(!ressSpellId)
+                ressSpellId = ((Player*)pVictim)->GetResurrectionSpellId();
 
             //Remove all expected to remove at death auras (most important negative case like DoT or periodic triggers)
             pVictim->RemoveAllAurasOnDeath();
@@ -1847,6 +1849,24 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
         if (((*i)->GetModifier()->m_miscvalue & int32(1<<school))==0)
             continue;
 
+        // Cheat Death
+        if((*i)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_ROGUE && (*i)->GetSpellProto()->SpellIconID == 2109)
+        {
+            if (((Player*)pVictim)->HasSpellCooldown(31231))
+                continue;
+            if (pVictim->GetHealth() <= RemainingDamage)
+            {
+                int32 chance = (*i)->GetModifier()->m_amount;
+                if (roll_chance_i(chance))
+                {
+                    pVictim->CastSpell(pVictim,31231,true);
+                    ((Player*)pVictim)->AddSpellCooldown(31231,0,time(NULL)+60);
+                    RemainingDamage = 0;
+                }
+            }
+            continue;
+        }
+        
         int32 currentAbsorb;
 
         //Reflective Shield

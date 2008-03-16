@@ -1095,10 +1095,7 @@ void Player::setDeathState(DeathState s)
 
         // passive spell
         if(!ressSpellId)
-        {
-            if(HasSpell(20608) && !HasSpellCooldown(21169) && HasItemCount(17030,1))
-                ressSpellId = 21169;
-        }
+            ressSpellId = GetResurrectionSpellId();
     }
     Unit::setDeathState(s);
 
@@ -1108,7 +1105,7 @@ void Player::setDeathState(DeathState s)
 
     if(isAlive() && !cur)
     {
-        //clear aura case after resurrection by another way (reincarnation passive will re-applied at death)
+        //clear aura case after resurrection by another way (spells will be applied before next death)
         SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
 
         // restore default warrior stance
@@ -16507,4 +16504,45 @@ void Player::RemoveItemDependentAurasAndCasts( Item * pItem )
             !HasItemFitToSpellReqirements(m_currentSpells[i]->m_spellInfo,pItem) )
             InterruptSpell(i);
     }
+}
+
+uint32 Player::GetResurrectionSpellId()
+{
+    // search priceless resurrection possabilities
+    uint32 prio = 0;
+    uint32 spell_id = 0;
+    AuraList const& dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+    for(AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
+    {
+        // Soulstone Resurrection                           // prio: 3 (max, non death persistent)
+        if( prio < 2 && (*itr)->GetSpellProto()->SpellVisual == 99 && (*itr)->GetSpellProto()->SpellIconID == 92 )
+        {
+            switch((*itr)->GetId())
+            {
+                case 20707: spell_id =  3026; break;        // rank 1
+                case 20762: spell_id = 20758; break;        // rank 2
+                case 20763: spell_id = 20759; break;        // rank 3
+                case 20764: spell_id = 20760; break;        // rank 4
+                case 20765: spell_id = 20761; break;        // rank 5
+                case 27239: spell_id = 27240; break;        // rank 6
+                default: 
+                    sLog.outError("Unhandled spell %%u: S.Resurrection",(*itr)->GetId());
+                    continue;
+            }
+
+            prio = 3;
+        }
+        // Twisting Nether                                  // prio: 2 (max)
+        else if((*itr)->GetId()==23701 && roll_chance_i(10))
+        {
+            prio = 2;
+            spell_id = 23700;
+        }
+    }
+
+    // Reincarnation (passive spell)                        // prio: 1
+    if(prio < 1 && HasSpell(20608) && !HasSpellCooldown(21169) && HasItemCount(17030,1))
+        spell_id = 21169;
+
+    return spell_id;
 }

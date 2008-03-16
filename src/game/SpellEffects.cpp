@@ -551,10 +551,100 @@ void Spell::EffectDummy(uint32 i)
                     if (!m_CastItem) return;
                     m_caster->CastSpell(m_caster,4073,true,m_CastItem);
                     return;
+                case 23019:                                 // Crystal Prison Dummy DND
+                {
+                    if(!unitTarget || !unitTarget->isAlive() || unitTarget->GetTypeId() != TYPEID_UNIT || ((Creature*)unitTarget)->isPet())
+                        return;
+
+                    Creature* creatureTarget = (Creature*)unitTarget;
+                    if(creatureTarget->isPet())
+                        return;
+
+                    creatureTarget->setDeathState(JUST_DIED);
+                    creatureTarget->RemoveCorpse();
+                    creatureTarget->SetHealth(0);                   // just for nice GM-mode view
+
+                    GameObject* pGameObj = new GameObject(m_caster);
+
+                    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179644 ,creatureTarget->GetMapId(),
+                        creatureTarget->GetPositionX(), creatureTarget->GetPositionY(), creatureTarget->GetPositionZ(),
+                        creatureTarget->GetOrientation(), 0, 0, 0, 0, 100, 1) )
+                    {
+                        delete pGameObj;
+                        return;
+                    }
+
+                    pGameObj->SetRespawnTime(creatureTarget->GetRespawnTime()-time(NULL));
+                    pGameObj->SetOwnerGUID(m_caster->GetGUID() );
+                    pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel() );
+                    pGameObj->SetSpellId(m_spellInfo->Id);
+
+                    DEBUG_LOG("AddObject at SpellEfects.cpp EffectDummy\n");
+                    MapManager::Instance().GetMap(creatureTarget->GetMapId(), pGameObj)->Add(pGameObj);
+
+                    WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);
+                    data << uint64(pGameObj->GetGUID());
+                    m_caster->SendMessageToSet(&data,true);
+
+                    return;
+                }
                 case 23133:                                 // Gnomish Battle Chicken
                     if (!m_CastItem) return;
                     m_caster->CastSpell(m_caster,13166,true,m_CastItem);
                     return;
+                case 25860:                                 // Reindeer Transformation
+                {
+                    if (!m_caster->HasAuraType(SPELL_AURA_MOUNTED))
+                        return;
+
+                    float flyspeed = m_caster->GetSpeedRate(MOVE_FLY);
+                    float speed = m_caster->GetSpeedRate(MOVE_MOUNTED);
+
+                    m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+
+                    //5 different spells used depending on mounted speed and if mount can fly or not
+                    if (flyspeed >= 4.1f)
+                        m_caster->CastSpell(m_caster, 44827, true); //310% flying Reindeer
+                    else if (flyspeed >= 3.8f)
+                        m_caster->CastSpell(m_caster, 44825, true); //280% flying Reindeer
+                    else if (flyspeed >= 1.6f)
+                        m_caster->CastSpell(m_caster, 44824, true); //60% flying Reindeer
+                    else if (speed >= 2.0f)
+                        m_caster->CastSpell(m_caster, 25859, true); //100% ground Reindeer
+                    else
+                        m_caster->CastSpell(m_caster, 25858, true); //60% ground Reindeer
+
+                    return;
+                }
+                case 29200:                                 // Purify Helboar Meat
+                {
+                    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    Player *player = (Player*)m_caster;
+
+                    uint32 newitemid = rand_chance() > 50 ? 23248 : 23355;
+
+                    uint16 dest;
+                    uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, newitemid, 1, false);
+                    if( msg != EQUIP_ERR_OK )
+                    {
+                        player->SendEquipError( msg, NULL, NULL );
+                        return;
+                    }
+
+                    Item *pItem = player->StoreNewItem( dest, newitemid, 1, true,Item::GenerateItemRandomPropertyId(newitemid));
+
+                    if(!pItem)
+                    {
+                        player->SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
+                        return;
+                    }
+
+                    player->SendNewItem(pItem, 1, true, true);
+
+                    return;
+                }
                 case 30507:                                 // Poultryizer
                     if (!m_CastItem) return;
                     if(roll_chance_i(80))                   // success
@@ -644,6 +734,17 @@ void Spell::EffectDummy(uint32 i)
                 else
                     SendCastResult(SPELL_FAILED_FIZZLE);
                 return;
+            }
+            break;
+        case SPELLFAMILY_ROGUE:
+            switch(m_spellInfo->Id )
+            {
+                // Cheat Death
+                case 31231:
+                {
+                    m_caster->CastSpell(m_caster,45182,true);
+                    return;
+                }
             }
             break;
         case SPELLFAMILY_HUNTER:
@@ -1299,100 +1400,6 @@ void Spell::EffectDummy(uint32 i)
             //regen 6% of Total Mana Every 3 secs
             int32 EffectBasePoints0 = unitTarget->GetMaxPower(POWER_MANA)  * damage / 100;
             m_caster->CastCustomSpell(unitTarget,39609,&EffectBasePoints0,NULL,NULL,true,NULL,NULL,m_originalCasterGUID);
-            return;
-        }
-
-        // Reindeer Transformation
-        case 25860:
-        {
-            if (!m_caster->HasAuraType(SPELL_AURA_MOUNTED))
-                return;
-
-            float flyspeed = m_caster->GetSpeedRate(MOVE_FLY);
-            float speed = m_caster->GetSpeedRate(MOVE_MOUNTED);
-
-            m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
-
-            //5 different spells used depending on mounted speed and if mount can fly or not
-            if (flyspeed >= 4.1f)
-                m_caster->CastSpell(m_caster, 44827, true); //310% flying Reindeer
-            else if (flyspeed >= 3.8f)
-                m_caster->CastSpell(m_caster, 44825, true); //280% flying Reindeer
-            else if (flyspeed >= 1.6f)
-                m_caster->CastSpell(m_caster, 44824, true); //60% flying Reindeer
-            else if (speed >= 2.0f)
-                m_caster->CastSpell(m_caster, 25859, true); //100% ground Reindeer
-            else
-                m_caster->CastSpell(m_caster, 25858, true); //60% ground Reindeer
-        }
-
-        // Crystal Prison Dummy DND
-        case 23019:
-        {
-            if(!unitTarget || !unitTarget->isAlive() || unitTarget->GetTypeId() != TYPEID_UNIT || ((Creature*)unitTarget)->isPet())
-                return;
-
-            Creature* creatureTarget = (Creature*)unitTarget;
-            if(creatureTarget->isPet())
-                return;
-
-            creatureTarget->setDeathState(JUST_DIED);
-            creatureTarget->RemoveCorpse();
-            creatureTarget->SetHealth(0);                   // just for nice GM-mode view
-
-            GameObject* pGameObj = new GameObject(m_caster);
-
-            if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179644 ,creatureTarget->GetMapId(),
-                creatureTarget->GetPositionX(), creatureTarget->GetPositionY(), creatureTarget->GetPositionZ(),
-                creatureTarget->GetOrientation(), 0, 0, 0, 0, 100, 1) )
-            {
-                delete pGameObj;
-                return;
-            }
-
-            pGameObj->SetRespawnTime(creatureTarget->GetRespawnTime()-time(NULL));
-            pGameObj->SetOwnerGUID(m_caster->GetGUID() );
-            pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel() );
-            pGameObj->SetSpellId(m_spellInfo->Id);
-
-            DEBUG_LOG("AddObject at SpellEfects.cpp EffectDummy\n");
-            MapManager::Instance().GetMap(creatureTarget->GetMapId(), pGameObj)->Add(pGameObj);
-
-            WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);
-            data << uint64(pGameObj->GetGUID());
-            m_caster->SendMessageToSet(&data,true);
-
-            return;
-        }
-
-        // Purify Helboar Meat
-        case 29200:
-        {
-            if(m_caster->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            Player *player = (Player*)m_caster;
-
-            uint32 newitemid = rand_chance() > 50 ? 23248 : 23355;
-
-            uint16 dest;
-            uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, newitemid, 1, false);
-            if( msg != EQUIP_ERR_OK )
-            {
-                player->SendEquipError( msg, NULL, NULL );
-                return;
-            }
-
-            Item *pItem = player->StoreNewItem( dest, newitemid, 1, true,Item::GenerateItemRandomPropertyId(newitemid));
-
-            if(!pItem)
-            {
-                player->SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
-                return;
-            }
-
-            player->SendNewItem(pItem, 1, true, true);
-
             return;
         }
     }
