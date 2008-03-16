@@ -1600,6 +1600,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool RewardHonor(Unit *pVictim, uint32 groupsize, float honor = -1);
         uint32 GetHonorPoints() { return GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY); }
         uint32 GetArenaPoints() { return GetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY); }
+        uint32 GetMaxPersonalArenaRatingRequirement();
         void SetHonorPoints(uint32 val) { SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, val); }
         void SetArenaPoints(uint32 val) { SetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY, val); }
         void SetFlushKills(bool value) { m_flushKills = value; }

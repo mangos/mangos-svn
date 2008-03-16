@@ -66,6 +66,7 @@ DBCStorage <GtRegenMPPerSptEntry>         sGtRegenMPPerSptStore(GtRegenMPPerSptf
 
 DBCStorage <ItemSetEntry> sItemSetStore(ItemSetEntryfmt);
 //DBCStorage <ItemDisplayInfoEntry> sItemDisplayInfoStore(ItemDisplayTemplateEntryfmt); -- not used currently
+DBCStorage <ItemCondExtCostsEntry> sItemCondExtCostsStore(ItemCondExtCostsEntryfmt);
 DBCStorage <ItemExtendedCostEntry> sItemExtendedCostStore(ItemExtendedCostEntryfmt);
 DBCStorage <ItemRandomPropertiesEntry> sItemRandomPropertiesStore(ItemRandomPropertiesfmt);
 DBCStorage <ItemRandomSuffixEntry> sItemRandomSuffixStore(ItemRandomSuffixfmt);
@@ -230,6 +231,7 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sGtRegenMPPerSptStore,     dataPath+"dbc/gtRegenMPPerSpt.dbc");
 
     //LoadDBC(bar,bad_dbc_files,sItemDisplayInfoStore,     dataPath+"dbc/ItemDisplayInfo.dbc");     -- not used currently
+    LoadDBC(bar,bad_dbc_files,sItemCondExtCostsStore,    dataPath+"dbc/ItemCondExtCosts.dbc");
     LoadDBC(bar,bad_dbc_files,sItemExtendedCostStore,    dataPath+"dbc/ItemExtendedCost.dbc");
     LoadDBC(bar,bad_dbc_files,sItemRandomPropertiesStore,dataPath+"dbc/ItemRandomProperties.dbc");
     LoadDBC(bar,bad_dbc_files,sItemRandomSuffixStore,    dataPath+"dbc/ItemRandomSuffix.dbc");
@@ -546,6 +548,19 @@ uint32 GetTalentTabInspectBitSize(uint32 talentTabId)
 uint32 const* GetTalentTabPages(uint32 cls)
 {
     return sTalentTabPages[cls];
+}
+
+uint32 GetItemCondExtCostsMask(uint32 requiredarenarank, uint32 itemextendedcost)
+{
+    // create and return mask for (RequiredArenaRank, ItemExtendedCost) pair
+    uint32 mask = 0;
+    for(uint32 i = 0; i < sItemCondExtCostsStore.nCount; ++i)
+    {
+        ItemCondExtCostsEntry const* icece = sItemCondExtCostsStore.LookupEntry(i);
+        if(icece && icece->requiredarenarank == requiredarenarank && icece->itemextendedcostentry == itemextendedcost)
+            mask |= (1 << icece->requirementtype);
+    }
+    return mask;
 }
 
 // script support functions

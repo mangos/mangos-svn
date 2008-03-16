@@ -88,11 +88,21 @@ bool ArenaTeam::AddMember(uint64 PlayerGuid)
     std::string plName;
     uint8 plClass;
 
+    if(GetMembersSize() >= GetType() * 2)
+    {
+        // arena team is full (can't have more than type * 2 players!)
+        // return false
+        return false;
+    }
+
     if(!objmgr.GetPlayerNameByGUID(PlayerGuid, plName))     // player doesnt exist
         return false;
                                                             // player already in arenateam of that size
-    if(Player::GetArenaTeamIdFromDB(PlayerGuid, GetSlot()) != 0)
+    if(Player::GetArenaTeamIdFromDB(PlayerGuid, GetType()) != 0)
+    {
+        sLog.outError("Arena::AddMember() : player already in this sized team");
         return false;
+    }
 
     // remove all player signs from another petitions
     // this will be prevent attempt joining player to many arenateams and corrupt arena team data integrity

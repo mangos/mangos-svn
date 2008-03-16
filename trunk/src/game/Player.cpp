@@ -5663,27 +5663,33 @@ uint32 Player::GetRankFromDB(uint64 guid)
         return 0;
 }
 
-uint32 Player::GetArenaTeamIdFromDB(uint64 guid, uint8 slot)
+uint32 Player::GetArenaTeamIdFromDB(uint64 guid, uint8 type)
 {
     // need fix it!
     QueryResult *result = CharacterDatabase.PQuery("SELECT arenateamid FROM arena_team_member WHERE guid='%u'", GUID_LOPART(guid));
     if(result)
     {
-        uint32 id = (*result)[0].GetUInt32();
+        // init id to 0, check the arena type before assigning a value to id
+        uint32 id = 0;
         do
         {
             QueryResult *result2 = CharacterDatabase.PQuery("SELECT type FROM arena_team WHERE arenateamid='%u'", id);
             if(result2)
             {
-                uint8 dbslot = (*result2)[0].GetUInt32();
+                uint8 dbtype = (*result2)[0].GetUInt32();
                 delete result2;
-                if(dbslot == slot)
+                if(dbtype == type)
+                {
+                    // if the type matches, we've found the id
+                    id = (*result)[0].GetUInt32();
                     break;
+                }
             }
         } while(result->NextRow());
         delete result;
         return id;
     }
+    // no arenateam for the specified guid, return 0
     return 0;
 }
 
@@ -14929,11 +14935,15 @@ void Player::SendProficiency(uint8 pr1, uint32 pr2)
 
 void Player::RemovePetitionsAndSigns(uint64 guid, uint32 type)
 {
-    QueryResult *result = CharacterDatabase.PQuery("SELECT ownerguid,petitionguid FROM petition_sign WHERE playerguid = '%u'", GUID_LOPART(guid));
+    QueryResult *result = NULL;
+    if(type==10)
+        result = CharacterDatabase.PQuery("SELECT ownerguid,petitionguid FROM petition_sign WHERE playerguid = '%u'", GUID_LOPART(guid));
+    else
+        result = CharacterDatabase.PQuery("SELECT ownerguid,petitionguid FROM petition_sign WHERE playerguid = '%u' AND type = '%u'", GUID_LOPART(guid), type);
     if(result)
     {
-        do
-        {
+        do    // this part effectively does nothing, since the deletion / modification only takes place _after_ the PetitionQuery. Though I don't know if the result remains intact if I execute the delete query beforehand.
+        {     // and SendPetitionQueryOpcode reads data from the DB
             Field *fields = result->Fetch();
             uint64 ownerguid   = MAKE_GUID(fields[0].GetUInt32(), HIGHGUID_PLAYER);
             uint64 petitionguid = MAKE_GUID(fields[1].GetUInt32(), HIGHGUID_ITEM);
@@ -14947,15 +14957,23 @@ void Player::RemovePetitionsAndSigns(uint64 guid, uint32 type)
 
         delete result;
 
-        CharacterDatabase.PExecute("DELETE FROM petition_sign WHERE playerguid = '%u'", GUID_LOPART(guid));
+        if(type==10)
+            CharacterDatabase.PExecute("DELETE FROM petition_sign WHERE playerguid = '%u'", GUID_LOPART(guid));
+        else
+            CharacterDatabase.PExecute("DELETE FROM petition_sign WHERE playerguid = '%u' AND type = '%u'", GUID_LOPART(guid), type);
     }
 
     CharacterDatabase.BeginTransaction();
     if(type == 10)
+    {
         CharacterDatabase.PExecute("DELETE FROM petition WHERE ownerguid = '%u'", GUID_LOPART(guid));
+        CharacterDatabase.PExecute("DELETE FROM petition_sign WHERE ownerguid = '%u'", GUID_LOPART(guid));
+    }
     else
+    {
         CharacterDatabase.PExecute("DELETE FROM petition WHERE ownerguid = '%u' AND type = '%u'", GUID_LOPART(guid), type);
-    CharacterDatabase.PExecute("DELETE FROM petition_sign WHERE ownerguid = '%u'", GUID_LOPART(guid));
+        CharacterDatabase.PExecute("DELETE FROM petition_sign WHERE ownerguid = '%u' AND type = '%u'", GUID_LOPART(guid), type);
+    }
     CharacterDatabase.CommitTransaction();
 }
 
@@ -15315,6 +15333,9 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         if(pProto->ExtendedCost)
         {
             ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(pProto->ExtendedCost);
+            uint32 mask = 0;
+            if(pProto->RequiredArenaRank)
+                mask = GetItemCondExtCostsMask(pProto->RequiredArenaRank, pProto->ExtendedCost);
             if(iece)
             {
                 if(GetHonorPoints() < (iece->reqhonorpoints * count))
@@ -15332,6 +15353,13 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
                     (iece->reqitem3 && !HasItemCount(iece->reqitem3, (iece->reqitemcount3 * count))) )
                 {
                     SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
+                    return false;
+                }
+                // check for personal arena rating requirement
+                if( (mask & (1<<3)) && (GetMaxPersonalArenaRatingRequirement() < iece->reqpersonalarenarating) )
+                {
+                    // probably not the proper equip err
+                    SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK,NULL,NULL);
                     return false;
                 }
             }
@@ -15467,6 +15495,26 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
     else
         SendBuyError( BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);
     return false;
+}
+
+uint32 Player::GetMaxPersonalArenaRatingRequirement()
+{
+    // returns the maximal personal arena rating that can be used to purchase items requiring this condition
+    // the personal rating of the arena team must match the required limit as well
+    // so return max[in arenateams](min(personalrating[teamtype], teamrating[teamtype]))
+    uint32 max_personal_rating = 0;
+    for(int i = 0; i < 3; ++i)
+    {
+        if(ArenaTeam * at = objmgr.GetArenaTeamById(GetArenaTeamId(i)))
+        {
+            uint32 p_rating = GetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (i * 6) + 5);
+            uint32 t_rating = at->GetRating();
+            p_rating = p_rating<t_rating? p_rating : t_rating;
+            if(max_personal_rating < p_rating)
+                max_personal_rating = p_rating;
+        }
+    }
+    return max_personal_rating;
 }
 
 void Player::_SaveBoundInstances()

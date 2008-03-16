@@ -536,7 +536,7 @@ struct ItemPrototype
     uint32 socketBonus;                                     // id from SpellItemEnchantment.dbc
     uint32 GemProperties;                                   // id from GemProperties.dbc
     uint32 ExtendedCost;                                    // id from ItemExtendedCost.dbc
-    uint32 RequiredArenaRank;
+    uint32 RequiredArenaRank;                               // id from ItemCondExtCosts.dbc     // note: this field should be renamed accordingly
     uint32 RequiredDisenchantSkill;
     float  ArmorDamageModifier;
     char* ScriptName;

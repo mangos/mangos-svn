@@ -283,6 +283,16 @@ struct ItemDisplayInfoEntry
     uint32      randomPropertyChance;
 };
 
+struct ItemCondExtCostsEntry
+{
+    // uint32      ID;
+    uint32      requiredarenarank;                          // ItemPrototype::RequiredArenaRank
+    uint32      itemextendedcostentry;                      // ItemPrototype::ExtendedCost
+    uint32      requirementtype;                            // 1 - honor and/or arena point from itemextendedcost
+                                                            // 2 - required item(s) from itemextendedcost
+                                                            // 3 - required personal arena rating from itemextendedcost
+};
+
 struct ItemExtendedCostEntry
 {
     uint32      ID;                                         // 0 extended-cost entry id
@@ -296,7 +306,7 @@ struct ItemExtendedCostEntry
     uint32      reqitemcount2;                              // 9 required count of 2st item
     uint32      reqitemcount3;                              // 10 required count of 3st item
                                                             // 11-12 not used, always 0 (4-5 item count?)
-                                                            // 13 not used
+    uint32      reqpersonalarenarating;                     // 13 required personal arena rating
 };
 
 struct ItemRandomPropertiesEntry
