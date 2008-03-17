@@ -171,7 +171,7 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 49;
+    const uint32 DBCFilesCount = 50;
 
     barGoLink bar( DBCFilesCount );
 
@@ -550,14 +550,14 @@ uint32 const* GetTalentTabPages(uint32 cls)
     return sTalentTabPages[cls];
 }
 
-uint32 GetItemCondExtCostsMask(uint32 requiredarenarank, uint32 itemextendedcost)
+uint32 GetItemCondExtCostsMask(uint32 condExtendedCost, uint32 itemextendedcost)
 {
-    // create and return mask for (RequiredArenaRank, ItemExtendedCost) pair
+    // create and return mask for (condExtendedCost, ItemExtendedCost) pair
     uint32 mask = 0;
     for(uint32 i = 0; i < sItemCondExtCostsStore.nCount; ++i)
     {
         ItemCondExtCostsEntry const* icece = sItemCondExtCostsStore.LookupEntry(i);
-        if(icece && icece->requiredarenarank == requiredarenarank && icece->itemextendedcostentry == itemextendedcost)
+        if(icece && icece->condExtendedCost == condExtendedCost && icece->itemextendedcostentry == itemextendedcost)
             mask |= (1 << icece->requirementtype);
     }
     return mask;

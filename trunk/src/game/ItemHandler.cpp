@@ -329,7 +329,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->socketBonus;
         data << pProto->GemProperties;
         data << pProto->ExtendedCost;
-        data << pProto->RequiredArenaRank;
+        data << pProto->CondExtendedCost;
         data << pProto->RequiredDisenchantSkill;
         data << pProto->ArmorDamageModifier;
         SendPacket( &data );

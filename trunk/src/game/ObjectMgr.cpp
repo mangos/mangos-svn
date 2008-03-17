@@ -1349,9 +1349,9 @@ void ObjectMgr::LoadItemPrototypes()
         if(proto->ExtendedCost && !sItemExtendedCostStore.LookupEntry(proto->ExtendedCost))
             sLog.outErrorDb("Item (Entry: %u) has wrong ExtendedCost (%u)",i,proto->ExtendedCost);
 
-        // check if the extended cost and the required arena rank pair is valid (does it have entry in ItemCondExtCosts.dbc?)
-        if(proto->ExtendedCost && proto->RequiredArenaRank && !GetItemCondExtCostsMask(proto->RequiredArenaRank, proto->ExtendedCost))
-            sLog.outErrorDb("Item (Entry: %u) has wrong ExtendedCost - RequiredArenaRank pair (%u, %u)",i,proto->ExtendedCost,proto->RequiredArenaRank);
+        // check if the extended cost and condition extended cost pair is valid
+        if(proto->ExtendedCost && proto->CondExtendedCost && !GetItemCondExtCostsMask(proto->CondExtendedCost, proto->ExtendedCost))
+            sLog.outErrorDb("Item (Entry: %u) has wrong ExtendedCost - CondExtendedCost pair (%u, %u)",i,proto->ExtendedCost,proto->CondExtendedCost);
 
         if(proto->FoodType >= MAX_PET_DIET)
         {
