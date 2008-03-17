@@ -626,6 +626,7 @@ CREATE TABLE `creature_template` (
   `modelid_H2` int(10) unsigned NOT NULL default '0',
   `name` char(100) NOT NULL default '0',
   `subname` char(100) default NULL,
+  `IconName` char(100) default NULL,
   `minlevel` tinyint(3) unsigned default '1',
   `maxlevel` tinyint(3) unsigned default '1',
   `minhealth` int(5) unsigned default '0',

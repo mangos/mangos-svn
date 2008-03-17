@@ -68,7 +68,7 @@ struct GameObjectInfo
             uint32 maxSuccessOpens;                         //5
             uint32 eventId;                                 //6
             uint32 _data7;
-            uint32 _data8;                                  //8 questId???
+            uint32 questId;                                 //8 not used currently but store quest required for GO activation for player
             uint32 _data9[5];
             uint32 _data14;                                 //14 something == trap.data12 == goober.data14 ???
         } chest;

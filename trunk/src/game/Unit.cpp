@@ -6924,7 +6924,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     float SpellModSpellDamage = 100.0f;
 
     if(Player* modOwner = GetSpellModOwner())
-        modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_SPELL_DAMAGE,SpellModSpellDamage);
+        modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_SPELL_BONUS_DAMAGE,SpellModSpellDamage);
 
     SpellModSpellDamage /= 100.0f;
 
@@ -7192,7 +7192,7 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     float SpellModSpellDamage = 100.0f;
 
     if(Player* modOwner = GetSpellModOwner())
-        modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_SPELL_DAMAGE,SpellModSpellDamage);
+        modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_SPELL_BONUS_DAMAGE,SpellModSpellDamage);
 
     SpellModSpellDamage /= 100.0f;
 
