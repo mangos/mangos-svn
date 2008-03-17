@@ -150,6 +150,7 @@ struct CreatureInfo
     uint32  DisplayID_H2;
     char*   Name;
     char*   SubName;
+    char*   IconName;
     uint32  minlevel;
     uint32  maxlevel;
     uint32  minhealth;

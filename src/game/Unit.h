@@ -88,7 +88,7 @@ enum SpellModOp
     SPELLMOD_CASTING_TIME_OLD       = 21,
     SPELLMOD_DOT                    = 22,
     SPELLMOD_EFFECT3                = 23,
-    SPELLMOD_SPELL_DAMAGE           = 24,
+    SPELLMOD_SPELL_BONUS_DAMAGE     = 24,
     // spellmod 25, 26 unused
     SPELLMOD_MULTIPLE_VALUE         = 27,
     SPELLMOD_RESIST_DISPEL_CHANCE   = 28
