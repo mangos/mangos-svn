@@ -639,6 +639,7 @@ pkgdata_DATA = \
 	5422_mangos_spell_proc_event.sql \
 	5441_characters_petition_petition_sign.sql \
 	5443_mangos_item_template.sql \
+	5445_mangos_spell_affect.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1258,4 +1259,5 @@ EXTRA_DIST = \
 	5422_mangos_spell_proc_event.sql \
 	5441_characters_petition_petition_sign.sql \
 	5443_mangos_item_template.sql \
+	5445_mangos_spell_affect.sql \
 	README
