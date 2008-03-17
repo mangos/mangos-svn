@@ -286,7 +286,7 @@ struct ItemDisplayInfoEntry
 struct ItemCondExtCostsEntry
 {
     // uint32      ID;
-    uint32      requiredarenarank;                          // ItemPrototype::RequiredArenaRank
+    uint32      condExtendedCost;                           // ItemPrototype::CondExtendedCost
     uint32      itemextendedcostentry;                      // ItemPrototype::ExtendedCost
     uint32      requirementtype;                            // 1 - honor and/or arena point from itemextendedcost
                                                             // 2 - required item(s) from itemextendedcost

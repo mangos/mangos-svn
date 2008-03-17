@@ -15334,8 +15334,8 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         {
             ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(pProto->ExtendedCost);
             uint32 mask = 0;
-            if(pProto->RequiredArenaRank)
-                mask = GetItemCondExtCostsMask(pProto->RequiredArenaRank, pProto->ExtendedCost);
+            if(pProto->CondExtendedCost)
+                mask = GetItemCondExtCostsMask(pProto->CondExtendedCost, pProto->ExtendedCost);
             if(iece)
             {
                 if(GetHonorPoints() < (iece->reqhonorpoints * count))
