@@ -138,7 +138,7 @@ void SpellCastTargets::Update(Unit* caster)
     }
 }
 
-bool SpellCastTargets::read ( WorldPacket * data,Unit *caster )
+bool SpellCastTargets::read ( WorldPacket * data, Unit *caster )
 {
     if(data->rpos()+2 > data->size())
         return false;
@@ -156,15 +156,15 @@ bool SpellCastTargets::read ( WorldPacket * data,Unit *caster )
     }
 
     if( m_targetMask & TARGET_FLAG_UNIT )
-        if(!readGUID(*data,m_unitTargetGUID))
+        if(!readGUID(*data, m_unitTargetGUID))
             return false;
 
     if( m_targetMask & ( TARGET_FLAG_OBJECT | TARGET_FLAG_OBJECT_UNK ))
-        if(!readGUID(*data,m_GOTargetGUID))
+        if(!readGUID(*data, m_GOTargetGUID))
             return false;
 
     if(( m_targetMask & ( TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM )) && caster->GetTypeId() == TYPEID_PLAYER)
-        if(!readGUID(*data,m_itemTargetGUID))
+        if(!readGUID(*data, m_itemTargetGUID))
             return false;
 
     if( m_targetMask & TARGET_FLAG_SOURCE_LOCATION )
@@ -173,7 +173,7 @@ bool SpellCastTargets::read ( WorldPacket * data,Unit *caster )
             return false;
 
         *data >> m_srcX >> m_srcY >> m_srcZ;
-        if(!MaNGOS::IsValidMapCoord(m_srcX,m_srcY))
+        if(!MaNGOS::IsValidMapCoord(m_srcX, m_srcY))
             return false;
     }
 
@@ -183,7 +183,7 @@ bool SpellCastTargets::read ( WorldPacket * data,Unit *caster )
             return false;
 
         *data >> m_destX >> m_destY >> m_destZ;
-        if(!MaNGOS::IsValidMapCoord(m_destX,m_destY))
+        if(!MaNGOS::IsValidMapCoord(m_destX, m_destY))
             return false;
     }
 
@@ -196,7 +196,7 @@ bool SpellCastTargets::read ( WorldPacket * data,Unit *caster )
     }
 
     if( m_targetMask & (TARGET_FLAG_CORPSE | TARGET_FLAG_PVP_CORPSE ) )
-        if(!readGUID(*data,m_CorpseTargetGUID))
+        if(!readGUID(*data, m_CorpseTargetGUID))
             return false;
 
     // find real units/GOs
@@ -207,10 +207,6 @@ bool SpellCastTargets::read ( WorldPacket * data,Unit *caster )
 void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
 {
     uint32 len = data->size();
-
-    // don't append targets when spell's for your own..
-    /*if(m_targetMask == TARGET_FLAG_SELF)
-     *data << (m_unitTarget ? m_unitTarget->GetGUID(): (uint64)0);*/
 
     if(m_targetMask & TARGET_FLAG_UNIT)
     {
@@ -3664,7 +3660,7 @@ uint8 Spell::CheckMana(uint32 *mana)
         else
             manaCost += float(m_spellInfo->ManaCostPercentage)/100.0f * m_caster->GetMaxPower(powerType);
     }
-    manaCost+= m_caster->GetInt32Value(UNIT_FIELD_POWER_COST_MODIFIER+m_spellInfo->School);
+    manaCost += m_caster->GetInt32Value(UNIT_FIELD_POWER_COST_MODIFIER+m_spellInfo->School);
 
     if(Player* modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost, this);
@@ -3751,7 +3747,6 @@ uint8 Spell::CheckItems()
         if(m_caster->GetTypeId() == TYPEID_PLAYER && !((Player*)m_caster)->HasItemFitToSpellReqirements(m_spellInfo))
             return SPELL_FAILED_EQUIPPED_ITEM_CLASS;
     }
-
 
     if(m_spellInfo->RequiresSpellFocus)
     {

@@ -121,7 +121,6 @@ void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
 
     normalizePlayerName(newp);
 
-
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname, _player))
             chn->SetOwner(_player->GetGUID(), newp.c_str());

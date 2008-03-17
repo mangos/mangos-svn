@@ -12427,7 +12427,7 @@ void Player::SendQuestReward( Quest const *pQuest, uint32 XP, Object * questGive
         data << uint32(0);
         data << uint32(pQuest->GetRewOrReqMoney() + int32(pQuest->GetRewMoneyMaxLevel() * sWorld.getRate(RATE_DROP_MONEY)));
     }
-    data << uint32(0);                                      //new 2.3.0, HonorPoints?
+    data << uint32(0);                                      // new 2.3.0, HonorPoints?
     data << uint32( pQuest->GetRewItemsCount() );
 
     for (uint32 i = 0; i < pQuest->GetRewItemsCount(); ++i)
@@ -13568,7 +13568,6 @@ void Player::_LoadDailyQuestStatus(QueryResult *result)
             ++quest_daily_idx;
 
             sLog.outDebug("Daily quest {%u} cooldown for player (GUID: %u)", quest_id, GetGUIDLow());
-
         }
         while( result->NextRow() );
 
@@ -14606,8 +14605,10 @@ void Player::Whisper(const uint64 receiver, const std::string text, uint32 langu
         GetSession()->SendPacket(&data);
     }
     else
+    {
         // announce to player that player he is whispering to is dnd and cannot receive his message
         ChatHandler(this).PSendSysMessage(LANG_PLAYER_DND, rPlayer->GetName(), rPlayer->dndMsg.c_str());
+    }
 
     if(!isAcceptWhispers())
     {
@@ -14621,9 +14622,7 @@ void Player::Whisper(const uint64 receiver, const std::string text, uint32 langu
 
     // if player whisper someone, auto turn of dnd to be able to receive an answer
     if(isDND() && !rPlayer->isGameMaster())
-    {
         ToggleDND();
-    }
 }
 
 void Player::PetSpellInitialize()

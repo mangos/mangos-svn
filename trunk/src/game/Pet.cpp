@@ -1555,7 +1555,7 @@ bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float 
 
     if(!IsPositionValid())
     {
-        sLog.outError("ERROR: Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %d Y: ^%d)",guidlow,Entry,x,y);
+        sLog.outError("ERROR: Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %d Y: ^%d)", guidlow, Entry, x, y);
         return false;
     }
 
@@ -1566,11 +1566,11 @@ bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float 
 
     m_DBTableGuid = guidlow;
 
-    SetUInt32Value(OBJECT_FIELD_ENTRY,Entry);
+    SetUInt32Value(OBJECT_FIELD_ENTRY, Entry);
     CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(Entry);
     if(!cinfo)
     {
-        sLog.outError("Error: creature entry %u does not exist.",Entry);
+        sLog.outError("Error: creature entry %u does not exist.", Entry);
         return false;
     }
 

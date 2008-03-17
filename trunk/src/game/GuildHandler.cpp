@@ -1702,7 +1702,6 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     pItemBank->SaveToDB();
                     pl->SaveInventoryAndGoldToDB();
                     pGuild->LogBankEvent(GUILD_BANK_LOG_DEPOSIT_ITEM, BankTab, pl->GetGUIDLow(), ItemEntry, SplitedAmount);
-
                 }
                 else                                        // Char <-> Bank swap items
                 {

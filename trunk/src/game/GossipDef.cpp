@@ -281,7 +281,7 @@ void PlayerMenu::SendTalking( char const * title, char const * text )
 
     pSession->SendPacket( &data );
 
-    sLog.outDebug(  "WORLD: Sent SMSG_NPC_TEXT_UPDATE " );
+    sLog.outDebug( "WORLD: Sent SMSG_NPC_TEXT_UPDATE " );
 }
 
 /*********************************************************/
@@ -590,7 +590,6 @@ void PlayerMenu::SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID,
     data << OfferRewardText;
 
     data << uint32( EnbleNext );
-
     data << uint32(0);                                      // unk
 
     uint32 EmoteCount = 0;
@@ -693,7 +692,6 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest const *pQuest, uint64 npcGUID
     data << npcGUID;
     data << pQuest->GetQuestId();
     data << Title;
-
     data << RequestItemsText;
 
     data << uint32(0x00);                                   // unk

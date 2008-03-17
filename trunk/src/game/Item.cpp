@@ -268,7 +268,7 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
 
     Field *fields = result->Fetch();
 
-    _Create(guid, HIGHGUID_ITEM);
+    Object::_Create(guid, HIGHGUID_ITEM);
 
     if(!LoadValues(fields[0].GetString()))
     {

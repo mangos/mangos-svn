@@ -130,7 +130,6 @@ bool IsAreaEffectTarget( Targets target )
     return false;
 }
 
-
 bool CanUsedWhileStealthed(uint32 spellId);
 bool IsMechanicInvulnerabilityImmunityToSpell(SpellEntry const* spellInfo);
 
@@ -139,7 +138,6 @@ bool IsChanneledSpell(SpellEntry const* spellInfo)
 {
     return spellInfo->ChannelInterruptFlags!=0;
 }
-
 
 // Spell affects related declarations (accessed using SpellMgr functions)
 struct SpellAffection

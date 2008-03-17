@@ -1126,7 +1126,7 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
     CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(Entry);
     if(!cinfo)
     {
-        sLog.outErrorDb("Error: creature entry %u does not exist.",Entry);
+        sLog.outErrorDb("Error: creature entry %u does not exist.", Entry);
         return false;
     }
 
@@ -1232,6 +1232,7 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
     {
         map->GetInstanceData()->OnCreatureCreate(this, Entry);
     }
+
     return true;
 }
 
