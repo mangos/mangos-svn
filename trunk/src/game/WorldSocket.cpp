@@ -414,7 +414,9 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     ///- Update the last_ip in the database
     //No SQL injection, username escaped.
-    loginDatabase.PExecute("UPDATE account SET last_ip = '%s' WHERE UPPER(username) = '%s'",GetRemoteAddress().c_str(), safe_account.c_str());
+    std::string address = GetRemoteAddress();
+    loginDatabase.escape_string(address);
+    loginDatabase.PExecute("UPDATE account SET last_ip = '%s' WHERE UPPER(username) = '%s'",address.c_str(), safe_account.c_str());
 
     // do small delay (10ms) at accepting successful authed connection to prevent droping packets by client
     // don't must harm anyone (let login ~100 accounts in 1 sec ;) )
