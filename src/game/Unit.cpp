@@ -3590,12 +3590,6 @@ bool Unit::AddAura(Aura *Aur)
     // take out same spell
     if (i != m_Auras.end())
     {
-        /*(*i).second->SetAuraDuration(Aur->GetAuraDuration());
-        if ((*i).second->GetTarget())
-        if ((*i).second->GetTarget()->GetTypeId() == TYPEID_PLAYER )
-        (*i).second->UpdateAuraDuration();
-        delete Aur;
-        return false;*/
         // passive and persistent auras can stack with themselves any number of times
         if (!Aur->IsPassive() && !Aur->IsPersistent() && m_Auras.count(spellEffectPair(Aur->GetId(), Aur->GetEffIndex())) >= Aur->GetSpellProto()->StackAmount)
             RemoveAura(i);
@@ -4022,28 +4016,6 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
         i = m_Auras.end();
     else
         i = m_Auras.begin();
-}
-
-bool Unit::SetAurDuration(uint32 spellId, uint32 effindex,uint32 duration)
-{
-    AuraMap::iterator iter = m_Auras.find(spellEffectPair(spellId, effindex));
-    if (iter != m_Auras.end())
-    {
-        (*iter).second->SetAuraDuration(duration);
-        (*iter).second->UpdateAuraDuration();
-        return true;
-    }
-    return false;
-}
-
-uint32 Unit::GetAurDuration(uint32 spellId, uint32 effindex)
-{
-    AuraMap::iterator iter = m_Auras.find(spellEffectPair(spellId, effindex));
-    if (iter != m_Auras.end())
-    {
-        return (*iter).second->GetAuraDuration();
-    }
-    return 0;
 }
 
 void Unit::RemoveAllAuras()
@@ -9586,9 +9558,8 @@ uint32 Unit::GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectT
                 break;
         }
 
-        AreaEffect = 
-            IsAreaEffectTarget(Targets(spellProto->EffectImplicitTargetA[i])) || 
-            IsAreaEffectTarget(Targets(spellProto->EffectImplicitTargetB[i]));
+        if(IsAreaEffectTarget(Targets(spellProto->EffectImplicitTargetA[i])) || IsAreaEffectTarget(Targets(spellProto->EffectImplicitTargetB[i])))
+            AreaEffect = true;
     }
 
     // Combined Spells with Both Over Time and Direct Damage
