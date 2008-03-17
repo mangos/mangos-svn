@@ -1443,7 +1443,7 @@ void SpellMgr::LoadSpellScriptTarget()
         }
         if(!targetfound)
         {
-            sLog.outErrorDb("Table `spell_script_target`: spellId %u listed for TargetEntry %u does not have any implecit target TARGET_SCRIPT(38).",spellId,targetEntry);
+            sLog.outErrorDb("Table `spell_script_target`: spellId %u listed for TargetEntry %u does not have any implicit target TARGET_SCRIPT(38).",spellId,targetEntry);
             continue;
         }
 
@@ -1585,6 +1585,3 @@ bool IsMechanicInvulnerabilityImmunityToSpell(SpellEntry const* spellInfo)
 
     return false;
 }
-
-
-

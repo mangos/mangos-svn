@@ -356,9 +356,8 @@ void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & /*recv_data*/ )
 
     CharacterDatabase.PExecute("DELETE FROM character_ticket WHERE guid = '%u' LIMIT 1",guid);
 
-    WorldPacket data( SMSG_GMTICKET_DELETETICKET, 8 );
+    WorldPacket data( SMSG_GMTICKET_DELETETICKET, 4 );
     data << uint32(9);
-    //data << uint32(0);
     SendPacket( &data );
 
     SendGMTicketGetTicket(0x0A, 0);
@@ -534,7 +533,7 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleFriendListOpcode( WorldPacket & /*recv_data*/ )
 {
-    sLog.outDebug( "WORLD: Received CMSG_FRIEND_LIST"  );
+    sLog.outDebug( "WORLD: Received CMSG_FRIEND_LIST" );
 
     GetPlayer()->SendFriendlist();
     GetPlayer()->SendIgnorelist();
@@ -542,9 +541,9 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & /*recv_data*/ )
 
 void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,1);
+    CHECK_PACKET_SIZE(recv_data, 1);
 
-    sLog.outDebug( "WORLD: Received CMSG_ADD_FRIEND"  );
+    sLog.outDebug( "WORLD: Received CMSG_ADD_FRIEND" );
 
     std::string friendName  = objmgr.GetMangosString(LANG_FRIEND_IGNORE_UNKNOWN,GetSessionLocaleIndex());
     uint8 friendResult      = FRIEND_NOT_FOUND;
@@ -563,7 +562,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     normalizePlayerName(friendName);
     CharacterDatabase.escape_string(friendName);            // prevent SQL injection - normal name don't must changed by this call
 
-    sLog.outDebug(  "WORLD: %s asked to add friend : '%s'",
+    sLog.outDebug( "WORLD: %s asked to add friend : '%s'",
         GetPlayer()->GetName(), friendName.c_str() );
 
     friendGuid = objmgr.GetPlayerGUIDByName(friendName);
@@ -596,23 +595,23 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
         if(!GetPlayer()->AddToFriendList(friendGuid, friendName))
         {
             friendResult = FRIEND_LIST_FULL;
-            sLog.outDebug(  "WORLD: %s's friend list is full.", GetPlayer()->GetName());
+            sLog.outDebug( "WORLD: %s's friend list is full.", GetPlayer()->GetName());
         }
 
-        sLog.outDebug(  "WORLD: %s Guid found '%u' area:%u Level:%u Class:%u. ",
+        sLog.outDebug( "WORLD: %s Guid found '%u' area:%u Level:%u Class:%u.",
             friendName.c_str(), GUID_LOPART(friendGuid), friendArea, friendLevel, friendClass);
     }
     else if(friendResult==FRIEND_ALREADY)
     {
-        sLog.outDebug(  "WORLD: %s Guid Already a Friend. ", friendName.c_str() );
+        sLog.outDebug( "WORLD: %s Guid Already a Friend.", friendName.c_str() );
     }
     else if(friendResult==FRIEND_SELF)
     {
-        sLog.outDebug(  "WORLD: %s Guid can't add himself. ", friendName.c_str() );
+        sLog.outDebug( "WORLD: %s Guid can't add himself.", friendName.c_str() );
     }
     else
     {
-        sLog.outDebug(  "WORLD: %s Guid not found. ", friendName.c_str() );
+        sLog.outDebug( "WORLD: %s Guid not found.", friendName.c_str() );
     }
 
     data << (uint8)friendResult << (uint64)friendGuid << (uint8)0;
@@ -626,12 +625,13 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleDelFriendOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,8);
+    CHECK_PACKET_SIZE(recv_data, 8);
 
     uint64 FriendGUID;
     uint8 FriendResult = FRIEND_REMOVED;
 
-    sLog.outDebug( "WORLD: Received CMSG_DEL_FRIEND"  );
+    sLog.outDebug( "WORLD: Received CMSG_DEL_FRIEND" );
+
     recv_data >> FriendGUID;
 
     GetPlayer()->RemoveFromFriendList(FriendGUID);
@@ -647,7 +647,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,1);
 
-    sLog.outDebug( "WORLD: Received CMSG_ADD_IGNORE"  );
+    sLog.outDebug( "WORLD: Received CMSG_ADD_IGNORE" );
 
     std::string IgnoreName = objmgr.GetMangosString(LANG_FRIEND_IGNORE_UNKNOWN,GetSessionLocaleIndex());
     unsigned char ignoreResult = FRIEND_IGNORE_NOT_FOUND;
@@ -661,7 +661,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
     normalizePlayerName(IgnoreName);
     CharacterDatabase.escape_string(IgnoreName);            // prevent SQL injection - normal name don't must changed by this call
 
-    sLog.outDebug(  "WORLD: %s asked to Ignore: '%s'",
+    sLog.outDebug( "WORLD: %s asked to Ignore: '%s'",
         GetPlayer()->GetName(), IgnoreName.c_str() );
 
     IgnoreGuid = objmgr.GetPlayerGUIDByName(IgnoreName);
@@ -683,19 +683,19 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
     {
         ignoreResult = FRIEND_IGNORE_ADDED;
 
-        GetPlayer()->AddToIgnoreList(IgnoreGuid,IgnoreName);
+        GetPlayer()->AddToIgnoreList(IgnoreGuid, IgnoreName);
     }
     else if(ignoreResult==FRIEND_IGNORE_ALREADY)
     {
-        sLog.outDebug(  "WORLD: %s Guid Already Ignored. ", IgnoreName.c_str() );
+        sLog.outDebug( "WORLD: %s Guid Already Ignored.", IgnoreName.c_str() );
     }
     else if(ignoreResult==FRIEND_IGNORE_SELF)
     {
-        sLog.outDebug(  "WORLD: %s Guid can't add himself. ", IgnoreName.c_str() );
+        sLog.outDebug( "WORLD: %s Guid can't add himself.", IgnoreName.c_str() );
     }
     else
     {
-        sLog.outDebug(  "WORLD: %s Guid not found. ", IgnoreName.c_str() );
+        sLog.outDebug( "WORLD: %s Guid not found.", IgnoreName.c_str() );
     }
 
     data << (uint8)ignoreResult << (uint64)IgnoreGuid;
@@ -706,11 +706,12 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleDelIgnoreOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,8);
+    CHECK_PACKET_SIZE(recv_data, 8);
 
     uint64 IgnoreGUID;
 
-    sLog.outDebug( "WORLD: Received CMSG_DEL_IGNORE"  );
+    sLog.outDebug( "WORLD: Received CMSG_DEL_IGNORE" );
+
     recv_data >> IgnoreGUID;
 
     unsigned char IgnoreResult = FRIEND_IGNORE_REMOVED;

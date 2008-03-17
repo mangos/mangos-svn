@@ -148,17 +148,18 @@ enum VictimState
 
 enum HitInfo
 {
-    HITINFO_NORMALSWING        = 0x00,
-    HITINFO_NORMALSWING2       = 0x02,
-    HITINFO_LEFTSWING          = 0x04,
-    HITINFO_MISS               = 0x10,
-    HITINFO_ABSORB             = 0x20,                      // plays absorb sound
-    HITINFO_RESIST             = 0x40,                      // resisted atleast some damage
-    HITINFO_CRITICALHIT        = 0x80,
-    HITINFO_GLANCING           = 0x4000,
-    HITINFO_CRUSHING           = 0x8000,
-    HITINFO_NOACTION           = 0x10000,
-    HITINFO_SWINGNOHITSOUND    = 0x80000
+    HITINFO_NORMALSWING         = 0x00000000,
+    HITINFO_UNK1                = 0x00000001,               // req correct packet structure
+    HITINFO_NORMALSWING2        = 0x00000002,
+    HITINFO_LEFTSWING           = 0x00000004,
+    HITINFO_MISS                = 0x00000010,
+    HITINFO_ABSORB              = 0x00000020,               // plays absorb sound
+    HITINFO_RESIST              = 0x00000040,               // resisted atleast some damage
+    HITINFO_CRITICALHIT         = 0x00000080,
+    HITINFO_GLANCING            = 0x00004000,
+    HITINFO_CRUSHING            = 0x00008000,
+    HITINFO_NOACTION            = 0x00010000,
+    HITINFO_SWINGNOHITSOUND     = 0x00080000
 };
 
 //i would like to remove this: (it is defined in item.h

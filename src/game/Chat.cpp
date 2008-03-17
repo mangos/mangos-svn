@@ -689,45 +689,17 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
                 target_guid = 0;                            // only for CHAT_MSG_WHISPER_INFORM used original value target_guid
             break;
     }
-    /*// in CHAT_MSG_WHISPER_INFORM mode used original target_guid
-    if (type == CHAT_MSG_SAY || type == CHAT_MSG_CHANNEL || type == CHAT_MSG_WHISPER ||
-        type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY || type == CHAT_MSG_RAID ||
-        type == CHAT_MSG_RAID_LEADER || type == CHAT_MSG_RAID_WARN ||
-        type == CHAT_MSG_GUILD || type == CHAT_MSG_OFFICER ||
-        type == CHAT_MSG_BATTLEGROUND_ALLIANCE || type == CHAT_MSG_BATTLEGROUND_HORDE ||
-        type == CHAT_MSG_BATTLEGROUND_CHAT || type == CHAT_MSG_BATTLEGROUND_LEADER)
-    {
-        target_guid = session ? session->GetPlayer()->GetGUID() : 0;
-    }
-    else if (type == CHAT_MSG_MONSTER_SAY)
-    {
-        *data << (uint64)(((Creature *)speaker)->GetGUID());
-        *data << (uint32)(strlen(((Creature *)speaker)->GetCreatureInfo()->Name) + 1);
-        *data << ((Creature *)speaker)->GetCreatureInfo()->Name;
-    }
-    else if (type != CHAT_MSG_WHISPER_INFORM && type != CHAT_MSG_IGNORED && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
-    {
-        target_guid = 0;                                    // only for CHAT_MSG_WHISPER_INFORM used original value target_guid
-    }*/
 
     *data << target_guid;                                   // there 0 for BG messages
-    *data << uint32(0);                                     //2.1.0 unk
+    *data << uint32(0);                                     // can be chat msg group or something
 
     if (type == CHAT_MSG_CHANNEL)
     {
         ASSERT(channelName);
         *data << channelName;
-        //*data << target_guid;
     }
-    /*if (type == CHAT_MSG_SYSTEM)
-    {
-        *data << (uint64)0;                                 // 2.1.0 unk
-    }
-    if (type == CHAT_MSG_SAY || type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY)
-        *data << target_guid;*/
 
-    *data << target_guid;                                   // WTF?, for type=3
-
+    *data << target_guid;
     *data << messageLength;
     *data << message;
     if(session != 0 && type != CHAT_MSG_WHISPER_INFORM && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)

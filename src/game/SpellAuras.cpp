@@ -2450,9 +2450,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
             if(BattleGround *bg = ((Player*)m_target)->GetBattleGround())
                 bg->HandleDropFlag((Player*)m_target);
 
-        // not apply flag for RACE_NIGHTELF stealth
-        if(GetId()!=20580)
-            m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_CREEP);
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_CREEP);
 
         // only at real aura add
         if(Real)
@@ -2475,6 +2473,8 @@ void Aura::HandleModStealth(bool apply, bool Real)
     }
     else
     {
+        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_CREEP);
+
         // only at real aura remove
         if(Real)
         {
@@ -2486,8 +2486,6 @@ void Aura::HandleModStealth(bool apply, bool Real)
                 reallyRemove = false;                       // vanish it timed out, but we have stealth active as well
             if(reallyRemove)
             {
-                m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_CREEP);
-
                 // apply only if not in GM invisibility
                 if(m_target->GetVisibility()!=VISIBILITY_OFF)
                 {
@@ -4212,42 +4210,10 @@ void Aura::HandleAuraEmpathy(bool apply, bool Real)
 
 void Aura::HandleAuraUntrackable(bool apply, bool Real)
 {
-    // value 100% blizz like (2.0.10)
-    m_target->ApplyModUInt32Value(UNIT_FIELD_BYTES_1, 0x4000000, apply);
-    /*
-    Packet offset 00
-    Packet number: 1
-    Opcode: 00A9
-    Object count: 1
-    Unk: 0
-    Update block for object 1:
-    Block offset 07
-    Updatetype: UPDATETYPE_VALUES
-    Object guid: 00000000004765CE
-    === values_update_block_start ===
-    Bit mask blocks count: 45
-    UNIT_FIELD_POWER1 (23): 1105
-    UNIT_FIELD_AURA1 (48): 13161
-    UNIT_FIELD_AURAFLAGS1 (104): 9
-    UNIT_FIELD_BYTES_1 (152): 67108864
-    === values_update_block_end ===
-
-    Packet offset 00
-    Packet number: 1
-    Opcode: 00A9
-    Object count: 1
-    Unk: 0
-    Update block for object 1:
-    Block offset 07
-    Updatetype: UPDATETYPE_VALUES
-    Object guid: 00000000004765CE
-    === values_update_block_start ===
-    Bit mask blocks count: 45
-    UNIT_FIELD_AURA1 (48): 0
-    UNIT_FIELD_AURAFLAGS1 (104): 0
-    UNIT_FIELD_BYTES_1 (152): 0
-    === values_update_block_end ===
-    */
+    if(apply)
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_UNTRACKABLE);
+    else
+        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_UNTRACKABLE);
 }
 
 void Aura::HandleAuraModPacify(bool apply, bool Real)

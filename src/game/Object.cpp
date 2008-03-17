@@ -56,7 +56,6 @@ uint32 GuidHigh2TypeId(uint32 guid_hi)
         case HIGHGUID_GAMEOBJECT:   return TYPEID_GAMEOBJECT;
         case HIGHGUID_DYNAMICOBJECT:return TYPEID_DYNAMICOBJECT;
         case HIGHGUID_CORPSE:       return TYPEID_CORPSE;
-        case HIGHGUID_PLAYER_CORPSE:return 10;              // unknown
         case HIGHGUID_MO_TRANSPORT: return TYPEID_GAMEOBJECT;
     }
     return 10;                                              // unknown
@@ -158,9 +157,6 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
     {
         // UPDATETYPE_CREATE_OBJECT2 dynamic objects, corpses...
         if(isType(TYPE_DYNAMICOBJECT) || isType(TYPE_CORPSE) || isType(TYPE_PLAYER))
-            /*** temporary reverted - until real source of stack corruption will not found
-            if(isType(TYPE_DYNAMICOBJECT) || isType(TYPE_CORPSE))
-            ***/
             updatetype = UPDATETYPE_CREATE_OBJECT2;
 
         // UPDATETYPE_CREATE_OBJECT2 for pets...

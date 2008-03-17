@@ -997,7 +997,7 @@ void Unit::CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, I
 {
     if(!spellInfo)
     {
-        sLog.outError("CastSpell: unknown spell ");
+        sLog.outError("CastSpell: unknown spell");
         return;
     }
 
@@ -1032,7 +1032,7 @@ void Unit::CastCustomSpell(Unit* Victim,SpellEntry const *spellInfo, int32 const
 {
     if(!spellInfo)
     {
-        sLog.outError("CastCustomSpell: unknown spell ");
+        sLog.outError("CastCustomSpell: unknown spell");
         return;
     }
 
@@ -1866,7 +1866,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
             }
             continue;
         }
-        
+
         int32 currentAbsorb;
 
         //Reflective Shield
@@ -2005,7 +2005,6 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
 
 void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDamage, uint32 *blocked_amount, SpellSchools damageType, uint32 *hitInfo, VictimState *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
 {
-
     MeleeHitOutcome outcome;
 
     // If is casted Melee spell, calculate like physical
@@ -2728,7 +2727,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
                     DEBUG_LOG ("RollMeleeOutcomeAgainst: BLOCKED CRIT");
                     return MELEE_HIT_BLOCK_CRIT;
                 }
-            } 
+            }
             DEBUG_LOG ("RollMeleeOutcomeAgainst: BLOCK <%d, %d)", sum-tmp, sum);
             return MELEE_HIT_BLOCK;
         }
@@ -4262,8 +4261,6 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, 
 
     data << (uint8)SwingType;
     data << (uint32)DamageType;
-
-    //
     data << (float)(Damage-AbsorbDamage-Resist-BlockedAmount);
     // still need to double check damage
     data << (uint32)(Damage-AbsorbDamage-Resist-BlockedAmount);
@@ -6601,7 +6598,7 @@ void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, bool c
     SendMessageToSet(&data, true);
 }
 
-void Unit::SendEnergizeSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage,Powers powertype, bool critical)
+void Unit::SendEnergizeSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, Powers powertype, bool critical)
 {
     WorldPacket data(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE, (8+8+4+4+4+1));
     data.append(pVictim->GetPackGUID());
@@ -9553,7 +9550,6 @@ void Unit::ApplyCastTimePercentMod(float val, bool apply )
         ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,-val,apply);
 }
 
-
 uint32 Unit::GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectType damagetype, uint32 CastingTime )
 {
     int32 overTime    = 0;
@@ -9619,5 +9615,3 @@ uint32 Unit::GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectT
 
     return CastingTime;
 }
-
-

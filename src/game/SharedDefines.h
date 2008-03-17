@@ -126,27 +126,27 @@ enum Stats
 
 enum Powers
 {
-    POWER_MANA                         = 0,
-    POWER_RAGE                         = 1,
-    POWER_FOCUS                        = 2,
-    POWER_ENERGY                       = 3,
-    POWER_HAPPINESS                    = 4
+    POWER_MANA                          = 0,
+    POWER_RAGE                          = 1,
+    POWER_FOCUS                         = 2,
+    POWER_ENERGY                        = 3,
+    POWER_HAPPINESS                     = 4
 };
 
-#define MAX_POWERS                       5
+#define MAX_POWERS                        5
 
 enum SpellSchools
 {
-    SPELL_SCHOOL_NORMAL                = 0,
-    SPELL_SCHOOL_HOLY                  = 1,
-    SPELL_SCHOOL_FIRE                  = 2,
-    SPELL_SCHOOL_NATURE                = 3,
-    SPELL_SCHOOL_FROST                 = 4,
-    SPELL_SCHOOL_SHADOW                = 5,
-    SPELL_SCHOOL_ARCANE                = 6
+    SPELL_SCHOOL_NORMAL                 = 0,
+    SPELL_SCHOOL_HOLY                   = 1,
+    SPELL_SCHOOL_FIRE                   = 2,
+    SPELL_SCHOOL_NATURE                 = 3,
+    SPELL_SCHOOL_FROST                  = 4,
+    SPELL_SCHOOL_SHADOW                 = 5,
+    SPELL_SCHOOL_ARCANE                 = 6
 };
 
-#define MAX_SPELL_SCHOOL                 7
+#define MAX_SPELL_SCHOOL                  7
 
 enum ItemQualities
 {
@@ -220,7 +220,7 @@ enum Language
     LANG_ADDON          = 0xFFFFFFFF                        // used by addons
 };
 
-#define LANGUAGES_COUNT 17
+#define LANGUAGES_COUNT   17
 
 enum Team
 {
