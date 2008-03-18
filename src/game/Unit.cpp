@@ -3607,7 +3607,7 @@ bool Unit::AddAura(Aura *Aur)
     }
 
     // update single target auras list (before aura add to aura list, to prevent unexpected remove recently added aura)
-    if (IsSingleTargetSpell(Aur->GetId()) && Aur->GetTarget() && Aur->GetSpellProto())
+    if (IsSingleTargetSpell(Aur->GetSpellProto()) && Aur->GetTarget() && Aur->GetSpellProto())
     {
         // caster pointer can be deleted in time aura remove, find it by guid at each iteration
         for(;;)
@@ -3909,7 +3909,7 @@ void Unit::RemoveAurasDueToItem(Item* castItem)
 
 void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
 {
-    if (IsSingleTargetSpell((*i).second->GetId()))
+    if (IsSingleTargetSpell((*i).second->GetSpellProto()))
     {
         if(Unit* caster = (*i).second->GetCaster())
         {

@@ -3613,7 +3613,7 @@ uint8 Spell::CheckRange(bool strict)
 
             uint32 original_casttime = GetSpellCastTime(sCastTimesStore.LookupEntry(m_spellInfo->CastingTimeIndex));
 
-            if (original_casttime!= 0 && !IsPositiveSpell(m_spellInfo->Id) && !IsSingleTargetSpell(m_spellInfo->Id))
+            if (original_casttime!= 0 && !IsPositiveSpell(m_spellInfo->Id) && !IsSingleTargetSpell(m_spellInfo))
                 return SPELL_FAILED_UNIT_NOT_INFRONT;
         }
     }
