@@ -1582,6 +1582,12 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
     if(apply)
     {
+        // remove other shapeshift before applying a new one
+        if(m_target->m_ShapeShiftForm)
+        {
+            m_target->RemoveAurasDueToSpell(m_target->m_ShapeShiftForm);
+        }
+        
         unit_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
         if(modelid > 0)
         {
@@ -4149,11 +4155,6 @@ void Aura::HandleShapeshiftBoosts(bool apply)
 
     if(apply)
     {
-        if(m_target->m_ShapeShiftForm)
-        {
-            m_target->RemoveAurasDueToSpell(m_target->m_ShapeShiftForm);
-        }
-
         if (spellId) m_target->CastSpell(m_target, spellId, true, NULL, this );
         if (spellId2) m_target->CastSpell(m_target, spellId2, true, NULL, this);
 

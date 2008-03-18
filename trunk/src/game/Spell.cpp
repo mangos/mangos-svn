@@ -2665,14 +2665,11 @@ uint8 Spell::CanCast(bool strict)
     }
 
     // Cannot be used in this stance/form
-    if (m_caster->GetTypeId()==TYPEID_PLAYER)
-    {
-        uint8 shapeError = GetErrorAtShapeshiftedCast(m_spellInfo, ((Player*)m_caster)->m_form);
-        if (shapeError)
-            return shapeError;
-    }
+    uint8 shapeError = GetErrorAtShapeshiftedCast(m_spellInfo, m_caster->m_form);
+    if (shapeError)
+        return shapeError;
 
-    if (m_spellInfo->Attributes & 0x20000 && !(m_caster->HasStealthAura()))
+    if (strict && (m_spellInfo->Attributes & 0x20000) && !(m_caster->HasStealthAura()))
         return SPELL_FAILED_ONLY_STEALTHED;
 
     // cancel autorepeat spells if cast start when moving
