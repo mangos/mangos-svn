@@ -649,7 +649,7 @@ void Player::HandleDrowning(uint32 UnderWaterTime)
         UnderWaterTime = uint32(UnderWaterTime * (100.0f + (*i)->GetModifier()->m_amount) / 100.0f);
 
     //if have water breath , then remove bar
-    if(waterbreath || !isAlive())
+    if(waterbreath || isGameMaster() || !isAlive())
     {
         StopMirrorTimer(BREATH_TIMER);
         m_isunderwater = 0;
