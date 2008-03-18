@@ -1154,6 +1154,18 @@ void Aura::TriggerSpell()
             originalCasterGUID = 0;
             break;
         }
+        // Skyshatter Regalia (Shaman Tier 6) - bonus
+        case 38443:
+        {
+            if( caster->m_TotemSlot[0] && caster->m_TotemSlot[1] &&
+                caster->m_TotemSlot[2] && caster->m_TotemSlot[3] )
+            {
+                caster->CastSpell(caster,38437,true);
+            }
+            else
+                caster->RemoveAurasDueToSpell(38437);
+            return;
+        }
     }
 
     if(!trigger_spell_id)
