@@ -1080,7 +1080,7 @@ CREATE TABLE `petition` (
   `type` int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (`ownerguid`,`type`),
   UNIQUE KEY `index_ownerguid_petitionguid` (`ownerguid`,`petitionguid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 
 --
 -- Dumping data for table `petition`
@@ -1103,7 +1103,7 @@ CREATE TABLE `petition_sign` (
   `player_account` int(11) unsigned NOT NULL default '0',
   `type` int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (`petitionguid`,`playerguid`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 --
 -- Dumping data for table `petition_sign`
 --
