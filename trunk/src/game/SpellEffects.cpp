@@ -530,8 +530,8 @@ void Spell::EffectDummy(uint32 i)
             // Gnomish Poultryizer trinket
             switch(m_spellInfo->Id )
             {
-                // Symbol of life (restore creature to life)
-                case 8593:
+                case 8593:                                  // Symbol of life (restore creature to life)
+                case 31225:                                 // Shimmering Vessel (restore creature to life)
                 {
                     if(!unitTarget || unitTarget->GetTypeId()!=TYPEID_UNIT)
                         return;
