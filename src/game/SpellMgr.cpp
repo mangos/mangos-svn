@@ -23,6 +23,7 @@
 #include "Database/DBCStores.h"
 #include "World.h"
 #include "Chat.h"
+#include "Spell.h"
 
 SpellMgr::SpellMgr()
 {
@@ -525,6 +526,44 @@ bool CanUsedWhileStealthed(uint32 spellId)
     if ( (spellInfo->AttributesEx & 32) == 32 || spellInfo->AttributesEx2 == 0x200000)
         return true;
     return false;
+}
+
+uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form)
+{
+    uint32 stanceMask = (form ? 1 << (form - 1) : 0);
+
+    if (stanceMask & spellInfo->StancesNot)         // can explicitly not be casted in this stance
+        return SPELL_FAILED_NOT_SHAPESHIFT;
+
+    if (stanceMask & spellInfo->Stances)            // can explicitly be casted in this stance
+        return 0;
+
+    bool actAsShifted = false;
+    if (form > 0)
+    {
+        SpellShapeshiftEntry const *shapeInfo = sSpellShapeshiftStore.LookupEntry(form);
+        if (!shapeInfo)
+        {
+            sLog.outError("GetErrorAtShapeshiftedCast: unknown shapeshift %u", form);
+            return 0;
+        }
+        actAsShifted = !(shapeInfo->flags1 & 1);    // shapeshift acts as normal form for spells
+    }
+    
+    if(actAsShifted)
+    {
+        if (spellInfo->Attributes & 0x10000)        // not while shapeshifted
+            return SPELL_FAILED_NOT_SHAPESHIFT;
+        else if (spellInfo->Stances != 0)           // needs other shapeshift
+            return SPELL_FAILED_ONLY_SHAPESHIFT;
+    }
+    else
+    {
+        if(!(spellInfo->AttributesEx2 & 0x80000) && spellInfo->Stances != 0) // needs shapeshift
+            return SPELL_FAILED_ONLY_SHAPESHIFT;
+    }
+
+    return 0;
 }
 
 void SpellMgr::LoadSpellTeleports()

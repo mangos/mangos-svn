@@ -144,6 +144,7 @@ extern DBCStorage <SpellItemEnchantmentConditionEntry> sSpellItemEnchantmentCond
 extern SpellCategoryStore                     sSpellCategoryStore;
 extern DBCStorage <SpellRadiusEntry>          sSpellRadiusStore;
 extern DBCStorage <SpellRangeEntry>           sSpellRangeStore;
+extern DBCStorage <SpellShapeshiftEntry>      sSpellShapeshiftStore;
 extern DBCStorage <SpellEntry>                sSpellStore;
 extern DBCStorage <StableSlotPricesEntry>     sStableSlotPricesStore;
 extern DBCStorage <TalentEntry>               sTalentStore;

@@ -1693,6 +1693,10 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         unit_target->m_form = 0;
     }
 
+    // adding/removing linked auras
+    // add/remove the shapeshift aura's boosts
+    HandleShapeshiftBoosts(apply);
+
     if(player)
         player->InitDataForForm();
 }

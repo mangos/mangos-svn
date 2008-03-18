@@ -431,7 +431,7 @@ struct SpellEntry
     uint32    AttributesExEx;                               // 10
                                                             // 11 not used
     uint32    Stances;                                      // 12
-                                                            // 13 not used
+    uint32    StancesNot;                                   // 13
     uint32    Targets;                                      // 14
     uint32    TargetCreatureType;                           // 15
     uint32    RequiresSpellFocus;                           // 16
@@ -552,6 +552,30 @@ struct SpellRangeEntry
     uint32    ID;
     float     minRange;
     float     maxRange;
+};
+
+struct SpellShapeshiftEntry
+{
+    uint32 ID;                      // 0
+    //uint32 buttonPosition;        // 1 unused
+    //char*  Name[16];              // 2-17 unused
+    //uint32 NameFlags;             // 18 unused
+    uint32 flags1;                  // 19
+    //uint32 unk0;                  // 20 unused
+    //uint32 unk1;                  // 21 unused
+    //uint32 attackSpeed;           // 22 unused
+    //uint32 modelID;               // 23 unused
+    //uint32 unk2;                  // 24 unused
+    //uint32 unk3;                  // 25 unused
+    //uint32 unk4;                  // 26 unused
+    //uint32 unk5;                  // 27 unused
+    //uint32 unk6;                  // 28 unused
+    //uint32 unk7;                  // 29 unused
+    //uint32 unk8;                  // 30 unused
+    //uint32 unk9;                  // 31 unused
+    //uint32 unk10;                 // 32 unused
+    //uint32 unk11;                 // 33 unused
+    //uint32 unk12;                 // 34 unused
 };
 
 struct SpellDurationEntry
