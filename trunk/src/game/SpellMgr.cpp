@@ -23,7 +23,6 @@
 #include "Database/DBCStores.h"
 #include "World.h"
 #include "Chat.h"
-#include "Spell.h"
 
 SpellMgr::SpellMgr()
 {
@@ -439,51 +438,6 @@ bool IsPositiveSpell(uint32 spellId)
     return true;
 }
 
-bool IsSingleTargetSpell(uint32 spellId)
-{
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-    if (!spellInfo)
-        return false;
-
-    // cheap shot is an exception
-    if ( spellId == 1833 || spellId == 14902 )
-        return false;
-
-    // hunter's mark and similar
-    if(spellInfo->SpellVisual == 3239)
-        return true;
-
-    // cannot be cast on another target while not cooled down anyway
-    int32 duration = GetSpellDuration(spellInfo);
-    if ( duration >= 0 && duration < int32(GetSpellRecoveryTime(spellInfo)))
-        return false;
-
-    // all other single target spells have if it has AttributesEx
-    if ( spellInfo->AttributesEx & (1<<18) )
-        return true;
-
-    // other single target
-    //Fear
-    if ((spellInfo->SpellIconID == 98 && spellInfo->SpellVisual == 336)
-        //Banish
-        || (spellInfo->SpellIconID == 96 && spellInfo->SpellVisual == 1305) )
-        return true;
-
-    // spell with single target specific types
-    switch(GetSpellSpecific(spellInfo->Id))
-    {
-        case SPELL_TRACKER:
-        case SPELL_ELEMENTAL_SHIELD:
-        case SPELL_MAGE_POLYMORPH:
-        case SPELL_JUDGEMENT:
-            return true;
-    }
-
-    // all other single target spells have if it has Attributes
-    //if ( spellInfo->Attributes & (1<<30) ) return true;
-    return false;
-}
-
 bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellInfo2)
 {
 
@@ -532,10 +486,10 @@ uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form)
 {
     uint32 stanceMask = (form ? 1 << (form - 1) : 0);
 
-    if (stanceMask & spellInfo->StancesNot)         // can explicitly not be casted in this stance
+    if (stanceMask & spellInfo->StancesNot)                 // can explicitly not be casted in this stance
         return SPELL_FAILED_NOT_SHAPESHIFT;
 
-    if (stanceMask & spellInfo->Stances)            // can explicitly be casted in this stance
+    if (stanceMask & spellInfo->Stances)                    // can explicitly be casted in this stance
         return 0;
 
     bool actAsShifted = false;
@@ -547,19 +501,20 @@ uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form)
             sLog.outError("GetErrorAtShapeshiftedCast: unknown shapeshift %u", form);
             return 0;
         }
-        actAsShifted = !(shapeInfo->flags1 & 1);    // shapeshift acts as normal form for spells
+        actAsShifted = !(shapeInfo->flags1 & 1);            // shapeshift acts as normal form for spells
     }
     
     if(actAsShifted)
     {
-        if (spellInfo->Attributes & 0x10000)        // not while shapeshifted
+        if (spellInfo->Attributes & 0x10000)                // not while shapeshifted
             return SPELL_FAILED_NOT_SHAPESHIFT;
-        else if (spellInfo->Stances != 0)           // needs other shapeshift
+        else if (spellInfo->Stances != 0)                   // needs other shapeshift
             return SPELL_FAILED_ONLY_SHAPESHIFT;
     }
     else
     {
-        if(!(spellInfo->AttributesEx2 & 0x80000) && spellInfo->Stances != 0) // needs shapeshift
+        // needs shapeshift
+        if(!(spellInfo->AttributesEx2 & 0x80000) && spellInfo->Stances != 0)
             return SPELL_FAILED_ONLY_SHAPESHIFT;
     }
 
