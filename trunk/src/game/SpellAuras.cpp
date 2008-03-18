@@ -1154,8 +1154,7 @@ void Aura::TriggerSpell()
             originalCasterGUID = 0;
             break;
         }
-        // Skyshatter Regalia (Shaman Tier 6) - bonus
-        case 38443:
+        case 38443:                                         // Skyshatter Regalia (Shaman Tier 6) - bonus
         {
             if( caster->m_TotemSlot[0] && caster->m_TotemSlot[1] &&
                 caster->m_TotemSlot[2] && caster->m_TotemSlot[3] )
@@ -1164,6 +1163,11 @@ void Aura::TriggerSpell()
             }
             else
                 caster->RemoveAurasDueToSpell(38437);
+            return;
+        }
+        case 31666:                                         // Master of Subtlety
+        {
+            caster->RemoveAurasDueToSpell(31665);
             return;
         }
     }
@@ -2523,6 +2527,22 @@ void Aura::HandleModStealth(bool apply, bool Real)
             }
         }
     }
+    // Master of Subtlety
+    Unit::AuraList const& mDummyAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
+    for(Unit::AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
+    {
+        if ((*i)->GetSpellProto()->SpellIconID == 2114)
+        {
+            if (apply)
+            {
+                int32 bp = (*i)->GetModifier()->m_amount;
+                m_target->CastCustomSpell(m_target,31665,&bp,NULL,NULL,true);
+            }
+            else
+                m_target->CastSpell(m_target,31666,true);
+            break;
+        }
+    }       
 }
 
 void Aura::HandleInvisibility(bool Apply, bool Real)

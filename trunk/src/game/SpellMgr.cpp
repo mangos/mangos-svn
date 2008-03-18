@@ -950,9 +950,12 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             }
             break;
         case SPELLFAMILY_ROGUE:
-            //if( spellInfo_2->SpellFamilyName == SPELLFAMILY_DRUID )
-            //{
-            //}
+            if( spellInfo_2->SpellFamilyName == SPELLFAMILY_ROGUE )
+            {
+                // Master of Subtlety
+                if (spellId_1 == 31665 && spellId_2 == 31666 || spellId_1 == 31666 && spellId_2 == 31665 )
+                    return false;
+            }
 
             // Garrote -> Garrote-Silence (multi-family check)
             if( spellInfo_1->SpellIconID == 498 && spellInfo_2->SpellIconID == 498 && spellInfo_2->SpellVisual == 0 )
