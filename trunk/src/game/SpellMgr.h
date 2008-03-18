@@ -132,6 +132,7 @@ bool IsAreaEffectTarget( Targets target )
 
 bool CanUsedWhileStealthed(uint32 spellId);
 bool IsMechanicInvulnerabilityImmunityToSpell(SpellEntry const* spellInfo);
+uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form);
 
 inline
 bool IsChanneledSpell(SpellEntry const* spellInfo)
