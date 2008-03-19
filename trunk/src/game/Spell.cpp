@@ -2664,11 +2664,11 @@ uint8 Spell::CanCast(bool strict)
             return SPELL_FAILED_NOT_READY;
     }
 
-    if (strict) //only check at first call, Stealth auras are already removed at second call
+    //only check at first call, Stealth auras are already removed at second call
+    if( strict )
     {
         // Cannot be used in this stance/form
-        uint8 shapeError = GetErrorAtShapeshiftedCast(m_spellInfo, m_caster->m_form);
-        if (shapeError)
+        if(uint8 shapeError = GetErrorAtShapeshiftedCast(m_spellInfo, m_caster->m_form))
             return shapeError;
 
         if ((m_spellInfo->Attributes & 0x20000) && !(m_caster->HasStealthAura()))
