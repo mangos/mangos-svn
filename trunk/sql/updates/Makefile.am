@@ -645,6 +645,7 @@ pkgdata_DATA = \
 	5457_realmd_account.sql \
 	5460_mangos_spell_proc_event.sql \
 	5462_mangos_spell_affect.sql \
+	5463_mangos_command.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1270,4 +1271,5 @@ EXTRA_DIST = \
 	5457_realmd_account.sql \
 	5460_mangos_spell_proc_event.sql \
 	5462_mangos_spell_affect.sql \
+	5463_mangos_command.sql \
 	README

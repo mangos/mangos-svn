@@ -3721,7 +3721,7 @@ void Spell::EffectScriptEffect(uint32 i)
             //Prevent stacking of mounts
             unitTarget->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
-            //Two seperate mounts depending on area id (allows use both in and out of specefic instance)
+            //Two seperate mounts depending on area id (allows use both in and out of specific instance)
             if (unitTarget->GetAreaId() == 3428)
                 unitTarget->CastSpell(unitTarget, 25863, true);
             else

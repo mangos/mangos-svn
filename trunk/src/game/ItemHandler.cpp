@@ -44,6 +44,9 @@ void WorldSession::HandleSplitItemOpcode( WorldPacket & recv_data )
     if(src==dst)
         return;
 
+    if (count==0)
+        return;                                             //check count - if zero it's fake packet
+
     _player->SplitItem( src, dst, count );
 }
 
