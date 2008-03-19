@@ -132,9 +132,10 @@ int AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
 
 uint32 AccountMgr::GetId(std::string username)
 {
+    std::transform( username.begin(), username.end(), username.begin(), ::toupper );
     loginDatabase.escape_string(username);
 
-    QueryResult *result = loginDatabase.PQuery("SELECT id FROM account WHERE UPPER(username)=UPPER('%s')", username.c_str());
+    QueryResult *result = loginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", username.c_str());
     if(!result)
         return 0;
     else
