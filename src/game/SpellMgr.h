@@ -270,14 +270,7 @@ bool IsPositiveSpell(uint32 spellId);
 bool IsPositiveEffect(uint32 spellId, uint32 effIndex);
 bool IsPositiveTarget(uint32 targetA, uint32 targetB);
 
-inline
-bool IsSingleTargetSpell(SpellEntry const *spellInfo)
-{
-    return spellInfo->AttributesExEx2 & 0x20;
-}
-
-
-
+bool IsSingleTargetSpell(SpellEntry const *spellInfo);
 bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellInfo2);
 
 inline
@@ -311,7 +304,7 @@ uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form);
 inline
 bool IsChanneledSpell(SpellEntry const* spellInfo)
 {
-    return spellInfo->AttributesExEx2 & 0x2000;
+    return spellInfo->ChannelInterruptFlags != 0;
 }
 
 // Spell affects related declarations (accessed using SpellMgr functions)
