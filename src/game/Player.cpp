@@ -5752,6 +5752,10 @@ void Player::UpdateArea(uint32 newArea)
         if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP) && !sWorld.IsFFAPvPRealm())
             RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
     }
+
+    // unmount if enter in this subzone
+    if( newArea == 35)
+        RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 }
 
 void Player::UpdateZone(uint32 newZone)
@@ -7728,7 +7732,7 @@ Item* Player::CreateItem( uint32 item, uint32 count ) const
         if ( count > pProto->Stackable )
             count = pProto->Stackable;
         if ( count < 1 )
-            count = 1;
+            return NULL;                                    //don'n create item at zero count
         if( pItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), item, const_cast<Player*>(this)) )
         {
             pItem->SetCount( count );
@@ -15233,14 +15237,23 @@ void Player::ProhibitSpellScholl(SpellSchools idSchool, uint32 unTimeMs )
 
 void Player::InitDataForForm()
 {
+    SpellShapeshiftEntry const* ssEntry = sSpellShapeshiftStore.LookupEntry(m_form);
+    if(ssEntry)
+    {
+        if(ssEntry->attackSpeed)
+        {
+            SetAttackTime(BASE_ATTACK,ssEntry->attackSpeed);
+            SetAttackTime(OFF_ATTACK,ssEntry->attackSpeed);
+            SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
+        }
+        else
+            SetRegularAttackTime();
+    }
+
     switch(m_form)
     {
         case FORM_CAT:
         {
-            SetAttackTime(BASE_ATTACK,1000);                //Speed 1
-            SetAttackTime(OFF_ATTACK,1000);                 //Speed 1
-            SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
-
             if(getPowerType()!=POWER_ENERGY)
                 setPowerType(POWER_ENERGY);
             break;
@@ -15248,18 +15261,12 @@ void Player::InitDataForForm()
         case FORM_BEAR:
         case FORM_DIREBEAR:
         {
-            SetAttackTime(BASE_ATTACK,2500);                //Speed 2.5
-            SetAttackTime(OFF_ATTACK,2500);                 //Speed 2.5
-            SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
-
             if(getPowerType()!=POWER_RAGE)
                 setPowerType(POWER_RAGE);
             break;
         }
         default:                                            // 0, for example
         {
-            SetRegularAttackTime();
-
             ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(getClass());
             if(cEntry && cEntry->powerType < MAX_POWERS && uint32(getPowerType()) != cEntry->powerType)
                 setPowerType(Powers(cEntry->powerType));

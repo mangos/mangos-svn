@@ -563,7 +563,7 @@ struct SpellShapeshiftEntry
     uint32 flags1;                  // 19
     //uint32 unk0;                  // 20 unused
     //uint32 unk1;                  // 21 unused
-    //uint32 attackSpeed;           // 22 unused
+    uint32 attackSpeed;             // 22
     //uint32 modelID;               // 23 unused
     //uint32 unk2;                  // 24 unused
     //uint32 unk3;                  // 25 unused

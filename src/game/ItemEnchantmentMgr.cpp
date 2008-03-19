@@ -195,9 +195,22 @@ uint32 GenerateEnchSuffixFactor(uint32 item_id)
         }
 
         //apply rare/epic armor modifier
-        if( (itemProto->Class == ITEM_CLASS_ARMOR) && (itemProto->Quality > ITEM_QUALITY_UNCOMMON))
+        switch (itemProto->Quality)
         {
-            suffixFactor *= ITEM_SUFFIXFACTOR_RARE_MOD;
+            case ITEM_QUALITY_POOR:
+            case ITEM_QUALITY_NORMAL:
+            case ITEM_QUALITY_UNCOMMON: 
+                break;
+            case ITEM_QUALITY_RARE:
+                suffixFactor *= ITEM_SUFFIXFACTOR_RARE_MOD;
+                break;
+            case ITEM_QUALITY_EPIC:
+                suffixFactor *= ITEM_SUFFIXFACTOR_EPIC_MOD;
+                break;
+            case ITEM_QUALITY_LEGENDARY:
+            case ITEM_QUALITY_ARTIFACT:
+                break;
+
         }
     }
 

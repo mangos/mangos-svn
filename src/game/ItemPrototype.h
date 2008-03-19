@@ -21,26 +21,27 @@
 
 #include "Common.h"
 
-#define    ITEM_SUFFIXFACTOR_HEAD_MOD           0.46
-#define    ITEM_SUFFIXFACTOR_NECK_MOD           0.26
-#define    ITEM_SUFFIXFACTOR_SHOULDERS_MOD      0.35
-#define    ITEM_SUFFIXFACTOR_CHEST_MOD          0.46
-#define    ITEM_SUFFIXFACTOR_WAIST_MOD          0.35
-#define    ITEM_SUFFIXFACTOR_LEGS_MOD           0.46
-#define    ITEM_SUFFIXFACTOR_FEET_MOD           0.34
-#define    ITEM_SUFFIXFACTOR_WRISTS_MOD         0.26
-#define    ITEM_SUFFIXFACTOR_HANDS_MOD          0.35
-#define    ITEM_SUFFIXFACTOR_FINGER_MOD         0.26
-#define    ITEM_SUFFIXFACTOR_SHIELD_MOD         0.25
-#define    ITEM_SUFFIXFACTOR_RANGED_MOD         0.14
-#define    ITEM_SUFFIXFACTOR_THROWN_MOD         0.14
-#define    ITEM_SUFFIXFACTOR_BACK_MOD           0.26
-#define    ITEM_SUFFIXFACTOR_2HAND_MOD          0.46
-#define    ITEM_SUFFIXFACTOR_MAIN_HAND_MOD      0.19
-#define    ITEM_SUFFIXFACTOR_ONE_HAND_MOD       0.19
-#define    ITEM_SUFFIXFACTOR_OFF_HAND_MOD       0.26
+#define    ITEM_SUFFIXFACTOR_HEAD_MOD           0.48f
+#define    ITEM_SUFFIXFACTOR_NECK_MOD           0.27f
+#define    ITEM_SUFFIXFACTOR_SHOULDERS_MOD      0.36f
+#define    ITEM_SUFFIXFACTOR_CHEST_MOD          0.48f
+#define    ITEM_SUFFIXFACTOR_WAIST_MOD          0.36f
+#define    ITEM_SUFFIXFACTOR_LEGS_MOD           0.48f
+#define    ITEM_SUFFIXFACTOR_FEET_MOD           0.36f
+#define    ITEM_SUFFIXFACTOR_WRISTS_MOD         0.27f
+#define    ITEM_SUFFIXFACTOR_HANDS_MOD          0.36f
+#define    ITEM_SUFFIXFACTOR_FINGER_MOD         0.27f
+#define    ITEM_SUFFIXFACTOR_SHIELD_MOD         0.27f
+#define    ITEM_SUFFIXFACTOR_RANGED_MOD         0.15f
+#define    ITEM_SUFFIXFACTOR_THROWN_MOD         0.15f
+#define    ITEM_SUFFIXFACTOR_BACK_MOD           0.27f
+#define    ITEM_SUFFIXFACTOR_2HAND_MOD          0.48f
+#define    ITEM_SUFFIXFACTOR_MAIN_HAND_MOD      0.20f
+#define    ITEM_SUFFIXFACTOR_ONE_HAND_MOD       0.20f
+#define    ITEM_SUFFIXFACTOR_OFF_HAND_MOD       0.27f
 
-#define    ITEM_SUFFIXFACTOR_RARE_MOD           1.24
+#define    ITEM_SUFFIXFACTOR_RARE_MOD           1.15f
+#define    ITEM_SUFFIXFACTOR_EPIC_MOD           1.30f
 
 enum ItemModType
 {
