@@ -253,11 +253,11 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     sLog.outDebug("Auth: client %u, unk2 %u, account %s, clientseed %u", BuiltNumberClient, unk2, account.c_str(), clientSeed);
 
     ///- Get the account information from the realmd database
-    std::string safe_account=account;                       // Duplicate, else will screw the SHA hash verification below
+    std::string safe_account = account;                     // Duplicate, else will screw the SHA hash verification below
     loginDatabase.escape_string(safe_account);
     //No SQL injection, username escaped.
     //                                                 0   1        2           3        4       5              6  7  8    9         10
-    QueryResult *result = loginDatabase.PQuery("SELECT id, gmlevel, sessionkey, last_ip, locked, sha_pass_hash, v, s, tbc, mutetime, locale FROM account WHERE UPPER(username) = '%s'", safe_account.c_str());
+    QueryResult *result = loginDatabase.PQuery("SELECT id, gmlevel, sessionkey, last_ip, locked, sha_pass_hash, v, s, tbc, mutetime, locale FROM account WHERE username = '%s'", safe_account.c_str());
 
     ///- Stop if the account is not found
     if ( !result )
@@ -295,7 +295,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     const char* sStr = s.AsHexStr();                        //Must be freed by OPENSSL_free()
     const char* vStr = v.AsHexStr();                        //Must be freed by OPENSSL_free()
     sLog.outDebug("SOCKET: (s,v) check s: %s v_old: %s v_new: %s", sStr, fields[6].GetString(), vStr );
-    loginDatabase.PExecute("UPDATE account SET v = '0', s = '0' WHERE UPPER(username) = '%s'", safe_account.c_str());
+    loginDatabase.PExecute("UPDATE account SET v = '0', s = '0' WHERE username = '%s'", safe_account.c_str());
     if ( strcmp(vStr,fields[6].GetString() ) )
     {
         packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
@@ -416,7 +416,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     //No SQL injection, username escaped.
     std::string address = GetRemoteAddress();
     loginDatabase.escape_string(address);
-    loginDatabase.PExecute("UPDATE account SET last_ip = '%s' WHERE UPPER(username) = '%s'",address.c_str(), safe_account.c_str());
+    loginDatabase.PExecute("UPDATE account SET last_ip = '%s' WHERE username = '%s'",address.c_str(), safe_account.c_str());
 
     // do small delay (10ms) at accepting successful authed connection to prevent droping packets by client
     // don't must harm anyone (let login ~100 accounts in 1 sec ;) )

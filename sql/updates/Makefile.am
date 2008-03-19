@@ -642,6 +642,7 @@ pkgdata_DATA = \
 	5445_mangos_spell_affect.sql \
 	5446_mangos_creature_template.sql \
 	5451_characters_petition_petition_sign.sql \
+	5457_realmd_account.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1264,4 +1265,5 @@ EXTRA_DIST = \
 	5445_mangos_spell_affect.sql \
 	5446_mangos_creature_template.sql \
 	5451_characters_petition_petition_sign.sql \
+	5457_realmd_account.sql \
 	README
