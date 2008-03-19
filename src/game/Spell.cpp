@@ -2664,13 +2664,16 @@ uint8 Spell::CanCast(bool strict)
             return SPELL_FAILED_NOT_READY;
     }
 
-    // Cannot be used in this stance/form
-    uint8 shapeError = GetErrorAtShapeshiftedCast(m_spellInfo, m_caster->m_form);
-    if (shapeError)
-        return shapeError;
+    if (strict) //only check at first call, Stealth auras are already removed at second call
+    {
+        // Cannot be used in this stance/form
+        uint8 shapeError = GetErrorAtShapeshiftedCast(m_spellInfo, m_caster->m_form);
+        if (shapeError)
+            return shapeError;
 
-    if (strict && (m_spellInfo->Attributes & 0x20000) && !(m_caster->HasStealthAura()))
-        return SPELL_FAILED_ONLY_STEALTHED;
+        if ((m_spellInfo->Attributes & 0x20000) && !(m_caster->HasStealthAura()))
+            return SPELL_FAILED_ONLY_STEALTHED;
+    }
 
     // cancel autorepeat spells if cast start when moving
     // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)

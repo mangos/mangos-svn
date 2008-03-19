@@ -437,8 +437,8 @@ struct SpellEntry
     uint32    RequiresSpellFocus;                           // 16
     uint32    CasterAuraState;                              // 17
     uint32    TargetAuraState;                              // 18
-                                                            // 19 not used
-                                                            // 20 not used
+                                                            // 19 not used CasterAuraStateNot?
+                                                            // 20 not used TargetAuraStateNot?
     uint32    CastingTimeIndex;                             // 21
     uint32    RecoveryTime;                                 // 22
     uint32    CategoryRecoveryTime;                         // 23
