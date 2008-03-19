@@ -438,6 +438,47 @@ bool IsPositiveSpell(uint32 spellId)
     return true;
 }
 
+bool IsSingleTargetSpell(SpellEntry const *spellInfo)
+{
+    // cheap shot is an exception
+    if ( spellInfo->Id == 1833 || spellInfo->Id == 14902 )
+        return false;
+
+    // hunter's mark and similar
+    if(spellInfo->SpellVisual == 3239)
+        return true;
+
+    // cannot be cast on another target while not cooled down anyway
+    int32 duration = GetSpellDuration(spellInfo);
+    if ( duration >= 0 && duration < int32(GetSpellRecoveryTime(spellInfo)))
+        return false;
+
+    // all other single target spells have if it has AttributesEx
+    if ( spellInfo->AttributesEx & (1<<18) )
+        return true;
+
+    // other single target
+    //Fear
+    if ((spellInfo->SpellIconID == 98 && spellInfo->SpellVisual == 336)
+        //Banish
+        || (spellInfo->SpellIconID == 96 && spellInfo->SpellVisual == 1305) )
+        return true;
+
+    // spell with single target specific types
+    switch(GetSpellSpecific(spellInfo->Id))
+    {
+        case SPELL_TRACKER:
+        case SPELL_ELEMENTAL_SHIELD:
+        case SPELL_MAGE_POLYMORPH:
+        case SPELL_JUDGEMENT:
+            return true;
+    }
+
+    // all other single target spells have if it has Attributes
+    //if ( spellInfo->Attributes & (1<<30) ) return true;
+    return false;
+}
+
 bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellInfo2)
 {
 

@@ -651,16 +651,12 @@ void WorldSession::LogoutPlayer(bool Save)
         if(_player->InBattleGround())
             _player->LeaveBattleground();
 
-        if(_player->InBattleGroundQueue())
+        for (int i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; i++)
         {
-            for (int i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; i++)
+            if(int32 bgTypeId = _player->GetBattleGroundQueueId(i))
             {
-                int32 bgTypeId = _player->GetBattleGroundQueueId(i);
-                if (bgTypeId != 0)
-                {
-                    _player->RemoveBattleGroundQueueId(bgTypeId);
-                    sBattleGroundMgr.m_BattleGroundQueues[ bgTypeId ].RemovePlayer(_player->GetGUID(), true);
-                }
+                _player->RemoveBattleGroundQueueId(bgTypeId);
+                sBattleGroundMgr.m_BattleGroundQueues[ bgTypeId ].RemovePlayer(_player->GetGUID(), true);
             }
         }
 

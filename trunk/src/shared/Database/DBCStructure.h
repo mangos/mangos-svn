@@ -429,7 +429,7 @@ struct SpellEntry
     uint32    AttributesEx2;                                // 8
     uint32    AttributesEx3;                                // 9
     uint32    AttributesExEx;                               // 10
-    uint32    AttributesExEx2;                              // 11
+                                                            // 11 not used
     uint32    Stances;                                      // 12
     uint32    StancesNot;                                   // 13
     uint32    Targets;                                      // 14

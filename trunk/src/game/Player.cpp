@@ -178,7 +178,10 @@ Player::Player (WorldSession *session): Unit( 0 )
 
     m_bgBattleGroundID = 0;
     for (int j=0; j < PLAYER_MAX_BATTLEGROUND_QUEUES; j++)
-        m_bgBattleGroundQueueID[j] = 0;
+    {
+        m_bgBattleGroundQueueID[j].bgType  = 0;
+        m_bgBattleGroundQueueID[j].invited = false;
+    }
 
     m_logintime = time(NULL);
     m_Last_tick = m_logintime;

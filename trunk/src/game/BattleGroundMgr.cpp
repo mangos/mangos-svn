@@ -328,20 +328,20 @@ bool BGQueueInviteEvent::Execute(uint64 /*e_time*/, uint32 p_time)
         return true;
 
     BattleGround* bg = sBattleGroundMgr.GetBattleGround(m_BgInstanceGUID);
-    if (bg)
+    if (!bg)
+        return true;
+
+    uint32 queueSlot = plr->GetBattleGroundQueueIndex(bg->GetTypeID());
+    if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES) // player is in queue
     {
-        uint32 queueSlot = plr->GetBattleGroundQueueIndex(bg->GetTypeID());
-        if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES) // player is in queue
+        // check if player is invited to this bg ... this check must be here, because when player leaves queue and joins another, it would cause a problems
+        BattleGroundQueue::QueuedPlayersMap const& qpMap = sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].m_QueuedPlayers[plr->GetBattleGroundQueueIdFromLevel()];
+        BattleGroundQueue::QueuedPlayersMap::const_iterator qItr = qpMap.find(m_PlayerGuid);
+        if (qItr != qpMap.end() && qItr->second.IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
         {
-            // check if player is invited to this bg ... this check must be here, because when player leaves queue and joins another, it would cause a problems
-            BattleGroundQueue::QueuedPlayersMap const& qpMap = sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].m_QueuedPlayers[plr->GetBattleGroundQueueIdFromLevel()];
-            BattleGroundQueue::QueuedPlayersMap::const_iterator qItr = qpMap.find(m_PlayerGuid);
-            if (qItr != qpMap.end() && qItr->second.IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
-            {
-                WorldPacket data;
-                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, plr->GetTeam(), queueSlot, STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME/2, 0);
-                plr->GetSession()->SendPacket(&data);
-            }
+            WorldPacket data;
+            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, plr->GetTeam(), queueSlot, STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME/2, 0);
+            plr->GetSession()->SendPacket(&data);
         }
     }
     return true;                                        //event will be deleted
@@ -364,23 +364,25 @@ bool BGQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
         return true;
 
     BattleGround* bg = sBattleGroundMgr.GetBattleGround(m_BgInstanceGUID);
-    if (bg)
+    if (!bg)
+        return true;
+
+    uint32 queueSlot = plr->GetBattleGroundQueueIndex(bg->GetTypeID());
+    if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES)         // player is in queue
     {
-        uint32 queueSlot = plr->GetBattleGroundQueueIndex(bg->GetTypeID());
-        if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES) // player is in queue
+        // check if player is invited to this bg ... this check must be here, because when player leaves queue and joins another, it would cause a problems
+        if (sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].m_QueuedPlayers[plr->GetBattleGroundQueueIdFromLevel()].find(m_PlayerGuid)->second.IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
         {
-            // check if player is invited to this bg ... this check must be here, because when player leaves queue and joins another, it would cause a problems
-            if (sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].m_QueuedPlayers[plr->GetBattleGroundQueueIdFromLevel()].find(m_PlayerGuid)->second.IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
-            {
-                plr->RemoveBattleGroundQueueId(bg->GetTypeID());
-                sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].RemovePlayer(m_PlayerGuid, true);
-                sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].Update(bg->GetTypeID(), bg->GetQueueType());
-                WorldPacket data;
-                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, plr->GetTeam(), queueSlot, STATUS_NONE, 0, 0);
-                plr->GetSession()->SendPacket(&data);
-            }
+            plr->RemoveBattleGroundQueueId(bg->GetTypeID());
+            sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].RemovePlayer(m_PlayerGuid, true);
+            sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].Update(bg->GetTypeID(), bg->GetQueueType());
+
+            WorldPacket data;
+            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, plr->GetTeam(), queueSlot, STATUS_NONE, 0, 0);
+            plr->GetSession()->SendPacket(&data);
         }
     }
+
     //event will be deleted
     return true;
 }
@@ -628,8 +630,11 @@ void BattleGroundMgr::InvitePlayer(Player* plr, uint32 bgInstanceGUID)
 {
     // set invited player counters:
     BattleGround* bg = this->GetBattleGround(bgInstanceGUID);
-    bg->IncreaseInvitedCount(plr->GetTeam());
+    if(!bg)
+        return;
 
+    bg->IncreaseInvitedCount(plr->GetTeam());
+    plr->SetInviteForBattleGroundType(bg->GetTypeID());
     // create invite events:
     //add events to player's counters ---- this is not good way - there should be something like global event processor, where we should add those events
     BGQueueInviteEvent* inviteEvent = new BGQueueInviteEvent(plr->GetGUID(), bgInstanceGUID);
