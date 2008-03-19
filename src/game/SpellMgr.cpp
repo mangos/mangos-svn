@@ -525,6 +525,12 @@ bool CanUsedWhileStealthed(uint32 spellId)
 
 uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form)
 {
+    // talents that learn spells can have stance requirements that need ignore
+    // (this requirement only for client-side stance show in talent description)
+    if( GetTalentSpellCost(spellInfo->Id) > 0 && 
+        (spellInfo->Effect[0]==SPELL_EFFECT_LEARN_SPELL || spellInfo->Effect[1]==SPELL_EFFECT_LEARN_SPELL || spellInfo->Effect[2]==SPELL_EFFECT_LEARN_SPELL) )
+        return 0;
+
     uint32 stanceMask = (form ? 1 << (form - 1) : 0);
 
     if (stanceMask & spellInfo->StancesNot)                 // can explicitly not be casted in this stance
