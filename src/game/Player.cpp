@@ -15238,17 +15238,14 @@ void Player::ProhibitSpellScholl(SpellSchools idSchool, uint32 unTimeMs )
 void Player::InitDataForForm()
 {
     SpellShapeshiftEntry const* ssEntry = sSpellShapeshiftStore.LookupEntry(m_form);
-    if(ssEntry)
+    if(ssEntry && ssEntry->attackSpeed)
     {
-        if(ssEntry->attackSpeed)
-        {
-            SetAttackTime(BASE_ATTACK,ssEntry->attackSpeed);
-            SetAttackTime(OFF_ATTACK,ssEntry->attackSpeed);
-            SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
-        }
-        else
-            SetRegularAttackTime();
+        SetAttackTime(BASE_ATTACK,ssEntry->attackSpeed);
+        SetAttackTime(OFF_ATTACK,ssEntry->attackSpeed);
+        SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
     }
+    else
+        SetRegularAttackTime();
 
     switch(m_form)
     {
