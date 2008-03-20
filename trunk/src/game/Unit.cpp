@@ -724,7 +724,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
 
             if(pet->GetTypeId()==TYPEID_UNIT && ((Creature*)pet)->isPet())
             {
-                uint32 petxp = MaNGOS::XP::BaseGain(getLevel(), pVictim->getLevel());
+                uint32 petxp = MaNGOS::XP::BaseGain(getLevel(), pVictim->getLevel(),
+                    PvP ? CONTENT_1_60 : GetContentLevelsForMapAndZone(pVictim->GetMapId(),pVictim->GetZoneId()));
                 ((Pet*)pet)->GivePetXP(petxp);
             }
         }

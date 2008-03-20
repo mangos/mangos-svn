@@ -45,13 +45,6 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
 
     GetPlayer()->SetSemaphoreTeleport(false);
 
-    // remove new continent flight forms
-    if(mEntry->MapID != 530)                                // non TBC map
-    {
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT);
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FLY);
-    }
-
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
     GetPlayer()->SendInitialPacketsAfterAddToMap();

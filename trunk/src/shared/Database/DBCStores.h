@@ -34,6 +34,16 @@ AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
 AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag,uint32 map_id);
 uint32 GetAreaFlagByMapId(uint32 mapid);
 inline bool IsNoDamageXPArea(uint32 area_id) { return area_id==3712 || area_id==3803; }
+
+uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId);
+
+enum ContentLevels
+{
+    CONTENT_1_60 = 0,
+    CONTENT_61_70
+};
+ContentLevels GetContentLevelsForMapAndZone(uint32 mapid, uint32 zoneId);
+
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id);
 
 bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId);
