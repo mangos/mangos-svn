@@ -5004,7 +5004,7 @@ void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map,char const* table)
         uint32 id    = fields[0].GetUInt32();
         uint32 quest = fields[1].GetUInt32();
 
-        if ( !mQuestTemplates[quest] )
+        if(mQuestTemplates.find(quest) == mQuestTemplates.end())
         {
             sLog.outErrorDb("Table `%s: Quest %u listed for entry %u does not exist.",table,quest,id);
             continue;
