@@ -5876,6 +5876,14 @@ void Player::UpdateZone(uint32 newZone)
             ++iter;
     }
 
+    // remove new continent flight forms
+    if( !isGameMaster() && 
+        GetVirtualMapForMapAndZone(GetMapId(),newZone) != 530)
+    {
+        RemoveSpellsCausingAura(SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT);
+        RemoveSpellsCausingAura(SPELL_AURA_FLY);
+    }
+
     // remove items with area/map limitations (delete only for alive player to allow back in ghost mode)
     // if player resurrected at teleport this will be applied in resurrect code
     if(isAlive())

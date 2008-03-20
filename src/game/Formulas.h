@@ -69,17 +69,18 @@ namespace MaNGOS
             return 17;
         }
 
-        inline uint32 BaseGain(uint32 pl_level, uint32 mob_level)
+        inline uint32 BaseGain(uint32 pl_level, uint32 mob_level, ContentLevels content)
         {
+            const uint32 nBaseExp = content == CONTENT_1_60 ? 45 : 235;
             if( mob_level >= pl_level )
-                return ((pl_level*5 + 45) * (20 + mob_level - pl_level)/10 + 1)/2;
+                return ((pl_level*5 + nBaseExp) * (20 + mob_level - pl_level)/10 + 1)/2;
             else
             {
                 uint32 gray_level = GetGrayLevel(pl_level);
                 if( mob_level > gray_level )
                 {
                     uint32 ZD = GetZeroDifference(pl_level);
-                    return (pl_level*5 + 45) * (ZD + mob_level - pl_level)/ZD;
+                    return (pl_level*5 + nBaseExp) * (ZD + mob_level - pl_level)/ZD;
                 }
                 return 0;
             }
@@ -90,7 +91,7 @@ namespace MaNGOS
             if(u->GetTypeId()==TYPEID_UNIT && ((Creature*)u)->isTotem() || ((Creature*)u)->isPet())
                 return 0;
 
-            uint32 xp_gain= BaseGain(pl->getLevel(), u->getLevel());
+            uint32 xp_gain= BaseGain(pl->getLevel(), u->getLevel(), GetContentLevelsForMapAndZone(u->GetMapId(),u->GetZoneId()));
             if( xp_gain == 0 )
                 return 0;
 

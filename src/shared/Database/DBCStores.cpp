@@ -471,6 +471,27 @@ uint32 GetAreaFlagByMapId(uint32 mapid)
         return i->second;
 }
 
+uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId)
+{
+    if(mapid != 530)                                        // speed for most cases
+        return mapid;
+
+    if(WorldMapAreaEntry const* wma = sWorldMapAreaStore.LookupEntry(zoneId))
+        return wma->virtual_map_id >= 0 ? wma->virtual_map_id : wma->map_id;
+
+    return mapid;
+}
+
+ContentLevels GetContentLevelsForMapAndZone(uint32 mapid, uint32 zoneId)
+{
+    mapid = GetVirtualMapForMapAndZone(mapid,zoneId);
+    if(mapid < 2)
+        return CONTENT_1_60;
+
+    MapEntry const* mapEntry = sMapStore.LookupEntry(mapid);
+    return !mapEntry || IsExpansionMap(mapEntry) ? CONTENT_1_60 : CONTENT_61_70;
+}
+
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
 {
     // not sorted, numbering index from 0

@@ -384,7 +384,15 @@ struct MapEntry
 
 inline bool IsExpansionMap(MapEntry const* map)
 {
-    return map && (map->MapID == 530 || map->parent_map == 530);
+    return map && (map->MapID == 530 || map->parent_map == 530 ||
+        // some maps have wrong parent map
+        map->MapID == 550 ||                                // Tempest Keep: The Eye
+        map->MapID == 552 ||                                // Tempest Keep: The Arcatraz
+        map->MapID == 553 ||                                // Tempest Keep: The Botanica
+        map->MapID == 554 ||                                // Tempest Keep: The Mechanar
+        map->MapID == 559 ||                                // Nagrand Arena
+        map->MapID == 562 ||                                // Blade's Edge Arena
+        map->MapID == 566 );                                // Eye of the Storm
 }
 
 struct SkillLineEntry
@@ -556,26 +564,26 @@ struct SpellRangeEntry
 
 struct SpellShapeshiftEntry
 {
-    uint32 ID;                      // 0
-    //uint32 buttonPosition;        // 1 unused
-    //char*  Name[16];              // 2-17 unused
-    //uint32 NameFlags;             // 18 unused
-    uint32 flags1;                  // 19
-    uint32 creatureType;            // 20 <=0 humanoid, other normal creature types
-    //uint32 unk1;                  // 21 unused
-    uint32 attackSpeed;             // 22
-    //uint32 modelID;               // 23 unused
-    //uint32 unk2;                  // 24 unused
-    //uint32 unk3;                  // 25 unused
-    //uint32 unk4;                  // 26 unused
-    //uint32 unk5;                  // 27 unused
-    //uint32 unk6;                  // 28 unused
-    //uint32 unk7;                  // 29 unused
-    //uint32 unk8;                  // 30 unused
-    //uint32 unk9;                  // 31 unused
-    //uint32 unk10;                 // 32 unused
-    //uint32 unk11;                 // 33 unused
-    //uint32 unk12;                 // 34 unused
+    uint32 ID;                                              // 0
+    //uint32 buttonPosition;                                // 1 unused
+    //char*  Name[16];                                      // 2-17 unused
+    //uint32 NameFlags;                                     // 18 unused
+    uint32 flags1;                                          // 19
+    uint32 creatureType;                                    // 20 <=0 humanoid, other normal creature types
+    //uint32 unk1;                                          // 21 unused
+    uint32 attackSpeed;                                     // 22
+    //uint32 modelID;                                       // 23 unused, alliance modelid (where horde case?)
+    //uint32 unk2;                                          // 24 unused
+    //uint32 unk3;                                          // 25 unused
+    //uint32 unk4;                                          // 26 unused
+    //uint32 unk5;                                          // 27 unused
+    //uint32 unk6;                                          // 28 unused
+    //uint32 unk7;                                          // 29 unused
+    //uint32 unk8;                                          // 30 unused
+    //uint32 unk9;                                          // 31 unused
+    //uint32 unk10;                                         // 32 unused
+    //uint32 unk11;                                         // 33 unused
+    //uint32 unk12;                                         // 34 unused
 };
 
 struct SpellDurationEntry
@@ -687,14 +695,14 @@ struct TotemCategoryEntry
 struct WorldMapAreaEntry
 {
     //uint32    ID;                                         // 0
-    //uint32    map_id;                                     // 1
+    uint32    map_id;                                       // 1
     uint32    area_id;                                      // 2 index (continent 0 areas ignored)
     //char*   internal_name                                 // 3
     float     y1;                                           // 4
     float     y2;                                           // 5
     float     x1;                                           // 6
     float     x2;                                           // 7
-    //int32   virtual_map_id;                               // 8 -1 (map_id have correct map) other: virtual map where zone show (map_id - where zone in fact internally)
+    int32   virtual_map_id;                                 // 8 -1 (map_id have correct map) other: virtual map where zone show (map_id - where zone in fact internally)
 };
 
 struct WorldSafeLocsEntry
