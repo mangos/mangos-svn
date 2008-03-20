@@ -1031,10 +1031,17 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 return false;
             break;
         case SPELLFAMILY_HUNTER:
+            if( spellInfo_2->SpellFamilyName == SPELLFAMILY_HUNTER )
+            {
+                // Rapid Fire & Quick Shots
+                if( (spellInfo_1->SpellFamilyFlags & 0x20) && (spellInfo_2->SpellFamilyFlags & 0x20000000000LL) ||
+                    (spellInfo_2->SpellFamilyFlags & 0x20) && (spellInfo_1->SpellFamilyFlags & 0x20000000000LL))
+                    return false;
+            }
+
             // Wing Clip -> Improved Wing Clip (multi-family check)
             if( (spellInfo_1->SpellFamilyFlags & 0x40) && spellInfo_2->Id == 19229 ) 
                 return false;
-
             break;
         case SPELLFAMILY_PALADIN:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_PALADIN )
