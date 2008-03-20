@@ -8535,24 +8535,11 @@ uint32 Unit::GetCreatureType() const
 {
     if(GetTypeId() == TYPEID_PLAYER)
     {
-        switch(((Player const*)this)->m_form)
-        {
-            case FORM_CAT:
-            case FORM_TRAVEL:
-            case FORM_AQUA:
-            case FORM_BEAR:
-            case FORM_DIREBEAR:
-            case FORM_GHOSTWOLF:
-            case FORM_SWIFT_FLIGHT:
-            case FORM_FLIGHT:
-                return CREATURE_TYPE_BEAST;
-            case FORM_TREE:
-            case FORM_SPIRITOFREDEMPTION:
-                return CREATURE_TYPE_ELEMENTAL;
-            case FORM_MOONKIN:
-            default:
-                return  CREATURE_TYPE_HUMANOID;
-        }
+        SpellShapeshiftEntry const* ssEntry = sSpellShapeshiftStore.LookupEntry(((Player*)this)->m_form);
+        if(ssEntry && ssEntry->creatureType > 0)
+            return ssEntry->creatureType;
+        else
+            return CREATURE_TYPE_HUMANOID;
     }
     else
         return ((Creature*)this)->GetCreatureInfo()->type;
