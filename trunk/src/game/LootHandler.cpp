@@ -271,11 +271,17 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,8);
 
     sLog.outDebug("WORLD: CMSG_LOOT_RELEASE");
-    Player  *player = GetPlayer();
-    Loot    *loot;
     uint64   lguid;
 
     recv_data >> lguid;
+
+    DoLootRelease(lguid);
+}
+
+void WorldSession::DoLootRelease( uint64 lguid )
+{
+    Player  *player = GetPlayer();
+    Loot    *loot;
 
     player->SetLootGUID(0);
     player->SendLootRelease(lguid);
