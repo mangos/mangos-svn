@@ -197,24 +197,23 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleLogoutRequestOpcode( WorldPacket & /*recv_data*/ )
 {
-    Player* Target = GetPlayer();
+    sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message, security - %u", GetSecurity() );
 
-    uint32 security = Target->GetSession()->GetSecurity();
-
-    sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message, security - %u", security );
+    if (uint64 lguid = GetPlayer()->GetLootGUID())
+        DoLootRelease(lguid);
 
     //instant logout for admins, gm's, mod's
-    if (security > SEC_PLAYER)
+    if( GetSecurity() > SEC_PLAYER )
     {
         LogoutPlayer(true);
         return;
     }
 
     //Can not logout if...
-    if( Target->isInCombat() ||                             //...is in combat
-        Target->duel         ||                             //...is in Duel
+    if( GetPlayer()->isInCombat() ||                        //...is in combat
+        GetPlayer()->duel         ||                        //...is in Duel
                                                             //...is jumping ...is falling
-        Target->HasMovementFlags( MOVEMENTFLAG_JUMPING | MOVEMENTFLAG_FALLING ))
+        GetPlayer()->HasMovementFlags( MOVEMENTFLAG_JUMPING | MOVEMENTFLAG_FALLING ))
     {
         WorldPacket data( SMSG_LOGOUT_RESPONSE, (2+4) ) ;
         data << (uint8)0xC;
@@ -226,7 +225,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & /*recv_data*/ )
     }
 
     //instant logout in taverns/cities
-    if(Target->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
+    if(GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
         LogoutPlayer(true);
         return;
@@ -235,14 +234,14 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & /*recv_data*/ )
     // not set flags if player can't free move to prevent lost state at logout cancel
     if(GetPlayer()->CanFreeMove())
     {
-        Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
-        Target->SetStandState(PLAYER_STATE_SIT);
+        GetPlayer()->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+        GetPlayer()->SetStandState(PLAYER_STATE_SIT);
 
         WorldPacket data( SMSG_FORCE_MOVE_ROOT, (8+4) );    // guess size
-        data.append(Target->GetPackGUID());
+        data.append(GetPlayer()->GetPackGUID());
         data << (uint32)2;
         SendPacket( &data );
-        Target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
+        GetPlayer()->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
     }
 
     WorldPacket data( SMSG_LOGOUT_RESPONSE, 5 );

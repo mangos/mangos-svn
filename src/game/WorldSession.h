@@ -181,6 +181,8 @@ class MANGOS_DLL_SPEC WorldSession
 
         void SendPartyMemberStatsChanged( uint64 Guid,  uint32 mask );
 
+        void DoLootRelease( uint64 lguid );
+
         // Account mute time
         time_t m_muteTime;
 
