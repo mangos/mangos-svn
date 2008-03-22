@@ -76,12 +76,12 @@ enum SpellAuraInterruptFlags
     AURA_INTERRUPT_FLAG_UNK9                = 0x00008000,   // 15
     AURA_INTERRUPT_FLAG_UNK10               = 0x00010000,   // 16
     AURA_INTERRUPT_FLAG_UNK11               = 0x00020000,   // 17
-    AURA_INTERRUPT_FLAG_NOT_SEATED          = 0x00040000    // 18   removed by standing up
-    AURA_INTERRUPT_FLAG_UNK11               = 0x00080000,   // 19   leaving area/getting teleported?
-    AURA_INTERRUPT_FLAG_UNK12               = 0x00100000,   // 20
-    AURA_INTERRUPT_FLAG_UNK13               = 0x00200000,   // 21
-    AURA_INTERRUPT_FLAG_UNK14               = 0x00400000,   // 22
-    AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT    = 0x00800000,   // 23   removed by entering pvp combat
+    AURA_INTERRUPT_FLAG_NOT_SEATED          = 0x00040000,   // 18   removed by standing up
+    AURA_INTERRUPT_FLAG_UNK12               = 0x00080000,   // 19   leaving area/getting teleported?
+    AURA_INTERRUPT_FLAG_UNK13               = 0x00100000,   // 20
+    AURA_INTERRUPT_FLAG_UNK14               = 0x00200000,   // 21
+    AURA_INTERRUPT_FLAG_UNK15               = 0x00400000,   // 22
+    AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT    = 0x00800000    // 23   removed by entering pvp combat
 };
 
 enum SpellModOp
