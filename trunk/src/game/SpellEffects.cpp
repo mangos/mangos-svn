@@ -659,6 +659,25 @@ void Spell::EffectDummy(uint32 i)
                     else                                    // backfire in 14% casts
                         m_caster->CastSpell(m_caster, 30457, true, m_CastItem);
                     return;
+                case 23453:                                 // Ultrasafe Transporter: Gadgetzan
+                {
+                    if ( roll_chance_i(50) )                // success
+                        m_caster->CastSpell(m_caster,23441,true);
+                    else                                    // failure
+                        m_caster->CastSpell(m_caster,23446,true);
+                    return;
+                }
+                case 23448:                                 // Ultrasafe Transporter: Gadgetzan - backfires
+                {
+                    int32 r = irand(0, 119);
+                    if ( r < 20 )                           // 1/6 polymorph
+                        m_caster->CastSpell(m_caster,23444,true);
+                    else if ( r < 100 )                     // 4/6 evil twin
+                        m_caster->CastSpell(m_caster,23445,true);
+                    else                                    // 1/6 miss the target
+                        m_caster->CastSpell(m_caster,36902,true);
+                    return;
+                }
             }
 
             //All IconID Check in there
@@ -1553,13 +1572,126 @@ void Spell::EffectTeleportUnits(uint32 /*i*/)
         return;
     }
 
+    // Transporter Malfunction
+    if ( m_spellInfo->Id == 36902 && m_caster->GetTypeId() == TYPEID_PLAYER )
+    {
+        float xpos = m_caster->GetPositionX()+urand(0,150)-75;
+        float ypos = m_caster->GetPositionY()+urand(0,150)-75;
+        float zpos = m_caster->GetPositionZ()+150;
+        ((Player*)m_caster)->TeleportTo(m_caster->GetMapId(),xpos,ypos,zpos,m_caster->GetOrientation());
+        return;
+    }
+
     SpellTeleport const* st = spellmgr.GetSpellTeleport(m_spellInfo->Id);
     if(!st)
     {
         sLog.outError( "SPELL: unknown Teleport coordinates for spell ID %u\n", m_spellInfo->Id );
         return;
     }
+
     ((Player*)unitTarget)->TeleportTo(st->target_mapId,st->target_X,st->target_Y,st->target_Z,st->target_Orientation);
+
+    // post effects
+    switch ( m_spellInfo->Id )
+    {
+        // Dimensional Ripper - Everlook
+        case 23442:
+        {
+            int32 r = irand(0, 119);
+            if ( r >= 60 )                                  // 6/12 success
+            {
+                if ( r < 100 )                              // 4/12 evil twin
+                    m_caster->CastSpell(m_caster,23445,true);
+                else if( r < 110 )                          // 1/12 fire
+                    m_caster->CastSpell(m_caster,23449,true);
+                else                                        // 1.12 miss
+                    m_caster->CastSpell(m_caster,36902,true);
+            }
+            return;
+        }
+        // Ultrasafe Transporter: Toshley's Station
+        case 36941:
+        {
+            if ( roll_chance_i(50) )                        // 50% success
+            {
+                int32 rand_eff = urand(1,7);
+                switch ( rand_eff )
+                {
+                    case 1:
+                        // soul split - evil
+                        m_caster->CastSpell(m_caster,36900,true);
+                        break;
+                    case 2:
+                        // soul split - good
+                        m_caster->CastSpell(m_caster,36901,true);
+                        break;
+                    case 3:
+                        // Increase the size
+                        m_caster->CastSpell(m_caster,36895,true);
+                        break;
+                    case 4:
+                        // Decrease the size
+                        m_caster->CastSpell(m_caster,36893,true);
+                        break;
+                    case 5:
+                    // Transform
+                    {
+                        if (((Player*)m_caster)->GetTeam() == ALLIANCE )
+                            m_caster->CastSpell(m_caster,36897,true);
+                        else
+                            m_caster->CastSpell(m_caster,36899,true);
+                        break;
+                    }
+                    case 6:
+                        // chicken
+                        m_caster->CastSpell(m_caster,36940,true);
+                        break;
+                    case 7:
+                        // evil twin
+                        m_caster->CastSpell(m_caster,23445,true);
+                        break;
+                }
+            }
+            return;
+        }
+        // Dimensional Ripper - Area 52
+        case 36890:
+        {
+            if ( roll_chance_i(50) )                        // 50% success
+            {
+                int32 rand_eff = urand(1,5);
+                switch ( rand_eff )
+                {
+                    case 1:
+                        // soul split - evil
+                        m_caster->CastSpell(m_caster,36900,true);
+                        break;
+                    case 2:
+                        // soul split - good
+                        m_caster->CastSpell(m_caster,36901,true);
+                        break;
+                    case 3:
+                        // Increase the size
+                        m_caster->CastSpell(m_caster,36895,true);
+                        break;
+                    case 4:
+                    // Transform
+                    {
+                        if (((Player*)m_caster)->GetTeam() == ALLIANCE )
+                            m_caster->CastSpell(m_caster,36897,true);
+                        else
+                            m_caster->CastSpell(m_caster,36899,true);
+                        break;
+                    }
+                    case 5:
+                        // miss
+                        m_caster->CastSpell(m_caster,36902,true);
+                        break;
+                }
+            }
+            return;
+        }
+    }
 }
 
 void Spell::EffectApplyAura(uint32 i)
