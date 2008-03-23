@@ -302,7 +302,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
         case 23335:                                         // BG spell
         case 34976:                                         // BG spell
             return true;
-        case 28441:                                         // not possitive dummy spell
+        case 28441:                                         // not positive dummy spell
             return false;
     }
 
@@ -325,6 +325,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                     switch(spellproto->Id)
                     {
                         case 13139:                         // net-o-matic special effect
+                        case 23445:                         // evil twin
                             return false;
                         default:
                             break;
@@ -359,10 +360,13 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                 case SPELL_AURA_PROC_TRIGGER_SPELL:
                     // many positive auras have negative triggered spells at damage for example and this not make it negative (it can be canceled for example)
                     break;
+                case SPELL_AURA_MOD_STUN:
                 case SPELL_AURA_MOD_ROOT:
                 case SPELL_AURA_MOD_SILENCE:
                 case SPELL_AURA_GHOST:
                 case SPELL_AURA_PERIODIC_LEECH:
+                case SPELL_AURA_MOD_PACIFY_SILENCE:
+                case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
                     return false;
                 case SPELL_AURA_MOD_DECREASE_SPEED:         // used in positive spells also
                     // part of positive spell if casted at self
@@ -371,6 +375,27 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                     // but not this if this first effect (don't found batter check)
                     if(spellproto->Attributes & 0x4000000 && effIndex==0)
                         return false;
+                    break;
+                case SPELL_AURA_TRANSFORM:
+                    // some spells negative
+                    switch(spellproto->Id)
+                    {
+                        case 36897:                         // Transporter Malfunction (race mutation to horde)
+                        case 36899:                         // Transporter Malfunction (race mutation to alliance)
+                            return false;
+                    }
+                    break;
+                case SPELL_AURA_MOD_SCALE:
+                    // some spells negative
+                    switch(spellproto->Id)
+                    {
+                        case 36900:                         // Soul Split: Evil!
+                        case 36901:                         // Soul Split: Good
+                        case 36893:                         // Transporter Malfunction (decrease size case)
+                        case 36895:                         // Transporter Malfunction (increase size case)
+                            return false;
+
+                    }
                     break;
                 case SPELL_AURA_MECHANIC_IMMUNITY:
                 {
