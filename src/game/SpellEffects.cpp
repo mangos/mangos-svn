@@ -1588,14 +1588,12 @@ void Spell::EffectTeleportUnits(uint32 /*i*/)
         case 23442:
         {
             int32 r = irand(0, 119);
-            if ( r >= 60 )                                  // 6/12 success
+            if ( r >= 70 )                                  // 7/12 success
             {
                 if ( r < 100 )                              // 4/12 evil twin
                     m_caster->CastSpell(m_caster,23445,true);
-                else if( r < 110 )                          // 1/12 fire
+                else                                        // 1/12 fire
                     m_caster->CastSpell(m_caster,23449,true);
-                else                                        // 1.12 miss
-                    m_caster->CastSpell(m_caster,36902,true);
             }
             return;
         }
@@ -1649,7 +1647,7 @@ void Spell::EffectTeleportUnits(uint32 /*i*/)
         {
             if ( roll_chance_i(50) )                        // 50% success
             {
-                int32 rand_eff = urand(1,5);
+                int32 rand_eff = urand(1,4);
                 switch ( rand_eff )
                 {
                     case 1:
@@ -1673,10 +1671,6 @@ void Spell::EffectTeleportUnits(uint32 /*i*/)
                             m_caster->CastSpell(m_caster,36899,true);
                         break;
                     }
-                    case 5:
-                        // miss
-                        m_caster->CastSpell(m_caster,36902,true);
-                        break;
                 }
             }
             return;
