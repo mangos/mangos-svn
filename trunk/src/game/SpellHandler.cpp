@@ -372,7 +372,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
             obj->AddUniqueUse(GetPlayer());
 
-            // full ammount unique participants including original summoner
+            // full amount unique participants including original summoner
             if(obj->GetUniqueUseCount() < info->summoningRitual.reqParticipants)
                 return;
 
