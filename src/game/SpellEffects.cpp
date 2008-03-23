@@ -2270,7 +2270,7 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                     if(player->GetQuestStatus(gameObjTarget->GetGOInfo()->goober.questId) != QUEST_STATUS_INCOMPLETE)
                         return;
 
-                gameObjTarget->AddUse();
+                gameObjTarget->AddUniqueUse(player);
                 gameObjTarget->SetLootState(GO_LOOTED);
                 player->CastedCreatureOrGO(gameObjTarget->GetEntry(), gameObjTarget->GetGUID(), 0);
 

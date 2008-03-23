@@ -392,7 +392,7 @@ void GameObject::Refresh()
 
 void GameObject::AddUniqueUse(Player* player)
 {
-    ++m_usetimes;
+    AddUse();
     m_unique_users.insert(player->GetGUIDLow());
 }
 
