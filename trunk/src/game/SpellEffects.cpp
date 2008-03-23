@@ -1572,16 +1572,6 @@ void Spell::EffectTeleportUnits(uint32 /*i*/)
         return;
     }
 
-    // Transporter Malfunction
-    if ( m_spellInfo->Id == 36902 && m_caster->GetTypeId() == TYPEID_PLAYER )
-    {
-        float xpos = m_caster->GetPositionX()+urand(0,150)-75;
-        float ypos = m_caster->GetPositionY()+urand(0,150)-75;
-        float zpos = m_caster->GetPositionZ()+150;
-        ((Player*)m_caster)->TeleportTo(m_caster->GetMapId(),xpos,ypos,zpos,m_caster->GetOrientation());
-        return;
-    }
-
     SpellTeleport const* st = spellmgr.GetSpellTeleport(m_spellInfo->Id);
     if(!st)
     {
