@@ -133,7 +133,7 @@ struct GameObjectInfo
         {
             uint32 spellId;                                 //0
             uint32 charges;                                 //1
-            uint32 _data2;
+            uint32 partyOnly;                               //2
             uint32 spellId2;                                //3 (is it used in this way?)
         } spellcaster;
         //23 GAMEOBJECT_TYPE_MEETINGSTONE
