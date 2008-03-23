@@ -400,14 +400,23 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
 
             info = obj->GetGOInfo();
-            if(info)
-            {
-                spellId = info->spellcaster.spellId;
-                if (spellId == 0)
-                    spellId = info->spellcaster.spellId2;
+            if(!info)
+                return;
 
-                //guid=_player->GetGUID();
+            if(info->spellcaster.partyOnly)
+            {
+                Unit* caster = obj->GetOwner();
+                if( !caster || caster->GetTypeId()!=TYPEID_PLAYER )
+                    return;
+
+                if(!GetPlayer()->IsInSameRaidWith((Player*)caster))
+                    return;
             }
+
+            spellId = info->spellcaster.spellId;
+            if (spellId == 0)
+                spellId = info->spellcaster.spellId2;
+
             obj->AddUse();
             break;
         }
