@@ -1879,30 +1879,33 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
         //Reflective Shield
         if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_PRIEST && (*i)->GetSpellProto()->SpellFamilyFlags == 0x1)
         {
-            AuraList const& vOverRideCS = pVictim->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-            for(AuraList::const_iterator k = vOverRideCS.begin(); k != vOverRideCS.end(); ++k)
+            if(Unit* caster = (*i)->GetCaster())
             {
-                int32 reflect_damage = 0;
-                switch((*k)->GetModifier()->m_miscvalue)
+                AuraList const& vOverRideCS = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                for(AuraList::const_iterator k = vOverRideCS.begin(); k != vOverRideCS.end(); ++k)
                 {
-                    case 5065:                              // Rank 1
-                    case 5064:                              // Rank 2
-                    case 5063:                              // Rank 3
-                    case 5062:                              // Rank 4
-                    case 5061:                              // Rank 5
+                    int32 reflect_damage = 0;
+                    switch((*k)->GetModifier()->m_miscvalue)
                     {
-                        if(RemainingDamage >= (*i)->GetModifier()->m_amount)
-                            reflect_damage = (*i)->GetModifier()->m_amount * (*k)->GetModifier()->m_amount/100;
-                        else
-                            reflect_damage = (*k)->GetModifier()->m_amount * RemainingDamage/100;
-                        pVictim->CastCustomSpell(this, 33619, &reflect_damage, NULL, NULL, true, NULL, *i);
+                        case 5065:                          // Rank 1
+                        case 5064:                          // Rank 2
+                        case 5063:                          // Rank 3
+                        case 5062:                          // Rank 4
+                        case 5061:                          // Rank 5
+                        {
+                            if(RemainingDamage >= (*i)->GetModifier()->m_amount)
+                                reflect_damage = (*i)->GetModifier()->m_amount * (*k)->GetModifier()->m_amount/100;
+                            else
+                                reflect_damage = (*k)->GetModifier()->m_amount * RemainingDamage/100;
+                            pVictim->CastCustomSpell(this, 33619, &reflect_damage, NULL, NULL, true, NULL, *i);
 
-                    } break;
-                    default: break;
+                        } break;
+                        default: break;
+                    }
+
+                    if(reflect_damage)
+                        break;
                 }
-
-                if(reflect_damage)
-                    break;
             }
         }
 
@@ -5570,7 +5573,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             if(auraSpellInfo->SpellFamilyFlags & 0x00080000000000LL)
             {
                 if (triggeredByAura->GetModifier()->m_amount == 0)
-                    break;
+                    return;
                 int32 improvedLotPBasePoints0 = triggeredByAura->GetModifier()->m_amount * GetMaxHealth() / 100;
                 CastCustomSpell(this, 34299, &improvedLotPBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
                 if (GetTypeId() == TYPEID_PLAYER)
