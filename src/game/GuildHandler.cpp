@@ -1823,13 +1823,19 @@ void WorldSession::HandleGuildBankModifyTab( WorldPacket & recv_data )
     recv_data.hexlike();
     uint64 GoGuid;
     uint8 TabId;
-    std::string Name = "";
-    std::string IconIndex = "";
+    std::string Name;
+    std::string IconIndex;
 
     recv_data >> GoGuid;
     recv_data >> TabId;
     recv_data >> Name;
     recv_data >> IconIndex;
+
+    if(Name.empty())
+        return;
+
+    if(IconIndex.empty())
+        return;
 
     if (!objmgr.IsGuildVaultGameObject((uint32)GoGuid))
         return;

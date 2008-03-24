@@ -2552,6 +2552,9 @@ void Spell::TakePower(uint32 mana)
 
 void Spell::TakeReagents()
 {
+    if(m_IsTriggeredSpell)                                  // reagents used in triggered spell removed by original spell or don't must be removed.
+        return;
+
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
