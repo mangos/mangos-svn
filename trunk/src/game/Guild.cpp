@@ -1002,6 +1002,9 @@ void Guild::SetGuildBankTabInfo(uint8 TabId, std::string Name, std::string Icon)
 
     m_TabListMap[TabId]->Name = Name;
     m_TabListMap[TabId]->Icon = Icon;
+
+    CharacterDatabase.escape_string(Name);
+    CharacterDatabase.escape_string(Icon);
     CharacterDatabase.PExecute("UPDATE guild_bank_tab SET TabName='%s',TabIcon='%s' WHERE guildid='%u' AND TabId='%u'", Name.c_str(), Icon.c_str(), Id, uint32(TabId));
 }
 
