@@ -41,6 +41,8 @@ int AccountMgr::CreateAccount(std::string username, std::string password)
     if(username.length() > 16)
         return 1;                                           // username's too long
 
+    std::transform( username.begin(), username.end(), username.begin(), ::toupper );
+
     loginDatabase.escape_string(username);
     QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM account WHERE username='%s'", username.c_str());
     if(result)
