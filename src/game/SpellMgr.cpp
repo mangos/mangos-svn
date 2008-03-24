@@ -686,8 +686,8 @@ void SpellMgr::LoadSpellAffects()
 
     uint32 count = 0;
 
-    //                                                0      1         2        3           4         5        6            7                8
-    QueryResult *result = WorldDatabase.Query("SELECT entry, effectId, SpellId, SchoolMask, Category, SkillID, SpellFamily, SpellFamilyMask, Charges FROM spell_affect");
+    //                                                0      1         2            3                4
+    QueryResult *result = WorldDatabase.Query("SELECT entry, effectId, SpellFamily, SpellFamilyMask, Charges FROM spell_affect");
     if( !result )
     {
 
@@ -736,13 +736,9 @@ void SpellMgr::LoadSpellAffects()
 
         SpellAffection sa;
 
-        sa.SpellId = fields[2].GetUInt16();
-        sa.SchoolMask = fields[3].GetUInt8();
-        sa.Category = fields[4].GetUInt16();
-        sa.SkillId = fields[5].GetUInt16();
-        sa.SpellFamily = fields[6].GetUInt8();
-        sa.SpellFamilyMask = fields[7].GetUInt64();
-        sa.Charges = fields[8].GetUInt16();
+        sa.SpellFamily = fields[2].GetUInt8();
+        sa.SpellFamilyMask = fields[3].GetUInt64();
+        sa.Charges = fields[4].GetUInt16();
 
         mSpellAffectMap.insert(SpellAffectMap::value_type((entry<<8) + effectId,sa));
 
@@ -786,20 +782,8 @@ bool SpellMgr::IsAffectedBySpell(SpellEntry const *spellInfo, uint32 spellId, ui
 
     if (spellAffect )
     {
-        if (spellAffect->SpellId && (spellAffect->SpellId == spellInfo->Id))
-            return true;
-        if (spellAffect->SchoolMask && (spellAffect->SchoolMask & (1 << spellInfo->School)))
-            return true;
-        if (spellAffect->Category && (spellAffect->Category == spellInfo->Category))
-            return true;
-        if (spellAffect->SkillId)
-        {
-            SkillLineAbilityEntry const *skillLineEntry = sSkillLineAbilityStore.LookupEntry(spellInfo->Id);
-            if(skillLineEntry && skillLineEntry->skillId == spellAffect->SkillId)
-                return true;
-        }
-        if (spellAffect->SpellFamily && spellAffect->SpellFamily == spellInfo->SpellFamilyName)
-            return true;
+        if (spellAffect->SpellFamily && spellAffect->SpellFamily != spellInfo->SpellFamilyName)
+            return false;
 
         if (spellAffect->SpellFamilyMask && (spellAffect->SpellFamilyMask & spellInfo->SpellFamilyFlags))
             return true;

@@ -310,10 +310,6 @@ bool IsChanneledSpell(SpellEntry const* spellInfo)
 // Spell affects related declarations (accessed using SpellMgr functions)
 struct SpellAffection
 {
-    uint16 SpellId;
-    uint8 SchoolMask;
-    uint16 Category;
-    uint16 SkillId;
     uint8 SpellFamily;
     uint64 SpellFamilyMask;
     uint16 Charges;
