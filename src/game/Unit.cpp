@@ -3925,6 +3925,17 @@ void Unit::RemoveAurasDueToItem(Item* castItem)
             ++iter;
     }
 }
+ 
+void Unit::RemoveAurasWithInterruptFlags(uint32 flags)
+{
+    for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); )
+    {
+        if (iter->second->GetSpellProto()->AuraInterruptFlags & flags)
+            RemoveAura(iter);
+        else
+            ++iter;
+    }
+}
 
 void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
 {
