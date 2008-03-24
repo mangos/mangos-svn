@@ -516,17 +516,7 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
         _player->SetUInt32Value(UNIT_FIELD_BYTES_1 , bytes1);
 
         if (_player->IsStandState())
-        {
-            // cancel drinking / eating
-            Unit::AuraMap& p_auras = _player->GetAuras();
-            for (Unit::AuraMap::iterator itr = p_auras.begin(); itr != p_auras.end();)
-            {
-                if (itr->second && (itr->second->GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) != 0)
-                    _player->RemoveAura(itr);
-                else
-                    ++itr;
-            }
-        }
+            _player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_SEATED);
     }
 }
 

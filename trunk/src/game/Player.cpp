@@ -1878,23 +1878,8 @@ void Player::SetInWater(bool apply)
     //TODO: exist also swimming mobs, and function must be symmetric to enter/leave water
     m_isInWater = apply;
 
-    // form update
-    if(apply)
-    {
-        // remove travel forms
-        if(m_form == FORM_TRAVEL || m_form == FORM_GHOSTWOLF)
-            RemoveAurasDueToSpell(m_ShapeShiftForm);
-
-        // remove mounts, check flight mounts also (flying=swimming in air :D)
-        if(IsMounted() && !IsFlying())
-            RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
-    }
-    else
-    {
-        // remove aqua form
-        if(m_form == FORM_AQUA)
-            RemoveAurasDueToSpell(m_ShapeShiftForm);
-    }
+    // remove auras that need water/land
+    RemoveAurasWithInterruptFlags(apply ? AURA_INTERRUPT_FLAG_NOT_ABOVEWATER : AURA_INTERRUPT_FLAG_NOT_UNDERWATER);
 
     getHostilRefManager().updateThreatTables();
 }
@@ -4915,13 +4900,10 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
 
     if( teleport || old_x != x || old_y != y || old_r != orientation )
     {
-        // remove at movement non-move stealth aura
-        if(GetVisibility()==VISIBILITY_GROUP_STEALTH)
-            RemoveAurasDueToSpell(20580);
-
-        // remove death simulation at move
-        if(hasUnitState(UNIT_STAT_DIED))
-            RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+        if (teleport || old_x != x || old_y != y)
+            RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOVE | AURA_INTERRUPT_FLAG_TURNING);
+        else
+            RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TURNING);
 
         // move and update visible state if need
         m->PlayerRelocation(this, x, y, z, orientation);
