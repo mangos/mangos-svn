@@ -1124,6 +1124,12 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                     if(Player* modOwner = GetSpellModOwner())
                         modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CRIT_DAMAGE_BONUS, bonusDmg);
 
+                    uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
+                    AuraList const& mDamageDoneVersus = GetAurasByType(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS);
+                    for(AuraList::const_iterator i = mDamageDoneVersus.begin();i != mDamageDoneVersus.end(); ++i)
+                        if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
+                            bonusDmg *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+
                     *damage += bonusDmg;
 
                     // Resilience - reduce crit damage
@@ -2090,6 +2096,12 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             {
                 if(Player* modOwner = GetSpellModOwner())
                     modOwner->ApplySpellMod(spellCasted->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
+
+                uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
+                AuraList const& mDamageDoneVersus = GetAurasByType(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS);
+                for(AuraList::const_iterator i = mDamageDoneVersus.begin();i != mDamageDoneVersus.end(); ++i)
+                    if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
+                        crit_bonus *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
             }
 
             *damage += crit_bonus;
@@ -6640,6 +6652,12 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         }
     }
 
+    uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
+    AuraList const& mDamageDoneVersus = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS);
+    for(AuraList::const_iterator i = mDamageDoneVersus.begin();i != mDamageDoneVersus.end(); ++i)
+        if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
+            DoneTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+
     // ..taken
     AuraList const& mModDamagePercentTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
     for(AuraList::const_iterator i = mModDamagePercentTaken.begin(); i != mModDamagePercentTaken.end(); ++i)
@@ -7046,6 +7064,15 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 *damage, Unit
                 modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
         }
     
+        if(pVictim)
+        {
+            uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
+            AuraList const& mDamageDoneVersus = GetAurasByType(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS);
+            for(AuraList::const_iterator i = mDamageDoneVersus.begin();i != mDamageDoneVersus.end(); ++i)
+                if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
+                    crit_bonus *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+        }
+
         if(crit_bonus> 0)
             *damage += crit_bonus;
 
@@ -7481,11 +7508,17 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
         TakenFlatBenefit += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN);
 
     // Done/Taken total percent damage auras
+    float DoneTotalMod = 1;
     float TakenTotalMod = 1;
 
     // ..done
     // SPELL_AURA_MOD_DAMAGE_PERCENT_DONE included in weapon damage
     // SPELL_AURA_MOD_OFFHAND_DAMAGE_PCT  included in weapon damage
+
+    AuraList const& mDamageDoneVersus = this->GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_VERSUS);
+    for(AuraList::const_iterator i = mDamageDoneVersus.begin();i != mDamageDoneVersus.end(); ++i)
+        if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
+            DoneTotalMod *= (*i)->GetModifier()->m_amount;
 
     // ..taken
     AuraList const& mModDamagePercentTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
@@ -7506,7 +7539,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
             TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
     }
 
-    float tmpDamage = float(int32(*pdamage) + DoneFlatBenefit);
+    float tmpDamage = float(int32(*pdamage) + DoneFlatBenefit) * DoneTotalMod;
 
     // apply spellmod to Done damage
     if(spellProto)
