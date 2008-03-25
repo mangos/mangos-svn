@@ -199,7 +199,7 @@ Object* ObjectAccessor::GetObjectByTypeMask(Player const &p, uint64 guid, uint32
 }
 
 GameObject*
-ObjectAccessor::GetGameObject(Unit const &u, uint64 guid)
+ObjectAccessor::GetGameObject(WorldObject const &u, uint64 guid)
 {
     GameObject * ret = GetObjectInWorld(guid, (GameObject*)NULL);
     if(ret && ret->GetMapId() != u.GetMapId()) ret = NULL;

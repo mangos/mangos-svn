@@ -1453,6 +1453,15 @@ void Map::SendRemoveTransports( Player * player )
     transData.BuildPacket(&packet);
     player->GetSession()->SendPacket(&packet);
 }
+inline void Map::setNGrid(NGridType *grid, uint32 x, uint32 y)
+{
+    if(x >= MAX_NUMBER_OF_GRIDS || y >= MAX_NUMBER_OF_GRIDS)
+    {
+        sLog.outError("map::setNGrid() Invalid grid coordinates found: %d, %d!",x,y);
+        assert(false);
+    }
+    i_grids[x][y] = grid;
+}
 
 uint32 Map::GetPlayersCountExceptGMs() const
 {

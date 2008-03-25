@@ -114,7 +114,7 @@ typedef HM_NAMESPACE::hash_map<Creature*, CreatureMover> CreatureMoveList;
 #define MAX_HEIGHT            100000.0f                     // can be use for find ground height at surface
 #define INVALID_HEIGHT       -100000.0f                     // for check, must be equal to VMAP_INVALID_HEIGHT, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE
 
-class MANGOS_DLL_DECL Map : public GridRefManager<NGridType>, public MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>
+class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>
 {
     public:
         typedef std::list<Player*> PlayerList;
@@ -130,6 +130,8 @@ class MANGOS_DLL_DECL Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         template<class T> void Remove(T *, bool);
 
         virtual void Update(const uint32&);
+
+        std::list<Player*> GetPlayers() { return i_Players;};
 
         void MessageBroadcast(Player *, WorldPacket *, bool to_self, bool own_team_only = false);
 
@@ -266,15 +268,7 @@ class MANGOS_DLL_DECL Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         bool isGridObjectDataLoaded(uint32 x, uint32 y) const { return getNGrid(x,y)->isGridObjectDataLoaded(); }
         void setGridObjectDataLoaded(bool pLoaded, uint32 x, uint32 y) { getNGrid(x,y)->setGridObjectDataLoaded(pLoaded); }
 
-        inline void setNGrid(NGridType* grid, uint32 x, uint32 y)
-        {
-            if(x >= MAX_NUMBER_OF_GRIDS || y >= MAX_NUMBER_OF_GRIDS)
-            {
-                sLog.outError("map::setNGrid() Invalid grid coordinates found: %d, %d!",x,y);
-                assert(false);
-            }
-            i_grids[x][y] = grid;
-        }
+        inline void setNGrid(NGridType* grid, uint32 x, uint32 y);
     protected:
         typedef MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>::Lock Guard;
 

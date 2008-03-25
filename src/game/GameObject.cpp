@@ -533,6 +533,11 @@ void GameObject::DeleteFromDB()
     WorldDatabase.PExecute("DELETE FROM gameobject WHERE guid = '%u'", m_DBTableGuid);
 }
 
+GameObject* GameObject::GetGameObject(WorldObject& object, uint64 guid)
+{
+    return ObjectAccessor::GetGameObject(object,guid);
+}
+
 GameObjectInfo const *GameObject::GetGOInfo() const
 {
     return objmgr.GetGameObjectInfo(GetUInt32Value (OBJECT_FIELD_ENTRY));
