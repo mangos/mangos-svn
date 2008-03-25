@@ -131,7 +131,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         virtual void Update(const uint32&);
 
-        std::list<Player*> GetPlayers() { return i_Players;};
+        std::list<Player*>& GetPlayers() { return i_Players;}
 
         void MessageBroadcast(Player *, WorldPacket *, bool to_self, bool own_team_only = false);
 
