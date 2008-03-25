@@ -139,7 +139,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         static Unit* GetUnit(WorldObject const &, uint64);
         static Pet* GetPet(Unit const &, uint64 guid) { return GetPet(guid); }
         static Player* GetPlayer(Unit const &, uint64 guid) { return FindPlayer(guid); }
-        static GameObject* GetGameObject(Unit const &, uint64);
+        static GameObject* GetGameObject(WorldObject const &, uint64);
         static DynamicObject* GetDynamicObject(Unit const &, uint64);
         static Corpse* GetCorpse(WorldObject const &u, uint64 guid);
         static Pet* GetPet(uint64 guid);
