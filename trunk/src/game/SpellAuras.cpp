@@ -1412,11 +1412,6 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
             return;
         }
 
-        // drop flag at mount in bg
-        if(Real && m_target->GetTypeId()==TYPEID_PLAYER && ((Player*)m_target)->InBattleGround())
-            if(BattleGround *bg = ((Player*)m_target)->GetBattleGround())
-                bg->HandleDropFlag((Player*)m_target);
-
         uint32 team = 0;
         if (m_target->GetTypeId()==TYPEID_PLAYER)
             team = ((Player*)m_target)->GetTeam();

@@ -7627,6 +7627,8 @@ void Unit::Mount(uint32 mount)
     if(!mount)
         return;
 
+    RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOUNTING);
+    
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, mount);
 
     SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
@@ -7657,6 +7659,8 @@ void Unit::Unmount()
     if(!IsMounted())
         return;
 
+    RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_MOUNTED);
+    
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
     RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
 
