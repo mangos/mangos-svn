@@ -3571,7 +3571,7 @@ bool Unit::IsUnderWater() const
 
 void Unit::DeMorph()
 {
-    SetUInt32Value(UNIT_FIELD_DISPLAYID, GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
+    SetDisplayId(GetNativeDisplayId());
 }
 
 int32 Unit::GetTotalAuraModifier(AuraType auratype) const
@@ -3925,7 +3925,7 @@ void Unit::RemoveAurasDueToItem(Item* castItem)
             ++iter;
     }
 }
- 
+
 void Unit::RemoveAurasWithInterruptFlags(uint32 flags)
 {
     for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); )
@@ -4211,13 +4211,13 @@ void Unit::SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID,uint32 Damage,
     data.append(GetPackGUID());
     data << uint32(SpellID);
     data << uint32(Damage-AbsorbedDamage-Resist-Blocked);
-    data << uint8(DamageType);                              //damagetype
-    data << uint32(AbsorbedDamage);                         //AbsorbedDamage
-    data << uint32(Resist);                                 //resist
-    data << (uint8)PhysicalDamage;
-    data << uint8(0);
-    data << uint32(Blocked);                                //blocked
-    data << uint8(CriticalHit ? 2 : 0);                     //seen 0x05 also...
+    data << uint8(DamageType);                              // damagetype
+    data << uint32(AbsorbedDamage);                         // AbsorbedDamage
+    data << uint32(Resist);                                 // resist
+    data << uint8(PhysicalDamage);
+    data << uint8(0);                                       // unk
+    data << uint32(Blocked);                                // blocked
+    data << uint8(CriticalHit ? 2 : 0);                     // seen 0x05 also...
     data << uint32(0);
     SendMessageToSet( &data, true );
 }
@@ -4227,18 +4227,12 @@ void Unit::SendSpellMiss(Unit *target, uint32 spellID, SpellMissInfo missInfo)
     WorldPacket data(SMSG_SPELLLOGMISS, (4+8+1+4+8+1));
     data << uint32(spellID);
     data << uint64(GetGUID());
-    data << uint8(0);                                       // someflag
+    data << uint8(0);                                       // can be 0 or 1
     data << uint32(1);                                      // target count
-    // loop
-    // {
+    // for(i = 0; i < target count; ++i)
     data << uint64(target->GetGUID());                      // target GUID
     data << uint8(missInfo);
-    // if(someflag)
-    // {
-    // data << float
-    // data << float
-    // }
-    // }
+    // end loop
     SendMessageToSet(&data, true);
 }
 
@@ -4252,13 +4246,17 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, 
     data.append(target->GetPackGUID());
     data << (uint32)(Damage-AbsorbDamage-Resist-BlockedAmount);
 
-    data << (uint8)SwingType;
+    data << (uint8)SwingType;                               // count?
+
+    // for(i = 0; i < SwingType; ++i)
     data << (uint32)DamageType;
     data << (float)(Damage-AbsorbDamage-Resist-BlockedAmount);
     // still need to double check damage
     data << (uint32)(Damage-AbsorbDamage-Resist-BlockedAmount);
     data << (uint32)AbsorbDamage;
     data << (uint32)Resist;
+    // end loop
+
     data << (uint32)TargetState;
 
     if( AbsorbDamage == 0 )                                 //also 0x3E8 = 0x3E8, check when that happens
@@ -6024,8 +6022,17 @@ void Unit::setPowerType(Powers new_powertype)
     uint32 tem_bytes_0 = GetUInt32Value(UNIT_FIELD_BYTES_0);
     SetUInt32Value(UNIT_FIELD_BYTES_0,((tem_bytes_0<<8)>>8) + (uint32(new_powertype)<<24));
 
-    if (GetTypeId() == TYPEID_PLAYER)
+    if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
         ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POWER_TYPE);
+    else if(((Creature*)this)->isPet())
+    {
+        Pet *pet = ((Pet*)this);
+        if(!pet->isControlled())
+            return;
+        Unit *owner = GetOwner();
+        if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_POWER_TYPE);
+    }
 
     switch(new_powertype)
     {
@@ -6585,8 +6592,8 @@ void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, bool c
     WorldPacket data(SMSG_HEALSPELL_ON_PLAYER_OBSOLETE, (8+8+4+4+1));
     data.append(pVictim->GetPackGUID());
     data.append(GetPackGUID());
-    data << SpellID;
-    data << Damage;
+    data << uint32(SpellID);
+    data << uint32(Damage);
     data << uint8(critical ? 1 : 0);
     SendMessageToSet(&data, true);
 }
@@ -6596,9 +6603,9 @@ void Unit::SendEnergizeSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, Po
     WorldPacket data(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE, (8+8+4+4+4+1));
     data.append(pVictim->GetPackGUID());
     data.append(GetPackGUID());
-    data << SpellID;
+    data << uint32(SpellID);
     data << uint32(powertype);
-    data << Damage;
+    data << uint32(Damage);
     data << uint8(critical ? 1 : 0);
     SendMessageToSet(&data, true);
 }
@@ -7628,7 +7635,7 @@ void Unit::Mount(uint32 mount)
         return;
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOUNTING);
-    
+
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, mount);
 
     SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
@@ -7639,7 +7646,7 @@ void Unit::Mount(uint32 mount)
         Pet* pet = GetPet();
         if(pet)
         {
-            if(pet->getPetType() == SUMMON_PET || pet->getPetType() == HUNTER_PET)
+            if(pet->isControlled())
             {
                 ((Player*)this)->SetOldPetNumber(pet->GetCharmInfo()->GetPetNumber());
                 ((Player*)this)->SetOldPetSpell(pet->GetUInt32Value(UNIT_CREATED_BY_SPELL));
@@ -7660,7 +7667,7 @@ void Unit::Unmount()
         return;
 
     RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_MOUNTED);
-    
+
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
     RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
 
@@ -8810,10 +8817,10 @@ float Unit::GetWeaponDamageRange(WeaponAttackType attType ,WeaponDamageRange typ
 
 void Unit::SetLevel(uint32 lvl)
 {
-    SetUInt32Value(UNIT_FIELD_LEVEL,lvl);
+    SetUInt32Value(UNIT_FIELD_LEVEL, lvl);
 
     // group update
-    if (GetTypeId() == TYPEID_PLAYER)
+    if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
         ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_LEVEL);
 }
 
@@ -8823,21 +8830,39 @@ void Unit::SetHealth(uint32 val)
     if(maxHealth < val)
         val = maxHealth;
 
-    SetUInt32Value(UNIT_FIELD_HEALTH,val);
+    SetUInt32Value(UNIT_FIELD_HEALTH, val);
 
     // group update
-    if (GetTypeId() == TYPEID_PLAYER)
+    if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
         ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_HP);
+    else if(((Creature*)this)->isPet())
+    {
+        Pet *pet = ((Pet*)this);
+        if(!pet->isControlled())
+            return;
+        Unit *owner = GetOwner();
+        if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_HP);
+    }
 }
 
 void Unit::SetMaxHealth(uint32 val)
 {
     uint32 health = GetHealth();
-    SetUInt32Value(UNIT_FIELD_MAXHEALTH,val);
+    SetUInt32Value(UNIT_FIELD_MAXHEALTH, val);
 
     // group update
-    if (GetTypeId() == TYPEID_PLAYER)
+    if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
         ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_HP);
+    else if(((Creature*)this)->isPet())
+    {
+        Pet *pet = ((Pet*)this);
+        if(!pet->isControlled())
+            return;
+        Unit *owner = GetOwner();
+        if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MAX_HP);
+    }
 
     if(val < health)
         SetHealth(val);
@@ -8849,21 +8874,39 @@ void Unit::SetPower(Powers power, uint32 val)
     if(maxPower < val)
         val = maxPower;
 
-    SetStatInt32Value(UNIT_FIELD_POWER1 + power,val);
+    SetStatInt32Value(UNIT_FIELD_POWER1 + power, val);
 
     // group update
-    if (GetTypeId() == TYPEID_PLAYER)
+    if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
         ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_POWER);
+    else if(((Creature*)this)->isPet())
+    {
+        Pet *pet = ((Pet*)this);
+        if(!pet->isControlled())
+            return;
+        Unit *owner = GetOwner();
+        if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
+    }
 }
 
 void Unit::SetMaxPower(Powers power, uint32 val)
 {
     uint32 cur_power = GetPower(power);
-    SetStatInt32Value(UNIT_FIELD_MAXPOWER1 + power,val);
+    SetStatInt32Value(UNIT_FIELD_MAXPOWER1 + power, val);
 
     // group update
-    if (GetTypeId() == TYPEID_PLAYER)
+    if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
         ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_POWER);
+    else if(((Creature*)this)->isPet())
+    {
+        Pet *pet = ((Pet*)this);
+        if(!pet->isControlled())
+            return;
+        Unit *owner = GetOwner();
+        if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MAX_POWER);
+    }
 
     if(val < cur_power)
         SetPower(power, val);
@@ -8874,8 +8917,17 @@ void Unit::ApplyPowerMod(Powers power, uint32 val, bool apply)
     ApplyModUInt32Value(UNIT_FIELD_POWER1+power, val, apply);
 
     // group update
-    if (GetTypeId() == TYPEID_PLAYER)
+    if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
         ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_POWER);
+    else if(((Creature*)this)->isPet())
+    {
+        Pet *pet = ((Pet*)this);
+        if(!pet->isControlled())
+            return;
+        Unit *owner = GetOwner();
+        if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
+    }
 }
 
 void Unit::ApplyMaxPowerMod(Powers power, uint32 val, bool apply)
@@ -8883,8 +8935,17 @@ void Unit::ApplyMaxPowerMod(Powers power, uint32 val, bool apply)
     ApplyModUInt32Value(UNIT_FIELD_MAXPOWER1+power, val, apply);
 
     // group update
-    if (GetTypeId() == TYPEID_PLAYER)
+    if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
         ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_POWER);
+    else if(((Creature*)this)->isPet())
+    {
+        Pet *pet = ((Pet*)this);
+        if(!pet->isControlled())
+            return;
+        Unit *owner = GetOwner();
+        if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MAX_POWER);
+    }
 }
 
 void Unit::ApplyAuraProcTriggerDamage( Aura* aura, bool apply )
@@ -9362,11 +9423,9 @@ void Unit::SendPetClearCooldown (uint32 spellid)
     if(!owner || owner->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
+    WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8));
     data << uint32(spellid);
     data << uint64(GetGUID());
-    data << uint32(0);
-
     ((Player*)owner)->GetSession()->SendPacket(&data);
 }
 
@@ -9407,6 +9466,21 @@ bool Unit::IsStandState() const
 bool Unit::IsPolymorphed() const
 {
     return GetSpellSpecific(getTransForm())==SPELL_MAGE_POLYMORPH;
+}
+
+void Unit::SetDisplayId(uint32 modelId)
+{
+    SetUInt32Value(UNIT_FIELD_DISPLAYID, modelId);
+
+    if(GetTypeId() == TYPEID_UNIT && ((Creature*)this)->isPet())
+    {
+        Pet *pet = ((Pet*)this);
+        if(!pet->isControlled())
+            return;
+        Unit *owner = GetOwner();
+        if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MODEL_ID);
+    }
 }
 
 void Unit::ClearComboPointHolders()

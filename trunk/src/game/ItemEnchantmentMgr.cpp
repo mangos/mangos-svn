@@ -210,7 +210,6 @@ uint32 GenerateEnchSuffixFactor(uint32 item_id)
             case ITEM_QUALITY_LEGENDARY:
             case ITEM_QUALITY_ARTIFACT:
                 break;
-
         }
     }
 

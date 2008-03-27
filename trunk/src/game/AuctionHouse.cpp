@@ -101,15 +101,13 @@ bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
     data << (uint32) pItem->GetCount();                     //item->count
     data << (uint32) pItem->GetSpellCharges();              //item->charge FFFFFFF
     data << (uint32) 0;                                     //Unknown
-    data << (uint32) auction->owner;                        //Auction->owner
-    data << (uint32) 0;                                     //player high_guid
+    data << (uint64) auction->owner;                        //Auction->owner
     data << (uint32) auction->startbid;                     //Auction->startbid (not sure if useful)
     data << (uint32) ((auction->bid)? objmgr.GetAuctionOutBid(auction->bid) : 0);
                                                             //minimal outbid
     data << (uint32) auction->buyout;                       //auction->buyout
     data << (uint32) (auction->time - time(NULL)) * 1000;   //time left
-    data << (uint32) auction->bidder;                       //auction->bidder current
-    data << (uint32) 0;                                     //player high_guid
+    data << (uint64) auction->bidder;                       //auction->bidder current
     data << (uint32) auction->bid;                          //current bid
     return true;
 }
@@ -620,6 +618,7 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
     }
     data.put<uint32>(0, count);
     data << (uint32) totalcount;
+    data << (uint32) 0;
     SendPacket(&data);
 }
 

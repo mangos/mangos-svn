@@ -78,6 +78,8 @@ Pet::Pet(WorldObject *instantiator, PetType type) : Creature( instantiator )
     m_resetTalentsCost = 0;
     m_resetTalentsTime = 0;
 
+    m_auraUpdateMask = 0;
+
     // pets always have a charminfo, even if they are not actually charmed
     CharmInfo* charmInfo = InitCharmInfo(this);
 
@@ -196,8 +198,8 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     else
         m_charmInfo->SetPetNumber(fields[0].GetUInt32(), false);
     SetUInt64Value(UNIT_FIELD_SUMMONEDBY, owner->GetGUID());
-    SetUInt64Value(UNIT_FIELD_DISPLAYID,       fields[3].GetUInt32());
-    SetUInt64Value(UNIT_FIELD_NATIVEDISPLAYID, fields[3].GetUInt32());
+    SetDisplayId(fields[3].GetUInt32());
+    SetNativeDisplayId(fields[3].GetUInt32());
     uint32 petlevel=fields[4].GetUInt32();
     SetUInt32Value(UNIT_NPC_FLAGS , 0);
     SetName(fields[12].GetString());
@@ -261,7 +263,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     //init AB
     if(is_temporary_summoned)
     {
-        // Temporary summoned pets alwaas have initial spell list at load
+        // Temporary summoned pets always have initial spell list at load
         InitPetCreateSpells();
     }
     else
@@ -330,7 +332,11 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     sLog.outDebug("New Pet has guid %u", GetGUIDLow());
 
     if(owner->GetTypeId() == TYPEID_PLAYER)
+    {
         ((Player*)owner)->PetSpellInitialize();
+        if(((Player*)owner)->GetGroup())
+            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_PET);
+    }
 
     return true;
 }
@@ -399,7 +405,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
                 << m_charmInfo->GetPetNumber() << ", "
                 << GetEntry() << ", "
                 << owner << ", "
-                << GetUInt32Value(UNIT_FIELD_DISPLAYID) << ", "
+                << GetDisplayId() << ", "
                 << getLevel() << ", "
                 << GetUInt32Value(UNIT_FIELD_PETEXPERIENCE) << ", "
                 << uint32(m_charmInfo->GetReactState()) << ", "
@@ -867,8 +873,8 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
         m_petType = MINI_PET;
         return true;
     }
-    SetUInt64Value(UNIT_FIELD_DISPLAYID,       creature->GetUInt64Value(UNIT_FIELD_DISPLAYID));
-    SetUInt64Value(UNIT_FIELD_NATIVEDISPLAYID, creature->GetUInt64Value(UNIT_FIELD_NATIVEDISPLAYID));
+    SetDisplayId(creature->GetDisplayId());
+    SetNativeDisplayId(creature->GetNativeDisplayId());
     SetMaxPower(POWER_HAPPINESS,GetCreatePowers(POWER_HAPPINESS));
     SetPower(   POWER_HAPPINESS,166500);
     setPowerType(POWER_FOCUS);
@@ -1584,8 +1590,8 @@ bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float 
         return false;
     }
 
-    SetUInt32Value(UNIT_FIELD_DISPLAYID, minfo->modelid);
-    SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, minfo->modelid);
+    SetDisplayId(minfo->modelid);
+    SetNativeDisplayId(minfo->modelid);
     SetUInt32Value(UNIT_FIELD_BYTES_2, 1);                  // let creature used equiped weapon in fight
 
     if(getPetType() == MINI_PET)                            // always non-attackable

@@ -290,15 +290,16 @@ void WorldSession::SendGMTicketGetTicket(uint32 status, char const* text)
 {
     int len = text ? strlen(text) : 0;
     WorldPacket data( SMSG_GMTICKET_GETTICKET, (4+len+1+4+2+4+4) );
-    data << status;                                         // standart 0x0A, 0x06 if text present
+    data << uint32(status);                                 // standart 0x0A, 0x06 if text present
     if(status == 6)
     {
         data << text;                                       // ticket text
         data << uint8(0x7);                                 // ticket category
-        data << uint32(0);                                  // time from ticket creation?
-        data << uint16(0);                                  // const
-        data << uint32(49024);                              // const
-        data << uint32(49024);                              // const
+        data << float(0);                                   // time from ticket creation?
+        data << float(0);                                   // const
+        data << float(0);                                   // const
+        data << uint8(0);                                   // const
+        data << uint8(0);                                   // const
     }
     SendPacket( &data );
 }
@@ -1405,9 +1406,9 @@ void WorldSession::HandleReportSpamOpcode( WorldPacket & recv_data )
     {
         case 0:
             CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4+4+4);
-            recv_data >> unk1;                              // unk
+            recv_data >> unk1;                              // const 0
             recv_data >> unk2;                              // probably mail id
-            recv_data >> unk3;                              // unk
+            recv_data >> unk3;                              // const 0
             break;
         case 1:
             CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4+4+4+4+1);

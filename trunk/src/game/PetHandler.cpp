@@ -380,6 +380,11 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
         return;
 
     pet->SetName(name);
+
+    Unit *owner = pet->GetOwner();
+    if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+        ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_NAME);
+
     //pet->RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_RENAME);
                                                             // check it!
     pet->SetUInt32Value(UNIT_FIELD_BYTES_2, uint32(2 << 16));

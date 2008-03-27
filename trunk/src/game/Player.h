@@ -1859,7 +1859,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         GroupReference& GetGroupRef() { return m_group; }
         void SetGroup(Group *group, int8 subgroup = -1);
         uint8 GetSubGroup() const { return m_group.getSubGroup(); }
-        void SetGroupUpdateFlag(uint32 flag) { m_groupUpdateMask |= flag;}
+        uint32 GetGroupUpdateFlag() { return m_groupUpdateMask; }
+        void SetGroupUpdateFlag(uint32 flag) { m_groupUpdateMask |= flag; }
+        uint64 GetAuraUpdateMask() { return m_auraUpdateMask; }
+        void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (1i64 << slot); }
 
         GridReference<Player> &GetGridRef() { return m_gridRef; }
 
@@ -2079,6 +2082,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         GroupReference m_group;
         Group *m_groupInvite;
         uint32 m_groupUpdateMask;
+        uint64 m_auraUpdateMask;
 
         // Temporarily removed pet cache
         uint32 m_oldpetnumber;

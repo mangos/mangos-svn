@@ -745,6 +745,14 @@ void Aura::UpdateAuraDuration()
         WorldPacket data(SMSG_UPDATE_AURA_DURATION, 5);
         data << (uint8)m_auraSlot << (uint32)m_duration;
         ((Player*)m_target)->SendDirectMessage(&data);
+
+        data.Initialize(SMSG_SET_AURA_SINGLE, (8+1+4+4+4));
+        data.append(m_target->GetPackGUID());
+        data << uint8(m_auraSlot);
+        data << uint32(GetSpellProto()->Id);
+        data << uint32(GetAuraMaxDuration());
+        data << uint32(GetAuraDuration());
+        ((Player*)m_target)->SendDirectMessage(&data);
     }
 
     // not send in case player loading (will not work anyway until player not added to map), sent in visibility change code
@@ -759,7 +767,7 @@ void Aura::UpdateAuraDuration()
 
 void Aura::SendAuraDurationForCaster(Player* caster)
 {
-    WorldPacket data(SMSG_SET_AURA_SINGLE, (8+2+4+4+4));
+    WorldPacket data(SMSG_SET_AURA_SINGLE2, (8+1+4+4+4));
     data.append(m_target->GetPackGUID());
     data << uint8(m_auraSlot);
     data << uint32(GetSpellProto()->Id);
@@ -842,19 +850,31 @@ void Aura::_AddAura()
 
             if(slot < MAX_AURAS)
             {
-                m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), GetId());
+                SetAura(slot, false);
+                SetAuraFlag(slot, true);
+                SetAuraLevel(slot);
 
-                uint8 flagslot = slot >> 2;
-                uint32 value = m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot));
+                if(m_target->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if(((Player*)m_target)->GetGroup())
+                    {
+                        ((Player*)m_target)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_AURAS);
+                        ((Player*)m_target)->SetAuraUpdateMask(slot);
+                    }
+                }
 
-                uint8 value1 = (slot & 3) << 3;
-
-                value &= ~((uint32)AFLAG_MASK << value1);
-                if (IsPositive())
-                    value |= ((uint32)AFLAG_POSITIVE << value1);
-                else
-                    value |= ((uint32)AFLAG_NEGATIVE << value1);
-                m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
+                if(m_target->GetTypeId() == TYPEID_UNIT && ((Creature*)m_target)->isPet())
+                {
+                    Pet *pet = ((Pet*)m_target);
+                    if(!pet->isControlled())
+                        return;
+                    Unit *owner = m_target->GetOwner();
+                    if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+                    {
+                        ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_AURAS);
+                        pet->SetAuraUpdateMask(slot);
+                    }
+                }
             }
 
             SetAuraSlot( slot );
@@ -932,16 +952,32 @@ void Aura::_RemoveAura()
     // only remove icon when the last aura of the spell is removed (current aura already removed from list)
     if (!samespell)
     {
-        m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), 0);
+        SetAura(slot, true);
+        SetAuraFlag(slot, false);
+        SetAuraLevel(slot);
 
-        uint8 flagslot = slot >> 2;
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
+        {
+            if(((Player*)m_target)->GetGroup())
+            {
+                ((Player*)m_target)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_AURAS);
+                ((Player*)m_target)->SetAuraUpdateMask(slot);
+            }
+        }
 
-        uint32 value = m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot));
+        if(m_target->GetTypeId() == TYPEID_UNIT && ((Creature*)m_target)->isPet())
+        {
+            Pet *pet = ((Pet*)m_target);
+            if(!pet->isControlled())
+                return;
+            Unit *owner = m_target->GetOwner();
+            if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+            {
+                ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_AURAS);
+                pet->SetAuraUpdateMask(slot);
+            }
+        }
 
-        uint8 aurapos = (slot & 3) << 3;
-        value &= ~((uint32)AFLAG_MASK << aurapos );
-
-        m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
         if( IsSealSpell(GetId()) )
             m_target->ModifyAuraState(AURA_STATE_JUDGEMENT,false);
 
@@ -977,6 +1013,45 @@ void Aura::_RemoveAura()
         UpdateSlotCounterAndDuration(false);
 }
 
+void Aura::SetAuraFlag(uint32 slot, bool add)
+{
+    uint32 index    = slot / 4;
+    uint32 byte     = (slot % 4) * 8;
+    uint32 val      = m_target->GetUInt32Value(UNIT_FIELD_AURAFLAGS + index);
+    val &= ~((uint32)AFLAG_MASK << byte);
+    if(add)
+    {
+        if (IsPositive())
+            val |= ((uint32)AFLAG_POSITIVE << byte);
+        else
+            val |= ((uint32)AFLAG_NEGATIVE << byte);
+    }
+    m_target->SetUInt32Value(UNIT_FIELD_AURAFLAGS + index, val);
+}
+
+void Aura::SetAuraLevel(uint32 slot)
+{
+    uint32 index    = slot / 4;
+    uint32 byte     = (slot % 4) * 8;
+    uint32 val      = m_target->GetUInt32Value(UNIT_FIELD_AURALEVELS + index);
+    val &= ~(0xFF << byte);
+    uint32 level = 0x46;
+    if(GetCaster())
+        level = GetCaster()->getLevel();
+    val |= (level << byte);
+    m_target->SetUInt32Value(UNIT_FIELD_AURALEVELS + index, val);
+}
+
+void Aura::SetAuraApplication(uint32 slot, int8 count)
+{
+    uint32 index    = slot / 4;
+    uint32 byte     = (slot % 4) * 8;
+    uint32 val      = m_target->GetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS + index);
+    val &= ~(0xFF << byte);
+    val |= (count << byte);
+    m_target->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS + index, val);
+}
+
 void Aura::UpdateSlotCounterAndDuration(bool add)
 {
     uint8 slot = GetAuraSlot();
@@ -1004,16 +1079,7 @@ void Aura::UpdateSlotCounterAndDuration(bool add)
     if(!add)
         --count;
 
-    uint32 index = slot / 4;
-    uint32 byte  = slot % 4;
-    uint32 val   = m_target->GetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+index);
-
-    uint32 byte_bitpos  = byte * 8;
-    uint32 byte_mask = 0xFF << (byte * 8);
-
-    val = (val & ~byte_mask) | (count << byte_bitpos);
-
-    m_target->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+index, val);
+    SetAuraApplication(slot, count);
 
     UpdateAuraDuration();
 }
@@ -1586,11 +1652,11 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         {
             m_target->RemoveAurasDueToSpell(m_target->m_ShapeShiftForm);
         }
-        
+
         unit_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
         if(modelid > 0)
         {
-            unit_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,modelid);
+            unit_target->SetDisplayId(modelid);
         }
 
         if(PowerType != POWER_MANA)
@@ -1690,7 +1756,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     }
     else
     {
-        unit_target->SetUInt32Value(UNIT_FIELD_DISPLAYID,unit_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
+        unit_target->SetDisplayId(unit_target->GetNativeDisplayId());
         unit_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
         if(unit_target->getClass() == CLASS_DRUID)
             unit_target->setPowerType(POWER_MANA);
@@ -1727,55 +1793,55 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
                 // Orb of Deception
                 case 16739:
                 {
-                    uint32 orb_model = m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID);
+                    uint32 orb_model = m_target->GetNativeDisplayId();
                     switch(orb_model)
                     {
                         // Troll Female
-                        case 1479: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10134); break;
+                        case 1479: m_target->SetDisplayId(10134); break;
                         // Troll Male
-                        case 1478: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10135); break;
+                        case 1478: m_target->SetDisplayId(10135); break;
                         // Tauren Male
-                        case 59:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10136); break;
+                        case 59:   m_target->SetDisplayId(10136); break;
                         // Human Male
-                        case 49:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10137); break;
+                        case 49:   m_target->SetDisplayId(10137); break;
                         // Human Female
-                        case 50:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10138); break;
+                        case 50:   m_target->SetDisplayId(10138); break;
                         // Orc Male
-                        case 51:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10139); break;
+                        case 51:   m_target->SetDisplayId(10139); break;
                         // Orc Female
-                        case 52:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10140); break;
+                        case 52:   m_target->SetDisplayId(10140); break;
                         // Dwarf Male
-                        case 53:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10141); break;
+                        case 53:   m_target->SetDisplayId(10141); break;
                         // Dwarf Female
-                        case 54:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10142); break;
+                        case 54:   m_target->SetDisplayId(10142); break;
                         // NightElf Male
-                        case 55:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10143); break;
+                        case 55:   m_target->SetDisplayId(10143); break;
                         // NightElf Female
-                        case 56:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10144); break;
+                        case 56:   m_target->SetDisplayId(10144); break;
                         // Undead Female
-                        case 58:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10145); break;
+                        case 58:   m_target->SetDisplayId(10145); break;
                         // Undead Male
-                        case 57:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10146); break;
+                        case 57:   m_target->SetDisplayId(10146); break;
                         // Tauren Female
-                        case 60:   m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10147); break;
+                        case 60:   m_target->SetDisplayId(10147); break;
                         // Gnome Male
-                        case 1563: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10148); break;
+                        case 1563: m_target->SetDisplayId(10148); break;
                         // Gnome Female
-                        case 1564: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10149); break;
+                        case 1564: m_target->SetDisplayId(10149); break;
                         // BloodElf Female
-                        case 15475: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17830); break;
+                        case 15475: m_target->SetDisplayId(17830); break;
                         // BloodElf Male
-                        case 15476: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17829); break;
+                        case 15476: m_target->SetDisplayId(17829); break;
                         // Dranei Female
-                        case 16126: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17828); break;
+                        case 16126: m_target->SetDisplayId(17828); break;
                         // Dranei Male
-                        case 16125: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17827); break;
+                        case 16125: m_target->SetDisplayId(17827); break;
                         default: break;
                     }
                     break;
                 }
                 // murloc costume
-                case 42365: m_target->SetUInt32Value( UNIT_FIELD_DISPLAYID, 21723 ); break;
+                case 42365: m_target->SetDisplayId(21723); break;
                 default: break;
             }
         }
@@ -1785,20 +1851,20 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
             if(!ci)
             {
                                                             //pig pink ^_^
-                m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, 16358);
+                m_target->SetDisplayId(16358);
                 sLog.outError("Auras: unknown creature id = %d (only need its modelid) Form Spell Aura Transform in Spell ID = %d", m_modifier.m_miscvalue, GetSpellProto()->Id);
             }
             else
             {
                                                             // Will use the default model here
-                m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->DisplayID_A);
+                m_target->SetDisplayId(ci->DisplayID_A);
             }
             m_target->setTransForm(GetSpellProto()->Id);
         }
     }
     else
     {
-        m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, m_target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
+        m_target->SetDisplayId(m_target->GetNativeDisplayId());
         m_target->setTransForm(0);
     }
 
@@ -2537,7 +2603,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
                 m_target->CastSpell(m_target,31666,true);
             break;
         }
-    }       
+    }
 }
 
 void Aura::HandleInvisibility(bool Apply, bool Real)

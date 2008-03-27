@@ -383,8 +383,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void UpdateMaxPower(Powers power);
         void UpdateAttackPowerAndDamage(bool ranged = false);
         void UpdateDamagePhysical(WeaponAttackType attType);
-        uint32 GetCurrentModelId() { return GetUInt32Value(UNIT_FIELD_DISPLAYID); };
-        uint32 GetCurrentEquipmentId() { return m_equipmentId; };
+        uint32 GetCurrentEquipmentId() { return m_equipmentId; }
         float GetSpellDamageMod(int32 Rank);
 
         /*********************************************************/

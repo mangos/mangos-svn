@@ -182,7 +182,10 @@ bool Group::AddMember(const uint64 &guid, const char* name)
 
     Player *player = objmgr.GetPlayer(guid);
     if(player)
-        UpdatePlayerOutOfRange(player, GROUP_UPDATE_FULL);
+    {
+        player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
+        UpdatePlayerOutOfRange(player);
+    }
 
     return true;
 }
@@ -318,7 +321,7 @@ void Group::SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber,
 {
     WorldPacket data(SMSG_LOOT_ROLL, (8+4+8+4+4+4+1+1));
     data << uint64(SourceGuid);                             // guid of the item rolled
-    data << (uint32)0;                                      // unknown, maybe amount of players
+    data << uint32(0);                                      // unknown, maybe amount of players
     data << uint64(TargetGuid);
     data << uint32(r.itemid);                               // the itemEntryId for the item that shall be rolled for
     data << uint32(r.itemRandomSuffix);                     // randomSuffix
@@ -341,7 +344,7 @@ void Group::SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumb
 {
     WorldPacket data(SMSG_LOOT_ROLL_WON, (8+4+4+4+4+1+1));
     data << uint64(SourceGuid);                             // guid of the item rolled
-    data << (uint32)0;                                      // unknown, maybe amount of players
+    data << uint32(0);                                      // unknown, maybe amount of players
     data << uint32(r.itemid);                               // the itemEntryId for the item that shall be rolled for
     data << uint32(r.itemRandomSuffix);                     // randomSuffix
     data << uint32(r.itemRandomPropId);                     // Item random property
@@ -712,53 +715,6 @@ void Group::GetDataForXPAtKill(Unit const* victim, uint32& count,uint32& sum_lev
     }
 }
 
-/*void Group::SendInit(WorldSession *session)
-{
-    if(!session)
-        return;
-
-    int8   myIndex;
-    uint8  myFlag;
-    uint64 guid;
-
-    guid = session->GetPlayer()->GetGUID();
-    myIndex = _getMemberIndex(guid);
-    myFlag  = m_members[myIndex].group | (m_members[myIndex].assistant?0x80:0);
-    for(int i=1; i<=m_members.size(); i++)
-    {
-                                                            // guess size
-        WorldPacket data(SMSG_GROUP_LIST, (2+4+8+8+1+2+m_members.size()*20));
-        data << (uint8)m_groupType;
-        data << (uint8)0;// 2.0.x, may be wrong position
-        data << (uint8)myFlag;
-
-        int count = 0;
-        data << uint32(m_members.size()-1);
-        for(vector<MemberSlot>::const_iterator citr=m_members.begin(); citr!=m_members.end(); citr++)
-        {
-            if(citr->guid == guid)
-                continue;
-
-            data << ((count<i) ? citr->name : "");
-            data << citr->guid;
-            data << (uint8)(objmgr.GetPlayer(citr->guid)?1:0);
-            data << (uint8)(citr->group | (citr->assistant?0x80:0));
-            ++count;
-
-            if(count >= i)
-                break;
-        }
-
-        data << m_leaderGuid;
-        data << (uint8)m_lootMethod;
-        data << m_looterGuid;
-        data << (uint16)2;
-        data << m_mainTank;//2.0.x
-        data << m_mainAssistant;//2.0.x
-        session->SendPacket( &data );
-    }
-}*/
-
 void Group::SendTargetIconList(WorldSession *session)
 {
     if(!session)
@@ -794,7 +750,7 @@ void Group::SendUpdate()
         data << (uint8)(isBGGroup() ? 1 : 0);               // 2.0.x, isBattleGroundGroup?
         data << (uint8)(citr->group);                       // groupid
         data << (uint8)(citr->assistant?0x80:0);            // 2.1.0 unk, member flags?
-        data << uint64(0x50000000FFFFFFFELL);               // 2.1.0 unk const. guid?
+        data << uint64(0x50000000FFFFFFFELL);               // related to voice chat?
         data << uint32(GetMembersCount()-1);
         for(member_citerator citr2 = m_memberSlots.begin(); citr2 != m_memberSlots.end(); ++citr2)
         {
@@ -819,15 +775,20 @@ void Group::SendUpdate()
     }
 }
 
-void Group::UpdatePlayerOutOfRange(Player* pPlayer, uint32 mask)
+void Group::UpdatePlayerOutOfRange(Player* pPlayer)
 {
+    if(!pPlayer)
+        return;
+
     Player *player;
+    WorldPacket data;
+    pPlayer->GetSession()->BuildPartyMemberStatsChangedPacket(pPlayer, &data);
 
     for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
         player = itr->getSource();
         if (player && player != pPlayer && !pPlayer->isVisibleFor(player))
-            player->GetSession()->SendPartyMemberStatsChanged(pPlayer->GetGUID(), mask);
+            player->GetSession()->SendPacket(&data);
     }
 }
 

@@ -663,13 +663,13 @@ void Guild::Roster(WorldSession *session)
     {
         if (Player *pl = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER)))
         {
-            data << pl->GetGUID();
+            data << (uint64)pl->GetGUID();
             data << (uint8)1;
             data << (std::string)pl->GetName();
-            data << itr->second.RankId;
+            data << (uint32)itr->second.RankId;
             data << (uint8)pl->getLevel();
-            data << pl->getClass();
-            data << pl->GetZoneId();
+            data << (uint8)pl->getClass();
+            data << (uint32)pl->GetZoneId();
             data << itr->second.Pnote;
             data << itr->second.OFFnote;
         }
@@ -765,7 +765,7 @@ void Guild::DisplayGuildBankContent(WorldSession *session, uint8 TabId)
     data << uint8(GUILD_BANK_MAX_SLOTS);
 
     for (int i=0; i<GUILD_BANK_MAX_SLOTS; ++i)
-        AppentDisplayGuildBankSlot(data, tab, i);
+        AppendDisplayGuildBankSlot(data, tab, i);
 
     session->SendPacket(&data);
 
@@ -818,7 +818,7 @@ void Guild::DisplayGuildBankContentUpdate(uint8 TabId, int32 slot1, int32 slot2)
     {
         data << uint8(1);
 
-        AppentDisplayGuildBankSlot(data, tab, slot1);
+        AppendDisplayGuildBankSlot(data, tab, slot1);
     }
     else                                                    // 2 items (in slot1 and slot2)
     {
@@ -827,8 +827,8 @@ void Guild::DisplayGuildBankContentUpdate(uint8 TabId, int32 slot1, int32 slot2)
         if(slot1 > slot2)
             std::swap(slot1,slot2);
 
-        AppentDisplayGuildBankSlot(data, tab, slot1);
-        AppentDisplayGuildBankSlot(data, tab, slot2);
+        AppendDisplayGuildBankSlot(data, tab, slot1);
+        AppendDisplayGuildBankSlot(data, tab, slot2);
     }
 
     for(MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
@@ -1547,14 +1547,13 @@ void Guild::RenumBankLogs()
 
 bool Guild::AddGBankItemToDB(uint32 GuildId, uint32 BankTab , uint32 BankTabSlot , uint32 GUIDLow, uint32 Entry )
 {
-
     CharacterDatabase.PExecute("DELETE FROM guild_bank_item WHERE guildid = '%u' AND TabId = '%u'AND SlotId = '%u'", GuildId, BankTab, BankTabSlot);
     CharacterDatabase.PExecute("INSERT INTO guild_bank_item (guildid,TabId,SlotId,item_guid,item_entry) "
         "VALUES ('%u', '%u', '%u', '%u', '%u')", GuildId, BankTab, BankTabSlot, GUIDLow, Entry);
     return true;
 }
 
-void Guild::AppentDisplayGuildBankSlot( WorldPacket& data, GuildBankTab const *tab, int slot )
+void Guild::AppendDisplayGuildBankSlot( WorldPacket& data, GuildBankTab const *tab, int slot )
 {
     Item *pItem = tab->Slots[slot];
     uint32 entry = pItem ? pItem->GetEntry() : 0;
@@ -1582,5 +1581,4 @@ void Guild::AppentDisplayGuildBankSlot( WorldPacket& data, GuildBankTab const *t
         else
             data << uint8(0);
     }
-
 }

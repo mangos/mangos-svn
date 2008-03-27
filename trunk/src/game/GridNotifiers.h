@@ -427,7 +427,6 @@ namespace MaNGOS
         private:
             Unit const* i_unit;
             uint32 i_focusId;
-
     };
 
     // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO)

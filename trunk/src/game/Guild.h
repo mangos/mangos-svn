@@ -317,7 +317,7 @@ class Guild
 
     protected:
         void AddRank(std::string name,uint32 rights,uint32 money);
-        void AppentDisplayGuildBankSlot( WorldPacket& data, GuildBankTab const *tab, int32 slot );
+        void AppendDisplayGuildBankSlot( WorldPacket& data, GuildBankTab const *tab, int32 slot );
 
         uint32 Id;
         std::string name;

@@ -135,6 +135,7 @@ Player::Player (WorldSession *session): Unit( 0 )
     // group is initialized in the reference constructor
     SetGroupInvite(NULL);
     m_groupUpdateMask = 0;
+    m_auraUpdateMask = 0;
 
     duel = 0;
 
@@ -396,12 +397,12 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     switch(gender)
     {
         case GENDER_FEMALE:
-            SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId_f );
-            SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId_f );
+            SetDisplayId(info->displayId_f );
+            SetNativeDisplayId(info->displayId_f );
             break;
         case GENDER_MALE:
-            SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId_m );
-            SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId_m );
+            SetDisplayId(info->displayId_m );
+            SetNativeDisplayId(info->displayId_m );
             break;
         default:
             sLog.outError("Invalid gender %u for player",gender);
@@ -1149,6 +1150,7 @@ void Player::BuildEnumData( QueryResult * result, WorldPacket * p_data )
 
     *p_data << GetUInt32Value(PLAYER_GUILDID);              // guild id
 
+    // it's uint32, not 4 x uint8
     *p_data << uint8(0x0);                                  // different values on off, looks like flags
     // 0x01
     // 0x02
@@ -1992,10 +1994,10 @@ void Player::RemoveFromGroup(Group* group, uint64 guid)
 
 void Player::SendLogXPGain(uint32 GivenXP, Unit* victim, uint32 RestXP)
 {
-    WorldPacket data(SMSG_LOG_XPGAIN, (21));
-    data << ( victim ? victim->GetGUID() : uint64(0) );
+    WorldPacket data(SMSG_LOG_XPGAIN, 21);
+    data << uint64(victim ? victim->GetGUID() : 0);         // guid
     data << uint32(GivenXP+RestXP);                         // given experience
-    data << ( victim ? (uint8)0 : (uint8)1 );               // 00-kill_xp type, 01-non_kill_xp type
+    data << uint8(victim ? 0 : 1);                          // 00-kill_xp type, 01-non_kill_xp type
     data << uint32(GivenXP);                                // experience without rested bonus
     data << float(1);                                       // 1 - none 0 - 100% group bonus output
     GetSession()->SendPacket(&data);
@@ -2057,6 +2059,7 @@ void Player::GiveLevel(uint32 level)
     WorldPacket data(SMSG_LEVELUP_INFO, (7*4+(MAX_STATS-STAT_STRENGTH)+4));
     data << uint32(level);
     data << uint32(int32(info.basehealth) - int32(GetCreateHealth()));
+    // it's for(5)
     data << uint32(int32(info.basemana)   - int32(GetCreateMana()));
     data << uint32(0);
     data << uint32(0);
@@ -2644,7 +2647,7 @@ void Player::removeSpell(uint16 spell_id)
 
     // removing
     WorldPacket data(SMSG_REMOVED_SPELL, 4);
-    data << spell_id;
+    data << uint16(spell_id);
     GetSession()->SendPacket(&data);
 
     if(itr->second->state == PLAYERSPELL_NEW)
@@ -2728,9 +2731,9 @@ void Player::RemoveAllSpellCooldown()
     {
         for(SpellCooldowns::const_iterator itr = m_spellCooldowns.begin();itr != m_spellCooldowns.end(); ++itr)
         {
-            WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
+            WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8));
             data << uint32(itr->first);
-            data << GetGUID();
+            data << uint64(GetGUID());
             GetSession()->SendPacket(&data);
         }
         m_spellCooldowns.clear();
@@ -3069,7 +3072,7 @@ void Player::InitVisibleBits()
     updateVisualBits.SetBit(PLAYER_DUEL_ARBITER);
     updateVisualBits.SetBit(PLAYER_DUEL_ARBITER+1);
 
-    // PLAYER_QUEST_LOG_x also visible bit on official...
+    // PLAYER_QUEST_LOG_x also visible bit on official (but only on party/raid)...
     for(uint16 i = PLAYER_QUEST_LOG_1_1; i < PLAYER_QUEST_LOG_25_2; i+=3)
         updateVisualBits.SetBit(i);
 
@@ -3464,9 +3467,9 @@ void Player::ResurrectPlayer(float restore_percent, bool updateToWorld)
 {
     WorldPacket data(SMSG_SH_POSITION, 4*4);                // remove spirit healer position
     data << uint32(-1);
-    data << uint32(0);
-    data << uint32(0);
-    data << uint32(0);
+    data << float(0);
+    data << float(0);
+    data << float(0);
     GetSession()->SendPacket(&data);
 
     // speed change, land walk
@@ -3604,7 +3607,7 @@ void Player::CreateCorpse()
         flags |= 0x20;                                      // to be able to remove insignia
     corpse->SetUInt32Value( CORPSE_FIELD_FLAGS, flags );
 
-    corpse->SetUInt32Value( CORPSE_FIELD_DISPLAY_ID, GetUInt32Value(UNIT_FIELD_DISPLAYID) );
+    corpse->SetUInt32Value( CORPSE_FIELD_DISPLAY_ID, GetDisplayId() );
 
     uint32 iDisplayID;
     uint16 iIventoryType;
@@ -4935,7 +4938,8 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
     CheckExploreSystem();
 
     // group update
-    SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POSITION);
+    if(GetGroup())
+        SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POSITION);
 
     return true;
 }
@@ -5084,25 +5088,13 @@ void Player::SendSetFactionStanding(const Faction* faction) const
     if(faction->Flags & FACTION_FLAG_VISIBLE)               //If faction is visible then update it
     {
         WorldPacket data(SMSG_SET_FACTION_STANDING, (12));  // last check 2.0.10
-        data << (uint32) 1;
+        data << (uint32) 1;                                 // count
+        // for
         data << (uint32) faction->ReputationListID;
         data << (uint32) faction->Standing;
+        // end for
         GetSession()->SendPacket(&data);
     }
-    /*
-    Packet SMSG.SET_FACTION_STANDING (292), len: 54
-    0000: 24 01 06 00 00 00 13 00 00 00 8f 21 00 00 0b 00 : $..........!....
-    0010: 00 00 91 0c 00 00 31 00 00 00 91 0c 00 00 14 00 : ......1.........
-    0020: 00 00 22 12 00 00 15 00 00 00 67 45 00 00 12 00 : ..".......gE....
-    0030: 00 00 a4 0c 00 00 -- -- -- -- -- -- -- -- -- -- : ......
-    */
-    //changed in 2.0.x:
-    /*uint32 count;
-    for (uint32 i = 0; i < count; i++)
-    {
-        uint32 ReputationListID;
-        uint32 Standing;
-    }*/
 }
 
 void Player::SendInitialReputations()
@@ -5875,7 +5867,8 @@ void Player::UpdateZone(uint32 newZone)
     UpdateLocalChannels( newZone );
 
     // group update
-    SetGroupUpdateFlag(GROUP_UPDATE_FLAG_ZONE);
+    if(GetGroup())
+        SetGroupUpdateFlag(GROUP_UPDATE_FLAG_ZONE);
 }
 
 //If players are too far way of duel flag... then player loose the duel
@@ -6703,7 +6696,7 @@ void Player::RemovedInsignia(Player* looterPlr)
 void Player::SendLootRelease( uint64 guid )
 {
     WorldPacket data( SMSG_LOOT_RELEASE_RESPONSE, (8+1) );
-    data << guid << uint8(1);
+    data << uint64(guid) << uint8(1);
     SendDirectMessage( &data );
 }
 
@@ -6977,7 +6970,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
     WorldPacket data(SMSG_LOOT_RESPONSE, (9+50));           // we guess size
 
-    data << guid;
+    data << uint64(guid);
     data << uint8(loot_type);
     data << LootView(*loot, q_list, ffa_list, conditional_list, this, permission);
 
@@ -7076,10 +7069,10 @@ void Player::SendInitWorldStates()
     }
 
     WorldPacket data(SMSG_INIT_WORLD_STATES, (4+4+4+2+(NumberOfFields*8)));
-    data << mapid;                                          // mapid
-    data << zoneid;                                         // zone id
-    data << areaid;                                         // area id, new 2.1.0
-    data << NumberOfFields;                                 // count of uint64 blocks
+    data << uint32(mapid);                                  // mapid
+    data << uint32(zoneid);                                 // zone id
+    data << uint32(areaid);                                 // area id, new 2.1.0
+    data << uint16(NumberOfFields);                         // count of uint64 blocks
     data << uint32(0x8d8) << uint32(0x0);                   // 1
     data << uint32(0x8d7) << uint32(0x0);                   // 2
     data << uint32(0x8d6) << uint32(0x0);                   // 3
@@ -7464,15 +7457,15 @@ int32 Player::FishingMinSkillForCurrentZone() const
 void Player::SetBindPoint(uint64 guid)
 {
     WorldPacket data(SMSG_BINDER_CONFIRM, 8);
-    data << guid;
+    data << uint64(guid);
     GetSession()->SendPacket( &data );
 }
 
 void Player::SendTalentWipeConfirm(uint64 guid)
 {
     WorldPacket data(MSG_TALENT_WIPE_CONFIRM, (8+4));
-    data << guid;
-    data << (uint32)resetTalentsCost();
+    data << uint64(guid);
+    data << uint32(resetTalentsCost());
     GetSession()->SendPacket( &data );
 }
 
@@ -10394,38 +10387,38 @@ void Player::RemoveItemFromBuyBackSlot( uint32 slot, bool del )
 
 void Player::SendEquipError( uint8 msg, Item* pItem, Item *pItem2 )
 {
-    sLog.outDebug(  "WORLD: Sent SMSG_INVENTORY_CHANGE_FAILURE" );
+    sLog.outDebug( "WORLD: Sent SMSG_INVENTORY_CHANGE_FAILURE" );
     WorldPacket data( SMSG_INVENTORY_CHANGE_FAILURE, ((msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I)?22:18) );
-    data << msg;
+    data << uint8(msg);
     if( msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I )
         data << (pItem && pItem->GetProto() ? pItem->GetProto()->RequiredLevel : uint32(0));
-    data << (pItem ? pItem->GetGUID() : uint64(0));
-    data << (pItem2 ? pItem2->GetGUID() : uint64(0));
+    data << uint64(pItem ? pItem->GetGUID() : 0);
+    data << uint64(pItem2 ? pItem2->GetGUID() : 0);
     data << uint8(0);                                       // not 0 there...
     GetSession()->SendPacket(&data);
 }
 
 void Player::SendBuyError( uint8 msg, Creature* pCreature, uint32 item, uint32 param )
 {
-    sLog.outDebug(  "WORLD: Sent SMSG_BUY_FAILED" );
+    sLog.outDebug( "WORLD: Sent SMSG_BUY_FAILED" );
     WorldPacket data( SMSG_BUY_FAILED, (8+4+4+1) );
-    data << (pCreature ? pCreature->GetGUID() : uint64(0));
-    data << item;
+    data << uint64(pCreature ? pCreature->GetGUID() : 0);
+    data << uint32(item);
     if( param > 0 )
-        data << param;
-    data << msg;
+        data << uint32(param);
+    data << uint8(msg);
     GetSession()->SendPacket(&data);
 }
 
 void Player::SendSellError( uint8 msg, Creature* pCreature, uint64 guid, uint32 param )
 {
-    sLog.outDebug(  "WORLD: Sent SMSG_SELL_ITEM" );
+    sLog.outDebug( "WORLD: Sent SMSG_SELL_ITEM" );
     WorldPacket data( SMSG_SELL_ITEM, (8+4+4+1) );          // last check 2.0.10
-    data << (pCreature ? pCreature->GetGUID() : uint64(0));
-    data << guid;
+    data << uint64(pCreature ? pCreature->GetGUID() : 0);
+    data << uint64(guid);
     if( param > 0 )
-        data << param;
-    data << msg;
+        data << uint32(param);
+    data << uint8(msg);
     GetSession()->SendPacket(&data);
 }
 
@@ -12464,7 +12457,7 @@ void Player::SendQuestTimerFailed( uint32 quest_id )
 void Player::SendCanTakeQuestResponse( uint32 msg )
 {
     WorldPacket data( SMSG_QUESTGIVER_QUEST_INVALID, 4 );
-    data << msg;
+    data << uint32(msg);
     GetSession()->SendPacket( &data );
     sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_INVALID");
 }
@@ -12473,9 +12466,9 @@ void Player::SendPushToPartyResponse( Player *pPlayer, uint32 msg )
 {
     if( pPlayer )
     {
-        WorldPacket data( MSG_QUEST_PUSH_RESULT, (8+4+1) );
-        data << pPlayer->GetGUID();
-        data << msg;
+        WorldPacket data( MSG_QUEST_PUSH_RESULT, (8+1+1) );
+        data << uint64(pPlayer->GetGUID());
+        data << uint8(msg);
         data << uint8(0);
         GetSession()->SendPacket( &data );
         sLog.outDebug("WORLD: Sent MSG_QUEST_PUSH_RESULT");
@@ -13777,12 +13770,12 @@ void Player::SaveToDB()
     uint32 tmp_bytes = GetUInt32Value(UNIT_FIELD_BYTES_1);
     uint32 tmp_flags = GetUInt32Value(UNIT_FIELD_FLAGS);
     uint32 tmp_pflags = GetUInt32Value(PLAYER_FLAGS);
-    uint32 tmp_displayid = GetUInt32Value(UNIT_FIELD_DISPLAYID);
+    uint32 tmp_displayid = GetDisplayId();
 
     // Set player sit state to standing on save, also stealth and shifted form
     RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT | PLAYER_STATE_FORM_ALL | PLAYER_STATE_FLAG_CREEP);
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
-    SetUInt32Value(UNIT_FIELD_DISPLAYID,GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
+    SetDisplayId(GetNativeDisplayId());
 
     bool inworld = IsInWorld();
 
@@ -13897,7 +13890,7 @@ void Player::SaveToDB()
     CharacterDatabase.CommitTransaction();
 
     // restore state (before aura apply, if aura remove flag then aura must set it ack by self)
-    SetUInt32Value(UNIT_FIELD_DISPLAYID, tmp_displayid);
+    SetDisplayId(tmp_displayid);
     SetUInt32Value(UNIT_FIELD_BYTES_1, tmp_bytes);
     SetUInt32Value(UNIT_FIELD_FLAGS, tmp_flags);
     SetUInt32Value(PLAYER_FLAGS, tmp_pflags);
@@ -14508,6 +14501,9 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
         WorldPacket data(SMSG_PET_SPELLS, 8);
         data << uint64(0);
         GetSession()->SendPacket(&data);
+
+        if(GetGroup())
+            SetGroupUpdateFlag(GROUP_UPDATE_PET);
     }
 }
 
@@ -15316,11 +15312,6 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             SendBuyError( BUY_ERR_ITEM_ALREADY_SOLD, pCreature, item, 0);
             return false;
         }
-        if( getLevel() < pProto->RequiredLevel )
-        {
-            SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
-            return false;
-        }
         if( uint32(GetReputationRank(pProto->RequiredReputationFaction)) < pProto->RequiredReputationRank)
         {
             SendBuyError( BUY_ERR_REPUTATION_REQUIRE, pCreature, item, 0);
@@ -16098,9 +16089,12 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
     if (m_groupUpdateMask == GROUP_UPDATE_FLAG_NONE)
         return;
     if(Group* group = GetGroup())
-        group->UpdatePlayerOutOfRange(this, m_groupUpdateMask);
+        group->UpdatePlayerOutOfRange(this);
 
     m_groupUpdateMask = GROUP_UPDATE_FLAG_NONE;
+    m_auraUpdateMask = 0;
+    if(Pet *pet = GetPet())
+        pet->ResetAuraUpdateMask();
 }
 
 void Player::SendTransferAborted(uint32 mapid, uint16 reason)

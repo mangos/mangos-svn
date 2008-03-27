@@ -421,7 +421,8 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         } break;
 
         default:
-            sLog.outError("CHAT: unknown msg type %u, lang: %u", type, lang);
+            sLog.outError("CHAT: unknown message type %u, lang: %u", type, lang);
+            break;
     }
 }
 
@@ -504,7 +505,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,8);
+    CHECK_PACKET_SIZE(recv_data, 8);
 
     uint64 iguid;
     //sLog.outDebug("WORLD: Received CMSG_CHAT_IGNORED");
