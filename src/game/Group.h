@@ -41,15 +41,15 @@ enum RollVote
 
 enum GroupMemberOnlineStatus
 {
-    MEMBER_STATUS_OFFLINE   = 0x00,
-    MEMBER_STATUS_ONLINE    = 0x01,
-    MEMBER_STATUS_PVP       = 0x02,
-    MEMBER_STATUS_UNK0      = 0x04,                         // dead? (health=0)
-    MEMBER_STATUS_UNK1      = 0x08,                         // ghost? (health=1)
-    MEMBER_STATUS_UNK2      = 0x10,                         // never seen
-    MEMBER_STATUS_UNK3      = 0x20,                         // never seen
-    MEMBER_STATUS_UNK4      = 0x40,                         // appears with dead and ghost flags
-    MEMBER_STATUS_UNK5      = 0x80,                         // never seen
+    MEMBER_STATUS_OFFLINE   = 0x0000,
+    MEMBER_STATUS_ONLINE    = 0x0001,
+    MEMBER_STATUS_PVP       = 0x0002,
+    MEMBER_STATUS_UNK0      = 0x0004,                       // dead? (health=0)
+    MEMBER_STATUS_UNK1      = 0x0008,                       // ghost? (health=1)
+    MEMBER_STATUS_UNK2      = 0x0010,                       // never seen
+    MEMBER_STATUS_UNK3      = 0x0020,                       // never seen
+    MEMBER_STATUS_UNK4      = 0x0040,                       // appears with dead and ghost flags
+    MEMBER_STATUS_UNK5      = 0x0080,                       // never seen
 };
 
 enum GroupType
@@ -62,8 +62,8 @@ class BattleGround;
 
 enum GroupUpdateFlags
 {
-    GROUP_UPDATE_FLAG_NONE              = 0x00000000,
-    GROUP_UPDATE_FLAG_ONLINE            = 0x00000001,       // uint8, flags
+    GROUP_UPDATE_FLAG_NONE              = 0x00000000,       // nothing
+    GROUP_UPDATE_FLAG_STATUS            = 0x00000001,       // uint8, flags
     GROUP_UPDATE_FLAG_CUR_HP            = 0x00000002,       // uint16
     GROUP_UPDATE_FLAG_MAX_HP            = 0x00000004,       // uint16
     GROUP_UPDATE_FLAG_POWER_TYPE        = 0x00000008,       // uint8
@@ -72,7 +72,7 @@ enum GroupUpdateFlags
     GROUP_UPDATE_FLAG_LEVEL             = 0x00000040,       // uint16
     GROUP_UPDATE_FLAG_ZONE              = 0x00000080,       // uint16
     GROUP_UPDATE_FLAG_POSITION          = 0x00000100,       // uint16, uint16
-    GROUP_UPDATE_FLAG_AURAS             = 0x00000200,       // uint64 mask, for each bit set uint16 spellid?
+    GROUP_UPDATE_FLAG_AURAS             = 0x00000200,       // uint64 mask, for each bit set uint16 spellid
     GROUP_UPDATE_FLAG_PET_GUID          = 0x00000400,       // uint64 pet guid
     GROUP_UPDATE_FLAG_PET_NAME          = 0x00000800,       // pet name, NULL terminated string
     GROUP_UPDATE_FLAG_PET_MODEL_ID      = 0x00001000,       // uint16, model id
@@ -81,25 +81,14 @@ enum GroupUpdateFlags
     GROUP_UPDATE_FLAG_PET_POWER_TYPE    = 0x00008000,       // uint8 pet power type
     GROUP_UPDATE_FLAG_PET_CUR_POWER     = 0x00010000,       // uint16 pet cur power
     GROUP_UPDATE_FLAG_PET_MAX_POWER     = 0x00020000,       // uint16 pet max power
-    GROUP_UPDATE_FLAG_PET_AURAS         = 0x00040000,       // uint64 mask, for each bit set uint16 spellid?, pet auras...
-    //GROUP_UPDATE_FLAG_UNK1              = 0x00080000, // unused
-    //GROUP_UPDATE_FLAG_UNK2              = 0x00100000, // unused
-    //GROUP_UPDATE_FLAG_UNK3              = 0x00200000, // unused
-    //GROUP_UPDATE_FLAG_UNK4              = 0x00400000, // unused
-    //GROUP_UPDATE_FLAG_UNK5              = 0x00800000, // unused
-    //GROUP_UPDATE_FLAG_UNK6              = 0x01000000, // unused
-    //GROUP_UPDATE_FLAG_UNK7              = 0x02000000, // unused
-    //GROUP_UPDATE_FLAG_UNK8              = 0x04000000, // unused
-    //GROUP_UPDATE_FLAG_UNK9              = 0x08000000, // unused
-    //GROUP_UPDATE_FLAG_UNK10             = 0x10000000, // unused
-    //GROUP_UPDATE_FLAG_UNK11             = 0x20000000, // unused
-    //GROUP_UPDATE_FLAG_UNK12             = 0x40000000, // unused
-    GROUP_UPDATE_FULL                   = 0x000001FF,
-    GROUP_UPDATE_FLAGS_COUNT            = 10
+    GROUP_UPDATE_FLAG_PET_AURAS         = 0x00040000,       // uint64 mask, for each bit set uint16 spellid, pet auras...
+    GROUP_UPDATE_PET                    = 0x0007FC00,       // all pet flags
+    GROUP_UPDATE_FULL                   = 0x0007FFFF,       // all known flags
 };
 
-                                                            //0, 1, 2, 3, 4, 5, 6, 7, 8, 9
-static const uint8 GroupUpdateLength[GROUP_UPDATE_FLAGS_COUNT] = { 0, 1, 2, 2, 1, 2, 2, 2, 2, 4};
+#define GROUP_UPDATE_FLAGS_COUNT          20
+                                                                // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15,16,17,18,19
+static const uint8 GroupUpdateLength[GROUP_UPDATE_FLAGS_COUNT] = { 0, 1, 2, 2, 1, 2, 2, 2, 2, 4, 8, 8, 1, 2, 2, 2, 1, 2, 2, 8};
 
 class Roll : public LootValidatorRef
 {
@@ -257,7 +246,7 @@ class MANGOS_DLL_SPEC Group
         //void SendInit(WorldSession *session);
         void SendTargetIconList(WorldSession *session);
         void SendUpdate();
-        void UpdatePlayerOutOfRange(Player* pPlayer, uint32 mask);
+        void UpdatePlayerOutOfRange(Player* pPlayer);
                                                             // ignore: GUID of player that will be ignored
         void BroadcastPacket(WorldPacket *packet, int group=-1, uint64 ignore=0);
 

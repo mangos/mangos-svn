@@ -542,6 +542,8 @@ void WorldSession::HandleGroupAssistantOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleGroupPromoteOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data, 1+8);
+
     Group *group = GetPlayer()->GetGroup();
     if(!group) return;
 
@@ -598,93 +600,198 @@ void WorldSession::HandleRaidReadyCheckOpcode( WorldPacket & recv_data )
     }
 }
 
-void WorldSession::SendPartyMemberStatsChanged(uint64 Guid, uint32 mask)
+void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacket *data)
 {
+    uint32 mask = player->GetGroupUpdateFlag();
+
     if (mask == GROUP_UPDATE_FLAG_NONE)
         return;
 
-    Player *player = objmgr.GetPlayer(Guid);
-    if(!player)                                             //currently do not send update if player is offline
-        return;
-    /*if(!player && mask != GROUP_UPDATE_FLAG_ONLINE) //if player is offline - then send nothing, but OFFLINE status
-        return;*/
-
-    if(mask & GROUP_UPDATE_FLAG_POWER_TYPE)                 // if update power type, update current/max power also
+    if (mask & GROUP_UPDATE_FLAG_POWER_TYPE)                // if update power type, update current/max power also
         mask |= (GROUP_UPDATE_FLAG_CUR_POWER | GROUP_UPDATE_FLAG_MAX_POWER);
 
+    if (mask & GROUP_UPDATE_FLAG_PET_POWER_TYPE)            // same for pets
+        mask |= (GROUP_UPDATE_FLAG_PET_CUR_POWER | GROUP_UPDATE_FLAG_PET_MAX_POWER);
+
     uint32 byteCount = 0;
-    for (int i=1;i<GROUP_UPDATE_FLAGS_COUNT;++i)
-        if (mask & (1<<i))
+    for (int i = 1; i < GROUP_UPDATE_FLAGS_COUNT; ++i)
+        if (mask & (1 << i))
             byteCount += GroupUpdateLength[i];
 
-    WorldPacket data(SMSG_PARTY_MEMBER_STATS, 8+4+byteCount);
-    if (player)
-        data.append(player->GetPackGUID());
-    else
-        data.appendPackGUID(Guid);
+    data->Initialize(SMSG_PARTY_MEMBER_STATS, 8 + 4 + byteCount);
+    data->append(player->GetPackGUID());
+    *data << (uint32) mask;
 
-    data << (uint32) mask;
-
-    if (mask & GROUP_UPDATE_FLAG_ONLINE)
+    if (mask & GROUP_UPDATE_FLAG_STATUS)
     {
         if (player)
         {
             if (player->IsPvP())
-                data << uint8(MEMBER_STATUS_ONLINE | MEMBER_STATUS_PVP);
+                *data << (uint8) (MEMBER_STATUS_ONLINE | MEMBER_STATUS_PVP);
             else
-                data << (uint8) MEMBER_STATUS_ONLINE;
+                *data << (uint8) MEMBER_STATUS_ONLINE;
         }
         else
-            data << (uint8) MEMBER_STATUS_OFFLINE;
+            *data << (uint8) MEMBER_STATUS_OFFLINE;
     }
 
     if (mask & GROUP_UPDATE_FLAG_CUR_HP)
-        data << (uint16) player->GetHealth();
+        *data << (uint16) player->GetHealth();
 
     if (mask & GROUP_UPDATE_FLAG_MAX_HP)
-        data << (uint16) player->GetMaxHealth();
+        *data << (uint16) player->GetMaxHealth();
 
     Powers powerType = player->getPowerType();
     if (mask & GROUP_UPDATE_FLAG_POWER_TYPE)
-        data << (uint8) powerType;
+        *data << (uint8) powerType;
 
     if (mask & GROUP_UPDATE_FLAG_CUR_POWER)
-        data << (uint16) player->GetPower(powerType);
+        *data << (uint16) player->GetPower(powerType);
 
     if (mask & GROUP_UPDATE_FLAG_MAX_POWER)
-        data << (uint16) player->GetMaxPower(powerType);
+        *data << (uint16) player->GetMaxPower(powerType);
 
     if (mask & GROUP_UPDATE_FLAG_LEVEL)
-        data << (uint16) player->getLevel();
+        *data << (uint16) player->getLevel();
 
     if (mask & GROUP_UPDATE_FLAG_ZONE)
-        data << (uint16) player->GetZoneId();
+        *data << (uint16) player->GetZoneId();
 
     if (mask & GROUP_UPDATE_FLAG_POSITION)
-        data << (uint16) player->GetPositionX() << (uint16) player->GetPositionY();
+        *data << (uint16) player->GetPositionX() << (uint16) player->GetPositionY();
 
-    //TODO: add missing group update flags (pets?)
+    if (mask & GROUP_UPDATE_FLAG_AURAS)
+    {
+        uint64 auramask = player->GetAuraUpdateMask();
+        ByteBuffer buf;
+        for(uint32 i = 0; i < MAX_AURAS; ++i)
+        {
+            if(auramask & (1i64 << i))
+            {
+                buf << uint16(player->GetUInt32Value(UNIT_FIELD_AURA + i));
+                //buf << uint8(1);
+            }
+        }
+        *data << uint64(auramask);
+        data->append(buf);
+    }
 
-    SendPacket(&data);
+    Pet *pet = player->GetPet();
+    if (mask & GROUP_UPDATE_FLAG_PET_GUID)
+    {
+        if(pet)
+            *data << (uint64) pet->GetGUID();
+        else
+            *data << (uint64) 0;
+    }
+
+    if (mask & GROUP_UPDATE_FLAG_PET_NAME)
+    {
+        if(pet)
+            *data << pet->GetName();
+        else
+            *data << (uint8)  0;
+    }
+
+    if (mask & GROUP_UPDATE_FLAG_PET_MODEL_ID)
+    {
+        if(pet)
+            *data << (uint16) pet->GetDisplayId();
+        else
+            *data << (uint16) 0;
+    }
+
+    if (mask & GROUP_UPDATE_FLAG_PET_CUR_HP)
+    {
+        if(pet)
+            *data << (uint16) pet->GetHealth();
+        else
+            *data << (uint16) 0;
+    }
+
+    if (mask & GROUP_UPDATE_FLAG_PET_MAX_HP)
+    {
+        if(pet)
+            *data << (uint16) pet->GetMaxHealth();
+        else
+            *data << (uint16) 0;
+    }
+
+    if (mask & GROUP_UPDATE_FLAG_PET_POWER_TYPE)
+    {
+        if(pet)
+            *data << (uint8)  pet->getPowerType();
+        else
+            *data << (uint8)  0;
+    }
+
+    if (mask & GROUP_UPDATE_FLAG_PET_CUR_POWER)
+    {
+        if(pet)
+            *data << (uint16) pet->GetPower(pet->getPowerType());
+        else
+            *data << (uint16) 0;
+    }
+
+    if (mask & GROUP_UPDATE_FLAG_PET_MAX_POWER)
+    {
+        if(pet)
+            *data << (uint16) pet->GetMaxPower(pet->getPowerType());
+        else
+            *data << (uint16) 0;
+    }
+
+    if (mask & GROUP_UPDATE_FLAG_PET_AURAS)
+    {
+        if(pet)
+        {
+            uint64 auramask = pet->GetAuraUpdateMask();
+            ByteBuffer buf;
+            for(uint32 i = 0; i < MAX_AURAS; ++i)
+            {
+                if(auramask & (1i64 << i))
+                {
+                    buf << uint16(pet->GetUInt32Value(UNIT_FIELD_AURA + i));
+                    //buf << uint8(1);
+                }
+            }
+            *data << uint64(auramask);
+            data->append(buf);
+        }
+        else
+            *data << (uint64) 0;
+    }
 }
 
 /*this procedure handles clients CMSG_REQUEST_PARTY_MEMBER_STATS request*/
 void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,8);
+    CHECK_PACKET_SIZE(recv_data, 8);
 
-    sLog.outDebug("WORLD RECIEVED CMSG_REQUEST_PARTY_MEMBER_STATS");
+    sLog.outDebug("WORLD: Received CMSG_REQUEST_PARTY_MEMBER_STATS");
     uint64 Guid;
     recv_data >> Guid;
 
     Player *player = objmgr.GetPlayer(Guid);
     if(!player)
+    {
+        WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 2+4+2);
+        data.appendPackGUID(Guid);
+        data << (uint32) GROUP_UPDATE_FLAG_STATUS;
+        data << (uint8) MEMBER_STATUS_OFFLINE;
+        SendPacket(&data);
         return;
-    WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 4+1+2+2+1+2*6+8+1+8);
+    }
 
+    Pet *pet = player->GetPet();
+
+    WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 4+2+2+2+1+2*6+8+1+8);
     data.append(player->GetPackGUID());
-    uint32 mask1 = 0x7FFC0BFF;                              // real flags used 0x000040BFF
-    //0x7FFC1BFF;                              // for hunters etc (GROUP_UPDATE_FLAG_PET_MODEL_ID)
+
+    uint32 mask1 = 0x00040BFF;                              // common mask, real flags used 0x000040BFF
+    if(pet)
+        mask1 = 0x7FFFFFFF;                                 // for hunters and other classes with pets
+
     Powers powerType = player->getPowerType();
     data << (uint32) mask1;                                 // group update mask
     data << (uint8)  MEMBER_STATUS_ONLINE;                  // member's online status
@@ -697,10 +804,53 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
     data << (uint16) player->GetZoneId();                   // GROUP_UPDATE_FLAG_ZONE
     data << (uint16) player->GetPositionX();                // GROUP_UPDATE_FLAG_POSITION
     data << (uint16) player->GetPositionY();                // GROUP_UPDATE_FLAG_POSITION
-    data << (uint64) 0xFF00000000000000LL;                  // GROUP_UPDATE_FLAG_AURAS
-    //data << (uint16) player->GetPet()->GetUInt32Value(UNIT_FIELD_DISPLAYID);    // GROUP_UPDATE_FLAG_PET_MODEL_ID, for hunters etc...
-    data << (uint8)  0x00;                                  // GROUP_UPDATE_FLAG_PET_NAME
-    data << (uint64) 0xFF00000000000000LL;                  // GROUP_UPDATE_FLAG_PET_AURAS
+
+    uint64 auramask = 0;
+    ByteBuffer buf;
+    for(uint8 i = 0; i < MAX_AURAS; ++i)
+    {
+        if(uint32 aura = player->GetUInt32Value(UNIT_FIELD_AURA + i))
+        {
+            auramask |= (1i64 << i);
+            buf << (uint16) aura;
+            //buf << (uint8)  1;
+        }
+    }
+    data << (uint64) auramask;                              // GROUP_UPDATE_FLAG_AURAS
+    data.append(buf);
+
+    if(pet)
+    {
+        Powers petpowertype = pet->getPowerType();
+        data << (uint64) pet->GetGUID();                    // GROUP_UPDATE_FLAG_PET_GUID
+        data << pet->GetName();                             // GROUP_UPDATE_FLAG_PET_NAME
+        data << (uint16) pet->GetDisplayId();               // GROUP_UPDATE_FLAG_PET_MODEL_ID
+        data << (uint16) pet->GetHealth();                  // GROUP_UPDATE_FLAG_PET_CUR_HP
+        data << (uint16) pet->GetMaxHealth();               // GROUP_UPDATE_FLAG_PET_MAX_HP
+        data << (uint8)  petpowertype;                      // GROUP_UPDATE_FLAG_PET_POWER_TYPE
+        data << (uint16) pet->GetPower(petpowertype);       // GROUP_UPDATE_FLAG_PET_CUR_POWER
+        data << (uint16) pet->GetMaxPower(petpowertype);    // GROUP_UPDATE_FLAG_PET_MAX_POWER
+
+        uint64 petauramask = 0;
+        ByteBuffer petbuf;
+        for(uint8 i = 0; i < MAX_AURAS; ++i)
+        {
+            if(uint32 petaura = pet->GetUInt32Value(UNIT_FIELD_AURA + i))
+            {
+                petauramask |= (1i64 << i);
+                petbuf << (uint16) petaura;
+                //petbuf << (uint8)  1;
+            }
+        }
+        data << (uint64) petauramask;                       // GROUP_UPDATE_FLAG_PET_AURAS
+        data.append(petbuf);
+    }
+    else
+    {
+        data << (uint8)  0;                                 // GROUP_UPDATE_FLAG_PET_NAME
+        data << (uint64) 0;                                 // GROUP_UPDATE_FLAG_PET_AURAS
+    }
+
     SendPacket(&data);
 }
 

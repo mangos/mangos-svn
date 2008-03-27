@@ -397,7 +397,6 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                         case 36893:                         // Transporter Malfunction (decrease size case)
                         case 36895:                         // Transporter Malfunction (increase size case)
                             return false;
-
                     }
                     break;
                 case SPELL_AURA_MECHANIC_IMMUNITY:

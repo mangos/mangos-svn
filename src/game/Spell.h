@@ -118,7 +118,7 @@ class SpellCastTargets
         SpellCastTargets();
         ~SpellCastTargets();
 
-        bool read ( WorldPacket * data,Unit *caster );
+        bool read ( WorldPacket * data, Unit *caster );
         void write ( WorldPacket * data, bool forceAppend=false);
 
         SpellCastTargets& operator=(const SpellCastTargets &target)

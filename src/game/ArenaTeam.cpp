@@ -324,7 +324,7 @@ void ArenaTeam::Roster(WorldSession *session)
     WorldPacket data(SMSG_ARENA_TEAM_ROSTER, 100);
     data << uint8(GetSlot());                               // slot
     data << uint32(GetMembersSize());                       // members count
-    data << uint32(0);                                      // unknown (may be arena team id?)
+    data << uint32(GetType());                              // arena team type?
 
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
@@ -334,7 +334,7 @@ void ArenaTeam::Roster(WorldSession *session)
             data << uint64(pl->GetGUID());                  // guid
             data << uint8(1);                               // online flag
             data << pl->GetName();                          // member name
-            data << uint32(pl->GetZoneId());                // unknown, probably rank or zone (0 and 1 ?)
+            data << uint32(itr->guid == GetCaptain() ? 0 : 1);// unknown
             data << uint8(pl->getLevel());                  // unknown, probably level
             data << uint8(pl->getClass());                  // class
             data << uint32(itr->played_week);               // played this week
@@ -348,7 +348,7 @@ void ArenaTeam::Roster(WorldSession *session)
             data << uint64(itr->guid);                      // guid
             data << uint8(0);                               // online flag
             data << itr->name;                              // member name
-            data << uint32(0);                              // unknown, zone id?
+            data << uint32(itr->guid == GetCaptain() ? 0 : 1);// unknown
             data << uint8(0);                               // unknown, level?
             data << uint8(itr->Class);                      // class
             data << uint32(itr->played_week);               // played this week
@@ -400,7 +400,7 @@ void ArenaTeam::InspectStats(WorldSession *session, uint64 guid)
     data << uint32(stats.games);                            // games
     data << uint32(stats.wins);                             // wins
     data << uint32(stats.played);                           // played (count of all games, that played...)
-    data << uint32(0);                                      // unk, 2.3.3
+    data << uint32(0);                                      // 2.3.3 personal rating?
     session->SendPacket(&data);
 }
 

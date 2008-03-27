@@ -259,7 +259,7 @@ WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint32 &di
                 if(tmpBehavior->model1 != 0)
                 {
                     //sLog.outDebug("DEBUG: wpSys - model1");
-                    creature.SetUInt32Value(UNIT_FIELD_DISPLAYID, tmpBehavior->model1);
+                    creature.SetDisplayId(tmpBehavior->model1);
                 }
                 tmpBehavior->HasDone = true;
             }                                               // HasDone == false
@@ -283,7 +283,7 @@ WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint32 &di
                 tmpBehavior->HasDone = false;
                 if(tmpBehavior->model2 != 0)
                 {
-                    creature.SetUInt32Value(UNIT_FIELD_DISPLAYID, tmpBehavior->model2);
+                    creature.SetDisplayId(tmpBehavior->model2);
                 }
                 if (tmpBehavior->orientation !=100)
                 {

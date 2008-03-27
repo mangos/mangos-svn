@@ -434,7 +434,7 @@ void BattleGround::EndBattleGround(uint32 winner)
 
     if(Source)
     {
-        ChatHandler(Source).FillMessageData(&data, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_GLOBAL, Source->GetGUID(), winmsg);
+        ChatHandler(Source).FillMessageData(&data, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, Source->GetGUID(), winmsg);
         SendPacketToAll(&data);
     }
 }
@@ -573,9 +573,6 @@ void BattleGround::StartBattleGround(time_t diff)
 
     SetLastResurrectTime(0);
 
-    WorldPacket data;
-    BattleGround *bg = NULL;
-
     /// this code seems not correct:
     if(GetTypeID() == BATTLEGROUND_AA)
     {
@@ -583,7 +580,7 @@ void BattleGround::StartBattleGround(time_t diff)
         uint8 arenas[3] = { BATTLEGROUND_NA, BATTLEGROUND_BE, BATTLEGROUND_RL };
         uint8 arena_type = arenas[urand(0, 2)];
 
-        bg = sBattleGroundMgr.GetBattleGround(arena_type);
+        BattleGround *bg = sBattleGroundMgr.GetBattleGround(arena_type);
         if(!bg)
             return;
 

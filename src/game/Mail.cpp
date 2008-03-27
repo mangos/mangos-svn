@@ -31,10 +31,10 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8+1+1+1+4+4+8+4+4);
 
-    uint64 mailbox;
+    uint64 mailbox, unk3;
     std::string receiver, subject, body;
-    uint32 unk1, unk2, unk3, unk4, money, COD;
-    uint8 unk5;
+    uint32 unk1, unk2, money, COD;
+    uint8 unk4;
     recv_data >> mailbox;
     recv_data >> receiver;
 
@@ -74,8 +74,9 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         }
     }
 
-    recv_data >> money >> COD;                              // then there are two (uint32) 0;
-    recv_data >> unk3 >> unk4 >> unk5;                      // unknown 2.3.0 (zero's)
+    recv_data >> money >> COD;                              // money and cod
+    recv_data >> unk3;                                      // const 0
+    recv_data >> unk4;                                      // const 0
 
     items_count = mi.size();                                // this is the real size after the duplicates have been removed
 
@@ -701,7 +702,7 @@ void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & /*recv_data*/ )
 
     if( _player->unReadMails > 0 )
     {
-        data << (uint32) 0;                                 // 0
+        data << (uint32) 0;                                 // float
         data << (uint32) 0;                                 // count
         uint32 count = 0;
         for(PlayerMails::iterator itr = _player->GetmailBegin(); itr != _player->GetmailEnd(); ++itr)
@@ -733,7 +734,7 @@ void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & /*recv_data*/ )
                         data << (uint32) m->stationery;
                         break;
                 }
-                data << (uint32) 0xC6000000;                // unk, time or something
+                data << (uint32) 0xC6000000;                // float unk, time or something
             }
         }
         data.put<uint32>(4, count);

@@ -345,9 +345,9 @@ void PlayerMenu::SendQuestGiverQuestList( QEmote eEmote, std::string Title, uint
         uint32 questID = qmi.m_qId;
         Quest const *pQuest = objmgr.GetQuestTemplate(questID);
 
-        data << questID;
-        data << uint32( qmi.m_qIcon );
-        data << uint32( pQuest ? pQuest->GetQuestLevel() : 0 );
+        data << uint32(questID);
+        data << uint32(qmi.m_qIcon);
+        data << uint32(pQuest ? pQuest->GetQuestLevel() : 0);
         data << ( pQuest ? pQuest->GetTitle() : "" );
     }
     pSession->SendPacket( &data );
@@ -358,7 +358,8 @@ void PlayerMenu::SendQuestGiverQuestList( QEmote eEmote, std::string Title, uint
 void PlayerMenu::SendQuestGiverStatus( uint32 questStatus, uint64 npcGUID )
 {
     WorldPacket data( SMSG_QUESTGIVER_STATUS, 12 );
-    data << npcGUID << questStatus;
+    data << uint64(npcGUID);
+    data << uint32(questStatus);
 
     pSession->SendPacket( &data );
     //sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_STATUS NPC Guid=%u, status=%u",GUID_LOPART(npcGUID),questStatus);
@@ -388,15 +389,15 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
         }
     }
 
-    data << npcGUID;
-    data << pQuest->GetQuestId() << Title << Details;
-    data << Objectives;
-    data << (uint32)ActivateAccept;
-    data << pQuest->GetSuggestedPlayers();
+    data << uint64(npcGUID);
+    data << uint32(pQuest->GetQuestId());
+    data << Title << Details << Objectives;
+    data << uint32(ActivateAccept);
+    data << uint32(pQuest->GetSuggestedPlayers());
 
     ItemPrototype const* IProto;
 
-    data << pQuest->GetRewChoiceItemsCount();
+    data << uint32(pQuest->GetRewChoiceItemsCount());
     for (uint32 i=0; i < QUEST_REWARD_CHOICES_COUNT; i++)
     {
         if ( !pQuest->RewChoiceItemId[i] ) continue;
@@ -409,17 +410,17 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
             data << uint32( 0x00 );
     }
 
-    data << pQuest->GetRewItemsCount();
+    data << uint32(pQuest->GetRewItemsCount());
     for (uint32 i=0; i < QUEST_REWARDS_COUNT; i++)
     {
         if ( !pQuest->RewItemId[i] ) continue;
-        data << pQuest->RewItemId[i];
-        data << pQuest->RewItemCount[i];
+        data << uint32(pQuest->RewItemId[i]);
+        data << uint32(pQuest->RewItemCount[i]);
         IProto = objmgr.GetItemPrototype(pQuest->RewItemId[i]);
         if ( IProto )
-            data << IProto->DisplayInfoID;
+            data << uint32(IProto->DisplayInfoID);
         else
-            data << uint32( 0x00 );
+            data << uint32(0);
     }
 
     data << uint32(pQuest->GetRewOrReqMoney());
@@ -443,7 +444,7 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
     data << uint32(QUEST_EMOTE_COUNT);
     for (uint32 i=0; i < QUEST_EMOTE_COUNT; i++)
     {
-        data << pQuest->DetailsEmote[i];
+        data << uint32(pQuest->DetailsEmote[i]);
         data << uint32(0);                                  // DetailsEmoteDelay
     }
     pSession->SendPacket( &data );

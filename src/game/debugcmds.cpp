@@ -93,11 +93,123 @@ bool ChatHandler::HandleSetPoiCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleSendItemErrorMsg(const char* args)
+bool ChatHandler::HandleEquipErrorCommand(const char* args)
 {
-    uint8 error_msg = atol((char*)args);
-    if(error_msg > 0)
-        m_session->GetPlayer()->SendEquipError(error_msg, 0, 0);
+    if(!args)
+        return false;
+
+    uint8 msg = atoi(args);
+    m_session->GetPlayer()->SendEquipError(msg, 0, 0);
+    return true;
+}
+
+bool ChatHandler::HandleSellErrorCommand(const char* args)
+{
+    if(!args)
+        return false;
+
+    uint8 msg = atoi(args);
+    m_session->GetPlayer()->SendSellError(msg, 0, 0, 0);
+    return true;
+}
+
+bool ChatHandler::HandleBuyErrorCommand(const char* args)
+{
+    if(!args)
+        return false;
+
+    uint8 msg = atoi(args);
+    m_session->GetPlayer()->SendBuyError(msg, 0, 0, 0);
+    return true;
+}
+
+bool ChatHandler::HandleSendOpcodeCommand(const char* args)
+{
+    if(!args)
+        return false;
+
+    Unit *unit = getSelectedUnit();
+    if (!unit || (unit->GetTypeId() != TYPEID_PLAYER))
+        unit = m_session->GetPlayer();
+
+    char* op = strtok((char*)args, " ");
+    if(!op)
+        return false;
+    char* val1 = strtok(NULL, " ");
+    if(!val1)
+        return false;
+    /*char* val2 = strtok(NULL, " ");
+    if(!val2)
+        return false;
+    char* val3 = strtok(NULL, " ");
+    if(!val3)
+        return false;*/
+
+    uint16 opcode = atoi(op);
+    uint64 value1 = atoi(val1);
+    //uint32 value2 = atoi(val2);
+    //uint32 value3 = atoi(val3);
+    WorldPacket data(opcode, 8);
+    data << uint64(value1);
+    ((Player*)unit)->GetSession()->SendPacket(&data);
+
+    PSendSysMessage(LANG_COMMAND_OPCODESENT, opcode, unit->GetName());
+    return true;
+}
+
+bool ChatHandler::HandleUpdateWorldStateCommand(const char* args)
+{
+    char* w = strtok((char*)args, " ");
+    char* s = strtok(NULL, " ");
+
+    if (!w || !s)
+        return false;
+
+    uint32 world = (uint32)atoi(w);
+    uint32 state = (uint32)atoi(s);
+    m_session->GetPlayer()->SendUpdateWorldState(world, state);
+    return true;
+}
+
+bool ChatHandler::HandlePlaySound2Command(const char* args)
+{
+    if(!args)
+        return false;
+
+    uint32 soundid = atoi(args);
+    m_session->GetPlayer()->PlaySound(soundid, false);
+    return true;
+}
+
+//Send notification in channel
+bool ChatHandler::HandleSendChannelNotifyCommand(const char* args)
+{
+    if(!args)
+        return false;
+
+    const char *name = "test";
+    uint8 code = atoi(args);
+
+    WorldPacket data(SMSG_CHANNEL_NOTIFY, (1+10));
+    data << code;                                           // notify type
+    data << name;                                           // channel name
+    data << uint32(0);
+    data << uint32(0);
+    m_session->SendPacket(&data);
+    return true;
+}
+
+//Send notification in chat
+bool ChatHandler::HandleSendChatMsgCommand(const char* args)
+{
+    if(!args)
+        return false;
+
+    const char *msg = "testtest";
+    uint8 type = atoi(args);
+    WorldPacket data;
+    ChatHandler::FillMessageData(&data, m_session, type, 0, "chan", m_session->GetPlayer()->GetGUID(), msg, m_session->GetPlayer());
+    m_session->SendPacket(&data);
     return true;
 }
 

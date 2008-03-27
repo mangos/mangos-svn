@@ -203,7 +203,7 @@ class ChatHandler
         bool HandleSetMoveTypeCommand(const char* args);
         bool HandleChangeLevelCommand(const char* args);
         bool HandleSetPoiCommand(const char* args);
-        bool HandleSendItemErrorMsg(const char* args);
+        bool HandleEquipErrorCommand(const char* args);
         bool HandleNPCFlagCommand(const char* args);
         bool HandleSetModelCommand(const char* args);
         bool HandleFactionIdCommand(const char* args);

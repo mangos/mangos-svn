@@ -78,7 +78,7 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
     recv_data >> instanceId;                                // instance id, 0 if First Available selected
     recv_data >> joinAsGroup;                               // join as group
 
-    sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_JOIN Message from: " I64FMT " for BG (Type: %u)", guid,bgTypeId);
+    sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_JOIN Message from: " I64FMT " for BG (Type: %u)", guid, bgTypeId);
 
     if(bgTypeId >= MAX_BATTLEGROUND_TYPES)                  // cheating?
         return;

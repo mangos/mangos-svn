@@ -337,14 +337,11 @@ class ObjectMgr
         }
         bool IsTavernAreaTrigger(uint32 Trigger_ID) const { return mTavernAreaTriggerSet.count(Trigger_ID) != 0; }
         bool IsGameObjectForQuests(uint32 entry) const { return mGameObjectForQuestSet.count(entry) != 0; }
-        bool IsGuildVaultGameObject(uint32 guid) const
+        bool IsGuildVaultGameObject(Player *player, uint64 guid) const
         {
-            const GameObjectData *pGoData = GetGOData(guid);
-            if (!pGoData)
-                return false;
-            const GameObjectInfo *pGoInfo = GetGameObjectInfo(pGoData->id);
-            if (pGoInfo && pGoInfo->type == GAMEOBJECT_TYPE_GUILD_BANK)
-                return true;
+            if(GameObject *go = ObjectAccessor::GetGameObject(*player, guid))
+                if(go->GetGoType() == GAMEOBJECT_TYPE_GUILD_BANK)
+                    return true;
             return false;
         }
 

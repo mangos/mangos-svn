@@ -508,15 +508,15 @@ void GameEvent::ChangeEquipOrModel(int16 event_id, bool activate)
             if (activate)
             {
                 itr->second.equipement_id_prev = pCreature->GetCurrentEquipmentId();
-                itr->second.modelid_prev = pCreature->GetCurrentModelId();
+                itr->second.modelid_prev = pCreature->GetDisplayId();
                 pCreature->LoadEquipment(itr->second.equipment_id, true);
                 if (itr->second.modelid >0 && itr->second.modelid_prev != itr->second.modelid)
                 {
                     CreatureModelInfo const *minfo = objmgr.GetCreatureModelInfo(itr->second.modelid);
                     if (minfo)
                     {
-                        pCreature->SetUInt32Value(UNIT_FIELD_DISPLAYID, itr->second.modelid);
-                        pCreature->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, itr->second.modelid);
+                        pCreature->SetDisplayId(itr->second.modelid);
+                        pCreature->SetNativeDisplayId(itr->second.modelid);
                         pCreature->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
                         pCreature->SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );
                     }
@@ -530,8 +530,8 @@ void GameEvent::ChangeEquipOrModel(int16 event_id, bool activate)
                     CreatureModelInfo const *minfo = objmgr.GetCreatureModelInfo(itr->second.modelid_prev);
                     if (minfo)
                     {
-                        pCreature->SetUInt32Value(UNIT_FIELD_DISPLAYID,itr->second.modelid_prev);
-                        pCreature->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, itr->second.modelid_prev);
+                        pCreature->SetDisplayId(itr->second.modelid_prev);
+                        pCreature->SetNativeDisplayId(itr->second.modelid_prev);
                         pCreature->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
                         pCreature->SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );
                     }

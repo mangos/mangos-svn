@@ -1286,8 +1286,8 @@ bool ChatHandler::HandleSetModelCommand(const char* args)
         return true;
     }
 
-    pCreature->SetUInt32Value(UNIT_FIELD_DISPLAYID, displayId);
-    pCreature->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, displayId);
+    pCreature->SetDisplayId(displayId);
+    pCreature->SetNativeDisplayId(displayId);
 
     pCreature->SaveToDB();
 
@@ -1306,7 +1306,7 @@ bool ChatHandler::HandleMorphCommand(const char* args)
     if(!target)
         target = m_session->GetPlayer();
 
-    target->SetUInt32Value(UNIT_FIELD_DISPLAYID, display_id);
+    target->SetDisplayId(display_id);
 
     return true;
 }

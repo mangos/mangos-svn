@@ -700,10 +700,9 @@ bool ChatHandler::HandleCooldownCommand(const char* args)
             return true;
         }
 
-        WorldPacket data( SMSG_CLEAR_COOLDOWN, (4+8+4) );
-        data << uint32( spell_id );
-        data << target->GetGUID();
-        data << uint32(0);
+        WorldPacket data( SMSG_CLEAR_COOLDOWN, (4+8) );
+        data << uint32(spell_id);
+        data << uint64(target->GetGUID());
         target->GetSession()->SendPacket(&data);
         target->RemoveSpellCooldown(spell_id);
         PSendSysMessage(LANG_REMOVE_COOLDOWN, spell_id, target==m_session->GetPlayer() ? GetMangosString(LANG_YOU) : target->GetName());
@@ -3077,8 +3076,8 @@ bool ChatHandler::HandleNpcInfoCommand(const char* /*args*/)
 
     uint32 faction = target->getFaction();
     uint32 npcflags = target->GetUInt32Value(UNIT_NPC_FLAGS);
-    uint32 displayid = target->GetUInt32Value(UNIT_FIELD_DISPLAYID);
-    uint32 nativeid = target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID);
+    uint32 displayid = target->GetDisplayId();
+    uint32 nativeid = target->GetNativeDisplayId();
     uint32 Entry = target->GetUInt32Value(OBJECT_FIELD_ENTRY);
     CreatureInfo const* cInfo = target->GetCreatureInfo();
 
@@ -3773,12 +3772,12 @@ static bool HandleResetStatsOrLevelHelper(Player* player)
         switch(player->getGender())
         {
             case GENDER_FEMALE:
-                player->SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId_f);
-                player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId_f);
+                player->SetDisplayId(info->displayId_f);
+                player->SetNativeDisplayId(info->displayId_f);
                 break;
             case GENDER_MALE:
-                player->SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId_m);
-                player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId_m);
+                player->SetDisplayId(info->displayId_m);
+                player->SetNativeDisplayId(info->displayId_m);
                 break;
             default:
                 break;
@@ -4400,96 +4399,6 @@ bool ChatHandler::HandleFlyModeCommand(const char* args)
     data << uint32(0);                                      // unk
     unit->SendMessageToSet(&data, true);
     PSendSysMessage(LANG_COMMAND_FLYMODE_STATUS, unit->GetName(), args);
-    return true;
-}
-
-bool ChatHandler::HandleSendOpcodeCommand(const char* args)
-{
-    if(!args)
-        return false;
-
-    Unit *unit = getSelectedUnit();
-    if (!unit || (unit->GetTypeId() != TYPEID_PLAYER))
-        unit = m_session->GetPlayer();
-
-    char* op = strtok((char*)args, " ");
-    if(!op)
-        return false;
-    char* val1 = strtok(NULL, " ");
-    if(!val1)
-        return false;
-    /*char* val2 = strtok(NULL, " ");
-    if(!val2)
-        return false;
-    char* val3 = strtok(NULL, " ");
-    if(!val3)
-        return false;*/
-
-    uint16 opcode = atoi(op);
-    uint64 value1 = atoi(val1);
-    //uint32 value2 = atoi(val2);
-    //uint32 value3 = atoi(val3);
-
-    WorldPacket data(opcode, 8);
-    data << uint64(value1);
-    ((Player*)unit)->GetSession()->SendPacket(&data);
-
-    PSendSysMessage(LANG_COMMAND_OPCODESENT, opcode, unit->GetName());
-    return true;
-}
-
-bool ChatHandler::HandleSellErrorCommand(const char* args)
-{
-    if(!args)
-        return false;
-
-    uint32 param = 0;
-    uint8 msg = atoi(args);
-    WorldPacket data( SMSG_SELL_ITEM, (8+8+4+1) );
-    data << uint64(0);
-    data << uint64(25);
-    if( param > 0 )
-        data << param;
-    data << msg;
-    m_session->SendPacket(&data);
-    return true;
-}
-
-bool ChatHandler::HandleBuyErrorCommand(const char* args)
-{
-    if(!args)
-        return false;
-
-    uint8 msg = atoi(args);
-    WorldPacket data( SMSG_BUY_FAILED, (8+8+4+1) );
-    data << m_session->GetPlayer()->GetGUID();
-    data << uint32(0);
-    data << msg;
-    m_session->SendPacket(&data);
-    return true;
-}
-
-bool ChatHandler::HandleUpdateWorldStateCommand(const char* args)
-{
-    char* w = strtok((char*)args, " ");
-    char* s = strtok(NULL, " ");
-
-    if (!w || !s)
-        return false;
-
-    uint32 world = (uint32)atoi(w);
-    uint32 state = (uint32)atoi(s);
-    m_session->GetPlayer()->SendUpdateWorldState(world, state);
-    return true;
-}
-
-bool ChatHandler::HandlePlaySound2Command(const char* args)
-{
-    if(!args)
-        return false;
-
-    uint32 soundid = atoi(args);
-    m_session->GetPlayer()->PlaySound(soundid, false);
     return true;
 }
 

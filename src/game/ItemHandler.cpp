@@ -610,8 +610,8 @@ void WorldSession::SendListInventory( uint64 vendorguid )
     uint32 diff;
 
     WorldPacket data( SMSG_LIST_INVENTORY, (8+1+numitems*7*4) );
-    data << vendorguid;
-    data << numitems;
+    data << uint64(vendorguid);
+    data << uint8(numitems);
 
     float discountMod = _player->GetReputationPriceDiscount(pCreature);
 
@@ -637,8 +637,8 @@ void WorldSession::SendListInventory( uint64 vendorguid )
                     crItem->lastincr = ptime;
                 }
                 data << uint32(count);
-                data << crItem->id;
-                data << pProto->DisplayInfoID;
+                data << uint32(crItem->id);
+                data << uint32(pProto->DisplayInfoID);
                 data << uint32(crItem->maxcount <= 0 ? 0xFFFFFFFF : crItem->count);
 
                 uint32 price = pProto->BuyPrice;
@@ -646,9 +646,9 @@ void WorldSession::SendListInventory( uint64 vendorguid )
                 // reputation discount
                 price = uint32(floor(pProto->BuyPrice * discountMod));
 
-                data << price;
-                data << pProto->MaxDurability;
-                data << pProto->BuyCount;
+                data << uint32(price);
+                data << uint32(pProto->MaxDurability);
+                data << uint32(pProto->BuyCount);
             }
         }
     }
@@ -854,7 +854,7 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket & recv_data)
         }
                                                             // guess size
         WorldPacket data(SMSG_ITEM_NAME_QUERY_RESPONSE, (4+10));
-        data << pProto->ItemId;
+        data << uint32(pProto->ItemId);
         data << Name;
         SendPacket(&data);
         return;

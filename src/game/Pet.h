@@ -201,6 +201,10 @@ class Pet : public Creature
         uint32  m_resetTalentsCost;
         time_t  m_resetTalentsTime;
 
+        uint64 GetAuraUpdateMask() { return m_auraUpdateMask; }
+        void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (1i64 << slot); }
+        void ResetAuraUpdateMask() { m_auraUpdateMask = 0; }
+
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
     protected:
         uint32  m_regenTimer;
@@ -210,6 +214,7 @@ class Pet : public Creature
         int32   m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
         int32   m_loyaltyPoints;
         int32   m_bonusdamage;
+        uint64  m_auraUpdateMask;
     private:
         void SaveToDB()                                     // overwrited of Creature::SaveToDB     - don't must be called
         {

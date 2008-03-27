@@ -936,7 +936,7 @@ void Creature::SaveToDB()
     // update in loaded data
     CreatureData& data = objmgr.NewOrExistCreatureData(m_DBTableGuid);
 
-    uint32 displayId = GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID);
+    uint32 displayId = GetNativeDisplayId();
 
     // check if it's a custom model and if not, use 0 for displayId
     CreatureInfo const *cinfo = GetCreatureInfo();
@@ -1118,17 +1118,18 @@ float Creature::GetSpellDamageMod(int32 Rank)
 
 bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const CreatureData *data)
 {
-    Object::_Create(guidlow, HIGHGUID_UNIT);
-
-    m_DBTableGuid = guidlow;
-
-    SetUInt32Value(OBJECT_FIELD_ENTRY,Entry);
     CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(Entry);
     if(!cinfo)
     {
         sLog.outErrorDb("Error: creature entry %u does not exist.", Entry);
         return false;
     }
+
+    Object::_Create(guidlow, HIGHGUID_UNIT);
+
+    m_DBTableGuid = guidlow;
+
+    SetUInt32Value(OBJECT_FIELD_ENTRY, Entry);
 
     if (cinfo->DisplayID_A == 0 || cinfo->DisplayID_H == 0) // Cancel load if no model defined
     {
@@ -1149,8 +1150,8 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
     else
         display_id = minfo->modelid;                        // it can be different (for another gender)
 
-    SetUInt32Value(UNIT_FIELD_DISPLAYID, display_id);
-    SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, display_id);
+    SetDisplayId(display_id);
+    SetNativeDisplayId(display_id);
     SetUInt32Value(UNIT_FIELD_BYTES_2, 1);                  // let creature use equiped weapon in fight
     SetUInt32Value(UNIT_FIELD_BYTES_0, ( minfo->gender << 16 ));
 

@@ -641,9 +641,9 @@ void Spell::EffectDummy(uint32 i)
                         {
                             ((Player*)m_caster)->RemoveSpellCooldown(classspell);
 
-                            WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
-                            data << classspell;
-                            data << m_caster->GetGUID();
+                            WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8));
+                            data << uint32(classspell);
+                            data << uint64(m_caster->GetGUID());
                             ((Player*)m_caster)->GetSession()->SendPacket(&data);
                         }
                     }
@@ -717,9 +717,9 @@ void Spell::EffectDummy(uint32 i)
                         {
                             ((Player*)m_caster)->RemoveSpellCooldown(20577);
 
-                            WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
+                            WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8));
                             data << uint32(20577);                  // spell id
-                            data << m_caster->GetGUID();
+                            data << uint64(m_caster->GetGUID());
                             ((Player*)m_caster)->GetSession()->SendPacket(&data);
                         }
 
@@ -943,9 +943,9 @@ void Spell::EffectDummy(uint32 i)
                         {
                             ((Player*)m_caster)->RemoveSpellCooldown(classspell);
 
-                            WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
-                            data << classspell;
-                            data << m_caster->GetGUID();
+                            WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8));
+                            data << uint32(classspell);
+                            data << uint64(m_caster->GetGUID());
                             ((Player*)m_caster)->GetSession()->SendPacket(&data);
                         }
                     }
@@ -1160,9 +1160,9 @@ void Spell::EffectDummy(uint32 i)
                         {
                             ((Player*)m_caster)->RemoveSpellCooldown(classspell);
 
-                            WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
-                            data << classspell;
-                            data << m_caster->GetGUID();
+                            WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8));
+                            data << uint32(classspell);
+                            data << uint64(m_caster->GetGUID());
                             ((Player*)m_caster)->GetSession()->SendPacket(&data);
                         }
                     }
@@ -1258,9 +1258,9 @@ void Spell::EffectDummy(uint32 i)
                         {
                             ((Player*)m_caster)->RemoveSpellCooldown(31989);
 
-                            WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
+                            WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8));
                             data << uint32(31789);                  // spell id
-                            data << m_caster->GetGUID();
+                            data << uint64(m_caster->GetGUID());
                             ((Player*)m_caster)->GetSession()->SendPacket(&data);
                         }
 

@@ -113,15 +113,12 @@ void WorldSession::SendUpdateTrade()
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_STACK_COUNT);
             data << (uint32) 0;                             // probably gift=1, created_by=0?
                                                             // gift creator
-            data << (uint32) item->GetUInt32Value(ITEM_FIELD_GIFTCREATOR);
-            data << (uint32) 0;                             // ITEM_FIELD_GIFTCREATOR high_guid
+            data << (uint64) item->GetUInt64Value(ITEM_FIELD_GIFTCREATOR);
             data << (uint32) item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT);
-            data << (uint32) 0;                             //item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1);    // enchantment id (permanent/gems?)
-            data << (uint32) 0;                             //item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+2);    // enchantment id (permanent/gems?)
-            data << (uint32) 0;                             //item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3);    // enchantment id (permanent/gems?)
+            for(uint8 j = 0; j < 3; ++j)
+                data << (uint32) 0;                         // enchantment id (permanent/gems?)
                                                             // creator
-            data << (uint32) item->GetUInt32Value(ITEM_FIELD_CREATOR);
-            data << (uint32) 0;                             // ITEM_FIELD_CREATOR high_guid
+            data << (uint64) item->GetUInt64Value(ITEM_FIELD_CREATOR);
             data << (uint32) item->GetSpellCharges();       // charges
             data << (uint32) item->GetItemSuffixFactor();   // SuffixFactor
                                                             // random properties id

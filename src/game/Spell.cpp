@@ -213,7 +213,7 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
         if(m_unitTarget)
             data->append(m_unitTarget->GetPackGUID());
         else
-            *data << (uint8)0;
+            *data << uint8(0);
     }
 
     if( m_targetMask & ( TARGET_FLAG_OBJECT | TARGET_FLAG_OBJECT_UNK ) )
@@ -221,7 +221,7 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
         if(m_GOTarget)
             data->append(m_GOTarget->GetPackGUID());
         else
-            *data << (uint8)0;
+            *data << uint8(0);
     }
 
     if( m_targetMask & TARGET_FLAG_ITEM )
@@ -229,7 +229,7 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
         if(m_itemTarget)
             data->append(m_itemTarget->GetPackGUID());
         else
-            *data << (uint8)0;
+            *data << uint8(0);
     }
 
     if( m_targetMask & TARGET_FLAG_SOURCE_LOCATION )
@@ -2155,7 +2155,7 @@ void Spell::SendCastResult(uint8 result)
     if(result != 0)
     {
         WorldPacket data(SMSG_CAST_RESULT, (4+1+1));
-        data << m_spellInfo->Id;
+        data << uint32(m_spellInfo->Id);
         data << uint8(result);                              // problem
         data << uint8(m_cast_count);                        // single cast or multi 2.3 (0/1)
         switch (result)
@@ -2197,7 +2197,7 @@ void Spell::SendCastResult(uint8 result)
     {
         WorldPacket data(SMSG_CAST_SUCCESS, (8+4));
         data.append(m_caster->GetPackGUID());
-        data << m_spellInfo->Id;
+        data << uint32(m_spellInfo->Id);
         ((Player*)m_caster)->GetSession()->SendPacket(&data);
     }
 }
@@ -2265,9 +2265,9 @@ void Spell::SendSpellGo()
         data.append(m_caster->GetPackGUID());
 
     data.append(m_caster->GetPackGUID());
-    data << m_spellInfo->Id;
+    data << uint32(m_spellInfo->Id);
 
-    data << m_castFlags;
+    data << uint16(m_castFlags);
     WriteSpellGoTargets(&data);
     data << m_targets.m_targetMask;
     m_targets.write( &data, true );
@@ -2308,8 +2308,8 @@ void Spell::WriteAmmoToPacket( WorldPacket * data )
     }
     // TODO: implement selection ammo data based at ranged weapon stored in equipmodel/equipinfo/equipslot fields
 
-    *data << ammoDisplayID;
-    *data << ammoInventoryType;
+    *data << uint32(ammoDisplayID);
+    *data << uint32(ammoInventoryType);
 }
 
 void Spell::WriteSpellGoTargets( WorldPacket * data )
