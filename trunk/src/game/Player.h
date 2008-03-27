@@ -1862,7 +1862,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetGroupUpdateFlag() { return m_groupUpdateMask; }
         void SetGroupUpdateFlag(uint32 flag) { m_groupUpdateMask |= flag; }
         uint64 GetAuraUpdateMask() { return m_auraUpdateMask; }
-        void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (1i64 << slot); }
+        void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (uint64(1) << slot); }
 
         GridReference<Player> &GetGridRef() { return m_gridRef; }
 
