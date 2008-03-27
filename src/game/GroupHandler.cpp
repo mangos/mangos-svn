@@ -666,7 +666,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
         ByteBuffer buf;
         for(uint32 i = 0; i < MAX_AURAS; ++i)
         {
-            if(auramask & (1i64 << i))
+            if(auramask & (uint64(1) << i))
             {
                 buf << uint16(player->GetUInt32Value(UNIT_FIELD_AURA + i));
                 //buf << uint8(1);
@@ -749,7 +749,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
             ByteBuffer buf;
             for(uint32 i = 0; i < MAX_AURAS; ++i)
             {
-                if(auramask & (1i64 << i))
+                if(auramask & (uint64(1) << i))
                 {
                     buf << uint16(pet->GetUInt32Value(UNIT_FIELD_AURA + i));
                     //buf << uint8(1);
@@ -811,7 +811,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
     {
         if(uint32 aura = player->GetUInt32Value(UNIT_FIELD_AURA + i))
         {
-            auramask |= (1i64 << i);
+            auramask |= (uint64(1) << i);
             buf << (uint16) aura;
             //buf << (uint8)  1;
         }
@@ -837,7 +837,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
         {
             if(uint32 petaura = pet->GetUInt32Value(UNIT_FIELD_AURA + i))
             {
-                petauramask |= (1i64 << i);
+                petauramask |= (uint64(1) << i);
                 petbuf << (uint16) petaura;
                 //petbuf << (uint8)  1;
             }
