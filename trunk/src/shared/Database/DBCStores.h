@@ -111,22 +111,21 @@ class DBCStorage
         DBCFile * dbc;
 };
 
-extern DBCStorage <AreaTableEntry>            sAreaStore; // recommend access using functions
-extern DBCStorage <AreaTriggerEntry>          sAreaTriggerStore;
-extern DBCStorage <BankBagSlotPricesEntry>    sBankBagSlotPricesStore;
-extern DBCStorage <BattlemasterListEntry>     sBattlemasterListStore;
-//extern DBCStorage <ChatChannelsEntry>         sChatChannelsStore; -- accessed using function, no usable index
-extern DBCStorage <ChrClassesEntry>           sChrClassesStore;
-extern DBCStorage <ChrRacesEntry>             sChrRacesStore;
-extern DBCStorage <CreatureDisplayInfoEntry>  sCreatureDisplayInfoStore;
-extern DBCStorage <CreatureFamilyEntry>       sCreatureFamilyStore;
-extern DBCStorage <DurabilityCostsEntry>      sDurabilityCostsStore;
-extern DBCStorage <DurabilityQualityEntry>    sDurabilityQualityStore;
-extern DBCStorage <SpellCastTimesEntry>       sCastTimesStore;
-extern DBCStorage <EmotesTextEntry>           sEmotesTextStore;
-extern DBCStorage <FactionEntry>              sFactionStore;
-extern DBCStorage <FactionTemplateEntry>      sFactionTemplateStore;
-extern DBCStorage <GemPropertiesEntry>        sGemPropertiesStore;
+extern DBCStorage <AreaTableEntry>               sAreaStore;// recommend access using functions
+extern DBCStorage <AreaTriggerEntry>             sAreaTriggerStore;
+extern DBCStorage <BankBagSlotPricesEntry>       sBankBagSlotPricesStore;
+extern DBCStorage <BattlemasterListEntry>        sBattlemasterListStore;
+//extern DBCStorage <ChatChannelsEntry>           sChatChannelsStore; -- accessed using function, no usable index
+extern DBCStorage <ChrClassesEntry>              sChrClassesStore;
+extern DBCStorage <ChrRacesEntry>                sChrRacesStore;
+extern DBCStorage <CreatureDisplayInfoEntry>     sCreatureDisplayInfoStore;
+extern DBCStorage <CreatureFamilyEntry>          sCreatureFamilyStore;
+extern DBCStorage <DurabilityCostsEntry>         sDurabilityCostsStore;
+extern DBCStorage <DurabilityQualityEntry>       sDurabilityQualityStore;
+extern DBCStorage <EmotesTextEntry>              sEmotesTextStore;
+extern DBCStorage <FactionEntry>                 sFactionStore;
+extern DBCStorage <FactionTemplateEntry>         sFactionTemplateStore;
+extern DBCStorage <GemPropertiesEntry>           sGemPropertiesStore;
 
 extern DBCStorage <GtCombatRatingsEntry>         sGtCombatRatingsStore;
 extern DBCStorage <GtChanceToMeleeCritBaseEntry> sGtChanceToMeleeCritBaseStore;
@@ -139,33 +138,35 @@ extern DBCStorage <GtRegenHPPerSptEntry>         sGtRegenHPPerSptStore;
 extern DBCStorage <GtRegenMPPerSptEntry>         sGtRegenMPPerSptStore;
 
 //extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore; -- not used currently
-extern DBCStorage <ItemExtendedCostEntry>     sItemExtendedCostStore;
-extern DBCStorage <ItemRandomPropertiesEntry> sItemRandomPropertiesStore;
-extern DBCStorage <ItemRandomSuffixEntry>     sItemRandomSuffixStore;
-extern DBCStorage <ItemSetEntry>              sItemSetStore;
-extern DBCStorage <LockEntry>                 sLockStore;
-extern DBCStorage <MapEntry>                  sMapStore;
-extern DBCStorage <SkillLineEntry>            sSkillLineStore;
-extern DBCStorage <SkillLineAbilityEntry>     sSkillLineAbilityStore;
-extern DBCStorage <SpellDurationEntry>        sSpellDurationStore;
-extern DBCStorage <SpellFocusObjectEntry>     sSpellFocusObjectStore;
-extern DBCStorage <SpellItemEnchantmentEntry> sSpellItemEnchantmentStore;
+extern DBCStorage <ItemExtendedCostEntry>        sItemExtendedCostStore;
+extern DBCStorage <ItemRandomPropertiesEntry>    sItemRandomPropertiesStore;
+extern DBCStorage <ItemRandomSuffixEntry>        sItemRandomSuffixStore;
+extern DBCStorage <ItemSetEntry>                 sItemSetStore;
+extern DBCStorage <LockEntry>                    sLockStore;
+extern DBCStorage <MapEntry>                     sMapStore;
+extern DBCStorage <RandomPropertiesPointsEntry>  sRandomPropertiesPointsStore;
+extern DBCStorage <SkillLineEntry>               sSkillLineStore;
+extern DBCStorage <SkillLineAbilityEntry>        sSkillLineAbilityStore;
+extern DBCStorage <SpellCastTimesEntry>          sCastTimesStore;
+extern DBCStorage <SpellDurationEntry>           sSpellDurationStore;
+extern DBCStorage <SpellFocusObjectEntry>        sSpellFocusObjectStore;
+extern DBCStorage <SpellItemEnchantmentEntry>    sSpellItemEnchantmentStore;
 extern DBCStorage <SpellItemEnchantmentConditionEntry> sSpellItemEnchantmentConditionStore;
-extern SpellCategoryStore                     sSpellCategoryStore;
-extern DBCStorage <SpellRadiusEntry>          sSpellRadiusStore;
-extern DBCStorage <SpellRangeEntry>           sSpellRangeStore;
-extern DBCStorage <SpellShapeshiftEntry>      sSpellShapeshiftStore;
-extern DBCStorage <SpellEntry>                sSpellStore;
-extern DBCStorage <StableSlotPricesEntry>     sStableSlotPricesStore;
-extern DBCStorage <TalentEntry>               sTalentStore;
-extern DBCStorage <TalentTabEntry>            sTalentTabStore;
-extern DBCStorage <TaxiNodesEntry>            sTaxiNodesStore;
-extern TaxiMask                               sTaxiNodesMask;
-extern TaxiPathSetBySource                    sTaxiPathSetBySource;
-extern TaxiPathNodesByPath                    sTaxiPathNodesByPath;
-extern DBCStorage <TotemCategoryEntry>        sTotemCategoryStore;
-//extern DBCStorage <WorldMapAreaEntry>         sWorldMapAreaStore; -- use Zone2MapCoordinates and Map2ZoneCoordinates
-extern DBCStorage <WorldSafeLocsEntry>        sWorldSafeLocsStore;
+extern SpellCategoryStore                        sSpellCategoryStore;
+extern DBCStorage <SpellRadiusEntry>             sSpellRadiusStore;
+extern DBCStorage <SpellRangeEntry>              sSpellRangeStore;
+extern DBCStorage <SpellShapeshiftEntry>         sSpellShapeshiftStore;
+extern DBCStorage <SpellEntry>                   sSpellStore;
+extern DBCStorage <StableSlotPricesEntry>        sStableSlotPricesStore;
+extern DBCStorage <TalentEntry>                  sTalentStore;
+extern DBCStorage <TalentTabEntry>               sTalentTabStore;
+extern DBCStorage <TaxiNodesEntry>               sTaxiNodesStore;
+extern TaxiMask                                  sTaxiNodesMask;
+extern TaxiPathSetBySource                       sTaxiPathSetBySource;
+extern TaxiPathNodesByPath                       sTaxiPathNodesByPath;
+extern DBCStorage <TotemCategoryEntry>           sTotemCategoryStore;
+//extern DBCStorage <WorldMapAreaEntry>           sWorldMapAreaStore; -- use Zone2MapCoordinates and Map2ZoneCoordinates
+extern DBCStorage <WorldSafeLocsEntry>           sWorldSafeLocsStore;
 
 void LoadDBCStores(std::string dataPath);
 

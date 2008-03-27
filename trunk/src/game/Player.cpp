@@ -10600,25 +10600,27 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
                 {
                     if(apply)
                     {
-                        ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
-                        if (item_rand)
+                        int32 basepoints = int32(enchant_amount);
+                        // Random Property Exist - try found basepoints for spell (basepoints depencs from item suffix factor)
+                        if (item->GetItemRandomPropertyId() !=0 && !enchant_amount)
                         {
-                            // Search enchant_amount
-                            if (!enchant_amount)
+                            ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
+                            if (item_rand)
                             {
+                                // Search enchant_amount
                                 for (int k=0; k<3; k++)
                                 {
                                     if(item_rand->enchant_id[k] == enchant_id)
                                     {
-                                        enchant_amount = uint32((item_rand->prefix[k]*item->GetItemSuffixFactor()) / 10000 );
+                                        basepoints = int32((item_rand->prefix[k]*item->GetItemSuffixFactor()) / 10000 );
                                         break;
                                     }
                                 }
                             }
-                            // Cast custom spell vs all equal basepoints getted from enchant_amount
-                            int32 basepoints = int32(enchant_amount);
-                            CastCustomSpell(this,enchant_spell_id,&basepoints,&basepoints,&basepoints,true,item);
                         }
+                        // Cast custom spell vs all equal basepoints getted from enchant_amount
+                        if (basepoints)
+                            CastCustomSpell(this,enchant_spell_id,&basepoints,&basepoints,&basepoints,true,item);
                         else
                             CastSpell(this,enchant_spell_id,true,item);
                     }

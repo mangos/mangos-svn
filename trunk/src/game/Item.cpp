@@ -282,6 +282,10 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
 
     if (delete_result) delete result;
 
+    // recalculate suffix factor
+    if(GetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID) < 0)
+        SetUInt32Value(ITEM_FIELD_SUFFIX_FACTOR,GenerateEnchSuffixFactor(GetEntry()));
+
     if(owner_guid != 0)
         SetOwnerGUID(owner_guid);
 

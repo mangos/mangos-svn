@@ -122,96 +122,79 @@ uint32 GetItemEnchantMod(uint32 entry)
 
 uint32 GenerateEnchSuffixFactor(uint32 item_id)
 {
-    float suffixFactor = 0;
-
     ItemPrototype const *itemProto = objmgr.GetItemPrototype(item_id);
 
     if(!itemProto)
         return 0;
+    if(!itemProto->RandomSuffix)
+        return 0;
 
-    if(itemProto->RandomSuffix)
+    RandomPropertiesPointsEntry const *randomProperty = sRandomPropertiesPointsStore.LookupEntry(itemProto->ItemLevel);
+    if(!randomProperty)
+        return 0;
+
+    uint32 suffixFactor;
+    switch(itemProto->InventoryType)
     {
-        switch(itemProto->InventoryType)
-        {
-            case INVTYPE_HEAD:
-                { suffixFactor = ITEM_SUFFIXFACTOR_HEAD_MOD; }
-                break;
-            case INVTYPE_NECK:
-                { suffixFactor = ITEM_SUFFIXFACTOR_NECK_MOD; }
-                break;
-            case INVTYPE_SHOULDERS:
-                { suffixFactor = ITEM_SUFFIXFACTOR_SHOULDERS_MOD; }
-                break;
-            case INVTYPE_CHEST:
-            case INVTYPE_ROBE:
-            case INVTYPE_BODY:
-                { suffixFactor = ITEM_SUFFIXFACTOR_CHEST_MOD; }
-                break;
-            case INVTYPE_WAIST:
-                { suffixFactor = ITEM_SUFFIXFACTOR_WAIST_MOD; }
-                break;
-            case INVTYPE_LEGS:
-                { suffixFactor = ITEM_SUFFIXFACTOR_LEGS_MOD; }
-                break;
-            case INVTYPE_FEET:
-                { suffixFactor = ITEM_SUFFIXFACTOR_FEET_MOD; }
-                break;
-            case INVTYPE_WRISTS:
-                { suffixFactor = ITEM_SUFFIXFACTOR_WRISTS_MOD; }
-                break;
-            case INVTYPE_HANDS:
-                { suffixFactor = ITEM_SUFFIXFACTOR_HANDS_MOD; }
-                break;
-            case INVTYPE_FINGER:
-                { suffixFactor = ITEM_SUFFIXFACTOR_FINGER_MOD; }
-                break;
-            case INVTYPE_SHIELD:
-                { suffixFactor = ITEM_SUFFIXFACTOR_SHIELD_MOD; }
-                break;
-            case INVTYPE_RANGED:
-            case INVTYPE_RANGEDRIGHT:
-                { suffixFactor = ITEM_SUFFIXFACTOR_RANGED_MOD; }
-                break;
-            case INVTYPE_CLOAK:
-                { suffixFactor = ITEM_SUFFIXFACTOR_BACK_MOD; }
-                break;
-            case INVTYPE_2HWEAPON:
-                { suffixFactor = ITEM_SUFFIXFACTOR_2HAND_MOD; }
-                break;
-            case INVTYPE_WEAPONMAINHAND:
-                { suffixFactor = ITEM_SUFFIXFACTOR_MAIN_HAND_MOD; }
-                break;
-            case INVTYPE_WEAPONOFFHAND:
-            case INVTYPE_HOLDABLE:
-                { suffixFactor = ITEM_SUFFIXFACTOR_OFF_HAND_MOD; }
-                break;
-            case INVTYPE_THROWN:
-                { suffixFactor = ITEM_SUFFIXFACTOR_THROWN_MOD; }
-                break;
-            case INVTYPE_WEAPON:
-                { suffixFactor = ITEM_SUFFIXFACTOR_ONE_HAND_MOD; }
-                break;
-            default:  return 0;
-        }
-
-        //apply rare/epic armor modifier
-        switch (itemProto->Quality)
-        {
-            case ITEM_QUALITY_POOR:
-            case ITEM_QUALITY_NORMAL:
-            case ITEM_QUALITY_UNCOMMON: 
-                break;
-            case ITEM_QUALITY_RARE:
-                suffixFactor *= ITEM_SUFFIXFACTOR_RARE_MOD;
-                break;
-            case ITEM_QUALITY_EPIC:
-                suffixFactor *= ITEM_SUFFIXFACTOR_EPIC_MOD;
-                break;
-            case ITEM_QUALITY_LEGENDARY:
-            case ITEM_QUALITY_ARTIFACT:
-                break;
-        }
+        // Items of that type don`t have points
+        case INVTYPE_NON_EQUIP:
+        case INVTYPE_BAG:
+        case INVTYPE_TABARD:
+        case INVTYPE_AMMO:
+        case INVTYPE_QUIVER:
+        case INVTYPE_RELIC:
+            return 0;
+        // Select point coefficient
+        case INVTYPE_HEAD:
+        case INVTYPE_BODY:
+        case INVTYPE_CHEST:
+        case INVTYPE_LEGS:
+        case INVTYPE_2HWEAPON:
+        case INVTYPE_ROBE:
+            suffixFactor = 0;
+            break;
+        case INVTYPE_SHOULDERS:
+        case INVTYPE_WAIST:
+        case INVTYPE_FEET:
+        case INVTYPE_HANDS:
+        case INVTYPE_TRINKET:
+            suffixFactor = 1;
+            break;
+        case INVTYPE_NECK:
+        case INVTYPE_WRISTS:
+        case INVTYPE_FINGER:
+        case INVTYPE_SHIELD:
+        case INVTYPE_CLOAK:
+        case INVTYPE_HOLDABLE:
+            suffixFactor = 2;
+            break;
+        case INVTYPE_WEAPON:
+        case INVTYPE_WEAPONMAINHAND:
+        case INVTYPE_WEAPONOFFHAND:
+            suffixFactor = 3;
+            break;
+        case INVTYPE_RANGED:
+        case INVTYPE_THROWN:
+        case INVTYPE_RANGEDRIGHT:
+            suffixFactor = 4;
+            break;
+        default:
+            return 0;
     }
-
-    return uint32(floor((suffixFactor*itemProto->ItemLevel) + 0.5f ));
+    // Select rare/epic modifier
+    switch (itemProto->Quality)
+    {
+        case ITEM_QUALITY_UNCOMMON:
+            return randomProperty->UncommonPropertiesPoints[suffixFactor];
+        case ITEM_QUALITY_RARE:
+            return randomProperty->RarePropertiesPoints[suffixFactor];
+        case ITEM_QUALITY_EPIC:
+            return randomProperty->EpicPropertiesPoints[suffixFactor];
+        case ITEM_QUALITY_LEGENDARY:
+        case ITEM_QUALITY_ARTIFACT:
+            return 0;                                       // not have random properties
+        default:
+            break;
+    }
+    return 0;
 }
