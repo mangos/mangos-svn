@@ -395,6 +395,15 @@ inline bool IsExpansionMap(MapEntry const* map)
         map->MapID == 566 );                                // Eye of the Storm
 }
 
+struct RandomPropertiesPointsEntry
+{
+    //uint32  Id;                                           // 0 hidden key
+    uint32    itemLevel;                                    // 1
+    uint32    EpicPropertiesPoints[5];                      // 2-6
+    uint32    RarePropertiesPoints[5];                      // 7-11
+    uint32    UncommonPropertiesPoints[5];                  // 12-16
+};
+
 struct SkillLineEntry
 {
     uint32    id;                                           // 0
