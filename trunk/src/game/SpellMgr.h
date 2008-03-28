@@ -304,7 +304,7 @@ uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form);
 inline
 bool IsChanneledSpell(SpellEntry const* spellInfo)
 {
-    return spellInfo->ChannelInterruptFlags != 0;
+    return (spellInfo->AttributesEx & 0x44);
 }
 
 // Spell affects related declarations (accessed using SpellMgr functions)
