@@ -494,6 +494,12 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void Respawn();
         void SaveRespawnTime();
 
+        uint32 GetRespawnDelay() const { return m_respawnDelay; }
+        void SetRespawnDelay(uint32 delay) { m_respawnDelay = delay; }
+
+        float GetRespawnRadius() const { return m_respawnradius; }
+        void SetRespawnRadius(float dist) { m_respawnradius = dist; }
+
         uint32 m_groupLootTimer;                            // (msecs)timer used for group loot
         uint64 lootingGroupLeaderGUID;                      // used to find group which is looting corpse
 
