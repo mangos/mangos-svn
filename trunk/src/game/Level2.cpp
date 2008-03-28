@@ -603,7 +603,7 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     float z = chr->GetPositionZ();
     float o = chr->GetOrientation();
 
-    Creature* pCreature = new Creature(chr);
+    Creature* pCreature = new Creature(NULL);
     if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id, (uint32)teamval))
     {
         delete pCreature;
@@ -612,10 +612,17 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
 
     pCreature->SaveToDB();
 
+    int32 guid = pCreature->GetDBTableGUIDLow();
+
     // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-    pCreature->LoadFromDB(pCreature->GetDBTableGUIDLow(), chr->GetInstanceId());
+    pCreature->LoadFromDB(guid, chr->GetInstanceId());
 
     MapManager::Instance().GetMap(pCreature->GetMapId(), pCreature)->Add(pCreature);
+
+    CreatureData const* data = objmgr.GetCreatureData(guid);
+
+    if (data)
+        objmgr.AddCreatureToGrid(guid, data);
 
     return true;
 }
@@ -1743,9 +1750,9 @@ bool ChatHandler::HandleSpawnDistCommand(const char* args)
         return false;
     }
 
-    int mtype=0;                                            // MovementType
-    if (option > 0)
-        mtype=1;
+    MovementGeneratorType mtype = IDLE_MOTION_TYPE;
+    if (option > 0) 
+        mtype = RANDOM_MOTION_TYPE;
 
     Creature *pCreature = getSelectedCreature();
     uint64 u_guid = 0;
@@ -1754,6 +1761,16 @@ bool ChatHandler::HandleSpawnDistCommand(const char* args)
         u_guid = pCreature->GetDBTableGUIDLow();
     else
         return false;
+
+    pCreature->SetRespawnRadius((float)option);
+    pCreature->SetDefaultMovementType(mtype);
+    pCreature->GetMotionMaster()->Initialize();
+    if(pCreature->isAlive())                                // dead creature will reset movement generator at respawn
+    {
+        pCreature->setDeathState(JUST_DIED);
+        pCreature->RemoveCorpse();
+        pCreature->Respawn();
+    }
 
     WorldDatabase.PExecuteLog("UPDATE creature SET spawndist=%i, MovementType=%i WHERE guid=%u",option,mtype,u_guid);
     PSendSysMessage(LANG_COMMAND_SPAWNDIST,option);
@@ -1787,6 +1804,7 @@ bool ChatHandler::HandleSpawnTimeCommand(const char* args)
         return false;
 
     WorldDatabase.PExecuteLog("UPDATE creature SET spawntimesecs=%i WHERE guid=%u",i_stime,u_guid);
+    pCreature->SetRespawnDelay((uint32)i_stime);
     PSendSysMessage(LANG_COMMAND_SPAWNTIME,i_stime);
 
     return true;
@@ -3082,7 +3100,7 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     float rot2 = sin(o/2);
     float rot3 = cos(o/2);
 
-    GameObject* pGameObj = new GameObject(chr);
+    GameObject* pGameObj = new GameObject(NULL);
     uint32 lowGUID = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
 
     if(!pGameObj->Create(lowGUID, goI->id, chr->GetMapId(), x, y, z, o, 0, 0, rot2, rot3, 0, 1))
@@ -3104,6 +3122,13 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
 
     pGameObj->SaveToDB();
     MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
+
+    GameObjectData const* data = objmgr.GetGOData(lowGUID);
+
+    if (data)
+    {
+        objmgr.AddGameobjectToGrid(lowGUID, data);
+    }
 
     PSendSysMessage(LANG_GAMEOBJECT_ADD,id,goI->name,lowGUID,x,y,z);
 
