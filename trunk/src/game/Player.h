@@ -662,6 +662,15 @@ enum KeyRingSlots
     KEYRING_SLOT_END            = 118
 };
 
+struct ItemPosCount
+{
+    ItemPosCount(uint16 _pos, uint8 _count) : pos(_pos), count(_count) {}
+
+    uint16 pos;
+    uint8 count;
+};
+typedef std::vector<ItemPosCount> ItemPosCountVec;
+
 enum SwitchWeapon
 {
     DEFAULT_SWITCH_WEAPON       = 1500,                     //cooldown in ms
@@ -992,6 +1001,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetSheath( uint32 sheathed );
         uint8 FindEquipSlot( ItemPrototype const* proto, uint32 slot, bool swap ) const;
         Item* CreateItem( uint32 item, uint32 count ) const;
+        Item* CloneItem( Item* pItem, uint32 count ) const;
         uint32 GetItemCount( uint32 item, Item* eItem = NULL ) const;
         uint32 GetBankItemCount( uint32 item, Item* eItem = NULL ) const;
         Item* GetItemByGuid( uint64 guid ) const;
@@ -1011,24 +1021,38 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HasItemCount( uint32 item, uint32 count ) const;
         bool HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item const* ignoreItem = NULL);
         Item* GetItemOrItemWithGemEquipped( uint32 item ) const;
-        uint8 CanTakeMoreSimilarItems(Item* pItem) const;
-        uint8 CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const;
-        uint8 CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const;
+        uint8 CanTakeMoreSimilarItems(Item* pItem) const { return _CanTakeMoreSimilarItems(pItem->GetEntry(),pItem->GetCount(),pItem); }
+        uint8 CanTakeMoreSimilarItems(uint32 entry, uint32 count) const { return _CanTakeMoreSimilarItems(entry,count,NULL); }
+        uint8 CanStoreNewItem( uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 item, uint32 count, uint32* no_space_count = NULL ) const
+        {
+            return _CanStoreItem(bag, slot, dest, item, count, NULL, false, no_space_count );
+        }
+        uint8 CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec& dest, Item *pItem, bool swap = false ) const
+        {
+            if(!pItem)
+                return EQUIP_ERR_ITEM_NOT_FOUND;
+            uint32 count = pItem->GetCount();
+            return _CanStoreItem( bag, slot, dest, pItem->GetEntry(), count, pItem, swap, NULL );
+
+        }
         uint8 CanStoreItems( Item **pItem,int count) const;
         uint8 CanEquipNewItem( uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const;
         uint8 CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bool not_loading = true ) const;
         uint8 CanUnequipItems( uint32 item, uint32 count ) const;
         uint8 CanUnequipItem( uint16 src, bool swap ) const;
-        uint8 CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap, bool not_loading = true ) const;
+        uint8 CanBankItem( uint8 bag, uint8 slot, ItemPosCountVec& dest, Item *pItem, bool swap, bool not_loading = true ) const;
         uint8 CanUseItem( Item *pItem, bool not_loading = true ) const;
         bool HasItemTotemCategory( uint32 TotemCategory ) const;
         bool CanUseItem( ItemPrototype const *pItem );
         uint8 CanUseAmmo( uint32 item ) const;
-        Item* StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update,int32 randomPropertyId = 0 );
-        Item* StoreItem( uint16 pos, Item *pItem, bool update );
+        Item* StoreNewItem( ItemPosCountVec const& pos, uint32 item, bool update,int32 randomPropertyId = 0 );
+        Item* StoreItem( ItemPosCountVec const& pos, Item *pItem, bool update );
         Item* EquipNewItem( uint16 pos, uint32 item, uint32 count, bool update );
         Item* EquipItem( uint16 pos, Item *pItem, bool update );
         void AutoUnequipOffhandIfNeed();
+
+        uint8 _CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem) const;
+        uint8 _CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count, Item *pItem = NULL, bool swap = false, uint32* no_space_count = NULL ) const;
 
         void ApplyEquipCooldown( Item * pItem );
         void SetAmmo( uint32 item );
@@ -1037,6 +1061,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool CheckAmmoCompatibility(const ItemPrototype *ammo_proto) const;
         void QuickEquipItem( uint16 pos, Item *pItem);
         void VisualizeItem( uint16 pos, Item *pItem);
+        Item* BankItem( ItemPosCountVec const& dest, Item *pItem, bool update )
+        {
+            return StoreItem( dest, pItem, update);
+        }
         Item* BankItem( uint16 pos, Item *pItem, bool update );
         void RemoveItem( uint8 bag, uint8 slot, bool update );
         void RemoveItemDependentAurasAndCasts( Item * pItem );
@@ -2095,6 +2123,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         float  m_summon_y;
         float  m_summon_z;
     private:
+        // internal common parts for CanStore/StoreItem functions
+        uint8 _CanStoreItem_InSpecificSlot( uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemPrototype const *pProto, uint32& count, bool swap, Item *pSrcItem ) const;
+        uint8 _CanStoreItem_InBag( uint8 bag, ItemPosCountVec& dest, ItemPrototype const *pProto, uint32& count, bool merge, Item *pSrcItem, uint8 skip_bag, uint8 skip_slot ) const;
+        uint8 _CanStoreItem_InInventorySlots( uint8 slot_begin, uint8 slot_end, ItemPosCountVec& dest, ItemPrototype const *pProto, uint32& count, bool merge, Item *pSrcItem, uint8 skip_bag, uint8 skip_slot ) const;
+        Item* _StoreItem( uint16 pos, Item *pItem, uint32 count, bool clone, bool update );
+
         GridReference<Player> m_gridRef;
 };
 

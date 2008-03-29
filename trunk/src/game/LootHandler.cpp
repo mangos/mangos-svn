@@ -146,11 +146,11 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-    uint16 dest;
-    uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item->itemid, item->count, false );
+    ItemPosCountVec dest;
+    uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item->itemid, item->count );
     if ( msg == EQUIP_ERR_OK )
     {
-        Item * newitem = player->StoreNewItem( dest, item->itemid, item->count, true, item->randomPropertyId);
+        Item * newitem = player->StoreNewItem( dest, item->itemid, true, item->randomPropertyId);
 
         if (qitem)
         {

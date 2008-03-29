@@ -2097,8 +2097,6 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
             ++items_count;
     }
 
-    uint16 dest;
-    uint8 msg;
     // will this creation mean a levelup?
     bool skill_levelup=false;
 
@@ -2106,7 +2104,8 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
     for(int i=0; i<items_count; i++)
     {
         // can the player store the new item?
-        msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, newitemid, num_to_add, false);
+        ItemPosCountVec dest;
+        uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, newitemid, num_to_add );
         if( msg != EQUIP_ERR_OK )
         {
             // send equip error if not
@@ -2116,7 +2115,7 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
         }
 
         // create the new item and store it
-        Item *pItem = player->StoreNewItem( dest, newitemid, num_to_add, true,Item::GenerateItemRandomPropertyId(newitemid));
+        Item *pItem = player->StoreNewItem( dest, newitemid, true,Item::GenerateItemRandomPropertyId(newitemid));
 
         // was it successful? return error if not
         if(!pItem)
@@ -2430,12 +2429,10 @@ void Spell::EffectSummonChangeItem(uint32 i)
     if( !pNewItem )
         return;
 
-    uint16 dest;
-    uint8 msg;
-
     if( player->IsInventoryPos( pos ) )
     {
-        msg = player->CanStoreItem( m_CastItem->GetBagSlot(), m_CastItem->GetSlot(), dest, pNewItem, true );
+        ItemPosCountVec dest;
+        uint8 msg = player->CanStoreItem( m_CastItem->GetBagSlot(), m_CastItem->GetSlot(), dest, pNewItem, true );
         if( msg == EQUIP_ERR_OK )
         {
             player->DestroyItem(m_CastItem->GetBagSlot(), m_CastItem->GetSlot(),true);
@@ -2445,7 +2442,8 @@ void Spell::EffectSummonChangeItem(uint32 i)
     }
     else if( player->IsBankPos ( pos ) )
     {
-        msg = player->CanBankItem( m_CastItem->GetBagSlot(), m_CastItem->GetSlot(), dest, pNewItem, true );
+        ItemPosCountVec dest;
+        uint8 msg = player->CanBankItem( m_CastItem->GetBagSlot(), m_CastItem->GetSlot(), dest, pNewItem, true );
         if( msg == EQUIP_ERR_OK )
         {
             player->DestroyItem(m_CastItem->GetBagSlot(), m_CastItem->GetSlot(),true);
@@ -2455,7 +2453,8 @@ void Spell::EffectSummonChangeItem(uint32 i)
     }
     else if( player->IsEquipmentPos ( pos ) )
     {
-        msg = player->CanEquipItem( m_CastItem->GetSlot(), dest, pNewItem, true );
+        uint16 dest;
+        uint8 msg = player->CanEquipItem( m_CastItem->GetSlot(), dest, pNewItem, true );
         if( msg == EQUIP_ERR_OK )
         {
             player->DestroyItem(m_CastItem->GetBagSlot(), m_CastItem->GetSlot(),true);
