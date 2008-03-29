@@ -7080,13 +7080,7 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 *damage, Unit
 
         // adds additional damage to crit_bonus (from talents)
         if(Player* modOwner = GetSpellModOwner())
-        {
-            // Ice Lance (have spell flags common with fire spells, then apply mod in code), use Frostbite that have semilar SPELLMOD_CRIT_DAMAGE_BONUS bonuses
-            if((spellProto->SpellFamilyFlags & 0x20000LL) && spellProto->SpellIconID == 186)
-                modOwner->ApplySpellMod(116, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
-            else
-                modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
-        }
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
     
         if(pVictim)
         {
