@@ -145,8 +145,8 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
 {
     for(int i=0; i<TRADE_SLOT_TRADED_COUNT; i++)
     {
-        uint16 traderDst;
-        uint16 playerDst;
+        ItemPosCountVec traderDst;
+        ItemPosCountVec playerDst;
         bool traderCanTrade = (myItems[i]==NULL || _player->pTrader->CanStoreItem( NULL_BAG, NULL_SLOT, traderDst, myItems[i], false ) == EQUIP_ERR_OK);
         bool playerCanTrade = (hisItems[i]==NULL || _player->CanStoreItem( NULL_BAG, NULL_SLOT, playerDst, hisItems[i], false ) == EQUIP_ERR_OK);
         if(traderCanTrade && playerCanTrade )

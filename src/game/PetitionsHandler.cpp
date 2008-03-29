@@ -175,8 +175,8 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
         return;
     }
 
-    uint16 dest;
-    uint8 msg = _player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, charterid, pProto->BuyCount, false);
+    ItemPosCountVec dest;
+    uint8 msg = _player->CanStoreNewItem(NULL_BAG, NULL_SLOT, dest, charterid, pProto->BuyCount );
     if(msg != EQUIP_ERR_OK)
     {
         _player->SendBuyError(msg, pCreature, charterid, 0);
@@ -184,7 +184,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
     }
 
     _player->ModifyMoney(-(int32)cost);
-    Item *charter = _player->StoreNewItem(dest, charterid, 1, true);
+    Item *charter = _player->StoreNewItem(dest, charterid, pProto->BuyCount, true);
     if(!charter)
         return;
 

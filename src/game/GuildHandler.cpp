@@ -1390,9 +1390,8 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
         {
             uint32 Entry = pItemBank->GetEntry();
             uint32 Count = pItemBank->GetCount();
-            uint16 Dest;
-            uint8 msg;
-            msg = pl->CanStoreItem(NULL_BAG, NULL_SLOT, Dest, pItemBank, false);
+            ItemPosCountVec dest;
+            uint8 msg = pl->CanStoreItem(NULL_BAG, NULL_SLOT, dest, pItemBank, false);
             if( msg != EQUIP_ERR_OK )
             {
                 pl->SendEquipError( msg, pItemBank, NULL );
@@ -1402,7 +1401,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
             CharacterDatabase.BeginTransaction();
 
                                                             // This cause item state to change
-            Item *pItemStacked = pl->StoreItem(Dest, pItemBank, true);
+            Item *pItemStacked = pl->StoreItem(dest, pItemBank, true);
             pGuild->EmptyBankSlot(BankTab, BankTabSlot);    // Delete from bank table
             if (pItemStacked == pItemBank)                  // In case stacked to player, do not execute
             {
@@ -1437,9 +1436,8 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     pItemToStore->Create(NewGuid, ItemEntry, GetPlayer());
                     pItemToStore->SetCount(SplitedAmount);
 
-                    uint16 Dest;
-                    uint8 msg;
-                    msg = pl->CanStoreItem(PlayerBag, PlayerSlot, Dest, pItemToStore, false);
+                    ItemPosCountVec dest;
+                    uint8 msg = pl->CanStoreItem(PlayerBag, PlayerSlot, dest, pItemToStore, false);
                     if( msg != EQUIP_ERR_OK )
                     {
                         pl->SendEquipError( msg, pItemToStore, NULL );
@@ -1453,7 +1451,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     pItemToStore->AddToWorld();
                     pItemToStore->FSetState(ITEM_NEW);
                     pItemToStore->SaveToDB();
-                    pl->StoreItem(Dest, pItemToStore, true);// Set state updated
+                    pl->StoreItem(dest, pItemToStore, true);// Set state updated
                     pItemBank->SetCount(pItemBank->GetCount()-SplitedAmount);
                     pItemBank->FSetState(ITEM_CHANGED);
                     pItemBank->SaveToDB();
@@ -1467,9 +1465,8 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                 }
                 else                                        // Bank -> Char swap with empty slot (move)
                 {
-                    uint16 Dest;
-                    uint8 msg;
-                    msg = pl->CanStoreItem(PlayerBag, PlayerSlot, Dest, pItemBank, false);
+                    ItemPosCountVec dest;
+                    uint8 msg = pl->CanStoreItem(PlayerBag, PlayerSlot, dest, pItemBank, false);
                     if( msg != EQUIP_ERR_OK )
                     {
                         pl->SendEquipError( msg, pItemBank, NULL );
@@ -1481,7 +1478,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
 
                     pGuild->EmptyBankSlot(BankTab, BankTabSlot);
                     // Set state updated
-                    pl->StoreItem(Dest, pItemBank, true);
+                    pl->StoreItem(dest, pItemBank, true);
                     pItemBank->SaveToDB();
                     pItemBank->SetState(ITEM_NEW);
                     pl->SaveInventoryAndGoldToDB();
@@ -1546,9 +1543,8 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                         return;
                     }
 
-                    uint16 Dest;
-                    uint8 msg;
-                    msg = pl->CanStoreItem(PlayerBag, PlayerSlot, Dest, pItemBank, true);
+                    ItemPosCountVec dest;
+                    uint8 msg = pl->CanStoreItem(PlayerBag, PlayerSlot, dest, pItemBank, true);
                     if( msg != EQUIP_ERR_OK )
                     {
                         sLog.outError("GUILDBANK: Could not add back item (GUID: %u) to character inventory after swap with item (GUID: %u)!",pItemBank->GetGUIDLow(),pItemChar->GetGUIDLow() );
@@ -1576,7 +1572,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     pItemChar->DeleteFromInventoryDB();
                     pItemChar->SaveToDB();                  // this item is now in bank
 
-                    pl->StoreItem(Dest, pItemBank, true);
+                    pl->StoreItem(dest, pItemBank, true);
                     pItemBank->SaveToDB();
                     pItemBank->SetState(ITEM_NEW);
                     pl->SaveInventoryAndGoldToDB();
@@ -1722,9 +1718,8 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                         return;
                     }
 
-                    uint16 Dest;
-                    uint8 msg;
-                    msg = pl->CanStoreItem(PlayerBag, PlayerSlot, Dest, pItemBank, true);
+                    ItemPosCountVec dest;
+                    uint8 msg = pl->CanStoreItem(PlayerBag, PlayerSlot, dest, pItemBank, true);
                     if( msg != EQUIP_ERR_OK )
                     {
                         GetPlayer()->SendEquipError( msg, pItemBank, NULL );
@@ -1752,7 +1747,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     pItemChar->DeleteFromInventoryDB();
                     pItemChar->SaveToDB();                  // this item is now in bank
 
-                    pl->StoreItem(Dest, pItemBank, true);   // ITEM_CHANGED auto set auto
+                    pl->StoreItem(dest, pItemBank, true);   // ITEM_CHANGED auto set auto
                     pItemBank->SaveToDB();
                     pItemBank->SetState(ITEM_NEW);
                     pGuild->MemberItemWithdraw(BankTab, pl->GetGUIDLow());

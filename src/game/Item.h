@@ -176,6 +176,8 @@ enum ItemUpdateState
     ITEM_REMOVED                                 = 3
 };
 
+bool ItemCanGoIntoBag(ItemPrototype const *proto, ItemPrototype const *pBagProto);
+
 class MANGOS_DLL_SPEC Item : public Object
 {
     public:
@@ -221,7 +223,6 @@ class MANGOS_DLL_SPEC Item : public Object
         void SetSlot(uint8 slot) {m_slot = slot;}
         uint16 GetPos() const { return uint16(GetBagSlot()) << 8 | GetSlot(); }
         void SetContainer(Bag *container) { m_container = container; }
-        bool CanGoIntoBag(ItemPrototype const *pBagProto);
 
         bool IsInBag() const { return m_container != NULL; }
         bool IsEquipped() const;

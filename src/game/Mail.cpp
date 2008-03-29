@@ -389,7 +389,6 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     uint64 mailbox;
     uint32 mailId;
     uint32 itemId;
-    uint16 dest;
     recv_data >> mailbox;
     recv_data >> mailId;
     recv_data >> itemId;                                    // item guid low?
@@ -411,6 +410,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 
     Item *it = pl->GetMItem(itemId);
 
+    ItemPosCountVec dest;
     uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, it, false );
     if( msg == EQUIP_ERR_OK )
     {
@@ -673,7 +673,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 
     sLog.outDetail("HandleMailCreateTextItem mailid=%u",mailId);
 
-    uint16 dest;
+    ItemPosCountVec dest;
     uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, bodyItem, false );
     if( msg == EQUIP_ERR_OK )
     {
