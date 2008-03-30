@@ -91,7 +91,7 @@ namespace MaNGOS
             if(u->GetTypeId()==TYPEID_UNIT && ((Creature*)u)->isTotem() || ((Creature*)u)->isPet())
                 return 0;
 
-            uint32 xp_gain= BaseGain(pl->getLevel(), u->getLevel(), GetContentLevelsForMapAndZone(u->GetMapId(),u->GetZoneId()));
+            uint32 xp_gain= BaseGain(pl->getLevel(), u->getLevel(), GetContentLevelsForMapAndZone(pl->GetMapId(),pl->GetZoneId()));
             if( xp_gain == 0 )
                 return 0;
 
