@@ -2174,7 +2174,7 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                     gameObjTarget->SetUInt32Value(GAMEOBJECT_STATE,1);
                 }
 
-                gameObjTarget->SetLootState(GO_CLOSED);
+                gameObjTarget->SetLootState(GO_READY);
                 gameObjTarget->SetRespawnTime(6);
 
                 sWorld.ScriptsStart(sGameObjectScripts, gameObjTarget->GetDBTableGUIDLow(), player, gameObjTarget);
@@ -2206,7 +2206,7 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                         return;
 
                 gameObjTarget->AddUniqueUse(player);
-                gameObjTarget->SetLootState(GO_LOOTED);
+                gameObjTarget->SetLootState(GO_JUST_DEACTIVATED);
                 player->CastedCreatureOrGO(gameObjTarget->GetEntry(), gameObjTarget->GetGUID(), 0);
 
                 // triggering linked GO
@@ -4278,7 +4278,7 @@ void Spell::EffectSummonObject(uint32 i)
     int32 duration = GetSpellDuration(m_spellInfo);
     pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
     pGameObj->SetSpellId(m_spellInfo->Id);
-    pGameObj->SetLootState(GO_CLOSED);
+    pGameObj->SetLootState(GO_READY);
     m_caster->AddGameObject(pGameObj);
 
     MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);

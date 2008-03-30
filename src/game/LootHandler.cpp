@@ -304,7 +304,7 @@ void WorldSession::DoLootRelease( uint64 lguid )
             // locked doors are opened with spelleffect openlock, prevent remove its as looted
             go->SetUInt32Value(GAMEOBJECT_FLAGS,33);
             go->SetUInt32Value(GAMEOBJECT_STATE,0);         //open
-            go->SetLootState(GO_CLOSED);
+            go->SetLootState(GO_READY);
             go->SetRespawnTime(5);                          //close door in 5 seconds
         }
         else if (loot->isLooted() || go->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE)
@@ -339,28 +339,28 @@ void WorldSession::DoLootRelease( uint64 lguid )
                             double chance = pow(0.8*chance_rate,4*(1/double(max_amount))*double(uses));
                             if(roll_chance_f(100*chance+skill))
                             {
-                                go->SetLootState(GO_CLOSED);
+                                go->SetLootState(GO_READY);
                             }
                             else                            // not have more uses
-                                go->SetLootState(GO_LOOTED);
+                                go->SetLootState(GO_JUST_DEACTIVATED);
                         }
                         else                                // 100% chance until min uses
-                            go->SetLootState(GO_CLOSED);
+                            go->SetLootState(GO_READY);
                     }
                     else                                    // max uses already
-                        go->SetLootState(GO_LOOTED);
+                        go->SetLootState(GO_JUST_DEACTIVATED);
                 }
                 else                                        // not vein
-                    go->SetLootState(GO_LOOTED);
+                    go->SetLootState(GO_JUST_DEACTIVATED);
             }
             else                                            // not chest (or vein/herb/etc)
-                go->SetLootState(GO_LOOTED);
+                go->SetLootState(GO_JUST_DEACTIVATED);
 
             loot->clear();
         }
         else
             // not fully looted object
-            go->SetLootState(GO_OPEN);
+            go->SetLootState(GO_ACTIVATED);
     }
     else if (IS_CORPSE_GUID(lguid))        // ONLY remove insignia at BG
     {
