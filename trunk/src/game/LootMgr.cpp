@@ -122,6 +122,11 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
 
             switch (condition)
             {
+                case CONDITION_NONE:
+                    if(cond_value1 || cond_value2)
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) have useless data in condition_value* for none condition!", tablename, item, entry);
+                    // accept loot data any way
+                    break;
                 case CONDITION_AURA:
                 {
                     if(!sSpellStore.LookupEntry(cond_value1))
@@ -175,6 +180,8 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
                         sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has set to subzone (%u) instead zone requirement!", tablename, item, entry,cond_value1);
                         continue;
                     }
+                    if(cond_value2)
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) have useless data in condition_value2!", tablename, item, entry);
                     break;
                 }
                 case CONDITION_REPUTATION_RANK:
@@ -194,6 +201,8 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
                         sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has set team drop condition to non-existing team!", tablename, item, entry);
                         continue;
                     }
+                    if(cond_value2)
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) have useless data in condition_value2!", tablename, item, entry);
                     break;
                 }
                 case CONDITION_SKILL:
@@ -212,6 +221,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
                     break;
                 }
                 case CONDITION_QUESTREWARDED:
+                case CONDITION_QUESTTAKEN:
                 {
                     Quest const *Quest = objmgr.GetQuestTemplate(cond_value1);
                     if (!Quest)
@@ -219,6 +229,8 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
                         sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has quest rewarded condition set but quest does not exist!", tablename, item, entry);
                         continue;
                     }
+                    if(cond_value2)
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) have useless data in condition_value2!", tablename, item, entry);
                     break;
                 }
             }
@@ -462,6 +474,11 @@ bool MeetsConditions(Player * owner, LootItem * itm)
                 return owner->HasSkill(itm->cond_value1) && owner->GetBaseSkillValue(itm->cond_value1) >= itm->cond_value2;
             case CONDITION_QUESTREWARDED:
                 return owner->GetQuestRewardStatus(itm->cond_value1);
+            case CONDITION_QUESTTAKEN:
+            {
+                QuestStatus status = owner->GetQuestStatus(itm->cond_value1);
+                return (status == QUEST_STATUS_INCOMPLETE);
+            }
             default:
                 return false;
         }
