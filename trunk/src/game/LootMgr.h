@@ -69,7 +69,8 @@ enum AdditionalLootCondition
     CONDITION_TEAM                  = 6,                    // player_team 0 (469 - Alliance 67 - Horde)
     CONDITION_SKILL                 = 7,                    // skill_id skill_value
     CONDITION_QUESTREWARDED         = 8,                    // quest_id 0
-    CONDITION_QUESTTAKEN            = 9                     // quest_id 0, for quest item that can looted in any amount while quest active.
+    CONDITION_QUESTTAKEN            = 9,                    // quest_id 0, for quest item that can looted in any amount while quest active.
+    CONDITION_QUESTGIVER            = 10                    // quest_id 0, for prevent redundent loot of quest starting items after quest start/complete
 };
 
 class Player;

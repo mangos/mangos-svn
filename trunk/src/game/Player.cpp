@@ -7811,68 +7811,61 @@ uint8 Player::CanUnequipItems( uint32 item, uint32 count ) const
     return res;
 }
 
-uint32 Player::GetItemCount( uint32 item, Item* eItem ) const
+uint32 Player::GetItemCount( uint32 item, bool inBankAlso, Item* skipItem ) const
 {
-    Item *pItem;
     uint32 count = 0;
     for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
-        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-        if( pItem && pItem != eItem &&  pItem->GetEntry() == item )
+        Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem != skipItem &&  pItem->GetEntry() == item )
             count += pItem->GetCount();
     }
     for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
     {
-        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-        if( pItem && pItem != eItem && pItem->GetEntry() == item )
+        Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem != skipItem && pItem->GetEntry() == item )
             count += pItem->GetCount();
     }
-    Bag *pBag;
     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
     {
-        pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        Bag* pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if( pBag )
-            count += pBag->GetItemCount(item,eItem);
+            count += pBag->GetItemCount(item,skipItem);
     }
 
-    if(eItem && eItem->GetProto()->GemProperties)
+    if(skipItem && skipItem->GetProto()->GemProperties)
     {
         for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
         {
-            pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-            if( pItem && pItem != eItem && pItem->GetProto()->Socket[0].Color )
+            Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+            if( pItem && pItem != skipItem && pItem->GetProto()->Socket[0].Color )
                 count += pItem->GetGemCountWithID(item);
         }
     }
 
-    return count;
-}
-
-uint32 Player::GetBankItemCount( uint32 item, Item* eItem ) const
-{
-    Item *pItem;
-    uint32 count = 0;
-    for(int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
-    {
-        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-        if( pItem && pItem != eItem && pItem->GetEntry() == item )
-            count += pItem->GetCount();
-    }
-    Bag *pBag;
-    for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
-    {
-        pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-        if( pBag )
-            count += pBag->GetItemCount(item,eItem);
-    }
-
-    if(eItem && eItem->GetProto()->GemProperties)
+    if(inBankAlso)
     {
         for(int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
         {
-            pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-            if( pItem && pItem != eItem && pItem->GetProto()->Socket[0].Color )
-                count += pItem->GetGemCountWithID(item);
+            Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+            if( pItem && pItem != skipItem && pItem->GetEntry() == item )
+                count += pItem->GetCount();
+        }
+        for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
+        {
+            Bag* pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+            if( pBag )
+                count += pBag->GetItemCount(item,skipItem);
+        }
+
+        if(skipItem && skipItem->GetProto()->GemProperties)
+        {
+            for(int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
+            {
+                Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+                if( pItem && pItem != skipItem && pItem->GetProto()->Socket[0].Color )
+                    count += pItem->GetGemCountWithID(item);
+            }
         }
     }
 
@@ -8012,13 +8005,12 @@ bool Player::IsBagPos( uint16 pos )
     return false;
 }
 
-bool Player::HasItemCount( uint32 item, uint32 count ) const
+bool Player::HasItemCount( uint32 item, uint32 count,bool inBankAlso ) const
 {
-    Item *pItem;
     uint32 tempcount = 0;
     for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
-        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if( pItem && pItem->GetEntry() == item )
         {
             tempcount += pItem->GetCount();
@@ -8028,7 +8020,7 @@ bool Player::HasItemCount( uint32 item, uint32 count ) const
     }
     for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
     {
-        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if( pItem && pItem->GetEntry() == item )
         {
             tempcount += pItem->GetCount();
@@ -8036,19 +8028,15 @@ bool Player::HasItemCount( uint32 item, uint32 count ) const
                 return true;
         }
     }
-    Bag *pBag;
-    ItemPrototype const *pBagProto;
     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
     {
-        pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-        if( pBag )
+        if(Bag* pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
         {
-            pBagProto = pBag->GetProto();
-            if( pBagProto )
+            if(ItemPrototype const *pBagProto = pBag->GetProto())
             {
                 for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                 {
-                    pItem = GetItemByPos( i, j );
+                    Item* pItem = GetItemByPos( i, j );
                     if( pItem && pItem->GetEntry() == item )
                     {
                         tempcount += pItem->GetCount();
@@ -8059,6 +8047,40 @@ bool Player::HasItemCount( uint32 item, uint32 count ) const
             }
         }
     }
+    
+    if(inBankAlso)
+    {
+        for(int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
+        {
+            Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+            if( pItem && pItem->GetEntry() == item )
+            {
+                tempcount += pItem->GetCount();
+                if( tempcount >= count )
+                    return true;
+            }
+        }
+        for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
+        {
+            if(Bag* pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+            {
+                if(ItemPrototype const *pBagProto = pBag->GetProto())
+                {
+                    for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                    {
+                        Item* pItem = GetItemByPos( i, j );
+                        if( pItem && pItem->GetEntry() == item )
+                        {
+                            tempcount += pItem->GetCount();
+                            if( tempcount >= count )
+                                return true;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
     return false;
 }
 
@@ -8099,7 +8121,7 @@ uint8 Player::_CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem) 
     if(pProto->MaxCount == 0)
         return EQUIP_ERR_OK;
 
-    uint32 curcount = GetItemCount(pProto->ItemId,pItem) + GetBankItemCount(pProto->ItemId,pItem);
+    uint32 curcount = GetItemCount(pProto->ItemId,true,pItem);
 
     if( curcount + count > pProto->MaxCount )
         return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
@@ -11991,7 +12013,7 @@ void Player::AdjustQuestReqItemCount( Quest const* pQuest )
             if( reqitemcount != 0 )
             {
                 uint32 quest_id = pQuest->GetQuestId();
-                uint32 curitemcount = GetItemCount(pQuest->ReqItemId[i]) + GetBankItemCount(pQuest->ReqItemId[i]);
+                uint32 curitemcount = GetItemCount(pQuest->ReqItemId[i],true);
                 mQuestStatus[quest_id].m_itemcount[i] = std::min(curitemcount, reqitemcount);
                 if (mQuestStatus[quest_id].uState != QUEST_NEW) mQuestStatus[quest_id].uState = QUEST_CHANGED;
             }
@@ -12089,7 +12111,7 @@ void Player::ItemRemovedQuestCheck( uint32 entry, uint32 count )
                         if( mQuestStatus[questid].m_status != QUEST_STATUS_COMPLETE )
                             curitemcount = mQuestStatus[questid].m_itemcount[j];
                         else
-                            curitemcount = GetItemCount(entry) + GetBankItemCount(entry);
+                            curitemcount = GetItemCount(entry,true);
                         if ( curitemcount < reqitemcount + count )
                         {
                             remitemcount = ( curitemcount <= reqitemcount ? count : count + reqitemcount - curitemcount);
@@ -12343,20 +12365,20 @@ bool Player::HasQuestForItem( uint32 itemid )
 
                     // total count of created ReqItems and SourceItems is less than ReqItemCount
                     if(qinfo->ReqItemId[idx] != 0 &&
-                        qs.m_itemcount[idx] * qinfo->ReqSourceCount[j] + GetItemCount(itemid) + GetBankItemCount(itemid) < qinfo->ReqItemCount[idx] * qinfo->ReqSourceCount[j])
+                        qs.m_itemcount[idx] * qinfo->ReqSourceCount[j] + GetItemCount(itemid,true) < qinfo->ReqItemCount[idx] * qinfo->ReqSourceCount[j])
                         return true;
 
                     // total count of casted ReqCreatureOrGOs and SourceItems is less than ReqCreatureOrGOCount
                     if (qinfo->ReqCreatureOrGOId[idx] != 0)
                     {
-                        if(qs.m_creatureOrGOcount[idx] * qinfo->ReqSourceCount[j] + GetItemCount(itemid) + GetBankItemCount(itemid) < qinfo->ReqCreatureOrGOCount[idx] * qinfo->ReqSourceCount[j])
+                        if(qs.m_creatureOrGOcount[idx] * qinfo->ReqSourceCount[j] + GetItemCount(itemid,true) < qinfo->ReqCreatureOrGOCount[idx] * qinfo->ReqSourceCount[j])
                             return true;
                     }
                     // spell with SPELL_EFFECT_QUEST_COMPLETE or SPELL_EFFECT_SEND_EVENT (with script) case
                     else if(qinfo->ReqSpell[idx] != 0)
                     {
                         // not casted and need more reagents/item for use.
-                        if(!qs.m_explored && GetItemCount(itemid) + GetBankItemCount(itemid) < qinfo->ReqSourceCount[j])
+                        if(!qs.m_explored && GetItemCount(itemid,true) < qinfo->ReqSourceCount[j])
                             return true;
                     }
                 }

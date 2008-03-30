@@ -1002,8 +1002,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 FindEquipSlot( ItemPrototype const* proto, uint32 slot, bool swap ) const;
         Item* CreateItem( uint32 item, uint32 count ) const;
         Item* CloneItem( Item* pItem, uint32 count ) const;
-        uint32 GetItemCount( uint32 item, Item* eItem = NULL ) const;
-        uint32 GetBankItemCount( uint32 item, Item* eItem = NULL ) const;
+        uint32 GetItemCount( uint32 item, bool inBankAlso = false, Item* skipItem = NULL ) const;
         Item* GetItemByGuid( uint64 guid ) const;
         Item* GetItemByPos( uint16 pos ) const;
         Item* GetItemByPos( uint8 bag, uint8 slot ) const;
@@ -1018,7 +1017,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         static bool IsBankBagPos( uint8 bag, uint8 slot );
         static bool IsWeaponSlot( uint8 slot ) { return slot==EQUIPMENT_SLOT_MAINHAND || slot==EQUIPMENT_SLOT_OFFHAND || slot==EQUIPMENT_SLOT_RANGED; }
         bool HasBankBagSlot( uint8 slot ) const;
-        bool HasItemCount( uint32 item, uint32 count ) const;
+        bool HasItemCount( uint32 item, uint32 count, bool inBankAlso = false ) const;
         bool HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item const* ignoreItem = NULL);
         Item* GetItemOrItemWithGemEquipped( uint32 item ) const;
         uint8 CanTakeMoreSimilarItems(Item* pItem) const { return _CanTakeMoreSimilarItems(pItem->GetEntry(),pItem->GetCount(),pItem); }
