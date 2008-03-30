@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: mangos
 -- ------------------------------------------------------
--- Server version	5.0.45-Debian_1ubuntu3.1-log
+-- Server version	5.0.56-nt
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -21,8 +21,8 @@
 
 DROP TABLE IF EXISTS `areatrigger_involvedrelation`;
 CREATE TABLE `areatrigger_involvedrelation` (
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
-  `quest` int(11) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
+  `id` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Identifier',
+  `quest` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
 
@@ -41,7 +41,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `areatrigger_tavern`;
 CREATE TABLE `areatrigger_tavern` (
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
+  `id` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Identifier',
   `name` text,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
@@ -61,11 +61,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `areatrigger_teleport`;
 CREATE TABLE `areatrigger_teleport` (
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
+  `id` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Identifier',
   `name` text,
   `required_level` tinyint(3) unsigned NOT NULL default '0',
-  `required_item` int(11) unsigned NOT NULL default '0',
-  `target_map` int(11) unsigned NOT NULL default '0',
+  `required_item` mediumint(8) unsigned NOT NULL default '0',
+  `target_map` smallint(5) unsigned NOT NULL default '0',
   `target_position_x` float NOT NULL default '0',
   `target_position_y` float NOT NULL default '0',
   `target_position_z` float NOT NULL default '0',
@@ -88,14 +88,14 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `battleground_template`;
 CREATE TABLE `battleground_template` (
-  `id` int(11) unsigned NOT NULL,
-  `MinPlayersPerTeam` int(11) unsigned NOT NULL default '0',
-  `MaxPlayersPerTeam` int(11) unsigned NOT NULL default '0',
-  `MinLvl` int(11) unsigned NOT NULL default '0',
-  `MaxLvl` int(11) unsigned NOT NULL default '0',
-  `AllianceStartLoc` int(11) unsigned NOT NULL,
+  `id` mediumint(8) unsigned NOT NULL,
+  `MinPlayersPerTeam` smallint(5) unsigned NOT NULL default '0',
+  `MaxPlayersPerTeam` smallint(5) unsigned NOT NULL default '0',
+  `MinLvl` tinyint(3) unsigned NOT NULL default '0',
+  `MaxLvl` tinyint(3) unsigned NOT NULL default '0',
+  `AllianceStartLoc` mediumint(8) unsigned NOT NULL,
   `AllianceStartO` float NOT NULL,
-  `HordeStartLoc` int(11) unsigned NOT NULL,
+  `HordeStartLoc` mediumint(8) unsigned NOT NULL,
   `HordeStartO` float NOT NULL,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -124,8 +124,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `battlemaster_entry`;
 CREATE TABLE `battlemaster_entry` (
-  `entry` int(11) unsigned NOT NULL default '0' COMMENT 'Entry of a creature',
-  `bg_template` int(11) unsigned NOT NULL default '0' COMMENT 'Battleground template id',
+  `entry` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Entry of a creature',
+  `bg_template` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Battleground template id',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -156,7 +156,7 @@ CREATE TABLE `command` (
 
 LOCK TABLES `command` WRITE;
 /*!40000 ALTER TABLE `command` DISABLE KEYS */;
-INSERT INTO `command` (`name`,`security`,`help`) VALUES
+INSERT INTO `command` VALUES
 ('acct',0,'Syntax: .acct\r\n\r\nDisplay the access level of your account.'),
 ('addgo',2,'Syntax: .addgo #id <spawntimeSecs>\r\n\r\nAdd a game object from game object templates to the world at your current location using the #id.\r\nspawntimesecs sets the spawntime, it is optional.\r\n\r\nNote: this is a copy of .gameobject.'),
 ('additem',3,'Syntax: .additem #itemid/[#itemname]/#shift-click-item-link #itemcount\r\n\r\nAdds the specified number of items of id #itemid (or exact (!) name $itemname in brackets, or link created by shift-click at item in inventory or recipe) to your or selected character inventory. If #itemcount is omitted, only one item will be added.\r\n.'),
@@ -312,7 +312,7 @@ INSERT INTO `command` (`name`,`security`,`help`) VALUES
 ('setskill',3,'Syntax: .setskill #skill #level [#max]\r\n\r\nSet a skill of id #skill with a current skill value of #level and a maximum value of #max (or equal current maximum if not provide) for the selected character. If no character is selected, you learn the skill.'),
 ('setvalue',3,'Syntax: .setvalue #field #value #isInt\r\n\r\nSet the field #field of the selected creature with value #value. If no creature is selected, set the content of your field.\r\n\r\nUse a #isInt of value 1 if #value is an integer.'),
 ('showarea',3,'Syntax: .showarea #areaid\r\n\r\nReveal the area of #areaid to the selected character. If no character is selected, reveal this area to you.'),
-('shutdown','3','Syntax: .shutdown seconds\r\n\r\nShut the server down after given seconds or cancel the shutdown if cancel value is used.'),
+('shutdown',3,'Syntax: .shutdown seconds\r\n\r\nShut the server down after given seconds or cancel the shutdown if cancel value is used.'),
 ('spawndist',2,'Syntax: .spawndist #dist\r\n\r\nAdjust spawndistance of selected creature to dist.'),
 ('spawntime',2,'Syntax: .spawntime #time \r\n\r\nAdjust spawntime of selected creature to time.'),
 ('speed',1,'Syntax:\r\n.modify speed #rate\r\n.speed #rate\r\n\r\nModify the running speed of the selected player to \"normal base run speed\"*rate. If no player is selected, modify your speed.\r\n\r\n #rate may range from 0.1 to 10.'),
@@ -348,24 +348,24 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creature`;
 CREATE TABLE `creature` (
-  `guid` int(11) unsigned NOT NULL auto_increment COMMENT 'Global Unique Identifier',
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Creature Identifier',
-  `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
-  `modelid` int(11) unsigned default '0',
-  `equipment_id` int(11) NOT NULL default '0',
+  `guid` int(10) unsigned NOT NULL auto_increment COMMENT 'Global Unique Identifier',
+  `id` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Creature Identifier',
+  `map` smallint(5) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
+  `modelid` mediumint(8) unsigned NOT NULL default '0',
+  `equipment_id` mediumint(9) NOT NULL default '0',
   `position_x` float NOT NULL default '0',
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
   `orientation` float NOT NULL default '0',
-  `spawntimesecs` int(11) unsigned NOT NULL default '120',
+  `spawntimesecs` int(10) unsigned NOT NULL default '120',
   `spawndist` float NOT NULL default '5',
-  `currentwaypoint` int(11) unsigned NOT NULL default '0',
+  `currentwaypoint` mediumint(8) unsigned NOT NULL default '0',
   `spawn_position_x` float NOT NULL default '0',
   `spawn_position_y` float NOT NULL default '0',
   `spawn_position_z` float NOT NULL default '0',
   `spawn_orientation` float NOT NULL default '0',
-  `curhealth` int(11) unsigned NOT NULL default '1',
-  `curmana` int(11) unsigned NOT NULL default '0',
+  `curhealth` int(10) unsigned NOT NULL default '1',
+  `curmana` int(10) unsigned NOT NULL default '0',
   `DeathState` tinyint(3) unsigned NOT NULL default '0',
   `MovementType` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`),
@@ -389,11 +389,11 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `creature_addon`;
 CREATE TABLE `creature_addon` (
   `guid` int(11) NOT NULL default '0',
-  `mount` int(11) unsigned NOT NULL default '0',
-  `bytes0` int(11) unsigned NOT NULL default '0',
-  `bytes1` int(11) unsigned NOT NULL default '0',
-  `bytes2` int(11) unsigned NOT NULL default '0',
-  `emote` int(11) unsigned NOT NULL default '0',
+  `mount` mediumint(8) unsigned NOT NULL default '0',
+  `bytes0` int(10) unsigned NOT NULL default '0',
+  `bytes1` int(10) unsigned NOT NULL default '0',
+  `bytes2` int(10) unsigned NOT NULL default '0',
+  `emote` int(10) unsigned NOT NULL default '0',
   `auras` text,
   PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -413,13 +413,13 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creature_equip_template`;
 CREATE TABLE `creature_equip_template` (
-  `entry` int(11) unsigned NOT NULL default '0' COMMENT 'Unique entry',
-  `equipmodel1` int(11) unsigned NOT NULL default '0',
-  `equipmodel2` int(11) unsigned NOT NULL default '0',
-  `equipmodel3` int(11) unsigned NOT NULL default '0',
-  `equipinfo1` int(11) unsigned NOT NULL default '0',
-  `equipinfo2` int(11) unsigned NOT NULL default '0',
-  `equipinfo3` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Unique entry',
+  `equipmodel1` mediumint(8) unsigned NOT NULL default '0',
+  `equipmodel2` mediumint(8) unsigned NOT NULL default '0',
+  `equipmodel3` mediumint(8) unsigned NOT NULL default '0',
+  `equipinfo1` int(10) unsigned NOT NULL default '0',
+  `equipinfo2` int(10) unsigned NOT NULL default '0',
+  `equipinfo3` int(10) unsigned NOT NULL default '0',
   `equipslot1` int(11) NOT NULL default '0',
   `equipslot2` int(11) NOT NULL default '0',
   `equipslot3` int(11) NOT NULL default '0',
@@ -441,8 +441,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creature_involvedrelation`;
 CREATE TABLE `creature_involvedrelation` (
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
-  `quest` int(11) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
+  `id` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Identifier',
+  `quest` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
   PRIMARY KEY  (`id`,`quest`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
 
@@ -461,16 +461,16 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creature_loot_template`;
 CREATE TABLE `creature_loot_template` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `item` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrRef` float NOT NULL default '100',
-  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
+  `QuestChanceOrGroup` tinyint(4) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `freeforall` tinyint(1) unsigned NOT NULL default '0',
+  `freeforall` tinyint(3) unsigned NOT NULL default '0',
   `lootcondition` tinyint(3) unsigned NOT NULL default '0',
-  `condition_value1` int(11) unsigned NOT NULL default '0',
-  `condition_value2` int(11) unsigned NOT NULL default '0',
+  `condition_value1` mediumint(8) unsigned NOT NULL default '0',
+  `condition_value2` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -489,11 +489,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creature_model_info`;
 CREATE TABLE `creature_model_info` (
-  `modelid` int(11) unsigned NOT NULL default '0',
+  `modelid` mediumint(8) unsigned NOT NULL default '0',
   `bounding_radius` float NOT NULL default '0',
   `combat_reach` float NOT NULL default '0',
-  `gender` tinyint(2) unsigned NOT NULL default '2',
-  `modelid_other_gender` int(11) unsigned NOT NULL default '0',
+  `gender` tinyint(3) unsigned NOT NULL default '2',
+  `modelid_other_gender` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`modelid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Creature System (Model related info)';
 
@@ -512,24 +512,24 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creature_movement`;
 CREATE TABLE `creature_movement` (
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
-  `point` int(11) unsigned NOT NULL default '0',
+  `id` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Identifier',
+  `point` mediumint(8) unsigned NOT NULL default '0',
   `position_x` float NOT NULL default '0',
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
-  `waittime` int(5) unsigned NOT NULL default '0',
+  `waittime` int(10) unsigned NOT NULL default '0',
   `text1` text,
   `text2` text,
   `text3` text,
   `text4` text,
   `text5` text,
-  `aiscript` varchar(255) default NULL,
-  `emote` int(10) unsigned default '0',
-  `spell` int(5) unsigned default '0',
-  `wpguid` int(11) default '0',
-  `orientation` float default '0',
-  `model1` int(11) default '0',
-  `model2` int(11) default '0',
+  `aiscript` varchar(128) default NULL,
+  `emote` mediumint(8) unsigned NOT NULL default '0',
+  `spell` mediumint(8) unsigned NOT NULL default '0',
+  `wpguid` int(11) NOT NULL default '0',
+  `orientation` float NOT NULL default '0',
+  `model1` mediumint(9) NOT NULL default '0',
+  `model2` mediumint(9) NOT NULL default '0',
   PRIMARY KEY  (`id`,`point`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
 
@@ -548,16 +548,16 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creature_onkill_reputation`;
 CREATE TABLE `creature_onkill_reputation` (
-  `creature_id` int(10) unsigned NOT NULL default '0' COMMENT 'Creature Identifier',
-  `RewOnKillRepFaction1` int(10) default '0',
-  `RewOnKillRepFaction2` int(10) default '0',
-  `MaxStanding1` tinyint(1) default '0',
-  `IsTeamAward1` tinyint(1) default '0',
-  `RewOnKillRepValue1` int(10) default '0',
-  `MaxStanding2` tinyint(1) default '0',
-  `IsTeamAward2` tinyint(1) default '0',
-  `RewOnKillRepValue2` int(10) default '0',
-  `TeamDependent` tinyint(1) unsigned NOT NULL default '0',
+  `creature_id` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Creature Identifier',
+  `RewOnKillRepFaction1` smallint(6) NOT NULL default '0',
+  `RewOnKillRepFaction2` smallint(6) NOT NULL default '0',
+  `MaxStanding1` tinyint(4) NOT NULL default '0',
+  `IsTeamAward1` tinyint(4) NOT NULL default '0',
+  `RewOnKillRepValue1` mediumint(9) NOT NULL default '0',
+  `MaxStanding2` tinyint(4) NOT NULL default '0',
+  `IsTeamAward2` tinyint(4) NOT NULL default '0',
+  `RewOnKillRepValue2` mediumint(9) NOT NULL default '0',
+  `TeamDependent` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`creature_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature OnKill Reputation gain';
 
@@ -576,8 +576,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creature_questrelation`;
 CREATE TABLE `creature_questrelation` (
-  `id` int(10) unsigned NOT NULL default '0' COMMENT 'Identifier',
-  `quest` int(10) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
+  `id` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Identifier',
+  `quest` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
   PRIMARY KEY  (`id`,`quest`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
 
@@ -596,9 +596,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creature_respawn`;
 CREATE TABLE `creature_respawn` (
-  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `respawntime` bigint(40) NOT NULL default '0',
-  `instance` int(11) unsigned NOT NULL default '0',
+  `guid` int(10) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `respawntime` bigint(20) NOT NULL default '0',
+  `instance` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`,`instance`),
   KEY `instance` (`instance`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid Loading System';
@@ -618,69 +618,69 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creature_template`;
 CREATE TABLE `creature_template` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `modelid_A` int(11) unsigned NOT NULL default '0',
-  `modelid_A2` int(10) unsigned NOT NULL default '0',
-  `modelid_H` int(11) unsigned NOT NULL default '0',
-  `modelid_H2` int(10) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `modelid_A` mediumint(8) unsigned NOT NULL default '0',
+  `modelid_A2` mediumint(8) unsigned NOT NULL default '0',
+  `modelid_H` mediumint(8) unsigned NOT NULL default '0',
+  `modelid_H2` mediumint(8) unsigned NOT NULL default '0',
   `name` char(100) NOT NULL default '0',
   `subname` char(100) default NULL,
   `IconName` char(100) default NULL,
-  `minlevel` tinyint(3) unsigned default '1',
-  `maxlevel` tinyint(3) unsigned default '1',
-  `minhealth` int(5) unsigned default '0',
-  `maxhealth` int(5) unsigned default '0',
-  `minmana` int(5) unsigned default '0',
-  `maxmana` int(5) unsigned default '0',
-  `armor` int(10) unsigned NOT NULL default '0',
-  `faction_A` int(4) unsigned NOT NULL default '0',
-  `faction_H` int(4) unsigned NOT NULL default '0',
-  `npcflag` int(4) unsigned default '0',
-  `speed` float default '0',
-  `scale` float default '0',  
-  `rank` tinyint(3) unsigned default '0',
-  `mindmg` float default '0',
-  `maxdmg` float default '0',
-  `dmgschool` tinyint(1) NOT NULL default '0',
+  `minlevel` tinyint(3) unsigned NOT NULL default '1',
+  `maxlevel` tinyint(3) unsigned NOT NULL default '1',
+  `minhealth` int(10) unsigned NOT NULL default '0',
+  `maxhealth` int(10) unsigned NOT NULL default '0',
+  `minmana` int(10) unsigned NOT NULL default '0',
+  `maxmana` int(10) unsigned NOT NULL default '0',
+  `armor` mediumint(8) unsigned NOT NULL default '0',
+  `faction_A` smallint(5) unsigned NOT NULL default '0',
+  `faction_H` smallint(5) unsigned NOT NULL default '0',
+  `npcflag` int(10) unsigned NOT NULL default '0',
+  `speed` float NOT NULL default '1',
+  `scale` float NOT NULL default '0',
+  `rank` tinyint(3) unsigned NOT NULL default '0',
+  `mindmg` float NOT NULL default '0',
+  `maxdmg` float NOT NULL default '0',
+  `dmgschool` tinyint(4) NOT NULL default '0',
   `attackpower` int(10) unsigned NOT NULL default '0',
-  `baseattacktime` int(4) unsigned default '0',
-  `rangeattacktime` int(4) unsigned default '0',
-  `flags` int(11) unsigned default '0',
-  `dynamicflags` int(11) unsigned default '0',
-  `family` int(11) default '0',
-  `trainer_type` tinyint(3) default '0',
-  `trainer_spell` int(11) unsigned default '0',
-  `class` tinyint(3) unsigned default '0',
-  `race` tinyint(3) unsigned default '0',
+  `baseattacktime` int(10) unsigned NOT NULL default '0',
+  `rangeattacktime` int(10) unsigned NOT NULL default '0',
+  `flags` int(10) unsigned NOT NULL default '0',
+  `dynamicflags` int(10) unsigned NOT NULL default '0',
+  `family` tinyint(4) NOT NULL default '0',
+  `trainer_type` tinyint(4) NOT NULL default '0',
+  `trainer_spell` mediumint(8) unsigned NOT NULL default '0',
+  `class` tinyint(3) unsigned NOT NULL default '0',
+  `race` tinyint(3) unsigned NOT NULL default '0',
   `minrangedmg` float NOT NULL default '0',
   `maxrangedmg` float NOT NULL default '0',
   `rangedattackpower` smallint(5) unsigned NOT NULL default '0',
-  `type` tinyint(3) unsigned default '0',
+  `type` tinyint(3) unsigned NOT NULL default '0',
   `civilian` tinyint(3) unsigned NOT NULL default '0',
-  `flag1` int(11) unsigned default '0',
-  `lootid` int(10) unsigned NOT NULL default '0',
-  `pickpocketloot` int(10) unsigned NOT NULL default '0',
-  `skinloot` int(10) unsigned NOT NULL default '0',
-  `resistance1` int(10) unsigned NOT NULL default '0',
-  `resistance2` int(10) unsigned NOT NULL default '0',
-  `resistance3` int(10) unsigned NOT NULL default '0',
-  `resistance4` int(10) unsigned NOT NULL default '0',
-  `resistance5` int(10) unsigned NOT NULL default '0',
-  `resistance6` int(10) unsigned NOT NULL default '0',
-  `spell1` int(11) unsigned NOT NULL default '0',
-  `spell2` int(11) unsigned NOT NULL default '0',
-  `spell3` int(11) unsigned NOT NULL default '0',
-  `spell4` int(11) unsigned NOT NULL default '0',
-  `mingold` int(30) unsigned NOT NULL default '0',
-  `maxgold` int(30) unsigned NOT NULL default '0',
-  `AIName` char(128) NOT NULL default '',
+  `flag1` int(10) unsigned NOT NULL default '0',
+  `lootid` mediumint(8) unsigned NOT NULL default '0',
+  `pickpocketloot` mediumint(8) unsigned NOT NULL default '0',
+  `skinloot` mediumint(8) unsigned NOT NULL default '0',
+  `resistance1` smallint(5) unsigned NOT NULL default '0',
+  `resistance2` smallint(5) unsigned NOT NULL default '0',
+  `resistance3` smallint(5) unsigned NOT NULL default '0',
+  `resistance4` smallint(5) unsigned NOT NULL default '0',
+  `resistance5` smallint(5) unsigned NOT NULL default '0',
+  `resistance6` smallint(5) unsigned NOT NULL default '0',
+  `spell1` mediumint(8) unsigned NOT NULL default '0',
+  `spell2` mediumint(8) unsigned NOT NULL default '0',
+  `spell3` mediumint(8) unsigned NOT NULL default '0',
+  `spell4` mediumint(8) unsigned NOT NULL default '0',
+  `mingold` mediumint(8) unsigned NOT NULL default '0',
+  `maxgold` mediumint(8) unsigned NOT NULL default '0',
+  `AIName` char(64) NOT NULL default '',
   `MovementType` tinyint(3) unsigned NOT NULL default '0',
-  `InhabitType` tinyint(1) unsigned NOT NULL default '3',
-  `RacialLeader` tinyint(1) unsigned NOT NULL default '0',
-  `RegenHealth` tinyint(1) unsigned NOT NULL default '1',
-  `equipment_id` int(11) unsigned NOT NULL default '0',
-  `mechanic_immune_mask` int(11) unsigned NOT NULL default '0',
-  `ScriptName` char(128) NOT NULL default '',
+  `InhabitType` tinyint(3) unsigned NOT NULL default '3',
+  `RacialLeader` tinyint(3) unsigned NOT NULL default '0',
+  `RegenHealth` tinyint(3) unsigned NOT NULL default '1',
+  `equipment_id` mediumint(8) unsigned NOT NULL default '0',
+  `mechanic_immune_mask` int(10) unsigned NOT NULL default '0',
+  `ScriptName` char(64) NOT NULL default '',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
 
@@ -690,8 +690,8 @@ CREATE TABLE `creature_template` (
 
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
-INSERT INTO `creature_template` (`entry`,`modelid_A`,`modelid_A2`,`modelid_H`,`modelid_H2`,`name`,`subname`,`minlevel`,`maxlevel`,`minhealth`,`maxhealth`,`minmana`,`maxmana`,`armor`,`faction_A`,`faction_H`,`npcflag`,`speed`,`scale`,`rank`,`mindmg`,`maxdmg`,`dmgschool`,`attackpower`,`baseattacktime`,`rangeattacktime`,`flags`,`dynamicflags`,`family`,`trainer_type`,`trainer_spell`,`class`,`race`,`minrangedmg`,`maxrangedmg`,`rangedattackpower`,`type`,`civilian`,`flag1`,`lootid`,`pickpocketloot`,`skinloot`,`resistance1`,`resistance2`,`resistance3`,`resistance4`,`resistance5`,`resistance6`,`spell1`,`spell2`,`spell3`,`spell4`,`mingold`,`maxgold`,`AIName`,`MovementType`,`InhabitType`,`RacialLeader`,`RegenHealth`,`equipment_id`,`ScriptName`) VALUES
-(1,10045,0,10045,0,'Waypoint (Only GM can see it)','Visual',1,1,64,64,0,0,0,35,35,0,0.91,0.0,0,14,15,0,100,2000,2200,4096,0,8,0,0,0,0,1.76,2.42,100,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,1,0,'');
+INSERT INTO `creature_template` VALUES
+(1,10045,0,10045,0,'Waypoint (Only GM can see it)','Visual',NULL,1,1,64,64,0,0,0,35,35,0,0.91,0,0,14,15,0,100,2000,2200,4096,0,8,0,0,0,0,1.76,2.42,100,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,1,0,0,'');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -701,12 +701,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creature_template_addon`;
 CREATE TABLE `creature_template_addon` (
-  `entry` int(11) NOT NULL default '0',
-  `mount` int(11) unsigned NOT NULL default '0',
-  `bytes0` int(11) unsigned NOT NULL default '0',
-  `bytes1` int(11) unsigned NOT NULL default '0',
-  `bytes2` int(11) unsigned NOT NULL default '0',
-  `emote` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `mount` mediumint(8) unsigned NOT NULL default '0',
+  `bytes0` int(10) unsigned NOT NULL default '0',
+  `bytes1` int(10) unsigned NOT NULL default '0',
+  `bytes2` int(10) unsigned NOT NULL default '0',
+  `emote` mediumint(8) unsigned NOT NULL default '0',
   `auras` text,
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -735,7 +735,7 @@ CREATE TABLE `db_version` (
 
 LOCK TABLES `db_version` WRITE;
 /*!40000 ALTER TABLE `db_version` DISABLE KEYS */;
-INSERT INTO `db_version` (`version`) VALUES
+INSERT INTO `db_version` VALUES
 ('Mangos default database.');
 /*!40000 ALTER TABLE `db_version` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -746,16 +746,16 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `disenchant_loot_template`;
 CREATE TABLE `disenchant_loot_template` (
-  `entry` int(11) unsigned NOT NULL default '0' COMMENT 'Recommended id selection: item_level*100 + item_quality',
-  `item` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Recommended id selection: item_level*100 + item_quality',
+  `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrRef` float NOT NULL default '100',
-  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
+  `QuestChanceOrGroup` tinyint(4) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `freeforall` tinyint(1) unsigned NOT NULL default '0',
+  `freeforall` tinyint(3) unsigned NOT NULL default '0',
   `lootcondition` tinyint(3) unsigned NOT NULL default '0',
-  `condition_value1` int(11) unsigned NOT NULL default '0',
-  `condition_value2` int(11) unsigned NOT NULL default '0',
+  `condition_value1` mediumint(8) unsigned NOT NULL default '0',
+  `condition_value2` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -774,11 +774,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `event_scripts`;
 CREATE TABLE `event_scripts` (
-  `id` int(11) unsigned NOT NULL default '0',
-  `delay` int(11) unsigned NOT NULL default '0',
-  `command` int(11) unsigned NOT NULL default '0',
-  `datalong` int(11) unsigned NOT NULL default '0',
-  `datalong2` int(11) unsigned NOT NULL default '0',
+  `id` mediumint(8) unsigned NOT NULL default '0',
+  `delay` int(10) unsigned NOT NULL default '0',
+  `command` mediumint(8) unsigned NOT NULL default '0',
+  `datalong` mediumint(8) unsigned NOT NULL default '0',
+  `datalong2` int(10) unsigned NOT NULL default '0',
   `datatext` text NOT NULL,
   `x` float NOT NULL default '0',
   `y` float NOT NULL default '0',
@@ -801,8 +801,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `exploration_basexp`;
 CREATE TABLE `exploration_basexp` (
-  `level` tinyint(2) NOT NULL default '0',
-  `basexp` int(11) NOT NULL default '0',
+  `level` tinyint(4) NOT NULL default '0',
+  `basexp` mediumint(9) NOT NULL default '0',
   PRIMARY KEY  (`level`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Exploration System';
 
@@ -812,7 +812,7 @@ CREATE TABLE `exploration_basexp` (
 
 LOCK TABLES `exploration_basexp` WRITE;
 /*!40000 ALTER TABLE `exploration_basexp` DISABLE KEYS */;
-INSERT INTO `exploration_basexp` (`level`,`basexp`) VALUES
+INSERT INTO `exploration_basexp` VALUES
 (0,0),
 (1,5),
 (2,15),
@@ -893,16 +893,16 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `fishing_loot_template`;
 CREATE TABLE `fishing_loot_template` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `item` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrRef` float NOT NULL default '100',
-  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
+  `QuestChanceOrGroup` tinyint(4) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `freeforall` tinyint(1) unsigned NOT NULL default '0',
+  `freeforall` tinyint(3) unsigned NOT NULL default '0',
   `lootcondition` tinyint(3) unsigned NOT NULL default '0',
-  `condition_value1` int(11) unsigned NOT NULL default '0',
-  `condition_value2` int(11) unsigned NOT NULL default '0',
+  `condition_value1` mediumint(8) unsigned NOT NULL default '0',
+  `condition_value2` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -946,7 +946,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `game_event_creature`;
 CREATE TABLE `game_event_creature` (
   `guid` int(10) unsigned NOT NULL,
-  `event` mediumint(9) NOT NULL default '0' COMMENT 'Put negatives values to remove during event',
+  `event` smallint(6) NOT NULL default '0' COMMENT 'Put negatives values to remove during event',
   PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -965,9 +965,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `game_event_creature_quest`;
 CREATE TABLE `game_event_creature_quest` (
-  `id` int(11) unsigned NOT NULL default '0',
-  `quest` int(11) unsigned NOT NULL default '0',
-  `event` mediumint(9) unsigned NOT NULL default '0',
+  `id` mediumint(8) unsigned NOT NULL default '0',
+  `quest` mediumint(8) unsigned NOT NULL default '0',
+  `event` smallint(5) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`,`quest`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -987,7 +987,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `game_event_gameobject`;
 CREATE TABLE `game_event_gameobject` (
   `guid` int(10) unsigned NOT NULL,
-  `event` mediumint(9) NOT NULL default '0' COMMENT 'Put negatives values to remove during event',
+  `event` smallint(6) NOT NULL default '0' COMMENT 'Put negatives values to remove during event',
   PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -1006,10 +1006,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `game_event_model_equip`;
 CREATE TABLE `game_event_model_equip` (
-  `guid` int(11) unsigned NOT NULL default '0',
-  `modelid` int(11) unsigned NOT NULL default '0',
-  `equipment_id` int(11) unsigned NOT NULL default '0',
-  `event` mediumint(9) unsigned NOT NULL default '0',
+  `guid` int(10) unsigned NOT NULL default '0',
+  `modelid` mediumint(8) unsigned NOT NULL default '0',
+  `equipment_id` mediumint(8) unsigned NOT NULL default '0',
+  `event` smallint(5) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -1028,9 +1028,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `game_graveyard_zone`;
 CREATE TABLE `game_graveyard_zone` (
-  `id` int(11) unsigned NOT NULL default '0',
-  `ghost_zone` int(11) unsigned NOT NULL default '0',
-  `faction` int(11) unsigned NOT NULL default '0',
+  `id` mediumint(8) unsigned NOT NULL default '0',
+  `ghost_zone` mediumint(8) unsigned NOT NULL default '0',
+  `faction` smallint(5) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`,`ghost_zone`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Trigger System';
 
@@ -1049,12 +1049,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `game_tele`;
 CREATE TABLE `game_tele` (
-  `id` int(11) unsigned NOT NULL auto_increment,
+  `id` mediumint(8) unsigned NOT NULL auto_increment,
   `position_x` float NOT NULL default '0',
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
   `orientation` float NOT NULL default '0',
-  `map` int(11) unsigned NOT NULL default '0',
+  `map` smallint(5) unsigned NOT NULL default '0',
   `name` varchar(100) NOT NULL default '',
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Tele Command';
@@ -1074,7 +1074,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `game_weather`;
 CREATE TABLE `game_weather` (
-  `zone` int(11) unsigned NOT NULL default '0',
+  `zone` mediumint(8) unsigned NOT NULL default '0',
   `spring_rain_chance` tinyint(3) unsigned NOT NULL default '25',
   `spring_snow_chance` tinyint(3) unsigned NOT NULL default '25',
   `spring_storm_chance` tinyint(3) unsigned NOT NULL default '25',
@@ -1105,9 +1105,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `gameobject`;
 CREATE TABLE `gameobject` (
-  `guid` int(11) unsigned NOT NULL auto_increment COMMENT 'Global Unique Identifier',
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Gameobject Identifier',
-  `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
+  `guid` int(10) unsigned NOT NULL auto_increment COMMENT 'Global Unique Identifier',
+  `id` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Gameobject Identifier',
+  `map` smallint(5) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
   `position_x` float NOT NULL default '0',
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
@@ -1117,8 +1117,8 @@ CREATE TABLE `gameobject` (
   `rotation2` float NOT NULL default '0',
   `rotation3` float NOT NULL default '0',
   `spawntimesecs` int(11) NOT NULL default '0',
-  `animprogress` int(11) unsigned NOT NULL default '0',
-  `state` int(11) unsigned NOT NULL default '0',
+  `animprogress` tinyint(3) unsigned NOT NULL default '0',
+  `state` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Gameobject System';
 
@@ -1137,8 +1137,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `gameobject_involvedrelation`;
 CREATE TABLE `gameobject_involvedrelation` (
-  `id` int(11) unsigned NOT NULL default '0',
-  `quest` int(11) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
+  `id` mediumint(8) unsigned NOT NULL default '0',
+  `quest` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
   PRIMARY KEY  (`id`,`quest`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -1157,16 +1157,16 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `gameobject_loot_template`;
 CREATE TABLE `gameobject_loot_template` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `item` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrRef` float NOT NULL default '100',
-  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
+  `QuestChanceOrGroup` tinyint(4) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `freeforall` tinyint(1) unsigned NOT NULL default '0',
+  `freeforall` tinyint(3) unsigned NOT NULL default '0',
   `lootcondition` tinyint(3) unsigned NOT NULL default '0',
-  `condition_value1` int(11) unsigned NOT NULL default '0',
-  `condition_value2` int(11) unsigned NOT NULL default '0',
+  `condition_value1` mediumint(8) unsigned NOT NULL default '0',
+  `condition_value2` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -1185,8 +1185,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `gameobject_questrelation`;
 CREATE TABLE `gameobject_questrelation` (
-  `id` int(11) unsigned NOT NULL default '0',
-  `quest` int(11) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
+  `id` mediumint(8) unsigned NOT NULL default '0',
+  `quest` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Quest Identifier',
   PRIMARY KEY  (`id`,`quest`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -1205,9 +1205,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `gameobject_respawn`;
 CREATE TABLE `gameobject_respawn` (
-  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `respawntime` bigint(40) NOT NULL default '0',
-  `instance` int(11) unsigned NOT NULL default '0',
+  `guid` int(10) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `respawntime` bigint(20) NOT NULL default '0',
+  `instance` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`,`instance`),
   KEY `instance` (`instance`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid Loading System';
@@ -1221,32 +1221,32 @@ LOCK TABLES `gameobject_respawn` WRITE;
 /*!40000 ALTER TABLE `gameobject_respawn` ENABLE KEYS */;
 UNLOCK TABLES;
 
--- 
+--
 -- Table structure for table `gameobject_scripts`
 --
 
 DROP TABLE IF EXISTS `gameobject_scripts`;
 CREATE TABLE `gameobject_scripts` (
-`id` int(11) unsigned NOT NULL default '0',
-`delay` int(11) unsigned NOT NULL default '0',
-`command` int(11) unsigned NOT NULL default '0',
-`datalong` int(11) unsigned NOT NULL default '0',
-`datalong2` int(11) unsigned NOT NULL default '0',
-`datatext` text NOT NULL,
-`x` float NOT NULL default '0',
-`y` float NOT NULL default '0',
-`z` float NOT NULL default '0',
-`o` float NOT NULL default '0'
+  `id` mediumint(8) unsigned NOT NULL default '0',
+  `delay` int(10) unsigned NOT NULL default '0',
+  `command` mediumint(8) unsigned NOT NULL default '0',
+  `datalong` mediumint(8) unsigned NOT NULL default '0',
+  `datalong2` int(10) unsigned NOT NULL default '0',
+  `datatext` text NOT NULL,
+  `x` float NOT NULL default '0',
+  `y` float NOT NULL default '0',
+  `z` float NOT NULL default '0',
+  `o` float NOT NULL default '0'
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
--- 
+--
 -- Dumping data for table `gameobject_scripts`
--- 
+--
 
 LOCK TABLES `gameobject_scripts` WRITE;
 /*!40000 ALTER TABLE `gameobject_scripts` DISABLE KEYS */;
 /*!40000 ALTER TABLE `gameobject_scripts` ENABLE KEYS */;
-UNLOCK TABLES; 
+UNLOCK TABLES;
 
 --
 -- Table structure for table `gameobject_template`
@@ -1254,38 +1254,38 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `gameobject_template`;
 CREATE TABLE `gameobject_template` (
-  `entry` int(20) unsigned NOT NULL default '0',
-  `type` int(11) unsigned NOT NULL default '0',
-  `displayId` int(11) unsigned NOT NULL default '0',
-  `name` varchar(100) NOT NULL default '0',
-  `faction` int(4) unsigned NOT NULL default '0',
-  `flags` int(4) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `type` tinyint(3) unsigned NOT NULL default '0',
+  `displayId` mediumint(8) unsigned NOT NULL default '0',
+  `name` varchar(100) NOT NULL default '',
+  `faction` smallint(5) unsigned NOT NULL default '0',
+  `flags` int(10) unsigned NOT NULL default '0',
   `size` float NOT NULL default '1',
-  `data0` int(11) unsigned NOT NULL default '0',
-  `data1` int(11) unsigned NOT NULL default '0',
-  `data2` int(11) unsigned NOT NULL default '0',
-  `data3` int(11) unsigned NOT NULL default '0',
-  `data4` int(11) unsigned NOT NULL default '0',
-  `data5` int(11) unsigned NOT NULL default '0',
-  `data6` int(11) unsigned NOT NULL default '0',
-  `data7` int(11) unsigned NOT NULL default '0',
-  `data8` int(11) unsigned NOT NULL default '0',
-  `data9` int(11) unsigned NOT NULL default '0',
-  `data10` int(11) unsigned NOT NULL default '0',
-  `data11` int(11) unsigned NOT NULL default '0',
-  `data12` int(11) unsigned NOT NULL default '0',
-  `data13` int(11) unsigned NOT NULL default '0',
-  `data14` int(11) unsigned NOT NULL default '0',
-  `data15` int(11) unsigned NOT NULL default '0',
-  `data16` int(11) unsigned NOT NULL default '0',
-  `data17` int(11) unsigned NOT NULL default '0',
-  `data18` int(11) unsigned NOT NULL default '0',
-  `data19` int(11) unsigned NOT NULL default '0',
-  `data20` int(11) unsigned NOT NULL default '0',
-  `data21` int(11) unsigned NOT NULL default '0',
-  `data22` int(11) unsigned NOT NULL default '0',
-  `data23` int(11) unsigned NOT NULL default '0',
-  `ScriptName` varchar(100) NOT NULL default '',
+  `data0` int(10) unsigned NOT NULL default '0',
+  `data1` int(10) unsigned NOT NULL default '0',
+  `data2` int(10) unsigned NOT NULL default '0',
+  `data3` int(10) unsigned NOT NULL default '0',
+  `data4` int(10) unsigned NOT NULL default '0',
+  `data5` int(10) unsigned NOT NULL default '0',
+  `data6` int(10) unsigned NOT NULL default '0',
+  `data7` int(10) unsigned NOT NULL default '0',
+  `data8` int(10) unsigned NOT NULL default '0',
+  `data9` int(10) unsigned NOT NULL default '0',
+  `data10` int(10) unsigned NOT NULL default '0',
+  `data11` int(10) unsigned NOT NULL default '0',
+  `data12` int(10) unsigned NOT NULL default '0',
+  `data13` int(10) unsigned NOT NULL default '0',
+  `data14` int(10) unsigned NOT NULL default '0',
+  `data15` int(10) unsigned NOT NULL default '0',
+  `data16` int(10) unsigned NOT NULL default '0',
+  `data17` int(10) unsigned NOT NULL default '0',
+  `data18` int(10) unsigned NOT NULL default '0',
+  `data19` int(10) unsigned NOT NULL default '0',
+  `data20` int(10) unsigned NOT NULL default '0',
+  `data21` int(10) unsigned NOT NULL default '0',
+  `data22` int(10) unsigned NOT NULL default '0',
+  `data23` int(10) unsigned NOT NULL default '0',
+  `ScriptName` varchar(64) NOT NULL default '',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Gameobject System';
 
@@ -1304,17 +1304,17 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `instance_template`;
 CREATE TABLE `instance_template` (
-  `map` int(11) unsigned NOT NULL,
-  `parent` int(11) unsigned NOT NULL,
-  `levelMin` int(11) unsigned NOT NULL default '0',
-  `levelMax` int(11) unsigned NOT NULL default '0',
-  `maxPlayers` int(11) unsigned NOT NULL default '0',
-  `reset_delay` int(20) unsigned NOT NULL default '0',
+  `map` smallint(5) unsigned NOT NULL,
+  `parent` int(10) unsigned NOT NULL,
+  `levelMin` tinyint(3) unsigned NOT NULL default '0',
+  `levelMax` tinyint(3) unsigned NOT NULL default '0',
+  `maxPlayers` tinyint(3) unsigned NOT NULL default '0',
+  `reset_delay` int(10) unsigned NOT NULL default '0',
   `startLocX` float default NULL,
   `startLocY` float default NULL,
   `startLocZ` float default NULL,
   `startLocO` float default NULL,
-  `script` varchar(255) NOT NULL default '',
+  `script` varchar(128) NOT NULL default '',
   PRIMARY KEY  (`map`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -1324,33 +1324,33 @@ CREATE TABLE `instance_template` (
 
 LOCK TABLES `instance_template` WRITE;
 /*!40000 ALTER TABLE `instance_template` DISABLE KEYS */;
-INSERT INTO `instance_template` (`map`,`levelMin`,`levelMax`,`maxPlayers`,`reset_delay`,`startLocX`,`startLocY`,`startLocZ`,`startLocO`,`script`) VALUES
-(33,22,30,10,7200,NULL,NULL,NULL,NULL,''),
-(34,24,32,10,7200,NULL,NULL,NULL,NULL,''),
-(36,15,20,10,7200,NULL,NULL,NULL,NULL,''),
-(43,15,21,10,7200,NULL,NULL,NULL,NULL,''),
-(47,29,38,10,7200,NULL,NULL,NULL,NULL,''),
-(48,24,32,10,7200,NULL,NULL,NULL,NULL,''),
-(70,35,47,10,7200,NULL,NULL,NULL,NULL,''),
-(90,29,38,10,7200,NULL,NULL,NULL,NULL,''),
-(109,45,55,10,7200,NULL,NULL,NULL,NULL,''),
-(129,37,46,10,7200,NULL,NULL,NULL,NULL,''),
-(189,34,45,10,7200,NULL,NULL,NULL,NULL,''),
-(209,44,54,10,7200,NULL,NULL,NULL,NULL,''),
-(229,58,0,10,120000,78.5083,-225.044,49.839,5.1,''),
-(230,52,0,5,7200,NULL,NULL,NULL,NULL,''),
-(249,60,0,40,432000,NULL,NULL,NULL,NULL,''),
-(289,57,0,5,7200,NULL,NULL,NULL,NULL,''),
-(309,60,0,20,259200,NULL,NULL,NULL,NULL,''),
-(329,58,60,5,7200,NULL,NULL,NULL,NULL,''),
-(349,46,55,10,7200,NULL,NULL,NULL,NULL,''),
-(389,13,18,10,7200,NULL,NULL,NULL,NULL,''),
-(409,60,0,40,604800,NULL,NULL,NULL,NULL,''),
-(429,55,60,5,7200,NULL,NULL,NULL,NULL,''),
-(469,60,0,40,604800,NULL,NULL,NULL,NULL,''),
-(509,60,0,20,259200,NULL,NULL,NULL,NULL,''),
-(531,60,0,40,604800,NULL,NULL,NULL,NULL,''),
-(533,60,0,40,604800,NULL,NULL,NULL,NULL,'');
+INSERT INTO `instance_template` VALUES
+(33,0,22,30,10,7200,NULL,NULL,NULL,NULL,''),
+(34,0,24,32,10,7200,NULL,NULL,NULL,NULL,''),
+(36,0,15,20,10,7200,NULL,NULL,NULL,NULL,''),
+(43,0,15,21,10,7200,NULL,NULL,NULL,NULL,''),
+(47,0,29,38,10,7200,NULL,NULL,NULL,NULL,''),
+(48,0,24,32,10,7200,NULL,NULL,NULL,NULL,''),
+(70,0,35,47,10,7200,NULL,NULL,NULL,NULL,''),
+(90,0,29,38,10,7200,NULL,NULL,NULL,NULL,''),
+(109,0,45,55,10,7200,NULL,NULL,NULL,NULL,''),
+(129,0,37,46,10,7200,NULL,NULL,NULL,NULL,''),
+(189,0,34,45,10,7200,NULL,NULL,NULL,NULL,''),
+(209,0,44,54,10,7200,NULL,NULL,NULL,NULL,''),
+(229,0,58,0,10,120000,78.5083,-225.044,49.839,5.1,''),
+(230,0,52,0,5,7200,NULL,NULL,NULL,NULL,''),
+(249,0,60,0,40,432000,NULL,NULL,NULL,NULL,''),
+(289,0,57,0,5,7200,NULL,NULL,NULL,NULL,''),
+(309,0,60,0,20,259200,NULL,NULL,NULL,NULL,''),
+(329,0,58,60,5,7200,NULL,NULL,NULL,NULL,''),
+(349,0,46,55,10,7200,NULL,NULL,NULL,NULL,''),
+(389,0,13,18,10,7200,NULL,NULL,NULL,NULL,''),
+(409,0,60,0,40,604800,NULL,NULL,NULL,NULL,''),
+(429,0,55,60,5,7200,NULL,NULL,NULL,NULL,''),
+(469,0,60,0,40,604800,NULL,NULL,NULL,NULL,''),
+(509,0,60,0,20,259200,NULL,NULL,NULL,NULL,''),
+(531,0,60,0,40,604800,NULL,NULL,NULL,NULL,''),
+(533,0,60,0,40,604800,NULL,NULL,NULL,NULL,'');
 /*!40000 ALTER TABLE `instance_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1360,8 +1360,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `item_enchantment_template`;
 CREATE TABLE `item_enchantment_template` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `ench` int(10) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `ench` mediumint(8) unsigned NOT NULL default '0',
   `chance` float unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`,`ench`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item Random Enchantment System';
@@ -1381,16 +1381,16 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `item_loot_template`;
 CREATE TABLE `item_loot_template` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `item` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrRef` float NOT NULL default '100',
-  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
-  `mincount` tinyint(3) unsigned NOT NULL default '1',
-  `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `freeforall` tinyint(1) unsigned NOT NULL default '0',
+  `QuestChanceOrGroup` tinyint(4) NOT NULL default '0',
+  `mincount` smallint(5) unsigned NOT NULL default '1',
+  `maxcount` smallint(5) unsigned NOT NULL default '1',
+  `freeforall` tinyint(3) unsigned NOT NULL default '0',
   `lootcondition` tinyint(3) unsigned NOT NULL default '0',
-  `condition_value1` int(11) unsigned NOT NULL default '0',
-  `condition_value2` int(11) unsigned NOT NULL default '0',
+  `condition_value1` mediumint(8) unsigned NOT NULL default '0',
+  `condition_value2` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -1409,51 +1409,51 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `item_template`;
 CREATE TABLE `item_template` (
-  `entry` int(255) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
   `class` tinyint(3) unsigned NOT NULL default '0',
   `subclass` tinyint(3) unsigned NOT NULL default '0',
-  `unk0` int(10) NOT NULL default '-1',
+  `unk0` int(11) NOT NULL default '-1',
   `name` varchar(255) NOT NULL default '',
-  `displayid` int(11) unsigned NOT NULL default '0',
+  `displayid` mediumint(8) unsigned NOT NULL default '0',
   `Quality` tinyint(3) unsigned NOT NULL default '0',
-  `Flags` int(30) unsigned NOT NULL default '0',
+  `Flags` int(10) unsigned NOT NULL default '0',
   `BuyCount` tinyint(3) unsigned NOT NULL default '1',
-  `BuyPrice` int(30) unsigned NOT NULL default '0',
-  `SellPrice` int(30) unsigned NOT NULL default '0',
+  `BuyPrice` int(10) unsigned NOT NULL default '0',
+  `SellPrice` int(10) unsigned NOT NULL default '0',
   `InventoryType` tinyint(3) unsigned NOT NULL default '0',
   `AllowableClass` mediumint(9) NOT NULL default '-1',
-  `AllowableRace`  mediumint(9) NOT NULL default '-1',
-  `ItemLevel` int(30) unsigned NOT NULL default '0',
+  `AllowableRace` mediumint(9) NOT NULL default '-1',
+  `ItemLevel` tinyint(3) unsigned NOT NULL default '0',
   `RequiredLevel` tinyint(3) unsigned NOT NULL default '0',
-  `RequiredSkill` int(30) unsigned NOT NULL default '0',
-  `RequiredSkillRank` int(30) unsigned NOT NULL default '0',
-  `requiredspell` int(30) unsigned NOT NULL default '0',
-  `requiredhonorrank` int(30) unsigned NOT NULL default '0',
-  `RequiredCityRank` int(30) unsigned NOT NULL default '0',
-  `RequiredReputationFaction` int(30) unsigned NOT NULL default '0',
-  `RequiredReputationRank` int(30) unsigned NOT NULL default '0',
+  `RequiredSkill` smallint(5) unsigned NOT NULL default '0',
+  `RequiredSkillRank` smallint(5) unsigned NOT NULL default '0',
+  `requiredspell` mediumint(8) unsigned NOT NULL default '0',
+  `requiredhonorrank` mediumint(8) unsigned NOT NULL default '0',
+  `RequiredCityRank` mediumint(8) unsigned NOT NULL default '0',
+  `RequiredReputationFaction` smallint(5) unsigned NOT NULL default '0',
+  `RequiredReputationRank` smallint(5) unsigned NOT NULL default '0',
   `maxcount` smallint(5) unsigned NOT NULL default '0',
   `stackable` smallint(5) unsigned NOT NULL default '0',
   `ContainerSlots` tinyint(3) unsigned NOT NULL default '0',
-  `stat_type1` tinyint(4) unsigned NOT NULL default '0',
+  `stat_type1` tinyint(3) unsigned NOT NULL default '0',
   `stat_value1` smallint(6) NOT NULL default '0',
-  `stat_type2` tinyint(4) unsigned NOT NULL default '0',
+  `stat_type2` tinyint(3) unsigned NOT NULL default '0',
   `stat_value2` smallint(6) NOT NULL default '0',
-  `stat_type3` tinyint(4) unsigned NOT NULL default '0',
+  `stat_type3` tinyint(3) unsigned NOT NULL default '0',
   `stat_value3` smallint(6) NOT NULL default '0',
-  `stat_type4` tinyint(4) unsigned NOT NULL default '0',
+  `stat_type4` tinyint(3) unsigned NOT NULL default '0',
   `stat_value4` smallint(6) NOT NULL default '0',
-  `stat_type5` tinyint(4) unsigned NOT NULL default '0',
+  `stat_type5` tinyint(3) unsigned NOT NULL default '0',
   `stat_value5` smallint(6) NOT NULL default '0',
-  `stat_type6` tinyint(4) unsigned NOT NULL default '0',
+  `stat_type6` tinyint(3) unsigned NOT NULL default '0',
   `stat_value6` smallint(6) NOT NULL default '0',
-  `stat_type7` tinyint(4) unsigned NOT NULL default '0',
+  `stat_type7` tinyint(3) unsigned NOT NULL default '0',
   `stat_value7` smallint(6) NOT NULL default '0',
-  `stat_type8` tinyint(4) unsigned NOT NULL default '0',
+  `stat_type8` tinyint(3) unsigned NOT NULL default '0',
   `stat_value8` smallint(6) NOT NULL default '0',
-  `stat_type9` tinyint(4) unsigned NOT NULL default '0',
+  `stat_type9` tinyint(3) unsigned NOT NULL default '0',
   `stat_value9` smallint(6) NOT NULL default '0',
-  `stat_type10` tinyint(4) unsigned NOT NULL default '0',
+  `stat_type10` tinyint(3) unsigned NOT NULL default '0',
   `stat_value10` smallint(6) NOT NULL default '0',
   `dmg_min1` float NOT NULL default '0',
   `dmg_max1` float NOT NULL default '0',
@@ -1470,87 +1470,87 @@ CREATE TABLE `item_template` (
   `dmg_min5` float NOT NULL default '0',
   `dmg_max5` float NOT NULL default '0',
   `dmg_type5` tinyint(3) unsigned NOT NULL default '0',
-  `armor` int(30) unsigned NOT NULL default '0',
-  `holy_res` int(30) unsigned NOT NULL default '0',
-  `fire_res` int(30) unsigned NOT NULL default '0',
-  `nature_res` int(30) unsigned NOT NULL default '0',
-  `frost_res` int(30) unsigned NOT NULL default '0',
-  `shadow_res` int(30) unsigned NOT NULL default '0',
-  `arcane_res` int(30) unsigned NOT NULL default '0',
-  `delay` int(11) unsigned NOT NULL default '1000',
-  `ammo_type` int(30) unsigned NOT NULL default '0',
+  `armor` smallint(5) unsigned NOT NULL default '0',
+  `holy_res` tinyint(3) unsigned NOT NULL default '0',
+  `fire_res` tinyint(3) unsigned NOT NULL default '0',
+  `nature_res` tinyint(3) unsigned NOT NULL default '0',
+  `frost_res` tinyint(3) unsigned NOT NULL default '0',
+  `shadow_res` tinyint(3) unsigned NOT NULL default '0',
+  `arcane_res` tinyint(3) unsigned NOT NULL default '0',
+  `delay` smallint(5) unsigned NOT NULL default '1000',
+  `ammo_type` tinyint(3) unsigned NOT NULL default '0',
   `RangedModRange` float NOT NULL default '0',
-  `spellid_1` int(30) unsigned NOT NULL default '0',
-  `spelltrigger_1` int(30) unsigned NOT NULL default '0',
-  `spellcharges_1` int(30) NOT NULL default '0',
+  `spellid_1` mediumint(8) unsigned NOT NULL default '0',
+  `spelltrigger_1` tinyint(3) unsigned NOT NULL default '0',
+  `spellcharges_1` tinyint(4) NOT NULL default '0',
   `spellppmRate_1` float NOT NULL default '0',
-  `spellcooldown_1` int(30) NOT NULL default '-1',
-  `spellcategory_1` int(30) unsigned NOT NULL default '0',
-  `spellcategorycooldown_1` int(30) NOT NULL default '-1',
-  `spellid_2` int(30) unsigned NOT NULL default '0',
-  `spelltrigger_2` int(30) unsigned NOT NULL default '0',
-  `spellcharges_2` int(30) NOT NULL default '0',
+  `spellcooldown_1` int(11) NOT NULL default '-1',
+  `spellcategory_1` smallint(5) unsigned NOT NULL default '0',
+  `spellcategorycooldown_1` int(11) NOT NULL default '-1',
+  `spellid_2` mediumint(8) unsigned NOT NULL default '0',
+  `spelltrigger_2` tinyint(3) unsigned NOT NULL default '0',
+  `spellcharges_2` tinyint(4) NOT NULL default '0',
   `spellppmRate_2` float NOT NULL default '0',
-  `spellcooldown_2` int(30) NOT NULL default '-1',
-  `spellcategory_2` int(30) unsigned NOT NULL default '0',
-  `spellcategorycooldown_2` int(30) NOT NULL default '-1',
-  `spellid_3` int(30) unsigned NOT NULL default '0',
-  `spelltrigger_3` int(30) unsigned NOT NULL default '0',
-  `spellcharges_3` int(30) NOT NULL default '0',
+  `spellcooldown_2` int(11) NOT NULL default '-1',
+  `spellcategory_2` smallint(5) unsigned NOT NULL default '0',
+  `spellcategorycooldown_2` int(11) NOT NULL default '-1',
+  `spellid_3` mediumint(8) unsigned NOT NULL default '0',
+  `spelltrigger_3` tinyint(3) unsigned NOT NULL default '0',
+  `spellcharges_3` tinyint(4) NOT NULL default '0',
   `spellppmRate_3` float NOT NULL default '0',
-  `spellcooldown_3` int(30) NOT NULL default '-1',
-  `spellcategory_3` int(30) unsigned NOT NULL default '0',
-  `spellcategorycooldown_3` int(30) NOT NULL default '-1',
-  `spellid_4` int(30) unsigned NOT NULL default '0',
-  `spelltrigger_4` int(30) unsigned NOT NULL default '0',
-  `spellcharges_4` int(30) NOT NULL default '0',
+  `spellcooldown_3` int(11) NOT NULL default '-1',
+  `spellcategory_3` smallint(5) unsigned NOT NULL default '0',
+  `spellcategorycooldown_3` int(11) NOT NULL default '-1',
+  `spellid_4` mediumint(8) unsigned NOT NULL default '0',
+  `spelltrigger_4` tinyint(3) unsigned NOT NULL default '0',
+  `spellcharges_4` tinyint(4) NOT NULL default '0',
   `spellppmRate_4` float NOT NULL default '0',
-  `spellcooldown_4` int(30) NOT NULL default '-1',
-  `spellcategory_4` int(30) unsigned NOT NULL default '0',
-  `spellcategorycooldown_4` int(30) NOT NULL default '-1',
-  `spellid_5` int(30) unsigned NOT NULL default '0',
-  `spelltrigger_5` int(30) unsigned NOT NULL default '0',
-  `spellcharges_5` int(30) NOT NULL default '0',
+  `spellcooldown_4` int(11) NOT NULL default '-1',
+  `spellcategory_4` smallint(5) unsigned NOT NULL default '0',
+  `spellcategorycooldown_4` int(11) NOT NULL default '-1',
+  `spellid_5` mediumint(8) unsigned NOT NULL default '0',
+  `spelltrigger_5` tinyint(3) unsigned NOT NULL default '0',
+  `spellcharges_5` tinyint(4) NOT NULL default '0',
   `spellppmRate_5` float NOT NULL default '0',
-  `spellcooldown_5` int(30) NOT NULL default '-1',
-  `spellcategory_5` int(30) unsigned NOT NULL default '0',
-  `spellcategorycooldown_5` int(30) NOT NULL default '-1',
+  `spellcooldown_5` int(11) NOT NULL default '-1',
+  `spellcategory_5` smallint(5) unsigned NOT NULL default '0',
+  `spellcategorycooldown_5` int(11) NOT NULL default '-1',
   `bonding` tinyint(3) unsigned NOT NULL default '0',
   `description` varchar(255) NOT NULL default '',
-  `PageText` int(30) unsigned NOT NULL default '0',
-  `LanguageID` int(30) unsigned NOT NULL default '0',
-  `PageMaterial` int(30) unsigned NOT NULL default '0',
-  `startquest` int(30) unsigned NOT NULL default '0',
-  `lockid` int(30) unsigned NOT NULL default '0',
-  `Material` int(30) NOT NULL default '0',
-  `sheath` int(30) unsigned NOT NULL default '0',
-  `RandomProperty` int(30) unsigned NOT NULL default '0',
-  `RandomSuffix` int(30) unsigned NOT NULL default '0',
-  `block` int(30) unsigned NOT NULL default '0',
-  `itemset` int(30) unsigned NOT NULL default '0',
-  `MaxDurability` int(30) unsigned NOT NULL default '0',
-  `area` int(30) unsigned NOT NULL default '0',
-  `Map` int(10) NOT NULL default '0',
-  `BagFamily` int(10) NOT NULL default '0',
-  `TotemCategory` int(10) NOT NULL default '0',
-  `socketColor_1` int(10) NOT NULL default '0',
-  `socketContent_1` int(10) NOT NULL default '0',
-  `socketColor_2` int(10) NOT NULL default '0',
-  `socketContent_2` int(10) NOT NULL default '0',
-  `socketColor_3` int(10) NOT NULL default '0',
-  `socketContent_3` int(10) NOT NULL default '0',
-  `socketBonus` int(10) NOT NULL default '0',
-  `GemProperties` int(10) NOT NULL default '0',
-  `ExtendedCost` int(10) NOT NULL default '0',
-  `CondExtendedCost` int(10) unsigned NOT NULL default '0',
-  `RequiredDisenchantSkill` int(10) NOT NULL default '-1',
+  `PageText` mediumint(8) unsigned NOT NULL default '0',
+  `LanguageID` tinyint(3) unsigned NOT NULL default '0',
+  `PageMaterial` tinyint(3) unsigned NOT NULL default '0',
+  `startquest` mediumint(8) unsigned NOT NULL default '0',
+  `lockid` mediumint(8) unsigned NOT NULL default '0',
+  `Material` tinyint(4) NOT NULL default '0',
+  `sheath` tinyint(3) unsigned NOT NULL default '0',
+  `RandomProperty` mediumint(8) unsigned NOT NULL default '0',
+  `RandomSuffix` mediumint(8) unsigned NOT NULL default '0',
+  `block` mediumint(8) unsigned NOT NULL default '0',
+  `itemset` mediumint(8) unsigned NOT NULL default '0',
+  `MaxDurability` smallint(5) unsigned NOT NULL default '0',
+  `area` mediumint(8) unsigned NOT NULL default '0',
+  `Map` smallint(6) NOT NULL default '0',
+  `BagFamily` mediumint(9) NOT NULL default '0',
+  `TotemCategory` tinyint(4) NOT NULL default '0',
+  `socketColor_1` tinyint(4) NOT NULL default '0',
+  `socketContent_1` mediumint(9) NOT NULL default '0',
+  `socketColor_2` tinyint(4) NOT NULL default '0',
+  `socketContent_2` mediumint(9) NOT NULL default '0',
+  `socketColor_3` tinyint(4) NOT NULL default '0',
+  `socketContent_3` mediumint(9) NOT NULL default '0',
+  `socketBonus` mediumint(9) NOT NULL default '0',
+  `GemProperties` mediumint(9) NOT NULL default '0',
+  `ExtendedCost` mediumint(9) NOT NULL default '0',
+  `CondExtendedCost` mediumint(8) unsigned NOT NULL default '0',
+  `RequiredDisenchantSkill` smallint(6) NOT NULL default '-1',
   `ArmorDamageModifier` float NOT NULL default '0',
-  `ScriptName` varchar(100) NOT NULL default '',
-  `DisenchantID` int(11) unsigned NOT NULL default '0',
+  `ScriptName` varchar(64) NOT NULL default '',
+  `DisenchantID` mediumint(8) unsigned NOT NULL default '0',
   `FoodType` tinyint(3) unsigned NOT NULL default '0',
-  `minMoneyLoot` int(11) unsigned NOT NULL default '0',
-  `maxMoneyLoot` int(11) unsigned NOT NULL default '0',
-  `Duration` int(11) NOT NULL DEFAULT '0' COMMENT 'Duration in seconds. Negative value means realtime, postive value ingame time',
+  `minMoneyLoot` int(10) unsigned NOT NULL default '0',
+  `maxMoneyLoot` int(10) unsigned NOT NULL default '0',
+  `Duration` int(11) NOT NULL default '0' COMMENT 'Duration in seconds. Negative value means realtime, postive value ingame time',
   PRIMARY KEY  (`entry`),
   KEY `items_index` (`class`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
@@ -1561,80 +1561,80 @@ CREATE TABLE `item_template` (
 
 LOCK TABLES `item_template` WRITE;
 /*!40000 ALTER TABLE `item_template` DISABLE KEYS */;
-INSERT INTO `item_template` (`entry`,`class`,`subclass`,`unk0`,`name`,`displayid`,`Quality`,`Flags`,`BuyCount`,`BuyPrice`,`SellPrice`,`InventoryType`,`AllowableClass`,`AllowableRace`,`ItemLevel`,`RequiredLevel`,`RequiredSkill`,`RequiredSkillRank`,`requiredspell`,`requiredhonorrank`,`RequiredCityRank`,`RequiredReputationFaction`,`RequiredReputationRank`,`maxcount`,`stackable`,`ContainerSlots`,`stat_type1`,`stat_value1`,`stat_type2`,`stat_value2`,`stat_type3`,`stat_value3`,`stat_type4`,`stat_value4`,`stat_type5`,`stat_value5`,`stat_type6`,`stat_value6`,`stat_type7`,`stat_value7`,`stat_type8`,`stat_value8`,`stat_type9`,`stat_value9`,`stat_type10`,`stat_value10`,`dmg_min1`,`dmg_max1`,`dmg_type1`,`dmg_min2`,`dmg_max2`,`dmg_type2`,`dmg_min3`,`dmg_max3`,`dmg_type3`,`dmg_min4`,`dmg_max4`,`dmg_type4`,`dmg_min5`,`dmg_max5`,`dmg_type5`,`armor`,`holy_res`,`fire_res`,`nature_res`,`frost_res`,`shadow_res`,`arcane_res`,`delay`,`ammo_type`,`RangedModRange`,`spellid_1`,`spelltrigger_1`,`spellcharges_1`,`spellppmRate_1`,`spellcooldown_1`,`spellcategory_1`,`spellcategorycooldown_1`,`spellid_2`,`spelltrigger_2`,`spellcharges_2`,`spellppmRate_2`,`spellcooldown_2`,`spellcategory_2`,`spellcategorycooldown_2`,`spellid_3`,`spelltrigger_3`,`spellcharges_3`,`spellppmRate_3`,`spellcooldown_3`,`spellcategory_3`,`spellcategorycooldown_3`,`spellid_4`,`spelltrigger_4`,`spellcharges_4`,`spellppmRate_4`,`spellcooldown_4`,`spellcategory_4`,`spellcategorycooldown_4`,`spellid_5`,`spelltrigger_5`,`spellcharges_5`,`spellppmRate_5`,`spellcooldown_5`,`spellcategory_5`,`spellcategorycooldown_5`,`bonding`,`description`,`PageText`,`LanguageID`,`PageMaterial`,`startquest`,`lockid`,`Material`,`sheath`,`RandomProperty`,`RandomSuffix`,`block`,`itemset`,`MaxDurability`,`area`,`Map`,`BagFamily`,`TotemCategory`,`socketColor_1`,`socketContent_1`,`socketColor_2`,`socketContent_2`,`socketColor_3`,`socketContent_3`,`socketBonus`,`GemProperties`,`ExtendedCost`,`CondExtendedCost`,`RequiredDisenchantSkill`,`ArmorDamageModifier`,`ScriptName`,`DisenchantID`,`FoodType`,`minMoneyLoot`,`maxMoneyLoot`) VALUES
-(65020,0,0,-1,'Tough Jerky',2473,1,0,6,25,1,0,2047,255,5,1,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,433,0,-1,0,-1,11,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(65021,0,0,-1,'Refreshing Spring Water',18084,1,0,6,25,1,0,2047,255,5,1,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,430,0,-1,0,-1,59,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(65022,0,0,-1,'Darnassian Bleu',6353,1,0,6,25,1,0,2047,255,5,1,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,433,0,-1,0,-1,11,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(65023,2,16,-1,'Small Throwing Knife',16754,1,0,1,15,0,25,2047,255,3,1,0,0,0,0,0,0,0,0,200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2000,4,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(65024,2,16,-1,'Crude Throwing Axe',20777,1,0,1,15,0,25,2047,255,3,1,0,0,0,0,0,0,0,0,200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2000,4,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(65025,0,0,-1,'Shiny Red Apple',6410,1,0,6,25,1,0,2047,255,5,1,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,433,0,-1,0,-1,11,100,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(65026,0,0,-1,'Tough Hunk of Bread',6399,1,0,6,25,1,0,2047,255,5,1,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,433,0,-1,0,-1,11,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(65027,0,0,-1,'Forest Mushroom Cap',15852,1,0,6,25,1,0,2047,255,5,1,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,433,0,-1,0,-1,11,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(25,2,7,-1,'Worn Shortsword',1542,1,0,1,35,7,21,32767,511,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1900,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,1,0,0,0,1,3,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(39,4,1,-1,'Recruit\'s Pants',9892,0,0,1,5,1,7,32767,511,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(40,4,0,-1,'Recruit\'s Boots',10141,1,0,1,4,1,8,32767,511,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(38,4,0,-1,'Recruit\'s Shirt',9891,1,0,1,1,1,4,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(2362,4,6,-1,'Worn Wooden Shield',18730,0,0,1,7,1,14,32767,511,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,1,4,0,0,1,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(6948,15,0,-1,'Hearthstone',6418,1,64,1,0,0,0,32767,511,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8690,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(14646,12,0,-1,'Northshire Gift Voucher',18499,1,0,1,0,0,0,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,'',0,0,0,5805,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(14647,12,0,-1,'Coldridge Valley Gift Voucher',18499,1,0,1,0,0,0,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,'',0,0,0,5841,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(14648,12,0,-1,'Shadowglen Gift Voucher',18499,1,0,1,0,0,0,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,'',0,0,0,5842,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(14649,12,0,-1,'Valley of Trials Gift Voucher',18499,1,0,1,0,0,0,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,'',0,0,0,5843,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(14650,12,0,-1,'Camp Narache Gift Voucher',18499,1,0,1,0,0,0,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,'',0,0,0,5844,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(14651,12,0,-1,'Deathknell Gift Voucher',18499,1,0,1,0,0,0,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,'',0,0,0,5847,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(43,4,0,-1,'Squire\'s Boots',10272,1,0,1,4,1,8,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(44,4,1,-1,'Squire\'s Pants',9937,0,0,1,4,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(45,4,0,-1,'Squire\'s Shirt',3265,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(47,4,0,-1,'Footpad\'s Shoes',9915,1,0,1,4,1,8,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(48,4,1,-1,'Footpad\'s Pants',9913,0,0,1,4,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(49,4,0,-1,'Footpad\'s Shirt',9906,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(51,4,0,-1,'Neophyte\'s Boots',9946,1,0,1,5,1,8,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(52,4,1,-1,'Neophyte\'s Pants',9945,0,0,1,5,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(53,4,0,-1,'Neophyte\'s Shirt',9944,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(55,4,0,-1,'Apprentice\'s Boots',9929,1,0,1,5,1,8,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(56,4,1,-1,'Apprentice\'s Robe',12647,0,0,1,5,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(57,4,1,-1,'Acolyte\'s Robe',12645,0,0,1,5,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(59,4,0,-1,'Acolyte\'s Shoes',3261,1,0,1,5,1,8,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(35,2,10,-1,'Bent Staff',472,1,0,1,47,9,17,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2900,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,2,2,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(36,2,4,-1,'Worn Mace',5194,1,0,1,38,7,21,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1900,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,2,3,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(37,2,0,-1,'Worn Axe',14029,1,0,1,38,7,21,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,1,3,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(2361,2,5,-1,'Battleworn Hammer',8690,1,0,1,45,9,17,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2900,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,2,1,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(2092,2,15,-1,'Worn Dagger',6442,1,0,1,35,7,13,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1600,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,1,3,0,0,0,0,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(6096,4,0,-1,'Apprentice\'s Shirt',2163,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(6097,4,0,-1,'Acolyte\'s Shirt',2470,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(6098,4,1,-1,'Neophyte\'s Robe',12679,0,0,1,4,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(1395,4,1,-1,'Apprentice\'s Pants',9924,0,0,1,5,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(1396,4,1,-1,'Acolyte\'s Pants',3260,0,0,1,4,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(6125,4,0,-1,'Brawler\'s Harness',9995,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(6126,4,1,-1,'Trapper\'s Pants',10002,0,0,1,5,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(6127,4,0,-1,'Trapper\'s Boots',10003,1,0,1,5,1,8,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(6129,4,1,-1,'Acolyte\'s Robe',12646,0,0,1,5,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(139,4,1,-1,'Brawler\'s Pants',9988,0,0,1,4,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(140,4,0,-1,'Brawler\'s Boots',9992,1,0,1,4,1,8,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(127,4,0,-1,'Trapper\'s Shirt',9996,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(120,4,1,-1,'Thug Pants',10006,0,0,1,4,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(121,4,0,-1,'Thug Boots',10008,1,0,1,4,1,8,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(147,4,1,-1,'Rugged Trapper\'s Pants',9975,0,0,1,5,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(148,4,0,-1,'Rugged Trapper\'s Shirt',9976,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(153,4,2,-1,'Primitive Kilt',10050,0,0,1,5,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,8,0,0,0,0,0,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(154,4,0,-1,'Primitive Mantle',10058,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(2101,1,2,-1,'Light Quiver',21328,1,0,1,4,1,18,2047,255,1,1,0,0,0,0,0,0,0,0,1,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,14824,1,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(2102,1,3,-1,'Small Ammo Pouch',1816,1,0,1,4,1,18,2047,255,1,1,0,0,0,0,0,0,0,0,1,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,14824,1,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(2105,4,0,-1,'Thug Shirt',10005,1,0,1,5,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(2504,2,2,-1,'Worn Shortbow',8106,1,0,1,29,5,15,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2300,2,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,2,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(2508,2,3,-1,'Old Blunderbuss',6606,1,0,1,27,5,26,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2300,3,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,1,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(2512,6,2,-1,'Rough Arrow',5996,1,0,1,10,0,24,2047,255,5,1,0,0,0,0,0,0,0,0,200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,2,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(2516,6,3,-1,'Light Shot',5998,1,0,1,10,0,24,2047,255,5,1,0,0,0,0,0,0,0,0,200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,2,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(3661,2,10,-1,'Handcrafted Staff',18530,1,0,1,45,9,17,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2900,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,2,2,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(6119,4,1,-1,'Neophyte\'s Robe',12681,0,0,1,4,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(6123,4,1,-1,'Novice\'s Robe',12683,0,0,1,4,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(6124,4,1,-1,'Novice\'s Pants',9987,0,0,1,5,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(6134,4,0,-1,'Primitive Mantle',10108,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(6135,4,2,-1,'Primitive Kilt',10109,0,0,1,5,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,8,0,0,0,0,0,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(6139,4,1,-1,'Novice\'s Robe',12684,0,0,1,4,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(6140,4,1,-1,'Apprentice\'s Robe',12649,0,0,1,4,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(6144,4,1,-1,'Neophyte\'s Robe',12680,0,0,1,5,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0),
-(12282,2,1,-1,'Worn Battleaxe',22291,1,0,1,43,8,17,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2900,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,1,1,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0);
+INSERT INTO `item_template` VALUES
+(65020,0,0,-1,'Tough Jerky',2473,1,0,6,25,1,0,2047,255,5,1,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,433,0,-1,0,-1,11,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(65021,0,0,-1,'Refreshing Spring Water',18084,1,0,6,25,1,0,2047,255,5,1,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,430,0,-1,0,-1,59,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(65022,0,0,-1,'Darnassian Bleu',6353,1,0,6,25,1,0,2047,255,5,1,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,433,0,-1,0,-1,11,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(65023,2,16,-1,'Small Throwing Knife',16754,1,0,1,15,0,25,2047,255,3,1,0,0,0,0,0,0,0,0,200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2000,4,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(65024,2,16,-1,'Crude Throwing Axe',20777,1,0,1,15,0,25,2047,255,3,1,0,0,0,0,0,0,0,0,200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2000,4,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(65025,0,0,-1,'Shiny Red Apple',6410,1,0,6,25,1,0,2047,255,5,1,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,433,0,-1,0,-1,11,100,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(65026,0,0,-1,'Tough Hunk of Bread',6399,1,0,6,25,1,0,2047,255,5,1,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,433,0,-1,0,-1,11,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(65027,0,0,-1,'Forest Mushroom Cap',15852,1,0,6,25,1,0,2047,255,5,1,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,433,0,-1,0,-1,11,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(25,2,7,-1,'Worn Shortsword',1542,1,0,1,35,7,21,32767,511,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1900,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,1,0,0,0,1,3,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(39,4,1,-1,'Recruit\'s Pants',9892,0,0,1,5,1,7,32767,511,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(40,4,0,-1,'Recruit\'s Boots',10141,1,0,1,4,1,8,32767,511,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(38,4,0,-1,'Recruit\'s Shirt',9891,1,0,1,1,1,4,0,0,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(2362,4,6,-1,'Worn Wooden Shield',18730,0,0,1,7,1,14,32767,511,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,5,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,1,4,0,0,1,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(6948,15,0,-1,'Hearthstone',6418,1,64,1,0,0,0,32767,511,1,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,8690,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(14646,12,0,-1,'Northshire Gift Voucher',18499,1,0,1,0,0,0,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,'',0,0,0,5805,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(14647,12,0,-1,'Coldridge Valley Gift Voucher',18499,1,0,1,0,0,0,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,'',0,0,0,5841,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(14648,12,0,-1,'Shadowglen Gift Voucher',18499,1,0,1,0,0,0,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,'',0,0,0,5842,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(14649,12,0,-1,'Valley of Trials Gift Voucher',18499,1,0,1,0,0,0,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,'',0,0,0,5843,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(14650,12,0,-1,'Camp Narache Gift Voucher',18499,1,0,1,0,0,0,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,'',0,0,0,5844,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(14651,12,0,-1,'Deathknell Gift Voucher',18499,1,0,1,0,0,0,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,4,'',0,0,0,5847,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(43,4,0,-1,'Squire\'s Boots',10272,1,0,1,4,1,8,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(44,4,1,-1,'Squire\'s Pants',9937,0,0,1,4,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(45,4,0,-1,'Squire\'s Shirt',3265,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(47,4,0,-1,'Footpad\'s Shoes',9915,1,0,1,4,1,8,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(48,4,1,-1,'Footpad\'s Pants',9913,0,0,1,4,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(49,4,0,-1,'Footpad\'s Shirt',9906,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(51,4,0,-1,'Neophyte\'s Boots',9946,1,0,1,5,1,8,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(52,4,1,-1,'Neophyte\'s Pants',9945,0,0,1,5,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(53,4,0,-1,'Neophyte\'s Shirt',9944,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(55,4,0,-1,'Apprentice\'s Boots',9929,1,0,1,5,1,8,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(56,4,1,-1,'Apprentice\'s Robe',12647,0,0,1,5,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(57,4,1,-1,'Acolyte\'s Robe',12645,0,0,1,5,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(59,4,0,-1,'Acolyte\'s Shoes',3261,1,0,1,5,1,8,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(35,2,10,-1,'Bent Staff',472,1,0,1,47,9,17,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2900,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,2,2,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(36,2,4,-1,'Worn Mace',5194,1,0,1,38,7,21,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1900,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,2,3,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(37,2,0,-1,'Worn Axe',14029,1,0,1,38,7,21,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,3,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,1,3,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(2361,2,5,-1,'Battleworn Hammer',8690,1,0,1,45,9,17,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2900,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,2,1,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(2092,2,15,-1,'Worn Dagger',6442,1,0,1,35,7,13,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1600,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,1,3,0,0,0,0,16,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(6096,4,0,-1,'Apprentice\'s Shirt',2163,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(6097,4,0,-1,'Acolyte\'s Shirt',2470,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(6098,4,1,-1,'Neophyte\'s Robe',12679,0,0,1,4,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(1395,4,1,-1,'Apprentice\'s Pants',9924,0,0,1,5,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(1396,4,1,-1,'Acolyte\'s Pants',3260,0,0,1,4,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(6125,4,0,-1,'Brawler\'s Harness',9995,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(6126,4,1,-1,'Trapper\'s Pants',10002,0,0,1,5,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(6127,4,0,-1,'Trapper\'s Boots',10003,1,0,1,5,1,8,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(6129,4,1,-1,'Acolyte\'s Robe',12646,0,0,1,5,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(139,4,1,-1,'Brawler\'s Pants',9988,0,0,1,4,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(140,4,0,-1,'Brawler\'s Boots',9992,1,0,1,4,1,8,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(127,4,0,-1,'Trapper\'s Shirt',9996,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(120,4,1,-1,'Thug Pants',10006,0,0,1,4,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(121,4,0,-1,'Thug Boots',10008,1,0,1,4,1,8,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(147,4,1,-1,'Rugged Trapper\'s Pants',9975,0,0,1,5,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(148,4,0,-1,'Rugged Trapper\'s Shirt',9976,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(153,4,2,-1,'Primitive Kilt',10050,0,0,1,5,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,8,0,0,0,0,0,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(154,4,0,-1,'Primitive Mantle',10058,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(2101,1,2,-1,'Light Quiver',21328,1,0,1,4,1,18,2047,255,1,1,0,0,0,0,0,0,0,0,1,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,14824,1,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(2102,1,3,-1,'Small Ammo Pouch',1816,1,0,1,4,1,18,2047,255,1,1,0,0,0,0,0,0,0,0,1,6,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,14824,1,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(2105,4,0,-1,'Thug Shirt',10005,1,0,1,5,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(2504,2,2,-1,'Worn Shortbow',8106,1,0,1,29,5,15,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2300,2,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,2,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(2508,2,3,-1,'Old Blunderbuss',6606,1,0,1,27,5,26,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2300,3,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,1,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(2512,6,2,-1,'Rough Arrow',5996,1,0,1,10,0,24,2047,255,5,1,0,0,0,0,0,0,0,0,200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,2,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(2516,6,3,-1,'Light Shot',5998,1,0,1,10,0,24,2047,255,5,1,0,0,0,0,0,0,0,0,200,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,2,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(3661,2,10,-1,'Handcrafted Staff',18530,1,0,1,45,9,17,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2900,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,2,2,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(6119,4,1,-1,'Neophyte\'s Robe',12681,0,0,1,4,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(6123,4,1,-1,'Novice\'s Robe',12683,0,0,1,4,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(6124,4,1,-1,'Novice\'s Pants',9987,0,0,1,5,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(6134,4,0,-1,'Primitive Mantle',10108,1,0,1,1,1,4,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(6135,4,2,-1,'Primitive Kilt',10109,0,0,1,5,1,7,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,14,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,8,0,0,0,0,0,30,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(6139,4,1,-1,'Novice\'s Robe',12684,0,0,1,4,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(6140,4,1,-1,'Apprentice\'s Robe',12649,0,0,1,4,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(6144,4,1,-1,'Neophyte\'s Robe',12680,0,0,1,5,1,20,2047,255,1,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,0,0,0,0,0,0,1000,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,7,0,0,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0),
+(12282,2,1,-1,'Worn Battleaxe',22291,1,0,1,43,8,17,2047,255,2,1,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,3,5,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,2900,0,0,0,0,0,0,-1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,1,1,0,0,0,0,25,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0,0,0,0,0);
 /*!40000 ALTER TABLE `item_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1644,7 +1644,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `locales_creature`;
 CREATE TABLE `locales_creature` (
-  `entry` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
   `name_loc1` varchar(100) NOT NULL default '',
   `name_loc2` varchar(100) NOT NULL default '',
   `name_loc3` varchar(100) NOT NULL default '',
@@ -1678,7 +1678,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `locales_gameobject`;
 CREATE TABLE `locales_gameobject` (
-  `entry` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
   `name_loc1` varchar(100) NOT NULL default '',
   `name_loc2` varchar(100) NOT NULL default '',
   `name_loc3` varchar(100) NOT NULL default '',
@@ -1704,7 +1704,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `locales_item`;
 CREATE TABLE `locales_item` (
-  `entry` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
   `name_loc1` varchar(100) NOT NULL default '',
   `name_loc2` varchar(100) NOT NULL default '',
   `name_loc3` varchar(100) NOT NULL default '',
@@ -1737,7 +1737,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `locales_npc_text`;
 CREATE TABLE `locales_npc_text` (
-  `entry` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
   `Text0_0_loc1` longtext,
   `Text0_0_loc2` longtext,
   `Text0_0_loc3` longtext,
@@ -1868,7 +1868,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `locales_page_text`;
 CREATE TABLE `locales_page_text` (
-  `entry` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
   `Text_loc1` longtext,
   `Text_loc2` longtext,
   `Text_loc3` longtext,
@@ -1894,7 +1894,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `locales_quest`;
 CREATE TABLE `locales_quest` (
-  `entry` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
   `Title_loc1` text,
   `Title_loc2` text,
   `Title_loc3` text,
@@ -1983,8 +1983,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `mangos_string`;
 CREATE TABLE `mangos_string` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `content_default` text,
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `content_default` text NOT NULL,
   `content_loc1` text,
   `content_loc2` text,
   `content_loc3` text,
@@ -2449,7 +2449,6 @@ INSERT INTO `mangos_string` VALUES
 (708,'%s is Away from Keyboard: %s',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (709,'Do not Disturb',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (710,'Away from Keyboard',NULL,NULL,NULL,NULL,NULL,NULL,NULL);
-
 /*!40000 ALTER TABLE `mangos_string` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -2459,12 +2458,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `npc_gossip`;
 CREATE TABLE `npc_gossip` (
-  `id` int(11) unsigned NOT NULL default '0',
-  `npc_guid` int(11) unsigned NOT NULL default '0',
-  `gossip_type` int(11) unsigned NOT NULL default '0',
-  `textid` int(11) unsigned NOT NULL default '0',
-  `option_count` int(11) unsigned default NULL,
-  PRIMARY KEY  (`id`,`npc_guid`)
+  `npc_guid` int(10) unsigned NOT NULL default '0',
+  `textid` mediumint(8) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`npc_guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -2482,9 +2478,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `npc_gossip_textid`;
 CREATE TABLE `npc_gossip_textid` (
-  `zoneid` int(11) unsigned NOT NULL default '0',
-  `action` int(3) unsigned NOT NULL default '0',
-  `textid` int(11) unsigned NOT NULL default '0',
+  `zoneid` smallint(5) unsigned NOT NULL default '0',
+  `action` smallint(5) unsigned NOT NULL default '0',
+  `textid` mediumint(8) unsigned NOT NULL default '0',
   KEY `zoneid` (`zoneid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -2503,11 +2499,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `npc_option`;
 CREATE TABLE `npc_option` (
-  `id` int(11) unsigned NOT NULL default '0',
-  `gossip_id` int(11) unsigned NOT NULL default '0',
-  `npcflag` int(11) unsigned NOT NULL default '0',
-  `icon` int(11) unsigned NOT NULL default '0',
-  `action` int(11) unsigned NOT NULL default '0',
+  `id` tinyint(3) unsigned NOT NULL default '0',
+  `gossip_id` tinyint(3) unsigned NOT NULL default '0',
+  `npcflag` int(10) unsigned NOT NULL default '0',
+  `icon` tinyint(3) unsigned NOT NULL default '0',
+  `action` tinyint(3) unsigned NOT NULL default '0',
   `option_text` text,
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -2527,87 +2523,87 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `npc_text`;
 CREATE TABLE `npc_text` (
-  `ID` int(11) unsigned NOT NULL default '0',
+  `ID` mediumint(8) unsigned NOT NULL default '0',
   `text0_0` longtext,
   `text0_1` longtext,
-  `lang0` bigint(20) unsigned NOT NULL default '0',
+  `lang0` tinyint(3) unsigned NOT NULL default '0',
   `prob0` float NOT NULL default '0',
-  `em0_0` bigint(20) unsigned NOT NULL default '0',
-  `em0_1` bigint(20) unsigned NOT NULL default '0',
-  `em0_2` bigint(20) unsigned NOT NULL default '0',
-  `em0_3` bigint(20) unsigned NOT NULL default '0',
-  `em0_4` bigint(20) unsigned NOT NULL default '0',
-  `em0_5` bigint(20) unsigned NOT NULL default '0',
+  `em0_0` smallint(5) unsigned NOT NULL default '0',
+  `em0_1` smallint(5) unsigned NOT NULL default '0',
+  `em0_2` smallint(5) unsigned NOT NULL default '0',
+  `em0_3` smallint(5) unsigned NOT NULL default '0',
+  `em0_4` smallint(5) unsigned NOT NULL default '0',
+  `em0_5` smallint(5) unsigned NOT NULL default '0',
   `text1_0` longtext,
   `text1_1` longtext,
-  `lang1` bigint(20) unsigned NOT NULL default '0',
+  `lang1` tinyint(3) unsigned NOT NULL default '0',
   `prob1` float NOT NULL default '0',
-  `em1_0` bigint(20) unsigned NOT NULL default '0',
-  `em1_1` bigint(20) unsigned NOT NULL default '0',
-  `em1_2` bigint(20) unsigned NOT NULL default '0',
-  `em1_3` bigint(20) unsigned NOT NULL default '0',
-  `em1_4` bigint(20) unsigned NOT NULL default '0',
-  `em1_5` bigint(20) unsigned NOT NULL default '0',
+  `em1_0` smallint(5) unsigned NOT NULL default '0',
+  `em1_1` smallint(5) unsigned NOT NULL default '0',
+  `em1_2` smallint(5) unsigned NOT NULL default '0',
+  `em1_3` smallint(5) unsigned NOT NULL default '0',
+  `em1_4` smallint(5) unsigned NOT NULL default '0',
+  `em1_5` smallint(5) unsigned NOT NULL default '0',
   `text2_0` longtext,
   `text2_1` longtext,
-  `lang2` bigint(20) unsigned NOT NULL default '0',
+  `lang2` tinyint(3) unsigned NOT NULL default '0',
   `prob2` float NOT NULL default '0',
-  `em2_0` bigint(20) unsigned NOT NULL default '0',
-  `em2_1` bigint(20) unsigned NOT NULL default '0',
-  `em2_2` bigint(20) unsigned NOT NULL default '0',
-  `em2_3` bigint(20) unsigned NOT NULL default '0',
-  `em2_4` bigint(20) unsigned NOT NULL default '0',
-  `em2_5` bigint(20) unsigned NOT NULL default '0',
+  `em2_0` smallint(5) unsigned NOT NULL default '0',
+  `em2_1` smallint(5) unsigned NOT NULL default '0',
+  `em2_2` smallint(5) unsigned NOT NULL default '0',
+  `em2_3` smallint(5) unsigned NOT NULL default '0',
+  `em2_4` smallint(5) unsigned NOT NULL default '0',
+  `em2_5` smallint(5) unsigned NOT NULL default '0',
   `text3_0` longtext,
   `text3_1` longtext,
-  `lang3` bigint(20) unsigned NOT NULL default '0',
+  `lang3` tinyint(3) unsigned NOT NULL default '0',
   `prob3` float NOT NULL default '0',
-  `em3_0` bigint(20) unsigned NOT NULL default '0',
-  `em3_1` bigint(20) unsigned NOT NULL default '0',
-  `em3_2` bigint(20) unsigned NOT NULL default '0',
-  `em3_3` bigint(20) unsigned NOT NULL default '0',
-  `em3_4` bigint(20) unsigned NOT NULL default '0',
-  `em3_5` bigint(20) unsigned NOT NULL default '0',
+  `em3_0` smallint(5) unsigned NOT NULL default '0',
+  `em3_1` smallint(5) unsigned NOT NULL default '0',
+  `em3_2` smallint(5) unsigned NOT NULL default '0',
+  `em3_3` smallint(5) unsigned NOT NULL default '0',
+  `em3_4` smallint(5) unsigned NOT NULL default '0',
+  `em3_5` smallint(5) unsigned NOT NULL default '0',
   `text4_0` longtext,
   `text4_1` longtext,
-  `lang4` bigint(20) unsigned NOT NULL default '0',
+  `lang4` tinyint(3) unsigned NOT NULL default '0',
   `prob4` float NOT NULL default '0',
-  `em4_0` bigint(20) unsigned NOT NULL default '0',
-  `em4_1` bigint(20) unsigned NOT NULL default '0',
-  `em4_2` bigint(20) unsigned NOT NULL default '0',
-  `em4_3` bigint(20) unsigned NOT NULL default '0',
-  `em4_4` bigint(20) unsigned NOT NULL default '0',
-  `em4_5` bigint(20) unsigned NOT NULL default '0',
+  `em4_0` smallint(5) unsigned NOT NULL default '0',
+  `em4_1` smallint(5) unsigned NOT NULL default '0',
+  `em4_2` smallint(5) unsigned NOT NULL default '0',
+  `em4_3` smallint(5) unsigned NOT NULL default '0',
+  `em4_4` smallint(5) unsigned NOT NULL default '0',
+  `em4_5` smallint(5) unsigned NOT NULL default '0',
   `text5_0` longtext,
   `text5_1` longtext,
-  `lang5` bigint(20) unsigned NOT NULL default '0',
+  `lang5` tinyint(3) unsigned NOT NULL default '0',
   `prob5` float NOT NULL default '0',
-  `em5_0` bigint(20) unsigned NOT NULL default '0',
-  `em5_1` bigint(20) unsigned NOT NULL default '0',
-  `em5_2` bigint(20) unsigned NOT NULL default '0',
-  `em5_3` bigint(20) unsigned NOT NULL default '0',
-  `em5_4` bigint(20) unsigned NOT NULL default '0',
-  `em5_5` bigint(20) unsigned NOT NULL default '0',
+  `em5_0` smallint(5) unsigned NOT NULL default '0',
+  `em5_1` smallint(5) unsigned NOT NULL default '0',
+  `em5_2` smallint(5) unsigned NOT NULL default '0',
+  `em5_3` smallint(5) unsigned NOT NULL default '0',
+  `em5_4` smallint(5) unsigned NOT NULL default '0',
+  `em5_5` smallint(5) unsigned NOT NULL default '0',
   `text6_0` longtext,
   `text6_1` longtext,
-  `lang6` bigint(20) unsigned NOT NULL default '0',
+  `lang6` tinyint(3) unsigned NOT NULL default '0',
   `prob6` float NOT NULL default '0',
-  `em6_0` bigint(20) unsigned NOT NULL default '0',
-  `em6_1` bigint(20) unsigned NOT NULL default '0',
-  `em6_2` bigint(20) unsigned NOT NULL default '0',
-  `em6_3` bigint(20) unsigned NOT NULL default '0',
-  `em6_4` bigint(20) unsigned NOT NULL default '0',
-  `em6_5` bigint(20) unsigned NOT NULL default '0',
+  `em6_0` smallint(5) unsigned NOT NULL default '0',
+  `em6_1` smallint(5) unsigned NOT NULL default '0',
+  `em6_2` smallint(5) unsigned NOT NULL default '0',
+  `em6_3` smallint(5) unsigned NOT NULL default '0',
+  `em6_4` smallint(5) unsigned NOT NULL default '0',
+  `em6_5` smallint(5) unsigned NOT NULL default '0',
   `text7_0` longtext,
   `text7_1` longtext,
-  `lang7` bigint(20) unsigned NOT NULL default '0',
+  `lang7` tinyint(3) unsigned NOT NULL default '0',
   `prob7` float NOT NULL default '0',
-  `em7_0` bigint(20) unsigned NOT NULL default '0',
-  `em7_1` bigint(20) unsigned NOT NULL default '0',
-  `em7_2` bigint(20) unsigned NOT NULL default '0',
-  `em7_3` bigint(20) unsigned NOT NULL default '0',
-  `em7_4` bigint(20) unsigned NOT NULL default '0',
-  `em7_5` bigint(20) unsigned NOT NULL default '0',
+  `em7_0` smallint(5) unsigned NOT NULL default '0',
+  `em7_1` smallint(5) unsigned NOT NULL default '0',
+  `em7_2` smallint(5) unsigned NOT NULL default '0',
+  `em7_3` smallint(5) unsigned NOT NULL default '0',
+  `em7_4` smallint(5) unsigned NOT NULL default '0',
+  `em7_5` smallint(5) unsigned NOT NULL default '0',
   PRIMARY KEY  (`ID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -2626,12 +2622,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `npc_trainer`;
 CREATE TABLE `npc_trainer` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `spell` int(11) unsigned NOT NULL default '0',
-  `spellcost` int(11) unsigned default '0',
-  `reqskill` int(11) unsigned default '0',
-  `reqskillvalue` int(11) unsigned default '0',
-  `reqlevel` int(11) unsigned default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `spell` mediumint(8) unsigned NOT NULL default '0',
+  `spellcost` int(10) unsigned NOT NULL default '0',
+  `reqskill` smallint(5) unsigned NOT NULL default '0',
+  `reqskillvalue` smallint(5) unsigned NOT NULL default '0',
+  `reqlevel` tinyint(3) unsigned NOT NULL default '0',
   UNIQUE KEY `entry_spell` (`entry`,`spell`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -2650,10 +2646,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `npc_vendor`;
 CREATE TABLE `npc_vendor` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `item` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `item` mediumint(8) unsigned NOT NULL default '0',
   `maxcount` tinyint(3) unsigned NOT NULL default '0',
-  `incrtime` int(11) unsigned NOT NULL default '0',
+  `incrtime` int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Npc System';
 
@@ -2672,9 +2668,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `page_text`;
 CREATE TABLE `page_text` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `text` longtext,
-  `next_page` bigint(20) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `text` longtext NOT NULL,
+  `next_page` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
 
@@ -2693,7 +2689,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `pet_levelstats`;
 CREATE TABLE `pet_levelstats` (
-  `creature_entry` int(11) unsigned NOT NULL,
+  `creature_entry` mediumint(8) unsigned NOT NULL,
   `level` tinyint(3) unsigned NOT NULL,
   `hp` smallint(5) unsigned NOT NULL,
   `mana` smallint(5) unsigned NOT NULL,
@@ -2721,10 +2717,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `pet_name_generation`;
 CREATE TABLE `pet_name_generation` (
-  `id` int(11) unsigned NOT NULL auto_increment,
+  `id` mediumint(8) unsigned NOT NULL auto_increment,
   `word` tinytext NOT NULL,
-  `entry` int(11) unsigned NOT NULL default '0',
-  `half` int(11) NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `half` tinyint(4) NOT NULL default '0',
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=199 DEFAULT CHARSET=utf8;
 
@@ -2734,7 +2730,7 @@ CREATE TABLE `pet_name_generation` (
 
 LOCK TABLES `pet_name_generation` WRITE;
 /*!40000 ALTER TABLE `pet_name_generation` DISABLE KEYS */;
-INSERT INTO `pet_name_generation` (`id`,`word`,`entry`,`half`) VALUES
+INSERT INTO `pet_name_generation` VALUES
 (1,'Aba',416,0),
 (2,'Az',416,0),
 (3,'Bel',416,0),
@@ -2942,12 +2938,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `petcreateinfo_spell`;
 CREATE TABLE `petcreateinfo_spell` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `Spell1` int(11) unsigned NOT NULL default '0',
-  `Spell2` int(11) unsigned NOT NULL default '0',
-  `Spell3` int(11) unsigned NOT NULL default '0',
-  `Spell4` int(11) unsigned NOT NULL default '0',
-  `FamilyPassive` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `Spell1` mediumint(8) unsigned NOT NULL default '0',
+  `Spell2` mediumint(8) unsigned NOT NULL default '0',
+  `Spell3` mediumint(8) unsigned NOT NULL default '0',
+  `Spell4` mediumint(8) unsigned NOT NULL default '0',
+  `FamilyPassive` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet Create Spells';
 
@@ -2966,16 +2962,16 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `pickpocketing_loot_template`;
 CREATE TABLE `pickpocketing_loot_template` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `item` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrRef` float NOT NULL default '100',
-  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
+  `QuestChanceOrGroup` tinyint(4) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `freeforall` tinyint(1) unsigned NOT NULL default '0',
+  `freeforall` tinyint(3) unsigned NOT NULL default '0',
   `lootcondition` tinyint(3) unsigned NOT NULL default '0',
-  `condition_value1` int(11) unsigned NOT NULL default '0',
-  `condition_value2` int(11) unsigned NOT NULL default '0',
+  `condition_value1` mediumint(8) unsigned NOT NULL default '0',
+  `condition_value2` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -3013,7 +3009,7 @@ CREATE TABLE `player_levelstats` (
 
 LOCK TABLES `player_levelstats` WRITE;
 /*!40000 ALTER TABLE `player_levelstats` DISABLE KEYS */;
-INSERT INTO `player_levelstats` (`race`,`class`,`level`,`basehp`,`basemana`,`str`,`agi`,`sta`,`inte`,`spi`) VALUES
+INSERT INTO `player_levelstats` VALUES
 (1,1,1,20,0,23,20,22,20,20),
 (1,1,2,29,0,24,21,23,20,20),
 (1,1,3,38,0,26,22,24,20,21),
@@ -6665,7 +6661,7 @@ DROP TABLE IF EXISTS `playercreateinfo`;
 CREATE TABLE `playercreateinfo` (
   `race` tinyint(3) unsigned NOT NULL default '0',
   `class` tinyint(3) unsigned NOT NULL default '0',
-  `map` mediumint(8) unsigned NOT NULL default '0',
+  `map` smallint(5) unsigned NOT NULL default '0',
   `zone` mediumint(8) unsigned NOT NULL default '0',
   `position_x` float NOT NULL default '0',
   `position_y` float NOT NULL default '0',
@@ -6679,7 +6675,7 @@ CREATE TABLE `playercreateinfo` (
 
 LOCK TABLES `playercreateinfo` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo` DISABLE KEYS */;
-INSERT INTO `playercreateinfo` (`race`,`class`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES
+INSERT INTO `playercreateinfo` VALUES
 (1,1,0,12,-8949,-132,84),
 (1,2,0,12,-8949,-132,84),
 (1,4,0,12,-8949,-132,84),
@@ -6743,10 +6739,10 @@ DROP TABLE IF EXISTS `playercreateinfo_action`;
 CREATE TABLE `playercreateinfo_action` (
   `race` tinyint(3) unsigned NOT NULL default '0',
   `class` tinyint(3) unsigned NOT NULL default '0',
-  `button` smallint(2) unsigned NOT NULL default '0',
-  `action` smallint(6) unsigned NOT NULL default '0',
-  `type` smallint(3) unsigned NOT NULL default '0',
-  `misc` smallint(3) unsigned NOT NULL default '0',
+  `button` smallint(5) unsigned NOT NULL default '0',
+  `action` smallint(5) unsigned NOT NULL default '0',
+  `type` smallint(5) unsigned NOT NULL default '0',
+  `misc` smallint(5) unsigned NOT NULL default '0',
   KEY `playercreateinfo_race_class_index` (`race`,`class`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -6756,7 +6752,7 @@ CREATE TABLE `playercreateinfo_action` (
 
 LOCK TABLES `playercreateinfo_action` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo_action` DISABLE KEYS */;
-INSERT INTO `playercreateinfo_action` (`race`,`class`,`button`,`action`,`type`,`misc`) VALUES
+INSERT INTO `playercreateinfo_action` VALUES
 (1,1,1,78,0,0),
 (1,1,0,6603,0,0),
 (1,1,11,65020,128,0),
@@ -7046,7 +7042,7 @@ CREATE TABLE `playercreateinfo_item` (
   `race` tinyint(3) unsigned NOT NULL default '0',
   `class` tinyint(3) unsigned NOT NULL default '0',
   `itemid` mediumint(8) unsigned NOT NULL default '0',
-  `amount` tinyint(8) unsigned NOT NULL default '1',
+  `amount` tinyint(3) unsigned NOT NULL default '1',
   KEY `playercreateinfo_race_class_index` (`race`,`class`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -7056,7 +7052,7 @@ CREATE TABLE `playercreateinfo_item` (
 
 LOCK TABLES `playercreateinfo_item` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo_item` DISABLE KEYS */;
-INSERT INTO `playercreateinfo_item` (`race`,`class`,`itemid`,`amount`) VALUES
+INSERT INTO `playercreateinfo_item` VALUES
 (1,1,38,1),
 (1,1,39,1),
 (1,1,40,1),
@@ -7496,7 +7492,7 @@ DROP TABLE IF EXISTS `playercreateinfo_skill`;
 CREATE TABLE `playercreateinfo_skill` (
   `race` tinyint(3) unsigned NOT NULL default '0',
   `class` tinyint(3) unsigned NOT NULL default '0',
-  `Skill` mediumint(8) unsigned NOT NULL default '0',
+  `Skill` smallint(5) unsigned NOT NULL default '0',
   `Note` varchar(255) default NULL,
   PRIMARY KEY  (`race`,`class`,`Skill`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -7507,7 +7503,7 @@ CREATE TABLE `playercreateinfo_skill` (
 
 LOCK TABLES `playercreateinfo_skill` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo_skill` DISABLE KEYS */;
-INSERT INTO `playercreateinfo_skill` (`race`,`class`,`Skill`,`Note`) VALUES
+INSERT INTO `playercreateinfo_skill` VALUES
 (1,1,183,'GENERIC (DND)'),
 (1,2,183,'GENERIC (DND)'),
 (1,4,183,'GENERIC (DND)'),
@@ -7707,7 +7703,7 @@ DROP TABLE IF EXISTS `playercreateinfo_spell`;
 CREATE TABLE `playercreateinfo_spell` (
   `race` tinyint(3) unsigned NOT NULL default '0',
   `class` tinyint(3) unsigned NOT NULL default '0',
-  `Spell` bigint(20) unsigned NOT NULL default '0',
+  `Spell` mediumint(8) unsigned NOT NULL default '0',
   `Note` varchar(255) default NULL,
   `Active` tinyint(3) unsigned NOT NULL default '1',
   PRIMARY KEY  (`race`,`class`,`Spell`)
@@ -7719,7 +7715,7 @@ CREATE TABLE `playercreateinfo_spell` (
 
 LOCK TABLES `playercreateinfo_spell` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo_spell` DISABLE KEYS */;
-INSERT INTO `playercreateinfo_spell` (`race`,`class`,`Spell`,`Note`,`Active`) VALUES
+INSERT INTO `playercreateinfo_spell` VALUES
 (1,1,78,'Heroic Strike',1),
 (1,1,81,'Dodge',1),
 (1,1,107,'Block',1),
@@ -9734,16 +9730,16 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `prospecting_loot_template`;
 CREATE TABLE `prospecting_loot_template` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `item` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrRef` float NOT NULL default '100',
-  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
+  `QuestChanceOrGroup` tinyint(4) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `freeforall` tinyint(1) unsigned NOT NULL default '0',
+  `freeforall` tinyint(3) unsigned NOT NULL default '0',
   `lootcondition` tinyint(3) unsigned NOT NULL default '0',
-  `condition_value1` int(11) unsigned NOT NULL default '0',
-  `condition_value2` int(11) unsigned NOT NULL default '0',
+  `condition_value1` mediumint(8) unsigned NOT NULL default '0',
+  `condition_value2` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -9762,11 +9758,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `quest_end_scripts`;
 CREATE TABLE `quest_end_scripts` (
-  `id` int(11) unsigned NOT NULL default '0',
-  `delay` int(11) unsigned NOT NULL default '0',
-  `command` int(11) unsigned NOT NULL default '0',
-  `datalong` int(11) unsigned NOT NULL default '0',
-  `datalong2` int(11) unsigned NOT NULL default '0',
+  `id` mediumint(8) unsigned NOT NULL default '0',
+  `delay` int(10) unsigned NOT NULL default '0',
+  `command` mediumint(8) unsigned NOT NULL default '0',
+  `datalong` mediumint(8) unsigned NOT NULL default '0',
+  `datalong2` int(10) unsigned NOT NULL default '0',
   `datatext` text NOT NULL,
   `x` float NOT NULL default '0',
   `y` float NOT NULL default '0',
@@ -9789,11 +9785,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `quest_start_scripts`;
 CREATE TABLE `quest_start_scripts` (
-  `id` int(11) unsigned NOT NULL default '0',
-  `delay` int(11) unsigned NOT NULL default '0',
-  `command` int(11) unsigned NOT NULL default '0',
-  `datalong` int(11) unsigned NOT NULL default '0',
-  `datalong2` int(11) unsigned NOT NULL default '0',
+  `id` mediumint(8) unsigned NOT NULL default '0',
+  `delay` int(10) unsigned NOT NULL default '0',
+  `command` mediumint(8) unsigned NOT NULL default '0',
+  `datalong` mediumint(8) unsigned NOT NULL default '0',
+  `datalong2` int(10) unsigned NOT NULL default '0',
   `datatext` text NOT NULL,
   `x` float NOT NULL default '0',
   `y` float NOT NULL default '0',
@@ -9816,30 +9812,30 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `quest_template`;
 CREATE TABLE `quest_template` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `ZoneOrSort` int(11) NOT NULL default '0',
-  `MinLevel` int(11) unsigned NOT NULL default '0',
-  `QuestLevel` int(11) unsigned NOT NULL default '0',
-  `Type` int(11) unsigned NOT NULL default '0',
-  `RequiredRaces` int(11) unsigned NOT NULL default '0',
-  `RequiredSkillValue` int(11) unsigned NOT NULL default '0',
-  `RepObjectiveFaction` int(10) unsigned NOT NULL default '0',
-  `RepObjectiveValue` int(10) NOT NULL default '0',
-  `RequiredMinRepFaction` int(10) unsigned NOT NULL default '0',
-  `RequiredMinRepValue` int(10) NOT NULL default '0',
-  `RequiredMaxRepFaction` int(10) unsigned NOT NULL default '0',
-  `RequiredMaxRepValue` int(10) NOT NULL default '0',
-  `SuggestedPlayers` int(11) unsigned NOT NULL default '0',
-  `LimitTime` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `ZoneOrSort` smallint(6) NOT NULL default '0',
+  `MinLevel` tinyint(3) unsigned NOT NULL default '0',
+  `QuestLevel` tinyint(3) unsigned NOT NULL default '0',
+  `Type` smallint(5) unsigned NOT NULL default '0',
+  `RequiredRaces` smallint(5) unsigned NOT NULL default '0',
+  `RequiredSkillValue` smallint(5) unsigned NOT NULL default '0',
+  `RepObjectiveFaction` smallint(5) unsigned NOT NULL default '0',
+  `RepObjectiveValue` mediumint(9) NOT NULL default '0',
+  `RequiredMinRepFaction` smallint(5) unsigned NOT NULL default '0',
+  `RequiredMinRepValue` mediumint(9) NOT NULL default '0',
+  `RequiredMaxRepFaction` smallint(5) unsigned NOT NULL default '0',
+  `RequiredMaxRepValue` mediumint(9) NOT NULL default '0',
+  `SuggestedPlayers` tinyint(3) unsigned NOT NULL default '0',
+  `LimitTime` int(10) unsigned NOT NULL default '0',
   `QuestFlags` smallint(5) unsigned NOT NULL default '0',
-  `SpecialFlags` tinyint(1) unsigned NOT NULL default '0',
-  `PrevQuestId` int(11) NOT NULL default '0',
-  `NextQuestId` int(11) NOT NULL default '0',
-  `ExclusiveGroup` int(11) NOT NULL default '0',
-  `NextQuestInChain` int(11) unsigned NOT NULL default '0',
-  `SrcItemId` int(11) unsigned NOT NULL default '0',
-  `SrcItemCount` int(11) unsigned NOT NULL default '0',
-  `SrcSpell` int(11) unsigned NOT NULL default '0',
+  `SpecialFlags` tinyint(3) unsigned NOT NULL default '0',
+  `PrevQuestId` mediumint(9) NOT NULL default '0',
+  `NextQuestId` mediumint(9) NOT NULL default '0',
+  `ExclusiveGroup` mediumint(9) NOT NULL default '0',
+  `NextQuestInChain` mediumint(8) unsigned NOT NULL default '0',
+  `SrcItemId` mediumint(8) unsigned NOT NULL default '0',
+  `SrcItemCount` tinyint(3) unsigned NOT NULL default '0',
+  `SrcSpell` mediumint(8) unsigned NOT NULL default '0',
   `Title` text,
   `Details` text,
   `Objectives` text,
@@ -9850,87 +9846,87 @@ CREATE TABLE `quest_template` (
   `ObjectiveText2` text,
   `ObjectiveText3` text,
   `ObjectiveText4` text,
-  `ReqItemId1` int(11) unsigned NOT NULL default '0',
-  `ReqItemId2` int(11) unsigned NOT NULL default '0',
-  `ReqItemId3` int(11) unsigned NOT NULL default '0',
-  `ReqItemId4` int(11) unsigned NOT NULL default '0',
-  `ReqItemCount1` int(11) unsigned NOT NULL default '0',
-  `ReqItemCount2` int(11) unsigned NOT NULL default '0',
-  `ReqItemCount3` int(11) unsigned NOT NULL default '0',
-  `ReqItemCount4` int(11) unsigned NOT NULL default '0',
-  `ReqSourceId1` int(11) unsigned NOT NULL default '0',
-  `ReqSourceId2` int(11) unsigned NOT NULL default '0',
-  `ReqSourceId3` int(11) unsigned NOT NULL default '0',
-  `ReqSourceId4` int(11) unsigned NOT NULL default '0',
-  `ReqSourceCount1` int(11) unsigned NOT NULL default '0',
-  `ReqSourceCount2` int(11) unsigned NOT NULL default '0',
-  `ReqSourceCount3` int(11) unsigned NOT NULL default '0',
-  `ReqSourceCount4` int(11) unsigned NOT NULL default '0',
-  `ReqSourceRef1` int(11) unsigned NOT NULL default '0',
-  `ReqSourceRef2` int(11) unsigned NOT NULL default '0',
-  `ReqSourceRef3` int(11) unsigned NOT NULL default '0',
-  `ReqSourceRef4` int(11) unsigned NOT NULL default '0',
-  `ReqCreatureOrGOId1` int(11) NOT NULL default '0',
-  `ReqCreatureOrGOId2` int(11) NOT NULL default '0',
-  `ReqCreatureOrGOId3` int(11) NOT NULL default '0',
-  `ReqCreatureOrGOId4` int(11) NOT NULL default '0',
-  `ReqCreatureOrGOCount1` int(11) unsigned NOT NULL default '0',
-  `ReqCreatureOrGOCount2` int(11) unsigned NOT NULL default '0',
-  `ReqCreatureOrGOCount3` int(11) unsigned NOT NULL default '0',
-  `ReqCreatureOrGOCount4` int(11) unsigned NOT NULL default '0',
-  `ReqSpellCast1` int(11) unsigned NOT NULL default '0',
-  `ReqSpellCast2` int(11) unsigned NOT NULL default '0',
-  `ReqSpellCast3` int(11) unsigned NOT NULL default '0',
-  `ReqSpellCast4` int(11) unsigned NOT NULL default '0',
-  `RewChoiceItemId1` int(11) unsigned NOT NULL default '0',
-  `RewChoiceItemId2` int(11) unsigned NOT NULL default '0',
-  `RewChoiceItemId3` int(11) unsigned NOT NULL default '0',
-  `RewChoiceItemId4` int(11) unsigned NOT NULL default '0',
-  `RewChoiceItemId5` int(11) unsigned NOT NULL default '0',
-  `RewChoiceItemId6` int(11) unsigned NOT NULL default '0',
-  `RewChoiceItemCount1` int(11) unsigned NOT NULL default '0',
-  `RewChoiceItemCount2` int(11) unsigned NOT NULL default '0',
-  `RewChoiceItemCount3` int(11) unsigned NOT NULL default '0',
-  `RewChoiceItemCount4` int(11) unsigned NOT NULL default '0',
-  `RewChoiceItemCount5` int(11) unsigned NOT NULL default '0',
-  `RewChoiceItemCount6` int(11) unsigned NOT NULL default '0',
-  `RewItemId1` int(11) unsigned NOT NULL default '0',
-  `RewItemId2` int(11) unsigned NOT NULL default '0',
-  `RewItemId3` int(11) unsigned NOT NULL default '0',
-  `RewItemId4` int(11) unsigned NOT NULL default '0',
-  `RewItemCount1` int(11) unsigned NOT NULL default '0',
-  `RewItemCount2` int(11) unsigned NOT NULL default '0',
-  `RewItemCount3` int(11) unsigned NOT NULL default '0',
-  `RewItemCount4` int(11) unsigned NOT NULL default '0',
-  `RewRepFaction1` int(11) unsigned NOT NULL default '0' COMMENT 'faction id from Faction.dbc in this case',
-  `RewRepFaction2` int(11) unsigned NOT NULL default '0' COMMENT 'faction id from Faction.dbc in this case',
-  `RewRepFaction3` int(11) unsigned NOT NULL default '0' COMMENT 'faction id from Faction.dbc in this case',
-  `RewRepFaction4` int(11) unsigned NOT NULL default '0' COMMENT 'faction id from Faction.dbc in this case',
-  `RewRepFaction5` int(11) unsigned NOT NULL default '0' COMMENT 'faction id from Faction.dbc in this case',
-  `RewRepValue1` int(11) NOT NULL default '0',
-  `RewRepValue2` int(11) NOT NULL default '0',
-  `RewRepValue3` int(11) NOT NULL default '0',
-  `RewRepValue4` int(11) NOT NULL default '0',
-  `RewRepValue5` int(11) NOT NULL default '0',
+  `ReqItemId1` mediumint(8) unsigned NOT NULL default '0',
+  `ReqItemId2` mediumint(8) unsigned NOT NULL default '0',
+  `ReqItemId3` mediumint(8) unsigned NOT NULL default '0',
+  `ReqItemId4` mediumint(8) unsigned NOT NULL default '0',
+  `ReqItemCount1` smallint(5) unsigned NOT NULL default '0',
+  `ReqItemCount2` smallint(5) unsigned NOT NULL default '0',
+  `ReqItemCount3` smallint(5) unsigned NOT NULL default '0',
+  `ReqItemCount4` smallint(5) unsigned NOT NULL default '0',
+  `ReqSourceId1` mediumint(8) unsigned NOT NULL default '0',
+  `ReqSourceId2` mediumint(8) unsigned NOT NULL default '0',
+  `ReqSourceId3` mediumint(8) unsigned NOT NULL default '0',
+  `ReqSourceId4` mediumint(8) unsigned NOT NULL default '0',
+  `ReqSourceCount1` smallint(5) unsigned NOT NULL default '0',
+  `ReqSourceCount2` smallint(5) unsigned NOT NULL default '0',
+  `ReqSourceCount3` smallint(5) unsigned NOT NULL default '0',
+  `ReqSourceCount4` smallint(5) unsigned NOT NULL default '0',
+  `ReqSourceRef1` tinyint(3) unsigned NOT NULL default '0',
+  `ReqSourceRef2` tinyint(3) unsigned NOT NULL default '0',
+  `ReqSourceRef3` tinyint(3) unsigned NOT NULL default '0',
+  `ReqSourceRef4` tinyint(3) unsigned NOT NULL default '0',
+  `ReqCreatureOrGOId1` mediumint(9) NOT NULL default '0',
+  `ReqCreatureOrGOId2` mediumint(9) NOT NULL default '0',
+  `ReqCreatureOrGOId3` mediumint(9) NOT NULL default '0',
+  `ReqCreatureOrGOId4` mediumint(9) NOT NULL default '0',
+  `ReqCreatureOrGOCount1` smallint(5) unsigned NOT NULL default '0',
+  `ReqCreatureOrGOCount2` smallint(5) unsigned NOT NULL default '0',
+  `ReqCreatureOrGOCount3` smallint(5) unsigned NOT NULL default '0',
+  `ReqCreatureOrGOCount4` smallint(5) unsigned NOT NULL default '0',
+  `ReqSpellCast1` mediumint(8) unsigned NOT NULL default '0',
+  `ReqSpellCast2` mediumint(8) unsigned NOT NULL default '0',
+  `ReqSpellCast3` mediumint(8) unsigned NOT NULL default '0',
+  `ReqSpellCast4` mediumint(8) unsigned NOT NULL default '0',
+  `RewChoiceItemId1` mediumint(8) unsigned NOT NULL default '0',
+  `RewChoiceItemId2` mediumint(8) unsigned NOT NULL default '0',
+  `RewChoiceItemId3` mediumint(8) unsigned NOT NULL default '0',
+  `RewChoiceItemId4` mediumint(8) unsigned NOT NULL default '0',
+  `RewChoiceItemId5` mediumint(8) unsigned NOT NULL default '0',
+  `RewChoiceItemId6` mediumint(8) unsigned NOT NULL default '0',
+  `RewChoiceItemCount1` smallint(5) unsigned NOT NULL default '0',
+  `RewChoiceItemCount2` smallint(5) unsigned NOT NULL default '0',
+  `RewChoiceItemCount3` smallint(5) unsigned NOT NULL default '0',
+  `RewChoiceItemCount4` smallint(5) unsigned NOT NULL default '0',
+  `RewChoiceItemCount5` smallint(5) unsigned NOT NULL default '0',
+  `RewChoiceItemCount6` smallint(5) unsigned NOT NULL default '0',
+  `RewItemId1` mediumint(8) unsigned NOT NULL default '0',
+  `RewItemId2` mediumint(8) unsigned NOT NULL default '0',
+  `RewItemId3` mediumint(8) unsigned NOT NULL default '0',
+  `RewItemId4` mediumint(8) unsigned NOT NULL default '0',
+  `RewItemCount1` smallint(5) unsigned NOT NULL default '0',
+  `RewItemCount2` smallint(5) unsigned NOT NULL default '0',
+  `RewItemCount3` smallint(5) unsigned NOT NULL default '0',
+  `RewItemCount4` smallint(5) unsigned NOT NULL default '0',
+  `RewRepFaction1` smallint(5) unsigned NOT NULL default '0' COMMENT 'faction id from Faction.dbc in this case',
+  `RewRepFaction2` smallint(5) unsigned NOT NULL default '0' COMMENT 'faction id from Faction.dbc in this case',
+  `RewRepFaction3` smallint(5) unsigned NOT NULL default '0' COMMENT 'faction id from Faction.dbc in this case',
+  `RewRepFaction4` smallint(5) unsigned NOT NULL default '0' COMMENT 'faction id from Faction.dbc in this case',
+  `RewRepFaction5` smallint(5) unsigned NOT NULL default '0' COMMENT 'faction id from Faction.dbc in this case',
+  `RewRepValue1` mediumint(9) NOT NULL default '0',
+  `RewRepValue2` mediumint(9) NOT NULL default '0',
+  `RewRepValue3` mediumint(9) NOT NULL default '0',
+  `RewRepValue4` mediumint(9) NOT NULL default '0',
+  `RewRepValue5` mediumint(9) NOT NULL default '0',
   `RewOrReqMoney` int(11) NOT NULL default '0',
-  `RewMoneyMaxLevel` int(11) unsigned NOT NULL default '0',
-  `RewSpell` int(11) unsigned NOT NULL default '0',
-  `PointMapId` int(11) unsigned NOT NULL default '0',
+  `RewMoneyMaxLevel` int(10) unsigned NOT NULL default '0',
+  `RewSpell` mediumint(8) unsigned NOT NULL default '0',
+  `PointMapId` smallint(5) unsigned NOT NULL default '0',
   `PointX` float NOT NULL default '0',
   `PointY` float NOT NULL default '0',
-  `PointOpt` int(2) unsigned NOT NULL default '0',
-  `DetailsEmote1` int(11) unsigned NOT NULL default '0',
-  `DetailsEmote2` int(11) unsigned NOT NULL default '0',
-  `DetailsEmote3` int(11) unsigned NOT NULL default '0',
-  `DetailsEmote4` int(11) unsigned NOT NULL default '0',
-  `IncompleteEmote` int(11) unsigned NOT NULL default '0',
-  `CompleteEmote` int(11) unsigned NOT NULL default '0',
-  `OfferRewardEmote1` int(11) unsigned NOT NULL default '0',
-  `OfferRewardEmote2` int(11) unsigned NOT NULL default '0',
-  `OfferRewardEmote3` int(11) unsigned NOT NULL default '0',
-  `OfferRewardEmote4` int(11) unsigned NOT NULL default '0',
-  `StartScript` int(11) unsigned NOT NULL default '0',
-  `CompleteScript` int(11) unsigned NOT NULL default '0',
+  `PointOpt` mediumint(8) unsigned NOT NULL default '0',
+  `DetailsEmote1` smallint(5) unsigned NOT NULL default '0',
+  `DetailsEmote2` smallint(5) unsigned NOT NULL default '0',
+  `DetailsEmote3` smallint(5) unsigned NOT NULL default '0',
+  `DetailsEmote4` smallint(5) unsigned NOT NULL default '0',
+  `IncompleteEmote` smallint(5) unsigned NOT NULL default '0',
+  `CompleteEmote` smallint(5) unsigned NOT NULL default '0',
+  `OfferRewardEmote1` smallint(5) unsigned NOT NULL default '0',
+  `OfferRewardEmote2` smallint(5) unsigned NOT NULL default '0',
+  `OfferRewardEmote3` smallint(5) unsigned NOT NULL default '0',
+  `OfferRewardEmote4` smallint(5) unsigned NOT NULL default '0',
+  `StartScript` mediumint(8) unsigned NOT NULL default '0',
+  `CompleteScript` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Quest System';
 
@@ -9968,8 +9964,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `skill_discovery_template`;
 CREATE TABLE `skill_discovery_template` (
-  `spellId` int(11) unsigned NOT NULL default '0' COMMENT 'SpellId of the discoverable spell',
-  `reqSpell` int(11) unsigned NOT NULL default '0' COMMENT 'spell requirement',
+  `spellId` mediumint(8) unsigned NOT NULL default '0' COMMENT 'SpellId of the discoverable spell',
+  `reqSpell` mediumint(8) unsigned NOT NULL default '0' COMMENT 'spell requirement',
   `chance` float NOT NULL default '0' COMMENT 'chance to discover',
   PRIMARY KEY  (`spellId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Skill Discovery System';
@@ -9989,11 +9985,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `skill_extra_item_template`;
 CREATE TABLE `skill_extra_item_template` (
-  `spellId` int(11) unsigned NOT NULL default '0' COMMENT 'SpellId of the item creation spell',
-  `requiredSpecialization` int(11) unsigned NOT NULL default '0' COMMENT 'Specialization spell id',
+  `spellId` mediumint(8) unsigned NOT NULL default '0' COMMENT 'SpellId of the item creation spell',
+  `requiredSpecialization` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Specialization spell id',
   `additionalCreateChance` float NOT NULL default '0' COMMENT 'chance to create add',
-  `additionalMaxNum` int(11) unsigned NOT NULL default '0' COMMENT 'max num of adds',
-
+  `additionalMaxNum` tinyint(3) unsigned NOT NULL default '0' COMMENT 'max num of adds',
   PRIMARY KEY  (`spellId`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Skill Specialization System';
 
@@ -10012,16 +10007,16 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `skinning_loot_template`;
 CREATE TABLE `skinning_loot_template` (
-  `entry` int(11) unsigned NOT NULL default '0',
-  `item` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
+  `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrRef` float NOT NULL default '100',
-  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
+  `QuestChanceOrGroup` tinyint(4) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `freeforall` tinyint(1) unsigned NOT NULL default '0',
+  `freeforall` tinyint(3) unsigned NOT NULL default '0',
   `lootcondition` tinyint(3) unsigned NOT NULL default '0',
-  `condition_value1` int(11) unsigned NOT NULL default '0',
-  `condition_value2` int(11) unsigned NOT NULL default '0',
+  `condition_value1` mediumint(8) unsigned NOT NULL default '0',
+  `condition_value2` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
@@ -10054,7 +10049,7 @@ CREATE TABLE `spell_affect` (
 
 LOCK TABLES `spell_affect` WRITE;
 /*!40000 ALTER TABLE `spell_affect` DISABLE KEYS */;
-INSERT INTO `spell_affect` (`entry`,`effectId`,`SpellFamily`,`SpellFamilyMask`,`Charges`) VALUES
+INSERT INTO `spell_affect` VALUES
 (5420,2,0,0x00001012100000D0,0),
 (11069,0,0,0x0000000000000001,0),
 (11070,0,0,0x0000000000000020,0),
@@ -11270,9 +11265,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `spell_chain`;
 CREATE TABLE `spell_chain` (
-  `spell_id` int(5) NOT NULL default '0',
-  `prev_spell` int(5) NOT NULL default '0',
-  `first_spell` int(5) NOT NULL default '0',
+  `spell_id` mediumint(9) NOT NULL default '0',
+  `prev_spell` mediumint(9) NOT NULL default '0',
+  `first_spell` mediumint(9) NOT NULL default '0',
   `rank` tinyint(4) NOT NULL default '0',
   PRIMARY KEY  (`spell_id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Spell Additinal Data';
@@ -11283,7 +11278,7 @@ CREATE TABLE `spell_chain` (
 
 LOCK TABLES `spell_chain` WRITE;
 /*!40000 ALTER TABLE `spell_chain` DISABLE KEYS */;
-INSERT INTO `spell_chain` (`spell_id`,`prev_spell`,`first_spell`,`rank`) VALUES
+INSERT INTO `spell_chain` VALUES
 (10,0,10,1),
 (17,0,17,1),
 (53,0,53,1),
@@ -13195,10 +13190,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `spell_learn_skill`;
 CREATE TABLE `spell_learn_skill` (
-  `entry` smallint(6) unsigned NOT NULL default '0',
+  `entry` smallint(5) unsigned NOT NULL default '0',
   `SkillID` smallint(6) NOT NULL default '0',
-  `Value` int(11) default '0',
-  `MaxValue` int(11) default '0',
+  `Value` smallint(6) NOT NULL default '0',
+  `MaxValue` smallint(6) NOT NULL default '0',
   PRIMARY KEY  (`entry`),
   UNIQUE KEY `spell_skill` (`entry`,`SkillID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
@@ -13209,7 +13204,7 @@ CREATE TABLE `spell_learn_skill` (
 
 LOCK TABLES `spell_learn_skill` WRITE;
 /*!40000 ALTER TABLE `spell_learn_skill` DISABLE KEYS */;
-INSERT INTO `spell_learn_skill` (`entry`,`SkillID`,`Value`,`MaxValue`) VALUES
+INSERT INTO `spell_learn_skill` VALUES
 (196,44,1,0),
 (197,172,1,0),
 (198,54,1,0),
@@ -13261,9 +13256,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `spell_learn_spell`;
 CREATE TABLE `spell_learn_spell` (
-  `entry` smallint(6) unsigned NOT NULL default '0',
-  `SpellID` smallint(6) unsigned NOT NULL default '0',
-  `IfNoSpell` smallint(6) unsigned NOT NULL default '0',
+  `entry` smallint(5) unsigned NOT NULL default '0',
+  `SpellID` smallint(5) unsigned NOT NULL default '0',
+  `IfNoSpell` smallint(5) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`,`SpellID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
 
@@ -13273,7 +13268,7 @@ CREATE TABLE `spell_learn_spell` (
 
 LOCK TABLES `spell_learn_spell` WRITE;
 /*!40000 ALTER TABLE `spell_learn_spell` DISABLE KEYS */;
-INSERT INTO `spell_learn_spell` (`entry`,`SpellID`,`IfNoSpell`) VALUES
+INSERT INTO `spell_learn_spell` VALUES
 (71,355,0),
 (71,7386,0),
 (264,3018,0),
@@ -13327,13 +13322,13 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `spell_proc_event`;
 CREATE TABLE `spell_proc_event` (
-  `entry` smallint(6) unsigned NOT NULL default '0',
+  `entry` smallint(5) unsigned NOT NULL default '0',
   `SchoolMask` tinyint(4) NOT NULL default '0',
   `Category` smallint(6) NOT NULL default '0',
   `SkillID` smallint(6) NOT NULL default '0',
-  `SpellFamilyName` smallint(6) unsigned NOT NULL default '0',
-  `SpellFamilyMask` bigint(40) unsigned NOT NULL default '0',
-  `procFlags` int(11) unsigned NOT NULL default '0',
+  `SpellFamilyName` smallint(5) unsigned NOT NULL default '0',
+  `SpellFamilyMask` bigint(20) unsigned NOT NULL default '0',
+  `procFlags` int(10) unsigned NOT NULL default '0',
   `ppmRate` float NOT NULL default '0',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -13344,7 +13339,7 @@ CREATE TABLE `spell_proc_event` (
 
 LOCK TABLES `spell_proc_event` WRITE;
 /*!40000 ALTER TABLE `spell_proc_event` DISABLE KEYS */;
-INSERT INTO `spell_proc_event` (`entry`,`SchoolMask`,`Category`,`SkillID`,`SpellFamilyName`,`SpellFamilyMask`,`procFlags`,`ppmRate`) VALUES
+INSERT INTO `spell_proc_event` VALUES
 (168,0,0,0,0,0,2,0),
 (324,0,0,0,0,0,1049602,0),
 (325,0,0,0,0,0,1049602,0),
@@ -14310,7 +14305,6 @@ INSERT INTO `spell_proc_event` (`entry`,`SchoolMask`,`Category`,`SkillID`,`Spell
 (45234,0,0,0,0,0x0000000000000000,0x00842000,0),
 (45243,0,0,0,0,0x0000000000000000,0x00842000,0),
 (45244,0,0,0,0,0x0000000000000000,0x00842000,0);
-
 /*!40000 ALTER TABLE `spell_proc_event` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -14320,9 +14314,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `spell_script_target`;
 CREATE TABLE `spell_script_target` (
-  `entry` int(6) unsigned NOT NULL,
-  `type` int(8) unsigned default '0',
-  `targetEntry` int(11) unsigned default '0',
+  `entry` mediumint(8) unsigned NOT NULL,
+  `type` tinyint(3) unsigned NOT NULL default '0',
+  `targetEntry` mediumint(8) unsigned NOT NULL default '0',
   UNIQUE KEY `entry_type_target` (`entry`,`type`,`targetEntry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Spell System';
 
@@ -14341,11 +14335,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `spell_scripts`;
 CREATE TABLE `spell_scripts` (
-  `id` int(11) unsigned NOT NULL default '0',
-  `delay` int(11) unsigned NOT NULL default '0',
-  `command` int(11) unsigned NOT NULL default '0',
-  `datalong` int(11) unsigned NOT NULL default '0',
-  `datalong2` int(11) unsigned NOT NULL default '0',
+  `id` mediumint(8) unsigned NOT NULL default '0',
+  `delay` int(10) unsigned NOT NULL default '0',
+  `command` mediumint(8) unsigned NOT NULL default '0',
+  `datalong` mediumint(8) unsigned NOT NULL default '0',
+  `datalong2` int(10) unsigned NOT NULL default '0',
   `datatext` text NOT NULL,
   `x` float NOT NULL default '0',
   `y` float NOT NULL default '0',
@@ -14368,8 +14362,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `spell_teleport`;
 CREATE TABLE `spell_teleport` (
-  `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
-  `target_map` int(11) unsigned NOT NULL default '0',
+  `id` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Identifier',
+  `target_map` smallint(5) unsigned NOT NULL default '0',
   `target_position_x` float NOT NULL default '0',
   `target_position_y` float NOT NULL default '0',
   `target_position_z` float NOT NULL default '0',
@@ -14392,8 +14386,8 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `spell_threat`;
 CREATE TABLE `spell_threat` (
-  `entry` int(10) unsigned NOT NULL,
-  `Threat` int(11) NOT NULL,
+  `entry` mediumint(8) unsigned NOT NULL,
+  `Threat` smallint(6) NOT NULL,
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED;
 
@@ -14403,7 +14397,7 @@ CREATE TABLE `spell_threat` (
 
 LOCK TABLES `spell_threat` WRITE;
 /*!40000 ALTER TABLE `spell_threat` DISABLE KEYS */;
-INSERT INTO `spell_threat` (`entry`,`Threat`) VALUES
+INSERT INTO `spell_threat` VALUES
 (78,20),
 (284,39),
 (285,59),
@@ -14499,9 +14493,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `transports`;
 CREATE TABLE `transports` (
-  `entry` int(11) unsigned NOT NULL default '0',
+  `entry` mediumint(8) unsigned NOT NULL default '0',
   `name` text,
-  `period` int(11) unsigned NOT NULL default '0',
+  `period` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Transports';
 
@@ -14520,10 +14514,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `uptime`;
 CREATE TABLE `uptime` (
-  `starttime` bigint(11) unsigned NOT NULL default '0',
+  `starttime` bigint(20) unsigned NOT NULL default '0',
   `startstring` varchar(64) NOT NULL default '',
-  `uptime` bigint(11) unsigned NOT NULL default '0',
-  `maxplayers` int(11) unsigned NOT NULL default '0',
+  `uptime` bigint(20) unsigned NOT NULL default '0',
+  `maxplayers` smallint(5) unsigned NOT NULL default '0',
   PRIMARY KEY  (`starttime`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Uptime system';
 
@@ -14545,4 +14539,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2008-01-10 13:56:06
+-- Dump completed on 2008-03-30 15:34:54
