@@ -157,6 +157,7 @@ class SpellCastTargets
         void setGOTarget(GameObject *target);
 
         uint64 getCorpseTargetGUID() const { return m_CorpseTargetGUID; }
+        void setCorpseTarget(Corpse* corpse);
         uint64 getItemTargetGUID() const { return m_itemTargetGUID; }
         Item* getItemTarget() const { return m_itemTarget; }
         void setItemTarget(Item* item);

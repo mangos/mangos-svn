@@ -172,3 +172,20 @@ ObjectUpdater::Visit(GridRefManager<T> &m)
 
 template void ObjectUpdater::Visit<GameObject>(GameObjectMapType &);
 template void ObjectUpdater::Visit<DynamicObject>(DynamicObjectMapType &);
+
+bool CannibalizeObjectCheck::operator()(Corpse* u)
+{
+    // ignore bones
+    if(u->GetType()!=CORPSE_RESURRECTABLE)
+        return false;
+
+    Player* owner = ObjectAccessor::FindPlayer(u->GetOwnerGUID());
+
+    if( !owner || i_funit->IsFriendlyTo(owner))
+        return false;
+
+    if(i_funit->IsWithinDistInMap(u, i_range) )
+        return true;
+
+    return false;
+}

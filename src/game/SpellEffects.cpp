@@ -690,46 +690,8 @@ void Spell::EffectDummy(uint32 i)
                 }
                 case 20577:                                 // Cannibalize
                 {
-                    // If spell cannibalize and his casted, check special requirements and cast aura Cannibalize is all ok
-
-                    // non-standard cast requirement check
-                    SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
-                    float max_range = GetSpellMaxRange(srange);
-
-                    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                    Cell cell(p);
-                    cell.data.Part.reserved = ALL_DISTRICT;
-                    cell.SetNoCreate();
-
-                    Unit* result = NULL;
-
-                    MaNGOS::CannibalizeUnitCheck u_check(m_caster, max_range);
-                    MaNGOS::UnitSearcher<MaNGOS::CannibalizeUnitCheck> searcher(result, u_check);
-
-                    TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::CannibalizeUnitCheck>, GridTypeMapContainer > unit_searcher(searcher);
-                    CellLock<GridReadGuard> cell_lock(cell, p);
-                    cell_lock->Visit(cell_lock, unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-
-                    if (!result)
-                    {
-                        // clear cooldown at fail
-                        if(m_caster->GetTypeId()==TYPEID_PLAYER)
-                        {
-                            ((Player*)m_caster)->RemoveSpellCooldown(20577);
-
-                            WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8));
-                            data << uint32(20577);                  // spell id
-                            data << uint64(m_caster->GetGUID());
-                            ((Player*)m_caster)->GetSession()->SendPacket(&data);
-                        }
-
-                        SendCastResult(SPELL_FAILED_NO_EDIBLE_CORPSES);
+                    if (!unitTarget)
                         return;
-                    }
-
-                    // ok, main function spell can be casted
-
-                    finish();                                       // prepare to replacing this spell cast to main function spell
 
                     // casting
                     m_caster->CastSpell(m_caster,20578,false,NULL);
