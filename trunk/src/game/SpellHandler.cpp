@@ -247,7 +247,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 obj->SetUInt32Value(GAMEOBJECT_STATE,1);    //if open/active -> close/deactivate it
             }
 
-            obj->SetLootState(GO_CLOSED);
+            obj->SetLootState(GO_READY);
             obj->SetRespawnTime(6);
             //doors/buttons never really despawn, only reset to default state/flags
             //no hard coded reset time for doors/buttons, this should be determined by time defined in `gameobject`.`spawntimesecs`
@@ -304,7 +304,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
             switch(obj->getLootState())
             {
-                case GO_CLOSED:                             // ready for loot
+                case GO_READY:                              // ready for loot
                 {
                     // 1) skill must be >= base_zone_skill
                     // 2) if skill == base_zone_skill => 5% chance
@@ -329,19 +329,19 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                     }
                     else
                     {
-                        // fish escaped
-                        obj->SetLootState(GO_LOOTED);       // can be deleted now
+                        // fish escaped, can be deleted now
+                        obj->SetLootState(GO_JUST_DEACTIVATED);
 
                         WorldPacket data(SMSG_FISH_ESCAPED, 0);
                         SendPacket(&data);
                     }
                     break;
                 }
-                case GO_LOOTED:                             // nothing to do, will be deleted at next update
+                case GO_JUST_DEACTIVATED:                   // nothing to do, will be deleted at next update
                     break;
                 default:
                 {
-                    obj->SetLootState(GO_LOOTED);
+                    obj->SetLootState(GO_JUST_DEACTIVATED);
 
                     WorldPacket data(SMSG_FISH_NOT_HOOKED, 0);
                     SendPacket(&data);
@@ -389,7 +389,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             caster->m_currentSpells[CURRENT_CHANNELED_SPELL]->finish();
 
             // can be deleted now
-            obj->SetLootState(GO_LOOTED);
+            obj->SetLootState(GO_JUST_DEACTIVATED);
 
             // go to end function to spell casting
             break;

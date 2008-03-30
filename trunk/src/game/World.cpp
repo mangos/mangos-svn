@@ -1401,7 +1401,7 @@ void World::ScriptsProcess()
                 if( go->isSpawned() )
                     break;                                  //gameobject already spawned
 
-                go->SetLootState(GO_CLOSED);
+                go->SetLootState(GO_READY);
                 go->SetRespawnTime(time_to_despawn);        //despawn object in ? seconds
 
                 MapManager::Instance().GetMap(go->GetMapId(), go)->Add(go);
@@ -1459,7 +1459,7 @@ void World::ScriptsProcess()
 
                 door->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_NODESPAWN);
                 door->SetUInt32Value(GAMEOBJECT_STATE,0);   //open door
-                door->SetLootState(GO_CLOSED);
+                door->SetLootState(GO_READY);
                 door->SetRespawnTime(time_to_close);        //close door in ? seconds
 
                 if(target && target->isType(TYPE_GAMEOBJECT) && ((GameObject*)target)->GetGoType()==GAMEOBJECT_TYPE_BUTTON)
@@ -1468,7 +1468,7 @@ void World::ScriptsProcess()
 
                     //push button
                     ((GameObject*)target)->SetUInt32Value(GAMEOBJECT_STATE,0);
-                    ((GameObject*)target)->SetLootState(GO_CLOSED);
+                    ((GameObject*)target)->SetLootState(GO_READY);
 
                     //return button in ? seconds
                     ((GameObject*)target)->SetRespawnTime(time_to_close);
@@ -1528,7 +1528,7 @@ void World::ScriptsProcess()
 
                 door->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_NODESPAWN);
                 door->SetUInt32Value(GAMEOBJECT_STATE,1);   //close door
-                door->SetLootState(GO_CLOSED);
+                door->SetLootState(GO_READY);
                 door->SetRespawnTime(time_to_open);         //open door in ? seconds
 
                 if(target && target->isType(TYPE_GAMEOBJECT) && ((GameObject*)target)->GetGoType()==GAMEOBJECT_TYPE_BUTTON)
@@ -1537,7 +1537,7 @@ void World::ScriptsProcess()
 
                     //push button
                     ((GameObject*)target)->SetUInt32Value(GAMEOBJECT_STATE,0);
-                    ((GameObject*)target)->SetLootState(GO_CLOSED);
+                    ((GameObject*)target)->SetLootState(GO_READY);
 
                     //return button in ? seconds
                     ((GameObject*)target)->SetRespawnTime(time_to_open);

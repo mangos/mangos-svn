@@ -45,7 +45,7 @@ GameObject::GameObject( WorldObject *instantiator ) : WorldObject( instantiator 
     m_valuesCount = GAMEOBJECT_END;
     m_respawnTime = 0;
     m_respawnDelayTime = 25;
-    m_lootState = GO_CLOSED;
+    m_lootState = GO_READY;
     m_spawnedByDefault = true;
     m_usetimes = 0;
     m_spellId = 0;
@@ -190,14 +190,14 @@ void GameObject::Update(uint32 /*p_time*/)
                         ((Player*)caster)->SendMessageToSet(&data,true);
                     }
 
-                    m_lootState = GO_CLOSED;                // can be succesfully open with some chance
+                    m_lootState = GO_READY;                 // can be succesfully open with some chance
                 }
                 return;
             }
 
-            m_lootState = GO_CLOSED;                        // for not bobber is same as GO_CLOSED
+            m_lootState = GO_READY;                         // for other GOis same switched without delay to GO_READY
             // NO BREAK
-        case GO_CLOSED:
+        case GO_READY:
         {
             if (m_respawnTime > 0)                          // timer on
             {
@@ -223,7 +223,8 @@ void GameObject::Update(uint32 /*p_time*/)
                                 WorldPacket data(SMSG_FISH_NOT_HOOKED,0);
                                 ((Player*)caster)->GetSession()->SendPacket(&data);
                             }
-                            m_lootState = GO_LOOTED;        // can be delete
+                            // can be delete
+                            m_lootState = GO_JUST_DEACTIVATED;
                             return;
                         }
                         case GAMEOBJECT_TYPE_DOOR:
@@ -237,7 +238,7 @@ void GameObject::Update(uint32 /*p_time*/)
                         default:
                             if(!m_spawnedByDefault)         // despawn timer
                             {
-                                SetLootState(GO_LOOTED);    // can be despawned or destroyed
+                                SetLootState(GO_JUST_DEACTIVATED);    // can be despawned or destroyed
                                 return;
                             }
                                                             // respawn timer
@@ -314,19 +315,19 @@ void GameObject::Update(uint32 /*p_time*/)
                     m_environmentcastTime = time(NULL) + 4; // 4 seconds
 
                     if(NeedDespawn)
-                        SetLootState(GO_LOOTED);            // can be despawned or destroyed
+                        SetLootState(GO_JUST_DEACTIVATED);  // can be despawned or destroyed
                 }
             }
 
             if (m_charges && m_usetimes >= m_charges)
-                SetLootState(GO_LOOTED);                    // can be despawned or destroyed
+                SetLootState(GO_JUST_DEACTIVATED);          // can be despawned or destroyed
 
             break;
         }
-        case GO_OPEN:
+        case GO_ACTIVATED:
             break;
 
-        case GO_LOOTED:
+        case GO_JUST_DEACTIVATED:
         {
             //if Gameobject should cast spell, then this, but some GOs (type = 10) should be destroyed
             if (GetGoType() == GAMEOBJECT_TYPE_GOOBER)
@@ -345,7 +346,7 @@ void GameObject::Update(uint32 /*p_time*/)
 
                     m_unique_users.clear();
                     m_usetimes = 0;
-                    SetLootState(GO_CLOSED);
+                    SetLootState(GO_READY);
                     break;
                 }
             }
@@ -358,7 +359,7 @@ void GameObject::Update(uint32 /*p_time*/)
             }
 
             loot.clear();
-            SetLootState(GO_CLOSED);
+            SetLootState(GO_READY);
 
             if(!m_spawnedByDefault)
             {

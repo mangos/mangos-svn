@@ -810,7 +810,7 @@ void BattleGround::SpawnBGObject(uint32 type, uint32 respawntime)
         if(obj)
         {
             obj->SetRespawnTime(respawntime);
-            obj->SetLootState(GO_LOOTED);
+            obj->SetLootState(GO_JUST_DEACTIVATED);
         }
         else
             objmgr.SaveGORespawnTime(GUID_LOPART(m_BgObjects[type]), 0, time(NULL) + respawntime);
@@ -941,7 +941,7 @@ void BattleGround::HandleTriggerBuff(uint64 const& go_guid,Player* source)
         return;                                             // buff not spawned yet
 
     obj->SetRespawnTime(BUFF_RESPAWN_TIME);
-    obj->SetLootState(GO_LOOTED);
+    obj->SetLootState(GO_JUST_DEACTIVATED);
     if(uint32 spellId = obj->GetGOInfo()->trap.spellId)
         source->CastSpell(source, spellId, true);
 }

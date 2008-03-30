@@ -191,14 +191,16 @@ struct GameObjectData
 #pragma pack(pop)
 #endif
 
-// For containers: [GO_NOT_READY] -> GO_CLOSED -> GO_OPEN -> GO_LOOTED -> GO_CLOSED -> ...
-// For bobber:     GO_NOT_READY   -> GO_CLOSED -> GO_OPEN -> GO_LOOTED -> <deleted>
+// For containers:  [GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED->GO_READY        -> ...
+// For bobber:      GO_NOT_READY  ->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED-><deleted>
+// For door(closed):[GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED->GO_READY(close) -> ...
+//* not implemented, For door(open):  [GO_NOT_READY]->GO_READY (open) ->GO_ACTIVATED (close)->GO_JUST_DEACTIVATED->GO_READY(open)  -> ...
 enum LootState
 {
     GO_NOT_READY = 0,
-    GO_CLOSED,
-    GO_OPEN,
-    GO_LOOTED
+    GO_READY,                                               // can be ready but despawned, and then not possible activate until spawn
+    GO_ACTIVATED,
+    GO_JUST_DEACTIVATED
 };
 
 class Unit;
