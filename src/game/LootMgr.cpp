@@ -222,6 +222,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
                 }
                 case CONDITION_QUESTREWARDED:
                 case CONDITION_QUESTTAKEN:
+                case CONDITION_QUESTGIVER:
                 {
                     Quest const *Quest = objmgr.GetQuestTemplate(cond_value1);
                     if (!Quest)
@@ -458,7 +459,7 @@ bool MeetsConditions(Player * owner, LootItem * itm)
             case CONDITION_AURA:
                 return owner->HasAura(itm->cond_value1, itm->cond_value2);
             case CONDITION_ITEM:
-                return owner->HasItemCount(itm->cond_value1,itm->cond_value2);
+                return owner->HasItemCount(itm->cond_value1,itm->cond_value2,true);
             case CONDITION_ITEM_EQUIPPED:
                 return owner->GetItemOrItemWithGemEquipped(itm->cond_value1) != NULL;
             case CONDITION_ZONEID:
@@ -478,6 +479,11 @@ bool MeetsConditions(Player * owner, LootItem * itm)
             {
                 QuestStatus status = owner->GetQuestStatus(itm->cond_value1);
                 return (status == QUEST_STATUS_INCOMPLETE);
+            }
+            case CONDITION_QUESTGIVER:
+            {
+                QuestStatus status = owner->GetQuestStatus(itm->cond_value1);
+                return status == QUEST_STATUS_NONE && !owner->HasItemCount(itm->itemid, 1,true);
             }
             default:
                 return false;
