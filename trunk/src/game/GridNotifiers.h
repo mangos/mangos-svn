@@ -192,9 +192,9 @@ namespace MaNGOS
         struct MANGOS_DLL_DECL WorldObjectSearcher
     {
         WorldObject* &i_object;
-        Check const& i_check;
+        Check &i_check;
 
-        WorldObjectSearcher(WorldObject* & result, Check const& check) : i_object(result),i_check(check) {}
+        WorldObjectSearcher(WorldObject* & result, Check& check) : i_object(result),i_check(check) {}
 
         void Visit(GameObjectMapType &m);
         void Visit(PlayerMapType &m);
@@ -267,9 +267,9 @@ namespace MaNGOS
         struct MANGOS_DLL_DECL GameObjectSearcher
     {
         GameObject* &i_object;
-        Check const& i_check;
+        Check &i_check;
 
-        GameObjectSearcher(GameObject* & result, Check const& check) : i_object(result),i_check(check) {}
+        GameObjectSearcher(GameObject* & result, Check& check) : i_object(result),i_check(check) {}
 
         void Visit(GameObjectMapType &m);
 
@@ -393,6 +393,39 @@ namespace MaNGOS
     };
 
     // CHECKS && DO classes
+
+    // WorldObject check classes
+    class CannibalizeObjectCheck
+        {
+        public:
+            CannibalizeObjectCheck(Unit* funit, float range) : i_funit(funit), i_range(range) {}
+            bool operator()(Player* u)
+            {
+                if( i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() )
+                    return false;
+
+                if(i_funit->IsWithinDistInMap(u, i_range) )
+                    return true;
+
+                return false;
+            }
+            bool operator()(Corpse* u);
+            bool operator()(Creature* u)
+            {
+                if( i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() ||
+                    (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD)==0)
+                    return false;
+
+                if(i_funit->IsWithinDistInMap(u, i_range) )
+                    return true;
+
+                return false;
+            }
+            template<class NOT_INTERESTED> bool operator()(NOT_INTERESTED* u) { return false; }
+        private:
+            Unit* const i_funit;
+            float i_range;
+        };
 
     // WorldObject do classes
 
@@ -563,36 +596,6 @@ namespace MaNGOS
     struct AnyStealthedCheck
     {
         bool operator()(Unit* u) { return u->GetVisibility()==VISIBILITY_GROUP_STEALTH; }
-    };
-
-    class CannibalizeUnitCheck
-    {
-        public:
-            CannibalizeUnitCheck(Unit* funit, float range) : i_funit(funit), i_range(range) {}
-            bool operator()(Player* u)
-            {
-                if( i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() )
-                    return false;
-
-                if(i_funit->IsWithinDistInMap(u, i_range) )
-                    return true;
-
-                return false;
-            }
-            bool operator()(Creature* u)
-            {
-                if( i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() ||
-                    (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD)==0)
-                    return false;
-
-                if(i_funit->IsWithinDistInMap(u, i_range) )
-                    return true;
-
-                return false;
-            }
-        private:
-            Unit* const i_funit;
-            float i_range;
     };
 
     // Creature checks

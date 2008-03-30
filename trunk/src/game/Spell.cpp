@@ -117,6 +117,11 @@ void SpellCastTargets::setItemTarget(Item* item)
     m_targetMask |= TARGET_FLAG_ITEM;
 }
 
+void SpellCastTargets::setCorpseTarget(Corpse* corpse)
+{
+    m_CorpseTargetGUID = corpse->GetGUID();
+}
+
 void SpellCastTargets::Update(Unit* caster)
 {
     m_GOTarget   = m_GOTargetGUID ? ObjectAccessor::GetGameObject(*caster,m_GOTargetGUID) : NULL;
@@ -406,11 +411,80 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_SELF_RESURRECT:
                 case SPELL_EFFECT_PROFICIENCY:
                 case SPELL_EFFECT_PARRY:
-                case SPELL_EFFECT_DUMMY:
                 case SPELL_EFFECT_CREATE_ITEM:
                     if(m_targets.getUnitTarget())
                         tmpUnitMap.push_back(m_targets.getUnitTarget());
                     break;
+                case SPELL_EFFECT_DUMMY:
+                {
+                    switch(m_spellInfo->Id)
+                    {
+                        case 20577:                         // Cannibalize
+                        {
+                            // non-standard target selection
+                            SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
+                            float max_range = GetSpellMaxRange(srange);
+
+                            CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                            Cell cell(p);
+                            cell.data.Part.reserved = ALL_DISTRICT;
+                            cell.SetNoCreate();
+
+                            WorldObject* result = NULL;
+
+                            MaNGOS::CannibalizeObjectCheck u_check(m_caster, max_range);
+                            MaNGOS::WorldObjectSearcher<MaNGOS::CannibalizeObjectCheck > searcher(result, u_check);
+
+                            TypeContainerVisitor<MaNGOS::WorldObjectSearcher<MaNGOS::CannibalizeObjectCheck >, GridTypeMapContainer > grid_searcher(searcher);
+                            CellLock<GridReadGuard> cell_lock(cell, p);
+                            cell_lock->Visit(cell_lock, grid_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+
+                            if(!result)
+                            {
+                                TypeContainerVisitor<MaNGOS::WorldObjectSearcher<MaNGOS::CannibalizeObjectCheck >, WorldTypeMapContainer > world_searcher(searcher);
+                                cell_lock->Visit(cell_lock, world_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                            }
+
+                            if(result)
+                            {
+                                switch(result->GetTypeId())
+                                {
+                                    case TYPEID_UNIT:
+                                    case TYPEID_PLAYER:
+                                        tmpUnitMap.push_back((Unit*)result);
+                                        break;
+                                    case TYPEID_CORPSE:
+                                        m_targets.setCorpseTarget((Corpse*)result);
+                                        if(Player* owner = ObjectAccessor::FindPlayer(((Corpse*)result)->GetOwnerGUID()))
+                                            tmpUnitMap.push_back(owner);
+                                        break;
+                                }
+                            }
+                            else
+                            {
+                                // clear cooldown at fail
+                                if(m_caster->GetTypeId()==TYPEID_PLAYER)
+                                {
+                                    ((Player*)m_caster)->RemoveSpellCooldown(m_spellInfo->Id);
+
+                                    WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8));
+                                    data << uint32(m_spellInfo->Id);
+                                    data << uint64(m_caster->GetGUID());
+                                    ((Player*)m_caster)->GetSession()->SendPacket(&data);
+                                }
+
+                                SendCastResult(SPELL_FAILED_NO_EDIBLE_CORPSES);
+                                finish(false);
+                            }
+                            break;
+                        }
+                        default:
+                            if(m_targets.getUnitTarget())
+                                tmpUnitMap.push_back(m_targets.getUnitTarget());
+                            break;
+                    }
+                    break;
+                }
                 case SPELL_EFFECT_SUMMON_PLAYER:
                     if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->GetSelection())
                     {
@@ -1683,6 +1757,10 @@ void Spell::cast(bool skipCheck)
     TakePower(mana);
     TakeReagents();                                         // we must remove reagents before HandleEffects to allow place crafted item in same slot
     FillTargetMap();
+
+    if(m_spellState == SPELL_STATE_FINISHED)                // stop cast if spell marked as finish somewhere in Take*/FillTargetMap
+        return;
+
     SendCastResult(castResult);
     SendSpellGo();                                          // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
 
@@ -4184,6 +4262,10 @@ bool Spell::CheckTarget( Unit* target, uint32 eff, bool hitPhase )
     {
         case SPELL_EFFECT_SUMMON_PLAYER:                    // from anywhere
             break;
+        case SPELL_EFFECT_DUMMY:
+            if(m_spellInfo->Id!=20577)                      // Cannibalize
+                break;
+            //fall through
         case SPELL_EFFECT_RESURRECT_NEW:
             if(!target->IsWithinLOSInMap(m_caster))         // player far away, maybe his corpse near?
             {
