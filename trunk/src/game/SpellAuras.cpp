@@ -1942,7 +1942,7 @@ void Aura::HandleChannelDeathItem(bool apply, bool Real)
         uint8 msg = ((Player*)caster)->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, spellInfo->EffectItemType[m_effIndex], 1 );
         if( msg == EQUIP_ERR_OK )
         {
-            Item* newitem = ((Player*)caster)->StoreNewItem(dest, spellInfo->EffectItemType[m_effIndex], 1, true);
+            Item* newitem = ((Player*)caster)->StoreNewItem(dest, spellInfo->EffectItemType[m_effIndex], true);
             ((Player*)caster)->SendNewItem(newitem, 1, true, false);
         }
         else

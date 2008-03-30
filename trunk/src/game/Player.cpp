@@ -9271,6 +9271,8 @@ Item* Player::_StoreItem( uint16 pos, Item *pItem, uint32 count, bool clone, boo
     {
         if(clone)
             pItem = CloneItem(pItem,count);
+        else
+            pItem->SetCount(count);
 
         if(!pItem)
             return NULL;
@@ -11402,7 +11404,7 @@ void Player::RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver
             ItemPosCountVec dest;
             if( CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, pQuest->RewChoiceItemId[reward], pQuest->RewChoiceItemCount[reward] ) == EQUIP_ERR_OK )
             {
-                Item* item = StoreNewItem( dest, pQuest->RewChoiceItemId[reward], pQuest->RewChoiceItemCount[reward], true);
+                Item* item = StoreNewItem( dest, pQuest->RewChoiceItemId[reward], true);
                 SendNewItem(item, pQuest->RewChoiceItemCount[reward], true, false);
             }
         }
@@ -11417,7 +11419,7 @@ void Player::RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver
                 ItemPosCountVec dest;
                 if( CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, pQuest->RewItemId[i], pQuest->RewItemCount[i] ) == EQUIP_ERR_OK )
                 {
-                    Item* item = StoreNewItem( dest, pQuest->RewItemId[i], pQuest->RewItemCount[i], true);
+                    Item* item = StoreNewItem( dest, pQuest->RewItemId[i], true);
                     SendNewItem(item, pQuest->RewItemCount[i], true, false);
                 }
             }
@@ -11854,7 +11856,7 @@ bool Player::GiveQuestSourceItem( Quest const *pQuest )
         uint8 msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, srcitem, count );
         if( msg == EQUIP_ERR_OK )
         {
-            Item * item = StoreNewItem(dest, srcitem, count, true);
+            Item * item = StoreNewItem(dest, srcitem, true);
             SendNewItem(item, count, true, false);
             return true;
         }
@@ -14433,7 +14435,7 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
                     uint8 msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, spellInfo->Reagent[i], spellInfo->ReagentCount[i] );
                     if( msg == EQUIP_ERR_OK )
                     {
-                        Item* item = StoreNewItem( dest, spellInfo->Reagent[i], spellInfo->ReagentCount[i], true);
+                        Item* item = StoreNewItem( dest, spellInfo->Reagent[i], true);
                         if(IsInWorld())
                             SendNewItem(item,spellInfo->ReagentCount[i],true,false);
                     }
@@ -15374,83 +15376,82 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
     {
         ItemPosCountVec dest;
         uint8 msg = CanStoreNewItem( bag, slot, dest, item, pProto->BuyCount * count );
-        if( msg == EQUIP_ERR_OK )
+        if( msg != EQUIP_ERR_OK )
         {
-            ModifyMoney( -(int32)price );
-            if(pProto->ExtendedCost)                    // case for new honor system
-            {
-                ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(pProto->ExtendedCost);
-                if(iece->reqhonorpoints)
-                    SetHonorPoints(GetHonorPoints() - (iece->reqhonorpoints * count));
-                if(iece->reqarenapoints)
-                    SetArenaPoints(GetArenaPoints() - (iece->reqarenapoints * count));
-                if(iece->reqitem1)
-                    DestroyItemCount(iece->reqitem1, (iece->reqitemcount1 * count), true);
-                if(iece->reqitem2)
-                    DestroyItemCount(iece->reqitem2, (iece->reqitemcount2 * count), true);
-                if(iece->reqitem3)
-                    DestroyItemCount(iece->reqitem3, (iece->reqitemcount3 * count), true);
-            }
-
-            if(Item *it = StoreNewItem( dest, item, pProto->BuyCount * count, true ))
-            {
-                if( crItem->maxcount != 0 )
-                    crItem->count -= pProto->BuyCount * count;
-
-                WorldPacket data(SMSG_BUY_ITEM, (8+4+4+4));
-                data << pCreature->GetGUID();
-                data << (uint32)crItem->id;                 // entry
-                data << (uint32)crItem->count;
-                data << (uint32)count;
-                GetSession()->SendPacket(&data);
-
-                SendNewItem(it, count, true, false, false);
-            }
-        }
-        else
             SendEquipError( msg, NULL, NULL );
+            return false;
+        }
+
+        ModifyMoney( -(int32)price );
+        if(pProto->ExtendedCost)                    // case for new honor system
+        {
+            ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(pProto->ExtendedCost);
+            if(iece->reqhonorpoints)
+                SetHonorPoints(GetHonorPoints() - (iece->reqhonorpoints * count));
+            if(iece->reqarenapoints)
+                SetArenaPoints(GetArenaPoints() - (iece->reqarenapoints * count));
+            if(iece->reqitem1)
+                DestroyItemCount(iece->reqitem1, (iece->reqitemcount1 * count), true);
+            if(iece->reqitem2)
+                DestroyItemCount(iece->reqitem2, (iece->reqitemcount2 * count), true);
+            if(iece->reqitem3)
+                DestroyItemCount(iece->reqitem3, (iece->reqitemcount3 * count), true);
+        }
+
+        if(Item *it = StoreNewItem( dest, item, true ))
+        {
+            if( crItem->maxcount != 0 )
+                crItem->count -= pProto->BuyCount * count;
+
+            WorldPacket data(SMSG_BUY_ITEM, (8+4+4+4));
+            data << pCreature->GetGUID();
+            data << (uint32)crItem->id;                 // entry
+            data << (uint32)crItem->count;
+            data << (uint32)count;
+            GetSession()->SendPacket(&data);
+
+            SendNewItem(it, count, true, false, false);
+        }
     }
     else if( IsEquipmentPos( bag, slot ) )
     {
         uint16 dest;
         uint8 msg = CanEquipNewItem( slot, dest, item, pProto->BuyCount * count, false );
-        if( msg == EQUIP_ERR_OK )
-        {
-            ModifyMoney( -(int32)price );
-            if(pProto->ExtendedCost)                    // case for new honor system
-            {
-                ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(pProto->ExtendedCost);
-                if(iece->reqhonorpoints)
-                    SetHonorPoints(GetHonorPoints() - iece->reqhonorpoints);
-                if(iece->reqarenapoints)
-                    SetArenaPoints(GetArenaPoints() - iece->reqarenapoints);
-                if(iece->reqitem1)
-                    DestroyItemCount(iece->reqitem1, iece->reqitemcount1, true);
-                if(iece->reqitem2)
-                    DestroyItemCount(iece->reqitem2, iece->reqitemcount2, true);
-                if(iece->reqitem3)
-                    DestroyItemCount(iece->reqitem3, iece->reqitemcount3, true);
-            }
-
-            if(Item *it = EquipNewItem( dest, item, pProto->BuyCount * count, true ))
-            {
-                if( crItem->maxcount != 0 )
-                    crItem->count -= pProto->BuyCount * count;
-
-                WorldPacket data(SMSG_BUY_ITEM, (8+4+4+4));
-                data << pCreature->GetGUID();
-                data << (uint32)crItem->id;                 // entry
-                data << (uint32)crItem->count;
-                data << (uint32)count;
-                GetSession()->SendPacket(&data);
-
-                SendNewItem(it, count, true, false, false);
-            }
-        }
-        else
+        if( msg != EQUIP_ERR_OK )
         {
             SendEquipError( msg, NULL, NULL );
             return false;
+        }
+
+        ModifyMoney( -(int32)price );
+        if(pProto->ExtendedCost)                    // case for new honor system
+        {
+            ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(pProto->ExtendedCost);
+            if(iece->reqhonorpoints)
+                SetHonorPoints(GetHonorPoints() - iece->reqhonorpoints);
+            if(iece->reqarenapoints)
+                SetArenaPoints(GetArenaPoints() - iece->reqarenapoints);
+            if(iece->reqitem1)
+                DestroyItemCount(iece->reqitem1, iece->reqitemcount1, true);
+            if(iece->reqitem2)
+                DestroyItemCount(iece->reqitem2, iece->reqitemcount2, true);
+            if(iece->reqitem3)
+                DestroyItemCount(iece->reqitem3, iece->reqitemcount3, true);
+        }
+
+        if(Item *it = EquipNewItem( dest, item, pProto->BuyCount * count, true ))
+        {
+            if( crItem->maxcount != 0 )
+                crItem->count -= pProto->BuyCount * count;
+
+            WorldPacket data(SMSG_BUY_ITEM, (8+4+4+4));
+            data << pCreature->GetGUID();
+            data << (uint32)crItem->id;                 // entry
+            data << (uint32)crItem->count;
+            data << (uint32)count;
+            GetSession()->SendPacket(&data);
+
+            SendNewItem(it, count, true, false, false);
         }
     }
     else
