@@ -1560,16 +1560,13 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     if(!Real)
         return;
 
-    Player* player = m_target->GetTypeId()==TYPEID_PLAYER ? ((Player*)m_target) : NULL;
-
-    Unit *unit_target = m_target;
     uint32 modelid = 0;
     Powers PowerType = POWER_MANA;
     uint32 new_bytes_1 = m_modifier.m_miscvalue;
     switch(m_modifier.m_miscvalue)
     {
         case FORM_CAT:
-            if(Player::TeamForRace(unit_target->getRace())==ALLIANCE)
+            if(Player::TeamForRace(m_target->getRace())==ALLIANCE)
                 modelid = 892;
             else
                 modelid = 8571;
@@ -1579,24 +1576,24 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             modelid = 632;
             break;
         case FORM_AQUA:
-            if(Player::TeamForRace(unit_target->getRace())==ALLIANCE)
+            if(Player::TeamForRace(m_target->getRace())==ALLIANCE)
                 modelid = 2428;
             else
                 modelid = 2428;
             break;
         case FORM_BEAR:
-            if(Player::TeamForRace(unit_target->getRace())==ALLIANCE)
+            if(Player::TeamForRace(m_target->getRace())==ALLIANCE)
                 modelid = 2281;
             else
                 modelid = 2289;
             PowerType = POWER_RAGE;
             break;
         case FORM_GHOUL:
-            if(Player::TeamForRace(unit_target->getRace())==ALLIANCE)
+            if(Player::TeamForRace(m_target->getRace())==ALLIANCE)
                 modelid = 10045;
             break;
         case FORM_DIREBEAR:
-            if(Player::TeamForRace(unit_target->getRace())==ALLIANCE)
+            if(Player::TeamForRace(m_target->getRace())==ALLIANCE)
                 modelid = 2281;
             else
                 modelid = 2289;
@@ -1609,19 +1606,19 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             modelid = 4613;
             break;
         case FORM_FLIGHT:
-            if(Player::TeamForRace(unit_target->getRace())==ALLIANCE)
+            if(Player::TeamForRace(m_target->getRace())==ALLIANCE)
                 modelid = 20857;
             else
                 modelid = 20872;
             break;
         case FORM_MOONKIN:
-            if(Player::TeamForRace(unit_target->getRace())==ALLIANCE)
+            if(Player::TeamForRace(m_target->getRace())==ALLIANCE)
                 modelid = 15374;
             else
                 modelid = 15375;
             break;
         case FORM_SWIFT_FLIGHT:
-            if(Player::TeamForRace(unit_target->getRace())==ALLIANCE)
+            if(Player::TeamForRace(m_target->getRace())==ALLIANCE)
                 modelid = 21243;
             else
                 modelid = 21244;
@@ -1653,17 +1650,17 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             m_target->RemoveAurasDueToSpell(m_target->m_ShapeShiftForm);
         }
 
-        unit_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
         if(modelid > 0)
         {
-            unit_target->SetDisplayId(modelid);
+            m_target->SetDisplayId(modelid);
         }
 
         if(PowerType != POWER_MANA)
         {
             // reset power to default values only at power change
-            if(unit_target->getPowerType()!=PowerType)
-                unit_target->setPowerType(PowerType);
+            if(m_target->getPowerType()!=PowerType)
+                m_target->setPowerType(PowerType);
 
             switch(m_modifier.m_miscvalue)
             {
@@ -1685,18 +1682,18 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
                     if (m_modifier.m_miscvalue == FORM_CAT)
                     {
-                        unit_target->SetPower(POWER_ENERGY,0);
+                        m_target->SetPower(POWER_ENERGY,0);
                         if(urand(1,100) <= FurorChance)
                         {
-                            unit_target->CastSpell(unit_target,17099,true,NULL,this);
+                            m_target->CastSpell(m_target,17099,true,NULL,this);
                         }
                     }
                     else
                     {
-                        unit_target->SetPower(POWER_RAGE,0);
+                        m_target->SetPower(POWER_RAGE,0);
                         if(urand(1,100) <= FurorChance)
                         {
-                            unit_target->CastSpell(unit_target,17057,true,NULL,this);
+                            m_target->CastSpell(m_target,17057,true,NULL,this);
                         }
                     }
                     break;
@@ -1719,8 +1716,8 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                         }
                     }
 
-                    if (unit_target->GetPower(POWER_RAGE) > Rage_val)
-                        unit_target->SetPower(POWER_RAGE,Rage_val);
+                    if (m_target->GetPower(POWER_RAGE) > Rage_val)
+                        m_target->SetPower(POWER_RAGE,Rage_val);
                     break;
                 }
                 default:
@@ -1728,10 +1725,10 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             }
         }
 
-        unit_target->m_ShapeShiftForm = m_spellId;
-        unit_target->m_form = m_modifier.m_miscvalue;
+        m_target->m_ShapeShiftForm = m_spellId;
+        m_target->m_form = m_modifier.m_miscvalue;
 
-        switch ( unit_target->m_form )
+        switch ( m_target->m_form )
         {
             case FORM_CAT:
             case FORM_TREE:
@@ -1743,12 +1740,12 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             case FORM_FLIGHT:
             case FORM_MOONKIN:
                 // remove movement affects
-                unit_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);           
-                unit_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
+                m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);           
+                m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
 
                 // and polymorphic affects
-                if(unit_target->IsPolymorphed())
-                    unit_target->RemoveAurasDueToSpell(unit_target->getTransForm());
+                if(m_target->IsPolymorphed())
+                    m_target->RemoveAurasDueToSpell(m_target->getTransForm());
                 break;
             default:
                break;
@@ -1756,20 +1753,34 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     }
     else
     {
-        unit_target->SetDisplayId(unit_target->GetNativeDisplayId());
-        unit_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
-        if(unit_target->getClass() == CLASS_DRUID)
-            unit_target->setPowerType(POWER_MANA);
-        unit_target->m_ShapeShiftForm = 0;
-        unit_target->m_form = 0;
+        m_target->SetDisplayId(m_target->GetNativeDisplayId());
+        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
+        if(m_target->getClass() == CLASS_DRUID)
+            m_target->setPowerType(POWER_MANA);
+        m_target->m_ShapeShiftForm = 0;
+        m_target->m_form = 0;
+        
+        // Nordrassil Harness - bonus
+        if ( m_modifier.m_miscvalue == FORM_BEAR || m_modifier.m_miscvalue == FORM_DIREBEAR || m_modifier.m_miscvalue == FORM_CAT )
+        {
+            Unit::AuraList const& m_dummyAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
+            for(Unit::AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
+            {
+                if ( (*i)->GetSpellProto()->Id == 37315 )
+                {
+                    m_target->CastSpell(m_target,37316,true,NULL,*i);
+                    break;
+                }
+            }
+        }
     }
 
     // adding/removing linked auras
     // add/remove the shapeshift aura's boosts
     HandleShapeshiftBoosts(apply);
 
-    if(player)
-        player->InitDataForForm();
+    if(m_target->GetTypeId()==TYPEID_PLAYER)
+        ((Player*)m_target)->InitDataForForm();
 }
 
 void Aura::HandleAuraTransform(bool apply, bool Real)

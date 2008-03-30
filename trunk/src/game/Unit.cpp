@@ -4410,202 +4410,32 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
     Item* castItem = triggeredByAura->GetCastItemGUID() && GetTypeId()==TYPEID_PLAYER
         ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGUID()) : NULL;
 
-    switch(dummySpell->Id )
-    {
-        // Ignite
-        case 11119:
-        case 11120:
-        case 12846:
-        case 12847:
-        case 12848:
-        {
-            if(!pVictim || !pVictim->isAlive())
-                return;
-
-            int32 igniteDotBasePoints0;
-
-            switch (dummySpell->Id)
-            {
-                case 11119: igniteDotBasePoints0=int32(0.04f*damage); break;
-                case 11120: igniteDotBasePoints0=int32(0.08f*damage); break;
-                case 12846: igniteDotBasePoints0=int32(0.12f*damage); break;
-                case 12847: igniteDotBasePoints0=int32(0.16f*damage); break;
-                case 12848: igniteDotBasePoints0=int32(0.20f*damage); break;
-                default:
-                    sLog.outError("Unit::HandleDummyAuraProc: non handled spell id: %u (IG)",dummySpell->Id);
-                    return;
-            };
-            CastCustomSpell(pVictim, 12654, &igniteDotBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
-            return;
-        }
-
-        // Windfury Weapon (Passive) 1-5 Ranks
-        case 33757:
-        {
-            if(GetTypeId()!=TYPEID_PLAYER)
-                return;
-
-            if(!castItem || !castItem->IsEquipped())
-                return;
-
-            uint32 windfurySpellId;
-            switch (castItem->GetEnchantmentId(EnchantmentSlot(TEMP_ENCHANTMENT_SLOT)))
-            {
-                case 283: windfurySpellId = 33757;break;    //1 Rank
-                case 284: windfurySpellId = 33756;break;    //2 Rank
-                case 525: windfurySpellId = 33755;break;    //3 Rank
-                case 1669:windfurySpellId = 33754;break;    //4 Rank
-                case 2636:windfurySpellId = 33727;break;    //5 Rank
-                default:
-                {
-                    sLog.outError("Unit::HandleDummyAuraProc: non handled item enchantment (rank?) %u for spell id: %u (Windfury)",
-                        castItem->GetEnchantmentId(EnchantmentSlot(TEMP_ENCHANTMENT_SLOT)),dummySpell->Id);
-                    return;
-                }
-            }
-            if( ((Player*)this)->HasSpellCooldown(32910))
-                return;
-
-            SpellEntry const* windfurySpellEntry = sSpellStore.LookupEntry(windfurySpellId);
-
-            int32 addvalue = windfurySpellEntry->EffectBasePoints[0]+windfurySpellEntry->EffectBaseDice[0];
-
-            CastCustomSpell(this, 32910, &addvalue, NULL, NULL, true, castItem, triggeredByAura);
-
-            ((Player*)this)->AddSpellCooldown(32910,0,time(NULL) + 3);
-
-            return;
-        }
-
-        // Combustion
-        case 11129:
-        {
-            CastSpell(this, 28682, true, castItem, triggeredByAura);
-            if (!(procFlag & PROC_FLAG_CRIT_SPELL))         //no crit
-                triggeredByAura->m_procCharges += 1;        //-> reincrease procCharge count since it was decreased before
-            else if (triggeredByAura->m_procCharges == 0)   //no more charges left and crit
-                RemoveAurasDueToSpell(28682);               //-> remove Combustion auras
-            return;
-        }
-        // Nightfall
-        case 18094:
-        case 18095:
-        {
-            CastSpell(this, 17941, true, castItem, triggeredByAura);
-            return;
-        }
-        // Vampiric Embrace
-        case 15286:
-        {
-            if(!pVictim || !pVictim->isAlive())
-                return;
-
-            if(triggeredByAura->GetCasterGUID() == pVictim->GetGUID())
-            {
-                int32 VEHealBasePoints0 = triggeredByAura->GetModifier()->m_amount*damage/100;
-                pVictim->CastCustomSpell(pVictim, 15290, &VEHealBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
-            }
-            return;
-        }
-        // Eye of Eye
-        case 9799:
-        case 25988:
-        {
-            if(!pVictim || !pVictim->isAlive())
-                return;
-
-            // prevent damage back from weapon special attacks
-            if (!procSpell || procSpell->DmgClass != SPELL_DAMAGE_CLASS_MAGIC )
-                return;
-
-            // return damage % to attacker but < 50% own total health
-            int32 backDamage = triggeredByAura->GetModifier()->m_amount*int32(damage)/100;
-            if(backDamage > GetMaxHealth()/2)
-                backDamage = GetMaxHealth()/2;
-
-            CastCustomSpell(pVictim, 25997, &backDamage, NULL, NULL, true, castItem, triggeredByAura);
-
-            return;
-        }
-
-        //Soul Leech
-        case 30293:
-        case 30295:
-        case 30296:
-        {
-            if(!procSpell)
-                return;
-            int32 HealthBasePoints0 = int32(damage*triggeredByAura->GetModifier()->m_amount/100);
-            CastCustomSpell(this,30294,&HealthBasePoints0,NULL,NULL,true,castItem,triggeredByAura);
-            return;
-        }
-
-        //Seal of Vengeance
-        case 31801:
-        {
-            if(effIndex != 0)                               // effect 1,2 used by seal unleashing code
-                return;
-
-            if(!pVictim)
-                return;
-
-            CastSpell(pVictim, 31803, true, castItem,triggeredByAura);
-
-            return;
-        }
-
-        // Spiritual Att.
-        case 33776:
-        case 31785:
-        {
-            if(!pVictim)
-                return;
-
-            // if healed by another unit (pVictim)
-            if(this != pVictim)
-            {
-                int32 SAHealBasePoints0 = triggeredByAura->GetModifier()->m_amount*damage/100;
-                CastCustomSpell(this, 31786, &SAHealBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
-            }
-
-            return;
-        }
-
-        // Shadowflame (item set effect)
-        case 37377:
-        {
-            if(GetTypeId() != TYPEID_PLAYER || !pVictim || !pVictim->isAlive())
-                return;
-
-            if(!castItem)
-                return;
-
-            CastSpell(pVictim,37379,true,castItem,triggeredByAura);
-            return;
-        }
-
-        // Shadowflame Hellfire (item set effect)
-        case 39437:
-        {
-            if(GetTypeId() != TYPEID_PLAYER || !pVictim || !pVictim->isAlive())
-                return;
-
-            if(!castItem)
-                return;
-
-            CastSpell(pVictim,37378,true,castItem,triggeredByAura);
-            return;
-        }
-
-        default: break;
-    }
-
     switch(dummySpell->SpellFamilyName)
     {
         case SPELLFAMILY_GENERIC:
         {
             switch (dummySpell->Id)
             {
+                // Eye of Eye
+                case 9799:
+                case 25988:
+                {
+                    if(!pVictim || !pVictim->isAlive())
+                        return;
+
+                    // prevent damage back from weapon special attacks
+                    if (!procSpell || procSpell->DmgClass != SPELL_DAMAGE_CLASS_MAGIC )
+                        return;
+
+                    // return damage % to attacker but < 50% own total health
+                    int32 backDamage = triggeredByAura->GetModifier()->m_amount*int32(damage)/100;
+                    if(backDamage > GetMaxHealth()/2)
+                        backDamage = GetMaxHealth()/2;
+
+                    CastCustomSpell(pVictim, 25997, &backDamage, NULL, NULL, true, castItem, triggeredByAura);
+
+                    return;
+                }
                 // Adaptive Warding (Frostfire Regalia set)
                 case 28764:
                 {
@@ -4702,7 +4532,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 case 21063:
                     CastSpell(pVictim, 21064, true, castItem, triggeredByAura);
                     return;
-                    // Vampiric Aura (boss spell)
+                // Vampiric Aura (boss spell)
                 case 38196:
                 {
                     int32 basePoint = 3 * damage;           // 300%
@@ -4785,6 +4615,47 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 return;
             }
             break;
+
+            switch(dummySpell->Id)
+            {
+                // Ignite
+                case 11119:
+                case 11120:
+                case 12846:
+                case 12847:
+                case 12848:
+                {
+                    if(!pVictim || !pVictim->isAlive())
+                        return;
+
+                    int32 igniteDotBasePoints0;
+
+                    switch (dummySpell->Id)
+                    {
+                        case 11119: igniteDotBasePoints0=int32(0.04f*damage); break;
+                        case 11120: igniteDotBasePoints0=int32(0.08f*damage); break;
+                        case 12846: igniteDotBasePoints0=int32(0.12f*damage); break;
+                        case 12847: igniteDotBasePoints0=int32(0.16f*damage); break;
+                        case 12848: igniteDotBasePoints0=int32(0.20f*damage); break;
+                        default:
+                            sLog.outError("Unit::HandleDummyAuraProc: non handled spell id: %u (IG)",dummySpell->Id);
+                            return;
+                    }
+                    CastCustomSpell(pVictim, 12654, &igniteDotBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
+                    return;
+                }
+                // Combustion
+                case 11129:
+                {
+                    CastSpell(this, 28682, true, castItem, triggeredByAura);
+                    if (!(procFlag & PROC_FLAG_CRIT_SPELL))         //no crit
+                        triggeredByAura->m_procCharges += 1;        //-> reincrease procCharge count since it was decreased before
+                    else if (triggeredByAura->m_procCharges == 0)   //no more charges left and crit
+                        RemoveAurasDueToSpell(28682);               //-> remove Combustion auras
+                    return;
+                }
+            }
+            break;
         }
         case SPELLFAMILY_WARRIOR:
         {
@@ -4845,21 +4716,66 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 mod->m_amount-=damage;
                 return;
             }
-            // Pet Healing (Corruptor Raiment or Rift Stalker Armor)
-            if (dummySpell->Id == 37381)
+            switch(dummySpell->Id)
             {
-                if(GetTypeId() != TYPEID_PLAYER)
-                    return;
-
-                if(!castItem)
-                    return;
-
-                if (Unit *pet = GetPet())
+                // Nightfall
+                case 18094:
+                case 18095:
                 {
-                    int32 healamount = damage * triggeredByAura->GetModifier()->m_amount/100;
-                    CastCustomSpell(pet, 37382, &healamount, NULL, NULL, true, castItem, triggeredByAura);
+                    CastSpell(this, 17941, true, castItem, triggeredByAura);
+                    return;
                 }
-                return;
+                //Soul Leech
+                case 30293:
+                case 30295:
+                case 30296:
+                {
+                    if(!procSpell)
+                        return;
+                    int32 HealthBasePoints0 = int32(damage*triggeredByAura->GetModifier()->m_amount/100);
+                    CastCustomSpell(this,30294,&HealthBasePoints0,NULL,NULL,true,castItem,triggeredByAura);
+                    return;
+                }
+                // Shadowflame (item set effect)
+                case 37377:
+                {
+                    if(GetTypeId() != TYPEID_PLAYER || !pVictim || !pVictim->isAlive())
+                        return;
+
+                    if(!castItem)
+                        return;
+
+                    CastSpell(pVictim,37379,true,castItem,triggeredByAura);
+                    return;
+                }
+                // Pet Healing (Corruptor Raiment or Rift Stalker Armor)
+                case 37381:
+                {
+                    if(GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if(!castItem)
+                        return;
+
+                    if (Unit *pet = GetPet())
+                    {
+                        int32 healamount = damage * triggeredByAura->GetModifier()->m_amount/100;
+                        CastCustomSpell(pet, 37382, &healamount, NULL, NULL, true, castItem, triggeredByAura);
+                    }
+                    return;
+                }
+                // Shadowflame Hellfire (item set effect)
+                case 39437:
+                {
+                    if(GetTypeId() != TYPEID_PLAYER || !pVictim || !pVictim->isAlive())
+                        return;
+
+                    if(!castItem)
+                        return;
+
+                    CastSpell(pVictim,37378,true,castItem,triggeredByAura);
+                    return;
+                }
             }
             break;
         }
@@ -4867,6 +4783,19 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         {
             switch(dummySpell->Id)
             {
+                // Vampiric Embrace
+                case 15286:
+                {
+                    if(!pVictim || !pVictim->isAlive())
+                        return;
+
+                    if(triggeredByAura->GetCasterGUID() == pVictim->GetGUID())
+                    {
+                        int32 VEHealBasePoints0 = triggeredByAura->GetModifier()->m_amount*damage/100;
+                        pVictim->CastCustomSpell(pVictim, 15290, &VEHealBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
+                    }
+                    return;
+                }
                 // Priest Tier 6 Trinket
                 case 40438:
                 {
@@ -5096,104 +5025,226 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     }
                 }
             }
-            // Holy Power (Redemption Armor set)
-            if(dummySpell->Id == 28789)
+
+            switch(dummySpell->Id)
             {
-                if(GetTypeId() != TYPEID_PLAYER || !pVictim || !pVictim->isAlive())
-                    return;
-
-                if(!castItem)
-                    return;
-
-                // Set class defined buff
-                uint32 spellId = 0;
-                switch (pVictim->getClass())
+                // Holy Power (Redemption Armor set)
+                case 28789:
                 {
-                    case CLASS_PALADIN:
-                    case CLASS_PRIEST:
-                    case CLASS_SHAMAN:
-                    case CLASS_DRUID:
-                        spellId = 28795;                    // Increases the friendly target's mana regeneration by $s1 per 5 sec. for $d.
-                        break;
-                    case CLASS_MAGE:
-                    case CLASS_WARLOCK:
-                        spellId = 28793;                    // Increases the friendly target's spell damage and healing by up to $s1 for $d.
-                        break;
-                    case CLASS_HUNTER:
-                    case CLASS_ROGUE:
-                        spellId = 28791;                    // Increases the friendly target's attack power by $s1 for $d.
-                        break;
-                    case CLASS_WARRIOR:
-                        spellId = 28790;                    // Increases the friendly target's armor
-                        break;
-                    default:
+                    if(GetTypeId() != TYPEID_PLAYER || !pVictim || !pVictim->isAlive())
                         return;
-                }
-                CastSpell(pVictim, spellId, true, castItem, triggeredByAura);
-                return;
-            }
-            // Paladin Tier 6 Trinket
-            if(dummySpell->Id == 40470)
-            {
-                if(GetTypeId() != TYPEID_PLAYER || !pVictim || !pVictim->isAlive())
+
+                    if(!castItem)
+                        return;
+
+                    // Set class defined buff
+                    uint32 spellId = 0;
+                    switch (pVictim->getClass())
+                    {
+                        case CLASS_PALADIN:
+                        case CLASS_PRIEST:
+                        case CLASS_SHAMAN:
+                        case CLASS_DRUID:
+                            spellId = 28795;                // Increases the friendly target's mana regeneration by $s1 per 5 sec. for $d.
+                            break;
+                        case CLASS_MAGE:
+                        case CLASS_WARLOCK:
+                            spellId = 28793;                // Increases the friendly target's spell damage and healing by up to $s1 for $d.
+                            break;
+                        case CLASS_HUNTER:
+                        case CLASS_ROGUE:
+                            spellId = 28791;                // Increases the friendly target's attack power by $s1 for $d.
+                            break;
+                        case CLASS_WARRIOR:
+                            spellId = 28790;                // Increases the friendly target's armor
+                            break;
+                        default:
+                            return;
+                    }
+                    CastSpell(pVictim, spellId, true, castItem, triggeredByAura);
                     return;
+                }
+                //Seal of Vengeance
+                case 31801:
+                {
+                    if(effIndex != 0)                       // effect 1,2 used by seal unleashing code
+                        return;
 
-                if(!castItem)
+                    if(!pVictim)
+                        return;
+
+                    CastSpell(pVictim, 31803, true, castItem,triggeredByAura);
+
                     return;
-
-                uint32 triggerId = 0;
-                float  chance = 0.0f;
-
-                // Flash of light/Holy light
-                if( procSpell->SpellFamilyFlags & 0x0000000000006000LL)
-                {
-                    triggerId = 40471; chance = 15.f;
                 }
-                // Judgement
-                else if( procSpell->SpellFamilyFlags & 0x0000000000800000LL )
+                // Spiritual Att.
+                case 31785:
+                case 33776:
                 {
-                    triggerId = 40472; chance = 50.f;
-                }
+                    if(!pVictim)
+                        return;
 
-                if (roll_chance_f(chance))
-                    CastSpell(pVictim, triggerId, true, castItem, triggeredByAura);
-                return;
+                    // if healed by another unit (pVictim)
+                    if(this != pVictim)
+                    {
+                        int32 SAHealBasePoints0 = triggeredByAura->GetModifier()->m_amount*damage/100;
+                        CastCustomSpell(this, 31786, &SAHealBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
+                    }
+
+                    return;
+                }
+                // Paladin Tier 6 Trinket
+                case 40470:
+                {
+                    if(GetTypeId() != TYPEID_PLAYER || !pVictim || !pVictim->isAlive())
+                        return;
+
+                    if(!castItem)
+                        return;
+
+                    uint32 triggerId = 0;
+                    float  chance = 0.0f;
+
+                    // Flash of light/Holy light
+                    if( procSpell->SpellFamilyFlags & 0x0000000000006000LL)
+                    {
+                        triggerId = 40471; chance = 15.f;
+                    }
+                    // Judgement
+                    else if( procSpell->SpellFamilyFlags & 0x0000000000800000LL )
+                    {
+                        triggerId = 40472; chance = 50.f;
+                    }
+
+                    if (roll_chance_f(chance))
+                        CastSpell(pVictim, triggerId, true, castItem, triggeredByAura);
+                    return;
+                }
             }
             break;
         }
         case SPELLFAMILY_SHAMAN:
         {
-            // Shaman Tier 6 Trinket
-            if(dummySpell->Id == 40463)
+            switch(dummySpell->Id)
             {
-                if(GetTypeId() != TYPEID_PLAYER)
-                    return;
-
-                if(!castItem)
-                    return;
-
-                uint32 triggerId = 0;
-                float  chance = 0.0f;
-                if (procSpell->SpellFamilyFlags & 0x0000000000000001LL)
+                // Totemic Power (The Earthshatterer set)
+                case 28823:
                 {
-                    triggerId = 40465; chance = 15.f;       // Lightning Bolt
-                }
-                else if (procSpell->SpellFamilyFlags & 0x0000000000000080LL)
-                {
-                    triggerId = 40465; chance = 10.f;       // Lesser Healing Wave
-                }
-                else if (procSpell->SpellFamilyFlags & 0x0000001000000000LL)
-                {
-                    triggerId = 40466; chance = 50.f;       // Stormstrike
-                }
-                else
+                    if(GetTypeId() != TYPEID_PLAYER || !pVictim || !pVictim->isAlive())
+                        return;
+
+                    if(!castItem)
+                        return;
+
+                    // Set class defined buff
+                    uint32 spellId = 0;
+                    switch (pVictim->getClass())
+                    {
+                        case CLASS_PALADIN:
+                        case CLASS_PRIEST:
+                        case CLASS_SHAMAN:
+                        case CLASS_DRUID:
+                            spellId = 28824;                // Increases the friendly target's mana regeneration by $s1 per 5 sec. for $d.
+                            break;
+                        case CLASS_MAGE:
+                        case CLASS_WARLOCK:
+                            spellId = 28825;                // Increases the friendly target's spell damage and healing by up to $s1 for $d.
+                            break;
+                        case CLASS_HUNTER:
+                        case CLASS_ROGUE:
+                            spellId = 28826;                // Increases the friendly target's attack power by $s1 for $d.
+                            break;
+                        case CLASS_WARRIOR:
+                            spellId = 28827;                // Increases the friendly target's armor
+                            break;
+                        default:
+                            return;
+                    }
+                    CastSpell(pVictim, spellId, true, castItem, triggeredByAura);
                     return;
+                }
+                // Lesser Healing Wave (Totem of Flowing Water Relic)
+                case 28849:
+                {
+                    if(GetTypeId() != TYPEID_PLAYER)
+                        return;
 
-                if (roll_chance_f(chance))
-                    CastSpell(this, triggerId, true, castItem, triggeredByAura);
+                    if(!castItem)
+                        return;
 
-                return;
+                    CastSpell(this, 28850, true, castItem, triggeredByAura);
+                    return;
+                }
+                // Windfury Weapon (Passive) 1-5 Ranks
+                case 33757:
+                {
+                    if(GetTypeId()!=TYPEID_PLAYER)
+                        return;
+
+                    if(!castItem || !castItem->IsEquipped())
+                        return;
+
+                    uint32 spellId;
+                    switch (castItem->GetEnchantmentId(EnchantmentSlot(TEMP_ENCHANTMENT_SLOT)))
+                    {
+                        case 283: spellId = 33757; break;   //1 Rank
+                        case 284: spellId = 33756; break;   //2 Rank
+                        case 525: spellId = 33755; break;   //3 Rank
+                        case 1669:spellId = 33754; break;   //4 Rank
+                        case 2636:spellId = 33727; break;   //5 Rank
+                        default:
+                        {
+                            sLog.outError("Unit::HandleDummyAuraProc: non handled item enchantment (rank?) %u for spell id: %u (Windfury)",
+                                castItem->GetEnchantmentId(EnchantmentSlot(TEMP_ENCHANTMENT_SLOT)),dummySpell->Id);
+                            return;
+                        }
+                    }
+                    if( ((Player*)this)->HasSpellCooldown(32910))
+                        return;
+
+                    SpellEntry const* windfurySpellEntry = sSpellStore.LookupEntry(spellId);
+
+                    int32 addvalue = windfurySpellEntry->EffectBasePoints[0]+windfurySpellEntry->EffectBaseDice[0];
+
+                    CastCustomSpell(this, 32910, &addvalue, NULL, NULL, true, castItem, triggeredByAura);
+
+                    ((Player*)this)->AddSpellCooldown(32910,0,time(NULL) + 3);
+
+                    return;
+                }
+                // Shaman Tier 6 Trinket
+                case 40463:
+                {
+                    if(GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if(!castItem)
+                        return;
+
+                    uint32 triggerId = 0;
+                    float  chance = 0.0f;
+                    if (procSpell->SpellFamilyFlags & 0x0000000000000001LL)
+                    {
+                        triggerId = 40465; chance = 15.f;       // Lightning Bolt
+                    }
+                    else if (procSpell->SpellFamilyFlags & 0x0000000000000080LL)
+                    {
+                        triggerId = 40465; chance = 10.f;       // Lesser Healing Wave
+                    }
+                    else if (procSpell->SpellFamilyFlags & 0x0000001000000000LL)
+                    {
+                        triggerId = 40466; chance = 50.f;       // Stormstrike
+                    }
+                    else
+                        return;
+
+                    if (roll_chance_f(chance))
+                        CastSpell(this, triggerId, true, castItem, triggeredByAura);
+
+                    return;
+                }
             }
+
             // Earth Shield
             if(dummySpell->SpellFamilyFlags==0x40000000000LL)
             {
@@ -5208,54 +5259,6 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     CastCustomSpell(this,379,&HealBasePoints0,NULL,NULL,true,castItem,triggeredByAura);
                     ((Player*)this)->AddSpellCooldown(379,0,time(NULL) + 3);
                 }
-                return;
-            }
-            // Lesser Healing Wave (Totem of Flowing Water Relic)
-            if (dummySpell->Id == 28849)
-            {
-                if(GetTypeId() != TYPEID_PLAYER)
-                    return;
-
-                if(!castItem)
-                    return;
-
-                CastSpell(this, 28850, true, castItem, triggeredByAura);
-                return;
-            }
-            // Totemic Power (The Earthshatterer set)
-            if (dummySpell->Id == 28823)
-            {
-                if(GetTypeId() != TYPEID_PLAYER || !pVictim || !pVictim->isAlive())
-                    return;
-
-                if(!castItem)
-                    return;
-
-                // Set class defined buff
-                uint32 spellId = 0;
-                switch (pVictim->getClass())
-                {
-                    case CLASS_PALADIN:
-                    case CLASS_PRIEST:
-                    case CLASS_SHAMAN:
-                    case CLASS_DRUID:
-                        spellId = 28824;                    // Increases the friendly target's mana regeneration by $s1 per 5 sec. for $d.
-                        break;
-                    case CLASS_MAGE:
-                    case CLASS_WARLOCK:
-                        spellId = 28825;                    // Increases the friendly target's spell damage and healing by up to $s1 for $d.
-                        break;
-                    case CLASS_HUNTER:
-                    case CLASS_ROGUE:
-                        spellId = 28826;                    // Increases the friendly target's attack power by $s1 for $d.
-                        break;
-                    case CLASS_WARRIOR:
-                        spellId = 28827;                    // Increases the friendly target's armor
-                        break;
-                    default:
-                        return;
-                }
-                CastSpell(pVictim, spellId, true, castItem, triggeredByAura);
                 return;
             }
             // Lightning Overload
