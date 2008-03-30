@@ -15314,18 +15314,29 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         if(pProto->CondExtendedCost)
             mask = GetItemCondExtCostsMask(pProto->CondExtendedCost, pProto->ExtendedCost);
 
+        // honor points price
         if(GetHonorPoints() < (iece->reqhonorpoints * count))
         {
             SendEquipError(EQUIP_ERR_NOT_ENOUGH_HONOR_POINTS, NULL, NULL);
             return false;
         }
 
+        // arena points price
         if(GetArenaPoints() < (iece->reqarenapoints * count))
         {
             SendEquipError(EQUIP_ERR_NOT_ENOUGH_ARENA_POINTS, NULL, NULL);
             return false;
         }
         
+        // item base price
+        if( (iece->reqitem1 && !HasItemCount(iece->reqitem1, (iece->reqitemcount1 * count))) ||
+            (iece->reqitem2 && !HasItemCount(iece->reqitem2, (iece->reqitemcount2 * count))) ||
+            (iece->reqitem3 && !HasItemCount(iece->reqitem3, (iece->reqitemcount3 * count))) )
+        {
+            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
+            return false;
+        }
+
         // check for personal arena rating requirement
         if( (mask & (1<<3)) && (GetMaxPersonalArenaRatingRequirement() < iece->reqpersonalarenarating) )
         {
