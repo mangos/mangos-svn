@@ -3366,53 +3366,12 @@ void Spell::EffectWeaponDmg(uint32 i)
 
     uint32 hitInfo = 0;
     uint32 nohitMask = HITINFO_ABSORB | HITINFO_RESIST | HITINFO_MISS;
-    SpellSchools damageSchool =  SpellSchools(m_spellInfo->School);
     VictimState victimState = VICTIMSTATE_NORMAL;
     uint32 blocked_dmg = 0;
     uint32 absorbed_dmg = 0;
     uint32 resisted_dmg = 0;
     CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
     bool criticalhit = false;
-
-    // select weapon attack type...
-    WeaponAttackType attType;
-
-    // offhand hand weapon required (not used with mainhand required (spellInfo->AttributesEx3 & 0x0000000000000400) in spell with damage effect
-    if(m_spellInfo->AttributesEx3 & 0x0000000001000000)
-        attType = OFF_ATTACK;
-    // some melee weapon spells have non-standard spell range
-    // FIXME: find better way to select melee/ranged weapon attack sorting
-    // FIXME: we also need select OFF_ATTACK if trigering some spell at offhand attack
-    else if(m_spellInfo->SpellVisual==3136 || m_spellInfo->SpellIconID==2293)
-        attType = BASE_ATTACK;
-    else if(m_spellInfo->rangeIndex != 1 && m_spellInfo->rangeIndex != 2 && m_spellInfo->rangeIndex != 7)
-    {
-        attType = RANGED_ATTACK;
-
-        // wand case
-        if((m_caster->getClassMask() & CLASSMASK_WAND_USERS) != 0)
-        {
-            if(m_caster->GetTypeId()!=TYPEID_PLAYER)
-                return;
-
-            Item* pItem = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-            if (!pItem)
-                return;
-
-            if( unitTarget->IsImmunedToSpellDamage(m_spellInfo,false) )
-                return;
-
-            damageSchool = SpellSchools(pItem->GetProto()->Damage->DamageType);
-        }
-    }
-    else
-        attType = BASE_ATTACK;
-
-    if(damageSchool==SPELL_SCHOOL_NORMAL && unitTarget->IsImmunedToPhysicalDamage() )
-    {
-        m_caster->SendAttackStateUpdate (HITINFO_MISS, unitTarget, 1, SPELL_SCHOOL_NORMAL, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
-        return;
-    }
 
     // calculate damage percent modifier
     float damagePercentMod = 1;
@@ -3424,7 +3383,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     //if miss/parry, no eff=0 automatically by func DoAttackDamage
     //if crit eff = (bonus + weapon) * 2
     //In a word, bonus + weapon will be calculated together in cases of miss, armor reduce, crit, etc.
-    bonus += m_caster->CalculateDamage (attType);
+    bonus += m_caster->CalculateDamage (m_attackType);
 
     switch(m_spellInfo->SpellFamilyName)
     {
@@ -3474,15 +3433,15 @@ void Spell::EffectWeaponDmg(uint32 i)
     // prevent negative damage
     uint32 eff_damage = uint32(bonus > 0 ? bonus : 0);
 
-    m_caster->DoAttackDamage(unitTarget, &eff_damage, &cleanDamage, &blocked_dmg, damageSchool, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType, m_spellInfo, m_IsTriggeredSpell);
+    m_caster->DoAttackDamage(unitTarget, &eff_damage, &cleanDamage, &blocked_dmg, m_spellSchool, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, m_attackType, m_spellInfo, m_IsTriggeredSpell);
 
-    if ((hitInfo & nohitMask) && attType != RANGED_ATTACK)  // not send ranged miss/etc
-        m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, damageSchool, eff_damage, absorbed_dmg, resisted_dmg, VICTIMSTATE_NORMAL, blocked_dmg);
+    if ((hitInfo & nohitMask) && m_attackType != RANGED_ATTACK)  // not send ranged miss/etc
+        m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, m_spellSchool, eff_damage, absorbed_dmg, resisted_dmg, VICTIMSTATE_NORMAL, blocked_dmg);
 
     if(hitInfo & HITINFO_CRITICALHIT)
         criticalhit = true;
 
-    m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, eff_damage, damageSchool, absorbed_dmg, resisted_dmg, false, blocked_dmg, criticalhit);
+    m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, eff_damage, m_spellSchool, absorbed_dmg, resisted_dmg, false, blocked_dmg, criticalhit);
 
     if (eff_damage > (absorbed_dmg + resisted_dmg + blocked_dmg))
     {
@@ -3505,7 +3464,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     }
 
     // take ammo
-    if(attType == RANGED_ATTACK && m_caster->GetTypeId() == TYPEID_PLAYER)
+    if(m_attackType == RANGED_ATTACK && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
         if(!pItem  || pItem->IsBroken())
@@ -4012,6 +3971,9 @@ void Spell::EffectDuel(uint32 i)
 void Spell::EffectStuck(uint32 /*i*/)
 {
     if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    if(!sWorld.getConfig(CONFIG_CAST_UNSTUCK))
         return;
 
     Player* pTarget = (Player*)unitTarget;

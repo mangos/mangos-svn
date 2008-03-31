@@ -264,6 +264,33 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
     m_triggeringContainer = triggeringContainer;
     m_deletable = true;
 
+    // Get data for type of attack
+    switch (m_spellInfo->DmgClass)
+    {
+     case SPELL_DAMAGE_CLASS_MELEE:
+         if (m_spellInfo->AttributesEx3 & 0x1000000) m_attackType = OFF_ATTACK;
+         else                                        m_attackType = BASE_ATTACK;
+         break;
+     case SPELL_DAMAGE_CLASS_RANGED: 
+         m_attackType = RANGED_ATTACK; 
+         break;
+     default:
+         if (m_spellInfo->Id == 5019) m_attackType = RANGED_ATTACK; // Wands
+         else                         m_attackType = BASE_ATTACK;
+         break;
+    }
+    m_spellSchool = SpellSchools(info->School);             // Can be override for some spell (wand shoot for example)
+
+    if(m_attackType == RANGED_ATTACK)
+    {
+        // wand case
+        if((m_caster->getClassMask() & CLASSMASK_WAND_USERS) != 0 && m_caster->GetTypeId()!=TYPEID_PLAYER)
+        {
+            if(Item* pItem = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
+                m_spellSchool = SpellSchools(pItem->GetProto()->Damage->DamageType);
+        }
+    }
+
     if(originalCasterGUID)
         m_originalCasterGUID = originalCasterGUID;
     else
@@ -2287,9 +2314,9 @@ void Spell::SendSpellStart()
 
     sLog.outDebug("Sending SMSG_SPELL_START id=%u",m_spellInfo->Id);
 
-    m_castFlags = CAST_FLAG_UNKNOWN1;
+    uint16 castFlags = CAST_FLAG_UNKNOWN1;
     if(m_rangedShoot)
-        m_castFlags = m_castFlags | CAST_FLAG_AMMO;
+        castFlags = castFlags | CAST_FLAG_AMMO;
 
     Unit * target;
     if(!m_targets.getUnitTarget())
@@ -2306,13 +2333,13 @@ void Spell::SendSpellStart()
     data.append(m_caster->GetPackGUID());
     data << uint32(m_spellInfo->Id);
     data << uint8(m_cast_count);                            // single cast or multi 2.3 (0/1)
-    data << uint16(m_castFlags);
+    data << uint16(castFlags);
     data << uint32(m_timer);
 
     data << uint16(m_targets.m_targetMask);
     m_targets.write( &data );
 
-    if( m_castFlags & CAST_FLAG_AMMO )
+    if( castFlags & CAST_FLAG_AMMO )
         WriteAmmoToPacket(&data);
 
     m_caster->SendMessageToSet(&data, true);
@@ -2332,9 +2359,9 @@ void Spell::SendSpellGo()
     else
         target = m_targets.getUnitTarget();
 
-    m_castFlags = CAST_FLAG_UNKNOWN3;
+    uint16 castFlags = CAST_FLAG_UNKNOWN3;
     if(m_rangedShoot)
-        m_castFlags = m_castFlags | CAST_FLAG_AMMO;
+        castFlags = castFlags | CAST_FLAG_AMMO;
 
     WorldPacket data(SMSG_SPELL_GO, 50);                    // guess size
     if(m_CastItem)
@@ -2345,12 +2372,12 @@ void Spell::SendSpellGo()
     data.append(m_caster->GetPackGUID());
     data << uint32(m_spellInfo->Id);
 
-    data << uint16(m_castFlags);
+    data << uint16(castFlags);
     WriteSpellGoTargets(&data);
     data << m_targets.m_targetMask;
     m_targets.write( &data, true );
 
-    if( m_castFlags & CAST_FLAG_AMMO )
+    if( castFlags & CAST_FLAG_AMMO )
         WriteAmmoToPacket(&data);
 
     m_caster->SendMessageToSet(&data, true);
