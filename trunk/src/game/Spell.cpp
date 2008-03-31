@@ -1221,7 +1221,9 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                     Player* Target = itr->getSource();
 
                     // IsHostileTo check duel and controlled by enemy
-                    if( Target && Target != pTarget && !m_caster->IsHostileTo(Target) && m_caster->IsWithinDistInMap(Target, radius) )
+                    if( Target && Target != pTarget && m_caster->IsWithinDistInMap(Target, radius) && 
+                        !Target->HasStealthAura() && !Target->HasInvisibilityAura() 
+                        && !m_caster->IsHostileTo(Target) )
                         nearMembers.push_back(Target);
                 }
 

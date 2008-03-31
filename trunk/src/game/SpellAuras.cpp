@@ -1310,10 +1310,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         // Earth Shield
         if ( caster && GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && (GetSpellProto()->SpellFamilyFlags & 0x40000000000LL))
             m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
-
-        // Prayer of Mending (jump animation)
-        if( caster && GetSpellProto()->SpellFamilyName == SPELLFAMILY_PRIEST && (GetSpellProto()->SpellFamilyFlags & 0x00002000000000LL))
-            caster->CastSpell(m_target,41637,true,NULL,this);
     }
     // AT REMOVE
     else
