@@ -343,6 +343,31 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                 {
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.08f);
                 }
+                // Starfire
+                else if ( m_spellInfo->SpellFamilyFlags & 0x0004LL )
+                {
+                    // Nordrassil Regalia - bonus
+                    Unit::AuraList const& m_OverrideClassScript = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                    for(Unit::AuraList::const_iterator i = m_OverrideClassScript.begin(); i != m_OverrideClassScript.end(); ++i)
+                    {
+                        // Starfire Bonus (caster)
+                        if ( (*i)->GetModifier()->m_miscvalue == 5481 )
+                        {
+                            Unit::AuraList const& m_periodicDamageAuras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                            for(Unit::AuraList::const_iterator itr = m_periodicDamageAuras.begin(); itr != m_periodicDamageAuras.end(); ++itr)
+                            {
+                                // Moonfire or Insect Swarm (target debuff)
+                                if ( (*itr)->GetSpellProto()->SpellFamilyFlags & 0x00200002LL )
+                                {
+                                    int32 mod = (*i)->GetModifier()->m_amount;
+                                    damage += damage*mod/100;
+                                    break;
+                                }
+                            }
+                            break;
+                        }
+                    }
+                }
                 break;
             }
             case SPELLFAMILY_ROGUE:

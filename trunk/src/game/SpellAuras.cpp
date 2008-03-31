@@ -1760,17 +1760,37 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         m_target->m_ShapeShiftForm = 0;
         m_target->m_form = 0;
         
-        // Nordrassil Harness - bonus
-        if ( m_modifier.m_miscvalue == FORM_BEAR || m_modifier.m_miscvalue == FORM_DIREBEAR || m_modifier.m_miscvalue == FORM_CAT )
+        switch(m_modifier.m_miscvalue)
         {
-            Unit::AuraList const& m_dummyAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
-            for(Unit::AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
+            // Nordrassil Harness - bonus
+            case FORM_BEAR:
+            case FORM_DIREBEAR:
+            case FORM_CAT:
             {
-                if ( (*i)->GetSpellProto()->Id == 37315 )
+                Unit::AuraList const& m_dummyAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
+                for(Unit::AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
                 {
-                    m_target->CastSpell(m_target,37316,true,NULL,*i);
-                    break;
+                    if ( (*i)->GetSpellProto()->Id == 37315 )
+                    {
+                        m_target->CastSpell(m_target,37316,true,NULL,*i);
+                        break;
+                    }
                 }
+                break;
+            }
+            // Nordrassil Regalia - bonus
+            case FORM_MOONKIN:
+            {
+                Unit::AuraList const& m_dummyAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
+                for(Unit::AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
+                {
+                    if ( (*i)->GetSpellProto()->Id == 37324 )
+                    {
+                        m_target->CastSpell(m_target,37325,true,NULL,*i);
+                        break;
+                    }
+                }
+                break;
             }
         }
     }
