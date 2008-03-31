@@ -207,16 +207,35 @@ bool ChatHandler::HandleVisibleCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleGPSCommand(const char* /*args*/)
+bool ChatHandler::HandleGPSCommand(const char* args)
 {
-    WorldObject *obj = getSelectedUnit();
-
-    if(!obj)
+    uint32 pguid = 0;
+    WorldObject *obj;
+    if (*args)
     {
-        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        return true;
+        std::string name = args;
+        normalizePlayerName(name);
+        pguid = objmgr.GetPlayerGUIDByName(name.c_str());
+        if (pguid != 0)
+        {
+            obj = objmgr.GetPlayer(name.c_str());
+        }
+        else
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            return true;
+        }
     }
+    else
+    {
+        obj = getSelectedUnit();
 
+        if(!obj)
+        {
+            SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+            return true;
+        }
+    }
     CellPair cell_val = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     Cell cell(cell_val);
 

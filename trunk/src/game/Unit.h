@@ -912,7 +912,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         // set withDelayed to true to interrupt delayed spells too
         // delayed+channeled spells are always interrupted
-        void InterruptNonMeleeSpells(bool withDelayed);
+        void InterruptNonMeleeSpells(bool withDelayed, uint32 spellid = 0);
 
         Spell* FindCurrentSpellBySpellId(uint32 spell_id) const;
 

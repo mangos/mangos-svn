@@ -647,10 +647,19 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     spell->prepare(&targets);
 }
 
-void WorldSession::HandleCancelCastOpcode(WorldPacket&/* recvPacket*/)
+void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
 {
+    CHECK_PACKET_SIZE(recvPacket,4);
+
+    uint32 spellId;
+    recvPacket >> spellId;
+
+    //FIXME: hack, ignore unexpected client cancel Deadly Throw cast
+    if(spellId==26679)
+        return;
+
     if(_player->IsNonMeleeSpellCasted(false))
-        _player->InterruptNonMeleeSpells(false);
+        _player->InterruptNonMeleeSpells(false,spellId);
 }
 
 void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)

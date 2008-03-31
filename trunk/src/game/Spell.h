@@ -406,6 +406,10 @@ class Spell
         Spell** m_selfContainer;                            // pointer to our spell container (if applicable)
         Spell** m_triggeringContainer;                      // pointer to container with spell that has triggered us
 
+        //Spell data
+        SpellSchools m_spellSchool;                         // Spell school (can be owerrided for some spells (wand shoot for example)
+        WeaponAttackType m_attackType;                      // For weapon based attack
+        bool m_canReflect;                                  // can reflect this spell?
         bool m_autoRepeat;
         bool m_meleeSpell;
         bool m_rangedShoot;
@@ -420,7 +424,6 @@ class Spell
         // These vars are used in both delayed spell system and modified immediate spell system
         bool m_deletable;                                   // is the spell pending deletion or must be updated till permitted to delete?
         bool m_needSpellLog;                                // need to send spell log?
-        bool m_canReflect;                                  // can reflect this spell?
         bool m_applyMultiplier[3];                          // by effect: damage multiplier needed?
         float m_damageMultipliers[3];                       // by effect: damage multiplier
 
@@ -484,7 +487,6 @@ class Spell
 
         uint32 m_spellState;
         uint32 m_timer;
-        uint16 m_castFlags;
 
         float m_castPositionX;
         float m_castPositionY;
