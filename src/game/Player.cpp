@@ -4390,7 +4390,7 @@ bool Player::UpdateCraftSkill(uint32 spellid)
     uint32 SkillId = pAbility->skillId;
     if ( !SkillId ) return false;
 
-    uint32 SkillValue = GetBaseSkillValue(SkillId);
+    uint32 SkillValue = GetPureSkillValue(SkillId);
 
     // Alchemy Discoveries here
     SpellEntry const* spellEntry = sSpellStore.LookupEntry(spellid);
@@ -4435,7 +4435,7 @@ bool Player::UpdateFishingSkill()
 {
     sLog.outDebug("UpdateFishingSkill");
 
-    uint32 SkillValue = GetBaseSkillValue(SKILL_FISHING);
+    uint32 SkillValue = GetPureSkillValue(SKILL_FISHING);
 
     int32 chance = SkillValue < 75 ? 100 : 2500/(SkillValue-50);
 
