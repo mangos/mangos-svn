@@ -1537,6 +1537,53 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
 
             pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
 
+            // talent Soul Siphon add bonus to Drain Life spells
+            if( spellProto->SpellFamilyName == SPELLFAMILY_WARLOCK && (spellProto->SpellFamilyFlags & 0x8) )
+            {
+                // find talent max bonus percentage
+                AuraList const& mClassScriptAuras = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                for(AuraList::const_iterator i = mClassScriptAuras.begin(); i != mClassScriptAuras.end(); ++i)
+                {
+                    if ((*i)->GetModifier()->m_miscvalue == 4992 || (*i)->GetModifier()->m_miscvalue == 4993)
+                    {
+                        if((*i)->GetEffIndex()!=1)
+                        {
+                            sLog.outError("Expected spell %u structure change, need code update",(*i)->GetId());
+                            break;
+                        }
+
+                        // effect 1 m_amount
+                        int32 maxPercent = (*i)->GetModifier()->m_amount;
+                        // effect 0 m_amount
+                        int32 stepPercent = CalculateSpellDamage((*i)->GetSpellProto(),0,(*i)->GetSpellProto()->EffectBasePoints[0],this);
+
+                        // count affliction effects and calc additional damage in percentage
+                        int32 modPercent = 0.0f;
+                        AuraMap& victimAuras = pVictim->GetAuras();
+                        for (Unit::AuraMap::iterator itr = victimAuras.begin(); itr != victimAuras.end(); ++itr)
+                        {
+                            Aura* aura = itr->second;
+                            if (aura->IsPositive())continue;
+                            SpellEntry const* m_spell = aura->GetSpellProto();
+                            if (m_spell->SpellFamilyName != SPELLFAMILY_WARLOCK)
+                                continue;
+                            SkillLineAbilityEntry const* skillLine = sSkillLineAbilityStore.LookupEntry(m_spell->Id);
+                            if (skillLine && skillLine->skillId == SKILL_AFFLICTION)
+                            {
+                                modPercent += stepPercent;
+                                if (modPercent >= maxPercent)
+                                {
+                                    modPercent = maxPercent;
+                                    break;
+                                }
+                            }
+                        }
+                        pdamage += (pdamage*modPercent/100);
+                        break;
+                    }
+                }
+            }
+
             //As of 2.2 resilience reduces damage from DoT ticks as much as the chance to not be critically hit
             // Reduce dot damage from resilience for players
             if (pVictim->GetTypeId()==TYPEID_PLAYER)
