@@ -8238,6 +8238,9 @@ uint8 Player::_CanStoreItem_InBag( uint8 bag, ItemPosCountVec &dest, ItemPrototy
     if( !pBagProto )
         return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
 
+    if( !ItemCanGoIntoBag(pProto,pBagProto) )
+        return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
+
     for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
     {
         // skip specific slot already processed in first called _CanStoreItem_InSpecificSlot
@@ -8484,8 +8487,7 @@ uint8 Player::_CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec &dest, uint3
                 continue;
 
             // not plain container check
-            if( pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass == ITEM_SUBCLASS_CONTAINER ||
-                !ItemCanGoIntoBag(pProto,pBagProto) )
+            if( pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass == ITEM_SUBCLASS_CONTAINER )
                 continue;
 
             res = _CanStoreItem_InBag(i,dest,pProto,count,false,pItem,bag,slot);
@@ -9068,9 +9070,6 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, ItemPosCountVec &dest, Item *p
             if(pBagProto->Class == ITEM_CLASS_CONTAINER && pBagProto->SubClass == ITEM_SUBCLASS_CONTAINER)
                 continue;
                 
-            if(!ItemCanGoIntoBag(pProto,pBagProto))
-                continue;
-
             res = _CanStoreItem_InBag(i,dest,pProto,count,true,pItem,bag,slot);
             if(res!=EQUIP_ERR_OK)
                 continue;
