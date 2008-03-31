@@ -1472,7 +1472,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateDamagePhysical(WeaponAttackType attType);
         void UpdateSpellDamageAndHealingBonus();
 
-        uint16 GetDefenseSkillTempBonusValue() const;
+        int16 GetDefenseSkillTempBonusValue() const;
         void UpdateDefenseBonusesMod();
         void ApplyRatingMod(uint16 index, int32 value, bool apply);
         float GetMeleeCritFromAgility();
@@ -1573,7 +1573,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint16 GetSkillValue(uint32 skill) const;           // skill value + perm. bonus + temp bonus
         uint16 GetBaseSkillValue(uint32 skill) const;       // skill value + perm. bonus
         uint16 GetPureSkillValue(uint32 skill) const;       // skill value
-        uint16 GetSkillTempBonusValue(uint32 skill) const;
+        int16 GetSkillTempBonusValue(uint32 skill) const;
         bool HasSkill(uint32 skill) const;
 
         void SetDontMove(bool dontMove);

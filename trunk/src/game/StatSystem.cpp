@@ -403,7 +403,7 @@ void Player::UpdateBlockPercentage()
     SetBaseModValue(BLOCK_PERCENTAGE, PCT_MOD, chance);
 
     float value  = GetBaseModValue(modGroup, FLAT_MOD) + chance;
-    value += float((GetDefenseSkillTempBonusValue())*0.04f) + GetRatingBonusValue(PLAYER_FIELD_BLOCK_RATING);
+    value += GetDefenseSkillTempBonusValue()*0.04f + GetRatingBonusValue(PLAYER_FIELD_BLOCK_RATING);
 
     SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, value);
 }
@@ -454,7 +454,7 @@ void Player::UpdateParryPercentage()
 
     //pct mods for pct fields act like flat mods
     float value  = 5.0f + GetBaseModValue(modGroup, FLAT_MOD);
-    value += float(GetDefenseSkillTempBonusValue()*0.04f) + GetRatingBonusValue(PLAYER_FIELD_PARRY_RATING);
+    value += GetDefenseSkillTempBonusValue()*0.04f + GetRatingBonusValue(PLAYER_FIELD_PARRY_RATING);
 
     SetStatFloatValue(PLAYER_PARRY_PERCENTAGE, value);
 }
@@ -481,7 +481,7 @@ void Player::UpdateDodgePercentage()
 
     //pct mods for pct fields act like flat mods
     float value  = base_dodge + GetStat(STAT_AGILITY)/classrate;
-    value += float(GetDefenseSkillTempBonusValue()*0.04f)+ GetBaseModValue(modGroup, FLAT_MOD);
+    value += GetDefenseSkillTempBonusValue()*0.04f + GetBaseModValue(modGroup, FLAT_MOD);
     value += GetRatingBonusValue(PLAYER_FIELD_DODGE_RATING);
 
     SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, value);

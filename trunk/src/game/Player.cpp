@@ -70,9 +70,9 @@
 #define SKILL_MAX(x)           (uint16(uint32(x) >> 16))
 #define MAKE_SKILL_VALUE(v, m) (uint32(uint32(uint16(v)) | (uint32(uint16(m)) << 16)))
 
-#define SKILL_TEMP_BONUS(x)    (uint16(x))
-#define SKILL_PERM_BONUS(x)    (uint16(uint32(x) >> 16))
-#define MAKE_SKILL_BONUS(t, p) (uint32(uint32(uint16(t)) | (uint32(uint16(p)) << 16)))
+#define SKILL_TEMP_BONUS(x)    (int16(uint16(x)))
+#define SKILL_PERM_BONUS(x)    (int16(uint32(x) >> 16))
+#define MAKE_SKILL_BONUS(t, p) (uint32( uint32(uint16(int16(t))) | (uint32(uint16(int16(p))) << 16) ))
 
 const int32 Player::ReputationRank_Length[MAX_REPUTATION_RANK] = {36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000};
 
@@ -3963,9 +3963,9 @@ void Player::UpdateDefense()
     }
 }
 
-uint16 Player::GetDefenseSkillTempBonusValue() const
+int16 Player::GetDefenseSkillTempBonusValue() const
 {
-    return GetSkillTempBonusValue(SKILL_DEFENSE) + uint32(GetRatingBonusValue(PLAYER_FIELD_DEFENCE_RATING));
+    return GetSkillTempBonusValue(SKILL_DEFENSE) + int32(GetRatingBonusValue(PLAYER_FIELD_DEFENCE_RATING));
 }
 
 void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, float amount, bool apply, bool affectStats)
@@ -4580,8 +4580,8 @@ void Player::ModifySkillBonus(uint32 skillid,int32 val, bool talent)
         if ((GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF) == skillid)
     {
         uint32 bonus_val = GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i));
-        uint16 temp_bonus = SKILL_TEMP_BONUS(bonus_val);
-        uint16 perm_bonus = SKILL_PERM_BONUS(bonus_val);
+        int16 temp_bonus = SKILL_TEMP_BONUS(bonus_val);
+        int16 perm_bonus = SKILL_PERM_BONUS(bonus_val);
 
         if(talent)                                          // permanent bonus stored in high part
             SetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i),MAKE_SKILL_BONUS(temp_bonus,perm_bonus+val));
@@ -4734,8 +4734,9 @@ uint16 Player::GetSkillValue(uint32 skill) const
         {
             uint32 bonus = GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i));
 
-            int16 result = int16(SKILL_VALUE(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i)))
-                + SKILL_TEMP_BONUS(bonus) + SKILL_PERM_BONUS(bonus));
+            int32 result = int32(SKILL_VALUE(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i))));
+            result += SKILL_TEMP_BONUS(bonus);
+            result += SKILL_PERM_BONUS(bonus);
             return result < 0 ? 0 : result;
         }
     }
@@ -4749,8 +4750,9 @@ uint16 Player::GetMaxSkillValue(uint32 skill) const
     {
         if ((GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF) == skill)
         {
-            return SKILL_MAX(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i)))
-                +SKILL_PERM_BONUS(GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i)));
+            int32 result = int32(SKILL_MAX(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i))));
+            result += SKILL_PERM_BONUS(GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i)));
+            return result < 0 ? 0 : result;
         }
     }
     return 0;
@@ -4776,8 +4778,9 @@ uint16 Player::GetBaseSkillValue(uint32 skill) const
     {
         if ((GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF) == skill)
         {
-            return SKILL_VALUE(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i)))
-                +SKILL_PERM_BONUS(GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i)));
+            int32 result = int32(SKILL_VALUE(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i))));
+            result +=  SKILL_PERM_BONUS(GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i)));
+            return result < 0 ? 0 : result;
         }
     }
     return 0;
@@ -4796,7 +4799,7 @@ uint16 Player::GetPureSkillValue(uint32 skill) const
     return 0;
 }
 
-uint16 Player::GetSkillTempBonusValue(uint32 skill) const
+int16 Player::GetSkillTempBonusValue(uint32 skill) const
 {
     if(!skill)
         return 0;
@@ -4805,8 +4808,7 @@ uint16 Player::GetSkillTempBonusValue(uint32 skill) const
     {
         if ((GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF) == skill)
         {
-            int16 result = SKILL_TEMP_BONUS(GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i)));
-            return result < 0 ? 0 : result;
+            return SKILL_TEMP_BONUS(GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i)));
         }
     }
 
