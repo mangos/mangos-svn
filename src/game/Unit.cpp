@@ -4866,7 +4866,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     case 33280: spellId=35092; break;       // 2 jump
                     case 35092: spellId=35093; break;       // 3 jump
                     case 35093: spellId=35094; break;       // 4 jump
-                    case 35094: return;                     // no jump
+                    case 35094: return;                     // no jumps
                     default:
                         sLog.outError("Unit::HandleDummyAuraProc: non handled spell id: %u (PoM)", dummySpell->Id);
                         return;
