@@ -690,26 +690,10 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
                 ((Creature*)pVictim)->AI()->JustDied(this);
         }
 
-        //judge if GainXP, Pet kill like player kill,kill pet not like PvP
-        bool PvP = false;
+        // find owner of controlled `this` or it's player maybe
         Player *player = NULL;
 
-        if(GetTypeId() == TYPEID_PLAYER)
-        {
-            player = (Player*)this;
-            if(pVictim->GetTypeId() == TYPEID_PLAYER)
-                PvP = true;
-
-            if(player->GetPetGUID())
-                if(Unit* pet = player->GetPet())
-                    pet->ClearInCombat();
-
-            if(player->GetCharmGUID())
-                if(Unit* pet = player->GetCharm())
-                    pet->ClearInCombat();
-        }
-        // FIXME: or charmed (can be player). Maybe must be check before GetTypeId() == TYPEID_PLAYER
-        else if(GetCharmerOrOwnerGUID())                    // Pet or timed creature, etc
+        if(GetCharmerOrOwnerGUID())                         // Pet or timed creature, or player
         {
             Unit* pet = this;
             Unit* owner = pet->GetCharmerOrOwner();
@@ -718,110 +702,23 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             {
                 player = (Player*)owner;
                 player->ClearInCombat();
-                if(pVictim->GetTypeId() == TYPEID_PLAYER)
-                    PvP = true;
-            }
-
-            if(pet->GetTypeId()==TYPEID_UNIT && ((Creature*)pet)->isPet())
-            {
-                uint32 petxp = MaNGOS::XP::BaseGain(getLevel(), pVictim->getLevel(),
-                    PvP ? CONTENT_1_60 : GetContentLevelsForMapAndZone(pVictim->GetMapId(),pVictim->GetZoneId()));
-                ((Pet*)pet)->GivePetXP(petxp);
             }
         }
-
-        // self or owner of pet
-        if(player)
+        else if(GetTypeId() == TYPEID_PLAYER)               // not controlled player
         {
-            if(player!=pVictim)
-            {
-                // prepare data for near group iteration (PvP and !PvP cases
-                uint32 xp = 0;
-                bool honored_kill = false;
+            player = (Player*)this;
 
-                Group *pGroup = player->GetGroup();
-                if(pGroup)
-                {
-                    uint32 count = 0;
-                    uint32 sum_level = 0;
-                    Player* member_with_max_level = NULL;
+            if(Unit* pet = player->GetPet())
+                pet->ClearInCombat();
 
-                    pGroup->GetDataForXPAtKill(pVictim,count,sum_level,member_with_max_level);
-
-                    if(member_with_max_level)
-                    {
-                        xp = PvP || IsNoDamageXPArea(player->GetAreaId()) ? 0 : MaNGOS::XP::Gain(member_with_max_level, pVictim);
-
-                        // skip in check PvP case (for speed, not used)
-                        bool is_raid = PvP ? false : MapManager::Instance().GetBaseMap(player->GetMapId())->IsRaid() && pGroup->isRaidGroup();
-                        bool is_dungeon = PvP ? false : MapManager::Instance().GetBaseMap(player->GetMapId())->IsDungeon();
-                        float group_rate = MaNGOS::XP::xp_in_group_rate(count,is_raid);
-
-                        for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
-                        {
-                            Player *pGroupGuy = pGroup->GetMemberForXPAtKill(itr->getSource(),pVictim);
-                            if(!pGroupGuy)
-                                continue;
-
-                            // honor can be in PvP and !PvP (racial leader) cases
-                            if(pGroupGuy->RewardHonor(pVictim,count) && player==pGroupGuy)
-                                honored_kill = true;
-
-                            // xp and reputation only in !PvP case
-                            if(!PvP)
-                            {
-                                float rate = group_rate * float(pGroupGuy->getLevel()) / sum_level;
-
-                                // if is in dungeon then all receive full reputation at kill
-                                pGroupGuy->RewardReputation(pVictim,is_dungeon ? 1.0f : rate);
-
-                                uint32 itr_xp = uint32(xp*rate);
-
-                                pGroupGuy->GiveXP(itr_xp, pVictim);
-                                if(Pet* pet = pGroupGuy->GetPet())
-                                {
-                                    pet->GivePetXP(itr_xp/2);
-                                }
-
-                                // normal creature (not pet/etc) can be only in !PvP case
-                                if(pVictim->GetTypeId()==TYPEID_UNIT)
-                                    pGroupGuy->KilledMonster(pVictim->GetEntry(), pVictim->GetGUID());
-                            }
-                        }
-                    }
-                }
-                else                                        // if (!pGroup)
-                {
-                    xp = PvP || IsNoDamageXPArea(player->GetAreaId()) ? 0 : MaNGOS::XP::Gain(player, pVictim);
-
-                    // honor can be in PvP and !PvP (racial leader) cases
-                    if(player->RewardHonor(pVictim,1))
-                        honored_kill = true;
-
-                    // xp and reputation only in !PvP case
-                    if(!PvP)
-                    {
-                        player->RewardReputation(pVictim,1);
-                        player->GiveXP(xp, pVictim);
-                        if(Pet* pet = player->GetPet())
-                        {
-                            pet->GivePetXP(xp);
-                        }
-
-                        // normal creature (not pet/etc) can be only in !PvP case
-                        if(pVictim->GetTypeId()==TYPEID_UNIT)
-                            player->KilledMonster(pVictim->GetEntry(),pVictim->GetGUID());
-                    }
-                }
-
-                if(xp || honored_kill)
-                    player->ProcDamageAndSpell(pVictim,PROC_FLAG_KILL_XP_GIVER,PROC_FLAG_NONE);
-            }
+            if(Unit* pet = player->GetCharm())
+                pet->ClearInCombat();
         }
-        else                                                // if (player)
-        {
-            DEBUG_LOG("Monster kill Monster");
-        }
+
+        // non-controlled player or owner of controlled pet
+        if(player && player!=pVictim)
+            if(player->RewardPlayerAndGroupAtKill(pVictim))
+                player->ProcDamageAndSpell(pVictim,PROC_FLAG_KILL_XP_GIVER,PROC_FLAG_NONE);
 
         // last damage from non duel opponent or opponent controlled creature
         if(duel_hasEnded)
@@ -5537,11 +5434,11 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         }
         case SPELLFAMILY_WARLOCK:
         {
-            //Pyroclasm
             if(auraSpellInfo->SpellFamilyFlags == 0x0000000000000000)
             {
                 switch(auraSpellInfo->SpellIconID)
                 {
+                    //Pyroclasm
                     case 1137:
                     {
                         if(!pVictim || !pVictim->isAlive())
@@ -5561,12 +5458,13 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                             CastSpell(pVictim, 18093, true, castItem, triggeredByAura);
                         return;
                     }
-                    //Improved Drain Soul
+                    //Drain Soul
                     case 113:
                     {
                         Unit::AuraList const& mAddFlatModifier = GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
                         for(Unit::AuraList::const_iterator i = mAddFlatModifier.begin(); i != mAddFlatModifier.end(); ++i)
                         {
+                            //Improved Drain Soul
                             if ((*i)->GetModifier()->m_miscvalue == SPELLMOD_CHANCE_OF_SUCCESS && (*i)->GetSpellProto()->SpellIconID == 113)
                             {
                                 int32 impDrainSoulBasePoints0 = (*i)->GetSpellProto()->EffectBasePoints[2] * GetMaxPower(POWER_MANA) / 100;
@@ -6468,7 +6366,7 @@ bool Unit::isAttackingPlayer() const
         if(getVictim()->GetTypeId() == TYPEID_PLAYER)
             return true;
 
-        if(getVictim()->GetOwnerGUID() && GUID_HIPART(getVictim()->GetOwnerGUID())==HIGHGUID_PLAYER)
+        if(getVictim()->GetOwnerGUID() && IS_PLAYER_GUID(getVictim()->GetOwnerGUID()))
             return true;
     }
 

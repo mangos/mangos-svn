@@ -672,7 +672,7 @@ bool ChatHandler::HandleDelObjectCommand(const char* args)
     if(owner_guid)
     {
         Unit* owner = ObjectAccessor::GetUnit(*m_session->GetPlayer(),owner_guid);
-        if(!owner && GUID_HIPART(owner_guid)!=HIGHGUID_PLAYER)
+        if(!owner && !IS_PLAYER_GUID(owner_guid))
         {
             PSendSysMessage(LANG_COMMAND_DELOBJREFERCREATURE, GUID_LOPART(owner_guid), obj->GetGUIDLow());
             return true;

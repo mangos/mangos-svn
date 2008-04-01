@@ -799,7 +799,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     }
 
     // Call scripted function for AI if this spell is casted upon a creature
-    if(GUID_HIPART(target->targetGUID)==HIGHGUID_UNIT)
+    if(IS_CREATURE_GUID(target->targetGUID))
     {
         // cast at creature (or GO) quest objectives update at succesful cast finished (+channel finished)
         // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
@@ -2162,7 +2162,7 @@ void Spell::update(uint32 difftime)
                     for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
                     {
                         TargetInfo* target = &*ihit;
-                        if(GUID_HIPART(target->targetGUID)!=HIGHGUID_UNIT)
+                        if(!IS_CREATURE_GUID(target->targetGUID))
                             continue;
 
                         Unit* unit = m_caster->GetGUID()==target->targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster,target->targetGUID);

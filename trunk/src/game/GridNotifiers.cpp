@@ -119,7 +119,7 @@ VisibleNotifier::Notify()
         std::set<uint64> const& oor = i_data.GetOutOfRangeGUIDs();
         for(std::set<uint64>::const_iterator iter = oor.begin(); iter != oor.end(); ++iter)
         {
-            if(GUID_HIPART(*iter)!=HIGHGUID_PLAYER)
+            if(!IS_PLAYER_GUID(*iter))
                 continue;
 
             Player* plr = ObjectAccessor::GetPlayer(i_player,*iter);

@@ -593,7 +593,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text, st
                 uint64 sel_guid = p->GetSelection();
                 sLog.outCommand("Command: %s [Player: %s (Account: %u) X: %f Y: %f Z: %f Map: %u Selected: %s (GUID: %u)]",
                     fullcmd.c_str(),p->GetName(),m_session->GetAccountId(),p->GetPositionX(),p->GetPositionY(),p->GetPositionZ(),p->GetMapId(),
-                    (GUID_HIPART(sel_guid)==HIGHGUID_UNIT ? "creature" : (sel_guid !=0 ? "player" : "none")),
+                    (IS_CREATURE_GUID(sel_guid) ? "creature" : (sel_guid !=0 ? "player" : "none")),
                     GUID_LOPART(sel_guid));
             }
         }

@@ -16339,7 +16339,7 @@ void Player::UpdateForQuestsGO()
     WorldPacket packet;
     for(ClientGUIDs::iterator itr=m_clientGUIDs.begin(); itr!=m_clientGUIDs.end(); ++itr)
     {
-        if(GUID_HIPART(*itr)==HIGHGUID_GAMEOBJECT)
+        if(IS_GAMEOBJECT_GUID(*itr))
         {
             GameObject *obj = HashMapHolder<GameObject>::Find(*itr);
             if(obj)
@@ -16596,4 +16596,85 @@ uint32 Player::GetResurrectionSpellId()
         spell_id = 21169;
 
     return spell_id;
+}
+
+bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
+{
+    bool PvP = pVictim->GetTypeId()==TYPEID_PLAYER || IS_PLAYER_GUID(pVictim->GetCharmerOrOwnerGUID());
+
+    // prepare data for near group iteration (PvP and !PvP cases)
+    uint32 xp = 0;
+    bool honored_kill = false;
+
+    if(Group *pGroup = GetGroup())
+    {
+        uint32 count = 0;
+        uint32 sum_level = 0;
+        Player* member_with_max_level = NULL;
+
+        pGroup->GetDataForXPAtKill(pVictim,count,sum_level,member_with_max_level);
+
+        if(member_with_max_level)
+        {
+            xp = PvP || IsNoDamageXPArea(GetAreaId()) ? 0 : MaNGOS::XP::Gain(member_with_max_level, pVictim);
+
+            // skip in check PvP case (for speed, not used)
+            bool is_raid = PvP ? false : MapManager::Instance().GetBaseMap(GetMapId())->IsRaid() && pGroup->isRaidGroup();
+            bool is_dungeon = PvP ? false : MapManager::Instance().GetBaseMap(GetMapId())->IsDungeon();
+            float group_rate = MaNGOS::XP::xp_in_group_rate(count,is_raid);
+
+            for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+            {
+                Player *pGroupGuy = pGroup->GetMemberForXPAtKill(itr->getSource(),pVictim);
+                if(!pGroupGuy)
+                    continue;
+
+                // honor can be in PvP and !PvP (racial leader) cases
+                if(pGroupGuy->RewardHonor(pVictim,count) && pGroupGuy==this)
+                    honored_kill = true;
+
+                // xp and reputation only in !PvP case
+                if(!PvP)
+                {
+                    float rate = group_rate * float(pGroupGuy->getLevel()) / sum_level;
+
+                    // if is in dungeon then all receive full reputation at kill
+                    pGroupGuy->RewardReputation(pVictim,is_dungeon ? 1.0f : rate);
+
+                    uint32 itr_xp = uint32(xp*rate);
+
+                    pGroupGuy->GiveXP(itr_xp, pVictim);
+                    if(Pet* pet = pGroupGuy->GetPet())
+                        pet->GivePetXP(itr_xp/2);
+    
+                    // normal creature (not pet/etc) can be only in !PvP case
+                    if(pVictim->GetTypeId()==TYPEID_UNIT)
+                        pGroupGuy->KilledMonster(pVictim->GetEntry(), pVictim->GetGUID());
+                }
+            }
+        }
+    }
+    else                                        // if (!pGroup)
+    {
+        xp = PvP || IsNoDamageXPArea(GetAreaId()) ? 0 : MaNGOS::XP::Gain(this, pVictim);
+
+        // honor can be in PvP and !PvP (racial leader) cases
+        if(RewardHonor(pVictim,1))
+            honored_kill = true;
+
+        // xp and reputation only in !PvP case
+        if(!PvP)
+        {
+            RewardReputation(pVictim,1);
+            GiveXP(xp, pVictim);
+
+            if(Pet* pet = GetPet())
+                pet->GivePetXP(xp);
+
+            // normal creature (not pet/etc) can be only in !PvP case
+            if(pVictim->GetTypeId()==TYPEID_UNIT)
+                KilledMonster(pVictim->GetEntry(),pVictim->GetGUID());
+        }
+    }
+    return xp || honored_kill;
 }

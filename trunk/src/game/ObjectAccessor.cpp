@@ -147,7 +147,7 @@ ObjectAccessor::GetCreature(WorldObject const &u, uint64 guid)
 Unit*
 ObjectAccessor::GetUnit(WorldObject const &u, uint64 guid)
 {
-    if(GUID_HIPART(guid)==HIGHGUID_PLAYER)
+    if(IS_PLAYER_GUID(guid))
         return FindPlayer(guid);
 
     return GetCreatureOrPet(u, guid);
