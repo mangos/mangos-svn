@@ -97,6 +97,9 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         static Unit* GetObjectInWorld(uint64 guid, Unit* /*fake*/)
         {
+            if(!guid)
+                return NULL;
+
             if (IS_PLAYER_GUID(guid))
                 return (Unit*)HashMapHolder<Player>::Find(guid);
 
