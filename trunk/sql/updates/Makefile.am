@@ -654,6 +654,7 @@ pkgdata_DATA = \
 	5498_mangos_spell_affect.sql \
 	5505_mangos.sql \
 	5505_mangos_npc_gossip.sql \
+	5526_mangos_player_levelstats.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1288,4 +1289,5 @@ EXTRA_DIST = \
 	5498_mangos_spell_affect.sql \
 	5505_mangos.sql \
 	5505_mangos_npc_gossip.sql \
+	5526_mangos_player_levelstats.sql \
 	README
