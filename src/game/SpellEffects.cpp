@@ -3565,7 +3565,7 @@ void Spell::EffectInterruptCast(uint32 /*i*/)
             if ( unitTarget->m_currentSpells[i]->m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_INTURRUPT )
             {
                 unitTarget->ProhibitSpellScholl(SpellSchools(unitTarget->m_currentSpells[i]->m_spellInfo->School), GetSpellDuration(m_spellInfo));
-                unitTarget->InterruptSpell(i);
+                unitTarget->InterruptSpell(i,false);
             }
         }
     }

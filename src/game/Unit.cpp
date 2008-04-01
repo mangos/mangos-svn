@@ -1026,7 +1026,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                     AuraList const& mDamageDoneVersus = GetAurasByType(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS);
                     for(AuraList::const_iterator i = mDamageDoneVersus.begin();i != mDamageDoneVersus.end(); ++i)
                         if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
-                            bonusDmg *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+                            bonusDmg = uint32(bonusDmg * ((*i)->GetModifier()->m_amount+100.0f)/100.0f);
 
                     *damage += bonusDmg;
 
@@ -1456,7 +1456,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                         int32 stepPercent = CalculateSpellDamage((*i)->GetSpellProto(),0,(*i)->GetSpellProto()->EffectBasePoints[0],this);
 
                         // count affliction effects and calc additional damage in percentage
-                        int32 modPercent = 0.0f;
+                        int32 modPercent = 0;
                         AuraMap& victimAuras = pVictim->GetAuras();
                         for (Unit::AuraMap::iterator itr = victimAuras.begin(); itr != victimAuras.end(); ++itr)
                         {
@@ -2052,7 +2052,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
                 AuraList const& mDamageDoneVersus = GetAurasByType(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS);
                 for(AuraList::const_iterator i = mDamageDoneVersus.begin();i != mDamageDoneVersus.end(); ++i)
                     if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
-                        crit_bonus *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+                        crit_bonus = uint32(crit_bonus * ((*i)->GetModifier()->m_amount+100.0f)/100.0f);
             }
 
             *damage += crit_bonus;
@@ -3330,11 +3330,7 @@ void Unit::SetCurrentCastedSpell( Spell * pSpell )
     if (pSpell == m_currentSpells[CSpellType]) return;      // avoid breaking self
 
     // break same type spell if it is not delayed
-    if ( m_currentSpells[CSpellType] &&
-        m_currentSpells[CSpellType]->getState() != SPELL_STATE_DELAYED )
-    {
-        InterruptSpell(CSpellType);
-    }
+    InterruptSpell(CSpellType,false);
 
     // special breakage effects:
     switch (CSpellType)
@@ -3342,11 +3338,7 @@ void Unit::SetCurrentCastedSpell( Spell * pSpell )
         case CURRENT_GENERIC_SPELL:
         {
             // generic spells always break channeled not delayed spells
-            if ( m_currentSpells[CURRENT_CHANNELED_SPELL] &&
-                m_currentSpells[CURRENT_CHANNELED_SPELL]->getState() != SPELL_STATE_DELAYED )
-            {
-                InterruptSpell(CURRENT_CHANNELED_SPELL);
-            }
+            InterruptSpell(CURRENT_CHANNELED_SPELL,false);
 
             // autorepeat breaking
             if ( m_currentSpells[CURRENT_AUTOREPEAT_SPELL] )
@@ -3359,8 +3351,8 @@ void Unit::SetCurrentCastedSpell( Spell * pSpell )
 
         case CURRENT_CHANNELED_SPELL:
         {
-            // channel spells always break generic and channeled spells
-            InterruptSpell(CURRENT_GENERIC_SPELL);
+            // channel spells always break generic non-delayed and any channeled spells
+            InterruptSpell(CURRENT_GENERIC_SPELL,false);
             InterruptSpell(CURRENT_CHANNELED_SPELL);
 
             // it also does break autorepeat if not Auto Shot
@@ -3374,9 +3366,9 @@ void Unit::SetCurrentCastedSpell( Spell * pSpell )
             // only Auto Shoot does not break anything
             if (pSpell->m_spellInfo->Category == 351)
             {
-                // generic autorepeats break generic and channeled spells
-                InterruptSpell(CURRENT_GENERIC_SPELL);
-                InterruptSpell(CURRENT_CHANNELED_SPELL);
+                // generic autorepeats break generic non-delayed and channeled non-delayed spells
+                InterruptSpell(CURRENT_GENERIC_SPELL,false);
+                InterruptSpell(CURRENT_CHANNELED_SPELL,false);
             }
             else
             {
@@ -3399,11 +3391,11 @@ void Unit::SetCurrentCastedSpell( Spell * pSpell )
     m_currentSpells[CSpellType] = pSpell;
 }
 
-void Unit::InterruptSpell(uint32 spellType)
+void Unit::InterruptSpell(uint32 spellType, bool withDelayed)
 {
     assert(spellType < CURRENT_MAX_SPELL);
 
-    if(m_currentSpells[spellType])
+    if(m_currentSpells[spellType] && (withDelayed || m_currentSpells[spellType]->getState() != SPELL_STATE_DELAYED) )
     {
         // send autorepeat cancel message for autorepeat spells
         if (spellType == CURRENT_AUTOREPEAT_SPELL)
@@ -6675,7 +6667,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             else if((spellProto->SpellFamilyFlags & 0x1LL) && spellProto->SpellIconID == 185)
             {
                 CastingTime = 3500;
-                DotFactor = damagetype == DOT ? 0 : 1.0f;
+                DotFactor = damagetype == DOT ? 0.0f : 1.0f;
             }
             // Molten armor
             else if (spellProto->SpellFamilyFlags & 0x0000000800000000LL)
@@ -6767,7 +6759,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             else if((spellProto->SpellFamilyFlags & 0x8000000LL) && spellProto->SpellIconID == 25)
             {
                 Item *item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-                float wspeed = GetAttackTime(BASE_ATTACK)/1000;
+                float wspeed = GetAttackTime(BASE_ATTACK)/1000.0f;
 
                 if( item && item->GetProto()->InventoryType == INVTYPE_2HWEAPON) 
                    CastingTime = (uint32)wspeed*3500*0.102f; 
@@ -6863,8 +6855,8 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     // Level Factor
     float LvlPenalty = 0.0f;
     if(spellProto->spellLevel < 20)
-        LvlPenalty = (20.0f - (float)(spellProto->spellLevel)) * 3.75f;
-    float LvlFactor = ((float)(spellProto->spellLevel) + 6.0f) / (float)(getLevel());
+        LvlPenalty = 20.0f - spellProto->spellLevel * 3.75f;
+    float LvlFactor = (float(spellProto->spellLevel) + 6.0f) / float(getLevel());
     if(LvlFactor > 1.0f)
         LvlFactor = 1.0f;
 

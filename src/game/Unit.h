@@ -903,7 +903,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void SetCurrentCastedSpell(Spell * pSpell);
         virtual void ProhibitSpellScholl(SpellSchools /*idSchool*/, uint32 /*unTimeMs*/ ) { }
-        void InterruptSpell(uint32 spellType);
+        void InterruptSpell(uint32 spellType, bool withDelayed = true);
 
         // set withDelayed to true to account delayed spells as casted
         // delayed+channeled spells are always accounted as casted
