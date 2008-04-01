@@ -1409,6 +1409,11 @@ void Spell::EffectTriggerSpell(uint32 i)
     // special cases
     switch(triggered_spell_id)
     {
+        // just skip
+        case 23770:                                         // Sayge's Dark Fortune of *
+            // not exist, common cooldown can be implemented in scripts if need.
+            return;
+
         // Righteous Defense
         case 31980:
         {

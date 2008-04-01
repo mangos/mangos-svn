@@ -324,6 +324,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool isPet() const { return m_isPet; }
         void SetRespawnCoord(float x, float y, float z) { respawn_cord[0] = x; respawn_cord[1] = y; respawn_cord[2] = z; }
+        void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
         bool isTotem() const { return m_isTotem; }
         bool isRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
         bool isCivilian() const { return GetCreatureInfo()->civilian; }

@@ -625,16 +625,19 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
         pVictim->CombatStop();
 
         // clear combat state for killer dependent units (owner/pets)
-        if(player==this)                                    // not controlled player
+        if(player)
         {
-            if(Unit* pet = GetPet())
-                pet->ClearInCombat();
+            if(player==this)                                // not controlled player
+            {
+                if(Unit* pet = GetPet())
+                    pet->ClearInCombat();
 
-            if(Unit* pet = GetCharm())
-                pet->ClearInCombat();
+                if(Unit* pet = GetCharm())
+                    pet->ClearInCombat();
+            }
+            else                                            // Pet or timed creature, or player
+                player->ClearInCombat();
         }
-        else if(player)                                     // Pet or timed creature, or player
-            player->ClearInCombat();
 
         // if talent known but not triggered (check priest class for speedup check)
         Aura* spiritOfRedemtionTalentReady = NULL;
