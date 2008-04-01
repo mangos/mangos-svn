@@ -602,8 +602,39 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
 
         DEBUG_LOG("DealDamage: victim just died");
 
+        // find player: owner of controlled `this` or `this` itself maybe
+        Player *player = NULL;
+        if(GetCharmerOrOwnerGUID())                         // Pet or timed creature, or player
+        {
+            if(Unit* owner = GetCharmerOrOwner())
+                if(owner->GetTypeId() == TYPEID_PLAYER)
+                    player = (Player*)owner;
+        }
+        else if(GetTypeId() == TYPEID_PLAYER)               // not controlled player
+            player = (Player*)this;
+
+        // Reward player, his pets, and group/raid members
+        // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
+        if(player && player!=pVictim)
+            if(player->RewardPlayerAndGroupAtKill(pVictim))
+                player->ProcDamageAndSpell(pVictim,PROC_FLAG_KILL_XP_GIVER,PROC_FLAG_NONE);
+
         DEBUG_LOG("DealDamageAttackStop");
+
+        // stop combat
         pVictim->CombatStop();
+
+        // clear combat state for killer dependent units (owner/pets)
+        if(player==this)                                    // not controlled player
+        {
+            if(Unit* pet = GetPet())
+                pet->ClearInCombat();
+
+            if(Unit* pet = GetCharm())
+                pet->ClearInCombat();
+        }
+        else                                                // Pet or timed creature, or player
+            player->ClearInCombat();
 
         // if talent known but not triggered (check priest class for speedup check)
         Aura* spiritOfRedemtionTalentReady = NULL;
@@ -689,36 +720,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             if (((Creature*)pVictim)->AI())
                 ((Creature*)pVictim)->AI()->JustDied(this);
         }
-
-        // find owner of controlled `this` or it's player maybe
-        Player *player = NULL;
-
-        if(GetCharmerOrOwnerGUID())                         // Pet or timed creature, or player
-        {
-            Unit* pet = this;
-            Unit* owner = pet->GetCharmerOrOwner();
-
-            if(owner && owner->GetTypeId() == TYPEID_PLAYER)
-            {
-                player = (Player*)owner;
-                player->ClearInCombat();
-            }
-        }
-        else if(GetTypeId() == TYPEID_PLAYER)               // not controlled player
-        {
-            player = (Player*)this;
-
-            if(Unit* pet = player->GetPet())
-                pet->ClearInCombat();
-
-            if(Unit* pet = player->GetCharm())
-                pet->ClearInCombat();
-        }
-
-        // non-controlled player or owner of controlled pet
-        if(player && player!=pVictim)
-            if(player->RewardPlayerAndGroupAtKill(pVictim))
-                player->ProcDamageAndSpell(pVictim,PROC_FLAG_KILL_XP_GIVER,PROC_FLAG_NONE);
 
         // last damage from non duel opponent or opponent controlled creature
         if(duel_hasEnded)
@@ -5434,46 +5435,42 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         }
         case SPELLFAMILY_WARLOCK:
         {
-            if(auraSpellInfo->SpellFamilyFlags == 0x0000000000000000)
+            //Pyroclasm
+            if(auraSpellInfo->SpellFamilyFlags == 0x0000000000000000 && auraSpellInfo->SpellIconID==1137)
             {
-                switch(auraSpellInfo->SpellIconID)
-                {
-                    //Pyroclasm
-                    case 1137:
-                    {
-                        if(!pVictim || !pVictim->isAlive())
-                            return;
+                if(!pVictim || !pVictim->isAlive())
+                    return;
 
-                        float chance = 0;
-                        switch (triggeredByAura->GetSpellProto()->Id)
-                        {
-                        case 18096:
-                            chance = 13.0f;
-                            break;
-                        case 18073:
-                            chance = 26.0f;
-                            break;
-                        }
-                        if (roll_chance_f(chance))
-                            CastSpell(pVictim, 18093, true, castItem, triggeredByAura);
-                        return;
-                    }
-                    //Drain Soul
-                    case 113:
+                float chance = 0;
+                switch (triggeredByAura->GetSpellProto()->Id)
+                {
+                    case 18096:
+                        chance = 13.0f;
+                        break;
+                    case 18073:
+                        chance = 26.0f;
+                        break;
+                }
+                if (roll_chance_f(chance))
+                    CastSpell(pVictim, 18093, true, castItem, triggeredByAura);
+                return;
+            }
+            //Drain Soul
+            if(auraSpellInfo->SpellFamilyFlags & 0x0000000000004000)
+            {
+                Unit::AuraList const& mAddFlatModifier = GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
+                for(Unit::AuraList::const_iterator i = mAddFlatModifier.begin(); i != mAddFlatModifier.end(); ++i)
+                {
+                    //Improved Drain Soul
+                    if ((*i)->GetModifier()->m_miscvalue == SPELLMOD_CHANCE_OF_SUCCESS && (*i)->GetSpellProto()->SpellIconID == 113)
                     {
-                        Unit::AuraList const& mAddFlatModifier = GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
-                        for(Unit::AuraList::const_iterator i = mAddFlatModifier.begin(); i != mAddFlatModifier.end(); ++i)
-                        {
-                            //Improved Drain Soul
-                            if ((*i)->GetModifier()->m_miscvalue == SPELLMOD_CHANCE_OF_SUCCESS && (*i)->GetSpellProto()->SpellIconID == 113)
-                            {
-                                int32 impDrainSoulBasePoints0 = (*i)->GetSpellProto()->EffectBasePoints[2] * GetMaxPower(POWER_MANA) / 100;
-                                CastCustomSpell(this, 18371, &impDrainSoulBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
-                            }
-                        }
-                        return;
+                        int32 value2 = CalculateSpellDamage((*i)->GetSpellProto(),2,(*i)->GetSpellProto()->EffectBasePoints[2],this);
+                        int32 impDrainSoulBasePoints0 = value2 * GetMaxPower(POWER_MANA) / 100;
+                        CastCustomSpell(this, 18371, &impDrainSoulBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
+                        break;
                     }
                 }
+                return;
             }
             break;
         }
@@ -6366,7 +6363,7 @@ bool Unit::isAttackingPlayer() const
         if(getVictim()->GetTypeId() == TYPEID_PLAYER)
             return true;
 
-        if(getVictim()->GetOwnerGUID() && IS_PLAYER_GUID(getVictim()->GetOwnerGUID()))
+        if(IS_PLAYER_GUID(getVictim()->GetOwnerGUID()))
             return true;
     }
 
