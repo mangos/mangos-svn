@@ -1588,6 +1588,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
 
+        bool RewardPlayerAndGroupAtKill(Unit* pVictim);
+
         FactionsList m_factions;
         ForcedReactions m_forcedReactions;
         int32 GetBaseReputation(const FactionEntry *factionEntry) const;

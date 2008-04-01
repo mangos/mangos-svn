@@ -65,7 +65,7 @@ GameObject::~GameObject()
             Unit* owner = ObjectAccessor::GetUnit(*this,owner_guid);
             if(owner)
                 owner->RemoveGameObject(this,false);
-            else if(GUID_HIPART(owner_guid)!=HIGHGUID_PLAYER)
+            else if(!IS_PLAYER_GUID(owner_guid))
                 sLog.outError("Delete GameObject (GUID: %u Entry: %u ) that have references in not found creature %u GO list. Crash possable later.",GetGUIDLow(),GetGOInfo()->id,GUID_LOPART(owner_guid));
         }
     }
@@ -157,7 +157,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
 
 void GameObject::Update(uint32 /*p_time*/)
 {
-    if (GUID_HIPART(GetGUID()) == HIGHGUID_MO_TRANSPORT)
+    if (IS_MO_TRANSPORT(GetGUID()))
     {
         //((Transport*)this)->Update(p_time);
         return;
