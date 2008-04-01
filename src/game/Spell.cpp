@@ -878,16 +878,21 @@ bool Spell::IsAliveUnitPresentInTargetList()
     if (m_needAliveTargetMask == 0)
         return true;
 
+    uint8 needAliveTargetMask = m_needAliveTargetMask;
+
     for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
     {
-        if( ihit->missCondition == SPELL_MISS_NONE && (m_needAliveTargetMask & ihit->effectMask) )
+        if( ihit->missCondition == SPELL_MISS_NONE && (needAliveTargetMask & ihit->effectMask) )
         {
             Unit *unit = m_caster->GetGUID()==ihit->targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster, ihit->targetGUID);
+
             if (unit && unit->isAlive())
-                return true;
+                needAliveTargetMask &= ~ihit->effectMask;   // remove from need alive mask effect that have alive target
         }
     }
-    return false;
+
+    // is all effects from m_needAliveTargetMask have alive targets
+    return needAliveTargetMask==0;
 }
 
 // Helper for Chain Healing
