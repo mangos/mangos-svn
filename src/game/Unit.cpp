@@ -4551,7 +4551,6 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 CastCustomSpell(this, 29442, &manaReward, NULL, NULL, true, castItem, triggeredByAura);
                 return;
             }
-            break;
 
             switch(dummySpell->Id)
             {
@@ -6761,10 +6760,10 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 Item *item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
                 float wspeed = GetAttackTime(BASE_ATTACK)/1000.0f;
 
-                if( item && item->GetProto()->InventoryType == INVTYPE_2HWEAPON) 
-                   CastingTime = (uint32)wspeed*3500*0.102f; 
+                if( item && item->GetProto()->InventoryType == INVTYPE_2HWEAPON)
+                   CastingTime = uint32(wspeed*3500*0.102f);
                 else
-                   CastingTime = (uint32)wspeed*3500*0.098f; 
+                   CastingTime = uint32(wspeed*3500*0.098f);
             }
             // Judgement of Righteousness - 73%
             else if ((spellProto->SpellFamilyFlags & 1024) && spellProto->SpellIconID == 25)
@@ -7025,7 +7024,7 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 *damage, Unit
             AuraList const& mDamageDoneVersus = GetAurasByType(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS);
             for(AuraList::const_iterator i = mDamageDoneVersus.begin();i != mDamageDoneVersus.end(); ++i)
                 if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
-                    crit_bonus *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+                    crit_bonus = int32(crit_bonus * ((*i)->GetModifier()->m_amount+100.0f)/100.0f);
         }
 
         if(crit_bonus> 0)
@@ -9595,7 +9594,7 @@ uint32 Unit::GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectT
                         break;
                     default: 
                         // -5% per additional effect
-                        CastingTime *= 0.95f;
+                        CastingTime = uint32(CastingTime * 0.95f);
                         break;
                 }
             default: 
@@ -9617,16 +9616,16 @@ uint32 Unit::GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectT
         float PtOT = (overTime / 15000.f) / ((overTime / 15000.f) + (OriginalCastTime / 3500.f));
 
         if ( damagetype == DOT )
-            CastingTime *= PtOT;
+            CastingTime = uint32(CastingTime * PtOT);
         else if ( PtOT < 1.0f )
-            CastingTime *= 1 - PtOT;
+            CastingTime  = uint32(CastingTime * (1 - PtOT));
         else 
             CastingTime = 0;
     }
 
     // Area Effect Spells receive only half of bonus
     if ( AreaEffect )
-        CastingTime *= 0.5f;
+        CastingTime = uint32(CastingTime * 0.5f);
 
     return CastingTime;
 }
