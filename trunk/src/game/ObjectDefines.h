@@ -39,8 +39,11 @@ enum HighGuid
 #define GUID_LOPART(x)   (uint32)(uint64(x) & 0xFFFFFFFFULL)
 #define MAKE_GUID(l, h)  uint64( uint32(l) | ( uint64(h) << 32 ) )
 
+#define IS_EMPTY_GUID(Guid)          ( Guid == 0 )
+
 #define IS_CREATURE_GUID(Guid)       ( GUID_HIPART(Guid) == HIGHGUID_UNIT )
-#define IS_PLAYER_GUID(Guid)         ( GUID_HIPART(Guid) == HIGHGUID_PLAYER )
+#define IS_PLAYER_GUID(Guid)         ( GUID_HIPART(Guid) == HIGHGUID_PLAYER && Guid!=0 )
+                                                            // special case for empty guid need check
 #define IS_ITEM_GUID(Guid)           ( GUID_HIPART(Guid) == HIGHGUID_ITEM )
 #define IS_GAMEOBJECT_GUID(Guid)     ( GUID_HIPART(Guid) == HIGHGUID_GAMEOBJECT )
 #define IS_DYNAMICOBJECT_GUID(Guid)  ( GUID_HIPART(Guid) == HIGHGUID_DYNAMICOBJECT )
