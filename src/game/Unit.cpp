@@ -633,7 +633,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             if(Unit* pet = GetCharm())
                 pet->ClearInCombat();
         }
-        else                                                // Pet or timed creature, or player
+        else if(palyer)                                     // Pet or timed creature, or player
             player->ClearInCombat();
 
         // if talent known but not triggered (check priest class for speedup check)
