@@ -487,6 +487,8 @@ class SpellMgr
             return itr->second.prev;
         }
 
+        // Note: not use rank for compare to spell ranks: spell chains isn't linear order
+        // Use IsHighRankOfSpell instead
         uint8 GetSpellRank(uint32 spell_id) const
         {
             SpellChainMap::const_iterator itr = mSpellChains.find(spell_id);
@@ -494,6 +496,24 @@ class SpellMgr
                 return 0;
 
             return itr->second.rank;
+        }
+
+        uint8 IsHighRankOfSpell(uint32 spell1,uint32 spell2) const
+        {
+            SpellChainMap::const_iterator itr = mSpellChains.find(spell1);
+
+            uint32 rank2 = GetSpellRank(spell2);
+
+            // not ordered correctly by rank value
+            if(itr == mSpellChains.end() || !rank2 || itr->second.rank <= rank2)
+                return false;
+
+            // check present in same rank chain
+            for(; itr != mSpellChains.end(); itr = mSpellChains.find(itr->second.prev))
+                if(itr->second.prev==spell2)
+                    return true;
+
+            return false;
         }
 
         uint32 GetLastSpellInChain(uint32 spell_id) const

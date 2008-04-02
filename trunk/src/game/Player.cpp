@@ -2499,10 +2499,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
             {
                 if(itr->second->active)
                 {
-                    uint8 spell_id_rank = spellmgr.GetSpellRank(spell_id);
-                    uint8 itr_rank = spellmgr.GetSpellRank(itr->first);
-
-                    if(spell_id_rank > itr_rank)
+                    if(spellmgr.IsHighRankOfSpell(spell_id,itr->first))
                     {
                         WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
                         data << uint16(itr->first);
@@ -2514,7 +2511,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
                         itr->second->state = PLAYERSPELL_CHANGED;
                         superceded_old = true;              // new spell replace old in action bars and spell book.
                     }
-                    else if(spell_id_rank < itr_rank)
+                    else if(spellmgr.IsHighRankOfSpell(itr->first,spell_id))
                     {
                         WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
                         data << uint16(spell_id);
