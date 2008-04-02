@@ -658,6 +658,7 @@ pkgdata_DATA = \
 	5529_mangos_spell_chain.sql \
 	5530_spell_learn_spell.sql \
 	5531_mangos_creature_movement.sql \
+	5534_mangos_player_levelstats.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1296,4 +1297,5 @@ EXTRA_DIST = \
 	5529_mangos_spell_chain.sql \
 	5530_spell_learn_spell.sql \
 	5531_mangos_creature_movement.sql \
+	5534_mangos_player_levelstats.sql \
 	README
