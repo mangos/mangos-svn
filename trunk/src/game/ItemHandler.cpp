@@ -890,6 +890,12 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
         return;
     }
 
+    if(!gift->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPER))// cheating: non-wrapper wrapper
+    {
+        _player->SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, gift, NULL );
+        return;
+    }
+
     Item *item = _player->GetItemByPos( item_bag, item_slot );
 
     if( !item )
