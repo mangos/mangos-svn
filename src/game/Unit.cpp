@@ -7796,9 +7796,14 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
     if (m_Visibility == VISIBILITY_ON && u->GetVisibility()!= VISIBILITY_GROUP_INVISIBILITY)
         return true;
 
-    // GMs are visible for higher gms (or players are visible for gms)
+    // GMs see any players, not higher GMs and all units
     if (u->GetTypeId() == TYPEID_PLAYER && ((Player *)u)->isGameMaster())
-        return (GetTypeId() == TYPEID_PLAYER && ((Player *)this)->GetSession()->GetSecurity() <= ((Player *)u)->GetSession()->GetSecurity());
+    {
+        if(GetTypeId() == TYPEID_PLAYER)
+            return ((Player *)this)->GetSession()->GetSecurity() <= ((Player *)u)->GetSession()->GetSecurity();
+        else
+            return true;
+    }
 
     // non faction visibility non-breakable for non-GMs
     if (m_Visibility == VISIBILITY_OFF)
