@@ -576,6 +576,11 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
                     // convert from float to uint32 and send
                     *data << uint32(m_floatValues[ index ] < 0 ? 0 : m_floatValues[ index ]);
                 }
+                // Gamemasters should be always able to select units - remove not selectable flag
+                else if(index == UNIT_FIELD_FLAGS && target->isGameMaster())
+                {
+                    *data << (m_uint32Values[ index ] & ~UNIT_FLAG_NOT_SELECTABLE);
+                }
                 else
                 {
                     // send in current format (float as float, uint32 as uint32)
