@@ -656,7 +656,7 @@ pkgdata_DATA = \
 	5505_mangos_npc_gossip.sql \
 	5526_mangos_player_levelstats.sql \
 	5529_mangos_spell_chain.sql \
-	5530_spell_learn_spell.sql \
+	5530_mangos_spell_learn_spell.sql \
 	5531_mangos_creature_movement.sql \
 	5534_mangos_player_levelstats.sql \
 	README
@@ -1295,7 +1295,7 @@ EXTRA_DIST = \
 	5505_mangos_npc_gossip.sql \
 	5526_mangos_player_levelstats.sql \
 	5529_mangos_spell_chain.sql \
-	5530_spell_learn_spell.sql \
+	5530_mangos_spell_learn_spell.sql \
 	5531_mangos_creature_movement.sql \
 	5534_mangos_player_levelstats.sql \
 	README
