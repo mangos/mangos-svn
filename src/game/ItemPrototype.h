@@ -90,7 +90,7 @@ enum ITEM_FLAGS
     ITEM_FLAGS_CONJURED                       = 0x00000002,
     ITEM_FLAGS_OPENABLE                       = 0x00000004,
     ITEM_FLAGS_WRAPPED                        = 0x00000008,
-    ITEM_FLAGS_WRAPPER                        = 0x00000100, // used or not used wrapper
+    ITEM_FLAGS_WRAPPER                        = 0x00000200, // used or not used wrapper
     ITEM_FLAGS_QUEST_OBJECTIVE                = 0x00000800,
     ITEM_FLAGS_CHARTER                        = 0x00002000, // arena/guild charter
     ITEM_FLAGS_UNIQUE_EQUIPPED                = 0x00080000,
