@@ -512,7 +512,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `creature_movement`;
 CREATE TABLE `creature_movement` (
-  `id` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Identifier',
+  `id` int(10) unsigned NOT NULL auto_increment COMMENT 'Creature GUID',
   `point` mediumint(8) unsigned NOT NULL default '0',
   `position_x` float NOT NULL default '0',
   `position_y` float NOT NULL default '0',
