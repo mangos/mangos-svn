@@ -87,6 +87,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_LOOT_MONEY ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLootMoneyOpcode               );
     objmgr.opcodeTable[ CMSG_LOOT ]                             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLootOpcode                    );
     objmgr.opcodeTable[ CMSG_LOOT_RELEASE ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLootReleaseOpcode             );
+    objmgr.opcodeTable[ CMSG_LOOT_MASTER_GIVE ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLootMasterGiveOpcode          );
     objmgr.opcodeTable[ CMSG_WHO ]                              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleWhoOpcode                     );
     objmgr.opcodeTable[ CMSG_LOGOUT_REQUEST ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLogoutRequestOpcode           );
     objmgr.opcodeTable[ CMSG_PLAYER_LOGOUT ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePlayerLogoutOpcode            );

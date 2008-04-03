@@ -671,88 +671,105 @@ ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li)
     b << uint32(li.displayid);
     b << uint32(li.randomSuffix);
     b << uint32(li.randomPropertyId);
-    b << uint8(0);
+    //b << uint8(0);                                        // slot type - will send after this function call
     return b;
 }
 
 ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
 {
     Loot &l = lv.loot;
+
     uint8 itemsShown = 0;
 
-    if (lv.qlist)
-    {
-        for (uint8 i = 0; i < lv.qlist->size(); ++i)
-            if (!lv.qlist->at(i).is_looted) ++itemsShown;
-    }
+    //gold
+    b << uint32(lv.permission!=NONE_PERMISSION ? l.gold : 0);
+
+    size_t count_pos = b.wpos();                            // pos of item count byte
+    b << uint8(0);                                          // item count placeholder
 
     switch (lv.permission)
     {
-        case NONE_PERMISSION:
-        {
-            b << uint32(0);                                 //gold
-            b << uint8(0);                                  //itemsShown
-            return b;
-        }
         case GROUP_PERMISSION:
         {
             // You are not the items proprietary, so you can only see
-            // blocked rolled items and quest items, and !ffa items (still needs work I'm afraid) /
-            //group loot fix: you can see gold, and items set to underthreshold
-            b << l.gold;                                    //gold
+            // blocked rolled items and quest items, and !ffa items
             for (uint8 i = 0; i < l.items.size(); ++i)
-                if (!l.items[i].is_looted && (l.items[i].is_blocked || l.items[i].is_underthreshold || l.items[i].freeforall) && (!l.items[i].condition || MeetsConditions(lv.viewer, &l.items[i])))
-                    ++itemsShown;
-            b << itemsShown;                                //send the number of items shown
-
-            for (uint8 i = 0; i < l.items.size(); ++i)
-                if (!l.items[i].is_looted && (l.items[i].is_blocked || l.items[i].is_underthreshold) && !l.items[i].freeforall && (!l.items[i].condition))
-                    b << uint8(i) << l.items[i];            //send the index and the item if it's not looted, and blocked or under threshold, free for all items will be sent later, only one-player loots here
-        }
-        break;
-        default:
-        {
-            b << l.gold;
-            for (uint8 i = 0; i < l.items.size(); ++i)
-                if (!l.items[i].is_looted && (!l.items[i].condition || MeetsConditions(lv.viewer, &l.items[i])))
-                    ++itemsShown;
-            b << itemsShown;
-
-            for (uint8 i = 0; i < l.items.size(); ++i)
+            {
                 if (!l.items[i].is_looted && !l.items[i].freeforall && !l.items[i].condition)
-                    b << uint8(i) << l.items[i];            //only send one-player loot items now, free for all will be sent later
+                {
+                    uint8 slot_type = (l.items[i].is_blocked || l.items[i].is_underthreshold) ? 0 : 1;
+
+                    b << uint8(i) << l.items[i];            //send the index and the item if it's not looted, and blocked or under threshold, free for all items will be sent later, only one-player loots here
+                    b << uint8(slot_type);                  // 0 - get 1 - look only
+                    ++itemsShown;
+                }
+            }
+            break;
         }
+        case ALL_PERMISSION:
+        case MASTER_PERMISSION:
+        {
+            uint8 slot_type = (lv.permission==MASTER_PERMISSION) ? 2 : 0;
+            for (uint8 i = 0; i < l.items.size(); ++i)
+            {
+                if (!l.items[i].is_looted && !l.items[i].freeforall && !l.items[i].condition)
+                {
+                    b << uint8(i) << l.items[i];            //only send one-player loot items now, free for all will be sent later
+                    b << uint8(slot_type);                  // 0 - get 2 - master selection
+                    ++itemsShown;
+                }
+            }
+            break;
+        }
+        case NONE_PERMISSION:
+        default:
+            return b;                                       // nothing output more
     }
 
     if (lv.qlist)
     {
-        for (QuestItemList::iterator i = lv.qlist->begin() ; i != lv.qlist->end(); ++i)
+        for (QuestItemList::iterator qi = lv.qlist->begin() ; qi != lv.qlist->end(); ++qi)
         {
-            LootItem &item = l.quest_items[i->index];
-            if (!i->is_looted && !item.is_looted)
-                b << uint8(l.items.size() + (i - lv.qlist->begin())) << item;
+            LootItem &item = l.quest_items[qi->index];
+            if (!qi->is_looted && !item.is_looted)
+            {
+                b << uint8(l.items.size() + (qi - lv.qlist->begin()));
+                b << uint8(0);                              // allow loot
+                ++itemsShown;
+            }
         }
     }
 
     if (lv.ffalist)
     {
-        for (QuestItemList::iterator i = lv.ffalist->begin() ; i != lv.ffalist->end(); ++i)
+        for (QuestItemList::iterator fi = lv.ffalist->begin() ; fi != lv.ffalist->end(); ++fi)
         {
-            LootItem &item = l.items[i->index];
-            if (!i->is_looted && !item.is_looted)
-                b << uint8(i->index) << item;
+            LootItem &item = l.items[fi->index];
+            if (!fi->is_looted && !item.is_looted)
+            {
+                b << uint8(fi->index) << item;
+                b << uint8(0);                              // allow loot
+                ++itemsShown;
+            }
         }
     }
 
     if (lv.conditionallist)
     {
-        for (QuestItemList::iterator i = lv.conditionallist->begin() ; i != lv.conditionallist->end(); ++i)
+        for (QuestItemList::iterator ci = lv.conditionallist->begin() ; ci != lv.conditionallist->end(); ++ci)
         {
-            LootItem &item = l.items[i->index];
-            if (!i->is_looted && !item.is_looted)
-                b << uint8(i->index) << item;
+            LootItem &item = l.items[ci->index];
+            if (!ci->is_looted && !item.is_looted)
+            {
+                b << uint8(ci->index) << item;
+                b << uint8(0);                              // allow loot
+                ++itemsShown;
+            }
         }
     }
+
+    //update number of items shown
+    b.put<uint8>(count_pos,itemsShown);
 
     return b;
 }

@@ -406,11 +406,18 @@ void WorldSession::DoLootRelease( uint64 lguid )
 
         loot = &pCreature->loot;
 
-        Player *recipient = pCreature->GetLootRecipient();
-        if (recipient && recipient->GetGroup())
+        // update next looter 
+        if(Player *recipient = pCreature->GetLootRecipient())
         {
-            if (recipient->GetGroup()->GetLooterGuid() == player->GetGUID())
-                loot->released = true;
+            if(Group* group = recipient->GetGroup())
+            {
+                if (group->GetLooterGuid() == player->GetGUID())
+                {
+                    group->UpdateLooterGuid(pCreature);
+                    if(group->GetLootMethod()==MASTER_LOOT)
+                        loot->released = true;              // allow loot anyone
+                }
+            }
         }
 
         if (loot->isLooted())
@@ -423,4 +430,79 @@ void WorldSession::DoLootRelease( uint64 lguid )
 
     //Player is not looking at loot list, he doesn't need to see updates on the loot list
     loot->RemoveLooter(player->GetGUID());
+}
+
+void WorldSession::HandleLootMasterGiveOpcode( WorldPacket & recv_data )
+{
+    CHECK_PACKET_SIZE(recv_data,8+1+8);
+
+    uint8 slotid;
+    uint64 lootguid, target_playerguid;
+
+    recv_data >> lootguid >> slotid >> target_playerguid;
+
+    if(!_player->GetGroup() || _player->GetGroup()->GetLooterGuid() != _player->GetGUID())
+    {
+        _player->SendLootRelease(GetPlayer()->GetLootGUID());
+        return;
+    }
+
+    Player *target = ObjectAccessor::FindPlayer(MAKE_GUID(target_playerguid,HIGHGUID_PLAYER));
+    if(!target)
+        return;
+
+    sLog.outDebug("WorldSession::HandleLootMasterGiveOpcode (CMSG_LOOT_MASTER_GIVE, 0x02A3) Target = [%s].", target->GetName()); 
+
+    if(_player->GetLootGUID() != lootguid)
+        return;
+
+    Loot *pLoot = NULL;
+
+    if(IS_CREATURE_GUID(GetPlayer()->GetLootGUID()))
+    {
+        Creature *pCreature = ObjectAccessor::GetCreature(*GetPlayer(), lootguid);
+        if(!pCreature)
+            return;
+
+        pLoot = &pCreature->loot;
+    }
+    else if(IS_GAMEOBJECT_GUID(GetPlayer()->GetLootGUID()))
+    {
+        GameObject *pGO = ObjectAccessor::GetGameObject(*GetPlayer(), lootguid);
+        if(!pGO)
+            return;
+
+        pLoot = &pGO->loot;
+    }
+
+    if(!pLoot)
+        return;
+
+    if (slotid > pLoot->items.size())
+    {
+        sLog.outDebug("AutoLootItem: Player %s might be using a hack! (slot %d, size %d)",GetPlayer()->GetName(), slotid, pLoot->items.size());
+        return;
+    }
+
+    uint32 amount = pLoot->items[slotid].count;
+    uint32 itemid = pLoot->items[slotid].itemid;
+
+    ItemPosCountVec dest;
+    uint8 msg = target->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemid, amount );
+    if ( msg != EQUIP_ERR_OK )
+    {
+        target->SendEquipError( msg, NULL, NULL );
+        _player->SendEquipError( msg, NULL, NULL );         // send duplicate of error massage to master looter
+        return;
+    }
+
+    // not move item from loot to target inventory
+    Item * newitem = target->StoreNewItem( dest, itemid, true );
+
+    pLoot->items[slotid].count=0;
+    pLoot->items[slotid].is_looted=true;
+
+    target->SendNewItem(newitem, uint32(amount), false, false, true );
+    pLoot->NotifyItemRemoved(slotid);
+    --pLoot->unlootedCount;
 }

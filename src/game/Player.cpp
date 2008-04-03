@@ -6875,18 +6875,9 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
                 loot->generateMoneyLoot(creature->GetCreatureInfo()->mingold,creature->GetCreatureInfo()->maxgold);
 
-                if (recipient->GetGroup())
+                if(Group* group = recipient->GetGroup())
                 {
-                    // round robin style looting applies for all low
-                    // quality items in each loot method except free for all
-                    GroupReference &group = recipient->GetGroupRef();
-
-                    // next by circle
-                    uint64 next_guid = 0;
-                    if (group.next()) next_guid = group.next()->getSource()->GetGUID();
-                    else if(group->GetFirstMember() && group->GetFirstMember()->isValid())
-                        next_guid = group->GetFirstMember()->getSource()->GetGUID();
-                    group->SetLooterGuid(next_guid);
+                    group->UpdateLooterGuid(creature,true);
 
                     switch (group->GetLootMethod())
                     {
@@ -6896,6 +6887,9 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                             break;
                         case NEED_BEFORE_GREED:
                             group->NeedBeforeGreed(recipient->GetGUID(), loot, creature);
+                            break;
+                        case MASTER_LOOT:
+                            group->MasterLoot(recipient->GetGUID(), loot, creature);
                             break;
                         default:
                             break;
@@ -6909,24 +6903,29 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 FillLoot(loot, creature->GetCreatureInfo()->SkinLootId, LootTemplates_Skinning, this);
             }
 
-            if (!GetGroup() && recipient == this)
-                permission = ALL_PERMISSION;
-            else
+            if(Group* group = GetGroup())
             {
-                if (GetGroup())
+                if( group == recipient->GetGroup() )
                 {
-                    Group *group = GetGroup();
-                    if ((group == recipient->GetGroup()) && (group->GetLooterGuid() == GetGUID() || loot->released || group->GetLootMethod() == FREE_FOR_ALL))
+                    if(loot->released || group->GetLootMethod() == FREE_FOR_ALL)
                         permission = ALL_PERMISSION;
+                    else if(group->GetLooterGuid() == GetGUID())
+                    {
+                        if(group->GetLootMethod() == MASTER_LOOT)
+                            permission = MASTER_PERMISSION;
+                        else
+                            permission = ALL_PERMISSION;
+                    }
                     else
-                    if (group == recipient->GetGroup())
                         permission = GROUP_PERMISSION;
-                    else
-                        permission = NONE_PERMISSION;
                 }
                 else
                     permission = NONE_PERMISSION;
             }
+            else if(recipient == this)
+                permission = ALL_PERMISSION;
+            else
+                permission = NONE_PERMISSION;
         }
     }
 
@@ -6966,7 +6965,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     if(loot_type == LOOT_PICKPOCKETING || loot_type == LOOT_DISENCHANTING || loot_type == LOOT_PROSPECTING || loot_type == LOOT_INSIGNIA)
         loot_type = LOOT_SKINNING;
 
-    WorldPacket data(SMSG_LOOT_RESPONSE, (9+50));           // we guess size
+    WorldPacket data(SMSG_LOOT_RESPONSE, (9+50));       // we guess size
 
     data << uint64(guid);
     data << uint8(loot_type);
@@ -14240,6 +14239,10 @@ void Player::outDebugValues() const
 
 void Player::UpdateSpeakTime()
 {
+    // ignore chat spam protection for GMs in any mode
+    if(GetSession()->GetSecurity() > SEC_PLAYER)
+        return;
+
     time_t current = time (NULL);
     if(m_speakTime > current)
     {

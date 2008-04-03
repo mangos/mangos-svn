@@ -69,6 +69,7 @@ bool Group::Create(const uint64 &guid, const char * name)
     m_groupType  = GROUPTYPE_NORMAL;
     m_lootMethod = GROUP_LOOT;
     m_lootThreshold = ITEM_QUALITY_UNCOMMON;
+    m_looterGuid = guid;
 
     if(!AddMember(guid, name))
         return false;
@@ -445,13 +446,12 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
 
 void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
 {
-    std::vector<LootItem>::iterator i;
     ItemPrototype const *item;
-    uint8 itemSlot = 0;
     Player *player = objmgr.GetPlayer(playerGUID);
     Group *group = player->GetGroup();
 
-    for (i=loot->items.begin(); i != loot->items.end(); ++i, ++itemSlot)
+    uint8 itemSlot = 0;
+    for(std::vector<LootItem>::iterator i=loot->items.begin(); i != loot->items.end(); ++i, ++itemSlot)
     {
         item = objmgr.GetItemPrototype(i->itemid);
 
@@ -499,6 +499,42 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
         }
         else
             i->is_underthreshold=1;
+    }
+}
+
+void Group::MasterLoot(uint64 playerGUID, Loot* /*loot*/, Creature *creature)
+{
+    Player *player = objmgr.GetPlayer(playerGUID);
+    if(!player)
+        return;
+
+    sLog.outDebug("Group::MasterLoot (SMSG_LOOT_MASTER_LIST, 330) player = [%s].", player->GetName());
+
+    uint32 real_count = 0;
+
+    WorldPacket data(SMSG_LOOT_MASTER_LIST, 330);
+    data << (uint8)GetMembersCount();
+
+    for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player *looter = itr->getSource();
+        if (!looter->IsInWorld())
+            continue;
+
+        if (looter->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
+        {
+            data << looter->GetGUID();
+            ++real_count;
+        }
+    }
+
+    data.put<uint8>(0,real_count);
+            
+    for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player *looter = itr->getSource();
+        if (looter->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
+            looter->GetSession()->SendPacket(&data);
     }
 }
 
@@ -1083,6 +1119,79 @@ void Group::ChangeMembersGroup(Player *player, const uint8 &group)
         player->GetGroupRef().setSubGroup(group);
         SendUpdate();
     }
+}
+
+void Group::UpdateLooterGuid( Creature* creature, bool ifneed )
+{
+    switch (GetLootMethod())
+    {
+        case MASTER_LOOT:
+        case FREE_FOR_ALL:
+            return;
+        default:
+            // round robin style looting applies for all low
+            // quality items in each loot method except free for all and master loot
+            break;
+    }
+
+    member_citerator guid_itr = _getMemberCSlot(GetLooterGuid());
+    if(guid_itr != m_memberSlots.end())
+    {
+        if(ifneed)
+        {
+            // not update if only update if need and ok
+            Player* looter = ObjectAccessor::FindPlayer(guid_itr->guid);
+            if(looter && looter->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
+                return;
+        }
+        ++guid_itr;
+    }
+
+    // search next after current
+    if(guid_itr != m_memberSlots.end())
+    {
+        for(member_citerator itr = guid_itr; itr != m_memberSlots.end(); ++itr)
+        {
+            if(Player* pl = ObjectAccessor::FindPlayer(itr->guid))
+            {
+                if (pl->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
+                {
+                    bool refresh = pl->GetLootGUID()==creature->GetGUID();
+
+                    //if(refresh)                             // update loot for new looter
+                    //    pl->GetSession()->DoLootRelease(pl->GetLootGUID());
+                    SetLooterGuid(pl->GetGUID());
+                    SendUpdate();
+                    if(refresh)                             // update loot for new looter
+                        pl->SendLoot(creature->GetGUID(),LOOT_CORPSE);
+                    return;
+                }
+            }
+        }
+    }
+
+    // search from start
+    for(member_citerator itr = m_memberSlots.begin(); itr != guid_itr; ++itr)
+    {
+        if(Player* pl = ObjectAccessor::FindPlayer(itr->guid))
+        {
+            if (pl->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
+            {
+                bool refresh = pl->GetLootGUID()==creature->GetGUID();
+
+                //if(refresh)                               // update loot for new looter
+                //    pl->GetSession()->DoLootRelease(pl->GetLootGUID());
+                SetLooterGuid(pl->GetGUID());
+                SendUpdate();
+                if(refresh)                                 // update loot for new looter
+                    pl->SendLoot(creature->GetGUID(),LOOT_CORPSE);
+                return;
+            }
+        }
+    }
+
+    SetLooterGuid(0);
+    SendUpdate();
 }
 
 //===================================================

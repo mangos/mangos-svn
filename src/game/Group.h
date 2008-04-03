@@ -147,6 +147,7 @@ class MANGOS_DLL_SPEC Group
         void   ChangeLeader(const uint64 &guid);
         void   SetLootMethod(LootMethod method) { m_lootMethod = method; }
         void   SetLooterGuid(const uint64 &guid) { m_looterGuid = guid; }
+        void   UpdateLooterGuid( Creature* creature, bool ifneed = false );
         void   SetLootThreshold(ItemQualities threshold) { m_lootThreshold = threshold; }
         void   Disband(bool hideDestroy=false);
 
@@ -260,6 +261,7 @@ class MANGOS_DLL_SPEC Group
         void SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, const Roll &r);
         void GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature);
         void NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature);
+        void MasterLoot(uint64 playerGUID, Loot *loot, Creature *creature);
         Rolls::iterator GetRoll(uint64 Guid)
         {
             Rolls::iterator iter;
