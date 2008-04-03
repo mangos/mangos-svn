@@ -101,20 +101,40 @@ void BattleGroundWS::Update(time_t diff)
             m_FlagsTimer[BG_TEAM_ALLIANCE] -= diff;
 
             if(m_FlagsTimer[BG_TEAM_ALLIANCE] < 0)
+            {
                 m_FlagsTimer[BG_TEAM_ALLIANCE] = 0;
-
-            if(m_FlagsTimer[BG_TEAM_ALLIANCE] == 0)
                 RespawnFlag(ALLIANCE, true);
+            }
+        }
+        if(m_FlagState[BG_TEAM_ALLIANCE] == BG_WS_FLAG_STATE_ON_GROUND)
+        {
+            m_FlagsDropTimer[BG_TEAM_ALLIANCE] -= diff;
+
+            if(m_FlagsDropTimer[BG_TEAM_ALLIANCE] < 0)
+            {
+                m_FlagsDropTimer[BG_TEAM_ALLIANCE] = 0;
+                RespawnFlagAfterDrop(ALLIANCE);
+            }
         }
         if(m_FlagState[BG_TEAM_HORDE] == BG_WS_FLAG_STATE_WAIT_RESPAWN)
         {
             m_FlagsTimer[BG_TEAM_HORDE] -= diff;
 
             if(m_FlagsTimer[BG_TEAM_HORDE] < 0)
+            {
                 m_FlagsTimer[BG_TEAM_HORDE] = 0;
-
-            if(m_FlagsTimer[BG_TEAM_HORDE] == 0)
                 RespawnFlag(HORDE, true);
+            }
+        }
+        if(m_FlagState[BG_TEAM_HORDE] == BG_WS_FLAG_STATE_ON_GROUND)
+        {
+            m_FlagsDropTimer[BG_TEAM_HORDE] -= diff;
+
+            if(m_FlagsDropTimer[BG_TEAM_HORDE] < 0)
+            {
+                m_FlagsDropTimer[BG_TEAM_HORDE] = 0;
+                RespawnFlagAfterDrop(HORDE);
+            }
         }
     }
 }
@@ -146,6 +166,29 @@ void BattleGroundWS::RespawnFlag(uint32 Team, bool captured)
         SendMessageToAll(GetMangosString(LANG_BG_WS_F_PLACED));
         PlaySoundToAll(8232);                               // flags respawned sound...
     }
+}
+
+void BattleGroundWS::RespawnFlagAfterDrop(uint32 team)
+{
+    if(GetStatus() != STATUS_IN_PROGRESS)
+        return;
+
+    SendMessageToAll(GetMangosString(LANG_BG_WS_F_PLACED));
+    PlaySoundToAll(8232);
+
+    RespawnFlag(team,false);
+    if(team == ALLIANCE)
+        SpawnBGObject(BG_WS_OBJECT_A_FLAG, RESPAWN_IMMEDIATELY);
+    else
+        SpawnBGObject(BG_WS_OBJECT_H_FLAG, RESPAWN_IMMEDIATELY);
+
+    GameObject *obj = HashMapHolder<GameObject>::Find(GetDropedFlagGUID(team));
+    if(obj)
+        obj->Delete();
+    else
+        sLog.outError("unknown droped flag bg, guid: %u",GetDropedFlagGUID(team));
+
+    SetDropedFlagGUID(0,team);
 }
 
 void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
@@ -274,6 +317,8 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
             UpdateWorldState(BG_WS_FLAG_UNK_HORDE, uint32(-1));
         else
             UpdateWorldState(BG_WS_FLAG_UNK_ALLIANCE, uint32(-1));
+
+        m_FlagsDropTimer[GetTeamIndexByTeamId(Source->GetTeam()) ? 0 : 1] = BG_WS_FLAG_DROP_TIME;
     }
 }
 
@@ -401,27 +446,27 @@ void BattleGroundWS::HandleAreaTrigger(Player *Source, uint32 Trigger)
     if(GetStatus() != STATUS_IN_PROGRESS)
         return;
 
-    uint32 SpellId = 0;
-    uint64 buff_guid = 0;
+    //uint32 SpellId = 0;
+    //uint64 buff_guid = 0;
     switch(Trigger)
     {
         case 3686:                                          // Alliance elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
-            buff_guid = m_BgObjects[BG_WS_OBJECT_SPEEDBUFF_1];
+            //buff_guid = m_BgObjects[BG_WS_OBJECT_SPEEDBUFF_1];
             break;
         case 3687:                                          // Horde elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
-            buff_guid = m_BgObjects[BG_WS_OBJECT_SPEEDBUFF_2];
+            //buff_guid = m_BgObjects[BG_WS_OBJECT_SPEEDBUFF_2];
             break;
         case 3706:                                          // Alliance elixir of regeneration spawn
-            buff_guid = m_BgObjects[BG_WS_OBJECT_REGENBUFF_1];
+            //buff_guid = m_BgObjects[BG_WS_OBJECT_REGENBUFF_1];
             break;
         case 3708:                                          // Horde elixir of regeneration spawn
-            buff_guid = m_BgObjects[BG_WS_OBJECT_REGENBUFF_2];
+            //buff_guid = m_BgObjects[BG_WS_OBJECT_REGENBUFF_2];
             break;
         case 3707:                                          // Alliance elixir of berserk spawn
-            buff_guid = m_BgObjects[BG_WS_OBJECT_BERSERKBUFF_1];
+            //buff_guid = m_BgObjects[BG_WS_OBJECT_BERSERKBUFF_1];
             break;
         case 3709:                                          // Horde elixir of berserk spawn
-            buff_guid = m_BgObjects[BG_WS_OBJECT_BERSERKBUFF_2];
+            //buff_guid = m_BgObjects[BG_WS_OBJECT_BERSERKBUFF_2];
             break;
         case 3646:                                          // Alliance Flag spawn
             if(m_FlagState[BG_TEAM_HORDE] && !m_FlagState[BG_TEAM_ALLIANCE])
@@ -444,8 +489,8 @@ void BattleGroundWS::HandleAreaTrigger(Player *Source, uint32 Trigger)
             break;
     }
 
-    if(buff_guid)
-        HandleTriggerBuff(buff_guid,Source);
+    //if(buff_guid)
+    //    HandleTriggerBuff(buff_guid,Source);
 }
 
 bool BattleGroundWS::SetupBattleGround()
@@ -501,6 +546,8 @@ void BattleGroundWS::ResetBGSubclass()
 {
     m_FlagKeepers[BG_TEAM_ALLIANCE]     = 0;
     m_FlagKeepers[BG_TEAM_HORDE]        = 0;
+    m_DropedFlagsGUID[BG_TEAM_ALLIANCE] = 0;
+    m_DropedFlagsGUID[BG_TEAM_HORDE]    = 0;
     m_FlagState[BG_TEAM_ALLIANCE]       = BG_WS_FLAG_STATE_ON_BASE;
     m_FlagState[BG_TEAM_HORDE]          = BG_WS_FLAG_STATE_ON_BASE;
     m_TeamScores[BG_TEAM_ALLIANCE]      = 0;
@@ -562,17 +609,17 @@ void BattleGroundWS::FillInitialWorldStates(WorldPacket& data)
         data << uint32(BG_WS_FLAG_UNK_ALLIANCE) << uint32(1);
     else
         data << uint32(BG_WS_FLAG_UNK_ALLIANCE) << uint32(0);
-    
+
     if(m_FlagState[BG_TEAM_HORDE] == BG_WS_FLAG_STATE_ON_GROUND)
         data << uint32(BG_WS_FLAG_UNK_HORDE) << uint32(-1);
     else if (m_FlagState[BG_TEAM_HORDE] == BG_WS_FLAG_STATE_ON_PLAYER)
         data << uint32(BG_WS_FLAG_UNK_HORDE) << uint32(1);
     else
         data << uint32(BG_WS_FLAG_UNK_HORDE) << uint32(0);
-    
+
 
     data << uint32(BG_WS_FLAG_CAPTURES_MAX) << uint32(BG_WS_MAX_TEAM_SCORE);
-    
+
     if (m_FlagState[BG_TEAM_HORDE] == BG_WS_FLAG_STATE_ON_PLAYER)
         data << uint32(BG_WS_FLAG_STATE_HORDE) << uint32(2);
     else

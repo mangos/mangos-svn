@@ -380,39 +380,12 @@ void BattleGround::EndBattleGround(uint32 winner)
         {
             if(!Source)
                 Source = plr;
-            switch(GetTypeID())
-            {
-                case BATTLEGROUND_AV:
-                    mark = ITEM_AV_MARK_WINNER;
-                    break;
-                case BATTLEGROUND_WS:
-                    mark = ITEM_WS_MARK_WINNER;
-                    break;
-                case BATTLEGROUND_AB:
-                    mark = ITEM_AB_MARK_WINNER;
-                    break;
-            }
+            RewardMark(plr,ITEM_WINNER_COUNT);
             UpdatePlayerScore(plr, SCORE_BONUS_HONOR, 20);
         }
         else
         {
-            switch(GetTypeID())
-            {
-                case BATTLEGROUND_AV:
-                    mark = ITEM_AV_MARK_LOSER;
-                    break;
-                case BATTLEGROUND_WS:
-                    mark = ITEM_WS_MARK_LOSER;
-                    break;
-                case BATTLEGROUND_AB:
-                    mark = ITEM_AB_MARK_LOSER;
-                    break;
-            }
-        }
-
-        if(mark)
-        {
-            plr->CastSpell(plr, mark, true);
+            RewardMark(plr,ITEM_LOSER_COUNT);
         }
 
         std::map<uint64, BattleGroundScore*>::iterator itr1 = m_PlayerScores.find(plr->GetGUID());
@@ -436,6 +409,56 @@ void BattleGround::EndBattleGround(uint32 winner)
     {
         ChatHandler(Source).FillMessageData(&data, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, Source->GetGUID(), winmsg);
         SendPacketToAll(&data);
+    }
+}
+
+void BattleGround::RewardMark(Player *plr,uint32 count)
+{
+    uint32 mark = 0;
+    bool IsSpell = true;
+    switch(GetTypeID())
+    {
+        case BATTLEGROUND_AV:
+            if(count == ITEM_WINNER_COUNT)
+                mark = ITEM_AV_MARK_WINNER;
+            else
+                mark = ITEM_AV_MARK_LOSER;
+            break;
+        case BATTLEGROUND_WS:
+            if(count == ITEM_WINNER_COUNT)
+                mark = ITEM_WS_MARK_WINNER;
+            else
+                mark = ITEM_WS_MARK_LOSER;
+            break;
+        case BATTLEGROUND_AB:
+            if(count == ITEM_WINNER_COUNT)
+                mark = ITEM_AB_MARK_WINNER;
+            else
+                mark = ITEM_AB_MARK_LOSER;
+            break;
+        case BATTLEGROUND_EY:
+            IsSpell = false;
+            mark = ITEM_EY_MARK_OF_HONOR;
+            break;
+    }
+    if(mark)
+    {
+        if(IsSpell)
+            plr->CastSpell(plr, mark, true);
+        else
+        {
+            ItemPosCountVec dest;
+            Item *item = NULL;
+            uint8 msg = plr->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, mark, count, false );
+            if( msg == EQUIP_ERR_OK )
+            {
+                item = plr->StoreNewItem( dest, mark, true, 0);
+                if(item)
+                {
+                    plr->SendNewItem(item,count,false,true);
+                }
+            }
+        }
     }
 }
 
@@ -925,7 +948,7 @@ const char *BattleGround::GetMangosString(uint32 entry)
     return objmgr.GetMangosString(entry);
 }
 
-void BattleGround::HandleTriggerBuff(uint64 const& go_guid,Player* source)
+void BattleGround::HandleTriggerBuff(uint64 const& go_guid)
 {
     GameObject *obj = HashMapHolder<GameObject>::Find(go_guid);
     if(!obj)
@@ -942,6 +965,4 @@ void BattleGround::HandleTriggerBuff(uint64 const& go_guid,Player* source)
 
     obj->SetRespawnTime(BUFF_RESPAWN_TIME);
     obj->SetLootState(GO_JUST_DEACTIVATED);
-    if(uint32 spellId = obj->GetGOInfo()->trap.spellId)
-        source->CastSpell(source, spellId, true);
 }

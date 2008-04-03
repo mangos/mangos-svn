@@ -134,8 +134,8 @@ void BattleGroundRL::HandleAreaTrigger(Player *Source, uint32 Trigger)
     if(GetStatus() != STATUS_IN_PROGRESS)
         return;
 
-    uint32 SpellId = 0;
-    uint64 buff_guid = 0;
+    //uint32 SpellId = 0;
+    //uint64 buff_guid = 0;
     switch(Trigger)
     {
         case 4696:                                          // buff trigger?
@@ -147,8 +147,8 @@ void BattleGroundRL::HandleAreaTrigger(Player *Source, uint32 Trigger)
             break;
     }
 
-    if(buff_guid)
-        HandleTriggerBuff(buff_guid,Source);
+    //if(buff_guid)
+    //    HandleTriggerBuff(buff_guid,Source);
 }
 
 void BattleGroundRL::ResetBGSubclass()

@@ -42,7 +42,14 @@ enum BattleGroundMarks
     ITEM_AB_MARK_LOSER              = 24952,
     ITEM_AB_MARK_WINNER             = 24953,
     ITEM_AV_MARK_LOSER              = 24954,
-    ITEM_AV_MARK_WINNER             = 24955
+    ITEM_AV_MARK_WINNER             = 24955,
+    ITEM_EY_MARK_OF_HONOR           = 29024
+};
+
+enum BattleGroundMarksCount
+{
+    ITEM_WINNER_COUNT               = 3,
+    ITEM_LOSER_COUNT                = 1
 };
 
 enum BattleGroundSpells
@@ -307,6 +314,7 @@ class BattleGround
         void CastSpellOnTeam(uint32 SpellID, uint32 TeamID);
         void RewardHonorToTeam(uint32 Honor, uint32 TeamID);
         void RewardReputationToTeam(uint32 faction_id, uint32 Reputation, uint32 TeamID);
+        void RewardMark(Player *plr,uint32 count);
         void UpdateWorldState(uint32 Field, uint32 Value);
         void EndBattleGround(uint32 winner);
         void BlockMovement(Player *plr);
@@ -362,11 +370,11 @@ class BattleGround
         void DoorOpen(uint32 type);
         const char *GetMangosString(uint32 entry);
 
+        void HandleTriggerBuff(uint64 const& go_guid);
+
     protected:
         //this method is called, when BG cannot spawn its own spirit guide, or something is wrong, It correctly ends BattleGround
         void EndNow();
-
-        void HandleTriggerBuff(uint64 const& go_guid,Player* source);
 
         /* Scorekeeping */
         std::map<uint64, BattleGroundScore*>    m_PlayerScores;// Player scores
