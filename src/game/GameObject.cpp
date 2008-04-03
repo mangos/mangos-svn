@@ -259,6 +259,7 @@ void GameObject::Update(uint32 /*p_time*/)
                 if(m_environmentcastTime >= time(NULL))
                     return;
 
+                //FIXME: this is activation radius (in different casting radius that must be selected from spell data)
                 float radius = goInfo->trap.radius;
                 if(!radius)                                 // cast in other case (at some triggering/linked go/etc explicit call)
                     return;
