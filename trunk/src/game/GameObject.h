@@ -77,7 +77,7 @@ struct GameObjectInfo
         {
             uint32 _data0;                                  //0 lockid???
             uint32 _data1;
-            uint32 radius;                                  //2
+            uint32 radius;                                  //2 radius for trap activation
             uint32 spellId;                                 //3
             uint32 isNeedDespawn;                           //4 (if >0)
             uint32 _data5[7];

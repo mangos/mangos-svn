@@ -3796,7 +3796,7 @@ bool Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster)
                     continue;
                 }
             }
-            RemoveAura(i);
+            RemoveAurasDueToSpell(spellInfo->Id);
             return true;
         }
         else
