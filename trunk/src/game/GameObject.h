@@ -80,7 +80,8 @@ struct GameObjectInfo
             uint32 radius;                                  //2 radius for trap activation
             uint32 spellId;                                 //3
             uint32 isNeedDespawn;                           //4 (if >0)
-            uint32 _data5[7];
+            uint32 _data5;                                  //5
+            uint32 _data6[6];
             uint32 _data12;                                 //12 something == chest.data14 == goober.data14 ???
         } trap;
         //8 GAMEOBJECT_TYPE_SPELL_FOCUS

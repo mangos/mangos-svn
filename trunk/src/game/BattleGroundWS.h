@@ -23,6 +23,7 @@
 
 #define BG_WS_MAX_TEAM_SCORE      3
 #define BG_WS_FLAG_RESPAWN_TIME   23000
+#define BG_WS_FLAG_DROP_TIME      10000
 
 #define BG_WS_SOUND_FLAG_CAPTURED_ALLIANCE 8173
 #define BG_WS_SOUND_FLAG_CAPTURED_HORDE    8213
@@ -132,6 +133,7 @@ class BattleGroundWS : public BattleGround
         bool IsAllianceFlagPickedup() const         { return m_FlagKeepers[BG_TEAM_ALLIANCE] != 0; }
         bool IsHordeFlagPickedup() const            { return m_FlagKeepers[BG_TEAM_HORDE] != 0; }
         void RespawnFlag(uint32 Team, bool captured);
+        void RespawnFlagAfterDrop(uint32 Team);
         uint8 GetFlagState(uint32 team)             { return m_FlagState[GetTeamIndexByTeamId(team)]; }
 
         /* Battleground Events */
@@ -150,6 +152,8 @@ class BattleGroundWS : public BattleGround
         void UpdateFlagState(uint32 team, uint32 value);
         void UpdateTeamScore(uint32 team);
         void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
+        void SetDropedFlagGUID(uint64 guid, uint32 TeamID)  { m_DropedFlagsGUID[GetTeamIndexByTeamId(TeamID)] = guid;}
+        uint64 GetDropedFlagGUID(uint32 TeamID)             { return m_DropedFlagsGUID[GetTeamIndexByTeamId(TeamID)];}
         virtual void FillInitialWorldStates(WorldPacket& data);
 
         /* Scorekeeping */
@@ -160,8 +164,10 @@ class BattleGroundWS : public BattleGround
 
     private:
         uint64 m_FlagKeepers[2];                            // 0 - alliance, 1 - horde
+        uint64 m_DropedFlagsGUID[2];
         uint8 m_FlagState[2];                               // for checking flag state
         uint32 m_TeamScores[2];
         int32 m_FlagsTimer[2];
+        int32 m_FlagsDropTimer[2];
 };
 #endif

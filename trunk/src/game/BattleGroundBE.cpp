@@ -140,15 +140,15 @@ void BattleGroundBE::HandleAreaTrigger(Player *Source, uint32 Trigger)
     if(GetStatus() != STATUS_IN_PROGRESS)
         return;
 
-    uint32 SpellId = 0;
-    uint64 buff_guid = 0;
+    //uint32 SpellId = 0;
+    //uint64 buff_guid = 0;
     switch(Trigger)
     {
         case 4538:                                          // buff trigger?
-            buff_guid = m_BgObjects[BG_BE_OBJECT_BUFF_1];
+            //buff_guid = m_BgObjects[BG_BE_OBJECT_BUFF_1];
             break;
         case 4539:                                          // buff trigger?
-            buff_guid = m_BgObjects[BG_BE_OBJECT_BUFF_2];
+            //buff_guid = m_BgObjects[BG_BE_OBJECT_BUFF_2];
             break;
         default:
             sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
@@ -156,8 +156,8 @@ void BattleGroundBE::HandleAreaTrigger(Player *Source, uint32 Trigger)
             break;
     }
 
-    if(buff_guid)
-        HandleTriggerBuff(buff_guid,Source);
+    //if(buff_guid)
+    //    HandleTriggerBuff(buff_guid,Source);
 }
 
 void BattleGroundBE::ResetBGSubclass()

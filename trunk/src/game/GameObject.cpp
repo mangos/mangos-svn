@@ -34,6 +34,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "InstanceData.h"
+#include "BattleGround.h"
 
 GameObject::GameObject( WorldObject *instantiator ) : WorldObject( instantiator )
 {
@@ -259,10 +260,22 @@ void GameObject::Update(uint32 /*p_time*/)
                 if(m_environmentcastTime >= time(NULL))
                     return;
 
+                bool IsBattleGroundTrap = false;
                 //FIXME: this is activation radius (in different casting radius that must be selected from spell data)
                 float radius = goInfo->trap.radius;
-                if(!radius)                                 // cast in other case (at some triggering/linked go/etc explicit call)
-                    return;
+                if(!radius)
+                {
+                    if(goInfo->trap._data5 != 3)               // cast in other case (at some triggring/linked go/etc explicit call)
+                        return;
+                    else
+                    {
+                        if(m_respawnTime > 0)
+                            break;
+
+                        radius = goInfo->trap._data5;          // battlegrounds gameobjects has data2 == 0 && data5 == 3
+                        IsBattleGroundTrap = true;
+                    }
+                }
 
                 bool NeedDespawn = (goInfo->trap.isNeedDespawn != 0);
 
@@ -317,6 +330,14 @@ void GameObject::Update(uint32 /*p_time*/)
 
                     if(NeedDespawn)
                         SetLootState(GO_JUST_DEACTIVATED);  // can be despawned or destroyed
+
+                    if(IsBattleGroundTrap && ok->GetTypeId() == TYPEID_PLAYER)
+                    {                
+                        //BattleGround gameobjects case
+                        if(((Player*)ok)->InBattleGround())
+                            if(BattleGround *bg = ((Player*)ok)->GetBattleGround())
+                                bg->HandleTriggerBuff(GetGUID());
+                    }
                 }
             }
 

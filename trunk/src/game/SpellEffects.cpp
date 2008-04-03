@@ -3605,6 +3605,24 @@ void Spell::EffectSummonObjectWild(uint32 i)
         m_caster->AddGameObject(pGameObj);
     MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
 
+    if(pGameObj->GetMapId() == 489 && pGameObj->GetGoType() == GAMEOBJECT_TYPE_FLAGDROP)  //WS
+    {
+        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            Player *pl = (Player*)m_caster;
+            BattleGround* bg = ((Player *)m_caster)->GetBattleGround();
+            if(bg && bg->GetTypeID()==BATTLEGROUND_WS && bg->GetStatus() == STATUS_IN_PROGRESS)
+            {
+                 uint32 team = ALLIANCE;
+
+                 if(pl->GetTeam() == team)
+                     team = HORDE;
+
+                ((BattleGroundWS*)bg)->SetDropedFlagGUID(pGameObj->GetGUID(),team);
+            }
+        }
+    }
+
     if(uint32 linkedEntry = pGameObj->GetLinkedGameObjectEntry())
     {
         GameObject* linkedGO = new GameObject(m_caster);
@@ -4548,8 +4566,8 @@ void Spell::EffectKnockBack(uint32 i)
     data << uint32(0);                                      //Sequence
     data << float(vcos);                                    //xdirection
     data << float(vsin);                                    //ydirection
-    data << float(damage/10);                               //Horizontal speed
-    data << float(m_spellInfo->EffectMiscValue[i])/-10;     //Z Movement speed
+    data << float(m_spellInfo->EffectMiscValue[i])/10;      //Horizontal speed
+    data << float(damage/-10);                              //Z Movement speed (vertical)
 
     ((Player*)unitTarget)->SendMessageToSet(&data,true);
 }
