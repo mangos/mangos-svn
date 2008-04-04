@@ -124,15 +124,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     if(GetPlayer( )->HasSpell(spellid))
         return;
 
-    // must unlearn old rank before (including decrease used talent points counter)
-    if(requested_rank > 0 )
-    {
-        uint32 respellid = talentInfo->RankID[requested_rank-1];
-        GetPlayer()->RemoveAurasDueToSpell(respellid);
-        GetPlayer( )->removeSpell((uint16)respellid);
-    }
-
-    // learn!
+    // learn! (other talent ranks will unlearned at learning)
     GetPlayer( )->learnSpell(spellid);
     sLog.outDetail("TalentID: %u Rank: %u Spell: %u\n", talent_id, requested_rank, spellid);
 

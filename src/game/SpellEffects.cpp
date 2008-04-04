@@ -2598,10 +2598,7 @@ void Spell::EffectLearnSpell(uint32 i)
     Player *player = (Player*)unitTarget;
 
     uint32 spellToLearn = m_spellInfo->EffectTriggerSpell[i];
-    //data.Initialize(SMSG_LEARNED_SPELL);
-    //data << spellToLearn;
-    //player->GetSession()->SendPacket(&data);
-    player->learnSpell((uint16)spellToLearn);
+    player->learnSpell(spellToLearn);
 
     sLog.outDebug( "Spell: Player %u have learned spell %u from NpcGUID=%u", player->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow() );
 }

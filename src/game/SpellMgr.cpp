@@ -1192,6 +1192,7 @@ SpellEntry const* SpellMgr::SelectAuraRankForPlayerLevel(SpellEntry const* spell
 void SpellMgr::LoadSpellChains()
 {
     mSpellChains.clear();                                   // need for reload case
+    mSpellChainsNext.clear();                               // need for reload case
 
     QueryResult *result = WorldDatabase.PQuery("SELECT spell_id, prev_spell, first_spell, rank FROM spell_chain");
     if(result == NULL)
@@ -1248,6 +1249,7 @@ void SpellMgr::LoadSpellChains()
         }
 
         mSpellChains[spell_id] = node;
+        mSpellChainsNext.insert(SpellChainMapNext::value_type(node.prev,spell_id));
 
         ++count;
     } while( result->NextRow() );
