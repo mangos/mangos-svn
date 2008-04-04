@@ -1888,7 +1888,7 @@ void Player::SetGameMaster(bool on)
         if(sWorld.IsFFAPvPRealm())
             SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
 
-        // restore FFA PvP area state
+        // restore FFA PvP area state, remove not allowed for GM mounts
         UpdateArea(m_areaUpdateId);
 
         getHostilRefManager().setOnlineOfflineState(true);
@@ -5753,6 +5753,16 @@ void Player::UpdateArea(uint32 newArea)
             RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
     }
 
+    // remove auras from spells with area limitations
+    for(AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end();)
+    {
+        // use m_zoneUpdateId for speed: UpdateArea called from UpdateZone or instead UpdateZone in both cases m_zoneUpdateId up-to-date
+        if(!IsSpellAllowedInAreaOrZone(iter->second->GetSpellProto(),m_zoneUpdateId,newArea))
+            RemoveAura(iter);
+        else
+            ++iter;
+    }
+
     // unmount if enter in this subzone
     if( newArea == 35)
         RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
@@ -5863,17 +5873,6 @@ void Player::UpdateZone(uint32 newZone)
                     SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
             }
         }
-    }
-
-    // remove auras from spells with area limitations
-    for(AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end();)
-    {
-        if(iter->second->GetSpellProto()->AreaId && iter->second->GetSpellProto()->AreaId != newZone)
-        {
-            RemoveAura(iter);
-        }
-        else
-            ++iter;
     }
 
     // remove new continent flight forms

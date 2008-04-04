@@ -2076,6 +2076,8 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
     else
         num_to_add = 2;
 
+    if (num_to_add < 1)
+        num_to_add = 1;
     if (num_to_add > pProto->Stackable)
         num_to_add = pProto->Stackable;
 

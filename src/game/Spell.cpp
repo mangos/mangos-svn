@@ -2910,16 +2910,7 @@ uint8 Spell::CanCast(bool strict)
         return SPELL_FAILED_ONLY_BATTLEGROUNDS;
 
     // zone check
-    uint32 zone_id = m_caster->GetZoneId();
-
-    // normal case
-    if( m_spellInfo->AreaId && m_spellInfo->AreaId != zone_id && m_spellInfo->AreaId != m_caster->GetAreaId() )
-        return SPELL_FAILED_REQUIRES_AREA;
-
-    // special cases zone check (maps not stored anywhere in DBC)
-    if( (m_spellInfo->Id==41618 || m_spellInfo->Id==41620) && zone_id != 3845 && zone_id != 3847 && zone_id != 3848 && zone_id != 3849 )
-        return SPELL_FAILED_REQUIRES_AREA;
-    if( (m_spellInfo->Id==41617 || m_spellInfo->Id==41619) && zone_id != 3717 && zone_id != 3607 && zone_id != 3715 && zone_id != 3716 )
+    if(!IsSpellAllowedInAreaOrZone(m_spellInfo,m_caster->GetZoneId(),m_caster->GetAreaId()))
         return SPELL_FAILED_REQUIRES_AREA;
 
     // not let players cast spells at mount (and let do it to creatures)
