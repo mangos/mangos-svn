@@ -329,14 +329,14 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(fals
     {
         m_caster_guid = target->GetGUID();
         damage = m_currentBasePoints+1;                     // stored value-1
-        m_maxduration = target->CalculateSpellDuration(m_spellProto);
+        m_maxduration = target->CalculateSpellDuration(m_spellProto, target);
     }
     else
     {
         m_caster_guid = caster->GetGUID();
 
         damage        = caster->CalculateSpellDamage(m_spellProto,m_effIndex,m_currentBasePoints,target);
-        m_maxduration = caster->CalculateSpellDuration(m_spellProto);
+        m_maxduration = caster->CalculateSpellDuration(m_spellProto, target);
 
         if (!damage && castItem && castItem->GetItemSuffixFactor())
         {

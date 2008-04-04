@@ -8354,7 +8354,7 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
     return value;
 }
 
-int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto)
+int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto, Unit const* target)
 {
     Player* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? (Player*)this : NULL;
 
@@ -8373,7 +8373,7 @@ int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto)
     if (duration > 0)
     {
         int32 durationMod = 0;
-        AuraList const& mMechanicMod = GetAurasByType(SPELL_AURA_MECHANIC_DURATION_MOD);
+        AuraList const& mMechanicMod = target->GetAurasByType(SPELL_AURA_MECHANIC_DURATION_MOD);
         for(AuraList::const_iterator i = mMechanicMod.begin();i != mMechanicMod.end(); ++i)
             if((*i)->GetModifier()->m_miscvalue == int32(spellProto->Mechanic))
                 durationMod+= (*i)->GetModifier()->m_amount;
