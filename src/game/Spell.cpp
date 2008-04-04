@@ -565,6 +565,10 @@ void Spell::FillTargetMap()
                         case SPELL_AURA_ADD_PCT_MODIFIER:
                             tmpUnitMap.push_back(m_caster);
                             break;
+                        default:                            // apply to target in other case
+                            if(m_targets.getUnitTarget())
+                                tmpUnitMap.push_back(m_targets.getUnitTarget());
+                            break;
                     }
                     break;
                 case SPELL_EFFECT_APPLY_AREA_AURA:
