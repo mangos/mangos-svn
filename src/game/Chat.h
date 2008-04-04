@@ -351,7 +351,7 @@ class ChatHandler
         WorldSession * m_session;
 
         // Utility methods for commands
-        void ShowTicket(uint64 guid, uint32 category, char const* text);
+        void ShowTicket(uint64 guid, uint32 category, char const* text, char const* time);
         uint32 GetTicketIDByNum(uint32 num);
 
         // common global flag

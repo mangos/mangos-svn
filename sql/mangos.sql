@@ -2214,7 +2214,7 @@ INSERT INTO `mangos_string` VALUES
 (287,'Creature (GUID: %u) not found',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (288,'Tickets count: %i show new tickets: %s\n',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (289,'New ticket from %s',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(290,'Ticket of %s (Category: %i):\n%s\n',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(290,'Ticket of %s (Last updated: %s) (Category: %i):\n%s ',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (291,'New ticket show: ON',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (292,'New ticket show: OFF',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (293,'Ticket %i doesn\'t exist',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
