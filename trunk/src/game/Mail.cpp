@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -528,20 +528,33 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     if(!pl->m_mailsLoaded)
         pl ->_LoadMail();
 
+    // client have limitation (~217) mail to show in mail box and can crash if receive more
+    uint32 const MaxMailsCount = 217;
+    uint32 mails_count = 0;
+
+    // client have limitation (~301) items(stacks) in mails to show in mail box and can crash if receive more
+    uint32 const MaxAllItemsCount = 301;
+    uint32 all_items_count = 0;
+
     WorldPacket data(SMSG_MAIL_LIST_RESULT, (200));         // guess size
     data << uint8(0);                                       // mail's count
-    uint8 mails_count = 0;
     time_t cur_time = time(NULL);
     std::deque<Mail*>::iterator itr;
 
-    // client have limitation (~217) mail to show in mail box and can crash if receive more
-    for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd() && mails_count < 217; itr++)
+    for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd(); ++itr)
     {
         // skip deleted or not delivered (deliver delay not expired) mails
         if ((*itr)->state == MAIL_STATE_DELETED || (*itr)->HasItems() && cur_time < (*itr)->deliver_time)
             continue;
 
-        ++mails_count;
+        mails_count += 1;
+        if(mails_count > MaxMailsCount)
+            break;
+
+        all_items_count += (*itr)->items.size();
+        if(all_items_count > MaxAllItemsCount)
+            break;
+
         data << (uint16) 0x0040;                            // unknown 2.3.0, different values
         data << (uint32) (*itr)->messageID;                 // Message ID
         data << (uint8) (*itr)->messageType;                // Message Type
