@@ -273,6 +273,8 @@ bool IsPositiveTarget(uint32 targetA, uint32 targetB);
 bool IsSingleTargetSpell(SpellEntry const *spellInfo);
 bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellInfo2);
 
+bool IsSpellAllowedInAreaOrZone(SpellEntry const *spellInfo,uint32 zone_id,uint32 area_id);
+
 inline
 bool IsAreaEffectTarget( Targets target )
 {

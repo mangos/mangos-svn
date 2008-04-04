@@ -1671,3 +1671,17 @@ bool IsMechanicInvulnerabilityImmunityToSpell(SpellEntry const* spellInfo)
 
     return false;
 }
+
+bool IsSpellAllowedInAreaOrZone(SpellEntry const *spellInfo,uint32 zone_id,uint32 area_id)
+{
+    // normal case
+    if( spellInfo->AreaId && spellInfo->AreaId != zone_id && spellInfo->AreaId != area_id )
+        return false;
+
+    // special cases zone check (maps not stored anywhere in DBC)
+    if( (spellInfo->Id==41618 || spellInfo->Id==41620) && zone_id != 3845 && zone_id != 3847 && zone_id != 3848 && zone_id != 3849 )
+        return false;
+    if( (spellInfo->Id==41617 || spellInfo->Id==41619) && zone_id != 3717 && zone_id != 3607 && zone_id != 3715 && zone_id != 3716 )
+        return false;
+    return true;
+}
