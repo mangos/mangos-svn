@@ -67,8 +67,8 @@ enum PlayerSpellState
 struct PlayerSpell
 {
     uint16 slotId          : 16;
-    uint8 active           : 8;
     PlayerSpellState state : 8;
+    bool active            : 1;
 };
 
 struct SpellModifier
@@ -1340,10 +1340,13 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendProficiency(uint8 pr1, uint32 pr2);
         void SendInitialSpells();
-        bool addSpell(uint16 spell_id,uint8 active, PlayerSpellState state = PLAYERSPELL_NEW, uint16 slot_id=0xffff);
-        void learnSpell(uint16 spell_id);
-        void removeSpell(uint16 spell_id);
+        bool addSpell(uint32 spell_id, bool active, bool learning = true, bool loading = false, uint16 slot_id=0xffff);
+        void learnSpell(uint32 spell_id);
+        void removeSpell(uint32 spell_id);
         void resetSpells();
+        void learnDefaultSpells();
+        void learnQuestRewardedSpells();
+
 
         uint32 GetFreeTalentPoints() const { return GetUInt32Value(PLAYER_CHARACTER_POINTS1); }
         void SetFreeTalentPoints(uint32 points) { SetUInt32Value(PLAYER_CHARACTER_POINTS1,points); }

@@ -93,7 +93,7 @@ DBCStorage <SpellRangeEntry> sSpellRangeStore(SpellRangefmt);
 DBCStorage <SpellShapeshiftEntry> sSpellShapeshiftStore(SpellShapeshiftfmt);
 DBCStorage <StableSlotPricesEntry> sStableSlotPricesStore(StableSlotPricesfmt);
 DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
-TalentSpellCosts sTalentSpellCosts;
+TalentSpellPosMap sTalentSpellPosMap;
 DBCStorage <TalentTabEntry> sTalentTabStore(TalentTabEntryfmt);
 
 // store absolute bit position for first rank for talent inspect
@@ -270,7 +270,7 @@ void LoadDBCStores(std::string dataPath)
         if (!talentInfo) continue;
         for (int j = 0; j < 5; j++)
             if(talentInfo->RankID[j])
-                sTalentSpellCosts[talentInfo->RankID[j]] = j+1;
+                sTalentSpellPosMap[talentInfo->RankID[j]] = TalentSpellPos(i,j);
     }
 
     LoadDBC(bar,bad_dbc_files,sTalentTabStore,           dataPath+"dbc/TalentTab.dbc");
@@ -436,13 +436,21 @@ char* GetPetName(uint32 petfamily, uint32 dbclang)
     return pet_family->Name[dbclang]?pet_family->Name[dbclang]:NULL;
 }
 
+TalentSpellPos const* GetTalentSpellPos(uint32 spellId)
+{
+    TalentSpellPosMap::const_iterator itr = sTalentSpellPosMap.find(spellId);
+    if(itr==sTalentSpellPosMap.end())
+        return NULL;
+
+    return &itr->second;
+}
+
 uint32 GetTalentSpellCost(uint32 spellId)
 {
-    TalentSpellCosts::const_iterator itr = sTalentSpellCosts.find(spellId);
-    if(itr==sTalentSpellCosts.end())
-        return 0;
+    if(TalentSpellPos const* pos = GetTalentSpellPos(spellId))
+        return pos->rank+1;
 
-    return itr->second;
+    return 0;
 }
 
 AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id)

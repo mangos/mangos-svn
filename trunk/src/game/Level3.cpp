@@ -1331,7 +1331,7 @@ bool ChatHandler::HandleLearnAllCommand(const char* /*args*/)
             continue;
         }
 
-        m_session->GetPlayer()->learnSpell((uint16)spell);
+        m_session->GetPlayer()->learnSpell(spell);
     }
 
     SendSysMessage(LANG_COMMAND_LEARN_MANY_SPELLS);
@@ -1371,7 +1371,7 @@ bool ChatHandler::HandleLearnAllGMCommand(const char* /*args*/)
             continue;
         }
 
-        m_session->GetPlayer()->learnSpell((uint16)spell);
+        m_session->GetPlayer()->learnSpell(spell);
     }
 
     SendSysMessage(LANG_LEARNING_GM_SKILLS);
@@ -1435,6 +1435,16 @@ bool ChatHandler::HandleLearnAllMySpellsCommand(const char* /*args*/)
     return true;
 }
 
+static void learnAllHighRanks(Player* player, uint32 spellid)
+{
+    SpellChainMapNext const& nextMap = spellmgr.GetSpellChainNext();
+    for(SpellChainMapNext::const_iterator itr = nextMap.lower_bound(spellid); itr != nextMap.upper_bound(spellid); ++itr)
+    {
+        player->learnSpell(itr->second);
+        learnAllHighRanks(player,itr->second);
+    }
+}
+
 bool ChatHandler::HandleLearnAllMyTalentsCommand(const char* /*args*/)
 {
     Player* player = m_session->GetPlayer();
@@ -1468,21 +1478,6 @@ bool ChatHandler::HandleLearnAllMyTalentsCommand(const char* /*args*/)
         if(!spellid)                                        // ??? none spells in telent
             continue;
 
-        // get possible non talent last spell in chain
-        uint32 last_spell_id = spellmgr.GetLastSpellInChain(spellid);
-
-        // already known high rank;
-        if(player->HasSpell(last_spell_id))
-            continue;
-
-        // unlearn lower ranks of talent
-        for(int j = 0; j < rank; ++j)
-        {
-            uint32 lowspellid = talentInfo->RankID[j];
-            player->RemoveAurasDueToSpell(lowspellid);
-            player->removeSpell(lowspellid);
-        }
-
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid);
         if(!spellInfo || !SpellMgr::IsSpellValid(spellInfo,m_session->GetPlayer(),false))
             continue;
@@ -1490,15 +1485,8 @@ bool ChatHandler::HandleLearnAllMyTalentsCommand(const char* /*args*/)
         // learn highest rank of talent
         player->learnSpell(spellid);
 
-        // and learn all non-talent spell ranks
-        for(uint32 cur_id = last_spell_id; cur_id != spellid && cur_id != 0; cur_id = spellmgr.GetPrevSpellInChain(cur_id))
-        {
-            SpellEntry const* spellInfo2 = sSpellStore.LookupEntry(cur_id);
-            if(!spellInfo2 || !SpellMgr::IsSpellValid(spellInfo2,m_session->GetPlayer(),false))
-                continue;
-
-            player->learnSpell(cur_id);
-        }
+        // and learn all non-talent spell ranks (recursive by tree)
+        learnAllHighRanks(player,spellid);
     }
 
     SendSysMessage(LANG_COMMAND_LEARN_CLASS_TALENTS);
@@ -1512,6 +1500,32 @@ bool ChatHandler::HandleLearnAllLangCommand(const char* /*args*/)
         m_session->GetPlayer()->learnSpell(lang_description[i].spell_id);
 
     SendSysMessage(LANG_COMMAND_LEARN_ALL_LANG);
+    return true;
+}
+
+bool ChatHandler::HandleLearnAllDefaultCommand(const char* args)
+{
+    char* pName = strtok((char*)args, "");
+    Player *player = NULL;
+    if (pName)
+    {
+        std::string name = pName;
+        normalizePlayerName(name);
+        player = objmgr.GetPlayer(name.c_str());
+    }
+    else
+        player = getSelectedPlayer();
+
+    if(!player)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
+    player->learnDefaultSpells();
+    player->learnQuestRewardedSpells();
+
+    PSendSysMessage(LANG_COMMAND_LEARN_ALL_DEFAULT_AND_QUEST,player->GetName());
     return true;
 }
 
@@ -1592,7 +1606,7 @@ bool ChatHandler::HandleLearnCommand(const char* args)
         return true;
     }
 
-    targetPlayer->learnSpell((uint16)spell);
+    targetPlayer->learnSpell(spell);
 
     return true;
 }

@@ -408,6 +408,7 @@ struct SpellChainNode
 };
 
 typedef HM_NAMESPACE::hash_map<uint32, SpellChainNode> SpellChainMap;
+typedef std::multimap<uint32, uint32> SpellChainMapNext;
 
 // Spell learning properties (accessed using SpellMgr functions)
 struct SpellLearnSkillNode
@@ -487,6 +488,8 @@ class SpellMgr
             return itr->second.prev;
         }
 
+        SpellChainMapNext const& GetSpellChainNext() const { return mSpellChainsNext; }
+
         // Note: not use rank for compare to spell ranks: spell chains isn't linear order
         // Use IsHighRankOfSpell instead
         uint8 GetSpellRank(uint32 spell_id) const
@@ -514,22 +517,6 @@ class SpellMgr
                     return true;
 
             return false;
-        }
-
-        uint32 GetLastSpellInChain(uint32 spell_id) const
-        {
-            // fast check non ranked spell
-            SpellChainMap::const_iterator spell_itr = mSpellChains.find(spell_id);
-            if(spell_itr == mSpellChains.end())
-                return 0;
-
-            for(SpellChainMap::const_iterator itr = mSpellChains.begin(); itr != mSpellChains.end(); ++itr)
-            {
-                if(itr->second.first==spell_itr->second.first && itr->second.rank > spell_itr->second.rank)
-                    spell_itr = itr;
-            }
-
-            return spell_itr->first;
         }
 
         bool IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spellId_2) const;
@@ -608,6 +595,7 @@ class SpellMgr
     private:
         SpellScriptTarget  mSpellScriptTarget;
         SpellChainMap      mSpellChains;
+        SpellChainMapNext  mSpellChainsNext;
         SpellLearnSkillMap mSpellLearnSkills;
         SpellLearnSpellMap mSpellLearnSpells;
         SpellTeleportMap   mSpellTeleports;

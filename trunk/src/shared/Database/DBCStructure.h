@@ -733,7 +733,16 @@ struct WorldSafeLocsEntry
 #endif
 
 // Structures not used for casting to loaded DBC data and not required then packing
-typedef std::map<uint32,uint32> TalentSpellCosts;
+struct TalentSpellPos
+{
+    TalentSpellPos() : talent_id(0), rank(0) {}
+    TalentSpellPos(uint16 _talent_id, uint8 _rank) : talent_id(_talent_id), rank(_rank) {}
+
+    uint16 talent_id;
+    uint8  rank;
+};
+
+typedef std::map<uint32,TalentSpellPos> TalentSpellPosMap;
 
 struct TaxiPathBySourceAndDestination
 {
