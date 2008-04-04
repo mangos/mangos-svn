@@ -484,11 +484,10 @@ void WorldSession::HandleLootMasterGiveOpcode( WorldPacket & recv_data )
         return;
     }
 
-    uint32 amount = pLoot->items[slotid].count;
-    uint32 itemid = pLoot->items[slotid].itemid;
+    LootItem& item = pLoot->items[slotid];
 
     ItemPosCountVec dest;
-    uint8 msg = target->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemid, amount );
+    uint8 msg = target->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item.itemid, item.count );
     if ( msg != EQUIP_ERR_OK )
     {
         target->SendEquipError( msg, NULL, NULL );
@@ -497,12 +496,14 @@ void WorldSession::HandleLootMasterGiveOpcode( WorldPacket & recv_data )
     }
 
     // not move item from loot to target inventory
-    Item * newitem = target->StoreNewItem( dest, itemid, true );
+    Item * newitem = target->StoreNewItem( dest, item.itemid, true, item.randomPropertyId );
+    target->SendNewItem(newitem, uint32(item.count), false, false, true );
 
-    pLoot->items[slotid].count=0;
-    pLoot->items[slotid].is_looted=true;
+    // mark as looted
+    item.count=0;
+    item.is_looted=true;
 
-    target->SendNewItem(newitem, uint32(amount), false, false, true );
+
     pLoot->NotifyItemRemoved(slotid);
     --pLoot->unlootedCount;
 }
