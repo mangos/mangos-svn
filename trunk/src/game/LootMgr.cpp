@@ -734,6 +734,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
             if (!qi->is_looted && !item.is_looted)
             {
                 b << uint8(l.items.size() + (qi - lv.qlist->begin()));
+                b << item;
                 b << uint8(0);                              // allow loot
                 ++itemsShown;
             }
