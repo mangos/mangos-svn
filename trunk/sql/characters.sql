@@ -561,6 +561,7 @@ CREATE TABLE `character_ticket` (
   `guid` int(11) unsigned NOT NULL default '0',
   `ticket_text` text,
   `ticket_category` int(1) NOT NULL default '0',
+  `ticket_lastchange` TIMESTAMP ON  UPDATE  CURRENT_TIMESTAMP  NOT  NULL  DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY  (`ticket_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 

@@ -1525,13 +1525,13 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
 }
 
 //show tickets
-void ChatHandler::ShowTicket(uint64 guid, uint32 category, char const* text)
+void ChatHandler::ShowTicket(uint64 guid, uint32 category, char const* text, char const* time)
 {
     std::string name;
     if(!objmgr.GetPlayerNameByGUID(guid,name))
         name = GetMangosString(LANG_UNKNOWN);
 
-    PSendSysMessage(LANG_COMMAND_TICKETVIEW, name.c_str(),category,text);
+    PSendSysMessage(LANG_COMMAND_TICKETVIEW, name.c_str(),time,category,text);
 }
 
 //ticket commands
@@ -1576,25 +1576,23 @@ bool ChatHandler::HandleTicketCommand(const char* args)
     int num = atoi(px);
     if(num > 0)
     {
-        QueryResult *result = CharacterDatabase.Query("SELECT guid,ticket_category,ticket_text FROM character_ticket");
+        QueryResult *result = CharacterDatabase.PQuery("SELECT guid,ticket_category,ticket_text,ticket_lastchange FROM character_ticket ORDER BY `ticket_id` ASC LIMIT %d,1",num-1);
 
-        if(!result || uint64(num) > result->GetRowCount())
+        if(!result)
         {
             PSendSysMessage(LANG_COMMAND_TICKENOTEXIST, num);
             delete result;
             return true;
         }
 
-        for(int i = 1; i < num; ++i)
-            result->NextRow();
-
         Field* fields = result->Fetch();
 
         uint64 guid = fields[0].GetUInt64();
         uint32 category = fields[1].GetUInt32();
         char const* text = fields[2].GetString();
+        char const* time = fields[3].GetString();
 
-        ShowTicket(guid,category,text);
+        ShowTicket(guid,category,text,time);
         delete result;
         return true;
     }
@@ -1609,17 +1607,18 @@ bool ChatHandler::HandleTicketCommand(const char* args)
         return false;
 
     // ticket $char_name
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid,ticket_category,ticket_text FROM character_ticket WHERE guid = '%u'",GUID_LOPART(guid));
+    QueryResult *result = CharacterDatabase.PQuery("SELECT ticket_category,ticket_text,ticket_lastchange FROM character_ticket WHERE guid = '%u' ORDER BY `ticket_id` ASC",GUID_LOPART(guid));
 
     if(!result)
         return false;
 
     Field* fields = result->Fetch();
 
-    uint32 category = fields[1].GetUInt32();
-    char const* text = fields[2].GetString();
+    uint32 category = fields[0].GetUInt32();
+    char const* text = fields[1].GetString();
+    char const* time = fields[2].GetString();
 
-    ShowTicket(guid,category,text);
+    ShowTicket(guid,category,text,time);
     delete result;
 
     return true;
