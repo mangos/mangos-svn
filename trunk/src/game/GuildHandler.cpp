@@ -1094,8 +1094,13 @@ void WorldSession::HandleGuildBankDeposit( WorldPacket & recv_data )
     if (GetPlayer()->GetMoney() < money)
         return;
 
+    CharacterDatabase.BeginTransaction();
+    
     pGuild->SetBankMoney(pGuild->GetGuildBankMoney()+money);
     GetPlayer()->ModifyMoney(-int(money));
+    GetPlayer()->SaveGoldToDB();
+
+    CharacterDatabase.CommitTransaction();
 
     // logging money
     if(_player->GetSession()->GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE))
@@ -1138,10 +1143,18 @@ void WorldSession::HandleGuildBankWithdraw( WorldPacket & recv_data )
     if (pGuild->GetRankRights(GetPlayer()->GetRank()) & GR_RIGHT_REPAIR_FROM_GUILD)
         return;
 
+    CharacterDatabase.BeginTransaction();
+    
     if (!pGuild->MemberMoneyWithdraw(money, GetPlayer()->GetGUIDLow()))
+    {
+        CharacterDatabase.RollbackTransaction();
         return;
+    }
 
     GetPlayer()->ModifyMoney(money);
+    GetPlayer()->SaveGoldToDB();
+
+    CharacterDatabase.CommitTransaction();
 
     // Log
     pGuild->LogBankEvent(GUILD_BANK_LOG_WITHDRAW_MONEY, uint8(0), GetPlayer()->GetGUIDLow(), money);
@@ -1267,7 +1280,6 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                 // pItemSrc moved to BankTabSlotDst
                 pGuild->AddGBankItemToDB(GuildId, uint32(BankTabDst), uint32(BankTabSlotDst), pItemSrc->GetGUIDLow(), pItemSrc->GetEntry());
 
-                CharacterDatabase.CommitTransaction();
                 // No need to save item instances, they did not change
 
                 pGuild->LogBankEvent(GUILD_BANK_LOG_MOVE_ITEM, BankTab, pl->GetGUIDLow(), pItemSrc->GetEntry(), pItemSrc->GetCount(), BankTabDst);
@@ -1657,6 +1669,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                 if(pItemChar->GetEntry()!=pItemBank->GetEntry() && SplitedAmount)
                 {
                     pl->SendEquipError( EQUIP_ERR_ITEMS_CANT_BE_SWAPPED, pItemChar, pItemBank );
+                    CharacterDatabase.RollbackTransaction();
                     return;
                 }
 
