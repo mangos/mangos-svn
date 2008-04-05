@@ -1660,7 +1660,6 @@ CREATE TABLE `locales_creature` (
   `subname_loc5` varchar(100) default NULL,
   `subname_loc6` varchar(100) default NULL,
   `subname_loc7` varchar(100) default NULL,
-  `subname_loc8` varchar(100) default NULL,
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
