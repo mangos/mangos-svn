@@ -1822,7 +1822,7 @@ void Spell::EffectUnlearnSpecialization( uint32 i )
 
 void Spell::EffectManaDrain(uint32 i)
 {
-    if(m_spellInfo->EffectMiscValue[i] > 4)
+    if(m_spellInfo->EffectMiscValue[i] < 0 || m_spellInfo->EffectMiscValue[i] >= MAX_POWERS)
         return;
 
     Powers drain_power = Powers(m_spellInfo->EffectMiscValue[i]);
@@ -2171,7 +2171,7 @@ void Spell::EffectEnergize(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    if(m_spellInfo->EffectMiscValue[i] > 4)
+    if(m_spellInfo->EffectMiscValue[i] < 0 || m_spellInfo->EffectMiscValue[i] >= MAX_POWERS)
         return;
 
     if(damage < 0)
@@ -4419,7 +4419,7 @@ void Spell::EffectSelfResurrect(uint32 i)
     if(damage < 0)
     {
         health = uint32(-damage);
-        mana   = mana = m_spellInfo->EffectMiscValue[i];
+        mana = m_spellInfo->EffectMiscValue[i];
     }
     // percent case
     else

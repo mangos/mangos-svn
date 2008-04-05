@@ -2481,7 +2481,7 @@ void ObjectMgr::LoadQuests()
                     bool found = false;
                     for(int k = 0; k < 3; ++k)
                     {
-                        if( spellInfo->Effect[k]==SPELL_EFFECT_QUEST_COMPLETE && spellInfo->EffectMiscValue[k]==qinfo->QuestId ||
+                        if( spellInfo->Effect[k]==SPELL_EFFECT_QUEST_COMPLETE && uint32(spellInfo->EffectMiscValue[k])==qinfo->QuestId ||
                             spellInfo->Effect[k]==SPELL_EFFECT_SEND_EVENT)
                         {
                             found = true;

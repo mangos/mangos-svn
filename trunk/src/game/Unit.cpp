@@ -3671,7 +3671,9 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
 
     uint32 spellId = Aur->GetId();
     uint32 effIndex = Aur->GetEffIndex();
-    bool is_sec = IsSpellSingleEffectPerCaster(spellId);
+
+    SpellSpecific spellId_spec = GetSpellSpecific(spellId);
+
     AuraMap::iterator i,next;
     for (i = m_Auras.begin(); i != m_Auras.end(); i = next)
     {
@@ -3733,18 +3735,17 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
 
         if(!is_triggered_by_spell)
         {
-            bool sec_match = false;
-            bool is_i_sec = IsSpellSingleEffectPerCaster(i_spellId);
-            if( is_sec && is_i_sec )
-                if (Aur->GetCasterGUID() == (*i).second->GetCasterGUID())
-                    if (GetSpellSpecific(spellId) == GetSpellSpecific(i_spellId))
-                        sec_match = true;
-            if( sec_match || spellmgr.IsNoStackSpellDueToSpell(spellId, i_spellId) && !is_sec && !is_i_sec )
+
+            SpellSpecific i_spellId_spec = GetSpellSpecific(i_spellId);
+
+            bool is_sspc = IsSingleFromSpellSpecificPerCaster(spellId_spec,i_spellId_spec);
+
+            if( is_sspc && Aur->GetCasterGUID() == (*i).second->GetCasterGUID() )
             {
-                // if sec_match this isn't always true, needs to be rechecked
+                // cannot remove higher rank
                 if (spellmgr.IsRankSpellDueToSpell(Aur->GetSpellProto(), i_spellId))
                     if(CompareAuraRanks(spellId, effIndex, i_spellId, i_effIndex) < 0)
-                        return false;                       // cannot remove higher rank
+                        return false;
 
                 RemoveAurasDueToSpell(i_spellId);
 
@@ -3753,9 +3754,18 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                 else
                     next =  m_Auras.begin();
             }
-            else                                            // Potions stack aura by aura
-            if (Aur->GetSpellProto()->SpellFamilyName == SPELLFAMILY_POTION &&
-                (*i).second->GetSpellProto()->SpellFamilyName == SPELLFAMILY_POTION)
+            else if( !is_sspc && spellmgr.IsNoStackSpellDueToSpell(spellId, i_spellId) )
+            {
+                RemoveAurasDueToSpell(i_spellId);
+
+                if( m_Auras.empty() )
+                    break;
+                else
+                    next =  m_Auras.begin();
+            }
+            // Potions stack aura by aura (elixirs/flask already checked)
+            else if( Aur->GetSpellProto()->SpellFamilyName == SPELLFAMILY_POTION &&
+                (*i).second->GetSpellProto()->SpellFamilyName == SPELLFAMILY_POTION )
             {
                 if (IsNoStackAuraDueToAura(spellId, effIndex, i_spellId, i_effIndex))
                 {

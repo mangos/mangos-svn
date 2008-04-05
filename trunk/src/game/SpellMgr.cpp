@@ -224,6 +224,35 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
 
             break;
         }
+
+        case SPELLFAMILY_POTION:
+        {
+            if((spellInfo->Attributes & 0x8000000LL)==0)
+                break;
+
+            if ( spellInfo->AttributesEx2 == 0x00000001 && spellInfo->AttributesEx3 == 0x00100000 )
+                return SPELL_FLASK_ELIXIR;
+
+            for (int i = 0; i < 3; ++i)
+            {
+                switch ( spellInfo->EffectApplyAuraName[i] )
+                {
+                    case SPELL_AURA_MOD_STAT:
+                        if ( spellInfo->EffectMiscValue[i] < 2 )
+                            return SPELL_BATTLE_ELIXIR;
+                        break;
+                    case SPELL_AURA_MOD_ATTACK_POWER:
+                    case SPELL_AURA_MOD_RANGED_ATTACK_POWER:
+                    case SPELL_AURA_MOD_DAMAGE_DONE:
+                    case SPELL_AURA_MOD_MELEE_ATTACK_POWER_VERSUS:
+                        return SPELL_BATTLE_ELIXIR;
+                    default:
+                        break;
+                }
+            }
+
+            return SPELL_GUARDIAN_ELIXIR;
+        }
     }
 
     // only warlock armor/skin have this (in additional to family cases)
@@ -249,9 +278,9 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
     return SPELL_NORMAL;
 }
 
-bool IsSpellSingleEffectPerCaster(uint32 spellId)
+bool IsSingleFromSpellSpecificPerCaster(uint32 spellSpec1,uint32 spellSpec2)
 {
-    switch(GetSpellSpecific(spellId))
+    switch(spellSpec1)
     {
         case SPELL_SEAL:
         case SPELL_BLESSING:
@@ -265,7 +294,17 @@ bool IsSpellSingleEffectPerCaster(uint32 spellId)
         case SPELL_MAGE_POLYMORPH:
         case SPELL_POSITIVE_SHOUT:
         case SPELL_JUDGEMENT:
-            return true;
+            return spellSpec1==spellSpec2;
+        case SPELL_BATTLE_ELIXIR:
+            return spellSpec2==SPELL_BATTLE_ELIXIR
+                || spellSpec2==SPELL_FLASK_ELIXIR;
+        case SPELL_GUARDIAN_ELIXIR:
+            return spellSpec2==SPELL_GUARDIAN_ELIXIR
+                || spellSpec2==SPELL_FLASK_ELIXIR;
+        case SPELL_FLASK_ELIXIR:
+            return spellSpec2==SPELL_BATTLE_ELIXIR
+                || spellSpec2==SPELL_GUARDIAN_ELIXIR
+                || spellSpec2==SPELL_FLASK_ELIXIR;
         default:
             return false;
     }
