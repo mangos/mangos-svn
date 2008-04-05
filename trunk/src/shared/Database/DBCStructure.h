@@ -369,7 +369,9 @@ struct MapEntry
                                                             // 44 intro text flags
     //char*     allianceIntro                               // 45-60 text for PvP Zones
                                                             // 46 intro text flags
-                                                            // 47-65 not used
+                                                            // 47-61 not used
+    uint32      multimap_id;                                // 62
+                                                            // 63-65 not used
     //chat*     unknownText1                                // 66-81 unknown empty text fields, possible normal Intro text.
                                                             // 82 text flags
     //chat*     heroicIntroText                             // 83-98 heroic mode requirement text

@@ -2910,7 +2910,7 @@ uint8 Spell::CanCast(bool strict)
         return SPELL_FAILED_ONLY_BATTLEGROUNDS;
 
     // zone check
-    if(!IsSpellAllowedInAreaOrZone(m_spellInfo,m_caster->GetZoneId(),m_caster->GetAreaId()))
+    if(!IsSpellAllowedInLacation(m_spellInfo,m_caster->GetMapId(),m_caster->GetZoneId(),m_caster->GetAreaId()))
         return SPELL_FAILED_REQUIRES_AREA;
 
     // not let players cast spells at mount (and let do it to creatures)
