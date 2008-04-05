@@ -1711,7 +1711,7 @@ bool IsMechanicInvulnerabilityImmunityToSpell(SpellEntry const* spellInfo)
     return false;
 }
 
-bool IsSpellAllowedInLacation(SpellEntry const *spellInfo,uint32 map_id,uint32 zone_id,uint32 area_id)
+bool IsSpellAllowedInLocation(SpellEntry const *spellInfo,uint32 map_id,uint32 zone_id,uint32 area_id)
 {
     // normal case
     if( spellInfo->AreaId && spellInfo->AreaId != zone_id && spellInfo->AreaId != area_id )
