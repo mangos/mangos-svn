@@ -3458,6 +3458,24 @@ void Spell::EffectWeaponDmg(uint32 i)
             }
             break;
         }
+        case SPELLFAMILY_SHAMAN:
+        {
+            // Skyshatter Harness item set bonus
+            // Stormstrike
+            if(m_spellInfo->SpellFamilyFlags & 0x001000000000LL)
+            {
+                Unit::AuraList const& m_OverrideClassScript = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                for(Unit::AuraList::const_iterator i = m_OverrideClassScript.begin(); i != m_OverrideClassScript.end(); ++i)
+                {
+                    // Stormstrike AP Buff
+                    if ( (*i)->GetModifier()->m_miscvalue == 5634 )
+                    {
+                        m_caster->CastSpell(m_caster,38430,true,NULL,*i);
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     // percent mod applied
