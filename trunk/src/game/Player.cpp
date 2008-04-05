@@ -6875,8 +6875,6 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
         }
         else
         {
-            uint32 lootid = creature->GetCreatureInfo()->lootid;
-
             // the player whose group may loot the corpse
             Player *recipient = creature->GetLootRecipient();
             if (!recipient)
@@ -6894,6 +6892,8 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             if(!creature->lootForBody)
             {
                 creature->lootForBody = true;
+
+                uint32 lootid = creature->GetCreatureInfo()->lootid;
                 if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
                 {
                     loot->clear();
@@ -6924,35 +6924,39 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 }
             }
 
+            // possible only if creature->lootForBody && loot->empty() at spell cast check
             if (loot_type == LOOT_SKINNING)
             {
                 loot->clear();
                 FillLoot(loot, creature->GetCreatureInfo()->SkinLootId, LootTemplates_Skinning, this);
             }
-
-            if(Group* group = GetGroup())
+            // set group rights only for loot_type != LOOT_SKINNING
+            else
             {
-                if( group == recipient->GetGroup() )
+                if(Group* group = GetGroup())
                 {
-                    if(loot->released || group->GetLootMethod() == FREE_FOR_ALL)
-                        permission = ALL_PERMISSION;
-                    else if(group->GetLooterGuid() == GetGUID())
+                    if( group == recipient->GetGroup() )
                     {
-                        if(group->GetLootMethod() == MASTER_LOOT)
-                            permission = MASTER_PERMISSION;
-                        else
+                        if(loot->released || group->GetLootMethod() == FREE_FOR_ALL)
                             permission = ALL_PERMISSION;
+                        else if(group->GetLooterGuid() == GetGUID())
+                        {
+                            if(group->GetLootMethod() == MASTER_LOOT)
+                                permission = MASTER_PERMISSION;
+                            else
+                                permission = ALL_PERMISSION;
+                        }
+                        else
+                            permission = GROUP_PERMISSION;
                     }
                     else
-                        permission = GROUP_PERMISSION;
+                        permission = NONE_PERMISSION;
                 }
+                else if(recipient == this)
+                    permission = ALL_PERMISSION;
                 else
                     permission = NONE_PERMISSION;
             }
-            else if(recipient == this)
-                permission = ALL_PERMISSION;
-            else
-                permission = NONE_PERMISSION;
         }
     }
 
