@@ -88,6 +88,7 @@
 				GenerateMapFile="true"
 				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\mangosd.map"
 				SubSystem="1"
+				LargeAddressAware="2"
 				LinkTimeCodeGeneration="0"
 				ImportLibrary="$(OutDir)\mangosd.lib"
 			/>
@@ -289,6 +290,7 @@
 				GenerateMapFile="true"
 				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\mangosd.map"
 				SubSystem="1"
+				LargeAddressAware="2"
 				ImportLibrary="$(OutDir)\mangosd.lib"
 				FixedBaseAddress="1"
 			/>
