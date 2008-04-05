@@ -90,7 +90,7 @@ const CliCommand Commands[]=
     {"setloglevel", & CliSetLogLevel,"Set Log Level"},
     {"corpses", & CliCorpses,"Manually call corpses erase global even code"},
     {"version", & CliVersion,"Display server version"},
-    {"idleshutdown", & CliIdleShutdown,"Shutdown server with some delay when not active connections at server"},
+    {"idleshutdown", & CliIdleShutdown,"Shutdown server with some delay when there are no active connections remaining"},
     {"shutdown", & CliShutdown,"Shutdown server with some delay"},
     {"exit", & CliExit,"Shutdown server NOW"},
     {"writepdump", &CliWritePlayerDump,"Write a player dump to a file"},
@@ -174,7 +174,7 @@ void CliBroadcast(char *text,pPrintf zprintf)
     std::string str = objmgr.GetMangosString(LANG_SYSTEMMESSAGE);
     str += text;
     sWorld.SendWorldText(str.c_str(), NULL);
-    zprintf("Broadcasting to the world:%s\r\n",str.c_str());
+    zprintf("Broadcasting to the world: %s\r\n",str.c_str());
 }
 
 /// Print the list of commands and associated description
@@ -319,9 +319,9 @@ void CliBanList(char*,pPrintf zprintf)
     QueryResult *result = loginDatabase.Query("SELECT id,username FROM account WHERE id IN (SELECT id FROM account_banned WHERE active = 1)");
     if(result)
     {
-        zprintf("Actual Banned Accounts:\r\n");
+        zprintf("Currently Banned Accounts:\r\n");
         zprintf("===============================================================================\r\n");
-        zprintf("|    Account    |   BanDate    |   UnbanDate  |  Banned By    | Banned reason |\r\n");
+        zprintf("|    Account    |   BanDate    |   UnbanDate  |  Banned By    |   Ban Reason  |\r\n");
         Field *fields2;
         do
         {
@@ -359,9 +359,9 @@ void CliBanList(char*,pPrintf zprintf)
     result = loginDatabase.Query( "SELECT ip,bandate,unbandate,bannedby,banreason FROM ip_banned WHERE (bandate=unbandate OR unbandate>UNIX_TIMESTAMP()) ORDER BY unbandate" );
     if(result)
     {
-        zprintf("Actual Banned IPs:\r\n");
+        zprintf("Currently Banned IPs:\r\n");
         zprintf("===============================================================================\r\n");
-        zprintf("|      IP       |   BanDate    |   UnbanDate  |  Banned By    | Banned reason |\r\n");
+        zprintf("|      IP       |   BanDate    |   UnbanDate  |  Banned By    |   Ban Reason  |\r\n");
         do
         {
             zprintf("-------------------------------------------------------------------------------\r\n");
@@ -489,7 +489,7 @@ void CliSetGM(char *command,pPrintf zprintf)
 
     if(!szAcc||!szLevel)                                    //wrong syntax 'setgm' without name
     {
-        zprintf("Syntax is: setgm $character $number (0 - normal, 3 - gamemaster)>\r\n");
+        zprintf("Syntax is: setgm $account $number (0 - normal, 3 - gamemaster)>\r\n");
         return;
     }
 
@@ -541,7 +541,7 @@ void CliSetPassword(char *command,pPrintf zprintf)
     uint32 acc_id = accmgr.GetId(szAcc);
     if (!acc_id)
     {
-        zprintf("Account '%s' not exist!\r\n", szAcc);
+        zprintf("Account '%s' does not exist!\r\n", szAcc);
         return;
     }
 
@@ -583,7 +583,7 @@ void CliCreate(char *command,pPrintf zprintf)
 
     if(strlen(szAcc)>16)
     {
-        zprintf("Account cannot be longer than 16 characters.\r\n");
+        zprintf("Account name cannot be longer than 16 characters.\r\n");
         return;
     }
 
@@ -835,7 +835,7 @@ void CliSend(char *playerN,pPrintf zprintf)
 
     if(!plr || !msg)
     {
-        zprintf("Syntax: send $player $message (Player names case sensitive)\r\n");
+        zprintf("Syntax: send $player $message (Player name is case sensitive)\r\n");
         return;
     }
 
