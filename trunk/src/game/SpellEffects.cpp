@@ -3732,14 +3732,39 @@ void Spell::EffectScriptEffect(uint32 i)
         case 27230:
         {
             uint32 itemtype;
+            uint32 rank = 0;
+            Unit::AuraList const& mDummyAuras = unitTarget->GetAurasByType(SPELL_AURA_DUMMY);
+            for(Unit::AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
+            {
+                if((*i)->GetId() == 18692)
+                {
+                    rank = 1;
+                    break;
+                }
+                else if((*i)->GetId() == 18693)
+                {
+                    rank = 2;
+                    break;
+                }
+            }
+
+            static uint32 const itypes[6][3] = {
+                { 5512,19004,19005},                        //Minor Healthstone
+                { 5511,19006,19007},                        //Lesser Healthstone
+                { 5509,19008,19009},                        //Healthstone
+                { 5510,19010,19011},                        //Greater Healthstone
+                { 9421,19012,19013},                        //Major Healthstone
+                {22103,22104,22105}                         //Master Healthstone
+            };
+
             switch(m_spellInfo->Id)
             {
-                case  6201: itemtype =  5512; break;        //primary healstone
-                case  6202: itemtype =  5511; break;        //inferior healstone
-                case  5699: itemtype =  5509; break;        //healstone
-                case 11729: itemtype =  5510; break;        //strong healstone
-                case 11730: itemtype =  9421; break;        //super healstone
-                case 27230: itemtype = 22103; break;        //Master Healthstone
+                case  6201: itemtype=itypes[0][rank];break; //Minor Healthstone
+                case  6202: itemtype=itypes[1][rank];break; //Lesser Healthstone
+                case  5699: itemtype=itypes[2][rank];break; //Healthstone
+                case 11729: itemtype=itypes[3][rank];break; //Greater Healthstone
+                case 11730: itemtype=itypes[4][rank];break; //Major Healthstone
+                case 27230: itemtype=itypes[5][rank];break; //Master Healthstone
                 default:
                     return;
             }
