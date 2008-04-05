@@ -3235,7 +3235,7 @@ uint8 Spell::CanCast(bool strict)
                             }
                             case LOCK_KEY_SKILL:
                             {
-                                if(m_spellInfo->EffectMiscValue[i]!=lockInfo->key[it])
+                                if(uint32(m_spellInfo->EffectMiscValue[i])!=lockInfo->key[it])
                                     break;
 
                                 switch(lockInfo->key[it])
@@ -3605,9 +3605,9 @@ uint8 Spell::CheckCasterAuras() const
     for(int i = 0;i < 3; i ++)
     {
         if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_SCHOOL_IMMUNITY)
-            school_immune |= m_spellInfo->EffectMiscValue[i];
+            school_immune |= uint32(m_spellInfo->EffectMiscValue[i]);
         else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
-            mechanic_immune |= 1 << m_spellInfo->EffectMiscValue[i];
+            mechanic_immune |= 1 << uint32(m_spellInfo->EffectMiscValue[i]);
     }
     //immune movement impairement and loss of control
     if(m_spellInfo->Id==(uint32)42292)mechanic_immune=0x9967da6;
@@ -3844,7 +3844,7 @@ uint8 Spell::CheckItems()
                     // Mana Potion, Rage Potion, Thistle Tea(Rogue), ...
                     if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENERGIZE)
                     {
-                        if(m_spellInfo->EffectMiscValue[i] >= MAX_POWERS)
+                        if(m_spellInfo->EffectMiscValue[i] < 0 || m_spellInfo->EffectMiscValue[i] >= MAX_POWERS)
                             return (uint8)SPELL_FAILED_ALREADY_AT_FULL_POWER;
 
                         Powers power = Powers(m_spellInfo->EffectMiscValue[i]);

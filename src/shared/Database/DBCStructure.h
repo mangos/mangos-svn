@@ -499,7 +499,7 @@ struct SpellEntry
     float     EffectMultipleValue[3];                       // 100-102
     uint32    EffectChainTarget[3];                         // 103-105
     uint32    EffectItemType[3];                            // 106-108
-    uint32    EffectMiscValue[3];                           // 109-111
+    int32     EffectMiscValue[3];                           // 109-111
     uint32    EffectTriggerSpell[3];                        // 112-114
     float     EffectPointsPerComboPoint[3];                 // 115-117
     uint32    SpellVisual;                                  // 118

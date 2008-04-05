@@ -244,7 +244,10 @@ enum SpellSpecific
     SPELL_ELEMENTAL_SHIELD = 10,
     SPELL_MAGE_POLYMORPH = 11,
     SPELL_POSITIVE_SHOUT = 12,
-    SPELL_JUDGEMENT = 13
+    SPELL_JUDGEMENT = 13,
+    SPELL_BATTLE_ELIXIR = 14,
+    SPELL_GUARDIAN_ELIXIR = 15,
+    SPELL_FLASK_ELIXIR = 16
 };
 
 SpellSpecific GetSpellSpecific(uint32 spellId);
@@ -262,7 +265,7 @@ bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_
 bool IsSealSpell(uint32 spellId);
 bool IsElementalShield(uint32 spellId);
 int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
-bool IsSpellSingleEffectPerCaster(uint32 spellId);
+bool IsSingleFromSpellSpecificPerCaster(uint32 spellSpec1,uint32 spellSpec2);
 bool IsPassiveSpell(uint32 spellId);
 bool IsNonCombatSpell(uint32 spellId);
 
