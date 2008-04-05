@@ -10285,7 +10285,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
 
         if( msg != EQUIP_ERR_OK )
         {
-            SendEquipError( msg, pSrcItem, pDstItem );
+            SendEquipError( msg, pDstItem, pSrcItem );
             return;
         }
 

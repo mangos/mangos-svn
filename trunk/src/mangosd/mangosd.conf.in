@@ -311,7 +311,7 @@ LogColors = ""
 #                 0 (false)
 #
 #    CastUnstuck
-#        Aloow cast or not Unstuck spell at .start or client Help option use
+#        Allow cast or not Unstuck spell at .start or client Help option use
 #        Default: 1 (true)
 #                 0 (false)
 #

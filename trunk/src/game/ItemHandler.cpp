@@ -100,63 +100,96 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
     recv_data >> srcbag >> srcslot;
     //sLog.outDebug("STORAGE: receive srcbag = %u, srcslot = %u", srcbag, srcslot);
 
-    Item *pItem  = _player->GetItemByPos( srcbag, srcslot );
-    if( pItem )
+    Item *pSrcItem  = _player->GetItemByPos( srcbag, srcslot );
+    if( !pSrcItem )
+        return;                                             // only at cheat
+
+    if(pSrcItem->m_lootGenerated)                           // prevent swap looting item
     {
-        uint16 dest;
+        //best error message found for attempting to swap while looting
+        _player->SendEquipError( EQUIP_ERR_CANT_DO_RIGHT_NOW, pSrcItem, NULL );
+        return;
+    }
 
-        ItemPrototype const *pProto = pItem->GetProto();
-        bool not_swapable = pProto && pProto->InventoryType == INVTYPE_BAG;
+    uint16 dest;
+    uint8 msg = _player->CanEquipItem( NULL_SLOT, dest, pSrcItem, !pSrcItem->IsBag() );
+    if( msg != EQUIP_ERR_OK )
+    {
+        _player->SendEquipError( msg, pSrcItem, NULL );
+        return;
+    }
 
-        uint8 msg = _player->CanEquipItem( NULL_SLOT, dest, pItem, !not_swapable );
+    uint16 src = pSrcItem->GetPos();
+    if(dest==src)                                           // prevent equip in same slot, only at cheat
+        return;
 
-        if( msg == EQUIP_ERR_OK )
+    Item *pDstItem = _player->GetItemByPos( dest );
+    if( !pDstItem )                                           // empty slot, simple case
+    {
+        _player->RemoveItem( srcbag, srcslot, true );
+        _player->EquipItem( dest, pSrcItem, true );
+        _player->AutoUnequipOffhandIfNeed();
+    }
+    else                                                    // have currently equipped item, not simple case
+    {
+        uint8 dstbag = pDstItem->GetBagSlot();
+        uint8 dstslot = pDstItem->GetSlot();
+
+        msg = _player->CanUnequipItem( dest, !pSrcItem->IsBag() );
+        if( msg != EQUIP_ERR_OK )
         {
-            uint16 src = ( (srcbag << 8) | srcslot );
-            if(dest==src)                                   // prevent equip in same slot
-                return;
-
-            msg = _player->CanUnequipItem( dest, !not_swapable );
+            _player->SendEquipError( msg, pDstItem, NULL );
+            return;
         }
 
-        if( msg == EQUIP_ERR_OK )
+        // check dest->src move possibility
+        ItemPosCountVec sSrc;
+        uint16 eSrc;
+        if( _player->IsInventoryPos( src ) )
         {
-            Item *pItem2 = _player->GetItemByPos( dest );
-            if( pItem2 )
-            {
-                uint8 bag = dest >> 8;
-                uint8 slot = dest & 255;
-                _player->RemoveItem( bag, slot, false );
-                _player->RemoveItem( srcbag, srcslot, false );
-                if( _player->IsInventoryPos( srcbag, srcslot ) )
-                {
-                    ItemPosCountVec src;
-                    src.push_back(ItemPosCount((srcbag << 8) | srcslot,pItem2->GetCount()));
-                    _player->StoreItem( src, pItem2, true);
-                }
-                else if( _player->IsBankPos ( srcbag, srcslot ) )
-                {
-                    ItemPosCountVec src;
-                    src.push_back(ItemPosCount((srcbag << 8) | srcslot,pItem2->GetCount()));
-                    _player->BankItem( src, pItem2, true);
-                }
-                else if( _player->IsEquipmentPos ( srcbag, srcslot ) )
-                {
-                    uint16 src = ((srcbag << 8) | srcslot);
-                    _player->EquipItem( src, pItem2, true);
-                }
-                _player->EquipItem( dest, pItem, true );
-                _player->AutoUnequipOffhandIfNeed();
-            }
-            else
-            {
-                _player->RemoveItem( srcbag, srcslot, true );
-                _player->EquipItem( dest, pItem, true );
-                _player->AutoUnequipOffhandIfNeed();
-            }
+            msg = _player->CanStoreItem( srcbag, srcslot, sSrc, pDstItem, true );
+            if( msg != EQUIP_ERR_OK )
+                msg = _player->CanStoreItem( srcbag, NULL_SLOT, sSrc, pDstItem, true );
+            if( msg != EQUIP_ERR_OK )
+                msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, sSrc, pDstItem, true );
         }
-        else
-            _player->SendEquipError( msg, pItem, NULL );
+        else if( _player->IsBankPos( src ) )
+        {
+            msg = _player->CanBankItem( srcbag, srcslot, sSrc, pDstItem, true );
+            if( msg != EQUIP_ERR_OK )
+                msg = _player->CanBankItem( srcbag, NULL_SLOT, sSrc, pDstItem, true );
+            if( msg != EQUIP_ERR_OK )
+                msg = _player->CanBankItem( NULL_BAG, NULL_SLOT, sSrc, pDstItem, true );
+        }
+        else if( _player->IsEquipmentPos( src ) )
+        {
+            msg = _player->CanEquipItem( srcslot, eSrc, pDstItem, true);
+            if( msg == EQUIP_ERR_OK )
+                msg = _player->CanUnequipItem( eSrc, true);
+        }
+
+        if( msg != EQUIP_ERR_OK )
+        {
+            _player->SendEquipError( msg, pDstItem, pSrcItem );
+            return;
+        }
+
+        // now do moves, remove...
+        _player->RemoveItem(dstbag, dstslot, false);
+        _player->RemoveItem(srcbag, srcslot, false);
+
+        // add to dest
+        _player->EquipItem(dest, pSrcItem, true);
+
+        // add to src
+        if( _player->IsInventoryPos( src ) )
+            _player->StoreItem(sSrc, pDstItem, true);
+        else if( _player->IsBankPos( src ) )
+            _player->BankItem(sSrc, pDstItem, true);
+        else if( _player->IsEquipmentPos( src ) )
+            _player->EquipItem(eSrc, pDstItem, true);
+
+        _player->AutoUnequipOffhandIfNeed();
     }
 }
 
@@ -706,7 +739,15 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-    _player->RemoveItem(srcbag, srcslot, true);
+    // no-op: placed in same slot
+    if(dest.size()==1 && dest[0].pos==src)
+    {
+        // just remove grey item state
+        _player->SendEquipError( EQUIP_ERR_NONE, pItem, NULL );
+        return;
+    }
+
+    _player->RemoveItem(srcbag, srcslot, true );
     _player->StoreItem( dest, pItem, true );
 }
 

@@ -4160,10 +4160,10 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
             accountname = fields[1].GetCppString();
             delete result;
         }
-        else if(type == "characters")
+        else if(type == "character")
         {
             normalizePlayerName(nameOrIP);
-            QueryResult *result = CharacterDatabase.PQuery("SELECT account FROM characters WHERE name = '%s')", nameOrIP.c_str());
+            QueryResult *result = CharacterDatabase.PQuery("SELECT account FROM characters WHERE name = '%s'", nameOrIP.c_str());
             if (!result)
             {
                 PSendSysMessage(LANG_BANINFO_NOCHARACTER);
