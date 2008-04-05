@@ -138,12 +138,6 @@ BindIP = "0.0.0.0"
 #        Update realm uptime period in minutes (for save data in 'uptime' table). Must be > 0 
 #        Default: 10 (minutes)
 #
-#
-#
-#
-#
-#
-
 ###################################################################################################################
 
 UseProcessors = 0
