@@ -1684,7 +1684,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
     // check space and find places
     ItemPosCountVec dest;
     uint8 msg = plTarget->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemId, count, &noSpaceForCount );
-    if( msg == EQUIP_ERR_INVENTORY_FULL )                   // convert to possibel store amount
+    if( msg == EQUIP_ERR_INVENTORY_FULL )                   // convert to possible store amount
         count -= noSpaceForCount;
     else if( msg != EQUIP_ERR_OK )                          // other error, can't add
     {
