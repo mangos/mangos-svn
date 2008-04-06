@@ -803,9 +803,7 @@ void BattleGround::DoorOpen(uint32 type)
     GameObject *obj = HashMapHolder<GameObject>::Find(m_BgObjects[type]);
     if(obj)
     {
-        obj->SetUInt32Value(GAMEOBJECT_FLAGS,33);
-        obj->SetUInt32Value(GAMEOBJECT_STATE,0);
-        //obj->SetLootState(GO_CLOSED);
+        obj->UseDoorOrButton(RESPAWN_ONE_DAY);
     }
     else
     {
@@ -822,7 +820,7 @@ void BattleGround::SpawnBGObject(uint32 type, uint32 respawntime)
         {
             //obj->Respawn();                               // bugged
             obj->SetRespawnTime(0);
-            objmgr.SaveGORespawnTime(obj->GetGUIDLow(), 0, 0);
+            //objmgr.SaveGORespawnTime(obj->GetGUIDLow(), 0, 0);
         }
         else
             objmgr.SaveGORespawnTime(GUID_LOPART(m_BgObjects[type]), 0, 0);

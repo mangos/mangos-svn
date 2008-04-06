@@ -51,8 +51,7 @@ GameObject::GameObject( WorldObject *instantiator ) : WorldObject( instantiator 
     m_usetimes = 0;
     m_spellId = 0;
     m_charges = 5;
-
-    m_environmentcastTime = 0;
+    m_cooldownTime = 0;
 }
 
 GameObject::~GameObject()
@@ -230,11 +229,6 @@ void GameObject::Update(uint32 /*p_time*/)
                         }
                         case GAMEOBJECT_TYPE_DOOR:
                         case GAMEOBJECT_TYPE_BUTTON:
-                            SetUInt32Value (GAMEOBJECT_FLAGS, m_flags);
-                            if(GetUInt32Value(GAMEOBJECT_STATE))
-                                SetUInt32Value (GAMEOBJECT_STATE, 0);
-                            else
-                                SetUInt32Value (GAMEOBJECT_STATE, 1);
                             break;
                         default:
                             if(!m_spawnedByDefault)         // despawn timer
@@ -257,11 +251,12 @@ void GameObject::Update(uint32 /*p_time*/)
                 Unit* owner = GetOwner();
                 Unit* ok = NULL;                            // pointer to appropriate target if found any
 
-                if(m_environmentcastTime >= time(NULL))
+                if(m_cooldownTime >= time(NULL))
                     return;
 
                 bool IsBattleGroundTrap = false;
                 //FIXME: this is activation radius (in different casting radius that must be selected from spell data)
+                //TODO: move activated state code (cast itself) to GO_ACTIVATED, in this place only check activating and set state
                 float radius = goInfo->trap.radius;
                 if(!radius)
                 {
@@ -326,7 +321,7 @@ void GameObject::Update(uint32 /*p_time*/)
                     Unit *caster =  owner ? owner : ok;
 
                     caster->CastSpell(ok, goInfo->trap.spellId, true);
-                    m_environmentcastTime = time(NULL) + 4; // 4 seconds
+                    m_cooldownTime = time(NULL) + 4;        // 4 seconds
 
                     if(NeedDespawn)
                         SetLootState(GO_JUST_DEACTIVATED);  // can be despawned or destroyed
@@ -347,8 +342,21 @@ void GameObject::Update(uint32 /*p_time*/)
             break;
         }
         case GO_ACTIVATED:
+        {
+            GameObjectInfo const* goInfo = GetGOInfo();
+            switch(goInfo->type)
+            {
+                case GAMEOBJECT_TYPE_DOOR:
+                case GAMEOBJECT_TYPE_BUTTON:
+                    if(m_cooldownTime < time(NULL))
+                    {
+                        SwitchDoorOrButton(false);
+                        SetLootState(GO_JUST_DEACTIVATED);
+                    }
+                    break;
+            }
             break;
-
+        }
         case GO_JUST_DEACTIVATED:
         {
             //if Gameobject should cast spell, then this, but some GOs (type = 10) should be destroyed
@@ -382,6 +390,9 @@ void GameObject::Update(uint32 /*p_time*/)
 
             loot.clear();
             SetLootState(GO_READY);
+
+            if(!m_respawnDelayTime)
+                return;
 
             if(!m_spawnedByDefault)
             {
@@ -526,23 +537,35 @@ bool GameObject::LoadFromDB(uint32 guid, uint32 InstanceId)
 
     m_DBTableGuid = stored_guid;
 
-    if(data->spawntimesecs >= 0)
+    switch(GetGOInfo()->type)
     {
-        m_spawnedByDefault = true;
-        m_respawnDelayTime=data->spawntimesecs;
-        m_respawnTime=objmgr.GetGORespawnTime(stored_guid,InstanceId);
-
-        if(m_respawnTime && m_respawnTime <= time(NULL))    // ready to respawn
-        {
+        case GAMEOBJECT_TYPE_DOOR:                          // not depawnable
+        case GAMEOBJECT_TYPE_BUTTON:
+            SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NODESPAWN);
+            m_spawnedByDefault = true;
+            m_respawnDelayTime = 0;
             m_respawnTime = 0;
-            objmgr.SaveGORespawnTime(m_DBTableGuid,GetInstanceId(),0);
-        }
-    }
-    else
-    {
-        m_spawnedByDefault = false;
-        m_respawnDelayTime=-data->spawntimesecs;
-        m_respawnTime = 0;
+            break;
+        default:
+            if(data->spawntimesecs >= 0)
+            {
+                m_spawnedByDefault = true;
+                m_respawnDelayTime=data->spawntimesecs;
+                m_respawnTime=objmgr.GetGORespawnTime(stored_guid,InstanceId);
+
+                if(m_respawnTime && m_respawnTime <= time(NULL))    // ready to respawn
+                {
+                    m_respawnTime = 0;
+                    objmgr.SaveGORespawnTime(m_DBTableGuid,GetInstanceId(),0);
+                }
+            }
+            else
+            {
+                m_spawnedByDefault = false;
+                m_respawnDelayTime=-data->spawntimesecs;
+                m_respawnTime = 0;
+            }
+            break;
     }
 
     return true;
@@ -724,4 +747,32 @@ GameObject* GameObject::LookupFishingHoleAround(float range)
     cell_lock->Visit(cell_lock, grid_object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
     
     return ok;
+}
+
+void GameObject::UseDoorOrButton(uint32 time_to_restore)
+{
+    if(m_lootState != GO_READY)
+        return;
+
+    if(!time_to_restore)
+        time_to_restore = objmgr.GetGOData(GetDBTableGUIDLow())->spawntimesecs;
+
+    SwitchDoorOrButton(true);
+    SetLootState(GO_ACTIVATED);
+
+    m_cooldownTime = time(NULL) + time_to_restore;
+
+}
+
+void GameObject::SwitchDoorOrButton(bool activate)
+{
+    if(activate)
+        SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+    else
+        RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
+
+    if(GetUInt32Value(GAMEOBJECT_STATE))                    //if closed -> open
+        SetUInt32Value(GAMEOBJECT_STATE,0);
+    else                                                    //if open -> close
+        SetUInt32Value(GAMEOBJECT_STATE,1);
 }

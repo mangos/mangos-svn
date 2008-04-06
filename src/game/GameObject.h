@@ -195,7 +195,7 @@ struct GameObjectData
 // For containers:  [GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED->GO_READY        -> ...
 // For bobber:      GO_NOT_READY  ->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED-><deleted>
 // For door(closed):[GO_NOT_READY]->GO_READY (close)->GO_ACTIVATED (open) ->GO_JUST_DEACTIVATED->GO_READY(close) -> ...
-//* not implemented, For door(open):  [GO_NOT_READY]->GO_READY (open) ->GO_ACTIVATED (close)->GO_JUST_DEACTIVATED->GO_READY(open)  -> ...
+// For door(open):  [GO_NOT_READY]->GO_READY (open) ->GO_ACTIVATED (close)->GO_JUST_DEACTIVATED->GO_READY(open)  -> ...
 enum LootState
 {
     GO_NOT_READY = 0,
@@ -300,6 +300,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         bool hasQuest(uint32 quest_id) const;
         bool hasInvolvedQuest(uint32 quest_id) const;
         bool ActivateToQuest(Player *pTarget) const;
+        void UseDoorOrButton(uint32 time_to_restore = 0);   // 0 = use `gameobject`.`spawntimesecs`
 
         uint32 GetLinkedGameObjectEntry() const
         {
@@ -326,7 +327,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         uint32      m_flags;
         LootState   m_lootState;
         bool        m_spawnedByDefault;
-        time_t      m_environmentcastTime;
+        time_t      m_cooldownTime;                         //used as internal reaction delay time store (not state change reaction).
+                                                            // For traps this: spell casting cooldown, for doors/buttnons: reset time.
         std::list<uint32> m_SkillupList;
 
         std::set<uint32> m_unique_users;
@@ -334,6 +336,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         uint32 m_DBTableGuid;
     private:
+        void SwitchDoorOrButton(bool activate);
+
         GridReference<GameObject> m_gridRef;
 };
 #endif
