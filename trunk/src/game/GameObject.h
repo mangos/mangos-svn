@@ -314,6 +314,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         bool isVisibleForInState(Player const* u, bool inVisibleList) const;
 
+        GameObject* LookupFishingHoleAround(float range);
+
         GridReference<GameObject> &GetGridRef() { return m_gridRef; }
     protected:
         uint32      m_charges;                              // Spell charges for GAMEOBJECT_TYPE_SPELLCASTER (22)

@@ -46,8 +46,8 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         GameObject *go =
             ObjectAccessor::GetGameObject(*player, lguid);
 
-        // not check distance for GO in case owned GO (fishing bobber case, for example)
-        if (!go || go->GetOwnerGUID() != _player->GetGUID() && !go->IsWithinDistInMap(_player,INTERACTION_DISTANCE))
+        // not check distance for GO in case owned GO (fishing bobber case, for example) or Fishing hole GO
+        if (!go || (go->GetOwnerGUID() != _player->GetGUID() && go->GetGoType() != GAMEOBJECT_TYPE_FISHINGHOLE) && !go->IsWithinDistInMap(_player,INTERACTION_DISTANCE))
         {
             player->SendLootRelease(lguid);
             return;
@@ -293,8 +293,8 @@ void WorldSession::DoLootRelease( uint64 lguid )
         GameObject *go =
             ObjectAccessor::GetGameObject(*player, lguid);
 
-        // not check distance for GO in case owned GO (fishing bobber case, for example)
-        if (!go || go->GetOwnerGUID() != _player->GetGUID() && !go->IsWithinDistInMap(_player,INTERACTION_DISTANCE))
+        // not check distance for GO in case owned GO (fishing bobber case, for example) or Fishing hole GO
+        if (!go || (go->GetOwnerGUID() != _player->GetGUID() && go->GetGoType() != GAMEOBJECT_TYPE_FISHINGHOLE) && !go->IsWithinDistInMap(_player,INTERACTION_DISTANCE))
             return;
 
         loot = &go->loot;
@@ -353,7 +353,17 @@ void WorldSession::DoLootRelease( uint64 lguid )
                 else                                        // not vein
                     go->SetLootState(GO_JUST_DEACTIVATED);
             }
-            else                                            // not chest (or vein/herb/etc)
+            else if (go->GetGoType() == GAMEOBJECT_TYPE_FISHINGHOLE)
+            {                                               // The fishing hole used once more
+                go->AddUse();                               // if the max usage is reached, will be despawned in next tick
+                if (go->GetUseCount()>=irand(go->GetGOInfo()->fishinghole.minSuccessOpens,go->GetGOInfo()->fishinghole.maxSuccessOpens))
+                {
+                    go->SetLootState(GO_JUST_DEACTIVATED);
+                }
+                else
+                    go->SetLootState(GO_READY);
+            }
+            else // not chest (or vein/herb/etc)
                 go->SetLootState(GO_JUST_DEACTIVATED);
 
             loot->clear();

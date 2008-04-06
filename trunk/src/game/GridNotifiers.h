@@ -462,6 +462,29 @@ namespace MaNGOS
             uint32 i_focusId;
     };
 
+    // Find the nearest Fishing hole and return true only if source object is in range of hole
+    class NearestGameObjectFishingHole
+    {
+        public:
+            NearestGameObjectFishingHole(WorldObject const& obj, float range) : i_obj(obj), i_range(range) {}
+            bool operator()(GameObject* go)
+            {
+                if(go->GetGOInfo()->type == GAMEOBJECT_TYPE_FISHINGHOLE && go->isSpawned() && i_obj.IsWithinDistInMap(go, i_range) && i_obj.IsWithinDistInMap(go, go->GetGOInfo()->fishinghole.radius))
+                {
+                    i_range = i_obj.GetDistance(go);
+                    return true;
+                }
+                return false;
+            }
+            float GetLastRange() const { return i_range; }
+        private:
+            WorldObject const& i_obj;
+            float  i_range;
+
+            // prevent clone
+            NearestGameObjectFishingHole(NearestGameObjectFishingHole const&);
+    };
+
     // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO)
     class NearestGameObjectEntryInObjectRangeCheck
     {

@@ -468,7 +468,8 @@ enum LootType
     LOOT_PICKPOCKETING          = 4,                        // unsupported by client, sending LOOT_SKINNING instead
     LOOT_DISENCHANTING          = 5,                        // unsupported by client, sending LOOT_SKINNING instead
     LOOT_PROSPECTING            = 6,                        // unsupported by client, sending LOOT_SKINNING instead
-    LOOT_INSIGNIA               = 7                         // unsupported by client, sending LOOT_SKINNING instead
+    LOOT_INSIGNIA               = 7,                        // unsupported by client, sending LOOT_SKINNING instead
+    LOOT_FISHINGHOLE            = 8                         // unsupported by client, sending LOOT_FISHING instead
 };
 
 enum MirrorTimerType
