@@ -459,7 +459,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         SetPower(POWER_MANA,GetMaxPower(POWER_MANA)); 
     }
 
-    learnDefaultSpells();
+    learnDefaultSpells(true);
 
     for (std::list<uint16>::const_iterator skill_itr = info->skill.begin(); skill_itr!=info->skill.end(); ++skill_itr)
     {
@@ -2445,6 +2445,24 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
     if (itr != m_spells.end())
     {
+        // update active state for known spell
+        if(itr->second->active != active && itr->second->state != PLAYERSPELL_REMOVED)
+        {
+            itr->second->active = active;
+
+            if(itr->second->state != PLAYERSPELL_NEW)
+                itr->second->state = PLAYERSPELL_CHANGED;
+
+            if(!active)
+            {
+                WorldPacket data(SMSG_REMOVED_SPELL, 4);
+                data << uint16(spell_id);
+                GetSession()->SendPacket(&data);
+                return false;
+            }
+            return active;                                  // learn (show in spell book if active now)
+        }
+
         switch(itr->second->state)
         {
             case PLAYERSPELL_UNCHANGED:                     // known saved spell
@@ -2456,7 +2474,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
                 state = PLAYERSPELL_CHANGED;
                 break;                                      // need re-add
             }
-            default:                                        // known not saved spell
+            default:                                        // known not saved yet spell (new or modified)
             {
                 // can be in case spell loading but learned at some previous spell loading
                 if(loading && !learning)
@@ -16196,7 +16214,7 @@ void Player::resetSpells()
     learnQuestRewardedSpells();
 }
 
-void Player::learnDefaultSpells()
+void Player::learnDefaultSpells(bool loading)
 {
     // learn default race/class spells
     PlayerInfo const *info = objmgr.GetPlayerInfo(getRace(),getClass());
@@ -16207,7 +16225,10 @@ void Player::learnDefaultSpells()
         if (tspell)
         {
             sLog.outDebug("PLAYER: Adding initial spell, id = %u",tspell);
-            learnSpell(tspell);
+            if(loading || !spell_itr->second)               // not care about passive spells or loading case
+                addSpell(tspell,spell_itr->second);
+            else                                            // but send in normal spell in game learn case
+                learnSpell(tspell);
         }
     }
 
