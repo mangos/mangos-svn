@@ -302,10 +302,7 @@ void WorldSession::DoLootRelease( uint64 lguid )
         if (go->GetGoType() == GAMEOBJECT_TYPE_DOOR)
         {
             // locked doors are opened with spelleffect openlock, prevent remove its as looted
-            go->SetUInt32Value(GAMEOBJECT_FLAGS,33);
-            go->SetUInt32Value(GAMEOBJECT_STATE,0);         //open
-            go->SetLootState(GO_READY);
-            go->SetRespawnTime(5);                          //close door in 5 seconds
+            go->UseDoorOrButton();
         }
         else if (loot->isLooted() || go->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE)
         {

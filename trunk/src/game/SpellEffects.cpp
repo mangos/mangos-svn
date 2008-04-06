@@ -2198,21 +2198,7 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
         {
             case GAMEOBJECT_TYPE_DOOR:
             case GAMEOBJECT_TYPE_BUTTON:
-                gameObjTarget->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_NODESPAWN);
-                if(gameObjTarget->GetUInt32Value(GAMEOBJECT_STATE))
-                {
-                                                            //if closed/inactive -> open/activate it
-                    gameObjTarget->SetUInt32Value(GAMEOBJECT_STATE,0);
-                }
-                else
-                {
-                                                            //if open/active -> close/deactivate it
-                    gameObjTarget->SetUInt32Value(GAMEOBJECT_STATE,1);
-                }
-
-                gameObjTarget->SetLootState(GO_READY);
-                gameObjTarget->SetRespawnTime(6);
-
+                gameObjTarget->UseDoorOrButton();
                 sWorld.ScriptsStart(sGameObjectScripts, gameObjTarget->GetDBTableGUIDLow(), player, gameObjTarget);
                 return;
 

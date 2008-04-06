@@ -1431,7 +1431,7 @@ void World::ScriptsProcess()
                 Unit* caster = (Unit*)source;
 
                 GameObject *door = NULL;
-                int32 time_to_close = step.script->datalong2<5 ? 5 : (int32)step.script->datalong2;
+                int32 time_to_close = step.script->datalong2 < 15 ? 15 : (int32)step.script->datalong2;
 
                 CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(), caster->GetPositionY()));
                 Cell cell(p);
@@ -1458,22 +1458,10 @@ void World::ScriptsProcess()
                 if( !door->GetUInt32Value(GAMEOBJECT_STATE) )
                     break;                                  //door already  open
 
-                door->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_NODESPAWN);
-                door->SetUInt32Value(GAMEOBJECT_STATE,0);   //open door
-                door->SetLootState(GO_READY);
-                door->SetRespawnTime(time_to_close);        //close door in ? seconds
+                door->UseDoorOrButton(time_to_close);
 
                 if(target && target->isType(TYPE_GAMEOBJECT) && ((GameObject*)target)->GetGoType()==GAMEOBJECT_TYPE_BUTTON)
-                {
-                    ((GameObject*)target)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_NODESPAWN);
-
-                    //push button
-                    ((GameObject*)target)->SetUInt32Value(GAMEOBJECT_STATE,0);
-                    ((GameObject*)target)->SetLootState(GO_READY);
-
-                    //return button in ? seconds
-                    ((GameObject*)target)->SetRespawnTime(time_to_close);
-                }
+                    ((GameObject*)target)->UseDoorOrButton(time_to_close);
 
                 break;
             }
@@ -1500,7 +1488,7 @@ void World::ScriptsProcess()
                 Unit* caster = (Unit*)source;
 
                 GameObject *door = NULL;
-                int32 time_to_open = step.script->datalong2<5 ? 5 : (int32)step.script->datalong2;
+                int32 time_to_open = step.script->datalong2 < 15 ? 15 : (int32)step.script->datalong2;
 
                 CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(), caster->GetPositionY()));
                 Cell cell(p);
@@ -1527,22 +1515,10 @@ void World::ScriptsProcess()
                 if( door->GetUInt32Value(GAMEOBJECT_STATE) )
                     break;                                  //door already closed
 
-                door->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_NODESPAWN);
-                door->SetUInt32Value(GAMEOBJECT_STATE,1);   //close door
-                door->SetLootState(GO_READY);
-                door->SetRespawnTime(time_to_open);         //open door in ? seconds
+                door->UseDoorOrButton(time_to_open);
 
                 if(target && target->isType(TYPE_GAMEOBJECT) && ((GameObject*)target)->GetGoType()==GAMEOBJECT_TYPE_BUTTON)
-                {
-                    ((GameObject*)target)->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_NODESPAWN);
-
-                    //push button
-                    ((GameObject*)target)->SetUInt32Value(GAMEOBJECT_STATE,0);
-                    ((GameObject*)target)->SetLootState(GO_READY);
-
-                    //return button in ? seconds
-                    ((GameObject*)target)->SetRespawnTime(time_to_open);
-                }
+                    ((GameObject*)target)->UseDoorOrButton(time_to_open);
 
                 break;
             }

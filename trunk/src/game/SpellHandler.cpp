@@ -237,20 +237,8 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     {
         case GAMEOBJECT_TYPE_DOOR:                          //0
         case GAMEOBJECT_TYPE_BUTTON:                        //1
-            obj->SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE | GO_FLAG_NODESPAWN);
-            if(obj->GetUInt32Value(GAMEOBJECT_STATE))
-            {
-                obj->SetUInt32Value(GAMEOBJECT_STATE,0);    //if closed/inactive -> open/activate it
-            }
-            else
-            {
-                obj->SetUInt32Value(GAMEOBJECT_STATE,1);    //if open/active -> close/deactivate it
-            }
-
-            obj->SetLootState(GO_READY);
-            obj->SetRespawnTime(6);
             //doors/buttons never really despawn, only reset to default state/flags
-            //no hard coded reset time for doors/buttons, this should be determined by time defined in `gameobject`.`spawntimesecs`
+            obj->UseDoorOrButton();
 
             // activate script
             sWorld.ScriptsStart(sGameObjectScripts, obj->GetDBTableGUIDLow(), spellCaster, obj);
