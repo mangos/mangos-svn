@@ -1019,20 +1019,20 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
         case SPELLFAMILY_WARLOCK:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_WARLOCK )
             {
+                // Siphon Life and Drain Life
+                if( spellInfo_1->SpellIconID == 152 && spellInfo_2->SpellIconID == 546 ||
+                    spellInfo_2->SpellIconID == 152 && spellInfo_1->SpellIconID == 546 )
+                    return false;
+
                 //Corruption & Seed of corruption
                 if( spellInfo_1->SpellIconID == 313 && spellInfo_2->SpellIconID == 1932 ||
                     spellInfo_2->SpellIconID == 313 && spellInfo_1->SpellIconID == 1932 )
                     if(spellInfo_1->SpellVisual != 0 && spellInfo_2->SpellVisual != 0)
                         return true;                        // can't be stacked
 
-                // Siphon Life and Drain Life
-                if( spellInfo_1->SpellIconID == 152 && spellInfo_2->SpellIconID == 546 ||
-                    spellInfo_2->SpellIconID == 152 && spellInfo_1->SpellIconID == 546 )
-                    return false;
-
-                // Corruption and Unstable Affliction
-                if( spellInfo_1->SpellIconID == 313 && spellInfo_2->SpellIconID == 2039 ||
-                    spellInfo_2->SpellIconID == 313 && spellInfo_1->SpellIconID == 2039 )
+                // Corruption and (Unstable Affliction or Curse of Agony or Curse of Doom)
+                if( spellInfo_1->SpellIconID == 313 && (spellInfo_2->SpellIconID == 2039 || spellInfo_2->SpellIconID == 544  || spellInfo_2->SpellIconID == 91) ||
+                    spellInfo_2->SpellIconID == 313 && (spellInfo_1->SpellIconID == 2039 || spellInfo_1->SpellIconID == 544  || spellInfo_1->SpellIconID == 91) )
                     return false;
             }
             break;
