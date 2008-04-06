@@ -4353,7 +4353,7 @@ void ObjectMgr::LoadGameobjectInfo()
                         }
                         /* disable check for while 
                         else
-                            sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data2=%u but trap GO (Entry %u) not exist in `gameobject_templete`.",
+                            sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data2=%u but trap GO (Entry %u) not exist in `gameobject_template`.",
                                 id,goInfo->type,goInfo->chest.linkedTrapId,goInfo->chest.linkedTrapId);
                         */
                     }
@@ -4390,7 +4390,7 @@ void ObjectMgr::LoadGameobjectInfo()
                     }
                     /* disable check for while 
                     else
-                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data2=%u but trap GO (Entry %u) not exist in `gameobject_templete`.",
+                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data2=%u but trap GO (Entry %u) not exist in `gameobject_template`.",
                             id,goInfo->type,goInfo->spellFocus.linkedTrapId,goInfo->spellFocus.linkedTrapId);
                     */
                 }
@@ -4416,7 +4416,7 @@ void ObjectMgr::LoadGameobjectInfo()
                     }
                     /* disable check for while 
                     else
-                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data12=%u but trap GO (Entry %u) not exist in `gameobject_templete`.",
+                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data12=%u but trap GO (Entry %u) not exist in `gameobject_template`.",
                             id,goInfo->type,goInfo->goober.linkedTrapId,goInfo->goober.linkedTrapId);
                     */
                 }

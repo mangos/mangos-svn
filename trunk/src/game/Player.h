@@ -1346,7 +1346,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void learnSpell(uint32 spell_id);
         void removeSpell(uint32 spell_id);
         void resetSpells();
-        void learnDefaultSpells();
+        void learnDefaultSpells(bool loading = false);
         void learnQuestRewardedSpells();
 
 
