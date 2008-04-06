@@ -707,3 +707,21 @@ void GameObject::TriggeringLinkedGameObject( uint32 trapEntry, Unit* target)
     if(trapGO)
         target->CastSpell(target,trapSpell,true);
 }
+
+GameObject* GameObject::LookupFishingHoleAround(float range)
+{
+    GameObject* ok = NULL;
+
+    CellPair p(MaNGOS::ComputeCellPair(GetPositionX(),GetPositionY()));
+    Cell cell(p);
+    cell.data.Part.reserved = ALL_DISTRICT;
+    MaNGOS::NearestGameObjectFishingHole u_check(*this, range);
+    MaNGOS::GameObjectSearcher<MaNGOS::NearestGameObjectFishingHole> checker(ok, u_check);
+
+    CellLock<GridReadGuard> cell_lock(cell, p);
+
+    TypeContainerVisitor<MaNGOS::GameObjectSearcher<MaNGOS::NearestGameObjectFishingHole>, GridTypeMapContainer > grid_object_checker(checker);
+    cell_lock->Visit(cell_lock, grid_object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
+    
+    return ok;
+}

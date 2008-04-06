@@ -3018,7 +3018,7 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
                 }
 
                 if( info->type==GAMEOBJECT_TYPE_FISHINGNODE ||
-                    info->type==GAMEOBJECT_TYPE_FISHINGNODE ||
+                    info->type==GAMEOBJECT_TYPE_FISHINGHOLE ||
                     info->type==GAMEOBJECT_TYPE_DOOR        ||
                     info->type==GAMEOBJECT_TYPE_BUTTON      ||
                     info->type==GAMEOBJECT_TYPE_TRAP )

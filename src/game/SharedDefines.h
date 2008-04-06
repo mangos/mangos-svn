@@ -612,6 +612,7 @@ enum GameobjectTypes
 
 #define MAX_GAMEOBJECT_TYPE                  35             // sending to client this or greater value can crash client.
 
+#define GAMEOBJECT_FISHINGNODE_ENTRY        35591           // Better to define it somewhere instead of hardcoding everywhere
 
 enum GameObjectFlags
 {

@@ -6738,7 +6738,8 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             ObjectAccessor::GetGameObject(*this, guid);
 
         // not check distance for GO in case owned GO (fishing bobber case, for example)
-        if (!go || (loot_type != LOOT_FISHING || go->GetOwnerGUID() != GetGUID()) && !go->IsWithinDistInMap(this,INTERACTION_DISTANCE))
+        // And permit out of range GO with no owner in case fishing hole
+        if (!go || (loot_type != LOOT_FISHINGHOLE && (loot_type != LOOT_FISHING || go->GetOwnerGUID() != GetGUID()) && !go->IsWithinDistInMap(this,INTERACTION_DISTANCE)))
         {
             SendLootRelease(guid);
             return;
@@ -6996,7 +6997,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     if(loot_type == LOOT_PICKPOCKETING || loot_type == LOOT_DISENCHANTING || loot_type == LOOT_PROSPECTING || loot_type == LOOT_INSIGNIA)
         loot_type = LOOT_SKINNING;
 
-    WorldPacket data(SMSG_LOOT_RESPONSE, (9+50));       // we guess size
+    if(loot_type == LOOT_FISHINGHOLE)
+        loot_type = LOOT_FISHING;
+
+    WorldPacket data(SMSG_LOOT_RESPONSE, (9+50));           // we guess size
 
     data << uint64(guid);
     data << uint8(loot_type);

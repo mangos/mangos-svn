@@ -325,7 +325,15 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
                         //fish catched
                         _player->UpdateFishingSkill();
-                        _player->SendLoot(obj->GetGUID(),LOOT_FISHING);
+
+                        GameObject* ok = obj->LookupFishingHoleAround(DEFAULT_VISIBILITY_DISTANCE);
+                        if (ok)
+                        {
+                            _player->SendLoot(ok->GetGUID(),LOOT_FISHINGHOLE);
+                            obj->SetLootState(GO_JUST_DEACTIVATED);
+                        }
+                        else
+                            _player->SendLoot(obj->GetGUID(),LOOT_FISHING);
                     }
                     else
                     {

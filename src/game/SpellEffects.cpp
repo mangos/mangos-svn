@@ -4791,11 +4791,11 @@ void Spell::EffectTransmitted(uint32 i)
         return;
     }
 
-    if(name_id==35591)
+    if(goinfo->type==GAMEOBJECT_TYPE_FISHINGNODE)
     {
         Map* map = MapManager::Instance().GetMap(cMap, m_caster);
-        if ( !map->IsInWater(fx,fy,fz) )
-        {
+        if ( !map->IsInWater(fx,fy,fz-0.5f)) // Hack to prevent fishing bobber from failing to land on fishing hole
+        { // but this is not proper, we realy need to ignore not materialized objects
             SendCastResult(SPELL_FAILED_NOT_HERE);
             SendChannelUpdate(0);
             return;
