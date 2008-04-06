@@ -4340,6 +4340,18 @@ void ObjectMgr::LoadGameobjectInfo()
                         if(!sLockStore.LookupEntry(goInfo->chest.lockId))
                             sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data0=%u but lock (Id: %u) not found.",id,goInfo->type,goInfo->chest.lockId,goInfo->chest.lockId);
                     }
+                    if(goInfo->chest.linkedTrapId)          // linked trap
+                    {
+                        if(GameObjectInfo const* trapInfo = sGOStorage.LookupEntry<GameObjectInfo>(goInfo->chest.linkedTrapId))
+                        {
+                            if(trapInfo->type!=GAMEOBJECT_TYPE_TRAP)
+                                sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data2=%u but GO (Entry %u) have not GAMEOBJECT_TYPE_TRAP (%) type.",id,goInfo->type,goInfo->spellFocus.linkedTrapId,GAMEOBJECT_TYPE_TRAP);
+                        }
+                        /* disable check for while 
+                        else
+                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data2=%u but trap GO (Entry %u) not exist in `gameobject_tamplete`.",id,goInfo->type,goInfo->chest.linkedTrapId,goInfo->chest.linkedTrapId);
+                        */
+                    }
                     break;
                 }
             case GAMEOBJECT_TYPE_TRAP:                      //6

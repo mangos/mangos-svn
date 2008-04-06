@@ -67,7 +67,7 @@ struct GameObjectInfo
             uint32 minSuccessOpens;                         //4
             uint32 maxSuccessOpens;                         //5
             uint32 eventId;                                 //6
-            uint32 _data7;
+            uint32 linkedTrapId;                            //7
             uint32 questId;                                 //8 not used currently but store quest required for GO activation for player
             uint32 _data9[5];
             uint32 _data14;                                 //14 something == trap.data12 == goober.data14 ???
@@ -305,6 +305,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         {
             switch(GetGoType())
             {
+                case GAMEOBJECT_TYPE_CHEST:       return GetGOInfo()->chest.linkedTrapId;
                 case GAMEOBJECT_TYPE_SPELL_FOCUS: return GetGOInfo()->spellFocus.linkedTrapId;
                 case GAMEOBJECT_TYPE_GOOBER:      return GetGOInfo()->goober.linkedTrapId;
                 default: return 0;
