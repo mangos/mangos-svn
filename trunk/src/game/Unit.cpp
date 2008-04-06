@@ -1350,10 +1350,8 @@ uint32 Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage
 
 void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier *mod, uint8 effect_idx, uint64 const& itemGuid)
 {
-    if(!this || !pVictim || !isAlive() || !pVictim->isAlive())
-    {
+    if(!pVictim || !isAlive() || !pVictim->isAlive())
         return;
-    }
 
     switch(mod->m_auraname)
     {
@@ -3528,7 +3526,7 @@ int32 Unit::GetTotalAuraModifier(AuraType auratype) const
 bool Unit::AddAura(Aura *Aur)
 {
     // ghost spell check, allow apply any auras at player loading in ghost mode (will be cleanup after load)
-    if( !isAlive() && Aur->GetSpellProto()->Id != 20584 && Aur->GetSpellProto()->Id != 8326 && Aur->GetSpellProto()->Id != 2584 &&
+    if( !isAlive() && Aur->GetId() != 20584 && Aur->GetId() != 8326 && Aur->GetId() != 2584 &&
         (GetTypeId()!=TYPEID_PLAYER || !((Player*)this)->GetSession()->PlayerLoading()) )
     {
         delete Aur;
@@ -3544,6 +3542,8 @@ bool Unit::AddAura(Aura *Aur)
         return false;
     }
 
+    SpellEntry const* aurSpellInfo = Aur->GetSpellProto();
+
     spellEffectPair spair = spellEffectPair(Aur->GetId(), Aur->GetEffIndex());
     AuraMap::iterator i = m_Auras.find( spair );
 
@@ -3554,9 +3554,9 @@ bool Unit::AddAura(Aura *Aur)
         if (!Aur->IsPassive() && !Aur->IsPersistent())
         {
             // replace aura if next will > spell StackAmount
-            if(Aur->GetSpellProto()->StackAmount)
+            if(aurSpellInfo->StackAmount)
             {
-                if(m_Auras.count(spellEffectPair(Aur->GetId(), Aur->GetEffIndex())) >= Aur->GetSpellProto()->StackAmount)
+                if(m_Auras.count(spair) >= aurSpellInfo->StackAmount)
                     RemoveAura(i);
             }
             // if StackAmount==0 not allow auras from same caster
@@ -3570,6 +3570,30 @@ bool Unit::AddAura(Aura *Aur)
                         RemoveAura(i2);
                         break;
                     }
+
+                    bool stop = false;
+                    switch(aurSpellInfo->EffectApplyAuraName[Aur->GetEffIndex()])
+                    {
+                        // DoT/HoT/etc
+                        case SPELL_AURA_PERIODIC_DAMAGE:    // allow stack
+                        case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+                        case SPELL_AURA_PERIODIC_LEECH:
+                        case SPELL_AURA_PERIODIC_HEAL:
+                        case SPELL_AURA_OBS_MOD_HEALTH:
+                        case SPELL_AURA_PERIODIC_MANA_LEECH:
+                        case SPELL_AURA_PERIODIC_ENERGIZE:
+                        case SPELL_AURA_OBS_MOD_MANA:
+                        case SPELL_AURA_POWER_BURN_MANA:    
+                            break;
+                        default:                            // not allow
+                            // can be only single (this check done at _each_ aura add
+                            RemoveAura(i2);
+                            stop = true;
+                            break;
+                    }
+
+                    if(stop)
+                        break;
                 }
             }
         }
@@ -3577,7 +3601,7 @@ bool Unit::AddAura(Aura *Aur)
 
     // passive auras stack with all (except passive spell proc auras)
     if ((!Aur->IsPassive() || !IsPassiveStackableSpell(Aur->GetId())) &&
-        !(Aur->GetSpellProto()->Id == 20584 || Aur->GetSpellProto()->Id == 8326))
+        !(Aur->GetId() == 20584 || Aur->GetId() == 8326))
     {
         if (!RemoveNoStackAurasDueToAura(Aur))
         {
@@ -3587,7 +3611,7 @@ bool Unit::AddAura(Aura *Aur)
     }
 
     // update single target auras list (before aura add to aura list, to prevent unexpected remove recently added aura)
-    if (IsSingleTargetSpell(Aur->GetSpellProto()) && Aur->GetTarget() && Aur->GetSpellProto())
+    if (IsSingleTargetSpell(aurSpellInfo) && Aur->GetTarget())
     {
         // caster pointer can be deleted in time aura remove, find it by guid at each iteration
         for(;;)
@@ -3601,7 +3625,7 @@ bool Unit::AddAura(Aura *Aur)
             for(AuraList::iterator itr = scAuras.begin(); itr != scAuras.end(); ++itr)
             {
                 if( (*itr)->GetTarget() != Aur->GetTarget() &&
-                    IsSingleTargetSpells((*itr)->GetSpellProto(),Aur->GetSpellProto()) )
+                    IsSingleTargetSpells((*itr)->GetSpellProto(),aurSpellInfo) )
                 {
                     (*itr)->GetTarget()->RemoveAura((*itr)->GetId(), (*itr)->GetEffIndex());
                     restart = true;
