@@ -312,16 +312,19 @@ void Creature::RegenerateMana()
     uint32 curValue = GetPower(POWER_MANA);
     uint32 maxValue = GetMaxPower(POWER_MANA);
 
-    if (curValue >= maxValue)   return;
-
-    float ManaIncreaseRate = sWorld.getRate(RATE_POWER_MANA);
-
-    float Spirit = GetStat(STAT_SPIRIT);
+    if (curValue >= maxValue)
+        return;
 
     uint32 addvalue = 0;
 
-    if (isInCombat() || isPet())
+    // Combat and any controelled creature
+    if (isInCombat() || GetCharmerOrOwnerGUID())
+    {
+        float ManaIncreaseRate = sWorld.getRate(RATE_POWER_MANA);
+        float Spirit = GetStat(STAT_SPIRIT);
+
         addvalue = uint32((Spirit/5 + 17) * ManaIncreaseRate);
+    }
     else
         addvalue = maxValue/3;
 
@@ -339,14 +342,14 @@ void Creature::RegenerateHealth()
     if (curValue >= maxValue)
         return;
 
-    float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
-
-    float Spirit = GetStat(STAT_SPIRIT);
-
     uint32 addvalue = 0;
 
-    if(isPet())
+    // Not only pet, but any controelled creature
+    if(GetCharmerOrOwnerGUID())
     {
+        float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
+        float Spirit = GetStat(STAT_SPIRIT);
+
         if( GetPower(POWER_MANA) > 0 )
             addvalue = uint32(Spirit * 0.25 * HealthIncreaseRate);
         else
