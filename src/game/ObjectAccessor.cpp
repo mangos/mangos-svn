@@ -603,33 +603,28 @@ ObjectAccessor::Update(uint32 diff)
             if (standing_cell.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || standing_cell.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
                 continue;
 
-            CellPair update_cell(standing_cell);
+            // the overloaded operators handle range checking
+            // so ther's no need for range checking inside the loop
+            CellPair begin_cell(standing_cell), end_cell(standing_cell);
+            begin_cell << 1; begin_cell -= 1;               // upper left
+            end_cell >> 1; end_cell += 1;                   // lower right
 
-            update_cell << 1;
-            update_cell -= 1;
-
-            for( ; abs(int32(standing_cell.x_coord) - int32(update_cell.x_coord)) < 2; update_cell >> 1 )
+            for(uint32 x = begin_cell.x_coord; x <= end_cell.x_coord; x++)
             {
-                for(CellPair cell_iter=update_cell; abs(int32(standing_cell.y_coord) - int32(cell_iter.y_coord)) < 2; cell_iter += 1 )
+                for(uint32 y = begin_cell.y_coord; y <= end_cell.y_coord; y++)
                 {
-                    uint32 cell_id = (cell_iter.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_iter.x_coord;
+                    uint32 cell_id = (y * TOTAL_NUMBER_OF_CELLS_PER_MAP) + x;
                     if( !map->isCellMarked(cell_id) )
                     {
                         map->markCell(cell_id);
-                        Cell cell(cell_iter);
+                        Cell cell(CellPair(x,y));
                         cell.data.Part.reserved = CENTER_DISTRICT;
                         cell.SetNoCreate();
-                        CellLock<NullGuard> cell_lock(cell, cell_iter);
+                        CellLock<NullGuard> cell_lock(cell, CellPair(x,y));
                         cell_lock->Visit(cell_lock, grid_object_update,  *map);
                         cell_lock->Visit(cell_lock, world_object_update, *map);
                     }
-
-                    if(cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP)
-                        break;
                 }
-
-                if(update_cell.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP)
-                    break;
             }
         }
     }
