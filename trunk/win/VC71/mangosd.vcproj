@@ -53,6 +53,7 @@
 				GenerateMapFile="TRUE"
 				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\mangosd.map"
 				SubSystem="1"
+				LargeAddressAware="2"
 				ImportLibrary="$(OutDir)\mangosd.lib"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -121,6 +122,7 @@
 				GenerateMapFile="TRUE"
 				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\mangosd.map"
 				SubSystem="1"
+				LargeAddressAware="2"
 				LinkTimeCodeGeneration="FALSE"
 				ImportLibrary="$(OutDir)/mangosd.lib"
 				FixedBaseAddress="1"/>

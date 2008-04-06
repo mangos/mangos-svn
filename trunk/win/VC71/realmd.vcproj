@@ -53,6 +53,7 @@
 				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\realmd.pdb"
 				GenerateMapFile="TRUE"
 				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\realmd.map"
+				LargeAddressAware="2"
 				SubSystem="1"/>
 			<Tool
 				Name="VCMIDLTool"
@@ -119,6 +120,7 @@
 				GenerateMapFile="TRUE"
 				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\realmd.map"
 				SubSystem="1"
+				LargeAddressAware="2"
 				FixedBaseAddress="1"/>
 			<Tool
 				Name="VCMIDLTool"
