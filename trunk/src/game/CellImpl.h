@@ -41,240 +41,92 @@ template<class LOCK_TYPE,class T, class CONTAINER>
 inline void
 Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &visitor, Map &m) const
 {
-    CellPair standing_cell = l.i_cellPair;
-    CellPair cell_iter;
-
+    const CellPair &standing_cell = l.i_cellPair;
     if (standing_cell.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || standing_cell.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
         return;
 
-    switch( (District)this->data.Part.reserved )
+    uint16 district = (District)this->data.Part.reserved;
+    if(district == CENTER_DISTRICT)
+    {
+        m.Visit(l, visitor);
+        return;
+    }
+
+    // set up the cell range based on the district
+    // the overloaded operators handle range checking
+    CellPair begin_cell = standing_cell;
+    CellPair end_cell = standing_cell;
+
+    switch( district )
     {
         case ALL_DISTRICT:
         {
-            CellPair update_cell(standing_cell);
-            update_cell << 1;
-            update_cell -= 1;
-            for(; abs(int(standing_cell.x_coord - update_cell.x_coord)) < 2; update_cell >> 1)
-            {
-                for(cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
-                {
-                    Cell r_zone(cell_iter);
-                    r_zone.data.Part.nocreate = l->data.Part.nocreate;
-                    CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-                    m.Visit(lock, visitor);
-
-                    if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
-                        break;
-                }
-
-                if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
-                    break;
-            }
+            begin_cell << 1; begin_cell -= 1;               // upper left
+            end_cell >> 1; end_cell += 1;                   // lower right
             break;
         }
         case UPPER_LEFT_DISTRICT:
         {
-            CellPair update_cell(standing_cell);
-            standing_cell << 1;
-            standing_cell -= 1;
-
-            for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
-            {
-                Cell r_zone(cell_iter);
-                r_zone.data.Part.nocreate = l->data.Part.nocreate;
-                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-                m.Visit(lock, visitor);
-
-                if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
-                    break;
-            }
-
-            for(cell_iter=update_cell, cell_iter += 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
-            {
-                Cell r_zone(cell_iter);
-                r_zone.data.Part.nocreate = l->data.Part.nocreate;
-                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-                m.Visit(lock, visitor);
-
-                if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
-                    break;
-            }
+            begin_cell << 1; begin_cell -= 1;               // upper left
             break;
         }
         case UPPER_RIGHT_DISTRICT:
         {
-            CellPair update_cell(standing_cell);
-            update_cell >> 1;
-            update_cell -= 1;
-
-            for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter << 1)
-            {
-                Cell r_zone(cell_iter);
-                r_zone.data.Part.nocreate = l->data.Part.nocreate;
-                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-                m.Visit(lock, visitor);
-
-                if (cell_iter.x_coord == 0)
-                    break;
-            }
-
-            for(cell_iter=update_cell, cell_iter += 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
-            {
-                Cell r_zone(cell_iter);
-                r_zone.data.Part.nocreate = l->data.Part.nocreate;
-                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-                m.Visit(lock, visitor);
-
-                if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
-                    break;
-            }
-
+            begin_cell -= 1;                                // up
+            end_cell >> 1;                                  // right
             break;
         }
         case LOWER_LEFT_DISTRICT:
         {
-            CellPair update_cell(standing_cell);
-            update_cell << 1;
-            update_cell += 1;
-
-            for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
-            {
-                Cell r_zone(cell_iter);
-                r_zone.data.Part.nocreate = l->data.Part.nocreate;
-                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-                m.Visit(lock, visitor);
-
-                if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
-                    break;
-            }
-
-            for(cell_iter=update_cell, cell_iter -= 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter -= 1)
-            {
-                Cell r_zone(cell_iter);
-                r_zone.data.Part.nocreate = l->data.Part.nocreate;
-                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-                m.Visit(lock, visitor);
-
-                if (cell_iter.y_coord == 0)
-                    break;
-            }
-
+            begin_cell << 1;                                // left
+            end_cell += 1;                                  // down
             break;
         }
         case LOWER_RIGHT_DISTRICT:
         {
-            CellPair update_cell(standing_cell);
-            update_cell >> 1;
-            update_cell += 1;
-
-            for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter << 1)
-            {
-                Cell r_zone(cell_iter);
-                r_zone.data.Part.nocreate = l->data.Part.nocreate;
-                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-                m.Visit(lock, visitor);
-
-                if (cell_iter.x_coord == 0)
-                    break;
-            }
-
-            for(cell_iter=update_cell, cell_iter -= 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter -= 1)
-            {
-                Cell r_zone(cell_iter);
-                r_zone.data.Part.nocreate = l->data.Part.nocreate;
-                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-                m.Visit(lock, visitor);
-
-                if (cell_iter.y_coord == 0)
-                    break;
-            }
-
+            end_cell >> 1; end_cell += 1;                   // lower right
             break;
         }
         case LEFT_DISTRICT:
         {
-            CellPair update_cell(standing_cell);
-            update_cell << 1;
-            update_cell -= 1;
-
-            for(cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
-            {
-                Cell r_zone(cell_iter);
-                r_zone.data.Part.nocreate = l->data.Part.nocreate;
-                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-                m.Visit(lock, visitor);
-
-                if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
-                    break;
-            }
-
+            begin_cell -= 1;                                // up
+            end_cell >> 1; end_cell += 1;                   // lower right
             break;
         }
         case RIGHT_DISTRICT:
         {
-            CellPair update_cell(standing_cell);
-            update_cell >> 1;
-            update_cell -= 1;
-
-            for(cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
-            {
-                Cell r_zone(cell_iter);
-                r_zone.data.Part.nocreate = l->data.Part.nocreate;
-                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-                m.Visit(lock, visitor);
-
-                if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
-                    break;
-            }
+            begin_cell << 1; begin_cell -= 1;               // upper left
+            end_cell += 1;                                  // down
             break;
         }
         case UPPER_DISTRICT:
         {
-            CellPair update_cell(standing_cell);
-            update_cell << 1;
-            update_cell -= 1;
-
-            for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
-            {
-                Cell r_zone(cell_iter);
-                r_zone.data.Part.nocreate = l->data.Part.nocreate;
-                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-                m.Visit(lock, visitor);
-
-                if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
-                    break;
-            }
-
+            begin_cell << 1; begin_cell -= 1;               // upper left
+            end_cell >> 1;                                  // right
             break;
         }
         case LOWER_DISTRICT:
         {
-            CellPair update_cell(standing_cell);
-            update_cell << 1;
-            update_cell += 1;
-
-            for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
-            {
-                Cell r_zone(cell_iter);
-                r_zone.data.Part.nocreate = l->data.Part.nocreate;
-                CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
-                m.Visit(lock, visitor);
-
-                if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
-                    break;
-            }
-
-            break;
-        }
-        case CENTER_DISTRICT:
-        {
-            m.Visit(l, visitor);
+            begin_cell << 1;                                // left
+            end_cell >> 1; end_cell += 1;                   // lower right
             break;
         }
         default:
         {
             assert( false );
             break;
+        }
+    }
+
+    // loop the cell range
+    for(uint32 x = begin_cell.x_coord; x <= end_cell.x_coord; x++)
+    {
+        for(uint32 y = begin_cell.y_coord; y <= end_cell.y_coord; y++)
+        {
+            Cell r_zone(CellPair(x,y));
+            r_zone.data.Part.nocreate = l->data.Part.nocreate;
+            CellLock<LOCK_TYPE> lock(r_zone, CellPair(x,y));
+            m.Visit(lock, visitor);
         }
     }
 }
