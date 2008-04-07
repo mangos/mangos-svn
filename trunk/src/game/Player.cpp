@@ -2409,7 +2409,7 @@ void Player::AddNewMailDeliverTime(time_t deliver_time)
     }
 }
 
-bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading, uint16 slot_id)
+bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading, uint16 slot_id)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
@@ -2511,7 +2511,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
     else if(uint32 prev_spell = spellmgr.GetPrevSpellInChain(spell_id))
     {
         if(loading)                                         // at spells loading, no output, but allow save
-            addSpell(prev_spell,false,true,loading);
+            addSpell(prev_spell,active,true,loading);
         else                                                // at normal learning
             learnSpell(prev_spell);
     }
@@ -2653,7 +2653,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
         if(!itr->second.autoLearned && (!itr->second.ifNoSpell || !HasSpell(itr->second.ifNoSpell)))
         {
             if(loading)                                     // at spells loading, no output, but allow save
-                addSpell(itr->second.spell,true,true,loading);
+                addSpell(itr->second.spell,1,true,loading);
             else                                            // at normal learning
                 learnSpell(itr->second.spell);
         }
@@ -2666,7 +2666,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
 void Player::learnSpell(uint32 spell_id)
 {
     // prevent duplicated entires in spell book
-    if (!addSpell(spell_id,true))
+    if (!addSpell(spell_id,1))
         return;
 
     WorldPacket data(SMSG_LEARNED_SPELL, 4);
@@ -13673,7 +13673,7 @@ void Player::_LoadSpells(QueryResult *result)
         {
             Field *fields = result->Fetch();
 
-            addSpell(fields[0].GetUInt16(), (fields[2].GetUInt8() != 0), false, true, fields[1].GetUInt16());
+            addSpell(fields[0].GetUInt16(), fields[2].GetUInt8(), false, true, fields[1].GetUInt16());
         }
         while( result->NextRow() );
 
@@ -16222,7 +16222,7 @@ void Player::learnDefaultSpells(bool loading)
     // learn default race/class spells
     PlayerInfo const *info = objmgr.GetPlayerInfo(getRace(),getClass());
     std::list<CreateSpellPair>::const_iterator spell_itr;
-    for (spell_itr = info->spell.begin(); spell_itr!=info->spell.end(); spell_itr++)
+    for (spell_itr = info->spell.begin(); spell_itr!=info->spell.end(); ++spell_itr)
     {
         uint16 tspell = spell_itr->first;
         if (tspell)

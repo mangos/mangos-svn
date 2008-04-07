@@ -343,8 +343,7 @@ void GameObject::Update(uint32 /*p_time*/)
         }
         case GO_ACTIVATED:
         {
-            GameObjectInfo const* goInfo = GetGOInfo();
-            switch(goInfo->type)
+            switch(GetGoType())
             {
                 case GAMEOBJECT_TYPE_DOOR:
                 case GAMEOBJECT_TYPE_BUTTON:

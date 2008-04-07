@@ -49,13 +49,15 @@ struct GameObjectInfo
         {
             uint32 _data0;
             uint32 lockId;                                  //1
+            uint32 autoCloseTime;                           //2 (unit32?)
         } door;
         //1 GAMEOBJECT_TYPE_BUTTON
         struct
         {
             uint32 _data0;
             uint32 lockId;                                  //1
-            uint32 _data2[2];
+            uint32 autoCloseTime;                           //2 (unit32?)
+            uint32 _data3;
             uint32 isBattlegroundObject;                    //4
         } button;
         //3 GAMEOBJECT_TYPE_CHEST
@@ -312,6 +314,17 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
                 default: return 0;
             }
         }
+
+        uint32 GetAutoCloseTime() const
+        {
+            switch(GetGoType())
+            {
+                case GAMEOBJECT_TYPE_DOOR:   return GetGOInfo()->door.autoCloseTime;
+                case GAMEOBJECT_TYPE_BUTTON: return GetGOInfo()->button.autoCloseTime;
+                default: return 0;
+            }
+        }
+
         void TriggeringLinkedGameObject( uint32 trapEntry, Unit* target);
 
         bool isVisibleForInState(Player const* u, bool inVisibleList) const;
