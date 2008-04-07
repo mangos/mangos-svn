@@ -2450,7 +2450,10 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
         {
             itr->second->active = active;
 
-            if(itr->second->state != PLAYERSPELL_NEW)
+            // loading && !learning == explicitly load from DB and then exist in it already and set correctly
+            if(loading && !learning)
+                itr->second->state = PLAYERSPELL_UNCHANGED;
+            else if(itr->second->state != PLAYERSPELL_NEW)
                 itr->second->state = PLAYERSPELL_CHANGED;
 
             if(!active)
@@ -2475,15 +2478,10 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
             }
             default:                                        // known not saved yet spell (new or modified)
             {
-                if(loading)
-                {
-                    // can be in case spell loading but learned at some previous spell loading
-                    if(!learning)
-                        itr->second->state = PLAYERSPELL_UNCHANGED;
-                    // can be in case spell loading and learned and known then to prevent DB error mark as chnaged instead new
-                    else if(itr->second->state = PLAYERSPELL_NEW)
-                        itr->second->state = PLAYERSPELL_CHANGED;
-                }
+                // can be in case spell loading but learned at some previous spell loading
+                if(loading && !learning)
+                    itr->second->state = PLAYERSPELL_UNCHANGED;
+
                 return false;
             }
         }
