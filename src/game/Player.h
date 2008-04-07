@@ -67,8 +67,8 @@ enum PlayerSpellState
 struct PlayerSpell
 {
     uint16 slotId          : 16;
+    uint8 active           : 8;
     PlayerSpellState state : 8;
-    bool active            : 1;
 };
 
 struct SpellModifier
@@ -132,7 +132,7 @@ enum ActionButtonType
 
 typedef std::map<uint8,ActionButton> ActionButtonList;
 
-typedef std::pair<uint16, bool> CreateSpellPair;
+typedef std::pair<uint16, uint8> CreateSpellPair;
 
 struct PlayerCreateInfoItem
 {
@@ -1342,7 +1342,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendProficiency(uint8 pr1, uint32 pr2);
         void SendInitialSpells();
-        bool addSpell(uint32 spell_id, bool active, bool learning = true, bool loading = false, uint16 slot_id=0xffff);
+        bool addSpell(uint32 spell_id, uint8 active, bool learning = true, bool loading = false, uint16 slot_id=0xffff);
         void learnSpell(uint32 spell_id);
         void removeSpell(uint32 spell_id);
         void resetSpells();
