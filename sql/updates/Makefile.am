@@ -666,6 +666,7 @@ pkgdata_DATA = \
 	5554_mangos_locales_creature.sql \
 	5558_mangos_player_levelstats.sql \
 	5570_mangos_spell_elixir.sql \
+	5571_mangos_player_levelstats.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1312,4 +1313,5 @@ EXTRA_DIST = \
 	5554_mangos_locales_creature.sql \
 	5558_mangos_player_levelstats.sql \
 	5570_mangos_spell_elixir.sql \
+	5571_mangos_player_levelstats.sql \
 	README
