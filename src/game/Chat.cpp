@@ -189,12 +189,14 @@ ChatCommand * ChatHandler::getCommandTable()
         { "skill_extra_item_template",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSkillExtraItemTemplateCommand,  "", NULL },
         { "spell_affect",                SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellAffectCommand,             "", NULL },
         { "spell_chain",                 SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellChainCommand,              "", NULL },
+        { "spell_elixir",                SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellElixirCommand,             "", NULL },
         { "spell_learn_skill",           SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellLearnSkillCommand,         "", NULL },
         { "spell_learn_spell",           SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellLearnSpellCommand,         "", NULL },
         { "spell_proc_event",            SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellProcEventCommand,          "", NULL },
         { "spell_script_target",         SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellScriptTargetCommand,       "", NULL },
         { "spell_scripts",               SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellScriptsCommand,            "", NULL },
         { "spell_teleport",              SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellTeleportCommand,           "", NULL },
+        { "spell_threats",               SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellThreatsCommand,            "", NULL },
         { "",                            SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCommand,                        "", NULL },
         { NULL,                          0,                 NULL,                                                     "", NULL }
     };

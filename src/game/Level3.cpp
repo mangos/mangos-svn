@@ -117,11 +117,13 @@ bool ChatHandler::HandleReloadAllSpellCommand(const char*)
     HandleReloadSkillExtraItemTemplateCommand("a");
     HandleReloadSpellAffectCommand("a");
     HandleReloadSpellChainCommand("a");
+    HandleReloadSpellElixirCommand("a");
     HandleReloadSpellLearnSkillCommand("a");
     HandleReloadSpellLearnSpellCommand("a");
     HandleReloadSpellProcEventCommand("a");
     HandleReloadSpellScriptTargetCommand("a");
     HandleReloadSpellTeleportCommand("a");
+    HandleReloadSpellThreatsCommand("a");
     return true;
 }
 
@@ -300,6 +302,14 @@ bool ChatHandler::HandleReloadSpellChainCommand(const char*)
     return true;
 }
 
+bool ChatHandler::HandleReloadSpellElixirCommand(const char*)
+{
+    sLog.outString( "Re-Loading Spell Elixir types..." );
+    spellmgr.LoadSpellElixirs();
+    SendGlobalSysMessage("DB table `spell_elixir` (spell exlixir types) reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadSpellLearnSkillCommand(const char*)
 {
     sLog.outString( "Re-Loading Spell Learn Skills..." );
@@ -337,6 +347,14 @@ bool ChatHandler::HandleReloadSpellTeleportCommand(const char*)
     sLog.outString( "Re-Loading Spell teleport coordinates..." );
     spellmgr.LoadSpellTeleports();
     SendGlobalSysMessage("DB table `spell_teleport` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadSpellThreatsCommand(const char*)
+{
+    sLog.outString( "Re-Loading Aggro Spells Definitions...");
+    spellmgr.LoadSpellThreats();
+    SendGlobalSysMessage("DB table `spell_threat` (spell aggro definistions) reloaded.");
     return true;
 }
 

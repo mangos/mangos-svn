@@ -156,7 +156,8 @@ bool IsElementalShield(uint32 spellId)
 SpellSpecific GetSpellSpecific(uint32 spellId)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-    if(!spellInfo) return SPELL_NORMAL;
+    if(!spellInfo)
+        return SPELL_NORMAL;
 
     switch(spellInfo->SpellFamilyName)
     {
@@ -226,33 +227,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         }
 
         case SPELLFAMILY_POTION:
-        {
-            if((spellInfo->Attributes & 0x8000000LL)==0)
-                break;
-
-            if ( spellInfo->AttributesEx2 == 0x00000001 && spellInfo->AttributesEx3 == 0x00100000 )
-                return SPELL_FLASK_ELIXIR;
-
-            for (int i = 0; i < 3; ++i)
-            {
-                switch ( spellInfo->EffectApplyAuraName[i] )
-                {
-                    case SPELL_AURA_MOD_STAT:
-                        if ( spellInfo->EffectMiscValue[i] < 2 )
-                            return SPELL_BATTLE_ELIXIR;
-                        break;
-                    case SPELL_AURA_MOD_ATTACK_POWER:
-                    case SPELL_AURA_MOD_RANGED_ATTACK_POWER:
-                    case SPELL_AURA_MOD_DAMAGE_DONE:
-                    case SPELL_AURA_MOD_MELEE_ATTACK_POWER_VERSUS:
-                        return SPELL_BATTLE_ELIXIR;
-                    default:
-                        break;
-                }
-            }
-
-            return SPELL_GUARDIAN_ELIXIR;
-        }
+            return spellmgr.GetSpellElixirSpecific(spellInfo->Id);
     }
 
     // only warlock armor/skin have this (in additional to family cases)
@@ -274,6 +249,10 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         spellInfo->EffectApplyAuraName[i] == SPELL_AURA_TRACK_RESOURCES ||
         spellInfo->EffectApplyAuraName[i] == SPELL_AURA_TRACK_STEALTHED ) )
             return SPELL_TRACKER;
+
+    // elixirs can have different families, but potion most ofc.
+    if(SpellSpecific sp = spellmgr.GetSpellElixirSpecific(spellInfo->Id))
+        return sp;
 
     return SPELL_NORMAL;
 }
@@ -916,8 +895,60 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spell
     return true;
 }
 
+void SpellMgr::LoadSpellElixirs()
+{
+    mSpellElixirs.clear();                                // need for reload case
+
+    uint32 count = 0;
+
+    //                                                0      1
+    QueryResult *result = WorldDatabase.Query("SELECT entry, mask FROM spell_elixir");
+    if( !result )
+    {
+
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outString( ">> Loaded %u spell elixir definitions", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        Field *fields = result->Fetch();
+
+        bar.step();
+
+        uint16 entry = fields[0].GetUInt16();
+        uint8 mask = fields[1].GetUInt8();
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(entry);
+
+        if (!spellInfo)
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_elixir` does not exist", entry);
+            continue;
+        }
+
+        mSpellElixirs[entry] = mask;
+
+        ++count;
+    } while( result->NextRow() );
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u spell elixir definitions", count );
+}
+
 void SpellMgr::LoadSpellThreats()
 {
+    sSpellThreatStore.Free();                               // for reload
+
     sSpellThreatStore.Load();
 
     sLog.outString( ">> Loaded %u aggro generating spells", sSpellThreatStore.RecordCount );
@@ -1716,6 +1747,35 @@ bool IsSpellAllowedInLocation(SpellEntry const *spellInfo,uint32 map_id,uint32 z
     // normal case
     if( spellInfo->AreaId && spellInfo->AreaId != zone_id && spellInfo->AreaId != area_id )
         return false;
+
+    // elixirs (all area dependent elixirs have family SPELLFAMILY_POTION, use this for speedup)
+    if(spellInfo->SpellFamilyName==SPELLFAMILY_POTION)
+    {
+        if(uint32 mask = spellmgr.GetSpellElixirMask(spellInfo->Id))
+        {
+            if(mask & ELIXIR_UNSTABLE_MASK)
+            {
+                // in the Blade's Edge Mountains Plateaus and Gruul's Lair.
+                return zone_id ==3522 || map_id==565;
+            }
+            if(mask & ELIXIR_UNSTABLE_MASK)
+            {
+                // in Tempest Keep, Serpentshrine Cavern, Caverns of Time: Mount Hyjal, Black Temple 
+                // TODO: and the Sunwell Plateau
+                if(zone_id ==3607 || map_id==534 || map_id==564)
+                    return true;
+                
+                MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
+                if(!mapEntry)
+                    return false;
+
+                return mapEntry->multimap_id==206;
+            }
+
+            // elixirs not have another limitations
+            return true;
+        }
+    }
 
     // special cases zone check (maps checked by multimap common id)
     switch(spellInfo->Id)

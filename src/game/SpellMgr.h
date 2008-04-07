@@ -373,6 +373,14 @@ struct SpellProcEventEntry
 
 typedef HM_NAMESPACE::hash_map<uint32, SpellProcEventEntry> SpellProcEventMap;
 
+#define ELIXIR_BATTLE_MASK    0x1
+#define ELIXIR_GUARDIAN_MASK  0x2
+#define ELIXIR_FLASK_MASK     (ELIXIR_BATTLE_MASK|ELIXIR_GUARDIAN_MASK)
+#define ELIXIR_UNSTABLE_MASK  0x4
+#define ELIXIR_SHATTRATH_MASK 0x8
+
+typedef std::map<uint32, uint8> SpellElixirMap;
+
 // Spell script target related declarations (accessed using SpellMgr functions)
 enum SpellTargetType
 {
@@ -453,6 +461,28 @@ class SpellMgr
         }
 
         bool IsAffectedBySpell(SpellEntry const *spellInfo, uint32 spellId, uint8 effectId, uint64 const& familyFlags) const;
+
+        uint32 GetSpellElixirMask(uint32 spellid) const
+        {
+            SpellElixirMap::const_iterator itr = mSpellElixirs.find(spellid);
+            if(itr==mSpellElixirs.end())
+                return 0x0;
+
+            return itr->second;
+        }
+
+        SpellSpecific GetSpellElixirSpecific(uint32 spellid) const
+        {
+            uint32 mask = GetSpellElixirMask(spellid);
+            if((mask & ELIXIR_FLASK_MASK)==ELIXIR_FLASK_MASK)
+                return SPELL_FLASK_ELIXIR;
+            else if(mask & ELIXIR_BATTLE_MASK)
+                return SPELL_BATTLE_ELIXIR;
+            else if(mask & ELIXIR_GUARDIAN_MASK)
+                return SPELL_GUARDIAN_ELIXIR;
+            else
+                return SPELL_NORMAL;
+        }
 
         // Spell proc events
         SpellProcEventEntry const* GetSpellProcEvent(uint32 spellId) const
@@ -593,6 +623,7 @@ class SpellMgr
         void LoadSpellLearnSpells();
         void LoadSpellScriptTarget();
         void LoadSpellAffects();
+        void LoadSpellElixirs();
         void LoadSpellProcEvents();
         void LoadSpellTeleports();
         void LoadSpellThreats();
@@ -605,6 +636,7 @@ class SpellMgr
         SpellLearnSpellMap mSpellLearnSpells;
         SpellTeleportMap   mSpellTeleports;
         SpellAffectMap     mSpellAffectMap;
+        SpellElixirMap     mSpellElixirs;
         SpellProcEventMap  mSpellProcEventMap;
 };
 
