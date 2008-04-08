@@ -259,10 +259,6 @@ bool ChatHandler::HandlePasswordCommand(const char* args)
         return true;
     }
 
-    loginDatabase.escape_string(password_old);
-    loginDatabase.escape_string(password_new);
-    loginDatabase.escape_string(password_new_c);
-
     if(!accmgr.CheckPassword(m_session->GetAccountId(), password_old) || password_new != password_new_c)
         SendSysMessage(LANG_COMMAND_WRONGOLDPASSWORD);
     else if(accmgr.ChangePassword(m_session->GetAccountId(), password_new) == 0)
