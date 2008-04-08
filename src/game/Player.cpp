@@ -2275,24 +2275,16 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
 void Player::SendInitialSpells()
 {
+
     uint16 spellCount = 0;
-
-    PlayerSpellMap::const_iterator itr;
-
-    for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
-    {
-        if(itr->second->state == PLAYERSPELL_REMOVED)
-            continue;
-
-        if(itr->second->active)
-            spellCount +=1;
-    }
 
     WorldPacket data(SMSG_INITIAL_SPELLS, (1+2+2+4*m_spells.size()));
     data << uint8(0);
-    data << uint16(spellCount);
 
-    for (itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+    size_t countPos = data.wpos();
+    data << uint16(spellCount);                             // spell count placeholder
+
+    for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
         if(itr->second->state == PLAYERSPELL_REMOVED)
             continue;
@@ -2303,10 +2295,14 @@ void Player::SendInitialSpells()
         data << uint16(itr->first);
         //data << uint16(itr->second->slotId);
         data << uint16(0);                                  // it's not slot id
+
+        spellCount +=1;
     }
 
+    data.put<uint16>(countPos,spellCount);                  // write real count value
+
     uint16 spellCooldowns = m_spellCooldowns.size();
-    data << spellCooldowns;
+    data << uint16(spellCooldowns);
     for(SpellCooldowns::const_iterator itr=m_spellCooldowns.begin(); itr!=m_spellCooldowns.end(); itr++)
     {
         SpellEntry const *sEntry = sSpellStore.LookupEntry(itr->first);
@@ -2538,25 +2534,31 @@ bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading
                 {
                     if(spellmgr.IsHighRankOfSpell(spell_id,itr->first))
                     {
-                        WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
-                        data << uint16(itr->first);
-                        data << uint16(spell_id);
-                        GetSession()->SendPacket( &data );
+                        if(!loading)                        // not send spell (re-/over-)learn packets at loading
+                        {
+                            WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
+                            data << uint16(itr->first);
+                            data << uint16(spell_id);
+                            GetSession()->SendPacket( &data );
+                        }
 
                         // mark old spell as disable (SMSG_SUPERCEDED_SPELL replace it in client by new)
-                        itr->second->active = false;
+                        itr->second->active = 0;
                         itr->second->state = PLAYERSPELL_CHANGED;
                         superceded_old = true;              // new spell replace old in action bars and spell book.
                     }
                     else if(spellmgr.IsHighRankOfSpell(itr->first,spell_id))
                     {
-                        WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
-                        data << uint16(spell_id);
-                        data << uint16(itr->first);
-                        GetSession()->SendPacket( &data );
+                        if(!loading)                        // not send spell (re-/over-)learn packets at loading
+                        {
+                            WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
+                            data << uint16(spell_id);
+                            data << uint16(itr->first);
+                            GetSession()->SendPacket( &data );
+                        }
 
                         // mark new spell as disable (not learned yet for client and will not learned)
-                        newspell->active = false;
+                        newspell->active = 0;
                         if(newspell->state != PLAYERSPELL_NEW)
                             newspell->state = PLAYERSPELL_CHANGED;
                     }
