@@ -1502,7 +1502,7 @@ void Creature::Respawn()
     }
 }
 
-bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo, bool useCharges, bool useChances)
+bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo, bool useCharges)
 {
     if (!spellInfo)
         return false;
@@ -1510,7 +1510,7 @@ bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo, bool useCharges, bo
     if (GetCreatureInfo()->MechanicImmuneMask & (1 << (spellInfo->Mechanic - 1)))
         return true;
 
-    return Unit::IsImmunedToSpell(spellInfo, useCharges,useChances);
+    return Unit::IsImmunedToSpell(spellInfo, useCharges);
 }
 
 bool Creature::IsImmunedToSpellEffect(uint32 effect, uint32 mechanic) const

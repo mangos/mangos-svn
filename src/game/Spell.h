@@ -436,6 +436,11 @@ class Spell
         // -------------------------------------------
         GameObject* focusObject;
 
+        //******************************************
+        // Spell trigger system
+        //******************************************
+        void doTriggers(SpellMissInfo missInfo, uint32 damage=0, uint32 block=0, uint32 absorb=0, bool crit=false);
+
         //*****************************************
         // Spell target subsystem
         //*****************************************

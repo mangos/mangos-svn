@@ -781,6 +781,83 @@ void Spell::AddItemTarget(Item* pitem, uint32 effIndex)
     m_UniqueItemInfo.push_back(target);
 }
 
+void Spell::doTriggers(SpellMissInfo missInfo, uint32 damage, uint32 block, uint32 absorb, bool crit)
+{
+    // Do triggers depenends from hit result (triggers on hit do in effects)
+    // Set aura states depends from hit result
+    if (missInfo!=SPELL_MISS_NONE)
+    {
+        // Miss/dodge/parry/block only for melee based spells
+        // Resist only for magic based spells
+        switch (missInfo)
+        {
+            case SPELL_MISS_MISS:
+                if(m_caster->GetTypeId()== TYPEID_PLAYER)
+                    ((Player*)m_caster)->UpdateWeaponSkill(BASE_ATTACK);
+
+                m_caster->CastMeleeProcDamageAndSpell(unitTarget, 0, m_attackType, MELEE_HIT_MISS, m_spellInfo, m_IsTriggeredSpell);
+                break;
+            case SPELL_MISS_RESIST:
+                m_caster->ProcDamageAndSpell(unitTarget, PROC_FLAG_TARGET_RESISTS, PROC_FLAG_RESIST_SPELL, 0, m_spellInfo, m_IsTriggeredSpell);
+                break;
+            case SPELL_MISS_DODGE:
+                if(unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    ((Player*)unitTarget)->UpdateDefense();
+
+                // Overpower
+                if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_WARRIOR)
+                {
+                   ((Player*) m_caster)->AddComboPoints(unitTarget, 1);
+                    m_caster->StartReactiveTimer( REACTIVE_OVERPOWER );
+                }
+
+                // Riposte
+                if (unitTarget->getClass() != CLASS_ROGUE)
+                {
+                    unitTarget->ModifyAuraState(AURA_STATE_DEFENSE, true);
+                    unitTarget->StartReactiveTimer( REACTIVE_DEFENSE );
+                }
+
+                m_caster->CastMeleeProcDamageAndSpell(unitTarget, 0, m_attackType, MELEE_HIT_DODGE, m_spellInfo, m_IsTriggeredSpell);
+                break;
+            case SPELL_MISS_PARRY:
+                // Update victim defense ?
+                if(unitTarget->GetTypeId() == TYPEID_PLAYER)
+                    ((Player*)unitTarget)->UpdateDefense();
+                // Mongoose bite - set only Counterattack here
+                if (unitTarget->getClass() == CLASS_HUNTER)
+                {
+                    unitTarget->ModifyAuraState(AURA_STATE_HUNTER_PARRY,true);
+                    unitTarget->StartReactiveTimer( REACTIVE_HUNTER_PARRY );
+                }
+                else
+                {
+                    unitTarget->ModifyAuraState(AURA_STATE_DEFENSE, true);
+                    unitTarget->StartReactiveTimer( REACTIVE_DEFENSE );
+                }
+                m_caster->CastMeleeProcDamageAndSpell(unitTarget, 0, m_attackType, MELEE_HIT_PARRY, m_spellInfo, m_IsTriggeredSpell);              
+                break;
+            case SPELL_MISS_BLOCK:
+                unitTarget->ModifyAuraState(AURA_STATE_DEFENSE, true);
+                unitTarget->StartReactiveTimer( REACTIVE_DEFENSE );
+
+                m_caster->CastMeleeProcDamageAndSpell(unitTarget, 0, m_attackType, MELEE_HIT_BLOCK, m_spellInfo, m_IsTriggeredSpell);              
+                break;
+            // Trigger from this events not supported
+            case SPELL_MISS_EVADE:
+            case SPELL_MISS_IMMUNE:
+            case SPELL_MISS_IMMUNE2:
+            case SPELL_MISS_DEFLECT:
+            case SPELL_MISS_ABSORB:
+            // Trigger from reflects need do after get reflect result
+            case SPELL_MISS_REFLECT:
+                break;
+            default:
+                break;
+        }
+    }
+}
+
 void Spell::DoAllEffectOnTarget(TargetInfo *target)
 {
     // Get mask of effects for target
@@ -792,7 +869,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     if (unit==NULL)
         return;
 
-    uint32 missInfo = target->missCondition;
+    SpellMissInfo missInfo = target->missCondition;
+    // Need init unitTarget by default unit (can changed in code on reflect)
+    // Or on missInfo!=SPELL_MISS_NONE unitTarget undefined (but need in trigger subsystem)
+    unitTarget = unit;
 
     if (missInfo==SPELL_MISS_NONE)                          // In case spell hit target, do all effect on that target
         DoSpellHitOnUnit(unit, mask);
@@ -801,6 +881,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         if (target->reflectResult == SPELL_MISS_NONE)       // If reflected spell hit caster -> do all effect on him
             DoSpellHitOnUnit(m_caster, mask);
     }
+
+    // Do triggers only on miss/resist/parry/dodge
+    if (missInfo!=SPELL_MISS_NONE)
+        doTriggers(missInfo);
 
     // Call scripted function for AI if this spell is casted upon a creature
     if(IS_CREATURE_GUID(target->targetGUID))
@@ -820,8 +904,8 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
     if(!unit || !effectMask)
         return;
 
-    // Recheck immune (only for delayed spells), and now including chances immunity
-    if (m_spellInfo->speed && (unit->IsImmunedToSpellDamage(m_spellInfo,true) || unit->IsImmunedToSpell(m_spellInfo,true,true)))
+    // Recheck immune (only for delayed spells)
+    if (m_spellInfo->speed && (unit->IsImmunedToSpellDamage(m_spellInfo,true) || unit->IsImmunedToSpell(m_spellInfo,true)))
     {
         m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
         return;
@@ -2884,7 +2968,7 @@ uint8 Spell::CanCast(bool strict)
 
         if(IsPositiveSpell(m_spellInfo->Id))
         {
-            if(target->IsImmunedToSpell(m_spellInfo,false,false))
+            if(target->IsImmunedToSpell(m_spellInfo,false))
                 return SPELL_FAILED_TARGET_AURASTATE;
         }
 
