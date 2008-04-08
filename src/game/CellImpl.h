@@ -123,9 +123,10 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
     {
         for(uint32 y = begin_cell.y_coord; y <= end_cell.y_coord; y++)
         {
-            Cell r_zone(CellPair(x,y));
+            CellPair cell_pair(x,y);
+            Cell r_zone(cell_pair);
             r_zone.data.Part.nocreate = l->data.Part.nocreate;
-            CellLock<LOCK_TYPE> lock(r_zone, CellPair(x,y));
+            CellLock<LOCK_TYPE> lock(r_zone, cell_pair);
             m.Visit(lock, visitor);
         }
     }

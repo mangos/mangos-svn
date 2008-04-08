@@ -616,11 +616,12 @@ ObjectAccessor::Update(uint32 diff)
                     uint32 cell_id = (y * TOTAL_NUMBER_OF_CELLS_PER_MAP) + x;
                     if( !map->isCellMarked(cell_id) )
                     {
+                        CellPair cell_pair(x,y);
                         map->markCell(cell_id);
-                        Cell cell(CellPair(x,y));
+                        Cell cell(cell_pair);
                         cell.data.Part.reserved = CENTER_DISTRICT;
                         cell.SetNoCreate();
-                        CellLock<NullGuard> cell_lock(cell, CellPair(x,y));
+                        CellLock<NullGuard> cell_lock(cell, cell_pair);
                         cell_lock->Visit(cell_lock, grid_object_update,  *map);
                         cell_lock->Visit(cell_lock, world_object_update, *map);
                     }
