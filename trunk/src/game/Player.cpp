@@ -4315,7 +4315,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
         case PLAYER_FIELD_HIT_TAKEN_MELEE_RATING:           // Implemended in Unit::MeleeMissChanceCalc
         case PLAYER_FIELD_HIT_TAKEN_RANGED_RATING:
             break;
-        case PLAYER_FIELD_HIT_TAKEN_SPELL_RATING:           // Implemended in Unit::SpellMissChanceCalc
+        case PLAYER_FIELD_HIT_TAKEN_SPELL_RATING:           // Implemended in Unit::MagicSpellHitResult
             break;
         case PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING:          // Implemended in Unit::RollMeleeOutcomeAgainst (only for chance to crit)
         case PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING:

@@ -1065,6 +1065,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 if( spellInfo_1->SpellIconID == 313 && (spellInfo_2->SpellIconID == 2039 || spellInfo_2->SpellIconID == 544  || spellInfo_2->SpellIconID == 91) ||
                     spellInfo_2->SpellIconID == 313 && (spellInfo_1->SpellIconID == 2039 || spellInfo_1->SpellIconID == 544  || spellInfo_1->SpellIconID == 91) )
                     return false;
+
+                // Unstable Affliction and Curse of Agony
+                if( spellInfo_1->SpellIconID == 2039 && spellInfo_2->SpellIconID == 544 ||
+                    spellInfo_2->SpellIconID == 2039 && spellInfo_1->SpellIconID == 544 )
+                    return false;
             }
             break;
         case SPELLFAMILY_WARRIOR:

@@ -1215,17 +1215,6 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
         case SPELL_SCHOOL_FROST:
         case SPELL_SCHOOL_SHADOW:
         case SPELL_SCHOOL_ARCANE:
-
-            //Spell miss (sends resist message)
-            if( int32(SpellMissChanceCalc(pVictim)*100.0f) > irand(0,10000) )
-            {
-                cleanDamage->damage = 0;
-                *damage = 0;
-                ProcDamageAndSpell(pVictim, PROC_FLAG_TARGET_RESISTS, PROC_FLAG_RESIST_SPELL, 0, spellInfo,isTriggeredSpell);
-                SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, SpellSchools(spellInfo->School), 0, 0,0,VICTIMSTATE_NORMAL,0);
-                return;
-            }
-
             // Calculate damage bonus
             *damage = SpellDamageBonus(pVictim, spellInfo, *damage, SPELL_DIRECT_DAMAGE);
 
@@ -1253,7 +1242,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                 cleanDamage->hitOutCome = MELEE_HIT_CRIT;
 
             // spell proc all magic damage==0 case in this function
-            if(damage <= 0)
+            if(*damage == 0)
             {
                 // Procflags
                 uint32 procAttacker = PROC_FLAG_HIT_SPELL;
@@ -2812,30 +2801,198 @@ void Unit::SendAttackStop(Unit* victim)
     ((Creature*)victim)->AI().EnterEvadeMode(this);*/
 }
 
-float Unit::SpellMissChanceCalc(Unit *pVictim) const
+/*
+// Melee based spells can be miss, parry or dodge on this step
+// Crit or block - determined on damage calculation phase! (and can be both in some time)
+float Unit::MeleeSpellMissChance(Unit *pVictim, WeaponAttackType attType, int32 skillDiff, SpellEntry const *spell)
 {
-    if(!pVictim)
-        return 0.0f;
+    // Calculate hit chance (more correct for chance mod)
+    int32 HitChance;
 
-    // PvP : PvE spell misschances per leveldif > 2
-    float chance = pVictim->GetTypeId() == TYPEID_PLAYER ? 7.0f : 11.0f;
-
-    int32 leveldif = int32(pVictim->getLevel()) - int32(getLevel());
-    if(leveldif < 0)
-        leveldif = 0;
-
-    float misschance = 4.0f - m_modSpellHitChance;
+    // PvP - PvE melee chances
+    int32 lchance = pVictim->GetTypeId() == TYPEID_PLAYER ? 5 : 7;
+    int32 leveldif = pVictim->getLevel() - getLevel();
     if(leveldif < 3)
-        misschance += leveldif;
+        HitChance = 95 - leveldif;
     else
-        misschance += (leveldif - 2) * chance;
+        HitChance = 93 - (leveldif - 2) * lchance;
 
-    misschance -= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE);
+    // Hit chance depends from victim auras
+    if(attType == RANGED_ATTACK)
+        HitChance += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE);
+    else
+        HitChance += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE); 
 
-    // Add victim rating bonus
+    // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
+    if(Player *modOwner = GetSpellModOwner())
+        modOwner->ApplySpellMod(spell->Id, SPELLMOD_RESIST_MISS_CHANCE, HitChance); 
+    
+    // Miss = 100 - hit
+    float miss_chance= 100.0f - HitChance;
+
+    // Bonuses from attacker aura and ratings
+    if (attType == RANGED_ATTACK)
+        miss_chance -= m_modRangedHitChance;
+    else
+        miss_chance -= m_modMeleeHitChance;
+
+    // bonus from skills is 0.04%
+    miss_chance -= skillDiff * 0.04f;
+
+    if      (miss_chance <  1.0f) miss_chance =  1.0f;
+    else if (miss_chance > 99.0f) miss_chance = 99.0f;
+    return miss_chance;
+}
+
+// Melee based spells hit result calculations
+SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
+{
+    WeaponAttackType attType = BASE_ATTACK;
+
+    if (spell->DmgClass == SPELL_DAMAGE_CLASS_RANGED)
+        attType = RANGED_ATTACK;
+
+    // bonus from skills is 0.04% per skill Diff
+    int32 skillDiff =  GetWeaponSkillValue(attType) - pVictim->GetDefenseSkillValue();
+
+    // Add rating bonuses for attacker
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        skillDiff+=int32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_ALL_WEAPONS_SKILL_RATING));
+        switch (attType)
+        {
+            case BASE_ATTACK:   skillDiff+=int32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING));break;
+            case OFF_ATTACK:    skillDiff+=int32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING));break;
+            case RANGED_ATTACK: skillDiff+=int32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING));break;
+        }
+    }
+
+    uint32 roll = urand (0, 10000);
+    uint32 missChance = uint32(MeleeSpellMissChance(pVictim, attType, skillDiff, spell)*100.0f);
+
+    // Roll miss
+    uint32 tmp = missChance;
+    if (roll < tmp)
+        return SPELL_MISS_MISS;
+
+    // Same spells cannot be parry/dodge
+    if (spell->Attributes & 0x200000)
+        return SPELL_MISS_NONE;
+
+    // Ranged attack can`t miss too
+    if (attType == RANGED_ATTACK)
+        return SPELL_MISS_NONE;
+    
+    bool attackFromBehind = !pVictim->HasInArc(M_PI,this);
+
+    // Roll dodge
+    int32 dodgeChance = int32(pVictim->GetUnitDodgeChance()*100.0f) - skillDiff * 4;
+    // Reduce dodge chance by attacker expertise rating
+    if (GetTypeId() == TYPEID_PLAYER)
+        dodgeChance-=int32(((Player*)this)->GetExpertiseDodgeOrParryReduction() * 100.0f);
+    if (dodgeChance < 0)
+        dodgeChance = 0;
+
+    // Can`t dodge from behind in PvP (but its possible in PvE)
+    if (GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER && attackFromBehind)
+        dodgeChance = 0;
+
+    // Rogue talent`s cant be dodged 
+    AuraList const& mCanNotBeDodge = GetAurasByType(SPELL_AURA_CANNOT_BE_DODGED);
+    for(AuraList::const_iterator i = mCanNotBeDodge.begin(); i != mCanNotBeDodge.end(); ++i)
+    {
+        if((*i)->GetModifier()->m_miscvalue == 2)       // can't be dodged rogue finishing move
+        {
+            if(spell->SpellFamilyName==SPELLFAMILY_ROGUE && (spell->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE__FINISHING_MOVE))
+            {
+                dodgeChance = 0;
+                break;
+            }
+        }
+    }
+
+    tmp += dodgeChance;
+    if (roll < tmp)
+        return SPELL_MISS_DODGE;
+
+    // Roll parry
+    int32 parryChance = int32(pVictim->GetUnitParryChance()*100.0f)  - skillDiff * 4;
+    // Reduce parry chance by attacker expertise rating
+    if (GetTypeId() == TYPEID_PLAYER)
+        parryChance-=int32(((Player*)this)->GetExpertiseDodgeOrParryReduction() * 100.0f);
+    // Can`t parry from behind
+    if (parryChance < 0 || attackFromBehind)
+        parryChance = 0;
+
+    tmp += parryChance;
+    if (roll < tmp)
+        return SPELL_MISS_PARRY;
+    
+    return SPELL_MISS_NONE;
+}*/
+
+// TODO need use unit spell resistances in calculations
+SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
+{
+    // Can`t miss on dead target (on skinning for example)
+    if (!pVictim->isAlive())
+        return SPELL_MISS_NONE;
+
+    uint32 schoolMask = 1<<spell->School;
+    // PvP - PvE spell misschances per leveldif > 2
+    int32 lchance = pVictim->GetTypeId() == TYPEID_PLAYER ? 7 : 11;
+    int32 leveldif = int32(pVictim->getLevel()) - int32(getLevel());
+
+    // Base hit chance from attacker and victim levels
+    int32 modHitChance;
+    if(leveldif < 3)
+        modHitChance = 96 - leveldif;
+    else
+        modHitChance = 94 - (leveldif - 2) * lchance;
+
+    // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
+    if(Player *modOwner = GetSpellModOwner())
+        modOwner->ApplySpellMod(spell->Id, SPELLMOD_RESIST_MISS_CHANCE, modHitChance);  
+
+    // Increase from attacker SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT auras
+    AuraList const& mModSpellHit= GetAurasByType(SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT);
+    for(AuraList::const_iterator i = mModSpellHit.begin();i != mModSpellHit.end(); ++i)
+        if((*i)->GetModifier()->m_miscvalue & schoolMask)
+            modHitChance+= (*i)->GetModifier()->m_amount;
+
+    // Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
+    AuraList const& mModMissRes = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE);
+    for(AuraList::const_iterator i = mModMissRes.begin();i != mModMissRes.end(); ++i)
+        if((*i)->GetModifier()->m_miscvalue & schoolMask)
+            modHitChance+= (*i)->GetModifier()->m_amount;
+ 
+    // Chance resist mechanic
+    AuraList const& mModMechanicRes = pVictim->GetAurasByType(SPELL_AURA_MOD_MECHANIC_RESISTANCE);
+    for(AuraList::const_iterator i = mModMechanicRes.begin();i != mModMechanicRes.end(); ++i)
+        if((*i)->GetModifier()->m_miscvalue == int32(spell->Mechanic))
+            modHitChance-= (*i)->GetModifier()->m_amount;
+    
+    // Chance resist debuff
+    AuraList const& mModDebuffRes = pVictim->GetAurasByType(SPELL_AURA_MOD_DEBUFF_RESISTANCE);
+    for(AuraList::const_iterator i = mModDebuffRes.begin();i != mModDebuffRes.end(); ++i)
+        if((*i)->GetModifier()->m_miscvalue == int32(spell->Dispel))
+            modHitChance-= (*i)->GetModifier()->m_amount;
+
+    int32 HitChance = modHitChance * 100; 
+    // Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
+    HitChance += int32(m_modSpellHitChance*100.0f);
+
+    // Decreasee hit chance from victim rating bonus
     if (pVictim->GetTypeId()==TYPEID_PLAYER)
-        misschance += ((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_HIT_TAKEN_SPELL_RATING);
-    return misschance < 1.0f ? 1.0f : misschance;
+        HitChance -= int32(((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_HIT_TAKEN_SPELL_RATING)*100.0f);
+
+    if (HitChance <  100) HitChance =  100;
+    if (HitChance > 9900) HitChance = 9900;
+    
+    uint32 rand = urand(0,10000);
+    if (rand > HitChance)
+        return SPELL_MISS_RESIST;
+    return SPELL_MISS_NONE;
 }
 
 SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool CanReflect)
@@ -2844,8 +3001,8 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
     if (pVictim->GetTypeId()==TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
         return SPELL_MISS_EVADE;
 
-    // Check for immune (use charges, but not use chances for delayed spells, this will checked later)
-    if (pVictim->IsImmunedToSpell(spell,true,spell->speed==0))
+    // Check for immune (use charges)
+    if (pVictim->IsImmunedToSpell(spell,true))
         return SPELL_MISS_IMMUNE;
 
     // All positive spells can`t miss
@@ -2853,7 +3010,7 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
     if (IsPositiveSpell(spell->Id))
         return SPELL_MISS_NONE;
 
-    // Check for immune (use charges, no chance dependent auras)
+    // Check for immune (use charges)
     if (pVictim->IsImmunedToSpellDamage(spell,true))
         return SPELL_MISS_IMMUNE;
 
@@ -2898,8 +3055,30 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
         }
     }
 
-    // TODO need add here hit result calculation for spells
+    // Temporary solution for melee based spells and spells vs SPELL_SCHOOL_NORMAL (hit result calculated after)
+    for (int i=0;i<3;i++)
+    {
+        if (spell->Effect[i] == SPELL_EFFECT_WEAPON_DAMAGE ||
+            spell->Effect[i] == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE ||
+            spell->Effect[i] == SPELL_EFFECT_NORMALIZED_WEAPON_DMG ||
+            spell->Effect[i] == SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL)
+            return SPELL_MISS_NONE;
+    }
 
+    if (spell->School == SPELL_SCHOOL_NORMAL)
+        return SPELL_MISS_NONE;
+
+    // TODO need use this code for spell hit result calculation
+    // now code commented for compotability
+    switch (spell->DmgClass)
+    {
+        case SPELL_DAMAGE_CLASS_RANGED:
+        case SPELL_DAMAGE_CLASS_MELEE:
+//             return MeleeSpellHitResult(pVictim, spell);
+        case SPELL_DAMAGE_CLASS_NONE:
+        case SPELL_DAMAGE_CLASS_MAGIC:
+            return MagicSpellHitResult(pVictim, spell);
+    }
     return SPELL_MISS_NONE;
 }
 
@@ -7326,7 +7505,7 @@ bool Unit::IsImmunedToSpellDamage(SpellEntry const* spellInfo, bool useCharges)
     return false;
 }
 
-bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, bool useCharges, bool useChances)
+bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, bool useCharges)
 {
     if (!spellInfo)
         return false;
@@ -7387,28 +7566,6 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, bool useCharges, bool u
                 }
             }
             return true;
-        }
-    }
-
-    if(useChances)                                          // to prevent double chnaces check for same spell
-    {
-        AuraList const& mModMechanicRes = GetAurasByType(SPELL_AURA_MOD_MECHANIC_RESISTANCE);
-        for(AuraList::const_iterator i = mModMechanicRes.begin();i != mModMechanicRes.end(); ++i)
-        {
-            if((*i)->GetModifier()->m_miscvalue == int32(spellInfo->Mechanic))
-            {
-                int32 chance = (*i)->GetModifier()->m_amount;
-                if(roll_chance_i(chance))
-                {
-                    if(useCharges && (*i)->m_procCharges > 0)
-                    {
-                        --(*i)->m_procCharges;
-                        if((*i)->m_procCharges==0)
-                            RemoveAurasDueToSpell((*i)->GetId());
-                    }
-                    return true;
-                }
-            }
         }
     }
 
