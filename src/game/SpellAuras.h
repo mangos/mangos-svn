@@ -310,7 +310,7 @@ class MANGOS_DLL_SPEC Aura
         void CleanupTriggeredSpells();
         void SetAura(uint32 slot, bool remove) { m_target->SetUInt32Value(UNIT_FIELD_AURA + slot, remove ? 0 : GetId()); }
         void SetAuraFlag(uint32 slot, bool add);
-        void SetAuraLevel(uint32 slot);
+        void SetAuraLevel(uint32 slot, uint32 level);
         void SetAuraApplication(uint32 slot, int8 count);
 
         float m_fearMoveAngle;

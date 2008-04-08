@@ -48,6 +48,8 @@
 #include "BattleGroundWS.h"
 #include "CreatureAI.h"
 
+#define NULL_AURA_SLOT 0xFF
+
 pAuraHandler AuraHandler[TOTAL_AURAS]=
 {
     &Aura::HandleNULL,                                      //  0 SPELL_AURA_NONE
@@ -783,22 +785,28 @@ void Aura::_AddAura()
     if(!m_target)
         return;
 
+    // we can found aura in NULL_AURA_SLOT and then need store state instead check slot != NULL_AURA_SLOT
     bool samespell = false;
-    uint8 slot = 0xFF;
+
+    uint8 slot = NULL_AURA_SLOT;
 
     for(uint8 i = 0; i < 3; i++)
     {
-        Aura* aura = m_target->GetAura(m_spellId, i);
-        if(aura)
+        Unit::spellEffectPair spair = Unit::spellEffectPair(GetId(), i);
+        for(Unit::AuraMap::const_iterator itr = m_target->GetAuras().lower_bound(spair); itr != m_target->GetAuras().upper_bound(spair); ++itr)
         {
-            samespell = true;
-            slot = aura->GetAuraSlot();
-            break;
+            // allow use single slot only by auras from same caster
+            if(itr->second->GetCasterGUID()==GetCasterGUID())
+            {
+                samespell = true;
+                slot = itr->second->GetAuraSlot();
+                break;
+            }
         }
-    }
 
-    //if(m_spellId == 23333 || m_spellId == 23335)            // for BG
-    //    m_positive = true;
+        if(samespell)
+            break;
+    }
 
     // not call total regen auras at adding
     switch (m_modifier.m_auraname)
@@ -823,9 +831,9 @@ void Aura::_AddAura()
     // passive auras (except totem auras) do not get placed in the slots
     if(!m_isPassive || (caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem()))
     {
-        if(!samespell)
+        if(!samespell)                                      // new slot need
         {
-            if (IsPositive())
+            if (IsPositive())                               // empty positive slot
             {
                 for (uint8 i = 0; i < MAX_POSITIVE_AURAS; i++)
                 {
@@ -836,7 +844,7 @@ void Aura::_AddAura()
                     }
                 }
             }
-            else
+            else                                            // empty negative slot
             {
                 for (uint8 i = MAX_POSITIVE_AURAS; i < MAX_AURAS; i++)
                 {
@@ -848,11 +856,11 @@ void Aura::_AddAura()
                 }
             }
 
-            if(slot < MAX_AURAS)
+            if(slot < MAX_AURAS)                            // slot found
             {
                 SetAura(slot, false);
                 SetAuraFlag(slot, true);
-                SetAuraLevel(slot);
+                SetAuraLevel(slot,caster ? caster->getLevel() : sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL));
 
                 if(m_target->GetTypeId() == TYPEID_PLAYER)
                 {
@@ -880,7 +888,7 @@ void Aura::_AddAura()
             SetAuraSlot( slot );
             UpdateAuraDuration();
         }
-        else
+        else                                                // use found slot
         {
             SetAuraSlot( slot );
             UpdateSlotCounterAndDuration(true);
@@ -926,11 +934,6 @@ void Aura::_RemoveAura()
 
     uint8 slot = GetAuraSlot();
 
-    // Aura added always to m_target
-    //Aura* aura = m_target->GetAura(m_spellId, m_effIndex);
-    //if(!aura)
-    //    return;
-
     if(slot >= MAX_AURAS)                                   // slot not set
         return;
 
@@ -939,14 +942,20 @@ void Aura::_RemoveAura()
 
     bool samespell = false;
 
+    // find other aura in same slot (current already removed from list)
     for(uint8 i = 0; i < 3; i++)
     {
-        Aura* aura = m_target->GetAura(m_spellId, i);
-        if(aura)
+        Unit::spellEffectPair spair = Unit::spellEffectPair(GetId(), i);
+        for(Unit::AuraMap::const_iterator itr = m_target->GetAuras().lower_bound(spair); itr != m_target->GetAuras().upper_bound(spair); ++itr)
         {
-            samespell = true;
-            break;
+            if(itr->second->GetAuraSlot()==slot)
+            {
+                samespell = true;
+                break;
+            }
         }
+        if(samespell)
+            break;
     }
 
     // only remove icon when the last aura of the spell is removed (current aura already removed from list)
@@ -954,7 +963,7 @@ void Aura::_RemoveAura()
     {
         SetAura(slot, true);
         SetAuraFlag(slot, false);
-        SetAuraLevel(slot);
+        SetAuraLevel(slot,caster ? caster->getLevel() : sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL));
 
         if(m_target->GetTypeId() == TYPEID_PLAYER)
         {
@@ -964,8 +973,7 @@ void Aura::_RemoveAura()
                 ((Player*)m_target)->SetAuraUpdateMask(slot);
             }
         }
-
-        if(m_target->GetTypeId() == TYPEID_UNIT && ((Creature*)m_target)->isPet())
+        else if(m_target->GetTypeId() == TYPEID_UNIT && ((Creature*)m_target)->isPet())
         {
             Pet *pet = ((Pet*)m_target);
             if(!pet->isControlled())
@@ -1029,15 +1037,12 @@ void Aura::SetAuraFlag(uint32 slot, bool add)
     m_target->SetUInt32Value(UNIT_FIELD_AURAFLAGS + index, val);
 }
 
-void Aura::SetAuraLevel(uint32 slot)
+void Aura::SetAuraLevel(uint32 slot,uint32 level)
 {
     uint32 index    = slot / 4;
     uint32 byte     = (slot % 4) * 8;
     uint32 val      = m_target->GetUInt32Value(UNIT_FIELD_AURALEVELS + index);
     val &= ~(0xFF << byte);
-    uint32 level = 0x46;
-    if(GetCaster())
-        level = GetCaster()->getLevel();
     val |= (level << byte);
     m_target->SetUInt32Value(UNIT_FIELD_AURALEVELS + index, val);
 }
@@ -1065,7 +1070,8 @@ void Aura::UpdateSlotCounterAndDuration(bool add)
     Unit::AuraList const& aura_list = m_target->GetAurasByType(GetModifier()->m_auraname);
     for(Unit::AuraList::const_iterator i = aura_list.begin();i != aura_list.end(); ++i)
     {
-        if((*i)->m_spellId==m_spellId && (*i)->m_effIndex==m_effIndex)
+        if( (*i)->GetId()==m_spellId && (*i)->GetEffIndex()==m_effIndex &&
+            (*i)->GetCasterGUID()==GetCasterGUID() )
         {
             ++count;
 

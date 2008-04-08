@@ -4753,6 +4753,23 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
                 if ((*i)->GetModifier()->m_miscvalue == int32(id))
                     (*i)->ApplyModifier(true);
 
+            // Learn all spells for skill
+            uint32 raceMask  = getRaceMask();
+            uint32 classMask = getClassMask();
+            for (uint32 j=0; j<sSkillLineAbilityStore.GetNumRows(); ++j)
+            {
+                SkillLineAbilityEntry const *pAbility = sSkillLineAbilityStore.LookupEntry(j);
+                if (!pAbility || pAbility->skillId!=id || pAbility->learnOnGetSkill != ABILITY_LEARNED_ON_GET_PROFESSION_SKILL)
+                    continue;
+                // Check race if set
+                if (pAbility->racemask && !(pAbility->racemask & raceMask))
+                    continue;
+                // Check class if set
+                if (pAbility->classmask && !(pAbility->classmask & classMask))
+                    continue;
+                // Ok need learn spell
+                learnSpell(pAbility->spellId);
+            }
             return;
         }
     }

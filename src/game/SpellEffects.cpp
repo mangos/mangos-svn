@@ -356,7 +356,7 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                             Unit::AuraList const& m_periodicDamageAuras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
                             for(Unit::AuraList::const_iterator itr = m_periodicDamageAuras.begin(); itr != m_periodicDamageAuras.end(); ++itr)
                             {
-                                // Moonfire or Insect Swarm (target debuff)
+                                // Moonfire or Insect Swarm (target debuff from any casters)
                                 if ( (*itr)->GetSpellProto()->SpellFamilyFlags & 0x00200002LL )
                                 {
                                     int32 mod = (*i)->GetModifier()->m_amount;
@@ -386,8 +386,9 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                         Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
                         for(Unit::AuraList::const_iterator itr = auras.begin(); itr!=auras.end() && combo;)
                         {
-                            // Deadly poison
-                            if((*itr)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_ROGUE && ((*itr)->GetSpellProto()->SpellFamilyFlags & 0x10000) && (*itr)->GetSpellProto()->SpellVisual==5100)
+                            // Deadly poison (only attacker applied)
+                            if( (*itr)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_ROGUE && ((*itr)->GetSpellProto()->SpellFamilyFlags & 0x10000) && 
+                                (*itr)->GetSpellProto()->SpellVisual==5100 && (*itr)->GetCasterGUID()==m_caster->GetGUID() )
                             {
                                 --combo;
                                 ++doses;
@@ -469,7 +470,7 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                     uint32 stacks = 0;
                     Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
                     for(Unit::AuraList::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
-                        if((*itr)->GetId() == 31803)
+                        if((*itr)->GetId() == 31803 && (*itr)->GetCasterGUID()==m_caster->GetGUID())
                             ++stacks;
                     if(!stacks)
                         //No damage if the target isn't affected by this
