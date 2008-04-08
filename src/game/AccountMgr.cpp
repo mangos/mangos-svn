@@ -150,6 +150,8 @@ uint32 AccountMgr::GetId(std::string username)
 
 bool AccountMgr::CheckPassword(uint32 accid, std::string passwd)
 {
+    loginDatabase.escape_string(passwd);
+
     QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM account WHERE id='%d' AND sha_pass_hash=SHA1(CONCAT(UPPER(username),':',UPPER('%s')))", accid, passwd.c_str());
     if (result)
     {

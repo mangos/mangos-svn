@@ -649,7 +649,6 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
         return;
 
     normalizePlayerName(IgnoreName);
-    CharacterDatabase.escape_string(IgnoreName);            // prevent SQL injection - normal name don't must changed by this call
 
     sLog.outDebug( "WORLD: %s asked to Ignore: '%s'",
         GetPlayer()->GetName(), IgnoreName.c_str() );

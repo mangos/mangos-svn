@@ -1369,6 +1369,7 @@ bool Player::AddToIgnoreList(uint64 guid, std::string name)
     if(m_ignorelist.size() >= (255-1))
         return false;
 
+    CharacterDatabase.escape_string(name);            // prevent SQL injection - normal name don't must changed by this call
     CharacterDatabase.PExecute("INSERT INTO character_social (guid,name,friend,flags) "
         "VALUES ('%u', '%s', '%u', 1)", GetGUIDLow(), name.c_str(), GUID_LOPART(guid));
     m_ignorelist.insert(GUID_LOPART(guid));

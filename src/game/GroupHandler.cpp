@@ -663,17 +663,15 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
     if (mask & GROUP_UPDATE_FLAG_AURAS)
     {
         uint64 auramask = player->GetAuraUpdateMask();
-        ByteBuffer buf;
+        *data << uint64(auramask);
         for(uint32 i = 0; i < MAX_AURAS; ++i)
         {
             if(auramask & (uint64(1) << i))
             {
-                buf << uint16(player->GetUInt32Value(UNIT_FIELD_AURA + i));
-                //buf << uint8(1);
+                *data << uint16(player->GetUInt32Value(UNIT_FIELD_AURA + i));
+                //*data << uint8(1);
             }
         }
-        *data << uint64(auramask);
-        data->append(buf);
     }
 
     Pet *pet = player->GetPet();
@@ -746,17 +744,15 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
         if(pet)
         {
             uint64 auramask = pet->GetAuraUpdateMask();
-            ByteBuffer buf;
+            *data << uint64(auramask);
             for(uint32 i = 0; i < MAX_AURAS; ++i)
             {
                 if(auramask & (uint64(1) << i))
                 {
-                    buf << uint16(pet->GetUInt32Value(UNIT_FIELD_AURA + i));
-                    //buf << uint8(1);
+                    *data << uint16(pet->GetUInt32Value(UNIT_FIELD_AURA + i));
+                    //*data << uint8(1);
                 }
             }
-            *data << uint64(auramask);
-            data->append(buf);
         }
         else
             *data << (uint64) 0;
