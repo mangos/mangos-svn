@@ -1085,6 +1085,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void StartReactiveTimer( ReactiveType reactive ) { m_reactiveTimer[reactive] = REACTIVE_TIMER_START;}
         void UpdateReactives(uint32 p_time);
 
+        // group updates
+        void UpdateAuraForGroup(uint8 slot);
+
     protected:
         explicit Unit ( WorldObject *instantiator );
 
