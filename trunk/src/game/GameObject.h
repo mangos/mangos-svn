@@ -39,6 +39,7 @@ struct GameObjectInfo
     uint32  type;
     uint32  displayId;
     char   *name;
+    char   *castBarCaption;
     uint32  faction;
     uint32  flags;
     float   size;
@@ -167,9 +168,10 @@ struct GameObjectInfo
 struct GameObjectLocale
 {
     std::vector<std::string> Name;
+    std::vector<std::string> CastBarCaption;
 };
 
-// from `ganeobject`
+// from `gameobject`
 struct GameObjectData
 {
     uint32 id;                                              // entry in gamobject_template

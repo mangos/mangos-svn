@@ -1259,6 +1259,7 @@ CREATE TABLE `gameobject_template` (
   `type` tinyint(3) unsigned NOT NULL default '0',
   `displayId` mediumint(8) unsigned NOT NULL default '0',
   `name` varchar(100) NOT NULL default '',
+  `castBarCaption` varchar(100) NOT NULL default '',
   `faction` smallint(5) unsigned NOT NULL default '0',
   `flags` int(10) unsigned NOT NULL default '0',
   `size` float NOT NULL default '1',
@@ -1686,6 +1687,13 @@ CREATE TABLE `locales_gameobject` (
   `name_loc5` varchar(100) NOT NULL default '',
   `name_loc6` varchar(100) NOT NULL default '',
   `name_loc7` varchar(100) NOT NULL default '',
+  `castbarcaption_loc1` varchar(100) NOT NULL default '',
+  `castbarcaption_loc2` varchar(100) NOT NULL default '',
+  `castbarcaption_loc3` varchar(100) NOT NULL default '',
+  `castbarcaption_loc4` varchar(100) NOT NULL default '',
+  `castbarcaption_loc5` varchar(100) NOT NULL default '',
+  `castbarcaption_loc6` varchar(100) NOT NULL default '',
+  `castbarcaption_loc7` varchar(100) NOT NULL default '',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 

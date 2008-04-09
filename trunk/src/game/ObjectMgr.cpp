@@ -4255,7 +4255,10 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
 
 void ObjectMgr::LoadGameObjectLocales()
 {
-    QueryResult *result = WorldDatabase.Query("SELECT entry,name_loc1,name_loc2,name_loc3,name_loc4,name_loc5,name_loc6,name_loc7 FROM locales_gameobject");
+    QueryResult *result = WorldDatabase.Query("SELECT entry,"
+        "name_loc1,name_loc2,name_loc3,name_loc4,name_loc5,name_loc6,name_loc7,"
+        "castbarcaption_loc1,castbarcaption_loc2,castbarcaption_loc3,castbarcaption_loc4,"
+        "castbarcaption_loc5,castbarcaption_loc6,castbarcaption_loc7 FROM locales_gameobject");
 
     if(!result)
     {
@@ -4294,6 +4297,23 @@ void ObjectMgr::LoadGameObjectLocales()
                 }
             }
         }
+
+        for(int i = 8; i < 15; ++i)
+        {
+            std::string str = fields[i].GetCppString();
+            if(!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if(idx >= 0)
+                {
+                    if(data.CastBarCaption.size() <= idx)
+                        data.CastBarCaption.resize(idx+1);
+
+                    data.CastBarCaption[idx] = str;
+                }
+            }
+        }
+
     } while (result->NextRow());
 
     delete result;
