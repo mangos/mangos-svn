@@ -862,27 +862,8 @@ void Aura::_AddAura()
                 SetAuraFlag(slot, true);
                 SetAuraLevel(slot,caster ? caster->getLevel() : sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL));
 
-                if(m_target->GetTypeId() == TYPEID_PLAYER)
-                {
-                    if(((Player*)m_target)->GetGroup())
-                    {
-                        ((Player*)m_target)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_AURAS);
-                        ((Player*)m_target)->SetAuraUpdateMask(slot);
-                    }
-                }
-
-                if(m_target->GetTypeId() == TYPEID_UNIT && ((Creature*)m_target)->isPet())
-                {
-                    Pet *pet = ((Pet*)m_target);
-                    if(!pet->isControlled())
-                        return;
-                    Unit *owner = m_target->GetOwner();
-                    if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
-                    {
-                        ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_AURAS);
-                        pet->SetAuraUpdateMask(slot);
-                    }
-                }
+                // update for out of range group members
+                m_target->UpdateAuraForGroup(slot);
             }
 
             SetAuraSlot( slot );
@@ -965,26 +946,8 @@ void Aura::_RemoveAura()
         SetAuraFlag(slot, false);
         SetAuraLevel(slot,caster ? caster->getLevel() : sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL));
 
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-        {
-            if(((Player*)m_target)->GetGroup())
-            {
-                ((Player*)m_target)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_AURAS);
-                ((Player*)m_target)->SetAuraUpdateMask(slot);
-            }
-        }
-        else if(m_target->GetTypeId() == TYPEID_UNIT && ((Creature*)m_target)->isPet())
-        {
-            Pet *pet = ((Pet*)m_target);
-            if(!pet->isControlled())
-                return;
-            Unit *owner = m_target->GetOwner();
-            if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
-            {
-                ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_AURAS);
-                pet->SetAuraUpdateMask(slot);
-            }
-        }
+        // update for out of range group members
+        m_target->UpdateAuraForGroup(slot);
 
         if( IsSealSpell(GetId()) )
             m_target->ModifyAuraState(AURA_STATE_JUDGEMENT,false);
