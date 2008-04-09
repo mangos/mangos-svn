@@ -4699,6 +4699,17 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     CastSpell(this, spellId, true, castItem, triggeredByAura);
                     return;
                 }
+                // Mana Leech (Passive) (Priest Pet Aura)
+                case 28305:
+                {
+                    // Cast on owner
+                    if (Unit *owner = GetOwner())
+                    {
+                        int32 manaRegen = int32(damage * 2.5f);
+                        CastCustomSpell(owner, 34650, &manaRegen, NULL, NULL, true, castItem, triggeredByAura);
+                    }
+                    return;
+                }
                 // Mark of Malice
                 case 33493:
                 {
