@@ -935,7 +935,8 @@ class MANGOS_DLL_SPEC Player : public Unit
             return GetTaxiDestination();
         }
 
-        bool ActivateTaxiPathTo(std::vector<uint32> const& nodes );
+        bool ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_id = 0 );
+                                                            // mount_id can be used in scripting calls
         bool LoadTaxiDestinationsFromString(std::string values);
         std::string SaveTaxiDestinationsToString();
 

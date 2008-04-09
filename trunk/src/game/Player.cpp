@@ -15120,7 +15120,7 @@ void Player::HandleStealthedUnitsDetection()
     }
 }
 
-bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
+bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_id)
 {
     if(nodes.size() < 2)
         return false;
@@ -15223,9 +15223,10 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
         prevnode = lastnode;
     }
 
-    uint16 MountId = objmgr.GetTaxiMount(sourcenode, GetTeam());
+    if(!mount_id)                                           // if not provide then attempt use default.
+        mount_id = objmgr.GetTaxiMount(sourcenode, GetTeam());
 
-    if (MountId == 0 || sourcepath == 0)
+    if (mount_id == 0 || sourcepath == 0)
     {
         WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
         data << uint32(ERR_TAXIUNSPECIFIEDSERVERERROR);
@@ -15256,7 +15257,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
 
     sLog.outDebug("WORLD: Sent SMSG_ACTIVATETAXIREPLY");
 
-    GetSession()->SendDoFlight(MountId, sourcepath);
+    GetSession()->SendDoFlight(mount_id, sourcepath);
 
     return true;
 }
