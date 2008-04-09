@@ -3427,7 +3427,7 @@ void Spell::EffectWeaponDmg(uint32 i)
         case SPELLFAMILY_ROGUE:
         {
             // Mutilate (for each hand)
-            if(m_spellInfo->SpellFamilyFlags & 0xC00000000LL)
+            if(m_spellInfo->SpellFamilyFlags & 0x600000000LL)
             {
                 Unit::AuraMap const& auras = unitTarget->GetAuras();
                 for(Unit::AuraMap::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
