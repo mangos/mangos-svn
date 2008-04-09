@@ -669,7 +669,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
             if(auramask & (uint64(1) << i))
             {
                 *data << uint16(player->GetUInt32Value(UNIT_FIELD_AURA + i));
-                //*data << uint8(1);
+                *data << uint8(1);
             }
         }
     }
@@ -750,7 +750,7 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
                 if(auramask & (uint64(1) << i))
                 {
                     *data << uint16(pet->GetUInt32Value(UNIT_FIELD_AURA + i));
-                    //*data << uint8(1);
+                    *data << uint8(1);
                 }
             }
         }
@@ -809,8 +809,8 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
         if(uint32 aura = player->GetUInt32Value(UNIT_FIELD_AURA + i))
         {
             auramask |= (uint64(1) << i);
-            data << (uint16) aura;
-            //buf << (uint8)  1;
+            data << uint16(aura);
+            data << uint8(1);
         }
     }
     data.put<uint64>(maskPos,auramask);                     // GROUP_UPDATE_FLAG_AURAS
