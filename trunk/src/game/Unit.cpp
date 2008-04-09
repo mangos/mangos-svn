@@ -1783,6 +1783,8 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
     int32 RemainingDamage = damage - *resist;
 
     // absorb without mana cost
+    int32 reflectDamage = 0;
+    Aura* reflectAura = NULL;
     AuraList const& vSchoolAbsorb = pVictim->GetAurasByType(SPELL_AURA_SCHOOL_ABSORB);
     for(AuraList::const_iterator i = vSchoolAbsorb.begin(), next; i != vSchoolAbsorb.end() && RemainingDamage > 0; i = next)
     {
@@ -1812,14 +1814,14 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
         int32 currentAbsorb;
 
         //Reflective Shield
-        if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_PRIEST && (*i)->GetSpellProto()->SpellFamilyFlags == 0x1)
+        if ((pVictim != this) && (*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_PRIEST && (*i)->GetSpellProto()->SpellFamilyFlags == 0x1)
         {
             if(Unit* caster = (*i)->GetCaster())
             {
                 AuraList const& vOverRideCS = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
                 for(AuraList::const_iterator k = vOverRideCS.begin(); k != vOverRideCS.end(); ++k)
                 {
-                    int32 reflect_damage = 0;
+                    
                     switch((*k)->GetModifier()->m_miscvalue)
                     {
                         case 5065:                          // Rank 1
@@ -1829,16 +1831,16 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
                         case 5061:                          // Rank 5
                         {
                             if(RemainingDamage >= (*i)->GetModifier()->m_amount)
-                                reflect_damage = (*i)->GetModifier()->m_amount * (*k)->GetModifier()->m_amount/100;
+                                reflectDamage = (*i)->GetModifier()->m_amount * (*k)->GetModifier()->m_amount/100;
                             else
-                                reflect_damage = (*k)->GetModifier()->m_amount * RemainingDamage/100;
-                            pVictim->CastCustomSpell(this, 33619, &reflect_damage, NULL, NULL, true, NULL, *i);
+                                reflectDamage = (*k)->GetModifier()->m_amount * RemainingDamage/100;
+                            reflectAura = *i;
 
                         } break;
                         default: break;
                     }
 
-                    if(reflect_damage)
+                    if(reflectDamage)
                         break;
                 }
             }
@@ -1858,6 +1860,9 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
 
         RemainingDamage -= currentAbsorb;
     }
+    // do not cast spells while looping auras; auras can get invalid otherwise
+    if (reflectDamage)
+        pVictim->CastCustomSpell(this, 33619, &reflectDamage, NULL, NULL, true, NULL, reflectAura);
 
     // absorb by mana cost
     AuraList const& vManaShield = pVictim->GetAurasByType(SPELL_AURA_MANA_SHIELD);
