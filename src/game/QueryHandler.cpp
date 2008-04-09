@@ -173,7 +173,10 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
     {
 
         std::string Name;
+        std::string CastBarCaption;
+
         Name = info->name;
+        CastBarCaption = info->castBarCaption;
 
         int loc_idx = GetSessionLocaleIndex();
         if (loc_idx >= 0)
@@ -183,6 +186,8 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
             {
                 if (gl->Name.size() > loc_idx && !gl->Name[loc_idx].empty())
                     Name = gl->Name[loc_idx];
+                if (gl->CastBarCaption.size() > loc_idx && !gl->CastBarCaption[loc_idx].empty())
+                    CastBarCaption = gl->CastBarCaption[loc_idx];
             }
         }
         sLog.outDetail("WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name, entryID);
@@ -193,7 +198,7 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
         data << Name;
         data << uint8(0) << uint8(0) << uint8(0);           // name2, name3, name4
         data << uint8(0);                                   // 2.0.3, string
-        data << uint8(0);                                   // 2.0.3, string
+        data << CastBarCaption;                             // 2.0.3, string. Text will appear in Cast Bar when using GO (ex: "Collecting")
         data << uint8(0);                                   // 2.0.3, probably string
         data.append(info->raw.data,24);
         SendPacket( &data );
