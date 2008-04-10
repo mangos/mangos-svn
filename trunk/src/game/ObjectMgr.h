@@ -385,7 +385,7 @@ class ObjectMgr
             return NULL;
         }
 
-        QuestMap const& GetQuestTremplates() const { return mQuestTemplates; }
+        QuestMap const& GetQuestTemplates() const { return mQuestTemplates; }
 
         void LoadGuilds();
         void LoadArenaTeams();

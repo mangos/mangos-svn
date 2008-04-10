@@ -2321,7 +2321,8 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
     // converting string that we try to find to lower case
     std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
 
-    for (ObjectMgr::QuestMap::const_iterator iter = objmgr.GetQuestTremplates().begin(); iter != objmgr.GetQuestTremplates().end(); ++iter)
+    ObjectMgr::QuestMap const& qTemplates = objmgr.GetQuestTemplates();
+    for (ObjectMgr::QuestMap::const_iterator iter = qTemplates.begin(); iter != qTemplates.end(); ++iter)
     {
         Quest * qinfo = iter->second;
 
