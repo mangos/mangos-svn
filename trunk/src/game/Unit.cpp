@@ -2415,7 +2415,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
     }
 }
 
-void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool isTriggered)
+void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType )
 {
     if(hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_STUNDED | UNIT_STAT_FLEEING) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) )
         return;
@@ -2423,17 +2423,14 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
     if (!pVictim->isAlive())
         return;
 
-    if(!isTriggered)
-    {
-        if(IsNonMeleeSpellCasted(false))
-            return;
+    if(IsNonMeleeSpellCasted(false))
+        return;
 
-        // melee attack spell casted at main hand attack only
-        if (m_currentSpells[CURRENT_MELEE_SPELL] && attType == BASE_ATTACK)
-        {
-            m_currentSpells[CURRENT_MELEE_SPELL]->cast();
-            return;
-        }
+    // melee attack spell casted at main hand attack only
+    if (m_currentSpells[CURRENT_MELEE_SPELL] && attType == BASE_ATTACK)
+    {
+        m_currentSpells[CURRENT_MELEE_SPELL]->cast();
+        return;
     }
 
     uint32 hitInfo;
