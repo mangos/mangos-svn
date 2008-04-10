@@ -3405,7 +3405,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     if(m_spellInfo->SpellVisual == 671 && m_spellInfo->SpellIconID == 1508)
     {
         int32 sp_bonus = 0;
-        for(int x=1;x<=3;x++)
+        for(int x=0;x<3;++x)
         {
             if(m_spellInfo->Effect[x]==SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
             {
