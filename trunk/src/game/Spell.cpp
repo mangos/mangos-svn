@@ -3877,6 +3877,12 @@ uint8 Spell::CheckMana(uint32 *mana)
     }
     manaCost += m_caster->GetInt32Value(UNIT_FIELD_POWER_COST_MODIFIER+m_spellInfo->School);
 
+    // Shiv - costs 20 + weaponSpeed*10 energy
+    if ( m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellIconID == 1834 )
+    {
+        manaCost += m_caster->GetAttackTime(OFF_ATTACK)/100;
+    }
+
     if(Player* modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost, this);
 
