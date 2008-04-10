@@ -1051,6 +1051,41 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastSpell(m_caster,45182,true);
                     return;
                 }
+                case 5938:                                  // Shiv
+                {
+                    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    Player *pCaster = ((Player*)m_caster);
+
+                    Item *item = pCaster->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+                    if(!item)
+                        return;
+
+                    // all poison enchantments is temporary
+                    uint32 enchant_id = item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT);
+                    if(!enchant_id)
+                        return;
+
+                    SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+                    if(!pEnchant)
+                        return;
+
+                    for (int s=0;s<3;s++)
+                    {
+                        if(pEnchant->type[s]!=ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+                            continue;
+
+                        SpellEntry const* combatEntry = sSpellStore.LookupEntry(pEnchant->spellid[s]);
+                        if(!combatEntry || combatEntry->Dispel!=IMMUNE_DISPEL_POISON)
+                            continue;
+
+                        m_caster->CastSpell(unitTarget, combatEntry, true, item);
+                    }
+
+                    m_caster->CastSpell(unitTarget, 5940, true);
+                    return;
+                }
             }
             break;
         case SPELLFAMILY_HUNTER:
