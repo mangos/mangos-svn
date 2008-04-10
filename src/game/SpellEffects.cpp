@@ -2380,7 +2380,7 @@ void Spell::EffectOpenLock(uint32 /*i*/)
     // Check and skill-up skill
     if( m_spellInfo->Effect[1] == SPELL_EFFECT_SKILL )
         SkillId = m_spellInfo->EffectMiscValue[1];
-                                                            // picklocking spells
+                                                            // pickpocketing spells
     else if( m_spellInfo->EffectMiscValue[0] == LOCKTYPE_PICKLOCK )
         SkillId = SKILL_LOCKPICKING;
 
