@@ -586,7 +586,7 @@ struct SpellShapeshiftEntry
     //char*  Name[16];                                      // 2-17 unused
     //uint32 NameFlags;                                     // 18 unused
     uint32 flags1;                                          // 19
-    uint32 creatureType;                                    // 20 <=0 humanoid, other normal creature types
+    int32  creatureType;                                    // 20 <=0 humanoid, other normal creature types
     //uint32 unk1;                                          // 21 unused
     uint32 attackSpeed;                                     // 22
     //uint32 modelID;                                       // 23 unused, alliance modelid (where horde case?)
