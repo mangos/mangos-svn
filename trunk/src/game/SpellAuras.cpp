@@ -2608,10 +2608,16 @@ void Aura::HandleInvisibility(bool Apply, bool Real)
     {
         m_target->m_invisibilityMask |= (1 << m_modifier.m_miscvalue);
 
-        // drop flag at invisible in bg
-        if(Real && m_target->GetTypeId()==TYPEID_PLAYER && ((Player*)m_target)->InBattleGround())
-            if(BattleGround *bg = ((Player*)m_target)->GetBattleGround())
-                bg->HandleDropFlag((Player*)m_target);
+        if(Real && m_target->GetTypeId()==TYPEID_PLAYER)
+        {
+            // apply glow vision
+            m_target->SetFlag(PLAYER_FIELD_BYTES2,PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
+
+            // drop flag at invisible in bg
+            if(((Player*)m_target)->InBattleGround())
+                if(BattleGround *bg = ((Player*)m_target)->GetBattleGround())
+                    bg->HandleDropFlag((Player*)m_target);
+        }
 
         // Real visibility update in Unit::_AddAura
     }
@@ -2632,6 +2638,10 @@ void Aura::HandleInvisibility(bool Apply, bool Real)
         // only at real aura remove and if not have different invisibility auras.
         if(Real && m_target->m_invisibilityMask==0)
         {
+            // remove glow vision
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+                m_target->RemoveFlag(PLAYER_FIELD_BYTES2,PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW);
+
             // apply only if not in GM invisibility
             if(m_target->GetVisibility()!=VISIBILITY_OFF)
             {

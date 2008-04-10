@@ -437,6 +437,14 @@ enum PlayerKnownTitles2
     PLAYER_TITLE_UNUSED34             = 0x40000000
 };
 
+// used in PLAYER_FIELD_BYTES2 values
+enum PlayerFieldByte2Flags
+{
+    PLAYER_FIELD_BYTE2_NONE              = 0x0000,
+    PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW = 0x1000
+};
+
+
 enum ActivateTaxiReplies
 {
     ERR_TAXIOK                      = 0,
