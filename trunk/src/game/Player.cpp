@@ -6898,18 +6898,14 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
         if(loot_type == LOOT_PICKPOCKETING)
         {
-            uint32 lootid = creature->GetCreatureInfo()->pickpocketLootId;
-
             if ( !creature->lootForPickPocketed )
             {
                 creature->lootForPickPocketed = true;
                 loot->clear();
 
-                if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
-                {
-                    loot->clear();
+                if (uint32 lootid = creature->GetCreatureInfo()->pickpocketLootId)
                     FillLoot(loot, lootid, LootTemplates_Pickpocketing, this);
-                }
+
                 // Generate extra money for pick pocket loot
                 const uint32 a = urand(0, creature->getLevel()/2);
                 const uint32 b = urand(0, getLevel()/2);
@@ -6935,13 +6931,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             if(!creature->lootForBody)
             {
                 creature->lootForBody = true;
+                loot->clear();
 
-                uint32 lootid = creature->GetCreatureInfo()->lootid;
-                if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
-                {
-                    loot->clear();
+                if (uint32 lootid = creature->GetCreatureInfo()->lootid)
                     FillLoot(loot, lootid, LootTemplates_Creature, recipient);
-                }
 
                 loot->generateMoneyLoot(creature->GetCreatureInfo()->mingold,creature->GetCreatureInfo()->maxgold);
 
