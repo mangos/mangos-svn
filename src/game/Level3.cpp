@@ -2268,6 +2268,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
                 bool learn = (spellInfo->Effect[0] == SPELL_EFFECT_LEARN_SPELL);
                 bool talent = (GetTalentSpellCost(id) > 0);
                 bool passive = IsPassiveSpell(id);
+                bool active = target->HasAura(id,0) || target->HasAura(id,1) || target->HasAura(id,2);
 
                 // unit32 used to prevent interpreting uint8 as char at output
                 // find rank of learned spell for learning spell
@@ -2291,6 +2292,8 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
                     ss << GetMangosString(LANG_LEARN);
                 if(known)
                     ss << GetMangosString(LANG_KNOWN);
+                if(active)
+                    ss << GetMangosString(LANG_ACTIVE);
 
                 SendSysMessage(ss.str().c_str());
 
