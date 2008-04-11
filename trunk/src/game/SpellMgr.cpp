@@ -1061,14 +1061,14 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     if(spellInfo_1->SpellVisual != 0 && spellInfo_2->SpellVisual != 0)
                         return true;                        // can't be stacked
 
-                // Corruption and (Unstable Affliction or Curse of Agony or Curse of Doom)
-                if( spellInfo_1->SpellIconID == 313 && (spellInfo_2->SpellIconID == 2039 || spellInfo_2->SpellIconID == 544  || spellInfo_2->SpellIconID == 91) ||
-                    spellInfo_2->SpellIconID == 313 && (spellInfo_1->SpellIconID == 2039 || spellInfo_1->SpellIconID == 544  || spellInfo_1->SpellIconID == 91) )
+                // Corruption and Unstable Affliction
+                if( spellInfo_1->SpellIconID == 313 && spellInfo_2->SpellIconID == 2039 ||
+                    spellInfo_2->SpellIconID == 313 && spellInfo_1->SpellIconID == 2039 )
                     return false;
 
-                // Unstable Affliction and Curse of Agony
-                if( spellInfo_1->SpellIconID == 2039 && spellInfo_2->SpellIconID == 544 ||
-                    spellInfo_2->SpellIconID == 2039 && spellInfo_1->SpellIconID == 544 )
+                // (Corruption or Unstable Affliction) and (Curse of Agony or Curse of Doom)
+                if( (spellInfo_1->SpellIconID == 313 || spellInfo_1->SpellIconID == 2039) && (spellInfo_2->SpellIconID == 544  || spellInfo_2->SpellIconID == 91) ||
+                    (spellInfo_2->SpellIconID == 313 || spellInfo_2->SpellIconID == 2039) && (spellInfo_1->SpellIconID == 544  || spellInfo_1->SpellIconID == 91) )
                     return false;
             }
             break;
