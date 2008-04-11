@@ -608,14 +608,15 @@ bool Map::CanEnter(Player* player) const
         }
     }
 
-    if(i_data && i_data->IsEncounterInProgress())
+    // prevent enter to instance non-GMs in boss encounter time
+    if(i_data && i_data->IsEncounterInProgress() && !player->isGameMaster() )
     {
         sLog.outDebug("MAP: Player '%s' can't enter instance '%s' while an encounter is in progress.", player->GetName(), GetMapName());
         player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
-        return(false);
+        return false;
     }
 
-    return(true);
+    return true;
 }
 
 void Map::Add(Player *player)
