@@ -14969,7 +14969,7 @@ void Player::RemoveAreaAurasFromGroup()
     for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
     {
         Player* Member = itr->getSource();
-        if(!Member || !pGroup->SameSubGroup(this, Member))
+        if(!Member || Member==this || !pGroup->SameSubGroup(this, Member))
             continue;
 
         Member->RemoveAreaAurasByOthers(GetGUID());
