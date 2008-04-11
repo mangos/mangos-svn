@@ -1430,6 +1430,27 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 ((Player*)owner)->RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
         }
     }
+
+    // Idol of the Emerald Queen
+    if ( GetId() == 34246 && m_target->GetTypeId()==TYPEID_PLAYER )
+    {
+        if(apply)
+        {
+            SpellModifier *mod = new SpellModifier;
+            mod->op = SPELLMOD_DOT;
+            mod->value = m_modifier.m_amount/7;
+            mod->type = SPELLMOD_FLAT;
+            mod->spellId = m_spellId;
+            mod->effectId = m_effIndex;
+            mod->lastAffected = NULL;
+            mod->mask = 0x001000000000LL;
+            mod->charges = 0;
+
+            m_spellmod = mod;
+        }
+
+        ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
+    }
 }
 
 void Aura::HandleAuraMounted(bool apply, bool Real)
