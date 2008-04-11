@@ -159,7 +159,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "all",            SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllCommand,           "", NULL },
         { "all_quest",      SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllQuestCommand,      "", NULL },
         { "all_loot",       SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllLootCommand,       "", NULL },
-        { "all_scripts",    SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllSpellCommand,      "", NULL },
+        { "all_scripts",    SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllScriptsCommand,    "", NULL },
         { "all_spell",      SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllSpellCommand,      "", NULL },
 
         { "areatrigger_tavern",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAreaTriggerTavernCommand,       "", NULL },
