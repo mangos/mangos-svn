@@ -6973,7 +6973,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 {
                     if( group == recipient->GetGroup() )
                     {
-                        if(loot->released || group->GetLootMethod() == FREE_FOR_ALL)
+                        if(group->GetLootMethod() == FREE_FOR_ALL)
                             permission = ALL_PERMISSION;
                         else if(group->GetLooterGuid() == GetGUID())
                         {
