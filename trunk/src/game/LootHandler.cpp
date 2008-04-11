@@ -415,17 +415,9 @@ void WorldSession::DoLootRelease( uint64 lguid )
 
         // update next looter 
         if(Player *recipient = pCreature->GetLootRecipient())
-        {
             if(Group* group = recipient->GetGroup())
-            {
                 if (group->GetLooterGuid() == player->GetGUID())
-                {
                     group->UpdateLooterGuid(pCreature);
-                    if(group->GetLootMethod()==MASTER_LOOT)
-                        loot->released = true;              // allow loot anyone
-                }
-            }
-        }
 
         if (loot->isLooted())
         {

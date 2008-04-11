@@ -191,9 +191,8 @@ struct Loot
     LootValidatorRefManager i_LootValidatorRefManager;
     uint32 gold;
     uint8 unlootedCount;
-    bool released;
 
-    Loot(uint32 _gold = 0) : gold(_gold), unlootedCount(0), released(false) {}
+    Loot(uint32 _gold = 0) : gold(_gold), unlootedCount(0) {}
     ~Loot() { clear(); }
 
     // if loot becomes invalid this reference is used to inform the listener
