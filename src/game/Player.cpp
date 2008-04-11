@@ -5585,6 +5585,7 @@ void Player::UpdateHonorFields(bool force)
 bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
 {
     uint64 victim_guid = 0;
+    uint32 victim_rank = 0;
     uint32 now = time(NULL);
     UpdateHonorFields();
 
@@ -5606,6 +5607,29 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
             uint32 k_grey = 0;
             uint32 k_level = getLevel();
             uint32 v_level = pVictim->getLevel();
+
+            {
+                // PLAYER_CHOSEN_TITLE VALUES DESCRIPTION
+                //  [0]      Just name
+                //  [1..14]  Alliance honor titles and player name
+                //  [15..28] Horde honor titles and player name
+                //  [29..37] Other title and player name
+                //  [38+]    Nothing
+                uint32 victim_title = pVictim->GetUInt32Value(PLAYER_CHOSEN_TITLE); // Get Killer titles
+                // Ranks:
+                //  title[1..14]  -> rank[5..18]
+                //  title[15..28] -> rank[5..18]
+                //  title[other]  -> 0
+                if (victim_title == 0)
+                    victim_guid = 0;                        // Don't show HK: <rank> message, only log.
+                if (victim_rank < 15)
+                    victim_rank = victim_title + 4;
+                else if (victim_rank < 29)
+                    victim_rank = victim_title - 14 + 4;
+                else
+                    victim_guid = 0;                        // Don't show HK: <rank> message, only log.
+            }
+
             if(k_level <= 5)
                 k_grey = 0;
             else if( k_level <= 39 )
@@ -5656,25 +5680,36 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
                 return false;
 
             honor = 100;                                    // ??? need more info
+            victim_rank = 19;                               // HK: Leader
         }
     }
 
     if (uVictim != NULL)
+    {
         honor *= sWorld.getRate(RATE_HONOR);
-    if(groupsize > 1)
-        honor /= groupsize;
 
-    float approx_honor = honor * (((float)urand(8,12))/10); // approx honor: 80% - 120% of real honor
+        if(groupsize > 1)
+            honor /= groupsize;
 
-    WorldPacket data(SMSG_PVP_CREDIT,4+8);
-    data << (uint32) approx_honor*10;
+        honor *= (((float)urand(8,12))/10);                 // approx honor: 80% - 120% of real honor
+    }
+
+    // honor - for show honor points in log
+    // victim_guid - for show victim name in log
+    // victim_rank [1..4]  HK: <dishonored rank>
+    // victim_rank [5..19] HK: <alliance\horde rank>
+    // victim_rank [0,20+] HK: <>
+    WorldPacket data(SMSG_PVP_CREDIT,4+8+4);
+    data << (uint32) honor*10;
     data << (uint64) victim_guid;
+    data << (uint32) victim_rank;
+
     GetSession()->SendPacket(&data);
 
     m_lastHonorDate = now;
     m_honorPending += honor;
 
-    ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, (uint32)(approx_honor*10), true);
+    ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, (uint32)(honor*10), true);
     return true;
 }
 
