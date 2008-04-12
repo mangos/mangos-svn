@@ -493,6 +493,10 @@ bool IsSingleTargetSpell(SpellEntry const *spellInfo)
     if(spellInfo->SpellVisual == 3239)
         return true;
 
+    // Slow
+    if(spellInfo->Id==31589)
+        return true;
+
     // cannot be cast on another target while not cooled down anyway
     int32 duration = GetSpellDuration(spellInfo);
     if ( duration >= 0 && duration < int32(GetSpellRecoveryTime(spellInfo)))

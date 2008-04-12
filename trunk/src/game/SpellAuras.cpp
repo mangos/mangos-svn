@@ -270,7 +270,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //215 Arena Prep.
     &Aura::HandleModCastingSpeed,                           //216 SPELL_AURA_HASTE_SPELLS
     &Aura::HandleUnused,                                    //217                                   unused
-    &Aura::HandleNULL,                                      //218 SPELL_AURA_HASTE_RANGED
+    &Aura::HandleAuraModRangedHaste,                        //218 SPELL_AURA_HASTE_RANGED
     &Aura::HandleModManaRegen,                              //219 SPELL_AURA_MOD_MANA_REGEN
     &Aura::HandleNoImmediateEffect,                         //220 SPELL_AURA_MOD_SPELL_HEALING_OF_STRENGTH implemented in Unit::SpellHealingBonus
     &Aura::HandleNULL,                                      //221 ignored
