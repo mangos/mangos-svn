@@ -497,7 +497,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         {
             sLog.outDebug("STORAGE: Creating initial item, itemId = %u, count = %u",titem_id, titem_amount);
 
-            if(Item *pItem = CreateItem( titem_id, titem_amount))
+            if(Item *pItem = Item::CreateItem( titem_id, titem_amount, this))
             {
                 uint16 eDest;
                 uint8 msg = CanEquipItem( NULL_SLOT, eDest, pItem, false );
@@ -7808,41 +7808,6 @@ uint8 Player::FindEquipSlot( ItemPrototype const* proto, uint32 slot, bool swap 
     return NULL_SLOT;
 }
 
-Item* Player::CreateItem( uint32 item, uint32 count ) const
-{
-    ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
-    if( pProto )
-    {
-        Item *pItem = NewItemOrBag( pProto );
-        if ( count > pProto->Stackable )
-            count = pProto->Stackable;
-        if ( count < 1 )
-            return NULL;                                    //don'n create item at zero count
-        if( pItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), item, const_cast<Player*>(this)) )
-        {
-            pItem->SetCount( count );
-            return pItem;
-        }
-        else
-            delete pItem;
-    }
-    return NULL;
-}
-
-Item* Player::CloneItem( Item* pItem, uint32 count ) const
-{
-    Item* newItem = CreateItem( pItem->GetEntry(), count );
-    if(!newItem)
-        return NULL;
-
-    newItem->SetUInt32Value( ITEM_FIELD_CREATOR,      pItem->GetUInt32Value( ITEM_FIELD_CREATOR ) );
-    newItem->SetUInt32Value( ITEM_FIELD_GIFTCREATOR,  pItem->GetUInt32Value( ITEM_FIELD_GIFTCREATOR ) );
-    newItem->SetUInt32Value( ITEM_FIELD_FLAGS,        pItem->GetUInt32Value( ITEM_FIELD_FLAGS ) );
-    newItem->SetUInt32Value( ITEM_FIELD_DURATION,     pItem->GetUInt32Value( ITEM_FIELD_DURATION ) );
-    newItem->SetItemRandomProperties(pItem->GetItemRandomPropertyId());
-    return newItem;
-}
-
 uint8 Player::CanUnequipItems( uint32 item, uint32 count ) const
 {
     Item *pItem;
@@ -8872,7 +8837,7 @@ uint8 Player::CanStoreItems( Item **pItems,int count) const
 uint8 Player::CanEquipNewItem( uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const
 {
     dest = 0;
-    Item *pItem = CreateItem( item, count );
+    Item *pItem = Item::CreateItem( item, count, this );
     if( pItem )
     {
         uint8 result = CanEquipItem(slot, dest, pItem, swap );
@@ -9367,7 +9332,7 @@ Item* Player::StoreNewItem( ItemPosCountVec const& dest, uint32 item, bool updat
     for(ItemPosCountVec::const_iterator itr = dest.begin(); itr != dest.end(); ++itr)
         count += itr->count;
 
-    Item *pItem = CreateItem( item, count );
+    Item *pItem = Item::CreateItem( item, count, this );
     if( pItem )
     {
         ItemAddedQuestCheck( item, count );
@@ -9420,7 +9385,7 @@ Item* Player::_StoreItem( uint16 pos, Item *pItem, uint32 count, bool clone, boo
     if( !pItem2 )
     {
         if(clone)
-            pItem = CloneItem(pItem,count);
+            pItem = pItem->CloneItem(count,this);
         else
             pItem->SetCount(count);
 
@@ -9508,7 +9473,7 @@ Item* Player::_StoreItem( uint16 pos, Item *pItem, uint32 count, bool clone, boo
 
 Item* Player::EquipNewItem( uint16 pos, uint32 item, uint32 count, bool update )
 {
-    Item *pItem = CreateItem( item, count );
+    Item *pItem = Item::CreateItem( item, count, this );
     if( pItem )
     {
         ItemAddedQuestCheck( item, count );
@@ -10090,7 +10055,7 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
     }
 
     sLog.outDebug( "STORAGE: SplitItem bag = %u, slot = %u, item = %u, count = %u", dstbag, dstslot, pSrcItem->GetEntry(), count);
-    Item *pNewItem = CloneItem( pSrcItem, count );
+    Item *pNewItem = pSrcItem->CloneItem( count, this );
     if( !pNewItem )
     {
         SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, pSrcItem, NULL );

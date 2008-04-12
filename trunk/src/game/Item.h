@@ -181,10 +181,12 @@ bool ItemCanGoIntoBag(ItemPrototype const *proto, ItemPrototype const *pBagProto
 class MANGOS_DLL_SPEC Item : public Object
 {
     public:
+        static Item* CreateItem( uint32 item, uint32 count, Player const* player = NULL );
+        Item* CloneItem( uint32 count, Player const* player = NULL ) const;
 
         Item ( );
 
-        virtual bool Create( uint32 guidlow, uint32 itemid, Player* owner);
+        virtual bool Create( uint32 guidlow, uint32 itemid, Player const* owner);
 
         ItemPrototype const* GetProto() const;
 

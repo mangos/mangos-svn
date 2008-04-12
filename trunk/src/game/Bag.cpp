@@ -65,7 +65,7 @@ void Bag::RemoveFromWorld()
     Item::RemoveFromWorld();
 }
 
-bool Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
+bool Bag::Create(uint32 guidlow, uint32 itemid, Player const* owner)
 {
     ItemPrototype const * itemProto = objmgr.GetItemPrototype(itemid);
 

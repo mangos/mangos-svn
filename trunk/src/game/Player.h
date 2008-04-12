@@ -1009,8 +1009,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetVirtualItemSlot( uint8 i, Item* item);
         void SetSheath( uint32 sheathed );
         uint8 FindEquipSlot( ItemPrototype const* proto, uint32 slot, bool swap ) const;
-        Item* CreateItem( uint32 item, uint32 count ) const;
-        Item* CloneItem( Item* pItem, uint32 count ) const;
         uint32 GetItemCount( uint32 item, bool inBankAlso = false, Item* skipItem = NULL ) const;
         Item* GetItemByGuid( uint64 guid ) const;
         Item* GetItemByPos( uint16 pos ) const;

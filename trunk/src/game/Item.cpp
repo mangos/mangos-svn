@@ -223,7 +223,7 @@ Item::Item( )
     mb_in_trade = false;
 }
 
-bool Item::Create( uint32 guidlow, uint32 itemid, Player* owner)
+bool Item::Create( uint32 guidlow, uint32 itemid, Player const* owner)
 {
     Object::_Create( guidlow, HIGHGUID_ITEM );
 
@@ -776,4 +776,39 @@ void Item::SendTimeUpdate(Player* owner)
     data << (uint64)GetGUID();
     data << (uint32)GetUInt32Value(ITEM_FIELD_DURATION);
     owner->GetSession()->SendPacket(&data);
+}
+
+Item* Item::CreateItem( uint32 item, uint32 count, Player const* player )
+{
+    ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
+    if( pProto )
+    {
+        Item *pItem = NewItemOrBag( pProto );
+        if ( count > pProto->Stackable )
+            count = pProto->Stackable;
+        if ( count < 1 )
+            return NULL;                                    //don'n create item at zero count
+        if( pItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), item, player) )
+        {
+            pItem->SetCount( count );
+            return pItem;
+        }
+        else
+            delete pItem;
+    }
+    return NULL;
+}
+
+Item* Item::CloneItem( uint32 count, Player const* player ) const
+{
+    Item* newItem = CreateItem( GetEntry(), count, player );
+    if(!newItem)
+        return NULL;
+
+    newItem->SetUInt32Value( ITEM_FIELD_CREATOR,      GetUInt32Value( ITEM_FIELD_CREATOR ) );
+    newItem->SetUInt32Value( ITEM_FIELD_GIFTCREATOR,  GetUInt32Value( ITEM_FIELD_GIFTCREATOR ) );
+    newItem->SetUInt32Value( ITEM_FIELD_FLAGS,        GetUInt32Value( ITEM_FIELD_FLAGS ) );
+    newItem->SetUInt32Value( ITEM_FIELD_DURATION,     GetUInt32Value( ITEM_FIELD_DURATION ) );
+    newItem->SetItemRandomProperties(GetItemRandomPropertyId());
+    return newItem;
 }
