@@ -513,7 +513,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
                         pItem->SendUpdateToPlayer( _player );
                     pItem->SetState(ITEM_CHANGED, _player);
 
-                    Item *pNewItem = _player->CloneItem( pItem, count );
+                    Item *pNewItem = pItem->CloneItem( count, _player );
                     _player->AddItemToBuyBackSlot( pNewItem );
                     if( _player->IsInWorld() )
                         pNewItem->SendUpdateToPlayer( _player );

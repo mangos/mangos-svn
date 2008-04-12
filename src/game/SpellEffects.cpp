@@ -2458,7 +2458,7 @@ void Spell::EffectSummonChangeItem(uint32 i)
 
     uint16 pos = m_CastItem->GetPos();
 
-    Item *pNewItem = player->CreateItem( newitemid, 1 );
+    Item *pNewItem = Item::CreateItem( newitemid, 1, player);
     if( !pNewItem )
         return;
 
