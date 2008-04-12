@@ -4391,6 +4391,16 @@ void ObjectMgr::LoadGameobjectInfo()
                 */
                 break;
             }
+            case GAMEOBJECT_TYPE_CHAIR:                     //7
+                if(goInfo->chair.height > 2)
+                {
+                    sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data1=%u but correct chair height in range 0..2.",
+                        id,goInfo->type,goInfo->chair.height);
+
+                    // prevent client and server unexpected work
+                    const_cast<GameObjectInfo*>(goInfo)->chair.height = 0;
+                }
+                break;
             case GAMEOBJECT_TYPE_SPELL_FOCUS:               //8
             {
                 if(goInfo->spellFocus.focusId)

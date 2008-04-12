@@ -255,10 +255,8 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             info = obj->GetGOInfo();
             if(info)
             {
-                //spellId = info->data0;                   // this is not a spell or offset
                 _player->TeleportTo(obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),false,false);
-                                                            // Using (3 + spellId) was wrong, this is a number of slot for chair/bench, not offset
-                _player->SetStandState(PLAYER_STATE_SIT_LOW_CHAIR);
+                _player->SetStandState(PLAYER_STATE_SIT_LOW_CHAIR+info->chair.height);
                 return;
             }
             break;

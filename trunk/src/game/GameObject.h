@@ -87,6 +87,12 @@ struct GameObjectInfo
             uint32 _data6[6];
             uint32 _data12;                                 //12 something == chest.data14 == goober.data14 ???
         } trap;
+        //7 GAMEOBJECT_TYPE_CHAIR
+        struct
+        {
+            uint32 slots;                                   //0 not used currently
+            uint32 height;                                  //1
+        } chair;
         //8 GAMEOBJECT_TYPE_SPELL_FOCUS
         struct
         {
