@@ -1842,21 +1842,6 @@ void Spell::cast(bool skipCheck)
         }
     }
 
-    // remove spell from another target if need
-    // hunter's mark
-    if(m_spellInfo->SpellVisual == 3239)
-    {
-        Unit::AuraList& scAuras = m_caster->GetSingleCastAuras();
-        for(Unit::AuraList::iterator itr = scAuras.begin(); itr != scAuras.end(); ++itr)
-        {
-            if((*itr)->GetSpellProto()->SpellVisual == 3239)
-            {
-                (*itr)->GetTarget()->RemoveAura((*itr)->GetId(), (*itr)->GetEffIndex());
-                break;
-            }
-        }
-    }
-
     // Conflagrate - consumes immolate
     if ((m_spellInfo->TargetAuraState == AURA_STATE_IMMOLATE) && m_targets.getUnitTarget())
     {
