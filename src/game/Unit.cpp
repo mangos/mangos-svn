@@ -450,7 +450,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
 
         if(pVictim->GetTypeId() == TYPEID_PLAYER && !pVictim->IsStandState() && !pVictim->hasUnitState(UNIT_STAT_STUNDED))
-            ((Player*)pVictim)->SetStandState(PLAYER_STATE_NONE); 
+            pVictim->SetStandState(PLAYER_STATE_NONE); 
     }
 
     //Script Event damage Deal
@@ -9624,6 +9624,19 @@ bool Unit::IsStandState() const
         s != PLAYER_STATE_SIT_MEDIUM_CHAIR && s != PLAYER_STATE_SIT_HIGH_CHAIR &&
         s != PLAYER_STATE_SIT && s != PLAYER_STATE_SLEEP &&
         s != PLAYER_STATE_KNEEL;
+}
+
+void Unit::SetStandState(uint8 state)
+{
+    RemoveFlag(UNIT_FIELD_BYTES_1,0x000000FF);
+    SetFlag(UNIT_FIELD_BYTES_1,state);
+
+    if(GetTypeId()==TYPEID_PLAYER)
+    {
+        WorldPacket data(SMSG_STANDSTATE_CHANGE_ACK, 1);
+        data << (uint8)state;
+        ((Player*)this)->GetSession()->SendPacket(&data);
+    }
 }
 
 bool Unit::IsPolymorphed() const

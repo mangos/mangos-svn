@@ -273,7 +273,6 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         //handle fall and logout at the sametime (logout started before fall finished)
         if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE))
         {
-            target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
             target->SetStandState(PLAYER_STATE_SIT);
             // Can't move
             WorldPacket data( SMSG_FORCE_MOVE_ROOT, 12 );
