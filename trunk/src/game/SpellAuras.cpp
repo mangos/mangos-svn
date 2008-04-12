@@ -3598,11 +3598,7 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool Real)
             return;
 
         if((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED))
-        {
-            m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
-                ((Player*)m_target)->SetStandState(PLAYER_STATE_SIT);
-        }
+            m_target->SetStandState(PLAYER_STATE_SIT);
 
         if(m_periodicTimer <= 0)
         {
@@ -3622,11 +3618,7 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool Real)
 void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
 {
     if((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply)
-    {
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)m_target)->SetStandState(PLAYER_STATE_SIT);
-    }
+        m_target->SetStandState(PLAYER_STATE_SIT);
 
     if(apply && m_periodicTimer <= 0 && m_target->getPowerType() == POWER_MANA)
     {
@@ -3650,11 +3642,7 @@ void Aura::HandleModRegen(bool apply, bool Real)            // eating
             return;
 
         if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED))
-        {
-            m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
-                ((Player*)m_target)->SetStandState(PLAYER_STATE_SIT);
-        }
+            m_target->SetStandState(PLAYER_STATE_SIT);
 
         if(m_periodicTimer <= 0)
         {
@@ -3678,11 +3666,7 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
     if (m_target->GetTypeId() == TYPEID_PLAYER)
         ((Player*)m_target)->UpdateManaRegen();
     if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply)
-    {
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)m_target)->SetStandState(PLAYER_STATE_SIT);
-    }
+        m_target->SetStandState(PLAYER_STATE_SIT);
 
     if(apply && m_periodicTimer <= 0)
     {
@@ -4544,11 +4528,7 @@ void Aura::HandleSpiritOfRedemption( bool apply, bool Real )
 
             // set stand state (expected in this form)
             if(!m_target->IsStandState())
-            {
-                m_target->RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
-                ((Player*)m_target)->SetStandState(PLAYER_STATE_NONE);
-            }
-
+                m_target->SetStandState(PLAYER_STATE_NONE);
         }
 
         m_target->SetHealth(1);

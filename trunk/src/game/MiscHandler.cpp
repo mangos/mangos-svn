@@ -234,7 +234,6 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & /*recv_data*/ )
     // not set flags if player can't free move to prevent lost state at logout cancel
     if(GetPlayer()->CanFreeMove())
     {
-        GetPlayer()->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
         GetPlayer()->SetStandState(PLAYER_STATE_SIT);
 
         WorldPacket data( SMSG_FORCE_MOVE_ROOT, (8+4) );    // guess size
@@ -275,8 +274,6 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & /*recv_data*/ )
         SendPacket( &data );
 
         //! Stand Up
-        //! Removes the flag so player stands
-        GetPlayer()->RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
         GetPlayer()->SetStandState(PLAYER_STATE_NONE);
 
         //! DISABLE_ROTATE
@@ -510,11 +507,6 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
         recv_data >> animstate;
 
         _player->SetStandState(animstate);
-
-        uint32 bytes1 = _player->GetUInt32Value( UNIT_FIELD_BYTES_1 );
-        bytes1 &=0xFFFFFF00;
-        bytes1 |=animstate;
-        _player->SetUInt32Value(UNIT_FIELD_BYTES_1 , bytes1);
 
         if (_player->IsStandState())
             _player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_SEATED);

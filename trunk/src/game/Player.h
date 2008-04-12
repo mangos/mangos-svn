@@ -325,15 +325,15 @@ enum PlayerStateType
         PLAYER_STATE_SUBMERGED
     */
 
-    PLAYER_STATE_NONE             = 0,
-    PLAYER_STATE_SIT              = 1,
-    PLAYER_STATE_SIT_CHAIR        = 2,
-    PLAYER_STATE_SLEEP            = 3,
-    PLAYER_STATE_SIT_LOW_CHAIR    = 4,
-    PLAYER_STATE_SIT_MEDIUM_CHAIR = 5,
-    PLAYER_STATE_SIT_HIGH_CHAIR   = 6,
-    PLAYER_STATE_DEAD             = 7,
-    PLAYER_STATE_KNEEL            = 8,
+    PLAYER_STATE_NONE              = 0,
+    PLAYER_STATE_SIT               = 1,
+    PLAYER_STATE_SIT_CHAIR         = 2,
+    PLAYER_STATE_SLEEP             = 3,
+    PLAYER_STATE_SIT_LOW_CHAIR     = 4,
+    PLAYER_STATE_SIT_MEDIUM_CHAIR  = 5,
+    PLAYER_STATE_SIT_HIGH_CHAIR    = 6,
+    PLAYER_STATE_DEAD              = 7,
+    PLAYER_STATE_KNEEL             = 8,
 
     PLAYER_STATE_FORM_ALL          = 0x00FF0000,
 
@@ -904,7 +904,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsInWater() const { return m_isInWater; }
         bool IsUnderWater() const;
 
-        void SetStandState(uint8 state);
         void SendInitialPacketsBeforeAddToMap();
         void SendInitialPacketsAfterAddToMap();
         void SendTransferAborted(uint32 mapid, uint16 reason);

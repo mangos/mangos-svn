@@ -16098,13 +16098,6 @@ void Player::ClearComboPoints()
     m_comboTarget = 0;
 }
 
-void Player::SetStandState(uint8 state)
-{
-    WorldPacket data(SMSG_STANDSTATE_CHANGE_ACK, 1);
-    data << (uint8)state;
-    GetSession()->SendPacket(&data);
-}
-
 void Player::SetGroup(Group *group, int8 subgroup)
 {
     if(group == NULL) m_group.unlink();
