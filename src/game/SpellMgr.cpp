@@ -134,25 +134,6 @@ int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, ui
     else return diff;
 }
 
-bool IsSealSpell(uint32 spellId)
-{
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-
-    //Collection of all the seal family flags. No other paladin spell has any of those.
-    return spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
-        ( spellInfo->SpellFamilyFlags & 0x4000A000200LL );
-}
-
-bool IsElementalShield(uint32 spellId)
-{
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-
-    // family flags 10 (Lightning), 42 (Earth), 37 (Water)
-    if (spellInfo->SpellFamilyFlags & 0x42000000400LL)
-        return SPELL_ELEMENTAL_SHIELD;
-    return false;
-}
-
 SpellSpecific GetSpellSpecific(uint32 spellId)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
@@ -201,7 +182,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         }
         case SPELLFAMILY_PALADIN:
         {
-            if (IsSealSpell(spellId))
+            if (IsSealSpell(spellInfo))
                 return SPELL_SEAL;
 
             if (spellInfo->SpellFamilyFlags & 0x10000000)
@@ -220,7 +201,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         }
         case SPELLFAMILY_SHAMAN:
         {
-            if (IsElementalShield(spellId))
+            if (IsElementalShield(spellInfo))
                 return SPELL_ELEMENTAL_SHIELD;
 
             break;
@@ -554,7 +535,7 @@ bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellI
             break;
         case SPELL_ELEMENTAL_SHIELD:
             // only Earth shield
-            if( IsElementalShield(spellInfo2->Id) && 
+            if( IsElementalShield(spellInfo2) && 
                 spellInfo1->SpellFamilyFlags & 0x40000000000LL &&
                 spellInfo2->SpellFamilyFlags & 0x40000000000LL )
                     return true;
@@ -1142,7 +1123,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_PALADIN )
             {
                 // Paladin Seals
-                if( IsSealSpell(spellId_1) && IsSealSpell(spellId_2) )
+                if( IsSealSpell(spellInfo_1) && IsSealSpell(spellInfo_2) )
                     return true;
             }
             break;
@@ -1150,7 +1131,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_SHAMAN )
             {
                 // shaman shields
-                if( IsElementalShield(spellId_1) && IsElementalShield(spellId_2) )
+                if( IsElementalShield(spellInfo_1) && IsElementalShield(spellInfo_2) )
                     return true;
 
                 // Windfury weapon
