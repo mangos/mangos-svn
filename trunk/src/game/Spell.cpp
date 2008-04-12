@@ -3862,8 +3862,8 @@ uint8 Spell::CheckMana(uint32 *mana)
     }
     manaCost += m_caster->GetInt32Value(UNIT_FIELD_POWER_COST_MODIFIER+m_spellInfo->School);
 
-    // Shiv - costs 20 + weaponSpeed*10 energy
-    if ( m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellIconID == 1834 )
+    // Shiv - costs 20 + weaponSpeed*10 energy (apply only to non-triggered spell with energy cost)
+    if ( m_spellInfo->manaCost > 0 && m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellIconID == 1834 )
     {
         manaCost += m_caster->GetAttackTime(OFF_ATTACK)/100;
     }

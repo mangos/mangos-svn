@@ -3966,7 +3966,7 @@ void Spell::EffectScriptEffect(uint32 i)
                     SpellEntry const *spellInfo = (*itr)->GetSpellProto();
 
                     // search seal (all seals have judgement's aura dummy spell id in 2 effect
-                    if ( !spellInfo || !IsSealSpell((*itr)->GetId()) || (*itr)->GetEffIndex() != 2 )
+                    if ( !spellInfo || !IsSealSpell((*itr)->GetSpellProto()) || (*itr)->GetEffIndex() != 2 )
                         continue;
 
                     // must be calculated base at raw base points in spell proto, GetModifier()->m_value for S.Righteousness modified by SPELLMOD_DAMAGE

@@ -876,7 +876,7 @@ void Aura::_AddAura()
         }
 
         // Update Seals information
-        if( IsSealSpell(GetId()) )
+        if( IsSealSpell(GetSpellProto()) )
             m_target->ModifyAuraState(AURA_STATE_JUDGEMENT,true);
 
         // Conflagrate aura state
@@ -949,7 +949,7 @@ void Aura::_RemoveAura()
         // update for out of range group members
         m_target->UpdateAuraForGroup(slot);
 
-        if( IsSealSpell(GetId()) )
+        if( IsSealSpell(GetSpellProto()) )
             m_target->ModifyAuraState(AURA_STATE_JUDGEMENT,false);
 
         // Conflagrate aura state

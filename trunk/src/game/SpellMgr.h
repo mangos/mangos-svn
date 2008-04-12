@@ -261,8 +261,20 @@ int32 GetSpellMaxDuration(SpellEntry const *spellInfo);
 inline uint32 GetSpellRecoveryTime(SpellEntry const *spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
 
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
-bool IsSealSpell(uint32 spellId);
-bool IsElementalShield(uint32 spellId);
+
+inline bool IsSealSpell(SpellEntry const *spellInfo)
+{
+    //Collection of all the seal family flags. No other paladin spell has any of those.
+    return spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
+        ( spellInfo->SpellFamilyFlags & 0x4000A000200LL );
+}
+
+inline bool IsElementalShield(SpellEntry const *spellInfo)
+{
+    // family flags 10 (Lightning), 42 (Earth), 37 (Water)
+    return (spellInfo->SpellFamilyFlags & 0x42000000400LL);
+}
+
 int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
 bool IsSingleFromSpellSpecificPerCaster(uint32 spellSpec1,uint32 spellSpec2);
 bool IsPassiveSpell(uint32 spellId);
