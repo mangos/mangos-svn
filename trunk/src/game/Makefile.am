@@ -185,6 +185,8 @@ libmangosgame_a_SOURCES = \
 	Player.h \
 	PlayerDump.cpp \
 	PlayerDump.h \
+	PointMovementGenerator.cpp \
+	PointMovementGenerator.h \
 	QueryHandler.cpp \
 	QuestDef.cpp \
 	QuestDef.h \

@@ -47,7 +47,6 @@ struct WaypointBehavior
     float orientation;
     uint32 model1;
     uint32 model2;
-    std::string aiscript;
     bool HasDone;
 };
 
@@ -90,7 +89,6 @@ public PathMovementBase<Creature>
     public:
         WaypointMovementGenerator(Creature &) : i_nextMoveTime(0) {}
         ~WaypointMovementGenerator() { ClearWaypoints(); }
-        void WPAIScript(Creature &pCreature, std::string pAiscript);
         void Initialize(Creature &u)
         {
             i_nextMoveTime.Reset(0);                        // TODO: check the lower bound (0 is probably too small)
@@ -100,6 +98,9 @@ public PathMovementBase<Creature>
         void Finalize(Creature &) {}
         void Reset(Creature &u) { ReloadPath(u); }
         bool Update(Creature &u, const uint32 &diff);
+
+        void MovementInform(Creature &);
+
         MovementGeneratorType GetMovementGeneratorType() { return WAYPOINT_MOTION_TYPE; }
 
         // now path movement implmementation

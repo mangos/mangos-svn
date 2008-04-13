@@ -81,6 +81,9 @@ class MANGOS_DLL_SPEC CreatureAI
 
         // Called when creature is spawned or respawned (for reseting variables)
         virtual void JustRespawned() {}
+
+        // Called at waypoint reached or point movement finished
+        virtual void MovementInform(uint32 /*MovementType*/, uint32 /*Data*/) {}
 };
 
 struct SelectableAI : public FactoryHolder<CreatureAI>, public Permissible<Creature>

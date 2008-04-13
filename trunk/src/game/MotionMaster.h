@@ -38,7 +38,8 @@ enum MovementGeneratorType
     CONFUSED_MOTION_TYPE  = 4,                              // ConfusedMovementGenerator.h
     TARGETED_MOTION_TYPE  = 5,                              // TargetedMovementGenerator.h
     HOME_MOTION_TYPE      = 6,                              // HomeMovementGenerator.h
-    FLIGHT_MOTION_TYPE    = 7                               // WaypointMovementGenerator.h
+    FLIGHT_MOTION_TYPE    = 7,                              // WaypointMovementGenerator.h
+    POINT_MOTION_TYPE     = 8,                              // PointMovementGenerator.h
 };
 
 class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>

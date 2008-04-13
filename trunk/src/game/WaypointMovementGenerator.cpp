@@ -37,6 +37,7 @@ alter table creature_movement add `wpguid` int(11) default '0';
 #include "ObjectMgr.h"
 #include "Creature.h"
 #include "DestinationHolderImp.h"
+#include "CreatureAI.h"
 
 #include <cassert>
 
@@ -98,7 +99,6 @@ WaypointMovementGenerator<Creature>::LoadPath(Creature &c)
                 tmpWPB->text[2] = text3;
                 tmpWPB->text[3] = text4;
                 tmpWPB->text[4] = text5;
-                tmpWPB->aiscript = aiscript;
                 tmpWPB->orientation = orientation;
                 tmpWPB->emote = emote;
                 tmpWPB->spell = spell;
@@ -218,10 +218,6 @@ WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint32 &di
                 {
                     creature.SetUInt32Value(UNIT_NPC_EMOTESTATE,tmpBehavior->emote);
                 }
-                if(!tmpBehavior->aiscript.empty())
-                {
-                    WPAIScript(creature, tmpBehavior->aiscript);
-                }
                 //sLog.outDebug("DEBUG: tmpBehavior->text[0] TEST");
                 if(!tmpBehavior->text[0].empty())
                 {
@@ -262,6 +258,7 @@ WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint32 &di
                     creature.SetDisplayId(tmpBehavior->model1);
                 }
                 tmpBehavior->HasDone = true;
+                MovementInform(creature);
             }                                               // HasDone == false
         }                                                   // wpBehaviour found
     }                                                       // i_creature.IsStopped()
@@ -304,48 +301,10 @@ WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint32 &di
     return true;
 }
 
-void
-WaypointMovementGenerator<Creature>::WPAIScript(Creature &pCreature, std::string pAiscript)
+void WaypointMovementGenerator<Creature>::MovementInform(Creature &unit)
 {
-    time_t curr;
-    tm local;
-    time(&curr);                                            // get current time_t value
-    local=*(localtime(&curr));                              //
-    int cT = ((local.tm_hour*100)+local.tm_min);
-
-    sLog.outDebug("WPAIScript: %s", pAiscript.c_str());
-
-    if( pAiscript == "guard-sw")                            //demo script for WP-AI System
-    {
-        // 1423 - SW guard
-        // 68   - SW city guard
-        if((pCreature.GetEntry() == 68) || (pCreature.GetEntry() == 1423) )
-        {
-            if(!( (cT < 1800) && (cT > 800) ))              //If time not smaller than 1800 and not bigger than 800 (24 hour format)
-            {                                               //try to set model of Off-hand (shield) to 0 (imo it doesn't work...)
-                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+1, 0);
-                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2, 234948100);
-                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2 + 1, 4);
-
-                //set new Off-Hand Item as lamp
-                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+1, 7557);
-                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2, 385941508);
-                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2 + 1, 7);
-            }                                               //else do it in other direction...
-            else
-            {
-                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+1, 0);
-                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2, 385941508);
-                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2 + 1, 7);
-
-                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+1, 2080);
-                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2, 234948100);
-                pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2 + 1, 4);
-            }
-        }
-        sLog.outDebug("guard-sw");
-    }                                                       // guard-sw
-}                                                           // WPAIScript
+    unit.AI()->MovementInform(WAYPOINT_MOTION_TYPE, i_currentNode);
+}
 
 std::set<uint32> WaypointMovementGenerator<Creature>::si_waypointHolders;
 
