@@ -2413,8 +2413,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         outfile.open (arg_str);
 
         QueryResult *result = WorldDatabase.PQuery(
-        //          0      1           2           3           4            5       6       7         8      9      10     11     12     13     14     15        16
-            "SELECT point, position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, text1, text2, text3, text4, text5, aiscript, id FROM creature_movement WHERE id = '%u' ORDER BY point", lowguid );
+        //          0      1           2           3           4            5       6       7         8      9      10     11     12     13     14     15
+            "SELECT point, position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, text1, text2, text3, text4, text5, id FROM creature_movement WHERE id = '%u' ORDER BY point", lowguid );
 
         if( result )
         {
@@ -2423,7 +2423,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
                 Field *fields = result->Fetch();
 
                 outfile << "insert into creature_movement ";
-                outfile << "( id, point, position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, text1, text2, text3, text4, text5, aiscript ) values ";
+                outfile << "( id, point, position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, text1, text2, text3, text4, text5 ) values ";
 
                 //sLog.outDebug("( ");
                 outfile << "( ";
@@ -2522,19 +2522,6 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
                 {
                     outfile << "'";
                     outfile << tmpChar;                     // text5
-                    outfile << "'";
-                }
-                outfile << ", ";
-                //sLog.outDebug("aiscript");
-                tmpChar = fields[15].GetString();
-                if( !tmpChar )
-                {
-                    outfile << "NULL";                      // aiscript
-                }
-                else
-                {
-                    outfile << "'";
-                    outfile << tmpChar;                     // aiscript
                     outfile << "'";
                 }
                 outfile << ");\n ";
@@ -2743,7 +2730,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         //pCreature->GetPositionX();
 
         QueryResult *result =
-            WorldDatabase.PQuery( "SELECT id, point, waittime, emote, spell, text1, text2, text3, text4, text5, model1, model2, aiscript FROM creature_movement WHERE wpguid = %u",
+            WorldDatabase.PQuery( "SELECT id, point, waittime, emote, spell, text1, text2, text3, text4, text5, model1, model2 FROM creature_movement WHERE wpguid = %u",
             pCreature->GetGUID() );
         if(!result)
         {
@@ -2755,7 +2742,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             const char* maxDIFF = "0.01";
             PSendSysMessage(LANG_WAYPOINT_NOTFOUNDSEARCH, pCreature->GetGUID());
 
-            result = WorldDatabase.PQuery( "SELECT id, point, waittime, emote, spell, text1, text2, text3, text4, text5, model1, model2, aiscript FROM creature_movement WHERE (abs(position_x - %f) <= %s ) and (abs(position_y - %f) <= %s ) and (abs(position_z - %f) <= %s )",
+            result = WorldDatabase.PQuery( "SELECT id, point, waittime, emote, spell, text1, text2, text3, text4, text5, model1, model2 FROM creature_movement WHERE (abs(position_x - %f) <= %s ) and (abs(position_y - %f) <= %s ) and (abs(position_z - %f) <= %s )",
                 pCreature->GetPositionX(), maxDIFF, pCreature->GetPositionY(), maxDIFF, pCreature->GetPositionZ(), maxDIFF);
             if(!result)
             {
@@ -2778,7 +2765,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             const char * text5      = fields[9].GetString();
             uint32 model1           = fields[10].GetUInt32();
             uint32 model2           = fields[11].GetUInt32();
-            const char * aiscript   = fields[12].GetString();
+
             // Get the creature for which we read the waypoint
             Creature* wpCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(creGUID,HIGHGUID_UNIT));
 
@@ -2793,7 +2780,6 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             PSendSysMessage(LANG_WAYPOINT_INFO_TEXT, 3, text3);
             PSendSysMessage(LANG_WAYPOINT_INFO_TEXT, 4, text4);
             PSendSysMessage(LANG_WAYPOINT_INFO_TEXT, 5, text5);
-            PSendSysMessage(LANG_WAYPOINT_INFO_AISCRIPT, aiscript);
 
         }while( result->NextRow() );
         // Cleanup memory

@@ -524,7 +524,6 @@ CREATE TABLE `creature_movement` (
   `text3` text,
   `text4` text,
   `text5` text,
-  `aiscript` varchar(128) default NULL,
   `emote` mediumint(8) unsigned NOT NULL default '0',
   `spell` mediumint(8) unsigned NOT NULL default '0',
   `wpguid` int(11) NOT NULL default '0',
