@@ -1034,6 +1034,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             if( spellInfo_1->SpellIconID == 498 && spellInfo_1->SpellVisual == 0 && 
                 spellInfo_2->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo_1->SpellIconID == 498  )
                 return false;
+
+            // Unstable Currents and other -> *Sanctity Aura (multi-family check)
+            if( spellInfo_2->SpellIconID==502 && spellInfo_2->SpellFamilyName == SPELLFAMILY_PALADIN && spellInfo_1->SpellIconID==502 && spellInfo_1->SpellVisual==969 ) 
+                return false;
             break;
         case SPELLFAMILY_MAGE:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_MAGE )
@@ -1143,6 +1147,9 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 if( IsSealSpell(spellInfo_1) && IsSealSpell(spellInfo_2) )
                     return true;
             }
+            // *Sanctity Aura -> Unstable Currents and other (multi-family check)
+            if( spellInfo_1->SpellIconID==502 && spellInfo_2->SpellFamilyName == SPELLFAMILY_GENERIC && spellInfo_2->SpellIconID==502 && spellInfo_2->SpellVisual==969 ) 
+                return false;
             break;
         case SPELLFAMILY_SHAMAN:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_SHAMAN )
