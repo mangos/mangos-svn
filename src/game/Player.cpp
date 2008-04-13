@@ -2521,7 +2521,7 @@ bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading
     bool superceded_old = false;
 
     // replace spells in action bars and spellbook to bigger rank if only one spell rank must be accessible
-    if(newspell->active && spellmgr.GetSpellRank(spellInfo->Id) != 0)
+    if(newspell->active && !SpellMgr::canStackSpellRanks(spellInfo) && spellmgr.GetSpellRank(spellInfo->Id) != 0)
     {
         for( PlayerSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr )
         {
@@ -2529,8 +2529,7 @@ bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading
             SpellEntry const *i_spellInfo = sSpellStore.LookupEntry(itr->first);
             if(!i_spellInfo) continue;
 
-            if( spellmgr.IsRankSpellDueToSpell(spellInfo,itr->first) &&
-                !SpellMgr::canStackSpellRanks(spellInfo,i_spellInfo) )
+            if( spellmgr.IsRankSpellDueToSpell(spellInfo,itr->first) )
             {
                 if(itr->second->active)
                 {

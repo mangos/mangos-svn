@@ -949,28 +949,32 @@ bool SpellMgr::IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spellI
     return GetFirstSpellInChain(spellInfo_1->Id)==GetFirstSpellInChain(spellId_2);
 }
 
-bool SpellMgr::canStackSpellRanks(SpellEntry const *spellInfo,SpellEntry const *spellInfo2)
+bool SpellMgr::canStackSpellRanks(SpellEntry const *spellInfo)
 {
-    // Riding not listed in spellbook and not stacked but have ranks and don't must replace ranks at learning
-    if(spellInfo->Attributes == 0x10000D0)
-        return true;
+    if(spellInfo->powerType != 0 && spellInfo->powerType != -2)
+        return false;
+    if(IsProfessionSpell(spellInfo->Id))
+        return false;
 
-    if(spellInfo->powerType == 0)
+    // All stance spells. if any better way, change it.
+    for (int i = 0; i < 3; i++)
     {
-        if(spellInfo->manaCost > 0 && spellInfo->manaCost != spellInfo2->manaCost)
-            return true;
-        if(spellInfo->ManaCostPercentage > 0 && spellInfo->ManaCostPercentage != spellInfo2->ManaCostPercentage)
-            return true;
-        if(spellInfo->manaCostPerlevel > 0 && spellInfo->manaCostPerlevel != spellInfo2->manaCostPerlevel)
-            return true;
-        if(spellInfo->manaPerSecond > 0 && spellInfo->manaPerSecond != spellInfo2->manaPerSecond)
-            return true;
-        if(spellInfo->manaPerSecondPerLevel > 0 && spellInfo->manaPerSecondPerLevel != spellInfo2->manaPerSecondPerLevel)
-            return true;
-        if(spellInfo->Reagent[0] > 0 && spellInfo->Reagent[0] != spellInfo2->Reagent[0])
-            return true;
+        // Paladin aura Spell
+        if(spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN 
+            && spellInfo->Effect[i]==SPELL_EFFECT_APPLY_AREA_AURA)
+            return false;
+        // Druid form Spell
+        if(spellInfo->SpellFamilyName == SPELLFAMILY_DRUID
+            && spellInfo->Effect[i]==SPELL_EFFECT_APPLY_AURA
+            && spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT)
+            return false;
+        // Rogue Stealth
+        if(spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE
+            && spellInfo->Effect[i]==SPELL_EFFECT_APPLY_AURA
+            && spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT)
+            return false;
     }
-    return false;
+    return true;
 }
 
 bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) const
@@ -1008,6 +1012,14 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     spellInfo_1->SpellVisual == 99 && spellInfo_2->SpellVisual == 0 ||
                     spellInfo_2->SpellVisual == 99 && spellInfo_1->SpellVisual == 0 ) )
                     return false;
+
+                // Heart of the Wild and (Primal Instinct (Idol of Terror) triggering spell or Agility)
+                if( spellInfo_1->SpellIconID == 240 && spellInfo_2->SpellIconID == 240 && (
+                    spellInfo_1->SpellVisual == 0 && spellInfo_2->SpellVisual == 78 ||
+                    spellInfo_2->SpellVisual == 0 && spellInfo_1->SpellVisual == 78 ) )
+                    return false;
+
+                break;
             }
 
             // Improved Hamstring -> Hamstring (multi-family check)
