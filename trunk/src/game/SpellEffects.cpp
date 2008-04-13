@@ -3505,7 +3505,8 @@ void Spell::EffectWeaponDmg(uint32 i)
             // Seal of Command - receive benefit from Spell Damage and Healing
             if(m_spellInfo->SpellFamilyFlags & 0x00000002000000LL)
             {
-                bonus = m_caster->SpellDamageBonus(unitTarget, m_spellInfo, bonus, SPELL_DIRECT_DAMAGE);
+                bonus += int32(0.20f*m_caster->SpellBaseDamageBonus((int32)(1<<m_spellInfo->School)));
+                bonus += int32(0.29f*m_caster->SpellBaseDamageBonusForVictim((int32)(1<<m_spellInfo->School), unitTarget));
             }
             break;
         }

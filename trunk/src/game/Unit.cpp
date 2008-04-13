@@ -6821,7 +6821,15 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             if(!Channeled) DotFactor = DotDuration / 15000.0f;
             int x = 0;
             for(int j = 0; j < 3; j++)
-                if(spellProto->Effect[j] == 6) x = j;
+            {
+                if(spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA &&
+                    (spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_DAMAGE ||
+                    spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH) )
+                {
+                    x = j;
+                    break;
+                }
+            }
             int DotTicks = 6;
             if(spellProto->EffectAmplitude[x] != 0)
                 DotTicks = DotDuration / spellProto->EffectAmplitude[x];
@@ -6882,11 +6890,10 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     switch(spellProto->SpellFamilyName)
     {
         case SPELLFAMILY_MAGE:
-            // Ignite - 8%
+            // Ignite - do not modify, it is (8*Rank)% damage of procing Spell
             if(spellProto->Id==12654)
             {
-                DotFactor = 0.08f;
-                break;
+                return pdamage;
             }
             // Ice Lance
             else if((spellProto->SpellFamilyFlags & 0x20000LL) && spellProto->SpellIconID == 186)
@@ -6980,15 +6987,8 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             }
             break;
         case SPELLFAMILY_PALADIN:
-            // Seal of Command - 20% of Done Holy Damage, 29% of Taken Holy Damage
-            if(spellProto->Id==20424)
-            {
-                CastingTime = 3500; 
-                DoneAdvertisedBenefit  = int32(0.20f*DoneAdvertisedBenefit);
-                TakenAdvertisedBenefit = int32(0.29f*TakenAdvertisedBenefit);
-            }
             // Consecration - 95% of Holy Damage
-            else if((spellProto->SpellFamilyFlags & 0x20LL) && spellProto->SpellIconID == 51)
+            if((spellProto->SpellFamilyFlags & 0x20LL) && spellProto->SpellIconID == 51)
             {
                 DotFactor = 0.95f; 
                 CastingTime = 3500; 
@@ -7012,7 +7012,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             // Seal of Vengeance - 17% per Fully Stacked Tick - 5 Applications
             else if ((spellProto->SpellFamilyFlags & 0x80000000000LL) && spellProto->SpellIconID == 2040)
             {
-                DotFactor = 0.136;
+                DotFactor = 0.17f;
                 CastingTime = 3500;
             } 
             // Holy shield - 5% of Holy Damage
@@ -7024,6 +7024,11 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             else if ((spellProto->SpellFamilyFlags & 0x10000000LL) && spellProto->SpellIconID == 29)
             {
                 CastingTime = 0; 
+            }
+            // Seal of Righteousness trigger - already computed for parent spell
+            else if ( spellProto->SpellFamilyName==SPELLFAMILY_PALADIN && spellProto->SpellIconID==25 && spellProto->AttributesExEx & 0x00800000LL )
+            {
+                return pdamage;
             }
             break;
         case  SPELLFAMILY_SHAMAN:
@@ -7293,11 +7298,11 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     if(spellProto->Id == 15290 || spellProto->Id == 39373 || spellProto->Id == 33778 || spellProto->Id == 379)
         return healamount;
 
+    bool Channeled = IsChanneledSpell(spellProto);
     int32 AdvertisedBenefit = SpellBaseHealingBonus(1<<spellProto->School);
     uint32 CastingTime = GetSpellCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
     if (CastingTime > 7000) CastingTime = 7000;
     if (CastingTime < 1500) CastingTime = 1500;
-    if (spellProto->Effect[0] == SPELL_EFFECT_APPLY_AURA) CastingTime = 3500;
 
     // Healing Taken
     AdvertisedBenefit += SpellBaseHealingBonusForVictim(1<<spellProto->School, pVictim);
@@ -7324,16 +7329,24 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     float DotFactor = 1.0f;
     if(damagetype == DOT)
     {
-        CastingTime = 3500;
+        if(!Channeled) CastingTime = 3500;
         int32 DotDuration = GetSpellDuration(spellProto);
         if(DotDuration > 0)
         {
             // 200% limit
             if(DotDuration > 30000) DotDuration = 30000;
-            DotFactor = DotDuration / 15000.0f;
+            if(!Channeled) DotFactor = DotDuration / 15000.0f;
             int x = 0;
             for(int j = 0; j < 3; j++)
-                if(spellProto->Effect[j] == 6) x = j;
+            {
+                if(spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA &&
+                    (spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_HEAL ||
+                    spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH) )
+                {
+                    x = j;
+                    break;
+                }
+            }
             int DotTicks = 6;
             if(spellProto->EffectAmplitude[x] != 0)
                 DotTicks = DotDuration / spellProto->EffectAmplitude[x];
@@ -7360,6 +7373,14 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
             // Lifebloom final heal
             if (spellProto->SpellFamilyFlags & 0x1000000000LL && damagetype != DOT)
                 CastingTime = 1500;
+            // Tranquilitiy triggered spell
+            else if (spellProto->SpellFamilyFlags & 0x80LL)
+                CastingTime = 500;
+            break;
+        case SPELLFAMILY_PALADIN:
+            // Seal and Judgement of Light
+            if ( spellProto->SpellFamilyFlags & 0x100040000LL )
+                CastingTime = 0;
             break;
         case SPELLFAMILY_WARRIOR:
         case SPELLFAMILY_HUNTER:
@@ -9813,6 +9834,7 @@ void Unit::ApplyCastTimePercentMod(float val, bool apply )
 uint32 Unit::GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectType damagetype, uint32 CastingTime )
 {
     int32 overTime    = 0;
+    uint8 effects     = 0;
     bool DirectDamage = false;
     bool AreaEffect   = false;
 
@@ -9839,7 +9861,7 @@ uint32 Unit::GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectT
                         break;
                     default: 
                         // -5% per additional effect
-                        CastingTime = uint32(CastingTime * 0.95f);
+                        ++effects;
                         break;
                 }
             default: 
@@ -9871,6 +9893,20 @@ uint32 Unit::GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectT
     // Area Effect Spells receive only half of bonus
     if ( AreaEffect )
         CastingTime = uint32(CastingTime * 0.5f);
+
+    // -5% of total per any additional effect
+    for ( uint8 i=0; i<effects; ++i)
+    {
+        if ( CastingTime > 175 ) 
+        {
+            CastingTime -= 175;
+        }
+        else 
+        {
+            CastingTime = 0;
+            break;
+        }
+    }
 
     return CastingTime;
 }
