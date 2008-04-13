@@ -24,7 +24,6 @@ alter table creature_movement add `text2` varchar(255) default NULL;
 alter table creature_movement add `text3` varchar(255) default NULL;
 alter table creature_movement add `text4` varchar(255) default NULL;
 alter table creature_movement add `text5` varchar(255) default NULL;
-alter table creature_movement add `aiscript` varchar(255) default NULL;
 alter table creature_movement add `emote` int(10) unsigned default '0';
 alter table creature_movement add `spell` int(5) unsigned default '0';
 alter table creature_movement add `wpguid` int(11) default '0';
@@ -48,7 +47,7 @@ WaypointMovementGenerator<Creature>::LoadPath(Creature &c)
     QueryResult *result = NULL;
     sLog.outDebug("DEBUG: WaypointMovementGenerator::_load: GUID - %d", c.GetGUIDLow());
     // Identify by GUID
-    result = WorldDatabase.PQuery("SELECT position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, text1, text2, text3, text4, text5, aiscript FROM creature_movement WHERE id = '%u' ORDER BY point", c.GetDBTableGUIDLow());
+    result = WorldDatabase.PQuery("SELECT position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, text1, text2, text3, text4, text5 FROM creature_movement WHERE id = '%u' ORDER BY point", c.GetDBTableGUIDLow());
     /*
     if( result ) {
     sLog.outDebug("DEBUG: Number of hits: %d", result->GetRowCount());
@@ -83,11 +82,9 @@ WaypointMovementGenerator<Creature>::LoadPath(Creature &c)
             std::string text3       = fields[11].GetCppString();
             std::string text4       = fields[12].GetCppString();
             std::string text5       = fields[13].GetCppString();
-            std::string aiscript    = fields[14].GetCppString();
 
             if( (emote != 0) || (spell != 0)
                 || !text1.empty() || !text2.empty() || !text3.empty() || !text4.empty() || !text5.empty()
-                || !aiscript.empty()
                 || (model1 != 0)  || (model2 != 0) || (orientation != 100))
             {
                 WaypointBehavior *tmpWPB = new WaypointBehavior;
