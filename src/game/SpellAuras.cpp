@@ -1451,6 +1451,34 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
         ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
     }
+
+    // Improved Weapon Totems
+    if( GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && GetSpellProto()->SpellIconID == 57 && 
+        m_target->GetTypeId()==TYPEID_PLAYER )
+    {
+        if(apply)
+        {
+            SpellModifier *mod = new SpellModifier;
+            mod->op = SPELLMOD_EFFECT1;
+            mod->value = m_modifier.m_amount;
+            mod->type = SPELLMOD_PCT;
+            mod->spellId = m_spellId;
+            mod->effectId = m_effIndex;
+            mod->lastAffected = NULL;
+            switch (m_effIndex)
+            {
+                case 0: mod->mask = 0x00200000000LL;        // Windfury Totem
+                    break;
+                case 1: mod->mask = 0x00400000000LL;        // Flametongue Totem
+                    break;
+            }
+            mod->charges = 0;
+
+            m_spellmod = mod;
+        }
+
+        ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
+    }
 }
 
 void Aura::HandleAuraMounted(bool apply, bool Real)
