@@ -306,6 +306,7 @@ bool IsAreaEffectTarget( Targets target )
         case TARGET_AREAEFFECT_PARTY:
         case TARGET_AREAEFFECT_CUSTOM_2:
         case TARGET_AREAEFFECT_PARTY_AND_CLASS:
+        case TARGET_IN_FRONT_OF_CASTER:
             return true;
         default:
             break;
