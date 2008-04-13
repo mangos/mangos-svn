@@ -24,6 +24,8 @@
 
 #include "Item.h"
 
+class Item;
+
 enum GuildDefaultRanks
 {
     GR_GUILDMASTER  = 0,
@@ -170,6 +172,15 @@ struct GuildBankTab
     std::string Icon;
 };
 
+struct GuildItemPosCount
+{
+    GuildItemPosCount(uint8 _slot, uint8 _count) : slot(_slot), count(_count) {}
+
+    uint8 slot;
+    uint8 count;
+};
+typedef std::vector<GuildItemPosCount> GuildItemPosCountVec;
+
 struct MemberSlot
 {
     uint64 logout_time;
@@ -273,11 +284,14 @@ class Guild
         // Content & item deposit/withdraw
         void   DisplayGuildBankContent(WorldSession *session, uint8 TabId);
         void   DisplayGuildBankContentUpdate(uint8 TabId, int32 slot1, int32 slot2 = -1);
+        void   DisplayGuildBankContentUpdate(uint8 TabId, GuildItemPosCountVec const& slots);
         void   DisplayGuildBankMoneyUpdate();
 
-        Item*  StoreItem(uint8 TabId, uint8* SlotId, Item* pItem);
         Item*  GetItem(uint8 TabId, uint8 SlotId);
-        void   EmptyBankSlot(uint8 TabId, uint8 SlotId);
+        uint8  CanStoreItem( uint8 tab, uint8 slot, GuildItemPosCountVec& dest, uint32 count, Item *pItem, bool swap = false) const;
+        Item*  StoreItem( uint8 tab, GuildItemPosCountVec const& pos, Item *pItem );
+        void   RemoveItem(uint8 tab, uint8 slot );
+
         // Tabs
         void   DisplayGuildBankTabsInfo(WorldSession *session);
         void   CreateNewBankTab();
@@ -317,7 +331,6 @@ class Guild
 
     protected:
         void AddRank(std::string name,uint32 rights,uint32 money);
-        void AppendDisplayGuildBankSlot( WorldPacket& data, GuildBankTab const *tab, int32 slot );
 
         uint32 Id;
         std::string name;
@@ -351,5 +364,11 @@ class Guild
         uint8 purchased_tabs;
 
         uint32 LogMaxGuid;
+    private:
+        // internal common parts for CanStore/StoreItem functions
+        void AppendDisplayGuildBankSlot( WorldPacket& data, GuildBankTab const *tab, int32 slot );
+        uint8 _CanStoreItem_InSpecificSlot( uint8 tab, uint8 slot, GuildItemPosCountVec& dest, uint32& count, bool swap, Item *pSrcItem ) const;
+        uint8 _CanStoreItem_InTab( uint8 tab, GuildItemPosCountVec& dest, uint32& count, bool merge, Item *pSrcItem, uint8 skip_slot ) const;
+        Item* _StoreItem( uint8 tab, uint8 slot, Item *pItem, uint32 count, bool clone );
 };
 #endif

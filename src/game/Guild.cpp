@@ -848,84 +848,42 @@ void Guild::DisplayGuildBankContentUpdate(uint8 TabId, int32 slot1, int32 slot2)
     sLog.outDebug("WORLD: Sent (SMSG_GUILD_BANK_LIST)");
 }
 
-
-// If same is return: failed or just modified, if different: player has to store, null: stored
-                                                            //, uint8 StackAmount)
-Item* Guild::StoreItem(uint8 TabId, uint8* SlotId, Item* pItem)
+void Guild::DisplayGuildBankContentUpdate(uint8 TabId, GuildItemPosCountVec const& slots)
 {
-    if (TabId >= m_TabListMap.size() || ((*SlotId) >= GUILD_BANK_MAX_SLOTS && (*SlotId) != 0xFF))
-        return pItem;
+    GuildBankTab const* tab = GetBankTab(TabId);
+    if (!tab)
+        return;
 
-    if (!pItem)                                             // Clear slot and return item if any
+    WorldPacket data(SMSG_GUILD_BANK_LIST,1200);
+
+    data << uint64(GetGuildBankMoney());
+    data << uint8(TabId);
+    // remaining slots for today
+
+    size_t rempos = data.wpos();
+    data << uint32(0);                                      // will be filled later
+    data << uint8(0);                                       // Tell client this is a tab content packet
+
+    data << uint8(slots.size());                            // updates count
+
+    for(GuildItemPosCountVec::const_iterator itr = slots.begin(); itr != slots.end(); ++itr)
+        AppendDisplayGuildBankSlot(data, tab, itr->slot);
+
+    for(MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        if (*SlotId >= GUILD_BANK_MAX_SLOTS)                // Should never happen
-            return pItem;
-        Item* BankItem = m_TabListMap[TabId]->Slots[*SlotId];
-        m_TabListMap[TabId]->Slots[*SlotId] = NULL;
-        return BankItem;
+        Player *player = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
+        if(!player)
+            continue;
+
+        if(!IsMemberHaveRights(itr->first,TabId,GUILD_BANK_RIGHT_VIEW_TAB))
+            continue;
+
+        data.put<uint32>(rempos,uint32(GetMemberSlotWithdrawRem(player->GetGUIDLow(), TabId)));
+
+        player->GetSession()->SendPacket(&data);
     }
 
-    // Find a compatible slot when right-click (slot 255) and stack/store or return fail
-    uint32 StackNeed = pItem->GetMaxStackCount() > pItem->GetCount() ? pItem->GetCount() : 0;
-    if (*SlotId == 0xFF)
-    {
-        uint8 firstFree = 0xFF, firstStack = 0xFF;
-        for (int i = GUILD_BANK_MAX_SLOTS-1; i >= 0; --i)
-        {
-            if (!m_TabListMap[TabId]->Slots[i])
-                firstFree = i;
-            if (StackNeed && m_TabListMap[TabId]->Slots[i] && m_TabListMap[TabId]->Slots[i]->GetEntry() == pItem->GetEntry() && StackNeed <= m_TabListMap[TabId]->Slots[i]->GetMaxStackCount() - m_TabListMap[TabId]->Slots[i]->GetCount())
-                firstStack = i;
-        }
-        if (firstStack != 0xFF)
-        {
-            m_TabListMap[TabId]->Slots[firstStack]->SetCount(m_TabListMap[TabId]->Slots[firstStack]->GetCount() + StackNeed);
-            *SlotId = firstStack;
-            return NULL;                                    // Stacked
-        }
-        else if (firstFree != 0xFF)
-        {
-            m_TabListMap[TabId]->Slots[firstFree] = pItem;
-            *SlotId = firstFree;
-            pItem->SetUInt64Value(ITEM_FIELD_CONTAINED, 0);
-            pItem->SetUInt64Value(ITEM_FIELD_OWNER, 0);
-            return NULL;                                    // Stored
-        }
-        else
-            return pItem;                                   // Tab full
-    }
-
-    if (!m_TabListMap[TabId]->Slots[*SlotId])               // Empty slot? Then just store
-    {
-        m_TabListMap[TabId]->Slots[*SlotId] = pItem;
-        pItem->SetUInt64Value(ITEM_FIELD_CONTAINED, 0);
-        pItem->SetUInt64Value(ITEM_FIELD_OWNER, 0);
-        return NULL;
-    }
-
-    Item *BankItem = m_TabListMap[TabId]->Slots[*SlotId];   // Just get a shorter name for it
-
-    if (pItem->GetEntry() != BankItem->GetEntry() || BankItem->GetCount() >= BankItem->GetMaxStackCount())
-    {                                                       // Item swap because different entry or full stack
-        m_TabListMap[TabId]->Slots[*SlotId] = pItem;
-        pItem->SetUInt64Value(ITEM_FIELD_CONTAINED, 0);
-        pItem->SetUInt64Value(ITEM_FIELD_OWNER, 0);
-        return BankItem;
-    }
-
-    // Same entry now with not full stack
-    {                                                       // there is a stack possibility
-        uint32 StackSpace = BankItem->GetMaxStackCount() - BankItem->GetCount();
-        if (StackSpace >= StackNeed)                        // Fully stackable
-        {
-            BankItem->SetCount(BankItem->GetCount() + StackNeed);
-            return NULL;
-        }
-        else                                                // No place
-            return pItem;
-    }
-
-    return pItem;                                           // Fail
+    sLog.outDebug("WORLD: Sent (SMSG_GUILD_BANK_LIST)");
 }
 
 Item* Guild::GetItem(uint8 TabId, uint8 SlotId)
@@ -935,13 +893,6 @@ Item* Guild::GetItem(uint8 TabId, uint8 SlotId)
     if (m_TabListMap[TabId]->Slots[SlotId]!=0)
         return m_TabListMap[TabId]->Slots[SlotId];
     return NULL;
-}
-
-void Guild::EmptyBankSlot(uint8 TabId, uint8 SlotId)
-{
-    m_TabListMap[TabId]->Slots[SlotId]=0;
-    CharacterDatabase.PExecute("DELETE FROM guild_bank_item WHERE guildid='%u' AND TabId='%u' AND SlotId='%u'",
-        Id, uint32(TabId), uint32(SlotId));
 }
 
 // *************************************************
@@ -1581,4 +1532,216 @@ void Guild::AppendDisplayGuildBankSlot( WorldPacket& data, GuildBankTab const *t
         else
             data << uint8(0);
     }
+}
+
+Item* Guild::StoreItem(uint8 tabId, GuildItemPosCountVec const& dest, Item* pItem )
+{
+    if( !pItem )
+        return NULL;
+
+    Item* lastItem = pItem;
+
+    for(GuildItemPosCountVec::const_iterator itr = dest.begin(); itr != dest.end(); )
+    {
+        uint8 slot = itr->slot;
+        uint32 count = itr->count;
+
+        ++itr;
+
+        if(itr == dest.end())
+        {
+            lastItem = _StoreItem(tabId,slot,pItem,count,false);
+            break;
+        }
+
+        lastItem = _StoreItem(tabId,slot,pItem,count,true);
+    }
+
+    return lastItem;
+}
+
+// Return stored item (if stored to stack, it can diff. from pItem). And pItem ca be deleted in this case.
+Item* Guild::_StoreItem( uint8 tab, uint8 slot, Item *pItem, uint32 count, bool clone )
+{
+    if( !pItem )
+        return NULL;
+
+    sLog.outDebug( "GUILD STORAGE: StoreItem tab = %u, slot = %u, item = %u, count = %u", tab, slot, pItem->GetEntry(), count);
+
+    Item* pItem2 = m_TabListMap[tab]->Slots[slot];
+
+    if( !pItem2 )
+    {
+        if(clone)
+            pItem = pItem->CloneItem(count);
+        else
+            pItem->SetCount(count);
+
+        if(!pItem)
+            return NULL;
+
+        m_TabListMap[tab]->Slots[slot] = pItem;
+
+        pItem->SetUInt64Value(ITEM_FIELD_CONTAINED, 0);
+        pItem->SetUInt64Value(ITEM_FIELD_OWNER, 0);
+        AddGBankItemToDB(GetId(), tab, slot, pItem->GetGUIDLow(), pItem->GetEntry());
+        pItem->FSetState(ITEM_NEW);
+        pItem->SaveToDB();
+
+        return pItem;
+    }
+    else
+    {
+        pItem2->SetCount( pItem2->GetCount() + count );
+        pItem2->FSetState(ITEM_CHANGED);
+        pItem2->SaveToDB();
+
+        if(!clone)
+        {
+            pItem->RemoveFromWorld();
+            pItem->DeleteFromDB();
+            delete pItem;
+        }
+
+        return pItem2;
+    }
+}
+
+void Guild::RemoveItem(uint8 tab, uint8 slot )
+{
+    m_TabListMap[tab]->Slots[slot] = NULL;
+    CharacterDatabase.PExecute("DELETE FROM guild_bank_item WHERE guildid='%u' AND TabId='%u' AND SlotId='%u'",
+        GetId(), uint32(tab), uint32(slot));
+}
+
+uint8 Guild::_CanStoreItem_InSpecificSlot( uint8 tab, uint8 slot, GuildItemPosCountVec &dest, uint32& count, bool swap, Item* pSrcItem ) const
+{
+    Item* pItem2 = m_TabListMap[tab]->Slots[slot];
+
+    // ignore move item (this slot will be empty at move)
+    if(pItem2==pSrcItem)
+        pItem2 = NULL;
+
+    uint32 need_space;
+
+    // empty specific slot - check item fit to slot
+    if( !pItem2 || swap )
+    {
+        // non empty stack with space
+        need_space = pSrcItem->GetMaxStackCount();
+    }
+    // non empty slot, check item type
+    else
+    {
+        // check item type
+        if(pItem2->GetEntry() != pSrcItem->GetEntry())
+            return EQUIP_ERR_ITEM_CANT_STACK;
+
+        // check free space
+        if(pItem2->GetCount() >= pSrcItem->GetMaxStackCount())
+            return EQUIP_ERR_ITEM_CANT_STACK;
+
+        need_space = pSrcItem->GetMaxStackCount() - pItem2->GetCount();
+    }
+
+    if(need_space > count)
+        need_space = count;
+
+    dest.push_back(GuildItemPosCount(slot,need_space));
+    count -= need_space;
+    return EQUIP_ERR_OK;
+}
+
+uint8 Guild::_CanStoreItem_InTab( uint8 tab, GuildItemPosCountVec &dest, uint32& count, bool merge, Item* pSrcItem, uint8 skip_slot ) const
+{
+    for(uint32 j = 0; j < GUILD_BANK_MAX_SLOTS; j++)
+    {
+        // skip specific slot already processed in first called _CanStoreItem_InSpecificSlot
+        if(j==skip_slot)
+            continue;
+
+        Item* pItem2 = m_TabListMap[tab]->Slots[j];
+
+        // ignore move item (this slot will be empty at move)
+        if(pItem2==pSrcItem)
+            pItem2 = NULL;
+
+        // if merge skip empty, if !merge skip non-empty
+        if((pItem2!=NULL)!=merge)
+            continue;
+
+        if( pItem2 )
+        {
+            if(pItem2->GetEntry() == pSrcItem->GetEntry() && pItem2->GetCount() < pSrcItem->GetMaxStackCount() )
+            {
+                uint32 need_space = pSrcItem->GetMaxStackCount() - pItem2->GetCount();
+                if(need_space > count)
+                    need_space = count;
+
+                dest.push_back(GuildItemPosCount(j,need_space));
+                count -= need_space;
+
+                if(count==0)
+                    return EQUIP_ERR_OK;
+            }
+        }
+        else
+        {
+            uint32 need_space = pSrcItem->GetMaxStackCount();
+            if(need_space > count)
+                need_space = count;
+
+            dest.push_back(GuildItemPosCount(j,need_space));
+            count -= need_space;
+
+            if(count==0)
+                return EQUIP_ERR_OK;
+        }
+    }
+    return EQUIP_ERR_OK;
+}
+
+uint8 Guild::CanStoreItem( uint8 tab, uint8 slot, GuildItemPosCountVec &dest, uint32 count, Item *pItem, bool swap ) const
+{
+    sLog.outDebug( "GUILD STORAGE: CanStoreItem tab = %u, slot = %u, item = %u, count = %u", tab, slot, pItem->GetEntry(), count);
+
+    if(count > pItem->GetCount())
+        return EQUIP_ERR_COULDNT_SPLIT_ITEMS;
+
+    if(pItem->IsSoulBound())
+        return EQUIP_ERR_CANT_DROP_SOULBOUND;
+
+    // in specific slot
+    if( slot != NULL_SLOT )
+    {
+        uint8 res = _CanStoreItem_InSpecificSlot(tab,slot,dest,count,swap,pItem);
+        if(res!=EQUIP_ERR_OK)
+            return res;
+
+        if(count==0)
+            return EQUIP_ERR_OK;
+    }
+
+    // not specific slot or have spece for partly store only in specific slot
+
+    // search stack in tab for merge to
+    if( pItem->GetMaxStackCount() > 1 )
+    {
+        uint8 res = _CanStoreItem_InTab(tab,dest,count,true,pItem,slot);
+        if(res!=EQUIP_ERR_OK)
+            return res;
+
+        if(count==0)
+            return EQUIP_ERR_OK;
+    }
+
+    // search free slot in bag for place to
+    uint8 res = _CanStoreItem_InTab(tab,dest,count,false,pItem,slot);
+    if(res!=EQUIP_ERR_OK)
+        return res;
+
+    if(count==0)
+        return EQUIP_ERR_OK;
+
+    return EQUIP_ERR_BANK_FULL;
 }
