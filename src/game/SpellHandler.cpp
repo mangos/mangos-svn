@@ -255,7 +255,52 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             info = obj->GetGOInfo();
             if(info)
             {
-                _player->TeleportTo(obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),false,false);
+                // a chair may have n slots. we have to calculate their positions and teleport the player to the nearest one
+
+                // check if the db is sane
+                if(info->chair.slots > 0)
+                {
+                    float lowestDist = DEFAULT_VISIBILITY_DISTANCE;
+                    
+                    float x_lowest = obj->GetPositionX();
+                    float y_lowest = obj->GetPositionY();
+
+                    // the object orientation+ 90°
+                    // every slot will be on that straight line
+                    float orthogonalOrientation = obj->GetOrientation()+M_PI*0.5f;
+                    // find nearest slot
+                    for(uint32 i=0; i<info->chair.slots; i++)
+                    {
+                        // the distance between this slot and the center of the go - imagine a 1D space
+                        float relativeDistance = (info->size*i)-(info->size*(info->chair.slots-1)/2.0f);
+
+                        float x_i = obj->GetPositionX() + relativeDistance * cos(orthogonalOrientation);
+                        float y_i = obj->GetPositionY() + relativeDistance * sin(orthogonalOrientation);
+
+                        // calculate the distance between the player and this slot
+                        float thisDistance = _player->GetDistance2d(x_i, y_i);
+
+                        /* debug code. It will spawn a npc on each slot to visualize them.
+                        Creature* helper = _player->SummonCreature(14496, x_i, y_i, obj->GetPositionZ(), obj->GetOrientation(), TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 10000);
+                        std::ostringstream output;
+                        output << i << ": thisDist: " << thisDistance;
+                        helper->MonsterSay(output.str().c_str(), LANG_UNIVERSAL, 0);
+                        */
+
+                        if(thisDistance <= lowestDist)
+                        {
+                            lowestDist = thisDistance;
+                            x_lowest = x_i;
+                            y_lowest = y_i;
+                        }
+                    }
+                    _player->TeleportTo(obj->GetMapId(), x_lowest, y_lowest, obj->GetPositionZ(), obj->GetOrientation(),false,false);
+                }
+                else
+                {
+                    // fallback, will always work
+                    _player->TeleportTo(obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),false,false);
+                }
                 _player->SetStandState(PLAYER_STATE_SIT_LOW_CHAIR+info->chair.height);
                 return;
             }
