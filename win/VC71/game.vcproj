@@ -640,6 +640,12 @@
 				RelativePath="..\..\src\game\Player.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\PointMovementGenerator.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\PointMovementGenerator.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\RandomMovementGenerator.cpp">
 			</File>
 			<File
