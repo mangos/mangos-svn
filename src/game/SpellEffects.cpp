@@ -3994,6 +3994,26 @@ void Spell::EffectScriptEffect(uint32 i)
 
                     // found, remove seal
                     m_caster->RemoveAurasDueToSpell((*itr)->GetId());
+                    
+                    // Sanctified Judgement
+                    Unit::AuraList const& m_auras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                    for(Unit::AuraList::const_iterator i = m_auras.begin(); i != m_auras.end(); ++i)
+                    {
+                        if ((*i)->GetSpellProto()->SpellIconID == 205 && (*i)->GetSpellProto()->Attributes == 0x01D0LL)
+                        {
+                            int32 chance = (*i)->GetModifier()->m_amount;
+                            if ( roll_chance_i(chance) )
+                            {
+                                int32 mana = spellInfo->manaCost;
+                                if ( Player* modOwner = m_caster->GetSpellModOwner() )
+                                    modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_COST, mana);
+                                mana = int32(mana* 0.8f);
+                                m_caster->CastCustomSpell(m_caster,31930,&mana,NULL,NULL,true,NULL,*i);
+                            }
+                            break;
+                        }
+                    }
+
                     break;
                 }
 
