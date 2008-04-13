@@ -7664,18 +7664,23 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
                 APbonus += (*i)->GetModifier()->m_amount;
     }
 
-    bool normalized = false;
-    for (uint8 i = 0; i<3;i++)
-    {
-        if (spellProto->Effect[i] == SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
-        {
-            normalized = true;
-            break;
-        }
-    }
-
     if (APbonus!=0)                                         // Can be negative
+    {
+        bool normalized = false;
+        if(spellProto)
+        {
+            for (uint8 i = 0; i<3;i++)
+            {
+                if (spellProto->Effect[i] == SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
+                {
+                    normalized = true;
+                    break;
+                }
+            }
+        }
+
         DoneFlatBenefit += int32(APbonus/14.0f * GetAPMultiplier(attType,normalized)/1000.0f);
+    }
 
     // ..taken
     AuraList const& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
