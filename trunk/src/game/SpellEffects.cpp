@@ -281,6 +281,17 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
     {
         switch(m_spellInfo->SpellFamilyName)
         {
+            case SPELLFAMILY_GENERIC:
+            {
+                //Gore
+                if(m_spellInfo->SpellIconID == 2269 )
+                {    
+                    damage+= rand()%2 ? damage : 0;
+                }
+
+                break;
+            }
+
             case SPELLFAMILY_MAGE:
             {
                 // Arcane Blast
@@ -4865,7 +4876,6 @@ void Spell::EffectTransmitted(uint32 i)
             pGameObj->SetFloatValue(GAMEOBJECT_ROTATION + 2, 0.88431775569915771 );
                                                             //Orientation4
             pGameObj->SetFloatValue(GAMEOBJECT_ROTATION + 3, -0.4668855369091033 );
-            pGameObj->SetLootState(GO_NOT_READY);           // bobber not move
             m_caster->AddGameObject(pGameObj);              // will removed at spell cancel
 
             // end time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))

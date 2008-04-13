@@ -46,7 +46,7 @@ GameObject::GameObject( WorldObject *instantiator ) : WorldObject( instantiator 
     m_valuesCount = GAMEOBJECT_END;
     m_respawnTime = 0;
     m_respawnDelayTime = 25;
-    m_lootState = GO_READY;
+    m_lootState = GO_NOT_READY;
     m_spawnedByDefault = true;
     m_usetimes = 0;
     m_spellId = 0;
