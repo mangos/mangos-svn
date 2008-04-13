@@ -9663,91 +9663,18 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
     }
 }
 
-void Player::RemoveItemCount( uint32 item, uint32 count, bool update )
+// in auction, guild bank, mail....
+void Player::MoveItemFromInventory(uint8 bag, uint8 slot, bool update)
 {
-    sLog.outDebug( "STORAGE: RemoveItemCount item = %u, count = %u", item, count);
-    Item *pItem;
-    uint32 remcount = 0;
-    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    if(Item* it = GetItemByPos(bag,slot))
     {
-        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-        if( pItem && pItem->GetEntry() == item )
+        ItemRemovedQuestCheck(it->GetEntry(),it->GetCount());
+        RemoveItem( bag,slot,update);
+        it->RemoveFromUpdateQueueOf(this);
+        if(it->IsInWorld())
         {
-            if( pItem->GetCount() + remcount <= count )
-            {
-                remcount += pItem->GetCount();
-                RemoveItem( INVENTORY_SLOT_BAG_0, i, update );
-
-                if(remcount >=count)
-                    return;
-            }
-            else
-            {
-                pItem->SetCount( pItem->GetCount() - count + remcount );
-                if( IsInWorld() && update )
-                    pItem->SendUpdateToPlayer( this );
-                pItem->SetState(ITEM_CHANGED, this);
-                return;
-            }
-        }
-    }
-    for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
-    {
-        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-        if( pItem && pItem->GetEntry() == item )
-        {
-            if( pItem->GetCount() + remcount <= count )
-            {
-                remcount += pItem->GetCount();
-                RemoveItem( INVENTORY_SLOT_BAG_0, i, update );
-
-                if(remcount >=count)
-                    return;
-            }
-            else
-            {
-                pItem->SetCount( pItem->GetCount() - count + remcount );
-                if( IsInWorld() && update )
-                    pItem->SendUpdateToPlayer( this );
-                pItem->SetState(ITEM_CHANGED, this);
-                return;
-            }
-        }
-    }
-    Bag *pBag;
-    ItemPrototype const *pBagProto;
-    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
-    {
-        pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-        if( pBag )
-        {
-            pBagProto = pBag->GetProto();
-            if( pBagProto )
-            {
-                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
-                {
-                    pItem = GetItemByPos( i, j );
-                    if( pItem && pItem->GetEntry() == item )
-                    {
-                        if( pItem->GetCount() + remcount <= count )
-                        {
-                            remcount += pItem->GetCount();
-                            RemoveItem( i, j, update );
-
-                            if(remcount >=count)
-                                return;
-                        }
-                        else
-                        {
-                            pItem->SetCount( pItem->GetCount() - count + remcount );
-                            if( IsInWorld() && update )
-                                pItem->SendUpdateToPlayer( this );
-                            pItem->SetState(ITEM_CHANGED, this);
-                            return;
-                        }
-                    }
-                }
-            }
+            it->RemoveFromWorld();
+            it->DestroyForPlayer( this );
         }
     }
 }

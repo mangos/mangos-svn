@@ -509,6 +509,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
                 if(count < pItem->GetCount())               // need split items
                 {
                     pItem->SetCount( pItem->GetCount() - count );
+                    _player->ItemRemovedQuestCheck( pItem->GetEntry(), count );
                     if( _player->IsInWorld() )
                         pItem->SendUpdateToPlayer( _player );
                     pItem->SetState(ITEM_CHANGED, _player);
@@ -520,6 +521,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
                 }
                 else
                 {
+                    _player->ItemRemovedQuestCheck( pItem->GetEntry(), pItem->GetCount());
                     _player->RemoveItem( pItem->GetBagSlot(), pItem->GetSlot(), true);
                     pItem->RemoveFromUpdateQueueOf(_player);
                     _player->AddItemToBuyBackSlot( pItem );
@@ -572,6 +574,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
         {
             _player->ModifyMoney( -(int32)price );
             _player->RemoveItemFromBuyBackSlot( slot, false );
+            _player->ItemAddedQuestCheck( pItem->GetEntry(), pItem->GetCount());
             _player->StoreItem( dest, pItem, true );
         }
         else

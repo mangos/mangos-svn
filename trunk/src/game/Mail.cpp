@@ -209,15 +209,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
                         GetPlayerName(), GetAccountId(), mailItem.item->GetProto()->Name1, mailItem.item->GetEntry(), mailItem.item->GetCount(), receiver.c_str(), rc_account);
                 }
 
-                pl->RemoveItem( mailItem.item->GetBagSlot(), mailItem.item->GetSlot(), true );
-                mailItem.item->RemoveFromUpdateQueueOf( pl );
-                //item reminds in item_instance table already, used it in mail now
-                if(mailItem.item->IsInWorld())
-                {
-                    mailItem.item->RemoveFromWorld();
-                    mailItem.item->DestroyForPlayer( pl );
-                }
-
+                pl->MoveItemFromInventory(mailItem.item->GetBagSlot(), mailItem.item->GetSlot(), true);
                 CharacterDatabase.BeginTransaction();
                 mailItem.item->DeleteFromInventoryDB();     //deletes item from character's inventory
                 mailItem.item->SaveToDB();                  // recursive and not have transaction guard into self
