@@ -3462,7 +3462,12 @@ void Spell::EffectWeaponDmg(uint32 i)
     //if miss/parry, no eff=0 automatically by func DoAttackDamage
     //if crit eff = (bonus + weapon) * 2
     //In a word, bonus + weapon will be calculated together in cases of miss, armor reduce, crit, etc.
-    bonus += m_caster->CalculateDamage (m_attackType);
+    bool normalized = false;
+    for (j = 0; j <3;j++)
+        if (m_spellInfo->Effect[j] ==  SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
+            normalized = true;
+ 
+    bonus += m_caster->CalculateDamage(m_attackType, normalized);
 
     switch(m_spellInfo->SpellFamilyName)
     {
@@ -3473,7 +3478,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             {
                 Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
                 if (item && item->GetProto()->Class == ITEM_CLASS_WEAPON && !item->IsBroken() && ((Player*)m_caster)->IsUseEquipedWeapon(false))
-                    bonus += m_caster->CalculateDamage (OFF_ATTACK);
+                    bonus += m_caster->CalculateDamage (OFF_ATTACK, normalized);
             }
             break;
         }
@@ -4380,7 +4385,6 @@ void Spell::EffectSummonObject(uint32 i)
     int32 duration = GetSpellDuration(m_spellInfo);
     pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
     pGameObj->SetSpellId(m_spellInfo->Id);
-    pGameObj->SetLootState(GO_READY);
     m_caster->AddGameObject(pGameObj);
 
     MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);

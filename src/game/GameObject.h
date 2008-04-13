@@ -73,7 +73,7 @@ struct GameObjectInfo
             uint32 linkedTrapId;                            //7
             uint32 questId;                                 //8 not used currently but store quest required for GO activation for player
             uint32 _data9[5];
-            uint32 _data14;                                 //14 something == trap.data12 == goober.data14 ???
+            uint32 _data14;                                 //14 something == trap.data12 == goober.data14 (openText?)
         } chest;
         //6 GAMEOBJECT_TYPE_TRAP
         struct
@@ -85,7 +85,7 @@ struct GameObjectInfo
             uint32 isNeedDespawn;                           //4 (if >0)
             uint32 _data5;                                  //5
             uint32 _data6[6];
-            uint32 _data12;                                 //12 something == chest.data14 == goober.data14 ???
+            uint32 _data12;                                 //12 something == chest.data14 == goober.data14 (openText?)
         } trap;
         //7 GAMEOBJECT_TYPE_CHAIR
         struct
@@ -111,7 +111,7 @@ struct GameObjectInfo
             uint32 _data11;
             uint32 linkedTrapId;                            //12
             uint32 _data13;
-            uint32 _data14;                                 //14 something == trap.data12 == chest.data14 ???
+            uint32 _data14;                                 //14 something == trap.data12 == chest.data14 (openText?)
             uint32 _data15;
             uint32 isBattlegroundObject;                    //16
         } goober;

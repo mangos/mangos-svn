@@ -326,31 +326,29 @@ void Player::UpdateAttackPowerAndDamage(bool ranged )
     }
 }
 
-void Player::UpdateDamagePhysical(WeaponAttackType attType)
+void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, float& min_damage, float& max_damage)
 {
-    UnitMods unitMod = UNIT_MOD_DAMAGE_MAINHAND;
-    UnitMods attPower = UNIT_MOD_ATTACK_POWER;
-
-    uint16 index1 = UNIT_FIELD_MINDAMAGE;
-    uint16 index2 = UNIT_FIELD_MAXDAMAGE;
+    UnitMods unitMod;
+    UnitMods attPower;
 
     switch(attType)
     {
-        case BASE_ATTACK: break;
+        case BASE_ATTACK:
+        default:
+            unitMod = UNIT_MOD_DAMAGE_MAINHAND;
+            attPower = UNIT_MOD_ATTACK_POWER;
+            break;
         case OFF_ATTACK:
             unitMod = UNIT_MOD_DAMAGE_OFFHAND;
-            index1 = UNIT_FIELD_MINOFFHANDDAMAGE;
-            index2 = UNIT_FIELD_MAXOFFHANDDAMAGE;
+            attPower = UNIT_MOD_ATTACK_POWER;
             break;
         case RANGED_ATTACK:
             unitMod = UNIT_MOD_DAMAGE_RANGED;
             attPower = UNIT_MOD_ATTACK_POWER_RANGED;
-            index1 = UNIT_FIELD_MINRANGEDDAMAGE;
-            index2 = UNIT_FIELD_MAXRANGEDDAMAGE;
             break;
     }
 
-    float att_speed = float(GetAttackTime(attType))/1000.0f;
+    float att_speed = GetAPMultiplier(attType,normalized);
 
     float base_value  = GetModifierValue(unitMod, BASE_VALUE) + GetTotalAttackPowerValue(attType)/ 14.0f * att_speed;
     float base_pct    = GetModifierValue(unitMod, BASE_PCT);
@@ -360,7 +358,7 @@ void Player::UpdateDamagePhysical(WeaponAttackType attType)
     float weapon_mindamage = GetWeaponDamageRange(attType, MINDAMAGE);
     float weapon_maxdamage = GetWeaponDamageRange(attType, MAXDAMAGE);
 
-    if ( IsInFeralForm() )                                  //check if player is druid and in cat or bear forms
+    if (IsInFeralForm())                                    //check if player is druid and in cat or bear forms
     {
         uint32 lvl = getLevel();
         if ( lvl > 60 ) lvl = 60;
@@ -379,11 +377,33 @@ void Player::UpdateDamagePhysical(WeaponAttackType attType)
         weapon_maxdamage += GetAmmoDPS() * att_speed;
     }
 
-    float mindamage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct ;
-    float maxdamage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct ;
+    min_damage = ((base_value + weapon_mindamage) * base_pct + total_value) * total_pct ;
+    max_damage = ((base_value + weapon_maxdamage) * base_pct + total_value) * total_pct ;
+}
 
-    SetStatFloatValue(index1, mindamage);
-    SetStatFloatValue(index2, maxdamage);
+void Player::UpdateDamagePhysical(WeaponAttackType attType)
+{
+    float mindamage;
+    float maxdamage;
+
+    CalculateMinMaxDamage(attType,false,mindamage,maxdamage);
+
+    switch(attType)
+    {
+        case BASE_ATTACK:
+        default:
+            SetStatFloatValue(UNIT_FIELD_MINDAMAGE,mindamage);
+            SetStatFloatValue(UNIT_FIELD_MAXDAMAGE,maxdamage);
+            break;
+        case OFF_ATTACK:
+            SetStatFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE,mindamage);
+            SetStatFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE,maxdamage);
+            break;
+        case RANGED_ATTACK:
+            SetStatFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,mindamage);
+            SetStatFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,maxdamage);
+            break;
+    }
 }
 
 void Player::UpdateDefenseBonusesMod()
