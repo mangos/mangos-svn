@@ -16745,3 +16745,14 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
     }
     return xp || honored_kill;
 }
+
+uint8 Player::GetWeaponSlotByAttack(WeaponAttackType attType)
+{
+    switch (attType)
+    {
+        case OFF_ATTACK:    return EQUIPMENT_SLOT_OFFHAND;
+        case RANGED_ATTACK: return EQUIPMENT_SLOT_RANGED;
+        case BASE_ATTACK:
+        default:            return EQUIPMENT_SLOT_MAINHAND;
+    }
+}

@@ -1483,6 +1483,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateDamagePhysical(WeaponAttackType attType);
         void UpdateSpellDamageAndHealingBonus();
 
+        static uint8 GetWeaponSlotByAttack(WeaponAttackType attType);
+        void CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, float& min_damage, float& max_damage);
+
         int16 GetDefenseSkillTempBonusValue() const;
         void UpdateDefenseBonusesMod();
         void ApplyRatingMod(uint16 index, int32 value, bool apply);

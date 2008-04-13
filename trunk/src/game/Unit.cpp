@@ -2456,7 +2456,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType )
         return;
     }
 
-    uint32 damage = CalculateDamage (attType);
+    uint32 damage = CalculateDamage (attType, false);
 
     DoAttackDamage (pVictim, &damage, &cleanDamage, &blocked_dmg, meleeSchool, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
 
@@ -2741,29 +2741,34 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     return MELEE_HIT_NORMAL;
 }
 
-uint32 Unit::CalculateDamage (WeaponAttackType attType)
+uint32 Unit::CalculateDamage (WeaponAttackType attType, bool normalized)
 {
     float min_damage, max_damage;
 
-    switch (attType)
+    if (normalized && GetTypeId()==TYPEID_PLAYER)
+        ((Player*)this)->CalculateMinMaxDamage(attType,normalized,min_damage, max_damage);
+    else
     {
-        case RANGED_ATTACK:
-            min_damage = GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
-            max_damage = GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
-            break;
-        case BASE_ATTACK:
-            min_damage = GetFloatValue(UNIT_FIELD_MINDAMAGE);
-            max_damage = GetFloatValue(UNIT_FIELD_MAXDAMAGE);
-            break;
-        case OFF_ATTACK:
-            min_damage = GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE);
-            max_damage = GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);
-            break;
-            // Just for good manner
-        default:
-            min_damage = 0.0f;
-            max_damage = 0.0f;
-            break;
+        switch (attType)
+        {
+            case RANGED_ATTACK:
+                min_damage = GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE);
+                max_damage = GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE);
+                break;
+            case BASE_ATTACK:
+                min_damage = GetFloatValue(UNIT_FIELD_MINDAMAGE);
+                max_damage = GetFloatValue(UNIT_FIELD_MAXDAMAGE);
+                break;
+            case OFF_ATTACK:
+                min_damage = GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE);
+                max_damage = GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);
+                break;
+                // Just for good manner
+            default:
+                min_damage = 0.0f;
+                max_damage = 0.0f;
+                break;
+        }
     }
 
     if (min_damage > max_damage)
@@ -3274,16 +3279,8 @@ uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
 {
     if(GetTypeId() == TYPEID_PLAYER)
     {
-        uint16  slot;
-        switch (attType)
-        {
-            case BASE_ATTACK:   slot = EQUIPMENT_SLOT_MAINHAND; break;
-            case OFF_ATTACK:    slot = EQUIPMENT_SLOT_OFFHAND;  break;
-            case RANGED_ATTACK: slot = EQUIPMENT_SLOT_RANGED;   break;
-            default:
-                return 0;
-        }
-        Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
+        uint16 slot = Player::GetWeaponSlotByAttack(attType);
+        Item* item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
 
         if(slot != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() ||
             item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon(false) ))
@@ -3305,16 +3302,8 @@ uint32 Unit::GetBaseWeaponSkillValue (WeaponAttackType attType) const
 {
     if(GetTypeId() == TYPEID_PLAYER)
     {
-        uint16  slot;
-        switch (attType)
-        {
-            case BASE_ATTACK:   slot = EQUIPMENT_SLOT_MAINHAND; break;
-            case OFF_ATTACK:    slot = EQUIPMENT_SLOT_OFFHAND;  break;
-            case RANGED_ATTACK: slot = EQUIPMENT_SLOT_RANGED;   break;
-            default:
-                return 0;
-        }
-        Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
+        uint16 slot = Player::GetWeaponSlotByAttack(attType);
+        Item* item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
 
         if(slot != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() ||
             item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon(false) ))
@@ -7675,8 +7664,18 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
                 APbonus += (*i)->GetModifier()->m_amount;
     }
 
+    bool normalized = false;
+    for (uint8 i = 0; i<3;i++)
+    {
+        if (spellProto->Effect[i] == SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
+        {
+            normalized = true;
+            break;
+        }
+    }
+
     if (APbonus!=0)                                         // Can be negative
-        DoneFlatBenefit += int32(APbonus/14.0f * GetAttackTime(attType)/1000);
+        DoneFlatBenefit += int32(APbonus/14.0f * GetAPMultiplier(attType,normalized)/1000.0f);
 
     // ..taken
     AuraList const& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
@@ -9367,13 +9366,8 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
             {
                 if(spellProto->EquippedItemClass == ITEM_CLASS_WEAPON)
                 {
-                    Item *item = NULL;
-                    if(attType == BASE_ATTACK)
-                        item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-                    else if (attType == OFF_ATTACK)
-                        item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-                    else
-                        item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+                    uint8 slot = Player::GetWeaponSlotByAttack(attType);
+                    Item *item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
 
                     if (!((Player*)this)->IsUseEquipedWeapon(attType==BASE_ATTACK))
                         continue;
@@ -9899,5 +9893,30 @@ void Unit::UpdateAuraForGroup(uint8 slot)
                 pet->SetAuraUpdateMask(slot);
             }
         }
+    }
+}
+
+float Unit::GetAPMultiplier(WeaponAttackType attType, bool normalized)
+{
+    if (!normalized || GetTypeId() != TYPEID_PLAYER)
+        return float(GetAttackTime(attType))/1000.0f;
+
+    Item *Weapon = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0,Player::GetWeaponSlotByAttack(attType));
+    if (!Weapon || Weapon->GetProto()->Class != ITEM_CLASS_WEAPON)
+        return 2.4;                                         // fist attack
+
+    switch (Weapon->GetProto()->InventoryType)
+    {
+        case INVTYPE_2HWEAPON:
+            return 3.3;
+        case INVTYPE_RANGED:
+        case INVTYPE_RANGEDRIGHT:
+        case INVTYPE_THROWN:
+            return 2.8;
+        case INVTYPE_WEAPON:
+        case INVTYPE_WEAPONMAINHAND:
+        case INVTYPE_WEAPONOFFHAND:
+        default:
+            return Weapon->GetProto()->SubClass==ITEM_SUBCLASS_WEAPON_DAGGER ? 1.7 : 2.4;
     }
 }
