@@ -1996,7 +1996,7 @@ void Spell::EffectHeal( uint32 /*i*/ )
         // Try to get original caster
         Unit *caster = m_originalCasterGUID ? m_originalCaster : m_caster;
 
-        // Skip if m_originalCaster not avaiable
+        // Skip if m_originalCaster not available
         if (!caster)
             return;
 
