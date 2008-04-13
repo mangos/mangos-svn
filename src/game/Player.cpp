@@ -5621,9 +5621,9 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
                 //  title[other]  -> 0
                 if (victim_title == 0)
                     victim_guid = 0;                        // Don't show HK: <rank> message, only log.
-                else if (victim_rank < 15)
+                else if (victim_title < 15)
                     victim_rank = victim_title + 4;
-                else if (victim_rank < 29)
+                else if (victim_title < 29)
                     victim_rank = victim_title - 14 + 4;
                 else
                     victim_guid = 0;                        // Don't show HK: <rank> message, only log.
