@@ -307,16 +307,12 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
             if(myItems[i])
             {
                 myItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->GetGUID());
-                _player->ItemRemovedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
-                _player->RemoveItem(_player->tradeItems[i] >> 8, _player->tradeItems[i] & 255, true);
-                myItems[i]->RemoveFromUpdateQueueOf(_player);
+                _player->MoveItemFromInventory(_player->tradeItems[i] >> 8, _player->tradeItems[i] & 255, true);
             }
             if(hisItems[i])
             {
                 hisItems[i]->SetUInt64Value( ITEM_FIELD_GIFTCREATOR,_player->pTrader->GetGUID());
-                _player->pTrader->ItemRemovedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
-                _player->pTrader->RemoveItem(_player->pTrader->tradeItems[i] >> 8, _player->pTrader->tradeItems[i] & 255, true);
-                hisItems[i]->RemoveFromUpdateQueueOf(_player->pTrader);
+                _player->pTrader->MoveItemFromInventory(_player->pTrader->tradeItems[i] >> 8, _player->pTrader->tradeItems[i] & 255, true);
             }
         }
 

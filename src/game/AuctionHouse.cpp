@@ -286,10 +286,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     mAuctions->AddAuction(AH);
 
     objmgr.AddAItem(it);
-    pl->RemoveItem( it->GetBagSlot(), it->GetSlot(), true);
-    it->RemoveFromUpdateQueueOf(pl);
-    it->RemoveFromWorld();
-    it->DestroyForPlayer( pl );
+    pl->MoveItemFromInventory( it->GetBagSlot(), it->GetSlot(), true);
 
     CharacterDatabase.BeginTransaction();
     it->DeleteFromInventoryDB();
