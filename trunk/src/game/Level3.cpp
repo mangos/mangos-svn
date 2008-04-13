@@ -2266,13 +2266,16 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
             {
                 bool known = target->HasSpell(id);
                 bool learn = (spellInfo->Effect[0] == SPELL_EFFECT_LEARN_SPELL);
-                bool talent = (GetTalentSpellCost(id) > 0);
+
+                uint32 telentCost = GetTalentSpellCost(id);
+
+                bool talent = (telentCost > 0);
                 bool passive = IsPassiveSpell(id);
                 bool active = target->HasAura(id,0) || target->HasAura(id,1) || target->HasAura(id,2);
 
                 // unit32 used to prevent interpreting uint8 as char at output
-                // find rank of learned spell for learning spell
-                uint32 rank = spellmgr.GetSpellRank(learn ? spellInfo->EffectTriggerSpell[0] : id);
+                // find rank of learned spell for learning spell, or talent rank
+                uint32 rank = telentCost ? telentCost : spellmgr.GetSpellRank(learn ? spellInfo->EffectTriggerSpell[0] : id);
 
                 // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
                 std::ostringstream ss;
