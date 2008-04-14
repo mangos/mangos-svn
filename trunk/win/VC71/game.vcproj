@@ -787,12 +787,10 @@
 				RelativePath="..\..\src\game\Language.h">
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerDump.cpp"
-				>
+				RelativePath="..\..\src\game\PlayerDump.cpp">
 			</File>
 			<File
-				RelativePath="..\..\src\game\PlayerDump.h"
-				>
+				RelativePath="..\..\src\game\PlayerDump.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\tools.cpp">

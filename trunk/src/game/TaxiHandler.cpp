@@ -305,11 +305,11 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
 
 void WorldSession::SendPath(Path const& path, uint32 start, uint32 end)
 {
-    uint32 traveltime = uint32(path.GetTotalLength(start,end) * 32);
+    uint32 traveltime = uint32(path.GetTotalLength(start, end) * 32);
 
     uint32 pathSize = end-start;
 
-    WorldPacket data( SMSG_MONSTER_MOVE, (8+4+4+4+4+1+4+4+4+pathSize*4*3) );
+    WorldPacket data( SMSG_MONSTER_MOVE, (_player->GetPackGUID().size()+4+4+4+4+1+4+4+4+pathSize*4*3) );
     data.append(GetPlayer()->GetPackGUID());
     data << GetPlayer( )->GetPositionX( )
         << GetPlayer( )->GetPositionY( )

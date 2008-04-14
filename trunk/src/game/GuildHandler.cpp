@@ -1095,7 +1095,7 @@ void WorldSession::HandleGuildBankDeposit( WorldPacket & recv_data )
         return;
 
     CharacterDatabase.BeginTransaction();
-    
+
     pGuild->SetBankMoney(pGuild->GetGuildBankMoney()+money);
     GetPlayer()->ModifyMoney(-int(money));
     GetPlayer()->SaveGoldToDB();
@@ -1144,7 +1144,7 @@ void WorldSession::HandleGuildBankWithdraw( WorldPacket & recv_data )
         return;
 
     CharacterDatabase.BeginTransaction();
-    
+
     if (!pGuild->MemberMoneyWithdraw(money, GetPlayer()->GetGUIDLow()))
     {
         CharacterDatabase.RollbackTransaction();

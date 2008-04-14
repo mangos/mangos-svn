@@ -25,14 +25,13 @@ enum HighGuid
 {
     HIGHGUID_ITEM           = 0x40000000,                   // blizz 40000000
     HIGHGUID_CONTAINER      = 0x40000000,                   // blizz 40000000
-    HIGHGUID_UNIT           = 0xF0070000,                   // blizz F009????, where "????" is unit entry
     HIGHGUID_PLAYER         = 0x00000000,                   // blizz 00000000
     HIGHGUID_GAMEOBJECT     = 0xF0060000,                   // blizz F0090000
+    HIGHGUID_TRANSPORT      = 0x1FA70000,                   // blizz 1FA70000 (type 11)
+    HIGHGUID_UNIT           = 0xF0070000,                   // blizz F009????, where "????" is unit entry
     HIGHGUID_DYNAMICOBJECT  = 0xF00A0000,                   // blizz F0090000, F0320000
     HIGHGUID_CORPSE         = 0xF0090000,                   // blizz F0090000, F0320000
-    HIGHGUID_PLAYER_CORPSE  = 0xF0080000,                   // blizz F0090000, F0320000
     HIGHGUID_MO_TRANSPORT   = 0x1FC00000,                   // blizz 1FC00000 (type 15)
-    HIGHGUID_TRANSPORT      = 0x1FA70000                    // blizz 1FA70000 (type 11)
 };
 
 #define GUID_HIPART(x)   (uint32)(uint64(x) >> 32)
@@ -48,7 +47,6 @@ enum HighGuid
 #define IS_GAMEOBJECT_GUID(Guid)     ( GUID_HIPART(Guid) == HIGHGUID_GAMEOBJECT )
 #define IS_DYNAMICOBJECT_GUID(Guid)  ( GUID_HIPART(Guid) == HIGHGUID_DYNAMICOBJECT )
 #define IS_CORPSE_GUID(Guid)         ( GUID_HIPART(Guid) == HIGHGUID_CORPSE )
-#define IS_PLAYER_CORPSE_GUID(Guid)  ( GUID_HIPART(Guid) == HIGHGUID_PLAYER_CORPSE )
 #define IS_TRANSPORT(Guid)           ( GUID_HIPART(Guid) == HIGHGUID_TRANSPORT )
 #define IS_MO_TRANSPORT(Guid)        ( GUID_HIPART(Guid) == HIGHGUID_MO_TRANSPORT )
 #endif

@@ -1465,7 +1465,6 @@ void World::ScriptsProcess()
 
                 if(target && target->isType(TYPE_GAMEOBJECT) && ((GameObject*)target)->GetGoType()==GAMEOBJECT_TYPE_BUTTON)
                     ((GameObject*)target)->UseDoorOrButton(time_to_close);
-
                 break;
             }
             case SCRIPT_COMMAND_CLOSE_DOOR:

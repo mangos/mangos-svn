@@ -55,7 +55,7 @@ enum PermissionTypes
 {
     ALL_PERMISSION    = 0,
     GROUP_PERMISSION  = 1,
-    MASTER_PERMISSION  = 2,
+    MASTER_PERMISSION = 2,
     NONE_PERMISSION   = 3
 };
 

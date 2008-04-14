@@ -199,7 +199,14 @@ struct MemberSlot
 
 struct RankInfo
 {
-    RankInfo(std::string _name, uint32 _rights, uint32 _money) : name(_name), rights(_rights), BankMoneyPerDay(_money) {}
+    RankInfo(std::string _name, uint32 _rights, uint32 _money) : name(_name), rights(_rights), BankMoneyPerDay(_money)
+    {
+        for(uint8 i = 0; i < GUILD_BANK_MAX_TABS; ++i)
+        {
+            TabRight[i] = 0;
+            TabSlotPerDay[i] = 0;
+        }
+    }
 
     std::string name;
     uint32 rights;

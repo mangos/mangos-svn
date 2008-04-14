@@ -40,7 +40,6 @@ class ThreatCalcHelper
 {
     public:
         static float calcThreat(Unit* pHatedUnit, Unit* pHatingUnit, float threat, SpellSchools school = SPELL_SCHOOL_NORMAL, SpellEntry const *threatSpell = NULL);
-
 };
 
 //==============================================================

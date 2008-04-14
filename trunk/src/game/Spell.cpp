@@ -211,6 +211,8 @@ bool SpellCastTargets::read ( WorldPacket * data, Unit *caster )
 
 void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
 {
+    *data << uint16(m_targetMask);
+
     uint32 len = data->size();
 
     if(m_targetMask & TARGET_FLAG_UNIT)
@@ -2420,8 +2422,7 @@ void Spell::SendSpellStart()
     data << uint16(castFlags);
     data << uint32(m_timer);
 
-    data << uint16(m_targets.m_targetMask);
-    m_targets.write( &data );
+    m_targets.write(&data);
 
     if( castFlags & CAST_FLAG_AMMO )
         WriteAmmoToPacket(&data);
@@ -2457,9 +2458,10 @@ void Spell::SendSpellGo()
     data << uint32(m_spellInfo->Id);
 
     data << uint16(castFlags);
+
     WriteSpellGoTargets(&data);
-    data << m_targets.m_targetMask;
-    m_targets.write( &data, true );
+
+    m_targets.write(&data, true);
 
     if( castFlags & CAST_FLAG_AMMO )
         WriteAmmoToPacket(&data);
@@ -2526,11 +2528,7 @@ void Spell::WriteSpellGoTargets( WorldPacket * data )
 
 void Spell::SendLogExecute()
 {
-    Unit * target;
-    if(!m_targets.getUnitTarget())
-        target = m_caster;
-    else
-        target = m_targets.getUnitTarget();
+    Unit *target = m_targets.getUnitTarget() ? m_targets.getUnitTarget() : m_caster;
 
     WorldPacket data(SMSG_SPELLLOGEXECUTE, (8+4+4+4+4+8));
 

@@ -44,6 +44,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
     recv_data >> type;
     recv_data >> lang;
+
     //sLog.outDebug("CHAT: packet received. type %u, lang %u", type, lang );
 
     // prevent talking at unknown language (cheating)

@@ -450,7 +450,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
 
         if(pVictim->GetTypeId() == TYPEID_PLAYER && !pVictim->IsStandState() && !pVictim->hasUnitState(UNIT_STAT_STUNDED))
-            pVictim->SetStandState(PLAYER_STATE_NONE); 
+            pVictim->SetStandState(PLAYER_STATE_NONE);
     }
 
     //Script Event damage Deal
@@ -1821,7 +1821,6 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
                 AuraList const& vOverRideCS = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
                 for(AuraList::const_iterator k = vOverRideCS.begin(); k != vOverRideCS.end(); ++k)
                 {
-                    
                     switch((*k)->GetModifier()->m_miscvalue)
                     {
                         case 5065:                          // Rank 1
@@ -3950,7 +3949,6 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
 
         if(!is_triggered_by_spell)
         {
-
             SpellSpecific i_spellId_spec = GetSpellSpecific(i_spellId);
 
             bool is_sspc = IsSingleFromSpellSpecificPerCaster(spellId_spec,i_spellId_spec);
@@ -4376,7 +4374,7 @@ void Unit::SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID,uint32 Damage,
     data.append(GetPackGUID());
     data << uint32(SpellID);
     data << uint32(Damage-AbsorbedDamage-Resist-Blocked);
-    data << uint8(DamageType);                              // damagetype
+    data << uint8(DamageType);                              // spell school
     data << uint32(AbsorbedDamage);                         // AbsorbedDamage
     data << uint32(Resist);                                 // resist
     data << uint8(PhysicalDamage);
