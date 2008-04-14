@@ -9663,7 +9663,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
     }
 }
 
-// in auction, guild bank, mail....
+// Common operation need to remove item from inventory without delete in trade, auction, guild bank, mail....
 void Player::MoveItemFromInventory(uint8 bag, uint8 slot, bool update)
 {
     if(Item* it = GetItemByPos(bag,slot))
@@ -9678,6 +9678,28 @@ void Player::MoveItemFromInventory(uint8 bag, uint8 slot, bool update)
         }
     }
 }
+
+// Common operation need to add item from inventory without delete in trade, guild bank, mail....
+void Player::MoveItemToInventory(ItemPosCountVec const& dest, Item* pItem, bool update)
+{
+    // update quest counters
+    ItemAddedQuestCheck(pItem->GetEntry(),pItem->GetCount());
+
+    // store item
+    Item* pLastItem = StoreItem( dest, pItem, update);
+
+    // only set if not merged to existed stack (pItem can be deleted already but we can compare pointers any way)
+    if(pLastItem==pItem)
+    {
+        // update owner for last item (this can be original item with wrong owner
+        if(pLastItem->GetOwnerGUID() != GetGUID())
+            pLastItem->SetOwnerGUID(GetGUID());
+
+        // if this original item then it need create record in inventory
+        pLastItem->SetState(ITEM_NEW, this);
+    }
+}
+
 
 void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
 {

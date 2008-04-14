@@ -1373,7 +1373,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
         return;
 
     // BankToChar swap or char to bank remaining
-    // Split subcase for both directions
+
     if (ToChar)                                             // Bank -> Char cases
     {
         if(SplitedAmount > pItemBank->GetCount())
@@ -1402,7 +1402,10 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
             // check source pos rights (item moved to inventory)
             uint32 remRight = pGuild->GetMemberSlotWithdrawRem(pl->GetGUIDLow(), BankTab);
             if(remRight <= 0)
+            {
+                delete pNewItem;
                 return;
+            }
 
             CharacterDatabase.BeginTransaction();
             pGuild->LogBankEvent(GUILD_BANK_LOG_WITHDRAW_ITEM, BankTab, pl->GetGUIDLow(), pItemBank->GetEntry(), SplitedAmount);
@@ -1410,8 +1413,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
             pItemBank->SetCount(pItemBank->GetCount()-SplitedAmount);
             pItemBank->FSetState(ITEM_CHANGED);
             pItemBank->SaveToDB();
-            pl->ItemAddedQuestCheck( pNewItem->GetEntry(), pNewItem->GetCount() );
-            pl->StoreItem(dest, pNewItem, true);
+            pl->MoveItemToInventory(dest,pNewItem,true);
             pl->SaveInventoryAndGoldToDB();
 
             pGuild->MemberItemWithdraw(BankTab, pl->GetGUIDLow());
@@ -1432,8 +1434,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                 pGuild->LogBankEvent(GUILD_BANK_LOG_WITHDRAW_ITEM, BankTab, pl->GetGUIDLow(), pItemBank->GetEntry(), SplitedAmount);
 
                 pGuild->RemoveItem(BankTab, BankTabSlot);
-                pl->StoreItem(dest, pItemBank, true);
-                pItemBank->SetState(ITEM_NEW);
+                pl->MoveItemToInventory(dest,pItemBank,true);
                 pl->SaveInventoryAndGoldToDB();
 
                 pGuild->MemberItemWithdraw(BankTab, pl->GetGUIDLow());
@@ -1490,8 +1491,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                 pItemChar->DeleteFromInventoryDB();
 
                 pGuild->StoreItem(BankTab, gDest, pItemChar);
-                pl->StoreItem(iDest, pItemBank, true);
-                pItemBank->SetState(ITEM_NEW);
+                pl->MoveItemToInventory(iDest,pItemBank,true);
                 pl->SaveInventoryAndGoldToDB();
 
                 pGuild->MemberItemWithdraw(BankTab, pl->GetGUIDLow());
@@ -1624,8 +1624,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
             pGuild->RemoveItem(BankTab, BankTabSlot);
 
             pGuild->StoreItem(BankTab,gDest,pItemChar);
-            pl->StoreItem(iDest, pItemBank, true);          // ITEM_CHANGED auto set auto
-            pItemBank->SetState(ITEM_NEW);
+            pl->MoveItemToInventory(iDest,pItemBank,true);
             pl->SaveInventoryAndGoldToDB();
             pGuild->MemberItemWithdraw(BankTab, pl->GetGUIDLow());
             CharacterDatabase.CommitTransaction();
