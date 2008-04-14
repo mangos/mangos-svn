@@ -450,22 +450,16 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
         m->state = MAIL_STATE_CHANGED;
         pl->m_mailsUpdated = true;
         pl->RemoveMItem(it->GetGUIDLow());
-        Item* it2 = pl->StoreItem( dest, it, true);
-        if(it2->GetOwnerGUID() != pl->GetGUID())
-        {
-            it2->SetOwnerGUID(pl->GetGUID());
-            it2->SetState(ITEM_CHANGED);
-        }
-        if(it2 == it)                                       // only set if not merged to existed stack (*it can be deleted already but we can compare pointers any way)
-            it->SetState(ITEM_NEW, pl);
-        pl->ItemAddedQuestCheck(it2->GetEntry(),it2->GetCount());
+
+        uint32 count = it->GetCount();                      // save counts before store and possible merge with deleting
+        pl->MoveItemToInventory(dest,it,true);
 
         CharacterDatabase.BeginTransaction();
         pl->SaveInventoryAndGoldToDB();
         pl->_SaveMail();
         CharacterDatabase.CommitTransaction();
 
-        pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_OK, 0, itemId, it2->GetCount());
+        pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_OK, 0, itemId, count);
     }
     else
         pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_BAG_FULL, msg);

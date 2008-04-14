@@ -165,8 +165,7 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
                         _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId());
 
                 // store
-                _player->pTrader->ItemAddedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
-                _player->pTrader->StoreItem( traderDst, myItems[i], true);
+                _player->pTrader->MoveItemToInventory( traderDst, myItems[i], true);
             }
             if(hisItems[i])
             {
@@ -179,8 +178,7 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
                         _player->GetName(),_player->GetSession()->GetAccountId());
 
                 // store
-                _player->ItemAddedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
-                _player->StoreItem( playerDst, hisItems[i], true);
+                _player->MoveItemToInventory( playerDst, hisItems[i], true);
             }
         }
         else
@@ -192,10 +190,7 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
                 if(!traderCanTrade)
                     sLog.outError("trader can't store item: %u",myItems[i]->GetGUIDLow());
                 if(_player->CanStoreItem( NULL_BAG, NULL_SLOT, playerDst, myItems[i], false ) == EQUIP_ERR_OK)
-                {
-                    _player->ItemAddedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
-                    _player->StoreItem(playerDst, myItems[i], true);
-                }
+                    _player->MoveItemToInventory(playerDst, myItems[i], true);
                 else
                     sLog.outError("player can't take item back: %u",myItems[i]->GetGUIDLow());
             }
@@ -205,10 +200,7 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
                 if(!playerCanTrade)
                     sLog.outError("player can't store item: %u",hisItems[i]->GetGUIDLow());
                 if(_player->pTrader->CanStoreItem( NULL_BAG, NULL_SLOT, traderDst, hisItems[i], false ) == EQUIP_ERR_OK)
-                {
-                    _player->pTrader->ItemAddedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
-                    _player->pTrader->StoreItem(traderDst, hisItems[i], true);
-                }
+                    _player->pTrader->MoveItemToInventory(traderDst, hisItems[i], true);
                 else
                     sLog.outError("trader can't take item back: %u",hisItems[i]->GetGUIDLow());
             }
