@@ -300,7 +300,8 @@ WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint32 &di
 
 void WaypointMovementGenerator<Creature>::MovementInform(Creature &unit)
 {
-    unit.AI()->MovementInform(WAYPOINT_MOTION_TYPE, i_currentNode);
+    if(unit.AI())
+        unit.AI()->MovementInform(WAYPOINT_MOTION_TYPE, i_currentNode);
 }
 
 std::set<uint32> WaypointMovementGenerator<Creature>::si_waypointHolders;

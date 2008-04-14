@@ -1201,6 +1201,12 @@ void ObjectMgr::LoadItemPrototypes()
             const_cast<ItemPrototype*>(proto)->Quality = ITEM_QUALITY_NORMAL;
         }
 
+        if(proto->BuyCount <= 0)
+        {
+            sLog.outErrorDb("Item (Entry: %u) has wrong BuyCount value (%u), set to default(1).",i,proto->BuyCount);
+            const_cast<ItemPrototype*>(proto)->BuyCount = 1;
+        }
+
         if(proto->InventoryType >= MAX_INVTYPE)
         {
             sLog.outErrorDb("Item (Entry: %u) has wrong InventoryType value (%u)",i,proto->InventoryType);
