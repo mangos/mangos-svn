@@ -26,7 +26,7 @@
 #define MAX_RAND_WAYPOINTS 8
 
 template<class T>
-class MANGOS_DLL_DECL RandomMovementGenerator
+class MANGOS_DLL_SPEC RandomMovementGenerator
 : public MovementGeneratorMedium< T, RandomMovementGenerator<T> >
 {
     public:

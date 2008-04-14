@@ -33,8 +33,8 @@ public:
         x(_x), y(_y), z(_z), i_nextMoveTime(0) {}
 
     void Initialize(T &);
-    void Finalize(T &) {}
-    void Reset(T &unit) { unit.StopMoving(); }
+    void Finalize(T &){}
+    void Reset(T &unit){unit.StopMoving();}
     bool Update(T &, const uint32 &diff);
 
     void MovementInform(T &);
@@ -47,9 +47,4 @@ private:
     uint32 id;
     DestinationHolder< Traveller<T> > i_destinationHolder;
 };
-
-//template<> 
-void MANGOS_DLL_SPEC PointMovementGenerator<Creature>::Initialize(Creature &unit);
-//template<> 
-bool MANGOS_DLL_SPEC PointMovementGenerator<Creature>::Update(Creature &unit, const uint32 &diff);
 #endif
