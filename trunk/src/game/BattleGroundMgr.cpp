@@ -160,8 +160,7 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
         return;
 
     //battleground with free slot for player should be always the last in this queue
-    BGFreeSlotQueueType::iterator itr;
-    for (itr = sBattleGroundMgr.BGFreeSlotQueue[bgTypeId].begin(); itr != sBattleGroundMgr.BGFreeSlotQueue[bgTypeId].end(); ++itr)
+    for (BGFreeSlotQueueType::iterator itr = sBattleGroundMgr.BGFreeSlotQueue[bgTypeId].begin(); itr != sBattleGroundMgr.BGFreeSlotQueue[bgTypeId].end(); ++itr)
     {
         // battleground is running, so if:
         // DO NOT allow queue manager to invite new player to running arena
@@ -183,7 +182,7 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
                         sLog.outError("BATTLEGROUND: problem with inviting offline player to Battleground queue .... pls report bug");
                         uint64 oldval = *itr2;
                         itr2 = m_PlayersSortedByWaitTime[queue_id].erase(itr2);
-                        this->RemovePlayer(oldval, true);
+                        RemovePlayer(oldval, true);
                         continue;
                     }
 
@@ -261,7 +260,7 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
                 sLog.outError("BATTLEGROUND: problem with inviting offline player to Battleground queue .... pls report bug");
                 uint64 oldval = *itr2;
                 itr2 = m_PlayersSortedByWaitTime[queue_id].erase(itr2);
-                this->RemovePlayer(oldval, true);
+                RemovePlayer(oldval, true);
                 continue;
             }
 
@@ -323,9 +322,10 @@ bool BGQueueInviteEvent::Execute(uint64 /*e_time*/, uint32 p_time)
     if (!plr)
         return true;
 
-    // player is already in battleground ... do nothing (battleground queue status is deleted when player is teleported to BG)
-    if (plr->GetBattleGroundId() > 0)
-        return true;
+    // Player can be in another BG queue and must be removed in normal way in any case
+    // // player is already in battleground ... do nothing (battleground queue status is deleted when player is teleported to BG)
+    // if (plr->GetBattleGroundId() > 0)
+    //    return true;
 
     BattleGround* bg = sBattleGroundMgr.GetBattleGround(m_BgInstanceGUID);
     if (!bg)
@@ -359,19 +359,23 @@ bool BGQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
     if (!plr)
         // player logged off (we should do nothing, he is correctly removed from queue in another procedure)
         return true;
-    if (plr->InBattleGround())
-        // player is already in battleground ... do nothing (battleground queue status is deleted when player is teleported to BG)
-        return true;
+
+    // Player can be in another BG queue and must be removed in normal way in any case
+    //if (plr->InBattleGround())
+    //    // player is already in battleground ... do nothing (battleground queue status is deleted when player is teleported to BG)
+    //    return true;
 
     BattleGround* bg = sBattleGroundMgr.GetBattleGround(m_BgInstanceGUID);
     if (!bg)
         return true;
 
     uint32 queueSlot = plr->GetBattleGroundQueueIndex(bg->GetTypeID());
-    if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES)         // player is in queue
+    if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES)         // player is in queue (base at player data
     {
         // check if player is invited to this bg ... this check must be here, because when player leaves queue and joins another, it would cause a problems
-        if (sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].m_QueuedPlayers[plr->GetBattleGroundQueueIdFromLevel()].find(m_PlayerGuid)->second.IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
+        BattleGroundQueue::QueuedPlayersMap const& qpMap = sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].m_QueuedPlayers[plr->GetBattleGroundQueueIdFromLevel()];
+        BattleGroundQueue::QueuedPlayersMap::const_iterator qItr = qpMap.find(m_PlayerGuid);
+        if (qItr!=qpMap.end() && qItr->second.IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
         {
             plr->RemoveBattleGroundQueueId(bg->GetTypeID());
             sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].RemovePlayer(m_PlayerGuid, true);
