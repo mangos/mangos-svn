@@ -383,6 +383,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "cast",           SEC_ADMINISTRATOR,  &ChatHandler::HandleCastCommand,                "", NULL },
         { "castback",       SEC_ADMINISTRATOR,  &ChatHandler::HandleCastBackCommand,            "", NULL },
         { "casttarget",     SEC_ADMINISTRATOR,  &ChatHandler::HandleCastTargetCommand,          "", NULL },
+        { "cometome",       SEC_ADMINISTRATOR,  &ChatHandler::HandleComeToMeCommand,            "", NULL },
 
         //! Development Commands
         { "setvalue",       SEC_ADMINISTRATOR,  &ChatHandler::HandleSetValue,                   "", NULL },

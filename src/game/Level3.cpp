@@ -39,6 +39,7 @@
 #include "CellImpl.h"
 #include "Weather.h"
 #include "TargetedMovementGenerator.h"
+#include "PointMovementGenerator.h"
 #include "SkillDiscovery.h"
 #include "SkillExtraItems.h"
 #include "SystemConfig.h"
@@ -4627,6 +4628,28 @@ bool ChatHandler::HandleCastTargetCommand(const char* args)
     caster->SendMessageToSet(&data,true);
 
     caster->CastSpell(caster->getVictim(),spell,false);
+
+    return true;
+}
+
+/* 
+ComeToMe command REQUIRED for 3rd party scripting library to have access to PointMovementGenerator 
+Without this function 3rd party scripting library will get linking errors (unresolved external)
+when attempting to use the PointMovementGenerator
+*/
+bool ChatHandler::HandleComeToMeCommand(const char *args)
+{
+    Unit* caster = getSelectedUnit();
+
+    if(!caster)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
+    }
+
+    if (caster->GetTypeId() == TYPEID_PLAYER)
+        caster->GetMotionMaster()->Mutate(new PointMovementGenerator<Player>(0, m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ()));
+    else caster->GetMotionMaster()->Mutate(new PointMovementGenerator<Creature>(0, m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ()));
 
     return true;
 }

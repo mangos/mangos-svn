@@ -51,7 +51,7 @@ struct WaypointBehavior
 };
 
 template<class T>
-class MANGOS_DLL_DECL PathMovementBase
+class MANGOS_DLL_SPEC PathMovementBase
 {
     public:
         PathMovementBase() : i_currentNode(0) {}
@@ -76,10 +76,10 @@ class MANGOS_DLL_DECL PathMovementBase
  */
 
 template<class T>
-class MANGOS_DLL_DECL WaypointMovementGenerator;
+class MANGOS_DLL_SPEC WaypointMovementGenerator;
 
 template<>
-class MANGOS_DLL_DECL WaypointMovementGenerator<Creature>
+class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
 : public MovementGeneratorMedium< Creature, WaypointMovementGenerator<Creature> >,
 public PathMovementBase<Creature>
 {
@@ -117,7 +117,7 @@ public PathMovementBase<Creature>
 /** FlightPathMovementGenerator generates movement of the player for the paths
  * and hence generates ground and activities for the player.
  */
-class MANGOS_DLL_DECL FlightPathMovementGenerator
+class MANGOS_DLL_SPEC FlightPathMovementGenerator
 : public MovementGeneratorMedium< Player, FlightPathMovementGenerator >,
 public PathMovementBase<Player>
 {
