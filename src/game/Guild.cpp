@@ -1519,7 +1519,7 @@ void Guild::AppendDisplayGuildBankSlot( WorldPacket& data, GuildBankTab const *t
             // SuffixFactor +4
             data << (uint32) pItem->GetItemSuffixFactor();
         // +12 // ITEM_FIELD_STACK_COUNT
-        data << (uint8)pItem->GetCount();
+        data << uint8(pItem->GetCount());
         data << uint32(0);                                  // +16 // Unknown value
         //data << uint8(0);
         uint32 Enchant0 = pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT);
@@ -1527,7 +1527,7 @@ void Guild::AppendDisplayGuildBankSlot( WorldPacket& data, GuildBankTab const *t
         {
             data << uint8(1);                               // nb of enchantements (max 3)
             data << uint8(PERM_ENCHANTMENT_SLOT);           // enchantment slot (range: 0:2)
-            data << (uint32)Enchant0;                       // enchantment id
+            data << uint32(Enchant0);                       // enchantment id
         }
         else
             data << uint8(0);

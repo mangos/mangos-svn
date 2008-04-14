@@ -535,7 +535,7 @@ bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellI
             break;
         case SPELL_ELEMENTAL_SHIELD:
             // only Earth shield
-            if( IsElementalShield(spellInfo2) && 
+            if( IsElementalShield(spellInfo2) &&
                 spellInfo1->SpellFamilyFlags & 0x40000000000LL &&
                 spellInfo2->SpellFamilyFlags & 0x40000000000LL )
                     return true;

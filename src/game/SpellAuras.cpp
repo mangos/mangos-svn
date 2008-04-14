@@ -1773,7 +1773,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             m_target->setPowerType(POWER_MANA);
         m_target->m_ShapeShiftForm = 0;
         m_target->m_form = 0;
-        
+
         switch(m_modifier.m_miscvalue)
         {
             // Nordrassil Harness - bonus

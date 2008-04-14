@@ -836,7 +836,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
             {
                 petauramask |= (uint64(1) << i);
                 data << (uint16) petaura;
-                //petbuf << (uint8)  1;
+                data << (uint8)  1;
             }
         }
         data.put<uint64>(petMaskPos,petauramask);           // GROUP_UPDATE_FLAG_PET_AURAS

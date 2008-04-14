@@ -444,7 +444,6 @@ enum PlayerFieldByte2Flags
     PLAYER_FIELD_BYTE2_INVISIBILITY_GLOW = 0x1000
 };
 
-
 enum ActivateTaxiReplies
 {
     ERR_TAXIOK                      = 0,
@@ -1357,7 +1356,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void resetSpells();
         void learnDefaultSpells(bool loading = false);
         void learnQuestRewardedSpells();
-
 
         uint32 GetFreeTalentPoints() const { return GetUInt32Value(PLAYER_CHARACTER_POINTS1); }
         void SetFreeTalentPoints(uint32 points) { SetUInt32Value(PLAYER_CHARACTER_POINTS1,points); }

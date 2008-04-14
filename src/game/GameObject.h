@@ -348,7 +348,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         uint32      m_flags;
         LootState   m_lootState;
         bool        m_spawnedByDefault;
-        time_t      m_cooldownTime;                         //used as internal reaction delay time store (not state change reaction).
+        time_t      m_cooldownTime;                         // used as internal reaction delay time store (not state change reaction).
                                                             // For traps this: spell casting cooldown, for doors/buttnons: reset time.
         std::list<uint32> m_SkillupList;
 

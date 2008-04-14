@@ -731,7 +731,6 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
             _player->SendEquipError( msg, pItem, NULL );
             return;
         }
-
     }
 
     ItemPosCountVec dest;

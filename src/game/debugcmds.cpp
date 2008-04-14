@@ -132,28 +132,71 @@ bool ChatHandler::HandleSendOpcodeCommand(const char* args)
     if (!unit || (unit->GetTypeId() != TYPEID_PLAYER))
         unit = m_session->GetPlayer();
 
-    char* op = strtok((char*)args, " ");
-    if(!op)
+    FILE *file = fopen("opcode.txt", "r");
+    if(!file)
+    {
+        fclose(file);
         return false;
-    char* val1 = strtok(NULL, " ");
-    if(!val1)
-        return false;
-    /*char* val2 = strtok(NULL, " ");
-    if(!val2)
-        return false;
-    char* val3 = strtok(NULL, " ");
-    if(!val3)
-        return false;*/
+    }
 
-    uint16 opcode = atoi(op);
-    uint64 value1 = atoi(val1);
-    //uint32 value2 = atoi(val2);
-    //uint32 value3 = atoi(val3);
-    WorldPacket data(opcode, 8);
-    data << uint64(value1);
+    uint32 type;
+
+    uint32 val1;
+    uint64 val2;
+    float val3;
+    char *val4[101];
+
+    uint32 opcode = 0;
+    fscanf(file, "%u", &opcode);
+    if(!opcode)
+    {
+        fclose(file);
+        return false;
+    }
+
+    WorldPacket data(opcode, 0);
+
+    while(fscanf(file, "%u", &type) != EOF)
+    {
+        switch(type)
+        {
+            case 0: // uint8
+                fscanf(file, "%u", &val1);
+                data << uint8(val1);
+                break;
+            case 1: // uint16
+                fscanf(file, "%u", &val1);
+                data << uint16(val1);
+                break;
+            case 2: // uint32
+                fscanf(file, "%u", &val1);
+                data << uint32(val1);
+                break;
+            case 3: // uint64
+                fscanf(file, "%llu", &val2);
+                data << uint64(val2);
+                break;
+            case 4: // float
+                fscanf(file, "%f", &val3);
+                data << float(val3);
+                break;
+            case 5: // string
+                fscanf(file, "%s", val4, 101);
+                data << val4;
+                break;
+            case 6: // packed guid
+                data.append(unit->GetPackGUID());
+                break;
+            default:
+                fclose(file);
+                return false;
+        }
+    }
+    fclose(file);
+    sLog.outDebug("Sending opcode %u", data.GetOpcode());
+    data.hexlike();
     ((Player*)unit)->GetSession()->SendPacket(&data);
-
-    PSendSysMessage(LANG_COMMAND_OPCODESENT, opcode, unit->GetName());
+    PSendSysMessage(LANG_COMMAND_OPCODESENT, data.GetOpcode(), unit->GetName());
     return true;
 }
 

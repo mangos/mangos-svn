@@ -658,22 +658,22 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void CombatStop() { AttackStop(); RemoveAllAttackers(); ClearInCombat(); }
         Unit* SelectNearbyTarget() const;
 
-        void addUnitState(uint32 f) { m_state |= f; };
+        void addUnitState(uint32 f) { m_state |= f; }
         bool hasUnitState(const uint32 f) const { return (m_state & f); }
-        void clearUnitState(uint32 f) { m_state &= ~f; };
+        void clearUnitState(uint32 f) { m_state &= ~f; }
         bool CanFreeMove() const
         {
             return !hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_FLEEING | UNIT_STAT_IN_FLIGHT |
                 UNIT_STAT_ROOT | UNIT_STAT_STUNDED ) && GetOwnerGUID()==0;
         }
 
-        uint32 getLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); };
+        uint32 getLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); }
         void SetLevel(uint32 lvl);
-        uint8 getRace() const { return (uint8)(GetUInt32Value(UNIT_FIELD_BYTES_0) & 0xFF); };
-        uint32 getRaceMask() const { return 1 << (getRace()-1); };
-        uint8 getClass() const { return (uint8)((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 8) & 0xFF); };
-        uint32 getClassMask() const { return 1 << (getClass()-1); };
-        uint8 getGender() const { return (uint8)((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 16) & 0xFF); };
+        uint8 getRace() const { return (uint8)(GetUInt32Value(UNIT_FIELD_BYTES_0) & 0xFF); }
+        uint32 getRaceMask() const { return 1 << (getRace()-1); }
+        uint8 getClass() const { return (uint8)((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 8) & 0xFF); }
+        uint32 getClassMask() const { return 1 << (getClass()-1); }
+        uint8 getGender() const { return (uint8)((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 16) & 0xFF); }
 
         float GetStat(Stats stat) const { return float(GetUInt32Value(UNIT_FIELD_STAT0+stat)); }
         void SetStat(Stats stat, int32 val) { SetStatInt32Value(UNIT_FIELD_STAT0+stat, val); }
@@ -689,7 +689,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SetMaxHealth(uint32 val);
         int32 ModifyHealth(int32 val);
 
-        Powers getPowerType() const { return Powers((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 24) & 0xFF); };
+        Powers getPowerType() const { return Powers((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 24) & 0xFF); }
         void setPowerType(Powers power);
         uint32 GetPower(   Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1   +power); }
         uint32 GetMaxPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_MAXPOWER1+power); }
@@ -721,7 +721,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
             return (creatureType >= 1) ? (1 << (creatureType - 1)) : 0;
         }
 
-        uint8 getStandState() const { return (uint8)(GetUInt32Value(UNIT_FIELD_BYTES_1) & 0xFF); };
+        uint8 getStandState() const { return (uint8)(GetUInt32Value(UNIT_FIELD_BYTES_1) & 0xFF); }
         bool IsStandState() const;
         void SetStandState(uint8 state);
 

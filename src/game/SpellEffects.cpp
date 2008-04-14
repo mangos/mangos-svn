@@ -3315,12 +3315,7 @@ void Spell::EffectSummonPet(uint32 i)
                 NewSummon->SetName(new_name);
         }
         else if(NewSummon->getPetType()==HUNTER_PET)
-        {
-            // this enables popup window (pet details, abandon, rename)
-            //NewSummon->SetFlag(UNIT_FIELD_FLAGS,(UNIT_FLAG_RESTING | UNIT_FLAG_RENAME)); // changed in 2.0.8?
-                                                            // check it!
             NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_2, uint32(2 << 16));
-        }
 
         NewSummon->AIM_Initialize();
         NewSummon->SetHealth(NewSummon->GetMaxHealth());
@@ -3994,7 +3989,7 @@ void Spell::EffectScriptEffect(uint32 i)
 
                     // found, remove seal
                     m_caster->RemoveAurasDueToSpell((*itr)->GetId());
-                    
+
                     // Sanctified Judgement
                     Unit::AuraList const& m_auras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
                     for(Unit::AuraList::const_iterator i = m_auras.begin(); i != m_auras.end(); ++i)

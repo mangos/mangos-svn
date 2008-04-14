@@ -424,7 +424,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(PLAYER_BYTES, (skin | (face << 8) | (hairStyle << 16) | (hairColor << 24)));
     SetUInt32Value(PLAYER_BYTES_2, (facialHair | (0x00 << 8) | (0x00 << 16) | (0x02 << 24)));
     SetUInt32Value(PLAYER_BYTES_3, gender);
-    //SetUInt32Value(PLAYER_FIELD_BYTES, 0xEEE00000 );
 
     SetUInt32Value( PLAYER_GUILDID, 0 );
     SetUInt32Value( PLAYER_GUILDRANK, 0 );
@@ -2154,7 +2153,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     // restore if need some important flags
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );
     SetUInt32Value(PLAYER_FIELD_BYTES2, 0 );                // flags empty by default
-    
+
     SetArmor(int32(m_createStats[STAT_AGILITY]*2));
 
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
@@ -2277,7 +2276,6 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
 void Player::SendInitialSpells()
 {
-
     uint16 spellCount = 0;
 
     WorldPacket data(SMSG_INITIAL_SPELLS, (1+2+2+4*m_spells.size()));
@@ -3454,18 +3452,6 @@ void Player::BuildPlayerRepop()
     // BG - remove insignia related
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
-    // setting new speed
-    /*if (getRace() == RACE_NIGHTELF)
-    {
-        SetSpeed(MOVE_RUN,  1.5f*1.2f, true);
-        SetSpeed(MOVE_SWIM, 1.5f*1.2f, true);
-    }
-    else
-    {
-        SetSpeed(MOVE_RUN,  1.5f, true);
-        SetSpeed(MOVE_SWIM, 1.5f, true);
-    }*/
-
     //! corpse reclaim delay 30 * 1000ms
     WorldPacket data(SMSG_CORPSE_RECLAIM_DELAY, 4);
     data << (uint32)(CORPSE_RECLAIM_DELAY*1000);
@@ -3475,32 +3461,11 @@ void Player::BuildPlayerRepop()
     if(corpse)
         corpse->ResetGhostTime();
 
-    data.Initialize(SMSG_UPDATE_AURA_DURATION, 5);          // last check 2.0.10
-    data << uint8(0x28) << uint32(0);
-    GetSession()->SendPacket( &data );
-
     StopMirrorTimers();                                     //disable timers(bars)
 
-    //SetUInt32Value(UNIT_FIELD_AURA + 32, 8326);           // set ghost form
-    //SetUInt32Value(UNIT_FIELD_AURA + 33, 20584);          //!dono
-
-    //SetUInt32Value(UNIT_FIELD_AURAFLAGS + 4, 0xEE);
-
-    //SetUInt32Value(UNIT_FIELD_AURASTATE, 0x02);
-
-    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,(float)1.0);    //see radius of death player?
+    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, (float)1.0);   //see radius of death player?
 
     SetUInt32Value(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_ALWAYS_STAND);
-
-    //if (getRace() == RACE_NIGHTELF)
-    //    SetUInt32Value(UNIT_FIELD_DISPLAYID, 1825);
-
-    // set initial flags + set ghost + restore pvp
-    //SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NONE | UNIT_FLAG_UNKNOWN1 | (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP)?UNIT_FLAG_PVP:0) );
-
-    // reserve some flags + ad ghost flag
-    //uint32 old_safe_flags = GetUInt32Value(PLAYER_FLAGS) & ( PLAYER_FLAGS_IN_PVP | PLAYER_FLAGS_HIDE_CLOAK | PLAYER_FLAGS_HIDE_HELM );
-    //SetUInt32Value(PLAYER_FLAGS, old_safe_flags | PLAYER_FLAGS_GHOST );
 }
 
 void Player::SendDelayResponse(const uint32 ml_seconds)
@@ -3523,7 +3488,6 @@ void Player::ResurrectPlayer(float restore_percent, bool updateToWorld)
     // speed change, land walk
 
     // remove death flag + set aura
-    //RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
     RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_ALL);
     if(getRace() == RACE_NIGHTELF)
         RemoveAurasDueToSpell(20584);                       // speed bonuses
@@ -3533,22 +3497,6 @@ void Player::ResurrectPlayer(float restore_percent, bool updateToWorld)
 
     SetMovement(MOVE_LAND_WALK);
     SetMovement(MOVE_UNROOT);
-
-    //SetSpeed(MOVE_RUN,  1.0f, true);
-    //SetSpeed(MOVE_SWIM, 1.0f, true);
-
-    //SetUInt32Value(CONTAINER_FIELD_SLOT_1+29, 0);
-
-    //SetUInt32Value(UNIT_FIELD_AURA+32, 0);
-    //SetUInt32Value(UNIT_FIELD_AURALEVELS+8, 0xeeeeeeee);
-    //SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+8, 0xeeeeeeee);
-    //SetUInt32Value(UNIT_FIELD_AURAFLAGS+4, 0);
-    //SetUInt32Value(UNIT_FIELD_AURASTATE, 0);
-
-    //if(getRace() == RACE_NIGHTELF)
-    //{
-    //    DeMorph();
-    //}
 
     m_deathTimer = 0;
 
@@ -8072,7 +8020,7 @@ bool Player::IsBagPos( uint16 pos )
     return false;
 }
 
-bool Player::HasItemCount( uint32 item, uint32 count,bool inBankAlso ) const
+bool Player::HasItemCount( uint32 item, uint32 count, bool inBankAlso ) const
 {
     uint32 tempcount = 0;
     for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
@@ -8114,7 +8062,7 @@ bool Player::HasItemCount( uint32 item, uint32 count,bool inBankAlso ) const
             }
         }
     }
-    
+
     if(inBankAlso)
     {
         for(int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
@@ -9146,7 +9094,6 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, ItemPosCountVec &dest, Item *p
             }
         }
 
-
         for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
         {
             res = _CanStoreItem_InBag(i,dest,pProto,count,true,true,pItem,bag,slot);
@@ -9700,7 +9647,6 @@ void Player::MoveItemToInventory(ItemPosCountVec const& dest, Item* pItem, bool 
     }
 }
 
-
 void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
 {
     Item *pItem = GetItemByPos( bag, slot );
@@ -10112,7 +10058,6 @@ void Player::SwapItem( uint16 src, uint16 dst )
             SendEquipError( msg, pSrcItem, pDstItem );
             return;
         }
-
     }
 
     // prevent put equipped/bank bag in self
@@ -16190,7 +16135,6 @@ void Player::learnDefaultSpells(bool loading)
                 learnSpell(tspell);
         }
     }
-
 }
 
 void Player::learnQuestRewardedSpells()
