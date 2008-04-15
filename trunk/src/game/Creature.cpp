@@ -1467,13 +1467,11 @@ void Creature::setDeathState(DeathState s)
     {
         SetUInt64Value (UNIT_FIELD_TARGET,0);               // remove target selection in any cases (can be set at aura remove in Unit::setDeathState)
         SetUInt32Value(UNIT_NPC_FLAGS, 0);
+
         if(!isPet() && GetCreatureInfo()->SkinLootId)
-        {
-            LootStore skinStore = LootTemplates_Skinning;
-            LootStore::iterator tab = skinStore.find(GetCreatureInfo()->SkinLootId);
-            if ( tab != skinStore.end() )
+            if ( LootTemplates_Skinning.HaveLootFor(GetCreatureInfo()->SkinLootId) )
                 SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-        }
+
         Unit::setDeathState(CORPSE);
     }
     if(s == JUST_ALIVED)

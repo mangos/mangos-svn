@@ -6779,7 +6779,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             {
                 sLog.outDebug("       if(lootid)");
                 loot->clear();
-                FillLoot(loot, lootid, LootTemplates_Gameobject, this);
+                loot->FillLoot(lootid, LootTemplates_Gameobject, this);
             }
 
             if(loot_type == LOOT_FISHING)
@@ -6806,7 +6806,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             {
                 item->m_lootGenerated = true;
                 loot->clear();
-                FillLoot(loot, item->GetProto()->DisenchantID, LootTemplates_Disenchant, this);
+                loot->FillLoot(item->GetProto()->DisenchantID, LootTemplates_Disenchant, this);
             }
         }
         else if(loot_type == LOOT_PROSPECTING)
@@ -6817,7 +6817,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             {
                 item->m_lootGenerated = true;
                 loot->clear();
-                FillLoot(loot, item->GetEntry(), LootTemplates_Prospecting, this);
+                loot->FillLoot(item->GetEntry(), LootTemplates_Prospecting, this);
             }
         }
         else
@@ -6828,7 +6828,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             {
                 item->m_lootGenerated = true;
                 loot->clear();
-                FillLoot(loot, item->GetEntry(), LootTemplates_Item, this);
+                loot->FillLoot(item->GetEntry(), LootTemplates_Item, this);
 
                 loot->generateMoneyLoot(item->GetProto()->MinMoneyLoot,item->GetProto()->MaxMoneyLoot);
             }
@@ -6886,7 +6886,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 loot->clear();
 
                 if (uint32 lootid = creature->GetCreatureInfo()->pickpocketLootId)
-                    FillLoot(loot, lootid, LootTemplates_Pickpocketing, this);
+                    loot->FillLoot(lootid, LootTemplates_Pickpocketing, this);
 
                 // Generate extra money for pick pocket loot
                 const uint32 a = urand(0, creature->getLevel()/2);
@@ -6916,7 +6916,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 loot->clear();
 
                 if (uint32 lootid = creature->GetCreatureInfo()->lootid)
-                    FillLoot(loot, lootid, LootTemplates_Creature, recipient);
+                    loot->FillLoot(lootid, LootTemplates_Creature, recipient);
 
                 loot->generateMoneyLoot(creature->GetCreatureInfo()->mingold,creature->GetCreatureInfo()->maxgold);
 
@@ -6946,7 +6946,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             if (loot_type == LOOT_SKINNING)
             {
                 loot->clear();
-                FillLoot(loot, creature->GetCreatureInfo()->SkinLootId, LootTemplates_Skinning, this);
+                loot->FillLoot(creature->GetCreatureInfo()->SkinLootId, LootTemplates_Skinning, this);
             }
             // set group rights only for loot_type != LOOT_SKINNING
             else
@@ -14164,7 +14164,7 @@ void Player::_SaveInventory()
                 break;
         }
 
-        item->SaveToDB();
+        item->SaveToDB();                                   // item have unchanged inventory record and can be save standalone
     }
     m_itemUpdateQueue.clear();
 }

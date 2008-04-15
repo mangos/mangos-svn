@@ -446,11 +446,11 @@ void GameObject::getFishLoot(Loot *fishloot)
     uint32 subzone = GetAreaId();
 
     // if subzone loot exist use it
-    if(LootTemplates_Fishing.find(subzone) != LootTemplates_Fishing.end())
-        FillLoot(fishloot, subzone, LootTemplates_Fishing, NULL);
+    if(LootTemplates_Fishing.HaveLootFor(subzone))
+        fishloot->FillLoot(subzone, LootTemplates_Fishing, NULL);
     // else use zone loot
     else
-        FillLoot(fishloot, GetZoneId(), LootTemplates_Fishing, NULL);
+        fishloot->FillLoot(GetZoneId(), LootTemplates_Fishing, NULL);
 }
 
 void GameObject::SaveToDB()
@@ -673,15 +673,8 @@ bool GameObject::ActivateToQuest( Player *pTarget)const
         // scan GO chest with loot including quest items
         case GAMEOBJECT_TYPE_CHEST:
         {
-            LootStore::iterator tab = LootTemplates_Gameobject.find(GetLootId());
-            if (tab != LootTemplates_Gameobject.end())
-            {
-                for(LootStoreItemList::iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
-                {
-                    if(pTarget->HasQuestForItem(item_iter->itemid))
-                        return true;
-                }
-            }
+            if(LootTemplates_Gameobject.HaveQuestLootForPlayer(GetLootId(), pTarget))
+                return true;
             break;
         }
         case GAMEOBJECT_TYPE_GOOBER:

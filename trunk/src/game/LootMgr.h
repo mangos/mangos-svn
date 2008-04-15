@@ -19,12 +19,8 @@
 #ifndef MANGOS_LOOTMGR_H
 #define MANGOS_LOOTMGR_H
 
-#include "Common.h"
-#include "Policies/Singleton.h"
-#include "ItemPrototype.h"
 #include "ItemEnchantmentMgr.h"
 #include "ByteBuffer.h"
-#include "Util.h"
 #include "Utilities/LinkedReference/RefManager.h"
 
 #include <map>
@@ -59,78 +55,83 @@ enum PermissionTypes
     NONE_PERMISSION   = 3
 };
 
-enum AdditionalLootCondition
-{                                                           //QuestFFAorLootCondition < 0 (negative) condition_value1 condition_value2
-    CONDITION_NONE                  = 0,                    // 0 0
-    CONDITION_AURA                  = 1,                    // spell_id effindex
-    CONDITION_ITEM                  = 2,                    // item_id count
-    CONDITION_ITEM_EQUIPPED         = 3,                    // item_id 0
-    CONDITION_ZONEID                = 4,                    // zone_id 0
-    CONDITION_REPUTATION_RANK       = 5,                    // faction_id min_rank
-    CONDITION_TEAM                  = 6,                    // player_team 0 (469 - Alliance 67 - Horde)
-    CONDITION_SKILL                 = 7,                    // skill_id skill_value
-    CONDITION_QUESTREWARDED         = 8,                    // quest_id 0
-    CONDITION_QUESTTAKEN            = 9,                    // quest_id 0, for quest item that can looted in any amount while quest active.
-    CONDITION_QUESTGIVER            = 10                    // quest_id 0, for prevent redundent loot of quest starting items after quest start/complete
+enum LootConditionType
+{                                                           // value1       value2  for the Condition enumed
+    CONDITION_NONE                  = 0,                    // 0            0
+    CONDITION_AURA                  = 1,                    // spell_id     effindex
+    CONDITION_ITEM                  = 2,                    // item_id      count
+    CONDITION_ITEM_EQUIPPED         = 3,                    // item_id      0
+    CONDITION_ZONEID                = 4,                    // zone_id      0
+    CONDITION_REPUTATION_RANK       = 5,                    // faction_id   min_rank
+    CONDITION_TEAM                  = 6,                    // player_team  0,      (469 - Alliance 67 - Horde)
+    CONDITION_SKILL                 = 7,                    // skill_id     skill_value
+    CONDITION_QUESTREWARDED         = 8,                    // quest_id     0
+    CONDITION_QUESTTAKEN            = 9,                    // quest_id     0,      for quest item that can looted in any amount while quest active.
 };
+
+#define MAX_CONDITION                 10                    // maximun value in this enum 
 
 class Player;
 
 struct LootStoreItem
 {
-    uint32  itemid;
-    uint32  displayid;
-    float   chanceOrRef;
-    int32   questChanceOrGroup;
-    uint8   mincount    :8;
-    uint8   maxcount    :8;
-    bool    freeforall  :8;                                 // free for all (clone for all lotters)
-    uint8   condition   :8;                                 // additional loot condition
-    uint32  cond_value1;
-    uint32  cond_value2;
+    uint32  itemid;                                         // id of the item
+    float   chance;                                         // always positive, chance to drop for both quest and non-quest items, chance to be used for refs
+    int32   mincountOrRef;                                  // mincount for drop items (positive) or minus referenced TemplateleId (negative)
+    uint8   group       :8;           
+    uint8   maxcount    :8;                                 // max drop count for the item (mincountOrRef positive) or Ref multiplicator (mincountOrRef negative)
+    uint16  conditionId :16;                                // additional loot condition Id
+    bool    freeforall  :1;                                 // free for all (clone for every looter)
+    bool    needs_quest :1;                                 // quest drop (negative ChanceOrQuestChance in DB)
 
-    LootStoreItem()
-        : itemid(0), displayid(0), chanceOrRef(0), questChanceOrGroup(0), mincount(1), maxcount(1), freeforall(false), condition(0), cond_value1(0), cond_value2(0) {}
+    // Constructor, converting ChanceOrQuestChance -> (chance, needs_quest)
+    // displayid is filled in IsValid() which must be called after
+    LootStoreItem(uint32 _itemid, float _chanceOrQuestChance, int8 _group, bool _freeforall, uint8 _conditionId, int32 _mincountOrRef, uint8 _maxcount)
+        : itemid(_itemid), chance(abs(_chanceOrQuestChance)), group(_group),
+          mincountOrRef(_mincountOrRef), maxcount(_maxcount), freeforall(_freeforall), 
+          needs_quest(_chanceOrQuestChance < 0), conditionId(_conditionId) {}
 
-    LootStoreItem(uint32 _itemid, uint32 _displayid, float _chanceOrRef, int32 _questChanceOrGroup, bool _freeforall = false, uint8 _condition = 0, uint32 _cond_value1 = 0, uint32 _cond_value2 = 0, uint8 _mincount = 1, uint8 _maxcount = 1)
-        : itemid(_itemid), displayid(_displayid), chanceOrRef(_chanceOrRef), questChanceOrGroup(_questChanceOrGroup), mincount(_mincount), maxcount(_maxcount), freeforall(_freeforall), condition(_condition), cond_value1(_cond_value1), cond_value2(_cond_value2) {}
+    bool Roll() const;                                      // Checks if the entry takes it's chance (at loot generation)
+    bool IsValid(uint32 entry) const;                       // Checks correctness of values
+};
 
-    int32 GetGroupId() const { return -questChanceOrGroup -1; }
+struct LootCondition
+{
+    LootConditionType condition;                            // additional loot condition type
+    uint32  value1;                                         // data for the condition - see LootConditionType definition
+    uint32  value2;                     
+
+    LootCondition(uint8 _condition = 0, uint32 _value1 = 0, uint32 _value2 = 0)
+        : condition(LootConditionType(_condition)), value1(_value1), value2(_value2) {}
+
+    bool IsValid() const;                                   // Checks correctness of values
+    bool Meets(Player const * APlayer) const;               // Checks if the player meets the condition 
+    bool operator == (LootCondition const& lc) const
+    {
+        return (lc.condition == condition && lc.value1 == value1 && lc.value2 == value2);
+    }
 };
 
 struct LootItem
 {
     uint32  itemid;
-    uint32  displayid;
     uint32  randomSuffix;
     int32   randomPropertyId;
-    uint32  cond_value1;
-    uint32  cond_value2;
-    uint8   condition         : 8;                          // allow compiler pack structure
+    uint16  conditionId       :16;                          // allow compiler pack structure
     uint8   count             : 8;
     bool    is_looted         : 1;
     bool    is_blocked        : 1;
     bool    freeforall        : 1;                          // free for all
     bool    is_underthreshold : 1;
     bool    is_counted        : 1;
+    bool    needs_quest       : 1;                          // quest drop
 
-    LootItem()
-        : itemid(0), displayid(0), randomSuffix(0), randomPropertyId(0),
-        cond_value1(0), cond_value2(0), condition(0), count(1),
-        is_looted(true), is_blocked(false), freeforall(false), is_underthreshold(false), is_counted(false) {}
-
-    LootItem(uint32 _itemid, uint32 _displayid, uint32 _randomSuffix, int32 _randomProp, bool _freeforall, uint8 _condition, uint32 _cond_value1, uint32 _cond_value2, uint8 _count = 1)
-        : itemid(_itemid), displayid(_displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp),
-        cond_value1(_cond_value1), cond_value2(_cond_value2), condition(_condition), count(_count),
-        is_looted(false), is_blocked(false), freeforall(_freeforall), is_underthreshold(false), is_counted(false) {}
-
-    LootItem(LootStoreItem const& li,uint8 _count, uint32 _randomSuffix = 0, int32 _randomProp = 0)
-        : itemid(li.itemid), displayid(li.displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp),
-        cond_value1(li.cond_value1), cond_value2(li.cond_value2), condition(li.condition), count(_count),
-        is_looted(false), is_blocked(false), freeforall(li.freeforall), is_underthreshold(false), is_counted(false) {}
-
-    static bool looted(LootItem &itm) { return itm.is_looted; }
-    static bool not_looted(LootItem &itm) { return !itm.is_looted; }
+    // Constructor, copies most fields from LootStoreItem, generates random count and random suffixes/properties
+    // Should be called for non-reference LootStoreItem entries only (mincountOrRef > 0)
+    explicit LootItem(LootStoreItem const& li);      
+                
+    // Basic checks for player/item compatibility - if false no chance to see the item in the loot
+    bool AllowedForPlayer(Player const * player) const;
 };
 
 struct QuestItem
@@ -145,14 +146,62 @@ struct QuestItem
         : index(_index), is_looted(_islooted) {}
 };
 
+struct Loot;
+class LootTemplate;
+
 typedef std::vector<QuestItem> QuestItemList;
 typedef std::map<uint32, QuestItemList *> QuestItemMap;
 typedef std::vector<LootStoreItem> LootStoreItemList;
-typedef HM_NAMESPACE::hash_map<uint32, LootStoreItemList > LootStore;
+typedef HM_NAMESPACE::hash_map<uint32, LootTemplate*> LootTemplateMap;
+
+class LootStore
+{
+    public:
+        explicit LootStore(char const* name) : m_name(name) {}
+        virtual ~LootStore() { Clear(); }
+
+        void LoadLootTable();
+        void Verify() const;
+
+        bool HaveLootFor(uint32 loot_id) const { return m_LootTemplates.find(loot_id) != m_LootTemplates.end(); }
+        bool HaveQuestLootFor(uint32 loot_id) const;
+        bool HaveQuestLootForPlayer(uint32 loot_id,Player* player) const;
+
+        LootTemplate const* GetLootFor(uint32 loot_id) const;
+
+        char const* GetName() const { return m_name; }
+    protected:
+        void Clear();
+    private:
+        LootTemplateMap m_LootTemplates;
+        char const* m_name;
+};
+
+class LootTemplate
+{
+    class  LootGroup;       // A set of loot definitions for items (refs are not allowed inside)
+    typedef std::vector<LootGroup> LootGroups;
+
+    public:
+        // Adds an entry to the group (at loading stage)
+        void AddEntry(LootStoreItem& item);
+        // Rolls for every item in the template and adds the rolled items the the loot
+        void Process(Loot& loot, LootStore const& store, uint8 GroupId = 0) const;
+
+        // True if template includes at least 1 quest drop entry
+        bool HasQuestDrop(LootTemplateMap const& store, uint8 GroupId = 0) const;
+        // True if template includes at least 1 quest drop for an active quest of the player
+        bool HasQuestDropForPlayer(LootTemplateMap const& store, Player const * player, uint8 GroupId = 0) const;
+
+        // Checks integrity of the template
+        void Verify(LootTemplateMap const& store, uint32 Id) const;
+    private:
+        LootStoreItemList Entries;  // not grouped only 
+        LootGroups        Groups;   // groups have own (optimised) processing, grouped entries go there
+};
 
 //=====================================================
 
-struct Loot;
 class LootValidatorRef :  public Reference<Loot, LootValidatorRef>
 {
     public:
@@ -232,6 +281,10 @@ struct Loot
     void RemoveLooter(uint64 GUID) { PlayersLooting.erase(GUID); }
 
     void generateMoneyLoot(uint32 minAmount, uint32 maxAmount);
+    void FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner);
+
+    // Inserts the item into the loot (called by LootTemplate processors)
+    void AddItem(LootStoreItem const & item);
 };
 
 struct LootView
@@ -255,14 +308,10 @@ extern LootStore LootTemplates_Skinning;
 extern LootStore LootTemplates_Disenchant;
 extern LootStore LootTemplates_Prospecting;
 
-bool MeetsConditions(Player * player, LootItem * item);
-
 QuestItemList* FillFFALoot(Player* player, Loot *loot);
 QuestItemList* FillQuestLoot(Player* player, Loot *loot);
 QuestItemList* FillNonQuestNonFFAConditionalLoot(Player* player, Loot *loot);
-void FillLoot(Loot *loot, uint32 loot_id, LootStore& store, Player* loot_owner, bool referenced = false);
 void LoadLootTables();
-void LoadLootTable(LootStore& lootstore,char const* tablename);
 
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li);
 ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
