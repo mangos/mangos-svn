@@ -1586,7 +1586,7 @@ Item* Guild::_StoreItem( uint8 tab, uint8 slot, Item *pItem, uint32 count, bool 
         pItem->SetUInt64Value(ITEM_FIELD_OWNER, 0);
         AddGBankItemToDB(GetId(), tab, slot, pItem->GetGUIDLow(), pItem->GetEntry());
         pItem->FSetState(ITEM_NEW);
-        pItem->SaveToDB();
+        pItem->SaveToDB();                                  // not in onventory and can be save standalone
 
         return pItem;
     }
@@ -1594,7 +1594,7 @@ Item* Guild::_StoreItem( uint8 tab, uint8 slot, Item *pItem, uint32 count, bool 
     {
         pItem2->SetCount( pItem2->GetCount() + count );
         pItem2->FSetState(ITEM_CHANGED);
-        pItem2->SaveToDB();
+        pItem2->SaveToDB();                                 // not in onventory and can be save standalone
 
         if(!clone)
         {

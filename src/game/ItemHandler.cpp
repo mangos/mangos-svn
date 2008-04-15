@@ -1021,11 +1021,11 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
     item->SetUInt32Value(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED);
     item->SetState(ITEM_CHANGED, _player);
 
-    if(item->GetState()==ITEM_NEW)                          // save new item, to have alway for `character_gifts` record in `item_template`
+    if(item->GetState()==ITEM_NEW)                          // save new item, to have alway for `character_gifts` record in `item_instance`
     {
         // after save it will be impossible to remove the item from the queue
         item->RemoveFromUpdateQueueOf(_player);
-        item->SaveToDB();
+        item->SaveToDB();                                   // item gave inventory record unchanged and can be save standalone
     }
     CharacterDatabase.CommitTransaction();
 
