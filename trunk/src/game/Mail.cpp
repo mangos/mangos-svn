@@ -212,7 +212,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
                 pl->MoveItemFromInventory(mailItem.item->GetBagSlot(), mailItem.item->GetSlot(), true);
                 CharacterDatabase.BeginTransaction();
                 mailItem.item->DeleteFromInventoryDB();     //deletes item from character's inventory
-                mailItem.item->SaveToDB();                  // recursive and not have transaction guard into self
+                mailItem.item->SaveToDB();                  // recursive and not have transaction guard into self, item not in inventory and can be save standalone
                 // owner in data will set at mail receive and item extracting
                 CharacterDatabase.PExecute("UPDATE item_instance SET owner_guid = '%u' WHERE guid='%u'", GUID_LOPART(rc), mailItem.item->GetGUIDLow());
                 CharacterDatabase.CommitTransaction();
@@ -349,7 +349,7 @@ void WorldSession::SendReturnToSender(uint8 messageType, uint32 sender_acc, uint
             for(MailItemMap::iterator mailItemIter = mi->begin(); mailItemIter != mi->end(); ++mailItemIter)
             {
                 MailItem& mailItem = mailItemIter->second;
-                mailItem.item->SaveToDB();
+                mailItem.item->SaveToDB();                  // item not in inventory and can be save standalone
                 // owner in data will set at mail receive and item extracting
                 CharacterDatabase.PExecute("UPDATE item_instance SET owner_guid = '%u' WHERE guid='%u'", receiver_guid, mailItem.item->GetGUIDLow());
             }
