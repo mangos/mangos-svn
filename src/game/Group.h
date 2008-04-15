@@ -153,8 +153,8 @@ class MANGOS_DLL_SPEC Group
 
         // properties accessories
         bool IsFull() const { return (m_groupType==GROUPTYPE_NORMAL) ? (m_memberSlots.size()>=MAXGROUPSIZE) : (m_memberSlots.size()>=MAXRAIDSIZE); }
-        bool isRaidGroup() { return (m_groupType==GROUPTYPE_RAID); }
-        bool isBGGroup() { return m_bgGroup != NULL; }
+        bool isRaidGroup() const { return m_groupType==GROUPTYPE_RAID; }
+        bool isBGGroup()   const { return m_bgGroup != NULL; }
         const uint64& GetLeaderGUID() const { return m_leaderGuid; }
         LootMethod    GetLootMethod() const { return m_lootMethod; }
         const uint64& GetLooterGuid() const { return m_looterGuid; }

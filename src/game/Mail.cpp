@@ -746,7 +746,7 @@ void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & /*recv_data*/ )
     SendPacket(&data);
 }
 
-void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 stationery, uint32 sender_guidlow, uint32 receiver_guidlow, std::string subject, uint32 itemTextId, MailItemsInfo* mi, uint32 money, uint32 COD, uint32 checked, uint32 deliver_delay)
+void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 stationery, uint32 sender_guidlow_or_entry, uint32 receiver_guidlow, std::string subject, uint32 itemTextId, MailItemsInfo* mi, uint32 money, uint32 COD, uint32 checked, uint32 deliver_delay)
 {
     uint32 mailId = objmgr.GenerateMailID();
 
@@ -764,7 +764,7 @@ void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 station
             m->messageID = mailId;
             m->messageType = messageType;
             m->stationery = stationery;
-            m->sender = sender_guidlow;
+            m->sender = sender_guidlow_or_entry;
             m->receiver = receiver->GetGUIDLow();
             m->subject = subject;
             m->itemTextId = itemTextId;
@@ -800,7 +800,7 @@ void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 station
     CharacterDatabase.escape_string(subject);
     CharacterDatabase.PExecute("INSERT INTO mail (id,messageType,stationery,sender,receiver,subject,itemTextId,has_items,expire_time,deliver_time,money,cod,checked) "
         "VALUES ('%u', '%u', '%u', '%u', '%u', '%s', '%u', '%u', '" I64FMTD "','" I64FMTD "', '%u', '%u', '%d')",
-        mailId, messageType, stationery, sender_guidlow, receiver_guidlow, subject.c_str(), itemTextId, (mi && !mi->empty() ? 1 : 0), (uint64)expire_time, (uint64)deliver_time, money, COD, checked);
+        mailId, messageType, stationery, sender_guidlow_or_entry, receiver_guidlow, subject.c_str(), itemTextId, (mi && !mi->empty() ? 1 : 0), (uint64)expire_time, (uint64)deliver_time, money, COD, checked);
 
     if(mi)
     {

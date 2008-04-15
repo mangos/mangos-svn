@@ -8126,11 +8126,15 @@ Item* Player::GetItemOrItemWithGemEquipped( uint32 item ) const
     return NULL;
 }
 
-uint8 Player::_CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem) const
+uint8 Player::_CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, uint32* no_space_count ) const
 {
     ItemPrototype const *pProto = objmgr.GetItemPrototype(entry);
     if( !pProto )
+    {
+        if(no_space_count)
+            *no_space_count = count;
         return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+    }
 
     // no maximum
     if(pProto->MaxCount == 0)
@@ -8139,7 +8143,11 @@ uint8 Player::_CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem) 
     uint32 curcount = GetItemCount(pProto->ItemId,true,pItem);
 
     if( curcount + count > pProto->MaxCount )
+    {
+        if(no_space_count)
+            *no_space_count = count +curcount - pProto->MaxCount;
         return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+    }
 
     return EQUIP_ERR_OK;
 }
@@ -8366,25 +8374,53 @@ uint8 Player::_CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec &dest, uint3
 
     ItemPrototype const *pProto = objmgr.GetItemPrototype(entry);
     if( !pProto )
+    {
+        if(no_space_count)
+            *no_space_count = count;
         return swap ? EQUIP_ERR_ITEMS_CANT_BE_SWAPPED :EQUIP_ERR_ITEM_NOT_FOUND;
+    }
 
     if(pItem && pItem->IsBindedNotWith(GetGUID()))
+    {
+        if(no_space_count)
+            *no_space_count = count;
         return EQUIP_ERR_DONT_OWN_THAT_ITEM;
+    }
 
     // check count of items (skip for auto move for same player from bank)
-    uint8 res = _CanTakeMoreSimilarItems(entry,count,pItem);
-    if(res != EQUIP_ERR_OK)
-        return res;
+    uint32 no_similar_count = 0;                            // can't store this amount similar items
+    uint8 res = _CanTakeMoreSimilarItems(entry,count,pItem,&no_similar_count);
+    if(res!=EQUIP_ERR_OK)
+    {
+        if(count==no_similar_count)
+        {
+            if(no_space_count)
+                *no_space_count = no_similar_count;
+            return res;
+        }
+        count -= no_similar_count;
+    }
 
     // in specific slot
     if( bag != NULL_BAG && slot != NULL_SLOT )
     {
         res = _CanStoreItem_InSpecificSlot(bag,slot,dest,pProto,count,swap,pItem);
         if(res!=EQUIP_ERR_OK)
+        {
+            if(no_space_count)
+                *no_space_count = count + no_similar_count;
             return res;
+        }
 
         if(count==0)
-            return EQUIP_ERR_OK;
+        {
+            if(no_similar_count==0)
+                return EQUIP_ERR_OK;
+
+            if(no_space_count)
+                *no_space_count = count + no_similar_count;
+            return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+        }
     }
 
     // not specific slot or have spece for partly store only in specific slot
@@ -8399,17 +8435,39 @@ uint8 Player::_CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec &dest, uint3
             {
                 res = _CanStoreItem_InInventorySlots(KEYRING_SLOT_START,KEYRING_SLOT_END,dest,pProto,count,true,pItem,bag,slot);
                 if(res!=EQUIP_ERR_OK)
+                {
+                    if(no_space_count)
+                        *no_space_count = count + no_similar_count;
                     return res;
+                }
 
                 if(count==0)
-                    return EQUIP_ERR_OK;
+                {
+                    if(no_similar_count==0)
+                        return EQUIP_ERR_OK;
+
+                    if(no_space_count)
+                        *no_space_count = count + no_similar_count;
+                    return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+                }
 
                 res = _CanStoreItem_InInventorySlots(INVENTORY_SLOT_ITEM_START,INVENTORY_SLOT_ITEM_END,dest,pProto,count,true,pItem,bag,slot);
                 if(res!=EQUIP_ERR_OK)
+                {
+                    if(no_space_count)
+                        *no_space_count = count + no_similar_count;
                     return res;
+                }
 
                 if(count==0)
-                    return EQUIP_ERR_OK;
+                {
+                    if(no_similar_count==0)
+                        return EQUIP_ERR_OK;
+
+                    if(no_space_count)
+                        *no_space_count = count + no_similar_count;
+                    return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+                }
             }
             else                                            // equipped bag
             {
@@ -8419,10 +8477,21 @@ uint8 Player::_CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec &dest, uint3
                     res = _CanStoreItem_InBag(bag,dest,pProto,count,true,true,pItem,NULL_BAG,slot);
 
                 if(res!=EQUIP_ERR_OK)
+                {
+                    if(no_space_count)
+                        *no_space_count = count + no_similar_count;
                     return res;
+                }
 
                 if(count==0)
-                    return EQUIP_ERR_OK;
+                {
+                    if(no_similar_count==0)
+                        return EQUIP_ERR_OK;
+
+                    if(no_space_count)
+                        *no_space_count = count + no_similar_count;
+                    return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+                }
             }
         }
 
@@ -8435,18 +8504,40 @@ uint8 Player::_CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec &dest, uint3
                 uint32 keyringSize = GetMaxKeyringSize();
                 res = _CanStoreItem_InInventorySlots(KEYRING_SLOT_START,KEYRING_SLOT_START+keyringSize,dest,pProto,count,false,pItem,bag,slot);
                 if(res!=EQUIP_ERR_OK)
+                {
+                    if(no_space_count)
+                        *no_space_count = count + no_similar_count;
                     return res;
+                }
 
                 if(count==0)
-                    return EQUIP_ERR_OK;
+                {
+                    if(no_similar_count==0)
+                        return EQUIP_ERR_OK;
+
+                    if(no_space_count)
+                        *no_space_count = count + no_similar_count;
+                    return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+                }
             }
 
             res = _CanStoreItem_InInventorySlots(INVENTORY_SLOT_ITEM_START,INVENTORY_SLOT_ITEM_END,dest,pProto,count,false,pItem,bag,slot);
             if(res!=EQUIP_ERR_OK)
+            {
+                if(no_space_count)
+                    *no_space_count = count + no_similar_count;
                 return res;
+            }
 
             if(count==0)
-                return EQUIP_ERR_OK;
+            {
+                if(no_similar_count==0)
+                    return EQUIP_ERR_OK;
+
+                if(no_space_count)
+                    *no_space_count = count + no_similar_count;
+                return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+            }
         }
         else                                                // equipped bag
         {
@@ -8455,10 +8546,21 @@ uint8 Player::_CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec &dest, uint3
                 res = _CanStoreItem_InBag(bag,dest,pProto,count,false,true,pItem,NULL_BAG,slot);
 
             if(res!=EQUIP_ERR_OK)
+            {
+                if(no_space_count)
+                    *no_space_count = count + no_similar_count;
                 return res;
+            }
 
             if(count==0)
-                return EQUIP_ERR_OK;
+            {
+                if(no_similar_count==0)
+                    return EQUIP_ERR_OK;
+
+                if(no_space_count)
+                    *no_space_count = count + no_similar_count;
+                return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+            }
         }
     }
 
@@ -8469,17 +8571,39 @@ uint8 Player::_CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec &dest, uint3
     {
         res = _CanStoreItem_InInventorySlots(KEYRING_SLOT_START,KEYRING_SLOT_END,dest,pProto,count,true,pItem,bag,slot);
         if(res!=EQUIP_ERR_OK)
+        {
+            if(no_space_count)
+                *no_space_count = count + no_similar_count;
             return res;
+        }
 
         if(count==0)
-            return EQUIP_ERR_OK;
+        {
+            if(no_similar_count==0)
+                return EQUIP_ERR_OK;
+
+            if(no_space_count)
+                *no_space_count = count + no_similar_count;
+            return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+        }
 
         res = _CanStoreItem_InInventorySlots(INVENTORY_SLOT_ITEM_START,INVENTORY_SLOT_ITEM_END,dest,pProto,count,true,pItem,bag,slot);
         if(res!=EQUIP_ERR_OK)
+        {
+            if(no_space_count)
+                *no_space_count = count + no_similar_count;
             return res;
+        }
 
         if(count==0)
-            return EQUIP_ERR_OK;
+        {
+            if(no_similar_count==0)
+                return EQUIP_ERR_OK;
+
+            if(no_space_count)
+                *no_space_count = count + no_similar_count;
+            return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+        }
 
         if( pProto->BagFamily )
         {
@@ -8490,7 +8614,14 @@ uint8 Player::_CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec &dest, uint3
                     continue;
 
                 if(count==0)
-                    return EQUIP_ERR_OK;
+                {
+                    if(no_similar_count==0)
+                        return EQUIP_ERR_OK;
+
+                    if(no_space_count)
+                        *no_space_count = count + no_similar_count;
+                    return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+                }
             }
         }
 
@@ -8501,7 +8632,14 @@ uint8 Player::_CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec &dest, uint3
                 continue;
 
             if(count==0)
-                return EQUIP_ERR_OK;
+            {
+                if(no_similar_count==0)
+                    return EQUIP_ERR_OK;
+
+                if(no_space_count)
+                    *no_space_count = count + no_similar_count;
+                return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+            }
         }
     }
 
@@ -8513,10 +8651,21 @@ uint8 Player::_CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec &dest, uint3
             uint32 keyringSize = GetMaxKeyringSize();
             res = _CanStoreItem_InInventorySlots(KEYRING_SLOT_START,KEYRING_SLOT_START+keyringSize,dest,pProto,count,false,pItem,bag,slot);
             if(res!=EQUIP_ERR_OK)
+            {
+                if(no_space_count)
+                    *no_space_count = count + no_similar_count;
                 return res;
+            }
 
             if(count==0)
-                return EQUIP_ERR_OK;
+            {
+                if(no_similar_count==0)
+                    return EQUIP_ERR_OK;
+
+                if(no_space_count)
+                    *no_space_count = count + no_similar_count;
+                return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+            }
         }
 
         for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
@@ -8526,17 +8675,35 @@ uint8 Player::_CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec &dest, uint3
                 continue;
 
             if(count==0)
-                return EQUIP_ERR_OK;
+            {
+                if(no_similar_count==0)
+                    return EQUIP_ERR_OK;
+
+                if(no_space_count)
+                    *no_space_count = count + no_similar_count;
+                return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+            }
         }
     }
 
     // search free slot
     res = _CanStoreItem_InInventorySlots(INVENTORY_SLOT_ITEM_START,INVENTORY_SLOT_ITEM_END,dest,pProto,count,false,pItem,bag,slot);
     if(res!=EQUIP_ERR_OK)
+    {
+        if(no_space_count)
+            *no_space_count = count + no_similar_count;
         return res;
+    }
 
     if(count==0)
-        return EQUIP_ERR_OK;
+    {
+        if(no_similar_count==0)
+            return EQUIP_ERR_OK;
+        
+        if(no_space_count)
+            *no_space_count = count + no_similar_count;
+        return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+    }
 
     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
     {
@@ -8545,11 +8712,19 @@ uint8 Player::_CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec &dest, uint3
             continue;
 
         if(count==0)
-            return EQUIP_ERR_OK;
+        {
+            if(no_similar_count==0)
+                return EQUIP_ERR_OK;
+
+            if(no_space_count)
+                *no_space_count = count + no_similar_count;
+            return EQUIP_ERR_CANT_CARRY_MORE_OF_THIS;
+        }
     }
 
     if(no_space_count)
-        *no_space_count = count;
+        *no_space_count = count + no_similar_count;
+
     return EQUIP_ERR_INVENTORY_FULL;
 }
 
@@ -11872,13 +12047,13 @@ bool Player::TakeQuestSourceItem( uint32 quest_id, bool msg )
     return true;
 }
 
-bool Player::GetQuestRewardStatus( uint32 quest_id )
+bool Player::GetQuestRewardStatus( uint32 quest_id ) const
 {
     Quest const* qInfo = objmgr.GetQuestTemplate(quest_id);
     if( qInfo )
     {
         // for repeatable quests: rewarded field is set after first reward only to prevent getting XP more than once
-        QuestStatusMap::iterator itr = mQuestStatus.find( quest_id );
+        QuestStatusMap::const_iterator itr = mQuestStatus.find( quest_id );
         if( itr != mQuestStatus.end() && itr->second.m_status != QUEST_STATUS_NONE
             && !qInfo->IsRepeatable() )
             return itr->second.m_rewarded;
@@ -11888,22 +12063,22 @@ bool Player::GetQuestRewardStatus( uint32 quest_id )
     return false;
 }
 
-QuestStatus Player::GetQuestStatus( uint32 quest_id )
+QuestStatus Player::GetQuestStatus( uint32 quest_id ) const
 {
     if( quest_id )
     {
-        QuestStatusMap::iterator itr = mQuestStatus.find( quest_id );
+        QuestStatusMap::const_iterator itr = mQuestStatus.find( quest_id );
         if( itr != mQuestStatus.end() )
             return itr->second.m_status;
     }
     return QUEST_STATUS_NONE;
 }
 
-bool Player::CanShareQuest(uint32 quest_id)
+bool Player::CanShareQuest(uint32 quest_id) const
 {
     if( quest_id )
     {
-        QuestStatusMap::iterator itr = mQuestStatus.find( quest_id );
+        QuestStatusMap::const_iterator itr = mQuestStatus.find( quest_id );
         if( itr != mQuestStatus.end() )
             return itr->second.m_status == QUEST_STATUS_NONE ||
                 itr->second.m_status == QUEST_STATUS_INCOMPLETE;
@@ -12283,9 +12458,9 @@ void Player::MoneyChanged( uint32 count )
     }
 }
 
-bool Player::HasQuestForItem( uint32 itemid )
+bool Player::HasQuestForItem( uint32 itemid ) const
 {
-    for( QuestStatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++i )
+    for( QuestStatusMap::const_iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++i )
     {
         QuestStatusData qs=i->second;
 

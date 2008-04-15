@@ -412,53 +412,109 @@ void BattleGround::EndBattleGround(uint32 winner)
     }
 }
 
+uint32 BattleGround::GetBattlemasterEntry() const
+{
+    switch(GetTypeID())
+    {
+        case BATTLEGROUND_AV: return 15972;
+        case BATTLEGROUND_WS: return 14623;
+        case BATTLEGROUND_AB: return 14879;
+        case BATTLEGROUND_EY: return 22516;
+        case BATTLEGROUND_NA: return 20200;
+        default:              return 0;
+    }
+}
+
 void BattleGround::RewardMark(Player *plr,uint32 count)
 {
-    uint32 mark = 0;
-    bool IsSpell = true;
+    BattleGroundMarks mark;
+    bool IsSpell;
     switch(GetTypeID())
     {
         case BATTLEGROUND_AV:
+            IsSpell = true;
             if(count == ITEM_WINNER_COUNT)
-                mark = ITEM_AV_MARK_WINNER;
+                mark = SPELL_AV_MARK_WINNER;
             else
-                mark = ITEM_AV_MARK_LOSER;
+                mark = SPELL_AV_MARK_LOSER;
             break;
         case BATTLEGROUND_WS:
+            IsSpell = true;
             if(count == ITEM_WINNER_COUNT)
-                mark = ITEM_WS_MARK_WINNER;
+                mark = SPELL_WS_MARK_WINNER;
             else
-                mark = ITEM_WS_MARK_LOSER;
+                mark = SPELL_WS_MARK_LOSER;
             break;
         case BATTLEGROUND_AB:
+            IsSpell = true;
             if(count == ITEM_WINNER_COUNT)
-                mark = ITEM_AB_MARK_WINNER;
+                mark = SPELL_AB_MARK_WINNER;
             else
-                mark = ITEM_AB_MARK_LOSER;
+                mark = SPELL_AB_MARK_LOSER;
             break;
         case BATTLEGROUND_EY:
             IsSpell = false;
             mark = ITEM_EY_MARK_OF_HONOR;
             break;
+        default:
+            return;
     }
-    if(mark)
+
+    if(IsSpell)
+        plr->CastSpell(plr, mark, true);
+    else
     {
-        if(IsSpell)
-            plr->CastSpell(plr, mark, true);
-        else
+        ItemPosCountVec dest;
+        Item *item = NULL;
+        uint32 no_space_count = 0;
+        uint8 msg = plr->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, mark, count, &no_space_count );
+        if( msg != EQUIP_ERR_OK )                       // convert to possible store amount
+            count -= no_space_count;
+
+        if( count != 0 && !dest.empty())                // can add some
         {
-            ItemPosCountVec dest;
-            Item *item = NULL;
-            uint8 msg = plr->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, mark, count, false );
-            if( msg == EQUIP_ERR_OK )
+            if(item = plr->StoreNewItem( dest, mark, true, 0))
             {
-                item = plr->StoreNewItem( dest, mark, true, 0);
-                if(item)
-                {
-                    plr->SendNewItem(item,count,false,true);
-                }
+                plr->SendNewItem(item,count,false,true);
             }
         }
+
+        if(no_space_count > 0)
+            SendRewardMarkByMail(plr,mark,no_space_count);
+    }
+}
+
+void BattleGround::SendRewardMarkByMail(Player *plr,uint32 mark, uint32 count)
+{
+    uint32 bmEntry = GetBattlemasterEntry();
+    if(!bmEntry)
+        return;
+
+    ItemPrototype const* markProto = objmgr.GetItemPrototype(mark);
+    if(!markProto)
+        return;
+
+    if(Item* markItem = Item::CreateItem(mark,count,plr))
+    {
+        // item
+        MailItemsInfo mi;
+        mi.AddItem(markItem->GetGUIDLow(), markItem->GetEntry(), markItem);
+
+        // subject: item name
+        std::string subject = markProto->Name1;
+        int loc_idx = plr->GetSession()->GetSessionLocaleIndex();
+        if ( loc_idx >= 0 )
+            if(ItemLocale const *il = objmgr.GetItemLocale(markProto->ItemId))
+                if (il->Name.size() > loc_idx && !il->Name[loc_idx].empty())
+                    subject = il->Name[loc_idx];
+
+        // text
+        std::string textFormat = objmgr.GetMangosString(LANG_BG_MARK_BY_MAIL, plr->GetSession()->GetSessionLocaleIndex());
+        char textBuf[300];
+        snprintf(textBuf,300,textFormat.c_str(),GetName(),GetName());
+        uint32 itemTextId = objmgr.CreateItemText( textBuf );
+
+        WorldSession::SendMailTo(plr, MAIL_CREATURE, MAIL_STATIONERY_NORMAL, bmEntry, plr->GetGUIDLow(), subject, itemTextId , &mi, 0, 0, NOT_READ);
     }
 }
 

@@ -1056,7 +1056,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* EquipItem( uint16 pos, Item *pItem, bool update );
         void AutoUnequipOffhandIfNeed();
 
-        uint8 _CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem) const;
+        uint8 _CanTakeMoreSimilarItems(uint32 entry, uint32 count, Item* pItem, uint32* no_space_count = NULL) const;
         uint8 _CanStoreItem( uint8 bag, uint8 slot, ItemPosCountVec& dest, uint32 entry, uint32 count, Item *pItem = NULL, bool swap = false, uint32* no_space_count = NULL ) const;
 
         void ApplyEquipCooldown( Item * pItem );
@@ -1163,8 +1163,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool SatisfyQuestDay( Quest const* qInfo, bool msg );
         bool GiveQuestSourceItem( Quest const *pQuest );
         bool TakeQuestSourceItem( uint32 quest_id, bool msg );
-        bool GetQuestRewardStatus( uint32 quest_id );
-        QuestStatus GetQuestStatus( uint32 quest_id );
+        bool GetQuestRewardStatus( uint32 quest_id ) const;
+        QuestStatus GetQuestStatus( uint32 quest_id ) const;
         void SetQuestStatus( uint32 quest_id, QuestStatus status );
 
         void SetDailyQuestStatus( uint32 quest_id );
@@ -1180,10 +1180,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id );
         void TalkedToCreature( uint32 entry, uint64 guid );
         void MoneyChanged( uint32 value );
-        bool HasQuestForItem( uint32 itemid );
+        bool HasQuestForItem( uint32 itemid ) const;
         bool HasQuestForGO(int32 GOId);
         void UpdateForQuestsGO();
-        bool CanShareQuest(uint32 quest_id);
+        bool CanShareQuest(uint32 quest_id) const;
 
         void SendQuestComplete( uint32 quest_id );
         void SendQuestReward( Quest const *pQuest, uint32 XP, Object* questGiver );

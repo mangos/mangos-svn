@@ -2446,6 +2446,7 @@ INSERT INTO `mangos_string` VALUES
 (663,'The Battle for Arathi Basin has begun!',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (664,'The Alliance has gathered $1776W resources, and is near victory!',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (665,'The Horde has gathered $1777W resources, and is near victory!',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(666,'After your recent battle in %s our best attempts to award you a Mark of Honor failed. Enclosed you will find the Mark of Honor we were not able to deliver to you at the time. Thanks for fighting in %s!',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (700,'You must be level %u to form an arena team',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (701,'One minute until the Arena battle begins!',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (702,'Thirty seconds until the Arena battle begins!',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
