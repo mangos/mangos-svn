@@ -4124,7 +4124,7 @@ uint8 Spell::CheckItems()
                 if(m_targets.getItemTarget()->GetCount() < 5)
                     return SPELL_FAILED_PROSPECT_NEED_MORE;
 
-                if(LootTemplates_Prospecting.find(m_targets.getItemTarget()->GetEntry())==LootTemplates_Prospecting.end())
+                if(!LootTemplates_Prospecting.HaveLootFor(m_targets.getItemTarget()->GetEntry()))
                     return SPELL_FAILED_CANT_BE_PROSPECTED;
 
                 break;

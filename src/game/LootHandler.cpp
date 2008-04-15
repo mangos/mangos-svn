@@ -117,7 +117,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
                 }
             }
         }
-        else if(item->condition)
+        else if(item->conditionId)
         {
             QuestItemMap::iterator itr = loot->PlayerNonQuestNonFFAConditionalItems.find(player->GetGUIDLow());
             if (itr != loot->PlayerNonQuestNonFFAConditionalItems.end())

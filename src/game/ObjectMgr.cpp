@@ -5218,20 +5218,11 @@ void ObjectMgr::LoadGameObjectForQuests()
             {
                 uint32 loot_id = GameObject::GetLootId(goInfo);
 
-                // find loot for GO
-                LootStore::const_iterator go_loot = LootTemplates_Gameobject.find(loot_id);
-                if(go_loot == LootTemplates_Gameobject.end())
-                    continue;
-
-                // scan loot for quest items
-                for(LootStoreItemList::const_iterator item_i = go_loot->second.begin(); item_i != go_loot->second.end(); ++item_i )
+                // find quest loot for GO
+                if(LootTemplates_Gameobject.HaveQuestLootFor(loot_id))
                 {
-                    if(item_i->questChanceOrGroup > 0)
-                    {
-                        mGameObjectForQuestSet.insert(go_entry);
-                        ++count;
-                        break;
-                    }
+                    mGameObjectForQuestSet.insert(go_entry);
+                    ++count;
                 }
                 break;
             }

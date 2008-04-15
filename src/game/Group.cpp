@@ -417,7 +417,7 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
                 Player *member = itr->getSource();
                 if(!member || !member->GetSession())
                     continue;
-                if ( MeetsConditions(member, &*i) )
+                if ( i->AllowedForPlayer(member) )
                 {
                     if (member->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
                     {
@@ -471,7 +471,7 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
                 if(!playerToRoll || !playerToRoll->GetSession())
                     continue;
 
-                if (playerToRoll->CanUseItem(item) && MeetsConditions(playerToRoll, &*i) )
+                if (playerToRoll->CanUseItem(item) && i->AllowedForPlayer(playerToRoll) )
                 {
                     if (playerToRoll->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
                     {
