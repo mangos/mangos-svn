@@ -2167,29 +2167,55 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
         }
     }
 
-    if(!num_to_add)
-        return;
-
-    // create the new item and store it
-    Item* pItem = player->StoreNewItem( dest, newitemid, true, Item::GenerateItemRandomPropertyId(newitemid));
-
-    // was it successful? return error if not
-    if(!pItem)
+    if(num_to_add)
     {
-        player->SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
-        return;
+        // create the new item and store it
+        Item* pItem = player->StoreNewItem( dest, newitemid, true, Item::GenerateItemRandomPropertyId(newitemid));
+
+        // was it successful? return error if not
+        if(!pItem)
+        {
+            player->SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
+            return;
+        }
+
+        // set the "Crafted by ..." property of the item
+        if( pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE && pItem->GetProto()->Class != ITEM_CLASS_QUEST)
+            pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
+
+        // send info to the client
+        if(pItem)
+            player->SendNewItem(pItem, num_to_add, true, true);
+
+        // we succeeded in creating at least one item, so a levelup is possible
+        player->UpdateCraftSkill(m_spellInfo->Id);
     }
 
-    // set the "Crafted by ..." property of the item
-    if( pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE && pItem->GetProto()->Class != ITEM_CLASS_QUEST)
-        pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
+    // for battleground marks send by mail if not add all expected
+    if(no_space > 0 )
+    {
+        BattleGroundTypeId bgType;
+        switch(m_spellInfo->Id)
+        {
+            case SPELL_AV_MARK_WINNER:
+            case SPELL_AV_MARK_LOSER:
+                bgType = BATTLEGROUND_AV;
+                break;
+            case SPELL_WS_MARK_WINNER:
+            case SPELL_WS_MARK_LOSER:
+                bgType = BATTLEGROUND_WS;
+                break;
+            case SPELL_AB_MARK_WINNER:
+            case SPELL_AB_MARK_LOSER:
+                bgType = BATTLEGROUND_AB;
+                break;
+            default:
+                return;
+        }
 
-    // send info to the client
-    if(pItem)
-        player->SendNewItem(pItem, num_to_add, true, true);
-
-    // we succeeded in creating at least one item, so a levelup is possible
-    player->UpdateCraftSkill(m_spellInfo->Id);
+        if(BattleGround* bg = sBattleGroundMgr.GetBattleGround(bgType))
+            bg->SendRewardMarkByMail(player,newitemid,no_space);
+    }
 }
 
 void Spell::EffectCreateItem(uint32 i)

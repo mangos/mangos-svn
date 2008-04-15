@@ -37,12 +37,12 @@ enum BattleGroundSounds
 enum BattleGroundMarks
 {
     //TODO add EY mark spell
-    ITEM_WS_MARK_LOSER              = 24950,
-    ITEM_WS_MARK_WINNER             = 24951,
-    ITEM_AB_MARK_LOSER              = 24952,
-    ITEM_AB_MARK_WINNER             = 24953,
-    ITEM_AV_MARK_LOSER              = 24954,
-    ITEM_AV_MARK_WINNER             = 24955,
+    SPELL_WS_MARK_LOSER             = 24950,
+    SPELL_WS_MARK_WINNER            = 24951,
+    SPELL_AB_MARK_LOSER             = 24952,
+    SPELL_AB_MARK_WINNER            = 24953,
+    SPELL_AV_MARK_LOSER             = 24954,
+    SPELL_AV_MARK_WINNER            = 24955,
     ITEM_EY_MARK_OF_HONOR           = 29024
 };
 
@@ -232,6 +232,7 @@ class BattleGround
         int GetStartDelayTime() const       { return m_StartDelayTime; }
         uint8 GetArenaType() const          { return m_ArenaType; }
         uint8 GetWinner() const             { return m_Winner; }
+        uint32 GetBattlemasterEntry() const;
 
         // Set methods:
         void SetName(char const* Name)      { m_Name = Name; }
@@ -315,6 +316,7 @@ class BattleGround
         void RewardHonorToTeam(uint32 Honor, uint32 TeamID);
         void RewardReputationToTeam(uint32 faction_id, uint32 Reputation, uint32 TeamID);
         void RewardMark(Player *plr,uint32 count);
+        void SendRewardMarkByMail(Player *plr,uint32 mark, uint32 count);
         void UpdateWorldState(uint32 Field, uint32 Value);
         void EndBattleGround(uint32 winner);
         void BlockMovement(Player *plr);

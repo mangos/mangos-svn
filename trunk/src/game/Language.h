@@ -517,6 +517,7 @@ enum MangosStrings
     LANG_BG_AB_STARTED                  = 663,
     LANG_BG_AB_A_NEAR_VICTORY           = 664,
     LANG_BG_AB_H_NEAR_VICTORY           = 665,
+    LANG_BG_MARK_BY_MAIL                = 666,
 
     LANG_ARENA_ONE_TOOLOW               = 700,
     LANG_ARENA_ONE_MINUTE               = 701,

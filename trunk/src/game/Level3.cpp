@@ -1703,11 +1703,12 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
     // check space and find places
     ItemPosCountVec dest;
     uint8 msg = plTarget->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, itemId, count, &noSpaceForCount );
-    if( msg == EQUIP_ERR_INVENTORY_FULL )                   // convert to possible store amount
+    if( msg != EQUIP_ERR_OK )                               // convert to possible store amount
         count -= noSpaceForCount;
-    else if( msg != EQUIP_ERR_OK )                          // other error, can't add
+
+    if( count == 0 || dest.empty())                         // can't add any
     {
-        PSendSysMessage(LANG_ITEM_CANNOT_CREATE, itemId, count );
+        PSendSysMessage(LANG_ITEM_CANNOT_CREATE, itemId, noSpaceForCount );
         return true;
     }
 
