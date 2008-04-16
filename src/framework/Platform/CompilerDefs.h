@@ -24,7 +24,7 @@
 #define PLATFORM_APPLE   2
 #define PLATFORM_INTEL   3
 
-// must be first (win 64 also define WIN32
+// must be first (win 64 also define WIN32)
 #if defined( _WIN64 )
 #  define PLATFORM PLATFORM_WINDOWS
 #elif defined( __WIN32__ ) || defined( WIN32 ) || defined( _WIN32 )

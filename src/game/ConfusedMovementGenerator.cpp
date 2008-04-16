@@ -64,7 +64,7 @@ ConfusedMovementGenerator<T>::Initialize(T &unit)
     }
 
     unit.StopMoving();
-    unit.setMoveRunFlag(true);
+    unit.SetUnitMovementFlag(MOVEMENT_FLAG_RUN);
 }
 
 template<>

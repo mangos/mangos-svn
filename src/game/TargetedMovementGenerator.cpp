@@ -80,7 +80,7 @@ TargetedMovementGenerator<T>::Initialize(T &owner)
 {
     if(!&owner)
         return;
-    owner.setMoveRunFlag(true);
+    owner.SetUnitMovementFlag(MOVEMENT_FLAG_RUN);
     _setTargetLocation(owner);
 }
 
