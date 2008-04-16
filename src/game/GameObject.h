@@ -50,14 +50,16 @@ struct GameObjectInfo
         {
             uint32 _data0;
             uint32 lockId;                                  //1
-            uint32 autoCloseTime;                           //2 (unit32?)
+            uint16 _data2lo;                                //2 lower part of data2, unknown
+            uint16 autoCloseTime;                           //2 (unit16)
         } door;
         //1 GAMEOBJECT_TYPE_BUTTON
         struct
         {
             uint32 _data0;
             uint32 lockId;                                  //1
-            uint32 autoCloseTime;                           //2 (unit32?)
+            uint16 _data2lo;                                //2 lower part of data2, unknown
+            uint16 autoCloseTime;                           //2 (unit16)
             uint32 _data3;
             uint32 isBattlegroundObject;                    //4
         } button;
@@ -323,7 +325,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
             }
         }
 
-        uint32 GetAutoCloseTime() const
+        uint16 GetAutoCloseTime() const
         {
             switch(GetGoType())
             {
