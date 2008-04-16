@@ -281,7 +281,8 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
          else                         m_attackType = BASE_ATTACK;
          break;
     }
-    m_spellSchool = SpellSchools(info->School);             // Can be override for some spell (wand shoot for example)
+
+    m_spellSchoolMask = GetSpellSchoolMask(info);           // Can be override for some spell (wand shoot for example)
 
     if(m_attackType == RANGED_ATTACK)
     {
@@ -289,7 +290,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
         if((m_caster->getClassMask() & CLASSMASK_WAND_USERS) != 0 && m_caster->GetTypeId()==TYPEID_PLAYER)
         {
             if(Item* pItem = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
-                m_spellSchool = SpellSchools(pItem->GetProto()->Damage->DamageType);
+                m_spellSchoolMask = SpellSchoolMask(1 << pItem->GetProto()->Damage->DamageType);
         }
     }
 
@@ -992,13 +993,13 @@ bool Spell::IsAliveUnitPresentInTargetList()
 struct ChainHealingOrder : public std::binary_function<const Unit*, const Unit*, bool>
 {
     const Unit* MainTarget;
-    ChainHealingOrder(const Unit* Target) : MainTarget(Target) {};
+    ChainHealingOrder(Unit const* Target) : MainTarget(Target) {};
     // functor for operator ">"
-    bool operator()(const Unit* _Left, const Unit* _Right) const
+    bool operator()(Unit const* _Left, Unit const* _Right) const
     {
         return (ChainHealingHash(_Left) < ChainHealingHash(_Right));
     }
-    int32 ChainHealingHash(const Unit* Target) const
+    int32 ChainHealingHash(Unit const* Target) const
     {
         if (Target == MainTarget)
             return 0;
@@ -3451,7 +3452,7 @@ uint8 Spell::CanCast(bool strict)
                     return SPELL_FAILED_BAD_TARGETS;
 
                 Player* target = objmgr.GetPlayer(((Player*)m_caster)->GetSelection());
-                if( !target || !target->IsInSameGroupWith((Player*)m_caster) )
+                if( !target || ((Player*)m_caster)==target || !target->IsInSameGroupWith((Player*)m_caster) )
                     return SPELL_FAILED_BAD_TARGETS;
 
                 if( target->isInCombat() )
@@ -3691,9 +3692,9 @@ uint8 Spell::CheckCasterAuras() const
         prevented_reason = SPELL_FAILED_CONFUSED;
     else if(m_caster->hasUnitState(UNIT_STAT_FLEEING))
         prevented_reason = SPELL_FAILED_FLEEING;
-    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && m_spellInfo->School != SPELL_SCHOOL_NORMAL)
+    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && (GetSpellSchoolMask(m_spellInfo) & SPELL_SCHOOL_MASK_NORMAL)==0)
         prevented_reason = SPELL_FAILED_SILENCED;
-    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && m_spellInfo->School == SPELL_SCHOOL_NORMAL && !m_triggeredByAuraSpell)
+    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && (GetSpellSchoolMask(m_spellInfo) & SPELL_SCHOOL_MASK_NORMAL) && !m_triggeredByAuraSpell)
         prevented_reason = SPELL_FAILED_PACIFIED;
 
     // Attr must make flag drop spell totally immuned from all effects
@@ -3707,8 +3708,8 @@ uint8 Spell::CheckCasterAuras() const
             {
                 if(itr->second)
                 {
-                    if( ((1 << itr->second->GetSpellProto()->School) & school_immune)     ||
-                        ((1 << itr->second->GetSpellProto()->Mechanic) & mechanic_immune) ||
+                    if( (GetSpellSchoolMask(itr->second->GetSpellProto()) & school_immune) ||
+                        ((1 << itr->second->GetSpellProto()->Mechanic) & mechanic_immune)  ||
                         ((1 << itr->second->GetSpellProto()->EffectMechanic[itr->second->GetEffIndex()]) & mechanic_immune))
                         continue;
 
@@ -3723,11 +3724,11 @@ uint8 Spell::CheckCasterAuras() const
                         case SPELL_AURA_MOD_FEAR:
                             return SPELL_FAILED_FLEEING;
                         case SPELL_AURA_MOD_SILENCE:
-                            if(m_spellInfo->School != SPELL_SCHOOL_NORMAL)
+                            if((GetSpellSchoolMask(m_spellInfo) & SPELL_SCHOOL_MASK_NORMAL)==0)
                                 return SPELL_FAILED_SILENCED;
                             break;
                         case SPELL_AURA_MOD_PACIFY:
-                            if(m_spellInfo->School == SPELL_SCHOOL_NORMAL)
+                            if(GetSpellSchoolMask(m_spellInfo) & SPELL_SCHOOL_MASK_NORMAL)
                                 return SPELL_FAILED_PACIFIED;
                             break;
                     }
@@ -3858,7 +3859,10 @@ uint8 Spell::CheckMana(uint32 *mana)
         else
             manaCost += float(m_spellInfo->ManaCostPercentage)/100.0f * m_caster->GetMaxPower(powerType);
     }
-    manaCost += m_caster->GetInt32Value(UNIT_FIELD_POWER_COST_MODIFIER+m_spellInfo->School);
+
+    SpellSchools school = GetFirstSchoolInMask(GetSpellSchoolMask(m_spellInfo));
+
+    manaCost += m_caster->GetInt32Value(UNIT_FIELD_POWER_COST_MODIFIER+school);
 
     // Shiv - costs 20 + weaponSpeed*10 energy (apply only to non-triggered spell with energy cost)
     if ( m_spellInfo->manaCost > 0 && m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellIconID == 1834 )
@@ -3869,7 +3873,7 @@ uint8 Spell::CheckMana(uint32 *mana)
     if(Player* modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost, this);
 
-    manaCost*= (1.0f+m_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+m_spellInfo->School));
+    manaCost*= (1.0f+m_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+school));
     if (manaCost < 0)
         manaCost = 0;
 

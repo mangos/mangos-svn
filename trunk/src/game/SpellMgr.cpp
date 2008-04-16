@@ -218,7 +218,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
     }
 
     // only hunter aspects have this (but not all aspects in hunter family)
-    if( spellInfo->activeIconID == 122 && spellInfo->School == SPELL_SCHOOL_NATURE &&
+    if( spellInfo->activeIconID == 122 && (GetSpellSchoolMask(spellInfo) & SPELL_SCHOOL_MASK_NATURE) &&
         (spellInfo->Attributes & 0x50000) != 0 && (spellInfo->Attributes & 0x9000010) == 0)
     {
         return SPELL_ASPECT;
@@ -861,7 +861,7 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spell
 
     // Additional checks in case spell cast/hit/crit is the event
     // Check (if set) school, category, skill line, spell talent mask
-    if(spellProcEvent->schoolMask && (!procSpell || !procSpell->School || ((1<<procSpell->School) & spellProcEvent->schoolMask) == 0))
+    if(spellProcEvent->schoolMask && (!procSpell || (GetSpellSchoolMask(procSpell) & spellProcEvent->schoolMask) == 0))
         return false;
     if(spellProcEvent->category && (!procSpell || procSpell->Category != spellProcEvent->category))
         return false;

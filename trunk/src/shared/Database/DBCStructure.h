@@ -444,7 +444,7 @@ struct SkillLineAbilityEntry
 struct SpellEntry
 {
     uint32    Id;                                           // 0 normally counted from 0 field (but some tools start counting from 1, check this before tool use for data view!)
-    uint32    School;                                       // 1
+    uint32    School;                                       // 1 (will removed in 2.4.0)
     uint32    Category;                                     // 2
                                                             // 3 not used
     uint32    Dispel;                                       // 4

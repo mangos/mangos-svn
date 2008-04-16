@@ -31,7 +31,7 @@
 //==============================================================
 
 // The pHatingUnit is not used yet
-float ThreatCalcHelper::calcThreat(Unit* pHatedUnit, Unit* pHatingUnit, float pThreat, SpellSchools pSchool, SpellEntry const *pThreatSpell)
+float ThreatCalcHelper::calcThreat(Unit* pHatedUnit, Unit* pHatingUnit, float pThreat, SpellSchoolMask schoolMask, SpellEntry const *pThreatSpell)
 {
     if(pThreatSpell)
     {
@@ -39,7 +39,7 @@ float ThreatCalcHelper::calcThreat(Unit* pHatedUnit, Unit* pHatingUnit, float pT
             modOwner->ApplySpellMod(pThreatSpell->Id, SPELLMOD_THREAT, pThreat);
     }
 
-    float threat = pHatedUnit->ApplyTotalThreatModifier(pThreat, pSchool);
+    float threat = pHatedUnit->ApplyTotalThreatModifier(pThreat, schoolMask);
     return threat;
 }
 
@@ -325,7 +325,7 @@ void ThreatManager::clearReferences()
 
 //============================================================
 
-void ThreatManager::addThreat(Unit* pVictim, float pThreat, SpellSchools pSchool, SpellEntry const *pThreatSpell)
+void ThreatManager::addThreat(Unit* pVictim, float pThreat, SpellSchoolMask schoolMask, SpellEntry const *pThreatSpell)
 {
     //function deals with adding threat and adding players and pets into ThreatList
     //mobs, NPCs, guards have ThreatList and HateOfflineList
@@ -340,7 +340,7 @@ void ThreatManager::addThreat(Unit* pVictim, float pThreat, SpellSchools pSchool
 
     assert(getOwner()->GetTypeId()== TYPEID_UNIT);
 
-    float threat = ThreatCalcHelper::calcThreat(pVictim, iOwner, pThreat, pSchool, pThreatSpell);
+    float threat = ThreatCalcHelper::calcThreat(pVictim, iOwner, pThreat, schoolMask, pThreatSpell);
 
     HostilReference* ref = iThreatContainer.addThreat(pVictim, threat);
     // Ref is not in the online refs, search the offline refs next

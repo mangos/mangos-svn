@@ -148,6 +148,27 @@ enum SpellSchools
 
 #define MAX_SPELL_SCHOOL                  7
 
+enum SpellSchoolMask
+{
+    SPELL_SCHOOL_MASK_NONE    = 0x00,                       // not exist
+    SPELL_SCHOOL_MASK_NORMAL  = (1 << SPELL_SCHOOL_NORMAL), // PHYSICAL (Armor)
+    SPELL_SCHOOL_MASK_HOLY    = (1 << SPELL_SCHOOL_HOLY  ),
+    SPELL_SCHOOL_MASK_FIRE    = (1 << SPELL_SCHOOL_FIRE  ),
+    SPELL_SCHOOL_MASK_NATURE  = (1 << SPELL_SCHOOL_NATURE),
+    SPELL_SCHOOL_MASK_FROST   = (1 << SPELL_SCHOOL_FROST ),
+    SPELL_SCHOOL_MASK_SHADOW  = (1 << SPELL_SCHOOL_SHADOW),
+    SPELL_SCHOOL_MASK_ARCANE  = (1 << SPELL_SCHOOL_ARCANE)
+};
+
+inline SpellSchools GetFirstSchoolInMask(SpellSchoolMask mask)
+{
+    for(int i = 0; i < MAX_SPELL_SCHOOL; ++i)
+        if(mask & (1 << i))
+            return SpellSchools(i);
+
+    return SPELL_SCHOOL_NORMAL;
+}
+
 enum ItemQualities
 {
     ITEM_QUALITY_POOR                  = 0,                 //GREY
@@ -487,24 +508,6 @@ enum ImmuneToSchool
     IMMUNE_SCHOOL_ARCANE       = 64,
     IMMUNE_SCHOOL_MAGIC        = 126
 };
-
-inline SpellSchools immuneToSchool(ImmuneToSchool immune)
-{
-    switch(immune)
-    {
-        case IMMUNE_SCHOOL_PHYSICAL: return SPELL_SCHOOL_NORMAL;
-        case IMMUNE_SCHOOL_HOLY:     return SPELL_SCHOOL_HOLY;
-        case IMMUNE_SCHOOL_FIRE:     return SPELL_SCHOOL_FIRE;
-        case IMMUNE_SCHOOL_NATURE:   return SPELL_SCHOOL_NATURE;
-        case IMMUNE_SCHOOL_FROST:    return SPELL_SCHOOL_FROST;
-        case IMMUNE_SCHOOL_SHADOW:   return SPELL_SCHOOL_SHADOW;
-        case IMMUNE_SCHOOL_ARCANE:   return SPELL_SCHOOL_ARCANE;
-        case IMMUNE_SCHOOL_MAGIC:    break;
-    }
-
-    assert(false);
-    return SPELL_SCHOOL_NORMAL;
-}
 
 enum Targets
 {
