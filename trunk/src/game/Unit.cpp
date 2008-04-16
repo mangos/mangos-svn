@@ -5628,6 +5628,13 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     // fall through
                     break;                                          // normal cast
                 }
+                // Elune's Touch (moonkin mana restore)
+                case 24905:
+                {
+                    int32 amount = int32(0.3f * GetTotalAttackPowerValue(BASE_ATTACK));
+                    CastCustomSpell(this, 33926, &amount, NULL, NULL, true, castItem, triggeredByAura);
+                    return;
+                }
             }
             break;
         }

@@ -347,7 +347,7 @@ void GameObject::Update(uint32 /*p_time*/)
             {
                 case GAMEOBJECT_TYPE_DOOR:
                 case GAMEOBJECT_TYPE_BUTTON:
-                    if(m_cooldownTime < time(NULL))
+                    if(GetAutoCloseTime() && (m_cooldownTime < time(NULL)))
                     {
                         SwitchDoorOrButton(false);
                         SetLootState(GO_JUST_DEACTIVATED);
@@ -748,7 +748,7 @@ void GameObject::UseDoorOrButton(uint32 time_to_restore)
         return;
 
     if(!time_to_restore)
-        time_to_restore = objmgr.GetGOData(GetDBTableGUIDLow())->spawntimesecs;
+        time_to_restore = GetAutoCloseTime();
 
     SwitchDoorOrButton(true);
     SetLootState(GO_ACTIVATED);
