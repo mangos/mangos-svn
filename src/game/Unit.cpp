@@ -4002,7 +4002,9 @@ bool Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster)
                 else
                     positive = (spellInfo->AttributesEx & (1<<7))==0;
 
-                if(positive && IsFriendlyTo(pCaster))       // PBW
+                // do not remove positive auras if friendly target
+                //               negative auras if non-friendly target
+                if(positive == IsFriendlyTo(pCaster))
                 {
                     ++i;
                     continue;
