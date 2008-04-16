@@ -1475,22 +1475,29 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
     std::string username = GetMangosString(LANG_ERROR);
     std::string last_ip = GetMangosString(LANG_ERROR);
     uint32 security = 0;
+    std::string last_login = GetMangosString(LANG_ERROR);
 
-    QueryResult* result = loginDatabase.PQuery("SELECT username,gmlevel,last_ip FROM account WHERE id = '%u'",accId);
+    QueryResult* result = loginDatabase.PQuery("SELECT username,gmlevel,last_ip,last_login FROM account WHERE id = '%u'",accId);
     if(result)
     {
         Field* fields = result->Fetch();
         username = fields[0].GetCppString();
         security = fields[1].GetUInt32();
         if(m_session->GetSecurity() >= security)
+        {
             last_ip = fields[2].GetCppString();
+            last_login = fields[3].GetCppString();
+        }
         else
+        {
             last_ip = "-";
+            last_login = "-";
+        }
 
         delete result;
     }
 
-    PSendSysMessage(LANG_PINFO_ACCOUNT, (target?"":GetMangosString(LANG_OFFLINE)), name.c_str(), GUID_LOPART(targetGUID), username.c_str(), accId, security, last_ip.c_str(), latency);
+    PSendSysMessage(LANG_PINFO_ACCOUNT, (target?"":GetMangosString(LANG_OFFLINE)), name.c_str(), GUID_LOPART(targetGUID), username.c_str(), accId, security, last_ip.c_str(), last_login.c_str(), latency);
 
     std::string timeStr = secsToTimeString(total_player_time,true,true);
     uint32 gold = money /GOLD;
