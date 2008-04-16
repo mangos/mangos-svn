@@ -530,7 +530,7 @@ void Aura::Update(uint32 diff)
                                                             //+vmaps
                 if((z<=pos_z+1.3 && z>=pos_z-1.3) && m_target->IsWithinLOS(x,y,z))
                 {
-                    m_target->SendMonsterMove(x,y,z,0,true,(diff*2));
+                    m_target->SendMonsterMove(x, y, z, 0, m_target->GetUnitMovementFlags(), (diff*2));
                     if(m_target->GetTypeId() != TYPEID_PLAYER)
                         MapManager::Instance().GetMap(m_target->GetMapId(), m_target)->CreatureRelocation((Creature*)m_target,x,y,z,m_target->GetOrientation());
                 }
@@ -545,7 +545,7 @@ void Aura::Update(uint32 diff)
 
                     if((z<=pos_z+1.3 && z>=pos_z-1.3) && m_target->IsWithinLOS(x,y,z))
                     {
-                        m_target->SendMonsterMove(x,y,z,0,true,(diff*2));
+                        m_target->SendMonsterMove(x, y, z, 0, m_target->GetUnitMovementFlags(), (diff*2));
                         if(m_target->GetTypeId() != TYPEID_PLAYER)
                             MapManager::Instance().GetMap(m_target->GetMapId(), m_target)->CreatureRelocation((Creature*)m_target,x,y,z,m_target->GetOrientation());
                     }

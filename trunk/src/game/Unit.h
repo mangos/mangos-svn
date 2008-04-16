@@ -587,6 +587,15 @@ enum ReactiveType
 // delay time next attack to prevent client attack animation problems
 #define ATTACK_DISPLAY_DELAY 200
 
+// MonsterMove packet movement flags
+enum MovementFlag
+{   
+    MOVEMENT_FLAG_NONE =            0x00000000,
+    MOVEMENT_FLAG_RUN =             0x00000100,
+
+    MOVEMENT_FLAG_SWIM_FLY      =   0x00000200,
+};
+
 class MANGOS_DLL_SPEC Unit : public WorldObject
 {
     public:
@@ -834,7 +843,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID,uint32 Damage, SpellSchoolMask damageSchoolMask,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked, bool CriticalHit = false);
         void SendSpellMiss(Unit *target, uint32 spellID, SpellMissInfo missInfo);
 
-        void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, bool Run, uint32 Time);
+        void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, uint32 MovementFlags, uint32 Time);
 
         virtual void MoveOutOfRange(Player &) {  };
 
@@ -999,7 +1008,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         AuraList const& GetAurasByType(AuraType type) const { return m_modAuras[type]; }
         void ApplyAuraProcTriggerDamage(Aura* aura, bool apply);
         int32 GetTotalAuraModifier(AuraType auratype) const;
-        void SendMoveToPacket(float x, float y, float z, bool run, uint32 transitTime = 0);
+        void SendMoveToPacket(float x, float y, float z, uint32 MovementFlags, uint32 transitTime = 0);
         uint32 GetDisplayId() { return GetUInt32Value(UNIT_FIELD_DISPLAYID); }
         void SetDisplayId(uint32 modelId);
         uint32 GetNativeDisplayId() { return GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID); }
@@ -1064,8 +1073,14 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool IsStopped() const { return !(hasUnitState(UNIT_STAT_MOVING)); }
         void StopMoving();
 
-        void setMoveRunFlag(bool f) { m_moveRun = f; }
-        bool getMoveRunFlag() const { return m_moveRun; }
+        void SetUnitMovementFlag(uint32 f) { m_unit_movement_flags |= f; }
+        void RemoveUnitMovementFlag(uint32 f) 
+        { 
+            uint32 oldval = m_unit_movement_flags;
+            m_unit_movement_flags = oldval & ~f; 
+        }
+        uint32 HasUnitMovementFlag(uint32 f) const { return m_unit_movement_flags & f; }
+        uint32 GetUnitMovementFlags() const { return m_unit_movement_flags; }
 
         void AddComboPointHolder(uint32 lowguid) { m_ComboPointHolders.insert(lowguid); }
         void RemoveComboPointHolder(uint32 lowguid) { m_ComboPointHolders.erase(lowguid); }
@@ -1132,7 +1147,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         SpellSchoolMask GetMeleeDamageSchoolMask() const;
 
         MotionMaster i_motionMaster;
-        bool m_moveRun;
+        uint32 m_unit_movement_flags;
 
         uint32 m_reactiveTimer[MAX_REACTIVE];
 

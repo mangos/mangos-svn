@@ -204,7 +204,7 @@ void Creature::Update(uint32 diff)
                 else
                 {
                     RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-                    setMoveRunFlag(false);
+                    RemoveUnitMovementFlag(MOVEMENT_FLAG_RUN);
 
                     SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
                     SetHealth(GetMaxHealth());
@@ -896,7 +896,7 @@ void Creature::LoadGossipOptions()
     m_gossipOptionLoaded = true;
 }
 
-void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run, uint8 type)
+void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, uint32 MovementFlags, uint8 type)
 {
     /*    uint32 timeElap = getMSTime();
         if ((timeElap - m_startMove) < m_moveTime)
@@ -916,7 +916,7 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool 
 
         m_startMove = getMSTime();
         m_moveTime = time;*/
-    SendMonsterMove(x,y,z,type,run,time);
+    SendMonsterMove(x, y, z, type, MovementFlags, time);
 }
 
 Player *Creature::GetLootRecipient() const
@@ -1481,7 +1481,7 @@ void Creature::setDeathState(DeathState s)
         CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(this->GetEntry());
         SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
         RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-        setMoveRunFlag(false);
+        RemoveUnitMovementFlag(MOVEMENT_FLAG_RUN);
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);       
         clearUnitState(UNIT_STAT_ALL_STATE);
         i_motionMaster.Clear();

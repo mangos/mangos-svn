@@ -210,7 +210,7 @@ Unit::Unit( WorldObject *instantiator )
 
     m_removedAuras = 0;
     m_charmInfo = NULL;
-    m_moveRun = false;
+    m_unit_movement_flags = 0;
 
     // remove aurastates allowing special moves
     for(int i=0; i < MAX_REACTIVE; ++i)
@@ -306,7 +306,7 @@ bool Unit::haveOffhandWeapon() const
         return false;
 }
 
-void Unit::SendMoveToPacket(float x, float y, float z, bool run, uint32 transitTime)
+void Unit::SendMoveToPacket(float x, float y, float z, uint32 MovementFlags, uint32 transitTime)
 {
     float dx = x - GetPositionX();
     float dy = y - GetPositionY();
@@ -318,17 +318,18 @@ void Unit::SendMoveToPacket(float x, float y, float z, bool run, uint32 transitT
             dist = 0;
         else
             dist = sqrt(dist);
-        double speed = GetSpeed(run ? MOVE_RUN : MOVE_WALK);
+
+        double speed = GetSpeed((MovementFlags & MOVEMENT_FLAG_RUN) ? MOVE_RUN : MOVE_WALK);
         if(speed<=0)
             speed = 2.5f;
         speed *= 0.001f;
         transitTime = static_cast<uint32>(dist / speed + 0.5);
     }
     //float orientation = (float)atan2((double)dy, (double)dx);
-    SendMonsterMove(x,y,z,0,run,transitTime);
+    SendMonsterMove(x, y, z, 0, MovementFlags, transitTime);
 }
 
-void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, bool Run, uint32 Time)
+void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, uint32 MovementFlags, uint32 Time)
 {
     WorldPacket data( SMSG_MONSTER_MOVE, (41 + GetPackGUID().size()) );
     data.append(GetPackGUID());
@@ -356,10 +357,9 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 ty
             break;
     }
 
-    data << uint32(Run ? 0x00000100 : 0x00000000);          // flags (0x100 - running, 0x200 - taxi)
-    /* Flags:
-    512: Floating, moving without walking/running
-    */
+    //Movement Flags (0x0 = walk, 0x100 = run, 0x200 = fly/swim)
+    data << uint32(MovementFlags);
+
     data << Time;                                           // Time in between points
     data << uint32(1);                                      // 1 single waypoint
     data << NewPosX << NewPosY << NewPosZ;                  // the single waypoint Point B
@@ -9620,8 +9620,9 @@ void Unit::SendPetAIReaction(uint64 guid)
 void Unit::StopMoving()
 {
     clearUnitState(UNIT_STAT_MOVING);
+
     // send explicit stop packet
-    SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(),0,true,0);
+    SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(),0, GetUnitMovementFlags(), 0);
 
     // update position and orientation;
     WorldPacket data;
