@@ -87,9 +87,9 @@ struct LootStoreItem
     // Constructor, converting ChanceOrQuestChance -> (chance, needs_quest)
     // displayid is filled in IsValid() which must be called after
     LootStoreItem(uint32 _itemid, float _chanceOrQuestChance, int8 _group, bool _freeforall, uint8 _conditionId, int32 _mincountOrRef, uint8 _maxcount)
-        : itemid(_itemid), chance(fabs(_chanceOrQuestChance)), group(_group),
-          mincountOrRef(_mincountOrRef), maxcount(_maxcount), freeforall(_freeforall), 
-          needs_quest(_chanceOrQuestChance < 0), conditionId(_conditionId) {}
+        : itemid(_itemid), chance(fabs(_chanceOrQuestChance)), mincountOrRef(_mincountOrRef), 
+          group(_group), maxcount(_maxcount), conditionId(_conditionId), freeforall(_freeforall), 
+          needs_quest(_chanceOrQuestChance < 0) {}
 
     bool Roll() const;                                      // Checks if the entry takes it's chance (at loot generation)
     bool IsValid(uint32 entry) const;                       // Checks correctness of values

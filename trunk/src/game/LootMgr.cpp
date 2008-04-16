@@ -270,16 +270,21 @@ bool LootStoreItem::IsValid(uint32 entry) const
 // --------- LootItem ---------
 //
 
-// Consructor, copies most fields from LootStoreItem and generates random count
+// Constructor, copies most fields from LootStoreItem and generates random count
 LootItem::LootItem(LootStoreItem const& li)
 {
     itemid      = li.itemid;
     conditionId = li.conditionId;
-    count       = urand(li.mincountOrRef, li.maxcount);     // constuctor called for mincountOrRef > 0 only
-    needs_quest = li.needs_quest;
     freeforall  = li.freeforall;
+    needs_quest = li.needs_quest;
+
+    count       = urand(li.mincountOrRef, li.maxcount);     // constructor called for mincountOrRef > 0 only
     randomSuffix = GenerateEnchSuffixFactor(itemid);
     randomPropertyId = Item::GenerateItemRandomPropertyId(itemid);
+    is_looted = 0;
+    is_blocked = 0;
+    is_underthreshold = 0;
+    is_counted = 0;
 }
 
 // Basic checks for player/item compatibility - if false no chance to see the item in the loot
