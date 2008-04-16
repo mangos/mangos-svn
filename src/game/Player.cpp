@@ -609,7 +609,7 @@ void Player::EnvironmentalDamage(uint64 guid, EnviromentalDamage type, uint32 da
     //m_session->SendPacket(&data);
     //Let other players see that you get damage
     SendMessageToSet(&data, true);
-    DealDamage(this, damage, NULL, SELF_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, false);
+    DealDamage(this, damage, NULL, SELF_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 
     if(type==DAMAGE_FALL && !isAlive())                     // DealDamage not apply item durability loss at self damage
     {
@@ -1934,7 +1934,7 @@ bool Player::IsGroupVisibleFor(Player* p) const
 
 bool Player::IsInSameGroupWith(Player const* p) const
 {
-    return  GetGroup() != NULL &&
+    return  p==this || GetGroup() != NULL &&
         GetGroup() == p->GetGroup() &&
         GetGroup()->SameSubGroup((Player*)this, (Player*)p);
 }
@@ -15324,7 +15324,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_i
     return true;
 }
 
-void Player::ProhibitSpellScholl(SpellSchools idSchool, uint32 unTimeMs )
+void Player::ProhibitSpellScholl(SpellSchoolMask idSchoolMask, uint32 unTimeMs )
 {
                                                             // last check 2.0.10
     WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+m_spells.size()*8);
@@ -15342,7 +15342,7 @@ void Player::ProhibitSpellScholl(SpellSchools idSchool, uint32 unTimeMs )
             ASSERT(spellInfo);
             continue;
         }
-        if(idSchool == SpellSchools(spellInfo->School) && GetSpellCooldownDelay(unSpellId) < unTimeMs )
+        if((idSchoolMask & GetSpellSchoolMask(spellInfo)) && GetSpellCooldownDelay(unSpellId) < unTimeMs )
         {
             data << unSpellId;
             data << unTimeMs;                               // in m.secs

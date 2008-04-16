@@ -255,7 +255,7 @@ void Spell::EffectInstaKill(uint32 /*i*/)
     }
 
     uint32 health = unitTarget->GetHealth();
-    m_caster->DealDamage(unitTarget, health, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, false);
+    m_caster->DealDamage(unitTarget, health, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 }
 
 void Spell::EffectEnvirinmentalDMG(uint32 i)
@@ -268,9 +268,9 @@ void Spell::EffectEnvirinmentalDMG(uint32 i)
     // currently each eanemy selected explicitly and self cast damage, we prevent apply self casted spell bonuses/etc
     damage = m_spellInfo->EffectBasePoints[i]+m_spellInfo->EffectBaseDice[i];
 
-    m_caster->CalcAbsorbResist(m_caster,SpellSchools(m_spellInfo->School), SPELL_DIRECT_DAMAGE, damage, &absorb, &resist);
+    m_caster->CalcAbsorbResist(m_caster,GetSpellSchoolMask(m_spellInfo), SPELL_DIRECT_DAMAGE, damage, &absorb, &resist);
 
-    m_caster->SendSpellNonMeleeDamageLog(m_caster, m_spellInfo->Id, damage, SpellSchools(m_spellInfo->School), absorb, resist, false, 0, false);
+    m_caster->SendSpellNonMeleeDamageLog(m_caster, m_spellInfo->Id, damage, GetSpellSchoolMask(m_spellInfo), absorb, resist, false, 0, false);
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
         ((Player*)m_caster)->EnvironmentalDamage(m_caster->GetGUID(),DAMAGE_FIRE,damage);
 }
@@ -937,7 +937,8 @@ void Spell::EffectDummy(uint32 i)
                         uint32 classspell = itr->first;
                         SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
 
-                        if( spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->School == SPELL_SCHOOL_FROST &&
+                        if( spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && 
+                            (GetSpellSchoolMask(spellInfo) & SPELL_SCHOOL_MASK_FROST) &&
                             spellInfo->Id != 11958 && GetSpellRecoveryTime(spellInfo) > 0 )
                         {
                             ((Player*)m_caster)->RemoveSpellCooldown(classspell);
@@ -993,8 +994,8 @@ void Spell::EffectDummy(uint32 i)
 
                 if(int32(m_caster->GetHealth()) > dmg)
                 {
-                    m_caster->SendSpellNonMeleeDamageLog(m_caster, m_spellInfo->Id, dmg, SpellSchools(m_spellInfo->School), 0, 0, false, 0, false);
-                    m_caster->DealDamage(m_caster,dmg,NULL,DIRECT_DAMAGE,SpellSchools(m_spellInfo->School),m_spellInfo,false);
+                    m_caster->SendSpellNonMeleeDamageLog(m_caster, m_spellInfo->Id, dmg, GetSpellSchoolMask(m_spellInfo), 0, 0, false, 0, false);
+                    m_caster->DealDamage(m_caster,dmg,NULL,DIRECT_DAMAGE,GetSpellSchoolMask(m_spellInfo),m_spellInfo,false);
 
                     int32 mana = dmg;
 
@@ -1477,7 +1478,7 @@ void Spell::EffectTriggerSpell(uint32 i)
                 if( // ignore positive and passive auras
                     !iter->second->IsPositive() && !iter->second->IsPassive()    &&
                     // ignore physical auras
-                    iter->second->GetSpellProto()->School != SPELL_SCHOOL_NORMAL &&
+                    (GetSpellSchoolMask(iter->second->GetSpellProto()) & SPELL_SCHOOL_MASK_NORMAL)==0 &&
                     // ignore immunity persistent spells
                     !( iter->second->GetSpellProto()->AttributesEx & 0x10000 ) )
                 {
@@ -3526,8 +3527,8 @@ void Spell::EffectWeaponDmg(uint32 i)
             // Seal of Command - receive benefit from Spell Damage and Healing
             if(m_spellInfo->SpellFamilyFlags & 0x00000002000000LL)
             {
-                bonus += int32(0.20f*m_caster->SpellBaseDamageBonus((int32)(1<<m_spellInfo->School)));
-                bonus += int32(0.29f*m_caster->SpellBaseDamageBonusForVictim((int32)(1<<m_spellInfo->School), unitTarget));
+                bonus += int32(0.20f*m_caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellInfo)));
+                bonus += int32(0.29f*m_caster->SpellBaseDamageBonusForVictim(GetSpellSchoolMask(m_spellInfo), unitTarget));
             }
             break;
         }
@@ -3557,15 +3558,15 @@ void Spell::EffectWeaponDmg(uint32 i)
     // prevent negative damage
     uint32 eff_damage = uint32(bonus > 0 ? bonus : 0);
 
-    m_caster->DoAttackDamage(unitTarget, &eff_damage, &cleanDamage, &blocked_dmg, m_spellSchool, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, m_attackType, m_spellInfo, m_IsTriggeredSpell);
+    m_caster->DoAttackDamage(unitTarget, &eff_damage, &cleanDamage, &blocked_dmg, m_spellSchoolMask, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, m_attackType, m_spellInfo, m_IsTriggeredSpell);
 
     if ((hitInfo & nohitMask) && m_attackType != RANGED_ATTACK)  // not send ranged miss/etc
-        m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, m_spellSchool, eff_damage, absorbed_dmg, resisted_dmg, VICTIMSTATE_NORMAL, blocked_dmg);
+        m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, m_spellSchoolMask, eff_damage, absorbed_dmg, resisted_dmg, VICTIMSTATE_NORMAL, blocked_dmg);
 
     if(hitInfo & HITINFO_CRITICALHIT)
         criticalhit = true;
 
-    m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, eff_damage, m_spellSchool, absorbed_dmg, resisted_dmg, false, blocked_dmg, criticalhit);
+    m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, eff_damage, m_spellSchoolMask, absorbed_dmg, resisted_dmg, false, blocked_dmg, criticalhit);
 
     if (eff_damage > (absorbed_dmg + resisted_dmg + blocked_dmg))
     {
@@ -3578,7 +3579,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     }
 
     // SPELL_SCHOOL_NORMAL use for weapon-like threat and rage calculation
-    m_caster->DealDamage(unitTarget, eff_damage, &cleanDamage, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, true);
+    m_caster->DealDamage(unitTarget, eff_damage, &cleanDamage, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, true);
 
     // Hemorrhage
     if(m_spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE && (m_spellInfo->SpellFamilyFlags & 0x2000000))
@@ -3659,7 +3660,7 @@ void Spell::EffectInterruptCast(uint32 /*i*/)
             // check if we can interrupt spell
             if ( unitTarget->m_currentSpells[i]->m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_INTURRUPT )
             {
-                unitTarget->ProhibitSpellScholl(SpellSchools(unitTarget->m_currentSpells[i]->m_spellInfo->School), GetSpellDuration(m_spellInfo));
+                unitTarget->ProhibitSpellScholl(GetSpellSchoolMask(unitTarget->m_currentSpells[i]->m_spellInfo), GetSpellDuration(m_spellInfo));
                 unitTarget->InterruptSpell(i,false);
             }
         }

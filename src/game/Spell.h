@@ -407,7 +407,7 @@ class Spell
         Spell** m_triggeringContainer;                      // pointer to container with spell that has triggered us
 
         //Spell data
-        SpellSchools m_spellSchool;                         // Spell school (can be owerrided for some spells (wand shoot for example)
+        SpellSchoolMask m_spellSchoolMask;                  // Spell school (can be overwrite for some spells (wand shoot for example)
         WeaponAttackType m_attackType;                      // For weapon based attack
         bool m_canReflect;                                  // can reflect this spell?
         bool m_autoRepeat;

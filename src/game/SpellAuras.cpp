@@ -2815,12 +2815,6 @@ void Aura::HandleModThreat(bool apply, bool Real)
     if(!caster || !caster->isAlive())
         return;
 
-    if(m_modifier.m_miscvalue < SPELL_SCHOOL_NORMAL || m_modifier.m_miscvalue >= (1<<MAX_SPELL_SCHOOL))
-    {
-        sLog.outError("WARNING: Misc Value for SPELL_AURA_MOD_THREAT not valid");
-        return;
-    }
-
     bool positive = m_modifier.m_miscvalue2 == 0;
 
     for(int8 x=0;x < MAX_SPELL_SCHOOL;x++)
@@ -3108,10 +3102,10 @@ void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
                 next = iter;
                 ++next;
                 SpellEntry const *spell = iter->second->GetSpellProto();
-                if( ( (1 << spell->School) & school_mask)   //Check for school mask
+                if((GetSpellSchoolMask(spell) & school_mask)//Check for school mask
                     && !( spell->Attributes & 0x20000000)   //Spells unaffected by invulnerability
                     && !iter->second->IsPositive()          //Don't remove positive spells
-                    && spell->Id != GetId())                //Don't remove self
+                    && spell->Id != GetId() )               //Don't remove self
                 {
                     m_target->RemoveAurasDueToSpell(spell->Id);
                     if(Auras.empty())
@@ -3314,12 +3308,6 @@ void Aura::HandlePeriodicManaLeech(bool apply, bool Real)
 
 void Aura::HandleAuraModResistanceExclusive(bool apply, bool Real)
 {
-    if(m_modifier.m_miscvalue < IMMUNE_SCHOOL_PHYSICAL || m_modifier.m_miscvalue > 127)
-    {
-        sLog.outError("WARNING: Misc Value for SPELL_AURA_MOD_RESISTANCE_EXCLUS not valid");
-        return;
-    }
-
     bool positive = m_modifier.m_miscvalue2 == 0;
 
     for(int8 x = SPELL_SCHOOL_NORMAL; x < MAX_SPELL_SCHOOL;x++)
@@ -3335,12 +3323,6 @@ void Aura::HandleAuraModResistanceExclusive(bool apply, bool Real)
 
 void Aura::HandleAuraModResistance(bool apply, bool Real)
 {
-    if(m_modifier.m_miscvalue < IMMUNE_SCHOOL_PHYSICAL || m_modifier.m_miscvalue > 127)
-    {
-        sLog.outError("WARNING: Misc Value for SPELL_AURA_MOD_RESISTANCE not valid");
-        return;
-    }
-
     bool positive = m_modifier.m_miscvalue2 == 0;
 
     for(int8 x = SPELL_SCHOOL_NORMAL; x < MAX_SPELL_SCHOOL;x++)
@@ -3356,12 +3338,6 @@ void Aura::HandleAuraModResistance(bool apply, bool Real)
 
 void Aura::HandleAuraModBaseResistancePCT(bool apply, bool Real)
 {
-    if(m_modifier.m_miscvalue < IMMUNE_SCHOOL_PHYSICAL || m_modifier.m_miscvalue > 127)
-    {
-        sLog.outError("WARNING: Misc Value for SPELL_AURA_MOD_BASE_RESISTANCE_PCT not valid");
-        return;
-    }
-
     // only players have base stats
     if(m_target->GetTypeId() != TYPEID_PLAYER)
     {
@@ -3592,7 +3568,7 @@ void Aura::HandleAuraModResistenceOfIntellectPercent(bool apply, bool Real)
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if(m_modifier.m_miscvalue != (1<<SPELL_SCHOOL_NORMAL))
+    if(m_modifier.m_miscvalue != SPELL_SCHOOL_MASK_NORMAL)
     {
         // support required adding replace UpdateArmor by loop by UpdateResistence at intelect update
         // and include in UpdateResistence same code as in UpdateArmor for aura mod apply.
@@ -4563,7 +4539,7 @@ void Aura::HandleSpiritOfRedemption( bool apply, bool Real )
     }
     // die at aura end
     else
-        m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, GetSpellProto(), false);
+        m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, GetSpellProto(), false);
 }
 
 void Aura::CleanupTriggeredSpells()

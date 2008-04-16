@@ -146,7 +146,7 @@ void Player::UpdateArmor()
     //add dynamic flat mods
     AuraList const& mResbyIntellect = GetAurasByType(SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT);
     for(AuraList::const_iterator i = mResbyIntellect.begin();i != mResbyIntellect.end(); ++i)
-        if((*i)->GetModifier()->m_miscvalue & (1<<SPELL_SCHOOL_NORMAL))
+        if((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL)
             value += int32(GetStat(STAT_INTELLECT) * (*i)->GetModifier()->m_amount / 100.0f);
 
     value *= GetModifierValue(unitMod, TOTAL_PCT);

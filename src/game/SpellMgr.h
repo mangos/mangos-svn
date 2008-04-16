@@ -324,6 +324,12 @@ bool IsChanneledSpell(SpellEntry const* spellInfo)
     return (spellInfo->AttributesEx & 0x44);
 }
 
+inline
+SpellSchoolMask GetSpellSchoolMask(SpellEntry const* spellInfo)
+{
+    return SpellSchoolMask(1 << spellInfo->School);         // in 2.4.* this will replaced by simple field access
+}
+
 // Spell affects related declarations (accessed using SpellMgr functions)
 struct SpellAffection
 {
