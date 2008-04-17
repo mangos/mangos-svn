@@ -27,7 +27,6 @@
 #include "WorldSession.h"
 #include "WorldPacket.h"
 #include "Item.h"
-#include "Container.h"
 #include "Corpse.h"
 #include "GridNotifiers.h"
 #include "MapManager.h"
@@ -372,13 +371,6 @@ ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_player
     {
         Item *item = static_cast<Item *>(obj);
         pl = item->GetOwner();
-        build_for_all = false;
-    }
-    else if( obj->isType(TYPE_CONTAINER) )                  // not called? all container are items
-    {
-        Container *c = static_cast<Container *>(obj);
-        assert( c != NULL );
-        pl = c->GetOwner();
         build_for_all = false;
     }
 
