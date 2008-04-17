@@ -387,7 +387,6 @@ void LoadDBCStores(std::string dataPath)
     }
     else if(!bad_dbc_files.empty() )
     {
-
         std::string str;
         for(std::list<std::string>::iterator i = bad_dbc_files.begin(); i != bad_dbc_files.end(); ++i)
             str += *i + "\n";
@@ -396,21 +395,17 @@ void LoadDBCStores(std::string dataPath)
         exit(1);
     }
 
-    // check at up-to-date DBC files (45743 is last added spell in 2.3.2 and 2.3.3)
-    if( !sSpellStore.LookupEntry(45743))
+    // check at up-to-date DBC files (47653 is last added spell in 2.4.1)
+    // check at up-to-date DBC files (47280 is last added spell in abilities in 2.4.1)
+    // check at up-to-date DBC files (598 is last map added in 2.4.1)
+    // check at up-to-date DBC files (4140 is last area added in 2.4.1)
+    if( !sSpellStore.LookupEntry(47653)            || 
+        !sSkillLineAbilityStore.LookupEntry(47280) || 
+        !sMapStore.LookupEntry(598)                ||
+        !sAreaStore.LookupEntry(4140)              )
     {
         sLog.outError("\nYou have _outdated_ DBC files. Please extract correct versions from current using client.");
         exit(1);
-    }
-
-    // check at up-to-date DBC files (44958 changes in 2.3.3)
-    if(SkillLineAbilityEntry const* ability = sSkillLineAbilityStore.LookupEntry(44958))
-    {
-        if( ability->max_value != 250 )
-        {
-            sLog.outError("\nYou have _outdated_ DBC files. Please extract correct versions from current using client.");
-            exit(1);
-        }
     }
 
     sLog.outString();

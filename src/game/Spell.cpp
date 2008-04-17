@@ -209,11 +209,9 @@ bool SpellCastTargets::read ( WorldPacket * data, Unit *caster )
     return true;
 }
 
-void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
+void SpellCastTargets::write ( WorldPacket * data )
 {
-    *data << uint16(m_targetMask);
-
-    uint32 len = data->size();
+    *data << uint32(m_targetMask);
 
     if(m_targetMask & TARGET_FLAG_UNIT)
     {
@@ -231,7 +229,7 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
             *data << uint8(0);
     }
 
-    if( m_targetMask & TARGET_FLAG_ITEM )
+    if( m_targetMask & ( TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM ) )
     {
         if(m_itemTarget)
             data->append(m_itemTarget->GetPackGUID());
@@ -250,9 +248,6 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
 
     if( m_targetMask & ( TARGET_FLAG_CORPSE | TARGET_FLAG_PVP_CORPSE ) )
         data->appendPackGUID(m_CorpseTargetGUID);
-
-    if( forceAppend && data->size() == len )
-        *data << (uint8)0;
 }
 
 Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 originalCasterGUID, Spell** triggeringContainer )
@@ -2459,10 +2454,11 @@ void Spell::SendSpellGo()
     data << uint32(m_spellInfo->Id);
 
     data << uint16(castFlags);
+    data << uint32(getMSTime());                            // timestamp
 
     WriteSpellGoTargets(&data);
 
-    m_targets.write(&data, true);
+    m_targets.write(&data);
 
     if( castFlags & CAST_FLAG_AMMO )
         WriteAmmoToPacket(&data);
@@ -2538,19 +2534,109 @@ void Spell::SendLogExecute()
     else
         data.append(target->GetPackGUID());
 
-    data << m_spellInfo->Id;
-    data << uint32(1);
-    data << m_spellInfo->SpellVisual;
-    data << uint32(1);
+    data << uint32(m_spellInfo->Id);
+    uint32 count1 = 1;
+    data << uint32(count1);                                 // count1 (effect count?)
+    for(uint32 i = 0; i < count1; ++i)
+    {
+        data << uint32(m_spellInfo->Effect[0]);             // spell effect?
+        uint32 count2 = 1;
+        data << uint32(count2);                             // count2 (target count?)
+        for(uint32 j = 0; j < count2; ++j)
+        {
+            switch(m_spellInfo->Effect[0])
+            {
+                case SPELL_EFFECT_MANA_DRAIN:
+                    if(Unit *unit = m_targets.getUnitTarget())
+                        data.append(unit->GetPackGUID());
+                    else
+                        data << uint8(0);
+                    data << uint32(0);
+                    data << uint32(0);
+                    data << float(0);
+                    break;
+                case SPELL_EFFECT_ADD_EXTRA_ATTACKS:
+                    if(Unit *unit = m_targets.getUnitTarget())
+                        data.append(unit->GetPackGUID());
+                    else
+                        data << uint8(0);
+                    data << uint32(0);                      // count?
+                    break;
+                case SPELL_EFFECT_INTERRUPT_CAST:
+                    if(Unit *unit = m_targets.getUnitTarget())
+                        data.append(unit->GetPackGUID());
+                    else
+                        data << uint8(0);
+                    data << uint32(0);                      // spellid
+                    break;
+                case SPELL_EFFECT_DURABILITY_DAMAGE:
+                    if(Unit *unit = m_targets.getUnitTarget())
+                        data.append(unit->GetPackGUID());
+                    else
+                        data << uint8(0);
+                    data << uint32(0);
+                    data << uint32(0);
+                    break;
+                case SPELL_EFFECT_OPEN_LOCK:
+                case SPELL_EFFECT_OPEN_LOCK_ITEM:
+                    if(Item *item = m_targets.getItemTarget())
+                        data.append(item->GetPackGUID());
+                    else
+                        data << uint8(0);
+                    break;
+                case SPELL_EFFECT_CREATE_ITEM:
+                    data << uint32(m_spellInfo->EffectItemType[0]);
+                    break;
+                case SPELL_EFFECT_SUMMON:
+                case SPELL_EFFECT_SUMMON_WILD:
+                case SPELL_EFFECT_SUMMON_GUARDIAN:
+                case SPELL_EFFECT_TRANS_DOOR:
+                case SPELL_EFFECT_SUMMON_PET:
+                case SPELL_EFFECT_SUMMON_POSSESSED:
+                case SPELL_EFFECT_SUMMON_TOTEM:
+                case SPELL_EFFECT_SUMMON_OBJECT_WILD:
+                case SPELL_EFFECT_CREATE_HOUSE:
+                case SPELL_EFFECT_DUEL:
+                case SPELL_EFFECT_SUMMON_TOTEM_SLOT1:
+                case SPELL_EFFECT_SUMMON_TOTEM_SLOT2:
+                case SPELL_EFFECT_SUMMON_TOTEM_SLOT3:
+                case SPELL_EFFECT_SUMMON_TOTEM_SLOT4:
+                case SPELL_EFFECT_SUMMON_PHANTASM:
+                case SPELL_EFFECT_SUMMON_CRITTER:
+                case SPELL_EFFECT_SUMMON_OBJECT_SLOT1:
+                case SPELL_EFFECT_SUMMON_OBJECT_SLOT2:
+                case SPELL_EFFECT_SUMMON_OBJECT_SLOT3:
+                case SPELL_EFFECT_SUMMON_OBJECT_SLOT4:
+                case SPELL_EFFECT_SUMMON_DEMON:
+                case SPELL_EFFECT_150:
+                    if(Unit *unit = m_targets.getUnitTarget())
+                        data.append(unit->GetPackGUID());
+                    else if(Item *item = m_targets.getItemTarget())
+                        data.append(item->GetPackGUID());
+                    else if(GameObject *go = m_targets.getGOTarget())
+                        data.append(go->GetPackGUID());
+                    else
+                        data << uint8(0);                   // guid
+                    break;
+                case SPELL_EFFECT_FEED_PET:
+                    if(Item *item = m_targets.getItemTarget())
+                        data << uint32(item->GetEntry());
+                    else
+                        data << uint32(0);                  // item id
+                    break;
+                case SPELL_EFFECT_DISMISS_PET:
+                    if(Unit *unit = m_targets.getUnitTarget())
+                        data.append(unit->GetPackGUID());
+                    else
+                        data << uint8(0);
+                    break;
+                default:
+                    return;
+            }
+        }
+    }
 
-    if(m_targets.getUnitTarget())
-        data << m_targets.getUnitTargetGUID();
-    else if(m_targets.getItemTargetGUID())
-        data << m_targets.getItemTargetGUID();
-    else if(m_targets.getGOTarget())
-        data << m_targets.getGOTargetGUID();
-
-    m_caster->SendMessageToSet(&data,true);
+    m_caster->SendMessageToSet(&data, true);
 }
 
 void Spell::SendInterrupted(uint8 result)
@@ -3558,7 +3644,7 @@ uint8 Spell::CanCast(bool strict)
                 if( form == FORM_CAT          || form == FORM_TREE      || form == FORM_TRAVEL   || 
                     form == FORM_AQUA         || form == FORM_BEAR      || form == FORM_DIREBEAR ||
                     form == FORM_CREATUREBEAR || form == FORM_GHOSTWOLF || form == FORM_FLIGHT   ||
-                    form == FORM_SWIFT_FLIGHT || form == FORM_MOONKIN )
+                    form == FORM_FLIGHT_EPIC  || form == FORM_MOONKIN )
                     return SPELL_FAILED_NOT_SHAPESHIFT;
 
                 break;

@@ -43,12 +43,6 @@
 #endif                                                      // __SHOW_STUPID_WARNINGS__
 #endif                                                      // __GNUC__
 
-// we need to stick to 1 version or half of the stuff will work for someone
-// others will not and opposite
-// will only support WoW and WoW:TBC 2.3.3 client build 7799...
-
-#define EXPECTED_MANGOS_CLIENT_BUILD        {7799, 0}
-
 // must be the first thing to include for it to work
 #include "MemoryLeaks.h"
 

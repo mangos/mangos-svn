@@ -264,6 +264,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleDelFriendOpcode(WorldPacket& recvPacket);
         void HandleAddIgnoreOpcode(WorldPacket& recvPacket);
         void HandleDelIgnoreOpcode(WorldPacket& recvPacket);
+        void HandleSetFriendNoteOpcode(WorldPacket& recvPacket);
         void HandleBugOpcode(WorldPacket& recvPacket);
         void HandleSetAmmoOpcode(WorldPacket& recvPacket);
         void HandleItemNameQueryOpcode(WorldPacket& recvPacket);
@@ -310,6 +311,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleGroupUninvite(uint64 guid, std::string name);
         void HandleGroupSetLeaderOpcode(WorldPacket& recvPacket);
         void HandleGroupDisbandOpcode(WorldPacket& recvPacket);
+        void HandleGroupPassOnLootOpcode( WorldPacket &recv_data );
         void HandleLootMethodOpcode(WorldPacket& recvPacket);
         void HandleLootRoll( WorldPacket &recv_data );
         void HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data );
@@ -445,6 +447,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleUnlearnSkillOpcode(WorldPacket& recvPacket);
 
         void HandleQuestgiverStatusQueryOpcode(WorldPacket& recvPacket);
+        void HandleQuestgiverStatusQueryMultipleOpcode(WorldPacket& recvPacket);
         void HandleQuestgiverHelloOpcode(WorldPacket& recvPacket);
         void HandleQuestgiverAcceptQuestOpcode(WorldPacket& recvPacket);
         void HandleQuestgiverQuestQueryOpcode(WorldPacket& recvPacket);
@@ -587,6 +590,8 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleGuildBankDepositItem(WorldPacket& recv_data);
         void HandleGuildBankModifyTab(WorldPacket& recv_data);
         void HandleGuildBankBuyTab(WorldPacket& recv_data);
+        void HandleGuildBankTabText(WorldPacket& recv_data);
+        void HandleGuildBankSetTabText(WorldPacket& recv_data);
     private:
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);

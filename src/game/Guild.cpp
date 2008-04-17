@@ -25,6 +25,7 @@
 #include "ObjectMgr.h"
 #include "Guild.h"
 #include "Chat.h"
+#include "SocialMgr.h"
 
 Guild::Guild()
 {
@@ -500,7 +501,7 @@ void Guild::BroadcastToGuild(WorldSession *session, std::string msg, uint32 lang
         {
             Player *pl = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
 
-            if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_GCHATLISTEN) && !pl->HasInIgnoreList(session->GetPlayer()->GetGUID()) )
+            if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_GCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetGUIDLow()) )
                 pl->GetSession()->SendPacket(&data);
         }
     }
@@ -517,7 +518,7 @@ void Guild::BroadcastToOfficers(WorldSession *session, std::string msg, uint32 l
 
             Player *pl = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
 
-            if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_OFFCHATLISTEN) && !pl->HasInIgnoreList(session->GetPlayer()->GetGUID()))
+            if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_OFFCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetGUIDLow()))
                 pl->GetSession()->SendPacket(&data);
         }
     }
@@ -669,6 +670,7 @@ void Guild::Roster(WorldSession *session)
             data << (uint32)itr->second.RankId;
             data << (uint8)pl->getLevel();
             data << (uint8)pl->getClass();
+            data << (uint8)0;                               // new 2.4.0
             data << (uint32)pl->GetZoneId();
             data << itr->second.Pnote;
             data << itr->second.OFFnote;
@@ -681,6 +683,7 @@ void Guild::Roster(WorldSession *session)
             data << (uint32)itr->second.RankId;
             data << (uint8)itr->second.level;
             data << (uint8)itr->second.Class;
+            data << (uint8)0;                               // new 2.4.0
             data << (uint32)itr->second.zoneId;
             data << (float(time(NULL)-itr->second.logout_time) / DAY);
             data << itr->second.Pnote;
@@ -993,8 +996,8 @@ void Guild::LoadGuildBankFromDB()
     m_bankloaded = true;
     LoadGuildBankEventLogFromDB();
 
-    //                                                     0      1        2
-    QueryResult *result = CharacterDatabase.PQuery("SELECT TabId, TabName, TabIcon FROM guild_bank_tab WHERE guildid='%u' ORDER BY TabId", Id);
+    //                                                     0      1        2        3
+    QueryResult *result = CharacterDatabase.PQuery("SELECT TabId, TabName, TabIcon, TabText FROM guild_bank_tab WHERE guildid='%u' ORDER BY TabId", Id);
     if(!result)
     {
         purchased_tabs = 0;
@@ -1012,6 +1015,7 @@ void Guild::LoadGuildBankFromDB()
 
         NewTab->Name = fields[1].GetCppString();
         NewTab->Icon = fields[2].GetCppString();
+        NewTab->Text = fields[3].GetCppString();
 
         m_TabListMap[TabId] = NewTab;
     }while( result->NextRow() );
@@ -1744,4 +1748,34 @@ uint8 Guild::CanStoreItem( uint8 tab, uint8 slot, GuildItemPosCountVec &dest, ui
         return EQUIP_ERR_OK;
 
     return EQUIP_ERR_BANK_FULL;
+}
+
+void Guild::SetGuildBankTabText(uint8 TabId, std::string text)
+{
+    if (TabId >= GUILD_BANK_MAX_TABS)
+        return;
+    if (TabId >= m_TabListMap.size())
+        return;
+    if (!m_TabListMap[TabId])
+        return;
+
+    m_TabListMap[TabId]->Text = text;
+
+    CharacterDatabase.escape_string(text);
+    CharacterDatabase.PExecute("UPDATE guild_bank_tab SET TabText='%s' WHERE guildid='%u' AND TabId='%u'", text.c_str(), Id, uint32(TabId));
+}
+
+void Guild::SendGuildBankTabText(WorldSession *session, uint8 TabId)
+{
+    if (TabId > GUILD_BANK_MAX_TABS)
+        return;
+
+    GuildBankTab const *tab = GetBankTab(TabId);
+    if (!tab)
+        return;
+
+    WorldPacket data(MSG_GUILD_BANK_TAB_TEXT, 1+tab->Text.size()+1);
+    data << uint8(TabId);
+    data << tab->Text;
+    session->SendPacket(&data);
 }

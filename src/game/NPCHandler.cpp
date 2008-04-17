@@ -160,12 +160,12 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
     uint32 count = 0;
     for(Creature::SpellsList::const_iterator itr = trainer_spells.begin(); itr != trainer_spells.end(); ++itr)
     {
-        if(!_player->IsSpellFitByClassAndRace(itr->spell->EffectTriggerSpell[0]))
+        if(!_player->IsSpellFitByClassAndRace(itr->spell->Id))
             continue;
 
         ++count;
 
-        bool primary_prof_first_rank = spellmgr.IsPrimaryProfessionFirstRankSpell(itr->spell->EffectTriggerSpell[0]);
+        bool primary_prof_first_rank = spellmgr.IsPrimaryProfessionFirstRankSpell(itr->spell->Id);
 
         data << uint32(itr->spell->Id);
         data << uint8(_player->GetTrainerSpellState(&*itr));
@@ -176,7 +176,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         data << uint8(itr->reqlevel ? itr->reqlevel : itr->spell->spellLevel);
         data << uint32(itr->reqskill);
         data << uint32(itr->reqskillvalue);
-        data << uint32(spellmgr.GetPrevSpellInChain(itr->spell->EffectTriggerSpell[0]));
+        data << uint32(spellmgr.GetPrevSpellInChain(itr->spell->Id));
         data << uint32(0);
         data << uint32(0);
     }
@@ -242,30 +242,32 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     if(_player->GetMoney() < nSpellCost )
         return;
 
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(trainer_spell->spell->EffectTriggerSpell[0]);
+    WorldPacket data(SMSG_PLAY_SPELL_VISUAL, 12);           // visual effect on trainer
+    data << uint64(guid) << uint32(0xB3);
+    SendPacket(&data);
 
-    WorldPacket data( SMSG_TRAINER_BUY_SUCCEEDED, 12 );
-    data << guid << spellId;
-    SendPacket( &data );
+    data.Initialize(SMSG_OBSOLETE, 12);                     // visual effect on player
+    data << uint64(_player->GetGUID()) << uint32(0x016A);
+    SendPacket(&data);
 
     _player->ModifyMoney( -int32(nSpellCost) );
 
-    if(spellInfo->powerType == 2)
+    if(trainer_spell->spell->powerType == 2)
     {
         _player->addSpell(spellId,4);                       // active = 4 for spell book of hunter's pet
         return;
     }
 
-    // learn explicitly to prevent lost money at lags, learning spell will be only show spell anumation
-    _player->learnSpell(spellInfo->Id);
+    // learn explicitly to prevent lost money at lags, learning spell will be only show spell animation
+    _player->learnSpell(trainer_spell->spell->Id);
 
-    Unit* caster = (trainer_spell->spell->SpellVisual == 222) ? (Unit*)_player : (Unit*)unit;
+    data.Initialize(SMSG_TRAINER_BUY_SUCCEEDED, 12);
+    data << uint64(guid) << uint32(spellId);
+    SendPacket(&data);
 
     // trainer always see at customer in time of training (part of client functionality)
     float u_oprientation = unit->GetOrientation();
     unit->SetInFront(_player);
-
-    caster->CastSpell(_player,trainer_spell->spell,false);
 
     // trainer always return to original orientation
     unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
@@ -319,15 +321,16 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,8+4);
+    CHECK_PACKET_SIZE(recv_data,8+4+4);
 
     sLog.outDebug("WORLD: CMSG_GOSSIP_SELECT_OPTION");
 
     uint32 option;
+    uint32 unk;
     uint64 guid;
     std::string code = "";
 
-    recv_data >> guid >> option;
+    recv_data >> guid >> unk >> option;
 
     if(_player->PlayerTalkClass->GossipOptionCoded( option ))
     {

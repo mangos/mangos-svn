@@ -64,7 +64,7 @@ void Corpse::RemoveFromWorld()
 
 bool Corpse::Create( uint32 guidlow )
 {
-    Object::_Create(guidlow, HIGHGUID_CORPSE);
+    Object::_Create(guidlow, 0, HIGHGUID_CORPSE);
     return true;
 }
 

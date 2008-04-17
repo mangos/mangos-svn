@@ -119,7 +119,7 @@ class Pet : public Creature
         bool isControlled() const { return getPetType()==SUMMON_PET || getPetType()==HUNTER_PET; }
         bool isTemporarySummoned() const { return m_duration > 0; }
 
-        bool Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry);
+        bool Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry, uint32 pet_number);
         bool CreateBaseAtCreature( Creature* creature );
         bool LoadPetFromDB( Unit* owner,uint32 petentry = 0,uint32 petnumber = 0, bool current = false );
         void SavePetToDB(PetSaveMode mode);
@@ -145,7 +145,7 @@ class Pet : public Creature
         uint32 GetMaxLoyaltyPoints(uint32 level);
         uint32 GetStartLoyaltyPoints(uint32 level);
         void KillLoyaltyBonus(uint32 level);
-        uint32 GetLoyaltyLevel(){ return ((GetUInt32Value(UNIT_FIELD_BYTES_1) >> 8) & 0xFF);};
+        uint32 GetLoyaltyLevel() { return GetByteValue(UNIT_FIELD_BYTES_1, 1); }
         void SetLoyaltyLevel(LoyaltyLevel level);
         void GivePetXP(uint32 xp);
         void GivePetLevel(uint32 level);

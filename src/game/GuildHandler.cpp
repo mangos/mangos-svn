@@ -26,6 +26,7 @@
 #include "Guild.h"
 #include "MapManager.h"
 #include "GossipDef.h"
+#include "SocialMgr.h"
 
 void WorldSession::HandleGuildQueryOpcode(WorldPacket& recvPacket)
 {
@@ -104,7 +105,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
     }
 
     // OK result but not send invite
-    if(player->HasInIgnoreList(GetPlayer()->GetGUID()))
+    if(player->GetSocial()->HasIgnore(GetPlayer()->GetGUIDLow()))
         return;
 
     // not let enemies sign guild charter
@@ -784,7 +785,6 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
 
     guild->Query(this);
     guild->Roster(this);
-
 }
 
 void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
@@ -1496,7 +1496,6 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                 if(pItemChar)
                     pGuild->LogBankEvent(GUILD_BANK_LOG_DEPOSIT_ITEM, BankTab, pl->GetGUIDLow(), pItemChar->GetEntry(), pItemChar->GetCount());
 
-
                 pGuild->RemoveItem(BankTab, BankTabSlot);
                 if(pItemChar)
                 {
@@ -1757,4 +1756,42 @@ void WorldSession::HandleGuildBankLog( WorldPacket & recv_data )
     recv_data >> TabId;
 
     pGuild->DisplayGuildBankLogs(this, TabId);
+}
+
+void WorldSession::HandleGuildBankTabText(WorldPacket &recv_data)
+{
+    sLog.outDebug("WORLD: Received MSG_GUILD_BANK_TAB_INFO");
+
+    uint32 GuildId = GetPlayer()->GetGuildId();
+    if (GuildId == 0)
+        return;
+
+    Guild *pGuild = objmgr.GetGuildById(GuildId);
+    if(!pGuild)
+        return;
+
+    uint8 TabId;
+    recv_data >> TabId;
+
+    pGuild->SendGuildBankTabText(this, TabId);
+}
+
+void WorldSession::HandleGuildBankSetTabText(WorldPacket &recv_data)
+{
+    sLog.outDebug("WORLD: Received CMSG_GUILD_BANK_SET_TAB_INFO");
+
+    uint32 GuildId = GetPlayer()->GetGuildId();
+    if (GuildId == 0)
+        return;
+
+    Guild *pGuild = objmgr.GetGuildById(GuildId);
+    if(!pGuild)
+        return;
+
+    uint8 TabId;
+    std::string Text;
+    recv_data >> TabId;
+    recv_data >> Text;
+
+    pGuild->SetGuildBankTabText(TabId, Text);
 }

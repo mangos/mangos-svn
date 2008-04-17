@@ -110,19 +110,7 @@ void Creature::LoadTrainerSpells()
 
         if(!spellinfo)
         {
-            sLog.outErrorDb("Trainer (Entry: %u ) have in list non existed spell %u",GetEntry(),spellid);
-            continue;
-        }
-
-        if(spellinfo->Effect[0]!=SPELL_EFFECT_LEARN_SPELL)
-        {
-            sLog.outErrorDb("LoadTrainerSpells: Trainer (Entry: %u) has not learning spell(%u).", GetEntry(), spellid);
-            continue;
-        }
-
-        if(!sSpellStore.LookupEntry(spellinfo->EffectTriggerSpell[0]))
-        {
-            sLog.outErrorDb("LoadTrainerSpells: Trainer (Entry: %u) has learning spell(%u) without triggered spell (bad dbc?).", GetEntry(), spellid);
+            sLog.outErrorDb("Trainer (Entry: %u ) has non existing spell %u",GetEntry(),spellid);
             continue;
         }
 
@@ -132,7 +120,7 @@ void Creature::LoadTrainerSpells()
             continue;
         }
 
-        if(SpellMgr::IsProfessionSpell(spellinfo->EffectTriggerSpell[0]))
+        if(SpellMgr::IsProfessionSpell(spellinfo->Id))
             m_trainer_type = 2;
 
         TrainerSpell tspell;
@@ -1128,7 +1116,7 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
         return false;
     }
 
-    Object::_Create(guidlow, HIGHGUID_UNIT);
+    Object::_Create(guidlow, Entry, HIGHGUID_UNIT);
 
     m_DBTableGuid = guidlow;
 
@@ -1155,8 +1143,8 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
 
     SetDisplayId(display_id);
     SetNativeDisplayId(display_id);
-    SetUInt32Value(UNIT_FIELD_BYTES_2, 1);                  // let creature use equiped weapon in fight
-    SetUInt32Value(UNIT_FIELD_BYTES_0, ( minfo->gender << 16 ));
+    SetByteValue(UNIT_FIELD_BYTES_2, 0, 1);                 // let creature use equiped weapon in fight
+    SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
 
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
     SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );

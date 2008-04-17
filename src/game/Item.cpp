@@ -225,7 +225,7 @@ Item::Item( )
 
 bool Item::Create( uint32 guidlow, uint32 itemid, Player const* owner)
 {
-    Object::_Create( guidlow, HIGHGUID_ITEM );
+    Object::_Create( guidlow, 0, HIGHGUID_ITEM );
 
     SetUInt32Value(OBJECT_FIELD_ENTRY, itemid);
     SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
@@ -329,7 +329,7 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
 
     Field *fields = result->Fetch();
 
-    Object::_Create(guid, HIGHGUID_ITEM);
+    Object::_Create(guid, 0, HIGHGUID_ITEM);
 
     if(!LoadValues(fields[0].GetString()))
     {

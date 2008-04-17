@@ -322,7 +322,7 @@ void ArenaTeam::Roster(WorldSession *session)
     Player *pl = NULL;
 
     WorldPacket data(SMSG_ARENA_TEAM_ROSTER, 100);
-    data << uint8(GetSlot());                               // slot
+    data << uint32(GetId());                                // arena team id
     data << uint32(GetMembersSize());                       // members count
     data << uint32(GetType());                              // arena team type?
 

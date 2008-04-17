@@ -34,6 +34,7 @@
 #include "Group.h"
 #include "Database/DatabaseImpl.h"
 #include "PlayerDump.h"
+#include "SocialMgr.h"
 
 // check used symbols in player name at creating and rename
 std::string notAllowedChars = "\t\v\b\f\a\n\r\\\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789\0";
@@ -72,8 +73,7 @@ bool LoginQueryHolder::Initialize()
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADACTIONS,         "SELECT button,action,type,misc FROM character_action WHERE guid = '%u' ORDER BY button", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADMAILCOUNT,       "SELECT COUNT(id) FROM mail WHERE receiver = '%u' AND checked = 0 AND deliver_time <= '" I64FMTD "'", GUID_LOPART(m_guid),(uint64)time(NULL));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADMAILDATE,        "SELECT MIN(deliver_time) FROM mail WHERE receiver = '%u' AND checked = 0", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADIGNORELIST,      "SELECT friend FROM character_social WHERE guid = '%u' AND flags = 1", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADFRIENDLIST,      "SELECT friend FROM character_social WHERE guid = '%u' AND flags = 0 LIMIT 255", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSOCIALLIST,      "SELECT friend,flags,note FROM character_social WHERE guid = '%u' LIMIT 255", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADHOMEBIND,        "SELECT map,zone,position_x,position_y,position_z FROM character_homebind WHERE guid = '%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS,  "SELECT spell,item,time FROM character_spell_cooldown WHERE guid = '%u'", GUID_LOPART(m_guid));
 
@@ -82,7 +82,6 @@ bool LoginQueryHolder::Initialize()
     // in other case still be dummy query
 
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGUILD,           "SELECT guildid,rank FROM guild_member WHERE guid = '%u'", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_BROADCASTTOFRIENDLISTERS,"SELECT guid FROM character_social WHERE friend = '%u' AND flags = 0", GUID_LOPART(m_guid));
 
     return res;
 }
@@ -413,8 +412,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         data << uint32(0);
     SendPacket(&data);
 
-    pCurrChar->SendFriendlist();
-    pCurrChar->SendIgnorelist();
+    pCurrChar->GetSocial()->SendSocialList();
 
     // added in 2.2.0
     data.Initialize(SMSG_VOICE_SYSTEM_STATUS, 2);
@@ -541,14 +539,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     }
 
     // friend status
-    data.Initialize(SMSG_FRIEND_STATUS, 19);
-    data<<uint8(FRIEND_ONLINE);
-    data<<pCurrChar->GetGUID();
-    data<<uint8(1);
-    data<<pCurrChar->GetAreaId();
-    data<<pCurrChar->getLevel();
-    data<<pCurrChar->getClass();
-    pCurrChar->BroadcastPacketToFriendListers(&data, true, holder->GetResult(PLAYER_LOGIN_QUERY_BROADCASTTOFRIENDLISTERS));
+    sSocialMgr.SendFriendStatus(pCurrChar, FRIEND_ONLINE, pCurrChar->GetGUIDLow(), "", true);
 
     // Place character in world (and load zone) before some object loading
     pCurrChar->LoadCorpse();

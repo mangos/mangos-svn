@@ -444,7 +444,6 @@ struct SkillLineAbilityEntry
 struct SpellEntry
 {
     uint32    Id;                                           // 0 normally counted from 0 field (but some tools start counting from 1, check this before tool use for data view!)
-    uint32    School;                                       // 1 (will removed in 2.4.0)
     uint32    Category;                                     // 2
                                                             // 3 not used
     uint32    Dispel;                                       // 4
@@ -536,6 +535,7 @@ struct SpellEntry
     //uint32    unk3[3];                                    // 205-207 not used null
     uint32    TotemCategory[2];                             // 208-209
     uint32    AreaId;                                       // 210
+    uint32    SchoolMask;                                   // school mask
 
     private:
         // prevent creating custom entries (copy data from original infact)

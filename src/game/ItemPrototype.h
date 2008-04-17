@@ -66,10 +66,11 @@ enum ItemSpelltriggerType
     ITEM_SPELLTRIGGER_ON_EQUIP        = 1,
     ITEM_SPELLTRIGGER_CHANCE_ON_HIT   = 2,
     ITEM_SPELLTRIGGER_SOULSTONE       = 4,
-    ITEM_SPELLTRIGGER_ON_NO_DELAY_USE = 5                   // no equip cooldown
+    ITEM_SPELLTRIGGER_ON_NO_DELAY_USE = 5,                  // no equip cooldown
+    ITEM_SPELLTRIGGER_LEARN_SPELL_ID  = 6                   // used in item_template.spell_2 with spell_id with SPELL_GENERIC_LEARN in spell_1
 };
 
-#define MAX_ITEM_SPELLTRIGGER           6
+#define MAX_ITEM_SPELLTRIGGER           7
 
 enum ItemBondingType
 {
@@ -104,13 +105,15 @@ enum BAG_FAMILY_MASK
     BAG_FAMILY_MASK_BULLETS                   = 0x00000002,
     BAG_FAMILY_MASK_SHARDS                    = 0x00000004,
     BAG_FAMILY_MASK_LEATHERWORKING_SUPP       = 0x00000008,
-    //BAG_FAMILY_MASK_UNK                     = 0x00000010, // not used currently
+    BAG_FAMILY_MASK_UNUSED                    = 0x00000010, // not used currently
     BAG_FAMILY_MASK_HERBS                     = 0x00000020,
     BAG_FAMILY_MASK_ENCHANTING_SUPP           = 0x00000040,
     BAG_FAMILY_MASK_ENGINEERING_SUPP          = 0x00000080,
     BAG_FAMILY_MASK_KEYS                      = 0x00000100,
     BAG_FAMILY_MASK_GEMS                      = 0x00000200,
-    BAG_FAMILY_MASK_MINING_SUPP               = 0x00000400
+    BAG_FAMILY_MASK_MINING_SUPP               = 0x00000400,
+    BAG_FAMILY_MASK_SOULBOUND_EQUIPMENT       = 0x00000800,
+    BAG_FAMILY_MASK_VANITY_PETS               = 0x00001000
 };
 
 /* TODO: Not entirely positive on need for this??

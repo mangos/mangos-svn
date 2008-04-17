@@ -44,6 +44,11 @@ void WorldSession::SendNameQueryOpcode(Player *p)
     data << uint32(p->getRace());
     data << uint32(p->getGender());
     data << uint32(p->getClass());
+    data << uint8(0);                                       // unk 2.4.0
+    /*for(5)
+    {
+        // string
+    }*/
 
     SendPacket(&data);
 }
@@ -67,6 +72,11 @@ void WorldSession::SendNameQueryOpcodeFromDB(uint64 guid)
     data << (uint32)(field & 0xFF);
     data << (uint32)((field >> 16) & 0xFF);
     data << (uint32)((field >> 8) & 0xFF);
+    data << (uint8)0;
+    /*for(5)
+    {
+        // string
+    }*/
 
     SendPacket( &data );
 }
@@ -263,9 +273,19 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
 
     if (!pGossip)
     {
-        data << uint32( 0 );
-        data << "Greetings $N";
-        data << "Greetings $N";
+        for(uint32 i = 0; i < 8; ++i)
+        {
+            data << float(0);
+            data << "Greetings $N";
+            data << "Greetings $N";
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+        }
     }
     else
     {

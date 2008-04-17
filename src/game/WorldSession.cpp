@@ -37,6 +37,7 @@
 #include "BattleGroundMgr.h"
 #include "Language.h"                                       // for CMSG_DISMOUNT handler
 #include "Chat.h"
+#include "SocialMgr.h"
 
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec, bool tbc, time_t mute_time, LocaleConstant locale) :
@@ -127,6 +128,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_DEL_FRIEND ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDelFriendOpcode               );
     objmgr.opcodeTable[ CMSG_ADD_IGNORE ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAddIgnoreOpcode               );
     objmgr.opcodeTable[ CMSG_DEL_IGNORE ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDelIgnoreOpcode               );
+    objmgr.opcodeTable[ CMSG_FRIEND_SET_NOTE ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetFriendNoteOpcode           );
     objmgr.opcodeTable[ CMSG_BUG ]                              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBugOpcode                     );
     objmgr.opcodeTable[ CMSG_SET_AMMO ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetAmmoOpcode                 );
     objmgr.opcodeTable[ CMSG_AREATRIGGER ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAreaTriggerOpcode             );
@@ -193,6 +195,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_GROUP_UNINVITE_GUID ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupUninviteGuidOpcode       );
     objmgr.opcodeTable[ CMSG_GROUP_SET_LEADER ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupSetLeaderOpcode          );
     objmgr.opcodeTable[ CMSG_GROUP_DISBAND ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupDisbandOpcode            );
+    objmgr.opcodeTable[ CMSG_GROUP_PASS_ON_LOOT_TOGGLE ]        = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleGroupPassOnLootOpcode         );
     objmgr.opcodeTable[ CMSG_LOOT_METHOD ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLootMethodOpcode              );
     objmgr.opcodeTable[ CMSG_LOOT_ROLL ]                        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLootRoll                      );
     objmgr.opcodeTable[ CMSG_REQUEST_PARTY_MEMBER_STATS ]       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleRequestPartyMemberStatsOpcode );
@@ -305,6 +308,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_UNLEARN_SKILL ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleUnlearnSkillOpcode            );
 
     objmgr.opcodeTable[ CMSG_QUESTGIVER_STATUS_QUERY ]          = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverStatusQueryOpcode   );
+    objmgr.opcodeTable[ CMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE ] = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverStatusQueryMultipleOpcode   );
     objmgr.opcodeTable[ CMSG_QUESTGIVER_HELLO ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverHelloOpcode         );
     objmgr.opcodeTable[ CMSG_QUESTGIVER_ACCEPT_QUEST ]          = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverAcceptQuestOpcode   );
     objmgr.opcodeTable[ CMSG_QUESTGIVER_CHOOSE_REWARD ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleQuestgiverChooseRewardOpcode  );
@@ -471,6 +475,8 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_GUILD_BANK_DEPOSIT_ITEM ]          = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildBankDepositItem          );
     objmgr.opcodeTable[ CMSG_GUILD_BANK_MODIFY_TAB ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildBankModifyTab            );
     objmgr.opcodeTable[ CMSG_GUILD_BANK_BUY_TAB ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildBankBuyTab               );
+    objmgr.opcodeTable[ MSG_GUILD_BANK_TAB_TEXT ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildBankTabText              );
+    objmgr.opcodeTable[ CMSG_GUILD_BANK_SET_TAB_TEXT ]          = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildBankSetTabText           );
 }
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
@@ -721,10 +727,7 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->GetGroup()->SendUpdate();
 
         ///- Broadcast a logout message to the player's friends
-        WorldPacket data(SMSG_FRIEND_STATUS, 9);
-        data<<uint8(FRIEND_OFFLINE);
-        data<<_player->GetGUID();
-        _player->BroadcastPacketToFriendListers(&data);
+        sSocialMgr.SendFriendStatus(_player, FRIEND_OFFLINE, _player->GetGUIDLow(), "", true);
 
         ///- Delete the player object
         _player->CleanupsBeforeDelete();                    // do some cleanup before deleting to prevent crash at crossreferences to already deleted data
@@ -734,7 +737,7 @@ void WorldSession::LogoutPlayer(bool Save)
         _player = NULL;
 
         ///- Send the 'logout complete' packet to the client
-        data.Initialize( SMSG_LOGOUT_COMPLETE, 0 );
+        WorldPacket data( SMSG_LOGOUT_COMPLETE, 0 );
         SendPacket( &data );
 
         ///- Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline

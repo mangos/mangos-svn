@@ -1059,6 +1059,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\SocialMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\SocialMgr.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\SpellMgr.cpp"
 				>
 			</File>

@@ -44,10 +44,12 @@ class Pet;
 class PlayerMenu;
 class Transport;
 class UpdateMask;
+class PlayerSocial;
 
 typedef std::deque<Mail*> PlayerMails;
 
 #define PLAYER_MAX_SKILLS       127
+#define PLAYER_MAX_DAILY_QUESTS 25
 
 // Note: SPELLMOD_* values is aura types in fact
 enum SpellModType
@@ -337,7 +339,7 @@ enum PlayerStateType
 
     PLAYER_STATE_FORM_ALL          = 0x00FF0000,
 
-    PLAYER_STATE_FLAG_ALWAYS_STAND = 0x01000000,
+    PLAYER_STATE_FLAG_ALWAYS_STAND = 0x01,                  // byte 4
     PLAYER_STATE_FLAG_CREEP        = 0x02000000,
     PLAYER_STATE_FLAG_UNTRACKABLE  = 0x04000000,
     PLAYER_STATE_FLAG_ALL          = 0xFF000000,
@@ -504,29 +506,6 @@ enum AtLoginFlags
     AT_LOGIN_RESET_SPELLS  = 2,
     AT_LOGIN_RESET_TALENTS = 4
 };
-
-// Social : friends/ignores
-
-enum FriendStatus
-{
-    FRIEND_STATUS_OFFLINE = 0,
-    FRIEND_STATUS_ONLINE  = 1,
-    FRIEND_STATUS_AFK     = 2,
-    //FRIEND_STATUS_UNK3
-    FRIEND_STATUS_DND     = 4
-};
-
-struct FriendInfo
-{
-    uint8 Status;
-    uint32 Area;
-    uint32 Level;
-    uint32 Class;
-};
-
-typedef std::set<uint32> IgnoreList;
-typedef std::set<uint32> MuteList;
-typedef std::set<uint64> FriendList;
 
 typedef std::map<uint32, QuestStatusData> QuestStatusMap;
 
@@ -850,16 +829,14 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADACTIONS              = 10,
     PLAYER_LOGIN_QUERY_LOADMAILCOUNT            = 11,
     PLAYER_LOGIN_QUERY_LOADMAILDATE             = 12,
-    PLAYER_LOGIN_QUERY_LOADIGNORELIST           = 13,
-    PLAYER_LOGIN_QUERY_LOADFRIENDLIST           = 14,
-    PLAYER_LOGIN_QUERY_LOADHOMEBIND             = 15,
-    PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS       = 16,
-    PLAYER_LOGIN_QUERY_LOADHONOR                = 17,
-    PLAYER_LOGIN_QUERY_LOADGUILD                = 18,
-    PLAYER_LOGIN_QUERY_BROADCASTTOFRIENDLISTERS = 19
+    PLAYER_LOGIN_QUERY_LOADSOCIALLIST           = 13,
+    PLAYER_LOGIN_QUERY_LOADHOMEBIND             = 14,
+    PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS       = 15,
+    PLAYER_LOGIN_QUERY_LOADHONOR                = 16,
+    PLAYER_LOGIN_QUERY_LOADGUILD                = 17,
 };
 
-#define MAX_PLAYER_LOGIN_QUERY                    20
+#define MAX_PLAYER_LOGIN_QUERY                    18
 
 // Player summoning auto-decline time (in secs)
 #define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
@@ -918,15 +895,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         std::string afkMsg;
         std::string dndMsg;
 
-        void SendFriendlist();
-        void SendIgnorelist();
-        bool AddToIgnoreList(uint64 guid, std::string name);
-        bool AddToFriendList(uint64 guid, std::string name);
-        void RemoveFromFriendList(uint64 guid);
-        void RemoveFromIgnoreList(uint64 guid);
-        bool HasInIgnoreList(uint64 guid) const { return m_ignorelist.find(GUID_LOPART(guid)) != m_ignorelist.end(); }
-        bool HasInFriendList(uint64 guid) const { return m_friendlist.find(GUID_LOPART(guid)) != m_friendlist.end(); }
-        void GetFriendInfo(uint64 friendGUID, FriendInfo &friendInfo);
+        PlayerSocial *GetSocial() { return m_social; }
 
         uint32 GetTaximask( uint8 index ) const { return m_taximask[index]; }
         void SetTaximask( uint8 index, uint32 value ) { m_taximask[index] = value; }
@@ -1575,8 +1544,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateLocalChannels( uint32 newZone );
         void LeaveLFGChannel();
 
-        void BroadcastPacketToFriendListers(WorldPacket *packet, bool extern_result = false, QueryResult *result = NULL);
-
         void UpdateDefense();
         void UpdateWeaponSkill (WeaponAttackType attType);
         void UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHitOutcome outcome, bool defence);
@@ -1960,7 +1927,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadSpells(QueryResult *result);
         void _LoadTaxiMask(const char* data);
         void _LoadTutorials(QueryResult *result);
-        void _LoadIgnoreList(QueryResult *result);
         void _LoadFriendList(QueryResult *result);
         bool _LoadHomeBind(QueryResult *result);
         void _LoadHonor(QueryResult *result);
@@ -2118,9 +2084,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         time_t m_resetTalentsTime;
         uint32 m_usedTalentCount;
 
-        IgnoreList m_ignorelist;
-        MuteList   m_mutelist;
-        FriendList m_friendlist;
+        // Social
+        PlayerSocial *m_social;
 
         // Groups
         GroupReference m_group;

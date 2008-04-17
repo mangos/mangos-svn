@@ -289,6 +289,8 @@ void WorldSession::SendPetNameQuery( uint64 petguid, uint32 petnumber)
     data << uint32(petnumber);
     data << name.c_str();
     data << uint32(pet->GetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP));
+    data << uint8(0);
+    // for(5) string
     _player->GetSession()->SendPacket(&data);
 }
 
@@ -376,7 +378,7 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
 
     Pet* pet = ObjectAccessor::GetPet(petguid);
                                                             // check it!
-    if(!pet || !pet->isPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET || (pet->GetUInt32Value(UNIT_FIELD_BYTES_2) >> 16) != 3 || pet->GetOwnerGUID() != _player->GetGUID() || !pet->GetCharmInfo())
+    if(!pet || !pet->isPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET || pet->GetByteValue(UNIT_FIELD_BYTES_2, 2) != 3 || pet->GetOwnerGUID() != _player->GetGUID() || !pet->GetCharmInfo())
         return;
 
     pet->SetName(name);
@@ -385,7 +387,7 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
         ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_NAME);
 
-    pet->SetUInt32Value(UNIT_FIELD_BYTES_2, uint32(2 << 16));
+    pet->SetByteValue(UNIT_FIELD_BYTES_2, 2, 0x02);
 
     CharacterDatabase.escape_string(name);
     CharacterDatabase.PExecute("UPDATE character_pet SET name = '%s', renamed = '1' WHERE owner = '%u' AND id = '%u'", name.c_str(),_player->GetGUIDLow(),pet->GetCharmInfo()->GetPetNumber() );

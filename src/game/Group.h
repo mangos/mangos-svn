@@ -63,7 +63,7 @@ class BattleGround;
 enum GroupUpdateFlags
 {
     GROUP_UPDATE_FLAG_NONE              = 0x00000000,       // nothing
-    GROUP_UPDATE_FLAG_STATUS            = 0x00000001,       // uint8, flags
+    GROUP_UPDATE_FLAG_STATUS            = 0x00000001,       // uint16, flags
     GROUP_UPDATE_FLAG_CUR_HP            = 0x00000002,       // uint16
     GROUP_UPDATE_FLAG_MAX_HP            = 0x00000004,       // uint16
     GROUP_UPDATE_FLAG_POWER_TYPE        = 0x00000008,       // uint8
@@ -88,7 +88,7 @@ enum GroupUpdateFlags
 
 #define GROUP_UPDATE_FLAGS_COUNT          20
                                                                 // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15,16,17,18,19
-static const uint8 GroupUpdateLength[GROUP_UPDATE_FLAGS_COUNT] = { 0, 1, 2, 2, 1, 2, 2, 2, 2, 4, 8, 8, 1, 2, 2, 2, 1, 2, 2, 8};
+static const uint8 GroupUpdateLength[GROUP_UPDATE_FLAGS_COUNT] = { 0, 2, 2, 2, 1, 2, 2, 2, 2, 4, 8, 8, 1, 2, 2, 2, 1, 2, 2, 8};
 
 class Roll : public LootValidatorRef
 {

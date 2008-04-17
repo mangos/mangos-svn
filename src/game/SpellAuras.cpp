@@ -300,7 +300,10 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleUnused,                                    //245 used by only one test spell
     &Aura::HandleUnused,                                    //246 unused
     &Aura::HandleUnused,                                    //247 unused
-    &Aura::HandleNULL                                       //248 SPELL_AURA_MOD_COMBAT_RESULT
+    &Aura::HandleNULL,                                      //248 SPELL_AURA_MOD_COMBAT_RESULT
+    &Aura::HandleNULL,                                      //249
+    &Aura::HandleNULL,                                      //250
+    &Aura::HandleNULL                                       //251
 };
 
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem) :
@@ -1631,7 +1634,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             else
                 modelid = 15375;
             break;
-        case FORM_SWIFT_FLIGHT:
+        case FORM_FLIGHT_EPIC:
             if(Player::TeamForRace(m_target->getRace())==ALLIANCE)
                 modelid = 21243;
             else
@@ -1664,7 +1667,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             m_target->RemoveAurasDueToSpell(m_target->m_ShapeShiftForm);
         }
 
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
+        m_target->SetByteValue(UNIT_FIELD_BYTES_2, 3, new_bytes_1);
         if(modelid > 0)
         {
             m_target->SetDisplayId(modelid);
@@ -1750,7 +1753,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             case FORM_AQUA:
             case FORM_BEAR:
             case FORM_DIREBEAR:
-            case FORM_SWIFT_FLIGHT:
+            case FORM_FLIGHT_EPIC:
             case FORM_FLIGHT:
             case FORM_MOONKIN:
                 // remove movement affects
@@ -1768,11 +1771,11 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     else
     {
         m_target->SetDisplayId(m_target->GetNativeDisplayId());
-        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, (new_bytes_1<<16) );
+        m_target->SetByteValue(UNIT_FIELD_BYTES_2, 3, FORM_NONE);
         if(m_target->getClass() == CLASS_DRUID)
             m_target->setPowerType(POWER_MANA);
         m_target->m_ShapeShiftForm = 0;
-        m_target->m_form = 0;
+        m_target->m_form = FORM_NONE;
 
         switch(m_modifier.m_miscvalue)
         {
@@ -2582,7 +2585,9 @@ void Aura::HandleModStealth(bool apply, bool Real)
             if(BattleGround *bg = ((Player*)m_target)->GetBattleGround())
                 bg->HandleDropFlag((Player*)m_target);
 
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_CREEP);
+        m_target->SetByteValue(UNIT_FIELD_BYTES_1, 2, 0x02);
+        if(m_target->GetTypeId()==TYPEID_PLAYER)
+            m_target->SetByteValue(PLAYER_FIELD_BYTES2, 1, 0x20);
 
         // only at real aura add
         if(Real)
@@ -2605,7 +2610,9 @@ void Aura::HandleModStealth(bool apply, bool Real)
     }
     else
     {
-        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_CREEP);
+        m_target->SetByteValue(UNIT_FIELD_BYTES_1, 2, 0x00);
+        if(m_target->GetTypeId()==TYPEID_PLAYER)
+            m_target->SetByteValue(PLAYER_FIELD_BYTES2, 1, 0x00);
 
         // only at real aura remove
         if(Real)
@@ -4229,7 +4236,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
         case FORM_FLIGHT:
             spellId = 33948;
             break;
-        case FORM_SWIFT_FLIGHT:
+        case FORM_FLIGHT_EPIC:
             spellId  = 40122;
             spellId2 = 40121;
             break;

@@ -426,63 +426,22 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
     {
         data->Initialize(SMSG_BATTLEFIELD_STATUS, 4*3);
         *data << uint32(QueueSlot);                         // queue id (0...2)
-        *data << uint32(1);
-        *data << uint32(2);
+        *data << uint64(0);
         return;
     }
 
     data->Initialize(SMSG_BATTLEFIELD_STATUS, (4+1+1+4+2+4+1+4+4+4));
     *data << uint32(QueueSlot);                             // queue id (0...2) - player can be in 3 queues in time
-    *data << uint8(bg->GetArenaType());                     // team type (0=BG, 2=2x2, 3=3x3, 5=5x5), for arenas
-    switch(bg->GetTypeID())                                 // value depends on bg id
-    {
-        case BATTLEGROUND_AV:
-            *data << uint8(1);
-            break;
-        case BATTLEGROUND_WS:
-            *data << uint8(2);
-            break;
-        case BATTLEGROUND_AB:
-            *data << uint8(3);
-            break;
-        case BATTLEGROUND_NA:
-            *data << uint8(4);
-            break;
-        case BATTLEGROUND_BE:
-            *data << uint8(5);
-            break;
-        case BATTLEGROUND_AA:
-            *data << uint8(6);
-            break;
-        case BATTLEGROUND_EY:
-            *data << uint8(7);
-            break;
-        case BATTLEGROUND_RL:
-            *data << uint8(8);
-            break;
-        default:                                            // unknown
-            *data << uint8(0);
-            break;
-    }
-
-    if(bg->isArena() && (StatusID == STATUS_WAIT_QUEUE))
-        *data << uint32(BATTLEGROUND_AA);                   // all arenas
-    else
-        *data << uint32(bg->GetTypeID());                   // BG id from DBC
-
-    *data << uint16(0x1F90);                                // unk value 8080
-    *data << uint32(bg->GetInstanceID());                   // instance id
-
-    if(bg->isBattleGround())
-        *data << uint8(bg->GetTeamIndexByTeamId(team));     // team
-    else
-        *data << uint8(bg->isRated());                      // is rated battle
-
+    // uint64 in client
+    *data << uint64( uint64(bg->GetArenaType()) | (uint64(0x0D) << 8) | (uint64(bg->GetTypeID()) << 16) | (uint64(0x1F90) << 48) );
+    *data << uint32(0);                                     // unknown
+    // alliance/horde for BG and skirmish/rated for Arenas
+    *data << uint8(bg->isArena() ? (bg->isRated() ? 1 : 0) : bg->GetTeamIndexByTeamId(team));
     *data << uint32(StatusID);                              // status
     switch(StatusID)
     {
         case STATUS_WAIT_QUEUE:                             // status_in_queue
-            *data << uint32(Time1);                         // wait time, milliseconds
+            *data << uint32(Time1);                         // average wait time, milliseconds
             *data << uint32(Time2);                         // time in queue, updated every minute?
             break;
         case STATUS_WAIT_JOIN:                              // status_invite

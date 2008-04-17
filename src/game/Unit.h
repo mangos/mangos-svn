@@ -124,26 +124,29 @@ enum SpellModOp
 
 enum ShapeshiftForm
 {
-    FORM_CAT                = 1,
-    FORM_TREE               = 2,
-    FORM_TRAVEL             = 3,
-    FORM_AQUA               = 4,
-    FORM_BEAR               = 5,
-    FORM_AMBIENT            = 6,
-    FORM_GHOUL              = 7,
-    FORM_DIREBEAR           = 8,
-    FORM_CREATUREBEAR       = 14,
-    FORM_CREATURECAT        = 15,
-    FORM_GHOSTWOLF          = 16,
-    FORM_BATTLESTANCE       = 17,
-    FORM_DEFENSIVESTANCE    = 18,
-    FORM_BERSERKERSTANCE    = 19,
-    FORM_SWIFT_FLIGHT       = 27,
-    FORM_SHADOW             = 28,
-    FORM_FLIGHT             = 29,
-    FORM_STEALTH            = 30,
-    FORM_MOONKIN            = 31,
-    FORM_SPIRITOFREDEMPTION = 32
+    FORM_NONE               = 0x00,
+    FORM_CAT                = 0x01,
+    FORM_TREE               = 0x02,
+    FORM_TRAVEL             = 0x03,
+    FORM_AQUA               = 0x04,
+    FORM_BEAR               = 0x05,
+    FORM_AMBIENT            = 0x06,
+    FORM_GHOUL              = 0x07,
+    FORM_DIREBEAR           = 0x08,
+    FORM_CREATUREBEAR       = 0x0E,
+    FORM_CREATURECAT        = 0x0F,
+    FORM_GHOSTWOLF          = 0x10,
+    FORM_BATTLESTANCE       = 0x11,
+    FORM_DEFENSIVESTANCE    = 0x12,
+    FORM_BERSERKERSTANCE    = 0x13,
+    FORM_TEST               = 0x14,
+    FORM_ZOMBIE             = 0x15,
+    FORM_FLIGHT_EPIC        = 0x1B,
+    FORM_SHADOW             = 0x1C,
+    FORM_FLIGHT             = 0x1D,
+    FORM_STEALTH            = 0x1E,
+    FORM_MOONKIN            = 0x1F,
+    FORM_SPIRITOFREDEMPTION = 0x20
 };
 
 #define CREATURE_MAX_SPELLS     4
@@ -678,11 +681,11 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         uint32 getLevel() const { return GetUInt32Value(UNIT_FIELD_LEVEL); }
         void SetLevel(uint32 lvl);
-        uint8 getRace() const { return (uint8)(GetUInt32Value(UNIT_FIELD_BYTES_0) & 0xFF); }
+        uint8 getRace() const { return GetByteValue(UNIT_FIELD_BYTES_0, 0); }
         uint32 getRaceMask() const { return 1 << (getRace()-1); }
-        uint8 getClass() const { return (uint8)((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 8) & 0xFF); }
+        uint8 getClass() const { return GetByteValue(UNIT_FIELD_BYTES_0, 1); }
         uint32 getClassMask() const { return 1 << (getClass()-1); }
-        uint8 getGender() const { return (uint8)((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 16) & 0xFF); }
+        uint8 getGender() const { return GetByteValue(UNIT_FIELD_BYTES_0, 2); }
 
         float GetStat(Stats stat) const { return float(GetUInt32Value(UNIT_FIELD_STAT0+stat)); }
         void SetStat(Stats stat, int32 val) { SetStatInt32Value(UNIT_FIELD_STAT0+stat, val); }
@@ -698,7 +701,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SetMaxHealth(uint32 val);
         int32 ModifyHealth(int32 val);
 
-        Powers getPowerType() const { return Powers((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 24) & 0xFF); }
+        Powers getPowerType() const { return Powers(GetByteValue(UNIT_FIELD_BYTES_0, 3)); }
         void setPowerType(Powers power);
         uint32 GetPower(   Powers power) const { return GetUInt32Value(UNIT_FIELD_POWER1   +power); }
         uint32 GetMaxPower(Powers power) const { return GetUInt32Value(UNIT_FIELD_MAXPOWER1+power); }
@@ -730,7 +733,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
             return (creatureType >= 1) ? (1 << (creatureType - 1)) : 0;
         }
 
-        uint8 getStandState() const { return (uint8)(GetUInt32Value(UNIT_FIELD_BYTES_1) & 0xFF); }
+        uint8 getStandState() const { return GetByteValue(UNIT_FIELD_BYTES_1, 0); }
         bool IsStandState() const;
         void SetStandState(uint8 state);
 

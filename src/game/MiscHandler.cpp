@@ -39,6 +39,7 @@
 #include "BattleGround.h"
 #include "SpellAuras.h"
 #include "Pet.h"
+#include "SocialMgr.h"
 
 void WorldSession::HandleRepopRequestOpcode( WorldPacket & /*recv_data*/ )
 {
@@ -184,6 +185,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
             data << uint32( lvl );                          // player level
             data << uint32( class_ );                       // player class
             data << uint32( race );                         // player race
+            data << uint8(0);                               // new 2.4.0
             data << uint32( pzoneid );                      // player zone id
         }
     }
@@ -513,12 +515,14 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
     }
 }
 
-void WorldSession::HandleFriendListOpcode( WorldPacket & /*recv_data*/ )
+void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data, 4);
     sLog.outDebug( "WORLD: Received CMSG_FRIEND_LIST" );
-
-    GetPlayer()->SendFriendlist();
-    GetPlayer()->SendIgnorelist();
+    uint32 unk;
+    recv_data >> unk;
+    sLog.outDebug("unk value is %u", unk);
+    _player->GetSocial()->SendSocialList();
 }
 
 void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
@@ -528,15 +532,13 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Received CMSG_ADD_FRIEND" );
 
     std::string friendName  = objmgr.GetMangosString(LANG_FRIEND_IGNORE_UNKNOWN,GetSessionLocaleIndex());
-    uint8 friendResult      = FRIEND_NOT_FOUND;
-
+    std::string friendNote;
+    FriendsResult friendResult = FRIEND_NOT_FOUND;
     Player *pFriend     = NULL;
     uint64 friendGuid   = 0;
-    uint32 friendArea   = 0;
-    uint32 friendLevel  = 0;
-    uint32 friendClass  = 0;
 
     recv_data >> friendName;
+    recv_data >> friendNote;
 
     if(friendName.empty())
         return;
@@ -556,32 +558,24 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
             friendResult = FRIEND_SELF;
         else if(GetPlayer()->GetTeam()!=objmgr.GetPlayerTeamByGUID(friendGuid) && !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_ADD_FRIEND))
             friendResult = FRIEND_ENEMY;
-        else if(GetPlayer()->HasInFriendList(friendGuid))
+        else if(GetPlayer()->GetSocial()->HasFriend(GUID_LOPART(friendGuid)))
             friendResult = FRIEND_ALREADY;
     }
-
-    WorldPacket data( SMSG_FRIEND_STATUS, (1+8+1+4+4+4) );  // guess size
 
     if (friendGuid && friendResult==FRIEND_NOT_FOUND)
     {
         if( pFriend && pFriend->IsInWorld() && pFriend->IsVisibleGloballyFor(GetPlayer()))
-        {
             friendResult = FRIEND_ADDED_ONLINE;
-            friendArea   = pFriend->GetZoneId();
-            friendLevel  = pFriend->getLevel();
-            friendClass  = pFriend->getClass();
-        }
         else
             friendResult = FRIEND_ADDED_OFFLINE;
 
-        if(!GetPlayer()->AddToFriendList(friendGuid, friendName))
+        if(!_player->GetSocial()->AddToSocialList(GUID_LOPART(friendGuid), false))
         {
             friendResult = FRIEND_LIST_FULL;
             sLog.outDebug( "WORLD: %s's friend list is full.", GetPlayer()->GetName());
         }
 
-        sLog.outDebug( "WORLD: %s Guid found '%u' area:%u Level:%u Class:%u.",
-            friendName.c_str(), GUID_LOPART(friendGuid), friendArea, friendLevel, friendClass);
+        sLog.outDebug( "WORLD: %s Guid found '%u'.", friendName.c_str(), GUID_LOPART(friendGuid));
     }
     else if(friendResult==FRIEND_ALREADY)
     {
@@ -596,11 +590,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
         sLog.outDebug( "WORLD: %s Guid not found.", friendName.c_str() );
     }
 
-    data << (uint8)friendResult << (uint64)friendGuid << (uint8)0;
-    if(friendResult == FRIEND_ADDED_ONLINE)
-        data << (uint32)friendArea << (uint32)friendLevel << (uint32)friendClass;
-
-    SendPacket( &data );
+    sSocialMgr.SendFriendStatus(GetPlayer(), friendResult, GUID_LOPART(friendGuid), friendName, false);
 
     sLog.outDebug( "WORLD: Sent (SMSG_FRIEND_STATUS)" );
 }
@@ -610,17 +600,14 @@ void WorldSession::HandleDelFriendOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data, 8);
 
     uint64 FriendGUID;
-    uint8 FriendResult = FRIEND_REMOVED;
 
     sLog.outDebug( "WORLD: Received CMSG_DEL_FRIEND" );
 
     recv_data >> FriendGUID;
 
-    GetPlayer()->RemoveFromFriendList(FriendGUID);
+    _player->GetSocial()->RemoveFromSocialList(GUID_LOPART(FriendGUID), false);
 
-    WorldPacket data( SMSG_FRIEND_STATUS, 9 );
-    data << (uint8)FriendResult << (uint64)FriendGUID;
-    SendPacket( &data );
+    sSocialMgr.SendFriendStatus(GetPlayer(), FRIEND_REMOVED, GUID_LOPART(FriendGUID), "", false);
 
     sLog.outDebug( "WORLD: Sent motd (SMSG_FRIEND_STATUS)" );
 }
@@ -632,7 +619,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Received CMSG_ADD_IGNORE" );
 
     std::string IgnoreName = objmgr.GetMangosString(LANG_FRIEND_IGNORE_UNKNOWN,GetSessionLocaleIndex());
-    unsigned char ignoreResult = FRIEND_IGNORE_NOT_FOUND;
+    FriendsResult ignoreResult = FRIEND_IGNORE_NOT_FOUND;
     uint64 IgnoreGuid = 0;
 
     recv_data >> IgnoreName;
@@ -641,6 +628,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
         return;
 
     normalizePlayerName(IgnoreName);
+    CharacterDatabase.escape_string(IgnoreName);            // prevent SQL injection - normal name don't must changed by this call
 
     sLog.outDebug( "WORLD: %s asked to Ignore: '%s'",
         GetPlayer()->GetName(), IgnoreName.c_str() );
@@ -653,18 +641,16 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
             ignoreResult = FRIEND_IGNORE_SELF;
         else
         {
-            if( GetPlayer()->HasInIgnoreList(IgnoreGuid) )
+            if( GetPlayer()->GetSocial()->HasIgnore(GUID_LOPART(IgnoreGuid)) )
                 ignoreResult = FRIEND_IGNORE_ALREADY;
         }
     }
-
-    WorldPacket data( SMSG_FRIEND_STATUS, 9 );
 
     if (IgnoreGuid && ignoreResult == FRIEND_IGNORE_NOT_FOUND)
     {
         ignoreResult = FRIEND_IGNORE_ADDED;
 
-        GetPlayer()->AddToIgnoreList(IgnoreGuid, IgnoreName);
+        _player->GetSocial()->AddToSocialList(GUID_LOPART(IgnoreGuid), true);
     }
     else if(ignoreResult==FRIEND_IGNORE_ALREADY)
     {
@@ -679,9 +665,8 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
         sLog.outDebug( "WORLD: %s Guid not found.", IgnoreName.c_str() );
     }
 
-    data << (uint8)ignoreResult << (uint64)IgnoreGuid;
+    sSocialMgr.SendFriendStatus(GetPlayer(), ignoreResult, GUID_LOPART(IgnoreGuid), "", false);
 
-    SendPacket( &data );
     sLog.outDebug( "WORLD: Sent (SMSG_FRIEND_STATUS)" );
 }
 
@@ -695,17 +680,21 @@ void WorldSession::HandleDelIgnoreOpcode( WorldPacket & recv_data )
 
     recv_data >> IgnoreGUID;
 
-    unsigned char IgnoreResult = FRIEND_IGNORE_REMOVED;
+    _player->GetSocial()->RemoveFromSocialList(GUID_LOPART(IgnoreGUID), true);
 
-    WorldPacket data( SMSG_FRIEND_STATUS, 9 );
-
-    data << (uint8)IgnoreResult << (uint64)IgnoreGUID;
-
-    GetPlayer()->RemoveFromIgnoreList(IgnoreGUID);
-
-    SendPacket( &data );
+    sSocialMgr.SendFriendStatus(GetPlayer(), FRIEND_IGNORE_REMOVED, GUID_LOPART(IgnoreGUID), "", false);
 
     sLog.outDebug( "WORLD: Sent motd (SMSG_FRIEND_STATUS)" );
+}
+
+void WorldSession::HandleSetFriendNoteOpcode( WorldPacket & recv_data )
+{
+    CHECK_PACKET_SIZE(recv_data, 8+1);
+    uint64 guid;
+    std::string note;
+    recv_data >> guid >> note;
+    CharacterDatabase.escape_string(note);
+    _player->GetSocial()->SetFriendNote(guid, note);
 }
 
 void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
@@ -1181,7 +1170,9 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
         return;
 
     uint32 talent_points = 0x3D;
+    uint32 guid_size = plr->GetPackGUID().size();
     WorldPacket data(SMSG_INSPECT_TALENTS, 4+talent_points);
+    data.append(plr->GetPackGUID());
     data << uint32(talent_points);
 
     // fill by 0 talents array
@@ -1241,9 +1232,9 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
                 uint32 curtalent_rank_offset =  curtalent_rank_index2 % 8;
 
                 // apply mask
-                uint32 val = data.read<uint8>(4 + curtalent_rank_slot);
+                uint32 val = data.read<uint8>(guid_size + 4 + curtalent_rank_slot);
                 val |= (1 << curtalent_rank_offset);
-                data.put<uint8>(4 + curtalent_rank_slot,val & 0xFF);
+                data.put<uint8>(guid_size + 4 + curtalent_rank_slot, val & 0xFF);
             }
 
             talentTabPos += GetTalentTabInspectBitSize(talentTabId);

@@ -109,12 +109,12 @@ void Object::_InitValues()
     m_objectUpdated = false;
 }
 
-void Object::_Create( uint32 guidlow, HighGuid guidhigh )
+void Object::_Create( uint32 guidlow, uint32 entry, HighGuid guidhigh )
 {
     if(!m_uint32Values) _InitValues();
 
-    SetUInt32Value( OBJECT_FIELD_GUID, guidlow );
-    SetUInt32Value( OBJECT_FIELD_GUID+1, guidhigh );
+    uint64 guid = MAKE_NEW_GUID(guidlow, entry, guidhigh);    // required more changes to make it working
+    SetUInt64Value( OBJECT_FIELD_GUID, guid );
     SetUInt32Value( OBJECT_FIELD_TYPE, m_objectType );
     m_PackGUID.clear();
     m_PackGUID.appendPackGUID(GetGUID());
@@ -173,6 +173,9 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
                 case GAMEOBJECT_TYPE_FLAGSTAND:
                 case GAMEOBJECT_TYPE_FLAGDROP:
                     updatetype = UPDATETYPE_CREATE_OBJECT2;
+                    break;
+                case GAMEOBJECT_TYPE_TRANSPORT:
+                    flags |= UPDATEFLAG_TRANSPORT;
                     break;
             }
         }
@@ -301,7 +304,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
     if (flags & UPDATEFLAG_HASPOSITION)
     {
         // 0x02
-        if(flags & UPDATEFLAG_TRANSPORT)
+        if(flags & UPDATEFLAG_TRANSPORT && m_uint32Values[GAMEOBJECT_TYPE_ID] == GAMEOBJECT_TYPE_MO_TRANSPORT)
         {
             *data << (float)0;
             *data << (float)0;
@@ -776,6 +779,32 @@ void Object::SetFloatValue( uint16 index, float value )
     }
 }
 
+void Object::SetByteValue( uint16 index, uint8 offset, uint8 value )
+{
+    ASSERT( index < m_valuesCount || PrintIndexError( index , true ) );
+
+    if(offset > 4)
+    {
+        sLog.outError("Object::SetByteValue: wrong offset %u", offset);
+        return;
+    }
+
+    if(uint8(m_uint32Values[ index ] >> (offset * 8)) != value)
+    {
+        m_uint32Values[ index ] &= ~uint32(uint32(0xFF) << (offset * 8));
+        m_uint32Values[ index ] |= uint32(uint32(value) << (offset * 8));
+
+        if(m_inWorld)
+        {
+            if(!m_objectUpdated)
+            {
+                ObjectAccessor::Instance().AddUpdateObject(this);
+                m_objectUpdated = true;
+            }
+        }
+    }
+}
+
 void Object::SetStatFloatValue( uint16 index, float value)
 {
     if(value < 0)
@@ -896,7 +925,7 @@ WorldObject::WorldObject( WorldObject *instantiator )
 
 void WorldObject::_Create( uint32 guidlow, HighGuid guidhigh, uint32 mapid, float x, float y, float z, float ang )
 {
-    Object::_Create(guidlow, guidhigh);
+    Object::_Create(guidlow, 0, guidhigh);
 
     m_mapId = mapid;
     m_positionX = x;

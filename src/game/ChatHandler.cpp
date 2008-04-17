@@ -45,6 +45,12 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
     recv_data >> type;
     recv_data >> lang;
 
+    if(type >= MAX_CHAT_MSG_TYPE)
+    {
+        sLog.outError("CHAT: Wrong message type received: %u", type);
+        return;
+    }
+
     //sLog.outDebug("CHAT: packet received. type %u, lang %u", type, lang );
 
     // prevent talking at unknown language (cheating)
@@ -506,12 +512,14 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data, 8);
+    CHECK_PACKET_SIZE(recv_data, 8+1);
 
     uint64 iguid;
+    uint8 unk;
     //sLog.outDebug("WORLD: Received CMSG_CHAT_IGNORED");
 
     recv_data >> iguid;
+    recv_data >> unk;                                       // probably related to spam reporting
 
     Player *player = objmgr.GetPlayer(iguid);
     if(!player || !player->GetSession())
