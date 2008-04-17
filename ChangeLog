@@ -1,6 +1,6 @@
-MaNGOS 0.10   (??? ??? 2008) http://www.mangosproject.org/trac/milestone/0.10
+MaNGOS 0.11   (??? ??? 2008) http://www.mangosproject.org/trac/milestone/0.11
 
- MaNGOS 0.10 - Codename "???" - adds further improvements to the
+ MaNGOS 0.11 - Codename "???" - adds further improvements to the
  server core as well as to the majority of game classes and the game content
  database.
 
@@ -11,6 +11,84 @@ MaNGOS 0.10   (??? ??? 2008) http://www.mangosproject.org/trac/milestone/0.10
  ==== Statistics ====
  * Fixed Bugs: ???
  * Total number of changes: ???
+
+ The complete list of closed tickets can be found here:
+   http://www.mangosproject.org/trac/query?status=closed&milestone=0.11
+
+MaNGOS 0.10   (Apr 18 2008) http://www.mangosproject.org/trac/milestone/0.10
+
+ MaNGOS 0.10 - adds further improvements to the
+ server core as well as to the majority of game classes and the game content
+ database.
+
+ ==== Game Features ====
+
+ * Added: Implement talent inspecting.
+ * Added: Implement unique equipped items support, including gems.
+ * Added: Check instances where mount using allowed. Still need implement in-building check.
+ * Added: Implement master looter loot mode.
+ * Added: Implement quest related lootable gameobject activating only for characters with active quest.
+ * Added: Implement multi-map taxi flights, allow teleport to instances/battleground in taxi flight time.
+ * Added: Allow equip 2hand weapon in case swap with equipped mainhand/offhand weapon pair.
+ * Added: Implement player confirmation request at player summon attempt.
+ * Added: Implement support items with limited lifetime.
+ * Added: Implement chance additional items crafting with appropriate profession specialization.
+ * Added: Implement FFA PvP zones and FFA PvP server type.
+ * Added: Implement Guild Banks.
+ * Added: Implement expertise and better rating work.
+ * Added: Implement dialog status show for gameobject like yellow exclamation signs above gameobject if quest available.
+ * Added: Implement money requirement show for gossip box open.
+ * Added: Apply reputation discounts to trainer spell prices.
+ * Added: Implement death at fall to void/textures.
+ * Added: Support dead by default creatures.
+ * Added: Implemented work some nice items like "safe" teleport items.
+ * Added: Implement correct stacking elixirs/flasks.
+ * Added: Implement Fishing hole gameobjects work.
+ * Added: Implement support correctly sitting at chairs with different height and slots.
+ * Added: Implement normalized weapon damage use where it expected.
+ * Improved: Limit player money amount by 214748g 36s 46c.
+ * Improved: Allow join to LFG channel if character registered in LFG tool.
+ * Improved: Better detection and calculation in fall damage.
+ * Improved: Update XP generation for high levels and use coefficients dependent from new/old continents position.
+ * Improved: Better immunity/resisted/interrupting spell work.
+ * Improved: Better check area/zone/map/mapset limited spells at cast and zone leave.
+ * Improved: Fixed long time existed problems with client crash at group member using transports.
+ * Improved: Add/update lot spell_affect/spell_proc_event tables content that let work many talents, spells, and item effects.
+ * Improved: Better mail system work, use it for problematic items at character loading, and sending honor marks if need.
+ * Improved: Use correct coefficients for damage/healing spell bonuses for many spells.
+ * Improved: Restore work weather system.
+ * Improved: More correct spell affects stacking at target, and spell icons stacking in spellbook.
+ * Improved: More correct work explicit target positive aura rank auto-selection and implemented area auras rank auto-selection.
+ * Improved: Correct work permanent skill bonuses.
+ * Improved: Prevent lost money at unexpected double pay for learned spell with lags.
+ * Improved: More correct show for other players character state under different spell affects and in time spell casting.
+ * Improved: More correct random item enchantment bonuses selection and work code.
+ * Improved: Better battlegrounds work.
+ * Improved: Implement default open doors/pushed buttons support.
+ * plus lots of fixes for auras, effects, spells, talents, and more.
+
+ ==== Server Features ====
+
+ * Added: broken spells check at use and loading.
+ * Added: Implement pid file support.
+ * Added: Extract and include svn revision version data in binaries at build.
+ * Added: Implement binding socket to specific network interface (IP address) instead all interfaces using new config option.
+ * Added: Implement support 64-bit binaries building at Windows.
+ * Added: Enable the LARGEADDRESSAWARE flag for Visual Studio 2003 mangosd and realmd projects.
+ * Improved: Allow Gamemasters see any creature/gameobject including invisible/stealth, allow select unselectable units.
+ * Improved: Many server-side check for casts (while shapeshifted, other caster and target reqirents) to prevent cheating.
+ * Improved: better loot system implementation including more loot conditions support and simplify loot managment for DB creators.
+ * Improved: better DB content error reporting at server load.`
+ * Improved: Many improvements in Gamemaster chat commands.
+ * Improved: Update sockets library to v.2.2.9 version.
+ * Improved: More arena support but not full yet.
+ * Improved: Less amount data sent to clients, including in spell casting time.
+ * Improved: Fixed/finish PostgreSql support.
+ * Improved: Better scripting support (DB base and C++ based scripts).
+
+ ==== Statistics ====
+ * Fixed Bugs: 784
+ * Total number of changes: 804
 
  The complete list of closed tickets can be found here:
    http://www.mangosproject.org/trac/query?status=closed&milestone=0.10

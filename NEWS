@@ -13,8 +13,19 @@ http://www.mangosproject.org/forum/
 Please submit bug reports at:
 http://www.mangosproject.org/trac/
 
-Version 0.10
+Version 0.11
  * Under discussion.
+ * Upgrade to client version 2.4.1 (build 8125).
+
+Version 0.10
+ * master looter lot mode,
+ * FFA PvP zones and FFA PvP server type support,
+ * Guild Banks,
+ * unique equipped items support, including gems,
+ * talent inspecting,
+ * PostgreSql support,
+ * sockets library updated to v.2.2.9 version,
+ * 64-bit binaries building at Windows,
  * Upgrade to client version 2.3.0 (build 7561).
 
 Version 0.9
