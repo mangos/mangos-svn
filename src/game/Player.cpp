@@ -5396,7 +5396,32 @@ bool Player::ModifyOneFactionReputation(FactionEntry const* factionEntry, int32 
         itr->second.Flags |= FACTION_FLAG_VISIBLE;
         itr->second.Changed = true;
 
+        for( int i = 0; i < MAX_QUEST_LOG_SIZE; i++ )
+        {
+            if(uint32 questid = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i))
+            {
+                Quest const* qInfo = objmgr.GetQuestTemplate(questid);
+                if( qInfo && qInfo->GetRepObjectiveFaction() == factionEntry->ID )
+                {
+                    if( mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE )
+                    {
+                        if(GetReputation(factionEntry) >= qInfo->GetRepObjectiveValue())
+                        {
+                            if ( CanCompleteQuest( questid ) )
+                                CompleteQuest( questid );
+                        }
+                    }
+                    else if( mQuestStatus[questid].m_status == QUEST_STATUS_COMPLETE )
+                    {
+                        if(GetReputation(factionEntry) < qInfo->GetRepObjectiveValue())
+                            IncompleteQuest( questid );
+                    }
+                }
+            }
+        }
+
         SendSetFactionStanding(&(itr->second));
+
         return true;
     }
     return false;
