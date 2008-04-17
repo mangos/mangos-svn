@@ -129,8 +129,9 @@ typedef struct AUTH_LOGON_PROOF_S
     uint8   cmd;
     uint8   error;
     uint8   M2[20];
+    uint16  unk1;
     uint32  unk2;
-    uint16  unk3;
+    uint32  unk3;
 } sAuthLogonProof_S;
 
 typedef struct XFER_INIT
@@ -451,12 +452,12 @@ bool AuthSocket::_HandleLogonChallenge()
 
                         ///- Fill the response packet with the result
                         pkt << (uint8)REALM_AUTH_SUCCESS;
-                        pkt.append(B.AsByteArray(), B.GetNumBytes());
+                        pkt.append(B.AsByteArray(), B.GetNumBytes());   // 32 bytes
                         pkt << (uint8)1;
                         pkt.append(g.AsByteArray(), 1);
                         pkt << (uint8)32;
                         pkt.append(N.AsByteArray(), 32);
-                        pkt.append(s.AsByteArray(), s.GetNumBytes());
+                        pkt.append(s.AsByteArray(), s.GetNumBytes());   // 32 bytes
                         pkt.append(unk3.AsByteArray(), 16);
                         pkt << (uint8)0;                    // Added in 1.12.x client branch
 
@@ -636,7 +637,8 @@ bool AuthSocket::_HandleLogonProof()
         memcpy(proof.M2, sha.GetDigest(), 20);
         proof.cmd = AUTH_LOGON_PROOF;
         proof.error = 0;
-        proof.unk2 = 0;
+        proof.unk1 = 0;
+        proof.unk2 = 0x80;
         proof.unk3 = 0;
 
         SendBuf((char *)&proof, sizeof(proof));

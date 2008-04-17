@@ -175,7 +175,8 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     float px, py, pz;
     owner->GetClosePoint(px, py, pz,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE);
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
-    if(!Create(guid, owner->GetMapId(), px, py, pz, owner->GetOrientation(), petentry))
+    uint32 pet_number = fields[0].GetUInt32();
+    if(!Create(guid, owner->GetMapId(), px, py, pz, owner->GetOrientation(), petentry, pet_number))
     {
         delete result;
         return false;
@@ -194,9 +195,9 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
         return true;
     }
     if(getPetType()==HUNTER_PET || getPetType()==SUMMON_PET && cinfo->type == CREATURE_TYPE_DEMON && owner->getClass() == CLASS_WARLOCK)
-        m_charmInfo->SetPetNumber(fields[0].GetUInt32(), true);
+        m_charmInfo->SetPetNumber(pet_number, true);
     else
-        m_charmInfo->SetPetNumber(fields[0].GetUInt32(), false);
+        m_charmInfo->SetPetNumber(pet_number, false);
     SetUInt64Value(UNIT_FIELD_SUMMONEDBY, owner->GetGUID());
     SetDisplayId(fields[3].GetUInt32());
     SetNativeDisplayId(fields[3].GetUInt32());
@@ -216,7 +217,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
             break;
         case HUNTER_PET:
             SetUInt32Value(UNIT_FIELD_BYTES_0, 0x02020100);
-            SetUInt32Value(UNIT_FIELD_BYTES_1,(fields[9].GetUInt32()<<8));
+            SetByteValue(UNIT_FIELD_BYTES_1, 1, fields[9].GetUInt32());
 
             if(fields[13].GetBool())
                 SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00022801); // can't be renamed (byte 0x02)
@@ -409,7 +410,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
                 << m_TrainingPoints << ", "
                 << uint32(mode) << ", '"
                 << name.c_str() << "', "
-                << uint32(((GetUInt32Value(UNIT_FIELD_BYTES_2) >> 16) == 3)?0:1) << ", "
+                << uint32((GetByteValue(UNIT_FIELD_BYTES_2, 2) == 0x03)?0:1) << ", "
                 << (curhealth<1?1:curhealth) << ", "
                 << curmana << ", "
                 << GetPower(POWER_HAPPINESS) << ", '";
@@ -606,8 +607,7 @@ void Pet::ModifyLoyalty(int32 addvalue)
             Unit* owner = GetOwner();
             if(owner && owner->GetTypeId() == TYPEID_PLAYER)
             {
-                WorldPacket data(SMSG_PET_BROKEN, 8);
-                data << GetGUID();
+                WorldPacket data(SMSG_PET_BROKEN, 0);
                 ((Player*)owner)->GetSession()->SendPacket(&data);
 
                 //run away
@@ -662,10 +662,7 @@ HappinessState Pet::GetHappinessState()
 
 void Pet::SetLoyaltyLevel(LoyaltyLevel level)
 {
-    uint32 curvalue = GetUInt32Value(UNIT_FIELD_BYTES_1);
-    curvalue &= 0xFFFF00FF;
-    curvalue |= (level << 8);
-    SetUInt32Value(UNIT_FIELD_BYTES_1, curvalue);
+    SetByteValue(UNIT_FIELD_BYTES_1, 1, level);
 }
 
 bool Pet::CanTakeMoreActiveSpells(uint32 spellid)
@@ -853,7 +850,8 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     SetInstanceId(creature->GetInstanceId());
 
     sLog.outBasic("Create pet");
-    Create(guid, creature->GetMapId(), creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), creature->GetEntry());
+    uint32 pet_number = objmgr.GeneratePetNumber();
+    Create(guid, creature->GetMapId(), creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), creature->GetEntry(), pet_number);
 
     CreatureInfo const *cinfo = GetCreatureInfo();
     if(!cinfo)
@@ -1543,7 +1541,7 @@ void Pet::ToggleAutocast(uint32 spellid, bool apply)
     }
 }
 
-bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry)
+bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry, uint32 pet_number)
 {
     respawn_cord[0] = x;
     respawn_cord[1] = y;
@@ -1560,7 +1558,7 @@ bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float 
     SetOrientation(ang);
     //oX = x;     oY = y;    dX = x;    dY = y;    m_moveTime = 0;    m_startMove = 0;
 
-    Object::_Create(guidlow, HIGHGUID_UNIT);
+    Object::_Create(guidlow, pet_number, HIGHGUID_PET);
 
     m_DBTableGuid = guidlow;
 
@@ -1584,7 +1582,7 @@ bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float 
 
     SetDisplayId(minfo->modelid);
     SetNativeDisplayId(minfo->modelid);
-    SetUInt32Value(UNIT_FIELD_BYTES_2, 1);                  // let creature used equiped weapon in fight
+    SetByteValue(UNIT_FIELD_BYTES_2, 0, 0x01);              // let creature used equiped weapon in fight
 
     if(getPetType() == MINI_PET)                            // always non-attackable
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE);

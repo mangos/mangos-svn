@@ -27,6 +27,7 @@
 #include "Player.h"
 #include "Group.h"
 #include "ObjectAccessor.h"
+#include "SocialMgr.h"
 
 /* differeces from off:
     -you can uninvite yourself - is is useful
@@ -87,7 +88,7 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
     }
 
     // just ignore us
-    if(player->HasInIgnoreList(GetPlayer()->GetGUID()))
+    if(player->GetSocial()->HasIgnore(GetPlayer()->GetGUIDLow()))
     {
         SendPartyResult(PARTY_OP_INVITE, membername, PARTY_RESULT_TARGET_IGNORE_YOU);
         return;
@@ -542,15 +543,19 @@ void WorldSession::HandleGroupAssistantOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleGroupPromoteOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data, 1+8);
+    CHECK_PACKET_SIZE(recv_data, 1+1+8);
 
     Group *group = GetPlayer()->GetGroup();
     if(!group) return;
 
-    uint8 flag;
+    uint8 flag1, flag2;
     uint64 guid;
-    recv_data >> flag;
+    recv_data >> flag1 >> flag2;
     recv_data >> guid;
+    // if(flag1) Main Assist
+    //     0x4
+    // if(flag2) Main Tank
+    //     0x2
 
     /** error handling **/
     if(!group->IsLeader(GetPlayer()->GetGUID()))
@@ -558,10 +563,10 @@ void WorldSession::HandleGroupPromoteOpcode( WorldPacket & recv_data )
     /********************/
 
     // everything's fine, do it
-    if(flag == 0)
-        group->SetMainTank(guid);
-    else if(flag == 1)
+    if(flag1 == 1)
         group->SetMainAssistant(guid);
+    if(flag2 == 1)
+        group->SetMainTank(guid);
 }
 
 void WorldSession::HandleRaidReadyCheckOpcode( WorldPacket & recv_data )
@@ -627,12 +632,12 @@ void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacke
         if (player)
         {
             if (player->IsPvP())
-                *data << (uint8) (MEMBER_STATUS_ONLINE | MEMBER_STATUS_PVP);
+                *data << (uint16) (MEMBER_STATUS_ONLINE | MEMBER_STATUS_PVP);
             else
-                *data << (uint8) MEMBER_STATUS_ONLINE;
+                *data << (uint16) MEMBER_STATUS_ONLINE;
         }
         else
-            *data << (uint8) MEMBER_STATUS_OFFLINE;
+            *data << (uint16) MEMBER_STATUS_OFFLINE;
     }
 
     if (mask & GROUP_UPDATE_FLAG_CUR_HP)
@@ -774,7 +779,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
         WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 2+4+2);
         data.appendPackGUID(Guid);
         data << (uint32) GROUP_UPDATE_FLAG_STATUS;
-        data << (uint8) MEMBER_STATUS_OFFLINE;
+        data << (uint16) MEMBER_STATUS_OFFLINE;
         SendPacket(&data);
         return;
     }
@@ -790,7 +795,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
 
     Powers powerType = player->getPowerType();
     data << (uint32) mask1;                                 // group update mask
-    data << (uint8)  MEMBER_STATUS_ONLINE;                  // member's online status
+    data << (uint16) MEMBER_STATUS_ONLINE;                  // member's online status
     data << (uint16) player->GetHealth();                   // GROUP_UPDATE_FLAG_CUR_HP
     data << (uint16) player->GetMaxHealth();                // GROUP_UPDATE_FLAG_MAX_HP
     data << (uint8)  powerType;                             // GROUP_UPDATE_FLAG_POWER_TYPE
@@ -873,3 +878,10 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
 {
     sLog.outDebug( "WORLD: got CMSG_GROUP_CANCEL." );
 }*/
+
+void WorldSession::HandleGroupPassOnLootOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: Received CMSG_GROUP_PASS_ON_LOOT");
+    sLog.outError("Not implemented!");
+    recv_data.hexlike();
+}

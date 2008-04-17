@@ -1383,7 +1383,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             data << uint32(1);
             data << uint32(mod->m_auraname);
             data << (uint32)pdamage;
-            data << (uint32)spellProto->School;             // will be mask in 2.4.x
+            data << (uint32)GetSpellSchoolMask(spellProto); // will be mask in 2.4.x
             data << (uint32)absorb;
             data << (uint32)resist;
             SendMessageToSet(&data,true);
@@ -4360,19 +4360,20 @@ void Unit::RemoveGameObject(uint32 spellid, bool del)
 
 void Unit::SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID,uint32 Damage, SpellSchoolMask damageSchoolMask,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked, bool CriticalHit)
 {
+    sLog.outDebug("Sending: SMSG_SPELLNONMELEEDAMAGELOG");
     WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (16+31)); // we guess size
     data.append(target->GetPackGUID());
     data.append(GetPackGUID());
     data << uint32(SpellID);
     data << uint32(Damage-AbsorbedDamage-Resist-Blocked);
-    data << uint8(GetFirstSchoolInMask(damageSchoolMask));  // spell school
+    data << uint8(damageSchoolMask);                        // spell school
     data << uint32(AbsorbedDamage);                         // AbsorbedDamage
     data << uint32(Resist);                                 // resist
-    data << uint8(PhysicalDamage);
-    data << uint8(0);                                       // unk
+    data << uint8(PhysicalDamage);                          // if 1, then client show spell name (example: %s's ranged shot hit %s for %u school or %s suffers %u school damage from %s's spell_name
+    data << uint8(0);                                       // unk isFromAura
     data << uint32(Blocked);                                // blocked
-    data << uint8(CriticalHit ? 2 : 0);                     // seen 0x05 also...
-    data << uint32(0);
+    data << uint32(CriticalHit ? 0x27 : 0x25);              // hitType, flags: 0x2 - critial, 0x10 - replace caster?
+    data << uint8(0);                                       // isDebug?
     SendMessageToSet( &data, true );
 }
 
@@ -4403,7 +4404,7 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, 
     data << (uint8)SwingType;                               // count?
 
     // for(i = 0; i < SwingType; ++i)
-    data << (uint32)GetFirstSchoolInMask(damageSchoolMask);
+    data << (uint32)damageSchoolMask;
     data << (float)(Damage-AbsorbDamage-Resist-BlockedAmount);
     // still need to double check damage
     data << (uint32)(Damage-AbsorbDamage-Resist-BlockedAmount);
@@ -6190,8 +6191,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
 
 void Unit::setPowerType(Powers new_powertype)
 {
-    uint32 tem_bytes_0 = GetUInt32Value(UNIT_FIELD_BYTES_0);
-    SetUInt32Value(UNIT_FIELD_BYTES_0,((tem_bytes_0<<8)>>8) + (uint32(new_powertype)<<24));
+    SetByteValue(UNIT_FIELD_BYTES_0, 3, new_powertype);
 
     if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
         ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POWER_TYPE);
@@ -6766,6 +6766,7 @@ void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, bool c
     data << uint32(SpellID);
     data << uint32(Damage);
     data << uint8(critical ? 1 : 0);
+    data << uint8(0);                                       // unused in client?
     SendMessageToSet(&data, true);
 }
 
@@ -6777,7 +6778,7 @@ void Unit::SendEnergizeSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, Po
     data << uint32(SpellID);
     data << uint32(powertype);
     data << uint32(Damage);
-    data << uint8(critical ? 1 : 0);
+    //data << uint8(critical ? 1 : 0);                      // removed in 2.4.0
     SendMessageToSet(&data, true);
 }
 
@@ -9547,9 +9548,8 @@ void Unit::SendPetCastFail(uint32 spellid, uint8 msg)
     if(!owner || owner->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    WorldPacket data(SMSG_PET_CAST_FAILED, (4+1+1));
+    WorldPacket data(SMSG_PET_CAST_FAILED, (4+1));
     data << uint32(spellid);
-    data << uint8(2);
     data << uint8(msg);
     ((Player*)owner)->GetSession()->SendPacket(&data);
 }
@@ -9641,8 +9641,7 @@ bool Unit::IsStandState() const
 
 void Unit::SetStandState(uint8 state)
 {
-    RemoveFlag(UNIT_FIELD_BYTES_1,0x000000FF);
-    SetFlag(UNIT_FIELD_BYTES_1,state);
+    SetByteValue(UNIT_FIELD_BYTES_1, 0, state);
 
     if(GetTypeId()==TYPEID_PLAYER)
     {

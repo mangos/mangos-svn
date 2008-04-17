@@ -55,6 +55,7 @@
 #include "BattleGroundWS.h"
 #include "VMapFactory.h"
 #include "Language.h"
+#include "SocialMgr.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -178,37 +179,40 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSpiritHeal,                               //117 SPELL_EFFECT_SPIRIT_HEAL              one spell: Spirit Heal
     &Spell::EffectSkill,                                    //118 SPELL_EFFECT_SKILL                    professions and more
     &Spell::EffectApplyPetAura,                             //119 SPELL_EFFECT_APPLY_AURA_NEW
-    &Spell::EffectNULL,                                     //120 SPELL_EFFECT_TELEPORT_GRAVEYARD       two spells: Graveyard Teleport and Graveyard Teleport Test
+    &Spell::EffectNULL,                                     //120 SPELL_EFFECT_TELEPORT_GRAVEYARD       one spell: Graveyard Teleport Test
     &Spell::EffectWeaponDmg,                                //121 SPELL_EFFECT_NORMALIZED_WEAPON_DMG
-    &Spell::EffectNULL,                                     //122 SPELL_EFFECT_122                      silithist cap reward spell
-    &Spell::EffectNULL,                                     //123 SPELL_EFFECT_123                      taxi/flight related
+    &Spell::EffectNULL,                                     //122 SPELL_EFFECT_122                      unused
+    &Spell::EffectNULL,                                     //123 SPELL_EFFECT_SEND_TAXI                taxi/flight related (misc value is taxi path id)
     &Spell::EffectPlayerPull,                               //124 SPELL_EFFECT_PLAYER_PULL              opposite of knockback effect (pulls player twoard caster)
     &Spell::EffectReduceThreatPercent,                      //125 SPELL_EFFECT_REDUCE_THREAT_PERCENT
     &Spell::EffectStealBeneficialBuff,                      //126 SPELL_EFFECT_STEAL_BENEFICIAL_BUFF    spell steal effect?
     &Spell::EffectProspecting,                              //127 SPELL_EFFECT_PROSPECTING              Prospecting spell
     &Spell::EffectApplyAura,                                //128 SPELL_EFFECT_APPLY_AURA_NEW2          probably apply aura again
-    &Spell::EffectNULL,                                     //129 SPELL_EFFECT_129 probably apply aura again
-    &Spell::EffectNULL,                                     //130 SPELL_EFFECT_130                      threat redirect
-    &Spell::EffectNULL,                                     //131 SPELL_EFFECT_131                      unused
-    &Spell::EffectNULL,                                     //132 SPELL_EFFECT_132                      taxi related, one spell: Brazen Taxi
+    &Spell::EffectNULL,                                     //129 SPELL_EFFECT_APPLY_AURA_NEW3
+    &Spell::EffectNULL,                                     //130 SPELL_EFFECT_REDIRECT_THREAT
+    &Spell::EffectNULL,                                     //131 SPELL_EFFECT_131                      used in some test spells
+    &Spell::EffectNULL,                                     //132 SPELL_EFFECT_PLAY_MUSIC               sound id in misc value
     &Spell::EffectUnlearnSpecialization,                    //133 SPELL_EFFECT_UNLEARN_SPECIALIZATION   unlearn profession specialization
-    &Spell::EffectNULL,                                     //134 SPELL_EFFECT_134
-    &Spell::EffectNULL,                                     //135 SPELL_EFFECT_135                      pet related
+    &Spell::EffectNULL,                                     //134 SPELL_EFFECT_KILL_CREDIT              misc value is creature entry
+    &Spell::EffectNULL,                                     //135 SPELL_EFFECT_CALL_PET
     &Spell::EffectNULL,                                     //136 SPELL_EFFECT_136
     &Spell::EffectNULL,                                     //137 SPELL_EFFECT_137
     &Spell::EffectNULL,                                     //138 SPELL_EFFECT_138
-    &Spell::EffectNULL,                                     //139 SPELL_EFFECT_139 unused
+    &Spell::EffectNULL,                                     //139 SPELL_EFFECT_139                      unused
     &Spell::EffectNULL,                                     //140 SPELL_EFFECT_140
     &Spell::EffectNULL,                                     //141 SPELL_EFFECT_141
     &Spell::EffectTriggerSpellWithValue,                    //142 SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE
-    &Spell::EffectNULL,                                     //143 SPELL_EFFECT_143 probably apply aura again :)
-    &Spell::EffectNULL,                                     //144 SPELL_EFFECT_144
-    &Spell::EffectNULL,                                     //145 SPELL_EFFECT_145
-    &Spell::EffectNULL,                                     //146 SPELL_EFFECT_146
-    &Spell::EffectNULL,                                     //147 SPELL_EFFECT_147
-    &Spell::EffectNULL,                                     //148 SPELL_EFFECT_148
+    &Spell::EffectNULL,                                     //143 SPELL_EFFECT_APPLY_AURA_NEW4
+    &Spell::EffectNULL,                                     //144 SPELL_EFFECT_144                      Spectral Blast
+    &Spell::EffectNULL,                                     //145 SPELL_EFFECT_145                      Black Hole Effect
+    &Spell::EffectNULL,                                     //146 SPELL_EFFECT_146                      unused
+    &Spell::EffectNULL,                                     //147 SPELL_EFFECT_147                      Torch Tossing Training Failure
+    &Spell::EffectNULL,                                     //148 SPELL_EFFECT_148                      unused
     &Spell::EffectNULL,                                     //149 SPELL_EFFECT_149
-
+    &Spell::EffectNULL,                                     //150 SPELL_EFFECT_150                      unused
+    &Spell::EffectNULL,                                     //151 SPELL_EFFECT_151                      related to summon
+    &Spell::EffectNULL,                                     //152 SPELL_EFFECT_152                      RAFS
+    &Spell::EffectNULL,                                     //153 SPELL_EFFECT_CREATE_PET               misc value is creature entry
 };
 
 void Spell::EffectNULL(uint32 /*i*/)
@@ -2601,9 +2605,10 @@ void Spell::EffectSummon(uint32 i)
     float x,y,z;
     m_caster->GetClosePoint(x,y,z);
 
+    uint32 pet_number = objmgr.GeneratePetNumber();
     if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
         m_caster->GetMapId(),x,y,z,-m_caster->GetOrientation(),
-        m_spellInfo->EffectMiscValue[i]))
+        m_spellInfo->EffectMiscValue[i], pet_number))
     {
         sLog.outErrorDb("Spell::EffectSummon: no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
         delete spawnCreature;
@@ -2630,7 +2635,7 @@ void Spell::EffectSummon(uint32 i)
 
     spawnCreature->InitStatsForLevel(level);
 
-    spawnCreature->GetCharmInfo()->SetPetNumber(objmgr.GeneratePetNumber(), false);
+    spawnCreature->GetCharmInfo()->SetPetNumber(pet_number, false);
 
     spawnCreature->AIM_Initialize();
     spawnCreature->InitPetCreateSpells();
@@ -2672,7 +2677,7 @@ void Spell::EffectLearnSpell(uint32 i)
 
     Player *player = (Player*)unitTarget;
 
-    uint32 spellToLearn = m_spellInfo->EffectTriggerSpell[i];
+    uint32 spellToLearn = (m_spellInfo->Id==SPELL_GENERIC_LEARN) ? damage : m_spellInfo->EffectTriggerSpell[i];
     player->learnSpell(spellToLearn);
 
     sLog.outDebug( "Spell: Player %u have learned spell %u from NpcGUID=%u", player->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow() );
@@ -2895,9 +2900,10 @@ void Spell::EffectSummonGuardian(uint32 i)
 
             Pet* spawnCreature = new Pet(m_caster, GUARDIAN_PET);
 
+            uint32 pet_number = objmgr.GeneratePetNumber();
             if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
                 m_caster->GetMapId(),px,py,pz,m_caster->GetOrientation(),
-                m_spellInfo->EffectMiscValue[i]))
+                m_spellInfo->EffectMiscValue[i], pet_number))
             {
                 sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
                 delete spawnCreature;
@@ -3288,7 +3294,8 @@ void Spell::EffectSummonPet(uint32 i)
         return;
     }
 
-    if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), px, py, pz+1, m_caster->GetOrientation(), petentry))
+    uint32 pet_number = objmgr.GeneratePetNumber();
+    if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), px, py, pz+1, m_caster->GetOrientation(), petentry, pet_number))
     {
         uint32 petlevel = m_caster->getLevel();
         NewSummon->setPetType(SUMMON_PET);
@@ -3312,7 +3319,7 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
         NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
-        NewSummon->GetCharmInfo()->SetPetNumber(objmgr.GeneratePetNumber(), true);
+        NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
                                                             // this enables pet details window (Shift+P)
 
         // this enables popup window (pet dismiss, cancel), hunter pet additional flags set later
@@ -3342,7 +3349,7 @@ void Spell::EffectSummonPet(uint32 i)
                 NewSummon->SetName(new_name);
         }
         else if(NewSummon->getPetType()==HUNTER_PET)
-            NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_2, uint32(2 << 16));
+            NewSummon->SetByteValue(UNIT_FIELD_BYTES_2, 2, 0x02);
 
         NewSummon->AIM_Initialize();
         NewSummon->SetHealth(NewSummon->GetMaxHealth());
@@ -4091,7 +4098,7 @@ void Spell::EffectDuel(uint32 i)
     Player *target = (Player*)unitTarget;
 
     // caster or target already have requested duel
-    if( caster->duel || target->duel || target->HasInIgnoreList(caster->GetGUID()) )
+    if( caster->duel || target->duel || target->GetSocial()->HasIgnore(caster->GetGUIDLow()) )
         return;
 
     // Players can only fight a duel with each other outside (=not inside dungeons and not in capital cities)
@@ -4652,8 +4659,9 @@ void Spell::EffectSummonCritter(uint32 i)
         float x,y,z;
         m_caster->GetClosePoint(x,y,z);
 
+        uint32 pet_number = objmgr.GeneratePetNumber();
         if(!critter->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
-            m_caster->GetMapId(),x,y,z,m_caster->GetOrientation(),m_spellInfo->EffectMiscValue[i]))
+            m_caster->GetMapId(),x,y,z,m_caster->GetOrientation(),m_spellInfo->EffectMiscValue[i], pet_number))
         {
             sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
             delete critter;

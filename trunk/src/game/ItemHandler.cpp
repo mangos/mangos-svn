@@ -374,8 +374,8 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         }
         data << pProto->socketBonus;
         data << pProto->GemProperties;
-        data << pProto->ExtendedCost;
-        data << pProto->CondExtendedCost;
+        //data << pProto->ExtendedCost;    deleted in 0.4.0 PTR
+        //data << pProto->CondExtendedCost;
         data << pProto->RequiredDisenchantSkill;
         data << pProto->ArmorDamageModifier;
         SendPacket( &data );
@@ -655,7 +655,7 @@ void WorldSession::SendListInventory( uint64 vendorguid )
     uint32 ptime = time(NULL);
     uint32 diff;
 
-    WorldPacket data( SMSG_LIST_INVENTORY, (8+1+numitems*7*4) );
+    WorldPacket data( SMSG_LIST_INVENTORY, (8+1+numitems*8*4) );
     data << uint64(vendorguid);
     data << uint8(numitems);
 
@@ -695,11 +695,12 @@ void WorldSession::SendListInventory( uint64 vendorguid )
                 data << uint32(price);
                 data << uint32(pProto->MaxDurability);
                 data << uint32(pProto->BuyCount);
+                data << uint32(pProto->ExtendedCost);
             }
         }
     }
 
-    if ( count == 0 || data.size() != 8 + 1 + size_t(count) * 7 * 4 )
+    if ( count == 0 || data.size() != 8 + 1 + size_t(count) * 8 * 4 )
         return;
 
     data.put<uint8>(8, count);
@@ -757,8 +758,7 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& /*recvPacket*/)
 {
     sLog.outDebug("WORLD: CMSG_BUY_BANK_SLOT");
 
-    uint32 bank = _player->GetUInt32Value(PLAYER_BYTES_2);
-    uint32 slot = (bank & 0x70000) >> 16;
+    uint32 slot = _player->GetByteValue(PLAYER_BYTES_2, 2);
 
     // next slot
     ++slot;
@@ -775,9 +775,7 @@ void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& /*recvPacket*/)
     if (_player->GetMoney() < price)
         return;
 
-    bank = (bank & ~0x70000) + (slot << 16);
-
-    _player->SetUInt32Value(PLAYER_BYTES_2, bank);
+    _player->SetByteValue(PLAYER_BYTES_2, 2, slot);
     _player->ModifyMoney(-int32(price));
 }
 
@@ -919,6 +917,7 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket & recv_data)
         WorldPacket data(SMSG_ITEM_NAME_QUERY_RESPONSE, (4+10));
         data << uint32(pProto->ItemId);
         data << Name;
+        data << uint32(pProto->InventoryType);
         SendPacket(&data);
         return;
     }

@@ -269,7 +269,7 @@ struct CreatureModelInfo
     uint32 modelid;
     float bounding_radius;
     float combat_reach;
-    uint32 gender;
+    uint8 gender;
     uint32 modelid_other_gender;
 };
 

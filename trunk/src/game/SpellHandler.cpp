@@ -34,14 +34,15 @@
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
     // TODO: add targets.read() check
-    CHECK_PACKET_SIZE(recvPacket,1+1+1+1);
+    CHECK_PACKET_SIZE(recvPacket,1+1+1+1+8);
 
     Player* pUser = _player;
     uint8 bagIndex, slot;
     uint8 spell_count;                                      // number of spells at item, not used
     uint8 cast_count;                                       // next cast if exists (single or not)
+    uint64 item_guid;
 
-    recvPacket >> bagIndex >> slot >> spell_count >> cast_count;
+    recvPacket >> bagIndex >> slot >> spell_count >> cast_count >> item_guid;
 
     Item *pItem = pUser->GetItemByPos(bagIndex, slot);
     if(!pItem)
@@ -96,6 +97,27 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     if(!Script->ItemUse(pUser,pItem,targets))
     {
         // no script or script not process request by self
+
+        // special learning case
+        if(pItem->GetProto()->Spells[0].SpellId==SPELL_GENERIC_LEARN)
+        {
+            uint32 learning_spell_id = pItem->GetProto()->Spells[1].SpellId;
+
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(SPELL_GENERIC_LEARN);
+            if(!spellInfo)
+            {
+                sLog.outError("Item (Entry: %u) in have wrong spell id %u, ignoring ",proto->ItemId, SPELL_GENERIC_LEARN);
+                pUser->SendEquipError(EQUIP_ERR_NONE,pItem,NULL);
+                return;
+            }
+
+            Spell *spell = new Spell(pUser, spellInfo, false);
+            spell->m_CastItem = pItem;
+            spell->m_cast_count = cast_count;               //set count of casts
+            spell->m_currentBasePoints[0] = learning_spell_id;
+            spell->prepare(&targets);
+            return;
+        }
 
         // use triggered flag only for items with many spell casts and for not first cast
         int count = 0;

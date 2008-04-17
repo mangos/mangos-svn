@@ -119,7 +119,7 @@ class SpellCastTargets
         ~SpellCastTargets();
 
         bool read ( WorldPacket * data, Unit *caster );
-        void write ( WorldPacket * data, bool forceAppend=false);
+        void write ( WorldPacket * data );
 
         SpellCastTargets& operator=(const SpellCastTargets &target)
         {
@@ -175,7 +175,7 @@ class SpellCastTargets
         float m_destX, m_destY, m_destZ;
         std::string m_strTarget;
 
-        uint16 m_targetMask;
+        uint32 m_targetMask;
     private:
         // objects (can be used at spell creating and after Update at casting
         Unit *m_unitTarget;

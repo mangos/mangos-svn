@@ -103,7 +103,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
         return false;
     }
 
-    Object::_Create(guidlow, HIGHGUID_GAMEOBJECT);
+    Object::_Create(guidlow, goinfo->id, HIGHGUID_GAMEOBJECT);
 
     m_DBTableGuid = guidlow;
 

@@ -25,6 +25,7 @@
 #include "Opcodes.h"
 #include "Player.h"
 #include "Item.h"
+#include "SocialMgr.h"
 
 enum TradeStatus
 {
@@ -55,8 +56,32 @@ enum TradeStatus
 
 void WorldSession::SendTradeStatus(uint32 status)
 {
-    WorldPacket data(SMSG_TRADE_STATUS,4);
-    data << (uint32)status;
+    WorldPacket data;
+
+    switch(status)
+    {
+        case TRADE_STATUS_BEGIN_TRADE:
+            data.Initialize(SMSG_TRADE_STATUS, 4+8);
+            data << uint32(status);
+            data << uint64(0);
+            break;
+        case TRADE_STATUS_OPEN_WINDOW:
+            data.Initialize(SMSG_TRADE_STATUS, 4+4);
+            data << uint32(status);
+            data << uint32(0);                              // added in 2.4.0
+            break;
+        case TRADE_STATUS_CLOSE_WINDOW:
+            data.Initialize(SMSG_TRADE_STATUS, 4+4+1+4);
+            data << uint32(status);
+            data << uint32(0);
+            data << uint8(0);
+            data << uint32(0);
+            break;
+        case TRADE_STATUS_ONLY_CONJURED:
+            data.Initialize(SMSG_TRADE_STATUS, 4+1);
+            data << uint32(status);
+            data << uint8(0);
+    }
     SendPacket(&data);
 }
 
@@ -93,6 +118,7 @@ void WorldSession::SendUpdateTrade()
 
     WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, (100));    // guess size
     data << (uint8 ) 1;                                     // can be different (only seen 0 and 1)
+    data << (uint32) 0;                                     // added in 2.4.0, this value must be equal to value from TRADE_STATUS_OPEN_WINDOW status packet (different value for different players to block multiple trades?)
     data << (uint32) TRADE_SLOT_COUNT;                      // trade slots count/number?, = next field in most cases
     data << (uint32) TRADE_SLOT_COUNT;                      // trade slots count/number?, = prev field in most cases
     data << (uint32) _player->pTrader->tradeGold;           // trader gold
@@ -459,7 +485,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if( pOther->HasInIgnoreList(GetPlayer()->GetGUID()) )
+    if( pOther->GetSocial()->HasIgnore(GetPlayer()->GetGUIDLow()) )
     {
         SendTradeStatus(TRADE_STATUS_IGNORE_YOU);
         return;

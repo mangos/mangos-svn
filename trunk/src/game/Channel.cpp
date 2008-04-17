@@ -19,6 +19,7 @@
 #include "Channel.h"
 #include "ObjectMgr.h"
 #include "World.h"
+#include "SocialMgr.h"
 
 Channel::Channel(std::string name, uint32 channel_id)
 : m_name(name), m_announce(true), m_moderate(false), m_channelId(channel_id), m_ownerGUID(0), m_password(""), m_flags(0)
@@ -618,7 +619,7 @@ void Channel::Invite(uint64 p, const char *newname)
     }
 
     WorldPacket data;
-    if(!newp->HasInIgnoreList(p))
+    if(!newp->GetSocial()->HasIgnore(GUID_LOPART(p)))
     {
         MakeInvite(&data, p);
         SendToOne(&data, newp->GetGUID());
@@ -663,7 +664,7 @@ void Channel::SendToAll(WorldPacket *data, uint64 p)
         Player *plr = objmgr.GetPlayer(i->first);
         if(plr)
         {
-            if(!p || !plr->HasInIgnoreList(p))
+            if(!p || !plr->GetSocial()->HasIgnore(GUID_LOPART(p)))
                 plr->GetSession()->SendPacket(data);
         }
     }

@@ -36,8 +36,8 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 
     uint64 guid;
     recv_data >> guid;
-    uint32 questStatus = DIALOG_STATUS_NONE;
-    uint32 defstatus = DIALOG_STATUS_NONE;
+    uint8 questStatus = DIALOG_STATUS_NONE;
+    uint8 defstatus = DIALOG_STATUS_NONE;
 
     Object* questgiver = ObjectAccessor::GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT);
     if(!questgiver)
@@ -338,13 +338,13 @@ void WorldSession::HandleQuestLogSwapQuest(WorldPacket& recv_data )
 
     uint32 temp1;
     uint32 temp2;
-    for (int i = 0; i < 3; i++ )
+    for (int i = 0; i < 4; i++ )
     {
-        temp1 = _player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot1 + i);
-        temp2 = _player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot2 + i);
+        temp1 = _player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot1 + i);
+        temp2 = _player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot2 + i);
 
-        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot1 + i, temp2);
-        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot2 + i, temp1);
+        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot1 + i, temp2);
+        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot2 + i, temp1);
     }
 }
 
@@ -360,7 +360,7 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
 
     if( slot < MAX_QUEST_LOG_SIZE )
     {
-        quest = _player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 0);
+        quest = _player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 0);
 
         if( quest )
         {
@@ -369,9 +369,10 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
 
             _player->SetQuestStatus( quest, QUEST_STATUS_NONE);
         }
-        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 0, 0);
-        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 1, 0);
-        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 2, 0);
+        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 0, 0);
+        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 1, 0);
+        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 2, 0);
+        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 3, 0);
     }
 }
 
@@ -502,10 +503,9 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
         Player *pPlayer = ObjectAccessor::FindPlayer( _player->GetDivider() );
         if( pPlayer )
         {
-            WorldPacket data( MSG_QUEST_PUSH_RESULT, (8+4+1) );
+            WorldPacket data( MSG_QUEST_PUSH_RESULT, (8+1) );
             data << uint64(guid);
-            data << uint32(msg);
-            data << uint8(0);
+            data << uint8(msg);                             // valid values: 0-8
             pPlayer->GetSession()->SendPacket(&data);
             _player->SetDivider( 0 );
         }
@@ -597,4 +597,52 @@ uint32 WorldSession::getDialogStatus(Player *pPlayer, Object* questgiver, uint32
         result = DIALOG_STATUS_CHAT;
 
     return result;
+}
+
+void WorldSession::HandleQuestgiverStatusQueryMultipleOpcode(WorldPacket& recvPacket)
+{
+    sLog.outDebug("WORLD: Received CMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE");
+
+    uint32 count = 0;
+    ByteBuffer buf;
+    for(Player::ClientGUIDs::iterator itr = _player->m_clientGUIDs.begin(); itr != _player->m_clientGUIDs.end(); ++itr)
+    {
+        uint8 questStatus = DIALOG_STATUS_NONE;
+        uint8 defstatus = DIALOG_STATUS_NONE;
+
+        if(IS_CREATURE_GUID(*itr))
+        {
+            Creature *questgiver = ObjectAccessor::GetCreature(*_player, *itr);
+            if(!questgiver || questgiver->IsHostileTo(_player))
+                continue;
+            questStatus = Script->NPCDialogStatus(_player, questgiver);
+            if( questStatus > 6 )
+                questStatus = getDialogStatus(_player, questgiver, defstatus);
+
+            buf << uint64(questgiver->GetGUID());
+            buf << uint8(questStatus);
+            ++count;
+        }
+        else if(IS_GAMEOBJECT_GUID(*itr))
+        {
+            GameObject *questgiver = ObjectAccessor::GetGameObject(*_player, *itr);
+            if(!questgiver)
+                continue;
+            questStatus = Script->GODialogStatus(_player, questgiver);
+            if( questStatus > 6 )
+                questStatus = getDialogStatus(_player, questgiver, defstatus);
+
+            buf << uint64(questgiver->GetGUID());
+            buf << uint8(questStatus);
+            ++count;
+        }
+    }
+
+    if(count)
+    {
+        WorldPacket data(SMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE_RESPONSE, 4+buf.size());
+        data << uint32(count);
+        data.append(buf);
+        SendPacket(&data);
+    }
 }

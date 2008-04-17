@@ -852,7 +852,7 @@ bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float 
     data.go_state       = 1;
     objmgr.AddGameobjectToGrid(guid, &data);
 
-    m_BgObjects[type] = MAKE_GUID(guid, HIGHGUID_GAMEOBJECT);
+    m_BgObjects[type] = MAKE_NEW_GUID(guid, entry, HIGHGUID_GAMEOBJECT);
 
     return true;
 }

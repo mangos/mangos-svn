@@ -130,8 +130,9 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
 {
     WorldPacket data( SMSG_GOSSIP_MESSAGE, (100) );         // guess size
     data << npcGUID;
+    data << uint32(0);                                      // new 2.4.0
     data << uint32( TitleTextId );
-    data << uint32( pGossipMenu->MenuItemCount() );
+    data << uint32( pGossipMenu->MenuItemCount() );         // max count 0x0F
 
     for ( unsigned int iI = 0; iI < pGossipMenu->MenuItemCount(); iI++ )
     {
@@ -150,7 +151,7 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
         data << gItem.m_gBoxMessage;                        // accept text (related to money) pop up box, 2.0.3
     }
 
-    data << uint32( pQuestMenu->MenuItemCount() );
+    data << uint32( pQuestMenu->MenuItemCount() );          // max count 0x20
 
     for ( uint16 iI = 0; iI < pQuestMenu->MenuItemCount(); iI++ )
     {
@@ -209,13 +210,23 @@ void PlayerMenu::SendTalking( uint32 textID )
     pGossip = objmgr.GetGossipText(textID);
 
     WorldPacket data( SMSG_NPC_TEXT_UPDATE, 100 );          // guess size
-    data << textID;
+    data << textID;                                         // can be < 0
 
     if (!pGossip)
     {
-        data << uint32( 0 );
-        data << "Greetings $N";
-        data << "Greetings $N";
+        for(uint32 i = 0; i < 8; ++i)
+        {
+            data << float(0);
+            data << "Greetings $N";
+            data << "Greetings $N";
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+            data << uint32(0);
+        }
     }
     else
     {
@@ -274,10 +285,20 @@ void PlayerMenu::SendTalking( uint32 textID )
 void PlayerMenu::SendTalking( char const * title, char const * text )
 {
     WorldPacket data( SMSG_NPC_TEXT_UPDATE, 50 );           // guess size
-    data << uint32( 0 );
-    data << uint32( 0 );
-    data << title;
-    data << text;
+    data << uint32(0);
+    for(uint32 i = 0; i < 8; ++i)
+    {
+        data << float(0);
+        data << title;
+        data << text;
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+        data << uint32(0);
+    }
 
     pSession->SendPacket( &data );
 
@@ -355,11 +376,11 @@ void PlayerMenu::SendQuestGiverQuestList( QEmote eEmote, std::string Title, uint
     //sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_QUEST_LIST NPC Guid=%u, questid-0=%u",npcGUID,fqid);
 }
 
-void PlayerMenu::SendQuestGiverStatus( uint32 questStatus, uint64 npcGUID )
+void PlayerMenu::SendQuestGiverStatus( uint8 questStatus, uint64 npcGUID )
 {
-    WorldPacket data( SMSG_QUESTGIVER_STATUS, 12 );
+    WorldPacket data( SMSG_QUESTGIVER_STATUS, 9 );
     data << uint64(npcGUID);
-    data << uint32(questStatus);
+    data << uint8(questStatus);
 
     pSession->SendPacket( &data );
     //sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_STATUS NPC Guid=%u, status=%u",GUID_LOPART(npcGUID),questStatus);
@@ -441,6 +462,8 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
 
     data << uint32(pQuest->GetRewSpell());                  // casted spell
 
+    data << uint32(0);                                      // new 2.4.0, reward title?
+
     data << uint32(QUEST_EMOTE_COUNT);
     for (uint32 i=0; i < QUEST_EMOTE_COUNT; i++)
     {
@@ -518,6 +541,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
     data << uint32(0);                                      // Honor points reward, not impelmented, and possible depricated
     data << uint32(pQuest->GetSrcItemId());
     data << uint32(pQuest->GetFlags() & 0xFFFF);
+    data << uint32(0);                                      // new 2.4.0
 
     int iI;
 
@@ -639,7 +663,7 @@ void PlayerMenu::SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID,
 
     data << uint32(pQuest->GetRewOrReqMoney());
     data << uint32(0x00);                                   // new 2.3.0. Honor points
-    data << uint32(0x08);
+    data << uint32(0x08);                                   // unused by client?
 
     // check if RewSpell is teaching another spell
     if(pQuest->GetRewSpell())

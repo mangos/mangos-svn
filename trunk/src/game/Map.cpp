@@ -40,7 +40,7 @@
 #define MAX_GRID_LOAD_TIME      50
 
 // magic *.map header
-const char MAP_MAGIC[] = "MAP_1.02";
+const char MAP_MAGIC[] = "MAP_1.03";
 
 GridState* si_GridStates[MAX_GRID_STATE];
 

@@ -115,8 +115,9 @@ class MANGOS_DLL_SPEC Object
         }
 
         const uint64& GetGUID() const { return GetUInt64Value(0); }
-        const uint32& GetGUIDLow() const { return GetUInt32Value(0); }
-        const uint32& GetGUIDHigh() const { return GetUInt32Value(1); }
+        uint32 GetGUIDLow() const { return GUID_LOPART(GetUInt64Value(0)); }
+        uint32 GetGUIDMid() const { return GUID_ENPART(GetUInt64Value(0)); }
+        uint32 GetGUIDHigh() const { return GUID_HIPART(GetUInt64Value(0)); }
         const ByteBuffer& GetPackGUID() const { return m_PackGUID; }
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
 
@@ -157,10 +158,18 @@ class MANGOS_DLL_SPEC Object
             return m_floatValues[ index ];
         }
 
+        const uint8& GetByteValue( uint16 index, uint8 offset) const
+        {
+            ASSERT( index < m_valuesCount || PrintIndexError( index , false) );
+            ASSERT( offset < 4 );
+            return *(((uint8*)&m_uint32Values[ index ])+offset);
+        }
+
         void SetInt32Value(  uint16 index,        int32  value );
         void SetUInt32Value( uint16 index,       uint32  value );
         void SetUInt64Value( uint16 index, const uint64 &value );
         void SetFloatValue(  uint16 index,       float   value );
+        void SetByteValue(   uint16 index, uint8 offset, uint8 value );
         void SetStatFloatValue( uint16 index, float value);
         void SetStatInt32Value( uint16 index, int32 value);
 
@@ -215,7 +224,7 @@ class MANGOS_DLL_SPEC Object
         Object ( );
 
         void _InitValues();
-        void _Create (uint32 guidlow, HighGuid guidhigh);
+        void _Create (uint32 guidlow, uint32 entry, HighGuid guidhigh);
 
         virtual void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
 

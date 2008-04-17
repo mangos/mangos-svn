@@ -74,7 +74,7 @@ int AccountMgr::DeleteAccount(uint32 accid)
         {
             Field *fields = result->Fetch();
             uint32 guidlo = fields[0].GetUInt32();
-            uint64 guid = MAKE_GUID(guidlo, HIGHGUID_PLAYER);
+            uint64 guid = MAKE_NEW_GUID(guidlo, 0, HIGHGUID_PLAYER);
 
             // kick if player currently
             if(Player* p = objmgr.GetPlayer(guid))

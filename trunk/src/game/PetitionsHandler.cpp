@@ -28,6 +28,7 @@
 #include "ArenaTeam.h"
 #include "MapManager.h"
 #include "GossipDef.h"
+#include "SocialMgr.h"
 
 /*enum PetitionType // dbc data
 {
@@ -586,7 +587,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket & recv_data)
     sLog.outDebug("OFFER PETITION: type %u, GUID1 %u, to player id: %u", petitiontype, GUID_LOPART(petitionguid), GUID_LOPART(plguid));
 
     player = ObjectAccessor::FindPlayer(plguid);
-    if(!player || player->HasInIgnoreList(GetPlayer()->GetGUID()))
+    if(!player || player->GetSocial()->HasIgnore(GetPlayer()->GetGUIDLow()))
         return;
 
     // not let offer to enemies

@@ -3761,9 +3761,9 @@ static bool HandleResetStatsOrLevelHelper(Player* player)
     }
 
     // set UNIT_FIELD_BYTES_1 to init state but preserve m_form value
-    player->SetUInt32Value(UNIT_FIELD_BYTES_1, player->m_form<<16 | unitfield );
+    player->SetUInt32Value(UNIT_FIELD_BYTES_2, player->m_form<<24 | unitfield);
 
-    player->SetUInt32Value(UNIT_FIELD_BYTES_2, 0x2800 );    // 0x2800, 0x2801 2.0.8...
+    player->SetByteValue(UNIT_FIELD_BYTES_2, 1, 0x28);
     player->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);
 
     //-1 is default value
@@ -4073,12 +4073,13 @@ bool ChatHandler::HandleRemoveQuest(const char* args)
     // remove all quest entries for 'entry' from quest log
     for(uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot )
     {
-        uint32 quest = player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 0);
+        uint32 quest = player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 0);
         if(quest==entry)
         {
-            player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 0, 0);
-            player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 1, 0);
-            player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 2, 0);
+            player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 0, 0);
+            player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 1, 0);
+            player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 2, 0);
+            player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 3, 0);
 
             // we ignore unequippable quest items in this case, its' still be equipped
             player->TakeQuestSourceItem( quest, false );

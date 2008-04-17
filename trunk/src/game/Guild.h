@@ -52,6 +52,8 @@ enum GuildRankRights
     GR_RIGHT_EOFFNOTE           = 0x00008040,
     GR_RIGHT_MODIFY_GUILD_INFO  = 0x00010040,
     GR_RIGHT_REPAIR_FROM_GUILD  = 0x00020000,               // Remove money withdraw capacity
+    // 0x40000 withdraw for repair
+    // 0x80000 withdraw gold?
     GR_RIGHT_ALL                = 0x0001F1FF
 };
 
@@ -137,6 +139,7 @@ enum GuildBankRights
 {
     GUILD_BANK_RIGHT_VIEW_TAB       = 0x01,
     GUILD_BANK_RIGHT_PUT_ITEM       = 0x02,
+    GUILD_BANK_RIGHT_UPDATE_TEXT    = 0x04,
 
     GUILD_BANK_RIGHT_DEPOSIT_ITEM   = GUILD_BANK_RIGHT_VIEW_TAB | GUILD_BANK_RIGHT_PUT_ITEM,
     GUILD_BANK_RIGHT_FULL           = 0xFF,
@@ -170,6 +173,7 @@ struct GuildBankTab
     Item* Slots[GUILD_BANK_MAX_SLOTS];
     std::string Name;
     std::string Icon;
+    std::string Text;
 };
 
 struct GuildItemPosCount
@@ -302,6 +306,8 @@ class Guild
         // Tabs
         void   DisplayGuildBankTabsInfo(WorldSession *session);
         void   CreateNewBankTab();
+        void   SetGuildBankTabText(uint8 TabId, std::string text);
+        void   SendGuildBankTabText(WorldSession *session, uint8 TabId);
         void   SetGuildBankTabInfo(uint8 TabId, std::string name, std::string icon);
         void   CreateBankRightForTab(uint32 rankid, uint8 TabId);
         const  GuildBankTab *GetBankTab(uint8 index) { if(index >= m_TabListMap.size()) return NULL; return m_TabListMap[index]; }

@@ -37,7 +37,6 @@ bool ChatHandler::load_command_table = true;
 LanguageDesc lang_description[LANGUAGES_COUNT] =
 {
     { LANG_ADDON,           0, 0                       },
-    { LANG_GLOBAL,          0, 0                       },
     { LANG_UNIVERSAL,       0, 0                       },
     { LANG_ORCISH,        669, SKILL_LANG_ORCISH       },
     { LANG_DARNASSIAN,    671, SKILL_LANG_DARNASSIAN   },
@@ -52,7 +51,8 @@ LanguageDesc lang_description[LANGUAGES_COUNT] =
     { LANG_GNOMISH,      7340, SKILL_LANG_GNOMISH      },
     { LANG_TROLL,        7341, SKILL_LANG_TROLL        },
     { LANG_GUTTERSPEAK, 17737, SKILL_LANG_GUTTERSPEAK  },
-    { LANG_DRAENEI,     29932, SKILL_LANG_DRAENEI      }
+    { LANG_DRAENEI,     29932, SKILL_LANG_DRAENEI      },
+    { LANG_ZOMBIE,          0, 0                       }
 };
 
 LanguageDesc const* GetLanguageDescByID(uint32 lang)
@@ -680,15 +680,24 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
         case CHAT_MSG_MONSTER_YELL:
         case CHAT_MSG_MONSTER_WHISPER:
         case CHAT_MSG_MONSTER_EMOTE:
-        //case CHAT_MSG_RAID_BOSS_WHISPER:
+        case CHAT_MSG_RAID_BOSS_WHISPER:
         case CHAT_MSG_RAID_BOSS_EMOTE:
             *data << uint64(speaker->GetGUID());
             *data << uint32(0);                             // 2.1.0
             *data << uint32(strlen(speaker->GetName()) + 1);
             *data << speaker->GetName();
-            break;
+            *data << uint64(speaker->GetGUID());
+            if(speaker->GetGUID() && (GUID_HIPART(speaker->GetGUID() != HIGHGUID_PLAYER)))
+            {
+                *data << uint32(1);                         // string length
+                *data << uint8(0);                          // string
+            }
+            *data << uint32(messageLength);
+            *data << message;
+            *data << uint8(0);
+            return;
         default:
-            if (type != CHAT_MSG_WHISPER_INFORM && type != CHAT_MSG_IGNORED && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
+            if (type != CHAT_MSG_REPLY && type != CHAT_MSG_IGNORED && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
                 target_guid = 0;                            // only for CHAT_MSG_WHISPER_INFORM used original value target_guid
             break;
     }
@@ -705,7 +714,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
     *data << uint64(target_guid);
     *data << uint32(messageLength);
     *data << message;
-    if(session != 0 && type != CHAT_MSG_WHISPER_INFORM && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
+    if(session != 0 && type != CHAT_MSG_REPLY && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
         *data << uint8(session->GetPlayer()->chatTag());
     else
         *data << uint8(0);

@@ -55,15 +55,15 @@ enum OpCodes
     CMSG_FORCEACTION                                = 24,
     CMSG_FORCEACTIONONOTHER                         = 25,
     CMSG_FORCEACTIONSHOW                            = 26,
-    SMSG_FORCEACTIONSHOW                            = 27,
+    SMSG_FORCEACTIONSHOW                            = 27,   // uint32, uint32
     SMSG_ATTACKERSTATEUPDATEDEBUGINFO_OBSOLETE      = 28,
-    SMSG_DEBUGINFOSPELL_OBSOLETE                    = 29,
+    SMSG_DEBUGINFOSPELL_OBSOLETE                    = 29,   // uint8, pet god mode
     SMSG_DEBUGINFOSPELLMISS_OBSOLETE                = 30,
     SMSG_DEBUG_PLAYER_RANGE_OBSOLETE                = 31,
     CMSG_UNDRESSPLAYER                              = 32,
     CMSG_BEASTMASTER                                = 33,
     CMSG_GODMODE                                    = 34,
-    SMSG_GODMODE                                    = 35,
+    SMSG_GODMODE                                    = 35,   // uint8, god mode
     CMSG_CHEAT_SETMONEY                             = 36,
     CMSG_LEVEL_CHEAT                                = 37,
     CMSG_PET_LEVEL_CHEAT                            = 38,
@@ -135,24 +135,24 @@ enum OpCodes
     SMSG_FRIEND_STATUS                              = 104,
     CMSG_ADD_FRIEND                                 = 105,
     CMSG_DEL_FRIEND                                 = 106,
-    SMSG_IGNORE_LIST                                = 107,
+    CMSG_FRIEND_SET_NOTE                            = 107,
     CMSG_ADD_IGNORE                                 = 108,
     CMSG_DEL_IGNORE                                 = 109,
     CMSG_GROUP_INVITE                               = 110,
-    SMSG_GROUP_INVITE                               = 111,
+    SMSG_GROUP_INVITE                               = 111,  // string
     CMSG_GROUP_CANCEL                               = 112,
-    SMSG_GROUP_CANCEL                               = 113,
+    SMSG_GROUP_CANCEL                               = 113,  // string
     CMSG_GROUP_ACCEPT                               = 114,
     CMSG_GROUP_DECLINE                              = 115,
-    SMSG_GROUP_DECLINE                              = 116,
+    SMSG_GROUP_DECLINE                              = 116,  // string
     CMSG_GROUP_UNINVITE                             = 117,
     CMSG_GROUP_UNINVITE_GUID                        = 118,
-    SMSG_GROUP_UNINVITE                             = 119,
+    SMSG_GROUP_UNINVITE                             = 119,  // empty
     CMSG_GROUP_SET_LEADER                           = 120,
-    SMSG_GROUP_SET_LEADER                           = 121,
+    SMSG_GROUP_SET_LEADER                           = 121,  // string
     CMSG_LOOT_METHOD                                = 122,
     CMSG_GROUP_DISBAND                              = 123,
-    SMSG_GROUP_DESTROYED                            = 124,
+    SMSG_GROUP_DESTROYED                            = 124,  // empty
     SMSG_GROUP_LIST                                 = 125,
     SMSG_PARTY_MEMBER_STATS                         = 126,
     SMSG_PARTY_COMMAND_RESULT                       = 127,
@@ -303,7 +303,7 @@ enum OpCodes
     CMSG_DROP_ITEM                                  = 272,
     CMSG_DESTROYITEM                                = 273,
     SMSG_INVENTORY_CHANGE_FAILURE                   = 274,
-    SMSG_OPEN_CONTAINER                             = 275,
+    SMSG_OPEN_CONTAINER                             = 275,  // uint64
     CMSG_INSPECT                                    = 276,
     SMSG_INSPECT                                    = 277,
     CMSG_INITIATE_TRADE                             = 278,
@@ -371,7 +371,7 @@ enum OpCodes
     CMSG_SETDEATHBINDPOINT                          = 340,
     SMSG_BINDPOINTUPDATE                            = 341,
     CMSG_GETDEATHBINDZONE                           = 342,
-    SMSG_BINDZONEREPLY                              = 343,
+    SMSG_BINDZONEREPLY                              = 343,  // uint32, uint32
     SMSG_PLAYERBOUND                                = 344,
     SMSG_DEATH_NOTIFY_OBSOLETE                      = 345,
     CMSG_REPOP_REQUEST                              = 346,
@@ -384,7 +384,7 @@ enum OpCodes
     SMSG_LOOT_RELEASE_RESPONSE                      = 353,
     SMSG_LOOT_REMOVED                               = 354,
     SMSG_LOOT_MONEY_NOTIFY                          = 355,
-    SMSG_LOOT_ITEM_NOTIFY                           = 356,
+    SMSG_LOOT_ITEM_NOTIFY                           = 356,  // uint64, uint8, uint8, uint32, string
     SMSG_LOOT_CLEAR_MONEY                           = 357,
     SMSG_ITEM_PUSH_RESULT                           = 358,
     SMSG_DUEL_REQUESTED                             = 359,
@@ -394,8 +394,8 @@ enum OpCodes
     SMSG_DUEL_WINNER                                = 363,
     CMSG_DUEL_ACCEPTED                              = 364,
     CMSG_DUEL_CANCELLED                             = 365,
-    SMSG_MOUNTRESULT                                = 366,  // 0 - can't mount that unit, 1 - mount too far away, 2 - already mounted, 3 - that unit can't be mounted, 4 - that mount is not our pet, 5 - unknown mount error, 6 - can't mount while looting, 7 - cant mount because your race, 8 - shapeshifted, 9 - you dismount before continuing
-    SMSG_DISMOUNTRESULT                             = 367,  // 0 - int err, don't have pet to dismount, 1 - not mounted, 2 - int err, dismounting a non-pet
+    SMSG_MOUNTRESULT                                = 366,  // uint32, 0 - can't mount that unit, 1 - mount too far away, 2 - already mounted, 3 - that unit can't be mounted, 4 - that mount is not our pet, 5 - unknown mount error, 6 - can't mount while looting, 7 - cant mount because your race, 8 - shapeshifted, 9 - you dismount before continuing
+    SMSG_DISMOUNTRESULT                             = 367,  // uint32, 0 - int err, don't have pet to dismount, 1 - not mounted, 2 - int err, dismounting a non-pet
     SMSG_PUREMOUNT_CANCELLED_OBSOLETE               = 368,
     CMSG_MOUNTSPECIAL_ANIM                          = 369,
     SMSG_MOUNTSPECIAL_ANIM                          = 370,
@@ -434,13 +434,13 @@ enum OpCodes
     CMSG_QUESTLOG_SWAP_QUEST                        = 403,
     CMSG_QUESTLOG_REMOVE_QUEST                      = 404,
     SMSG_QUESTLOG_FULL                              = 405,
-    SMSG_QUESTUPDATE_FAILED                         = 406,
-    SMSG_QUESTUPDATE_FAILEDTIMER                    = 407,
-    SMSG_QUESTUPDATE_COMPLETE                       = 408,
-    SMSG_QUESTUPDATE_ADD_KILL                       = 409,
-    SMSG_QUESTUPDATE_ADD_ITEM                       = 410,
+    SMSG_QUESTUPDATE_FAILED                         = 406,  // uint32
+    SMSG_QUESTUPDATE_FAILEDTIMER                    = 407,  // uint32
+    SMSG_QUESTUPDATE_COMPLETE                       = 408,  // uint32
+    SMSG_QUESTUPDATE_ADD_KILL                       = 409,  // uint32, uint32, uint32, uint32, uint64
+    SMSG_QUESTUPDATE_ADD_ITEM                       = 410,  // unused (client has if(opcode == 410) return; in opcode handler)
     CMSG_QUEST_CONFIRM_ACCEPT                       = 411,
-    SMSG_QUEST_CONFIRM_ACCEPT                       = 412,
+    SMSG_QUEST_CONFIRM_ACCEPT                       = 412,  // uint32, string, uint64
     CMSG_PUSHQUESTTOPARTY                           = 413,
     CMSG_LIST_INVENTORY                             = 414,
     SMSG_LIST_INVENTORY                             = 415,
@@ -470,7 +470,7 @@ enum OpCodes
     CMSG_BANKER_ACTIVATE                            = 439,
     SMSG_SHOW_BANK                                  = 440,
     CMSG_BUY_BANK_SLOT                              = 441,
-    SMSG_BUY_BANK_SLOT_RESULT                       = 442,
+    SMSG_BUY_BANK_SLOT_RESULT                       = 442,  // uint32
     CMSG_PETITION_SHOWLIST                          = 443,
     SMSG_PETITION_SHOWLIST                          = 444,
     CMSG_PETITION_BUY                               = 445,
@@ -565,7 +565,7 @@ enum OpCodes
     MSG_CORPSE_QUERY                                = 534,
     CMSG_GMTICKET_DELETETICKET                      = 535,
     SMSG_GMTICKET_DELETETICKET                      = 536,
-    SMSG_CHAT_WRONG_FACTION                         = 537,  // You can only whisper to the members of your alliance.
+    SMSG_CHAT_WRONG_FACTION                         = 537,  // empty, You can only whisper to the members of your alliance.
     CMSG_GMTICKET_SYSTEMSTATUS                      = 538,
     SMSG_GMTICKET_SYSTEMSTATUS                      = 539,
     CMSG_SPIRIT_HEALER_ACTIVATE                     = 540,
@@ -638,7 +638,7 @@ enum OpCodes
     SMSG_AUCTION_OWNER_NOTIFICATION                 = 607,
     SMSG_PROCRESIST                                 = 608,
     SMSG_STANDSTATE_CHANGE_FAILURE                  = 609,
-    SMSG_DISPEL_FAILED                              = 610,
+    SMSG_DISPEL_FAILED                              = 610,  // uint64, uint64, uint32, uint32 (for?)
     SMSG_SPELLORDAMAGE_IMMUNE                       = 611,
     CMSG_AUCTION_LIST_BIDDER_ITEMS                  = 612,
     SMSG_AUCTION_BIDDER_LIST_RESULT                 = 613,
@@ -663,7 +663,7 @@ enum OpCodes
     SMSG_PLAY_OBJECT_SOUND                          = 632,
     CMSG_REQUEST_PET_INFO                           = 633,
     CMSG_FAR_SIGHT                                  = 634,
-    SMSG_SPELLDISPELLOG                             = 635,
+    SMSG_SPELLDISPELLOG                             = 635,  // pguid, pguid, uint32, uint8, uint32 count, for(count) { uint32; uint8; }
     SMSG_DAMAGE_CALC_LOG                            = 636,
     CMSG_ENABLE_DAMAGE_LOG                          = 637,
     CMSG_GROUP_CHANGE_SUB_GROUP                     = 638,
@@ -704,7 +704,7 @@ enum OpCodes
     SMSG_LOOT_START_ROLL                            = 673,
     SMSG_LOOT_ROLL                                  = 674,
     CMSG_LOOT_MASTER_GIVE                           = 675,
-    SMSG_LOOT_MASTER_LIST                           = 676,
+    SMSG_LOOT_MASTER_LIST                           = 676,  // uint8 count, for(count) { uint64; }
     SMSG_SET_FORCED_REACTIONS                       = 677,
     SMSG_SPELL_FAILED_OTHER                         = 678,
     SMSG_GAMEOBJECT_RESET_STATE                     = 679,  // uint64 guid
@@ -715,7 +715,7 @@ enum OpCodes
     CMSG_SUMMON_RESPONSE                            = 684,
     MSG_MOVE_TOGGLE_GRAVITY_CHEAT                   = 685,
     SMSG_MONSTER_MOVE_TRANSPORT                     = 686,
-    SMSG_PET_BROKEN                                 = 687,  // Your pet has run away (:D)
+    SMSG_PET_BROKEN                                 = 687,  // empty?, Your pet has run away
     MSG_MOVE_FEATHER_FALL                           = 688,
     MSG_MOVE_WATER_WALK                             = 689,
     CMSG_SERVER_BROADCAST                           = 690,
@@ -793,7 +793,7 @@ enum OpCodes
     SMSG_INSTANCE_RESET_SCHEDULED                   = 762,  // WARNING! %s is scheduled to reset in %u minutes! and other messages...
     SMSG_COMPRESSED_MOVE                            = 763,
     CMSG_GUILD_CHANGEINFO                           = 764,
-    SMSG_TRIAL_RESTRICTED                           = 765,  // Trial accounts cannot send unlimited tells, you must wait before you can send tells to more players.
+    SMSG_TRIAL_RESTRICTED                           = 765,  // uint8, Trial accounts cannot send unlimited tells, you must wait before you can send tells to more players.
     SMSG_SET_MOVE_SPEED                             = 766,  // GUID + float speed, move speed, except swim/turn/fly
     SMSG_SET_RUN_BACK_SPEED                         = 767,  // GUID + float speed, run back speed
     SMSG_SET_SWIM_SPEED                             = 768,  // GUID + float speed, swim and swim back speed
@@ -830,7 +830,7 @@ enum OpCodes
     SMSG_RESET_INSTANCES_FAILED                     = 799,  // uint32 reason, uint32 mapid
     SMSG_UNKNOWN_800                                = 800,  // uint32 mapid, instance related (save?)
     MSG_RAID_ICON_TARGET                            = 801,  // uint8+uint8+uint64 guid or only uint8(0x01)
-    MSG_RAID_READY_CHECK                            = 802,  // uint64+uint8
+    MSG_RAID_READY_CHECK                            = 802,  // uint64(server) or empty(client)
     // 803 not exist?
     SMSG_PET_ACTION_SOUND                           = 804,  // GUID + uint32, looks like SMSG_AI_REACTION (pet action sound?)
     SMSG_PET_DISMISS_SOUND                          = 805,  // uint32 unk + x, y, z (pet dismiss sound?)
@@ -841,11 +841,11 @@ enum OpCodes
     CMSG_GM_SURVEY_RESULTS                          = 810,  // script function named GMSurveySubmit()
     SMSG_UNKNOWN_811                                = 811,  // uint32, 0x0, SMSG_INSTANCE_RESET_ACTIVATE ?
     SMSG_UNKNOWN_812                                = 812,
-    // 813 not exist?
+    SMSG_UNKNOWN_813                                = 813,  // string
     // 814 not exist?
     SMSG_SPELL_INSTA_KILL_SELF                      = 815,  // spell related, uint64 guid + spellid (You are killed by %s(spell_name))
     SMSG_UNKNOWN_816                                = 816,  // spell related, uint64 guid + spellid + uint32 count + for(count) uint64 guid (target?)
-    CMSG_UNKNOWN_817                                = 817,
+    CMSG_UNKNOWN_817                                = 817,  // response to chat message with type 7 in some case
     SMSG_ANTISPAM                                   = 818,  // 2.0.8, received before server MOTD, strange regexp sequence, looks like anti spam filter for chat messages...
     SMSG_UNKNOWN_819                                = 819,  // pGUID, pGUID, uint32 unk1, uint8 unk2, uint32 count, for(count) {uint32; if(unk2) {uint32; uint32}}
     // 820 not exist?
@@ -918,7 +918,7 @@ enum OpCodes
     MSG_INSPECT_ARENA_STATS                         = 887,
     SMSG_SH_POSITION                                = 888,  // spirit healer position, map/x/y/z, at player death...
     CMSG_CANCEL_TEMP_ITEM_ENCHANTMENT               = 889,  // cancel temporary item enchantment
-    SMSG_UNKNOWN_890                                = 890,
+    SMSG_UNKNOWN_890                                = 890,  // empty
     // 891 not exist?
     // 892 not exist?
     // 893 not exist?
@@ -954,8 +954,8 @@ enum OpCodes
     SMSG_UNKNOWN_923                                = 923,  // uint8 count, for(count) uint32
     // 924 not exist?
     SMSG_SET_COMBO_POINTS                           = 925,  // set combo points
-    SMSG_VOICE_SESSION                              = 926,
-    SMSG_UNKNOWN_927                                = 927,  // uint64 guid + uint32 + float?, received after leave voice channel
+    SMSG_VOICE_SESSION                              = 926,  // VoiceSessionRosterUpdate, uint64, uint16, uint8, string, string, uint32, uin16, uint8 unk, uint64, uint8, uint8, if(unk-1) { for(unk-1) { uint64; uint8; uint8; uint8; } }
+    SMSG_UNKNOWN_927                                = 927,  // uint64 guid + uint64, received after leave voice channel
     // 928 not exist?
     // 929 not exist?
     SMSG_UNKNOWN_930                                = 930,  // uint64 + uint8
@@ -970,9 +970,9 @@ enum OpCodes
     // 939 not exist?
     SMSG_UNKNOWN_940                                = 940,  // packed guid (received at spell cast)
     SMSG_UNKNOWN_941                                = 941,  // teleport/movement opcode
-    SMSG_READY_CHECK_ALL_READY                      = 942,  // Everyone is Ready! (message)
+    SMSG_READY_CHECK_ALL_READY                      = 942,  // uint64, uint8, Everyone is Ready! (message)
     CMSG_VOICE_SETTINGS                             = 943,  // uint8 isVoiceEnabled, uint8 isMicrophoneEnabled (id correct for 2.3.0)
-    SMSG_VOICE_CHAT_PARENTAL_DISABLE_ALL            = 944,  // Voice chat has been disabled by parental control
+    SMSG_VOICE_CHAT_PARENTAL_DISABLE_ALL            = 944,  // uint8, uint8, Voice chat has been disabled by parental control
     // 945  not exist?
     SMSG_UNKNOWN_946                                = 946,  // special chat packet?
     // 947  not exist?
@@ -988,14 +988,14 @@ enum OpCodes
     CMSG_COMMENTATOR_ADD_OR_REMOVE_PLAYER           = 957,
     SMSG_UNKNOWN_958                                = 958,  // uint64 guid, cause client to send CMSG_SET_SELECTION
     CMSG_UNKNOWN_959                                = 959,  // uint8, uint8, uint8, string
-    SMSG_UNKNOWN_960                                = 960,  // uint64 guid, uint32, uint32 (client sedn CMSG_ITEM_QUERY_SINGLE)
+    SMSG_UNKNOWN_960                                = 960,  // uint64 player_guid, uint32 drunk_state (0-3), uint32 itemid
     // 961 not exist?
     // 962 not exist?
     // 963 not exist?
-    SMSG_UNKNOWN_964                                = 964,  // uint8?
-    CMSG_UNKNOWN_965                                = 965,  // related to raid ready check...
+    SMSG_UNKNOWN_964                                = 964,  // uint8, disconnect related?
+    MSG_UNKNOWN_965                                 = 965,  // empty, related to raid ready check...
     CMSG_REPORT_SPAM                                = 966,  // Report Spam chat button
-    SMSG_REPORT_SPAM_RESULT                         = 967,  // Complaint Registered. (message)
+    SMSG_REPORT_SPAM_RESULT                         = 967,  // uint8, Complaint Registered. (message)
     SMSG_VOICE_SYSTEM_STATUS                        = 968,  // uint8, uint8 (id correct for 2.3.0)
     // 969 not exist?
     // 970 not exist?
@@ -1040,8 +1040,8 @@ enum OpCodes
     SMSG_PLAYER_JOINED_CUSTOM_CHANNEL               = 1009, // uint64, uint8, uint8, uint32, string
     CMSG_CLEAR_CHANNEL_WATCH                        = 1010,
     SMSG_INSPECT_TALENTS                            = 1011, // uint32 count, for(count) uint8 unk
-    SMSG_UNKNOWN_1012                               = 1012, // uint8
-    SMSG_UNKNOWN_1013                               = 1013, // uint64, uint32
+    SMSG_UNKNOWN_1012                               = 1012, // uint8, toggle run forward
+    SMSG_UNKNOWN_1013                               = 1013, // uint64, uint32 ERR_PLAYER_SILENCED_ECHO/ERR_PLAYER_UNSILENCED_ECHO
     // 1014 not exist?
     CMSG_UNKNOWN_1015                               = 1015, // uint64, click on NPC with 0x1000000 npc_flag
     SMSG_UNKNOWN_1016                               = 1016, // uint64
@@ -1053,40 +1053,39 @@ enum OpCodes
     MSG_GUILD_EVENT_LOG                             = 1022,
     // 1023 not exist?
     CMSG_UNKNOWN_1024                               = 1024, // empty
-    SMSG_UNKNOWN_1025                               = 1025, // empty?
+    SMSG_MIRRORIMAGE_DATA                           = 1025,
+    SMSG_FORCE_DISPLAY_UPDATE                       = 1026,
+    SMSG_UNKNOWN_1027                               = 1027, // uint32, uint32, uint32
+    UMSG_UNKNOWN_1028                               = 1028,
+    SMSG_UNKNOWN_1029                               = 1029, // do nothing at client
+    CMSG_UNKNOWN_1030                               = 1030,
+    SMSG_UNKNOWN_1031                               = 1031, // empty?, message You can't do that yet
+    CMSG_GROUP_PASS_ON_LOOT_TOGGLE                  = 1032, // uint32
+    MSG_GUILD_BANK_TAB_TEXT                         = 1033, // uint8, GuildBankText
+    CMSG_GUILD_BANK_SET_TAB_TEXT                    = 1034, // uint8, string, SetGuildBankText
+    UMSG_UNKNOWN_1035                               = 1035, // not exist?
+    CMSG_UNKNOWN_1036                               = 1036, // lua: GrantLevel
+    UMSG_UNKNOWN_1037                               = 1037, // not exist?
+    UMSG_UNKNOWN_1038                               = 1038, // not exist?
+    CMSG_UNKNOWN_1039                               = 1039, // string, DeclineInvite
+    SMSG_GROUP_ACTION_THROTTLED                     = 1040, // empty
+    SMSG_UNKNOWN_1041                               = 1041, // uint32, uint32, uint32
+    SMSG_UNKNOWN_1042                               = 1042, // uint8, uint64, uint32, uint32
+    CMSG_UNKNOWN_1043                               = 1043, // lua: DestroyTotem(slot)
+    UMSG_UNKNOWN_1044                               = 1044, // not exist?
+    UMSG_UNKNOWN_1045                               = 1045, // not exist?
+    CMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE           = 1046, // quest giver query status multiple (all visible)
+    SMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE_RESPONSE  = 1047, // response to 1046, uint32 count; for(count) { uint64; uint8; }
+    CMSG_UNKNOWN_1048                               = 1048, // lua: DeclineCharacter
+    SMSG_UNKNOWN_1049                               = 1049, // uint32 result, if(!result) uint64, CharacterDeclineResult
+    UMSG_UNKNOWN_1050                               = 1050, // not exist?
+    UMSG_UNKNOWN_1051                               = 1051, // not exist?
+    UMSG_UNKNOWN_1052                               = 1052, // not exist?
+    SMSG_UNKNOWN_1053                               = 1053, // uint32 count; for(count) { uint32; }
 };
 
 //if you add new opcode .. Do NOT forget to change the following define MAX_OPCODE_ID and also add new opcode to table in opcodes.cpp
-#define MAX_OPCODE_ID 1026
-
-/// Results of friend related commands
-enum FriendsResult
-{
-    FRIEND_DB_ERROR                               = 0x00,
-    FRIEND_LIST_FULL                              = 0x01,
-    FRIEND_ONLINE                                 = 0x02,
-    FRIEND_OFFLINE                                = 0x03,
-    FRIEND_NOT_FOUND                              = 0x04,
-    FRIEND_REMOVED                                = 0x05,
-    FRIEND_ADDED_ONLINE                           = 0x06,
-    FRIEND_ADDED_OFFLINE                          = 0x07,
-    FRIEND_ALREADY                                = 0x08,
-    FRIEND_SELF                                   = 0x09,
-    FRIEND_ENEMY                                  = 0x0A,
-    FRIEND_IGNORE_FULL                            = 0x0B,
-    FRIEND_IGNORE_SELF                            = 0x0C,
-    FRIEND_IGNORE_NOT_FOUND                       = 0x0D,
-    FRIEND_IGNORE_ALREADY                         = 0x0E,
-    FRIEND_IGNORE_ADDED                           = 0x0F,
-    FRIEND_IGNORE_REMOVED                         = 0x10,
-    // 0x11
-    // 0x12
-    // 0x13
-    // 0x14
-    // 0x15
-    FRIEND_MUTE_ADDED                             = 0x16,
-    FRIEND_MUTE_REMOVED                           = 0x17
-};
+#define MAX_OPCODE_ID 1054
 
 extern const char* g_worldOpcodeNames[];
 
