@@ -388,13 +388,14 @@ void BattleGround::EndBattleGround(uint32 winner)
             RewardMark(plr,ITEM_LOSER_COUNT);
         }
 
+        /* old way of rewarding honor, now it is done instantly, code is obsolete
         std::map<uint64, BattleGroundScore*>::iterator itr1 = m_PlayerScores.find(plr->GetGUID());
 
         if(!(itr1 == m_PlayerScores.end()))
         {
             if(itr1->second->BonusHonor)
                 plr->RewardHonor(NULL, 1, itr1->second->BonusHonor);
-        }
+        }*/
 
         BlockMovement(plr);
 
@@ -769,6 +770,8 @@ void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
             itr->second->HonorableKills += value;
             break;
         case SCORE_BONUS_HONOR:                             // Honor bonus
+            // reward honor instantly
+            Source->RewardHonor(NULL, 1, value);
             itr->second->BonusHonor += value;
             break;
             //used only in EY, but in MSG_PVP_LOG_DATA opcode
