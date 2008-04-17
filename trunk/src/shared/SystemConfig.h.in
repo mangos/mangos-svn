@@ -24,7 +24,7 @@
 
 #ifndef _VERSION
 #if PLATFORM == PLATFORM_WINDOWS
-# define _VERSION "0.10.1" " (Revision " SVN_REVISION ")"
+# define _VERSION "0.11.0-SVN" " (Revision " SVN_REVISION ")"
 #else
 # define _VERSION "@VERSION@" " (Revision " SVN_REVISION ")"
 #endif
