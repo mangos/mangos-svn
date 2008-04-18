@@ -413,11 +413,35 @@ struct RandomPropertiesPointsEntry
     uint32    UncommonPropertiesPoints[5];                  // 12-16
 };
 
+//struct SkillLineCategoryEntry{
+//    uint32    id;                                           // 0 hidden key
+//    char*     name[16];                                     // 1 - 17 Category name
+//                                                                  // 18 string flag
+//    uint32    displayOrder;                                 // Display order in character tab
+//};
+
+//struct SkillRaceClassInfoEntry{
+//    uint32    id;                                           // 0 
+//    uint32    skillId;                                      // 1 present some refrences to unknown skill
+//    uint32    raceMask;                                     // 2 
+//    uint32    classMask;                                    // 3
+//    uint32    Unk_4;                                        // 4 mask for some thing
+//    uint32    reqLevel;                                     // 5
+//    uint32    skillTierId;                                  // 6
+//    uint32    Unk_7;                                        // 7
+//};
+
+//struct SkillTiersEntry{
+//    uint32    id;                                           // 0
+//    uint32    skillValue[16];                               // 1-17 unknown possibly add value on learn?
+//    uint32    maxSkillValue[16];                            // Max value for rank
+//};
+
 struct SkillLineEntry
 {
     uint32    id;                                           // 0
-    uint32    categoryId;                                   // 1
-                                                            // 2 unknow, not used
+    uint32    categoryId;                                   // 1 (index from SkillLineCategory.dbc)
+                                                            // 2 unknown, not used
     char*     name[16];                                     // 3-18
                                                             // 19 string flags, not used
     //char*     description[16];                            // 20-35, not used
