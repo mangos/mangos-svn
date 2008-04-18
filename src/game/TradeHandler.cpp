@@ -81,7 +81,13 @@ void WorldSession::SendTradeStatus(uint32 status)
             data.Initialize(SMSG_TRADE_STATUS, 4+1);
             data << uint32(status);
             data << uint8(0);
+            break;
+        default:
+            data.Initialize(SMSG_TRADE_STATUS, 4);
+            data << uint32(status);
+            break;
     }
+
     SendPacket(&data);
 }
 

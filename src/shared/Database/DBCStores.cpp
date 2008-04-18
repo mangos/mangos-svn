@@ -398,7 +398,7 @@ void LoadDBCStores(std::string dataPath)
     // check at up-to-date DBC files (47653 is last added spell in 2.4.1)
     // check at up-to-date DBC files (47280 is last added spell in abilities in 2.4.1)
     // check at up-to-date DBC files (598 is last map added in 2.4.1)
-    // check at up-to-date DBC files (4140 is last area added in 2.4.1)
+    // check at up-to-date DBC files (1768 is last area added in 2.4.1)
     if( !sSpellStore.LookupEntry(47653)            || 
         !sSkillLineAbilityStore.LookupEntry(47280) || 
         !sMapStore.LookupEntry(598)                ||

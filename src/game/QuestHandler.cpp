@@ -604,7 +604,10 @@ void WorldSession::HandleQuestgiverStatusQueryMultipleOpcode(WorldPacket& recvPa
     sLog.outDebug("WORLD: Received CMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE");
 
     uint32 count = 0;
-    ByteBuffer buf;
+
+    WorldPacket data(SMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE_RESPONSE, 4);
+    data << uint32(count);                                  // placeholder
+
     for(Player::ClientGUIDs::iterator itr = _player->m_clientGUIDs.begin(); itr != _player->m_clientGUIDs.end(); ++itr)
     {
         uint8 questStatus = DIALOG_STATUS_NONE;
@@ -615,12 +618,14 @@ void WorldSession::HandleQuestgiverStatusQueryMultipleOpcode(WorldPacket& recvPa
             Creature *questgiver = ObjectAccessor::GetCreature(*_player, *itr);
             if(!questgiver || questgiver->IsHostileTo(_player))
                 continue;
+            if(!questgiver->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER))
+                continue;
             questStatus = Script->NPCDialogStatus(_player, questgiver);
             if( questStatus > 6 )
                 questStatus = getDialogStatus(_player, questgiver, defstatus);
 
-            buf << uint64(questgiver->GetGUID());
-            buf << uint8(questStatus);
+            data << uint64(questgiver->GetGUID());
+            data << uint8(questStatus);
             ++count;
         }
         else if(IS_GAMEOBJECT_GUID(*itr))
@@ -628,21 +633,18 @@ void WorldSession::HandleQuestgiverStatusQueryMultipleOpcode(WorldPacket& recvPa
             GameObject *questgiver = ObjectAccessor::GetGameObject(*_player, *itr);
             if(!questgiver)
                 continue;
+            if(questgiver->GetGoType() != GAMEOBJECT_TYPE_QUESTGIVER)
+                continue;
             questStatus = Script->GODialogStatus(_player, questgiver);
             if( questStatus > 6 )
                 questStatus = getDialogStatus(_player, questgiver, defstatus);
 
-            buf << uint64(questgiver->GetGUID());
-            buf << uint8(questStatus);
+            data << uint64(questgiver->GetGUID());
+            data << uint8(questStatus);
             ++count;
         }
     }
 
-    if(count)
-    {
-        WorldPacket data(SMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE_RESPONSE, 4+buf.size());
-        data << uint32(count);
-        data.append(buf);
-        SendPacket(&data);
-    }
+    data.put<uint32>(0, count);                             // write real count
+    SendPacket(&data);
 }
