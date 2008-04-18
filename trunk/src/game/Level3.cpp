@@ -4062,13 +4062,10 @@ bool ChatHandler::HandleRemoveQuest(const char* args)
     // remove all quest entries for 'entry' from quest log
     for(uint8 slot = 0; slot < MAX_QUEST_LOG_SIZE; ++slot )
     {
-        uint32 quest = player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 0);
+        uint32 quest = player->GetQuestSlotQuestId(slot);
         if(quest==entry)
         {
-            player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 0, 0);
-            player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 1, 0);
-            player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 2, 0);
-            player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 3, 0);
+            player->SetQuestSlot(slot,0);
 
             // we ignore unequippable quest items in this case, its' still be equipped
             player->TakeQuestSourceItem( quest, false );
