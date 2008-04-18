@@ -336,16 +336,7 @@ void WorldSession::HandleQuestLogSwapQuest(WorldPacket& recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_QUESTLOG_SWAP_QUEST slot 1 = %u, slot 2 = %u", slot1, slot2 );
 
-    uint32 temp1;
-    uint32 temp2;
-    for (int i = 0; i < 4; i++ )
-    {
-        temp1 = _player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot1 + i);
-        temp2 = _player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot2 + i);
-
-        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot1 + i, temp2);
-        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot2 + i, temp1);
-    }
+    GetPlayer()->SwapQuestSlot(slot1,slot2);
 }
 
 void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
@@ -353,26 +344,21 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
     CHECK_PACKET_SIZE(recv_data,1);
 
     uint8 slot;
-    uint32 quest;
     recv_data >> slot;
 
     sLog.outDebug( "WORLD: Received CMSG_QUESTLOG_REMOVE_QUEST slot = %u",slot );
 
     if( slot < MAX_QUEST_LOG_SIZE )
     {
-        quest = _player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 0);
-
-        if( quest )
+        if(uint32 quest = _player->GetQuestSlotQuestId(slot))
         {
             if(!_player->TakeQuestSourceItem( quest, true ))
                 return;                                     // can't un-equip some items, reject quest cancel
 
             _player->SetQuestStatus( quest, QUEST_STATUS_NONE);
         }
-        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 0, 0);
-        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 1, 0);
-        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 2, 0);
-        _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 4*slot + 3, 0);
+
+        _player->SetQuestSlot(slot, 0);
     }
 }
 

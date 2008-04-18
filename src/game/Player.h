@@ -509,7 +509,22 @@ enum AtLoginFlags
 
 typedef std::map<uint32, QuestStatusData> QuestStatusMap;
 
-#define IS_BACK_SLOT(s) (s == 0xFF)
+enum QuestSlotOffsets
+{
+    QUEST_ID_OFFSET = 0,
+    QUEST_STATE_OFFSET = 1,
+    QUEST_COUNTS_OFFSET = 2,
+    QUEST_TIME_OFFSET = 3
+};
+
+#define MAX_QUEST_OFFSET 4
+
+enum QuestSlotStateMask
+{
+    QUEST_STATE_NONE     = 0x0000,
+    QUEST_STATE_COMPLETE = 0x0001,
+    QUEST_STATE_FAIL     = 0x0002
+};
 
 class Quest;
 class Spell;
@@ -1139,9 +1154,36 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetDailyQuestStatus( uint32 quest_id );
         void ResetDailyQuestStatus();
 
+        uint16 FindQuestSlot( uint32 quest_id ) const;
+        uint32 GetQuestSlotQuestId(uint16 slot) const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_ID_OFFSET); }
+        uint32 GetQuestSlotState(uint16 slot)   const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_STATE_OFFSET); }
+        uint32 GetQuestSlotCounters(uint16 slot)const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_COUNTS_OFFSET); }
+        uint8 GetQuestSlotCounter(uint16 slot,uint8 counter) const { return GetByteValue(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_COUNTS_OFFSET,counter); }
+        uint32 GetQuestSlotTime(uint16 slot)    const { return GetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_TIME_OFFSET); }
+        void SetQuestSlot(uint16 slot,uint32 quest_id, uint32 timer = 0)
+        {
+            SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_ID_OFFSET,quest_id);
+            SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_STATE_OFFSET,0);
+            SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_COUNTS_OFFSET,0);
+            SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_TIME_OFFSET,timer);
+        }
+        void SetQuestSlotCounter(uint16 slot,uint8 counter,uint8 count) { SetByteValue(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_COUNTS_OFFSET,counter,count); }
+        void SetQuestSlotState(uint16 slot,uint32 state) { SetFlag(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_STATE_OFFSET,state); }
+        void RemoveQuestSlotState(uint16 slot,uint32 state) { RemoveFlag(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_STATE_OFFSET,state); }
+        void SetQuestSlotTimer(uint16 slot,uint32 timer) { SetUInt32Value(PLAYER_QUEST_LOG_1_1 + slot*MAX_QUEST_OFFSET + QUEST_TIME_OFFSET,timer); }
+        void SwapQuestSlot(uint16 slot1,uint16 slot2)
+        {
+            for (int i = 0; i < MAX_QUEST_OFFSET ; ++i )
+            {
+                uint32 temp1 = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + MAX_QUEST_OFFSET *slot1 + i);
+                uint32 temp2 = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + MAX_QUEST_OFFSET *slot2 + i);
+
+                SetUInt32Value(PLAYER_QUEST_LOG_1_1 + MAX_QUEST_OFFSET *slot1 + i, temp2);
+                SetUInt32Value(PLAYER_QUEST_LOG_1_1 + MAX_QUEST_OFFSET *slot2 + i, temp1);
+            }
+        }
         uint32 GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry);
         void AdjustQuestReqItemCount( Quest const* pQuest );
-        uint16 GetQuestSlot( uint32 quest_id );
         void AreaExploredOrEventHappens( uint32 questId );
         void ItemAddedQuestCheck( uint32 entry, uint32 count );
         void ItemRemovedQuestCheck( uint32 entry, uint32 count );
