@@ -102,8 +102,8 @@ void LootStore::LoadLootTable()
 
     sLog.outString( "%s :", GetName());
 
-    //                                                 0      1     2                     3       4              5          6          7              8                 9
-    QueryResult *result = WorldDatabase.PQuery("SELECT entry, item, ChanceOrQuestChance, `group`, mincountOrRef, maxcount, freeforall, lootcondition, condition_value1, condition_value2 FROM %s",GetName());
+    //                                                 0      1     2                    3       4              5          6          7              8                 9
+    QueryResult *result = WorldDatabase.PQuery("SELECT entry, item, ChanceOrQuestChance, group, mincountOrRef, maxcount, freeforall, lootcondition, condition_value1, condition_value2 FROM %s",GetName());
 
     if (result)
     {
