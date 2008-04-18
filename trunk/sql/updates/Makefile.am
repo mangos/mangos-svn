@@ -680,6 +680,13 @@ pkgdata_DATA = \
 	5636_mangos_loot_template.sql \
 	5640_mangos_spell_proc_event.sql \
 	5642_mangos_mangos_string.sql \
+	5651_characters_guild_bank_tab.sql \
+	5651_characters_characters.sql \
+	5651_characters_character_social.sql \
+	5651_mangos_creature_template.sql \
+	5655_mangos_spell_affect.sql \
+	5655_mangos_spell_chain.sql \
+	5655_mangos_spell_proc_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1340,4 +1347,11 @@ EXTRA_DIST = \
 	5636_mangos_loot_template.sql \
 	5640_mangos_spell_proc_event.sql \
 	5642_mangos_mangos_string.sql \
+	5651_characters_guild_bank_tab.sql \
+	5651_characters_characters.sql \
+	5651_characters_character_social.sql \
+	5651_mangos_creature_template.sql \
+	5655_mangos_spell_affect.sql \
+	5655_mangos_spell_chain.sql \
+	5655_mangos_spell_proc_event.sql \
 	README
