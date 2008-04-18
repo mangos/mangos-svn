@@ -678,18 +678,18 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
         uint32 type_slot;
         switch(type)
         {
-        case ARENA_TEAM_2v2:
-            type_slot = 0;
-            break;
-        case ARENA_TEAM_3v3:
-            type_slot = 1;
-            break;
-        case ARENA_TEAM_5v5:
-            type_slot = 2;
-            break;
-        default:
-            type_slot = 0;
-            break;
+            case ARENA_TEAM_2v2:
+                type_slot = 0;
+                break;
+            case ARENA_TEAM_3v3:
+                type_slot = 1;
+                break;
+            case ARENA_TEAM_5v5:
+                type_slot = 2;
+                break;
+            default:
+                type_slot = 0;
+                break;
         }
         if(_player->GetArenaTeamId(type_slot))
         {

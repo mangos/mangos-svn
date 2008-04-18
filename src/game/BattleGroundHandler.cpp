@@ -487,7 +487,7 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
             break;
         default:
             sLog.outError("Unknown arena type %u at HandleBattleGroundArenaJoin()", type);
-            break;
+            return;
     }
 
     if(isRated && !_player->GetArenaTeamId(type))           // player not in arena team of that size

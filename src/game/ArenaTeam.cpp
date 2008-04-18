@@ -461,9 +461,8 @@ uint8 ArenaTeam::GetSlot()
             return 2;
         default:
             sLog.outError("Unknown arena team type %u for arena team %u", GetType(), GetId());
-            break;
+            return 0xFF;
     }
-    return 0xFF;
 }
 
 void ArenaTeam::BroadcastPacket(WorldPacket *packet)
