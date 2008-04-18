@@ -465,7 +465,7 @@ CREATE TABLE `creature_loot_template` (
   `entry` mediumint(8) unsigned NOT NULL default '0',
   `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrQuestChance` float NOT NULL default '100',
-  `group` tinyint(3) unsigned NOT NULL default '0',
+  `groupid` tinyint(3) unsigned NOT NULL default '0',
   `mincountOrRef` mediumint(9) NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
   `freeforall` tinyint(3) unsigned NOT NULL default '0',
@@ -749,7 +749,7 @@ CREATE TABLE `disenchant_loot_template` (
   `entry` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Recommended id selection: item_level*100 + item_quality',
   `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrQuestChance` float NOT NULL default '100',
-  `group` tinyint(3) unsigned NOT NULL default '0',
+  `groupid` tinyint(3) unsigned NOT NULL default '0',
   `mincountOrRef` mediumint(9) NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
   `freeforall` tinyint(3) unsigned NOT NULL default '0',
@@ -896,7 +896,7 @@ CREATE TABLE `fishing_loot_template` (
   `entry` mediumint(8) unsigned NOT NULL default '0',
   `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrQuestChance` float NOT NULL default '100',
-  `group` tinyint(3) unsigned NOT NULL default '0',
+  `groupid` tinyint(3) unsigned NOT NULL default '0',
   `mincountOrRef` mediumint(9) NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
   `freeforall` tinyint(3) unsigned NOT NULL default '0',
@@ -1160,7 +1160,7 @@ CREATE TABLE `gameobject_loot_template` (
   `entry` mediumint(8) unsigned NOT NULL default '0',
   `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrQuestChance` float NOT NULL default '100',
-  `group` tinyint(3) unsigned NOT NULL default '0',
+  `groupid` tinyint(3) unsigned NOT NULL default '0',
   `mincountOrRef` mediumint(9) NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
   `freeforall` tinyint(3) unsigned NOT NULL default '0',
@@ -1385,7 +1385,7 @@ CREATE TABLE `item_loot_template` (
   `entry` mediumint(8) unsigned NOT NULL default '0',
   `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrQuestChance` float NOT NULL default '100',
-  `group` tinyint(3) unsigned NOT NULL default '0',
+  `groupid` tinyint(3) unsigned NOT NULL default '0',
   `mincountOrRef` mediumint(9) NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
   `freeforall` tinyint(3) unsigned NOT NULL default '0',
@@ -2974,7 +2974,7 @@ CREATE TABLE `pickpocketing_loot_template` (
   `entry` mediumint(8) unsigned NOT NULL default '0',
   `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrQuestChance` float NOT NULL default '100',
-  `group` tinyint(3) unsigned NOT NULL default '0',
+  `groupid` tinyint(3) unsigned NOT NULL default '0',
   `mincountOrRef` mediumint(9) NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
   `freeforall` tinyint(3) unsigned NOT NULL default '0',
@@ -9742,7 +9742,7 @@ CREATE TABLE `prospecting_loot_template` (
   `entry` mediumint(8) unsigned NOT NULL default '0',
   `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrQuestChance` float NOT NULL default '100',
-  `group` tinyint(3) unsigned NOT NULL default '0',
+  `groupid` tinyint(3) unsigned NOT NULL default '0',
   `mincountOrRef` mediumint(9) NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
   `freeforall` tinyint(3) unsigned NOT NULL default '0',
@@ -10019,7 +10019,7 @@ CREATE TABLE `skinning_loot_template` (
   `entry` mediumint(8) unsigned NOT NULL default '0',
   `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrQuestChance` float NOT NULL default '100',
-  `group` tinyint(3) unsigned NOT NULL default '0',
+  `groupid` tinyint(3) unsigned NOT NULL default '0',
   `mincountOrRef` mediumint(9) NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
   `freeforall` tinyint(3) unsigned NOT NULL default '0',
@@ -11259,14 +11259,14 @@ INSERT INTO `spell_affect` VALUES
 (44299,0,0,0x0000000000040000,0),
 (44300,0,0,0x0000800000000000,0),
 (44301,0,0,0x0000000001000000,0),
-(44302,0,0,0x0000000001000000,0);
-(46088,0,0,0x0000044000000000,0);
-(46090,0,0,0x0000000000000002,0);
-(46091,0,0,0x0000000000800000,0);
-(46095,0,0,0x0000004000000000,0);
-(46096,0,0,0x0000001000000000,0);
-(46097,0,0,0x0000000090100000,0);
-(46100,0,0,0x0000001000000000,0);
+(44302,0,0,0x0000000001000000,0),
+(46088,0,0,0x0000044000000000,0),
+(46090,0,0,0x0000000000000002,0),
+(46091,0,0,0x0000000000800000,0),
+(46095,0,0,0x0000004000000000,0),
+(46096,0,0,0x0000001000000000,0),
+(46097,0,0,0x0000000090100000,0),
+(46100,0,0,0x0000001000000000,0),
 (46851,0,0,0x0001000000000000,0);
 
 /*!40000 ALTER TABLE `spell_affect` ENABLE KEYS */;
@@ -13306,7 +13306,7 @@ INSERT INTO `spell_elixir` VALUES
 (41609,0xB),
 (41610,0xB),
 (41611,0xB),
-(42735,0x3);
+(42735,0x3),
 (46837,0xB),
 (46839,0xB);
 /*!40000 ALTER TABLE `spell_elixir` ENABLE KEYS */;
