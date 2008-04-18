@@ -1,4 +1,4 @@
-UPDATE characters.characters
+UPDATE characters
 SET data = CONCAT(
   SUBSTRING_INDEX(data,' ',225+1),
   ' 1 0 ',
