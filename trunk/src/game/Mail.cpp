@@ -514,12 +514,12 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     if(!pl->m_mailsLoaded)
         pl ->_LoadMail();
 
-    // client have limitation (~217) mail to show in mail box and can crash if receive more
-    uint32 const MaxMailsCount = 217;
+    // client have limitation (~190) mail to show in mail box and can crash if receive more
+    uint32 MaxMailsCount = 190;
     uint32 mails_count = 0;
 
-    // client have limitation (~301) items(stacks) in mails to show in mail box and can crash if receive more
-    uint32 const MaxAllItemsCount = 301;
+    // client have limitation (~296) items(stacks) in mails to show in mail box and can crash if receive more
+    uint32 MaxAllItemsCount = 296;
     uint32 all_items_count = 0;
 
     WorldPacket data(SMSG_MAIL_LIST_RESULT, (200));         // guess size
