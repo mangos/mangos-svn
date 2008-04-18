@@ -1406,21 +1406,10 @@ bool ChatHandler::HandleLearnAllMyClassCommand(const char* /*args*/)
 
 bool ChatHandler::HandleLearnAllMySpellsCommand(const char* /*args*/)
 {
-    uint32 family = 0;
-    switch(m_session->GetPlayer()->getClass())
-    {
-        case CLASS_WARRIOR: family = SPELLFAMILY_WARRIOR; break;
-        case CLASS_PALADIN: family = SPELLFAMILY_PALADIN; break;
-        case CLASS_HUNTER:  family = SPELLFAMILY_HUNTER;  break;
-        case CLASS_ROGUE:   family = SPELLFAMILY_ROGUE;   break;
-        case CLASS_PRIEST:  family = SPELLFAMILY_PRIEST;  break;
-        case CLASS_SHAMAN:  family = SPELLFAMILY_SHAMAN;  break;
-        case CLASS_MAGE:    family = SPELLFAMILY_MAGE;    break;
-        case CLASS_WARLOCK: family = SPELLFAMILY_WARLOCK; break;
-        case CLASS_DRUID:   family = SPELLFAMILY_DRUID;   break;
-        default:
-            return true;
-    }
+    ChrClassesEntry const* clsEntry = sChrClassesStore.LookupEntry(m_session->GetPlayer()->getClass());
+    if(!clsEntry)
+        return true;
+    uint32 family = clsEntry->spellfamily;
 
     for (uint32 i = 0; i < sSpellStore.GetNumRows(); i++)
     {
