@@ -487,9 +487,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_social`;
 CREATE TABLE `character_social` (
-  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `friend` int(11) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
-  `flags` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Friend flags',
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
+  `friend` int(11) unsigned NOT NULL default '0' COMMENT 'Friend Global Unique Identifier',
+  `flags` tinyint(1) unsigned NOT NULL default '0' COMMENT 'Friend Flags',
   `note` varchar(21) NOT NULL DEFAULT '' COMMENT 'Friend Note',
   PRIMARY KEY  (`guid`,`friend`,`flags`),
   KEY `guid` (`guid`),
