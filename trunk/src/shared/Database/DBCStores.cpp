@@ -402,7 +402,7 @@ void LoadDBCStores(std::string dataPath)
     if( !sSpellStore.LookupEntry(47653)            || 
         !sSkillLineAbilityStore.LookupEntry(47280) || 
         !sMapStore.LookupEntry(598)                ||
-        !sAreaStore.LookupEntry(4140)              )
+        !sAreaStore.LookupEntry(1768)              )
     {
         sLog.outError("\nYou have _outdated_ DBC files. Please extract correct versions from current using client.");
         exit(1);
