@@ -4178,9 +4178,8 @@ void Aura::SendCoolDownEvent()
     Unit* caster = GetCaster();
     if(caster)
     {
-        WorldPacket data(SMSG_COOLDOWN_EVENT, (4+8+4));     // last check 2.0.10
+        WorldPacket data(SMSG_COOLDOWN_EVENT, (4+8));       // last check 2.4.1
         data << uint32(m_spellId) << m_caster_guid;
-        //data << uint32(0); // removed
         caster->SendMessageToSet(&data,true);               // WTF? why we send cooldown message to set?
     }
 }

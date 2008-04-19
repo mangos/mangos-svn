@@ -159,7 +159,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
                 return;
             }
 
-            mailItem.item = pl->GetItemByGuid(MAKE_GUID(mailItem.item_guidlow,HIGHGUID_ITEM));
+            mailItem.item = pl->GetItemByGuid(MAKE_NEW_GUID(mailItem.item_guidlow, 0, HIGHGUID_ITEM));
             // prevent sending bag with items (cheat: can be placed in bag after adding equipped empty bag to mail)
             if(!mailItem.item || !mailItem.item->CanBeTraded())
             {
@@ -329,11 +329,11 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
 
 void WorldSession::SendReturnToSender(uint8 messageType, uint32 sender_acc, uint32 sender_guid, uint32 receiver_guid, std::string subject, uint32 itemTextId, MailItemsInfo *mi, uint32 money, uint32 COD)
 {
-    Player *receiver = objmgr.GetPlayer(MAKE_GUID(receiver_guid, HIGHGUID_PLAYER));
+    Player *receiver = objmgr.GetPlayer(MAKE_NEW_GUID(receiver_guid, 0, HIGHGUID_PLAYER));
 
     uint32 rc_account = 0;
     if(!receiver)
-        rc_account = objmgr.GetPlayerAccountIdByGUID(MAKE_GUID(receiver_guid, HIGHGUID_PLAYER));
+        rc_account = objmgr.GetPlayerAccountIdByGUID(MAKE_NEW_GUID(receiver_guid, 0, HIGHGUID_PLAYER));
 
     if(receiver || rc_account)
     {
@@ -411,7 +411,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 
         if (m->COD > 0)                                     //if there is COD, take COD money from player and send them to sender by mail
         {
-            uint64 sender_guid = MAKE_GUID(m->sender, HIGHGUID_PLAYER);
+            uint64 sender_guid = MAKE_NEW_GUID(m->sender, 0, HIGHGUID_PLAYER);
             Player *receive = objmgr.GetPlayer(sender_guid);
 
             uint32 sender_accId = 0;
@@ -548,7 +548,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         switch((*itr)->messageType)
         {
             case MAIL_NORMAL:                               // sender guid
-                data << uint64(MAKE_GUID((*itr)->sender,HIGHGUID_PLAYER));
+                data << uint64(MAKE_NEW_GUID((*itr)->sender, 0, HIGHGUID_PLAYER));
                 break;
             case MAIL_CREATURE:
             case MAIL_GAMEOBJECT:

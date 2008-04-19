@@ -205,7 +205,7 @@ bool Guild::LoadGuildFromDB(uint32 GuildId)
 
     Id = fields[0].GetUInt32();
     name = fields[1].GetCppString();
-    leaderGuid  = MAKE_GUID(fields[2].GetUInt32(),HIGHGUID_PLAYER);
+    leaderGuid  = MAKE_NEW_GUID(fields[2].GetUInt32(), 0, HIGHGUID_PLAYER);
 
     EmblemStyle = fields[3].GetUInt32();
     EmblemColor = fields[4].GetUInt32();
@@ -280,7 +280,7 @@ bool Guild::LoadMembersFromDB(uint32 GuildId)
         Field *fields = result->Fetch();
         MemberSlot newmember;
         newmember.RankId = fields[1].GetUInt32();
-        uint64 guid = MAKE_GUID(fields[0].GetUInt32(),HIGHGUID_PLAYER);
+        uint64 guid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
 
         // Player does not exist
         if(!FillPlayerData(guid, &newmember))
@@ -499,7 +499,7 @@ void Guild::BroadcastToGuild(WorldSession *session, std::string msg, uint32 lang
 
         for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
         {
-            Player *pl = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
+            Player *pl = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
 
             if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_GCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetGUIDLow()) )
                 pl->GetSession()->SendPacket(&data);
@@ -516,7 +516,7 @@ void Guild::BroadcastToOfficers(WorldSession *session, std::string msg, uint32 l
             WorldPacket data;
             ChatHandler::FillMessageData(&data, session, CHAT_MSG_OFFICER, language, NULL, 0, msg.c_str(),NULL);
 
-            Player *pl = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
+            Player *pl = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
 
             if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_OFFCHATLISTEN) && !pl->GetSocial()->HasIgnore(session->GetPlayer()->GetGUIDLow()))
                 pl->GetSession()->SendPacket(&data);
@@ -528,7 +528,7 @@ void Guild::BroadcastPacket(WorldPacket *packet)
 {
     for(MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        Player *player = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
+        Player *player = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
         if(player)
             player->GetSession()->SendPacket(packet);
     }
@@ -540,7 +540,7 @@ void Guild::BroadcastPacketToRank(WorldPacket *packet, uint32 rankId)
     {
         if (itr->second.RankId == rankId)
         {
-            Player *player = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
+            Player *player = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
             if(player)
                 player->GetSession()->SendPacket(packet);
         }
@@ -627,7 +627,7 @@ void Guild::Disband()
     while (!members.empty())
     {
         MemberList::iterator itr = members.begin();
-        DelMember(MAKE_GUID(itr->first,HIGHGUID_PLAYER), true);
+        DelMember(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER), true);
     }
 
     CharacterDatabase.BeginTransaction();
@@ -662,7 +662,7 @@ void Guild::Roster(WorldSession *session)
     }
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        if (Player *pl = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER)))
+        if (Player *pl = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER)))
         {
             data << (uint64)pl->GetGUID();
             data << (uint8)1;
@@ -677,7 +677,7 @@ void Guild::Roster(WorldSession *session)
         }
         else
         {
-            data << uint64(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
+            data << uint64(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
             data << (uint8)0;
             data << itr->second.name;
             data << (uint32)itr->second.RankId;
@@ -791,7 +791,7 @@ void Guild::DisplayGuildBankMoneyUpdate()
 
     for(MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        Player *player = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
+        Player *player = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
         if(!player)
             continue;
 
@@ -836,7 +836,7 @@ void Guild::DisplayGuildBankContentUpdate(uint8 TabId, int32 slot1, int32 slot2)
 
     for(MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        Player *player = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
+        Player *player = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
         if(!player)
             continue;
 
@@ -874,7 +874,7 @@ void Guild::DisplayGuildBankContentUpdate(uint8 TabId, GuildItemPosCountVec cons
 
     for(MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        Player *player = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
+        Player *player = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
         if(!player)
             continue;
 

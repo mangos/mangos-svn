@@ -113,7 +113,7 @@ bool Group::LoadGroupFromDB(const uint64 &leaderGuid)
     m_mainTank = (*result)[0].GetUInt64();
     m_mainAssistant = (*result)[1].GetUInt64();
     m_lootMethod = (LootMethod)(*result)[2].GetUInt8();
-    m_looterGuid = MAKE_GUID((*result)[3].GetUInt32(),HIGHGUID_PLAYER);
+    m_looterGuid = MAKE_NEW_GUID((*result)[3].GetUInt32(), 0, HIGHGUID_PLAYER);
     m_lootThreshold = (ItemQualities)(*result)[4].GetUInt16();
 
     for(int i=0; i<TARGETICONCOUNT; i++)
@@ -127,7 +127,7 @@ bool Group::LoadGroupFromDB(const uint64 &leaderGuid)
     do
     {
         MemberSlot member;
-        member.guid      = MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER);
+        member.guid      = MAKE_NEW_GUID((*result)[0].GetUInt32(), 0, HIGHGUID_PLAYER);
 
         // skip non-existed member
         if(!objmgr.GetPlayerNameByGUID(member.guid, member.name))

@@ -248,7 +248,7 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
     if(!pItem)
         return;
 
-    uint64 bidder_guid = MAKE_GUID(auction->bidder,HIGHGUID_PLAYER);
+    uint64 bidder_guid = MAKE_NEW_GUID(auction->bidder, 0, HIGHGUID_PLAYER);
     Player *bidder = objmgr.GetPlayer(bidder_guid);
 
     uint32 bidder_accId = 0;
@@ -338,7 +338,7 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
     if(!pItem)
         return;
 
-    uint64 owner_guid = MAKE_GUID(auction->owner,HIGHGUID_PLAYER);
+    uint64 owner_guid = MAKE_NEW_GUID(auction->owner, 0, HIGHGUID_PLAYER);
     Player *owner = objmgr.GetPlayer(owner_guid);
 
     uint32 owner_accId = 0;
@@ -384,7 +384,7 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
         return;
     }
 
-    uint64 owner_guid = MAKE_GUID(auction->owner,HIGHGUID_PLAYER);
+    uint64 owner_guid = MAKE_NEW_GUID(auction->owner, 0, HIGHGUID_PLAYER);
     Player *owner = objmgr.GetPlayer(owner_guid);
 
     uint32 owner_accId = 0;
@@ -980,7 +980,7 @@ uint64 ObjectMgr::GetPlayerGUIDByName(std::string name) const
     QueryResult *result = CharacterDatabase.PQuery("SELECT guid FROM characters WHERE name = '%s'", name.c_str());
     if(result)
     {
-        guid = MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER);
+        guid = MAKE_NEW_GUID((*result)[0].GetUInt32(), 0, HIGHGUID_PLAYER);
 
         delete result;
     }
@@ -2192,7 +2192,7 @@ void ObjectMgr::LoadGroups()
         ++count;
 
         group = new Group;
-        if(!group->LoadGroupFromDB(MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER)))
+        if(!group->LoadGroupFromDB(MAKE_NEW_GUID((*result)[0].GetUInt32(), 0, HIGHGUID_PLAYER)))
         {
             group->Disband();
             delete group;

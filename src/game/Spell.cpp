@@ -2398,7 +2398,7 @@ void Spell::SendSpellStart()
 
     uint16 castFlags = CAST_FLAG_UNKNOWN1;
     if(m_rangedShoot)
-        castFlags = castFlags | CAST_FLAG_AMMO;
+        castFlags |= CAST_FLAG_AMMO;
 
     Unit * target;
     if(!m_targets.getUnitTarget())
@@ -2442,7 +2442,7 @@ void Spell::SendSpellGo()
 
     uint16 castFlags = CAST_FLAG_UNKNOWN3;
     if(m_rangedShoot)
-        castFlags = castFlags | CAST_FLAG_AMMO;
+        castFlags |= CAST_FLAG_AMMO;
 
     WorldPacket data(SMSG_SPELL_GO, 50);                    // guess size
     if(m_CastItem)
