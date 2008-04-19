@@ -11513,18 +11513,17 @@ bool Player::SatisfyQuestLevel( Quest const* qInfo, bool msg )
 
 bool Player::SatisfyQuestLog( bool msg )
 {
-    if( FindQuestSlot(0) )
+    // exist free slot
+    if( FindQuestSlot(0) < MAX_QUEST_LOG_SIZE )
         return true;
-    else
+
+    if( msg )
     {
-        if( msg )
-        {
-            WorldPacket data( SMSG_QUESTLOG_FULL, 0 );
-            GetSession()->SendPacket( &data );
-            sLog.outDebug( "WORLD: Sent QUEST_LOG_FULL_MESSAGE" );
-        }
-        return false;
+        WorldPacket data( SMSG_QUESTLOG_FULL, 0 );
+        GetSession()->SendPacket( &data );
+        sLog.outDebug( "WORLD: Sent QUEST_LOG_FULL_MESSAGE" );
     }
+    return false;
 }
 
 bool Player::SatisfyQuestPreviousQuest( Quest const* qInfo, bool msg )
