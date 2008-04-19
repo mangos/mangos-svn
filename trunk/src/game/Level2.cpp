@@ -952,7 +952,7 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
 
     // add to DB and to current ingame vendor
     WorldDatabase.PExecuteLog("INSERT INTO npc_vendor (entry,item,maxcount,incrtime) VALUES('%u','%u','%u','%u')",vendor->GetEntry(), itemId, maxcount,incrtime);
-    vendor->AddItem(itemId,maxcount,incrtime);
+    vendor->AddItem(itemId,maxcount,incrtime,0);
     PSendSysMessage(LANG_ITEM_ADDED_TO_LIST,itemId,pProto->Name1,maxcount,incrtime);
     return true;
 }

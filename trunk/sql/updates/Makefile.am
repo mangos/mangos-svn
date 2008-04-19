@@ -689,6 +689,8 @@ pkgdata_DATA = \
 	5655_mangos_spell_proc_event.sql \
 	5659_mangos_loot_template.sql \
 	5660_mangos_spell_elixir.sql \
+	5664_mangos_item_template.sql \
+	5664_mangos_npc_vendor.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1358,4 +1360,6 @@ EXTRA_DIST = \
 	5655_mangos_spell_proc_event.sql \
 	5659_mangos_loot_template.sql \
 	5660_mangos_spell_elixir.sql \
+	5664_mangos_item_template.sql \
+	5664_mangos_npc_vendor.sql \
 	README

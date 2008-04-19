@@ -807,6 +807,7 @@ void BattleGround::AddPlayerToResurrectQueue(uint64 npc_guid, uint64 player_guid
 void BattleGround::RemovePlayerFromResurrectQueue(uint64 player_guid)
 {
     for(std::map<uint64, std::vector<uint64> >::iterator itr = m_ReviveQueue.begin(); itr != m_ReviveQueue.end(); ++itr)
+    {
         for(std::vector<uint64>::iterator itr2 =(itr->second).begin(); itr2 != (itr->second).end(); ++itr2)
         {
             if(*itr2 == player_guid)
@@ -822,6 +823,7 @@ void BattleGround::RemovePlayerFromResurrectQueue(uint64 player_guid)
                 return;
             }
         }
+    }
 }
 
 bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint32 spawntime)

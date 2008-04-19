@@ -1542,8 +1542,6 @@ CREATE TABLE `item_template` (
   `socketContent_3` mediumint(9) NOT NULL default '0',
   `socketBonus` mediumint(9) NOT NULL default '0',
   `GemProperties` mediumint(9) NOT NULL default '0',
-  `ExtendedCost` mediumint(9) NOT NULL default '0',
-  `CondExtendedCost` mediumint(8) unsigned NOT NULL default '0',
   `RequiredDisenchantSkill` smallint(6) NOT NULL default '-1',
   `ArmorDamageModifier` float NOT NULL default '0',
   `ScriptName` varchar(64) NOT NULL default '',
@@ -2659,6 +2657,7 @@ CREATE TABLE `npc_vendor` (
   `item` mediumint(8) unsigned NOT NULL default '0',
   `maxcount` tinyint(3) unsigned NOT NULL default '0',
   `incrtime` int(10) unsigned NOT NULL default '0',
+  `ExtendedCost` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`,`item`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Npc System';
 

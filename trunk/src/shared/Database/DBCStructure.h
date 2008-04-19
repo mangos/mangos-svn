@@ -297,29 +297,21 @@ struct ItemDisplayInfoEntry
     uint32      randomPropertyChance;
 };
 
-struct ItemCondExtCostsEntry
-{
-    // uint32      ID;
-    uint32      condExtendedCost;                           // ItemPrototype::CondExtendedCost
-    uint32      itemextendedcostentry;                      // ItemPrototype::ExtendedCost
-    uint32      requirementtype;                            // 1 - honor and/or arena point from itemextendedcost
-                                                            // 2 - required item(s) from itemextendedcost
-                                                            // 3 - required personal arena rating from itemextendedcost
-};
+//struct ItemCondExtCostsEntry
+//{
+//    uint32      ID;
+//    uint32      condExtendedCost;                           // ItemPrototype::CondExtendedCost
+//    uint32      itemextendedcostentry;                      // ItemPrototype::ExtendedCost
+//    uint32      arenaseason;                                // arena season number(1-4)
+//};
 
 struct ItemExtendedCostEntry
 {
     uint32      ID;                                         // 0 extended-cost entry id
     uint32      reqhonorpoints;                             // 1 required honor points
     uint32      reqarenapoints;                             // 2 required arena points
-    uint32      reqitem1;                                   // 3 1st required item id
-    uint32      reqitem2;                                   // 4 2nd required item id
-    uint32      reqitem3;                                   // 5 3rd required item id
-                                                            // 6-7 not used, always 0 (4-5 item?)
-    uint32      reqitemcount1;                              // 8 required count of 1st item
-    uint32      reqitemcount2;                              // 9 required count of 2st item
-    uint32      reqitemcount3;                              // 10 required count of 3st item
-                                                            // 11-12 not used, always 0 (4-5 item count?)
+    uint32      reqitem[5];                                 // 3-7 required item id
+    uint32      reqitemcount[5];                            // 8-12 required count of 1st item
     uint32      reqpersonalarenarating;                     // 13 required personal arena rating
 };
 

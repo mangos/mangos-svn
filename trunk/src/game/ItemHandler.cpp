@@ -695,7 +695,7 @@ void WorldSession::SendListInventory( uint64 vendorguid )
                 data << uint32(price);
                 data << uint32(pProto->MaxDurability);
                 data << uint32(pProto->BuyCount);
-                data << uint32(pProto->ExtendedCost);
+                data << uint32(crItem->ExtendedCost);
             }
         }
     }
