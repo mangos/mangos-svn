@@ -912,6 +912,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         PlayerSocial *GetSocial() { return m_social; }
 
+        void InitTaxiNodesForLevel();
         uint32 GetTaximask( uint8 index ) const { return m_taximask[index]; }
         void SetTaximask( uint8 index, uint32 value ) { m_taximask[index] = value; }
         void ClearTaxiDestinations() { m_TaxiDestinations.clear(); }

@@ -1418,13 +1418,6 @@ void ObjectMgr::LoadItemPrototypes()
         if(proto->GemProperties && !sGemPropertiesStore.LookupEntry(proto->GemProperties))
             sLog.outErrorDb("Item (Entry: %u) has wrong GemProperties (%u)",i,proto->GemProperties);
 
-        if(proto->ExtendedCost && !sItemExtendedCostStore.LookupEntry(proto->ExtendedCost))
-            sLog.outErrorDb("Item (Entry: %u) has wrong ExtendedCost (%u)",i,proto->ExtendedCost);
-
-        // check if the extended cost and condition extended cost pair is valid
-        if(proto->ExtendedCost && proto->CondExtendedCost && !GetItemCondExtCostsMask(proto->CondExtendedCost, proto->ExtendedCost))
-            sLog.outErrorDb("Item (Entry: %u) has wrong ExtendedCost - CondExtendedCost pair (%u, %u)",i,proto->ExtendedCost,proto->CondExtendedCost);
-
         if(proto->FoodType >= MAX_PET_DIET)
         {
             sLog.outErrorDb("Item (Entry: %u) has wrong FoodType value (%u)",i,proto->FoodType);
@@ -2291,13 +2284,6 @@ void ObjectMgr::LoadQuests()
             sLog.outErrorDb("Quest %u has `SpecialFlags` = %u > max allowed value. Correct `SpecialFlags` to value <= %u",
                 qinfo->GetQuestId(),qinfo->QuestFlags,QUEST_MANGOS_FLAGS_DB_ALLOWED >> 16);
             qinfo->QuestFlags &= QUEST_MANGOS_FLAGS_DB_ALLOWED;
-        }
-
-        if(qinfo->Type == QUEST_TYPE_DAILY && (qinfo->GetFlags() & QUEST_FLAGS_DAILY) == 0)
-        {
-            sLog.outErrorDb("Quest %u has `Type` = %u (QUEST_TYPE_DAILY) but does not have `QuestFlags` set with mask %u (QUEST_FLAGS_DAILY).",
-                qinfo->GetQuestId(),qinfo->Type,QUEST_FLAGS_DAILY);
-            qinfo->QuestFlags |= QUEST_FLAGS_DAILY;
         }
 
         // zone case

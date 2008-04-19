@@ -1275,7 +1275,6 @@ enum QuestTypes
     QUEST_TYPE_LEGENDARY           = 83,
     QUEST_TYPE_ESCORT              = 84,
     QUEST_TYPE_HEROIC              = 85,
-    QUEST_TYPE_DAILY               = 87
 };
 
 // values based at QuestSort.dbc

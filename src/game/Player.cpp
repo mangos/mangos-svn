@@ -452,6 +452,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     // base stats and related field values
     InitStatsForLevel();
+    InitTaxiNodesForLevel();
     InitTalentForLevel();
     InitPrimaryProffesions();                               // to max set before any spell added
 
@@ -1925,6 +1926,7 @@ void Player::GiveLevel(uint32 level)
     SetCreateMana(info.basemana);
 
     InitTalentForLevel();
+    InitTaxiNodesForLevel();
 
     UpdateAllStats();
 
@@ -1954,7 +1956,6 @@ void Player::InitTalentForLevel()
         {
             resetTalents(true);
             SetFreeTalentPoints(0);
-
         }
     }
     else
@@ -2131,6 +2132,18 @@ void Player::InitStatsForLevel(bool reapplyMods)
         SetPower(POWER_RAGE, GetMaxPower(POWER_RAGE));
     SetPower(POWER_FOCUS, 0);
     SetPower(POWER_HAPPINESS, 0);
+}
+
+void Player::InitTaxiNodesForLevel()
+{
+    if(getLevel() >= 65)
+    {
+        uint32 curloc = 213;                                // Shattered Sun Staging Area
+        uint8  field   = (uint8)((curloc - 1) / 32);
+        uint32 submask = 1 << ((curloc-1) % 32);
+        if ( !(GetTaximask(field) & submask) )
+            SetTaximask(field, (submask | GetTaximask(field)));
+    }
 }
 
 void Player::SendInitialSpells()
@@ -12779,6 +12792,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     // reset stats before loading any modifiers
     InitStatsForLevel();
+    InitTaxiNodesForLevel();
 
     // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
 
@@ -15242,18 +15256,14 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         return false;
     }
 
-    if(pProto->ExtendedCost)
+    if(crItem->ExtendedCost)
     {
-        ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(pProto->ExtendedCost);
+        ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
         if(!iece)
         {
-            sLog.outError("Item %u have wrong ExtendedCost field value %u", pProto->ItemId, pProto->ExtendedCost);
+            sLog.outError("Item %u have wrong ExtendedCost field value %u", pProto->ItemId, crItem->ExtendedCost);
             return false;
         }
-
-        uint32 mask = 0;
-        if(pProto->CondExtendedCost)
-            mask = GetItemCondExtCostsMask(pProto->CondExtendedCost, pProto->ExtendedCost);
 
         // honor points price
         if(GetHonorPoints() < (iece->reqhonorpoints * count))
@@ -15270,16 +15280,17 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         }
         
         // item base price
-        if( (iece->reqitem1 && !HasItemCount(iece->reqitem1, (iece->reqitemcount1 * count))) ||
-            (iece->reqitem2 && !HasItemCount(iece->reqitem2, (iece->reqitemcount2 * count))) ||
-            (iece->reqitem3 && !HasItemCount(iece->reqitem3, (iece->reqitemcount3 * count))) )
+        for (uint8 i = 0; i < 5; ++i)
         {
-            SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
-            return false;
+            if(iece->reqitem[i] && !HasItemCount(iece->reqitem[i], (iece->reqitemcount[i] * count)))
+            {
+                SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
+                return false;
+            }
         }
-
+        
         // check for personal arena rating requirement
-        if( (mask & (1<<3)) && (GetMaxPersonalArenaRatingRequirement() < iece->reqpersonalarenarating) )
+        if( GetMaxPersonalArenaRatingRequirement() < iece->reqpersonalarenarating )
         {
             // probably not the proper equip err
             SendEquipError(EQUIP_ERR_CANT_EQUIP_RANK,NULL,NULL);
@@ -15335,19 +15346,18 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         }
 
         ModifyMoney( -(int32)price );
-        if(pProto->ExtendedCost)                    // case for new honor system
+        if(crItem->ExtendedCost)                    // case for new honor system
         {
-            ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(pProto->ExtendedCost);
+            ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
             if(iece->reqhonorpoints)
                 SetHonorPoints(GetHonorPoints() - (iece->reqhonorpoints * count));
             if(iece->reqarenapoints)
                 SetArenaPoints(GetArenaPoints() - (iece->reqarenapoints * count));
-            if(iece->reqitem1)
-                DestroyItemCount(iece->reqitem1, (iece->reqitemcount1 * count), true);
-            if(iece->reqitem2)
-                DestroyItemCount(iece->reqitem2, (iece->reqitemcount2 * count), true);
-            if(iece->reqitem3)
-                DestroyItemCount(iece->reqitem3, (iece->reqitemcount3 * count), true);
+            for (uint8 i = 0; i < 5; ++i)
+            {
+                if(iece->reqitem[i])
+                    DestroyItemCount(iece->reqitem[i], (iece->reqitemcount[i] * count), true);
+            }
         }
 
         if(Item *it = StoreNewItem( dest, item, true ))
@@ -15376,19 +15386,18 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         }
 
         ModifyMoney( -(int32)price );
-        if(pProto->ExtendedCost)                    // case for new honor system
+        if(crItem->ExtendedCost)                    // case for new honor system
         {
-            ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(pProto->ExtendedCost);
+            ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
             if(iece->reqhonorpoints)
                 SetHonorPoints(GetHonorPoints() - iece->reqhonorpoints);
             if(iece->reqarenapoints)
                 SetArenaPoints(GetArenaPoints() - iece->reqarenapoints);
-            if(iece->reqitem1)
-                DestroyItemCount(iece->reqitem1, iece->reqitemcount1, true);
-            if(iece->reqitem2)
-                DestroyItemCount(iece->reqitem2, iece->reqitemcount2, true);
-            if(iece->reqitem3)
-                DestroyItemCount(iece->reqitem3, iece->reqitemcount3, true);
+            for (uint8 i = 0; i < 5; ++i)
+            {
+                if(iece->reqitem[i])
+                    DestroyItemCount(iece->reqitem[i], iece->reqitemcount[i], true);
+            }
         }
 
         if(Item *it = EquipNewItem( dest, item, pProto->BuyCount * count, true ))

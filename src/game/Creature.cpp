@@ -1327,7 +1327,7 @@ void Creature::LoadGoods()
 
     m_vendor_items.clear();
 
-    QueryResult *result = WorldDatabase.PQuery("SELECT item, maxcount,incrtime FROM npc_vendor WHERE entry = '%u'", GetEntry());
+    QueryResult *result = WorldDatabase.PQuery("SELECT item, maxcount, incrtime, ExtendedCost FROM npc_vendor WHERE entry = '%u'", GetEntry());
 
     if(!result) return;
 
@@ -1347,8 +1347,12 @@ void Creature::LoadGoods()
             sLog.outErrorDb("Vendor %u have in item list non-existed item %u",GetEntry(),item_id);
             continue;
         }
+        
+        uint32 ExtendedCost = fields[3].GetUInt32();
+        if(ExtendedCost && !sItemExtendedCostStore.LookupEntry(ExtendedCost))
+            sLog.outErrorDb("Item (Entry: %u) has wrong ExtendedCost (%u) for vendor (%u)",item_id,ExtendedCost,GetEntry());
 
-        AddItem( item_id, fields[1].GetUInt32(), fields[2].GetUInt32());
+        AddItem( item_id, fields[1].GetUInt32(), fields[2].GetUInt32(), ExtendedCost);
     }
     while( result->NextRow() );
 

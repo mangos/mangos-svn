@@ -517,8 +517,6 @@ struct ItemPrototype
     _Socket Socket[3];
     uint32 socketBonus;                                     // id from SpellItemEnchantment.dbc
     uint32 GemProperties;                                   // id from GemProperties.dbc
-    uint32 ExtendedCost;                                    // id from ItemExtendedCost.dbc
-    uint32 CondExtendedCost;                                // id from ItemCondExtCosts.dbc
     uint32 RequiredDisenchantSkill;
     float  ArmorDamageModifier;
     char* ScriptName;

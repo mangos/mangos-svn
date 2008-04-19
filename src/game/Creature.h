@@ -114,14 +114,15 @@ struct GossipOption
 
 struct CreatureItem
 {
-    CreatureItem(uint32 _item, uint32 _maxcount, uint32 _incrtime)
-        : id(_item),count(_maxcount), maxcount(_maxcount), incrtime(_incrtime),lastincr((uint32)time(NULL)) {}
+    CreatureItem(uint32 _item, uint32 _maxcount, uint32 _incrtime, uint32 _ExtendedCost)
+        : id(_item), count(_maxcount), maxcount(_maxcount), incrtime(_incrtime), ExtendedCost(_ExtendedCost), lastincr((uint32)time(NULL)) {}
 
     uint32 id;
     uint32 count;
     uint32 maxcount;
     uint32 incrtime;
     uint32 lastincr;
+    uint32 ExtendedCost;
 };
 
 struct TrainerSpell
@@ -399,9 +400,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
             return &m_vendor_items[slot];
         }
         uint8 GetItemCount() const { return m_vendor_items.size(); }
-        void AddItem( uint32 item, uint32 maxcount, uint32 ptime)
+        void AddItem( uint32 item, uint32 maxcount, uint32 ptime, uint32 ExtendedCost)
         {
-            m_vendor_items.push_back(CreatureItem(item,maxcount,ptime));
+            m_vendor_items.push_back(CreatureItem(item, maxcount, ptime, ExtendedCost));
         }
         bool RemoveItem( uint32 item_id )
         {
