@@ -446,7 +446,7 @@ void WorldSession::HandleLootMasterGiveOpcode( WorldPacket & recv_data )
         return;
     }
 
-    Player *target = ObjectAccessor::FindPlayer(MAKE_GUID(target_playerguid,HIGHGUID_PLAYER));
+    Player *target = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(target_playerguid, 0, HIGHGUID_PLAYER));
     if(!target)
         return;
 

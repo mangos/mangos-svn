@@ -45,9 +45,9 @@ static void CorpsesErase(CorpseType type,uint32 delay)
             float positionX = fields[1].GetFloat();
             float positionY = fields[2].GetFloat();
             uint32 mapid    = fields[3].GetUInt32();
-            uint64 player_guid = MAKE_GUID(fields[4].GetUInt32(),HIGHGUID_PLAYER);
+            uint64 player_guid = MAKE_NEW_GUID(fields[4].GetUInt32(), 0, HIGHGUID_PLAYER);
 
-            uint64 guid = MAKE_GUID(guidlow,HIGHGUID_CORPSE);
+            uint64 guid = MAKE_NEW_GUID(guidlow, 0, HIGHGUID_CORPSE);
 
             sLog.outDebug("[Global event] Removing %s %u (X:%f Y:%f Map:%u).",(type==CORPSE_BONES?"bones":"corpse"),guidlow,positionX,positionY,mapid);
 

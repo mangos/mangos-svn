@@ -312,7 +312,7 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionguid)
     if(result)
     {
         Field* fields = result->Fetch();
-        ownerguid = MAKE_GUID(fields[0].GetUInt32(), HIGHGUID_PLAYER);
+        ownerguid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
         name      = fields[1].GetCppString();
         signs     = fields[2].GetUInt8();
         delete result;
@@ -460,7 +460,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
     }
 
     fields = result->Fetch();
-    ownerguid = MAKE_GUID(fields[0].GetUInt32(), HIGHGUID_PLAYER);
+    ownerguid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
     signs = fields[1].GetUInt8();
 
     delete result;
@@ -558,7 +558,7 @@ void WorldSession::HandlePetitionDeclineOpcode(WorldPacket & recv_data)
         return;
 
     Field *fields = result->Fetch();
-    ownerguid = MAKE_GUID(fields[0].GetUInt32(), HIGHGUID_PLAYER);
+    ownerguid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
     delete result;
 
     Player *owner = objmgr.GetPlayer(ownerguid);
