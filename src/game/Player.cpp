@@ -125,6 +125,8 @@ Player::Player (WorldSession *session): Unit( 0 )
     // this must help in case next save after mass player load after server startup
     m_nextSave = rand32(m_nextSave/2,m_nextSave*3/2);
 
+    m_unit_movement_flags = MOVEMENT_FLAG_RUN;
+
     m_resurrectGUID = 0;
     m_resurrectX = m_resurrectY = m_resurrectZ = 0;
     m_resurrectHealth = m_resurrectMana = 0;
@@ -201,6 +203,8 @@ Player::Player (WorldSession *session): Unit( 0 )
     //returning reagests for temporarily removed pets
     //when dying/logging out
     m_oldpetspell = 0;
+
+    m_unit_movement_flags = MOVEMENT_FLAG_RUN;
 
     ////////////////////Rest System/////////////////////
     time_inn_enter=0;
