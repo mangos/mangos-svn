@@ -915,6 +915,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         void InitTaxiNodesForLevel();
         uint32 GetTaximask( uint8 index ) const { return m_taximask[index]; }
         void SetTaximask( uint8 index, uint32 value ) { m_taximask[index] = value; }
+        void SetTaximaskNode(uint32 nodeidx)
+        {
+            uint8  field   = uint8((nodeidx - 1) / 32);
+            uint32 submask = 1<<((nodeidx-1)%32);
+            if ((m_taximask[field] & submask) != submask )
+                m_taximask[field] = (submask | m_taximask[field]);
+        }
         void ClearTaxiDestinations() { m_TaxiDestinations.clear(); }
         void AddTaxiDestination(uint32 dest) { m_TaxiDestinations.push_back(dest); }
         uint32 GetTaxiSource() const { return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front(); }
