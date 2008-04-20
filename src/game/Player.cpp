@@ -2033,6 +2033,8 @@ void Player::InitStatsForLevel(bool reapplyMods)
     //Base block percentage
     SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5.0f);
 
+    SetUInt32Value(PLAYER_SHIELD_BLOCK, 0);
+
     // Base dodge values
     switch(getClass())
     {
@@ -3825,10 +3827,8 @@ void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, floa
         case FROST_SPELL_CRIT_PERCENTAGE:
         case SHADOW_SPELL_CRIT_PERCENTAGE:
         case ARCANE_SPELL_CRIT_PERCENTAGE: UpdateSpellCritChance(GetSpellSchoolByBaseGroup(modGroup)); break;
-        case SHIELD_BLOCK_VALUE:
-
-        default:
-            break;
+        case SHIELD_BLOCK_VALUE:           UpdateShieldBlockValue();                                   break;
+        default: break;
     }
 }
 

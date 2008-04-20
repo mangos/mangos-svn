@@ -1500,6 +1500,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateMaxHealth();
         void UpdateMaxPower(Powers power);
         void UpdateAttackPowerAndDamage(bool ranged = false);
+        void UpdateShieldBlockValue();
         void UpdateDamagePhysical(WeaponAttackType attType);
         void UpdateSpellDamageAndHealingBonus();
 
