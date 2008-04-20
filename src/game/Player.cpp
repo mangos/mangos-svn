@@ -3567,11 +3567,9 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
 
     if(cost)
     {
-
         uint32 LostDurability = maxDurability - curDurability;
         if(LostDurability>0)
         {
-
             ItemPrototype const *ditemProto = sItemStorage.LookupEntry<ItemPrototype>(item->GetEntry());
             if(!ditemProto)
             {
@@ -3613,9 +3611,15 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
                 if (!pGuild)
                     return TotalCost;
 
+                if (!pGuild->HasRankRight(GetRank(), GR_RIGHT_WITHDRAW_REPAIR))
+                {
+                    DEBUG_LOG("You do not have rights to withdraw for repairs");
+                    return TotalCost;
+                }
+
                 if (pGuild->GetMemberMoneyWithdrawRem(GetGUIDLow()) < costs)
                 {
-                    DEBUG_LOG("You do not have enough money withdraw rights");
+                    DEBUG_LOG("You do not have enough money withdraw amount remaining");
                     return TotalCost;
                 }
 
