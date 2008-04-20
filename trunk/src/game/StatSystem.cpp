@@ -50,6 +50,7 @@ bool Player::UpdateStats(Stats stat)
     {
         case STAT_STRENGTH:
             UpdateAttackPowerAndDamage();
+            UpdateShieldBlockValue();
             break;
         case STAT_AGILITY:
             UpdateArmor();
@@ -110,6 +111,7 @@ bool Player::UpdateAllStats()
     UpdateAllCritPercentages();
     UpdateAllSpellCritChances();
     UpdateDefenseBonusesMod();
+    UpdateShieldBlockValue();
     UpdateSpellDamageAndHealingBonus();
 
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; i++)
@@ -324,6 +326,11 @@ void Player::UpdateAttackPowerAndDamage(bool ranged )
         if(CanDualWield() && haveOffhandWeapon())           //allow update offhand damage only if player knows DualWield Spec and has equipped offhand weapon
             UpdateDamagePhysical(OFF_ATTACK);
     }
+}
+
+void Player::UpdateShieldBlockValue()
+{
+    SetUInt32Value(PLAYER_SHIELD_BLOCK, GetShieldBlockValue());
 }
 
 void Player::CalculateMinMaxDamage(WeaponAttackType attType, bool normalized, float& min_damage, float& max_damage)
