@@ -3679,6 +3679,13 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
     if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply)
         m_target->SetStandState(PLAYER_STATE_SIT);
 
+    // Some mana regen auras have 0 in m_amount, but correct value in second SPELL_AURA_DUMMY_2 aura
+    if(m_effIndex < 2 && m_spellProto->EffectApplyAuraName[m_effIndex+1]==SPELL_AURA_DUMMY_2)
+    {
+        if (Unit *caster = GetCaster())
+            m_modifier.m_amount = caster->CalculateSpellDamage(m_spellProto,m_effIndex+1,m_spellProto->EffectBasePoints[m_effIndex+1],m_target);
+    }
+
     if(apply && m_periodicTimer <= 0)
     {
         m_periodicTimer += 2000;
