@@ -874,6 +874,12 @@ void WorldSession::HandleGuildChangeInfoOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    if(!guild->HasRankRight(GetPlayer()->GetRank(), GR_RIGHT_MODIFY_GUILD_INFO))
+    {
+        SendGuildCommandResult(GUILD_CREATE_S, "", GUILD_PERMISSIONS);
+        return;
+    }
+
     guild->SetGINFO(GINFO);
 }
 
@@ -1140,7 +1146,7 @@ void WorldSession::HandleGuildBankWithdraw( WorldPacket & recv_data )
     if (pGuild->GetGuildBankMoney()<money)                  // not enough money in bank
         return;
 
-    if (pGuild->GetRankRights(GetPlayer()->GetRank()) & GR_RIGHT_REPAIR_FROM_GUILD)
+    if (!pGuild->HasRankRight(GetPlayer()->GetRank(), GR_RIGHT_WITHDRAW_GOLD))
         return;
 
     CharacterDatabase.BeginTransaction();
