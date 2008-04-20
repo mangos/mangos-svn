@@ -2717,6 +2717,9 @@ void Player::ResetComboPointsIfNeed(const SpellEntry *spellInfo)
     // overpower - need reset combopoints
     else if(spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && (spellInfo->SpellFamilyFlags & 0x4))
         needClearCombo = true;
+    // Envenom
+    else if(spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && (spellInfo->SpellFamilyFlags & 0x800000000LL))
+        needClearCombo = true;
 
     // Reset if need
     if (needClearCombo)

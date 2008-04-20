@@ -388,7 +388,7 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
             case SPELLFAMILY_ROGUE:
             {
                 // Envenom
-                if((m_spellInfo->SpellFamilyFlags & 0x800000000LL) && m_caster->GetTypeId()==TYPEID_PLAYER)
+                if(m_caster->GetTypeId()==TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags & 0x800000000LL))
                 {
                     // consume from stack dozes not more that have combo-points
                     if(uint32 combo = ((Player*)m_caster)->GetComboPoints())
