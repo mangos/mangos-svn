@@ -236,13 +236,13 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
     /* THIS IS A CASE THAT IN QUEUE THERE IS ENOUGHT PLAYERS TO START NEW BG */
     //itr->end is the last BG - template, which is not already started!
 
-    /* here will be a most of change, when we create battlegrounds instanciated */
-    /* if (there is enought players to start new BG)
+    /* here will be a most of change, when we create battlegrounds instantiated */
+    /* if (there is enough players to start new BG)
         Battleground* newbg = sBattleGroundMgr.CreateNewBattleGround(bgTypeId)
         - that function will use the COPY constructor on BattleGround class ( in bg manager we should have one battleground as a template
             (battleground template will be used only to create new BGs, it will be an instance of BG class, but it won't ever start) */
 
-    /* folowing code is working with current Battleground system and it should be removed, when BGs will work like instances */
+    /* following code is working with current Battleground system and it should be removed, when BGs will work like instances */
     BattleGround* bg2 = sBattleGroundMgr.GetBattleGround(bgTypeId);
     if (bg2->GetQueueType() != MAX_BATTLEGROUND_QUEUES || bg2->GetStatus() != STATUS_WAIT_QUEUE)
         return;
@@ -332,7 +332,7 @@ bool BGQueueInviteEvent::Execute(uint64 /*e_time*/, uint32 p_time)
         return true;
 
     uint32 queueSlot = plr->GetBattleGroundQueueIndex(bg->GetTypeID());
-    if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES) // player is in queue
+    if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES)         // player is in queue
     {
         // check if player is invited to this bg ... this check must be here, because when player leaves queue and joins another, it would cause a problems
         BattleGroundQueue::QueuedPlayersMap const& qpMap = sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].m_QueuedPlayers[plr->GetBattleGroundQueueIdFromLevel()];
@@ -344,7 +344,7 @@ bool BGQueueInviteEvent::Execute(uint64 /*e_time*/, uint32 p_time)
             plr->GetSession()->SendPacket(&data);
         }
     }
-    return true;                                        //event will be deleted
+    return true;                                            //event will be deleted
 }
 
 void BGQueueInviteEvent::Abort(uint64 /*e_time*/)
@@ -463,26 +463,27 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
 void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
 {
     uint8 type = (bg->isArena() ? 1 : 0);
-                                                            // checked on 2.1.3
+                                                            // last check on 2.4.1
     data->Initialize(MSG_PVP_LOG_DATA, (1+1+4+40*bg->GetPlayerScoresSize()));
     *data << uint8(type);                                   // seems to be type (battleground=0/arena=1)
-    if(type == 1)                                           // arena
+    if(type)                                                // arena
     {
         for(uint8 i = 0; i < 2; i++)
         {
             *data << uint32(3000+1+i);                      // rating change: showed value - 3000
-            *data << uint8(0);                              // string
+            *data << uint32(0);                             // 2.4.0, unknown
+            *data << uint8(0);                              // some unknown string
         }
     }
 
-    if(bg->GetWinner() < 2)                                 // we have winner
+    if(bg->GetWinner() == 2)
+    {
+        *data << uint8(0);                                  // bg in progress
+    }
+    else
     {
         *data << uint8(1);                                  // bg ended
         *data << uint8(bg->GetWinner());                    // who win
-    }
-    else                                                    // no winner yet
-    {
-        *data << uint8(0);                                  // bg in progress
     }
 
     *data << (int32)(bg->GetPlayerScoresSize());
@@ -491,13 +492,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
     {
         *data << (uint64)itr->first;
         *data << (int32)itr->second->KillingBlows;
-        if(type == 0)
-        {
-            *data << (int32)itr->second->HonorableKills;
-            *data << (int32)itr->second->Deaths;
-            *data << (int32)(itr->second->BonusHonor*10);
-        }
-        else
+        if(type)
         {
             // that part probably wrong
             Player *plr = objmgr.GetPlayer(itr->first);
@@ -513,12 +508,18 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
             else
                 *data << uint8(0);
         }
-        *data << (int32)itr->second->DamageDone;             // damage done
-        *data << (int32)itr->second->HealingDone;            // healing done
-        switch(bg->GetTypeID())                              // battleground specific things
+        else
+        {
+            *data << (int32)itr->second->HonorableKills;
+            *data << (int32)itr->second->Deaths;
+            *data << (int32)(itr->second->BonusHonor*10);   // multiplier not required in 2.4.x?
+        }
+        *data << (int32)itr->second->DamageDone;            // damage done
+        *data << (int32)itr->second->HealingDone;           // healing done
+        switch(bg->GetTypeID())                             // battleground specific things
         {
             case BATTLEGROUND_AV:
-                *data << (uint32)0x00000005;                 // count of next fields
+                *data << (uint32)0x00000005;                // count of next fields
                 *data << (uint32)((BattleGroundAVScore*)itr->second)->GraveyardsAssaulted;  // GraveyardsAssaulted
                 *data << (uint32)((BattleGroundAVScore*)itr->second)->GraveyardsDefended;   // GraveyardsDefended
                 *data << (uint32)((BattleGroundAVScore*)itr->second)->TowersAssaulted;      // TowersAssaulted
@@ -526,12 +527,12 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
                 *data << (uint32)((BattleGroundAVScore*)itr->second)->MinesCaptured;        // MinesCaptured
                 break;
             case BATTLEGROUND_WS:
-                *data << (uint32)0x00000002;                 // count of next fields
+                *data << (uint32)0x00000002;                // count of next fields
                 *data << (uint32)((BattleGroundWGScore*)itr->second)->FlagCaptures;         // flag captures
                 *data << (uint32)((BattleGroundWGScore*)itr->second)->FlagReturns;          // flag returns
                 break;
             case BATTLEGROUND_AB:
-                *data << (uint32)0x00000002;                 // count of next fields
+                *data << (uint32)0x00000002;                // count of next fields
                 *data << (uint32)((BattleGroundABScore*)itr->second)->BasesAssaulted;       // bases asssulted
                 *data << (uint32)((BattleGroundABScore*)itr->second)->BasesDefended;        // bases defended
                 break;
@@ -539,7 +540,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
             case BATTLEGROUND_BE:
             case BATTLEGROUND_AA:
             case BATTLEGROUND_RL:
-                *data << (int32)0;                         // 0
+                *data << (int32)0;                          // 0
                 break;
             default:
                 sLog.outDebug("Unhandled MSG_PVP_LOG_DATA for BG id %u", bg->GetTypeID());
@@ -552,7 +553,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
 void BattleGroundMgr::BuildGroupJoinedBattlegroundPacket(WorldPacket *data, uint32 bgTypeId)
 {
     /*bgTypeId is:
-    0 - Your group has joined a battleground queue, but you are not iligible
+    0 - Your group has joined a battleground queue, but you are not eligible
     1 - Your group has joined the queue for AV
     2 - Your group has joined the queue for WS
     3 - Your group has joined the queue for AB
@@ -640,7 +641,7 @@ uint32 BattleGroundMgr::CreateBattleGround(uint32 bgTypeId, uint32 MinPlayersPer
     }
 
     bg->SetTypeID(bgTypeId);
-    bg->SetInstanceID(bgTypeId);                               // temporary
+    bg->SetInstanceID(bgTypeId);                            // temporary
     bg->SetMinPlayersPerTeam(MinPlayersPerTeam);
     bg->SetMaxPlayersPerTeam(MaxPlayersPerTeam);
     bg->SetMinPlayers(MinPlayersPerTeam*2);
@@ -826,7 +827,7 @@ void BattleGroundMgr::SendToBattleGround(Player *pl, uint32 bgTypeId)
 void BattleGroundMgr::SendAreaSpiritHealerQueryOpcode(Player *pl, BattleGround *bg, uint64 guid)
 {
     WorldPacket data(SMSG_AREA_SPIRIT_HEALER_TIME, 12);
-    uint32 time_ = 30000 - bg->GetLastResurrectTime(); // resurrect every 30 seconds
+    uint32 time_ = 30000 - bg->GetLastResurrectTime();      // resurrect every 30 seconds
     if(time_ == uint32(-1))
         time_ = 0;
     data << guid << time_;
