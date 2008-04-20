@@ -253,6 +253,9 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_summon_x = 0.0f;
     m_summon_y = 0.0f;
     m_summon_z = 0.0f;
+
+    // Taxi nodes
+    memset(m_taximask, 0, sizeof(m_taximask));
 }
 
 Player::~Player ()
@@ -336,41 +339,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     SetMapId(info->mapId);
     Relocate(info->positionX,info->positionY,info->positionZ);
-
-    // Taxi nodes setup
-    memset(m_taximask, 0, sizeof(m_taximask));
-    /*
-        // Automatically add the race's taxi hub to the character's taximask at creation time ( 1 << (taxi_node_id-1) )
-        ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(race);
-        if(!rEntry)
-        {
-            sLog.outError("Race %u not found in DBÑ (Wrong DBC files?)",race);
-            return false;
-        }
-
-        m_taximask[0] = rEntry->startingTaxiMask;
-    */
-    // capital and taxi hub masks
-    switch(race)
-    {
-        case 1:  m_taximask[0]= 1 << ( 2-1); break;         // Human
-        case 2:  m_taximask[0]= 1 << (23-1); break;         // Orc
-        case 3:  m_taximask[0]= 1 << ( 6-1); break;         // Dwarf
-                                                            // Night Elf
-        case 4:  m_taximask[0]= (1 << (26-1)) | (1 << (27-1)); break;
-        case 5:  m_taximask[0]= 1 << (11-1); break;         // Undead
-        case 6:  m_taximask[0]= 1 << (22-1); break;         // Tauren
-        case 7:  m_taximask[0]= 1 << ( 6-1); break;         // Gnome
-        case 8:  m_taximask[0]= 1 << (23-1); break;         // Troll
-        //case 10: m_taximask[0]= 1 << (1-1); break;        // Blood Elf
-        case 11: m_taximask[0+94/32]= 1 << (94%32-1); break;// Draenei
-    }
-    // new continent starting masks (It will be accessible only at new map
-    switch(TeamForRace(race))
-    {
-        case ALLIANCE: m_taximask[3]= 1 << (4-1); break;
-        case HORDE:    m_taximask[3]= 1 << (3-1); break;
-    }
 
     ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(class_);
     if(!cEntry)
@@ -2133,14 +2101,30 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
 void Player::InitTaxiNodesForLevel()
 {
-    if(getLevel() >= 65)
+    // capital and taxi hub masks
+    switch(getRace())
     {
-        uint32 curloc = 213;                                // Shattered Sun Staging Area
-        uint8  field   = (uint8)((curloc - 1) / 32);
-        uint32 submask = 1 << ((curloc-1) % 32);
-        if ( !(GetTaximask(field) & submask) )
-            SetTaximask(field, (submask | GetTaximask(field)));
+        case RACE_HUMAN:    SetTaximaskNode(2);  break;     // Human
+        case RACE_ORC:      SetTaximaskNode(23); break;     // Orc
+        case RACE_DWARF:    SetTaximaskNode(6);  break;     // Dwarf
+        case RACE_NIGHTELF: SetTaximaskNode(26); 
+                            SetTaximaskNode(27); break;     // Night Elf
+        case RACE_UNDEAD_PLAYER: SetTaximaskNode(11); break;// Undead
+        case RACE_TAUREN:   SetTaximaskNode(22); break;     // Tauren
+        case RACE_GNOME:    SetTaximaskNode(6);  break;     // Gnome
+        case RACE_TROLL:    SetTaximaskNode(23); break;     // Troll
+        case RACE_BLOODELF: SetTaximaskNode(82); break;     // Blood Elf
+        case RACE_DRAENEI:  SetTaximaskNode(94); break;     // Draenei
     }
+    // new continent starting masks (It will be accessible only at new map)
+    switch(TeamForRace(getRace()))
+    {
+        case ALLIANCE: SetTaximaskNode(100); break;
+        case HORDE:    SetTaximaskNode(99);  break;
+    }
+    // level dependent taxi hubs
+    if(getLevel()>=65)
+        SetTaximaskNode(213);                               //Shattered Sun Staging Area
 }
 
 void Player::SendInitialSpells()
@@ -12717,7 +12701,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM) )
         SetUInt32Value(PLAYER_FLAGS, 0 | old_safe_flags);
 
-    _LoadTaxiMask( fields[11].GetString() );
+    _LoadTaxiMask( fields[11].GetString() );                // must be before InitTaxiNodesForLevel
 
     uint32 gmstate = fields[25].GetUInt32();
 
