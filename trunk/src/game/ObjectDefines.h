@@ -21,6 +21,11 @@
 
 #include "Platform/Define.h"
 
+// used for creating values for respawn for example
+#define MAKE_PAIR(l, h)  uint64( uint32(l) | ( uint64(h) << 32 ) )
+#define PAIR_HIPART(x)   (uint32)((uint64(x) >> 48) & 0x0000FFFF)
+#define PAIR_LOPART(x)   (uint32)(uint64(x) & 0x00FFFFFF)
+
 enum HighGuid
 {
     HIGHGUID_ITEM           = 0x4000,                       // blizz 4000
@@ -35,16 +40,6 @@ enum HighGuid
     HIGHGUID_MO_TRANSPORT   = 0x1FC0,                       // blizz 1FC0 (for GAMEOBJECT_TYPE_MO_TRANSPORT)
 };
 
-#define GUID_HIPART(x)   (uint32)((uint64(x) >> 48) & 0x0000FFFF)
-#define GUID_ENPART(x)   (uint32)((uint64(x) >> 24) & 0x00FFFFFF)
-#define GUID_LOPART(x)   (uint32)(uint64(x) & 0x00FFFFFF)
-#define MAKE_GUID(l, h)  uint64( uint32(l) | ( uint64(h) << 32 ) )
-
-// l - OBJECT_FIELD_GUID
-// e - OBJECT_FIELD_ENTRY for GO (except GAMEOBJECT_TYPE_MO_TRANSPORT) and creatures or UNIT_FIELD_PETNUMBER for pets
-// h - OBJECT_FIELD_GUID + 1
-#define MAKE_NEW_GUID(l, e, h)   uint64( uint64(l) | ( uint64(e) << 24 ) | ( uint64(h) << 48 ) )
-
 #define IS_EMPTY_GUID(Guid)          ( Guid == 0 )
 
 #define IS_CREATURE_GUID(Guid)       ( GUID_HIPART(Guid) == HIGHGUID_UNIT )
@@ -56,4 +51,59 @@ enum HighGuid
 #define IS_CORPSE_GUID(Guid)         ( GUID_HIPART(Guid) == HIGHGUID_CORPSE )
 #define IS_TRANSPORT(Guid)           ( GUID_HIPART(Guid) == HIGHGUID_TRANSPORT )
 #define IS_MO_TRANSPORT(Guid)        ( GUID_HIPART(Guid) == HIGHGUID_MO_TRANSPORT )
+
+// l - OBJECT_FIELD_GUID
+// e - OBJECT_FIELD_ENTRY for GO (except GAMEOBJECT_TYPE_MO_TRANSPORT) and creatures or UNIT_FIELD_PETNUMBER for pets
+// h - OBJECT_FIELD_GUID + 1
+#define MAKE_NEW_GUID(l, e, h)   uint64( uint64(l) | ( uint64(e) << 24 ) | ( uint64(h) << 48 ) )
+
+#define GUID_HIPART(x)   (uint32)((uint64(x) >> 48) & 0x0000FFFF)
+
+// We have different low and middle part size for different guid types
+#define _GUID_ENPART_2(x) 0
+#define _GUID_ENPART_3(x) (uint32)((uint64(x) >> 24) & 0x00FFFFFF)
+#define _GUID_LOPART_2(x) (uint32)(uint64(x) & 0xFFFFFFFF)
+#define _GUID_LOPART_3(x) (uint32)(uint64(x) & 0x00FFFFFF)
+
+inline uint32 _GetGuidLowPart(uint64 const& guid)
+{
+    switch(GUID_HIPART(guid))
+    {
+        case HIGHGUID_ITEM:
+        case HIGHGUID_PLAYER:
+            return _GUID_LOPART_2(guid); 
+        case HIGHGUID_GAMEOBJECT:
+        case HIGHGUID_TRANSPORT:
+        case HIGHGUID_UNIT:
+        case HIGHGUID_PET:
+        case HIGHGUID_DYNAMICOBJECT:
+        case HIGHGUID_CORPSE:
+        case HIGHGUID_MO_TRANSPORT:
+        default:
+            return _GUID_LOPART_3(guid); 
+    }
+}
+
+inline uint32 _GetGuidEnPart(uint64 const& guid)
+{
+    switch(GUID_HIPART(guid))
+    {
+    case HIGHGUID_ITEM:
+    case HIGHGUID_PLAYER:
+        return _GUID_ENPART_2(guid); 
+    case HIGHGUID_GAMEOBJECT:
+    case HIGHGUID_TRANSPORT:
+    case HIGHGUID_UNIT:
+    case HIGHGUID_PET:
+    case HIGHGUID_DYNAMICOBJECT:
+    case HIGHGUID_CORPSE:
+    case HIGHGUID_MO_TRANSPORT:
+    default:
+        return _GUID_ENPART_3(guid); 
+    }
+}
+
+#define GUID_ENPART(x) _GetGuidEnPart(x)
+#define GUID_LOPART(x) _GetGuidLowPart(x)
+
 #endif
