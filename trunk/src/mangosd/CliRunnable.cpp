@@ -270,12 +270,14 @@ void CliInfo(char*,pPrintf zprintf)
         return;
 
     int linesize = 1+15+2+20+3+15+2+4+1+5+3;                // see format string
-    char* buf = new char[resultDB->GetRowCount()*linesize+1];
-    char* bufPos = buf;
-
+    std::string sInfo;
+    sInfo.reserve(resultDB->GetRowCount()*linesize+1);
+    sInfo = "";
+    char szLine[512];
     ///- Circle through accounts
     do
     {
+        szLine[0] = '\0';
         Field *fieldsDB = resultDB->Fetch();
         std::string name = fieldsDB[0].GetCppString();
         uint32 account = fieldsDB[1].GetUInt32();
@@ -288,27 +290,26 @@ void CliInfo(char*,pPrintf zprintf)
         if(resultLogin)
         {
             Field *fieldsLogin = resultLogin->Fetch();
-            bufPos+=sprintf(bufPos,"|%15s| %20s | %15s |%4d|%5d|\r\n",
+            sprintf(szLine,"|%15s| %20s | %15s |%4d|%5d|\r\n",
                 fieldsLogin[0].GetString(),name.c_str(),fieldsLogin[1].GetString(),fieldsLogin[2].GetUInt32(),fieldsLogin[3].GetUInt32());
 
             delete resultLogin;
         }
         else
-            bufPos += sprintf(bufPos,"|<Error>        | %20s |<Error>          |<Er>|<Err>|\r\n",name.c_str());
+            sprintf(szLine, "|<Error>        | %20s |<Error>          |<Er>|<Err>|\r\n",name.c_str());
+    sInfo+=szLine;
 
     }while(resultDB->NextRow());
 
-    *bufPos = '\0';
+    sInfo += "\0";
 
     ///- Display the list of account/characters online
     zprintf("=====================================================================\r\n");
     zprintf("|    Account    |       Character      |       IP        | GM | TBC |\r\n");
     zprintf("=====================================================================\r\n");
-    zprintf("%s",buf);
+    zprintf("%s",sInfo.c_str());
     zprintf("=====================================================================\r\n");
-
     delete resultDB;
-    delete[] buf;
 }
 
 /// Display a list of banned accounts and ip addresses
