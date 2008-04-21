@@ -136,7 +136,7 @@ void WorldSession::HandleTalentWipeOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8);
 
-    sLog.outString("MSG_TALENT_WIPE_CONFIRM");
+    sLog.outDetail("MSG_TALENT_WIPE_CONFIRM");
     uint64 guid;
     recv_data >> guid;
 

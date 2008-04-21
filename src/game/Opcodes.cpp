@@ -1055,33 +1055,33 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "CMSG_UNKNOWN_1024",                                    // CMSG_UNKNOWN_1024
     "SMSG_MIRRORIMAGE_DATA",                                // SMSG_UNKNOWN_1025
     "SMSG_FORCE_DISPLAY_UPDATE",                            // SMSG_UNKNOWN_1026
-    "UMSG_UNKNOWN_1027",                                    // SMSG_UNKNOWN_1027
-    "UMSG_UNKNOWN_1028",                                    // SMSG_UNKNOWN_1028
-    "UMSG_UNKNOWN_1029",                                    // SMSG_UNKNOWN_1029
-    "UMSG_UNKNOWN_1030",                                    // SMSG_UNKNOWN_1030
-    "UMSG_UNKNOWN_1031",                                    // SMSG_UNKNOWN_1031
-    "UMSG_UNKNOWN_1032",                                    // SMSG_UNKNOWN_1032
-    "UMSG_UNKNOWN_1033",                                    // SMSG_UNKNOWN_1033
-    "UMSG_UNKNOWN_1034",                                    // SMSG_UNKNOWN_1034
-    "UMSG_UNKNOWN_1035",                                    // SMSG_UNKNOWN_1035
-    "UMSG_UNKNOWN_1036",                                    // SMSG_UNKNOWN_1036
+    "UMSG_UNKNOWN_1027",                                    // UMSG_UNKNOWN_1027
+    "UMSG_UNKNOWN_1028",                                    // UMSG_UNKNOWN_1028
+    "UMSG_UNKNOWN_1029",                                    // UMSG_UNKNOWN_1029
+    "CMSG_UNKNOWN_1030",                                    // CMSG_UNKNOWN_1030
+    "SMSG_UNKNOWN_1031",                                    // SMSG_UNKNOWN_1031
+    "CMSG_GROUP_PASS_ON_LOOT_TOGGLE",                       // CMSG_GROUP_PASS_ON_LOOT_TOGGLE
+    "MSG_GUILD_BANK_TAB_TEXT",                              // MSG_GUILD_BANK_TAB_TEXT
+    "CMSG_GUILD_BANK_SET_TAB_TEXT",                         // CMSG_GUILD_BANK_SET_TAB_TEXT
+    "UMSG_UNKNOWN_1035",                                    // UMSG_UNKNOWN_1035
+    "CMSG_UNKNOWN_1036",                                    // CMSG_UNKNOWN_1036
     "UMSG_UNKNOWN_1037",                                    // SMSG_UNKNOWN_1037
     "UMSG_UNKNOWN_1038",                                    // SMSG_UNKNOWN_1038
-    "UMSG_UNKNOWN_1039",                                    // SMSG_UNKNOWN_1039
-    "UMSG_UNKNOWN_1040",                                    // SMSG_UNKNOWN_1040
-    "UMSG_UNKNOWN_1041",                                    // SMSG_UNKNOWN_1041
-    "UMSG_UNKNOWN_1042",                                    // SMSG_UNKNOWN_1042
-    "UMSG_UNKNOWN_1043",                                    // SMSG_UNKNOWN_1043
-    "UMSG_UNKNOWN_1044",                                    // SMSG_UNKNOWN_1044
-    "UMSG_UNKNOWN_1045",                                    // SMSG_UNKNOWN_1045
-    "UMSG_UNKNOWN_1046",                                    // SMSG_UNKNOWN_1046
-    "UMSG_UNKNOWN_1047",                                    // SMSG_UNKNOWN_1047
-    "UMSG_UNKNOWN_1048",                                    // SMSG_UNKNOWN_1048
-    "UMSG_UNKNOWN_1049",                                    // SMSG_UNKNOWN_1049
-    "UMSG_UNKNOWN_1050",                                    // SMSG_UNKNOWN_1050
-    "UMSG_UNKNOWN_1051",                                    // SMSG_UNKNOWN_1051
-    "UMSG_UNKNOWN_1052",                                    // SMSG_UNKNOWN_1052
-    "UMSG_UNKNOWN_1053",                                    // SMSG_UNKNOWN_1053
+    "CMSG_UNKNOWN_1039",                                    // CMSG_UNKNOWN_1039
+    "SMSG_GROUP_ACTION_THROTTLED",                          // SMSG_GROUP_ACTION_THROTTLED
+    "SMSG_UNKNOWN_1041",                                    // SMSG_UNKNOWN_1041
+    "SMSG_UNKNOWN_1042",                                    // SMSG_UNKNOWN_1042
+    "CMSG_UNKNOWN_1043",                                    // CMSG_UNKNOWN_1043
+    "UMSG_UNKNOWN_1044",                                    // UMSG_UNKNOWN_1044
+    "UMSG_UNKNOWN_1045",                                    // UMSG_UNKNOWN_1045
+    "CMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE",                // CMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE
+    "SMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE_RESPONSE",       // SMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE_RESPONSE
+    "CMSG_UNKNOWN_1048",                                    // CMSG_UNKNOWN_1048
+    "SMSG_UNKNOWN_1049",                                    // SMSG_UNKNOWN_1049
+    "UMSG_UNKNOWN_1050",                                    // UMSG_UNKNOWN_1050
+    "UMSG_UNKNOWN_1051",                                    // UMSG_UNKNOWN_1051
+    "UMSG_UNKNOWN_1052",                                    // UMSG_UNKNOWN_1052
+    "SMSG_UNKNOWN_1053",                                    // SMSG_UNKNOWN_1053
     //there would be declared new opcode, id 1054
     //do not forget to change MAX_OPCODE_ID, if you add a line here!
 };

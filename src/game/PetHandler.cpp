@@ -428,7 +428,7 @@ void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
 {
     CHECK_PACKET_SIZE(recvPacket,8);
 
-    sLog.outString("CMSG_PET_UNLEARN");
+    sLog.outDetail("CMSG_PET_UNLEARN");
     uint64 guid;
     recvPacket >> guid;
 
@@ -490,7 +490,7 @@ void WorldSession::HandlePetSpellAutocastOpcode( WorldPacket& recvPacket )
 {
     CHECK_PACKET_SIZE(recvPacket,8+2+2+1);
 
-    sLog.outString("CMSG_PET_SPELL_AUTOCAST");
+    sLog.outDetail("CMSG_PET_SPELL_AUTOCAST");
     uint64 guid;
     uint16 spellid;
     uint16 spellid2;                                        //maybe second spell, automatically toggled off when first toggled on?
@@ -537,7 +537,7 @@ void WorldSession::HandlePetSpellAutocastOpcode( WorldPacket& recvPacket )
 
 void WorldSession::HandleAddDynamicTargetObsoleteOpcode( WorldPacket& recvPacket )
 {
-    sLog.outString("WORLD: MSG_ADD_DYNAMIC_TARGET_OBSOLETE");
+    sLog.outDetail("WORLD: MSG_ADD_DYNAMIC_TARGET_OBSOLETE");
 
     //CHECK_PACKET_SIZE(recvPacket,8+4+14);
     CHECK_PACKET_SIZE(recvPacket,4);
