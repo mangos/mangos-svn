@@ -275,6 +275,7 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
         mapid = go_data->mapid;
     }
     // by in game guid
+    /* FIX ME: impossible without entry
     else if(GameObject* go = ObjectAccessor::GetGameObject(*m_session->GetPlayer(), MAKE_GUID(guid, HIGHGUID_GAMEOBJECT)))
     {
         x = go->GetPositionX();
@@ -283,6 +284,7 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
         ort = go->GetOrientation();
         mapid = go->GetMapId();
     }
+    */
     else
     {
         SendSysMessage(LANG_COMMAND_GOOBJNOTFOUND);
@@ -660,7 +662,10 @@ bool ChatHandler::HandleDelObjectCommand(const char* args)
     if(!lowguid)
         return false;
 
-    GameObject* obj = GetObjectGlobalyWithGuidOrNearWithDbGuid(lowguid);
+    /* FIXME: impossible without entry
+    GameObject* obj = GetObjectGlobalyWithGuidOrNearWithDbGuid(lowguid,entry);
+    */
+    GameObject* obj = NULL;
 
     if(!obj)
     {
@@ -702,7 +707,10 @@ bool ChatHandler::HandleTurnObjectCommand(const char* args)
     if(!lowguid)
         return false;
 
-    GameObject* obj = GetObjectGlobalyWithGuidOrNearWithDbGuid(lowguid);
+    /* FIXME: impossible without entry
+    GameObject* obj = GetObjectGlobalyWithGuidOrNearWithDbGuid(lowguid,entry);
+    */
+    GameObject* obj = NULL;
 
     if(!obj)
     {
@@ -756,24 +764,22 @@ bool ChatHandler::HandleMoveCreatureCommand(const char* args)
 
         uint32 lowguid = atoi(cId);
 
+        /* FIXME: impossibel without entry
         if(lowguid)
             pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(lowguid,HIGHGUID_UNIT));
+        */
 
-        // Attempting creature load from DB
+        // Attempting creature load from DB data
         if(!pCreature)
         {
-            QueryResult *result = WorldDatabase.PQuery( "SELECT guid,map FROM creature WHERE guid = '%u'",lowguid);
-            if(!result)
+            CreatureData const* data = objmgr.GetCreatureData(lowguid);
+            if(!data)
             {
                 PSendSysMessage(LANG_COMMAND_CREATGUIDNOTFOUND, lowguid);
                 return true;
             }
 
-            Field* fields = result->Fetch();
-            lowguid = fields[0].GetUInt32();
-
-            uint32 map_id = fields[1].GetUInt32();
-            delete result;
+            uint32 map_id = data->mapid;
 
             if(m_session->GetPlayer()->GetMapId()!=map_id)
             {
@@ -825,7 +831,10 @@ bool ChatHandler::HandleMoveObjectCommand(const char* args)
     if(!lowguid)
         return false;
 
-    GameObject* obj = GetObjectGlobalyWithGuidOrNearWithDbGuid(lowguid);
+    /* FIXME: impossible without entry
+    GameObject* obj = GetObjectGlobalyWithGuidOrNearWithDbGuid(lowguid,entry);
+    */
+    GameObject* obj = NULL;
 
     if(!obj)
     {
@@ -1012,19 +1021,20 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
 
     Creature* pCreature = NULL;
 
+    /* FIXME: impossible without entry
     if(lowguid)
         pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(lowguid,HIGHGUID_UNIT));
+    */
 
-    // attempt check creature existance by DB
+    // attempt check creature existence by DB data
     if(!pCreature)
     {
-        QueryResult *result = WorldDatabase.PQuery( "SELECT guid FROM creature WHERE guid = '%u'",lowguid);
-        if(!result)
+        CreatureData const* data = objmgr.GetCreatureData(lowguid);
+        if(!data)
         {
             PSendSysMessage(LANG_COMMAND_CREATGUIDNOTFOUND, lowguid);
             return true;
         }
-        delete result;
     }
     else
     {
@@ -1149,19 +1159,21 @@ bool ChatHandler::HandleSetMoveTypeCommand(const char* args)
     else                                                    // case .setmovetype #creature_guid $move_type (with selected creature)
     {
         lowguid = atoi((char*)guid_str);
+
+        /* impossible without entry
         if(lowguid)
             pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(lowguid,HIGHGUID_UNIT));
+        */
 
-        // attempt check creature existence by DB
+        // attempt check creature existence by DB data
         if(!pCreature)
         {
-            QueryResult *result = WorldDatabase.PQuery( "SELECT guid FROM creature WHERE guid = '%u'",lowguid);
-            if(!result)
+            CreatureData const* data = objmgr.GetCreatureData(lowguid);
+            if(!data)
             {
                 PSendSysMessage(LANG_COMMAND_CREATGUIDNOTFOUND, lowguid);
                 return true;
             }
-            delete result;
         }
         else
         {
@@ -1924,19 +1936,20 @@ bool ChatHandler::HandleWpAddCommand(const char* args)
 
     Creature* pCreature = NULL;
 
+    /* impossible without entry
     if(lowguid)
         pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(lowguid,HIGHGUID_UNIT));
+    */
 
-    // attempt check creature existence by DB
+    // attempt check creature existence by DB data
     if(!pCreature)
     {
-        QueryResult *result = WorldDatabase.PQuery( "SELECT guid FROM creature WHERE guid = '%u'",lowguid);
-        if(!result)
+        CreatureData const* data = objmgr.GetCreatureData(lowguid);
+        if(!data)
         {
             PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, lowguid);
             return true;
         }
-        delete result;
     }
 
     sLog.outDebug("DEBUG: HandleWpAddCommand - point == 0");
@@ -2042,18 +2055,17 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
 
         // Did the user select a visual spawnpoint?
         if(wpGuid)
-            wpCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(wpGuid,HIGHGUID_UNIT));
+            wpCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_NEW_GUID(wpGuid,VISUAL_WAYPOINT,HIGHGUID_UNIT));
 
-        // attempt check creature existence by DB
+        // attempt check creature existence by DB data
         if(!wpCreature)
         {
-            QueryResult *result = WorldDatabase.PQuery( "SELECT guid FROM creature WHERE guid = '%u'",wpGuid);
-            if(!result)
+            CreatureData const* data = objmgr.GetCreatureData(wpGuid);
+            if(!data)
             {
                 PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, wpGuid);
                 return true;
             }
-            delete result;
         }
         // User did select a visual waypoint?
         // Check the creature
@@ -2232,13 +2244,15 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
     // Special functions:
     // add - move - del -> no args commands
     // Add a waypoint after the selected visual
-    if(show == "add")
+    if(show == "add" && target)
     {
         PSendSysMessage("DEBUG: wp modify add, GUID: %u", lowguid);
 
         // Get the creature for which we read the waypoint
-        Creature* npcCreature = NULL;
-        npcCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(), MAKE_GUID(lowguid, HIGHGUID_UNIT));
+        /* impossible without entry
+        Creature* npcCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(), MAKE_GUID(lowguid, HIGHGUID_UNIT));
+        */
+        Creature* npcCreature = (Creature*)target;
 
         if( !npcCreature )
         {
@@ -2303,19 +2317,21 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         return true;
     }                                                       // add
 
-    if(show == "del")
+    if(show == "del" && target)
     {
         PSendSysMessage("DEBUG: wp modify del, GUID: %u", lowguid);
 
         // Get the creature for which we read the waypoint
-        Creature* npcCreature = NULL;
-        npcCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(lowguid, HIGHGUID_UNIT));
+        /* impossible without entry
+        Creature* npcCreature  = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(lowguid, HIGHGUID_UNIT));
+        */
+        Creature* npcCreature = (Creature*)target;
 
         // wpCreature
         Creature* wpCreature = NULL;
         if( wpGuid != 0 )
         {
-            wpCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(wpGuid, HIGHGUID_UNIT));
+            wpCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_NEW_GUID(wpGuid, VISUAL_WAYPOINT, HIGHGUID_UNIT));
             wpCreature->CombatStop();
             wpCreature->DeleteFromDB();
             ObjectAccessor::Instance().AddObjectToRemoveList(wpCreature);
@@ -2357,15 +2373,17 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         return true;
     }                                                       // del
 
-    if(show == "move")
+    if(show == "move" && target)
     {
         PSendSysMessage("DEBUG: wp move, GUID: %u", lowguid);
 
         Player *chr = m_session->GetPlayer();
         {
             // Get the creature for which we read the waypoint
-            Creature* npcCreature = NULL;
-            npcCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(lowguid,HIGHGUID_UNIT));
+            /* impossible without entry
+            Creature* npcCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(lowguid,HIGHGUID_UNIT));
+            */
+            Creature* npcCreature = (Creature*)target;
 
             // wpCreature
             Creature* wpCreature = NULL;
@@ -2374,7 +2392,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             // Respawn the owner of the waypoints
             if( wpGuid != 0 )
             {
-                wpCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(wpGuid, HIGHGUID_UNIT));
+                wpCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_NEW_GUID(wpGuid, VISUAL_WAYPOINT, HIGHGUID_UNIT));
                 wpCreature->CombatStop();
                 wpCreature->DeleteFromDB();
                 ObjectAccessor::Instance().AddObjectToRemoveList(wpCreature);
@@ -2572,8 +2590,10 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
     // Create creature - npc that has the waypoint
     Creature* npcCreature = NULL;
 
+    /* FIXME: impossible withput entry
     if(lowguid)
         npcCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(lowguid,HIGHGUID_UNIT));
+    */
 
     // attempt check creature existance by DB
     if(!npcCreature)
@@ -2703,8 +2723,11 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
     Creature* pCreature = NULL;
 
     sLog.outDebug("DEBUG: HandleWpShowCommand: lowguid: %u", lowguid);
+
+    /* imposiible without entry
     if(lowguid)
         pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(lowguid,HIGHGUID_UNIT));
+    */
 
     sLog.outDebug("DEBUG: HandleWpShowCommand: Habe creature: %ld", pCreature );
     // attempt check creature existance by DB
@@ -2774,7 +2797,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             uint32 model2           = fields[11].GetUInt32();
 
             // Get the creature for which we read the waypoint
-            Creature* wpCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(creGUID,HIGHGUID_UNIT));
+            Creature* wpCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_NEW_GUID(creGUID,VISUAL_WAYPOINT,HIGHGUID_UNIT));
 
             PSendSysMessage(LANG_WAYPOINT_INFO_TITLE, point, (wpCreature ? wpCreature->GetName() : "<not found>"), creGUID);
             PSendSysMessage(LANG_WAYPOINT_INFO_WAITTIME, waittime);
@@ -2813,7 +2836,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             {
                 Field *fields = result2->Fetch();
                 uint32 wpguid = fields[0].GetUInt32();
-                Creature* pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(wpguid,HIGHGUID_UNIT));
+                Creature* pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_NEW_GUID(wpguid,VISUAL_WAYPOINT,HIGHGUID_UNIT));
 
                 if(!pCreature)
                 {
@@ -2975,7 +2998,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         {
             Field *fields = result->Fetch();
             uint32 guid = fields[0].GetUInt32();
-            Creature* pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(guid,HIGHGUID_UNIT));
+            Creature* pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_NEW_GUID(guid,VISUAL_WAYPOINT,HIGHGUID_UNIT));
 
             //Creature* pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(), guid);
 

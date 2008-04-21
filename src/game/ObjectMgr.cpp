@@ -916,7 +916,7 @@ void ObjectMgr::LoadCreatureRespawnTimes()
         uint64 respawn_time = fields[1].GetUInt64();
         uint32 instance     = fields[2].GetUInt32();
 
-        mCreatureRespawnTimes[MAKE_GUID(loguid,instance)] = time_t(respawn_time);
+        mCreatureRespawnTimes[MAKE_PAIR(loguid,instance)] = time_t(respawn_time);
 
         ++count;
     } while (result->NextRow());
@@ -958,7 +958,7 @@ void ObjectMgr::LoadGameobjectRespawnTimes()
         uint64 respawn_time = fields[1].GetUInt64();
         uint32 instance     = fields[2].GetUInt32();
 
-        mGORespawnTimes[MAKE_GUID(loguid,instance)] = time_t(respawn_time);
+        mGORespawnTimes[MAKE_PAIR(loguid,instance)] = time_t(respawn_time);
 
         ++count;
     } while (result->NextRow());
@@ -4224,17 +4224,35 @@ void ObjectMgr::SetHighestGuids()
 
 uint32 ObjectMgr::GenerateAuctionID()
 {
-    return ++m_auctionid;
+    ++m_auctionid;
+    if(m_auctionid>=0xFFFFFFFF)
+    {
+        sLog.outError("Auctions ids overflow!! Can't continue, shuting down server. ");
+        sWorld.m_stopEvent = true;
+    }
+    return m_auctionid;
 }
 
 uint32 ObjectMgr::GenerateMailID()
 {
-    return ++m_mailid;
+    ++m_mailid;
+    if(m_mailid>=0xFFFFFFFF)
+    {
+        sLog.outError("Mail ids overflow!! Can't continue, shuting down server. ");
+        sWorld.m_stopEvent = true;
+    }
+    return m_mailid;
 }
 
 uint32 ObjectMgr::GenerateItemTextID()
 {
-    return ++m_ItemTextId;
+    ++m_ItemTextId;
+    if(m_ItemTextId>=0xFFFFFFFF)
+    {
+        sLog.outError("Item text ids overflow!! Can't continue, shuting down server. ");
+        sWorld.m_stopEvent = true;
+    }
+    return m_ItemTextId;
 }
 
 uint32 ObjectMgr::CreateItemText(std::string text)
@@ -4257,7 +4275,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
     {
         case HIGHGUID_ITEM:
             ++m_hiItemGuid;
-            if(m_hiItemGuid==0xFFFFFFFF)
+            if(m_hiItemGuid>=0xFFFFFFFF)
             {
                 sLog.outError("Item guid overflow!! Can't continue, shuting down server. ");
                 sWorld.m_stopEvent = true;
@@ -4265,7 +4283,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             return m_hiItemGuid;
         case HIGHGUID_UNIT:
             ++m_hiCreatureGuid;
-            if(m_hiCreatureGuid==0xFFFFFFFF)
+            if(m_hiCreatureGuid>=0x00FFFFFF)
             {
                 sLog.outError("Creature guid overflow!! Can't continue, shuting down server. ");
                 sWorld.m_stopEvent = true;
@@ -4273,7 +4291,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             return m_hiCreatureGuid;
         case HIGHGUID_PLAYER:
             ++m_hiCharGuid;
-            if(m_hiCharGuid==0xFFFFFFFF)
+            if(m_hiCharGuid>=0xFFFFFFFF)
             {
                 sLog.outError("Players guid overflow!! Can't continue, shuting down server. ");
                 sWorld.m_stopEvent = true;
@@ -4281,7 +4299,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             return m_hiCharGuid;
         case HIGHGUID_GAMEOBJECT:
             ++m_hiGoGuid;
-            if(m_hiGoGuid==0xFFFFFFFF)
+            if(m_hiGoGuid>=0x00FFFFFF)
             {
                 sLog.outError("Gameobject guid overflow!! Can't continue, shuting down server. ");
                 sWorld.m_stopEvent = true;
@@ -4289,7 +4307,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             return m_hiGoGuid;
         case HIGHGUID_CORPSE:
             ++m_hiCorpseGuid;
-            if(m_hiCorpseGuid==0xFFFFFFFF)
+            if(m_hiCorpseGuid>=0x00FFFFFF)
             {
                 sLog.outError("Corpse guid overflow!! Can't continue, shuting down server. ");
                 sWorld.m_stopEvent = true;
@@ -4297,7 +4315,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             return m_hiCorpseGuid;
         case HIGHGUID_DYNAMICOBJECT:
             ++m_hiDoGuid;
-            if(m_hiDoGuid==0xFFFFFFFF)
+            if(m_hiDoGuid>=0x00FFFFFF)
             {
                 sLog.outError("DynamicObject guid overflow!! Can't continue, shuting down server. ");
                 sWorld.m_stopEvent = true;
@@ -5007,7 +5025,7 @@ void ObjectMgr::LoadWeatherZoneChances()
 
 void ObjectMgr::SaveCreatureRespawnTime(uint32 loguid, uint32 instance, time_t t)
 {
-    mCreatureRespawnTimes[MAKE_GUID(loguid,instance)] = t;
+    mCreatureRespawnTimes[MAKE_PAIR(loguid,instance)] = t;
     WorldDatabase.PExecute("DELETE FROM creature_respawn WHERE guid = '%u' AND instance = '%u'", loguid, instance);
     if(t)
         WorldDatabase.PExecute("INSERT INTO creature_respawn VALUES ( '%u', '" I64FMTD "', '%u' )", loguid, uint64(t), instance);
@@ -5031,7 +5049,7 @@ void ObjectMgr::DeleteCreatureData(uint32 guid)
 
 void ObjectMgr::SaveGORespawnTime(uint32 loguid, uint32 instance, time_t t)
 {
-    mGORespawnTimes[MAKE_GUID(loguid,instance)] = t;
+    mGORespawnTimes[MAKE_PAIR(loguid,instance)] = t;
     WorldDatabase.PExecute("DELETE FROM gameobject_respawn WHERE guid = '%u' AND instance = '%u'", loguid, instance);
     if(t)
         WorldDatabase.PExecute("INSERT INTO gameobject_respawn VALUES ( '%u', '" I64FMTD "', '%u' )", loguid, uint64(t), instance);

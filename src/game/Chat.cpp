@@ -819,11 +819,11 @@ char const *fmtstring( char const *format, ... )
     return buf;
 }
 
-GameObject* ChatHandler::GetObjectGlobalyWithGuidOrNearWithDbGuid(uint32 lowguid)
+GameObject* ChatHandler::GetObjectGlobalyWithGuidOrNearWithDbGuid(uint32 lowguid,uint32 entry)
 {
     Player* pl = m_session->GetPlayer();
 
-    GameObject* obj = ObjectAccessor::GetGameObject(*pl, MAKE_GUID(lowguid, HIGHGUID_GAMEOBJECT));
+    GameObject* obj = ObjectAccessor::GetGameObject(*pl, MAKE_NEW_GUID(lowguid, entry, HIGHGUID_GAMEOBJECT));
 
     if(!obj && objmgr.GetGOData(lowguid))                   // guid is DB guid of object
     {

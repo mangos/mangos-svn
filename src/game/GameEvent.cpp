@@ -470,12 +470,14 @@ void GameEvent::GameEventUnspawn(int16 event_id)
     {
         // Remove the creature from grid
         if( CreatureData const* data = objmgr.GetCreatureData(*itr) )
+        {
             objmgr.RemoveCreatureFromGrid(*itr, data);
 
-        if( Creature* pCreature = ObjectAccessor::Instance().GetObjectInWorld(MAKE_GUID(*itr, HIGHGUID_UNIT), (Creature*)NULL) )
-        {
-            pCreature->CombatStop();
-            ObjectAccessor::Instance().AddObjectToRemoveList(pCreature);
+            if( Creature* pCreature = ObjectAccessor::Instance().GetObjectInWorld(MAKE_NEW_GUID(*itr, data->id, HIGHGUID_UNIT), (Creature*)NULL) )
+            {
+                pCreature->CombatStop();
+                ObjectAccessor::Instance().AddObjectToRemoveList(pCreature);
+            }
         }
     }
 
@@ -489,10 +491,12 @@ void GameEvent::GameEventUnspawn(int16 event_id)
     {
         // Remove the gameobject from grid
         if(GameObjectData const* data = objmgr.GetGOData(*itr))
+        {
             objmgr.RemoveGameobjectFromGrid(*itr, data);
 
-        if( GameObject* pGameobject = ObjectAccessor::Instance().GetObjectInWorld(MAKE_GUID(*itr, HIGHGUID_GAMEOBJECT), (GameObject*)NULL) )
-            ObjectAccessor::Instance().AddObjectToRemoveList(pGameobject);
+            if( GameObject* pGameobject = ObjectAccessor::Instance().GetObjectInWorld(MAKE_NEW_GUID(*itr, data->id, HIGHGUID_GAMEOBJECT), (GameObject*)NULL) )
+                ObjectAccessor::Instance().AddObjectToRemoveList(pGameobject);
+        }
     }
 }
 
@@ -500,9 +504,13 @@ void GameEvent::ChangeEquipOrModel(int16 event_id, bool activate)
 {
     for(ModelEquipList::iterator itr = mGameEventModelEquip[event_id].begin();itr != mGameEventModelEquip[event_id].end();++itr)
     {
+        // Remove the creature from grid
+        CreatureData const* data = objmgr.GetCreatureData(itr->first);
+        if(!data)
+            continue;
+
         // Update if spawned
-        Creature* pCreature;
-        pCreature = ObjectAccessor::Instance().GetObjectInWorld(MAKE_GUID(itr->first, HIGHGUID_UNIT), (Creature*)NULL);
+        Creature* pCreature = ObjectAccessor::Instance().GetObjectInWorld(MAKE_NEW_GUID(itr->first, data->id,HIGHGUID_UNIT), (Creature*)NULL);
         if (pCreature)
         {
             if (activate)
