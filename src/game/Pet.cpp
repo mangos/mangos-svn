@@ -915,7 +915,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
         SetFloatValue(OBJECT_FIELD_SCALE_X, 0.4 + float(petlevel) / 100);
     m_bonusdamage = 0;
 
-    uint32 createResistance[MAX_SPELL_SCHOOL] = {0,0,0,0,0,0,0};
+    int32 createResistance[MAX_SPELL_SCHOOL] = {0,0,0,0,0,0,0};
 
     if(cinfo && getPetType() != HUNTER_PET)
     {

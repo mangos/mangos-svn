@@ -187,12 +187,12 @@ struct CreatureInfo
     uint32  lootid;
     uint32  pickpocketLootId;
     uint32  SkinLootId;
-    uint32  resistance1;
-    uint32  resistance2;
-    uint32  resistance3;
-    uint32  resistance4;
-    uint32  resistance5;
-    uint32  resistance6;
+    int32   resistance1;
+    int32   resistance2;
+    int32   resistance3;
+    int32   resistance4;
+    int32   resistance5;
+    int32   resistance6;
     uint32  spell1;
     uint32  spell2;
     uint32  spell3;
