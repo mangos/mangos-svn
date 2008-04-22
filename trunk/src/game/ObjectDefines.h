@@ -65,13 +65,13 @@ enum HighGuid
 #define _GUID_LOPART_2(x) (uint32)(uint64(x) & 0xFFFFFFFF)
 #define _GUID_LOPART_3(x) (uint32)(uint64(x) & 0x00FFFFFF)
 
-inline uint32 _GetGuidLowPart(uint64 const& guid)
+inline uint32 IsGuidHaveEnPart(uint64 const& guid)
 {
     switch(GUID_HIPART(guid))
     {
         case HIGHGUID_ITEM:
         case HIGHGUID_PLAYER:
-            return _GUID_LOPART_2(guid); 
+            return false; 
         case HIGHGUID_GAMEOBJECT:
         case HIGHGUID_TRANSPORT:
         case HIGHGUID_UNIT:
@@ -80,30 +80,11 @@ inline uint32 _GetGuidLowPart(uint64 const& guid)
         case HIGHGUID_CORPSE:
         case HIGHGUID_MO_TRANSPORT:
         default:
-            return _GUID_LOPART_3(guid); 
+            return true; 
     }
 }
 
-inline uint32 _GetGuidEnPart(uint64 const& guid)
-{
-    switch(GUID_HIPART(guid))
-    {
-    case HIGHGUID_ITEM:
-    case HIGHGUID_PLAYER:
-        return _GUID_ENPART_2(guid); 
-    case HIGHGUID_GAMEOBJECT:
-    case HIGHGUID_TRANSPORT:
-    case HIGHGUID_UNIT:
-    case HIGHGUID_PET:
-    case HIGHGUID_DYNAMICOBJECT:
-    case HIGHGUID_CORPSE:
-    case HIGHGUID_MO_TRANSPORT:
-    default:
-        return _GUID_ENPART_3(guid); 
-    }
-}
-
-#define GUID_ENPART(x) _GetGuidEnPart(x)
-#define GUID_LOPART(x) _GetGuidLowPart(x)
+#define GUID_ENPART(x) (IsGuidHaveEnPart(x) ? _GUID_ENPART_3(x) : _GUID_ENPART_2(x))
+#define GUID_LOPART(x) (IsGuidHaveEnPart(x) ? _GUID_LOPART_3(x) : _GUID_LOPART_2(x))
 
 #endif
