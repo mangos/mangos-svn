@@ -464,7 +464,7 @@ enum OpCodes
     SMSG_TRAINER_LIST                               = 433,
     CMSG_TRAINER_BUY_SPELL                          = 434,
     SMSG_TRAINER_BUY_SUCCEEDED                      = 435,
-    SMSG_TRAINER_BUY_FAILED                         = 436,
+    SMSG_TRAINER_BUY_FAILED                         = 436,  // uint64, uint32, uint32 (0 - unavailable, 1 - not enough money, 2 - enough skill
     CMSG_BINDER_ACTIVATE                            = 437,
     SMSG_PLAYERBINDERROR                            = 438,  // You already bound there.
     CMSG_BANKER_ACTIVATE                            = 439,
@@ -668,7 +668,7 @@ enum OpCodes
     CMSG_ENABLE_DAMAGE_LOG                          = 637,
     CMSG_GROUP_CHANGE_SUB_GROUP                     = 638,
     CMSG_REQUEST_PARTY_MEMBER_STATS                 = 639,
-    CMSG_GROUP_SWAP_SUB_GROUP                       = 640,
+    CMSG_GROUP_SWAP_SUB_GROUP                       = 640,  // lua: SwapRaidSubgroup; string, string
     CMSG_RESET_FACTION_CHEAT                        = 641,
     CMSG_AUTOSTORE_BANK_ITEM                        = 642,
     CMSG_AUTOBANK_ITEM                              = 643,

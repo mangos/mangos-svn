@@ -13692,6 +13692,7 @@ void Player::SaveToDB()
 
     // save state (after auras removing), if aura remove some flags then it must set it back by self)
     uint32 tmp_bytes = GetUInt32Value(UNIT_FIELD_BYTES_1);
+    uint32 tmp_bytes2 = GetUInt32Value(UNIT_FIELD_BYTES_2);
     uint32 tmp_flags = GetUInt32Value(UNIT_FIELD_FLAGS);
     uint32 tmp_pflags = GetUInt32Value(PLAYER_FLAGS);
     uint32 tmp_displayid = GetDisplayId();
@@ -13818,6 +13819,7 @@ void Player::SaveToDB()
     // restore state (before aura apply, if aura remove flag then aura must set it ack by self)
     SetDisplayId(tmp_displayid);
     SetUInt32Value(UNIT_FIELD_BYTES_1, tmp_bytes);
+    SetUInt32Value(UNIT_FIELD_BYTES_2, tmp_bytes2);
     SetUInt32Value(UNIT_FIELD_FLAGS, tmp_flags);
     SetUInt32Value(PLAYER_FLAGS, tmp_pflags);
 
