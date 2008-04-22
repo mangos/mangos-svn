@@ -4307,7 +4307,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             return m_hiGoGuid;
         case HIGHGUID_CORPSE:
             ++m_hiCorpseGuid;
-            if(m_hiCorpseGuid>=0x00FFFFFF)
+            if(m_hiCorpseGuid>=0xFFFFFFFF)
             {
                 sLog.outError("Corpse guid overflow!! Can't continue, shuting down server. ");
                 sWorld.m_stopEvent = true;
@@ -4315,7 +4315,7 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
             return m_hiCorpseGuid;
         case HIGHGUID_DYNAMICOBJECT:
             ++m_hiDoGuid;
-            if(m_hiDoGuid>=0x00FFFFFF)
+            if(m_hiDoGuid>=0xFFFFFFFF)
             {
                 sLog.outError("DynamicObject guid overflow!! Can't continue, shuting down server. ");
                 sWorld.m_stopEvent = true;
