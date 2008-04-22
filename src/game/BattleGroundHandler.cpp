@@ -504,6 +504,9 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
     if(!bg)
         return;
 
+    bg->SetArenaType(arenatype);
+    bg->SetRated(isRated);
+
     if(asGroup && _player->GetGroup())
     {
         Group *grp = _player->GetGroup();

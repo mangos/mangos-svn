@@ -277,7 +277,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     g.SetDword(7);
     I.SetHexStr(fields[5].GetString());
 
-    //In case of leading zeroes in the I hash, restore them
+    //In case of leading zeros in the I hash, restore them
     uint8 mDigest[SHA_DIGEST_LENGTH];
     memset(mDigest,0,SHA_DIGEST_LENGTH);
     if (I.GetNumBytes() <= SHA_DIGEST_LENGTH)
