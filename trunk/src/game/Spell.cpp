@@ -3544,10 +3544,17 @@ uint8 Spell::CanCast(bool strict)
                 if( target->isInCombat() )
                     return SPELL_FAILED_TARGET_IN_COMBAT;
 
-                // check if our map is instanceable
-                if( MapManager::Instance().GetBaseMap(m_caster->GetMapId())->Instanceable() && !m_caster->IsInMap(target) )
-                    return SPELL_FAILED_TARGET_NOT_IN_INSTANCE;
-
+                // check if our map is dungeon
+                if(MapManager::Instance().GetBaseMap(m_caster->GetMapId())->IsDungeon() )
+                {
+                    InstanceTemplate const* instance = ObjectMgr::GetInstanceTemplate(m_caster->GetMapId());
+                    if(!instance)
+                        return SPELL_FAILED_TARGET_NOT_IN_INSTANCE;
+                    if ( instance->levelMin > target->getLevel() )
+                        return SPELL_FAILED_LOWLEVEL;
+                    if ( instance->levelMax < target->getLevel() )
+                        return SPELL_FAILED_HIGHLEVEL;
+                }
                 break;
             }
             case SPELL_EFFECT_LEAP:
