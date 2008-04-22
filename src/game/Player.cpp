@@ -5350,7 +5350,7 @@ void Player::UpdateHonorFields(bool force)
         // if the last was added yesterday then this is the first update after midnight
 
         // update yesterday's contribution
-        SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, (uint32)(m_honorPending*10));
+        SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, uint32(m_honorPending));
         // add the pending honor points, a day has passed
         SetHonorPoints(GetHonorPoints()+uint32(m_honorPending));
         // this is the first update today, reset today's contribution and pending honor
@@ -5497,7 +5497,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
     // victim_rank [5..19] HK: <alliance\horde rank>
     // victim_rank [0,20+] HK: <>
     WorldPacket data(SMSG_PVP_CREDIT,4+8+4);
-    data << (uint32) honor*10;
+    data << (uint32) honor;
     data << (uint64) victim_guid;
     data << (uint32) victim_rank;
 
@@ -5506,7 +5506,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
     m_lastHonorDate = now;
     m_honorPending += honor;
 
-    ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, (uint32)(honor*10), true);
+    ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, uint32(honor), true);
     return true;
 }
 
@@ -13046,7 +13046,7 @@ void Player::_LoadHonor(QueryResult *result)
             // the honorPending is always for one day
             // if honor was last gained yesterday then
             // honorPending is the total honor yesterday
-            SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, (uint32)(m_honorPending*10));
+            SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, uint32(m_honorPending));
         }
         else
         {
