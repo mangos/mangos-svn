@@ -210,7 +210,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //148 SPELL_EFFECT_148                      unused
     &Spell::EffectNULL,                                     //149 SPELL_EFFECT_149
     &Spell::EffectNULL,                                     //150 SPELL_EFFECT_150                      unused
-    &Spell::EffectNULL,                                     //151 SPELL_EFFECT_151                      related to summon
+    &Spell::EffectTriggerSpell,                             //151 SPELL_EFFECT_TRIGGER_SPELL_2
     &Spell::EffectNULL,                                     //152 SPELL_EFFECT_152                      RAFS
     &Spell::EffectNULL,                                     //153 SPELL_EFFECT_CREATE_PET               misc value is creature entry
 };
