@@ -7841,13 +7841,6 @@ bool Player::IsEquipmentPos( uint8 bag, uint8 slot )
     return false;
 }
 
-bool Player::IsBankBagPos( uint8 bag, uint8 slot )
-{
-    if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= BANK_SLOT_BAG_START && slot < BANK_SLOT_BAG_END ) )
-        return true;
-    return false;
-}
-
 bool Player::IsBankPos( uint8 bag, uint8 slot )
 {
     if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= BANK_SLOT_ITEM_START && slot < BANK_SLOT_ITEM_END ) )
@@ -9365,7 +9358,7 @@ Item* Player::_StoreItem( uint16 pos, Item *pItem, uint32 count, bool clone, boo
 
         if( pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP ||
             pItem->GetProto()->Bonding == BIND_QUEST_ITEM ||
-            pItem->GetProto()->Bonding == BIND_WHEN_EQUIPED && IsBankBagPos(bag,slot) )
+            pItem->GetProto()->Bonding == BIND_WHEN_EQUIPED && IsBagPos(pos) )
             pItem->SetBinding( true );
 
         if( bag == INVENTORY_SLOT_BAG_0 )
@@ -9411,7 +9404,7 @@ Item* Player::_StoreItem( uint16 pos, Item *pItem, uint32 count, bool clone, boo
     {
         if( pItem2->GetProto()->Bonding == BIND_WHEN_PICKED_UP ||
             pItem2->GetProto()->Bonding == BIND_QUEST_ITEM ||
-            pItem2->GetProto()->Bonding == BIND_WHEN_EQUIPED && IsBankBagPos(bag,slot) )
+            pItem2->GetProto()->Bonding == BIND_WHEN_EQUIPED && IsBagPos(pos) )
             pItem2->SetBinding( true );
 
         pItem2->SetCount( pItem2->GetCount() + count );
@@ -13926,12 +13919,12 @@ void Player::_SaveInventory()
 
         if (test == NULL)
         {
-            sLog.outError("Player::_SaveInventory - the bag(%d) and slot(%d) values for the item with guid %d are incorrect, the player doesn't have an item at that position!", item->GetBagSlot(), item->GetSlot(), item->GetGUIDLow());
+            sLog.outError("Player(GUID: %u Name: %s)::_SaveInventory - the bag(%d) and slot(%d) values for the item with guid %d are incorrect, the player doesn't have an item at that position!", GetGUIDLow(), GetName(), item->GetBagSlot(), item->GetSlot(), item->GetGUIDLow());
             error = true;
         }
         else if (test != item)
         {
-            sLog.outError("Player::_SaveInventory - the bag(%d) and slot(%d) values for the item with guid %d are incorrect, the item with guid %d is there instead!", item->GetBagSlot(), item->GetSlot(), item->GetGUIDLow(), test->GetGUIDLow());
+            sLog.outError("Player(GUID: %u Name: %s)::_SaveInventory - the bag(%d) and slot(%d) values for the item with guid %d are incorrect, the item with guid %d is there instead!", GetGUIDLow(), GetName(), item->GetBagSlot(), item->GetSlot(), item->GetGUIDLow(), test->GetGUIDLow());
             error = true;
         }
     }

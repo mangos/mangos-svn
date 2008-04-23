@@ -620,7 +620,7 @@ bool Item::CanBeTraded() const
 {
     if(IsSoulBound())
         return false;
-    if(IsBag() && !((Bag const*)this)->IsEmpty())
+    if(IsBag() && (Player::IsBagPos(GetPos()) || !((Bag const*)this)->IsEmpty()) )
         return false;
 
     if(Player* owner = GetOwner())
