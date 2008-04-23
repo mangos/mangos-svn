@@ -156,6 +156,16 @@ enum GuildBankLogEntries
     GUILD_BANK_LOG_MOVE_ITEM2       = 7,
 };
 
+enum GuildEmblem
+{
+    ERR_GUILDEMBLEM_SUCCESS               = 0,
+    ERR_GUILDEMBLEM_INVALID_TABARD_COLORS = 1,
+    ERR_GUILDEMBLEM_NOGUILD               = 2,
+    ERR_GUILDEMBLEM_NOTGUILDMASTER        = 3,
+    ERR_GUILDEMBLEM_NOTENOUGHMONEY        = 4,
+    ERR_GUILDEMBLEM_INVALIDVENDOR         = 5
+};
+    
 struct GuildBankEvent
 {
     uint32 LogGuid;
