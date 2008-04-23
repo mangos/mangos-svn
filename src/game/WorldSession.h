@@ -173,6 +173,7 @@ class MANGOS_DLL_SPEC WorldSession
         void BuildArenaTeamEventPacket(WorldPacket *data, uint8 eventid, uint8 str_count, std::string str1, std::string str2, std::string str3);
         void SendNotInArenaTeamPacket(uint8 type);
         void SendPetitionShowList( uint64 guid );
+        void SendSaveGuildEmblem( uint32 msg );
 
         // Looking For Group
         // TRUE values set by client sending CMSG_LFG_SET_AUTOJOIN and CMSG_LFM_UNSET_AUTOADD before player login

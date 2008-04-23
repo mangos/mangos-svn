@@ -36,9 +36,10 @@
 
 bool ChatHandler::HandleSayCommand(const char* args)
 {
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    Creature* pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(), guid);
+    if(!*args) 
+        return false;
 
+    Creature* pCreature = getSelectedCreature();
     if(!pCreature)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
@@ -52,9 +53,10 @@ bool ChatHandler::HandleSayCommand(const char* args)
 
 bool ChatHandler::HandleYellCommand(const char* args)
 {
-    uint64 guid = m_session->GetPlayer()->GetSelection();
-    Creature* pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(), guid);
+    if(!*args) 
+        return false;
 
+    Creature* pCreature = getSelectedCreature();
     if(!pCreature)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
@@ -69,7 +71,8 @@ bool ChatHandler::HandleYellCommand(const char* args)
 //show text emote by creature in chat
 bool ChatHandler::HandleTextEmoteCommand(const char* args)
 {
-    if(!*args) return false;
+    if(!*args) 
+        return false;
 
     Creature* pCreature = getSelectedCreature();
 
@@ -87,6 +90,9 @@ bool ChatHandler::HandleTextEmoteCommand(const char* args)
 // make npc whisper to player
 bool ChatHandler::HandleNpcWhisperCommand(const char* args)
 {
+    if(!*args) 
+        return false;
+
     char* receiver = strtok((char*)args, " ");
     char* text = strtok(NULL, "");
 
