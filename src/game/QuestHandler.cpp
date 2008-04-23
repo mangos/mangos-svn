@@ -393,10 +393,10 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
             if( pQuest->IsRepeatable() )
                 _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanCompleteRepeatableQuest(pQuest), false);
             else
-                _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, false, false);
+                _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanRewardQuest(pQuest,false), false);
         }
         else
-            _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, true, false);
+            _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanRewardQuest(pQuest,false), false);
     }
 }
 
