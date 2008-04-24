@@ -67,7 +67,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
         // battleground state prepre, stop flight
         GetPlayer()->GetMotionMaster()->MovementExpired();
         GetPlayer()->FlightComplete();
-        GetPlayer()->ClearTaxiDestinations();
+        GetPlayer()->m_taxi.ClearTaxiDestinations();
         GetPlayer()->StopMoving();
     }
 

@@ -572,13 +572,13 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         pCurrChar->SetMovement(MOVE_WATER_WALK);
     }
 
-    if(uint32 sourceNode = pCurrChar->GetTaxiSource())
+    if(uint32 sourceNode = pCurrChar->m_taxi.GetTaxiSource())
     {
 
         sLog.outDebug( "WORLD: Restart character %u taxi flight", pCurrChar->GetGUIDLow() );
 
         uint32 MountId = objmgr.GetTaxiMount(sourceNode, pCurrChar->GetTeam());
-        uint32 path = pCurrChar->GetCurrentTaxiPath();
+        uint32 path = pCurrChar->m_taxi.GetCurrentTaxiPath();
 
         // search appropriate start path node
         uint32 startNode = 0;
@@ -623,7 +623,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     }
 
     // Load pet if any and player is alive and not in taxi flight
-    if(pCurrChar->isAlive() && pCurrChar->GetTaxiSource()==0)
+    if(pCurrChar->isAlive() && pCurrChar->m_taxi.GetTaxiSource()==0)
         pCurrChar->LoadPet();
 
     // Set FFA PvP for non GM in non-rest mode
