@@ -573,7 +573,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                             cantalking=false;
                         break;
                     case GOSSIP_OPTION_TAXIVENDOR:
-                        if ( pPlayer->GetSession()->SendLearnNewTaxiNode(GetGUID()) )
+                        if ( pPlayer->GetSession()->SendLearnNewTaxiNode(this) )
                             return;
                         break;
                     case GOSSIP_OPTION_BATTLEFIELD:
@@ -688,7 +688,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             player->SendPetSkillWipeConfirm();
             break;
         case GOSSIP_OPTION_TAXIVENDOR:
-            player->GetSession()->SendTaxiMenu(guid);
+            player->GetSession()->SendTaxiMenu(this);
             break;
         case GOSSIP_OPTION_INNKEEPER:
             player->PlayerTalkClass->CloseGossip();

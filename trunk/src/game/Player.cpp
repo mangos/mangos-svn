@@ -75,6 +75,129 @@
 #define SKILL_PERM_BONUS(x)    (int16(uint32(x) >> 16))
 #define MAKE_SKILL_BONUS(t, p) (uint32( uint32(uint16(int16(t))) | (uint32(uint16(int16(p))) << 16) ))
 
+//== PlayerTaxi ================================================
+
+PlayerTaxi::PlayerTaxi()
+{
+    // Taxi nodes
+    memset(m_taximask, 0, sizeof(m_taximask));
+}
+
+void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 level)
+{
+    // capital and taxi hub masks
+    switch(race)
+    {
+        case RACE_HUMAN:    SetTaximaskNode(2);  break;     // Human
+        case RACE_ORC:      SetTaximaskNode(23); break;     // Orc
+        case RACE_DWARF:    SetTaximaskNode(6);  break;     // Dwarf
+        case RACE_NIGHTELF: SetTaximaskNode(26); 
+                            SetTaximaskNode(27); break;     // Night Elf
+        case RACE_UNDEAD_PLAYER: SetTaximaskNode(11); break;// Undead
+        case RACE_TAUREN:   SetTaximaskNode(22); break;     // Tauren
+        case RACE_GNOME:    SetTaximaskNode(6);  break;     // Gnome
+        case RACE_TROLL:    SetTaximaskNode(23); break;     // Troll
+        case RACE_BLOODELF: SetTaximaskNode(82); break;     // Blood Elf
+        case RACE_DRAENEI:  SetTaximaskNode(94); break;     // Draenei
+    }
+    // new continent starting masks (It will be accessible only at new map)
+    switch(Player::TeamForRace(race))
+    {
+        case ALLIANCE: SetTaximaskNode(100); break;
+        case HORDE:    SetTaximaskNode(99);  break;
+    }
+    // level dependent taxi hubs
+    if(level>=65)
+        SetTaximaskNode(213);                               //Shattered Sun Staging Area
+}
+
+void PlayerTaxi::LoadTaxiMask(const char* data)
+{
+    Tokens tokens = StrSplit(data, " ");
+
+    int index;
+    Tokens::iterator iter;
+    for (iter = tokens.begin(), index = 0;
+        (index < TaxiMaskSize) && (iter != tokens.end()); ++iter, ++index)
+    {
+        // load and set bits only for existed taxi nodes
+        m_taximask[index] = sTaxiNodesMask[index] & uint32(atol((*iter).c_str()));
+    }
+}
+
+void PlayerTaxi::AppendTaximaskTo( ByteBuffer& data, bool all )
+{
+    if(all)
+    {
+        for (uint8 i=0; i<TaxiMaskSize; i++)
+            data << sTaxiNodesMask[i];                      // all existed nodes
+    }
+    else
+    {
+        for (uint8 i=0; i<TaxiMaskSize; i++)
+            data << uint32(m_taximask[i]);                  // known nodes
+    }
+}
+
+bool PlayerTaxi::LoadTaxiDestinationsFromString( std::string values )
+{
+    ClearTaxiDestinations();
+
+    Tokens tokens = StrSplit(values," ");
+
+    for(Tokens::iterator iter = tokens.begin(); iter != tokens.end(); ++iter)
+    {
+        uint32 node = uint32(atol(iter->c_str()));
+        AddTaxiDestination(node);
+    }
+
+    if(m_TaxiDestinations.empty())
+        return true;
+
+    // Check integrity
+    if(m_TaxiDestinations.size() < 2)
+        return false;
+
+    for(size_t i = 1; i < m_TaxiDestinations.size(); ++i)
+    {
+        uint32 cost;
+        uint32 path;
+        objmgr.GetTaxiPath(m_TaxiDestinations[i-1],m_TaxiDestinations[i],path,cost);
+        if(!path)
+            return false;
+    }
+
+    return true;
+}
+
+std::string PlayerTaxi::SaveTaxiDestinationsToString()
+{
+    if(m_TaxiDestinations.empty())
+        return "";
+
+    std::ostringstream ss;
+
+    for(size_t i=0; i < m_TaxiDestinations.size(); ++i)
+        ss << m_TaxiDestinations[i] << " ";
+
+    return ss.str();
+}
+
+uint32 PlayerTaxi::GetCurrentTaxiPath() const
+{
+    if(m_TaxiDestinations.size() < 2)
+        return 0;
+
+    uint32 path;
+    uint32 cost;
+
+    objmgr.GetTaxiPath(m_TaxiDestinations[0],m_TaxiDestinations[1],path,cost);
+
+    return path;
+}
+
+//== Player ====================================================
+
 const int32 Player::ReputationRank_Length[MAX_REPUTATION_RANK] = {36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000};
 
 UpdateMask Player::updateVisualBits;
@@ -257,9 +380,6 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_summon_x = 0.0f;
     m_summon_y = 0.0f;
     m_summon_z = 0.0f;
-
-    // Taxi nodes
-    memset(m_taximask, 0, sizeof(m_taximask));
 }
 
 Player::~Player ()
@@ -2103,34 +2223,6 @@ void Player::InitStatsForLevel(bool reapplyMods)
         SetPower(POWER_RAGE, GetMaxPower(POWER_RAGE));
     SetPower(POWER_FOCUS, 0);
     SetPower(POWER_HAPPINESS, 0);
-}
-
-void Player::InitTaxiNodesForLevel()
-{
-    // capital and taxi hub masks
-    switch(getRace())
-    {
-        case RACE_HUMAN:    SetTaximaskNode(2);  break;     // Human
-        case RACE_ORC:      SetTaximaskNode(23); break;     // Orc
-        case RACE_DWARF:    SetTaximaskNode(6);  break;     // Dwarf
-        case RACE_NIGHTELF: SetTaximaskNode(26); 
-                            SetTaximaskNode(27); break;     // Night Elf
-        case RACE_UNDEAD_PLAYER: SetTaximaskNode(11); break;// Undead
-        case RACE_TAUREN:   SetTaximaskNode(22); break;     // Tauren
-        case RACE_GNOME:    SetTaximaskNode(6);  break;     // Gnome
-        case RACE_TROLL:    SetTaximaskNode(23); break;     // Troll
-        case RACE_BLOODELF: SetTaximaskNode(82); break;     // Blood Elf
-        case RACE_DRAENEI:  SetTaximaskNode(94); break;     // Draenei
-    }
-    // new continent starting masks (It will be accessible only at new map)
-    switch(TeamForRace(getRace()))
-    {
-        case ALLIANCE: SetTaximaskNode(100); break;
-        case HORDE:    SetTaximaskNode(99);  break;
-    }
-    // level dependent taxi hubs
-    if(getLevel()>=65)
-        SetTaximaskNode(213);                               //Shattered Sun Staging Area
 }
 
 void Player::SendInitialSpells()
@@ -12713,7 +12805,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM) )
         SetUInt32Value(PLAYER_FLAGS, 0 | old_safe_flags);
 
-    _LoadTaxiMask( fields[11].GetString() );                // must be before InitTaxiNodesForLevel
+    m_taxi.LoadTaxiMask( fields[11].GetString() );                // must be before InitTaxiNodesForLevel
 
     uint32 gmstate = fields[25].GetUInt32();
 
@@ -12827,15 +12919,12 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         return false;
 
     // Not finish taxi flight path
-    if(!LoadTaxiDestinationsFromString(taxi_nodes))
+    if(!m_taxi.LoadTaxiDestinationsFromString(taxi_nodes))
     {
         // problems with taxi path loading
         TaxiNodesEntry const* nodeEntry = NULL;
-        if(!m_TaxiDestinations.empty())
-        {
-            uint32 node_id = m_TaxiDestinations[0];
+        if(uint32 node_id = m_taxi.GetTaxiSource())
             nodeEntry = sTaxiNodesStore.LookupEntry(node_id);
-        }
 
         if(!nodeEntry)                                      // don't know taxi start node, to homebind
         {
@@ -12851,14 +12940,13 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
             Relocate(nodeEntry->x, nodeEntry->y, nodeEntry->z);
             SaveRecallPosition();                           // save as recall also to prevent recall and fall from sky
         }
-        ClearTaxiDestinations();
+        m_taxi.ClearTaxiDestinations();
     }
-    else if(!m_TaxiDestinations.empty())
+    else if(uint32 node_id = m_taxi.GetTaxiSource())
     {
         // save source node as recall coord to prevent recall and fall from sky
-        uint32 node_id = m_TaxiDestinations[0];
         TaxiNodesEntry const* nodeEntry = sTaxiNodesStore.LookupEntry(node_id);
-
+        assert(nodeEntry);                                  // checked in m_taxi.LoadTaxiDestinationsFromString
         m_recallMap = nodeEntry->map_id;
         m_recallX = nodeEntry->x;
         m_recallY = nodeEntry->y;
@@ -13562,20 +13650,6 @@ void Player::_LoadSpells(QueryResult *result)
     }
 }
 
-void Player::_LoadTaxiMask(const char* data)
-{
-    Tokens tokens = StrSplit(data, " ");
-
-    int index;
-    Tokens::iterator iter;
-    for (iter = tokens.begin(), index = 0;
-        (index < TaxiMaskSize) && (iter != tokens.end()); ++iter, ++index)
-    {
-        // load and set bits only for existed taxi nodes
-        m_taximask[index] = sTaxiNodesMask[index] & uint32(atol((*iter).c_str()));
-    }
-}
-
 void Player::_LoadTutorials(QueryResult *result)
 {
     //QueryResult *result = CharacterDatabase.PQuery("SELECT tut0,tut1,tut2,tut3,tut4,tut5,tut6,tut7 FROM character_tutorial WHERE guid = '%u'",GetGUIDLow());
@@ -13738,7 +13812,7 @@ void Player::SaveToDB()
     ss << "', '";
 
     for( i = 0; i < 8; i++ )
-        ss << m_taximask[i] << " ";
+        ss << m_taxi.GetTaximask(i) << " ";
 
     ss << "', ";
     ss << (inworld ? 1 : 0);
@@ -13795,7 +13869,7 @@ void Player::SaveToDB()
     ss << ", ";
     ss << m_lastKillDate;
     ss << ", '";
-    ss << SaveTaxiDestinationsToString();
+    ss << m_taxi.SaveTaxiDestinationsToString();
     ss << "' )";
 
     CharacterDatabase.Execute( ss.str().c_str() );
@@ -15047,10 +15121,10 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_i
     TradeCancel(true);
 
     // clean not finished taxi path if any
-    ClearTaxiDestinations();
+    m_taxi.ClearTaxiDestinations();
 
     // 0 element current node
-    AddTaxiDestination(sourcenode);
+    m_taxi.AddTaxiDestination(sourcenode);
 
     // fill destinations path tail
     uint32 sourcepath = 0;
@@ -15068,7 +15142,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_i
 
         if(!path)
         {
-            ClearTaxiDestinations();
+            m_taxi.ClearTaxiDestinations();
             return false;
         }
 
@@ -15077,7 +15151,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_i
         if(prevnode == sourcenode)
             sourcepath = path;
 
-        AddTaxiDestination(lastnode);
+        m_taxi.AddTaxiDestination(lastnode);
 
         prevnode = lastnode;
     }
@@ -15090,7 +15164,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_i
         WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
         data << uint32(ERR_TAXIUNSPECIFIEDSERVERERROR);
         GetSession()->SendPacket(&data);
-        ClearTaxiDestinations();
+        m_taxi.ClearTaxiDestinations();
         return false;
     }
 
@@ -15100,7 +15174,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_i
         WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
         data << uint32(ERR_TAXINOTENOUGHMONEY);
         GetSession()->SendPacket(&data);
-        ClearTaxiDestinations();
+        m_taxi.ClearTaxiDestinations();
         return false;
     }
 
@@ -16293,7 +16367,7 @@ void Player::SummonIfPossible()
     {
         GetMotionMaster()->MovementExpired();
         FlightComplete();
-        ClearTaxiDestinations();
+        m_taxi.ClearTaxiDestinations();
         StopMoving();
     }
 
@@ -16349,63 +16423,6 @@ void Player::AutoUnequipOffhandIfNeed()
     {
         sLog.outError("Player::EquipItem: Can's store offhand item at 2hand item equip for player (GUID: %u).",GetGUIDLow());
     }
-}
-
-bool Player::LoadTaxiDestinationsFromString( std::string values )
-{
-    ClearTaxiDestinations();
-
-    Tokens tokens = StrSplit(values," ");
-
-    for(Tokens::iterator iter = tokens.begin(); iter != tokens.end(); ++iter)
-    {
-        uint32 node = uint32(atol(iter->c_str()));
-        AddTaxiDestination(node);
-    }
-
-    if(m_TaxiDestinations.empty())
-        return true;
-
-    // Check integrity
-    if(m_TaxiDestinations.size() < 2)
-        return false;
-
-    for(size_t i = 1; i < m_TaxiDestinations.size(); ++i)
-    {
-        uint32 cost;
-        uint32 path;
-        objmgr.GetTaxiPath(m_TaxiDestinations[i-1],m_TaxiDestinations[i],path,cost);
-        if(!path)
-            return false;
-    }
-
-    return true;
-}
-
-std::string Player::SaveTaxiDestinationsToString()
-{
-    if(m_TaxiDestinations.empty())
-        return "";
-
-    std::ostringstream ss;
-
-    for(size_t i=0; i < m_TaxiDestinations.size(); ++i)
-        ss << m_TaxiDestinations[i] << " ";
-
-    return ss.str();
-}
-
-uint32 Player::GetCurrentTaxiPath() const
-{
-    if(m_TaxiDestinations.size() < 2)
-        return 0;
-
-    uint32 path;
-    uint32 cost;
-
-    objmgr.GetTaxiPath(m_TaxiDestinations[0],m_TaxiDestinations[1],path,cost);
-
-    return path;
 }
 
 bool Player::HasItemFitToSpellReqirements(SpellEntry const* spellInfo, Item const* ignoreItem)

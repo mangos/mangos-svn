@@ -857,6 +857,56 @@ enum PlayerLoginQueryIndex
 #define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
 #define MAX_MONEY_AMOUNT                       (0x7FFFFFFF-1)
 
+class MANGOS_DLL_SPEC PlayerTaxi
+{
+    public:
+        PlayerTaxi();
+        ~PlayerTaxi() {}
+        // Nodes
+        void InitTaxiNodesForLevel(uint32 race, uint32 level);
+        void LoadTaxiMask(const char* data);
+        void SaveTaxiMask(const char* data);
+
+        uint32 GetTaximask( uint8 index ) const { return m_taximask[index]; }
+        bool IsTaximaskNodeKnown(uint32 nodeidx) const
+        {
+            uint8  field   = uint8((nodeidx - 1) / 32);
+            uint32 submask = 1<<((nodeidx-1)%32);
+            return (m_taximask[field] & submask) == submask;
+        }
+        bool SetTaximaskNode(uint32 nodeidx)
+        {
+            uint8  field   = uint8((nodeidx - 1) / 32);
+            uint32 submask = 1<<((nodeidx-1)%32);
+            if ((m_taximask[field] & submask) != submask )
+            {
+                m_taximask[field] |= submask;
+                return true;
+            }
+            else
+                return false;
+        }
+        void AppendTaximaskTo(ByteBuffer& data,bool all);
+
+        // Destinations
+        bool LoadTaxiDestinationsFromString(std::string values);
+        std::string SaveTaxiDestinationsToString();
+
+        void ClearTaxiDestinations() { m_TaxiDestinations.clear(); }
+        void AddTaxiDestination(uint32 dest) { m_TaxiDestinations.push_back(dest); }
+        uint32 GetTaxiSource() const { return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front(); }
+        uint32 GetTaxiDestination() const { return m_TaxiDestinations.size() < 2 ? 0 : m_TaxiDestinations[1]; }
+        uint32 GetCurrentTaxiPath() const;
+        uint32 NextTaxiDestination()
+        {
+            m_TaxiDestinations.pop_front();
+            return GetTaxiDestination();
+        }
+    private:
+        TaxiMask m_taximask;
+        std::deque<uint32> m_TaxiDestinations;
+};
+
 class MANGOS_DLL_SPEC Player : public Unit
 {
     friend class WorldSession;
@@ -912,32 +962,10 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         PlayerSocial *GetSocial() { return m_social; }
 
-        void InitTaxiNodesForLevel();
-        uint32 GetTaximask( uint8 index ) const { return m_taximask[index]; }
-        void SetTaximask( uint8 index, uint32 value ) { m_taximask[index] = value; }
-        void SetTaximaskNode(uint32 nodeidx)
-        {
-            uint8  field   = uint8((nodeidx - 1) / 32);
-            uint32 submask = 1<<((nodeidx-1)%32);
-            if ((m_taximask[field] & submask) != submask )
-                m_taximask[field] = (submask | m_taximask[field]);
-        }
-        void ClearTaxiDestinations() { m_TaxiDestinations.clear(); }
-        void AddTaxiDestination(uint32 dest) { m_TaxiDestinations.push_back(dest); }
-        uint32 GetTaxiSource() const { return m_TaxiDestinations.empty() ? 0 : m_TaxiDestinations.front(); }
-        uint32 GetTaxiDestination() const { return m_TaxiDestinations.size() < 2 ? 0 : m_TaxiDestinations[1]; }
-        uint32 GetCurrentTaxiPath() const;
-        uint32 NextTaxiDestination()
-        {
-            m_TaxiDestinations.pop_front();
-            return GetTaxiDestination();
-        }
-
+        PlayerTaxi m_taxi;
+        void InitTaxiNodesForLevel() { m_taxi.InitTaxiNodesForLevel(getRace(),getLevel()); }
         bool ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_id = 0 );
                                                             // mount_id can be used in scripting calls
-        bool LoadTaxiDestinationsFromString(std::string values);
-        std::string SaveTaxiDestinationsToString();
-
         bool isAcceptTickets() const;
         void SetAcceptTicket(bool on) { if(on) m_GMFlags |= GM_ACCEPT_TICKETS; else m_GMFlags &= ~GM_ACCEPT_TICKETS; }
         bool isAcceptWhispers() const { return m_GMFlags & GM_ACCEPT_WHISPERS; }
@@ -1976,7 +2004,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadGroup(QueryResult *result);
         void _LoadReputation(QueryResult *result);
         void _LoadSpells(QueryResult *result);
-        void _LoadTaxiMask(const char* data);
         void _LoadTutorials(QueryResult *result);
         void _LoadFriendList(QueryResult *result);
         bool _LoadHomeBind(QueryResult *result);
@@ -2078,9 +2105,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         JoinedChannelsList m_channels;
 
         bool m_dontMove;
-
-        TaxiMask m_taximask;
-        std::deque<uint32> m_TaxiDestinations;
 
         int m_cinematic;
 
