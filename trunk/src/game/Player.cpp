@@ -5033,7 +5033,12 @@ void Player::SetFactionVisibleForFactionTemplateId(uint32 FactionTemplateId)
     if(!factionTemplateEntry)
         return;
 
-    FactionEntry const *factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction);
+    SetFactionVisibleForFactionId(factionTemplateEntry->faction);
+}
+
+void Player::SetFactionVisibleForFactionId(uint32 FactionId)
+{
+    FactionEntry const *factionEntry = sFactionStore.LookupEntry(FactionId);
     if(!factionEntry)
         return;
 
@@ -11318,6 +11323,9 @@ void Player::AddQuest( Quest const *pQuest, Object *questGiver )
 
     GiveQuestSourceItem( pQuest );
     AdjustQuestReqItemCount( pQuest );
+
+    if( pQuest->GetRepObjectiveFaction() )
+        SetFactionVisibleForFactionId(pQuest->GetRepObjectiveFaction());
 
     uint32 qtime = 0;
     if( pQuest->HasFlag( QUEST_MANGOS_FLAGS_TIMED ) )
