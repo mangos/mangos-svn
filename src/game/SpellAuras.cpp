@@ -790,7 +790,7 @@ void Aura::_AddAura()
 
     // we can found aura in NULL_AURA_SLOT and then need store state instead check slot != NULL_AURA_SLOT
     bool samespell = false;
-
+    bool secondaura = false;
     uint8 slot = NULL_AURA_SLOT;
 
     for(uint8 i = 0; i < 3; i++)
@@ -802,6 +802,8 @@ void Aura::_AddAura()
             if(itr->second->GetCasterGUID()==GetCasterGUID())
             {
                 samespell = true;
+                if (m_effIndex > itr->second->GetEffIndex())
+                     secondaura = true;
                 slot = itr->second->GetAuraSlot();
                 break;
             }
@@ -859,23 +861,31 @@ void Aura::_AddAura()
                 }
             }
 
-            if(slot < MAX_AURAS)                            // slot found
-            {
-                SetAura(slot, false);
-                SetAuraFlag(slot, true);
-                SetAuraLevel(slot,caster ? caster->getLevel() : sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL));
-
-                // update for out of range group members
-                m_target->UpdateAuraForGroup(slot);
-            }
-
             SetAuraSlot( slot );
-            UpdateAuraDuration();
+
+            // Not update fields for not first spell's aura, all data already in fields
+            if(!secondaura)
+            {
+                if(slot < MAX_AURAS)                        // slot found 
+                {
+                    SetAura(slot, false);
+                    SetAuraFlag(slot, true);
+                    SetAuraLevel(slot,caster ? caster->getLevel() : sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL));
+                    UpdateAuraCharges();
+
+                    // update for out of range group members
+                    m_target->UpdateAuraForGroup(slot);
+                }
+
+                UpdateAuraDuration();
+            }
         }
         else                                                // use found slot
         {
             SetAuraSlot( slot );
-            UpdateSlotCounterAndDuration(true);
+            // Not recalculate stack count for second aura of the same spell
+            if (!secondaura)
+                UpdateSlotCounterAndDuration(true);
         }
 
         // Update Seals information
@@ -925,6 +935,7 @@ void Aura::_RemoveAura()
         return;
 
     bool samespell = false;
+    bool sameaura = false;
 
     // find other aura in same slot (current already removed from list)
     for(uint8 i = 0; i < 3; i++)
@@ -935,6 +946,10 @@ void Aura::_RemoveAura()
             if(itr->second->GetAuraSlot()==slot)
             {
                 samespell = true;
+
+                if(GetEffIndex()==i)
+                    sameaura = true;
+
                 break;
             }
         }
@@ -949,6 +964,7 @@ void Aura::_RemoveAura()
         SetAuraFlag(slot, false);
         SetAuraLevel(slot,caster ? caster->getLevel() : sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL));
 
+        SetAuraApplication(slot, 0);
         // update for out of range group members
         m_target->UpdateAuraForGroup(slot);
 
@@ -983,7 +999,7 @@ void Aura::_RemoveAura()
         if( caster==m_target && ( duration < 0 || uint32(duration) > GetSpellRecoveryTime(GetSpellProto()) ))
             SendCoolDownEvent();
     }
-    else                                                    // decrease count for spell
+    else if(sameaura)                                       // decrease count for spell, only for same aura effect, or this spell auras in remove proccess.
         UpdateSlotCounterAndDuration(false);
 }
 
@@ -1019,7 +1035,7 @@ void Aura::SetAuraApplication(uint32 slot, int8 count)
     uint32 byte     = (slot % 4) * 8;
     uint32 val      = m_target->GetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS + index);
     val &= ~(0xFF << byte);
-    val |= (count << byte);
+    val |= ((uint8(count)) << byte);
     m_target->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS + index, val);
 }
 
@@ -3165,7 +3181,10 @@ void Aura::HandleAuraProcTriggerSpell(bool Apply, bool Real)
         // some spell have charges by functionality not have its in spell data
         switch (m_spellId)
         {
-            case 28200: m_procCharges = 6; break;           // Ascendance (Talisman of Ascendance trinket
+            case 28200:                         // Ascendance (Talisman of Ascendance trinket
+                m_procCharges = 6; 
+                UpdateAuraCharges(); 
+                break;
             default: break;
         }
     }

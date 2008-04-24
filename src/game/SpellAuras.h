@@ -239,6 +239,14 @@ class MANGOS_DLL_SPEC Aura
 
         uint8 GetAuraSlot() const { return m_auraSlot; }
         void SetAuraSlot(uint8 slot) { m_auraSlot = slot; }
+        void UpdateAuraCharges()
+        {
+            uint8 slot = GetAuraSlot();
+
+            // only aura inslot with charges and without stack limitation
+            if (slot < MAX_AURAS && m_procCharges >= 1 && GetSpellProto()->StackAmount==0)
+                SetAuraApplication(slot, m_procCharges - 1);
+        }
 
         bool IsPositive() { return m_positive; }
         void SetNegative() { m_positive = false; }
