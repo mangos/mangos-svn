@@ -9465,6 +9465,9 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                 }
             }
 
+            // save charges existence before processing to prevent crash at access to deleted triggered aura after
+            bool triggeredByAuraWithCharges =  i->triggeredByAura->m_procCharges > 0;
+
             switch(*aur)
             {
                 case SPELL_AURA_PROC_TRIGGER_SPELL:
@@ -9497,6 +9500,21 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                 {
                     // nothing do, just charges counter
                     break;
+                }
+            }
+            // Update charge (aura can be removed by triggers)
+            if(triggeredByAuraWithCharges)
+            {
+                // need found aura (can be dropped by triggers)
+                AuraMap::const_iterator lower = GetAuras().lower_bound(i->triggeredByAura_SpellPair);
+                AuraMap::const_iterator upper = GetAuras().upper_bound(i->triggeredByAura_SpellPair);
+                for(AuraMap::const_iterator itr = lower; itr!= upper; ++itr)
+                {
+                    if(itr->second == i->triggeredByAura)
+                    {
+                        i->triggeredByAura->UpdateAuraCharges();
+                        break;
+                    }
                 }
             }
         }
