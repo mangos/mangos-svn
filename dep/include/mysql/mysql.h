@@ -27,6 +27,10 @@
 #ifndef _mysql_h
 #define _mysql_h
 
+#ifdef _AIX           /* large-file support will break without this */
+#include <standards.h>
+#endif
+
 #ifdef __CYGWIN__     /* CYGWIN implements a UNIX API */
 #undef WIN
 #undef _WIN
@@ -552,16 +556,6 @@ unsigned long STDCALL mysql_real_escape_string(MYSQL *mysql,
 					       char *to,const char *from,
 					       unsigned long length);
 void		STDCALL mysql_debug(const char *debug);
-char *		STDCALL mysql_odbc_escape_string(MYSQL *mysql,
-						 char *to,
-						 unsigned long to_length,
-						 const char *from,
-						 unsigned long from_length,
-						 void *param,
-						 char *
-						 (*extend_buffer)
-						 (void *, char *to,
-						  unsigned long *length));
 void 		STDCALL myodbc_remove_escape(MYSQL *mysql,char *name);
 unsigned int	STDCALL mysql_thread_safe(void);
 my_bool		STDCALL mysql_embedded(void);

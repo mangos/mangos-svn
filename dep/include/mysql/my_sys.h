@@ -147,14 +147,14 @@ extern ulonglong sf_malloc_mem_limit;
 #define TERMINATE(A) {}
 #define QUICK_SAFEMALLOC
 #define NORMAL_SAFEMALLOC
-extern gptr my_malloc(uint Size,myf MyFlags);
+extern gptr my_malloc(size_t Size, myf MyFlags);
 #define my_malloc_ci(SZ,FLAG) my_malloc( SZ, FLAG )
 extern gptr my_realloc(gptr oldpoint,uint Size,myf MyFlags);
 extern void my_no_flags_free(gptr ptr);
-extern gptr my_memdup(const byte *from,uint length,myf MyFlags);
+extern gptr my_memdup(const byte *from, size_t length, myf MyFlags);
 extern char *my_strdup(const char *from,myf MyFlags);
-extern char *my_strdup_with_length(const char *from, uint length,
-				   myf MyFlags);
+extern char *my_strdup_with_length(const char *from, size_t length,
+                                   myf MyFlags);
 /* we do use FG (as a no-op) in below so that a typo on FG is caught */
 #define my_free(PTR,FG) ((void)FG,my_no_flags_free(PTR))
 #define CALLER_INFO_PROTO   /* nothing */
@@ -165,7 +165,7 @@ extern char *my_strdup_with_length(const char *from, uint length,
 
 #ifdef HAVE_LARGE_PAGES
 extern uint my_get_large_page_size(void);
-extern gptr my_large_malloc(uint size, myf my_flags);
+extern gptr my_large_malloc(size_t size, myf my_flags);
 extern void my_large_free(gptr ptr, myf my_flags);
 #else
 #define my_get_large_page_size() (0)
@@ -530,6 +530,12 @@ typedef int (*qsort2_cmp)(const void *, const void *, const void *);
 #define my_b_tell(info) ((info)->pos_in_file + \
 			 (uint) (*(info)->current_pos - (info)->request_pos))
 
+#define my_b_get_buffer_start(info) (info)->request_pos 
+#define my_b_get_bytes_in_buffer(info) (char*) (info)->read_end -   \
+  (char*) my_b_get_buffer_start(info)
+#define my_b_get_pos_in_file(info) (info)->pos_in_file
+
+
 /* tell write offset in the SEQ_APPEND cache */
 my_off_t my_b_append_tell(IO_CACHE* info);
 my_off_t my_b_safe_tell(IO_CACHE* info); /* picks the correct tell() */
@@ -590,18 +596,18 @@ extern uint my_fwrite(FILE *stream,const byte *Buffer,uint Count,
 		      myf MyFlags);
 extern my_off_t my_fseek(FILE *stream,my_off_t pos,int whence,myf MyFlags);
 extern my_off_t my_ftell(FILE *stream,myf MyFlags);
-extern gptr _mymalloc(uint uSize,const char *sFile,
-		      uint uLine, myf MyFlag);
-extern gptr _myrealloc(gptr pPtr,uint uSize,const char *sFile,
-		       uint uLine, myf MyFlag);
+extern gptr _mymalloc(size_t uSize, const char *sFile,
+                       uint uLine, myf MyFlag);
+extern gptr _myrealloc(gptr pPtr, size_t uSize, const char *sFile,
+                        uint uLine, myf MyFlag);
 extern gptr my_multi_malloc _VARARGS((myf MyFlags, ...));
-extern void _myfree(gptr pPtr,const char *sFile,uint uLine, myf MyFlag);
+extern void _myfree(gptr pPtr, const char *sFile, uint uLine, myf MyFlag);
 extern int _sanity(const char *sFile,unsigned int uLine);
-extern gptr _my_memdup(const byte *from,uint length,
-		       const char *sFile, uint uLine,myf MyFlag);
+extern gptr _my_memdup(const byte *from, size_t length,
+                        const char *sFile, uint uLine, myf MyFlag);
 extern my_string _my_strdup(const char *from, const char *sFile, uint uLine,
 			    myf MyFlag);
-extern char *_my_strdup_with_length(const char *from, uint length,
+extern char *_my_strdup_with_length(const char *from, size_t length,
 				    const char *sFile, uint uLine,
 				    myf MyFlag);
 
@@ -691,6 +697,8 @@ extern WF_PACK *wf_comp(my_string str);
 extern int wf_test(struct wild_file_pack *wf_pack,const char *name);
 extern void wf_end(struct wild_file_pack *buffer);
 extern size_s strip_sp(my_string str);
+extern my_bool array_append_string_unique(const char *str,
+                                          const char **array, size_t size);
 extern void get_date(my_string to,int timeflag,time_t use_time);
 extern void soundex(CHARSET_INFO *, my_string out_pntr, my_string in_pntr,pbool remove_garbage);
 extern int init_record_cache(RECORD_CACHE *info,uint cachesize,File file,
@@ -709,8 +717,10 @@ extern sig_handler my_set_alarm_variable(int signo);
 extern void my_string_ptr_sort(void *base,uint items,size_s size);
 extern void radixsort_for_str_ptr(uchar* base[], uint number_of_elements,
 				  size_s size_of_element,uchar *buffer[]);
-extern qsort_t qsort2(void *base_ptr, size_t total_elems, size_t size,
-		      qsort2_cmp cmp, void *cmp_argument);
+extern qsort_t my_qsort(void *base_ptr, size_t total_elems, size_t size,
+                        qsort_cmp cmp);
+extern qsort_t my_qsort2(void *base_ptr, size_t total_elems, size_t size,
+                         qsort2_cmp cmp, void *cmp_argument);
 extern qsort2_cmp get_ptr_compare(uint);
 void my_store_ptr(byte *buff, uint pack_length, my_off_t pos);
 my_off_t my_get_ptr(byte *ptr, uint pack_length);
@@ -879,6 +889,8 @@ extern CHARSET_INFO *get_charset(uint cs_number, myf flags);
 extern CHARSET_INFO *get_charset_by_name(const char *cs_name, myf flags);
 extern CHARSET_INFO *get_charset_by_csname(const char *cs_name,
 					   uint cs_flags, myf my_flags);
+extern CHARSET_INFO *get_compatible_charset_with_ctype(CHARSET_INFO
+                                                       *original_cs);
 extern void free_charsets(void);
 extern char *get_charsets_dir(char *buf);
 extern my_bool my_charset_same(CHARSET_INFO *cs1, CHARSET_INFO *cs2);
