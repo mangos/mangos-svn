@@ -108,7 +108,9 @@ struct GameObjectInfo
             uint32 _data0;                                  //0 lockid ???
             uint32 questId;                                 //1
             uint32 eventId;                                 //2
-            uint32 _data3[7];
+            uint32 _data3[4];
+            uint32 pageId;                                  //7
+            uint32 _data8[2];
             uint32 spellId;                                 //10
             uint32 _data11;
             uint32 linkedTrapId;                            //12

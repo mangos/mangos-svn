@@ -1434,7 +1434,7 @@ CREATE TABLE `item_template` (
   `RequiredReputationFaction` smallint(5) unsigned NOT NULL default '0',
   `RequiredReputationRank` smallint(5) unsigned NOT NULL default '0',
   `maxcount` smallint(5) unsigned NOT NULL default '0',
-  `stackable` smallint(5) unsigned NOT NULL default '0',
+  `stackable` smallint(5) unsigned NOT NULL default '1',
   `ContainerSlots` tinyint(3) unsigned NOT NULL default '0',
   `stat_type1` tinyint(3) unsigned NOT NULL default '0',
   `stat_value1` smallint(6) NOT NULL default '0',

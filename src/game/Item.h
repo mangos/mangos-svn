@@ -219,7 +219,7 @@ class MANGOS_DLL_SPEC Item : public Object
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
         uint32 GetCount() const { return GetUInt32Value (ITEM_FIELD_STACK_COUNT); }
         void SetCount(uint32 value) { SetUInt32Value (ITEM_FIELD_STACK_COUNT, value); }
-        uint32 GetMaxStackCount() const { return GetProto()->Stackable ? GetProto()->Stackable : 1; }
+        uint32 GetMaxStackCount() const { return GetProto()->Stackable; }
         uint8 GetGemCountWithID(uint32 GemID) const;
 
         uint8 GetSlot() const {return m_slot;}

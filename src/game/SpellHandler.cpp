@@ -331,7 +331,25 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             //big gun, its a spell/aura
         case GAMEOBJECT_TYPE_GOOBER:                        //10
             info = obj->GetGOInfo();
-            spellId = info ? info->goober.spellId : 0;
+
+            // show page
+            if(info->goober.pageId)
+            {
+                WorldPacket data(SMSG_GAMEOBJECT_PAGETEXT, 8);
+                data << obj->GetGUID();
+                SendPacket(&data);
+            }
+
+            // quest objective
+            if (info->goober.questId)
+            {
+                if(_player->GetQuestStatus(info->goober.questId) == QUEST_STATUS_INCOMPLETE)
+                    _player->CastedCreatureOrGO(info->id, obj->GetGUID(), 0);
+            }
+
+            // cast this spell later if provided
+            spellId = info->goober.spellId;
+
             break;
 
         case GAMEOBJECT_TYPE_CAMERA:                        //13
