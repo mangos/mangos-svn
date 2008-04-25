@@ -1252,6 +1252,12 @@ void ObjectMgr::LoadItemPrototypes()
         else if(proto->RequiredReputationRank > MIN_REPUTATION_RANK)
             sLog.outErrorDb("Item (Entry: %u) has RequiredReputationFaction ==0 but RequiredReputationRank > 0, rank setting is useless.",i);
 
+        if(proto->Stackable==0)
+        {
+            sLog.outErrorDb("Item (Entry: %u) has wrong value in stackable (%u), replace by default 1.",i,proto->Stackable);
+            const_cast<ItemPrototype*>(proto)->Stackable = 1;
+        }
+
         for (int j = 0; j < 10; j++)
         {
             // for ItemStatValue != 0
@@ -4504,6 +4510,12 @@ void ObjectMgr::LoadGameobjectInfo()
             }
             case GAMEOBJECT_TYPE_GOOBER:                    //10
             {
+                if(goInfo->goober.pageId)                   // pageId
+                {
+                    if(!sPageTextStore.LookupEntry<PageText>(goInfo->goober.pageId))
+                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data7=%u but PageText (Entry %u) not exist.",
+                            id,goInfo->type,goInfo->goober.pageId,goInfo->goober.pageId);
+                }
                 /* disable check for while 
                 if(goInfo->goober.spellId)                  // spell
                 {
@@ -4512,7 +4524,7 @@ void ObjectMgr::LoadGameobjectInfo()
                             id,goInfo->type,goInfo->goober.spellId,goInfo->goober.spellId);
                 }
                 */
-                if(goInfo->goober.linkedTrapId)                 // linked trap
+                if(goInfo->goober.linkedTrapId)             // linked trap
                 {
                     if(GameObjectInfo const* trapInfo = sGOStorage.LookupEntry<GameObjectInfo>(goInfo->goober.linkedTrapId))
                     {
