@@ -1785,8 +1785,6 @@ bool Player::CanInteractWithNPCs(bool alive) const
         return false;
     if(isInFlight())
         return false;
-    if(isInCombat())
-        return false;
 
     return true;
 }
@@ -15078,8 +15076,8 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_i
         return false;
     }
 
-    // not let cheating with start flight in time of logout process
-    if(GetSession()->isLogingOut())
+    // not let cheating with start flight in time of logout process || if casting not finished || while in combat
+    if(GetSession()->isLogingOut() || IsNonMeleeSpellCasted(false) || isInCombat())
     {
         WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
         data << uint32(ERR_TAXIPLAYERBUSY);
@@ -15090,14 +15088,6 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_i
     if(HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         return false;
 
-    // not let flight if casting not finished
-    if(IsNonMeleeSpellCasted(false))
-    {
-        WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
-        data << uint32(ERR_TAXIPLAYERBUSY);
-        GetSession()->SendPacket(&data);
-        return false;
-    }
 
     uint32 sourcenode = nodes[0];
 
