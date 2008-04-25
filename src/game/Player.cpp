@@ -1139,7 +1139,6 @@ void Player::Update( uint32 p_time )
 
     UpdateEnchantTime(p_time);
     UpdateHomebindTime(p_time);
-    UpdateManaRegen();
 
     // group update
     SendUpdateToOutOfRangeGroupMembers();
@@ -4113,17 +4112,14 @@ float Player::OCTRegenMPPerSpirit()
 
     if (level>GT_MAX_LEVEL) level = GT_MAX_LEVEL;
 
-    GtOCTRegenMPEntry     const *baseRatio = sGtOCTRegenMPStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+//    GtOCTRegenMPEntry     const *baseRatio = sGtOCTRegenMPStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
     GtRegenMPPerSptEntry  const *moreRatio = sGtRegenMPPerSptStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
-    if (baseRatio==NULL || moreRatio==NULL)
+    if (moreRatio==NULL)
         return 0.0f;
 
     // Formula get from PaperDollFrame script
-    float spirit = GetStat(STAT_SPIRIT);
-    float baseSpirit = spirit;
-    if (baseSpirit>50) baseSpirit = 50;
-    float moreSpirit = spirit - baseSpirit;
-    float regen = baseSpirit * baseRatio->ratio + moreSpirit * moreRatio->ratio;
+    float spirit    = GetStat(STAT_SPIRIT);
+    float regen     = spirit * moreRatio->ratio;
     return regen;
 }
 
@@ -6035,9 +6031,11 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     if(apply)
         CastItemEquipSpell(item);
     else
+    {
         for (int i = 0; i < 5; i++)
             if(proto->Spells[i].SpellId)
-                RemoveAurasDueToSpell(proto->Spells[i].SpellId );
+                RemoveAurasDueToItemSpell(item,proto->Spells[i].SpellId);
+    }
 
     ApplyEnchantment(item, apply);
 
@@ -6512,7 +6510,7 @@ void Player::_RemoveAllItemMods()
             for (int m = 0; m < 5; m++)
             {
                 if(proto->Spells[m].SpellId)
-                    RemoveAurasDueToSpell(proto->Spells[m].SpellId );
+                    RemoveAurasDueToItemSpell(m_items[i],proto->Spells[m].SpellId );
             }
 
             ApplyEnchantment(m_items[i], false);
@@ -10691,7 +10689,7 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
                             CastSpell(this,enchant_spell_id,true,item);
                     }
                     else
-                        RemoveAurasDueToItem(item);
+                        RemoveAurasDueToItemSpell(item,enchant_spell_id);
                 }
                 break;
             case ITEM_ENCHANTMENT_TYPE_RESISTANCE:
@@ -13001,7 +12999,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         Unmount();
         RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
     }
-    UpdateManaRegen();
+
     m_Loaded = true;
 
     return true;

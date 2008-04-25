@@ -55,7 +55,7 @@ bool Player::UpdateStats(Stats stat)
         case STAT_AGILITY:
             UpdateArmor();
             UpdateAttackPowerAndDamage(true);
-            if(getClass() == CLASS_ROGUE || getClass() == CLASS_HUNTER)
+            if(getClass() == CLASS_ROGUE || getClass() == CLASS_HUNTER || getClass() == CLASS_DRUID && m_form==FORM_CAT)
                 UpdateAttackPowerAndDamage();
 
             UpdateAllCritPercentages();
@@ -68,6 +68,7 @@ bool Player::UpdateStats(Stats stat)
             UpdateAllSpellCritChances();
             UpdateAttackPowerAndDamage(true);               //SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT, only intelect currently
             UpdateArmor();                                  //SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT, only armor currently
+            UpdateManaRegen();
             break;
 
         case STAT_SPIRIT:
@@ -113,7 +114,7 @@ bool Player::UpdateAllStats()
     UpdateDefenseBonusesMod();
     UpdateShieldBlockValue();
     UpdateSpellDamageAndHealingBonus();
-
+    UpdateManaRegen();
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; i++)
         UpdateResistances(i);
 
@@ -260,10 +261,12 @@ void Player::UpdateAttackPowerAndDamage(bool ranged )
                     case FORM_CAT:
                     case FORM_BEAR:
                     case FORM_DIREBEAR:
+                    case FORM_MOONKIN:
                     {
                         Unit::AuraList const& mDummy = GetAurasByType(SPELL_AURA_DUMMY);
                         for(Unit::AuraList::const_iterator itr = mDummy.begin(); itr != mDummy.end(); ++itr)
                         {
+                            // Predatory Strikes
                             if ((*itr)->GetSpellProto()->SpellIconID == 1563)
                             {
                                 mLevelMult = (*itr)->GetModifier()->m_amount / 100.0f;
@@ -281,11 +284,13 @@ void Player::UpdateAttackPowerAndDamage(bool ranged )
                     case FORM_BEAR:
                     case FORM_DIREBEAR:
                         val2 = getLevel()*(mLevelMult+3.0f) + GetStat(STAT_STRENGTH)*2.0f - 20.0f; break;
+                    case FORM_MOONKIN:
+                        val2 = getLevel()*(mLevelMult+1.5f) + GetStat(STAT_STRENGTH)*2.0f - 20.0f; break;
                     default:
                         val2 = GetStat(STAT_STRENGTH)*2.0f - 20.0f; break;
                 }
+                break;
             }
-            break;
             case CLASS_MAGE:    val2 =              GetStat(STAT_STRENGTH)                         - 10.0f; break;
             case CLASS_PRIEST:  val2 =              GetStat(STAT_STRENGTH)                         - 10.0f; break;
             case CLASS_WARLOCK: val2 =              GetStat(STAT_STRENGTH)                         - 10.0f; break;
@@ -553,7 +558,7 @@ void Player::UpdateExpertise()
 void Player::UpdateManaRegen()
 {
     float Intellect = GetStat(STAT_INTELLECT);
-    float SpiritBasedRegen = OCTRegenMPPerSpirit();
+    float SpiritBasedRegen = sqrt(Intellect) * OCTRegenMPPerSpirit();
     float power_regen_mod = 0;
 
     AuraList const& ModPowerRegenAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN);
@@ -574,7 +579,6 @@ void Player::UpdateManaRegen()
     SetStatFloatValue(PLAYER_FIELD_MOD_MANA_REGEN_INTERRUPT,(Mp5 + (SpiritBasedRegen * modManaRegenInterrupt)));
     SpiritBasedRegen += Mp5;
     SetStatFloatValue(PLAYER_FIELD_MOD_MANA_REGEN, SpiritBasedRegen);
-
 }
 
 void Player::_ApplyAllStatBonuses()
@@ -587,7 +591,6 @@ void Player::_ApplyAllStatBonuses()
     SetCanModifyStats(true);
 
     UpdateAllStats();
-    UpdateManaRegen();
 }
 
 void Player::_RemoveAllStatBonuses()

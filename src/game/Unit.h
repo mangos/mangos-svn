@@ -884,7 +884,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void RemoveAura(uint32 spellId, uint32 effindex);
         void RemoveSingleAuraFromStack(uint32 spellId, uint32 effindex);
         void RemoveAurasDueToSpell(uint32 spellId);
-        void RemoveAurasDueToItem(Item* castItem);
+        void RemoveAurasDueToItemSpell(Item* castItem,uint32 spellId);
         void RemoveSpellsCausingAura(AuraType auraType);
         void RemoveRankAurasDueToSpell(uint32 spellId);
         bool RemoveNoStackAurasDueToAura(Aura *Aur);

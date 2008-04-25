@@ -3832,6 +3832,27 @@ bool Unit::AddAura(Aura *Aur)
                 ObjectAccessor::UpdateVisibilityForPlayer((Player*)this);
             break;
         }
+        case SPELL_AURA_MOD_MANA_REGEN_INTERRUPT:
+        case SPELL_AURA_MOD_MANA_REGEN:
+        case SPELL_AURA_MOD_POWER_REGEN:
+        {
+            if(GetTypeId()==TYPEID_PLAYER)
+                ((Player*)this)->UpdateManaRegen();
+            break;
+        }
+        case SPELL_AURA_DUMMY:
+        {
+            // Predatory Strikes
+            if(GetTypeId()==TYPEID_PLAYER && aurSpellInfo->SpellIconID == 1563)
+                ((Player*)this)->UpdateAttackPowerAndDamage();
+            break;
+        }
+        case SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT:
+        {
+            if(GetTypeId()==TYPEID_PLAYER)
+                ((Player*)this)->UpdateAttackPowerAndDamage(true);
+            break;
+        }
     }
 
     return true;
@@ -4069,11 +4090,11 @@ void Unit::RemoveAurasDueToSpell(uint32 spellId)
         RemoveAura(spellId,i);
 }
 
-void Unit::RemoveAurasDueToItem(Item* castItem)
+void Unit::RemoveAurasDueToItemSpell(Item* castItem,uint32 spellId)
 {
     for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); )
     {
-        if (iter->second->GetCastItemGUID() == castItem->GetGUID())
+        if (iter->second->GetId()==spellId && iter->second->GetCastItemGUID() == castItem->GetGUID())
             RemoveAura(iter);
         else
             ++iter;
