@@ -100,40 +100,40 @@
 #define NETWARE_SET_SCREEN_MODE(A)
 #endif
 
+/* Workaround for _LARGE_FILES and _LARGE_FILE_API incompatibility on AIX */
+#if defined(_AIX) && defined(_LARGE_FILE_API)
+#undef _LARGE_FILE_API
+#endif
+
 /*
   The macros below are used to allow build of Universal/fat binaries of
   MySQL and MySQL applications under darwin. 
 */
-#ifdef TARGET_FAT_BINARY
-# undef SIZEOF_CHARP 
-# undef SIZEOF_INT 
-# undef SIZEOF_LONG 
-# undef SIZEOF_LONG_LONG 
-# undef SIZEOF_OFF_T 
-# undef SIZEOF_SHORT 
-
-#if defined(__i386__)
-# undef WORDS_BIGENDIAN
-# define SIZEOF_CHARP 4
-# define SIZEOF_INT 4
-# define SIZEOF_LONG 4
-# define SIZEOF_LONG_LONG 8
-# define SIZEOF_OFF_T 8
-# define SIZEOF_SHORT 2
-
-#elif defined(__ppc__)
-# define WORDS_BIGENDIAN
-# define SIZEOF_CHARP 4
-# define SIZEOF_INT 4
-# define SIZEOF_LONG 4
-# define SIZEOF_LONG_LONG 8
-# define SIZEOF_OFF_T 8
-# define SIZEOF_SHORT 2
-
-#else
-# error Building FAT binary for an unknown architecture.
-#endif
-#endif /* TARGET_FAT_BINARY */
+#if defined(__APPLE__) && defined(__MACH__)
+#  undef SIZEOF_CHARP 
+#  undef SIZEOF_SHORT 
+#  undef SIZEOF_INT 
+#  undef SIZEOF_LONG 
+#  undef SIZEOF_LONG_LONG 
+#  undef SIZEOF_OFF_T 
+#  undef WORDS_BIGENDIAN
+#  define SIZEOF_SHORT 2
+#  define SIZEOF_INT 4
+#  define SIZEOF_LONG_LONG 8
+#  define SIZEOF_OFF_T 8
+#  if defined(__i386__) || defined(__ppc__)
+#    define SIZEOF_CHARP 4
+#    define SIZEOF_LONG 4
+#  elif defined(__x86_64__) || defined(__ppc64__)
+#    define SIZEOF_CHARP 8
+#    define SIZEOF_LONG 8
+#  else
+#    error Building FAT binary for an unknown architecture.
+#  endif
+#  if defined(__ppc__) || defined(__ppc64__)
+#    define WORDS_BIGENDIAN
+#  endif
+#endif /* defined(__APPLE__) && defined(__MACH__) */
 
 
 /*
@@ -780,9 +780,6 @@ typedef SOCKET_SIZE_TYPE size_socket;
 #define DBL_MAX		1.79769313486231470e+308
 #define FLT_MAX		((float)3.40282346638528860e+38)
 #endif
-#ifndef SSIZE_MAX
-#define SSIZE_MAX ((~((size_t) 0)) / 2)
-#endif
 
 #ifndef HAVE_FINITE
 #define finite(x) (1.0 / fabs(x) > 0.0)
@@ -895,7 +892,12 @@ typedef unsigned long	uint32; /* Short for unsigned integer >= 32 bits */
 typedef unsigned long	ulong;		  /* Short for unsigned long */
 #endif
 #ifndef longlong_defined
-#if defined(HAVE_LONG_LONG) && SIZEOF_LONG != 8
+/* 
+  Using [unsigned] long long is preferable as [u]longlong because we use 
+  [unsigned] long long unconditionally in many places, 
+  for example in constants with [U]LL suffix.
+*/
+#if defined(HAVE_LONG_LONG) && SIZEOF_LONG_LONG == 8
 typedef unsigned long long int ulonglong; /* ulong or unsigned long long */
 typedef long long int	longlong;
 #else
