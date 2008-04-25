@@ -63,6 +63,8 @@ void SQLStorage::Free ()
         }
         else if (format[x]==FT_LOGIC)
             offset+=sizeof(bool);
+        else if (format[x]==FT_BYTE)
+            offset+=sizeof(char);
         else
             offset+=4;
 
@@ -114,7 +116,7 @@ void SQLStorage::Load ()
         exit(1);                                            // Stop server at loading broken or non-compatiable table.
     }
 
-    if(sizeof(char*)==sizeof(uint32) && sizeof(bool)==sizeof(uint32))
+    if(sizeof(char*)==sizeof(uint32) && sizeof(bool)==sizeof(uint32) && sizeof(char)==sizeof(uint32))
         recordsize=4*iNumFields;
     else
     {
