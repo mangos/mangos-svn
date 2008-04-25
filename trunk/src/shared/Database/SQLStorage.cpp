@@ -116,23 +116,18 @@ void SQLStorage::Load ()
         exit(1);                                            // Stop server at loading broken or non-compatiable table.
     }
 
-    if(sizeof(char*)==sizeof(uint32) && sizeof(bool)==sizeof(uint32) && sizeof(char)==sizeof(uint32))
-        recordsize=4*iNumFields;
-    else
-    {
-        //get struct size
-        uint32 sc=0;
-        uint32 bo=0;
-        uint32 bb=0;
-        for(uint32 x=0;x<iNumFields;x++)
-            if(format[x]==FT_STRING)
-                ++sc;
-            else if (format[x]==FT_LOGIC)
-                ++bo;
-            else if (format[x]==FT_BYTE)
-                ++bb;
-        recordsize=(iNumFields-sc-bo-bb)*4+sc*sizeof(char*)+bo*sizeof(bool)+bb*sizeof(char);
-    }
+    //get struct size
+    uint32 sc=0;
+    uint32 bo=0;
+    uint32 bb=0;
+    for(uint32 x=0;x<iNumFields;x++)
+        if(format[x]==FT_STRING)
+            ++sc;
+        else if (format[x]==FT_LOGIC)
+            ++bo;
+        else if (format[x]==FT_BYTE)
+            ++bb;
+    recordsize=(iNumFields-sc-bo-bb)*4+sc*sizeof(char*)+bo*sizeof(bool)+bb*sizeof(char);
 
     char** newIndex=new char*[maxi];
     memset(newIndex,0,maxi*sizeof(char*));
