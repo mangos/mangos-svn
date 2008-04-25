@@ -1525,7 +1525,10 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         // Check enter rights before map getting to avoid creating instance copy for player
         // this check not dependent from map instance copy and same for all instance copies of selected map
         if (!MapManager::Instance().CanPlayerEnter(mapid, this))
+        {
+            SetSemaphoreTeleport(false);
             return;
+        }
 
         // now we must check if we are going to be homebind after teleport, if it is so,
         // we must re-instantiate again (entering instance to be homebind is not very good idea)
