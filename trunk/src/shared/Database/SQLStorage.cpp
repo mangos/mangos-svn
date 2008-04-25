@@ -29,7 +29,7 @@ extern DatabaseMysql  WorldDatabase;
 
 const char CreatureInfofmt[]="iiiiisssiiiiiiiiiiffiffiiiiiiiiiiiffiiliiiiiiiiiiiiiiiisiilliis";
 const char CreatureDataAddonInfofmt[]="iiiiiis";
-const char CreatureModelfmt[]="iffii";
+const char CreatureModelfmt[]="iffbi";
 const char CreatureInfoAddonInfofmt[]="iiiiiis";
 const char EquipmentInfofmt[]="iiiiiiiiii";
 const char GameObjectInfofmt[]="iiissiifiiiiiiiiiiiiiiiiiiiiiiiis";
@@ -121,12 +121,15 @@ void SQLStorage::Load ()
         //get struct size
         uint32 sc=0;
         uint32 bo=0;
+        uint32 bb=0;
         for(uint32 x=0;x<iNumFields;x++)
             if(format[x]==FT_STRING)
                 ++sc;
             else if (format[x]==FT_LOGIC)
                 ++bo;
-        recordsize=(iNumFields-sc-bo)*4+sc*sizeof(char*)+bo*sizeof(bool);
+            else if (format[x]==FT_BYTE)
+                ++bb;
+        recordsize=(iNumFields-sc-bo-bb)*4+sc*sizeof(char*)+bo*sizeof(bool)+bb*sizeof(char);
     }
 
     char** newIndex=new char*[maxi];
@@ -149,6 +152,10 @@ void SQLStorage::Load ()
                 case FT_LOGIC:
                     *((bool*)(&p[offset]))=(fields[x].GetUInt32()>0);
                     offset+=sizeof(bool);
+                    break;
+                case FT_BYTE:
+                    *((char*)(&p[offset]))=(fields[x].GetUInt8());
+                    offset+=sizeof(char);
                     break;
                 case FT_INT:
                     *((uint32*)(&p[offset]))=fields[x].GetUInt32();
