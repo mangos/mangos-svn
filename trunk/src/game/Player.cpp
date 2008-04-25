@@ -4828,11 +4828,12 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
 
     const float old_x = GetPositionX();
     const float old_y = GetPositionY();
+    const float old_z = GetPositionZ();
     const float old_r = GetOrientation();
 
-    if( teleport || old_x != x || old_y != y || old_r != orientation )
+    if( teleport || old_x != x || old_y != y || old_z != z || old_r != orientation )
     {
-        if (teleport || old_x != x || old_y != y)
+        if (teleport || old_x != x || old_y != y || old_z != z)
             RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_MOVE | AURA_INTERRUPT_FLAG_TURNING);
         else
             RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_TURNING);
