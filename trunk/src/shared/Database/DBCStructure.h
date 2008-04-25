@@ -276,10 +276,10 @@ struct GtOCTRegenHPEntry
     float    ratio;
 };
 
-struct GtOCTRegenMPEntry
-{
-    float    ratio;
-};
+//struct GtOCTRegenMPEntry
+//{
+//    float    ratio;
+//};
 
 struct GtRegenHPPerSptEntry
 {

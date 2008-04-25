@@ -60,7 +60,7 @@ DBCStorage <GtChanceToMeleeCritEntry>     sGtChanceToMeleeCritStore(GtChanceToMe
 DBCStorage <GtChanceToSpellCritBaseEntry> sGtChanceToSpellCritBaseStore(GtChanceToSpellCritBasefmt);
 DBCStorage <GtChanceToSpellCritEntry>     sGtChanceToSpellCritStore(GtChanceToSpellCritfmt);
 DBCStorage <GtOCTRegenHPEntry>            sGtOCTRegenHPStore(GtOCTRegenHPfmt);
-DBCStorage <GtOCTRegenMPEntry>            sGtOCTRegenMPStore(GtOCTRegenMPfmt);
+//DBCStorage <GtOCTRegenMPEntry>            sGtOCTRegenMPStore(GtOCTRegenMPfmt);  -- not used currently
 DBCStorage <GtRegenHPPerSptEntry>         sGtRegenHPPerSptStore(GtRegenHPPerSptfmt);
 DBCStorage <GtRegenMPPerSptEntry>         sGtRegenMPPerSptStore(GtRegenMPPerSptfmt);
 
@@ -174,7 +174,7 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 51;
+    const uint32 DBCFilesCount = 50;
 
     barGoLink bar( DBCFilesCount );
 
@@ -229,7 +229,7 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sGtChanceToSpellCritStore, dataPath+"dbc/gtChanceToSpellCrit.dbc");
 
     LoadDBC(bar,bad_dbc_files,sGtOCTRegenHPStore,        dataPath+"dbc/gtOCTRegenHP.dbc");
-    LoadDBC(bar,bad_dbc_files,sGtOCTRegenMPStore,        dataPath+"dbc/gtOCTRegenMP.dbc");
+//    LoadDBC(bar,bad_dbc_files,sGtOCTRegenMPStore,        dataPath+"dbc/gtOCTRegenMP.dbc");       -- not used currently
     LoadDBC(bar,bad_dbc_files,sGtRegenHPPerSptStore,     dataPath+"dbc/gtRegenHPPerSpt.dbc");
     LoadDBC(bar,bad_dbc_files,sGtRegenMPPerSptStore,     dataPath+"dbc/gtRegenMPPerSpt.dbc");
 

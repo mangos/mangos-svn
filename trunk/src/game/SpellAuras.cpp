@@ -1340,6 +1340,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             if(finalSpelId)
                 caster->CastSpell(m_target,finalSpelId,true,NULL,this);
         }
+
+        // Predatory Strikes (apply case called after _AddAura call)
+        if(m_target->GetTypeId()==TYPEID_PLAYER && GetSpellProto()->SpellIconID == 1563)
+            ((Player*)m_target)->UpdateAttackPowerAndDamage();
+
     }
 
     // AT APPLAY & REMOVE
@@ -1394,8 +1399,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         // update active aura
         Unit::AuraList const& mDummy2Auras = m_target->GetAurasByType(SPELL_AURA_DUMMY_2);
         for(Unit::AuraList::const_iterator i = mDummy2Auras.begin();i != mDummy2Auras.end(); ++i)
+        {
             if((*i)->GetId() == 34074)                      // Aspect of the Viper
+            {
                 const_cast<int32&>((*i)->GetModifier()->m_amount) += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
+                ((Player*)m_target)->UpdateManaRegen();
+            }
+        }
     }
 
     // Victorious
@@ -3693,8 +3703,8 @@ void Aura::HandleModRegen(bool apply, bool Real)            // eating
 
 void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
 {
-    if (m_target->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)m_target)->UpdateManaRegen();
+    if (Real && !apply && m_target->GetTypeId() == TYPEID_PLAYER)
+        ((Player*)m_target)->UpdateManaRegen();             // apply case called after _AddAura call
     if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply)
         m_target->SetStandState(PLAYER_STATE_SIT);
 
@@ -3740,8 +3750,8 @@ void Aura::HandleModManaRegen(bool apply, bool Real)
         return;
     //Already calculated in Player::UpdateManaRegen()
     //Note: an increase in regen does NOT cause threat.
-    ((Player*)m_target)->UpdateManaRegen();
-
+    if (Real && !apply)
+        ((Player*)m_target)->UpdateManaRegen();             // apply case called after _AddAura call
 }
 
 void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
@@ -3850,7 +3860,8 @@ void Aura::HandleAuraModRegenInterrupt(bool apply, bool Real)
 {
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
-    ((Player*)m_target)->UpdateManaRegen();
+    if (Real && !apply)
+        ((Player*)m_target)->UpdateManaRegen();             // apply case called after _AddAura call
 }
 
 void Aura::HandleAuraModCritPercent(bool apply, bool Real)
@@ -4011,15 +4022,9 @@ void Aura::HandleAuraModRangedAttackPowerOfStatPercent(bool apply, bool Real)
         return;
     }
 
-    // Recalculate bonus
-    ((Player*)m_target)->UpdateAttackPowerAndDamage(true);
-
-    // On apply aura isn`t on Player so need add manually
-    if (apply)
-    {
-        int32 RAPBonus = int32(m_target->GetStat(Stats(m_modifier.m_miscvalue)) * m_modifier.m_amount / 100.0f);
-        m_target->ApplyModUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,RAPBonus,apply);
-    }
+    // Recalculate bonus at remove (apply case after _addAura)
+    if(Real && !apply)
+        ((Player*)m_target)->UpdateAttackPowerAndDamage(true);
 }
 
 /********************************/
