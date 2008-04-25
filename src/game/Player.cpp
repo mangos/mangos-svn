@@ -5767,7 +5767,8 @@ void Player::UpdateZone(uint32 newZone)
     pvpInfo.inHostileArea =
         GetTeam() == ALLIANCE && zone->team == AREATEAM_HORDE ||
         GetTeam() == HORDE    && zone->team == AREATEAM_ALLY  ||
-        sWorld.IsPvPRealm()   && zone->team == AREATEAM_NONE;
+        sWorld.IsPvPRealm()   && zone->team == AREATEAM_NONE  ||
+        InBattleGround();                                   // overwrite for battlegrounds, maybe batter some zone flags but current known not 100% fit to this
 
     if(pvpInfo.inHostileArea)                               // in hostile area
     {
@@ -5798,7 +5799,7 @@ void Player::UpdateZone(uint32 newZone)
     // flags & 0x00004000   (16384) - outland zones? (only Circle of Blood Arena not have this flag, but have 0x00000400 flag)
     // flags & 0x00008000   (32768) - pvp objective area?
 
-    if((zone->flags & 0x800) != 0)                          // in sanctuary
+    if(zone->flags & 0x800)                                 // in sanctuary
     {
         UpdatePvP(false, true);                             // i'm right? need disable PvP in this area...
 
@@ -5806,7 +5807,7 @@ void Player::UpdateZone(uint32 newZone)
             RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
     }
 
-    if((zone->flags & 0x100) != 0)                          // in capital city
+    if(zone->flags & 0x100)                                 // in capital city
     {
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
         SetRestType(REST_TYPE_IN_CITY);
