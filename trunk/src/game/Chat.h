@@ -183,7 +183,6 @@ class ChatHandler
 
         bool HandleAddHonorCommand(const char* args);
         bool HandleHonorAddKillCommand(const char* args);
-        bool HandleHonorFlushKillsCommand(const char* args);
         bool HandleUpdateHonorFieldsCommand(const char* args);
 
         bool HandleLoadScriptsCommand(const char* args);

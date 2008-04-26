@@ -785,23 +785,6 @@ MovementFlags const movementOrTurningFlagsMask = MovementFlags(
 
 typedef HM_NAMESPACE::hash_map< uint32, std::pair < uint32, uint32 > > BoundInstancesMap;
 
-enum KillStates
-{
-    KILL_UNCHANGED  = 0,
-    KILL_CHANGED    = 1,
-    KILL_NEW        = 2
-    // no removed state, all kills are flushed at midnight
-};
-
-struct KillInfo
-{
-    uint8 count;
-    KillStates state;
-    KillInfo() : count(0), state(KILL_NEW) {}
-};
-
-typedef std::map<uint32, KillInfo> KillInfoMap;
-
 enum RestType
 {
     REST_TYPE_NO        = 0,
@@ -847,11 +830,10 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADSOCIALLIST           = 13,
     PLAYER_LOGIN_QUERY_LOADHOMEBIND             = 14,
     PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS       = 15,
-    PLAYER_LOGIN_QUERY_LOADHONOR                = 16,
-    PLAYER_LOGIN_QUERY_LOADGUILD                = 17,
+    PLAYER_LOGIN_QUERY_LOADGUILD                = 16,
 };
 
-#define MAX_PLAYER_LOGIN_QUERY                    18
+#define MAX_PLAYER_LOGIN_QUERY                    17
 
 // Player summoning auto-decline time (in secs)
 #define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
@@ -1694,8 +1676,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetMaxPersonalArenaRatingRequirement();
         void SetHonorPoints(uint32 val) { SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, val); }
         void SetArenaPoints(uint32 val) { SetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY, val); }
-        void SetFlushKills(bool value) { m_flushKills = value; }
-        KillInfoMap& GetKillsPerPlayer() { return m_killsPerPlayer; }
         //End of PvP System
 
         void SetDrunkValue(uint16 newDrunkValue);
@@ -2046,9 +2026,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         float m_honorPending;
         uint32 m_lastHonorDate;
         uint32 m_lastKillDate;
-        KillInfoMap m_killsPerPlayer;
-        bool m_flushKills;
-        bool m_saveKills;
 
         void outDebugValues() const;
         bool _removeSpell(uint16 spell_id);

@@ -342,27 +342,6 @@ LOCK TABLES `character_inventory` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `character_kill`
---
-
-DROP TABLE IF EXISTS `character_kill`;
-CREATE TABLE `character_kill` (
-  `guid` int(11) unsigned NOT NULL default '0',
-  `victim_guid` int(11) unsigned NOT NULL default '0',
-  `count` tinyint(3) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`guid`,`victim_guid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Kills Yesterday';
-
---
--- Dumping data for table `character_kill`
---
-
-LOCK TABLES `character_kill` WRITE;
-/*!40000 ALTER TABLE `character_kill` DISABLE KEYS */;
-/*!40000 ALTER TABLE `character_kill` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `character_pet`
 --
 

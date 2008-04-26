@@ -77,8 +77,6 @@ bool LoginQueryHolder::Initialize()
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADHOMEBIND,        "SELECT map,zone,position_x,position_y,position_z FROM character_homebind WHERE guid = '%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS,  "SELECT spell,item,time FROM character_spell_cooldown WHERE guid = '%u'", GUID_LOPART(m_guid));
 
-    if(sWorld.getConfig(CONFIG_HONOR_KILL_LIMIT))
-        res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADHONOR,       "SELECT victim_guid,count FROM character_kill WHERE guid='%u'", GUID_LOPART(m_guid));
     // in other case still be dummy query
 
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGUILD,           "SELECT guildid,rank FROM guild_member WHERE guid = '%u'", GUID_LOPART(m_guid));
