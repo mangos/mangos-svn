@@ -1710,7 +1710,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void CorrectMetaGemEnchants(uint8 slot, bool apply);
         void InitDataForForm();
 
-        void CastItemEquipSpell(Item *item);
+        void ApplyItemEquipSpell(Item *item, bool apply, bool form_change = false);
         void CastItemCombatSpell(Item *item,Unit* Target, WeaponAttackType attType);
 
         void SendInitWorldStates();
