@@ -1328,7 +1328,7 @@ uint32 Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage
 
 void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier *mod, uint8 effect_idx, uint64 const& itemGuid)
 {
-    if(!pVictim || !isAlive() || !pVictim->isAlive())
+    if(!pVictim || !pVictim->isAlive())
         return;
 
     switch(mod->m_auraname)
@@ -1394,6 +1394,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         }
         case SPELL_AURA_PERIODIC_LEECH:
         {
+            if(!isAlive())
+                return;
+
             if( spellProto->Effect[effect_idx]==SPELL_EFFECT_PERSISTENT_AREA_AURA &&
                 SpellHitResult(pVictim,spellProto,false)!=SPELL_MISS_NONE)
                 return;
@@ -1500,6 +1503,10 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         case SPELL_AURA_PERIODIC_HEAL:
         case SPELL_AURA_OBS_MOD_HEALTH:
         {
+            // heal for caster damage (must be alive)
+            if(pVictim != this && spellProto->SpellVisual==163 && !isAlive())
+                return;
+
             // ignore non positive values (can be result apply spellmods to aura damage
             uint32 amount = mod->m_amount > 0 ? mod->m_amount : 0;
 
@@ -1566,6 +1573,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         }
         case SPELL_AURA_PERIODIC_MANA_LEECH:
         {
+            if(!isAlive())
+                return;
+
             if( spellProto->Effect[effect_idx]==SPELL_EFFECT_PERSISTENT_AREA_AURA &&
                 SpellHitResult(pVictim,spellProto,false)!=SPELL_MISS_NONE)
                 return;
@@ -1655,7 +1665,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             sLog.outDetail("PeriodicAuraLog: %u (TypeId: %u) energize %u (TypeId: %u) for %u mana inflicted by %u",
                 GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), pdamage, spellProto->Id);
 
-            if(GetMaxPower(POWER_MANA) == 0)
+            if(pVictim->GetMaxPower(POWER_MANA) == 0)
                 break;
 
             WorldPacket data(SMSG_PERIODICAURALOG, (21+16));// we guess size
@@ -1668,7 +1678,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             data << (uint32)pdamage;
             SendMessageToSet(&data,true);
 
-            int32 gain = ModifyPower(POWER_MANA, pdamage);
+            int32 gain = pVictim->ModifyPower(POWER_MANA, pdamage);
             getHostilRefManager().threatAssist(this, float(gain) * 0.5f, spellProto);
             break;
         }
