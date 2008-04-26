@@ -9565,16 +9565,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
 
 SpellSchoolMask Unit::GetMeleeDamageSchoolMask() const
 {
-    if(GetTypeId()==TYPEID_UNIT)
-    {
-        CreatureInfo const* cInfo = ((Creature*)this)->GetCreatureInfo();
-        if(cInfo)
-            return SpellSchoolMask(1 << cInfo->dmgschool);  // checked at creature_template loading
-        else
-            return SPELL_SCHOOL_MASK_NORMAL;
-    }
-    else
-        return SPELL_SCHOOL_MASK_NORMAL;
+    return SPELL_SCHOOL_MASK_NORMAL;
 }
 
 Player* Unit::GetSpellModOwner()

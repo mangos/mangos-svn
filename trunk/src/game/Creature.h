@@ -369,6 +369,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
             return (getLevel()/2 + uint32(GetStat(STAT_STRENGTH)/20));
         }
 
+        SpellSchoolMask GetMeleeDamageSchoolMask() const { return m_meleeDamageSchoolMask; }
+        void SetMeleeDamageSchool(SpellSchools school) { m_meleeDamageSchoolMask = SpellSchoolMask(1 << school); }
+
         void _AddCreatureSpellCooldown(uint32 spell_id, time_t end_time);
         void _AddCreatureCategoryCooldown(uint32 category, time_t apply_time);
         void AddCreatureSpellCooldown(uint32 spellid);
@@ -568,6 +571,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool m_regenHealth;
         bool m_AI_locked;
         bool m_isDeadByDefault;
+
+        SpellSchoolMask m_meleeDamageSchoolMask;
     private:
         GridReference<Creature> m_gridRef;
 };

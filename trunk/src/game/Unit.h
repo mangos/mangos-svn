@@ -1147,7 +1147,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         CharmInfo *m_charmInfo;
 
-        SpellSchoolMask GetMeleeDamageSchoolMask() const;
+        virtual SpellSchoolMask GetMeleeDamageSchoolMask() const;
 
         MotionMaster i_motionMaster;
         uint32 m_unit_movement_flags;

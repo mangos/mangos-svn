@@ -49,7 +49,8 @@ m_itemsLoaded(false), m_trainerSpellsLoaded(false), m_trainer_type(0), m_lootMon
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0f),
 m_gossipOptionLoaded(false),m_NPCTextId(0), m_emoteState(0), m_isPet(false), m_isTotem(false),
 m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0), 
-m_AlreadyCallAssistence(false), m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false)
+m_AlreadyCallAssistence(false), m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false),
+m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL)
 {
     m_valuesCount = UNIT_END;
 
@@ -201,6 +202,7 @@ void Creature::Update(uint32 diff)
                 clearUnitState(UNIT_STAT_ALL_STATE);
                 i_motionMaster.Clear();
                 LoadCreaturesAddon(true);
+                SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
 
                 //Call AI respawn virtual function
                 i_AI->JustRespawned();
@@ -1280,6 +1282,8 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
 
     SetHealth(m_deathState == ALIVE ? curhealth : 0);
     SetPower(POWER_MANA,data->curmana);
+
+    SetMeleeDamageSchool(SpellSchools(GetCreatureInfo()->dmgschool));
 
     // checked at creature_template loading
     m_defaultMovementType = MovementGeneratorType(data->movementType);
