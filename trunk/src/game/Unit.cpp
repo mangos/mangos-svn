@@ -5166,7 +5166,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                         case 20293: spellId = 25713; break; // Rank 8
                         case 27155: spellId = 27156; break; // Rank 9
                         default:
-                            sLog.outError("Unit::HandleDummyAuraProc: non handled possibly Seal of Righteousness (Id = %u)", triggeredByAura->GetId());
+                            sLog.outError("Unit::HandleDummyAuraProc: non handled possibly SoR (Id = %u)", triggeredByAura->GetId());
                             return;
                     }
                     Item *item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
