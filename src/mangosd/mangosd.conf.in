@@ -359,12 +359,6 @@ LogColors = ""
 #        Default: 0 - no skilups
 #                 1 - skilups possible
 #
-#    Honor.KillLimit
-#        Subseqent kills of the same player decrease the amount of honor gained.
-#        Maximum number of times a user may kill another player in one day and get honor for it.
-#        Default: 10
-#        Disable: 0 or any value larger than 255
-#
 #    Event.Announce
 #        Default: 0 (false)
 #                 1 (true)
@@ -396,7 +390,6 @@ MinPetitionSigns = 9
 MaxGroupXPDistance = 74
 MailDeliveryDelay = 3600
 SkillChance.Prospecting = 0
-Honor.KillLimit = 10
 Event.Announce = 0
 BeepAtStart = 1
 Motd = "Welcome to the Massive Network Game Object Server."

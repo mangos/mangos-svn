@@ -3207,21 +3207,6 @@ bool ChatHandler::HandleHonorAddKillCommand(const char* /*args*/)
     return true;
 }
 
-bool ChatHandler::HandleHonorFlushKillsCommand(const char* /*args*/)
-{
-    Player *target = getSelectedPlayer();
-    if(!target)
-    {
-        SendSysMessage(LANG_PLAYER_NOT_FOUND);
-        return true;
-    }
-
-    KillInfoMap &kmap = target->GetKillsPerPlayer();
-    kmap.clear();
-    target->SetFlushKills(true);
-    return true;
-}
-
 bool ChatHandler::HandleUpdateHonorFieldsCommand(const char* /*args*/)
 {
     Player *target = getSelectedPlayer();

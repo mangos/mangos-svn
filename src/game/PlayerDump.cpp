@@ -24,7 +24,7 @@
 #include "ObjectMgr.h"
 
 // Character Dump tables
-#define DUMP_TABLE_COUNT 21
+#define DUMP_TABLE_COUNT 20
 
 struct DumpTable
 {
@@ -35,7 +35,6 @@ struct DumpTable
 static DumpTable dumpTables[DUMP_TABLE_COUNT] =
 {
     { "characters",               DTT_CHARACTER  },
-    { "character_kill",           DTT_CHAR_TABLE },
     { "character_queststatus",    DTT_CHAR_TABLE },
     { "character_reputation",     DTT_CHAR_TABLE },
     { "character_spell",          DTT_CHAR_TABLE },

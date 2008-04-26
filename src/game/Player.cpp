@@ -371,8 +371,6 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_honorPending = 0;
     m_lastHonorDate = 0;
     m_lastKillDate = 0;
-    m_flushKills = false;
-    m_saveKills = false;
 
     // Player summoning
     m_summon_expire = 0;
@@ -3329,7 +3327,6 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     CharacterDatabase.PExecute("DELETE FROM character_homebind WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_instance WHERE leader = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_inventory WHERE guid = '%u'",guid);
-    CharacterDatabase.PExecute("DELETE FROM character_kill WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_queststatus WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_reputation WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_spell WHERE guid = '%u'",guid);
@@ -5459,13 +5456,6 @@ void Player::UpdateHonorFields(bool force)
         // if we have pending kills they were done today or yesterday
         // if the last was done yesterday then this is the first update after midnight
 
-        if(sWorld.getConfig(CONFIG_HONOR_KILL_LIMIT))
-        {
-            // clear all of today's kills, they will be flushed from the DB on next save
-            m_killsPerPlayer.clear();
-            m_flushKills = true;
-        }
-
         // this is the first update today, kills_today become yeseterday's kills
         SetUInt32Value(PLAYER_FIELD_KILLS, kills_today << 16);
     }
@@ -5539,30 +5529,12 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
             honor = ((f * diff_level * (190 + v_rank*10))/6);
             honor *= ((float)k_level) / 70.0f;              //factor of dependence on levels of the killer
 
-            uint8 limit = sWorld.getConfig(CONFIG_HONOR_KILL_LIMIT);
-            if(limit)
-            {
-                KillInfo &info = m_killsPerPlayer[uVictim->GetGUIDLow()];
-                // gradually decrease the honor for subsequent kills
-                // no honor reward for killing a player more than 'limit' times per day
-                honor *= (float)(limit - info.count) / (float)limit;
-                // if the kill is not present in the DB keep in new state so it will be insterted
-                // otherwise adding a kill means it will need to be updated
-                if(info.state != KILL_NEW)
-                    info.state = KILL_CHANGED;
-
-                // count the number of times a certain player was killed in one day
-                if(info.count < limit)
-                    ++info.count;
-            }
-
             // count the number of playerkills in one day
             ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);
             // and those in a lifetime
             ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 1, true);
 
             m_lastKillDate = now;
-            m_saveKills = true;
         }
         else
         {
@@ -12958,8 +12930,6 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     _LoadSpellCooldowns(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS));
 
-    _LoadHonor(holder->GetResult(PLAYER_LOGIN_QUERY_LOADHONOR));
-
     // Spell code allow apply any auras to dead character in load time in aura/spell/item loading
     // Do now before stats re-calculation cleanup for ghost state unexpected auras
     if(!isAlive())
@@ -13156,27 +13126,7 @@ void Player::_LoadHonor(QueryResult *result)
     uint16 kills_today = kills & 0xFFFF;
     if(kills_today)
     {
-        if (m_lastKillDate >= today)
-        {
-            // kills in the DB are for one day always
-            // so if the last was today then they all were
-            // QueryResult *result = CharacterDatabase.PQuery("SELECT victim_guid,count FROM character_kill WHERE guid='%u'", GetGUIDLow());
-            if (result && sWorld.getConfig(CONFIG_HONOR_KILL_LIMIT))
-            {
-                do
-                {
-                    Field *fields  = result->Fetch();
-                    uint32 victim_guid = fields[0].GetUInt32();
-                    uint8 count = fields[1].GetUInt8();
-
-                    KillInfo &info = m_killsPerPlayer[victim_guid];
-                    info.state = KILL_UNCHANGED;
-                    info.count = count;
-                }
-                while( result->NextRow() );
-            }
-        }
-        else
+        if (m_lastKillDate < today)
         {
             if(m_lastKillDate >= yesterday)
             {
@@ -14197,37 +14147,6 @@ void Player::_SaveHonor()
 {
     // first save/honor gain after midnight will also update the player's honor fields
     UpdateHonorFields();
-
-    // the character_kill tables are not used if the config is set to 0
-    if(!sWorld.getConfig(CONFIG_HONOR_KILL_LIMIT))
-        return;
-
-    // flush all kills from the DB at midnight
-    if(m_flushKills)
-    {
-        CharacterDatabase.PExecute("DELETE FROM character_kill WHERE guid = '%u'", GetGUIDLow());
-        m_flushKills = false;
-    }
-
-    // only if there's something to save
-    if(m_saveKills)
-    {
-        for(KillInfoMap::iterator itr = m_killsPerPlayer.begin(); itr != m_killsPerPlayer.end(); ++itr)
-        {
-            switch(itr->second.state)
-            {
-                case KILL_NEW:
-                    CharacterDatabase.PExecute("DELETE FROM character_kill WHERE guid = '%u' AND victim_guid = '%u'", GetGUIDLow(), itr->first);
-                    CharacterDatabase.PExecute("INSERT INTO character_kill VALUES ('%u','%u','%u')", GetGUIDLow(), itr->first, itr->second.count);
-                    break;
-                case KILL_CHANGED:
-                    CharacterDatabase.PExecute("UPDATE character_kill SET count='%u' WHERE guid = '%u' AND victim_guid = '%u'", itr->second.count, GetGUIDLow(), itr->first);
-                    break;
-            }
-            itr->second.state = KILL_UNCHANGED;
-        }
-        m_saveKills = false;
-    }
 }
 
 void Player::outDebugValues() const
