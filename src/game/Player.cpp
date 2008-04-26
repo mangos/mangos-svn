@@ -6003,15 +6003,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
     if( slot==EQUIPMENT_SLOT_RANGED )
         _ApplyAmmoBonuses();
 
-    if(apply)
-        CastItemEquipSpell(item);
-    else
-    {
-        for (int i = 0; i < 5; i++)
-            if(proto->Spells[i].SpellId)
-                RemoveAurasDueToItemSpell(item,proto->Spells[i].SpellId);
-    }
-
+    ApplyItemEquipSpell(item,apply);
     ApplyEnchantment(item, apply);
 
     if(proto->Socket[0].Color)                              //only (un)equipping of items with sockets can influence metagems, so no need to waste time with normal items
@@ -6361,13 +6353,14 @@ void Player::_ApplyWeaponDependentAuraDamageMod(Item *item, uint8 slot, Aura* au
     }
 }
 
-void Player::CastItemEquipSpell(Item *item)
+void Player::ApplyItemEquipSpell(Item *item, bool apply, bool form_change)
 {
-    if(!item) return;
+    if(!item)
+        return;
 
     ItemPrototype const *proto = item->GetProto();
-
-    if(!proto) return;
+    if(!proto)
+        return;
 
     for (int i = 0; i < 5; i++)
     {
@@ -6377,13 +6370,59 @@ void Player::CastItemEquipSpell(Item *item)
         if(!spellData.SpellId )
             continue;
 
-        // wrong triggering type
-        if(spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_EQUIP)
+        // check if it is valid spell
+        SpellEntry const* spellproto = sSpellStore.LookupEntry(spellData.SpellId);
+        if(!spellproto)
             continue;
 
-        DEBUG_LOG("WORLD: cast Item spellId - %i", spellData.SpellId);
+        if(apply)
+        {
+            // wrong triggering type
+            if(spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_EQUIP)
+                continue;
 
-        CastSpell(this,spellData.SpellId,true,item);
+            // Cannot be used in this stance/form
+            if(GetErrorAtShapeshiftedCast(spellproto, m_form)!=0)
+                continue;
+
+            if(form_change)                                 // check aura active state from other form
+            {
+                bool found = false;
+                for (int k=0; k < 3; ++k)
+                {
+                    spellEffectPair spair = spellEffectPair(spellData.SpellId, k);
+                    for (AuraMap::iterator iter = m_Auras.lower_bound(spair); iter != m_Auras.upper_bound(spair); ++iter)
+                    {
+                        if(iter->second->GetCastItemGUID() == item->GetGUID())
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if(found)
+                        break;
+                }
+
+                if(found)                                   // and skip re-cast already active aura at form change
+                    continue;
+            }
+
+            DEBUG_LOG("WORLD: cast Item spellId - %i", spellData.SpellId);
+
+            CastSpell(this,spellData.SpellId,true,item);
+        }
+        else
+        {
+            if(form_change)                                 // check aura compatibility
+            {
+                // Cannot be used in this stance/form
+                if(GetErrorAtShapeshiftedCast(spellproto, m_form)==0)
+                    continue;                               // and remove only not compatible at form change
+            }
+
+            // un-apply all spells , not only at-equipped
+            RemoveAurasDueToItemSpell(item,spellData.SpellId);
+        }
     }
 }
 
@@ -6482,12 +6521,7 @@ void Player::_RemoveAllItemMods()
             if(proto->ItemSet)
                 RemoveItemsSetItem(this,proto);
 
-            for (int m = 0; m < 5; m++)
-            {
-                if(proto->Spells[m].SpellId)
-                    RemoveAurasDueToItemSpell(m_items[i],proto->Spells[m].SpellId );
-            }
-
+            ApplyItemEquipSpell(m_items[i],false);
             ApplyEnchantment(m_items[i], false);
         }
     }
@@ -6554,8 +6588,7 @@ void Player::_ApplyAllItemMods()
             if(proto->ItemSet)
                 AddItemsSetItem(this,m_items[i]);
 
-            CastItemEquipSpell(m_items[i]);
-
+            ApplyItemEquipSpell(m_items[i],true);
             ApplyEnchantment(m_items[i], true);
         }
     }
@@ -15168,6 +15201,16 @@ void Player::InitDataForForm()
             if(cEntry && cEntry->powerType < MAX_POWERS && uint32(getPowerType()) != cEntry->powerType)
                 setPowerType(Powers(cEntry->powerType));
             break;
+        }
+    }
+
+    // apply auras in this form
+    for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        if(m_items[i])
+        {
+            ApplyItemEquipSpell(m_items[i],false,true);     // remove spells that not fit to form
+            ApplyItemEquipSpell(m_items[i],true,true);      // add spells that fit form but not active
         }
     }
 

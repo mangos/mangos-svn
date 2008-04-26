@@ -4102,12 +4102,19 @@ void Unit::RemoveAurasDueToSpell(uint32 spellId)
 
 void Unit::RemoveAurasDueToItemSpell(Item* castItem,uint32 spellId)
 {
-    for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); )
+    for (int k=0; k < 3; ++k)
     {
-        if (iter->second->GetId()==spellId && iter->second->GetCastItemGUID() == castItem->GetGUID())
-            RemoveAura(iter);
-        else
-            ++iter;
+        spellEffectPair spair = spellEffectPair(spellId, k);
+        for (AuraMap::iterator iter = m_Auras.lower_bound(spair); iter != m_Auras.upper_bound(spair);)
+        {
+            if (iter->second->GetCastItemGUID() == castItem->GetGUID())
+            {
+                RemoveAura(iter);
+                iter = m_Auras.upper_bound(spair);          // overwrite by more appropriate
+            }
+            else
+                ++iter;
+        }
     }
 }
 
