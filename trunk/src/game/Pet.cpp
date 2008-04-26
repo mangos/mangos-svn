@@ -69,7 +69,6 @@ Pet::Pet(WorldObject *instantiator, PetType type) : Creature( instantiator )
     m_regenTimer = 4000;
     m_happinessTimer = 7500;
     m_loyaltyTimer = 12000;
-    m_GlobalCooldown = 0;
     m_duration = 0;
     m_bonusdamage = 0;
 
