@@ -789,7 +789,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption const *gossip)
         }
         uint32 textid=GetGossipTextId( gossip->Action, zoneid );
         player->PlayerTalkClass->SendTalking( textid );
-        player->PlayerTalkClass->SendPointOfInterest( x, y, icon, 2, 15, areaname.c_str() );
+        // how this could worked player->PlayerTalkClass->SendPointOfInterest( x, y, icon, 2, 15, areaname.c_str() );
     }
 }
 
