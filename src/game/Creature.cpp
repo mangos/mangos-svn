@@ -733,16 +733,17 @@ void Creature::OnPoiSelect(Player* player, GossipOption const *gossip)
 {
     if(gossip->GossipId==GOSSIP_GUARD_SPELLTRAINER || gossip->GossipId==GOSSIP_GUARD_SKILLTRAINER)
     {
-        float x,y;
-        bool findnpc=false;
+        //float x,y;
+        //bool findnpc=false;
         Poi_Icon icon = ICON_POI_0;
-        QueryResult *result;
-        Field *fields;
+        //QueryResult *result;
+        //Field *fields;
         uint32 mapid=GetMapId();
         Map const* map=MapManager::Instance().GetBaseMap( mapid );
         uint16 areaflag=map->GetAreaFlag(GetPositionX(),GetPositionY());
         uint32 zoneid=Map::GetZoneId(areaflag,mapid);
         std::string areaname= gossip->Option;
+        /*
         uint16 pflag;
 
         // use the action relate to creaturetemplate.trainer_type ?
@@ -768,7 +769,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption const *gossip)
         {
             player->PlayerTalkClass->SendTalking( "$NSorry", "Here no this person.");
             return;
-        }
+        }*/
 
         //need add more case.
         switch(gossip->Action)
