@@ -1090,10 +1090,19 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
     if (fincrtime)
         incrtime = atol(fincrtime);
 
+    char* fextendedcost = strtok(NULL, " ");                //add ExtendedCost, default: 0
+    uint32 extendedcost = fextendedcost ? atol(fextendedcost) : 0;
+    
     ItemPrototype const *pProto = objmgr.GetItemPrototype(itemId);
     if(!pProto)
     {
         PSendSysMessage(LANG_ITEM_NOT_FOUND, itemId);
+        return true;
+    }
+
+    if(extendedcost && !sItemExtendedCostStore.LookupEntry(extendedcost))
+    { 
+        PSendSysMessage(LANG_BAD_VALUE, extendedcost);
         return true;
     }
 
@@ -1113,9 +1122,9 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
     }
 
     // add to DB and to current ingame vendor
-    WorldDatabase.PExecuteLog("INSERT INTO npc_vendor (entry,item,maxcount,incrtime) VALUES('%u','%u','%u','%u')",vendor->GetEntry(), itemId, maxcount,incrtime);
-    vendor->AddItem(itemId,maxcount,incrtime,0);
-    PSendSysMessage(LANG_ITEM_ADDED_TO_LIST,itemId,pProto->Name1,maxcount,incrtime);
+    WorldDatabase.PExecuteLog("INSERT INTO npc_vendor (entry,item,maxcount,incrtime,extendedcost) VALUES('%u','%u','%u','%u','%u')",vendor->GetEntry(), itemId, maxcount,incrtime,extendedcost);
+    vendor->AddItem(itemId,maxcount,incrtime,extendedcost);
+    PSendSysMessage(LANG_ITEM_ADDED_TO_LIST,itemId,pProto->Name1,maxcount,incrtime,extendedcost);
     return true;
 }
 
