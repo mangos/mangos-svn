@@ -2803,7 +2803,7 @@ void Player::ResetComboPointsIfNeed(const SpellEntry *spellInfo)
         spellInfo->EffectPointsPerComboPoint[1] != 0 ||
         spellInfo->EffectPointsPerComboPoint[2] != 0;
 
-    if(comboDamageUsed &&  m_attacking && (m_attacking->GetGUID() == GetComboTarget()))
+    if(comboDamageUsed)
         needClearCombo = true;
 
     // Check in duration calculations
