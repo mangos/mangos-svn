@@ -3459,6 +3459,8 @@ void Unit::_UpdateAutoRepeatSpell()
                     // check, if we are casting something else, if no then run autorepeat spell
                     if (!IsNonMeleeSpellCasted(false, false, true))
                     {
+                        // wee need clear target list before recasting 
+                        m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CleanupTargetList();
                         m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->setState(SPELL_STATE_PREPARING);
                         m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->ReSetTimer();
                     }
@@ -3818,53 +3820,8 @@ bool Unit::AddAura(Aura *Aur)
         m_modAuras[Aur->GetModifier()->m_auraname].push_back(Aur);
     }
 
-    // auras code that need applied _after_ aura add to list
-    switch(Aur->GetModifier()->m_auraname)
-    {
-        // invisibility code based at already added aura state in visibility update
-        case SPELL_AURA_MOD_INVISIBILITY:
-        {
-            // apply only if not in GM invisibility
-            if(GetVisibility()!=VISIBILITY_OFF)
-            {
-                // Aura not added yet but visibility code expect temporary add aura
-                SetVisibility(VISIBILITY_GROUP_NO_DETECT);
-                if(GetTypeId() == TYPEID_PLAYER)
-                    SendUpdateToPlayer((Player*)this);
-                SetVisibility(VISIBILITY_GROUP_INVISIBILITY);
-            }
-            break;
-        }
-        // invisibility detect code based at already added aura state in visibility update
-        case SPELL_AURA_MOD_INVISIBILITY_DETECTION:
-        {
-            if(GetTypeId()==TYPEID_PLAYER)
-                ObjectAccessor::UpdateVisibilityForPlayer((Player*)this);
-            break;
-        }
-        case SPELL_AURA_MOD_MANA_REGEN_INTERRUPT:
-        case SPELL_AURA_MOD_MANA_REGEN:
-        case SPELL_AURA_MOD_POWER_REGEN:
-        {
-            if(GetTypeId()==TYPEID_PLAYER)
-                ((Player*)this)->UpdateManaRegen();
-            break;
-        }
-        case SPELL_AURA_DUMMY:
-        {
-            // Predatory Strikes
-            if(GetTypeId()==TYPEID_PLAYER && aurSpellInfo->SpellIconID == 1563)
-                ((Player*)this)->UpdateAttackPowerAndDamage();
-            break;
-        }
-        case SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT:
-        {
-            if(GetTypeId()==TYPEID_PLAYER)
-                ((Player*)this)->UpdateAttackPowerAndDamage(true);
-            break;
-        }
-    }
-
+    Aur->ApplyModifier(true,true);
+    sLog.outDebug("Aura %u now is in use", Aur->GetModifier()->m_auraname);
     return true;
 }
 
@@ -4080,11 +4037,19 @@ void Unit::RemoveAreaAurasByOthers(uint64 guid)
     }
 }
 
-void Unit::RemoveAura(uint32 spellId, uint32 effindex)
+void Unit::RemoveAura(uint32 spellId, uint32 effindex, Aura* except)
 {
-    AuraMap::iterator iter;
-    while((iter = m_Auras.find(spellEffectPair(spellId, effindex))) != m_Auras.end())
-        RemoveAura(iter);
+    spellEffectPair spair = spellEffectPair(spellId, effindex);
+    for(AuraMap::iterator iter = m_Auras.lower_bound(spair); iter != m_Auras.upper_bound(spair);)
+    {
+        if(iter->second!=except)
+        {
+            RemoveAura(iter);
+            iter = m_Auras.lower_bound(spair);
+        }
+        else
+            ++iter;
+    }
 }
 
 void Unit::RemoveSingleAuraFromStack(uint32 spellId, uint32 effindex)
@@ -4094,10 +4059,10 @@ void Unit::RemoveSingleAuraFromStack(uint32 spellId, uint32 effindex)
         RemoveAura(iter);
 }
 
-void Unit::RemoveAurasDueToSpell(uint32 spellId)
+void Unit::RemoveAurasDueToSpell(uint32 spellId, Aura* except)
 {
     for (int i = 0; i < 3; ++i)
-        RemoveAura(spellId,i);
+        RemoveAura(spellId,i,except);
 }
 
 void Unit::RemoveAurasDueToItemSpell(Item* castItem,uint32 spellId)
@@ -4221,6 +4186,8 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
     m_Auras.erase(i);
     ++m_removedAuras;                                       // internal count used by unit update
 
+    sLog.outDebug("Aura %u now is remove",Aur->GetModifier()->m_auraname);
+    Aur->ApplyModifier(false,true);
     Aur->_RemoveAura();
     delete Aur;
 
@@ -8099,68 +8066,12 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
         return true;
 
     // Invisible units, always are visible for unit that can detect this invisibility (have appropriate level for detect)
-    if(uint32 mask = (m_invisibilityMask & u->m_detectInvisibilityMask))
-    {
-        for(uint32 i = 0; i < 10; ++i)
-        {
-            if(((1 << i) & mask)==0)
-                continue;
-
-            // find invisibility level
-            uint32 invLevel = 0;
-            Unit::AuraList const& iAuras = GetAurasByType(SPELL_AURA_MOD_INVISIBILITY);
-            for(Unit::AuraList::const_iterator itr = iAuras.begin(); itr != iAuras.end(); ++itr)
-                if(((*itr)->GetModifier()->m_miscvalue)==i && invLevel < (*itr)->GetModifier()->m_amount)
-                    invLevel = (*itr)->GetModifier()->m_amount;
-
-            // find invisibility detect level
-            uint32 detectLevel = 0;
-            Unit::AuraList const& dAuras = u->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECTION);
-            for(Unit::AuraList::const_iterator itr = dAuras.begin(); itr != dAuras.end(); ++itr)
-                if(((*itr)->GetModifier()->m_miscvalue)==i && detectLevel < (*itr)->GetModifier()->m_amount)
-                    detectLevel = (*itr)->GetModifier()->m_amount;
-
-            if(i==6 && u->GetTypeId()==TYPEID_PLAYER)       // special drunk detection case
-            {
-                detectLevel = ((Player*)u)->GetDrunkValue();
-            }
-
-            if(invLevel <= detectLevel)
-                return true;
-        }
-    }
+    if(u->canDetectInvisibilityOf(this))
+        return true;
 
     // Units that can detect invisibility always are visible for units that can be detected
-    if(uint32 mask = (m_detectInvisibilityMask & u->m_invisibilityMask))
-    {
-        for(uint32 i = 0; i < 10; ++i)
-        {
-            if(((1 << i) & mask)==0)
-                continue;
-
-            // find invisibility level
-            uint32 invLevel = 0;
-            Unit::AuraList const& iAuras = u->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY);
-            for(Unit::AuraList::const_iterator itr = iAuras.begin(); itr != iAuras.end(); ++itr)
-                if(((*itr)->GetModifier()->m_miscvalue)==i && invLevel < (*itr)->GetModifier()->m_amount)
-                    invLevel = (*itr)->GetModifier()->m_amount;
-
-            // find invisibility detect level
-            uint32 detectLevel = 0;
-            Unit::AuraList const& dAuras = GetAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECTION);
-            for(Unit::AuraList::const_iterator itr = dAuras.begin(); itr != dAuras.end(); ++itr)
-                if(((*itr)->GetModifier()->m_miscvalue)==i && detectLevel < (*itr)->GetModifier()->m_amount)
-                    detectLevel = (*itr)->GetModifier()->m_amount;
-
-            if(i==6 && GetTypeId()==TYPEID_PLAYER)          // special drunk detection case
-            {
-                detectLevel = ((Player*)this)->GetDrunkValue();
-            }
-
-            if(invLevel <= detectLevel)
-                return true;
-        }
-    }
+    if(canDetectInvisibilityOf(u))
+        return true;
 
     // Stealth/invisible not hostile units, not visible (except Player-with-Player case)
     if (!u->IsHostileTo(this))
@@ -8239,7 +8150,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
     //-Level Diff (every level diff = 1.0f in visible distance)
     visibleDistance += int32(u->getLevel()) - int32(this->getLevel());
 
-    //This allows to check talent tree and will add addition stealth dependant on used points)
+    //This allows to check talent tree and will add addition stealth dependent on used points)
     int32 stealthMod = GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_LEVEL);
     if(stealthMod < 0)
         stealthMod = 0;
@@ -8270,6 +8181,42 @@ void Unit::SetVisibility(UnitVisibility x)
         else
             m->CreatureRelocation((Creature*)this,GetPositionX(),GetPositionY(),GetPositionZ(),GetOrientation());
     }
+}
+
+bool Unit::canDetectInvisibilityOf(Unit const* u) const
+{
+    if(uint32 mask = (m_detectInvisibilityMask & u->m_invisibilityMask))
+    {
+        for(uint32 i = 0; i < 10; ++i)
+        {
+            if(((1 << i) & mask)==0)
+                continue;
+
+            // find invisibility level
+            uint32 invLevel = 0;
+            Unit::AuraList const& iAuras = u->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY);
+            for(Unit::AuraList::const_iterator itr = iAuras.begin(); itr != iAuras.end(); ++itr)
+                if(((*itr)->GetModifier()->m_miscvalue)==i && invLevel < (*itr)->GetModifier()->m_amount)
+                    invLevel = (*itr)->GetModifier()->m_amount;
+
+            // find invisibility detect level
+            uint32 detectLevel = 0;
+            Unit::AuraList const& dAuras = GetAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECTION);
+            for(Unit::AuraList::const_iterator itr = dAuras.begin(); itr != dAuras.end(); ++itr)
+                if(((*itr)->GetModifier()->m_miscvalue)==i && detectLevel < (*itr)->GetModifier()->m_amount)
+                    detectLevel = (*itr)->GetModifier()->m_amount;
+
+            if(i==6 && GetTypeId()==TYPEID_PLAYER)          // special drunk detection case
+            {
+                detectLevel = ((Player*)this)->GetDrunkValue();
+            }
+
+            if(invLevel <= detectLevel)
+                return true;
+        }
+    }
+
+    return false;
 }
 
 float Unit::GetSpeed( UnitMoveType mtype ) const

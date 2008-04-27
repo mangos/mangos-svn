@@ -82,11 +82,13 @@ class MANGOS_DLL_SPEC Aura
         void HandleModPossess(bool Apply, bool Real);
         void HandlePeriodicDamage(bool Apply, bool Real);
         void HandleAuraDummy(bool Apply, bool Real);
+        void HandleAuraDummy2(bool apply, bool Real);
         void HandleModConfuse(bool Apply, bool Real);
         void HandleModCharm(bool Apply, bool Real);
         void HandleModFear(bool Apply, bool Real);
         void HandlePeriodicHeal(bool Apply, bool Real);
         void HandleModAttackSpeed(bool Apply, bool Real);
+        void HandleModMeleeRangedSpeedPct(bool apply, bool Real);
         void HandleModCombatSpeedPct(bool apply, bool Real);
         void HandleModThreat(bool Apply, bool Real);
         void HandleModTaunt(bool Apply, bool Real);

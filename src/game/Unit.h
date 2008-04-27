@@ -881,9 +881,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         bool RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster);
         void RemoveAura(AuraMap::iterator &i, bool onDeath = false);
-        void RemoveAura(uint32 spellId, uint32 effindex);
+        void RemoveAura(uint32 spellId, uint32 effindex, Aura* except = NULL);
         void RemoveSingleAuraFromStack(uint32 spellId, uint32 effindex);
-        void RemoveAurasDueToSpell(uint32 spellId);
+        void RemoveAurasDueToSpell(uint32 spellId, Aura* except = NULL);
         void RemoveAurasDueToItemSpell(Item* castItem,uint32 spellId);
         void RemoveSpellsCausingAura(AuraType auraType);
         void RemoveRankAurasDueToSpell(uint32 spellId);
@@ -982,6 +982,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         // common function for visibility checks for player/creatures with detection code
         bool isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList = false) const;
+        bool canDetectInvisibilityOf(Unit const* u) const;
 
         // virtual functions for all world objects types
         bool isVisibleForInState(Player const* u, bool inVisibleList) const;
