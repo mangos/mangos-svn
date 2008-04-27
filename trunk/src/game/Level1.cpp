@@ -726,7 +726,7 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
     if(!*args)
         return false;
 
-    char* pfactionid = strtok((char*)args, " ");
+    char* pfactionid = extractKeyFromLink((char*)args,"Hfaction");
 
     Creature* chr = getSelectedCreature();
     if(!chr)

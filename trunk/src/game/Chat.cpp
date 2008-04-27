@@ -110,6 +110,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "titles",         SEC_MODERATOR,      &ChatHandler::HandleModifyKnownTitlesCommand,   "", NULL },
         { "mount",          SEC_MODERATOR,      &ChatHandler::HandleModifyMountCommand,         "", NULL },
         { "honor",          SEC_MODERATOR,      &ChatHandler::HandleModifyHonorCommand,         "", NULL },
+        { "rep",            SEC_MODERATOR,      &ChatHandler::HandleModifyRepCommand,           "", NULL },
+        { "arena",          SEC_MODERATOR,      &ChatHandler::HandleModifyArenaCommand,         "", NULL },
         { NULL,             0,                  NULL,                                           "", NULL }
     };
 
@@ -222,6 +224,7 @@ ChatCommand * ChatHandler::getCommandTable()
     static ChatCommand lookupCommandTable[] =
     {
         { "area",           SEC_MODERATOR,      &ChatHandler::HandleLookupAreaCommand,          "", NULL },
+        { "faction",        SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupFactionCommand,       "", NULL },
         { "item",           SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupItemCommand,          "", NULL },
         { "itemset",        SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupItemSetCommand,       "", NULL },
         { "skill",          SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupSkillCommand,         "", NULL },

@@ -5344,6 +5344,69 @@ bool Player::ModifyOneFactionReputation(FactionEntry const* factionEntry, int32 
     return false;
 }
 
+
+bool Player::SetFactionReputation(uint32 FactionTemplateId, int32 standing)
+{
+    FactionTemplateEntry const* factionTemplateEntry = sFactionTemplateStore.LookupEntry(FactionTemplateId);
+
+    if(!factionTemplateEntry)
+    {
+        sLog.outError("Player::SetFactionReputation: Can't set reputation of %s for unknown faction (faction template id) #%u.", GetName(), FactionTemplateId);
+        return false;
+    }
+
+    FactionEntry const *factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction);
+
+    // Faction without recorded reputation. Just ignore.
+    if(!factionEntry)
+        return false;
+
+    return SetFactionReputation(factionEntry, standing);
+}
+
+bool Player::SetFactionReputation(FactionEntry const* factionEntry, int32 standing)
+{
+    SimpleFactionsList const* flist = GetFactionTeamList(factionEntry->ID);
+    if (flist)
+    {
+        bool res = false;
+        for (SimpleFactionsList::const_iterator itr = flist->begin();itr != flist->end();++itr)
+        {
+            FactionEntry const *factionEntryCalc = sFactionStore.LookupEntry(*itr);
+            if(factionEntryCalc)
+                res = SetOneFactionReputation(factionEntryCalc, standing);
+        }
+        return res;
+    }
+    else
+        return SetOneFactionReputation(factionEntry, standing);
+}
+
+bool Player::SetOneFactionReputation(FactionEntry const* factionEntry, int32 standing)
+{
+    FactionsList::iterator itr = m_factions.find(factionEntry->reputationListID);
+    if (itr != m_factions.end())
+    {
+        if (standing > Reputation_Cap)
+            standing = Reputation_Cap;
+        else
+        if (standing < Reputation_Bottom)
+            standing = Reputation_Bottom;
+
+        if(ReputationToRank(standing) <= REP_HOSTILE)
+            SetFactionAtWar(&itr->second,true);
+
+        int32 BaseRep = GetBaseReputation(factionEntry);
+        itr->second.Standing = standing - BaseRep;
+        itr->second.Flags |= FACTION_FLAG_VISIBLE;
+        itr->second.Changed = true;
+
+        SendSetFactionStanding(&(itr->second));
+        return true;
+    }
+    return false;
+}
+
 //Calculate total reputation percent player gain with quest/creature level
 int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep, bool for_quest)
 {

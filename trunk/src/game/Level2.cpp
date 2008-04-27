@@ -33,9 +33,15 @@
 #include "World.h"
 #include "WaypointMovementGenerator.h"
 #include "GameEvent.h"
-
+#include <cctype>
 #include <iostream>
 #include <fstream>
+#include <map>
+
+static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] = {
+    LANG_REP_HATED,    LANG_REP_HOSTILE, LANG_REP_UNFRIENDLY, LANG_REP_NEUTRAL,
+    LANG_REP_FRIENDLY, LANG_REP_HONORED, LANG_REP_REVERED,    LANG_REP_EXALTED
+};
 
 //mute player for some times
 bool ChatHandler::HandleMuteCommand(const char* args)
@@ -461,7 +467,152 @@ bool ChatHandler::HandleGUIDCommand(const char* /*args*/)
     return true;
 }
 
-bool ChatHandler::HandleNameCommand(const char* /*args*/)
+bool ChatHandler::HandleLookupFactionCommand(const char* args)
+{
+    if(!*args)
+        return false;
+    std::string namepart = args;
+    uint32 counter = 0;                                     // Counter for figure out that we found smth.
+
+    Player *target = getSelectedPlayer();
+
+    for (uint32 id = 0; id < sFactionStore.GetNumRows(); id++)
+    //for(FactionsList::const_iterator itr = target->m_factions.begin(); itr != target->m_factions.end(); ++itr)
+    {
+        FactionEntry const *factionEntry = sFactionStore.LookupEntry(id);
+        //FactionEntry const *factionEntry = sFactionStore.LookupEntry(itr->second.ID);
+        if (factionEntry)
+        {
+            FactionsList::const_iterator repItr = target->m_factions.find(factionEntry->reputationListID);
+            std::string name = factionEntry->name[sWorld.GetDBClang()];
+
+            // converting name to lower case
+            std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+
+            // converting string that we try to find to lower case
+            std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+
+            if (name.find(namepart) != std::string::npos)
+            {
+                // send faction in "id - [faction] rank reputation [visible] [at war] [own team] [unknown] [invisible] [inactive]" format
+                // or              "id - [faction] [no reputation]" format
+                std::ostringstream ss;
+                ss << id << " - |cffffffff|Hfaction:" << id << "|h[" << factionEntry->name[sWorld.GetDBClang()] << "]|h|r";
+    
+                if (repItr != target->m_factions.end())
+                {
+                    ReputationRank rank = target->GetReputationRank(factionEntry);
+                    std::string rankName = GetMangosString(ReputationRankStrIndex[rank]);
+
+                    ss << " " << rankName << "|h|r (" << target->GetReputation(factionEntry) << ")";
+
+                    if(repItr->second.Flags & FACTION_FLAG_VISIBLE)
+                        ss << GetMangosString(LANG_FACTION_VISIBLE);
+                    if(repItr->second.Flags & FACTION_FLAG_AT_WAR)
+                        ss << GetMangosString(LANG_FACTION_ATWAR);
+                    if(repItr->second.Flags & FACTION_FLAG_OWN_TEAM)
+                        ss << GetMangosString(LANG_FACTION_OWNTEAM);
+                    if(repItr->second.Flags & FACTION_FLAG_UNKNOWN)
+                        ss << GetMangosString(LANG_FACTION_UNKNOWN);
+                    if(repItr->second.Flags & FACTION_FLAG_INVISIBLE)
+                        ss << GetMangosString(LANG_FACTION_INVISIBLE);
+                    if(repItr->second.Flags & FACTION_FLAG_INACTIVE)
+                        ss << GetMangosString(LANG_FACTION_INACTIVE);
+                }
+                else
+                    ss << GetMangosString(LANG_FACTION_NOREPUTATION);
+
+                SendSysMessage(ss.str().c_str());
+                 counter++;
+           }
+        }
+    }
+
+    if (counter == 0)                                       // if counter == 0 then we found nth
+        SendSysMessage(LANG_COMMAND_FACTION_NOTFOUND);
+    return true;
+}
+
+bool ChatHandler::HandleModifyRepCommand(const char * args) {
+    if (!*args) return false;
+
+    Player* target = NULL;
+    target = getSelectedPlayer();
+
+    if(!target)
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        return true;
+    }
+
+    char* factionTxt = extractKeyFromLink((char*)args,"Hfaction");
+    if(!factionTxt)
+        return false;
+
+    uint32 factionId = atoi(factionTxt);
+
+    int32 amount = 0;
+    char *rankTxt = strtok(NULL, " ");
+    if (!factionTxt || !rankTxt)
+        return false;
+
+    std::string rankStr = rankTxt;
+    std::transform( rankStr.begin(), rankStr.end(), rankStr.begin(), ::tolower );
+    
+    amount = atoi(rankTxt);
+    if ((amount == 0) && (rankTxt[0] != '-') && !isdigit(rankTxt[0]))
+    {
+        int r = 0;
+        amount = -42000;
+        for (; r < MAX_REPUTATION_RANK; ++r)
+        {
+            std::string rank = GetMangosString(ReputationRankStrIndex[r]);
+            std::transform( rank.begin(), rank.end(), rank.begin(), ::tolower );
+
+            if (rankStr == rank) 
+            {
+                char *deltaTxt = strtok(NULL, " ");
+                if (deltaTxt)
+                {
+                    int32 delta = atoi(deltaTxt);
+                    if ((delta < 0) || (delta > Player::ReputationRank_Length[r] -1))
+                    {
+                        PSendSysMessage(LANG_COMMAND_FACTION_DELTA, (Player::ReputationRank_Length[r]-1));
+                        return true;
+                    }
+                    amount += delta;
+                }
+                break;
+            }
+            amount += Player::ReputationRank_Length[r];
+        }
+        if (r >= MAX_REPUTATION_RANK)
+        {
+            PSendSysMessage(LANG_COMMAND_FACTION_INVPARAM, rankTxt);
+            return true;
+        }
+    }
+
+    FactionEntry const *factionEntry = sFactionStore.LookupEntry(factionId);
+
+    if (!factionEntry)
+    {
+        PSendSysMessage(LANG_COMMAND_FACTION_UNKNOWN, factionId);
+        return true;
+    }
+
+    if (factionEntry->reputationListID < 0)
+    {
+        PSendSysMessage(LANG_COMMAND_FACTION_NOREP_ERROR, factionEntry->name[sWorld.GetDBClang()], factionId);
+        return true;
+    }
+
+    target->SetFactionReputation(factionEntry,amount);
+    PSendSysMessage(LANG_COMMAND_MODIFY_REP, factionEntry->name[sWorld.GetDBClang()], factionId, target->GetName(), target->GetReputation(factionId));
+    return true;
+}
+
+bool ChatHandler::HandleNameCommand(const char* args)
 {
     /* Temp. disabled
         if(!*args)
@@ -1528,7 +1679,6 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
             return true;
         }
 
-        static const char* ReputationRankStr[MAX_REPUTATION_RANK] = {"Hated", "Hostile", "Unfriendly", "Neutral", "Friendly", "Honored", "Reverted", "Exalted"};
         char* FactionName;
         for(FactionsList::const_iterator itr = target->m_factions.begin(); itr != target->m_factions.end(); ++itr)
         {
@@ -1537,9 +1687,25 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
                 FactionName = factionEntry->name[sWorld.GetDBClang()];
             else
                 FactionName = "#Not found#";
-            ReputationRank Rank = target->GetReputationRank(factionEntry);
+            ReputationRank rank = target->GetReputationRank(factionEntry);
+            std::string rankName = GetMangosString(ReputationRankStrIndex[rank]);
+            std::ostringstream ss;
+            ss << itr->second.ID << ": |cffffffff|Hfaction:" << itr->second.ID << "|h[" << FactionName << "]|h|r " << rankName << "|h|r (" << target->GetReputation(factionEntry) << ")";
 
-            PSendSysMessage("Id:%4d %s %s %5d %1x", itr->second.ID, FactionName, ReputationRankStr[Rank], target->GetReputation(factionEntry), itr->second.Flags);
+            if(itr->second.Flags & FACTION_FLAG_VISIBLE)
+                ss << GetMangosString(LANG_FACTION_VISIBLE);
+            if(itr->second.Flags & FACTION_FLAG_AT_WAR)
+                ss << GetMangosString(LANG_FACTION_ATWAR);
+            if(itr->second.Flags & FACTION_FLAG_OWN_TEAM)
+                ss << GetMangosString(LANG_FACTION_OWNTEAM);
+            if(itr->second.Flags & FACTION_FLAG_UNKNOWN)
+                ss << GetMangosString(LANG_FACTION_UNKNOWN);
+            if(itr->second.Flags & FACTION_FLAG_INVISIBLE)
+                ss << GetMangosString(LANG_FACTION_INVISIBLE);
+            if(itr->second.Flags & FACTION_FLAG_INACTIVE)
+                ss << GetMangosString(LANG_FACTION_INACTIVE);
+
+            SendSysMessage(ss.str().c_str());
         }
     }
     return true;

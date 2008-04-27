@@ -2838,6 +2838,32 @@ bool ChatHandler::HandleDieCommand(const char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleModifyArenaCommand(const char * args) {
+    if (!*args)
+        return false;
+
+    Player *target = getSelectedPlayer();
+    if(!target)
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        return true;
+    }
+
+    uint32 amount = (uint32)atoi(args);
+
+    if (amount < 0 || amount > 999999)
+    {
+        SendSysMessage(LANG_BAD_VALUE);
+        return true;
+    }
+
+    target->SetArenaPoints(amount);
+
+    PSendSysMessage(LANG_COMMAND_MODIFY_ARENA, target->GetName(), amount);
+
+    return true;
+}
+
 bool ChatHandler::HandleReviveCommand(const char* args)
 {
     Player* SelectedPlayer = NULL;
