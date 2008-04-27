@@ -234,7 +234,7 @@ bool ChatHandler::HandleTargetObjectCommand(const char* args)
         return false;
     }
 
-    PSendSysMessage(LANG_GAMEOBJECT_DETAIL, goI->name, guid, id, x, y, z, mapid, o);
+    PSendSysMessage(LANG_GAMEOBJECT_DETAIL, guid, goI->name, guid, id, x, y, z, mapid, o);
 
     return true;
 }
@@ -662,10 +662,11 @@ bool ChatHandler::HandleDelObjectCommand(const char* args)
     if(!lowguid)
         return false;
 
-    /* FIXME: impossible without entry
-    GameObject* obj = GetObjectGlobalyWithGuidOrNearWithDbGuid(lowguid,entry);
-    */
     GameObject* obj = NULL;
+
+    // by DB guid
+    if (GameObjectData const* go_data = objmgr.GetGOData(lowguid))
+        obj = GetObjectGlobalyWithGuidOrNearWithDbGuid(lowguid,go_data->id);
 
     if(!obj)
     {
@@ -831,10 +832,11 @@ bool ChatHandler::HandleMoveObjectCommand(const char* args)
     if(!lowguid)
         return false;
 
-    /* FIXME: impossible without entry
-    GameObject* obj = GetObjectGlobalyWithGuidOrNearWithDbGuid(lowguid,entry);
-    */
     GameObject* obj = NULL;
+
+    // by DB guid
+    if (GameObjectData const* go_data = objmgr.GetGOData(lowguid))
+        obj = GetObjectGlobalyWithGuidOrNearWithDbGuid(lowguid,go_data->id);
 
     if(!obj)
     {

@@ -356,6 +356,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "listcreature",   SEC_ADMINISTRATOR,  &ChatHandler::HandleListCreatureCommand,        "", NULL },
         { "listitem",       SEC_ADMINISTRATOR,  &ChatHandler::HandleListItemCommand,            "", NULL },
         { "listobject",     SEC_ADMINISTRATOR,  &ChatHandler::HandleListObjectCommand,          "", NULL },
+        { "nearobjects",    SEC_ADMINISTRATOR,  &ChatHandler::HandleNearObjectCommand,          "", NULL },
         { "lookup",         SEC_ADMINISTRATOR,  NULL,                                           "", lookupCommandTable },
         { "money",          SEC_MODERATOR,      &ChatHandler::HandleModifyMoneyCommand,         "", NULL },
         { "titles",         SEC_MODERATOR,      &ChatHandler::HandleModifyKnownTitlesCommand,   "", NULL },

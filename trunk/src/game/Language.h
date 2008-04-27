@@ -483,6 +483,7 @@ enum MangosStrings
     LANG_SELECTED_TARGET_NOT_HAVE_VICTIM = 579,
 
     LANG_COMMAND_LEARN_ALL_DEFAULT_AND_QUEST = 580,
+    LANG_COMMAND_NEAROBJMESSAGE         = 581,
 
     // Battleground
     LANG_BG_A_WINS                      = 600,
