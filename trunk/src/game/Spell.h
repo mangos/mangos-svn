@@ -393,6 +393,8 @@ class Spell
         bool CheckTargetCreatureType(Unit* target) const;
 
         void AddTriggeredSpell(SpellEntry const* spell) { m_TriggerSpells.push_back(spell); }
+
+        void CleanupTargetList();
     protected:
 
         void SendLoot(uint64 guid, LootType loottype);
@@ -473,7 +475,6 @@ class Spell
         };
         std::list<ItemTargetInfo> m_UniqueItemInfo;
 
-        void CleanupTargetList();
         void AddUnitTarget(Unit* target, uint32 effIndex);
         void AddUnitTarget(uint64 unitGUID, uint32 effIndex);
         void AddGOTarget(GameObject* target, uint32 effIndex);
