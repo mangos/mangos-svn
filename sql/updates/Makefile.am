@@ -194,6 +194,15 @@ pkgdata_DATA = \
 	5665_mangos_creature_template.sql \
 	5679_mangos_creature_template.sql \
 	5680_mangos_spell_proc_event.sql \
+	5698_mangos_item_template.sql \
+	5708_mangos_player_levelstats.sql \
+	5711_characters_character_kill.sql \
+	5711_mangos_command.sql \
+	5714_mangos_command.sql \
+	5714_mangos_mangos_string.sql \
+	5718_mangos_command.sql \
+	5718_mangos_creature_template.sql \
+	5718_mangos_mangos_string.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -368,4 +377,13 @@ EXTRA_DIST = \
 	5665_mangos_creature_template.sql \
 	5679_mangos_creature_template.sql \
 	5680_mangos_spell_proc_event.sql \
+	5698_mangos_item_template.sql \
+	5708_mangos_player_levelstats.sql \
+	5711_characters_character_kill.sql \
+	5711_mangos_command.sql \
+	5714_mangos_command.sql \
+	5714_mangos_mangos_string.sql \
+	5718_mangos_command.sql \
+	5718_mangos_creature_template.sql \
+	5718_mangos_mangos_string.sql \
 	README

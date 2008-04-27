@@ -272,6 +272,31 @@ enum MangosStrings
     LANG_CHAT_ALREADY_ENABLED           = 302,
     LANG_YOUR_CHAT_ENABLED              = 303,
     LANG_YOU_ENABLE_CHAT                = 304,
+
+    LANG_COMMAND_MODIFY_REP             = 305,
+    LANG_COMMAND_MODIFY_ARENA           = 306,
+    LANG_COMMAND_FACTION_NOTFOUND       = 307,
+    LANG_COMMAND_FACTION_UNKNOWN        = 308,
+    LANG_COMMAND_FACTION_INVPARAM       = 309,
+    LANG_COMMAND_FACTION_DELTA          = 310,
+    LANG_FACTION_LIST                   = 311,
+    LANG_FACTION_VISIBLE                = 312,
+    LANG_FACTION_ATWAR                  = 313,
+    LANG_FACTION_OWNTEAM                = 314,
+    LANG_FACTION_UNKNOWN                = 315,
+    LANG_FACTION_INVISIBLE              = 316,
+    LANG_FACTION_INACTIVE               = 317,
+    LANG_REP_HATED                      = 318,
+    LANG_REP_HOSTILE                    = 319,
+    LANG_REP_UNFRIENDLY                 = 320,
+    LANG_REP_NEUTRAL                    = 321,
+    LANG_REP_FRIENDLY                   = 322,
+    LANG_REP_HONORED                    = 323,
+    LANG_REP_REVERED                    = 324,
+    LANG_REP_EXALTED                    = 325,
+    LANG_COMMAND_FACTION_NOREP_ERROR    = 326,
+    LANG_FACTION_NOREPUTATION           = 327,
+
     // Room for more level 2
 
     // level 3 chat

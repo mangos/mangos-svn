@@ -136,6 +136,8 @@ class ChatHandler
         bool HandleModifySpellCommand(const char* args);
         bool HandleModifyTalentCommand (const char* args);
         bool HandleModifyHonorCommand (const char* args);
+        bool HandleModifyRepCommand(const char* args);
+        bool HandleModifyArenaCommand(const char* args);
 
         bool HandleReloadCommand(const char* args);
         bool HandleReloadAllCommand(const char* args);
@@ -307,6 +309,7 @@ class ChatHandler
         bool HandleListObjectCommand(const char* args);
         bool HandleNearObjectCommand(const char* args);
         bool HandleLookupAreaCommand(const char* args);
+        bool HandleLookupFactionCommand(const char * args);
         bool HandleLookupSkillCommand(const char* args);
         bool HandleLookupSpellCommand(const char* args);
         bool HandleLookupQuestCommand(const char* args);
