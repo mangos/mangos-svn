@@ -509,7 +509,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
 
     data << uint32(pQuest->GetQuestId());
     data << uint32(pQuest->GetMinLevel());                  // not MinLevel. Accepted values: 0, 1 or 2 Possible theory for future dev: 0==cannot in quest log, 1==can in quest log session only(removed on log out), 2==can in quest log always (save to db)
-    data << uint32(pQuest->GetQuestLevel());
+    data << uint32(pQuest->GetQuestLevel());                // sometimes -1
     data << uint32(pQuest->GetZoneOrSort());
 
     data << uint32(pQuest->GetType());
