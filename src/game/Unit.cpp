@@ -6198,16 +6198,20 @@ void Unit::setPowerType(Powers new_powertype)
 {
     SetByteValue(UNIT_FIELD_BYTES_0, 3, new_powertype);
 
-    if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
-        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POWER_TYPE);
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        if(((Player*)this)->GetGroup())
+            ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POWER_TYPE);
+    }
     else if(((Creature*)this)->isPet())
     {
         Pet *pet = ((Pet*)this);
-        if(!pet->isControlled())
-            return;
-        Unit *owner = GetOwner();
-        if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
-            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_POWER_TYPE);
+        if(pet->isControlled())
+        {
+            Unit *owner = GetOwner();
+            if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+                ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_POWER_TYPE);
+        }
     }
 
     switch(new_powertype)
@@ -8999,16 +9003,20 @@ void Unit::SetHealth(uint32 val)
     SetUInt32Value(UNIT_FIELD_HEALTH, val);
 
     // group update
-    if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
-        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_HP);
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        if(((Player*)this)->GetGroup())
+            ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_HP);
+    }
     else if(((Creature*)this)->isPet())
     {
         Pet *pet = ((Pet*)this);
-        if(!pet->isControlled())
-            return;
-        Unit *owner = GetOwner();
-        if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
-            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_HP);
+        if(pet->isControlled())
+        {
+            Unit *owner = GetOwner();
+            if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+                ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_HP);
+        }
     }
 }
 
@@ -9018,16 +9026,20 @@ void Unit::SetMaxHealth(uint32 val)
     SetUInt32Value(UNIT_FIELD_MAXHEALTH, val);
 
     // group update
-    if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
-        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_HP);
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        if(((Player*)this)->GetGroup())
+            ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_HP);
+    }
     else if(((Creature*)this)->isPet())
     {
         Pet *pet = ((Pet*)this);
-        if(!pet->isControlled())
-            return;
-        Unit *owner = GetOwner();
-        if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
-            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MAX_HP);
+        if(pet->isControlled())
+        {
+            Unit *owner = GetOwner();
+            if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+                ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MAX_HP);
+        }
     }
 
     if(val < health)
@@ -9043,16 +9055,20 @@ void Unit::SetPower(Powers power, uint32 val)
     SetStatInt32Value(UNIT_FIELD_POWER1 + power, val);
 
     // group update
-    if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
-        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_POWER);
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        if(((Player*)this)->GetGroup())
+            ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_POWER);
+    }
     else if(((Creature*)this)->isPet())
     {
         Pet *pet = ((Pet*)this);
-        if(!pet->isControlled())
-            return;
-        Unit *owner = GetOwner();
-        if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
-            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
+        if(pet->isControlled())
+        {
+            Unit *owner = GetOwner();
+            if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+                ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
+        }
     }
 }
 
@@ -9062,16 +9078,20 @@ void Unit::SetMaxPower(Powers power, uint32 val)
     SetStatInt32Value(UNIT_FIELD_MAXPOWER1 + power, val);
 
     // group update
-    if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
-        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_POWER);
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        if(((Player*)this)->GetGroup())
+            ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_POWER);
+    }
     else if(((Creature*)this)->isPet())
     {
         Pet *pet = ((Pet*)this);
-        if(!pet->isControlled())
-            return;
-        Unit *owner = GetOwner();
-        if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
-            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MAX_POWER);
+        if(pet->isControlled())
+        {
+            Unit *owner = GetOwner();
+            if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+                ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MAX_POWER);
+        }
     }
 
     if(val < cur_power)
@@ -9083,16 +9103,20 @@ void Unit::ApplyPowerMod(Powers power, uint32 val, bool apply)
     ApplyModUInt32Value(UNIT_FIELD_POWER1+power, val, apply);
 
     // group update
-    if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
-        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_POWER);
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        if(((Player*)this)->GetGroup())
+            ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_POWER);
+    }
     else if(((Creature*)this)->isPet())
     {
         Pet *pet = ((Pet*)this);
-        if(!pet->isControlled())
-            return;
-        Unit *owner = GetOwner();
-        if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
-            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
+        if(pet->isControlled())
+        {
+            Unit *owner = GetOwner();
+            if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+                ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
+        }
     }
 }
 
@@ -9101,16 +9125,20 @@ void Unit::ApplyMaxPowerMod(Powers power, uint32 val, bool apply)
     ApplyModUInt32Value(UNIT_FIELD_MAXPOWER1+power, val, apply);
 
     // group update
-    if ((GetTypeId() == TYPEID_PLAYER) && ((Player*)this)->GetGroup())
-        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_POWER);
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        if(((Player*)this)->GetGroup())
+            ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_POWER);
+    }
     else if(((Creature*)this)->isPet())
     {
         Pet *pet = ((Pet*)this);
-        if(!pet->isControlled())
-            return;
-        Unit *owner = GetOwner();
-        if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
-            ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MAX_POWER);
+        if(pet->isControlled())
+        {
+            Unit *owner = GetOwner();
+            if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
+                ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_MAX_POWER);
+        }
     }
 }
 
