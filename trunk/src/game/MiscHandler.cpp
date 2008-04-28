@@ -340,6 +340,8 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & /*recv_data*/ )
 
 void WorldSession::HandleGMTicketUpdateTextOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,1+1);
+
     uint8 unk;
     std::string ticketText;
     recv_data >> unk;
@@ -364,6 +366,8 @@ void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & /*recv_data*/ )
 
 void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,1+4+4+4+4+1+1);
+
     uint32 map;
     float x, y, z;
     uint8 category;
@@ -372,6 +376,10 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 
     recv_data >> category >> map >> x >> y >> z;            // last check 2.0.12
     recv_data >> ticketText;
+
+    // recheck
+    CHECK_PACKET_SIZE(recv_data,1+4+4+4+4+(ticketText.size()+1)+1);
+
     recv_data >> unk_text;
 
     sLog.outDebug("TicketCreate: category %u, map %u, x %f, y %f, z %f, text %s, unk_text %s", category, map, x, y, z, ticketText.c_str(), unk_text.c_str());
@@ -527,7 +535,7 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data, 1);
+    CHECK_PACKET_SIZE(recv_data, 1+1);
 
     sLog.outDebug( "WORLD: Received CMSG_ADD_FRIEND" );
 
@@ -538,6 +546,10 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     uint64 friendGuid   = 0;
 
     recv_data >> friendName;
+
+    // recheck
+    CHECK_PACKET_SIZE(recv_data, (friendName.size()+1)+1);
+
     recv_data >> friendNote;
 
     if(friendName.empty())
@@ -693,7 +705,6 @@ void WorldSession::HandleSetFriendNoteOpcode( WorldPacket & recv_data )
     uint64 guid;
     std::string note;
     recv_data >> guid >> note;
-    CharacterDatabase.escape_string(note);
     _player->GetSocial()->SetFriendNote(guid, note);
 }
 
@@ -1124,11 +1135,10 @@ void WorldSession::HandleSetActionBar(WorldPacket& recv_data)
     CHECK_PACKET_SIZE(recv_data,1);
 
     uint8 ActionBar;
-    uint32 temp;
 
     recv_data >> ActionBar;
 
-    temp = ((GetPlayer()->GetUInt32Value( PLAYER_FIELD_BYTES )) & 0xFFF0FFFF) + (ActionBar << 16);
+    uint32 temp = ((GetPlayer()->GetUInt32Value( PLAYER_FIELD_BYTES )) & 0xFFF0FFFF) + (ActionBar << 16);
     GetPlayer()->SetUInt32Value( PLAYER_FIELD_BYTES, temp);
 }
 

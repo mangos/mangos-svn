@@ -813,7 +813,7 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
     sLog.outDebug("WORLD: CMSG_REPAIR_ITEM");
 
     uint64 npcGUID, itemGUID;
-    uint8 guildBank;                                // new in 2.3.2, bool that means from guild bank money
+    uint8 guildBank;                                        // new in 2.3.2, bool that means from guild bank money
 
     recv_data >> npcGUID >> itemGUID >> guildBank;
 

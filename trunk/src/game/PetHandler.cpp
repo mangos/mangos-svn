@@ -539,8 +539,7 @@ void WorldSession::HandleAddDynamicTargetObsoleteOpcode( WorldPacket& recvPacket
 {
     sLog.outDetail("WORLD: MSG_ADD_DYNAMIC_TARGET_OBSOLETE");
 
-    //CHECK_PACKET_SIZE(recvPacket,8+4+14);
-    CHECK_PACKET_SIZE(recvPacket,4);
+    CHECK_PACKET_SIZE(recvPacket,8+4);
     uint64 guid;
     uint32 spellid;
 

@@ -881,7 +881,21 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
 
 void WorldSession::HandleGroupPassOnLootOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data, 4);
+
     sLog.outDebug("WORLD: Received CMSG_GROUP_PASS_ON_LOOT");
-    sLog.outError("Not implemented!");
-    recv_data.hexlike();
+
+    uint32 unkn;
+    recv_data >> unkn;
+
+    // ignore if player not loaded
+    if(!GetPlayer())
+    {
+        if(unkn!=0)
+            sLog.outError("CMSG_GROUP_PASS_ON_LOOT value<>0 for not-loaded character!");
+        return;
+    }
+
+    if(unkn!=0)
+        sLog.outError("CMSG_GROUP_PASS_ON_LOOT: activation not implemented!");
 }

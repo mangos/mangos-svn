@@ -1027,7 +1027,7 @@ void WorldSession::HandleGuildBankGetRights( WorldPacket& /* recv_data */ )
 void WorldSession::HandleGuildBankQuery( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: Received (CMSG_GUILD_BANK)");
-    CHECK_PACKET_SIZE(recv_data,9);
+    CHECK_PACKET_SIZE(recv_data,8+1);
     uint64 GoGuid;
     uint8  unk;
     recv_data >> GoGuid >> unk;

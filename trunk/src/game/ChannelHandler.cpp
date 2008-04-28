@@ -25,8 +25,8 @@ INSTANTIATE_SINGLETON_1( HordeChannelMgr );
 void WorldSession::HandleChannelJoin(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
-    CHECK_PACKET_SIZE(recvPacket, 1+1);
+    //recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 4+1+1+1);
 
     uint32 channel_id;
     uint8 unknown1, unknown2;
@@ -39,7 +39,7 @@ void WorldSession::HandleChannelJoin(WorldPacket& recvPacket)
         return;
 
     // recheck
-    CHECK_PACKET_SIZE(recvPacket, (channelname.size()+1)+1);
+    CHECK_PACKET_SIZE(recvPacket, 4+1+1+(channelname.size()+1)+1);
 
     recvPacket >> pass;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
@@ -50,8 +50,8 @@ void WorldSession::HandleChannelJoin(WorldPacket& recvPacket)
 void WorldSession::HandleChannelLeave(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
-    CHECK_PACKET_SIZE(recvPacket, 1);
+    //recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 4+1);
 
     uint32 unk;
     std::string channelname;
@@ -72,7 +72,7 @@ void WorldSession::HandleChannelLeave(WorldPacket& recvPacket)
 void WorldSession::HandleChannelList(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1);
 
     std::string channelname;
@@ -86,7 +86,7 @@ void WorldSession::HandleChannelList(WorldPacket& recvPacket)
 void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, pass;
@@ -105,7 +105,7 @@ void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
 void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, newp;
@@ -129,7 +129,7 @@ void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
 void WorldSession::HandleChannelOwner(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1);
 
     std::string channelname;
@@ -142,7 +142,7 @@ void WorldSession::HandleChannelOwner(WorldPacket& recvPacket)
 void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, otp;
@@ -166,7 +166,7 @@ void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)
 void WorldSession::HandleChannelUnmoderator(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, otp;
@@ -190,7 +190,7 @@ void WorldSession::HandleChannelUnmoderator(WorldPacket& recvPacket)
 void WorldSession::HandleChannelMute(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, otp;
@@ -214,7 +214,7 @@ void WorldSession::HandleChannelMute(WorldPacket& recvPacket)
 void WorldSession::HandleChannelUnmute(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, otp;
@@ -238,7 +238,7 @@ void WorldSession::HandleChannelUnmute(WorldPacket& recvPacket)
 void WorldSession::HandleChannelInvite(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, otp;
@@ -262,7 +262,7 @@ void WorldSession::HandleChannelInvite(WorldPacket& recvPacket)
 void WorldSession::HandleChannelKick(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, otp;
@@ -285,7 +285,7 @@ void WorldSession::HandleChannelKick(WorldPacket& recvPacket)
 void WorldSession::HandleChannelBan(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, otp;
@@ -309,7 +309,7 @@ void WorldSession::HandleChannelBan(WorldPacket& recvPacket)
 void WorldSession::HandleChannelUnban(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, otp;
@@ -333,7 +333,7 @@ void WorldSession::HandleChannelUnban(WorldPacket& recvPacket)
 void WorldSession::HandleChannelAnnounce(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1);
 
     std::string channelname;
@@ -346,7 +346,7 @@ void WorldSession::HandleChannelAnnounce(WorldPacket& recvPacket)
 void WorldSession::HandleChannelModerate(WorldPacket& recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1);
 
     std::string channelname;
@@ -359,7 +359,7 @@ void WorldSession::HandleChannelModerate(WorldPacket& recvPacket)
 void WorldSession::HandleChannelRosterQuery(WorldPacket &recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1);
 
     std::string channelname;
@@ -372,7 +372,7 @@ void WorldSession::HandleChannelRosterQuery(WorldPacket &recvPacket)
 void WorldSession::HandleChannelInfoQuery(WorldPacket &recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1);
 
     std::string channelname;
@@ -393,7 +393,7 @@ void WorldSession::HandleChannelInfoQuery(WorldPacket &recvPacket)
 void WorldSession::HandleChannelJoinNotify(WorldPacket &recvPacket)
 {
     sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
-    recvPacket.hexlike();
+    //recvPacket.hexlike();
     CHECK_PACKET_SIZE(recvPacket, 1);
 
     std::string channelname;
