@@ -784,6 +784,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     CHECK_PACKET_SIZE(recv_data, 8+1);
 
     recv_data >> guid;
+    recv_data >> newname;
 
     QueryResult *result = CharacterDatabase.PQuery("SELECT at_login FROM characters WHERE guid ='%u'", GUID_LOPART(guid));
     if (result)
@@ -808,8 +809,6 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
         SendPacket( &data );
         return;
     }
-
-    recv_data >> newname;
 
     if(!objmgr.GetPlayerNameByGUID(guid, oldname))          // character not exist, because we have no name for this guid
     {

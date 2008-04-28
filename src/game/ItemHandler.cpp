@@ -426,15 +426,17 @@ void WorldSession::HandleReadItem( WorldPacket & recv_data )
 
 void WorldSession::HandlePageQuerySkippedOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,4+4+4);
+    CHECK_PACKET_SIZE(recv_data,4+8);
 
     sLog.outDebug(  "WORLD: Received CMSG_PAGE_TEXT_QUERY" );
 
-    uint32 itemid, guidlow, guidhigh;
+    uint32 itemid;
+    uint64 guid;
 
-    recv_data >> itemid >> guidlow >> guidhigh;
+    recv_data >> itemid >> guid;
 
-    sLog.outDetail( "Packet Info: itemid: %u guidlow: %u guidhigh: %u", itemid, guidlow, guidhigh );
+    sLog.outDetail( "Packet Info: itemid: %u guidlow: %u guidentry: %u guidhigh: %u", 
+        itemid, GUID_LOPART(guid), GUID_ENPART(guid), GUID_HIPART(guid));
 }
 
 void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )

@@ -29,7 +29,7 @@
 
 void WorldSession::HandleSendMail(WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,8+1+1+1+4+4+8+4+4);
+    CHECK_PACKET_SIZE(recv_data,8+1+1+1+4+4+1+4+4+8+1);
 
     uint64 mailbox, unk3;
     std::string receiver, subject, body;
@@ -39,17 +39,17 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     recv_data >> receiver;
 
     // recheck
-    CHECK_PACKET_SIZE(recv_data, 8+(receiver.size()+1)+1+1+4+4+8+4+4);
+    CHECK_PACKET_SIZE(recv_data, 8+(receiver.size()+1)+1+1+4+4+1+4+4+8+1);
 
     recv_data >> subject;
 
     // recheck
-    CHECK_PACKET_SIZE(recv_data, 8+(receiver.size()+1)+(subject.size()+1)+1+4+4+8+4+4);
+    CHECK_PACKET_SIZE(recv_data, 8+(receiver.size()+1)+(subject.size()+1)+1+4+4+1+4+4+8+1);
 
     recv_data >> body;
 
     // recheck
-    CHECK_PACKET_SIZE(recv_data, 8+(receiver.size()+1)+(subject.size()+1)+(body.size()+1)+4+4+8+4+4);
+    CHECK_PACKET_SIZE(recv_data, 8+(receiver.size()+1)+(subject.size()+1)+(body.size()+1)+4+4+1+4+4+8+1);
 
     recv_data >> unk1;                                      // stationery?
     recv_data >> unk2;                                      // 0x00000000
@@ -61,6 +61,9 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     if(items_count > 12)                                    // client limit
         return;
+
+    // recheck
+    CHECK_PACKET_SIZE(recv_data, 8+(receiver.size()+1)+(subject.size()+1)+(body.size()+1)+4+4+1+items_count*(1+8)+4+4+8+1);
 
     if(items_count)
     {

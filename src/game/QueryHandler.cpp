@@ -253,7 +253,7 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket & /*recv_data*/)
 
 void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,4+4+4);
+    CHECK_PACKET_SIZE(recv_data,4+8);
 
     uint32 textID;
     uint64 guid;

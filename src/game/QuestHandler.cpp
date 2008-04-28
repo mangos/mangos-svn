@@ -585,7 +585,7 @@ uint32 WorldSession::getDialogStatus(Player *pPlayer, Object* questgiver, uint32
     return result;
 }
 
-void WorldSession::HandleQuestgiverStatusQueryMultipleOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleQuestgiverStatusQueryMultipleOpcode(WorldPacket& /*recvPacket*/)
 {
     sLog.outDebug("WORLD: Received CMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE");
 
