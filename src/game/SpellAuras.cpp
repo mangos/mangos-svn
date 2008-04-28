@@ -4328,13 +4328,16 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             // HotW
             if (HotWSpellId)
             {
-                int32 HotWMod = 0;
                 Unit::AuraList const& mModTotalStatPct = m_target->GetAurasByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
                 for(Unit::AuraList::const_iterator i = mModTotalStatPct.begin(); i != mModTotalStatPct.end(); ++i)
+                {
                     if ((*i)->GetSpellProto()->SpellIconID == 240 && (*i)->GetModifier()->m_miscvalue == 3)
-                        HotWMod = (*i)->GetModifier()->m_amount;
-                if (HotWMod)
-                    m_target->CastCustomSpell(m_target, HotWSpellId, &HotWMod, NULL, NULL, true, NULL, this);
+                    {
+                        int32 HotWMod = (*i)->GetModifier()->m_amount;
+                        m_target->CastCustomSpell(m_target, HotWSpellId, &HotWMod, NULL, NULL, true, NULL, this);
+                        break;
+                    }
+                }
             }
         }
     }
