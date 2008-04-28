@@ -307,10 +307,11 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 };
 
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem) :
-m_procCharges(0), m_spellmod(NULL), m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0), m_target(target),
+m_procCharges(0), m_spellmod(NULL), m_effIndex(eff), m_caster_guid(0), m_target(target),
 m_timeCla(1000), m_castItemGuid(castItem?castItem->GetGUID():0), m_auraSlot(MAX_AURAS),
-m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false), m_isPersistent(false),
-m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(false),m_fearMoveAngle(0), m_isRemovedOnShapeLost(true)
+m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false), 
+m_isPersistent(false), m_updated(false), m_removeOnDeath(false), m_isRemovedOnShapeLost(true),
+m_periodicTimer(0), m_PeriodicEventId(0), m_fearMoveAngle(0)
 {
     assert(target);
 
@@ -320,9 +321,9 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(fals
 
     m_currentBasePoints = currentBasePoints ? *currentBasePoints : m_spellProto->EffectBasePoints[eff];
 
-    m_isPassive = IsPassiveSpell(m_spellId);
-    m_positive = IsPositiveEffect(m_spellId, m_effIndex);
-
+    m_isPassive = IsPassiveSpell(GetId());
+    m_positive = IsPositiveEffect(GetId(), m_effIndex);
+    
     m_applyTime = time(NULL);
 
     uint32 type = 0;
@@ -374,12 +375,12 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(fals
     Player* modOwner = caster ? caster->GetSpellModOwner() : NULL;
 
     if(!m_permanent && modOwner)
-        modOwner->ApplySpellMod(m_spellId, SPELLMOD_DURATION, m_maxduration);
+        modOwner->ApplySpellMod(GetId(), SPELLMOD_DURATION, m_maxduration);
 
     m_duration = m_maxduration;
 
     if(modOwner)
-        modOwner->ApplySpellMod(m_spellId, SPELLMOD_ACTIVATION_TIME, m_periodicTimer);
+        modOwner->ApplySpellMod(GetId(), SPELLMOD_ACTIVATION_TIME, m_periodicTimer);
 
     sLog.outDebug("Aura: construct Spellid : %u, Aura : %u Duration : %d Target : %d Damage : %d", m_spellProto->Id, m_spellProto->EffectApplyAuraName[eff], m_maxduration, m_spellProto->EffectImplicitTargetA[eff],damage);
 
@@ -394,7 +395,7 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(fals
         m_procCharges = m_spellProto->procCharges;
 
         if(modOwner)
-            modOwner->ApplySpellMod(m_spellId, SPELLMOD_CHARGES, m_procCharges);
+            modOwner->ApplySpellMod(GetId(), SPELLMOD_CHARGES, m_procCharges);
     }
     else
         m_procCharges = -1;
@@ -628,7 +629,7 @@ void AreaAura::Update(uint32 diff)
                         continue;
                 }
 
-                Aura *t_aura = Target->GetAura(m_spellId, m_effIndex);
+                Aura *t_aura = Target->GetAura(GetId(), m_effIndex);
 
                 if(caster->IsWithinDistInMap(Target, m_radius) )
                 {
@@ -654,7 +655,7 @@ void AreaAura::Update(uint32 diff)
                     // remove auras of the same caster from out of range players
                     if (t_aura)
                         if (t_aura->GetCasterGUID() == m_caster_guid)
-                            Target->RemoveAura(m_spellId, m_effIndex);
+                            Target->RemoveAura(GetId(), m_effIndex);
                 }
             }
         }
@@ -664,7 +665,7 @@ void AreaAura::Update(uint32 diff)
             Unit *owner = caster->GetCharmerOrOwner();
             if (owner)
             {
-                Aura *o_aura = owner->GetAura(m_spellId, m_effIndex);
+                Aura *o_aura = owner->GetAura(GetId(), m_effIndex);
                 if(caster->IsWithinDistInMap(owner, m_radius))
                 {
                     if (!o_aura)
@@ -677,7 +678,7 @@ void AreaAura::Update(uint32 diff)
                 {
                     if (o_aura)
                         if (o_aura->GetCasterGUID() == m_caster_guid)
-                            owner->RemoveAura(m_spellId, m_effIndex);
+                            owner->RemoveAura(GetId(), m_effIndex);
                 }
             }
         }
@@ -687,7 +688,7 @@ void AreaAura::Update(uint32 diff)
     {
         Unit * tmp_target = m_target;
         Unit* caster = GetCaster();
-        uint32 tmp_spellId = m_spellId, tmp_effIndex = m_effIndex;
+        uint32 tmp_spellId = GetId(), tmp_effIndex = m_effIndex;
 
         // WARNING: the aura may get deleted during the update
         // DO NOT access its members after update!
@@ -783,7 +784,7 @@ void Aura::SendAuraDurationForCaster(Player* caster)
 
 void Aura::_AddAura()
 {
-    if (!m_spellId)
+    if (!GetId())
         return;
     if(!m_target)
         return;
@@ -1045,7 +1046,7 @@ void Aura::UpdateSlotCounterAndDuration(bool add)
     Unit::AuraList const& aura_list = m_target->GetAurasByType(GetModifier()->m_auraname);
     for(Unit::AuraList::const_iterator i = aura_list.begin();i != aura_list.end(); ++i)
     {
-        if( (*i)->GetId()==m_spellId && (*i)->GetEffIndex()==m_effIndex &&
+        if( (*i)->GetId()==GetId() && (*i)->GetEffIndex()==m_effIndex &&
             (*i)->GetCasterGUID()==GetCasterGUID() )
         {
             ++count;
@@ -1085,11 +1086,11 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         mod->op = SpellModOp(m_modifier.m_miscvalue);
         mod->value = m_modifier.m_amount;
         mod->type = SpellModType(m_modifier.m_auraname);    // SpellModType value == spell aura types
-        mod->spellId = m_spellId;
+        mod->spellId = GetId();
         mod->effectId = m_effIndex;
         mod->lastAffected = NULL;
 
-        SpellAffection const *spellAffect = spellmgr.GetSpellAffection(m_spellId, m_effIndex);
+        SpellAffection const *spellAffect = spellmgr.GetSpellAffection(GetId(), m_effIndex);
 
         if (spellAffect && spellAffect->SpellFamilyMask)
             mod->mask = spellAffect->SpellFamilyMask;
@@ -1366,7 +1367,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             mod->op = SPELLMOD_DAMAGE;
             mod->value = m_modifier.m_amount;
             mod->type = SPELLMOD_PCT;
-            mod->spellId = m_spellId;
+            mod->spellId = GetId();
             mod->effectId = m_effIndex;
             mod->lastAffected = NULL;
             mod->mask = 0x00008000 | 0x00001000;
@@ -1389,7 +1390,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             mod->op = SPELLMOD_EFFECT1;
             mod->value = m_modifier.m_amount;
             mod->type = SPELLMOD_FLAT;
-            mod->spellId = m_spellId;
+            mod->spellId = GetId();
             mod->effectId = m_effIndex;
             mod->lastAffected = NULL;
             mod->mask = 0x4000000000000LL;
@@ -1480,7 +1481,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             mod->op = SPELLMOD_DOT;
             mod->value = m_modifier.m_amount/7;
             mod->type = SPELLMOD_FLAT;
-            mod->spellId = m_spellId;
+            mod->spellId = GetId();
             mod->effectId = m_effIndex;
             mod->lastAffected = NULL;
             mod->mask = 0x001000000000LL;
@@ -1503,7 +1504,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             mod->op = SPELLMOD_EFFECT1;
             mod->value = m_modifier.m_amount;
             mod->type = SPELLMOD_PCT;
-            mod->spellId = m_spellId;
+            mod->spellId = GetId();
             mod->effectId = m_effIndex;
             mod->lastAffected = NULL;
             switch (m_effIndex)
@@ -1800,7 +1801,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             }
         }
 
-        m_target->m_ShapeShiftForm = m_spellId;
+        m_target->m_ShapeShiftForm = GetId();
         m_target->m_form = m_modifier.m_miscvalue;
 
         switch ( m_target->m_form )
@@ -3234,7 +3235,7 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
     if(apply)
     {
         // some spell have charges by functionality not have its in spell data
-        switch (m_spellId)
+        switch (GetId())
         {
             case 28200:                         // Ascendance (Talisman of Ascendance trinket
                 m_procCharges = 6; 
@@ -4228,7 +4229,7 @@ void Aura::SendCoolDownEvent()
     if(caster)
     {
         WorldPacket data(SMSG_COOLDOWN_EVENT, (4+8));       // last check 2.4.1
-        data << uint32(m_spellId) << m_caster_guid;
+        data << uint32(GetId()) << m_caster_guid;
         caster->SendMessageToSet(&data,true);               // WTF? why we send cooldown message to set?
     }
 }

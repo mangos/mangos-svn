@@ -213,7 +213,7 @@ class MANGOS_DLL_SPEC Aura
         Modifier* GetModifier() {return &m_modifier;}
 
         SpellEntry const* GetSpellProto() const { return m_spellProto; }
-        uint32 GetId() const{ return m_spellId; }
+        uint32 GetId() const{ return m_spellProto->Id; }
         uint64 GetCastItemGUID() const { return m_castItemGuid; }
         uint32 GetEffIndex() const{ return m_effIndex; }
         int32 GetBasePoints() const { return m_currentBasePoints; }
@@ -286,7 +286,6 @@ class MANGOS_DLL_SPEC Aura
 
         Modifier m_modifier;
         SpellModifier *m_spellmod;
-        uint32 m_spellId;
         uint32 m_effIndex;
         SpellEntry const *m_spellProto;
         int32 m_currentBasePoints;                          // cache SpellEntry::EffectBasePoints and use for set custom base points
@@ -301,20 +300,20 @@ class MANGOS_DLL_SPEC Aura
 
         uint8 m_auraSlot;
 
-        bool m_positive;
-        bool m_permanent;
-        bool m_isPeriodic;
-        bool m_isTrigger;
-        bool m_isAreaAura;
-        bool m_isPassive;
-        bool m_isPersistent;
-        bool m_isDeathPersist;
-        bool m_isRemovedOnShapeLost;
+        bool m_positive:1;
+        bool m_permanent:1;
+        bool m_isPeriodic:1;
+        bool m_isTrigger:1;
+        bool m_isAreaAura:1;
+        bool m_isPassive:1;
+        bool m_isPersistent:1;
+        bool m_isDeathPersist:1;
+        bool m_isRemovedOnShapeLost:1;
+        bool m_updated:1;
+        bool m_removeOnDeath:1;
 
         int32 m_periodicTimer;
         uint32 m_PeriodicEventId;
-        bool m_updated;
-        bool m_removeOnDeath;
     private:
         void UpdateSlotCounterAndDuration(bool add);
         void CleanupTriggeredSpells();
