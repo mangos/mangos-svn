@@ -973,7 +973,7 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
     // TODO this in only generic way, check for exceptions
     DEBUG_LOG("DealFlatDamage (BEFORE) >> DMG:%u", *damage);
 
-    // Per-school calc
+    // Per-damage calss calculation
     switch (spellInfo->DmgClass)
     {
         // Melee and Ranged Spells 
@@ -1218,7 +1218,7 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
             }
 
             // do all damage=0 cases here
-            if(damage <= 0)
+            if(*damage == 0)
                 CastMeleeProcDamageAndSpell(pVictim,0,BASE_ATTACK,outcome,spellInfo,isTriggeredSpell);
 
             break;
@@ -1227,9 +1227,6 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
         case SPELL_DAMAGE_CLASS_NONE:
         case SPELL_DAMAGE_CLASS_MAGIC:
         {
-            // Calculate damage bonus
-            *damage = SpellDamageBonus(pVictim, spellInfo, *damage, SPELL_DIRECT_DAMAGE);
-
             // Calculate damage bonus
             *damage = SpellDamageBonus(pVictim, spellInfo, *damage, SPELL_DIRECT_DAMAGE);
 
@@ -3079,9 +3076,6 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
             return SPELL_MISS_NONE;
     }
 
-    if (GetSpellSchoolMask(spell) & SPELL_SCHOOL_MASK_NORMAL)
-        return SPELL_MISS_NONE;
-
     // TODO need use this code for spell hit result calculation
     // now code commented for compotability
     switch (spell->DmgClass)
@@ -3089,6 +3083,7 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
         case SPELL_DAMAGE_CLASS_RANGED:
         case SPELL_DAMAGE_CLASS_MELEE:
 //             return MeleeSpellHitResult(pVictim, spell);
+            return SPELL_MISS_NONE;
         case SPELL_DAMAGE_CLASS_NONE:
         case SPELL_DAMAGE_CLASS_MAGIC:
             return MagicSpellHitResult(pVictim, spell);
