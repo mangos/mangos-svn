@@ -1220,6 +1220,8 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
             // do all damage=0 cases here
             if(damage <= 0)
                 CastMeleeProcDamageAndSpell(pVictim,0,BASE_ATTACK,outcome,spellInfo,isTriggeredSpell);
+
+            break;
         }
         // Magical Attacks
         case SPELL_DAMAGE_CLASS_NONE:
@@ -1245,6 +1247,8 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
 
                 ProcDamageAndSpell(pVictim, procAttacker, procVictim, 0, spellInfo, isTriggeredSpell);
             }
+
+            break;
         }
     }
 
