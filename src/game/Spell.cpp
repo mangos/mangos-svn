@@ -1363,6 +1363,61 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
             cell_lock->Visit(cell_lock, grid_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
         }break;
+        // TARGET_SINGLE_PARTY means that the spells can only be casted on a party member and not on the caster (some sceals, fire shield from imp, etc..) 
+        case TARGET_SINGLE_PARTY:
+        {
+            Unit *target = m_targets.getUnitTarget();
+            // Thoses spells apparently can't be casted on the caster.
+            if( target && target != m_caster)
+            {
+                // Can only be casted on group's members or its pets
+                Group  *pGroup = NULL;
+
+                Unit* owner = m_caster->GetCharmerOrOwner();
+                Unit *targetOwner = target->GetCharmerOrOwner();
+                if(owner)
+                {
+                    if(owner->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        if( target == owner )
+                        {
+                            TagUnitMap.push_back(target);
+                            break;
+                        }
+                        pGroup = ((Player*)owner)->GetGroup();
+                    }
+                }
+                else if (m_caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if( targetOwner == m_caster && target->GetTypeId()==TYPEID_UNIT && ((Creature*)target)->isPet())
+                    {
+                        TagUnitMap.push_back(target);
+                        break;
+                    }
+                    pGroup = ((Player*)m_caster)->GetGroup();
+                }
+ 
+                if(pGroup)
+                {
+                    // Our target can also be a player's pet who's grouped with us or our pet. But can't be controlled player
+                    if(targetOwner)
+                    {
+                        if( targetOwner->GetTypeId() == TYPEID_PLAYER && 
+                            target->GetTypeId()==TYPEID_UNIT && (((Creature*)target)->isPet()) &&
+                            target->GetOwnerGUID()==targetOwner->GetGUID() &&
+                            pGroup->IsMember(((Player*)targetOwner)->GetGUID()))
+                        {
+                            TagUnitMap.push_back(target);
+                        }
+                    }
+                    // 1Our target can be a player who is on our group
+                    else if (target->GetTypeId() == TYPEID_PLAYER && pGroup->IsMember(((Player*)target)->GetGUID()))
+                    {
+                        TagUnitMap.push_back(target);
+                    }
+                }
+            }
+        }break;
         case TARGET_GAMEOBJECT:
         {
             if(m_targets.getGOTarget())
