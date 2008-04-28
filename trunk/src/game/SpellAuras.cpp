@@ -310,7 +310,7 @@ Aura::Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, U
 m_procCharges(0), m_spellmod(NULL), m_effIndex(eff), m_caster_guid(0), m_target(target),
 m_timeCla(1000), m_castItemGuid(castItem?castItem->GetGUID():0), m_auraSlot(MAX_AURAS),
 m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false), 
-m_isPersistent(false), m_updated(false), m_removeOnDeath(false), m_isRemovedOnShapeLost(true),
+m_isPersistent(false), m_updated(false), m_removeOnDeath(false), m_isRemovedOnShapeLost(true), m_in_use(false),
 m_periodicTimer(0), m_PeriodicEventId(0), m_fearMoveAngle(0)
 {
     assert(target);
@@ -736,9 +736,11 @@ void PersistentAreaAura::Update(uint32 diff)
 void Aura::ApplyModifier(bool apply, bool Real)
 {
     AuraType aura = m_modifier.m_auraname;
-
+    
+    m_in_use = true;
     if(aura<TOTAL_AURAS)
         (*this.*AuraHandler [aura])(apply,Real);
+    m_in_use = false;
 }
 
 void Aura::UpdateAuraDuration()

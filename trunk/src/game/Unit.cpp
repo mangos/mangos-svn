@@ -3801,6 +3801,11 @@ bool Unit::AddAura(Aura *Aur)
                 if( (*itr)->GetTarget() != Aur->GetTarget() &&
                     IsSingleTargetSpells((*itr)->GetSpellProto(),aurSpellInfo) )
                 {
+                    if ((*itr)->IsInUse())
+                    {
+                        sLog.outError("Aura (Spell %u Effect %u) is in process but attempt removed at aura (Spell %u Effect %u) adding, need add stack rule for IsSingleTargetSpell", (*itr)->GetId(), (*itr)->GetEffIndex(),Aur->GetId(), Aur->GetEffIndex());
+                        continue;
+                    }
                     (*itr)->GetTarget()->RemoveAura((*itr)->GetId(), (*itr)->GetEffIndex());
                     restart = true;
                     break;
@@ -3876,10 +3881,12 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
         ++next;
         if (!(*i).second) continue;
 
-        if (!(*i).second->GetSpellProto())
+        SpellEntry const* i_spellProto = (*i).second->GetSpellProto();
+
+        if (!i_spellProto)
             continue;
 
-        uint32 i_spellId = (*i).second->GetId();
+        uint32 i_spellId = i_spellProto->Id;
 
         if(IsPassiveSpell(i_spellId))
         {
@@ -3887,7 +3894,7 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                 continue;
 
             // passive non-stackable spells not stackable only with another rank of same spell
-            if (!spellmgr.IsRankSpellDueToSpell(Aur->GetSpellProto(), i_spellId))
+            if (!spellmgr.IsRankSpellDueToSpell(spellProto, i_spellId))
                 continue;
         }
 
@@ -3898,14 +3905,14 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
         bool is_triggered_by_spell = false;
         // prevent triggered aura of removing aura that triggered it
         for(int j = 0; j < 3; ++j)
-            if ((*i).second->GetSpellProto()->EffectTriggerSpell[j] == spellProto->Id)
+            if (i_spellProto->EffectTriggerSpell[j] == spellProto->Id)
                 is_triggered_by_spell = true;
         if (is_triggered_by_spell) continue;
 
-        // prevent remove dummy triggered spells at next effect aura add
         for(int j = 0; j < 3; ++j)
         {
-            switch(spellProto->Effect[j])
+            // prevent remove dummy triggered spells at next effect aura add
+            switch(spellProto->Effect[j])                   // main spell auras added added after triggred spell
             {
                 case SPELL_EFFECT_DUMMY:
                     switch(spellId)
@@ -3914,15 +3921,19 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                     }
                     break;
             }
+
             if(is_triggered_by_spell)
                 break;
 
-            switch(spellProto->EffectApplyAuraName[j])
+            // prevent remove form main spell by triggred passive spells
+            switch(i_spellProto->EffectApplyAuraName[j])    // main aura added before triggered spell
             {
                 case SPELL_AURA_MOD_SHAPESHIFT:
-                    switch(spellId)
+                    switch(i_spellId)
                     {
-                        case 33891: if(i_spellId==5420 || i_spellId==34123) is_triggered_by_spell = true; break;
+                        case 24858: if(spellId==24905)                  is_triggered_by_spell = true; break;
+                        case 33891: if(spellId==5420 || spellId==34123) is_triggered_by_spell = true; break;
+                        case 34551: if(spellId==22688)                  is_triggered_by_spell = true; break;
                     }
                     break;
             }
@@ -3937,10 +3948,16 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
             if( is_sspc && Aur->GetCasterGUID() == (*i).second->GetCasterGUID() )
             {
                 // cannot remove higher rank
-                if (spellmgr.IsRankSpellDueToSpell(Aur->GetSpellProto(), i_spellId))
+                if (spellmgr.IsRankSpellDueToSpell(spellProto, i_spellId))
                     if(CompareAuraRanks(spellId, effIndex, i_spellId, i_effIndex) < 0)
                         return false;
 
+                // Its a parent aura (create this aura in ApplyModifier)
+                if ((*i).second->IsInUse())
+                {
+                    sLog.outError("Aura (Spell %u Effect %u) is in process but attempt removed at aura (Spell %u Effect %u) adding, need add stack rule for Unit::RemoveNoStackAurasDueToAura", i->second->GetId(), i->second->GetEffIndex(),Aur->GetId(), Aur->GetEffIndex());
+                    continue;
+                }
                 RemoveAurasDueToSpell(i_spellId);
 
                 if( m_Auras.empty() )
@@ -3950,6 +3967,12 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
             }
             else if( !is_sspc && spellmgr.IsNoStackSpellDueToSpell(spellId, i_spellId) )
             {
+                // Its a parent aura (create this aura in ApplyModifier)
+                if ((*i).second->IsInUse())
+                {
+                    sLog.outError("Aura (Spell %u Effect %u) is in process but attempt removed at aura (Spell %u Effect %u) adding, need add stack rule for Unit::RemoveNoStackAurasDueToAura", i->second->GetId(), i->second->GetEffIndex(),Aur->GetId(), Aur->GetEffIndex());
+                    continue;
+                }
                 RemoveAurasDueToSpell(i_spellId);
 
                 if( m_Auras.empty() )
@@ -3958,14 +3981,19 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                     next =  m_Auras.begin();
             }
             // Potions stack aura by aura (elixirs/flask already checked)
-            else if( Aur->GetSpellProto()->SpellFamilyName == SPELLFAMILY_POTION &&
-                (*i).second->GetSpellProto()->SpellFamilyName == SPELLFAMILY_POTION )
+            else if( spellProto->SpellFamilyName == SPELLFAMILY_POTION && i_spellProto->SpellFamilyName == SPELLFAMILY_POTION )
             {
                 if (IsNoStackAuraDueToAura(spellId, effIndex, i_spellId, i_effIndex))
                 {
                     if(CompareAuraRanks(spellId, effIndex, i_spellId, i_effIndex) < 0)
                         return false;                       // cannot remove higher rank
 
+                    // Its a parent aura (create this aura in ApplyModifier)
+                    if ((*i).second->IsInUse())
+                    {
+                        sLog.outError("Aura (Spell %u Effect %u) is in process but attempt removed at aura (Spell %u Effect %u) adding, need add stack rule for Unit::RemoveNoStackAurasDueToAura", i->second->GetId(), i->second->GetEffIndex(),Aur->GetId(), Aur->GetEffIndex());
+                        continue;
+                    }
                     RemoveAura(i);
                     next = i;
                 }
