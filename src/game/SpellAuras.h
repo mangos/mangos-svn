@@ -262,6 +262,7 @@ class MANGOS_DLL_SPEC Aura
         bool IsPersistent() const { return m_isPersistent; }
         bool IsDeathPersistent() const { return m_isDeathPersist; }
         bool IsRemovedOnShapeLost() const { return m_isRemovedOnShapeLost; }
+        bool IsInUse() const { return m_in_use;}
 
         virtual void Update(uint32 diff);
         void ApplyModifier(bool apply, bool Real = false);
@@ -311,6 +312,7 @@ class MANGOS_DLL_SPEC Aura
         bool m_isRemovedOnShapeLost:1;
         bool m_updated:1;
         bool m_removeOnDeath:1;
+        bool m_in_use:1;                                    // true while in Aura::ApplyModifier call
 
         int32 m_periodicTimer;
         uint32 m_PeriodicEventId;
