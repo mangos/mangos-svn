@@ -1220,6 +1220,8 @@ void Aura::TriggerSpell()
             caster->RemoveAurasDueToSpell(31665);
             return;
         }
+
+        case 30576: trigger_spell_id = 30571; break;         // Quake
     }
 
     if(!trigger_spell_id)
