@@ -407,7 +407,7 @@ void GameEvent::GameEventSpawn(int16 event_id)
             // Spawn if necessary (loaded grids only)
             Map* map = const_cast<Map*>(MapManager::Instance().GetBaseMap(data->mapid));
             // We use spawn coords to spawn
-            if(!map->Instanceable() && !map->IsRemovalGrid(data->spawn_posX,data->spawn_posY))
+            if(!map->Instanceable() && !map->IsRemovalGrid(data->posX,data->posY))
             {
                 Creature* pCreature = new Creature((WorldObject*)NULL);
                 //sLog.outDebug("Spawning creature %u",*itr);

@@ -731,8 +731,8 @@ void ObjectMgr::LoadCreatures()
     QueryResult *result = WorldDatabase.Query("SELECT creature.guid, id, map, modelid,"
     //   4             5           6           7           8            9              10         11
         "equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint,"
-    //   12                13                14                15                 16         17       18          19            20
-        "spawn_position_x, spawn_position_y, spawn_position_z, spawn_orientation, curhealth, curmana, DeathState, MovementType, event "
+    //   12         13       14          15            16
+        "curhealth, curmana, DeathState, MovementType, event "
         "FROM creature LEFT OUTER JOIN game_event_creature ON creature.guid=game_event_creature.guid");
 
     if(!result)
@@ -768,15 +768,11 @@ void ObjectMgr::LoadCreatures()
         data.spawntimesecs  = fields[ 9].GetUInt32();
         data.spawndist      = fields[10].GetFloat();
         data.currentwaypoint= fields[11].GetUInt32();
-        data.spawn_posX     = fields[12].GetFloat();
-        data.spawn_posY     = fields[13].GetFloat();
-        data.spawn_posZ     = fields[14].GetFloat();
-        data.spawn_orientation = fields[15].GetFloat();
-        data.curhealth      = fields[16].GetUInt32();
-        data.curmana        = fields[17].GetUInt32();
-        data.is_dead        = fields[18].GetBool();
-        data.movementType   = fields[19].GetUInt8();
-        int16 gameEvent     = fields[20].GetInt16();
+        data.curhealth      = fields[12].GetUInt32();
+        data.curmana        = fields[13].GetUInt32();
+        data.is_dead        = fields[14].GetBool();
+        data.movementType   = fields[15].GetUInt8();
+        int16 gameEvent     = fields[16].GetInt16();
 
         if (gameEvent==0)                                   // if not this is to be managed by GameEvent System
             AddCreatureToGrid(guid, &data);

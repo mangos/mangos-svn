@@ -1007,8 +1007,8 @@ bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
 
 bool Map::CreatureRespawnRelocation(Creature *c)
 {
-    float resp_x, resp_y, resp_z;
-    c->GetRespawnCoord(resp_x, resp_y, resp_z);
+    float resp_x, resp_y, resp_z, resp_o;
+    c->GetRespawnCoord(resp_x, resp_y, resp_z, &resp_o);
 
     CellPair resp_val = MaNGOS::ComputeCellPair(resp_x, resp_y);
     Cell resp_cell(resp_val);
@@ -1024,7 +1024,7 @@ bool Map::CreatureRespawnRelocation(Creature *c)
     // teleport it to respawn point (like normal respawn if player see)
     if(CreatureCellRelocation(c,resp_cell))
     {
-        c->Relocate(resp_x, resp_y, resp_z, c->GetOrientation());
+        c->Relocate(resp_x, resp_y, resp_z, resp_o);
         c->GetMotionMaster()->Initialize();                 // prevent possible problems with default move generators
         CreatureRelocationNotify(c,resp_cell,resp_cell.cellPair());
         return true;
