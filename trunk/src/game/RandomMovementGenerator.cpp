@@ -37,8 +37,7 @@ void
 RandomMovementGenerator<Creature>::Initialize(Creature &creature)
 {
     float x,y,z,z2, wander_distance;
-    creature.GetRespawnCoord(x, y, z);
-    creature.GetRespawnDist(wander_distance);
+    creature.GetRespawnCoord(x, y, z,NULL,&wander_distance);
     uint32 mapid=creature.GetMapId();
 
     Map const* map = MapManager::Instance().GetBaseMap(mapid);

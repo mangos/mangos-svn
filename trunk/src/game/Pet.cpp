@@ -1542,9 +1542,6 @@ void Pet::ToggleAutocast(uint32 spellid, bool apply)
 
 bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry, uint32 pet_number)
 {
-    respawn_cord[0] = x;
-    respawn_cord[1] = y;
-    respawn_cord[2] = z;
     SetMapId(mapid);
     Relocate(x,y,z);
 

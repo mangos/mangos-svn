@@ -54,8 +54,6 @@ m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL)
 {
     m_valuesCount = UNIT_END;
 
-    for(int i =0; i<3; ++i) respawn_cord[i] = 0.0f;
-
     for(int i =0; i<4; ++i)
         m_spells[i] = 0;
 
@@ -151,9 +149,9 @@ void Creature::RemoveCorpse()
     loot.clear();
     m_respawnTime = time(NULL) + m_respawnDelay;
 
-    float x,y,z;
-    GetRespawnCoord(x, y, z);
-    MapManager::Instance().GetMap(GetMapId(), this)->CreatureRelocation(this,x,y,z,GetOrientation());
+    float x,y,z,o;
+    GetRespawnCoord(x, y, z, &o);
+    MapManager::Instance().GetMap(GetMapId(), this)->CreatureRelocation(this,x,y,z,o);
 }
 
 void Creature::Update(uint32 diff)
@@ -370,9 +368,6 @@ bool Creature::AIM_Initialize()
 
 bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry, uint32 team, const CreatureData *data)
 {
-    respawn_cord[0] = x;
-    respawn_cord[1] = y;
-    respawn_cord[2] = z;
     SetMapId(mapid);
     Relocate(x,y,z);
 
@@ -964,10 +959,6 @@ void Creature::SaveToDB()
     data.spawntimesecs = m_respawnDelay;
     data.spawndist = m_respawnradius;
     data.currentwaypoint = 0;
-    data.spawn_posX = respawn_cord[0];
-    data.spawn_posY = respawn_cord[1];
-    data.spawn_posZ = respawn_cord[2];
-    data.spawn_orientation = GetOrientation();
     data.curhealth = GetHealth();
     data.curmana = GetPower(POWER_MANA);
     data.is_dead = m_isDeadByDefault;
@@ -990,12 +981,8 @@ void Creature::SaveToDB()
         << GetPositionZ() << ","
         << GetOrientation() << ","
         << m_respawnDelay << ","                            //respawn time
-        << (float) 0  << ","                                //spawn distance (float)
+        << (float) m_respawnradius << ","                   //spawn distance (float)
         << (uint32) (0) << ","                              //currentwaypoint
-        << respawn_cord[0] << ","                           //spawn_position_x
-        << respawn_cord[1] << ","                           //spawn_position_y
-        << respawn_cord[2] << ","                           //spawn_position_z
-        << (float)(0) << ","                                //spawn_orientation
         << GetHealth() << ","                               //curhealth
         << GetPower(POWER_MANA) << ","                      //curmana
         << (m_isDeadByDefault ? 1 : 0) << ","               //is_dead
@@ -1256,9 +1243,6 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
         this->m_corpseDelay *= 3;                           //if creature is elite, then remove corpse later
 
     m_respawnradius = data->spawndist;
-    respawn_cord[0] = data->spawn_posX;
-    respawn_cord[1] = data->spawn_posY;
-    respawn_cord[2] = data->spawn_posZ;
 
     m_respawnDelay = data->spawntimesecs;
     m_isDeadByDefault = data->is_dead;
@@ -1810,4 +1794,27 @@ bool Creature::HasSpell(uint32 spellID) const
         if(spellID == m_spells[i])
             break;
     return i < CREATURE_MAX_SPELLS;                         //broke before end of iteration of known spells
+}
+
+void Creature::GetRespawnCoord( float &x, float &y, float &z, float* ori, float* dist ) const
+{
+    if(CreatureData const* data = objmgr.GetCreatureData(GetDBTableGUIDLow()))
+    {
+        x = data->posX;
+        y = data->posY;
+        z = data->posZ;
+        if(ori)
+            *ori = data->orientation;
+        if(dist)
+            *dist = data->spawndist;
+    }
+    else
+    {
+        if(isPet())
+            sLog.outError("Creature::GetRespawnCoord: Pet spawn coordinates requested??.");
+        else if(isTotem())
+            sLog.outError("Creature::GetRespawnCoord: Pet spawn coordinates requested??.");
+        else
+            sLog.outError("Creature::GetRespawnCoord: Creature (DBGUIDLow: %u Entry: %u ) not found in DB.",GetDBTableGUIDLow(),GetEntry());
+    }
 }

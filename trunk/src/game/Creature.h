@@ -237,10 +237,6 @@ struct CreatureData
     uint32 spawntimesecs;
     float spawndist;
     uint32 currentwaypoint;
-    float spawn_posX;
-    float spawn_posY;
-    float spawn_posZ;
-    float spawn_orientation;
     uint32 curhealth;
     uint32 curmana;
     bool  is_dead;
@@ -319,12 +315,10 @@ class MANGOS_DLL_SPEC Creature : public Unit
         char const* GetSubName() const { return GetCreatureInfo()->SubName; }
 
         void Update( uint32 time );                         // overwrited Unit::Update
-        void GetRespawnCoord(float &x, float &y, float &z) const { x = respawn_cord[0]; y = respawn_cord[1]; z = respawn_cord[2]; }
-        void GetRespawnDist(float &d) const { d = m_respawnradius; }
+        void GetRespawnCoord(float &x, float &y, float &z, float* ori = NULL, float* dist =NULL) const;
         uint32 GetEquipmentId() const { return m_equipmentId; }
 
         bool isPet() const { return m_isPet; }
-        void SetRespawnCoord(float x, float y, float z) { respawn_cord[0] = x; respawn_cord[1] = y; respawn_cord[2] = z; }
         void SetCorpseDelay(uint32 delay) { m_corpseDelay = delay; }
         bool isTotem() const { return m_isTotem; }
         bool isRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
@@ -553,8 +547,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool m_gossipOptionLoaded;
         GossipOptionList m_goptions;
         uint32 m_NPCTextId;                                 // cached value
-
-        float respawn_cord[3];
 
         uint8 m_emoteState;
         bool m_isPet;                                       // set only in Pet::Pet

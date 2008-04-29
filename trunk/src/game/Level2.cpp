@@ -948,14 +948,21 @@ bool ChatHandler::HandleMoveCreatureCommand(const char* args)
     {
         lowguid = pCreature->GetDBTableGUIDLow();
     }
-    float x, y, z, o;
-    x = m_session->GetPlayer()->GetPositionX();
-    y = m_session->GetPlayer()->GetPositionY();
-    z = m_session->GetPlayer()->GetPositionZ();
-    o = m_session->GetPlayer()->GetOrientation();
+
+    float x = m_session->GetPlayer()->GetPositionX();
+    float y = m_session->GetPlayer()->GetPositionY();
+    float z = m_session->GetPlayer()->GetPositionZ();
+    float o = m_session->GetPlayer()->GetOrientation();
+
     if (pCreature)
     {
-        pCreature->SetRespawnCoord(x, y, z);
+        if(CreatureData const* data = objmgr.GetCreatureData(pCreature->GetDBTableGUIDLow()))
+        {
+            const_cast<CreatureData*>(data)->posX = x;
+            const_cast<CreatureData*>(data)->posY = y;
+            const_cast<CreatureData*>(data)->posZ = z;
+            const_cast<CreatureData*>(data)->orientation = o;
+        }
         MapManager::Instance().GetMap(pCreature->GetMapId(),pCreature)->CreatureRelocation(pCreature,x, y, z,o);
         pCreature->GetMotionMaster()->Initialize();
         if(pCreature->isAlive())                            // dead creature will reset movement generator at respawn
@@ -966,7 +973,7 @@ bool ChatHandler::HandleMoveCreatureCommand(const char* args)
         }
     }
 
-    WorldDatabase.PExecuteLog("UPDATE creature SET spawn_position_x = '%f', spawn_position_y = '%f', spawn_position_z = '%f', spawn_orientation = '%f',position_x = '%f', position_y = '%f', position_z = '%f', orientation = '%f' WHERE guid = '%u'", x, y, z, o, x, y, z, o, lowguid);
+    WorldDatabase.PExecuteLog("UPDATE creature SET position_x = '%f', position_y = '%f', position_z = '%f', orientation = '%f',position_x = '%f', position_y = '%f', position_z = '%f', orientation = '%f' WHERE guid = '%u'", x, y, z, o, x, y, z, o, lowguid);
     PSendSysMessage(LANG_COMMAND_CREATUREMOVED);
     return true;
 }
