@@ -1810,11 +1810,12 @@ void Creature::GetRespawnCoord( float &x, float &y, float &z, float* ori, float*
     }
     else
     {
-        if(isPet())
-            sLog.outError("Creature::GetRespawnCoord: Pet spawn coordinates requested??.");
-        else if(isTotem())
-            sLog.outError("Creature::GetRespawnCoord: Pet spawn coordinates requested??.");
-        else
-            sLog.outError("Creature::GetRespawnCoord: Creature (DBGUIDLow: %u Entry: %u ) not found in DB.",GetDBTableGUIDLow(),GetEntry());
+        x = GetPositionX();
+        y = GetPositionY();
+        z = GetPositionZ();
+        if(ori)
+            *ori = GetOrientation();
+        if(dist)
+            *dist = 0;
     }
 }
