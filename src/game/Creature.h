@@ -374,6 +374,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool HasSpell(uint32 spellID) const;
 
+
+        bool UpdateEntry(uint32 entry, uint32 team=ALLIANCE, const CreatureData* data=NULL);
         bool UpdateStats(Stats stat);
         bool UpdateAllStats();
         void UpdateResistances(uint32 school);
@@ -565,6 +567,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool m_isDeadByDefault;
 
         SpellSchoolMask m_meleeDamageSchoolMask;
+        uint32 m_originalEntry;
     private:
         GridReference<Creature> m_gridRef;
 };

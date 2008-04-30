@@ -4449,6 +4449,29 @@ bool ChatHandler::HandleLoadPDumpCommand(const char *args)
     return true;
 }
 
+bool ChatHandler::HandleChangeEntryCommand(const char *args)
+{
+    if(!args)
+        return false;
+
+    char* newEntry = strtok((char*)args, " ");
+    uint32 newEntryNum = atoi(newEntry);
+    if(!newEntry || !newEntryNum)
+        return false;
+
+    Unit* unit = getSelectedUnit();
+    if(!unit || unit->GetTypeId() != TYPEID_UNIT)
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
+        return true;
+    }
+    Creature* creature = (Creature*)unit;
+    if(creature->UpdateEntry(newEntryNum))
+        SendSysMessage(LANG_DONE);
+    else
+        SendSysMessage(LANG_ERROR);
+    return true;
+}
 bool ChatHandler::HandleWritePDumpCommand(const char *args)
 {
     if(!args)
