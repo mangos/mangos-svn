@@ -154,6 +154,108 @@ void Creature::RemoveCorpse()
     MapManager::Instance().GetMap(GetMapId(), this)->CreatureRelocation(this,x,y,z,o);
 }
 
+/**
+ * change the entry of creature until respawn
+ */
+bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
+{
+    CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(Entry);
+    if(!cinfo)
+    {
+        sLog.outErrorDb("Creature::UpdateEntry creature entry %u does not exist.", Entry);
+        return false;
+    }
+    
+    SetUInt32Value(OBJECT_FIELD_ENTRY, Entry);
+    m_regenHealth = cinfo->RegenHealth;
+    if (cinfo->DisplayID_A == 0 || cinfo->DisplayID_H == 0) // Cancel load if no model defined
+    {
+        sLog.outErrorDb("Creature (Entry: %u) has no model defined for Horde or Alliance in table `creature_template`, can't load. ",Entry);
+        return false;
+    }
+    uint32 display_id = objmgr.ChooseDisplayId(team, cinfo, data);
+    CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(display_id);
+    if (!minfo)
+    {
+        sLog.outErrorDb("Creature (Entry: %u) has model %u not found in table `creature_model_info`, can't load. ", Entry, display_id);
+        return false;
+    }
+    else
+        display_id = minfo->modelid;                        // it can be different (for another gender)
+
+    SetDisplayId(display_id);
+    SetNativeDisplayId(display_id);
+    SetByteValue(UNIT_FIELD_BYTES_2, 0, 1);                 // let creature use equiped weapon in fight
+    SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
+
+    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
+    SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );
+    // Load creature equipment
+    if(!data || data->equipmentId == 0)
+    {                                                       // use default from the template
+        if(!LoadEquipment(cinfo->equipmentId))
+            sLog.outErrorDb("Creature (Entry: %u) has equipment_id %u (default from creature template) not found in table `creature_equip_template`.", Entry, cinfo->equipmentId);
+    }
+    else if(data && data->equipmentId != -1)
+    {                                                       // override, -1 means no equipment
+        if(!LoadEquipment(data->equipmentId))
+            sLog.outErrorDb("Creature (Entry: %u) has equipment_id %u (override from creature data) not found in table `equipment`. ", data->id, data->equipmentId);
+    }
+
+    SetName(cinfo->Name);
+    SelectLevel(cinfo);
+    if (team == HORDE)
+        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, cinfo->faction_H);
+    else
+        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, cinfo->faction_A);
+
+    SetUInt32Value(UNIT_NPC_FLAGS,cinfo->npcflag);
+
+    SetAttackTime(BASE_ATTACK,  cinfo->baseattacktime);
+    SetAttackTime(RANGED_ATTACK,cinfo->rangeattacktime);
+
+    SetUInt32Value(UNIT_FIELD_FLAGS,cinfo->Flags);
+    SetUInt32Value(UNIT_DYNAMIC_FLAGS,cinfo->dynamicflags);
+
+    SetModifierValue(UNIT_MOD_ARMOR,             BASE_VALUE, float(cinfo->armor));
+    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY,   BASE_VALUE, float(cinfo->resistance1));
+    SetModifierValue(UNIT_MOD_RESISTANCE_FIRE,   BASE_VALUE, float(cinfo->resistance2));
+    SetModifierValue(UNIT_MOD_RESISTANCE_NATURE, BASE_VALUE, float(cinfo->resistance3));
+    SetModifierValue(UNIT_MOD_RESISTANCE_FROST,  BASE_VALUE, float(cinfo->resistance4));
+    SetModifierValue(UNIT_MOD_RESISTANCE_SHADOW, BASE_VALUE, float(cinfo->resistance5));
+    SetModifierValue(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(cinfo->resistance6));
+
+    SetCanModifyStats(true);
+    UpdateAllStats();
+    SetFloatValue(OBJECT_FIELD_SCALE_X, cinfo->scale);
+
+    FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cinfo->faction_A);
+    if (factionTemplate)                                    // check and error show at loading templates
+    {
+        FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction);
+        if (factionEntry)
+            if (!cinfo->civilian && (factionEntry->team == ALLIANCE || factionEntry->team == HORDE))
+                SetPvP(true);
+    }
+
+    m_spells[0] = cinfo->spell1;
+    m_spells[1] = cinfo->spell2;
+    m_spells[2] = cinfo->spell3;
+    m_spells[3] = cinfo->spell4;
+
+    SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
+
+    SetSpeed(MOVE_WALK,     cinfo->speed );
+    SetSpeed(MOVE_RUN,      cinfo->speed );
+    SetSpeed(MOVE_WALKBACK, cinfo->speed );
+    SetSpeed(MOVE_SWIM,     cinfo->speed );
+    SetSpeed(MOVE_SWIMBACK, cinfo->speed );
+
+    // checked at loading
+    m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
+    return true;
+}
+
 void Creature::Update(uint32 diff)
 {
     if(m_GlobalCooldown <= diff)
@@ -179,6 +281,9 @@ void Creature::Update(uint32 diff)
                 m_respawnTime = 0;
                 lootForPickPocketed = false;
                 lootForBody         = false;
+
+                if(m_originalEntry != GetUInt32Value(OBJECT_FIELD_ENTRY))
+                    UpdateEntry(m_originalEntry);
 
                 CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(this->GetEntry());
 
@@ -1105,106 +1210,14 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
         sLog.outErrorDb("Error: creature entry %u does not exist.", Entry);
         return false;
     }
+    m_originalEntry = Entry;
 
     Object::_Create(guidlow, Entry, HIGHGUID_UNIT);
 
     m_DBTableGuid = guidlow;
-
-    SetUInt32Value(OBJECT_FIELD_ENTRY, Entry);
-
-    if (cinfo->DisplayID_A == 0 || cinfo->DisplayID_H == 0) // Cancel load if no model defined
-    {
-        sLog.outErrorDb("Creature (Entry: %u) has no model defined for Horde or Alliance in table `creature_template`, can't load. ",Entry);
+    if(!UpdateEntry(Entry, team, data))
         return false;
-    }
 
-    m_regenHealth = cinfo->RegenHealth;
-
-    uint32 display_id = objmgr.ChooseDisplayId(team,cinfo,data);
-
-    CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(display_id);
-    if (!minfo)
-    {
-        sLog.outErrorDb("Creature (Entry: %u) has model %u not found in table `creature_model_info`, can't load. ", Entry, display_id);
-        return false;
-    }
-    else
-        display_id = minfo->modelid;                        // it can be different (for another gender)
-
-    SetDisplayId(display_id);
-    SetNativeDisplayId(display_id);
-    SetByteValue(UNIT_FIELD_BYTES_2, 0, 1);                 // let creature use equiped weapon in fight
-    SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
-
-    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
-    SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );
-
-    // Load creature equipment
-    if(!data || data->equipmentId == 0)
-    {                                                       // use default from the template
-        if(!LoadEquipment(cinfo->equipmentId))
-            sLog.outErrorDb("Creature (Entry: %u) has equipment_id %u (default from creature template) not found in table `creature_equip_template`.", Entry, cinfo->equipmentId);
-    }
-    else if(data && data->equipmentId != -1)
-    {                                                       // override, -1 means no equipment
-        if(!LoadEquipment(data->equipmentId))
-            sLog.outErrorDb("Creature (GUID: %u Entry: %u) has equipment_id %u (override from creature data) not found in table `equipment`. ", guidlow, data->id, data->equipmentId);
-    }
-
-    SetName(GetCreatureInfo()->Name);
-
-    SelectLevel(cinfo);
-
-    if (team == HORDE)
-        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, cinfo->faction_H);
-    else
-        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, cinfo->faction_A);
-
-    SetUInt32Value(UNIT_NPC_FLAGS,cinfo->npcflag);
-
-    SetAttackTime(BASE_ATTACK,  cinfo->baseattacktime);
-    SetAttackTime(RANGED_ATTACK,cinfo->rangeattacktime);
-
-    SetUInt32Value(UNIT_FIELD_FLAGS,cinfo->Flags);
-    SetUInt32Value(UNIT_DYNAMIC_FLAGS,cinfo->dynamicflags);
-
-    SetModifierValue(UNIT_MOD_ARMOR,             BASE_VALUE, float(cinfo->armor));
-    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY,   BASE_VALUE, float(cinfo->resistance1));
-    SetModifierValue(UNIT_MOD_RESISTANCE_FIRE,   BASE_VALUE, float(cinfo->resistance2));
-    SetModifierValue(UNIT_MOD_RESISTANCE_NATURE, BASE_VALUE, float(cinfo->resistance3));
-    SetModifierValue(UNIT_MOD_RESISTANCE_FROST,  BASE_VALUE, float(cinfo->resistance4));
-    SetModifierValue(UNIT_MOD_RESISTANCE_SHADOW, BASE_VALUE, float(cinfo->resistance5));
-    SetModifierValue(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(cinfo->resistance6));
-
-    SetCanModifyStats(true);
-    UpdateAllStats();
-
-    SetFloatValue(OBJECT_FIELD_SCALE_X, cinfo->scale);
-
-    FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cinfo->faction_A);
-    if (factionTemplate)                                    // check and error show at loading templates
-    {
-        FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction);
-        if (factionEntry)
-            if (!cinfo->civilian && (factionEntry->team == ALLIANCE || factionEntry->team == HORDE))
-                SetPvP(true);
-    }
-
-    m_spells[0] = cinfo->spell1;
-    m_spells[1] = cinfo->spell2;
-    m_spells[2] = cinfo->spell3;
-    m_spells[3] = cinfo->spell4;
-
-    SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
-
-    SetSpeed(MOVE_WALK,     cinfo->speed );
-    SetSpeed(MOVE_RUN,      cinfo->speed );
-    SetSpeed(MOVE_WALKBACK, cinfo->speed );
-    SetSpeed(MOVE_SWIM,     cinfo->speed );
-    SetSpeed(MOVE_SWIMBACK, cinfo->speed );
-
-    // checked at loading
-    m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
 
     //Notify the map's instance data.
     //Only works if you create the object in it, not if it is moves to that map.

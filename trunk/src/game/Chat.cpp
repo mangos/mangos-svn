@@ -313,6 +313,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "neargrave",      SEC_ADMINISTRATOR,  &ChatHandler::HandleNearGraveCommand,           "", NULL },
         { "transport",      SEC_ADMINISTRATOR,  &ChatHandler::HandleSpawnTransportCommand,      "", NULL },
         { "explorecheat",   SEC_ADMINISTRATOR,  &ChatHandler::HandleExploreCheatCommand,        "", NULL },
+        { "changeentry",    SEC_ADMINISTRATOR,  &ChatHandler::HandleChangeEntryCommand,        "", NULL },
         { "hover",          SEC_ADMINISTRATOR,  &ChatHandler::HandleHoverCommand,               "", NULL },
         { "levelup",        SEC_ADMINISTRATOR,  &ChatHandler::HandleLevelUpCommand,             "", NULL },
         { "playemote",      SEC_ADMINISTRATOR,  &ChatHandler::HandlePlayEmoteCommand,           "", NULL },
