@@ -270,7 +270,7 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_GuildIdInvited = 0;
     m_ArenaTeamIdInvited = 0;
 
-    m_dungeonDifficulty = DUNGEONDIFFICULTY_NORMAL;
+    m_dungeonDifficulty = DIFFICULTY_NORMAL;
 
     m_atLoginFlags = AT_LOGIN_NONE;
 
