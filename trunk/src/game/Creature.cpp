@@ -1027,6 +1027,20 @@ void Creature::SetLootRecipient(Player *player)
 
 void Creature::SaveToDB()
 {
+    // this should only be used when the creature has already been loaded
+    // perferably after adding to map, because mapid may not be valid otherwise
+    CreatureData const *data = objmgr.GetCreatureData(m_DBTableGuid);
+    if(!data)
+    {
+        sLog.outError("Creature::SaveToDB failed, cannot get creature data!");
+        return;
+    }
+
+    SaveToDB(GetMapId(), data->spawnMask);
+}
+
+void Creature::SaveToDB(uint32 mapid, uint8 spawnMask)
+{
     // update in loaded data
     CreatureData& data = objmgr.NewOrExistCreatureData(m_DBTableGuid);
 
@@ -1054,7 +1068,7 @@ void Creature::SaveToDB()
 
     // data->guid = guid don't must be update at save
     data.id = GetEntry();
-    data.mapid = GetMapId();
+    data.mapid = mapid;
     data.displayid = displayId;
     data.equipmentId = GetEquipmentId();
     data.posX = GetPositionX();
@@ -1068,17 +1082,19 @@ void Creature::SaveToDB()
     data.curmana = GetPower(POWER_MANA);
     data.is_dead = m_isDeadByDefault;
     data.movementType = GetDefaultMovementType();
+    data.spawnMask = spawnMask;
 
     // updated in DB
     WorldDatabase.BeginTransaction();
 
-    WorldDatabase.PExecuteLog("DELETE FROM `creature` WHERE guid = '%u'", m_DBTableGuid);
+    WorldDatabase.PExecuteLog("DELETE FROM creature WHERE guid = '%u'", m_DBTableGuid);
 
     std::ostringstream ss;
     ss << "INSERT INTO creature VALUES ("
         << m_DBTableGuid << ","
         << GetEntry() << ","
-        << GetMapId() <<","
+        << mapid <<","
+        << (uint32)spawnMask << ","
         << displayId <<","
         << GetEquipmentId() <<","
         << GetPositionX() << ","
@@ -1807,6 +1823,17 @@ bool Creature::HasSpell(uint32 spellID) const
         if(spellID == m_spells[i])
             break;
     return i < CREATURE_MAX_SPELLS;                         //broke before end of iteration of known spells
+}
+
+time_t Creature::GetRespawnTimeEx()
+{
+    time_t now = time(NULL);
+    if(m_respawnTime > now)                                 // dead (no corpse)
+        return m_respawnTime;
+    else if(m_deathTimer > 0)                               // dead (corpse)
+        return now+m_respawnDelay+m_deathTimer/1000;
+    else
+        return now;
 }
 
 void Creature::GetRespawnCoord( float &x, float &y, float &z, float* ori, float* dist ) const

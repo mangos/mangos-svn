@@ -102,7 +102,7 @@ struct CellObjectGuids
     CellCorpseSet corpses;
 };
 typedef HM_NAMESPACE::hash_map<uint32/*cell_id*/,CellObjectGuids> CellObjectGuidsMap;
-typedef HM_NAMESPACE::hash_map<uint32/*mapid*/,CellObjectGuidsMap> MapObjectGuids;
+typedef HM_NAMESPACE::hash_map<uint32/*(mapid,spawnMode) pair*/,CellObjectGuidsMap> MapObjectGuids;
 
 typedef HM_NAMESPACE::hash_map<uint64/*(instance,guid) pair*/,time_t> RespawnTimes;
 
@@ -495,9 +495,9 @@ class ObjectMgr
 
         OpcodeTableMap opcodeTable;
 
-        CellObjectGuids const& GetCellObjectGuids(uint32 mapid, uint32 cell_id)
+        CellObjectGuids const& GetCellObjectGuids(uint16 mapid, uint8 spawnMode, uint32 cell_id)
         {
-            return mMapObjectGuids[mapid][cell_id];
+            return mMapObjectGuids[mapid+(spawnMode<<16)][cell_id];
         }
 
         CreatureData const* GetCreatureData(uint32 guid) const
