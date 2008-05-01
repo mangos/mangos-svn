@@ -71,6 +71,7 @@ class MANGOS_DLL_SPEC Database
         virtual bool Execute(const char *sql) = 0;
         bool PExecute(const char *format,...) ATTR_PRINTF(2,3);
         virtual bool DirectExecute(const char* sql) = 0;
+        bool DirectPExecute(const char *format,...) ATTR_PRINTF(2,3);
 
         // Writes SQL commands to a LOG file (see mangosd.conf "LogSQL")
         bool PExecuteLog(const char *format,...) ATTR_PRINTF(2,3);

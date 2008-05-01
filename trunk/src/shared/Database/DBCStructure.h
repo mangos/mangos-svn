@@ -360,6 +360,15 @@ struct LockEntry
                                                             // 19-32, not used
 };
 
+enum MapTypes
+{
+    MAP_COMMON          = 0,
+    MAP_INSTANCE        = 1,
+    MAP_RAID            = 2,
+    MAP_BATTLEGROUND    = 3,
+    MAP_ARENA           = 4
+};
+
 struct MapEntry
 {
     uint32      MapID;                                      // 0
@@ -387,8 +396,14 @@ struct MapEntry
     int32       parent_map;                                 // 117 map_id of parent map
     //float start_x                                         // 118 enter x coordinate (if exist single entry)
     //float start_y                                         // 119 enter y coordinate (if exist single entry)
-                                                            // 120-123
+    uint32 resetTimeRaid;                                   // 120
+    uint32 resetTimeHeroic;                                 // 121
+                                                            // 122-123
     uint32      addon;                                      // 124 (0-original maps,1-tbc addon)
+
+    inline bool IsDungeon() const { return map_type == MAP_INSTANCE || map_type == MAP_RAID; }
+    inline bool SupportsHeroicMode() const { return resetTimeHeroic && !resetTimeRaid; }
+    inline bool HasResetTime() const { return resetTimeHeroic || resetTimeRaid; }
 };
 
 inline bool IsExpansionMap(MapEntry const* map)
