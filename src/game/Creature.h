@@ -227,7 +227,7 @@ struct EquipmentInfo
 struct CreatureData
 {
     uint32 id;                                              // entry in creature_template
-    uint32 mapid;
+    uint16 mapid;
     uint32 displayid;
     int32 equipmentId;
     float posX;
@@ -241,6 +241,7 @@ struct CreatureData
     uint32 curmana;
     bool  is_dead;
     uint8 movementType;
+    uint8 spawnMask;
 };
 
 struct CreatureDataAddonAura
@@ -457,8 +458,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void setDeathState(DeathState s);                   // overwrite virtual Unit::setDeathState
 
         bool LoadFromDB(uint32 guid, uint32 InstanceId);
-        virtual void SaveToDB();                            // overwrited in Pet
-        virtual void DeleteFromDB();                        // overwrited in Pet
+        void SaveToDB();
+        virtual void SaveToDB(uint32 mapid, uint8 spawnMask); // overwrited in Pet
+        virtual void DeleteFromDB();                          // overwrited in Pet
 
         Loot loot;
         bool lootForPickPocketed;
@@ -491,6 +493,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void RemoveCorpse();
 
         time_t const& GetRespawnTime() const { return m_respawnTime; }
+        time_t GetRespawnTimeEx();
         void SetRespawnTime(uint32 respawn) { m_respawnTime = respawn ? time(NULL) + respawn : 0; }
         void Respawn();
         void SaveRespawnTime();

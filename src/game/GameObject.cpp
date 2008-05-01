@@ -455,6 +455,20 @@ void GameObject::getFishLoot(Loot *fishloot)
 
 void GameObject::SaveToDB()
 {
+    // this should only be used when the creature has already been loaded
+    // perferably after adding to map, because mapid may not be valid otherwise
+    GameObjectData const *data = objmgr.GetGOData(m_DBTableGuid);
+    if(!data)
+    {
+        sLog.outError("GameObject::SaveToDB failed, cannot get gameobject data!");
+        return;
+    }
+
+    SaveToDB(GetMapId(), data->spawnMask);
+}
+
+void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask)
+{
     const GameObjectInfo *goI = GetGOInfo();
 
     if (!goI)
@@ -465,7 +479,7 @@ void GameObject::SaveToDB()
 
     // data->guid = guid don't must be update at save
     data.id = GetEntry();
-    data.mapid = GetMapId();
+    data.mapid = mapid;
     data.posX = GetFloatValue(GAMEOBJECT_POS_X);
     data.posY = GetFloatValue(GAMEOBJECT_POS_Y);
     data.posZ = GetFloatValue(GAMEOBJECT_POS_Z);
@@ -477,13 +491,15 @@ void GameObject::SaveToDB()
     data.spawntimesecs = m_spawnedByDefault ? m_respawnDelayTime : -(int32)m_respawnDelayTime;
     data.animprogress = GetUInt32Value (GAMEOBJECT_ANIMPROGRESS);
     data.go_state = GetUInt32Value (GAMEOBJECT_STATE);
+    data.spawnMask = spawnMask;
 
     // updated in DB
     std::ostringstream ss;
     ss << "INSERT INTO gameobject VALUES ( "
         << m_DBTableGuid << ", "
         << GetUInt32Value (OBJECT_FIELD_ENTRY) << ", "
-        << GetMapId() << ", "
+        << mapid << ", "
+        << (uint32)spawnMask << ", "
         << GetFloatValue(GAMEOBJECT_POS_X) << ", "
         << GetFloatValue(GAMEOBJECT_POS_Y) << ", "
         << GetFloatValue(GAMEOBJECT_POS_Z) << ", "

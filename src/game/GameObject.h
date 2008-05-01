@@ -197,6 +197,7 @@ struct GameObjectData
     int32  spawntimesecs;
     uint32 animprogress;
     uint32 go_state;
+    uint8 spawnMask;
 };
 
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform
@@ -255,6 +256,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void Whisper(const uint64 receiver, const char* text) { MonsterWhisper(receiver,text); }
 
         void SaveToDB();
+        void SaveToDB(uint32 mapid, uint8 spawnMask);
         bool LoadFromDB(uint32 guid, uint32 InstanceId);
         void DeleteFromDB();
         void SetLootState(LootState s) { m_lootState = s; }

@@ -203,6 +203,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         std::string GetScript() { return i_script; }
         InstanceData* GetInstanceData() { return i_data; }
         uint32 GetInstanceId() { return i_InstanceId; }
+        uint8 GetSpawnMode() { return 0; }
         bool NeedsReset() { return Instanceable() && ( i_resetTime == 0 || i_resetTime <= time(NULL)); }
         uint32 GetPlayersCountExceptGMs() const;
         uint32 HavePlayers() const { return !i_Players.empty(); }

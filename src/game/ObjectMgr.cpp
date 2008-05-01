@@ -731,9 +731,10 @@ void ObjectMgr::LoadCreatures()
     QueryResult *result = WorldDatabase.Query("SELECT creature.guid, id, map, modelid,"
     //   4             5           6           7           8            9              10         11
         "equipment_id, position_x, position_y, position_z, orientation, spawntimesecs, spawndist, currentwaypoint,"
-    //   12         13       14          15            16
-        "curhealth, curmana, DeathState, MovementType, event "
-        "FROM creature LEFT OUTER JOIN game_event_creature ON creature.guid=game_event_creature.guid");
+    //   12         13       14          15            16         17
+        "curhealth, curmana, DeathState, MovementType, spawnMask, event "
+        "FROM creature LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid");
+
 
     if(!result)
     {
@@ -772,7 +773,8 @@ void ObjectMgr::LoadCreatures()
         data.curmana        = fields[13].GetUInt32();
         data.is_dead        = fields[14].GetBool();
         data.movementType   = fields[15].GetUInt8();
-        int16 gameEvent     = fields[16].GetInt16();
+        data.spawnMask      = fields[16].GetUInt8();
+        int16 gameEvent     = fields[17].GetInt16();
 
         if (gameEvent==0)                                   // if not this is to be managed by GameEvent System
             AddCreatureToGrid(guid, &data);
@@ -788,31 +790,45 @@ void ObjectMgr::LoadCreatures()
 
 void ObjectMgr::AddCreatureToGrid(uint32 guid, CreatureData const* data)
 {
-    CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
-    uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+    uint8 mask = data->spawnMask;
+    for(uint8 i = 0; mask != 0; i++, mask >>= 1)
+    {
+        if(mask & 1)
+        {
+            CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
+            uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-    CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid][cell_id];
-    cell_guids.creatures.insert(guid);
+            CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid+(i << 16)][cell_id];
+            cell_guids.creatures.insert(guid);
+        }
+    }
 }
 
 void ObjectMgr::RemoveCreatureFromGrid(uint32 guid, CreatureData const* data)
 {
-    CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
-    uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+    uint8 mask = data->spawnMask;
+    for(uint8 i = 0; mask != 0; i++, mask >>= 1)
+    {
+        if(mask & 1)
+        {
+            CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
+            uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-    CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid][cell_id];
-    cell_guids.creatures.erase(guid);
+            CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid+(i << 16)][cell_id];
+            cell_guids.creatures.erase(guid);
+        }
+    }
 }
 
 void ObjectMgr::LoadGameobjects()
 {
     uint32 count = 0;
 
-    //                                                         0       1   2    3           4           5           6
+    //                                                0                1   2    3           4           5           6
     QueryResult *result = WorldDatabase.Query("SELECT gameobject.guid, id, map, position_x, position_y, position_z, orientation,"
-    //   7          8          9          10         11             12            13     14
-        "rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state, event "
-        "FROM gameobject LEFT OUTER JOIN game_event_gameobject ON gameobject.guid=game_event_gameobject.guid");
+    //   7          8          9          10         11             12            13     14         15
+        "rotation0, rotation1, rotation2, rotation3, spawntimesecs, animprogress, state, spawnMask, event "
+        "FROM gameobject LEFT OUTER JOIN game_event_gameobject ON gameobject.guid = game_event_gameobject.guid");
 
     if(!result)
     {
@@ -849,7 +865,8 @@ void ObjectMgr::LoadGameobjects()
         data.spawntimesecs  = fields[11].GetInt32();
         data.animprogress   = fields[12].GetUInt32();
         data.go_state       = fields[13].GetUInt32();
-        int16 gameEvent     = fields[14].GetInt16();
+        data.spawnMask      = fields[14].GetUInt8();
+        int16 gameEvent     = fields[15].GetInt16();
 
         if (gameEvent==0)                                   // if not this is to be managed by GameEvent System
             AddGameobjectToGrid(guid, &data);
@@ -865,26 +882,40 @@ void ObjectMgr::LoadGameobjects()
 
 void ObjectMgr::AddGameobjectToGrid(uint32 guid, GameObjectData const* data)
 {
-    CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
-    uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+    uint8 mask = data->spawnMask;
+    for(uint8 i = 0; mask != 0; i++, mask >>= 1)
+    {
+        if(mask & 1)
+        {
+            CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
+            uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-    CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid][cell_id];
-    cell_guids.gameobjects.insert(guid);
+            CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid+(i << 16)][cell_id];
+            cell_guids.gameobjects.insert(guid);
+        }
+    }
 }
 
 void ObjectMgr::RemoveGameobjectFromGrid(uint32 guid, GameObjectData const* data)
 {
-    CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
-    uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+    uint8 mask = data->spawnMask;
+    for(uint8 i = 0; mask != 0; i++, mask >>= 1)
+    {
+        if(mask & 1)
+        {
+            CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
+            uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-    CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid][cell_id];
-    cell_guids.gameobjects.erase(guid);
+            CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid+(i << 16)][cell_id];
+            cell_guids.gameobjects.erase(guid);
+        }
+    }
 }
 
 void ObjectMgr::LoadCreatureRespawnTimes()
 {
     // remove outdated data
-    WorldDatabase.Execute("DELETE FROM creature_respawn WHERE respawntime <= UNIX_TIMESTAMP(NOW())");
+    WorldDatabase.DirectExecute("DELETE FROM creature_respawn WHERE respawntime <= UNIX_TIMESTAMP(NOW())");
 
     uint32 count = 0;
 
@@ -926,7 +957,7 @@ void ObjectMgr::LoadCreatureRespawnTimes()
 void ObjectMgr::LoadGameobjectRespawnTimes()
 {
     // remove outdated data
-    WorldDatabase.Execute("DELETE FROM gameobject_respawn WHERE respawntime <= UNIX_TIMESTAMP(NOW())");
+    WorldDatabase.DirectExecute("DELETE FROM gameobject_respawn WHERE respawntime <= UNIX_TIMESTAMP(NOW())");
 
     uint32 count = 0;
 
@@ -5044,13 +5075,7 @@ void ObjectMgr::DeleteCreatureData(uint32 guid)
     // remove mapid*cellid -> guid_set map
     CreatureData const* data = GetCreatureData(guid);
     if(data)
-    {
-        CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
-        uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
-
-        CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid][cell_id];
-        cell_guids.creatures.erase(guid);
-    }
+        RemoveCreatureFromGrid(guid, data);
 
     mCreatureDataMap.erase(guid);
 }
@@ -5094,25 +5119,21 @@ void ObjectMgr::DeleteGOData(uint32 guid)
     // remove mapid*cellid -> guid_set map
     GameObjectData const* data = GetGOData(guid);
     if(data)
-    {
-        CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
-        uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
-
-        CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid][cell_id];
-        cell_guids.gameobjects.erase(guid);
-    }
+        RemoveGameobjectFromGrid(guid, data);
 
     mGameObjectDataMap.erase(guid);
 }
 
 void ObjectMgr::AddCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid, uint32 instance)
 {
+    // corpses are always added to spawn mode 0 and they are spawned by their instance id
     CellObjectGuids& cell_guids = mMapObjectGuids[mapid][cellid];
     cell_guids.corpses[player_guid] = instance;
 }
 
 void ObjectMgr::DeleteCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid)
 {
+    // corpses are always added to spawn mode 0 and they are spawned by their instance id
     CellObjectGuids& cell_guids = mMapObjectGuids[mapid][cellid];
     cell_guids.corpses.erase(player_guid);
 }
