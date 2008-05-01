@@ -97,15 +97,6 @@ enum ReputationRank
 #define MIN_REPUTATION_RANK (REP_HATED)
 #define MAX_REPUTATION_RANK 8
 
-enum MapTypes
-{
-    MAP_COMMON          = 0,
-    MAP_INSTANCE        = 1,
-    MAP_RAID            = 2,
-    MAP_BATTLEGROUND    = 3,
-    MAP_ARENA           = 4
-};
-
 enum MoneyConstants
 {
     COPPER = 1,
@@ -1665,5 +1656,12 @@ enum AiReaction
     AI_REACTION_AGGRO   = 2,
     AI_REACTION_UNK3    = 3,
     AI_REACTION_UNK4    = 4
+};
+
+enum DungeonDifficulties
+{
+    DIFFICULTY_NORMAL = 0,
+    DIFFICULTY_HEROIC = 1,
+    TOTAL_DIFFICULTIES
 };
 #endif
