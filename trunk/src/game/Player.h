@@ -463,12 +463,6 @@ enum ActivateTaxiReplies
     ERR_TAXINOTSTANDING             = 12
 };
 
-enum DungeonDifficulties
-{
-    DUNGEONDIFFICULTY_NORMAL = 0,
-    DUNGEONDIFFICULTY_HEROIC = 1
-};
-
 enum LootType
 {
     LOOT_CORPSE                 = 1,
