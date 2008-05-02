@@ -251,6 +251,7 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_unit_movement_flags = MOVEMENT_FLAG_RUN;
 
     m_resurrectGUID = 0;
+    m_resurrectMap = 0;
     m_resurrectX = m_resurrectY = m_resurrectZ = 0;
     m_resurrectHealth = m_resurrectMana = 0;
 
