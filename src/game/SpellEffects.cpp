@@ -229,7 +229,7 @@ void Spell::EffectResurrectNew(uint32 i)
 
     uint32 health = m_currentBasePoints[i]+1;
     uint32 mana = m_spellInfo->EffectMiscValue[i];
-    ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+    ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
     SendResurrectRequest((Player*)unitTarget);
 }
 
@@ -4463,7 +4463,7 @@ void Spell::EffectResurrect(uint32 i)
     uint32 health = m_currentBasePoints[i]+1;
     uint32 mana = m_spellInfo->EffectMiscValue[i];
 
-    ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+    ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
     SendResurrectRequest(pTarget);
 }
 

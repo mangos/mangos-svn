@@ -1417,9 +1417,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadSpellCooldowns(QueryResult *result);
         void _SaveSpellCooldowns();
 
-        void setResurrect(uint64 guid,float X, float Y, float Z, uint32 health, uint32 mana)
+        void setResurrect(uint64 guid, uint32 mapId, float X, float Y, float Z, uint32 health, uint32 mana)
         {
             m_resurrectGUID = guid;
+            m_resurrectMap = mapId;
             m_resurrectX = X;
             m_resurrectY = Y;
             m_resurrectZ = Z;
@@ -2070,6 +2071,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         ItemDurationList m_itemDuration;
 
         uint64 m_resurrectGUID;
+        uint32 m_resurrectMap;
         float m_resurrectX, m_resurrectY, m_resurrectZ;
         uint32 m_resurrectHealth, m_resurrectMana;
 

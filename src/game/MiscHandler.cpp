@@ -792,7 +792,7 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
     if(status == 0)
         return;
 
-    if(GetPlayer()->m_resurrectGUID == 0)
+    if(GetPlayer()->m_resurrectGUID == 0 || GetPlayer()->m_resurrectGUID != guid)
         return;
 
     GetPlayer()->ResurrectPlayer(0.0f,false);
@@ -813,9 +813,10 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
 
     GetPlayer()->SpawnCorpseBones();
 
-    GetPlayer()->TeleportTo(GetPlayer()->GetMapId(), GetPlayer()->m_resurrectX, GetPlayer()->m_resurrectY, GetPlayer()->m_resurrectZ, GetPlayer()->GetOrientation());
+    GetPlayer()->TeleportTo(GetPlayer()->m_resurrectMap, GetPlayer()->m_resurrectX, GetPlayer()->m_resurrectY, GetPlayer()->m_resurrectZ, GetPlayer()->GetOrientation());
 
     GetPlayer()->m_resurrectGUID = 0;
+    GetPlayer()->m_resurrectMap = 0;
     GetPlayer()->m_resurrectHealth = GetPlayer()->m_resurrectMana = 0;
     GetPlayer()->m_resurrectX = GetPlayer()->m_resurrectY = GetPlayer()->m_resurrectZ = 0;
 
