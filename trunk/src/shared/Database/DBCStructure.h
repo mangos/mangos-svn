@@ -150,11 +150,16 @@ struct CreatureDisplayInfoEntry
 struct CreatureFamilyEntry
 {
     uint32    ID;                                           // 0
-                                                            // 1-5 unused
-    uint32    tamable;                                      // 6 if this = 270 then "is tamable Creature" (or 0 is non-tamable)
+                                                            // 1 bitmask, unused
+                                                            // 2 0/1 unused
+                                                            // 3 bitmask, unused
+                                                            // 4 0/60, unused
+                                                            // 5 skillID, unused
+    uint32    tamable;                                      // 6 if this = 270 then "is tamable Creature" (or 0 is non-tamable); skillID2
     uint32    petFoodMask;                                  // 7
     char*     Name[16];                                     // 8-23
                                                             // 24 string flags, unused
+                                                            // 25 icon, unused
 };
 
 struct DurabilityCostsEntry

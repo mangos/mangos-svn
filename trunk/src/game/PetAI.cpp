@@ -255,7 +255,7 @@ void PetAI::UpdateAI(const uint32 diff)
                 Unit* Target = ObjectAccessor::GetUnit(i_pet,*tar);
 
                 //only buff targets that are in combat, unless the spell can only be cast while out of combat
-                if(!Target || (!Target->isInCombat() && !IsNonCombatSpell(spellID)))
+                if(!Target || (!Target->isInCombat() && !IsNonCombatSpell(spellInfo)))
                     continue;
                 if(spell->CanAutoCast(Target))
                     targetMap[spellID] = Target;

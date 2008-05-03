@@ -71,10 +71,13 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     {
         for(int i = 0; i < 5; ++i)
         {
-            if (IsNonCombatSpell(proto->Spells[i].SpellId))
+            if (SpellEntry const *spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId))
             {
-                pUser->SendEquipError(EQUIP_ERR_NOT_IN_COMBAT,pItem,NULL);
-                return;
+                if (IsNonCombatSpell(spellInfo))
+                {
+                    pUser->SendEquipError(EQUIP_ERR_NOT_IN_COMBAT,pItem,NULL);
+                    return;
+                }
             }
         }
     }

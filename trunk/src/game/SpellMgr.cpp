@@ -38,38 +38,6 @@ SpellMgr& SpellMgr::Instance()
     return spellMgr;
 }
 
-float GetSpellRadius(SpellRadiusEntry const *radius)
-{
-    if(radius)
-        return radius->Radius;
-    else
-        return 0;
-}
-
-uint32 GetSpellCastTime(SpellCastTimesEntry const *time)
-{
-    if(time)
-        return time->CastTime;
-    else
-        return 0;
-}
-
-float GetSpellMaxRange(SpellRangeEntry const *range)
-{
-    if(range)
-        return range->maxRange;
-    else
-        return 0;
-}
-
-float GetSpellMinRange(SpellRangeEntry const *range)
-{
-    if(range)
-        return range->minRange;
-    else
-        return 0;
-}
-
 int32 GetSpellDuration(SpellEntry const *spellInfo)
 {
     if(!spellInfo)
@@ -96,14 +64,6 @@ bool IsPassiveSpell(uint32 spellId)
     if (!spellInfo)
         return false;
     return (spellInfo->Attributes & (1<<6)) != 0;
-}
-
-bool IsNonCombatSpell(uint32 spellId)
-{
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-    if (!spellInfo)
-        return false;
-    return (spellInfo->Attributes & (1<<28)) != 0;
 }
 
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2)
@@ -281,6 +241,7 @@ bool IsPositiveTarget(uint32 targetA, uint32 targetB)
         case TARGET_IN_FRONT_OF_CASTER:
         case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
         case TARGET_CURRENT_SELECTED_ENEMY:
+        case TARGET_SINGLE_ENEMY:
             return false;
         case TARGET_ALL_AROUND_CASTER:
             return (targetB == TARGET_ALL_PARTY || targetB == TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER);
@@ -542,14 +503,6 @@ bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellI
             break;
     }
 
-    return false;
-}
-
-bool CanUsedWhileStealthed(uint32 spellId)
-{
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-    if ( (spellInfo->AttributesEx & 32) == 32 || spellInfo->AttributesEx2 == 0x200000)
-        return true;
     return false;
 }
 
