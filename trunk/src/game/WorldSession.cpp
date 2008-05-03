@@ -413,7 +413,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_LEAVE_BATTLEFIELD ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundLeaveOpcode       );
     objmgr.opcodeTable[ CMSG_ARENAMASTER_JOIN ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundArenaJoin         );
 
-    objmgr.opcodeTable[ CMSG_SET_ACTIONBAR_TOGGLES ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetActionBar                  );
+    objmgr.opcodeTable[ CMSG_SET_ACTIONBAR_TOGGLES ]            = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleSetActionBar                  );
     objmgr.opcodeTable[ CMSG_FIELD_WATCHED_FACTION_SHOW_BAR ]   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetWatchedFactionIndexOpcode  );
     objmgr.opcodeTable[ CMSG_FIELD_WATCHED_FACTION_INACTIVE ]   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetWatchedFactionInactiveOpcode );
 

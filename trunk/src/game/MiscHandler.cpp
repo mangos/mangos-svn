@@ -1139,6 +1139,13 @@ void WorldSession::HandleSetActionBar(WorldPacket& recv_data)
 
     recv_data >> ActionBar;
 
+    if(!GetPlayer())                                        // ignore until not logged
+    {
+        if(ActionBar!=0)
+            sLog.outError("WorldSession::HandleSetActionBar in not logged state with value: %u, ignored",uint32(ActionBar));
+        return;
+    }
+
     uint32 temp = ((GetPlayer()->GetUInt32Value( PLAYER_FIELD_BYTES )) & 0xFFF0FFFF) + (ActionBar << 16);
     GetPlayer()->SetUInt32Value( PLAYER_FIELD_BYTES, temp);
 }
