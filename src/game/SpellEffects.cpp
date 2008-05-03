@@ -793,23 +793,6 @@ void Spell::EffectDummy(uint32 i)
                     if (!m_CastItem) return;
                     m_caster->CastSpell(m_caster,13166,true,m_CastItem);
                     return;
-                case 23356:                                 //Taming Lesson
-                {
-                    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    // Tame Beast 3 spell learning
-                    m_caster->CastSpell(unitTarget,1579,true);
-                    return;
-                }
-                case 23357:                                 //Training Lesson
-                {
-                    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-                        return;
-                    // Beast Training 3 spell learning
-                    m_caster->CastSpell(unitTarget,5300,true);
-                    return;
-                }
                 case 23448:                                 // Ultrasafe Transporter: Gadgetzan - backfires
                 {
                     int32 r = irand(0, 119);

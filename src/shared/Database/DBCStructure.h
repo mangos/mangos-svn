@@ -90,6 +90,17 @@ struct BattlemasterListEntry
                                                             // 32 unused
 };
 
+struct CharTitlesEntry
+{
+    uint32      ID;                                         // 0, title ids, for example in Quest::GetCharTitleId()
+    //uint32      unk1;                                     // 1 flags?
+    //char*       name[16];                                 // 2-17, unused
+                                                            // 18 string flag, unused
+    //char*       name2[16];                                // 19-34, unused
+                                                            // 35 string flag, unused
+    uint32      bit_index;                                  // 36 used in PLAYER_CHOSEN_TITLE and 1<<(index-1) in PLAYER__FIELD_KNOWN_TITLES
+};
+
 struct ChatChannelsEntry
 {
     uint32      ChannelID;                                  // 0

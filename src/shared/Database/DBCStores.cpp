@@ -36,6 +36,7 @@ static AreaFlagByMapID  sAreaFlagByMapID;                   // for instances wit
 DBCStorage <AreaTriggerEntry> sAreaTriggerStore(AreaTriggerEntryfmt);
 DBCStorage <BankBagSlotPricesEntry> sBankBagSlotPricesStore(BankBagSlotPricesEntryfmt);
 DBCStorage <BattlemasterListEntry> sBattlemasterListStore(BattlemasterListEntryfmt);
+DBCStorage <CharTitlesEntry> sCharTitlesStore(CharTitlesEntryfmt);
 DBCStorage <ChatChannelsEntry> sChatChannelsStore(ChatChannelsEntryfmt);
 DBCStorage <ChrClassesEntry> sChrClassesStore(ChrClassesEntryfmt);
 DBCStorage <ChrRacesEntry> sChrRacesStore(ChrRacesEntryfmt);
@@ -174,7 +175,7 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 50;
+    const uint32 DBCFilesCount = 51;
 
     barGoLink bar( DBCFilesCount );
 
@@ -199,6 +200,7 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sAreaTriggerStore,         dataPath+"dbc/AreaTrigger.dbc");
     LoadDBC(bar,bad_dbc_files,sBankBagSlotPricesStore,   dataPath+"dbc/BankBagSlotPrices.dbc");
     LoadDBC(bar,bad_dbc_files,sBattlemasterListStore,    dataPath+"dbc/BattlemasterList.dbc");
+    LoadDBC(bar,bad_dbc_files,sCharTitlesStore,          dataPath+"dbc/CharTitles.dbc");
     LoadDBC(bar,bad_dbc_files,sChatChannelsStore,        dataPath+"dbc/ChatChannels.dbc");
     LoadDBC(bar,bad_dbc_files,sChrClassesStore,          dataPath+"dbc/ChrClasses.dbc");
     LoadDBC(bar,bad_dbc_files,sChrRacesStore,            dataPath+"dbc/ChrRaces.dbc");
