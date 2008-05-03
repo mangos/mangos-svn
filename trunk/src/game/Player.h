@@ -1392,10 +1392,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         PlayerSpellMap      & GetSpellMap()       { return m_spells; }
 
         void AddSpellMod(SpellModifier* mod, bool apply);
-        int32 GetTotalFlatMods(uint32 spellId, uint8 op);
-        int32 GetTotalPctMods(uint32 spellId, uint8 op);
+        int32 GetTotalFlatMods(uint32 spellId, SpellModOp op);
+        int32 GetTotalPctMods(uint32 spellId, SpellModOp op);
         bool IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mod, Spell const* spell = NULL);
-        template <class T> T ApplySpellMod(uint32 spellId, uint8 op, T &basevalue, Spell const* spell = NULL);
+        template <class T> T ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell const* spell = NULL);
         void RemoveSpellMods(Spell const* spell);
 
         bool HasSpellCooldown(uint32 spell_id) const
@@ -2063,8 +2063,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         float m_auraBaseMod[BASEMOD_END][MOD_END];
 
-        SpellModList m_spellMods[32];                       // 32 = SPELLMOD_COUNT
-        int32 m_totalSpellMod[32][64];                      // 32 = SPELLMOD_COUNT; 64 = size of SpellFamilyFlags
+        SpellModList m_spellMods[MAX_SPELLMOD];
+        int32 m_totalSpellMod[MAX_SPELLMOD][64];            // 64 = size of SpellFamilyFlags
         int32 m_SpellModRemoveCount;
         EnchantDurationList m_enchantDuration;
         ItemDurationList m_itemDuration;
@@ -2167,7 +2167,7 @@ void AddItemsSetItem(Player*player,Item *item);
 void RemoveItemsSetItem(Player*player,ItemPrototype const *proto);
 
 // "the bodies of template functions must be made available in a header file"
-template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalue, Spell const* spell)
+template <class T> T Player::ApplySpellMod(uint32 spellId, SpellModOp op, T &basevalue, Spell const* spell)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo) return 0;

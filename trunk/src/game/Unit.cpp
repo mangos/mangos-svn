@@ -5050,6 +5050,14 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     CastCustomSpell(this, 39373, &healamount, NULL, NULL, true, castItem, triggeredByAura);
                     return;
                 }
+                // Vestments of Faith (Priest Tier 3) - 4 pieces bonus
+                case 28809:
+                {
+                    if (!pVictim || !pVictim->isAlive())
+                        return;
+                    CastSpell(pVictim,28810,true,castItem,triggeredByAura);
+                    return;
+                }
             }
 
             //Prayer of Mending

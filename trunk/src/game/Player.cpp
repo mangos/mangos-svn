@@ -14785,7 +14785,7 @@ void Player::CharmSpellInitialize()
     GetSession()->SendPacket(&data);
 }
 
-int32 Player::GetTotalFlatMods(uint32 spellId, uint8 op)
+int32 Player::GetTotalFlatMods(uint32 spellId, SpellModOp op)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo) return 0;
@@ -14803,7 +14803,7 @@ int32 Player::GetTotalFlatMods(uint32 spellId, uint8 op)
     return total;
 }
 
-int32 Player::GetTotalPctMods(uint32 spellId, uint8 op)
+int32 Player::GetTotalPctMods(uint32 spellId, SpellModOp op)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo) return 0;
