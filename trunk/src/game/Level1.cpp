@@ -544,6 +544,14 @@ bool ChatHandler::HandleModifyKnownTitlesCommand(const char* args)
         return true;
     }
 
+    uint32 titles2 = titles;
+
+    for(int i=1; i < sCharTitlesStore.nCount; ++i)
+        if(CharTitlesEntry const* tEntry = sCharTitlesStore.LookupEntry(i))
+            titles2 &= ~(1 << (tEntry->bit_index-1));
+
+    titles &= ~titles2;                                     // remove not existed titles
+
     chr->SetUInt32Value(PLAYER__FIELD_KNOWN_TITLES, titles);
     SendSysMessage(LANG_DONE);
 

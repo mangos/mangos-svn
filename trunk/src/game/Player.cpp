@@ -5532,7 +5532,8 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
                 //  [15..28] Horde honor titles and player name
                 //  [29..37] Other title and player name
                 //  [38+]    Nothing
-                uint32 victim_title = pVictim->GetUInt32Value(PLAYER_CHOSEN_TITLE); // Get Killer titles
+                uint32 victim_title = pVictim->GetUInt32Value(PLAYER_CHOSEN_TITLE);
+                                                            // Get Killer titles, CharTitlesEntry::bit_index
                 // Ranks:
                 //  title[1..14]  -> rank[5..18]
                 //  title[15..28] -> rank[5..18]
@@ -11551,7 +11552,9 @@ void Player::RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver
 
     RewardReputation( pQuest );
 
-    if( pQuest->GetRewSpell() > 0 )
+    if( pQuest->GetRewSpellCast() > 0 )
+        CastSpell( this, pQuest->GetRewSpellCast(), true);
+    else if( pQuest->GetRewSpell() > 0)
         CastSpell( this, pQuest->GetRewSpell(), true);
 
     uint16 log_slot = FindQuestSlot( quest_id );
@@ -12936,6 +12939,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     // after spell load
     InitTalentForLevel();
 
+    // after spell load, learn rewarded spell if need also
     _LoadQuestStatus(holder->GetResult(PLAYER_LOGIN_QUERY_LOADQUESTSTATUS));
     _LoadDailyQuestStatus(holder->GetResult(PLAYER_LOGIN_QUERY_LOADDAILYQUESTSTATUS));
 
@@ -13542,6 +13546,10 @@ void Player::_LoadQuestStatus(QueryResult *result)
 
                     ++slot;
                 }
+
+                // learn rewarded spell if unknown
+                if(questStatusData.m_rewarded)
+                    learnQuestRewardedSpells(pQuest);
 
                 sLog.outDebug("Quest status is {%u} for quest {%u} for player (GUID: %u)", mQuestStatus[quest_id].m_status, quest_id, GetGUIDLow());
             }
@@ -16173,6 +16181,33 @@ void Player::learnDefaultSpells(bool loading)
     }
 }
 
+void Player::learnQuestRewardedSpells(Quest const* quest)
+{
+    // skip quests without rewarded spell
+    if( !quest->GetRewSpellCast() )
+        return;
+
+    uint32 spell_id = quest->GetRewSpellCast();
+
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
+
+    bool found = false;
+    for(int i=0; i < 3; ++i)
+    {
+        if(spellInfo->Effect[i] == SPELL_EFFECT_LEARN_SPELL && !HasSpell(spellInfo->EffectTriggerSpell[i]))
+        {
+            found = true;
+            break;
+        }
+    }
+
+    // skip quests with not teaching spell or already known spell
+    if(!found)
+        return;
+
+    CastSpell( this, spell_id, true);
+}
+
 void Player::learnQuestRewardedSpells()
 {
     // learn spells received from quest completing
@@ -16183,19 +16218,10 @@ void Player::learnQuestRewardedSpells()
             continue;
 
         Quest const* quest = objmgr.GetQuestTemplate(itr->first);
-
-        // skip quests without rewarded spell
-        if( !quest || !quest->GetRewSpell() )
+        if( !quest )
             continue;
 
-        uint32 spell_id = quest->GetRewSpell();
-
-        // skip quests with not teaching spell
-        SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
-        if(spellInfo->Effect[0] != SPELL_EFFECT_LEARN_SPELL)
-            continue;
-
-        CastSpell( this, spell_id, true);
+        learnQuestRewardedSpells(quest);
     }
 }
 

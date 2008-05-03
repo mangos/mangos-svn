@@ -2254,29 +2254,29 @@ void ObjectMgr::LoadQuests()
     QueryResult *result = WorldDatabase.Query("SELECT entry, ZoneOrSort, MinLevel, QuestLevel, Type,"
     //   5              6                   7                    8                  9                      10                   11                     12                   13                14
         "RequiredRaces, RequiredSkillValue, RepObjectiveFaction, RepObjectiveValue, RequiredMinRepFaction, RequiredMinRepValue, RequiredMaxRepFaction, RequiredMaxRepValue, SuggestedPlayers, LimitTime,"
-    //   15          16            17           18           19              20                21         22            23
-        "QuestFlags, SpecialFlags, PrevQuestId, NextQuestId, ExclusiveGroup, NextQuestInChain, SrcItemId, SrcItemCount, SrcSpell,"
-    //   24     25       26          27               28                29       30              31              32              33
+    //   15          16            17           18           19           20              21                22         23            24
+        "QuestFlags, SpecialFlags, CharTitleId, PrevQuestId, NextQuestId, ExclusiveGroup, NextQuestInChain, SrcItemId, SrcItemCount, SrcSpell,"
+    //   25     26       27          28               29                30       31              32              33              34
         "Title, Details, Objectives, OfferRewardText, RequestItemsText, EndText, ObjectiveText1, ObjectiveText2, ObjectiveText3, ObjectiveText4,"
-    //   34          35          36          37          38             39             40             41
+    //   35          36          37          38          39             40             41             42
         "ReqItemId1, ReqItemId2, ReqItemId3, ReqItemId4, ReqItemCount1, ReqItemCount2, ReqItemCount3, ReqItemCount4,"
-    //   42            43            44            45            46               47               48               49               50             51             52             53
+    //   43            44            45            46            47               48               49               50               51             52             53             54
         "ReqSourceId1, ReqSourceId2, ReqSourceId3, ReqSourceId4, ReqSourceCount1, ReqSourceCount2, ReqSourceCount3, ReqSourceCount4, ReqSourceRef1, ReqSourceRef2, ReqSourceRef3, ReqSourceRef4,"
-    //   54                  55                  56                  57                  58                     59                     60                     61
+    //   55                  56                  57                  58                  59                     60                     61                     62
         "ReqCreatureOrGOId1, ReqCreatureOrGOId2, ReqCreatureOrGOId3, ReqCreatureOrGOId4, ReqCreatureOrGOCount1, ReqCreatureOrGOCount2, ReqCreatureOrGOCount3, ReqCreatureOrGOCount4,"
-    //   62             63             64             65
+    //   63             64             65             66
         "ReqSpellCast1, ReqSpellCast2, ReqSpellCast3, ReqSpellCast4,"
-    //   66                67                68                69                70                71
+    //   67                68                69                70                71                72
         "RewChoiceItemId1, RewChoiceItemId2, RewChoiceItemId3, RewChoiceItemId4, RewChoiceItemId5, RewChoiceItemId6,"
-    //   72                   73                   74                   75                   76                   77
+    //   73                   74                   75                   76                   77                   78
         "RewChoiceItemCount1, RewChoiceItemCount2, RewChoiceItemCount3, RewChoiceItemCount4, RewChoiceItemCount5, RewChoiceItemCount6,"
-    //   78          79          80          81          82             83             84             85
+    //   79          80          81          82          83             84             85             86
         "RewItemId1, RewItemId2, RewItemId3, RewItemId4, RewItemCount1, RewItemCount2, RewItemCount3, RewItemCount4,"
-    //   86              87              88              89              90              91            92            93            94            95
+    //   87              88              89              90              91              92            93            94            95            96
         "RewRepFaction1, RewRepFaction2, RewRepFaction3, RewRepFaction4, RewRepFaction5, RewRepValue1, RewRepValue2, RewRepValue3, RewRepValue4, RewRepValue5,"
-    //   96             97                98        99          100     101     102       103            104            105            106
-        "RewOrReqMoney, RewMoneyMaxLevel, RewSpell, PointMapId, PointX, PointY, PointOpt, DetailsEmote1, DetailsEmote2, DetailsEmote3, DetailsEmote4,"
-    //   107              108            109                110                111                112                113          114
+    //   97             98                99        100           101         102     103     104       105            106            107            108
+        "RewOrReqMoney, RewMoneyMaxLevel, RewSpell, RewSpellCast, PointMapId, PointX, PointY, PointOpt, DetailsEmote1, DetailsEmote2, DetailsEmote3, DetailsEmote4,"
+    //   109              110            111                112                113                114                115          116
         "IncompleteEmote, CompleteEmote, OfferRewardEmote1, OfferRewardEmote2, OfferRewardEmote3, OfferRewardEmote4, StartScript, CompleteScript"
         " FROM quest_template");
     if(result == NULL)
@@ -2412,6 +2412,14 @@ void ObjectMgr::LoadQuests()
             sLog.outErrorDb("Quest %u has `RequiredMaxRepValue` = %d but `RequiredMaxRepFaction` is 0, value has no effect",
                 qinfo->GetQuestId(),qinfo->RequiredMaxRepValue);
             // warning
+        }
+
+        if(qinfo->CharTitleId && !sCharTitlesStore.LookupEntry(qinfo->CharTitleId))
+        {
+            sLog.outErrorDb("Quest %u has `CharTitleId` = %u but CharTitle Id %u does not exist, quest can't be rewarded with title.",
+                qinfo->GetQuestId(),qinfo->GetCharTitleId(),qinfo->GetCharTitleId());
+            qinfo->CharTitleId = 0;
+            // quest can't reward this title
         }
 
         if(qinfo->SrcItemId)
@@ -2724,16 +2732,36 @@ void ObjectMgr::LoadQuests()
 
             if(!spellInfo)
             {
-                sLog.outErrorDb("Quest %u has `RewSpell` = %u but spell %u does not exist, quest will not have a spell reward.",
+                sLog.outErrorDb("Quest %u has `RewSpell` = %u but spell %u does not exist, spell removed as display reward.",
                     qinfo->GetQuestId(),qinfo->RewSpell,qinfo->RewSpell);
-                qinfo->RewSpell = 0;                        // quest will not reward this
+                qinfo->RewSpell = 0;                        // no spell reward will display for this quest
             }
 
             else if(!SpellMgr::IsSpellValid(spellInfo))
             {
                 sLog.outErrorDb("Quest %u has `RewSpell` = %u but spell %u is broken, quest can't be done.",
                     qinfo->GetQuestId(),qinfo->RewSpell,qinfo->RewSpell);
-                qinfo->RewSpell = 0;                        // quest will not reward this
+                qinfo->RewSpell = 0;                        // no spell reward will display for this quest
+            }
+
+        }
+
+        if(qinfo->RewSpellCast)
+        {
+            SpellEntry const* spellInfo = sSpellStore.LookupEntry(qinfo->RewSpellCast);
+
+            if(!spellInfo)
+            {
+                sLog.outErrorDb("Quest %u has `RewSpellCast` = %u but spell %u does not exist, quest will not have a spell reward.",
+                    qinfo->GetQuestId(),qinfo->RewSpellCast,qinfo->RewSpellCast);
+                qinfo->RewSpellCast = 0;                    // no spell will be casted on player
+            }
+
+            else if(!SpellMgr::IsSpellValid(spellInfo))
+            {
+                sLog.outErrorDb("Quest %u has `RewSpellCast` = %u but spell %u is broken, quest can't be done.",
+                    qinfo->GetQuestId(),qinfo->RewSpellCast,qinfo->RewSpellCast);
+                qinfo->RewSpellCast = 0;                    // no spell will be casted on player
             }
 
         }

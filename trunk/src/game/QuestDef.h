@@ -183,6 +183,7 @@ class Quest
         int32  GetNextQuestId() const { return NextQuestId; }
         int32  GetExclusiveGroup() const { return ExclusiveGroup; }
         uint32 GetNextQuestInChain() const { return NextQuestInChain; }
+        uint32 GetCharTitleId() const { return CharTitleId; }
         uint32 GetSrcItemId() const { return SrcItemId; }
         uint32 GetSrcItemCount() const { return SrcItemCount; }
         uint32 GetSrcSpell() const { return SrcSpell; }
@@ -196,6 +197,7 @@ class Quest
         uint32 GetRewMoneyMaxLevel() const { return RewMoneyMaxLevel; }
                                                             // use in XP calculation at client
         uint32 GetRewSpell() const { return RewSpell; }
+        uint32 GetRewSpellCast() const { return RewSpellCast; }
         uint32 GetPointMapId() const { return PointMapId; }
         float  GetPointX() const { return PointX; }
         float  GetPointY() const { return PointY; }
@@ -263,6 +265,7 @@ class Quest
         uint32 SuggestedPlayers;
         uint32 LimitTime;
         uint32 QuestFlags;
+        uint32 CharTitleId;
         int32  PrevQuestId;
         int32  NextQuestId;
         int32  ExclusiveGroup;
@@ -279,6 +282,7 @@ class Quest
         int32  RewOrReqMoney;
         uint32 RewMoneyMaxLevel;
         uint32 RewSpell;
+        uint32 RewSpellCast;
         uint32 PointMapId;
         float  PointX;
         float  PointY;
