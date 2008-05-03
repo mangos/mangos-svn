@@ -69,6 +69,7 @@ SpellCastTargets::SpellCastTargets()
     m_GOTargetGUID     = 0;
     m_CorpseTargetGUID = 0;
     m_itemTargetGUID   = 0;
+    m_itemTargetEntry  = 0;
 
     m_srcX = m_srcY = m_srcZ = m_destX = m_destY = m_destZ = 0;
     m_strTarget = "";
@@ -114,6 +115,7 @@ void SpellCastTargets::setItemTarget(Item* item)
 
     m_itemTarget = item;
     m_itemTargetGUID = item->GetGUID();
+    m_itemTargetEntry = item->GetEntry();
     m_targetMask |= TARGET_FLAG_ITEM;
 }
 
@@ -140,6 +142,8 @@ void SpellCastTargets::Update(Unit* caster)
             if(pTrader && m_itemTargetGUID < TRADE_SLOT_COUNT)
                 m_itemTarget = pTrader->GetItemByPos(pTrader->GetItemPosByTradeSlot(m_itemTargetGUID));
         }
+        if(m_itemTarget)
+            m_itemTargetEntry = m_itemTarget->GetEntry();
     }
 }
 
@@ -2664,18 +2668,15 @@ void Spell::SendLogExecute()
                 case SPELL_EFFECT_150:
                     if(Unit *unit = m_targets.getUnitTarget())
                         data.append(unit->GetPackGUID());
-                    else if(Item *item = m_targets.getItemTarget())
-                        data.append(item->GetPackGUID());
+                    else if(m_targets.getItemTargetGUID())
+                        data.appendPackGUID(m_targets.getItemTargetGUID());
                     else if(GameObject *go = m_targets.getGOTarget())
                         data.append(go->GetPackGUID());
                     else
                         data << uint8(0);                   // guid
                     break;
                 case SPELL_EFFECT_FEED_PET:
-                    if(Item *item = m_targets.getItemTarget())
-                        data << uint32(item->GetEntry());
-                    else
-                        data << uint32(0);                  // item id
+                    data << uint32(m_targets.getItemTargetEntry());
                     break;
                 case SPELL_EFFECT_DISMISS_PET:
                     if(Unit *unit = m_targets.getUnitTarget())
@@ -2842,6 +2843,10 @@ void Spell::TakeCastItem()
         uint32 count = 1;
         ((Player*)m_caster)->DestroyItemCount(m_CastItem, count, true);
 
+        // prevent crash at access to deleted m_targets.getItemTarget
+        if(m_CastItem==m_targets.getItemTarget())
+            m_targets.setItemTarget(NULL);
+
         m_CastItem = NULL;
     }
 }
@@ -2915,6 +2920,10 @@ void Spell::TakeReagents()
                 m_CastItem = NULL;
             }
         }
+
+        // if getItemTarget is also spell reagent
+        if (m_targets.getItemTargetEntry()==itemid)
+            m_targets.setItemTarget(NULL);
 
         p_caster->DestroyItemCount(itemid, itemcount, true);
     }
@@ -4274,7 +4283,7 @@ uint8 Spell::CheckItems()
                 if(m_targets.getItemTarget()->GetCount() < 5)
                     return SPELL_FAILED_PROSPECT_NEED_MORE;
 
-                if(!LootTemplates_Prospecting.HaveLootFor(m_targets.getItemTarget()->GetEntry()))
+                if(!LootTemplates_Prospecting.HaveLootFor(m_targets.getItemTargetEntry()))
                     return SPELL_FAILED_CANT_BE_PROSPECTED;
 
                 break;

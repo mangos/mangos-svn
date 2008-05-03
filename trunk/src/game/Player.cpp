@@ -67,13 +67,13 @@
 #define PLAYER_SKILL_VALUE_INDEX(x) (PLAYER_SKILL_INDEX(x)+1)
 #define PLAYER_SKILL_BONUS_INDEX(x) (PLAYER_SKILL_INDEX(x)+2)
 
-#define SKILL_VALUE(x)         (uint16(x))
-#define SKILL_MAX(x)           (uint16(uint32(x) >> 16))
-#define MAKE_SKILL_VALUE(v, m) (uint32(uint32(uint16(v)) | (uint32(uint16(m)) << 16)))
+#define SKILL_VALUE(x)         PAIR32_LOPART(x)
+#define SKILL_MAX(x)           PAIR32_HIPART(x)
+#define MAKE_SKILL_VALUE(v, m) MAKE_PAIR32(v,m)
 
-#define SKILL_TEMP_BONUS(x)    (int16(uint16(x)))
-#define SKILL_PERM_BONUS(x)    (int16(uint32(x) >> 16))
-#define MAKE_SKILL_BONUS(t, p) (uint32( uint32(uint16(int16(t))) | (uint32(uint16(int16(p))) << 16) ))
+#define SKILL_TEMP_BONUS(x)    PAIR32_LOPART(x)
+#define SKILL_PERM_BONUS(x)    PAIR32_HIPART(x)
+#define MAKE_SKILL_BONUS(t, p) MAKE_PAIR32(t,p)
 
 //== PlayerTaxi ================================================
 
@@ -4566,9 +4566,9 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
             }
             // enable unlearn button for primary professions only
             if (pSkill->categoryId == SKILL_CATEGORY_PROFESSION)
-                SetUInt32Value(PLAYER_SKILL_INDEX(i), id | (1 << 16));
+                SetUInt32Value(PLAYER_SKILL_INDEX(i), MAKE_PAIR32(id,1));
             else
-                SetUInt32Value(PLAYER_SKILL_INDEX(i), id);
+                SetUInt32Value(PLAYER_SKILL_INDEX(i), MAKE_PAIR32(id,0));
             SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i),MAKE_SKILL_VALUE(currVal,maxVal));
 
             // apply skill bonuses
@@ -5485,14 +5485,14 @@ void Player::UpdateHonorFields(bool force)
         m_honorPending = 0;
     }
 
-    uint16 kills_today = GetUInt32Value(PLAYER_FIELD_KILLS) & 0xFFFF;
+    uint16 kills_today = PAIR32_LOPART(GetUInt32Value(PLAYER_FIELD_KILLS));
     if ((kills_today && m_lastKillDate < today) || force)
     {
         // if we have pending kills they were done today or yesterday
         // if the last was done yesterday then this is the first update after midnight
 
         // this is the first update today, kills_today become yeseterday's kills
-        SetUInt32Value(PLAYER_FIELD_KILLS, kills_today << 16);
+        SetUInt32Value(PLAYER_FIELD_KILLS, MAKE_PAIR32(0,kills_today));
     }
 }
 
@@ -12898,9 +12898,9 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
         // enable unlearn button for primary professions only
         if (pSkill->categoryId == SKILL_CATEGORY_PROFESSION)
-            SetUInt32Value(PLAYER_SKILL_INDEX(i), id | (1 << 16));
+            SetUInt32Value(PLAYER_SKILL_INDEX(i), MAKE_PAIR32(id,1));
         else
-            SetUInt32Value(PLAYER_SKILL_INDEX(i), id);
+            SetUInt32Value(PLAYER_SKILL_INDEX(i), MAKE_PAIR32(id,0));
     }
 
     // make sure the unit is considered out of combat for proper loading
@@ -13191,7 +13191,7 @@ void Player::_LoadHonor(QueryResult *result)
 
     // load kills today
     uint32 kills = GetUInt32Value(PLAYER_FIELD_KILLS);      // today + yesterday << 16
-    uint16 kills_today = kills & 0xFFFF;
+    uint16 kills_today = PAIR32_LOPART(kills);
     if(kills_today)
     {
         if (m_lastKillDate < today)
@@ -13200,7 +13200,7 @@ void Player::_LoadHonor(QueryResult *result)
             {
                 // if the last victim was killed yesterday then
                 // kills_today is actually the total kills yesterday
-                SetUInt32Value(PLAYER_FIELD_KILLS, kills_today << 16);
+                SetUInt32Value(PLAYER_FIELD_KILLS, MAKE_PAIR32(0,kills_today));
             }
             else
             {
