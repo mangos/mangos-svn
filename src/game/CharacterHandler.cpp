@@ -392,8 +392,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         m_playerLoading = false;
         return;
     }
-    else
-        SetPlayer(pCurrChar);
+
+    SetPlayer(pCurrChar);
 
     pCurrChar->SendDungeonDifficulty();
 
