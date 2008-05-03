@@ -1794,7 +1794,7 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
 
     // stealth must be removed at cast starting (at show channel bar)
     // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
-    if ( !m_IsTriggeredSpell && !CanUsedWhileStealthed(m_spellInfo->Id) )
+    if ( !m_IsTriggeredSpell && !CanBeUsedWhileStealthed(m_spellInfo) )
     {
         m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         m_caster->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
@@ -2380,8 +2380,8 @@ void Spell::finish(bool ok)
     }
 
     // Clear combo at finish state
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)m_caster)->ResetComboPointsIfNeed(m_spellInfo);
+    if(m_caster->GetTypeId() == TYPEID_PLAYER && NeedsComboPoints(m_spellInfo))
+        ((Player*)m_caster)->ClearComboPoints();
 }
 
 void Spell::SendCastResult(uint8 result)
@@ -3744,7 +3744,7 @@ int16 Spell::PetCanCast(Unit* target)
 
     if(m_caster->IsNonMeleeSpellCasted(false))              //prevent spellcast interuption by another spellcast
         return SPELL_FAILED_SPELL_IN_PROGRESS;
-    if(m_caster->isInCombat() && IsNonCombatSpell(m_spellInfo->Id))
+    if(m_caster->isInCombat() && IsNonCombatSpell(m_spellInfo))
         return SPELL_FAILED_AFFECTING_COMBAT;
 
     if(m_caster->GetTypeId()==TYPEID_UNIT && (((Creature*)m_caster)->isPet() || m_caster->isCharmed()))

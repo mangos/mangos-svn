@@ -258,13 +258,13 @@ enum SpellSpecific
 SpellSpecific GetSpellSpecific(uint32 spellId);
 
 // Different spell properties
-float GetSpellRadius(SpellRadiusEntry const *radius);
-uint32 GetSpellCastTime(SpellCastTimesEntry const*time);
-float GetSpellMinRange(SpellRangeEntry const *range);
-float GetSpellMaxRange(SpellRangeEntry const *range);
+inline float GetSpellRadius(SpellRadiusEntry const *radius) { return (radius ? radius->Radius : 0); }
+inline uint32 GetSpellCastTime(SpellCastTimesEntry const*time) { return (time ? time->CastTime : 0); }
+inline float GetSpellMinRange(SpellRangeEntry const *range) { return (range ? range->minRange : 0); }
+inline float GetSpellMaxRange(SpellRangeEntry const *range) { return (range ? range->maxRange : 0); }
+inline uint32 GetSpellRecoveryTime(SpellEntry const *spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
 int32 GetSpellDuration(SpellEntry const *spellInfo);
 int32 GetSpellMaxDuration(SpellEntry const *spellInfo);
-inline uint32 GetSpellRecoveryTime(SpellEntry const *spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
 
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
 
@@ -284,7 +284,10 @@ inline bool IsElementalShield(SpellEntry const *spellInfo)
 int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
 bool IsSingleFromSpellSpecificPerCaster(uint32 spellSpec1,uint32 spellSpec2);
 bool IsPassiveSpell(uint32 spellId);
-bool IsNonCombatSpell(uint32 spellId);
+inline bool IsNonCombatSpell(SpellEntry const *spellInfo)
+{
+    return (spellInfo->Attributes & (1<<28)) != 0;
+}
 
 bool IsPositiveSpell(uint32 spellId);
 bool IsPositiveEffect(uint32 spellId, uint32 effIndex);
@@ -295,8 +298,7 @@ bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellI
 
 bool IsSpellAllowedInLocation(SpellEntry const *spellInfo,uint32 map_id,uint32 zone_id,uint32 area_id);
 
-inline
-bool IsAreaEffectTarget( Targets target )
+inline bool IsAreaEffectTarget( Targets target )
 {
     switch (target )
     {
@@ -320,18 +322,24 @@ bool IsAreaEffectTarget( Targets target )
     return false;
 }
 
-bool CanUsedWhileStealthed(uint32 spellId);
+inline bool CanBeUsedWhileStealthed(SpellEntry const* spellInfo)
+{
+    return ( (spellInfo->AttributesEx & 32) == 32 || spellInfo->AttributesEx2 == 0x200000);
+}
 bool IsMechanicInvulnerabilityImmunityToSpell(SpellEntry const* spellInfo);
 uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form);
 
-inline
-bool IsChanneledSpell(SpellEntry const* spellInfo)
+inline bool IsChanneledSpell(SpellEntry const* spellInfo)
 {
     return (spellInfo->AttributesEx & 0x44);
 }
 
-inline
-SpellSchoolMask GetSpellSchoolMask(SpellEntry const* spellInfo)
+inline bool NeedsComboPoints(SpellEntry const* spellInfo)
+{
+    return (spellInfo->AttributesEx & 0x500000);
+}
+
+inline SpellSchoolMask GetSpellSchoolMask(SpellEntry const* spellInfo)
 {
     return SpellSchoolMask(spellInfo->SchoolMask);
 }

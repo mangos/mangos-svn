@@ -1307,7 +1307,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void AddComboPoints(Unit* target, int8 count);
         void ClearComboPoints();
-        void ResetComboPointsIfNeed(const SpellEntry *spellInfo);
         void SendComboPoints();
 
         void SendMailResult(uint32 mailId, uint32 mailAction, uint32 mailError, uint32 equipError = 0, uint32 item_guid = 0, uint32 item_count = 0);

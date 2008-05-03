@@ -302,8 +302,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleUnused,                                    //247 unused
     &Aura::HandleNULL,                                      //248 SPELL_AURA_MOD_COMBAT_RESULT
     &Aura::HandleNULL,                                      //249
-    &Aura::HandleNULL,                                      //250
-    &Aura::HandleNULL                                       //251
+    &Aura::HandleNULL,                                      //250 increase health
+    &Aura::HandleNULL                                       //251 SPELL_AURA_MOD_ENEMY_DODGE
 };
 
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem) :
