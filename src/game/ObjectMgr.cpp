@@ -798,7 +798,7 @@ void ObjectMgr::AddCreatureToGrid(uint32 guid, CreatureData const* data)
             CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
             uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-            CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid+(i << 16)][cell_id];
+            CellObjectGuids& cell_guids = mMapObjectGuids[MAKE_PAIR32(data->mapid,i)][cell_id];
             cell_guids.creatures.insert(guid);
         }
     }
@@ -814,7 +814,7 @@ void ObjectMgr::RemoveCreatureFromGrid(uint32 guid, CreatureData const* data)
             CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
             uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-            CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid+(i << 16)][cell_id];
+            CellObjectGuids& cell_guids = mMapObjectGuids[MAKE_PAIR32(data->mapid,i)][cell_id];
             cell_guids.creatures.erase(guid);
         }
     }
@@ -890,7 +890,7 @@ void ObjectMgr::AddGameobjectToGrid(uint32 guid, GameObjectData const* data)
             CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
             uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-            CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid+(i << 16)][cell_id];
+            CellObjectGuids& cell_guids = mMapObjectGuids[MAKE_PAIR32(data->mapid,i)][cell_id];
             cell_guids.gameobjects.insert(guid);
         }
     }
@@ -906,7 +906,7 @@ void ObjectMgr::RemoveGameobjectFromGrid(uint32 guid, GameObjectData const* data
             CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
             uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
-            CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid+(i << 16)][cell_id];
+            CellObjectGuids& cell_guids = mMapObjectGuids[MAKE_PAIR32(data->mapid,i)][cell_id];
             cell_guids.gameobjects.erase(guid);
         }
     }
@@ -943,7 +943,7 @@ void ObjectMgr::LoadCreatureRespawnTimes()
         uint64 respawn_time = fields[1].GetUInt64();
         uint32 instance     = fields[2].GetUInt32();
 
-        mCreatureRespawnTimes[MAKE_PAIR(loguid,instance)] = time_t(respawn_time);
+        mCreatureRespawnTimes[MAKE_PAIR64(loguid,instance)] = time_t(respawn_time);
 
         ++count;
     } while (result->NextRow());
@@ -985,7 +985,7 @@ void ObjectMgr::LoadGameobjectRespawnTimes()
         uint64 respawn_time = fields[1].GetUInt64();
         uint32 instance     = fields[2].GetUInt32();
 
-        mGORespawnTimes[MAKE_PAIR(loguid,instance)] = time_t(respawn_time);
+        mGORespawnTimes[MAKE_PAIR64(loguid,instance)] = time_t(respawn_time);
 
         ++count;
     } while (result->NextRow());
@@ -5064,7 +5064,7 @@ void ObjectMgr::LoadWeatherZoneChances()
 
 void ObjectMgr::SaveCreatureRespawnTime(uint32 loguid, uint32 instance, time_t t)
 {
-    mCreatureRespawnTimes[MAKE_PAIR(loguid,instance)] = t;
+    mCreatureRespawnTimes[MAKE_PAIR64(loguid,instance)] = t;
     WorldDatabase.PExecute("DELETE FROM creature_respawn WHERE guid = '%u' AND instance = '%u'", loguid, instance);
     if(t)
         WorldDatabase.PExecute("INSERT INTO creature_respawn VALUES ( '%u', '" I64FMTD "', '%u' )", loguid, uint64(t), instance);
@@ -5082,7 +5082,7 @@ void ObjectMgr::DeleteCreatureData(uint32 guid)
 
 void ObjectMgr::SaveGORespawnTime(uint32 loguid, uint32 instance, time_t t)
 {
-    mGORespawnTimes[MAKE_PAIR(loguid,instance)] = t;
+    mGORespawnTimes[MAKE_PAIR64(loguid,instance)] = t;
     WorldDatabase.PExecute("DELETE FROM gameobject_respawn WHERE guid = '%u' AND instance = '%u'", loguid, instance);
     if(t)
         WorldDatabase.PExecute("INSERT INTO gameobject_respawn VALUES ( '%u', '" I64FMTD "', '%u' )", loguid, uint64(t), instance);
@@ -5127,14 +5127,14 @@ void ObjectMgr::DeleteGOData(uint32 guid)
 void ObjectMgr::AddCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid, uint32 instance)
 {
     // corpses are always added to spawn mode 0 and they are spawned by their instance id
-    CellObjectGuids& cell_guids = mMapObjectGuids[mapid][cellid];
+    CellObjectGuids& cell_guids = mMapObjectGuids[MAKE_PAIR32(mapid,0)][cellid];
     cell_guids.corpses[player_guid] = instance;
 }
 
 void ObjectMgr::DeleteCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid)
 {
     // corpses are always added to spawn mode 0 and they are spawned by their instance id
-    CellObjectGuids& cell_guids = mMapObjectGuids[mapid][cellid];
+    CellObjectGuids& cell_guids = mMapObjectGuids[MAKE_PAIR32(mapid,0)][cellid];
     cell_guids.corpses.erase(player_guid);
 }
 

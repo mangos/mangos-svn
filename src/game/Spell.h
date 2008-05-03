@@ -132,6 +132,8 @@ class SpellCastTargets
             m_CorpseTargetGUID = target.m_CorpseTargetGUID;
             m_itemTargetGUID   = target.m_itemTargetGUID;
 
+            m_itemTargetEntry  = target.m_itemTargetEntry;
+
             m_srcX = target.m_srcX;
             m_srcY = target.m_srcY;
             m_srcZ = target.m_srcZ;
@@ -160,11 +162,15 @@ class SpellCastTargets
         void setCorpseTarget(Corpse* corpse);
         uint64 getItemTargetGUID() const { return m_itemTargetGUID; }
         Item* getItemTarget() const { return m_itemTarget; }
+        uint32 getItemTargetEntry() const { return m_itemTargetEntry; }
         void setItemTarget(Item* item);
         void updateTradeSlotItem()
         {
             if(m_itemTarget && (m_targetMask & TARGET_FLAG_TRADE_ITEM))
+            {
                 m_itemTargetGUID = m_itemTarget->GetGUID();
+                m_itemTargetEntry = m_itemTarget->GetEntry();
+            }
         }
 
         bool IsEmpty() const { return m_GOTargetGUID==0 && m_unitTargetGUID==0 && m_itemTarget==0 && m_CorpseTargetGUID==0; }
@@ -182,11 +188,12 @@ class SpellCastTargets
         GameObject *m_GOTarget;
         Item *m_itemTarget;
 
-        // object GUID, can be used always
+        // object GUID/etc, can be used always
         uint64 m_unitTargetGUID;
         uint64 m_GOTargetGUID;
         uint64 m_CorpseTargetGUID;
         uint64 m_itemTargetGUID;
+        uint32 m_itemTargetEntry;
 };
 
 enum SpellState
