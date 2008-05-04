@@ -41,8 +41,10 @@ class LootTemplate::LootGroup                               // A set of loot def
         bool HasQuestDropForPlayer(Player const * player) const;
                                                             // The same for active quests of the player
         void Process(Loot& loot) const;                     // Rolls an item from the group (if any) and adds the item to the loot
+        float RawTotalChance() const;                       // Overall chance for the group (without equal chanced items)
         float TotalChance() const;                          // Overall chance for the group
 
+        void Verify(LootStore const& lootstore, uint32 id, uint32 group_id) const;
     private:
         LootStoreItemList ExplicitlyChanced;                // Entries with chances defined in DB
         LootStoreItemList EqualChanced;                     // Zero chances - every entry takes the same chance
@@ -65,12 +67,9 @@ uint16 GetConditionId(LootConditionType condition, uint32 value1, uint32 value2)
         if (lc == LootConditions[i])
             return i;
     }
-    if ( lc.IsValid() )
-    {
-        LootConditions.push_back(lc);
-        return LootConditions.size() - 1;
-    }
-    return 0;
+
+    LootConditions.push_back(lc);
+    return LootConditions.size() - 1;
 }
 
 //Remove all data and free all memory
@@ -87,7 +86,7 @@ void LootStore::Clear()
 void LootStore::Verify() const
 {
     for (LootTemplateMap::const_iterator i = m_LootTemplates.begin(); i != m_LootTemplates.end(); ++i )
-        i->second->Verify(m_LootTemplates, i->first);
+        i->second->Verify(*this, i->first);
 }
 
 // Loads a *_loot_template DB table into loot store
@@ -125,12 +124,16 @@ void LootStore::LoadLootTable()
             uint32 cond_value1         = fields[8].GetUInt32();
             uint32 cond_value2         = fields[9].GetUInt32();
 
+
+            if(!LootCondition::IsValid(*this,entry,item,condition,cond_value1, cond_value2))
+                continue;                                   // error already printed to log/console.
+
             // (condition + cond_value1/2) are converted into single conditionId
             uint16 conditionId = GetConditionId(condition, cond_value1, cond_value2);
 
             LootStoreItem storeitem = LootStoreItem(item, chanceOrQuestChance, group, freeforall, conditionId, mincountOrRef, maxcount);
 
-            if (!storeitem.IsValid(entry))                  // Validity checks
+            if (!storeitem.IsValid(*this,entry))                  // Validity checks
                 continue;
 
             // Looking for the template of the entry
@@ -224,11 +227,11 @@ bool LootStoreItem::Roll() const
 }
 
 // Checks correctness of values
-bool LootStoreItem::IsValid(uint32 entry) const
+bool LootStoreItem::IsValid(LootStore const& store, uint32 entry) const
 {
     if (mincountOrRef == 0)
     {
-        sLog.outErrorDb("Entry %d item %d: wrong mincountOrRef (%d) - skipped", entry, itemid, mincountOrRef);
+        sLog.outErrorDb("Table '%s' entry %d item %d: wrong mincountOrRef (%d) - skipped", store.GetName(), entry, itemid, mincountOrRef);
         return false;
     }
  
@@ -237,29 +240,29 @@ bool LootStoreItem::IsValid(uint32 entry) const
         ItemPrototype const *proto = objmgr.GetItemPrototype(itemid);
         if(!proto)
         {
-            sLog.outErrorDb("Entry %d item %d: wrong item id - skipped", entry, itemid);
+            sLog.outErrorDb("Table '%s' entry %d item %d: wrong item id - skipped", store.GetName(), entry, itemid);
             return false;
         }
 
         if( chance == 0 && group == 0)                      // Zero chance is allowed for grouped entries only
         {
-            sLog.outErrorDb("Entry %d item %d: equal-chanced grouped entry, but group not defined - skipped", entry, itemid);
+            sLog.outErrorDb("Table '%s' entry %d item %d: equal-chanced grouped entry, but group not defined - skipped", store.GetName(), entry, itemid);
             return false;
         }
 
         if( chance != 0 && chance < 0.000001f )             // loot with low chance
         {
-            sLog.outErrorDb("Entry %d item %d: low chance (%d) - skipped", entry, itemid, chance);
+            sLog.outErrorDb("Table '%s' entry %d item %d: low chance (%d) - skipped", store.GetName(), entry, itemid, chance);
             return false;
         }
     }
     else                                                    // mincountOrRef < 0
     {
         if (needs_quest)
-            sLog.outErrorDb("Entry %d item %d: quest chance will be treated as non-quest chance", entry, itemid);
+            sLog.outErrorDb("Table '%s' entry %d item %d: quest chance will be treated as non-quest chance", store.GetName(), entry, itemid);
         else if( chance == 0 )                              // no chance for the reference
         {
-            sLog.outErrorDb("Entry %d item %d: zero chance is specified for a reference, skipped", entry, itemid);
+            sLog.outErrorDb("Table '%s' entry %d item %d: zero chance is specified for a reference, skipped", store.GetName(), entry, itemid);
             return false;
         }
     }
@@ -350,11 +353,11 @@ bool LootCondition::Meets(Player const * player) const
 }
 
 // Verification of condition values validity
-bool LootCondition::IsValid() const
+bool LootCondition::IsValid(LootStore const& store,uint32 entry,uint32 item,LootConditionType condition, uint32 value1, uint32 value2)
 {
     if( condition >= MAX_CONDITION)                         // Wrong condition type
     {
-        sLog.outErrorDb("Condition has bad type of %u, skipped ", condition );
+        sLog.outErrorDb("Table '%s' entry %u item %u ñondition has bad type of %u, skipped ", store.GetName(), entry, item, condition );
         return false;
     }
 
@@ -364,12 +367,12 @@ bool LootCondition::IsValid() const
         {
             if(!sSpellStore.LookupEntry(value1))
             {
-                sLog.outErrorDb("Aura condition requires to have non existing spell (Id: %d), skipped", value1);
+                sLog.outErrorDb("Table '%s' entry %u item %u aura condition requires to have non existing spell (Id: %d), skipped", store.GetName(), entry, item, value1);
                 return false;
             }
             if(value2 > 2)
             {
-                sLog.outErrorDb("Aura condition requires to have non existing effect index (%u) (must be 0..2), skipped", value2);
+                sLog.outErrorDb("Table '%s' entry %u item %u aura condition requires to have non existing effect index (%u) (must be 0..2), skipped", store.GetName(), entry, item, value2);
                 return false;
             }
             break;
@@ -379,7 +382,7 @@ bool LootCondition::IsValid() const
             ItemPrototype const *proto = objmgr.GetItemPrototype(value1);
             if(!proto)
             {
-                sLog.outErrorDb("Item condition requires to have non existing item (%u), skipped", value1);
+                sLog.outErrorDb("Table '%s' entry %u item %u item condition requires to have non existing item (%u), skipped", store.GetName(), entry, item, value1);
                 return false;
             }
             break;
@@ -389,7 +392,7 @@ bool LootCondition::IsValid() const
             ItemPrototype const *proto = objmgr.GetItemPrototype(value1);
             if(!proto)
             {
-                sLog.outErrorDb("ItemEquipped condition requires to have non existing item (%u) equipped, skipped", value1);
+                sLog.outErrorDb("Table '%s' entry %u item %u ItemEquipped condition requires to have non existing item (%u) equipped, skipped", store.GetName(), entry, item, value1);
                 return false;
             }
             break;
@@ -399,12 +402,12 @@ bool LootCondition::IsValid() const
             AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(value1);
             if(!areaEntry)
             {
-                sLog.outErrorDb("Zone condition requires to be in non existing area (%u), skipped", value1);
+                sLog.outErrorDb("Table '%s' entry %u item %u zone condition requires to be in non existing area (%u), skipped", store.GetName(), entry, item, value1);
                 return false;
             }
             if(areaEntry->zone != 0)
             {
-                sLog.outErrorDb("Zone condition requires to be in area (%u) which is a subzone but zone expected, skipped", value1);
+                sLog.outErrorDb("Table '%s' entry %u item %u zone condition requires to be in area (%u) which is a subzone but zone expected, skipped", store.GetName(), entry, item, value1);
                 return false;
             }
             break;
@@ -414,7 +417,7 @@ bool LootCondition::IsValid() const
             FactionEntry const* factionEntry = sFactionStore.LookupEntry(value1);
             if(!factionEntry)
             {
-                sLog.outErrorDb("Reputation condition requires to have reputation non existing faction (%u), skipped", value1);
+                sLog.outErrorDb("Table '%s' entry %u item %u reputation condition requires to have reputation non existing faction (%u), skipped", store.GetName(), entry, item, value1);
                 return false;
             }
             break;
@@ -423,7 +426,7 @@ bool LootCondition::IsValid() const
         {
             if (value1 != ALLIANCE && value1 != HORDE)
             {
-                sLog.outErrorDb("Team condition specifies unknown team (%u), skipped", value1);
+                sLog.outErrorDb("Table '%s' entry %u item %u team condition specifies unknown team (%u), skipped", store.GetName(), entry, item, value1);
                 return false;
             }
             break;
@@ -433,12 +436,12 @@ bool LootCondition::IsValid() const
             SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(value1);
             if (!pSkill)
             {
-                sLog.outErrorDb("Skill condition specifies non-existing skill (%u), skipped", value1);
+                sLog.outErrorDb("Table '%s' entry %u item %u skill condition specifies non-existing skill (%u), skipped", store.GetName(), entry, item, value1);
                 return false;
             }
             if (value2 < 1 || value2 > sWorld.GetConfigMaxSkillValue() )
             {
-                sLog.outErrorDb("Skill condition specifies invalid skill value (%u), skipped", value2);
+                sLog.outErrorDb("Table '%s' entry %u item %u skill condition specifies invalid skill value (%u), skipped", store.GetName(), entry, item, value2);
                 return false;
             }
             break;
@@ -449,11 +452,11 @@ bool LootCondition::IsValid() const
             Quest const *Quest = objmgr.GetQuestTemplate(value1);
             if (!Quest)
             {
-                sLog.outErrorDb("Quest condition specifies non-existing quest (%u), skipped", value1);
+                sLog.outErrorDb("Table '%s' entry %u item %u quest condition specifies non-existing quest (%u), skipped", store.GetName(), entry, item, value1);
                 return false;
             }
             if(value2)
-                sLog.outErrorDb("Quest condition has useless data in value2 (%u)!", value2);
+                sLog.outErrorDb("Table '%s' entry %u item %u quest condition has useless data in value2 (%u)!", store.GetName(), entry, item, value2);
             break;
         }
     }
@@ -491,7 +494,7 @@ void Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner)
 
     if (!tab)
     {
-        sLog.outErrorDb("Loot id #%u used but it doesn't have records in '%s' table.",loot_id,store.GetName());
+        sLog.outErrorDb("Table '%s' loot id #%u used but it doesn't have records.",store.GetName(),loot_id);
         return;
     }
 
@@ -828,7 +831,7 @@ void LootTemplate::LootGroup::AddEntry(LootStoreItem& item)
 // Rolls an item from the group, returns NULL if all miss their chances
 LootStoreItem const * LootTemplate::LootGroup::Roll() const
 {
-    if (ExplicitlyChanced.size() > 0)                           // First explicitly chanced entries are checked
+    if (!ExplicitlyChanced.empty())                         // First explicitly chanced entries are checked
     {
         float Roll = rand_chance();
 
@@ -839,10 +842,10 @@ LootStoreItem const * LootTemplate::LootGroup::Roll() const
                 return &ExplicitlyChanced[i];
         }
     }
-    if (EqualChanced.size() > 0)                                // If nothing selected yet - an item is taken from equal-chanced part
+    if (!EqualChanced.empty())                              // If nothing selected yet - an item is taken from equal-chanced part
         return &EqualChanced[irand(0, EqualChanced.size()-1)];
 
-    return NULL;                                                // Empty drop from the group
+    return NULL;                                            // Empty drop from the group
 }
 
 // True if group includes at least 1 quest drop entry
@@ -877,19 +880,41 @@ void LootTemplate::LootGroup::Process(Loot& loot) const
         loot.AddItem(*item);
 }
 
-// Overall chance for the group
-float LootTemplate::LootGroup::TotalChance() const
+// Overall chance for the group without equal chanced items
+float LootTemplate::LootGroup::RawTotalChance() const
 {
     float result = 0;
-    
+
     for (LootStoreItemList::const_iterator i=ExplicitlyChanced.begin(); i != ExplicitlyChanced.end(); ++i)
         if ( !i->needs_quest )
             result += i->chance;
 
-    if (EqualChanced.size() >  0 && result < 100.0f)
+    return result;
+}
+
+// Overall chance for the group
+float LootTemplate::LootGroup::TotalChance() const
+{
+    float result = RawTotalChance();
+    
+    if (!EqualChanced.empty() && result < 100.0f)
         return 100.0f;
 
     return result;
+}
+
+void LootTemplate::LootGroup::Verify(LootStore const& lootstore, uint32 id, uint32 group_id) const
+{
+    float chance = RawTotalChance();
+    if (chance > 101.0f)                                // TODO: replace with 100% when DBs will be ready
+    {
+        sLog.outErrorDb("Table '%s' entry %u group %d has total chance > 100%% (%f)", lootstore.GetName(), id, group_id, chance);
+    }
+
+    if(chance >= 100.0f && !EqualChanced.empty())
+    {
+        sLog.outErrorDb("Table '%s' entry %u group %d has items with chance=0%% but group total chance >= 100%% (%f)", lootstore.GetName(), id, group_id, chance);
+    }
 }
 
 //
@@ -1012,16 +1037,11 @@ bool LootTemplate::HasQuestDropForPlayer(LootTemplateMap const& store, Player co
 }
 
 // Checks integrity of the template
-void LootTemplate::Verify(LootTemplateMap const& lootstore, uint32 id) const
+void LootTemplate::Verify(LootStore const& lootstore, uint32 id) const
 {
     // Checking group chances
     for (uint32 i=0; i < Groups.size(); ++i)
-    {
-        float chance = Groups[i].TotalChance();
-        if (chance > 101.0f)                                // TODO: replace with 100% when DBs will be ready
-        {
-            sLog.outErrorDb("Template %d group %d has total chance > 100%% (%f)", id, i+1, chance);
-        }
-    }
+        Groups[i].Verify(lootstore,id,i+1);
+
     // TODO: References validity checks
 }
