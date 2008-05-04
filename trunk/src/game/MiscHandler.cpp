@@ -940,16 +940,24 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
         // must have one or the other, report the first one that's missing
         uint32 missingItem = 0;
-        if(at->requiredItem && !GetPlayer()->HasItemCount(at->requiredItem, 1))
-            missingItem = at->requiredItem;
+        if(at->requiredItem)
+        {
+            if(!GetPlayer()->HasItemCount(at->requiredItem, 1) &&
+               (!at->requiredItem2 || !GetPlayer()->HasItemCount(at->requiredItem2, 1)))
+                missingItem = at->requiredItem;
+        }
         else if(at->requiredItem2 && !GetPlayer()->HasItemCount(at->requiredItem2, 1))
             missingItem = at->requiredItem2;
 
         uint32 missingKey = 0;
         if(GetPlayer()->GetDungeonDifficulty() == DIFFICULTY_HEROIC)
         {
-            if(at->heroicKey && !GetPlayer()->HasItemCount(at->heroicKey, 1))
-                missingKey = at->heroicKey;
+            if(at->heroicKey)
+            {
+                if(!GetPlayer()->HasItemCount(at->heroicKey, 1) &&
+                   (!at->heroicKey2 || !GetPlayer()->HasItemCount(at->heroicKey2, 1)))
+                    missingKey = at->heroicKey;
+            }
             else if(at->heroicKey2 && !GetPlayer()->HasItemCount(at->heroicKey2, 1))
                 missingKey = at->heroicKey2;
         }
