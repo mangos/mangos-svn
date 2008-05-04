@@ -217,6 +217,7 @@ void Channel::KickOrBan(uint64 good, const char *badname, bool ban)
 
             SendToAll(&data);
             players.erase(bad->GetGUID());
+            bad->LeftChannel(this);
 
             if(changeowner)
             {
