@@ -1372,25 +1372,26 @@ void Guild::LoadGuildBankEventLogFromDB()
 void Guild::UnloadGuildBankEventLog()
 {
     GuildBankEvent *EventLogEntry;
-    if (m_GuildBankEventLog_Money.size()>0)
+    if( !m_GuildBankEventLog_Money.empty() )
     {
         do
         {
             EventLogEntry = *(m_GuildBankEventLog_Money.begin());
             m_GuildBankEventLog_Money.pop_front();
             delete EventLogEntry;
-        }while( m_GuildBankEventLog_Money.size()>0 );
+        }while( !m_GuildBankEventLog_Money.empty() );
     }
+
     for (int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
     {
-        if (m_GuildBankEventLog_Item[i].size()>0)
+        if( !m_GuildBankEventLog_Item[i].empty() )
         {
             do
             {
                 EventLogEntry = *(m_GuildBankEventLog_Item[i].begin());
                 m_GuildBankEventLog_Item[i].pop_front();
                 delete EventLogEntry;
-            }while( m_GuildBankEventLog_Item[i].size()>0 );
+            }while( !m_GuildBankEventLog_Item[i].empty() );
         }
     }
 }

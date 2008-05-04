@@ -280,17 +280,6 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
         ort = go_data->orientation;
         mapid = go_data->mapid;
     }
-    // by in game guid
-    /* FIX ME: impossible without entry
-    else if(GameObject* go = ObjectAccessor::GetGameObject(*m_session->GetPlayer(), MAKE_GUID(guid, HIGHGUID_GAMEOBJECT)))
-    {
-        x = go->GetPositionX();
-        y = go->GetPositionY();
-        z = go->GetPositionZ();
-        ort = go->GetOrientation();
-        mapid = go->GetMapId();
-    }
-    */
     else
     {
         SendSysMessage(LANG_COMMAND_GOOBJNOTFOUND);

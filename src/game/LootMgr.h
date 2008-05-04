@@ -72,6 +72,7 @@ enum LootConditionType
 #define MAX_CONDITION                 10                    // maximun value in this enum 
 
 class Player;
+class LootStore;
 
 struct LootStoreItem
 {
@@ -92,7 +93,8 @@ struct LootStoreItem
           needs_quest(_chanceOrQuestChance < 0) {}
 
     bool Roll() const;                                      // Checks if the entry takes it's chance (at loot generation)
-    bool IsValid(uint32 entry) const;                       // Checks correctness of values
+    bool IsValid(LootStore const& store, uint32 entry) const;
+                                                            // Checks correctness of values
 };
 
 struct LootCondition
@@ -104,7 +106,8 @@ struct LootCondition
     LootCondition(uint8 _condition = 0, uint32 _value1 = 0, uint32 _value2 = 0)
         : condition(LootConditionType(_condition)), value1(_value1), value2(_value2) {}
 
-    bool IsValid() const;                                   // Checks correctness of values
+    static bool IsValid(LootStore const& store,uint32 entry,uint32 item,LootConditionType condition, uint32 value1, uint32 value2);
+                                                            // Checks correctness of values
     bool Meets(Player const * APlayer) const;               // Checks if the player meets the condition 
     bool operator == (LootCondition const& lc) const
     {
@@ -194,7 +197,7 @@ class LootTemplate
         bool HasQuestDropForPlayer(LootTemplateMap const& store, Player const * player, uint8 GroupId = 0) const;
 
         // Checks integrity of the template
-        void Verify(LootTemplateMap const& store, uint32 Id) const;
+        void Verify(LootStore const& store, uint32 Id) const;
     private:
         LootStoreItemList Entries;  // not grouped only 
         LootGroups        Groups;   // groups have own (optimised) processing, grouped entries go there
