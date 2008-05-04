@@ -332,10 +332,10 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         }
 
         // 0x02200000
-        if(flags2 & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_UNK5))
+        if(flags2 & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING2))
         {
             if(GetTypeId() == TYPEID_PLAYER)
-                *data << (float)((Player*)this)->m_movementInfo.s_angle;
+                *data << (float)((Player*)this)->m_movementInfo.s_pitch;
             else
                 *data << (float)0;                          // is't part of movement packet, we must store and send it...
         }

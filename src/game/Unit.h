@@ -459,9 +459,9 @@ enum MovementFlags
     MOVEMENTFLAG_RIGHT          = 0x00000020,
     MOVEMENTFLAG_PITCH_UP       = 0x00000040,
     MOVEMENTFLAG_PITCH_DOWN     = 0x00000080,
-    MOVEMENTFLAG_WALK_MODE      = 0x00000100,              // not walking, but not run _if_ move.
-    MOVEMENTFLAG_ONTRANSPORT    = 0x00000200,
-    MOVEMENTFLAG_UNK1           = 0x00000400,
+    MOVEMENTFLAG_WALK_MODE      = 0x00000100,               // Walking
+    MOVEMENTFLAG_ONTRANSPORT    = 0x00000200,               // Used for flying on some creatures
+    MOVEMENTFLAG_LEVITATING     = 0x00000400,
     MOVEMENTFLAG_FLY_UNK1       = 0x00000800,
     MOVEMENTFLAG_JUMPING        = 0x00001000,
     MOVEMENTFLAG_UNK4           = 0x00002000,
@@ -471,10 +471,10 @@ enum MovementFlags
     MOVEMENTFLAG_FLY_UP         = 0x00400000,
     MOVEMENTFLAG_CAN_FLY        = 0x00800000,
     MOVEMENTFLAG_FLYING         = 0x01000000,
-    MOVEMENTFLAG_UNK5           = 0x02000000,
-    MOVEMENTFLAG_SPLINE         = 0x04000000,               // probably wrong name
-    MOVEMENTFLAG_SPLINE2        = 0x08000000,
-    MOVEMENTFLAG_WATERWALKING   = 0x10000000,
+    MOVEMENTFLAG_FLYING2        = 0x02000000,               // Actual flying mode
+    MOVEMENTFLAG_SPLINE         = 0x04000000,               // used for flight paths
+    MOVEMENTFLAG_SPLINE2        = 0x08000000,               // used for flight paths
+    MOVEMENTFLAG_WATERWALKING   = 0x10000000,               // prevent unit from falling through water
     MOVEMENTFLAG_SAFE_FALL      = 0x20000000,               // active rogue safe fall spell (passive)
     MOVEMENTFLAG_UNK3           = 0x40000000
 };

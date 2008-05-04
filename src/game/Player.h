@@ -712,7 +712,7 @@ struct MovementInfo
     float   t_x, t_y, t_z, t_o;
     uint32  t_time;
     // swimming and unk
-    float   s_angle;
+    float   s_pitch;
     // last fall time
     uint32  fallTime;
     // jumping
@@ -725,7 +725,7 @@ struct MovementInfo
         //flags = 
         time = t_time = fallTime = 0;
         unk1 = 0;
-        x = y = z = o = t_x = t_y = t_z = t_o = s_angle = j_unk = j_sinAngle = j_cosAngle = j_xyspeed = u_unk1 = 0.0f;
+        x = y = z = o = t_x = t_y = t_z = t_o = s_pitch = j_unk = j_sinAngle = j_cosAngle = j_xyspeed = u_unk1 = 0.0f;
         t_guid = 0;
     }
 
