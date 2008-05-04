@@ -210,6 +210,7 @@ pkgdata_DATA = \
 	5739_mangos_creature.sql \
 	5739_mangos_gameobject.sql \
 	5746_mangos_quest_template.sql \
+	5753_mangos_areatrigger_teleport.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -400,4 +401,5 @@ EXTRA_DIST = \
 	5739_mangos_creature.sql \
 	5739_mangos_gameobject.sql \
 	5746_mangos_quest_template.sql \
+	5753_mangos_areatrigger_teleport.sql \
 	README

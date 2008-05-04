@@ -930,36 +930,50 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
     // NULL if all values default (non teleport trigger)
     AreaTrigger const* at = objmgr.GetAreaTrigger(Trigger_ID);
+    if(!at) return;
 
-    if(at)
+    if(!GetPlayer()->isGameMaster())
     {
-        if(at->requiredItem)
-        {
-            uint32 ReqItem = at->requiredItem;
-            ItemPrototype const *pProto = objmgr.GetItemPrototype(ReqItem);
-            // pProto != NULL checked and fixed (if need with error output) at server load and don't must be happens here
+        uint32 missingLevel = 0;
+        if(GetPlayer()->getLevel() < at->requiredLevel && !sWorld.getConfig(CONFIG_INSTANCE_IGNORE_LEVEL))
+            missingLevel = at->requiredLevel;
 
-            // item and level or GM
-            if( (!pProto || GetPlayer()->HasItemCount(ReqItem, 1)) &&
-                (GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_INSTANCE_IGNORE_LEVEL))
-                || GetPlayer()->isGameMaster() )
-                GetPlayer()->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation,true,false);
-            else
-            {
-                std::stringstream msgstr;
-                SendAreaTriggerMessage(objmgr.GetMangosString(LANG_LEVEL_MINREQUIRED_AND_ITEM,GetSessionLocaleIndex()),(uint32)at->requiredLevel,pProto->Name1);
-            }
-        }
-        else
+        // must have one or the other, report the first one that's missing
+        uint32 missingItem = 0;
+        if(at->requiredItem && !GetPlayer()->HasItemCount(at->requiredItem, 1))
+            missingItem = at->requiredItem;
+        else if(at->requiredItem2 && !GetPlayer()->HasItemCount(at->requiredItem2, 1))
+            missingItem = at->requiredItem2;
+
+        uint32 missingKey = 0;
+        if(GetPlayer()->GetDungeonDifficulty() == DIFFICULTY_HEROIC)
         {
-            if(GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_INSTANCE_IGNORE_LEVEL) || GetPlayer()->isGameMaster())
-                GetPlayer()->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation,true,false);
-            else
-            {
-                SendAreaTriggerMessage(objmgr.GetMangosString(LANG_LEVEL_MINREQUIRED,GetSessionLocaleIndex()),(uint32)at->requiredLevel );
-            }
+            if(at->heroicKey && !GetPlayer()->HasItemCount(at->heroicKey, 1))
+                missingKey = at->heroicKey;
+            else if(at->heroicKey2 && !GetPlayer()->HasItemCount(at->heroicKey2, 1))
+                missingKey = at->heroicKey2;
+        }
+
+        uint32 missingQuest = 0;
+        if(at->requiredQuest && !GetPlayer()->GetQuestRewardStatus(at->requiredQuest))
+            missingQuest = at->requiredQuest;
+
+        if(missingLevel || missingItem || missingKey || missingQuest)
+        {
+            // TODO: all this is probably wrong
+            if(missingItem)
+                SendAreaTriggerMessage(objmgr.GetMangosString(LANG_LEVEL_MINREQUIRED_AND_ITEM,GetSessionLocaleIndex()), at->requiredLevel, objmgr.GetItemPrototype(missingItem)->Name1);
+            else if(missingKey)
+                GetPlayer()->SendTransferAborted(at->target_mapId, TRANSFER_ABORT_DIFFICULTY2);
+            else if(missingQuest)
+                SendAreaTriggerMessage(at->requiredFailedText.c_str());
+            else if(missingLevel)
+                SendAreaTriggerMessage(objmgr.GetMangosString(LANG_LEVEL_MINREQUIRED,GetSessionLocaleIndex()), missingLevel);
+            return;
         }
     }
+
+    GetPlayer()->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation,true,false);
 }
 
 void WorldSession::HandleUpdateAccountData(WorldPacket &/*recv_data*/)
