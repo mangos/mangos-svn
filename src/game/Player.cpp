@@ -248,8 +248,6 @@ Player::Player (WorldSession *session): Unit( 0 )
     // this must help in case next save after mass player load after server startup
     m_nextSave = rand32(m_nextSave/2,m_nextSave*3/2);
 
-    m_unit_movement_flags = MOVEMENT_FLAG_RUN;
-
     m_resurrectGUID = 0;
     m_resurrectMap = 0;
     m_resurrectX = m_resurrectY = m_resurrectZ = 0;
@@ -328,8 +326,6 @@ Player::Player (WorldSession *session): Unit( 0 )
     //when dying/logging out
     m_oldpetspell = 0;
 
-    m_unit_movement_flags = MOVEMENT_FLAG_RUN;
-
     ////////////////////Rest System/////////////////////
     time_inn_enter=0;
     inn_pos_mapid=0;
@@ -379,6 +375,9 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_summon_x = 0.0f;
     m_summon_y = 0.0f;
     m_summon_z = 0.0f;
+
+    //Default movement to run mode
+    m_unit_movement_flags = 0;
 }
 
 Player::~Player ()
@@ -1448,7 +1447,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     }
 
     // reset movement flags at teleport, because player will continue move with these flags after teleport
-    m_movementInfo.SetMovementFlags(0);
+    SetUnitMovementFlags(0);
 
     if ((this->GetMapId() == mapid) && (!m_transport))
     {

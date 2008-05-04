@@ -449,6 +449,37 @@ enum NPCFlags
     UNIT_NPC_FLAG_GUARD                 = 0x10000000,       // custom flag for guards
 };
 
+enum MovementFlags
+{
+    MOVEMENTFLAG_NONE           = 0x00000000,
+    MOVEMENTFLAG_FORWARD        = 0x00000001,
+    MOVEMENTFLAG_BACKWARD       = 0x00000002,
+    MOVEMENTFLAG_STRAFE_LEFT    = 0x00000004,
+    MOVEMENTFLAG_STRAFE_RIGHT   = 0x00000008,
+    MOVEMENTFLAG_LEFT           = 0x00000010,
+    MOVEMENTFLAG_RIGHT          = 0x00000020,
+    MOVEMENTFLAG_PITCH_UP       = 0x00000040,
+    MOVEMENTFLAG_PITCH_DOWN     = 0x00000080,
+    MOVEMENTFLAG_WALK_MODE      = 0x00000100,              // not walking, but not run _if_ move.
+    MOVEMENTFLAG_ONTRANSPORT    = 0x00000200,
+    MOVEMENTFLAG_UNK1           = 0x00000400,
+    MOVEMENTFLAG_FLY_UNK1       = 0x00000800,
+    MOVEMENTFLAG_JUMPING        = 0x00001000,
+    MOVEMENTFLAG_UNK4           = 0x00002000,
+    MOVEMENTFLAG_FALLING        = 0x00004000,
+    // 0x8000, 0x10000, 0x20000, 0x40000, 0x80000, 0x100000
+    MOVEMENTFLAG_SWIMMING       = 0x00200000,               // appears with fly flag also
+    MOVEMENTFLAG_FLY_UP         = 0x00400000,
+    MOVEMENTFLAG_CAN_FLY        = 0x00800000,
+    MOVEMENTFLAG_FLYING         = 0x01000000,
+    MOVEMENTFLAG_UNK5           = 0x02000000,
+    MOVEMENTFLAG_SPLINE         = 0x04000000,               // probably wrong name
+    MOVEMENTFLAG_SPLINE2        = 0x08000000,
+    MOVEMENTFLAG_WATERWALKING   = 0x10000000,
+    MOVEMENTFLAG_SAFE_FALL      = 0x20000000,               // active rogue safe fall spell (passive)
+    MOVEMENTFLAG_UNK3           = 0x40000000
+};
+
 enum DiminishingMechanics
 {
     DIMINISHING_NONE                = 0,
@@ -589,15 +620,6 @@ enum ReactiveType
 
 // delay time next attack to prevent client attack animation problems
 #define ATTACK_DISPLAY_DELAY 200
-
-// MonsterMove packet movement flags
-enum MovementFlag
-{   
-    MOVEMENT_FLAG_NONE =            0x00000000,
-    MOVEMENT_FLAG_RUN =             0x00000100,
-
-    MOVEMENT_FLAG_SWIM_FLY      =   0x00000200,
-};
 
 class MANGOS_DLL_SPEC Unit : public WorldObject
 {
@@ -1078,7 +1100,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool IsStopped() const { return !(hasUnitState(UNIT_STAT_MOVING)); }
         void StopMoving();
 
-        void SetUnitMovementFlag(uint32 f) { m_unit_movement_flags |= f; }
+        void AddUnitMovementFlag(uint32 f) { m_unit_movement_flags |= f; }
         void RemoveUnitMovementFlag(uint32 f) 
         { 
             uint32 oldval = m_unit_movement_flags;
@@ -1086,6 +1108,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         }
         uint32 HasUnitMovementFlag(uint32 f) const { return m_unit_movement_flags & f; }
         uint32 GetUnitMovementFlags() const { return m_unit_movement_flags; }
+        void SetUnitMovementFlags(uint32 f) { m_unit_movement_flags = f; }
 
         void AddComboPointHolder(uint32 lowguid) { m_ComboPointHolders.insert(lowguid); }
         void RemoveComboPointHolder(uint32 lowguid) { m_ComboPointHolders.erase(lowguid); }

@@ -319,7 +319,7 @@ void Unit::SendMoveToPacket(float x, float y, float z, uint32 MovementFlags, uin
         else
             dist = sqrt(dist);
 
-        double speed = GetSpeed((MovementFlags & MOVEMENT_FLAG_RUN) ? MOVE_RUN : MOVE_WALK);
+        double speed = GetSpeed((MovementFlags & MOVEMENTFLAG_WALK_MODE) ? MOVE_WALK : MOVE_RUN);
         if(speed<=0)
             speed = 2.5f;
         speed *= 0.001f;

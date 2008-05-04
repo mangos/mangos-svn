@@ -264,19 +264,12 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         {
             case TYPEID_UNIT:
             {
-                switch(GetEntry())
-                {
-                    case 6491:                              // Spirit Healer
-                    case 13116:                             // Alliance Spirit Guide
-                    case 13117:                             // Horde Spirit Guide
-                        flags2 |= MOVEMENTFLAG_WATERWALKING;// waterwalking movement flag?
-                        break;
-                }
+                flags2 = ((Unit*)this)->GetUnitMovementFlags();
             }
             break;
             case TYPEID_PLAYER:
             {
-                flags2 = ((Player*)this)->GetMovementFlags();
+                flags2 = ((Unit*)this)->GetUnitMovementFlags();
 
                 if(((Player*)this)->GetTransport())
                     flags2 |= MOVEMENTFLAG_ONTRANSPORT;
@@ -326,12 +319,16 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         // 0x00000200
         if(flags2 & MOVEMENTFLAG_ONTRANSPORT)
         {
-            *data << (uint64)((Player*)this)->GetTransport()->GetGUID();
-            *data << (float)((Player*)this)->GetTransOffsetX();
-            *data << (float)((Player*)this)->GetTransOffsetY();
-            *data << (float)((Player*)this)->GetTransOffsetZ();
-            *data << (float)((Player*)this)->GetTransOffsetO();
-            *data << (uint32)((Player*)this)->GetTransTime();
+            if(GetTypeId() == TYPEID_PLAYER)
+            {
+                *data << (uint64)((Player*)this)->GetTransport()->GetGUID();
+                *data << (float)((Player*)this)->GetTransOffsetX();
+                *data << (float)((Player*)this)->GetTransOffsetY();
+                *data << (float)((Player*)this)->GetTransOffsetZ();
+                *data << (float)((Player*)this)->GetTransOffsetO();
+                *data << (uint32)((Player*)this)->GetTransTime();
+            }
+            //MaNGOS currently not have support for other than player on transport
         }
 
         // 0x02200000
@@ -388,6 +385,12 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         // 0x08000000
         if(flags2 & MOVEMENTFLAG_SPLINE2)
         {
+            if(GetTypeId() != TYPEID_PLAYER)
+            {
+                sLog.outDebug("_BuildMovementUpdate: MOVEMENTFLAG_SPLINE2 for non-player");
+                return;
+            }
+
             if(!((Player*)this)->isInFlight())
             {
                 sLog.outDebug("_BuildMovementUpdate: MOVEMENTFLAG_SPLINE2 but not in flight");
@@ -1175,10 +1178,13 @@ void WorldObject::MonsterWhisper(const uint64 receiver, const char* text)
 
 void WorldObject::BuildHeartBeatMsg(WorldPacket *data) const
 {
-    data->Initialize(MSG_MOVE_HEARTBEAT, 32);
+    //Heartbeat message cannot be used for non-units
+    if (!isType(TYPE_UNIT))
+        return;
 
+    data->Initialize(MSG_MOVE_HEARTBEAT, 32);
     data->append(GetPackGUID());
-    *data << uint32(0);                                     // movement flags?
+    *data << uint32(((Unit*)this)->GetUnitMovementFlags()); // movement flags
     *data << uint8(0);                                      // 2.3.0
     *data << getMSTime();                                   // time
     *data << m_positionX;
@@ -1190,10 +1196,14 @@ void WorldObject::BuildHeartBeatMsg(WorldPacket *data) const
 
 void WorldObject::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, float ang) const
 {
+    //TeleportAck message cannot be used for non-units
+    if (!isType(TYPE_UNIT))
+        return;
+
     data->Initialize(MSG_MOVE_TELEPORT_ACK, 41);
     data->append(GetPackGUID());
     *data << uint32(0);                                     // this value increments every time
-    *data << uint32(0);                                     // movement flags?
+    *data << uint32(((Unit*)this)->GetUnitMovementFlags()); // movement flags
     *data << uint8(0);                                      // 2.3.0
     *data << getMSTime();                                   // time
     *data << x;

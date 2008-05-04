@@ -4724,21 +4724,14 @@ bool ChatHandler::HandleComeToMeCommand(const char *args)
         return true;
     }
 
-    if (strncmp(args, "run", 3) == 0)
-    {
-        caster->SetUnitMovementFlag(MOVEMENT_FLAG_RUN);
-        caster->RemoveUnitMovementFlag(MOVEMENT_FLAG_SWIM_FLY);
-    }
-    else if (strncmp(args, "fly", 3) == 0)
-    {
-        caster->SetUnitMovementFlag(MOVEMENT_FLAG_RUN);
-        caster->SetUnitMovementFlag(MOVEMENT_FLAG_SWIM_FLY);
-    }
-    else
-    {
-        caster->RemoveUnitMovementFlag(MOVEMENT_FLAG_RUN);
-        caster->RemoveUnitMovementFlag(MOVEMENT_FLAG_SWIM_FLY);
-    }
+    char* newFlagStr = strtok((char*)args, " ");
+
+    if(!newFlagStr)
+        return false;
+
+    uint32 newFlags = atoi(newFlagStr);
+
+    caster->SetUnitMovementFlags(newFlags);
 
     if (caster->GetTypeId() == TYPEID_PLAYER)
         caster->GetMotionMaster()->Mutate(new PointMovementGenerator<Player>(0, m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ()));
