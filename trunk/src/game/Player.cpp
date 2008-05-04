@@ -15345,7 +15345,7 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             SendEquipError(EQUIP_ERR_NOT_ENOUGH_ARENA_POINTS, NULL, NULL);
             return false;
         }
-        
+
         // item base price
         for (uint8 i = 0; i < 5; ++i)
         {
@@ -15355,7 +15355,7 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
                 return false;
             }
         }
-        
+
         // check for personal arena rating requirement
         if( GetMaxPersonalArenaRatingRequirement() < iece->reqpersonalarenarating )
         {

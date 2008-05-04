@@ -217,18 +217,24 @@ void SpellCastTargets::write ( WorldPacket * data )
 {
     *data << uint32(m_targetMask);
 
-    if(m_targetMask & TARGET_FLAG_UNIT)
+    if( m_targetMask & ( TARGET_FLAG_UNIT | TARGET_FLAG_PVP_CORPSE | TARGET_FLAG_OBJECT | TARGET_FLAG_CORPSE | TARGET_FLAG_UNK2 ) )
     {
-        if(m_unitTarget)
-            data->append(m_unitTarget->GetPackGUID());
-        else
-            *data << uint8(0);
-    }
-
-    if( m_targetMask & ( TARGET_FLAG_OBJECT | TARGET_FLAG_OBJECT_UNK ) )
-    {
-        if(m_GOTarget)
-            data->append(m_GOTarget->GetPackGUID());
+        if(m_targetMask & TARGET_FLAG_UNIT)
+        {
+            if(m_unitTarget)
+                data->append(m_unitTarget->GetPackGUID());
+            else
+                *data << uint8(0);
+        }
+        else if( m_targetMask & ( TARGET_FLAG_OBJECT | TARGET_FLAG_OBJECT_UNK ) )
+        {
+            if(m_GOTarget)
+                data->append(m_GOTarget->GetPackGUID());
+            else
+                *data << uint8(0);
+        }
+        else if( m_targetMask & ( TARGET_FLAG_CORPSE | TARGET_FLAG_PVP_CORPSE ) )
+            data->appendPackGUID(m_CorpseTargetGUID);
         else
             *data << uint8(0);
     }
@@ -249,9 +255,6 @@ void SpellCastTargets::write ( WorldPacket * data )
 
     if( m_targetMask & TARGET_FLAG_STRING )
         *data << m_strTarget;
-
-    if( m_targetMask & ( TARGET_FLAG_CORPSE | TARGET_FLAG_PVP_CORPSE ) )
-        data->appendPackGUID(m_CorpseTargetGUID);
 }
 
 Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 originalCasterGUID, Spell** triggeringContainer )

@@ -471,7 +471,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
         for(uint8 i = 0; i < 2; i++)
         {
             *data << uint32(3000+1+i);                      // rating change: showed value - 3000
-            *data << uint32(0);                             // 2.4.0, unknown
+            *data << uint32(0);                             // 2.4.0, has some to do with rating change...
             *data << uint8(0);                              // some unknown string
         }
     }
@@ -494,6 +494,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
         *data << (int32)itr->second->KillingBlows;
         if(type)
         {
+            // this value is team (green/gold)?
             // that part probably wrong
             Player *plr = objmgr.GetPlayer(itr->first);
             if(plr)
@@ -512,7 +513,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
         {
             *data << (int32)itr->second->HonorableKills;
             *data << (int32)itr->second->Deaths;
-            *data << (int32)(itr->second->BonusHonor*10);   // multiplier not required in 2.4.x?
+            *data << (int32)itr->second->BonusHonor;        // bonus honor
         }
         *data << (int32)itr->second->DamageDone;            // damage done
         *data << (int32)itr->second->HealingDone;           // healing done
