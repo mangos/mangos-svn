@@ -378,7 +378,6 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         //data << pProto->CondExtendedCost;
         data << pProto->RequiredDisenchantSkill;
         data << pProto->ArmorDamageModifier;
-        data << uint32(0);                                  // added in 2.4.2.8209
         SendPacket( &data );
     }
     else
