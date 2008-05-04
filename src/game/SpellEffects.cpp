@@ -104,7 +104,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSummonGuardian,                           // 42 SPELL_EFFECT_SUMMON_GUARDIAN
     &Spell::EffectTeleUnitsFaceCaster,                      // 43 SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER
     &Spell::EffectLearnSkill,                               // 44 SPELL_EFFECT_SKILL_STEP
-    &Spell::EffectNULL,                                     // 45 SPELL_EFFECT_ADD_HONOR                honor/pvp related
+    &Spell::EffectAddHonor,                                 // 45 SPELL_EFFECT_ADD_HONOR                honor/pvp related
     &Spell::EffectNULL,                                     // 46 SPELL_EFFECT_SPAWN                    we must spawn pet there
     &Spell::EffectTradeSkill,                               // 47 SPELL_EFFECT_TRADE_SKILL
     &Spell::EffectNULL,                                     // 48 SPELL_EFFECT_STEALTH                  one spell: Base Stealth
@@ -2954,6 +2954,20 @@ void Spell::EffectLearnSkill(uint32 i)
     uint32 skillid =  m_spellInfo->EffectMiscValue[i];
     uint16 skillval = ((Player*)unitTarget)->GetPureSkillValue(skillid);
     ((Player*)unitTarget)->SetSkill(skillid,skillval?skillval:1,damage*75);
+}
+
+void Spell::EffectAddHonor(uint32 /*i*/)
+{
+    if(unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    sLog.outDebug("SpellEffect::AddHonor called for spell_id %u , that rewards %d honor points to player: %u", m_spellInfo->Id, this->damage, ((Player*)unitTarget)->GetGUIDLow());
+
+    //TODO find formula for honor reward based on player's level!
+
+    //now fixed only for lvl 70 players:
+    if (((Player*)unitTarget)->getLevel() == 70)
+        ((Player*)unitTarget)->RewardHonor(NULL, 1, this->damage);
 }
 
 void Spell::EffectTradeSkill(uint32 /*i*/)

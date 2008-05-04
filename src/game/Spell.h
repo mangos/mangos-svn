@@ -249,6 +249,7 @@ class Spell
         void EffectSummonGuardian(uint32 i);
         void EffectTeleUnitsFaceCaster(uint32 i);
         void EffectLearnSkill(uint32 i);
+        void EffectAddHonor(uint32 i);
         void EffectTradeSkill(uint32 i);
         void EffectEnchantItemPerm(uint32 i);
         void EffectEnchantItemTmp(uint32 i);
