@@ -65,6 +65,11 @@ CREATE TABLE `areatrigger_teleport` (
   `name` text,
   `required_level` tinyint(3) unsigned NOT NULL default '0',
   `required_item` mediumint(8) unsigned NOT NULL default '0',
+  `required_item2` mediumint(8) unsigned NOT NULL default '0',
+  `heroic_key` mediumint(8) unsigned NOT NULL default '0',
+  `heroic_key2` mediumint(8) unsigned NOT NULL default '0',
+  `required_quest_done` int(11) unsigned NOT NULL default '0' AFTER `heroic_key`,
+  `required_failed_text` text AFTER `required_quest_done`;
   `target_map` smallint(5) unsigned NOT NULL default '0',
   `target_position_x` float NOT NULL default '0',
   `target_position_y` float NOT NULL default '0',

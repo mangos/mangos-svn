@@ -4132,8 +4132,8 @@ void ObjectMgr::LoadAreaTriggerTeleports()
 
     uint32 count = 0;
 
-    //                                                0   1               2              3           4                  5                  6                  7
-    QueryResult *result = WorldDatabase.Query("SELECT id, required_level, required_item, target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM areatrigger_teleport");
+    //                                                0   1               2              3               4           5            6                    7                     8           9                  10                 11                 12
+    QueryResult *result = WorldDatabase.Query("SELECT id, required_level, required_item, required_item2, heroic_key, heroic_key2, required_quest_done, required_failed_text, target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM areatrigger_teleport");
     if( !result )
     {
 
@@ -4162,11 +4162,16 @@ void ObjectMgr::LoadAreaTriggerTeleports()
 
         at.requiredLevel      = fields[1].GetUInt8();
         at.requiredItem       = fields[2].GetUInt32();
-        at.target_mapId       = fields[3].GetUInt32();
-        at.target_X           = fields[4].GetFloat();
-        at.target_Y           = fields[5].GetFloat();
-        at.target_Z           = fields[6].GetFloat();
-        at.target_Orientation = fields[7].GetFloat();
+        at.requiredItem2      = fields[3].GetUInt32();
+        at.heroicKey          = fields[4].GetUInt32();
+        at.heroicKey2         = fields[5].GetUInt32();
+        at.requiredQuest      = fields[6].GetUInt32();
+        at.requiredFailedText = fields[7].GetCppString();
+        at.target_mapId       = fields[8].GetUInt32();
+        at.target_X           = fields[9].GetFloat();
+        at.target_Y           = fields[10].GetFloat();
+        at.target_Z           = fields[11].GetFloat();
+        at.target_Orientation = fields[12].GetFloat();
 
         AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
         if(!atEntry)
@@ -4182,6 +4187,44 @@ void ObjectMgr::LoadAreaTriggerTeleports()
             {
                 sLog.outError("Key item %u does not exist for trigger %u, removing key requirement.", at.requiredItem, Trigger_ID);
                 at.requiredItem = 0;
+            }
+        }
+        if(at.requiredItem2)
+        {
+            ItemPrototype const *pProto = objmgr.GetItemPrototype(at.requiredItem2);
+            if(!pProto)
+            {
+                sLog.outError("Second item %u not exist for trigger %u, remove key requirement.", at.requiredItem2, Trigger_ID);
+                at.requiredItem2 = 0;
+            }
+        }
+
+        if(at.heroicKey)
+        {
+            ItemPrototype const *pProto = objmgr.GetItemPrototype(at.heroicKey);
+            if(!pProto)
+            {
+                sLog.outError("Heroic key item %u not exist for trigger %u, remove key requirement.", at.heroicKey, Trigger_ID);
+                at.heroicKey = 0;
+            }
+        }
+
+        if(at.heroicKey2)
+        {
+            ItemPrototype const *pProto = objmgr.GetItemPrototype(at.heroicKey2);
+            if(!pProto)
+            {
+                sLog.outError("Heroic second key item %u not exist for trigger %u, remove key requirement.", at.heroicKey2, Trigger_ID);
+                at.heroicKey2 = 0;
+            }
+        }
+
+        if(at.requiredQuest)
+        {
+            if(!mQuestTemplates[at.requiredQuest])
+            {
+                sLog.outErrorDb("Required Quest %u not exist for trigger %u, remove quest done requirement.",at.requiredQuest,Trigger_ID);
+                at.requiredQuest = 0;
             }
         }
 
@@ -4206,6 +4249,22 @@ void ObjectMgr::LoadAreaTriggerTeleports()
 
     sLog.outString();
     sLog.outString( ">> Loaded %u area trigger teleport definitions", count );
+}
+
+AreaTrigger const* ObjectMgr::GetGoBackTrigger(uint32 Map) const
+{
+    const MapEntry *mapEntry = sMapStore.LookupEntry(Map);
+    if(!mapEntry) return NULL;
+    for (AreaTriggerMap::const_iterator itr = mAreaTriggers.begin(); itr != mAreaTriggers.end(); itr++)
+    {
+        if(itr->second.target_mapId == mapEntry->parent_map)
+        {
+            AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(itr->first);
+            if(atEntry && atEntry->mapid == Map)
+                return &itr->second;
+        }
+    }
+    return NULL;
 }
 
 void ObjectMgr::SetHighestGuids()
