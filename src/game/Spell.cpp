@@ -3727,7 +3727,7 @@ uint8 Spell::CanCast(bool strict)
                 if(m_caster->IsFriendlyTo(m_targets.getUnitTarget()))
                     return SPELL_FAILED_TARGET_FRIENDLY;
             };break;
-            case SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT:
+            case SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED:
             case SPELL_AURA_FLY:
             {
                 // not allow cast fly spells at old maps by players (all spells is self target)

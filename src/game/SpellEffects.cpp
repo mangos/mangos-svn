@@ -822,7 +822,7 @@ void Spell::EffectDummy(uint32 i)
                         return;
 
                     float flyspeed = m_caster->GetSpeedRate(MOVE_FLY);
-                    float speed = m_caster->GetSpeedRate(MOVE_MOUNTED);
+                    float speed = m_caster->GetSpeedRate(MOVE_RUN);
 
                     m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
