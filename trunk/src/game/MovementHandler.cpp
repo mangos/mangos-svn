@@ -160,12 +160,12 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         recv_data >> movementInfo.t_time;
     }
 
-    if(MovementFlags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_UNK5))
+    if(MovementFlags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING2))
     {
         // recheck
         CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
 
-        recv_data >> movementInfo.s_angle;                  // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
+        recv_data >> movementInfo.s_pitch;                  // pitch, -1.55=looking down, 0=looking straight forward, +1.55=looking up
     }
 
     // recheck
@@ -328,7 +328,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     uint64 t_GUID;
     float  t_x, t_y, t_z, t_o;
     uint32 t_time;
-    float  s_angle;
+    float  s_pitch;
     float  j_unk1, j_sinAngle, j_cosAngle, j_xyspeed;
     float  u_unk1;
     float  newspeed;
@@ -352,12 +352,12 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
         recv_data >> t_GUID;
         recv_data >> t_x >> t_y >> t_z >> t_o >> t_time;
     }
-    if (flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_UNK5))
+    if (flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_FLYING2))
     {
         // recheck
         CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
 
-        recv_data >> s_angle;                               // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
+        recv_data >> s_pitch;                               // pitch, -1.55=looking down, 0=looking straight forward, +1.55=looking up
     }
 
     // recheck
