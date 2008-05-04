@@ -1407,7 +1407,7 @@ bool ChatHandler::HandleModifyMoneyCommand(const char* args)
 
     int32 addmoney = atoi((char*)args);
 
-    uint32 moneyuser = m_session->GetPlayer()->GetMoney();
+    uint32 moneyuser = chr->GetMoney();
 
     if(addmoney < 0)
     {
