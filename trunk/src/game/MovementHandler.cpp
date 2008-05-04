@@ -271,6 +271,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         }
 
         //handle fall and logout at the sametime (logout started before fall finished)
+        /* outdated and create problems with sit at stun sometime
         if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE))
         {
             target->SetStandState(PLAYER_STATE_SIT);
@@ -280,6 +281,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             data << (uint32)2;
             SendPacket( &data );
         }
+        */
     }
 
     if(((movementInfo.flags & MOVEMENTFLAG_SWIMMING) != 0) != GetPlayer()->IsInWater())
