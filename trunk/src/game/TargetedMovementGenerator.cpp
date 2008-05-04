@@ -92,7 +92,7 @@ TargetedMovementGenerator<T>::Initialize(T &owner)
 {
     if(!&owner)
         return;
-    owner.SetUnitMovementFlag(MOVEMENT_FLAG_RUN);
+    owner.RemoveUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
     _setTargetLocation(owner);
 }
 

@@ -130,8 +130,8 @@ RandomMovementGenerator<Creature>::Update(Creature &creature, const uint32 &diff
             creature.StopMoving();
 
             if (!urand(0, 10))
-                creature.SetUnitMovementFlag(MOVEMENT_FLAG_RUN);
-            else creature.RemoveUnitMovementFlag(MOVEMENT_FLAG_RUN);
+                creature.RemoveUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
+            else creature.AddUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
 
             ++i_nextMove;
             if( i_nextMove == MAX_RAND_WAYPOINTS )

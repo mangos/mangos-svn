@@ -137,8 +137,9 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     /* extract packet */
     MovementInfo movementInfo;
+    uint32 MovementFlags;
 
-    recv_data >> movementInfo.flags;
+    recv_data >> MovementFlags;
     recv_data >> movementInfo.unk1;
     recv_data >> movementInfo.time;
     recv_data >> movementInfo.x;
@@ -146,7 +147,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     recv_data >> movementInfo.z;
     recv_data >> movementInfo.o;
 
-    if(movementInfo.flags & MOVEMENTFLAG_ONTRANSPORT)
+    if(MovementFlags & MOVEMENTFLAG_ONTRANSPORT)
     {
         // recheck
         CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+8+4+4+4+4+4);
@@ -159,7 +160,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         recv_data >> movementInfo.t_time;
     }
 
-    if(movementInfo.flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_UNK5))
+    if(MovementFlags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_UNK5))
     {
         // recheck
         CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
@@ -172,7 +173,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     recv_data >> movementInfo.fallTime;                     // duration of last jump (when in jump duration from jump begin to now)
 
-    if(movementInfo.flags & MOVEMENTFLAG_JUMPING)
+    if(MovementFlags & MOVEMENTFLAG_JUMPING)
     {
         // recheck
         CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4+4+4+4);
@@ -183,7 +184,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         recv_data >> movementInfo.j_xyspeed;                // speed of xy movement
     }
 
-    if(movementInfo.flags & MOVEMENTFLAG_SPLINE)
+    if(MovementFlags & MOVEMENTFLAG_SPLINE)
     {
         // recheck
         CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
@@ -203,7 +204,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         return;
 
     /* handle special cases */
-    if (movementInfo.flags & MOVEMENTFLAG_ONTRANSPORT)
+    if (MovementFlags & MOVEMENTFLAG_ONTRANSPORT)
     {
         // if we boarded a transport, add us to it
         if (!GetPlayer()->m_transport)
@@ -284,7 +285,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         */
     }
 
-    if(((movementInfo.flags & MOVEMENTFLAG_SWIMMING) != 0) != GetPlayer()->IsInWater())
+    if(((MovementFlags & MOVEMENTFLAG_SWIMMING) != 0) != GetPlayer()->IsInWater())
     {
         // now client not include swimming flag in case juming under water
         GetPlayer()->SetInWater( !GetPlayer()->IsInWater() || GetPlayer()->GetBaseMap()->IsUnderWater(movementInfo.x, movementInfo.y, movementInfo.z) );
@@ -511,5 +512,6 @@ void WorldSession::HandleSummonResponseOpcode(WorldPacket& /*recv_data*/)
 
     _player->SummonIfPossible();
 }
+
 
 

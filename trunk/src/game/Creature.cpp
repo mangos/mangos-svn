@@ -60,6 +60,7 @@ m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL)
     m_CreatureSpellCooldowns.clear();
     m_CreatureCategoryCooldowns.clear();
     m_GlobalCooldown = 0;
+    m_unit_movement_flags = MOVEMENTFLAG_WALK_MODE;
 }
 
 Creature::~Creature()
@@ -296,7 +297,7 @@ void Creature::Update(uint32 diff)
                 else
                 {
                     RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-                    RemoveUnitMovementFlag(MOVEMENT_FLAG_RUN);
+                    AddUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
 
                     SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
                     SetHealth(GetMaxHealth());
@@ -1491,7 +1492,7 @@ void Creature::setDeathState(DeathState s)
         CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(this->GetEntry());
         SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
         RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-        RemoveUnitMovementFlag(MOVEMENT_FLAG_RUN);
+        AddUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);       
         clearUnitState(UNIT_STAT_ALL_STATE);
         i_motionMaster.Clear();
