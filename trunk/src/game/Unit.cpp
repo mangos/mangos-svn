@@ -55,7 +55,6 @@ float baseMoveSpeed[MAX_MOVE_TYPE] =
     3.141594f,                                              // MOVE_TURN
     7.0f,                                                   // MOVE_FLY
     4.5f,                                                   // MOVE_FLYBACK
-    7.0f                                                    // MOVE_MOUNTED
 };
 
 // auraTypes contains attacker auras capable of proc'ing cast auras
@@ -3693,6 +3692,30 @@ int32 Unit::GetTotalAuraModifier(AuraType auratype) const
     AuraList const& mTotalAuraList = GetAurasByType(auratype);
     for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
         modifier += (*i)->GetModifier()->m_amount;
+
+    return modifier;
+}
+
+int32 Unit::GetMaxPositiveAuraModifier(AuraType auratype) const
+{
+    int32 modifier = 0;
+
+    AuraList const& mTotalAuraList = GetAurasByType(auratype);
+    for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
+        if ((*i)->GetModifier()->m_amount > modifier)
+            modifier = (*i)->GetModifier()->m_amount;
+
+    return modifier;
+}
+
+int32 Unit::GetMaxNegativeAuraModifier(AuraType auratype) const
+{
+    int32 modifier = 0;
+
+    AuraList const& mTotalAuraList = GetAurasByType(auratype);
+    for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
+        if ((*i)->GetModifier()->m_amount < modifier)
+            modifier = (*i)->GetModifier()->m_amount;
 
     return modifier;
 }
@@ -7886,8 +7909,6 @@ void Unit::Mount(uint32 mount)
         else
             ((Player*)this)->SetOldPetNumber(0);
     }
-
-    ApplySpeedMod(MOVE_MOUNTED, 1.0f, true, true);          //Send Client mounted Speed
 }
 
 void Unit::Unmount()
@@ -7908,8 +7929,6 @@ void Unit::Unmount()
 
         ((Player*)this)->SetOldPetNumber(0);
     }
-
-    ApplySpeedMod(MOVE_RUN, 1.0f, true, true);              //Send Client run speed
 }
 
 void Unit::SetInCombat()
@@ -8263,6 +8282,71 @@ bool Unit::canDetectInvisibilityOf(Unit const* u) const
     return false;
 }
 
+void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
+{
+    int32 main_speed_mod  = 0;
+    int32 stack_bonus     = 0;
+    int32 non_stack_bonus = 0;
+
+    switch(mtype)
+    {
+        case MOVE_RUN:
+        {
+            if (IsMounted()) // Use on mount auras
+            {
+                main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
+                stack_bonus     = GetTotalAuraModifier(SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS);
+                non_stack_bonus = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK);
+            }
+            else
+            {
+                main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_SPEED);
+                stack_bonus     = GetTotalAuraModifier(SPELL_AURA_MOD_SPEED_ALWAYS);
+            }
+        }
+        break;
+        case MOVE_SWIM:
+        {
+            main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_SWIM_SPEED);
+        }
+        break;
+        case MOVE_FLY:
+        {
+            if (IsMounted()) // Use on mount auras
+                main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED);
+            else             // Use not mount (snapeshift for example) auras
+                main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_SPEED_FLIGHT);
+            stack_bonus     = GetTotalAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED_ALWAYS);
+            non_stack_bonus = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACK);
+        }
+        break;
+        default:
+            sLog.outError("Unit::UpdateSpeed: Unsupported move type (%d)", mtype);
+            return;
+    }
+    
+    int32 slow = GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED);
+    int32 bonus = non_stack_bonus > stack_bonus ? non_stack_bonus : stack_bonus;
+
+    // now we ready for speed calculation
+    float speed = main_speed_mod ? (100.0f + main_speed_mod)/100.0f : 1.0f;
+
+    if(bonus)
+    {
+        // skip bonus if movement type capped by aura
+        uint32 mask = 0;
+
+        AuraList const& mSpeedCapAuraList = GetAurasByType(SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED);
+        for(AuraList::const_iterator itr = mSpeedCapAuraList.begin();itr != mSpeedCapAuraList.end(); ++itr)
+            mask |= (*itr)->GetModifier()->m_amount;
+
+        if((mask & (1 < mtype))==0) speed *=(100.0f + bonus)/100.0f;
+    }
+
+    if (slow)  speed *=(100.0f + slow)/100.0f;
+    SetSpeed(mtype, speed, forced);
+}
+
 float Unit::GetSpeed( UnitMoveType mtype ) const
 {
     return m_speed_rate[mtype]*baseMoveSpeed[mtype];
@@ -8270,28 +8354,19 @@ float Unit::GetSpeed( UnitMoveType mtype ) const
 
 void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
 {
-    m_speed_rate[mtype] = 1.0f;
-    ApplySpeedMod(mtype, rate, forced, true);
-}
+    if (rate < 0)
+        rate = 0.0f;
 
-void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply)
-{
-    if(apply)
-        m_speed_rate[mtype] *= rate;
-    else
-        m_speed_rate[mtype] /= rate;
+    // Update speed only on change
+    if (m_speed_rate[mtype] == rate)
+        return;
+
+    m_speed_rate[mtype] = rate;
+
     propagateSpeedChange();
 
     // Send speed change packet only for player
     if (GetTypeId()!=TYPEID_PLAYER)
-        return;
-
-    // Not send speed change if MOVE_MOUNTED and not mounted
-    if (mtype == MOVE_MOUNTED && !((Player*)this)->IsMounted())
-        return;
-
-    // Not send speed change if MOVE_RUN and mounted
-    if (mtype == MOVE_RUN     &&  ((Player*)this)->IsMounted())
         return;
 
     WorldPacket data;
@@ -8302,7 +8377,6 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
             case MOVE_WALK:
                 data.Initialize(MSG_MOVE_SET_WALK_SPEED, 8+4+1+4+4+4+4+4+4+4);
                 break;
-            case MOVE_MOUNTED:
             case MOVE_RUN:
                 data.Initialize(MSG_MOVE_SET_RUN_SPEED, 8+4+1+4+4+4+4+4+4+4);
                 break;
@@ -8343,12 +8417,14 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
     }
     else
     {
+        // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
+        // and do it only for real sent packets and use run for run/mounted as client expected
+        ++((Player*)this)->m_forced_speed_changes[mtype];
         switch(mtype)
         {
             case MOVE_WALK:
                 data.Initialize(SMSG_FORCE_WALK_SPEED_CHANGE, 16);
                 break;
-            case MOVE_MOUNTED:
             case MOVE_RUN:
                 data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE, 17);
                 break;
@@ -8377,12 +8453,12 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
         data.append(GetPackGUID());
         data << (uint32)0;
                                                             // new 2.1.0
-        if (mtype == MOVE_RUN || mtype == MOVE_MOUNTED) data << uint8(0);
+        if (mtype == MOVE_RUN) data << uint8(0);
         data << float(GetSpeed(mtype));
         SendMessageToSet( &data, true );
     }
     if(Pet* pet = GetPet())
-        pet->SetSpeed(mtype==MOVE_MOUNTED ? MOVE_RUN : mtype,m_speed_rate[mtype],forced);
+        pet->SetSpeed(MOVE_RUN, m_speed_rate[mtype],forced);
 }
 
 void Unit::SetHover(bool on)

@@ -105,7 +105,6 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraEmpathy(bool Apply, bool Real);
         void HandleModOffhandDamagePercent(bool apply, bool Real);
         void HandleAuraModRangedAttackPower(bool Apply, bool Real);
-        void HandleAuraModIncreaseSpeedAlways(bool Apply, bool Real);
         void HandleAuraModIncreaseEnergyPercent(bool Apply, bool Real);
         void HandleAuraModIncreaseHealthPercent(bool Apply, bool Real);
         void HandleAuraModRegenInterrupt(bool Apply, bool Real);
@@ -125,7 +124,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraModStat(bool Apply, bool Real);
         void HandleAuraModIncreaseSpeed(bool Apply, bool Real);
         void HandleAuraModIncreaseMountedSpeed(bool Apply, bool Real);
-        void HandleAuraModIncreaseMountedSpeedAlways(bool apply, bool Real);
+        void HandleAuraModIncreaseFlightSpeed(bool Apply, bool Real);
         void HandleAuraModDecreaseSpeed(bool Apply, bool Real);
         void HandleAuraModIncreaseHealth(bool Apply, bool Real);
         void HandleAuraModIncreaseEnergy(bool Apply, bool Real);
@@ -182,9 +181,6 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraModPacify(bool Apply, bool Real);
         void HandleAuraGhost(bool Apply, bool Real);
         void HandleAuraAllowFlight(bool Apply, bool Real);
-        void HandleAuraModSpeedMountedFlight(bool Apply, bool Real);
-        void HandleAuraModSpeedFlight(bool Apply, bool Real);
-        void HandleAuraModSpeedFlightAlways(bool apply, bool Real);
         void HandleModRating(bool apply, bool Real);
         void HandleModTargetResistance(bool apply, bool Real);
         void HandleAuraModAttackPowerPercent(bool apply, bool Real);

@@ -345,11 +345,10 @@ enum UnitMoveType
     MOVE_SWIMBACK   = 4,
     MOVE_TURN       = 5,
     MOVE_FLY        = 6,
-    MOVE_FLYBACK    = 7,
-    MOVE_MOUNTED    = 8                                     // server side only alternative for MOVE_RUN in mounted state
+    MOVE_FLYBACK    = 7
 };
 
-#define MAX_MOVE_TYPE 9
+#define MAX_MOVE_TYPE 8
 
 extern float baseMoveSpeed[MAX_MOVE_TYPE];
 
@@ -1035,6 +1034,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         AuraList const& GetAurasByType(AuraType type) const { return m_modAuras[type]; }
         void ApplyAuraProcTriggerDamage(Aura* aura, bool apply);
         int32 GetTotalAuraModifier(AuraType auratype) const;
+        int32 GetMaxPositiveAuraModifier(AuraType auratype) const;
+        int32 GetMaxNegativeAuraModifier(AuraType auratype) const;
         void SendMoveToPacket(float x, float y, float z, uint32 MovementFlags, uint32 transitTime = 0);
         uint32 GetDisplayId() { return GetUInt32Value(UNIT_FIELD_DISPLAYID); }
         void SetDisplayId(uint32 modelId);
@@ -1077,10 +1078,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 CalcArmorReducedDamage(Unit* pVictim, const uint32 damage);
         void CalcAbsorbResist(Unit *pVictim, SpellSchoolMask schoolMask, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist);
 
+        void  UpdateSpeed(UnitMoveType mtype, bool forced);
         float GetSpeed( UnitMoveType mtype ) const;
         float GetSpeedRate( UnitMoveType mtype ) const { return m_speed_rate[mtype]; }
         void SetSpeed(UnitMoveType mtype, float rate, bool forced = false);
-        virtual void ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply);
 
         void SetHover(bool on);
         bool isHover() const { return HasAuraType(SPELL_AURA_HOVER); }

@@ -5856,7 +5856,7 @@ void Player::UpdateZone(uint32 newZone)
     if( !isGameMaster() && 
         GetVirtualMapForMapAndZone(GetMapId(),newZone) != 530)
     {
-        RemoveSpellsCausingAura(SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT);
+        RemoveSpellsCausingAura(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED);
         RemoveSpellsCausingAura(SPELL_AURA_FLY);
     }
 
@@ -15258,22 +15258,6 @@ void Player::InitDataForForm()
 
     UpdateAttackPowerAndDamage();
     UpdateAttackPowerAndDamage(true);
-}
-
-void Player::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply)
-{
-    // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
-    // and do it only for real sent packets and use run for run/mounted as client expected
-    if( forced )
-    {
-        if( mtype == MOVE_MOUNTED &&  ((Player*)this)->IsMounted() ||
-            mtype == MOVE_RUN     && !((Player*)this)->IsMounted() )
-            ++m_forced_speed_changes[MOVE_RUN];
-        else if(mtype != MOVE_RUN && mtype != MOVE_MOUNTED )
-            ++m_forced_speed_changes[mtype];
-    }
-
-    Unit::ApplySpeedMod(mtype,rate,forced,apply);
 }
 
 // Return true is the bought item has a max count to force refresh of window by caller

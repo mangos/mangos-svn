@@ -1858,8 +1858,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_DetectInvTimer;
         void HandleStealthedUnitsDetection();
 
-        void ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply);
-                                                            // overwrite Unit version
         uint8 m_forced_speed_changes[MAX_MOVE_TYPE];
 
         bool HasAtLoginFlag(AtLoginFlags f) const { return m_atLoginFlags & f; }
