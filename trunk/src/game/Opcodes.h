@@ -1082,16 +1082,10 @@ enum OpCodes
     UMSG_UNKNOWN_1051                               = 1051, // not exist?
     UMSG_UNKNOWN_1052                               = 1052, // not exist?
     SMSG_UNKNOWN_1053                               = 1053, // uint32 count; for(count) { uint32; }
-    SMSG_UNKNOWN_1054                               = 1054, // packed guid
-    CMSG_UNKNOWN_1055                               = 1055, // AcceptLevelGrant
-    SMSG_UNKNOWN_1056                               = 1056, // uint32 unk, if(unk==9) string;
-    SMSG_UNKNOWN_1057                               = 1057, // packed guid
-    SMSG_UNKNOWN_1058                               = 1058, // packed guid
-    SMSG_UNKNOWN_1059                               = 1059  // empty
 };
 
 //if you add new opcode .. Do NOT forget to change the following define MAX_OPCODE_ID and also add new opcode to table in opcodes.cpp
-#define MAX_OPCODE_ID 1060
+#define MAX_OPCODE_ID 1054
 
 extern const char* g_worldOpcodeNames[];
 

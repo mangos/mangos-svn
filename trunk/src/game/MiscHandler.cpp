@@ -587,8 +587,6 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
             sLog.outDebug( "WORLD: %s's friend list is full.", GetPlayer()->GetName());
         }
 
-        _player->GetSocial()->SetFriendNote(GUID_LOPART(friendGuid), friendNote);
-
         sLog.outDebug( "WORLD: %s Guid found '%u'.", friendName.c_str(), GUID_LOPART(friendGuid));
     }
     else if(friendResult==FRIEND_ALREADY)
