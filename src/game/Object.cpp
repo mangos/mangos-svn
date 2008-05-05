@@ -1113,7 +1113,7 @@ void WorldObject::MonsterSay(const char* text, const uint32 language, const uint
     data << (uint32)(strlen(GetName())+1);
     data << GetName();
     data << (uint64)TargetGuid;                             //Unit Target
-    if( TargetGuid && ( GUID_HIPART(TargetGuid) != HIGHGUID_PLAYER) )
+    if( TargetGuid && !IS_PLAYER_GUID(TargetGuid) )
     {
         data << (uint32)1;                                  // target name lenth
         data << (uint8)0;                                   // target name
@@ -1135,7 +1135,7 @@ void WorldObject::MonsterYell(const char* text, const uint32 language, const uin
     data << (uint32)(strlen(GetName())+1);
     data << GetName();
     data << (uint64)TargetGuid;                             //Unit Target
-    if( TargetGuid && ( GUID_HIPART(TargetGuid) != HIGHGUID_PLAYER ))
+    if( TargetGuid && !IS_PLAYER_GUID(TargetGuid) )
     {
         data << (uint32)1;                                  // target name lenth
         data << (uint8)0;                                   // target name
@@ -1160,7 +1160,7 @@ void WorldObject::MonsterTextEmote(const char* text, const uint64 TargetGuid)
     data << (uint32)(strlen(GetName())+1);
     data << GetName();
     data << (uint64)TargetGuid;                             //Unit Target
-    if( TargetGuid && ( GUID_HIPART(TargetGuid) != HIGHGUID_PLAYER ) )
+    if( TargetGuid && !IS_PLAYER_GUID(TargetGuid) )
     {
         data << (uint32)1;                                  // target name lenth
         data << (uint8)0;                                   // target name
@@ -1182,7 +1182,7 @@ void WorldObject::MonsterWhisper(const uint64 receiver, const char* text)
     data << (uint32)(strlen(GetName())+1);
     data << GetName();
     data << (uint64)receiver;                               // Player's guid
-    if( receiver && ( GUID_HIPART(receiver) != HIGHGUID_PLAYER ) )
+    if( receiver && !IS_PLAYER_GUID(receiver) )
     {
         data << (uint32)1;                                  // target name lenth
         data << (uint8)0;                                   // target name

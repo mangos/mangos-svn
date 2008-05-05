@@ -426,14 +426,11 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     ZThread::Thread::sleep(10);
     #endif
 
-    ///- Create and send the Addon packet
-    if(sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos()))
-        SendPacket(&SendAddonPacked);
-
     ///- Check that we do not exceed the maximum number of online players in the realm
     uint32 Sessions  = sWorld.GetActiveAndQueuedSessionCount();
     uint32 pLimit    = sWorld.GetPlayerAmountLimit();
     uint32 QueueSize = sWorld.GetQueueSize();               //number of players in the queue
+    bool   inQueue   = false;
     --Sessions;                                             //so we don't count the user trying to login as a session and queue the socket that we are using
 
     if( pLimit >  0 && Sessions >= pLimit && security == SEC_PLAYER )
@@ -442,8 +439,15 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         SendAuthWaitQue(sWorld.GetQueuePos(this));
         sWorld.UpdateMaxSessionCounters();
         sLog.outDetail( "PlayerQueue: %s is in Queue Position (%u).",safe_account.c_str(),++QueueSize);
-        return;
+        inQueue = true;
     }
+
+    ///- Create and send the Addon packet
+    if(sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos()))
+        SendPacket(&SendAddonPacked);
+
+    if(inQueue)
+        return;
 
     sWorld.UpdateMaxSessionCounters();
 

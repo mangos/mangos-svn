@@ -693,7 +693,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
             *data << uint32(strlen(speaker->GetName()) + 1);
             *data << speaker->GetName();
             *data << uint64(speaker->GetGUID());
-            if(speaker->GetGUID() && (GUID_HIPART(speaker->GetGUID()) != HIGHGUID_PLAYER))
+            if(speaker->GetGUID() && !IS_PLAYER_GUID(speaker->GetGUID()))
             {
                 *data << uint32(1);                         // string length
                 *data << uint8(0);                          // string
