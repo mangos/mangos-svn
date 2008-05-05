@@ -145,11 +145,6 @@ bool IsIPAddress(char const* ipaddress)
 // internal status if the irand() random number generator
 static uint32 holdrand = 0x89abcdef;
 
-// initialize the irand() random number generator
-void Rand_Init(uint32 seed)
-{
-    holdrand = seed;
-}
 
 /* Return a random number in the range min .. max.
  * max-min must be smaller than 32768. */
@@ -165,6 +160,22 @@ int32 irand(int32 min, int32 max)
 
 // current state of the random number generator
 static int32 rand32_state = 1;
+
+// initialize the irand() random number generator
+void Randomizer_Init()
+{
+    // if const randoms are needed in debug
+    #ifdef _DEBUG
+        // return;
+    #endif
+
+    time_t ti;
+    time( &ti );
+    
+    holdrand = uint32(ti);
+    rand32_state = (int32)ti;
+}
+
 
 /* Return a pseudo-random number in the range 0 .. RAND32_MAX.
  * Note: Not reentrant - if two threads call this simultaneously, they will likely
@@ -205,4 +216,5 @@ uint32 CreatePIDFile(std::string filename)
 
     return (uint32)pid;
 }
+
 
