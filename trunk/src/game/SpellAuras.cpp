@@ -243,7 +243,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //188 SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_CHANCE implemented in Unit::GetUnitCriticalChance
     &Aura::HandleModRating,                                 //189 SPELL_AURA_MOD_RATING
     &Aura::HandleNULL,                                      //190 SPELL_AURA_MOD_FACTION_REPUTATION_GAIN
-    &Aura::HandleNoImmediateEffect,                         //191 SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED
+    &Aura::HandleAuraModUseNormalSpeed,                     //191 SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED
     &Aura::HandleModMeleeRangedSpeedPct,                    //192 SPELL_AURA_HASTE_MELEE
     &Aura::HandleModCombatSpeedPct,                         //193 SPELL_AURA_MELEE_SLOW (in fact combat (any type attack) speed pct)
     &Aura::HandleUnused,                                    //194 SPELL_AURA_MOD_DEPRICATED_1 not used now (old SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT)
@@ -2967,7 +2967,9 @@ void Aura::HandleAuraModIncreaseMountedSpeed(bool apply, bool Real)
     if(!Real)
         return;
 
+    m_target->UpdateSpeed(MOVE_WALK, true);
     m_target->UpdateSpeed(MOVE_RUN, true);
+    m_target->UpdateSpeed(MOVE_WALKBACK, true);
 }
 
 void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
@@ -2990,6 +2992,7 @@ void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
     }
 
     m_target->UpdateSpeed(MOVE_FLY, true);
+    m_target->UpdateSpeed(MOVE_FLYBACK, true);
 }
 
 void Aura::HandleAuraModIncreaseSwimSpeed(bool apply, bool Real)
@@ -2999,6 +3002,7 @@ void Aura::HandleAuraModIncreaseSwimSpeed(bool apply, bool Real)
         return;
 
     m_target->UpdateSpeed(MOVE_SWIM, true);
+    m_target->UpdateSpeed(MOVE_SWIMBACK, true);
 }
 
 void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
@@ -3007,9 +3011,30 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
     if(!Real)
         return;
 
+    m_target->UpdateSpeed(MOVE_WALK, true);
     m_target->UpdateSpeed(MOVE_RUN, true);
-    m_target->UpdateSpeed(MOVE_FLY, true);
+    m_target->UpdateSpeed(MOVE_WALKBACK, true);
     m_target->UpdateSpeed(MOVE_SWIM, true);
+    m_target->UpdateSpeed(MOVE_SWIMBACK, true);
+    m_target->UpdateSpeed(MOVE_FLY, true);
+    m_target->UpdateSpeed(MOVE_FLYBACK, true);
+}
+
+void Aura::HandleAuraModUseNormalSpeed(bool apply, bool Real)
+{
+    // all applied/removed only at real aura add/remove
+    if(!Real)
+        return;
+
+    // Update movement type by mask
+    uint32 mask = m_modifier.m_amount;
+    if (mask & (1<<MOVE_WALK    )) m_target->UpdateSpeed(MOVE_WALK,    true);
+    if (mask & (1<<MOVE_RUN     )) m_target->UpdateSpeed(MOVE_RUN,     true);
+    if (mask & (1<<MOVE_WALKBACK)) m_target->UpdateSpeed(MOVE_WALKBACK,true);
+    if (mask & (1<<MOVE_SWIM    )) m_target->UpdateSpeed(MOVE_SWIM,    true);
+    if (mask & (1<<MOVE_SWIMBACK)) m_target->UpdateSpeed(MOVE_SWIMBACK,true);
+    if (mask & (1<<MOVE_FLY     )) m_target->UpdateSpeed(MOVE_FLY,     true);
+    if (mask & (1<<MOVE_FLYBACK )) m_target->UpdateSpeed(MOVE_FLYBACK, true);
 }
 
 /*********************************************************/
