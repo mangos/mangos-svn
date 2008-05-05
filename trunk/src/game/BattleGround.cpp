@@ -852,6 +852,7 @@ bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float 
     data.spawntimesecs  = spawntime;
     data.animprogress   = 100;
     data.go_state       = 1;
+    data.spawnMask      = 1;
     objmgr.AddGameobjectToGrid(guid, &data);
 
     m_BgObjects[type] = MAKE_NEW_GUID(guid, entry, HIGHGUID_GAMEOBJECT);
