@@ -16303,7 +16303,7 @@ bool Player::HasQuestForGO(int32 GOId)
 
 void Player::UpdateForQuestsGO()
 {
-    if(m_clientGUIDs.size() == 0)
+    if(m_clientGUIDs.empty())
         return;
 
     UpdateData udata;

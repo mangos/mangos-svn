@@ -659,7 +659,7 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest const *pQuest, uint64 npcGUID
     // items.  Otherwise, we'll skip straight to the OfferReward
 
     // We may wish a better check, perhaps checking the real quest requirements
-    if (pQuest->GetRequestItemsText().size() == 0)
+    if (pQuest->GetRequestItemsText().empty())
     {
         SendQuestGiverOfferReward(pQuest, npcGUID, true);
         return;

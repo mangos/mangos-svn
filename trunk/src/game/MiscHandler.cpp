@@ -126,7 +126,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     uint32 team = _player->GetTeam();
     uint32 security = GetSecurity();
     bool allowTwoSideWhoList = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
-    bool gmInWhoList         = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST) || security > SEC_PLAYER;
+    bool gmInWhoList         = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST);
 
     WorldPacket data( SMSG_WHO, 50 );                       // guess size
     data << clientcount;                                    // clientcount place holder
@@ -136,15 +136,39 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     HashMapHolder<Player>::MapType& m = ObjectAccessor::Instance().GetPlayers();
     for(HashMapHolder<Player>::MapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
-        std::string gname = objmgr.GetGuildNameById(itr->second->GetGuildId());
-        const char *pname = itr->second->GetName();
-        uint32 lvl = itr->second->getLevel();
-        uint32 class_ = itr->second->getClass();
-        uint32 race = itr->second->getRace();
-        uint32 pzoneid = itr->second->GetZoneId();
-        bool z_show = true;
-        bool s_show = true;
+        if (security == SEC_PLAYER)
+        {
+            // player can see member of other team only if CONFIG_ALLOW_TWO_SIDE_WHO_LIST
+            if (itr->second->GetTeam() != team && !allowTwoSideWhoList )
+                continue;
 
+            // player can see MODERATOR, GAME MASTER, ADMINISTRATOR only if CONFIG_GM_IN_WHO_LIST
+            if ((itr->second->GetSession()->GetSecurity() > SEC_PLAYER && !gmInWhoList))
+                continue;
+        }
+
+        // check if target is globally visible for player
+        if (!(itr->second->IsVisibleGloballyFor(_player)))
+            continue;
+        
+        // check if target's level is in level range
+        uint32 lvl = itr->second->getLevel();
+        if (lvl < level_min || lvl > level_max)
+            continue;
+
+        // check if class machtes classmask
+        uint32 class_ = itr->second->getClass();
+        if (!(classmask & (1 << class_)))
+            continue;
+        
+        // check if race matches racemask
+        uint32 race = itr->second->getRace();
+        if (!(racemask & (1 << race)))
+            continue;
+
+        uint32 pzoneid = itr->second->GetZoneId();
+        
+        bool z_show = true;
         for(uint32 i = 0; i < zones_count; i++)
         {
             if(zoneids[i] == pzoneid)
@@ -155,39 +179,44 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 
             z_show = false;
         }
+        if (!z_show)
+            continue;
 
+        const char *pname = itr->second->GetName();
+        if (!pname || !(player_name.empty() || strstr(pname, player_name.c_str())))
+            continue;
+
+        std::string gname = objmgr.GetGuildNameById(itr->second->GetGuildId());
+        if (!(guild_name.empty() || strstr(gname.c_str(), guild_name.c_str())))
+            continue;
+
+        bool s_show = true;
         for(uint32 i = 0; i < str_count; i++)
         {
-            s_show = str[i].length() ? strstr(gname.c_str(), str[i].c_str())!=0 : true;
-            if(s_show)
-                break;
-            s_show = str[i].length() ? strstr(pname, str[i].c_str())!=0 : true;
-            if(s_show)
-                break;
+            if (!str[i].empty())
+            {
+                if (strstr(gname.c_str(), str[i].c_str()) || strstr(pname, str[i].c_str()))
+                {
+                    s_show = true;
+                    break;
+                }
+                s_show = false;
+            }
         }
+        if (!s_show)
+            continue;
 
-        // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
-        // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
-        if( pname &&
-            ( security > SEC_PLAYER || itr->second->GetTeam() == team || allowTwoSideWhoList ) &&
-            (classmask & (1 << class_) ) && (racemask & (1 << race) ) &&
-            (lvl >= level_min && lvl <= level_max) &&
-            (guild_name.length()?strstr(gname.c_str(), guild_name.c_str())!=0 : true) &&
-            (player_name.length()?strstr(pname, player_name.c_str())!=0 : true) &&
-            z_show && s_show &&
-            (itr->second->GetSession()->GetSecurity() == SEC_PLAYER || gmInWhoList && itr->second->IsVisibleGloballyFor(_player) ) &&
-            clientcount < 49)
-        {
-            ++clientcount;
+        data << pname;                                  // player name
+        data << gname;                                  // guild name
+        data << uint32( lvl );                          // player level
+        data << uint32( class_ );                       // player class
+        data << uint32( race );                         // player race
+        data << uint8(0);                               // new 2.4.0
+        data << uint32( pzoneid );                      // player zone id
 
-            data << pname;                                  // player name
-            data << gname;                                  // guild name
-            data << uint32( lvl );                          // player level
-            data << uint32( class_ );                       // player class
-            data << uint32( race );                         // player race
-            data << uint8(0);                               // new 2.4.0
-            data << uint32( pzoneid );                      // player zone id
-        }
+        // 49 is maximum player count sent to client
+        if ((++clientcount) == 49)
+            break;
     }
 
     data.put( 0,              clientcount );                //insert right count
