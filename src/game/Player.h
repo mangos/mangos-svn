@@ -1455,9 +1455,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetDungeonDifficulty(uint32 difficulty) { m_dungeonDifficulty = difficulty; }
         uint32 GetDungeonDifficulty() { return m_dungeonDifficulty; }
 
-        bool UpdateSkill(uint32 skill_id);
+        bool UpdateSkill(uint32 skill_id, uint32 step);
+        bool UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step);
 
-        bool UpdateSkillPro(uint16 SkillId, int32 Chance);
         bool UpdateCraftSkill(uint32 spellid);
         bool UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator = 1);
         bool UpdateFishingSkill();

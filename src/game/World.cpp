@@ -471,6 +471,34 @@ void World::SetInitialWorldSettings()
 
     m_configs[CONFIG_SKILL_PROSPECTING] = sConfig.GetBoolDefault("SkillChance.Prospecting",false);
 
+    m_configs[CONFIG_SKILL_GAIN_CRAFTING]  = sConfig.GetIntDefault("SkillGain.Crafting", 1);
+    if(m_configs[CONFIG_SKILL_GAIN_CRAFTING] < 0)
+    {
+        sLog.outError("SkillGain.Crafting (%i) can't be negative. Set to 1.",m_configs[CONFIG_SKILL_GAIN_CRAFTING]);
+        m_configs[CONFIG_SKILL_GAIN_CRAFTING] = 1;
+    }
+
+    m_configs[CONFIG_SKILL_GAIN_DEFENSE]  = sConfig.GetIntDefault("SkillGain.Defense", 1);
+    if(m_configs[CONFIG_SKILL_GAIN_DEFENSE] < 0)
+    {
+        sLog.outError("SkillGain.Defense (%i) can't be negative. Set to 1.",m_configs[CONFIG_SKILL_GAIN_DEFENSE]);
+        m_configs[CONFIG_SKILL_GAIN_DEFENSE] = 1;
+    }
+
+    m_configs[CONFIG_SKILL_GAIN_GATHERING]  = sConfig.GetIntDefault("SkillGain.Gathering", 1);
+    if(m_configs[CONFIG_SKILL_GAIN_GATHERING] < 0)
+    {
+        sLog.outError("SkillGain.Gathering (%i) can't be negative. Set to 1.",m_configs[CONFIG_SKILL_GAIN_GATHERING]);
+        m_configs[CONFIG_SKILL_GAIN_GATHERING] = 1;
+    }
+
+    m_configs[CONFIG_SKILL_GAIN_WEAPON]  = sConfig.GetIntDefault("SkillGain.Weapon", 1);
+    if(m_configs[CONFIG_SKILL_GAIN_WEAPON] < 0)
+    {
+        sLog.outError("SkillGain.Weapon (%i) can't be negative. Set to 1.",m_configs[CONFIG_SKILL_GAIN_WEAPON]);
+        m_configs[CONFIG_SKILL_GAIN_WEAPON] = 1;
+    }
+
     m_configs[CONFIG_MAX_OVERSPEED_PINGS] = sConfig.GetIntDefault("MaxOverspeedPings",2);
     if(m_configs[CONFIG_MAX_OVERSPEED_PINGS] != 0 && m_configs[CONFIG_MAX_OVERSPEED_PINGS] < 2)
     {

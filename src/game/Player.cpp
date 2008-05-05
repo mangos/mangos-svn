@@ -3840,7 +3840,9 @@ void Player::LeaveLFGChannel()
 
 void Player::UpdateDefense()
 {
-    if(UpdateSkill(SKILL_DEFENSE))
+    uint32 defense_skill_gain = sWorld.getConfig(CONFIG_SKILL_GAIN_DEFENSE);
+
+    if(UpdateSkill(SKILL_DEFENSE,defense_skill_gain))
     {
         // update dependent from defense skill part BlockChanceWithoutMods = 5 + (GetDefenseSkillValue() - getLevel()*5)*0.04);
         UpdateBlockPercentage();
@@ -4218,8 +4220,8 @@ void Player::SetRegularAttackTime()
     }
 }
 
-//skill+1, checking for max value
-bool Player::UpdateSkill(uint32 skill_id)
+//skill+step, checking for max value
+bool Player::UpdateSkill(uint32 skill_id, uint32 step)
 {
     if(!skill_id)
         return false;
@@ -4241,7 +4243,11 @@ bool Player::UpdateSkill(uint32 skill_id)
 
     if (value*512 < max*urand(0,512))
     {
-        SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i),data+MAKE_SKILL_VALUE(1,0));
+        uint32 new_value = value+step;
+        if(new_value > max)
+            new_value = max;
+
+        SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i),MAKE_SKILL_VALUE(new_value,max));
         return true;
     }
 
@@ -4279,15 +4285,20 @@ bool Player::UpdateCraftSkill(uint32 spellid)
             learnSpell(discoveredSpell);
     }
 
+    uint32 craft_skill_gain = sWorld.getConfig(CONFIG_SKILL_GAIN_CRAFTING);
+
     return UpdateSkillPro(pAbility->skillId, SkillGainChance(SkillValue,
         pAbility->max_value,
         (pAbility->max_value + pAbility->min_value)/2,
-        pAbility->min_value));
+        pAbility->min_value),
+        craft_skill_gain);
 }
 
 bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLevel, uint32 Multiplicator )
 {
     sLog.outDebug("UpdateGatherSkill(SkillId %d SkillLevel %d RedLevel %d)", SkillId, SkillValue, RedLevel);
+
+    uint32 gathering_skill_gain = sWorld.getConfig(CONFIG_SKILL_GAIN_GATHERING);
 
     // For skinning and Mining chance decrease with level. 1-74 - no decrease, 75-149 - 2 times, 225-299 - 8 times
     switch (SkillId)
@@ -4295,17 +4306,17 @@ bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLeve
         case SKILL_HERBALISM:
         case SKILL_LOCKPICKING:
         case SKILL_JEWELCRAFTING:
-            return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator);
+            return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator,gathering_skill_gain);
         case SKILL_SKINNING:
             if( sWorld.getConfig(CONFIG_SKILL_CHANCE_SKINNING_STEPS)==0)
-                return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator);
+                return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator,gathering_skill_gain);
             else
-                return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator) >> (SkillValue/sWorld.getConfig(CONFIG_SKILL_CHANCE_SKINNING_STEPS)) );
+                return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator) >> (SkillValue/sWorld.getConfig(CONFIG_SKILL_CHANCE_SKINNING_STEPS)), gathering_skill_gain);
         case SKILL_MINING:
             if (sWorld.getConfig(CONFIG_SKILL_CHANCE_MINING_STEPS)==0)
-                return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator);
+                return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator,gathering_skill_gain);
             else
-                return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator) >> (SkillValue/sWorld.getConfig(CONFIG_SKILL_CHANCE_MINING_STEPS)) );
+                return UpdateSkillPro(SkillId, (SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator) >> (SkillValue/sWorld.getConfig(CONFIG_SKILL_CHANCE_MINING_STEPS)),gathering_skill_gain);
     }
     return false;
 }
@@ -4318,10 +4329,12 @@ bool Player::UpdateFishingSkill()
 
     int32 chance = SkillValue < 75 ? 100 : 2500/(SkillValue-50);
 
-    return UpdateSkillPro(SKILL_FISHING,chance*10);
+    uint32 gathering_skill_gain = sWorld.getConfig(CONFIG_SKILL_GAIN_GATHERING);
+
+    return UpdateSkillPro(SKILL_FISHING,chance*10,gathering_skill_gain);
 }
 
-bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance)
+bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step)
 {
     sLog.outDebug("UpdateSkillPro(SkillId %d, Chance %3.1f%%)", SkillId, Chance/10.0);
     if ( !SkillId )
@@ -4350,7 +4363,11 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance)
 
     if ( Roll <= Chance )
     {
-        SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i),data + MAKE_SKILL_VALUE(1,0));
+        uint32 new_value = SkillValue+step;
+        if(new_value > MaxValue)
+            new_value = MaxValue;
+
+        SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i),MAKE_SKILL_VALUE(new_value,MaxValue));
         sLog.outDebug("Player::UpdateSkillPro Chance=%3.1f%% taken", Chance/10.0);
         return true;
     }
@@ -4372,6 +4389,8 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
     if(m_form == FORM_TREE)
         return;                                             // use weapon but not skill up
 
+    uint32 weapon_skill_gain = sWorld.getConfig(CONFIG_SKILL_GAIN_WEAPON);
+
     switch(attType)
     {
         case BASE_ATTACK:
@@ -4379,9 +4398,9 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
             Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
 
             if (!tmpitem || tmpitem->IsBroken() || !IsUseEquipedWeapon(true))
-                UpdateSkill(SKILL_UNARMED);
+                UpdateSkill(SKILL_UNARMED,weapon_skill_gain);
             else if(tmpitem->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE)
-                UpdateSkill(tmpitem->GetSkill());
+                UpdateSkill(tmpitem->GetSkill(),weapon_skill_gain);
 
         };break;
         case OFF_ATTACK:
@@ -4389,14 +4408,14 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
             Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
             if (tmpitem && tmpitem->GetProto()->Class == ITEM_CLASS_WEAPON && !tmpitem->IsBroken() && IsUseEquipedWeapon(false))
-                UpdateSkill(tmpitem->GetSkill());
+                UpdateSkill(tmpitem->GetSkill(),weapon_skill_gain);
         };break;
         case RANGED_ATTACK:
         {
             Item* tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
 
             if (tmpitem && tmpitem->GetProto()->Class == ITEM_CLASS_WEAPON && !tmpitem->IsBroken() && IsUseEquipedWeapon(false))
-                UpdateSkill(tmpitem->GetSkill());
+                UpdateSkill(tmpitem->GetSkill(),weapon_skill_gain);
         };break;
     }
 }
