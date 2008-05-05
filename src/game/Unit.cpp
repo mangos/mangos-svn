@@ -8290,11 +8290,15 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
 
     switch(mtype)
     {
+        case MOVE_WALK:
         case MOVE_RUN:
+        case MOVE_WALKBACK:
         {
             if (IsMounted()) // Use on mount auras
             {
-                main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
+                // Apply main mod only for forward move on mount
+                if (mtype == MOVE_RUN)
+                    main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
                 stack_bonus     = GetTotalAuraModifier(SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS);
                 non_stack_bonus = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK);
             }
@@ -8303,23 +8307,29 @@ void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
                 main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_SPEED);
                 stack_bonus     = GetTotalAuraModifier(SPELL_AURA_MOD_SPEED_ALWAYS);
             }
+            break;
         }
-        break;
         case MOVE_SWIM:
         {
             main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_SWIM_SPEED);
+            break;
         }
-        break;
+        case MOVE_SWIMBACK:
+            break;                                          // none mods
         case MOVE_FLY:
+        case MOVE_FLYBACK:
         {
-            if (IsMounted()) // Use on mount auras
-                main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED);
-            else             // Use not mount (snapeshift for example) auras
-                main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_SPEED_FLIGHT);
+            if (mtype == MOVE_FLY)
+            {
+                if (IsMounted()) // Use on mount auras
+                    main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED);
+                else             // Use not mount (snapeshift for example) auras
+                    main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_SPEED_FLIGHT);
+            }
             stack_bonus     = GetTotalAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED_ALWAYS);
             non_stack_bonus = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACK);
+            break;
         }
-        break;
         default:
             sLog.outError("Unit::UpdateSpeed: Unsupported move type (%d)", mtype);
             return;

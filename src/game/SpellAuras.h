@@ -126,6 +126,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraModIncreaseMountedSpeed(bool Apply, bool Real);
         void HandleAuraModIncreaseFlightSpeed(bool Apply, bool Real);
         void HandleAuraModDecreaseSpeed(bool Apply, bool Real);
+        void HandleAuraModUseNormalSpeed(bool Apply, bool Real);
         void HandleAuraModIncreaseHealth(bool Apply, bool Real);
         void HandleAuraModIncreaseEnergy(bool Apply, bool Real);
         void HandleAuraModShapeshift(bool Apply, bool Real);
