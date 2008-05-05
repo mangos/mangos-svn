@@ -402,6 +402,7 @@ CREATE TABLE `creature_addon` (
   `bytes1` int(10) unsigned NOT NULL default '0',
   `bytes2` int(10) unsigned NOT NULL default '0',
   `emote` int(10) unsigned NOT NULL default '0',
+  `moveflags` int(10) unsigned NOT NULL default '0',
   `auras` text,
   PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -714,6 +715,7 @@ CREATE TABLE `creature_template_addon` (
   `bytes1` int(10) unsigned NOT NULL default '0',
   `bytes2` int(10) unsigned NOT NULL default '0',
   `emote` mediumint(8) unsigned NOT NULL default '0',
+  `moveflags` int(10) unsigned NOT NULL default '0',
   `auras` text,
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
