@@ -4336,10 +4336,10 @@ void Spell::EffectDisEnchant(uint32 /*i*/)
 
 void Spell::EffectInebriate(uint32 /*i*/)
 {
-    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    Player *player = (Player*)m_caster;
+    Player *player = (Player*)unitTarget;
     uint16 currentDrunk = player->GetDrunkValue();
     uint16 drunkMod = damage * 0xFFFF / 100;
     if (currentDrunk + drunkMod > 0xFFFF)

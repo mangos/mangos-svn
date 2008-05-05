@@ -117,6 +117,7 @@ class ChatHandler
         bool HandleSendMailCommand(const char* args);
         bool HandleNameTeleCommand(const char* args);
         bool HandleGroupTeleCommand(const char* args);
+        bool HandleDrunkCommand(const char* args);
 
         bool HandleModifyKnownTitlesCommand(const char* args);
         bool HandleModifyHPCommand(const char* args);
@@ -216,6 +217,7 @@ class ChatHandler
         bool HandleGoCreatureCommand(const char* args);
         bool HandleGoObjectCommand(const char* args);
         bool HandleGoTriggerCommand(const char* args);
+        bool HandleGoGraveyardCommand(const char* args);
         bool HandleTargetObjectCommand(const char* args);
         bool HandleDelObjectCommand(const char* args);
         bool HandleMoveCreatureCommand(const char* args);

@@ -2200,3 +2200,18 @@ bool ChatHandler::HandleGoGridCommand(const char* args)
 
     return true;
 }
+
+bool ChatHandler::HandleDrunkCommand(const char* args)
+{
+    if(!*args)    return false;
+
+    uint32 drunklevel = (uint32)atoi(args);
+    if(drunklevel > 100)
+        drunklevel = 100;
+
+    uint16 drunkMod = drunklevel * 0xFFFF / 100;
+
+    m_session->GetPlayer()->SetDrunkValue(drunkMod);
+
+    return true;
+}
