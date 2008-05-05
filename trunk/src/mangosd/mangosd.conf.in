@@ -660,6 +660,13 @@ CreatureFamilyAssistenceRadius = 10
 #         Reputation Gain rate
 #         Default: 1
 #
+#    SkillGain.Crafting
+#    SkillGain.Defense
+#    SkillGain.Gathering
+#    SkillGain.Weapon
+#         crafting/defense/gathering/weapon skills gain at skill grow (1,2,...)
+#         Default: 1
+#
 #    SkillChance.Orange
 #    SkillChance.Yellow
 #    SkillChance.Green
@@ -714,6 +721,10 @@ Rate.Mining.Amount = 1
 Rate.Mining.Next   = 1
 Rate.Talent = 1
 Rate.Reputation.Gain = 1
+SkillGain.Crafting = 1
+SkillGain.Defense = 1
+SkillGain.Gathering = 1
+SkillGain.Weapon = 1
 SkillChance.Orange = 100
 SkillChance.Yellow = 75
 SkillChance.Green  = 25
