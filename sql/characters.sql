@@ -179,7 +179,6 @@ CREATE TABLE `characters` (
   `at_login` int(11) unsigned NOT NULL default '0',
   `zone` int(11) unsigned NOT NULL default '0',
   `last_honor_date` int(11) unsigned NOT NULL default '0',
-  `pending_honor` float NOT NULL default '0',
   `last_kill_date` int(11) unsigned NOT NULL default '0',
   `taxi_path` text,
   PRIMARY KEY  (`guid`),

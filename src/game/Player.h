@@ -1641,9 +1641,22 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool RewardHonor(Unit *pVictim, uint32 groupsize, float honor = -1);
         uint32 GetHonorPoints() { return GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY); }
         uint32 GetArenaPoints() { return GetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY); }
+        void ModifyHonorPoints( int32 d )
+        {
+            if(d < 0)
+                SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, GetHonorPoints() > uint32(-d) ? GetHonorPoints() + d : 0);
+            else
+                SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, GetHonorPoints() < MAX_MONEY_AMOUNT - d ? GetHonorPoints() + d : MAX_MONEY_AMOUNT);
+        }
+        void ModifyArenaPoints( int32 d )
+        {
+            if(d < 0)
+                SetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY, GetArenaPoints() > uint32(-d) ? GetArenaPoints() + d : 0);
+            else
+                SetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY, GetArenaPoints() < MAX_MONEY_AMOUNT - d ? GetArenaPoints() + d : MAX_MONEY_AMOUNT);
+        }
         uint32 GetMaxPersonalArenaRatingRequirement();
-        void SetHonorPoints(uint32 val) { SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, val); }
-        void SetArenaPoints(uint32 val) { SetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY, val); }
+
         //End of PvP System
 
         void SetDrunkValue(uint16 newDrunkValue);
@@ -1951,7 +1964,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadTutorials(QueryResult *result);
         void _LoadFriendList(QueryResult *result);
         bool _LoadHomeBind(QueryResult *result);
-        void _LoadHonor(QueryResult *result);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -1967,7 +1979,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveReputation();
         void _SaveSpells();
         void _SaveTutorials();
-        void _SaveHonor();
 
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
@@ -1987,7 +1998,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***                  HONOR SYSTEM                     ***/
         /*********************************************************/
-        float m_honorPending;
         uint32 m_lastHonorDate;
         uint32 m_lastKillDate;
 

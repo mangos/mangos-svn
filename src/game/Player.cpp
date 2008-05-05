@@ -107,7 +107,7 @@ void PlayerTaxi::InitTaxiNodesForLevel(uint32 race, uint32 level)
         case HORDE:    SetTaximaskNode(99);  break;
     }
     // level dependent taxi hubs
-    if(level>=65)
+    if(level>=68)
         SetTaximaskNode(213);                               //Shattered Sun Staging Area
 }
 
@@ -365,7 +365,6 @@ Player::Player (WorldSession *session): Unit( 0 )
     }
 
     // Honor System
-    m_honorPending = 0;
     m_lastHonorDate = 0;
     m_lastKillDate = 0;
 
@@ -5487,29 +5486,34 @@ void Player::UpdateHonorFields(bool force)
 {
     /// called when rewarding honor and at each save
     uint32 today = uint32(time(NULL) / DAY) * DAY;
+    uint32 yesterday = today - DAY;
 
-    if ((m_honorPending && m_lastHonorDate < today) || force)
+    if ((m_lastHonorDate < today) || force)
     {
         // if we have pending honor it either got added today or yesterday
         // if the last was added yesterday then this is the first update after midnight
 
         // update yesterday's contribution
-        SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, uint32(m_honorPending));
-        // add the pending honor points, a day has passed
-        SetHonorPoints(GetHonorPoints()+uint32(m_honorPending));
+        SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, GetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION));
         // this is the first update today, reset today's contribution and pending honor
         SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
-        m_honorPending = 0;
     }
 
     uint16 kills_today = PAIR32_LOPART(GetUInt32Value(PLAYER_FIELD_KILLS));
     if ((kills_today && m_lastKillDate < today) || force)
     {
-        // if we have pending kills they were done today or yesterday
         // if the last was done yesterday then this is the first update after midnight
-
-        // this is the first update today, kills_today become yeseterday's kills
-        SetUInt32Value(PLAYER_FIELD_KILLS, MAKE_PAIR32(0,kills_today));
+        if(m_lastKillDate >= yesterday || force)
+        {
+            // if the last victim was killed yesterday then
+            // kills_today is actually the total kills yesterday
+            SetUInt32Value(PLAYER_FIELD_KILLS, MAKE_PAIR32(0,kills_today));
+        }
+        else
+        {
+            // no kills yesterday or today, reset
+            SetUInt32Value(PLAYER_FIELD_KILLS, 0);
+        }
     }
 }
 
@@ -5521,6 +5525,8 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
     uint64 victim_guid = 0;
     uint32 victim_rank = 0;
     uint32 now = time(NULL);
+
+    // first save/honor gain after midnight will also update the player's honor fields
     UpdateHonorFields();
 
     if(honor <= 0)
@@ -5624,7 +5630,8 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
     GetSession()->SendPacket(&data);
 
     m_lastHonorDate = now;
-    m_honorPending += honor;
+    // add honor points
+    ModifyHonorPoints(int32(honor));
 
     ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, uint32(honor), true);
     return true;
@@ -12718,8 +12725,8 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 
 bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 {
-    ////                                                     0     1        2     3     4     5      6           7           8           9    10           11        12         13         14         15          16           17                 18                 19                 20       21       22       23       24         25       26            27        [28]  [29]    30             31               32              33
-    //QueryResult *result = CharacterDatabase.PQuery("SELECT guid, account, data, name, race, class, position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, gmstate, stable_slots, at_login, zone, online, pending_honor, last_honor_date, last_kill_date, taxi_path FROM characters WHERE guid = '%u'", guid);
+    ////                                                     0     1        2     3     4     5      6           7           8           9    10           11        12         13         14         15          16           17                 18                 19                 20       21       22       23       24         25       26            27        [28]  [29]    30               31              32  
+    //QueryResult *result = CharacterDatabase.PQuery("SELECT guid, account, data, name, race, class, position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, gmstate, stable_slots, at_login, zone, online, last_honor_date, last_kill_date, taxi_path FROM characters WHERE guid = '%u'", guid);
     QueryResult *result = holder->GetResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
     if(!result)
@@ -12880,11 +12887,10 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     m_atLoginFlags = fields[27].GetUInt32();
 
     // Honor system
-    m_honorPending = fields[30].GetFloat();
-    m_lastHonorDate = fields[31].GetUInt32();
-    m_lastKillDate = fields[32].GetUInt32();
+    m_lastHonorDate = fields[30].GetUInt32();
+    m_lastKillDate = fields[31].GetUInt32();
 
-    std::string taxi_nodes = fields[33].GetCppString();
+    std::string taxi_nodes = fields[32].GetCppString();
 
     delete result;
 
@@ -13181,58 +13187,6 @@ void Player::LoadCorpse()
             ResurrectPlayer(0.5f);
         }
     }
-}
-
-void Player::_LoadHonor(QueryResult *result)
-{
-    uint32 today = uint32(time(NULL) / DAY) * DAY;
-    uint32 yesterday = today - DAY;
-
-    if (m_honorPending && m_lastHonorDate < today)
-    {
-        if(m_lastHonorDate >= yesterday)
-        {
-            // the honorPending is always for one day
-            // if honor was last gained yesterday then
-            // honorPending is the total honor yesterday
-            SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, uint32(m_honorPending));
-        }
-        else
-        {
-            // no honor yesterday, reset yesterday's contribution
-            SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0);
-        }
-
-        // add the pending honor points, a day has passed
-        SetHonorPoints(GetHonorPoints()+uint32(m_honorPending));
-        // this is the first login today, reset today's contribution and pending honor
-        SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
-        m_honorPending = 0;
-    }
-
-    // load kills today
-    uint32 kills = GetUInt32Value(PLAYER_FIELD_KILLS);      // today + yesterday << 16
-    uint16 kills_today = PAIR32_LOPART(kills);
-    if(kills_today)
-    {
-        if (m_lastKillDate < today)
-        {
-            if(m_lastKillDate >= yesterday)
-            {
-                // if the last victim was killed yesterday then
-                // kills_today is actually the total kills yesterday
-                SetUInt32Value(PLAYER_FIELD_KILLS, MAKE_PAIR32(0,kills_today));
-            }
-            else
-            {
-                // no kills yesterday or today, reset
-                SetUInt32Value(PLAYER_FIELD_KILLS, 0);
-            }
-        }
-    }
-
-    if(result)
-        delete result;
 }
 
 void Player::_LoadInventory(QueryResult *result, uint32 timediff)
@@ -13799,6 +13753,9 @@ void Player::SaveToDB()
     // delay auto save at any saves (manual, in code, or autosave)
     m_nextSave = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
 
+    // first save/honor gain after midnight will also update the player's honor fields
+    UpdateHonorFields();
+
     // Must saved before enter into BattleGround
     if(InBattleGround())
         return;
@@ -13835,7 +13792,7 @@ void Player::SaveToDB()
         "taximask,online,cinematic,"
         "totaltime,leveltime,rest_bonus,logout_time,is_logout_resting,resettalents_cost,resettalents_time,"
         "trans_x, trans_y, trans_z, trans_o, transguid, gmstate, stable_slots,at_login,zone,"
-        "pending_honor, last_honor_date, last_kill_date,taxi_path) VALUES ("
+        "last_honor_date, last_kill_date,taxi_path) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -13907,8 +13864,6 @@ void Player::SaveToDB()
     ss << GetZoneId();
 
     ss << ", ";
-    ss << m_honorPending;
-    ss << ", ";
     ss << m_lastHonorDate;
     ss << ", ";
     ss << m_lastKillDate;
@@ -13931,7 +13886,6 @@ void Player::SaveToDB()
     _SaveAuras();
     _SaveReputation();
     _SaveBoundInstances();
-    _SaveHonor();
 
     CharacterDatabase.CommitTransaction();
 
@@ -14234,12 +14188,6 @@ void Player::_SaveTutorials()
     };
 
     m_TutorialsChanged = false;
-}
-
-void Player::_SaveHonor()
-{
-    // first save/honor gain after midnight will also update the player's honor fields
-    UpdateHonorFields();
 }
 
 void Player::outDebugValues() const
@@ -15418,9 +15366,9 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         {
             ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
             if(iece->reqhonorpoints)
-                SetHonorPoints(GetHonorPoints() - (iece->reqhonorpoints * count));
+                ModifyHonorPoints( - int32(iece->reqhonorpoints * count));
             if(iece->reqarenapoints)
-                SetArenaPoints(GetArenaPoints() - (iece->reqarenapoints * count));
+                ModifyArenaPoints( - int32(iece->reqarenapoints * count));
             for (uint8 i = 0; i < 5; ++i)
             {
                 if(iece->reqitem[i])
@@ -15458,9 +15406,9 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         {
             ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(crItem->ExtendedCost);
             if(iece->reqhonorpoints)
-                SetHonorPoints(GetHonorPoints() - iece->reqhonorpoints);
+                ModifyHonorPoints( - int32(iece->reqhonorpoints));
             if(iece->reqarenapoints)
-                SetArenaPoints(GetArenaPoints() - iece->reqarenapoints);
+                ModifyArenaPoints( - int32(iece->reqarenapoints));
             for (uint8 i = 0; i < 5; ++i)
             {
                 if(iece->reqitem[i])

@@ -1506,17 +1506,11 @@ bool ChatHandler::HandleModifyHonorCommand (const char* args)
         return true;
     }
 
-    uint32 amount = (uint32)atoi(args);
+    int32 amount = (uint32)atoi(args);
 
-    if (amount < 0 || amount > 999999)
-    {
-        SendSysMessage(LANG_BAD_VALUE);
-        return true;
-    }
+    target->ModifyHonorPoints(amount);
 
-    target->SetHonorPoints(amount);
-
-    PSendSysMessage(LANG_COMMAND_MODIFY_HONOR, target->GetName(), amount);
+    PSendSysMessage(LANG_COMMAND_MODIFY_HONOR, target->GetName(), target->GetHonorPoints());
 
     return true;
 }
