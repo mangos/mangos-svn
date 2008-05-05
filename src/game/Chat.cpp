@@ -388,6 +388,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "castback",       SEC_ADMINISTRATOR,  &ChatHandler::HandleCastBackCommand,            "", NULL },
         { "casttarget",     SEC_ADMINISTRATOR,  &ChatHandler::HandleCastTargetCommand,          "", NULL },
         { "cometome",       SEC_ADMINISTRATOR,  &ChatHandler::HandleComeToMeCommand,            "", NULL },
+        { "gograveyard",    SEC_GAMEMASTER,     &ChatHandler::HandleGoGraveyardCommand,         "", NULL },
+        { "drunk",          SEC_MODERATOR,      &ChatHandler::HandleDrunkCommand,               "", NULL },
 
         //! Development Commands
         { "setvalue",       SEC_ADMINISTRATOR,  &ChatHandler::HandleSetValue,                   "", NULL },
