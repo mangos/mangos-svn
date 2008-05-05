@@ -49,6 +49,11 @@ inline uint32 urand(uint32 min, uint32 max)
 /* maximum number that can come out of the rand32 generator */
 #define RAND32_MAX  2147483645
 
+/*
+* set seed random generators
+*/
+void Randomizer_Init();
+
 /* Return a random number in the range 0 .. RAND32_MAX.
  * Note: Not reentrant - if two threads call this simultaneously, they will likely
  * get the same random number. */

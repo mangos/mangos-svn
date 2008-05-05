@@ -94,6 +94,9 @@ void Master::Run()
         sLog.outString( "Daemon PID: %u\n", pid );
     }
 
+    // init randoms
+    Randomizer_Init();
+
     ///- Start the databases
     if (!_StartDB())
         return;
@@ -432,6 +435,7 @@ void Master::_UnhookSignals()
     signal(SIGBREAK, 0);
     #endif
 }
+
 
 
 
