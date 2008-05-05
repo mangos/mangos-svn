@@ -73,7 +73,12 @@ namespace MaNGOS
         {
             const uint32 nBaseExp = content == CONTENT_1_60 ? 45 : 235;
             if( mob_level >= pl_level )
-                return ((pl_level*5 + nBaseExp) * (20 + mob_level - pl_level)/10 + 1)/2;
+            {
+                uint32 nLevelDiff = mob_level - pl_level;
+                if (nLevelDiff > 4)
+                    nLevelDiff = 4;
+                return ((pl_level*5 + nBaseExp) * (20 + nLevelDiff)/10 + 1)/2;
+            }
             else
             {
                 uint32 gray_level = GetGrayLevel(pl_level);
