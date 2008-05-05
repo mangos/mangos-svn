@@ -828,7 +828,7 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "CMSG_RESET_INSTANCES",                                 // CMSG_RESET_INSTANCES
     "SMSG_RESET_INSTANCES_SUCCESS",                         // SMSG_RESET_INSTANCES_SUCCESS
     "SMSG_RESET_INSTANCES_FAILED",                          // SMSG_RESET_INSTANCES_FAILED
-    "SMSG_UNKNOWN_800",                                     // SMSG_UNKNOWN_800
+    "SMSG_INSTANCE_SAVE",                                   // SMSG_INSTANCE_SAVE
     "MSG_RAID_ICON_TARGET",                                 // MSG_RAID_ICON_TARGET
     "MSG_RAID_READY_CHECK",                                 // MSG_RAID_READY_CHECK
     "UMSG_UNKNOWN_803",                                     // UMSG_UNKNOWN_803
@@ -839,7 +839,7 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "SMSG_GM_SURVEY_REQUEST",                               // SMSG_GM_SURVEY_REQUEST
     "MSG_SET_DUNGEON_DIFFICULTY",                           // MSG_SET_DUNGEON_DIFFICULTY
     "CMSG_GM_SURVEY_RESULTS",                               // CMSG_GM_SURVEY_RESULTS
-    "SMSG_UNKNOWN_811",                                     // SMSG_UNKNOWN_811
+    "SMSG_INSTANCE_RESET_ACTIVATE",                         // SMSG_INSTANCE_RESET_ACTIVATE
     "UMSG_UNKNOWN_812",                                     // UMSG_UNKNOWN_812
     "UMSG_UNKNOWN_813",                                     // UMSG_UNKNOWN_813
     "UMSG_UNKNOWN_814",                                     // UMSG_UNKNOWN_814

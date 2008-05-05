@@ -216,7 +216,7 @@ class Pet : public Creature
         int32   m_bonusdamage;
         uint64  m_auraUpdateMask;
     private:
-        void SaveToDB()                                     // overwrited of Creature::SaveToDB     - don't must be called
+        void SaveToDB(uint32, uint8)                        // overwrited of Creature::SaveToDB     - don't must be called
         {
             assert(false);
         }

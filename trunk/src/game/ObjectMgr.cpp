@@ -2201,10 +2201,12 @@ void ObjectMgr::LoadArenaTeams()
 
 void ObjectMgr::LoadGroups()
 {
-    Group *group;
+    // -- loading groups --
+    Group *group = NULL;
+    uint64 leaderGuid = 0;
     uint32 count = 0;
-
-    QueryResult *result = CharacterDatabase.Query( "SELECT leaderGuid FROM groups" );
+    //                                                     0         1              2           3           4              5      6      7      8      9      10     11     12     13      14
+    QueryResult *result = CharacterDatabase.PQuery("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid, leaderGuid FROM groups");
 
     if( !result )
     {
@@ -2222,23 +2224,73 @@ void ObjectMgr::LoadGroups()
     do
     {
         bar.step();
+        Field *fields = result->Fetch();
         ++count;
+        leaderGuid = MAKE_NEW_GUID(fields[14].GetUInt32(),0,HIGHGUID_PLAYER);
 
         group = new Group;
-        if(!group->LoadGroupFromDB(MAKE_NEW_GUID((*result)[0].GetUInt32(), 0, HIGHGUID_PLAYER)))
+        if(!group->LoadGroupFromDB(leaderGuid, result, false))
         {
             group->Disband();
             delete group;
             continue;
         }
         AddGroup(group);
-
     }while( result->NextRow() );
 
     delete result;
 
     sLog.outString();
     sLog.outString( ">> Loaded %u group definitions", count );
+
+    // -- loading members --
+    count = 0;
+    group = NULL;
+    leaderGuid = 0;
+    //                                        0           1          2         3
+    result = CharacterDatabase.PQuery("SELECT memberGuid, assistant, subgroup, leaderGuid FROM group_member ORDER BY leaderGuid");
+    if(!result)
+    {
+        barGoLink bar( 1 );
+        bar.step();
+    }
+    else
+    {
+        barGoLink bar( result->GetRowCount() );
+        do
+        {
+            bar.step();
+            Field *fields = result->Fetch();
+            count++;
+            leaderGuid = MAKE_NEW_GUID(fields[3].GetUInt32(), 0, HIGHGUID_PLAYER);
+            if(!group || group->GetLeaderGUID() != leaderGuid)
+            {
+                group = GetGroupByLeader(leaderGuid);
+                if(!group)
+                {
+                    sLog.outErrorDb("Incorrect entry in group_member table : no group with leader %d for member %d!", fields[3].GetUInt32(), fields[0].GetUInt32());
+                    continue;
+                }
+            }
+            
+            group->LoadMemberFromDB(fields[0].GetUInt32(), fields[2].GetUInt8(), fields[1].GetBool());
+        }while( result->NextRow() );
+        delete result;
+    }
+
+    // clean groups
+    // TODO: maybe delete from the DB before loading in this case
+    for(GroupSet::iterator itr = mGroupSet.begin(); itr != mGroupSet.end(); ++itr)
+    {
+        if((*itr)->GetMembersCount() < 2)
+        {
+            delete *itr;
+            mGroupSet.erase(itr++);
+        }
+    }
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u group members total", count );
 }
 
 void ObjectMgr::LoadQuests()

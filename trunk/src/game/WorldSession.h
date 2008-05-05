@@ -311,7 +311,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleGroupUninviteGuidOpcode(WorldPacket& recvPacket);
         void HandleGroupUninvite(uint64 guid, std::string name);
         void HandleGroupSetLeaderOpcode(WorldPacket& recvPacket);
-        void HandleGroupDisbandOpcode(WorldPacket& recvPacket);
+        void HandleGroupLeaveOpcode(WorldPacket& recvPacket);
         void HandleGroupPassOnLootOpcode( WorldPacket &recv_data );
         void HandleLootMethodOpcode(WorldPacket& recvPacket);
         void HandleLootRoll( WorldPacket &recv_data );

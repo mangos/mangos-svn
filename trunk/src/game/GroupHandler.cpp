@@ -323,7 +323,7 @@ void WorldSession::HandleGroupSetLeaderOpcode( WorldPacket & recv_data )
     group->ChangeLeader(guid);
 }
 
-void WorldSession::HandleGroupDisbandOpcode( WorldPacket & /*recv_data*/ )
+void WorldSession::HandleGroupLeaveOpcode( WorldPacket & /*recv_data*/ )
 {
     if(!GetPlayer()->GetGroup())
         return;

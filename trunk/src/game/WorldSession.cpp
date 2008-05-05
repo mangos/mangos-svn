@@ -194,7 +194,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_GROUP_UNINVITE ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupUninviteNameOpcode       );
     objmgr.opcodeTable[ CMSG_GROUP_UNINVITE_GUID ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupUninviteGuidOpcode       );
     objmgr.opcodeTable[ CMSG_GROUP_SET_LEADER ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupSetLeaderOpcode          );
-    objmgr.opcodeTable[ CMSG_GROUP_DISBAND ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupDisbandOpcode            );
+    objmgr.opcodeTable[ CMSG_GROUP_DISBAND ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGroupLeaveOpcode              );
     objmgr.opcodeTable[ CMSG_GROUP_PASS_ON_LOOT_TOGGLE ]        = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleGroupPassOnLootOpcode         );
     objmgr.opcodeTable[ CMSG_LOOT_METHOD ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLootMethodOpcode              );
     objmgr.opcodeTable[ CMSG_LOOT_ROLL ]                        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLootRoll                      );

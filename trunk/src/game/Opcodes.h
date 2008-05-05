@@ -828,7 +828,7 @@ enum OpCodes
     CMSG_RESET_INSTANCES                            = 797,  // reset instances, empty
     SMSG_RESET_INSTANCES_SUCCESS                    = 798,  // uint32 mapid, chat message: %s has been reset.
     SMSG_RESET_INSTANCES_FAILED                     = 799,  // uint32 reason, uint32 mapid
-    SMSG_UNKNOWN_800                                = 800,  // uint32 mapid, instance related (save?)
+    SMSG_INSTANCE_SAVE                              = 800,  // uint32 mapid, nstance save from player
     MSG_RAID_ICON_TARGET                            = 801,  // uint8+uint8+uint64 guid or only uint8(0x01)
     MSG_RAID_READY_CHECK                            = 802,  // uint64(server) or empty(client)
     // 803 not exist?
@@ -839,7 +839,7 @@ enum OpCodes
     SMSG_GM_SURVEY_REQUEST                          = 808,  // uint32, 1 - causes client get ticket request, 2 - hide, 3 - show
     MSG_SET_DUNGEON_DIFFICULTY                      = 809,  // uint32+uint32+uint32
     CMSG_GM_SURVEY_RESULTS                          = 810,  // script function named GMSurveySubmit()
-    SMSG_UNKNOWN_811                                = 811,  // uint32, 0x0, SMSG_INSTANCE_RESET_ACTIVATE ?
+    SMSG_INSTANCE_RESET_ACTIVATE                    = 811,  // instance can reset
     SMSG_UNKNOWN_812                                = 812,
     SMSG_UNKNOWN_813                                = 813,  // string
     // 814 not exist?

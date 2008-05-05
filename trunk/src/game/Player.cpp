@@ -1565,7 +1565,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             }
             GetSession()->SendPacket( &data );
 
-            data.Initialize(SMSG_UNKNOWN_811, 4);
+            data.Initialize(SMSG_INSTANCE_RESET_ACTIVATE, 4);
             data << uint32(0);
             GetSession()->SendPacket( &data );
 
@@ -3427,9 +3427,8 @@ void Player::ResurrectPlayer(float restore_percent, bool updateToWorld)
         SetPower(POWER_ENERGY, uint32(GetMaxPower(POWER_ENERGY)*restore_percent));
     }
 
-    // update world right away
-    if(updateToWorld)
-        MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
+    // update visbility
+    ObjectAccessor::UpdateVisibilityForPlayer(this);
 
     // some items limited to specific map
     DestroyZoneLimitedItem( true, GetZoneId());

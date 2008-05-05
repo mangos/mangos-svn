@@ -93,19 +93,24 @@ bool Group::Create(const uint64 &guid, const char * name)
     return true;
 }
 
-bool Group::LoadGroupFromDB(const uint64 &leaderGuid)
+bool Group::LoadGroupFromDB(const uint64 &leaderGuid, QueryResult *result, bool loadMembers)
 {
-    //                                                     0         1              2           3           4              5      6      7      8      9      10     11     12     13
-    QueryResult *result = CharacterDatabase.PQuery("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid FROM groups WHERE leaderGuid='%u'", GUID_LOPART(leaderGuid));
+    bool external = true;
     if(!result)
-        return false;
+    {
+        external = false;
+        //                                       0          1              2           3           4              5      6      7      8      9      10     11     12     13
+        result = CharacterDatabase.PQuery("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid FROM groups WHERE leaderGuid ='%u'", GUID_LOPART(leaderGuid));
+        if(!result)
+            return false;
+    }
 
     m_leaderGuid = leaderGuid;
 
     // group leader not exist
     if(!objmgr.GetPlayerNameByGUID(m_leaderGuid, m_leaderName))
     {
-        delete result;
+        if(!external) delete result;
         return false;
     }
 
@@ -118,31 +123,39 @@ bool Group::LoadGroupFromDB(const uint64 &leaderGuid)
 
     for(int i=0; i<TARGETICONCOUNT; i++)
         m_targetIcons[i] = (*result)[5+i].GetUInt64();
-    delete result;
+    if(!external) delete result;
 
-    result = CharacterDatabase.PQuery("SELECT memberGuid,assistant,subgroup FROM group_member WHERE leaderGuid='%u'", GUID_LOPART(leaderGuid));
-    if(!result)
-        return false;
-
-    do
+    if(loadMembers)
     {
-        MemberSlot member;
-        member.guid      = MAKE_NEW_GUID((*result)[0].GetUInt32(), 0, HIGHGUID_PLAYER);
+        result = CharacterDatabase.PQuery("SELECT memberGuid, assistant, subgroup FROM group_member WHERE leaderGuid ='%u'", GUID_LOPART(leaderGuid));
+        if(!result)
+            return false;
 
-        // skip non-existed member
-        if(!objmgr.GetPlayerNameByGUID(member.guid, member.name))
-            continue;
+        do
+        {
+            LoadMemberFromDB((*result)[0].GetUInt32(), (*result)[2].GetUInt8(), (*result)[1].GetBool());
+        } while( result->NextRow() );     
+        delete result;
+        // group too small
+        if(GetMembersCount() < 2)
+            return false;
+    }
 
-        member.group     = (*result)[2].GetUInt8();
-        member.assistant = (*result)[1].GetBool();
-        m_memberSlots.push_back(member);
-    } while( result->NextRow() );
-    delete result;
+    return true;
+}
 
-    // group too small
-    if(GetMembersCount() < 2)
+bool Group::LoadMemberFromDB(uint32 guidLow, uint8 subgroup, bool assistant)
+{
+    MemberSlot member;
+    member.guid      = MAKE_NEW_GUID(guidLow, 0, HIGHGUID_PLAYER);
+
+    // skip non-existed member
+    if(!objmgr.GetPlayerNameByGUID(member.guid, member.name))
         return false;
 
+    member.group     = subgroup;
+    member.assistant = assistant;
+    m_memberSlots.push_back(member);
     return true;
 }
 
