@@ -1947,7 +1947,6 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
 
     std::string name = px;
     normalizePlayerName(name);
-    //WorldDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
     uint64 guid = objmgr.GetPlayerGUIDByName(name);
 
