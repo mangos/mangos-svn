@@ -2838,7 +2838,8 @@ bool ChatHandler::HandleDieCommand(const char* /*args*/)
     return true;
 }
 
-bool ChatHandler::HandleModifyArenaCommand(const char * args) {
+bool ChatHandler::HandleModifyArenaCommand(const char * args)
+{
     if (!*args)
         return false;
 
@@ -3119,31 +3120,6 @@ bool ChatHandler::HandleNpcInfoCommand(const char* /*args*/)
     {
         SendSysMessage(LANG_NPCINFO_TRAINER);
     }
-
-    return true;
-}
-
-bool ChatHandler::HandleNpcInfoSetCommand(const char* args)
-{
-    uint32 entry = 0, testvalue = 0;
-
-    Creature* target = getSelectedCreature();
-    if(!target)
-    {
-        SendSysMessage(LANG_SELECT_CREATURE);
-        return true;
-    }
-
-    if(!args)
-        return true;
-
-    //m_session->GetPlayer( )->SetUInt32Value(PLAYER_FLAGS, (uint32)8);
-
-    testvalue = uint32(atoi((char*)args));
-
-    entry = target->GetUInt32Value( OBJECT_FIELD_ENTRY );
-
-    //m_session->SendTestCreatureQueryOpcode( entry, target->GetGUID(), testvalue );
 
     return true;
 }
@@ -3702,8 +3678,8 @@ bool ChatHandler::HandleListAurasCommand (const char * /*args*/)
     PSendSysMessage(LANG_COMMAND_TARGET_LISTAURAS, uAuras.size());
     for (Unit::AuraMap::iterator itr = uAuras.begin(); itr != uAuras.end(); ++itr)
     {
-        PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, itr->second->GetId(), itr->second->GetEffIndex(), 
-            itr->second->GetModifier()->m_auraname, itr->second->GetAuraDuration(), itr->second->GetAuraMaxDuration(), 
+        PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, itr->second->GetId(), itr->second->GetEffIndex(),
+            itr->second->GetModifier()->m_auraname, itr->second->GetAuraDuration(), itr->second->GetAuraMaxDuration(),
             itr->second->GetSpellProto()->SpellName[sWorld.GetDBClang()],
             IS_PLAYER_GUID(itr->second->GetCasterGUID()) ? "player" : "creature",GUID_LOPART(itr->second->GetCasterGUID()));
     }
@@ -3714,7 +3690,7 @@ bool ChatHandler::HandleListAurasCommand (const char * /*args*/)
         PSendSysMessage(LANG_COMMAND_TARGET_LISTAURATYPE, uAuraList.size(), i);
         for (Unit::AuraList::const_iterator itr = uAuraList.begin(); itr != uAuraList.end(); ++itr)
         {
-            PSendSysMessage(LANG_COMMAND_TARGET_AURASIMPLE, (*itr)->GetId(), (*itr)->GetEffIndex(), 
+            PSendSysMessage(LANG_COMMAND_TARGET_AURASIMPLE, (*itr)->GetId(), (*itr)->GetEffIndex(),
                 (*itr)->GetSpellProto()->SpellName[sWorld.GetDBClang()],
                 IS_PLAYER_GUID((*itr)->GetCasterGUID()) ? "player" : "creature",GUID_LOPART((*itr)->GetCasterGUID()));
         }
@@ -4466,6 +4442,7 @@ bool ChatHandler::HandleChangeEntryCommand(const char *args)
         SendSysMessage(LANG_ERROR);
     return true;
 }
+
 bool ChatHandler::HandleWritePDumpCommand(const char *args)
 {
     if(!args)
@@ -4704,7 +4681,7 @@ bool ChatHandler::HandleCastTargetCommand(const char* args)
 }
 
 /* 
-ComeToMe command REQUIRED for 3rd party scripting library to have access to PointMovementGenerator 
+ComeToMe command REQUIRED for 3rd party scripting library to have access to PointMovementGenerator
 Without this function 3rd party scripting library will get linking errors (unresolved external)
 when attempting to use the PointMovementGenerator
 */

@@ -294,9 +294,10 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     const char* sStr = s.AsHexStr();                        //Must be freed by OPENSSL_free()
     const char* vStr = v.AsHexStr();                        //Must be freed by OPENSSL_free()
-    sLog.outDebug("SOCKET: (s,v) check s: %s v_old: %s v_new: %s", sStr, fields[6].GetString(), vStr );
+    const char* vold = fields[6].GetString();
+    sLog.outDebug("SOCKET: (s,v) check s: %s v_old: %s v_new: %s", sStr, vold, vStr );
     loginDatabase.PExecute("UPDATE account SET v = '0', s = '0' WHERE username = '%s'", safe_account.c_str());
-    if ( strcmp(vStr,fields[6].GetString() ) )
+    if ( !vold || strcmp( vStr, vold ) )
     {
         packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
         packet << uint8( AUTH_UNKNOWN_ACCOUNT );
