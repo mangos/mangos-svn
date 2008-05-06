@@ -291,6 +291,11 @@ LogColors = ""
 #        8 = Unknown; 9 = Unknown; 10 = Unknown; 11 = Unknown; 12 = Unknown; 13 = Unknown; 14 = Unknown; 15 = Unknown
 #        255 = Auto Detect (Default)
 #
+#    StrictPlayerNames
+#        Limit player name to only latin characters, not allow create characters with non latin names, and set rename request and disconnect at login attempt with non-latin name
+#        Default: 0 (false)
+#                 1 (true)
+#
 #    MaxPlayerLevel
 #        Max level that can reached by player for expirience (in range from 1 to 255).
 #        Change not recommended
@@ -376,6 +381,7 @@ LogColors = ""
 GameType = 1
 Expansion = 1
 DBC.Locale = 255
+StrictPlayerNames = 0
 MaxPlayerLevel = 70
 StartPlayerLevel = 1
 ActivateWeather = 1

@@ -36,9 +36,6 @@
 #include "PlayerDump.h"
 #include "SocialMgr.h"
 
-// check used symbols in player name at creating and rename
-std::string notAllowedChars = "\t\v\b\f\a\n\r\\\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789\0";
-
 class LoginQueryHolder : public SqlQueryHolder
 {
     private:
@@ -212,15 +209,14 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     normalizePlayerName(name);
 
-    if(name.find_first_of(notAllowedChars)!=name.npos)
+    // check name limitations
+    if(!ObjectMgr::IsValidName(name))
     {
         data << (uint8)CHAR_NAME_INVALID_CHARACTER;
         SendPacket( &data );
-        sLog.outError("Account:[%d] tried to Create character with empty name or with not allowed by client charcters",GetAccountId());
         return;
     }
 
-    // check name limitations
     if(GetSecurity() == SEC_PLAYER && objmgr.IsReservedName(name))
     {
         data << (uint8)CHAR_NAME_RESERVED;
@@ -832,7 +828,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
 
     normalizePlayerName(newname);
 
-    if(newname.find_first_of(notAllowedChars) != newname.npos)
+    if(!ObjectMgr::IsValidName(newname))
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
         data << (uint8)CHAR_NAME_INVALID_CHARACTER;

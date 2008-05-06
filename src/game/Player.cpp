@@ -12740,6 +12740,16 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     Object::_Create( guid, 0, HIGHGUID_PLAYER );
 
+    m_name = fields[3].GetCppString();
+
+    // check name limitations
+    if(!ObjectMgr::IsValidName(m_name) || GetSession()->GetSecurity() == SEC_PLAYER && objmgr.IsReservedName(m_name))
+    {
+        delete result;
+        CharacterDatabase.PExecute("UPDATE characters SET at_login = at_login | '%u' WHERE guid ='%u'", uint32(AT_LOGIN_RENAME),guid);
+        return false;
+    }
+
     if(!LoadValues( fields[2].GetString()))
     {
         sLog.outError("ERROR: Player #%d have broken data in `data` field. Can't be loaded.",GUID_LOPART(guid));
@@ -12772,8 +12782,6 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     // set value, including drunk invisibility detection
     SetDrunkValue(GetUInt32Value(PLAYER_BYTES_3) & 0xFFFE);
-
-    m_name = fields[3].GetCppString();
 
     sLog.outDebug("Load Basic value of player %s is: ", m_name.c_str());
     outDebugValues();

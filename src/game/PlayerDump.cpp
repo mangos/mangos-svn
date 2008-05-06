@@ -361,8 +361,6 @@ bool PlayerDumpWriter::WriteDump(std::string file, uint32 guid)
 // Reading - High-level functions
 #define ROLLBACK {CharacterDatabase.RollbackTransaction(); fclose(fin); return false;}
 
-extern std::string notAllowedChars;
-
 bool PlayerDumpReader::LoadDump(std::string file, uint32 account, std::string name, uint32 guid)
 {
     FILE *fin = fopen(file.c_str(), "r");
@@ -386,11 +384,13 @@ bool PlayerDumpReader::LoadDump(std::string file, uint32 account, std::string na
     else guid = objmgr.m_hiCharGuid;
 
     // normalize the name if specified and check if it exists
-    if(!name.empty() && name.find_first_of(notAllowedChars) == name.npos)
+    normalizePlayerName(name);
+
+    if(ObjectMgr::IsValidName(name))
     {
-        CharacterDatabase.escape_string(name);
-        normalizePlayerName(name);
-        result = CharacterDatabase.PQuery("SELECT * FROM characters WHERE name = '%s'", name.c_str());
+        std::string name1 = name;                           // not escape original name
+        CharacterDatabase.escape_string(name1);
+        result = CharacterDatabase.PQuery("SELECT * FROM characters WHERE name = '%s'", name1.c_str());
         if (result)
         {
             name = "";                                      // use the one from the dump

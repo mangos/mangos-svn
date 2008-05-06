@@ -603,6 +603,9 @@ class ObjectMgr
             return m_ReservedNames.find(name) != m_ReservedNames.end();
         }
 
+        // name with valid structure and symbols
+        static bool IsValidName( std::string name );
+
         int GetIndexForLocale(LocaleConstant loc);
         LocaleConstant GetLocalForIndex(int);
         // guild bank tabs

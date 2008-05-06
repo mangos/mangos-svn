@@ -1539,7 +1539,7 @@ void WorldSession::HandleChooseTitleOpcode( WorldPacket & recv_data )
 
     uint32 available = GetPlayer()->GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES);
     if(!(available & (1<<title)))
-        return;
+        title=0;
 
     GetPlayer()->SetUInt32Value(PLAYER_CHOSEN_TITLE, title);
     /*
