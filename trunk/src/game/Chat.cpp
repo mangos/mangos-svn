@@ -336,7 +336,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  NULL,                                           "", NULL }
     };
 
-    static ChatCommand goblectCommandTable[] =
+    static ChatCommand gobjectCommandTable[] =
     {
         { "add",            SEC_GAMEMASTER,     &ChatHandler::HandleGameObjectCommand,          "", NULL },
         { "delete",         SEC_GAMEMASTER,     &ChatHandler::HandleDelObjectCommand,           "", NULL },
@@ -372,7 +372,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "modify",         SEC_MODERATOR,      NULL,                                           "", modifyCommandTable },
         { "debug",          SEC_MODERATOR,      NULL,                                           "", debugCommandTable },
         { "tele",           SEC_MODERATOR,      NULL,                                           "", teleCommandTable },
-        { "goblect",        SEC_GAMEMASTER,     NULL,                                           "", goblectCommandTable },
+        { "gobject",        SEC_GAMEMASTER,     NULL,                                           "", gobjectCommandTable },
         { "honor",          SEC_GAMEMASTER,     NULL,                                           "", honorCommandTable },
         { "wp",             SEC_GAMEMASTER,     NULL,                                           "", wpCommandTable },
         { "quest",          SEC_ADMINISTRATOR,  NULL,                                           "", questCommandTable },

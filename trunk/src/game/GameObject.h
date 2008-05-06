@@ -272,6 +272,16 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
             }
         }
 
+        time_t GetRespawnTime() const { return m_respawnTime; }
+        time_t GetRespawnTimeEx() const
+        {
+            time_t now = time(NULL);
+            if(m_respawnTime > now)
+                return m_respawnTime;
+            else
+                return now;
+        }
+
         void SetRespawnTime(int32 respawn)
         {
             m_respawnTime = respawn > 0 ? time(NULL) + respawn : 0;
@@ -285,6 +295,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
                 m_respawnTime == 0 && m_spawnedByDefault;
         }
         bool isSpawnedByDefault() const { return m_spawnedByDefault; }
+        uint32 GetRespawnDelay() const { return m_respawnDelayTime; }
         void Refresh();
         void Delete();
         void SetSpellId(uint32 id) { m_spellId = id;}

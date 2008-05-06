@@ -509,6 +509,7 @@ enum MangosStrings
 
     LANG_COMMAND_LEARN_ALL_DEFAULT_AND_QUEST = 580,
     LANG_COMMAND_NEAROBJMESSAGE         = 581,
+    LANG_COMMAND_RAWPAWNTIMES           = 582,
 
     // Battleground
     LANG_BG_A_WINS                      = 600,
