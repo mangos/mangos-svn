@@ -1424,7 +1424,7 @@ void SpellMgr::LoadSpellLearnSpells()
 {
     mSpellLearnSpells.clear();                              // need for reload case
 
-    QueryResult *result = WorldDatabase.PQuery("SELECT entry, SpellID,IfNoSpell FROM spell_learn_spell");
+    QueryResult *result = WorldDatabase.PQuery("SELECT entry, SpellID FROM spell_learn_spell");
     if(!result)
     {
         barGoLink bar( 1 );
@@ -1448,7 +1448,6 @@ void SpellMgr::LoadSpellLearnSpells()
 
         SpellLearnSpellNode node;
         node.spell      = fields[1].GetUInt32();
-        node.ifNoSpell  = fields[2].GetUInt32();
         node.autoLearned= false;
 
         if(!sSpellStore.LookupEntry(spell_id))
@@ -1460,12 +1459,6 @@ void SpellMgr::LoadSpellLearnSpells()
         if(!sSpellStore.LookupEntry(node.spell))
         {
             sLog.outErrorDb("Spell %u listed in `spell_learn_spell` does not exist",node.spell);
-            continue;
-        }
-
-        if(node.ifNoSpell && !sSpellStore.LookupEntry(node.ifNoSpell))
-        {
-            sLog.outErrorDb("Spell %u listed in `spell_learn_spell` does not exist",node.ifNoSpell);
             continue;
         }
 
@@ -1491,7 +1484,6 @@ void SpellMgr::LoadSpellLearnSpells()
             {
                 SpellLearnSpellNode dbc_node;
                 dbc_node.spell       = entry->EffectTriggerSpell[i];
-                dbc_node.ifNoSpell   = 0;
                 dbc_node.autoLearned = true;
 
                 SpellLearnSpellMap::const_iterator db_node_begin = GetBeginSpellLearnSpell(spell);

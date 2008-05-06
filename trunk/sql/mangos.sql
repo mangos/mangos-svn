@@ -13431,7 +13431,6 @@ DROP TABLE IF EXISTS `spell_learn_spell`;
 CREATE TABLE `spell_learn_spell` (
   `entry` smallint(5) unsigned NOT NULL default '0',
   `SpellID` smallint(5) unsigned NOT NULL default '0',
-  `IfNoSpell` smallint(5) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`,`SpellID`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
 
@@ -13442,11 +13441,15 @@ CREATE TABLE `spell_learn_spell` (
 LOCK TABLES `spell_learn_spell` WRITE;
 /*!40000 ALTER TABLE `spell_learn_spell` DISABLE KEYS */;
 INSERT INTO `spell_learn_spell` VALUES
-(71,355,0),
-(71,7386,0),
-(17002,24867,0),
-(24866,24864,0),
-(33943,34090,0);
+(71,355),
+(71,7386),
+(5784,33388), 
+(13819,33388), 
+(17002,24867),
+(24866,24864),
+(33943,34090),
+(34769,33388);
+
 /*!40000 ALTER TABLE `spell_learn_spell` ENABLE KEYS */;
 UNLOCK TABLES;
 
