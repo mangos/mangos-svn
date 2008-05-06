@@ -270,7 +270,6 @@ class ChatHandler
         bool HandleExploreCheatCommand(const char* args);
         bool HandleTextEmoteCommand(const char* args);
         bool HandleNpcInfoCommand(const char* args);
-        bool HandleNpcInfoSetCommand(const char* args);
         bool HandleHoverCommand(const char* args);
         bool HandleLevelUpCommand(const char* args);
         bool HandleShowAreaCommand(const char* args);
