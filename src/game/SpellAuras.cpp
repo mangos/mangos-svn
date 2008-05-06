@@ -2241,7 +2241,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
         {
             m_target->SetCharmerGUID(GetCasterGUID());
             m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
-            m_target->CastStop();
+            m_target->CastStop(m_target==caster ? GetId() : 0);
             caster->SetCharm(m_target);
 
             if(caster->getVictim()==m_target)
@@ -2354,7 +2354,7 @@ void Aura::HandleModConfuse(bool apply, bool Real)
     if( apply )
     {
         m_target->addUnitState(UNIT_STAT_CONFUSED);
-        m_target->CastStop();
+        m_target->CastStop(m_target==caster ? GetId() : 0);
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
 
         if(m_target->GetTypeId() == TYPEID_PLAYER)
@@ -2423,7 +2423,7 @@ void Aura::HandleModFear(bool apply, bool Real)
     if( apply )
     {
         m_target->addUnitState(UNIT_STAT_FLEEING);
-        m_target->CastStop();
+        m_target->CastStop(m_target->GetGUID()==GetCasterGUID() ? GetId() : 0);
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
 
         // only at real add aura
@@ -2575,7 +2575,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
 
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
-        m_target->CastStop();
+        m_target->CastStop(m_target==caster ? GetId() : 0);
 
         // remove fears (after unit state update to prevent attack back/etc)
         m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_FEAR);
