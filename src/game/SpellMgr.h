@@ -468,8 +468,7 @@ typedef std::map<uint32, SpellLearnSkillNode> SpellLearnSkillMap;
 struct SpellLearnSpellNode
 {
     uint32 spell;
-    uint32 ifNoSpell;
-    uint32 autoLearned;
+    bool autoLearned;
 };
 
 typedef std::multimap<uint32, SpellLearnSpellNode> SpellLearnSpellMap;

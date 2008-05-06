@@ -2599,7 +2599,7 @@ bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading
 
     for(SpellLearnSpellMap::const_iterator itr = spell_begin; itr != spell_end; ++itr)
     {
-        if(!itr->second.autoLearned && (!itr->second.ifNoSpell || !HasSpell(itr->second.ifNoSpell)))
+        if(!itr->second.autoLearned)
         {
             if(loading)                                     // at spells loading, no output, but allow save
                 addSpell(itr->second.spell,1,true,loading);
