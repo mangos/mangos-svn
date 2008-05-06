@@ -1829,7 +1829,7 @@ bool Creature::HasSpell(uint32 spellID) const
     return i < CREATURE_MAX_SPELLS;                         //broke before end of iteration of known spells
 }
 
-time_t Creature::GetRespawnTimeEx()
+time_t Creature::GetRespawnTimeEx() const
 {
     time_t now = time(NULL);
     if(m_respawnTime > now)                                 // dead (no corpse)

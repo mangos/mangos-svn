@@ -223,7 +223,7 @@ bool ChatHandler::HandleTargetObjectCommand(const char* args)
     }
 
     Field *fields = result->Fetch();
-    uint32 guid = fields[0].GetUInt32();
+    uint32 lowguid = fields[0].GetUInt32();
     uint32 id = fields[1].GetUInt32();
     float x = fields[2].GetFloat();
     float y = fields[3].GetFloat();
@@ -232,7 +232,7 @@ bool ChatHandler::HandleTargetObjectCommand(const char* args)
     int mapid = fields[6].GetUInt16();
     delete result;
 
-    const GameObjectInfo *goI = objmgr.GetGameObjectInfo(id);
+    GameObjectInfo const* goI = objmgr.GetGameObjectInfo(id);
 
     if (!goI)
     {
@@ -240,8 +240,21 @@ bool ChatHandler::HandleTargetObjectCommand(const char* args)
         return false;
     }
 
-    PSendSysMessage(LANG_GAMEOBJECT_DETAIL, guid, goI->name, guid, id, x, y, z, mapid, o);
+    GameObject* target = ObjectAccessor::GetGameObject(*m_session->GetPlayer(),MAKE_NEW_GUID(lowguid,id,HIGHGUID_GAMEOBJECT));
 
+    PSendSysMessage(LANG_GAMEOBJECT_DETAIL, lowguid, goI->name, lowguid, id, x, y, z, mapid, o);
+
+    if(target)
+    {
+        int32 curRespawnDelay = target->GetRespawnTimeEx()-time(NULL);
+        if(curRespawnDelay < 0)
+            curRespawnDelay = 0;
+
+        std::string curRespawnDelayStr = secsToTimeString(curRespawnDelay,true);
+        std::string defRespawnDelayStr = secsToTimeString(target->GetRespawnDelay(),true);
+
+        PSendSysMessage(LANG_COMMAND_RAWPAWNTIMES, defRespawnDelayStr.c_str(),curRespawnDelayStr.c_str());
+    }
     return true;
 }
 
