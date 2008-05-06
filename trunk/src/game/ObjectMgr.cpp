@@ -5363,6 +5363,32 @@ void ObjectMgr::LoadReservedPlayersNames()
     sLog.outString( ">> Loaded %u reserved player names", count );
 }
 
+bool ObjectMgr::IsValidName( std::string name )
+{
+    // check used symbols in player name at creating and rename
+    std::string notAllowedChars = "\t\v\b\f\a\n\r\\\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789\0";
+
+    if(name.find_first_of(notAllowedChars)!=name.npos)
+        return false;
+
+    if(name.size() < 1)
+        return false;
+
+    if(sWorld.getConfig(CONFIG_STRICT_PLAYER_NAMES))
+    {
+        if(name[0] < 'A' || name[0] > 'Z')
+            return false;
+
+        for(size_t i=1; i < name.size(); ++i)
+        {
+            if(name[i] < 'a' || name[i] > 'z')
+                return false;
+        }
+    }
+
+    return true;
+}
+
 int ObjectMgr::GetIndexForLocale( LocaleConstant loc )
 {
     if(loc==LOCALE_ENG)
