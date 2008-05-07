@@ -147,6 +147,9 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     recv_data >> movementInfo.z;
     recv_data >> movementInfo.o;
 
+    //Save movement flags
+    _player->SetUnitMovementFlags(MovementFlags);
+
     if(MovementFlags & MOVEMENTFLAG_ONTRANSPORT)
     {
         // recheck
