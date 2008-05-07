@@ -3944,9 +3944,9 @@ void Spell::EffectScriptEffect(uint32 i)
 
             //Two seperate mounts depending on area id (allows use both in and out of specific instance)
             if (unitTarget->GetAreaId() == 3428)
-                unitTarget->CastSpell(unitTarget, 25863, true);
+                unitTarget->CastSpell(unitTarget, 25863, false);
             else
-                unitTarget->CastSpell(unitTarget, 26655, true);
+                unitTarget->CastSpell(unitTarget, 26655, false);
             break;
         }
         //Piccolo of the Flaming Fire
@@ -3956,6 +3956,16 @@ void Spell::EffectScriptEffect(uint32 i)
                 return;
             unitTarget->HandleEmoteCommand(EMOTE_STATE_DANCE);
             break;
+        }
+
+        //Flame Crash
+        case 41126:
+        {
+            if(!unitTarget)
+                return;
+
+           unitTarget->CastSpell(unitTarget, 41131, true);
+           break;
         }
     }
 
@@ -4634,7 +4644,9 @@ void Spell::EffectCharge(uint32 /*i*/)
     if(unitTarget->GetTypeId() != TYPEID_PLAYER)
         ((Creature *)unitTarget)->StopMoving();
 
-    m_caster->SendMonsterMove(x, y, z, 0, m_caster->GetUnitMovementFlags(), 1);
+    //Send opposite MOVE_WALK movement flag. Client always set its movementflag to opposite of what we send
+    m_caster->SendMonsterMove(x, y, z, 0, m_caster->GetUnitMovementFlags() ^ MOVEMENTFLAG_WALK_MODE, 1);
+
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->CreatureRelocation((Creature*)m_caster,x,y,z,m_caster->GetOrientation());
  

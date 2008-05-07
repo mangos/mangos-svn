@@ -534,7 +534,9 @@ void Aura::Update(uint32 diff)
                                                             //+vmaps
                 if((z<=pos_z+1.3 && z>=pos_z-1.3) && m_target->IsWithinLOS(x,y,z))
                 {
-                    m_target->SendMonsterMove(x, y, z, 0, m_target->GetUnitMovementFlags(), (diff*2));
+                    //Send opposite MOVE_WALK movement flag. Client always set its movementflag to opposite of what we send
+                    m_target->SendMonsterMove(x, y, z, 0, m_target->GetUnitMovementFlags() ^ MOVEMENTFLAG_WALK_MODE, (diff*2));
+
                     if(m_target->GetTypeId() != TYPEID_PLAYER)
                         MapManager::Instance().GetMap(m_target->GetMapId(), m_target)->CreatureRelocation((Creature*)m_target,x,y,z,m_target->GetOrientation());
                 }
@@ -549,7 +551,9 @@ void Aura::Update(uint32 diff)
 
                     if((z<=pos_z+1.3 && z>=pos_z-1.3) && m_target->IsWithinLOS(x,y,z))
                     {
-                        m_target->SendMonsterMove(x, y, z, 0, m_target->GetUnitMovementFlags(), (diff*2));
+                        //Send opposite MOVE_WALK movement flag. Client always set its movementflag to opposite of what we send
+                        m_target->SendMonsterMove(x, y, z, 0, m_target->GetUnitMovementFlags() ^ MOVEMENTFLAG_WALK_MODE, (diff*2));
+
                         if(m_target->GetTypeId() != TYPEID_PLAYER)
                             MapManager::Instance().GetMap(m_target->GetMapId(), m_target)->CreatureRelocation((Creature*)m_target,x,y,z,m_target->GetOrientation());
                     }
@@ -1231,7 +1235,11 @@ void Aura::TriggerSpell()
             return;
         }
 
-        case 30576: trigger_spell_id = 30571; break;         // Quake
+        case 30576: trigger_spell_id = 30571; break;        // Quake
+
+        case 37027: trigger_spell_id = 37029; break;        // Remote Toy
+
+        case 39857: trigger_spell_id = 39856; break;        // Tear of Azzinoth Channel - it's not really supposed to do anything,and this only prevents the console spam
     }
 
     if(!trigger_spell_id)

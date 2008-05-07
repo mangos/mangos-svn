@@ -792,8 +792,8 @@ void Player::HandleLava()
         if (!m_breathTimer)
         {
             uint64 guid = GetGUID();
-            uint32 damage = GetMaxHealth() / 3 + urand(0, getLevel()-1);
-            uint32 dmgZone = GetZoneId();
+            uint32 damage = urand(600, 700);    // TODO: Get more detailed information about lava damage
+            uint32 dmgZone = GetZoneId();       // TODO: Find correct "lava dealing zone" flag in Area Table
 
             // Deal lava damage only in lava zones.
             switch(dmgZone)
