@@ -1084,6 +1084,16 @@ void Aura::HandleAddModifier(bool apply, bool Real)
 
     if (apply)
     {
+        // Add custum charges for some mod aura
+        switch (m_spellProto->Id)
+        {
+            case 17941:    // Shadow Trance
+            case 22008:    // Netherwind Focus
+            case 34936:    // Backlash
+                m_procCharges = 1;
+                break;
+        }
+
         SpellModifier *mod = new SpellModifier;
         mod->op = SpellModOp(m_modifier.m_miscvalue);
         mod->value = m_modifier.m_amount;
@@ -1099,10 +1109,10 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         else
             mod->mask = spellInfo->EffectItemType[m_effIndex];
 
-        if(spellAffect && spellAffect->Charges)
-            mod->charges = spellAffect->Charges;
+        if (m_procCharges > 0)
+            mod->charges = m_procCharges;
         else
-            mod->charges = spellInfo->procCharges;
+            mod->charges = 0;
 
         m_spellmod = mod;
     }

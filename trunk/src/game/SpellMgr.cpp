@@ -642,8 +642,8 @@ void SpellMgr::LoadSpellAffects()
 
     uint32 count = 0;
 
-    //                                                0      1         2            3                4
-    QueryResult *result = WorldDatabase.Query("SELECT entry, effectId, SpellFamily, SpellFamilyMask, Charges FROM spell_affect");
+    //                                                0      1         2
+    QueryResult *result = WorldDatabase.Query("SELECT entry, effectId, SpellFamilyMask FROM spell_affect");
     if( !result )
     {
 
@@ -692,9 +692,7 @@ void SpellMgr::LoadSpellAffects()
 
         SpellAffection sa;
 
-        sa.SpellFamily = fields[2].GetUInt8();
-        sa.SpellFamilyMask = fields[3].GetUInt64();
-        sa.Charges = fields[4].GetUInt16();
+        sa.SpellFamilyMask = fields[2].GetUInt64();
 
         mSpellAffectMap.insert(SpellAffectMap::value_type((entry<<8) + effectId,sa));
 
@@ -729,22 +727,34 @@ void SpellMgr::LoadSpellAffects()
     */
 }
 
-bool SpellMgr::IsAffectedBySpell(SpellEntry const *spellInfo, uint32 spellId, uint8 effectId, uint64 const& familyFlags) const
+bool SpellMgr::IsAffectedBySpell(SpellEntry const *spellInfo, uint32 spellId, uint8 effectId, uint64 familyFlags) const
 {
+    // false for spellInfo == NULL
     if (!spellInfo)
         return false;
 
-    SpellAffection const *spellAffect = GetSpellAffection(spellId,effectId);
+    SpellEntry const *affect_spell = sSpellStore.LookupEntry(spellId);
+    // false for affect_spell == NULL
+    if (!affect_spell)
+        return false;
 
-    if (spellAffect )
+    // False if spellFamily not equal
+    if (affect_spell->SpellFamilyName != spellInfo->SpellFamilyName)
+        return false;
+
+    // If familyFlags == 0
+    if (!familyFlags)
     {
-        if (spellAffect->SpellFamily && spellAffect->SpellFamily != spellInfo->SpellFamilyName)
+        // Get it from spellAffect table
+        if (SpellAffection const *spellAffect = GetSpellAffection(spellId,effectId))
+            familyFlags = spellAffect->SpellFamilyMask;
+        // false if familyFlags == 0
+        if (!familyFlags)
             return false;
-
-        if (spellAffect->SpellFamilyMask && (spellAffect->SpellFamilyMask & spellInfo->SpellFamilyFlags))
-            return true;
     }
-    else if (familyFlags & spellInfo->SpellFamilyFlags)
+
+    // true
+    if (familyFlags & spellInfo->SpellFamilyFlags)
         return true;
 
     return false;

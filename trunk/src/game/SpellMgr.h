@@ -347,9 +347,7 @@ inline SpellSchoolMask GetSpellSchoolMask(SpellEntry const* spellInfo)
 // Spell affects related declarations (accessed using SpellMgr functions)
 struct SpellAffection
 {
-    uint8 SpellFamily;
     uint64 SpellFamilyMask;
-    uint16 Charges;
 };
 
 typedef HM_NAMESPACE::hash_map<uint32, SpellAffection> SpellAffectMap;
@@ -491,7 +489,7 @@ class SpellMgr
             return NULL;
         }
 
-        bool IsAffectedBySpell(SpellEntry const *spellInfo, uint32 spellId, uint8 effectId, uint64 const& familyFlags) const;
+        bool IsAffectedBySpell(SpellEntry const *spellInfo, uint32 spellId, uint8 effectId, uint64 familyFlags) const;
 
         uint32 GetSpellElixirMask(uint32 spellid) const
         {
