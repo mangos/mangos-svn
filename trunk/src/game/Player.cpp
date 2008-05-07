@@ -1388,7 +1388,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     bool tbc = GetSession()->IsTBC() && sWorld.getConfig(CONFIG_EXPANSION) > 0;
 
     // normal client and TBC map
-    if(!tbc && IsExpansionMap(mEntry))
+    if(!tbc && mEntry->IsExpansionMap())
     {
         sLog.outDebug("Player %s using Normal client and tried teleport to non existing map %u", GetName(), mapid);
 
@@ -11234,9 +11234,8 @@ Quest const * Player::GetNextQuest( uint64 guid, Quest const *pQuest )
 
 bool Player::CanSeeStartQuest( Quest const *pQuest )
 {
-    if( SatisfyQuestRace( pQuest, false ) && SatisfyQuestClass( pQuest, false ) &&
-        SatisfyQuestExclusiveGroup( pQuest, false ) &&
-        SatisfyQuestSkill( pQuest, false ) && SatisfyQuestReputation( pQuest, false ) &&
+    if( SatisfyQuestRace( pQuest, false ) && SatisfyQuestClassOrSkill( pQuest, false ) &&
+        SatisfyQuestExclusiveGroup( pQuest, false ) && SatisfyQuestReputation( pQuest, false ) &&
         SatisfyQuestPreviousQuest( pQuest, false ) && SatisfyQuestNextChain( pQuest, false ) &&
         SatisfyQuestPrevChain( pQuest, false ) && SatisfyQuestDay( pQuest, false ) )
     {
@@ -11249,8 +11248,8 @@ bool Player::CanSeeStartQuest( Quest const *pQuest )
 bool Player::CanTakeQuest( Quest const *pQuest, bool msg )
 {
     return SatisfyQuestStatus( pQuest, msg ) && SatisfyQuestExclusiveGroup( pQuest, msg )
-        && SatisfyQuestRace( pQuest, msg ) && SatisfyQuestLevel( pQuest, msg ) && SatisfyQuestClass( pQuest, msg )
-        && SatisfyQuestSkill( pQuest, msg ) && SatisfyQuestReputation( pQuest, msg )
+        && SatisfyQuestRace( pQuest, msg ) && SatisfyQuestLevel( pQuest, msg )
+        && SatisfyQuestClassOrSkill( pQuest, msg ) && SatisfyQuestReputation( pQuest, msg )
         && SatisfyQuestPreviousQuest( pQuest, msg ) && SatisfyQuestTimed( pQuest, msg )
         && SatisfyQuestNextChain( pQuest, msg ) && SatisfyQuestPrevChain( pQuest, msg )
         && SatisfyQuestDay( pQuest, msg );
@@ -11644,23 +11643,35 @@ void Player::FailTimedQuest( uint32 quest_id )
     }
 }
 
-bool Player::SatisfyQuestClass( Quest const* qInfo, bool msg )
+bool Player::SatisfyQuestClassOrSkill( Quest const* qInfo, bool msg )
 {
-    int32 zoneOrSort = qInfo->GetZoneOrSort();
+    int32 classOrSkill = qInfo->GetClassOrSkill();
 
-    // skip zone case
-    if ( zoneOrSort >= 0 )
+    // skip 0 case
+    if( classOrSkill == 0 )
         return true;
 
-    int32 questSort = -zoneOrSort;
-
-    uint8 reqClass = ClassByQuestSort(questSort);
-
-    if(reqClass != 0 && getClass() != reqClass)
+    // check class
+    if( classOrSkill < 0 )
     {
-        if( msg )
-            SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
-        return false;
+        uint8 reqClass = -int32(classOrSkill);
+        if(getClass() != reqClass)
+        {
+            if( msg )
+                SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
+            return false;
+        }
+    }
+    // check skill
+    else if( classOrSkill > 0 )
+    {
+        uint32 reqSkill = classOrSkill;
+        if( GetSkillValue( reqSkill ) < qInfo->GetRequiredSkillValue() )
+        {
+            if( msg )
+                SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
+            return false;
+        }
     }
 
     return true;
@@ -11821,27 +11832,6 @@ bool Player::SatisfyQuestReputation( Quest const* qInfo, bool msg )
         return false;
     }
 
-    return true;
-}
-
-bool Player::SatisfyQuestSkill( Quest const* qInfo, bool msg )
-{
-    int32 zoneOrSort = qInfo->GetZoneOrSort();
-
-    // skip zone case
-    if ( zoneOrSort >= 0 )
-        return true;
-
-    int32 questSort = -zoneOrSort;
-
-    uint32 reqskill = SkillByQuestSort(questSort);
-
-    if( reqskill != 0 && GetSkillValue( reqskill ) < qInfo->GetRequiredSkillValue() )
-    {
-        if( msg )
-            SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
-        return false;
-    }
     return true;
 }
 

@@ -166,6 +166,7 @@ class Quest
         // table data accessors:
         uint32 GetQuestId() const { return QuestId; }
         int32  GetZoneOrSort() const { return ZoneOrSort; }
+        int32  GetClassOrSkill() const { return ClassOrSkill; }
         uint32 GetMinLevel() const { return MinLevel; }
         uint32 GetQuestLevel() const { return QuestLevel; }
         uint32 GetType() const { return Type; }
@@ -251,6 +252,7 @@ class Quest
     protected:
         uint32 QuestId;
         int32  ZoneOrSort;
+        int32  ClassOrSkill;
         uint32 MinLevel;
         uint32 QuestLevel;
         uint32 Type;
