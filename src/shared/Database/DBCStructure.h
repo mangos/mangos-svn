@@ -417,15 +417,19 @@ struct MapEntry
                                                             // 122-123
     uint32      addon;                                      // 124 (0-original maps,1-tbc addon)
 
-    inline bool IsDungeon() const { return map_type == MAP_INSTANCE || map_type == MAP_RAID; }
-    inline bool SupportsHeroicMode() const { return resetTimeHeroic && !resetTimeRaid; }
-    inline bool HasResetTime() const { return resetTimeHeroic || resetTimeRaid; }
+    // Helpers
+    bool IsExpansionMap() const { return addon != 0; }
+    bool IsDungeon() const { return map_type == MAP_INSTANCE || map_type == MAP_RAID; }
+    bool SupportsHeroicMode() const { return resetTimeHeroic && !resetTimeRaid; }
+    bool HasResetTime() const { return resetTimeHeroic || resetTimeRaid; }
 };
 
-inline bool IsExpansionMap(MapEntry const* map)
+struct QuestSortEntry
 {
-    return map && map->addon != 0;
-}
+    uint32      id;                                         // 0, sort id
+    //char*       name[16];                                 // 1-16, unused
+                                                            // 17 name flags, unused
+};
 
 struct RandomPropertiesPointsEntry
 {

@@ -9851,6 +9851,7 @@ DROP TABLE IF EXISTS `quest_template`;
 CREATE TABLE `quest_template` (
   `entry` mediumint(8) unsigned NOT NULL default '0',
   `ZoneOrSort` smallint(6) NOT NULL default '0',
+  `ClassOrSkill` smallint(6) NOT NULL default '0',
   `MinLevel` tinyint(3) unsigned NOT NULL default '0',
   `QuestLevel` tinyint(3) unsigned NOT NULL default '0',
   `Type` smallint(5) unsigned NOT NULL default '0',

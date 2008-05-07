@@ -4618,11 +4618,17 @@ bool ChatHandler::HandleCastCommand(const char* args)
 
 bool ChatHandler::HandleCastBackCommand(const char* args)
 {
-    Unit* caster = getSelectedUnit();
+    Creature* caster = getSelectedCreature();
 
     if(!caster)
     {
         SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
+    }
+
+    if(caster->GetCharmerOrOwnerGUID() && caster->GetCharmerOrOwnerGUID() != m_session->GetPlayer()->GetGUID())
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
 
@@ -4650,11 +4656,17 @@ bool ChatHandler::HandleCastBackCommand(const char* args)
 
 bool ChatHandler::HandleCastTargetCommand(const char* args)
 {
-    Unit* caster = getSelectedUnit();
+    Creature* caster = getSelectedCreature();
 
     if(!caster)
     {
         SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
+    }
+
+    if(caster->GetCharmerOrOwnerGUID() && caster->GetCharmerOrOwnerGUID() != m_session->GetPlayer()->GetGUID())
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
 
@@ -4693,11 +4705,17 @@ when attempting to use the PointMovementGenerator
 */
 bool ChatHandler::HandleComeToMeCommand(const char *args)
 {
-    Unit* caster = getSelectedUnit();
+    Creature* caster = getSelectedCreature();
 
     if(!caster)
     {
-        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        SendSysMessage(LANG_SELECT_CREATURE);
+        return true;
+    }
+
+    if(caster->GetCharmerOrOwnerGUID() && caster->GetCharmerOrOwnerGUID() != m_session->GetPlayer()->GetGUID())
+    {
+        SendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
 

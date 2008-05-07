@@ -2302,33 +2302,33 @@ void ObjectMgr::LoadQuests()
 
     mExclusiveQuestGroups.clear();
 
-    //                                                0      1           2         3           4
-    QueryResult *result = WorldDatabase.Query("SELECT entry, ZoneOrSort, MinLevel, QuestLevel, Type,"
-    //   5              6                   7                    8                  9                      10                   11                     12                   13                14
-        "RequiredRaces, RequiredSkillValue, RepObjectiveFaction, RepObjectiveValue, RequiredMinRepFaction, RequiredMinRepValue, RequiredMaxRepFaction, RequiredMaxRepValue, SuggestedPlayers, LimitTime,"
-    //   15          16            17           18           19           20              21                22         23            24
+    //                                                0      1           2             3         4           5     6              7
+    QueryResult *result = WorldDatabase.Query("SELECT entry, ZoneOrSort, ClassOrSkill, MinLevel, QuestLevel, Type, RequiredRaces, RequiredSkillValue,"
+    //   8                    9                  10                     11                   12                     13                   14                15
+        "RepObjectiveFaction, RepObjectiveValue, RequiredMinRepFaction, RequiredMinRepValue, RequiredMaxRepFaction, RequiredMaxRepValue, SuggestedPlayers, LimitTime,"
+    //   16          17            18           19           20           21              22                23         24            25
         "QuestFlags, SpecialFlags, CharTitleId, PrevQuestId, NextQuestId, ExclusiveGroup, NextQuestInChain, SrcItemId, SrcItemCount, SrcSpell,"
-    //   25     26       27          28               29                30       31              32              33              34
+    //   26     27       28          29               30                31       32              33              34              35
         "Title, Details, Objectives, OfferRewardText, RequestItemsText, EndText, ObjectiveText1, ObjectiveText2, ObjectiveText3, ObjectiveText4,"
-    //   35          36          37          38          39             40             41             42
+    //   36          37          38          39          40             41             42             43
         "ReqItemId1, ReqItemId2, ReqItemId3, ReqItemId4, ReqItemCount1, ReqItemCount2, ReqItemCount3, ReqItemCount4,"
-    //   43            44            45            46            47               48               49               50               51             52             53             54
+    //   44            45            46            47            48               49               50               51               52             53             54             55
         "ReqSourceId1, ReqSourceId2, ReqSourceId3, ReqSourceId4, ReqSourceCount1, ReqSourceCount2, ReqSourceCount3, ReqSourceCount4, ReqSourceRef1, ReqSourceRef2, ReqSourceRef3, ReqSourceRef4,"
-    //   55                  56                  57                  58                  59                     60                     61                     62
+    //   56                  57                  58                  59                  60                     61                     62                     63
         "ReqCreatureOrGOId1, ReqCreatureOrGOId2, ReqCreatureOrGOId3, ReqCreatureOrGOId4, ReqCreatureOrGOCount1, ReqCreatureOrGOCount2, ReqCreatureOrGOCount3, ReqCreatureOrGOCount4,"
-    //   63             64             65             66
+    //   64             65             66             67
         "ReqSpellCast1, ReqSpellCast2, ReqSpellCast3, ReqSpellCast4,"
-    //   67                68                69                70                71                72
+    //   68                69                70                71                72                73
         "RewChoiceItemId1, RewChoiceItemId2, RewChoiceItemId3, RewChoiceItemId4, RewChoiceItemId5, RewChoiceItemId6,"
-    //   73                   74                   75                   76                   77                   78
+    //   74                   75                   76                   77                   78                   79
         "RewChoiceItemCount1, RewChoiceItemCount2, RewChoiceItemCount3, RewChoiceItemCount4, RewChoiceItemCount5, RewChoiceItemCount6,"
-    //   79          80          81          82          83             84             85             86
+    //   80          81          82          83          84             85             86             87
         "RewItemId1, RewItemId2, RewItemId3, RewItemId4, RewItemCount1, RewItemCount2, RewItemCount3, RewItemCount4,"
-    //   87              88              89              90              91              92            93            94            95            96
+    //   88              89              90              91              92              93            94            95            96            97
         "RewRepFaction1, RewRepFaction2, RewRepFaction3, RewRepFaction4, RewRepFaction5, RewRepValue1, RewRepValue2, RewRepValue3, RewRepValue4, RewRepValue5,"
-    //   97             98                99        100           101         102     103     104       105            106            107            108
+    //   98             99                100       101           102         103     104     105       106            107            108            109
         "RewOrReqMoney, RewMoneyMaxLevel, RewSpell, RewSpellCast, PointMapId, PointX, PointY, PointOpt, DetailsEmote1, DetailsEmote2, DetailsEmote3, DetailsEmote4,"
-    //   109              110            111                112                113                114                115          116
+    //   110              111            112                113                114                115                116          117
         "IncompleteEmote, CompleteEmote, OfferRewardEmote1, OfferRewardEmote2, OfferRewardEmote3, OfferRewardEmote4, StartScript, CompleteScript"
         " FROM quest_template");
     if(result == NULL)
@@ -2371,7 +2371,7 @@ void ObjectMgr::LoadQuests()
             qinfo->QuestFlags &= QUEST_MANGOS_FLAGS_DB_ALLOWED;
         }
 
-        // zone case
+        // client quest log visual (area case)
         if( qinfo->ZoneOrSort > 0 )
         {
             if(!GetAreaEntryByAreaID(qinfo->ZoneOrSort))
@@ -2379,6 +2379,58 @@ void ObjectMgr::LoadQuests()
                 sLog.outErrorDb("Quest %u has `ZoneOrSort` = %u (zone case) but zone with this id does not exist.",
                     qinfo->GetQuestId(),qinfo->ZoneOrSort);
                 // no changes, quest not dependent from this value but can have problems at client
+            }
+        }
+        // client quest log visual (sort case)
+        if( qinfo->ZoneOrSort < 0 )
+        {
+            QuestSortEntry const* qSort = sQuestSortStore.LookupEntry(-int32(qinfo->ZoneOrSort));
+            if( !qSort )
+            {
+                sLog.outErrorDb("Quest %u has `ZoneOrSort` = %i (sort case) but quest sort with this id does not exist.",
+                    qinfo->GetQuestId(),qinfo->ZoneOrSort);
+                // no changes, quest not dependent from this value but can have problems at client (note some may be 0, we must allow this so no check)
+            }
+            //check for proper ClassOrSkill value (class case)
+            if(int32 class_id =  ClassByQuestSort(-int32(qinfo->ZoneOrSort)))
+            {
+                // class is negative value in ClassOrSkill
+                if(qinfo->ClassOrSkill != -class_id)
+                {
+                    sLog.outErrorDb("Quest %u has `ZoneOrSort` = %i (class sort case) but `ClassOrSkill` does not have a corresponding value (%i).",
+                        qinfo->GetQuestId(),qinfo->ZoneOrSort,-class_id);
+                    //override, and force proper value here?
+                }
+            }
+            //check for proper ClassOrSkill value (skill case)
+            if(int32 skill_id =  SkillByQuestSort(-int32(qinfo->ZoneOrSort)))
+            {
+                // skill is positive value in ClassOrSkill
+                if(qinfo->ClassOrSkill != skill_id )
+                {
+                    sLog.outErrorDb("Quest %u has `ZoneOrSort` = %i (skill sort case) but `ClassOrSkill` does not have a corresponding value (%i).",
+                        qinfo->GetQuestId(),qinfo->ZoneOrSort,skill_id);
+                    //override, and force proper value here?
+                }
+            }
+        }
+
+        // ClassOrSkill (class case)
+        if( qinfo->ClassOrSkill < 0 )
+        {
+            if( !sChrClassesStore.LookupEntry(-int32(qinfo->ClassOrSkill)) )
+            {
+                sLog.outErrorDb("Quest %u has `ClassOrSkill` = %i (class case) but class (%i) does not exist",
+                    qinfo->GetQuestId(),qinfo->ClassOrSkill,-qinfo->ClassOrSkill);
+            }
+        }
+        // ClassOrSkill (skill case)
+        if( qinfo->ClassOrSkill > 0 )
+        {
+            if( !sSkillLineStore.LookupEntry(qinfo->ClassOrSkill) )
+            {
+                sLog.outErrorDb("Quest %u has `ClassOrSkill` = %u (skill case) but skill (%i) does not exist",
+                    qinfo->GetQuestId(),qinfo->ClassOrSkill,qinfo->ClassOrSkill);
             }
         }
 
@@ -2391,21 +2443,11 @@ void ObjectMgr::LoadQuests()
                 // no changes, quest can't be done for this requirement
             }
 
-            if( qinfo->ZoneOrSort >= 0 )
+            if( qinfo->ClassOrSkill <= 0 )
             {
-                sLog.outErrorDb("Quest %u has `RequiredSkillValue` = %u but `ZoneOrSort` = %i (zone case), value ignored.",
-                    qinfo->GetQuestId(),qinfo->RequiredSkillValue,qinfo->ZoneOrSort);
-                // no changes, quest will ignore requirement
-            }
-            else
-            {
-                uint32 reqskill = SkillByQuestSort(-qinfo->ZoneOrSort);
-                if(!reqskill)
-                {
-                    sLog.outErrorDb("Quest %u has `RequiredSkillValue` = %u but `ZoneOrSort` = %i (non skill case), value ignored.",
-                        qinfo->GetQuestId(),qinfo->RequiredSkillValue,qinfo->ZoneOrSort);
-                    // no changes, quest will ignore requirement
-                }
+                sLog.outErrorDb("Quest %u has `RequiredSkillValue` = %u but `ClassOrSkill` = %i (class case), value ignored.",
+                    qinfo->GetQuestId(),qinfo->RequiredSkillValue,qinfo->ClassOrSkill);
+                // no changes, quest can't be done for this requirement (fail at wrong skill id)
             }
         }
         // else Skill quests can have 0 skill level, this is ok
