@@ -188,7 +188,6 @@ bool ChatHandler::HandleVisibleCommand(const char* args)
 {
     if (!*args)
     {
-        SendSysMessage(LANG_USE_BOL);
         PSendSysMessage(LANG_YOU_ARE, m_session->GetPlayer()->isGMVisible() ?  GetMangosString(LANG_VISIBLE) : GetMangosString(LANG_INVISIBLE));
         return true;
     }

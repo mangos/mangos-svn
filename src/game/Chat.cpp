@@ -632,12 +632,12 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text, st
         {
             if(!ExecuteCommandInTable(table[i].ChildCommands, text, fullcmd))
             {
-                if(!table[i].Help.empty())
-                    SendSysMultilineMessage(table[i].Help.c_str());
-                else if(table[i].Name && table[i].Name[0] != '\0')
+                if(text && text[0] != '\0')
                     SendSysMessage(LANG_NO_SUBCMD);
                 else
                     SendSysMessage(LANG_CMD_SYNTAX);
+
+                ShowHelpForCommand(table[i].ChildCommands,text);
             }
 
             return true;
@@ -701,6 +701,89 @@ int ChatHandler::ParseCommands(const char* text)
         SendSysMessage(LANG_NO_CMD);
 
     return 1;
+}
+
+bool ChatHandler::ShowHelpForSubCommands(ChatCommand *table, char const* cmd, char const* subcmd)
+{
+    std::string list;
+    for(uint32 i = 0; table[i].Name != NULL; ++i)
+    {
+        if(m_session->GetSecurity() < table[i].SecurityLevel)
+            continue;
+
+        if(strlen(table[i].Name) && !hasStringAbbr(table[i].Name, subcmd))
+            continue;
+
+        (list += "\r\n    ") += table[i].Name;
+    }
+
+    if(list.empty())
+        return false;
+
+    if(table==getCommandTable())
+    {
+        SendSysMessage(LANG_AVIABLE_CMD);
+        PSendSysMessage("%s",list.c_str());
+    }
+    else
+        PSendSysMessage(LANG_SUBCMDS_LIST,cmd,list.c_str());
+
+    return true;
+}
+
+bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
+{
+    if(*cmd)
+    {
+        for(uint32 i = 0; table[i].Name != NULL; ++i)
+        {
+            if(m_session->GetSecurity() < table[i].SecurityLevel)
+                continue;
+
+            if(strlen(table[i].Name) && !hasStringAbbr(table[i].Name, cmd))
+                continue;
+
+            // have subcommand
+            char const* subcmd = (*cmd) ? strtok(NULL, " ") : "";
+
+            if(table[i].ChildCommands && subcmd && *subcmd)
+            {
+                if(ShowHelpForCommand(table[i].ChildCommands, subcmd))
+                    return true;
+            }
+
+            if(!table[i].Help.empty())
+                SendSysMultilineMessage(table[i].Help.c_str());
+
+            if(table[i].ChildCommands)
+                if(ShowHelpForSubCommands(table[i].ChildCommands,table[i].Name,subcmd ? subcmd : ""))
+                    return true;
+
+            return !table[i].Help.empty();
+        }
+    }
+    else
+    {
+        for(uint32 i = 0; table[i].Name != NULL; ++i)
+        {
+            if(m_session->GetSecurity() < table[i].SecurityLevel)
+                continue;
+
+            if(strlen(table[i].Name))
+                continue;
+
+            if(!table[i].Help.empty())
+                SendSysMultilineMessage(table[i].Help.c_str());
+
+            if(table[i].ChildCommands)
+                if(ShowHelpForSubCommands(table[i].ChildCommands,"",""))
+                    return true;
+
+            return !table[i].Help.empty();
+        }
+    }
+
+    return ShowHelpForSubCommands(table,"",cmd);
 }
 
 //Note: target_guid used only in CHAT_MSG_WHISPER_INFORM mode (in this case channelName ignored)
