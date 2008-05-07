@@ -87,6 +87,7 @@ class ChatHandler
 
         bool ExecuteCommandInTable(ChatCommand *table, const char* text, std::string fullcommand);
         bool ShowHelpForCommand(ChatCommand *table, const char* cmd);
+        bool ShowHelpForSubCommands(ChatCommand *table, char const* cmd, char const* subcmd);
 
         ChatCommand* getCommandTable();
 
