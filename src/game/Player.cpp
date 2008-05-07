@@ -5160,6 +5160,10 @@ void Player::SetInitialFactions()
             // show(1) and disable AtWar button(16) of own team factions
             if( GetTeam() == factionEntry->team )
                 newFaction.Flags = FACTION_FLAG_OWN_TEAM | FACTION_FLAG_VISIBLE;
+            // opposition team
+            else if( GetTeam()==ALLIANCE && factionEntry->team == HORDE || GetTeam()==HORDE && factionEntry->team == ALLIANCE)
+                newFaction.Flags = FACTION_FLAG_AT_WAR | FACTION_FLAG_INVISIBLE;
+
 
             //If the faction is Hostile or Hated  of my one we are at war!
             if(GetBaseReputationRank(factionEntry) <= REP_HOSTILE)
@@ -13595,10 +13599,15 @@ void Player::_LoadReputation(QueryResult *result)
                 newFaction.Changed          = false;
 
                 // fix flags base at initial values
-                if((oldFlags & FACTION_FLAG_OWN_TEAM) != 0)
+                if((oldFlags & FACTION_FLAG_OWN_TEAM) != 0) // own team
                 {
                     newFaction.Flags |= (FACTION_FLAG_OWN_TEAM | FACTION_FLAG_VISIBLE);
                     newFaction.Flags &= ~FACTION_FLAG_AT_WAR;
+                }
+
+                if((oldFlags & FACTION_FLAG_INVISIBLE) != 0)// opposition team
+                {
+                    newFaction.Flags |= (FACTION_FLAG_AT_WAR | FACTION_FLAG_INVISIBLE);
                 }
 
                 m_factions[newFaction.ReputationListID] = newFaction;

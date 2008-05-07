@@ -211,7 +211,7 @@ enum FactionFlags
     FACTION_FLAG_VISIBLE    = 0x01,
     FACTION_FLAG_AT_WAR     = 0x02,
     FACTION_FLAG_UNKNOWN    = 0x04,
-    FACTION_FLAG_INVISIBLE  = 0x08,                         // unsure
+    FACTION_FLAG_INVISIBLE  = 0x08,                         // always overwrite FACTION_FLAG_VISIBLE and hide faction in rep.list, used for hide opposition team factions
     FACTION_FLAG_OWN_TEAM   = 0x10,
     FACTION_FLAG_INACTIVE   = 0x20
 };
