@@ -401,7 +401,7 @@ void WorldSession::SendSpiritResurrect()
     //Characters level 20 and up suffer from ten minutes of sickness.
     if (level > 10)
     {
-        // prepere resurrection sickness setup (will be set in ResurrectPlayer())
+        // prepare resurrection sickness setup (will be set in ResurrectPlayer())
         uint32 spellLvl = level < 20 ? level : 20;
         _player->m_resurrectingSicknessExpire = time(NULL) + (spellLvl-10)*MINUTE;
     }
