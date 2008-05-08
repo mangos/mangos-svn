@@ -47,11 +47,6 @@ GridState* si_GridStates[MAX_GRID_STATE];
 Map::~Map()
 {
     UnloadAll(true);
-    if(i_data)
-    {
-        delete i_data;
-        i_data = NULL;
-    }
 }
 
 bool Map::ExistMap(uint32 mapid,int x,int y)
@@ -1089,6 +1084,13 @@ void Map::UnloadAll(bool pForce)
         NGridType &grid(*i->getSource());
         ++i;
         UnloadGrid(grid.getX(), grid.getY(), pForce); // deletes the grid and removes it from the GridRefManager
+    }
+
+    //Delete instance data
+    if(i_data)
+    {
+        delete i_data;
+        i_data = NULL;
     }
 }
 
