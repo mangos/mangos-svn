@@ -687,7 +687,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
         // clean InHateListOf
         if (pVictim->GetTypeId() == TYPEID_PLAYER)
         {
-            if (GetTypeId() != TYPEID_PLAYER && durabilityLoss)
+            // only if not player and not controlled by player pet. And not at BG
+            if (durabilityLoss && !player && !((Player*)pVictim)->InBattleGround())
             {
                 DEBUG_LOG("We are dead, loosing 10 percents durability");
                 ((Player*)pVictim)->DurabilityLossAll(0.10);
