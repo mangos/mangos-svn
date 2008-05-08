@@ -421,10 +421,10 @@ void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage)
         RemoveSpellsCausingAura(auraType);
 }
 
-void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const *spellProto, bool durabilityLoss)
+uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchoolMask damageSchoolMask, SpellEntry const *spellProto, bool durabilityLoss)
 {
     if (!pVictim->isAlive() || pVictim->isInFlight() || pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
-        return;
+        return 0;
 
     //You don't lose health from damage taken from another player while in a sanctuary
     //You still see it in the combat log though
@@ -432,7 +432,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
     {
         const AreaTableEntry *area = GetAreaEntryByAreaID(pVictim->GetAreaId());
         if(area && area->flags & 0x800)                     //sanctuary
-            return;
+            return 0;
     }
 
     // remove affects from victim (including from 0 damage and DoTs)
@@ -465,7 +465,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
         if(cleanDamage && cleanDamage->damage && (damageSchoolMask & SPELL_SCHOOL_MASK_NORMAL) && pVictim->GetTypeId() == TYPEID_PLAYER && (pVictim->getPowerType() == POWER_RAGE))
             ((Player*)pVictim)->RewardRage(cleanDamage->damage, 0, false);
 
-        return;
+        return 0;
     }
 
     pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damage);
@@ -493,7 +493,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             if(GetTypeId() == TYPEID_PLAYER)
                 ((Player*)this)->KilledMonster(pVictim->GetEntry(),pVictim->GetGUID());
 
-            return;
+            return damage;
         }
 
         if(!pVictim->isInCombat() && ((Creature*)pVictim)->AI())
@@ -879,7 +879,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
         }
     }
 
-    DEBUG_LOG("DealDamageEnd");
+    DEBUG_LOG("DealDamageEnd returned %d damage", damage);
+
+    return damage;
 }
 
 void Unit::CastStop(uint32 except_spellid)
@@ -1278,32 +1280,37 @@ uint32 Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage
         uint32 resist = 0;
 
         CalcAbsorbResist(pVictim,GetSpellSchoolMask(spellInfo), SPELL_DIRECT_DAMAGE, damage, &absorb, &resist);
-
-        // Only send absorbed message if we actually absorbed some damage
-        if(damage > 0)
+        
+        //No more damage left, target absorbed and/or resisted all damage
+        if (damage > absorb + resist)
+            damage -= absorb + resist;      //Remove Absorbed and Resisted from damage actually dealt
+        else
         {
-            // Handle absorb & resists
-            if(damage <= absorb + resist && absorb)
+            uint32 HitInfo = HITINFO_SWINGNOHITSOUND;
+
+            if (absorb)
+                HitInfo |= HITINFO_ABSORB;
+            if (resist)
             {
-                SendAttackStateUpdate(HITINFO_ABSORB|HITINFO_SWINGNOHITSOUND, pVictim, 1, GetSpellSchoolMask(spellInfo),damage, absorb,resist,VICTIMSTATE_NORMAL,0);
-                return 0;
-            }
-            else if(damage <= resist)                       // If we didn't fully absorb check if we fully resisted
-            {
+                HitInfo |= HITINFO_RESIST;
                 ProcDamageAndSpell(pVictim, PROC_FLAG_TARGET_RESISTS, PROC_FLAG_RESIST_SPELL, 0, spellInfo,isTriggeredSpell);
-                SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, GetSpellSchoolMask(spellInfo), damage, absorb,resist,VICTIMSTATE_NORMAL,0);
-                return 0;
             }
+
+            //Send resist
+            SendAttackStateUpdate(HitInfo, pVictim, 1, GetSpellSchoolMask(spellInfo), damage, absorb,resist,VICTIMSTATE_NORMAL,0);
+            return 0;
         }
+
+        // Deal damage done
+        damage = DealDamage(pVictim, damage, &cleanDamage, SPELL_DIRECT_DAMAGE, GetSpellSchoolMask(spellInfo), spellInfo, true);
 
         // Send damage log
         sLog.outDetail("SpellNonMeleeDamageLog: %u (TypeId: %u) attacked %u (TypeId: %u) for %u dmg inflicted by %u,absorb is %u,resist is %u",
             GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damage, spellID, absorb,resist);
+
+        // Actual log sent to client
         SendSpellNonMeleeDamageLog(pVictim, spellID, damage, GetSpellSchoolMask(spellInfo), absorb, resist, false, 0, crit);
-
-        // Deal damage done
-        DealDamage(pVictim, (damage-absorb-resist), &cleanDamage, SPELL_DIRECT_DAMAGE, GetSpellSchoolMask(spellInfo), spellInfo, true);
-
+        
         // Procflags
         uint32 procAttacker = PROC_FLAG_HIT_SPELL;
         uint32 procVictim   = (PROC_FLAG_STRUCK_SPELL|PROC_FLAG_TAKE_DAMAGE);
@@ -1314,9 +1321,9 @@ uint32 Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage
             procVictim   |= PROC_FLAG_STRUCK_CRIT_SPELL;
         }
 
-        ProcDamageAndSpell(pVictim, procAttacker, procVictim, (damage-absorb-resist), spellInfo, isTriggeredSpell);
+        ProcDamageAndSpell(pVictim, procAttacker, procVictim, damage, spellInfo, isTriggeredSpell);
 
-        return damage-absorb-resist;
+        return damage;
     }
     else
     {
