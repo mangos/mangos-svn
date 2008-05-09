@@ -494,11 +494,13 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
             count = pItem->GetCount();
         }
         else
-            // prevent sell more items that exist in stack (possable only not from client)
-        if(count > pItem->GetCount())
         {
-            _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
-            return;
+            // prevent sell more items that exist in stack (possable only not from client)
+            if(count > pItem->GetCount())
+            {
+                _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
+                return;
+            }
         }
 
         ItemPrototype const *pProto = pItem->GetProto();
@@ -506,17 +508,22 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
         {
             if( pProto->SellPrice > 0 )
             {
-                _player->ModifyMoney( pProto->SellPrice * count );
-
                 if(count < pItem->GetCount())               // need split items
                 {
+                    Item *pNewItem = pItem->CloneItem( count, _player );
+                    if (!pNewItem)
+                    {
+                        sLog.outError("WORLD: HandleSellItemOpcode - could not create clone of item %u; count = %u", pItem->GetEntry(), count );
+                        _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
+                        return;
+                    }
+                    
                     pItem->SetCount( pItem->GetCount() - count );
                     _player->ItemRemovedQuestCheck( pItem->GetEntry(), count );
                     if( _player->IsInWorld() )
                         pItem->SendUpdateToPlayer( _player );
                     pItem->SetState(ITEM_CHANGED, _player);
 
-                    Item *pNewItem = pItem->CloneItem( count, _player );
                     _player->AddItemToBuyBackSlot( pNewItem );
                     if( _player->IsInWorld() )
                         pNewItem->SendUpdateToPlayer( _player );
@@ -528,6 +535,8 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
                     pItem->RemoveFromUpdateQueueOf(_player);
                     _player->AddItemToBuyBackSlot( pItem );
                 }
+
+                _player->ModifyMoney( pProto->SellPrice * count );
             }
             else
                 _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);

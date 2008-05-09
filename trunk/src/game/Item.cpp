@@ -779,14 +779,18 @@ void Item::SendTimeUpdate(Player* owner)
 
 Item* Item::CreateItem( uint32 item, uint32 count, Player const* player )
 {
+    if ( count < 1 )
+        return NULL;                                    //don't create item at zero count
+    
     ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
     if( pProto )
     {
-        Item *pItem = NewItemOrBag( pProto );
         if ( count > pProto->Stackable )
             count = pProto->Stackable;
-        if ( count < 1 )
-            return NULL;                                    //don'n create item at zero count
+
+        assert(count !=0 && "pProto->Stackable==0 but checked at loading already");
+
+        Item *pItem = NewItemOrBag( pProto );
         if( pItem->Create(objmgr.GenerateLowGuid(HIGHGUID_ITEM), item, player) )
         {
             pItem->SetCount( count );
