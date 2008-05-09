@@ -117,6 +117,8 @@ void BattleGroundNA::HandleKillPlayer(Player *player, Player *killer)
         return;
     }
 
+    BattleGround::HandleKillPlayer(player, killer);
+
     uint32 killer_team_index = GetTeamIndexByTeamId(killer->GetTeam());
 
     ++m_TeamKills[killer_team_index];                       // add kills to killer's team

@@ -2098,6 +2098,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     // restore if need some important flags
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );
+    RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);     // set only at death at battleground
     SetUInt32Value(PLAYER_FIELD_BYTES2, 0 );                // flags empty by default
 
     SetArmor(int32(m_createStats[STAT_AGILITY]*2));

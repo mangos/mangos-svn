@@ -1026,3 +1026,17 @@ void BattleGround::HandleTriggerBuff(uint64 const& go_guid)
     obj->SetRespawnTime(BUFF_RESPAWN_TIME);
     obj->SetLootState(GO_JUST_DEACTIVATED);
 }
+
+void BattleGround::HandleKillPlayer( Player* player, Player* killer )
+{
+    // add +1 deaths
+    UpdatePlayerScore(player, SCORE_DEATHS, 1);
+
+    // add +1 kills
+    if(killer)
+        UpdatePlayerScore(killer, SCORE_HONORABLE_KILLS, 1);
+
+    // to be able to remove insignia
+    player->SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE );
+
+}

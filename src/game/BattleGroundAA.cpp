@@ -48,8 +48,9 @@ void BattleGroundAA::RemovePlayer(Player * /*plr*/, uint64 /*guid*/)
 {
 }
 
-void BattleGroundAA::HandleKillPlayer(Player * /*player*/, Player * /*killer*/)
+void BattleGroundAA::HandleKillPlayer(Player* player, Player* killer)
 {
+    BattleGround::HandleKillPlayer(player, killer);
 }
 
 void BattleGroundAA::HandleAreaTrigger(Player * /*Source*/, uint32 /*Trigger*/)
