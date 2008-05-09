@@ -643,9 +643,16 @@ void WorldSession::LogoutPlayer(bool Save)
                 if((*itr)->GetTypeId()==TYPEID_PLAYER)
                     aset.insert((Player*)(*itr));
             }
+
             // give honor to all attackers from set like group case
             for(std::set<Player*>::const_iterator itr = aset.begin(); itr != aset.end(); ++itr)
                 (*itr)->RewardHonor(_player,aset.size());
+
+            // give bg rewards and update counters like kill by first from attackers
+            // this can't be called for all attackers.
+            if(!aset.empty())
+                if(BattleGround *bg = _player->GetBattleGround())
+                    bg->HandleKillPlayer(_player,*aset.begin());
         }
         else if(_player->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
         {

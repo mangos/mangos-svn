@@ -566,6 +566,8 @@ void BattleGroundWS::HandleKillPlayer(Player *player, Player *killer)
         return;
 
     EventPlayerDroppedFlag(player);
+
+    BattleGround::HandleKillPlayer(player, killer);
 }
 
 void BattleGroundWS::HandleDropFlag(Player *player)
