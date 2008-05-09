@@ -518,6 +518,11 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
     uint32 counter = 0;                                     // Counter for figure out that we found smth.
 
     Player *target = getSelectedPlayer();
+    if (!target)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
 
     for (uint32 id = 0; id < sFactionStore.GetNumRows(); id++)
     //for(FactionsList::const_iterator itr = target->m_factions.begin(); itr != target->m_factions.end(); ++itr)
