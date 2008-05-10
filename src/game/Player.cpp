@@ -2072,8 +2072,8 @@ void Player::InitStatsForLevel(bool reapplyMods)
     if(reapplyMods)                                         //reapply stats values only on .reset stats (level) command
         _RemoveAllStatBonuses();
 
-    PlayerClassLevelInfo ñlassInfo;
-    objmgr.GetPlayerClassLevelInfo(getClass(),getLevel(),&ñlassInfo);
+    PlayerClassLevelInfo classInfo;
+    objmgr.GetPlayerClassLevelInfo(getClass(),getLevel(),&classInfo);
 
     PlayerLevelInfo info;
     objmgr.GetPlayerLevelInfo(getRace(),getClass(),getLevel(),&info);
@@ -2096,10 +2096,10 @@ void Player::InitStatsForLevel(bool reapplyMods)
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetStat(Stats(i), info.stats[i]);
 
-    SetCreateHealth(ñlassInfo.basehealth);
+    SetCreateHealth(classInfo.basehealth);
 
     //set create powers
-    SetCreateMana(ñlassInfo.basemana);
+    SetCreateMana(classInfo.basemana);
 
     // restore if need some important flags
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );
@@ -2201,7 +2201,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     for (int i = POWER_MANA; i < MAX_POWERS; i++)
         SetMaxPower(Powers(i),  uint32(GetCreatePowers(Powers(i))));
 
-    SetMaxHealth(ñlassInfo.basehealth);                     // stamina bonus will applied later
+    SetMaxHealth(classInfo.basehealth);                     // stamina bonus will applied later
 
     // cleanup mounted state (it will set correctly at aura loading if player saved at mount.
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
