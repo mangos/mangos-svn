@@ -1074,6 +1074,32 @@ uint32 ObjectMgr::GetSecurityByAccount(uint32 acc_id) const
     return 0;
 }
 
+bool ObjectMgr::GetAccountNameByAccount(uint32 acc_id, std::string &name) const
+{
+    QueryResult *result = loginDatabase.PQuery("SELECT username FROM account WHERE id = '%u'", acc_id);
+    if(result)
+    {
+        name = (*result)[0].GetCppString();
+        delete result;
+        return true;
+    }
+
+    return false;
+}
+
+uint32 ObjectMgr::GetAccountByAccountName(std::string name) const
+{
+    QueryResult *result = loginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", name.c_str());
+    if(result)
+    {
+        uint32 id = (*result)[0].GetUInt32();
+        delete result;
+        return id;
+    }
+
+    return 0;
+}
+
 void ObjectMgr::LoadAuctions()
 {
     QueryResult *result = CharacterDatabase.Query("SELECT COUNT(*) FROM auctionhouse");

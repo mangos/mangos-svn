@@ -4414,10 +4414,29 @@ bool ChatHandler::HandleLoadPDumpCommand(const char *args)
 
     char * file = strtok((char*)args, " "); if(!file) return false;
     char * acc = strtok(NULL, " "); if(!acc) return false;
-    char * name = strtok(NULL, " ");
-    char * guid = name ? strtok(NULL, " ") : NULL;
+    if(!file || !acc)
+        return false;
 
-    if(PlayerDumpReader().LoadDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0))
+    uint32 account_id = objmgr.GetAccountByAccountName(acc);
+    if(!account_id)
+    {
+        account_id = atoi(acc);
+        if(account_id)
+        {
+            std::string acc_name;
+            if(!objmgr.GetAccountNameByAccount(account_id,acc_name))
+                return false;
+        }
+        else
+            return false;
+    }
+
+    char * name = strtok(NULL, " ");
+    char * guid_str = name ? strtok(NULL, " ") : NULL;
+
+    uint32 guid = guid_str ? atoi(guid_str) : 0;
+
+    if(PlayerDumpReader().LoadDump(file, account_id, name ? name : "", guid))
         PSendSysMessage(LANG_COMMAND_IMPORT_SUCCESS);
     else
         PSendSysMessage(LANG_COMMAND_IMPORT_FAILED);
