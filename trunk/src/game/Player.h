@@ -146,13 +146,25 @@ struct PlayerCreateInfoItem
 
 typedef std::list<PlayerCreateInfoItem> PlayerCreateInfoItems;
 
-struct PlayerLevelInfo
+struct PlayerClassLevelInfo
 {
-    PlayerLevelInfo() : basehealth(0), basemana(0) { for(int i=0; i < MAX_STATS; ++i ) stats[i] = 0; }
-
-    uint8 stats[MAX_STATS];
+    PlayerClassLevelInfo() : basehealth(0), basemana(0) {}
     uint16 basehealth;
     uint16 basemana;
+};
+
+struct PlayerClassInfo
+{
+    PlayerClassInfo() : levelInfo(NULL) { }
+
+    PlayerClassLevelInfo* levelInfo;                        //[level-1] 0..MaxPlayerLevel-1
+};
+
+struct PlayerLevelInfo
+{
+    PlayerLevelInfo() { for(int i=0; i < MAX_STATS; ++i ) stats[i] = 0; }
+
+    uint8 stats[MAX_STATS];
 };
 
 struct PlayerInfo

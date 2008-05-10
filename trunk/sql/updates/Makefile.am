@@ -226,6 +226,8 @@ pkgdata_DATA = \
 	5779_mangos_quest_template.sql \
 	5784_mangos_player_levelstats.sql \
 	5787_mangos_player_levelstats.sql \
+	5790_mangos_player_levelhealthmana.sql \
+	5790_mangos_player_levelstats.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -432,4 +434,6 @@ EXTRA_DIST = \
 	5779_mangos_quest_template.sql \
 	5784_mangos_player_levelstats.sql \
 	5787_mangos_player_levelstats.sql \
+	5790_mangos_player_levelhealthmana.sql \
+	5790_mangos_player_levelstats.sql \
 	README
