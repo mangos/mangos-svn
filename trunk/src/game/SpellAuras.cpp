@@ -4224,11 +4224,11 @@ void Aura::HandleModPowerCost(bool apply, bool Real)
 void Aura::SendCoolDownEvent()
 {
     Unit* caster = GetCaster();
-    if(caster)
+    if(caster && caster->GetTypeId()==TYPEID_PLAYER)
     {
         WorldPacket data(SMSG_COOLDOWN_EVENT, (4+8));       // last check 2.4.1
         data << uint32(GetId()) << m_caster_guid;
-        caster->SendMessageToSet(&data,true);               // WTF? why we send cooldown message to set?
+        ((Player*)caster)->SendDirectMessage(&data);
     }
 }
 
