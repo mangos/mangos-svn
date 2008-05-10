@@ -445,9 +445,12 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 
     sLog.outDebug(  "WORLD: Received CMSG_SELL_ITEM" );
     uint64 vendorguid, itemguid;
-    uint8 count;
+    uint8 _count;
 
-    recv_data >> vendorguid >> itemguid >> count;
+    recv_data >> vendorguid >> itemguid >> _count;
+
+    // prevent possible overflow, as mangos uses uint32 for item count
+    uint32 count = _count;
 
     if(!itemguid)
         return;
