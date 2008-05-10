@@ -1983,12 +1983,15 @@ void Player::GiveLevel(uint32 level)
     PlayerLevelInfo info;
     objmgr.GetPlayerLevelInfo(getRace(),getClass(),level,&info);
 
+    PlayerClassLevelInfo classInfo;
+    objmgr.GetPlayerClassLevelInfo(getClass(),level,&classInfo);
+
     // send levelup info to client
     WorldPacket data(SMSG_LEVELUP_INFO, (7*4+(MAX_STATS-STAT_STRENGTH)+4));
     data << uint32(level);
-    data << uint32(int32(info.basehealth) - int32(GetCreateHealth()));
+    data << uint32(int32(classInfo.basehealth) - int32(GetCreateHealth()));
     // it's for(5)
-    data << uint32(int32(info.basemana)   - int32(GetCreateMana()));
+    data << uint32(int32(classInfo.basemana)   - int32(GetCreateMana()));
     data << uint32(0);
     data << uint32(0);
     data << uint32(0);
@@ -2011,8 +2014,8 @@ void Player::GiveLevel(uint32 level)
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetCreateStat(Stats(i), info.stats[i]);
 
-    SetCreateHealth(info.basehealth);
-    SetCreateMana(info.basemana);
+    SetCreateHealth(classInfo.basehealth);
+    SetCreateMana(classInfo.basemana);
 
     InitTalentForLevel();
     InitTaxiNodesForLevel();
@@ -2069,8 +2072,10 @@ void Player::InitStatsForLevel(bool reapplyMods)
     if(reapplyMods)                                         //reapply stats values only on .reset stats (level) command
         _RemoveAllStatBonuses();
 
-    PlayerLevelInfo info;
+    PlayerClassLevelInfo ñlassInfo;
+    objmgr.GetPlayerClassLevelInfo(getClass(),getLevel(),&ñlassInfo);
 
+    PlayerLevelInfo info;
     objmgr.GetPlayerLevelInfo(getRace(),getClass(),getLevel(),&info);
 
     SetUInt32Value(PLAYER_FIELD_MAX_LEVEL, sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) );
@@ -2091,10 +2096,10 @@ void Player::InitStatsForLevel(bool reapplyMods)
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetStat(Stats(i), info.stats[i]);
 
-    SetCreateHealth(info.basehealth);
+    SetCreateHealth(ñlassInfo.basehealth);
 
     //set create powers
-    SetCreateMana(info.basemana);
+    SetCreateMana(ñlassInfo.basemana);
 
     // restore if need some important flags
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );
@@ -2196,7 +2201,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     for (int i = POWER_MANA; i < MAX_POWERS; i++)
         SetMaxPower(Powers(i),  uint32(GetCreatePowers(Powers(i))));
 
-    SetMaxHealth(info.basehealth);                          // stamina bonus will applied later
+    SetMaxHealth(ñlassInfo.basehealth);                     // stamina bonus will applied later
 
     // cleanup mounted state (it will set correctly at aura loading if player saved at mount.
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);

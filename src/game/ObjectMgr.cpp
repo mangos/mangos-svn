@@ -57,8 +57,6 @@ ObjectMgr::ObjectMgr()
 
     m_hiPetNumber       = 1;
 
-    playerInfo          = NULL;
-
     mGuildBankTabPrice.resize(GUILD_BANK_MAX_TABS);
     mGuildBankTabPrice[0] = 100;
     mGuildBankTabPrice[1] = 250;
@@ -92,17 +90,17 @@ ObjectMgr::~ObjectMgr()
     petInfo.clear();
 
     // free only if loaded
-    if(playerInfo)
+    for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
     {
-        for (int race = 0; race < MAX_RACES; ++race)
+        delete[] playerClassInfo[class_].levelInfo;
+    }
+
+    for (int race = 0; race < MAX_RACES; ++race)
+    {
+        for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
         {
-            for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
-            {
-                delete[] playerInfo[race][class_].levelInfo;
-            }
-            delete[] playerInfo[race];
+            delete[] playerInfo[race][class_].levelInfo;
         }
-        delete[] playerInfo;
     }
 
     // free group and guild objects
@@ -1284,6 +1282,11 @@ void ObjectMgr::LoadItemPrototypes()
             sLog.outErrorDb("Item (Entry: %u) has wrong value in stackable (%u), replace by default 1.",i,proto->Stackable);
             const_cast<ItemPrototype*>(proto)->Stackable = 1;
         }
+        else if(proto->Stackable > 255)
+        {
+            sLog.outErrorDb("Item (Entry: %u) has too large value in stackable (%u), replace by hardcoded upper limit (255).",i,proto->Stackable);
+            const_cast<ItemPrototype*>(proto)->Stackable = 255;
+        }
 
         for (int j = 0; j < 10; j++)
         {
@@ -1619,13 +1622,6 @@ PetLevelInfo const* ObjectMgr::GetPetLevelInfo(uint32 creature_id, uint32 level)
 
 void ObjectMgr::LoadPlayerInfo()
 {
-    // allocate dynamic array
-    playerInfo = new PlayerInfo*[MAX_RACES];
-    for (uint8 race = 0; race < MAX_RACES; ++race)
-    {
-        playerInfo[race] = new PlayerInfo[MAX_CLASSES];
-    }
-
     // Load playercreate
     {
         //                                                0     1      2    3     4           5           6
@@ -1904,10 +1900,98 @@ void ObjectMgr::LoadPlayerInfo()
         }
     }
 
-    // Loading levels data
+    // Loading levels data (class only dependent)
     {
-        //                                                 0     1      2      3       4         5    6    7    8     9
-        QueryResult *result  = WorldDatabase.Query("SELECT race, class, level, basehp, basemana, str, agi, sta, inte, spi FROM player_levelstats");
+        //                                                 0      1      2       3
+        QueryResult *result  = WorldDatabase.Query("SELECT class, level, basehp, basemana FROM player_classlevelstats");
+
+        uint32 count = 0;
+
+        if (!result)
+        {
+            barGoLink bar( 1 );
+
+            sLog.outString();
+            sLog.outString( ">> Loaded %u level health/mana definitions", count );
+            sLog.outErrorDb( "Error loading `player_classlevelstats` table or empty table.");
+            exit(1);
+        }
+
+        barGoLink bar( result->GetRowCount() );
+
+        do
+        {
+            Field* fields = result->Fetch();
+
+            uint32 current_class = fields[0].GetUInt32();
+            if(current_class >= MAX_CLASSES)
+            {
+                sLog.outErrorDb("Wrong class %u in `player_classlevelstats` table, ignoring.",current_class);
+                continue;
+            }
+
+            uint32 current_level = fields[1].GetUInt32();
+            if(current_level > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+            {
+                if(current_level > 255)                     // hardcoded level maximum
+                    sLog.outErrorDb("Wrong (> 255) level %u in `player_classlevelstats` table, ignoring.",current_level);
+                else
+                    sLog.outDetail("Unused (> MaxPlayerLevel in mangosd.conf) level %u in `player_classlevelstats` table, ignoring.",current_level);
+                continue;
+            }
+
+            PlayerClassInfo* pClassInfo = &playerClassInfo[current_class];
+
+            if(!pClassInfo->levelInfo)
+                pClassInfo->levelInfo = new PlayerClassLevelInfo[sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL)];
+
+            PlayerClassLevelInfo* pClassLevelInfo = &pClassInfo->levelInfo[current_level-1];
+
+            pClassLevelInfo->basehealth = fields[2].GetUInt16();
+            pClassLevelInfo->basemana   = fields[3].GetUInt16();
+
+            bar.step();
+            ++count;
+        }
+        while (result->NextRow());
+
+        delete result;
+
+        sLog.outString();
+        sLog.outString( ">> Loaded %u level health/mana definitions", count );
+    }
+
+    // Fill gaps and check integrity
+    for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
+    {
+        // skip non existed classes
+        if(!sChrClassesStore.LookupEntry(class_))
+            continue;
+
+        PlayerClassInfo* pClassInfo = &playerClassInfo[class_];
+
+        // fatal error if no level 1 data
+        if(!pClassInfo->levelInfo || pClassInfo->levelInfo[0].basehealth == 0 )
+        {
+            sLog.outErrorDb("Class %i Level 1 does not have health/mana data!",class_);
+            exit(1);
+        }
+
+        // fill level gaps
+        for (uint32 level = 1; level < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL); ++level)
+        {
+            if(pClassInfo->levelInfo[level].basehealth == 0)
+            {
+                sLog.outErrorDb("Class %i Level %i does not have health/mana data. Using stats data of level %i.",class_,level+1, level);
+                pClassInfo->levelInfo[level] = pClassInfo->levelInfo[level-1];
+            }
+        }
+    }
+
+    // Loading levels data (class/race dependent)
+    {
+        //                                                 0     1      2      3    4    5    6    7
+        QueryResult *result  = WorldDatabase.Query("SELECT race, class, level, str, agi, sta, inte, spi FROM player_levelstats");
 
         uint32 count = 0;
 
@@ -1958,12 +2042,9 @@ void ObjectMgr::LoadPlayerInfo()
 
             PlayerLevelInfo* pLevelInfo = &pInfo->levelInfo[current_level-1];
 
-            pLevelInfo->basehealth = fields[3].GetUInt16();
-            pLevelInfo->basemana   = fields[4].GetUInt16();
-
             for (int i = 0; i < MAX_STATS; i++)
             {
-                pLevelInfo->stats[i] = fields[i+5].GetUInt8();
+                pLevelInfo->stats[i] = fields[i+3].GetUInt8();
             }
 
             bar.step();
@@ -2001,7 +2082,7 @@ void ObjectMgr::LoadPlayerInfo()
                 continue;
 
             // fatal error if no level 1 data
-            if(!pInfo->levelInfo || pInfo->levelInfo[0].basehealth == 0 )
+            if(!pInfo->levelInfo || pInfo->levelInfo[0].stats[0] == 0 )
             {
                 sLog.outErrorDb("Race %i Class %i Level 1 does not have stats data!",race,class_);
                 exit(1);
@@ -2010,7 +2091,7 @@ void ObjectMgr::LoadPlayerInfo()
             // fill level gaps
             for (uint32 level = 1; level < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL); ++level)
             {
-                if(pInfo->levelInfo[level].basehealth == 0)
+                if(pInfo->levelInfo[level].stats[0] == 0)
                 {
                     sLog.outErrorDb("Race %i Class %i Level %i does not have stats data. Using stats data of level %i.",race,class_,level+1, level);
                     pInfo->levelInfo[level] = pInfo->levelInfo[level-1];
@@ -2018,6 +2099,18 @@ void ObjectMgr::LoadPlayerInfo()
             }
         }
     }
+}
+
+void ObjectMgr::GetPlayerClassLevelInfo(uint32 class_, uint32 level, PlayerClassLevelInfo* info) const
+{
+    if(level < 1) return;
+    if(class_ >= MAX_CLASSES) return;
+    PlayerClassInfo const* pInfo = &playerClassInfo[class_];
+
+    if(level > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+        level = sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL);
+
+    *info = pInfo->levelInfo[level-1];
 }
 
 void ObjectMgr::GetPlayerLevelInfo(uint32 race, uint32 class_, uint32 level, PlayerLevelInfo* info) const
@@ -2106,9 +2199,6 @@ void ObjectMgr::BuildPlayerLevelInfo(uint8 race, uint8 _class, uint8 level, Play
                 info->stats[STAT_INTELLECT] += (lvl > 38 ? 3: (lvl > 4 ? 1: 0));
                 info->stats[STAT_SPIRIT]    += (lvl > 38 ? 3: (lvl > 5 ? 1: 0));
         }
-
-        info->basemana   += (_class == CLASS_WARRIOR || _class == CLASS_ROGUE) ? 0 : info->stats[STAT_SPIRIT] / 2;
-        info->basehealth += info->stats[STAT_STAMINA] / 2;
     }
 }
 
