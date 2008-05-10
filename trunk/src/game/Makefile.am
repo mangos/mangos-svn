@@ -193,8 +193,6 @@ libmangosgame_a_SOURCES = \
 	RandomMovementGenerator.h \
 	ReactorAI.cpp \
 	ReactorAI.h \
-	RedZoneDistrict.cpp \
-	RedZoneDistrict.h \
 	ScriptCalls.cpp \
 	ScriptCalls.h \
 	SharedDefines.h \

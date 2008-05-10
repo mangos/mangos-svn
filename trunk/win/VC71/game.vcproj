@@ -658,12 +658,6 @@
 				RelativePath="..\..\src\game\ReactorAI.h">
 			</File>
 			<File
-				RelativePath="..\..\src\game\RedZoneDistrict.cpp">
-			</File>
-			<File
-				RelativePath="..\..\src\game\RedZoneDistrict.h">
-			</File>
-			<File
 				RelativePath="..\..\src\game\SocialMgr.cpp">
 			</File>
 			<File
