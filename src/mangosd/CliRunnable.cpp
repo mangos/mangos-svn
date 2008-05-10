@@ -113,7 +113,18 @@ void CliWritePlayerDump(char*command,pPrintf zprintf)
         zprintf("Syntax is: writepdump $filename $playerGUID\r\n");
         return;
     }
-    PlayerDumpWriter().WriteDump(file, atoi(p2));
+
+    uint32 guid = objmgr.GetPlayerGUIDByName(p2);
+    if(!guid)
+        guid = atoi(p2);
+
+    if(!guid)
+    {
+        zprintf("Syntax is: writepdump $filename $playerGUID\r\n");
+        return;
+    }
+
+    PlayerDumpWriter().WriteDump(file, guid);
 }
 
 /// Load a character from a dump file

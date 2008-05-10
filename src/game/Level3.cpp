@@ -4474,11 +4474,16 @@ bool ChatHandler::HandleWritePDumpCommand(const char *args)
         return false;
 
     char* file = strtok((char*)args, " ");
-    char* guid = strtok(NULL, " ");
+    char* p2 = strtok(NULL, " ");
 
-    if(!file || !guid) return false;
+    if(!file || !p2)
+        return false;
 
-    if (PlayerDumpWriter().WriteDump(file, atoi(guid)))
+    uint32 guid = objmgr.GetPlayerGUIDByName(p2);
+    if(!guid)
+        guid = atoi(p2);
+
+    if (PlayerDumpWriter().WriteDump(file, guid))
         PSendSysMessage(LANG_COMMAND_EXPORT_SUCCESS);
     else
         PSendSysMessage(LANG_COMMAND_EXPORT_FAILED);

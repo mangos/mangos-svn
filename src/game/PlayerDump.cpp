@@ -154,10 +154,13 @@ bool changetoknth(std::string &str, int n, const char *with, bool insert = false
 
 uint32 registerNewGuid(uint32 oldGuid, std::map<uint32, uint32> &guidMap, uint32 hiGuid)
 {
-    if(guidMap[oldGuid] == 0)
-        guidMap[oldGuid] = hiGuid + guidMap.size();
+    std::map<uint32, uint32>::iterator itr = guidMap.find(oldGuid);
+    if(itr != guidMap.end())
+        return itr->second;
 
-    return guidMap[oldGuid];
+    uint32 newguid = hiGuid + guidMap.size();
+    guidMap[oldGuid] = newguid;
+    return newguid;
 }
 
 bool changeGuid(std::string &str, int n, std::map<uint32, uint32> &guidMap, uint32 hiGuid, bool nonzero = false)
@@ -384,7 +387,8 @@ bool PlayerDumpReader::LoadDump(std::string file, uint32 account, std::string na
     else guid = objmgr.m_hiCharGuid;
 
     // normalize the name if specified and check if it exists
-    normalizePlayerName(name);
+    if(!name.empty())
+        normalizePlayerName(name);
 
     if(ObjectMgr::IsValidName(name))
     {
@@ -404,8 +408,8 @@ bool PlayerDumpReader::LoadDump(std::string file, uint32 account, std::string na
     snprintf(newpetid, 20, "%d", objmgr.GeneratePetNumber());
     snprintf(lastpetid, 20, "%s", "");
 
-    std::map<uint32, uint32> items;
-    std::map<uint32, uint32> mails;
+    std::map<uint32,uint32> items;
+    std::map<uint32,uint32> mails;
     char buf[32000] = "";
 
     typedef std::map<uint32, uint32> PetIds;                // old->new petid relation
