@@ -16163,8 +16163,14 @@ void Player::learnQuestRewardedSpells(Quest const* quest)
     {
         if(spellInfo->Effect[i] == SPELL_EFFECT_LEARN_SPELL && !HasSpell(spellInfo->EffectTriggerSpell[i]))
         {
+            // prevent learn not first ranks spells for ranked spells (prof. specializations)
+            if(spellmgr.GetSpellRank(spellInfo->EffectTriggerSpell[i]) > 1)
+            {
+                found = false;
+                break;
+            }
+
             found = true;
-            break;
         }
     }
 
