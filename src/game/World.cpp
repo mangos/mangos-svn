@@ -52,7 +52,6 @@
 #include "GameEvent.h"
 #include "Database/DatabaseImpl.h"
 #include "WorldSocket.h"
-#include "RedZoneDistrict.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 
@@ -868,7 +867,6 @@ void World::SetInitialWorldSettings()
     AIRegistry::Initialize();
     WaypointMovementGenerator<Creature>::Initialize();
     Player::InitVisibleBits();
-    RedZone::Initialize();
 
     ///- Initialize MapManager
     sLog.outString( "Starting Map System" );

@@ -21,20 +21,16 @@
 
 #include "Cell.h"
 #include "Map.h"
-#include "RedZoneDistrict.h"
 #include <cmath>
 
 inline Cell::Cell(CellPair const& p)
 {
-    /* Possible replace for RedZone use, need performance testing
     data.Part.grid_x = p.x_coord / MAX_NUMBER_OF_CELLS;
-    data.Part.cell_x = p.x_coord % MAX_NUMBER_OF_CELLS;
     data.Part.grid_y = p.y_coord / MAX_NUMBER_OF_CELLS;
+    data.Part.cell_x = p.x_coord % MAX_NUMBER_OF_CELLS;
     data.Part.cell_y = p.y_coord % MAX_NUMBER_OF_CELLS;
-    data.Part.loadgrids = LOAD_GRID_AT_VISIT;
+    data.Part.nocreate = 0;
     data.Part.reserved = 0;
-    */
-    data.All = RedZone::GetZone(p).data.All;
 }
 
 template<class LOCK_TYPE,class T, class CONTAINER>
