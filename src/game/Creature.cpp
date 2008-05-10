@@ -248,9 +248,7 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
 
     SetSpeed(MOVE_WALK,     cinfo->speed );
     SetSpeed(MOVE_RUN,      cinfo->speed );
-    SetSpeed(MOVE_WALKBACK, cinfo->speed );
     SetSpeed(MOVE_SWIM,     cinfo->speed );
-    SetSpeed(MOVE_SWIMBACK, cinfo->speed );
 
     // checked at loading
     m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);

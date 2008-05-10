@@ -3693,6 +3693,17 @@ int32 Unit::GetTotalAuraModifier(AuraType auratype) const
     return modifier;
 }
 
+float Unit::GetTotalAuraMultiplier(AuraType auratype) const
+{
+    float multipler = 1.0f;
+
+    AuraList const& mTotalAuraList = GetAurasByType(auratype);
+    for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
+        multipler *= (100.0f + (*i)->GetModifier()->m_amount)/100.0f;
+
+    return multipler;
+}
+
 int32 Unit::GetMaxPositiveAuraModifier(AuraType auratype) const
 {
     int32 modifier = 0;
@@ -3713,6 +3724,64 @@ int32 Unit::GetMaxNegativeAuraModifier(AuraType auratype) const
     for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
         if ((*i)->GetModifier()->m_amount < modifier)
             modifier = (*i)->GetModifier()->m_amount;
+
+    return modifier;
+}
+
+int32 Unit::GetTotalAuraModifierByMiscMask(AuraType auratype, uint32 misc_mask) const
+{
+    int32 modifier = 0;
+
+    AuraList const& mTotalAuraList = GetAurasByType(auratype);
+    for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
+    {
+        Modifier* mod = (*i)->GetModifier();
+        if (mod->m_miscvalue & misc_mask)
+            modifier += mod->m_amount;
+    }
+    return modifier;
+}
+
+float Unit::GetTotalAuraMultiplierByMiscMask(AuraType auratype, uint32 misc_mask) const
+{
+    float multipler = 1.0f;
+
+    AuraList const& mTotalAuraList = GetAurasByType(auratype);
+    for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
+    {
+        Modifier* mod = (*i)->GetModifier();
+        if (mod->m_miscvalue & misc_mask)
+            multipler *= (100.0f + mod->m_amount)/100.0f;
+    }
+    return multipler;
+}
+
+int32 Unit::GetMaxPositiveAuraModifierByMiscMask(AuraType auratype, uint32 misc_mask) const
+{
+    int32 modifier = 0;
+
+    AuraList const& mTotalAuraList = GetAurasByType(auratype);
+    for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
+    {
+        Modifier* mod = (*i)->GetModifier();
+        if (mod->m_miscvalue & misc_mask && mod->m_amount > modifier)
+            modifier = mod->m_amount;
+    }
+
+    return modifier;
+}
+
+int32 Unit::GetMaxNegativeAuraModifierByMiscMask(AuraType auratype, uint32 misc_mask) const
+{
+    int32 modifier = 0;
+
+    AuraList const& mTotalAuraList = GetAurasByType(auratype);
+    for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
+    {
+        Modifier* mod = (*i)->GetModifier();
+        if (mod->m_miscvalue & misc_mask && mod->m_amount < modifier)
+            modifier = mod->m_amount;
+    }
 
     return modifier;
 }
@@ -8282,75 +8351,84 @@ bool Unit::canDetectInvisibilityOf(Unit const* u) const
 void Unit::UpdateSpeed(UnitMoveType mtype, bool forced)
 {
     int32 main_speed_mod  = 0;
-    int32 stack_bonus     = 0;
-    int32 non_stack_bonus = 0;
+    float stack_bonus     = 1.0f;
+    float non_stack_bonus = 1.0f;
 
     switch(mtype)
     {
         case MOVE_WALK:
+            return;
         case MOVE_RUN:
-        case MOVE_WALKBACK:
         {
             if (IsMounted()) // Use on mount auras
             {
                 // Apply main mod only for forward move on mount
-                if (mtype == MOVE_RUN)
-                    main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
-                stack_bonus     = GetTotalAuraModifier(SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS);
-                non_stack_bonus = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK);
+                main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_MOUNTED_SPEED);
+                stack_bonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS);
+                non_stack_bonus = (100.0f + GetMaxPositiveAuraModifier(SPELL_AURA_MOD_MOUNTED_SPEED_NOT_STACK))/100.0f;
             }
             else
             {
                 main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_SPEED);
-                stack_bonus     = GetTotalAuraModifier(SPELL_AURA_MOD_SPEED_ALWAYS);
+                stack_bonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_SPEED_ALWAYS);
             }
             break;
         }
+        case MOVE_WALKBACK:
+            return;
         case MOVE_SWIM:
         {
             main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_SWIM_SPEED);
             break;
         }
         case MOVE_SWIMBACK:
-            break;                                          // none mods
+            return;
         case MOVE_FLY:
-        case MOVE_FLYBACK:
         {
-            if (mtype == MOVE_FLY)
-            {
-                if (IsMounted()) // Use on mount auras
-                    main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED);
-                else             // Use not mount (snapeshift for example) auras
-                    main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_SPEED_FLIGHT);
-            }
-            stack_bonus     = GetTotalAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED_ALWAYS);
-            non_stack_bonus = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACK);
+            if (IsMounted()) // Use on mount auras
+                main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED);
+            else             // Use not mount (shapeshift for example) auras
+                main_speed_mod  = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_SPEED_FLIGHT);
+            stack_bonus     = GetTotalAuraMultiplier(SPELL_AURA_MOD_FLIGHT_SPEED_ALWAYS);
+            non_stack_bonus = (100.0 + GetMaxPositiveAuraModifier(SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACK))/100.0f;
             break;
         }
+        case MOVE_FLYBACK:
+            return;
         default:
             sLog.outError("Unit::UpdateSpeed: Unsupported move type (%d)", mtype);
             return;
     }
     
-    int32 slow = GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED);
-    int32 bonus = non_stack_bonus > stack_bonus ? non_stack_bonus : stack_bonus;
-
+    float bonus = non_stack_bonus > stack_bonus ? non_stack_bonus : stack_bonus;
     // now we ready for speed calculation
-    float speed = main_speed_mod ? (100.0f + main_speed_mod)/100.0f : 1.0f;
+    float speed  = main_speed_mod ? bonus*(100.0f + main_speed_mod)/100.0f : bonus;
 
-    if(bonus)
+    switch(mtype)
     {
-        // skip bonus if movement type capped by aura
-        uint32 mask = 0;
-
-        AuraList const& mSpeedCapAuraList = GetAurasByType(SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED);
-        for(AuraList::const_iterator itr = mSpeedCapAuraList.begin();itr != mSpeedCapAuraList.end(); ++itr)
-            mask |= (*itr)->GetModifier()->m_amount;
-
-        if((mask & (1 < mtype))==0) speed *=(100.0f + bonus)/100.0f;
+        case MOVE_RUN:
+        case MOVE_SWIM:
+        case MOVE_FLY:
+        {
+            // Normalize speed by 191 aura SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED if need
+            // TODO: possible affect only on MOVE_RUN
+            if(int32 normalization = GetMaxPositiveAuraModifier(SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED))
+            {
+                // Use speed from aura
+                float max_speed = normalization / baseMoveSpeed[mtype];
+                if (speed > max_speed)
+                    speed = max_speed;
+            }
+            break;
+        }
+        default:
+            break;
     }
 
-    if (slow)  speed *=(100.0f + slow)/100.0f;
+    // Apply strongest slow aura mod to speed
+    int32 slow = GetMaxNegativeAuraModifier(SPELL_AURA_MOD_DECREASE_SPEED);
+    if (slow)
+        speed *=(100.0f + slow)/100.0f;
     SetSpeed(mtype, speed, forced);
 }
 

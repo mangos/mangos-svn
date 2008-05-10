@@ -2985,9 +2985,7 @@ void Aura::HandleAuraModIncreaseMountedSpeed(bool apply, bool Real)
     if(!Real)
         return;
 
-    m_target->UpdateSpeed(MOVE_WALK, true);
     m_target->UpdateSpeed(MOVE_RUN, true);
-    m_target->UpdateSpeed(MOVE_WALKBACK, true);
 }
 
 void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
@@ -3010,7 +3008,6 @@ void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
     }
 
     m_target->UpdateSpeed(MOVE_FLY, true);
-    m_target->UpdateSpeed(MOVE_FLYBACK, true);
 }
 
 void Aura::HandleAuraModIncreaseSwimSpeed(bool apply, bool Real)
@@ -3020,7 +3017,6 @@ void Aura::HandleAuraModIncreaseSwimSpeed(bool apply, bool Real)
         return;
 
     m_target->UpdateSpeed(MOVE_SWIM, true);
-    m_target->UpdateSpeed(MOVE_SWIMBACK, true);
 }
 
 void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
@@ -3029,13 +3025,9 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
     if(!Real)
         return;
 
-    m_target->UpdateSpeed(MOVE_WALK, true);
     m_target->UpdateSpeed(MOVE_RUN, true);
-    m_target->UpdateSpeed(MOVE_WALKBACK, true);
     m_target->UpdateSpeed(MOVE_SWIM, true);
-    m_target->UpdateSpeed(MOVE_SWIMBACK, true);
     m_target->UpdateSpeed(MOVE_FLY, true);
-    m_target->UpdateSpeed(MOVE_FLYBACK, true);
 }
 
 void Aura::HandleAuraModUseNormalSpeed(bool apply, bool Real)
@@ -3044,15 +3036,9 @@ void Aura::HandleAuraModUseNormalSpeed(bool apply, bool Real)
     if(!Real)
         return;
 
-    // Update movement type by mask
-    uint32 mask = m_modifier.m_amount;
-    if (mask & (1<<MOVE_WALK    )) m_target->UpdateSpeed(MOVE_WALK,    true);
-    if (mask & (1<<MOVE_RUN     )) m_target->UpdateSpeed(MOVE_RUN,     true);
-    if (mask & (1<<MOVE_WALKBACK)) m_target->UpdateSpeed(MOVE_WALKBACK,true);
-    if (mask & (1<<MOVE_SWIM    )) m_target->UpdateSpeed(MOVE_SWIM,    true);
-    if (mask & (1<<MOVE_SWIMBACK)) m_target->UpdateSpeed(MOVE_SWIMBACK,true);
-    if (mask & (1<<MOVE_FLY     )) m_target->UpdateSpeed(MOVE_FLY,     true);
-    if (mask & (1<<MOVE_FLYBACK )) m_target->UpdateSpeed(MOVE_FLYBACK, true);
+    m_target->UpdateSpeed(MOVE_RUN,  true);
+    m_target->UpdateSpeed(MOVE_SWIM, true);
+    m_target->UpdateSpeed(MOVE_FLY,  true);
 }
 
 /*********************************************************/
