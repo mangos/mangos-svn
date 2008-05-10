@@ -10190,8 +10190,8 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
     }
     else if( IsEquipmentPos ( dst ) )
     {
-        // change item amount before check (for unique max count check)
-        pSrcItem->SetCount( pSrcItem->GetCount() + count );
+        // change item amount before check (for unique max count check), provide space for splitted items
+        pSrcItem->SetCount( pSrcItem->GetCount() - count );
 
         uint16 dest;
         uint8 msg = CanEquipItem( dstslot, dest, pNewItem, false );
