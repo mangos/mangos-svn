@@ -1592,9 +1592,7 @@ bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float 
 
     SetSpeed(MOVE_WALK,     cinfo->speed );
     SetSpeed(MOVE_RUN,      cinfo->speed );
-    SetSpeed(MOVE_WALKBACK, cinfo->speed );
     SetSpeed(MOVE_SWIM,     cinfo->speed);
-    SetSpeed(MOVE_SWIMBACK, cinfo->speed);
 
     if(cinfo->MovementType < MAX_DB_MOTION_TYPE)
         m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);

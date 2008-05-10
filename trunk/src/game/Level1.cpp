@@ -954,9 +954,7 @@ bool ChatHandler::HandleModifyASpeedCommand(const char* args)
 
     chr->SetSpeed(MOVE_WALK,    ASpeed,true);
     chr->SetSpeed(MOVE_RUN,     ASpeed,true);
-    chr->SetSpeed(MOVE_WALKBACK,ASpeed,true);
     chr->SetSpeed(MOVE_SWIM,    ASpeed,true);
-    chr->SetSpeed(MOVE_SWIMBACK,ASpeed,true);
     //chr->SetSpeed(MOVE_TURN,    ASpeed,true);
     chr->SetSpeed(MOVE_FLY,     ASpeed,true);
     return true;
