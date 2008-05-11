@@ -1001,6 +1001,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             // Unstable Currents and other -> *Sanctity Aura (multi-family check)
             if( spellInfo_2->SpellIconID==502 && spellInfo_2->SpellFamilyName == SPELLFAMILY_PALADIN && spellInfo_1->SpellIconID==502 && spellInfo_1->SpellVisual==969 ) 
                 return false;
+
+            // Dragonmaw Illusion (multi-family check)
+            if (spellId_1 == 40216 && spellId_2 == 42016 )
+                return false;
+
             break;
         case SPELLFAMILY_MAGE:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_MAGE )
@@ -1072,6 +1077,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     (spellInfo_2->SpellFamilyFlags == 0x0 && spellInfo_2->SpellIconID == 108) && (spellInfo_1->SpellFamilyFlags & 0x20000000000000LL) )
                     return false;
             }
+
+            // Dragonmaw Illusion (multi-family check)
+            if (spellId_1 == 42016 && spellId_2 == 40216 )
+                return false;
+
             break;
         case SPELLFAMILY_ROGUE:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_ROGUE )
@@ -1772,6 +1782,14 @@ bool IsSpellAllowedInLocation(SpellEntry const *spellInfo,uint32 map_id,uint32 z
                 return false;
 
             return mapEntry->multimap_id==207;
+        }
+        // Dragonmaw Illusion
+        case 40216:
+        case 42016:
+        {
+            if ( area_id != 3759 && area_id != 3966 && area_id != 3939 )
+                return false;
+            break;
         }
     }
 
