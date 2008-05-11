@@ -50,6 +50,7 @@ ObjectMgr::ObjectMgr()
 {
     m_hiCharGuid        = 1;
     m_hiCreatureGuid    = 1;
+    m_hiPetGuid         = 1;
     m_hiItemGuid        = 1;
     m_hiGoGuid          = 1;
     m_hiDoGuid          = 1;
@@ -4495,6 +4496,14 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
+    result = CharacterDatabase.Query( "SELECT MAX(id) FROM character_pet" );
+    if( result )
+    {
+        m_hiPetGuid = (*result)[0].GetUInt32()+1;
+
+        delete result;
+    }
+
     result = CharacterDatabase.Query( "SELECT MAX(guid) FROM item_instance" );
     if( result )
     {
@@ -4625,6 +4634,14 @@ uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
                 sWorld.m_stopEvent = true;
             }
             return m_hiCreatureGuid;
+        case HIGHGUID_PET:
+            ++m_hiPetGuid;
+            if(m_hiPetGuid>=0x00FFFFFF)
+            {
+                sLog.outError("Pet guid overflow!! Can't continue, shuting down server. ");
+                sWorld.m_stopEvent = true;
+            }
+            return m_hiPetGuid;
         case HIGHGUID_PLAYER:
             ++m_hiCharGuid;
             if(m_hiCharGuid>=0xFFFFFFFF)

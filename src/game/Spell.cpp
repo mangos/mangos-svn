@@ -888,10 +888,10 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     if (missInfo!=SPELL_MISS_NONE)
         doTriggers(missInfo);
 
-    // Call scripted function for AI if this spell is casted upon a creature
+    // Call scripted function for AI if this spell is casted upon a creature (except pets)
     if(IS_CREATURE_GUID(target->targetGUID))
     {
-        // cast at creature (or GO) quest objectives update at succesful cast finished (+channel finished)
+        // cast at creature (or GO) quest objectives update at successful cast finished (+channel finished)
         // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
         if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsMeleeSpell() && !IsChannelActive() )
             ((Player*)m_caster)->CastedCreatureOrGO(unit->GetEntry(),unit->GetGUID(),m_spellInfo->Id);

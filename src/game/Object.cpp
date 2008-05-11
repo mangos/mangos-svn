@@ -52,6 +52,7 @@ uint32 GuidHigh2TypeId(uint32 guid_hi)
         case HIGHGUID_ITEM:         return TYPEID_ITEM;
         //case HIGHGUID_CONTAINER:    return TYPEID_CONTAINER; HIGHGUID_CONTAINER==HIGHGUID_ITEM currently
         case HIGHGUID_UNIT:         return TYPEID_UNIT;
+        case HIGHGUID_PET:          return TYPEID_UNIT;
         case HIGHGUID_PLAYER:       return TYPEID_PLAYER;
         case HIGHGUID_GAMEOBJECT:   return TYPEID_GAMEOBJECT;
         case HIGHGUID_DYNAMICOBJECT:return TYPEID_DYNAMICOBJECT;

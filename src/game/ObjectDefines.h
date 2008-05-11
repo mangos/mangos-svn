@@ -47,7 +47,10 @@ enum HighGuid
 #define IS_EMPTY_GUID(Guid)          ( Guid == 0 )
 
 #define IS_CREATURE_GUID(Guid)       ( GUID_HIPART(Guid) == HIGHGUID_UNIT )
+#define IS_PET_GUID(Guid)            ( GUID_HIPART(Guid) == HIGHGUID_PET )
+#define IS_CREATURE_OR_PET_GUID(Guid)( IS_CREATURE_GUID(Guid) || IS_PET_GUID(Guid) )
 #define IS_PLAYER_GUID(Guid)         ( GUID_HIPART(Guid) == HIGHGUID_PLAYER && Guid!=0 )
+#define IS_UNIT_GUID(Guid)           ( IS_CREATURE_OR_PET_GUID(Guid) || IS_PLAYER_GUID(Guid) )
                                                             // special case for empty guid need check
 #define IS_ITEM_GUID(Guid)           ( GUID_HIPART(Guid) == HIGHGUID_ITEM )
 #define IS_GAMEOBJECT_GUID(Guid)     ( GUID_HIPART(Guid) == HIGHGUID_GAMEOBJECT )
@@ -90,5 +93,23 @@ inline bool IsGuidHaveEnPart(uint64 const& guid)
 
 #define GUID_ENPART(x) (IsGuidHaveEnPart(x) ? _GUID_ENPART_3(x) : _GUID_ENPART_2(x))
 #define GUID_LOPART(x) (IsGuidHaveEnPart(x) ? _GUID_LOPART_3(x) : _GUID_LOPART_2(x))
+
+inline char const* GetLogNameForGuid(uint64 guid)
+{
+    switch(GUID_HIPART(guid))
+    {
+        case HIGHGUID_ITEM:         return "item";
+        case HIGHGUID_PLAYER:       return guid ? "player" : "none";
+        case HIGHGUID_GAMEOBJECT:   return "gameobject";
+        case HIGHGUID_TRANSPORT:    return "transport";
+        case HIGHGUID_UNIT:         return "creature";
+        case HIGHGUID_PET:          return "pet";
+        case HIGHGUID_DYNAMICOBJECT:return "dynobject";
+        case HIGHGUID_CORPSE:       return "corpse";
+        case HIGHGUID_MO_TRANSPORT: return "mo_transport";
+        default:
+            return "<unknown>";
+    }
+}
 
 #endif
