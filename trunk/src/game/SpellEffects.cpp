@@ -3996,6 +3996,20 @@ void Spell::EffectScriptEffect(uint32 i)
            unitTarget->CastSpell(unitTarget, 41131, true);
            break;
         }
+        // Mirren's Drinking Hat
+        case 29830:
+        {
+            uint32 item = 0;
+            switch ( urand(1,6) )
+            {
+                case 1: case 2: case 3: item = 23584; break;// Loch Modan Lager
+                case 4: case 5:         item = 23585; break;// Stouthammer Lite
+                case 6:                 item = 23586; break;// Aerie Peak Pale Ale
+            }
+            if (item)
+                DoCreateItem(i,item);
+            break;
+        }
     }
 
     // paladin's holy light / flash of light
