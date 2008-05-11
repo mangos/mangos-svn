@@ -1150,6 +1150,9 @@ void World::ScriptsProcess()
                 case HIGHGUID_UNIT:
                     source = HashMapHolder<Creature>::Find(step.sourceGUID);
                     break;
+                case HIGHGUID_PET:
+                    source = HashMapHolder<Pet>::Find(step.sourceGUID);
+                    break;
                 case HIGHGUID_PLAYER:
                     source = HashMapHolder<Player>::Find(step.sourceGUID);
                     break;
@@ -1173,6 +1176,9 @@ void World::ScriptsProcess()
             {
                 case HIGHGUID_UNIT:
                     target = HashMapHolder<Creature>::Find(step.targetGUID);
+                    break;
+                case HIGHGUID_PET:
+                    target = HashMapHolder<Pet>::Find(step.targetGUID);
                     break;
                 case HIGHGUID_PLAYER:                       // empty GUID case also
                     target = HashMapHolder<Player>::Find(step.targetGUID);

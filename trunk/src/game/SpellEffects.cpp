@@ -2611,7 +2611,7 @@ void Spell::EffectSummon(uint32 i)
     m_caster->GetClosePoint(x,y,z);
 
     uint32 pet_number = objmgr.GeneratePetNumber();
-    if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
+    if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),
         m_caster->GetMapId(),x,y,z,-m_caster->GetOrientation(),
         m_spellInfo->EffectMiscValue[i], pet_number))
     {
@@ -2906,7 +2906,7 @@ void Spell::EffectSummonGuardian(uint32 i)
             Pet* spawnCreature = new Pet(m_caster, GUARDIAN_PET);
 
             uint32 pet_number = objmgr.GeneratePetNumber();
-            if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
+            if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),
                 m_caster->GetMapId(),px,py,pz,m_caster->GetOrientation(),
                 m_spellInfo->EffectMiscValue[i], pet_number))
             {
@@ -3314,7 +3314,7 @@ void Spell::EffectSummonPet(uint32 i)
     }
 
     uint32 pet_number = objmgr.GeneratePetNumber();
-    if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), px, py, pz+1, m_caster->GetOrientation(), petentry, pet_number))
+    if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),  m_caster->GetMapId(), px, py, pz+1, m_caster->GetOrientation(), petentry, pet_number))
     {
         uint32 petlevel = m_caster->getLevel();
         NewSummon->setPetType(SUMMON_PET);
@@ -4691,7 +4691,7 @@ void Spell::EffectSummonCritter(uint32 i)
         m_caster->GetClosePoint(x,y,z);
 
         uint32 pet_number = objmgr.GeneratePetNumber();
-        if(!critter->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
+        if(!critter->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),
             m_caster->GetMapId(),x,y,z,m_caster->GetOrientation(),m_spellInfo->EffectMiscValue[i], pet_number))
         {
             sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);

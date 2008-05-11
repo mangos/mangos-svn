@@ -173,7 +173,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
 
     float px, py, pz;
     owner->GetClosePoint(px, py, pz,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE);
-    uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
+    uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_PET);
     uint32 pet_number = fields[0].GetUInt32();
     if(!Create(guid, owner->GetMapId(), px, py, pz, owner->GetOrientation(), petentry, pet_number))
     {
@@ -843,7 +843,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
         sLog.outError("CRITICAL ERROR: NULL pointer parsed into CreateBaseAtCreature()");
         return false;
     }
-    uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
+    uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_PET);
 
     sLog.outBasic("SetInstanceID()");
     SetInstanceId(creature->GetInstanceId());
