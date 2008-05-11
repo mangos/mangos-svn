@@ -195,36 +195,56 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & /*recv_data*/ )
 
     Player *player = GetPlayer();
     uint64 guid = player->GetLootGUID();
+    if(!guid)
+        return;
+
     Loot *pLoot = NULL;
 
-    if( IS_GAMEOBJECT_GUID( guid ) )
+    switch(GUID_HIPART(guid))
     {
-        GameObject *pGameObject = ObjectAccessor::GetGameObject(*GetPlayer(), guid);
+        case HIGHGUID_GAMEOBJECT:
+        {
+            GameObject *pGameObject = ObjectAccessor::GetGameObject(*GetPlayer(), guid);
 
-        // not check distance for GO in case owned GO (fishing bobber case, for example)
-        if( pGameObject && (pGameObject->GetOwnerGUID()==_player->GetGUID() || pGameObject->IsWithinDistInMap(_player,INTERACTION_DISTANCE)) )
-            pLoot = &pGameObject->loot;
-    }
-    else if( IS_CORPSE_GUID( guid ) )    // remove insignia ONLY in BG
-    {
-        Corpse *bones = ObjectAccessor::GetCorpse(*GetPlayer(), guid);
+            // not check distance for GO in case owned GO (fishing bobber case, for example)
+            if( pGameObject && (pGameObject->GetOwnerGUID()==_player->GetGUID() || pGameObject->IsWithinDistInMap(_player,INTERACTION_DISTANCE)) )
+                pLoot = &pGameObject->loot;
 
-        if (bones && bones->IsWithinDistInMap(_player,INTERACTION_DISTANCE) )
-            pLoot = &bones->loot;
-    }
-    else
-    {
-        Creature* pCreature = ObjectAccessor::GetCreature(*GetPlayer(), guid);
+            break;
+        }
+        case HIGHGUID_CORPSE:                               // remove insignia ONLY in BG
+        {
+            Corpse *bones = ObjectAccessor::GetCorpse(*GetPlayer(), guid);
 
-        bool ok_loot = pCreature && pCreature->isAlive() == (player->getClass()==CLASS_ROGUE && pCreature->lootForPickPocketed);
+            if (bones && bones->IsWithinDistInMap(_player,INTERACTION_DISTANCE) )
+                pLoot = &bones->loot;
 
-        if ( ok_loot && pCreature->IsWithinDistInMap(_player,INTERACTION_DISTANCE) )
-            pLoot = &pCreature->loot ;
+            break;
+        }
+        case HIGHGUID_ITEM:
+        {
+            if(Item *item = GetPlayer()->GetItemByGuid(guid))
+                pLoot = &item->loot;
+            break;
+        }
+        case HIGHGUID_UNIT:
+        {
+            Creature* pCreature = ObjectAccessor::GetCreature(*GetPlayer(), guid);
+
+            bool ok_loot = pCreature && pCreature->isAlive() == (player->getClass()==CLASS_ROGUE && pCreature->lootForPickPocketed);
+
+            if ( ok_loot && pCreature->IsWithinDistInMap(_player,INTERACTION_DISTANCE) )
+                pLoot = &pCreature->loot ;
+
+            break;
+        }
+        default:
+            return;                                         // unlootable type
     }
 
     if( pLoot )
     {
-        if (player->GetGroup())
+        if (!IS_ITEM_GUID(guid) && player->GetGroup())      //item can be looted only single player
         {
             Group *group = player->GetGroup();
 
