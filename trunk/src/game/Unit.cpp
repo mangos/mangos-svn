@@ -4892,6 +4892,110 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                         ((Player*)this)->Say("This is Madness!", LANG_UNIVERSAL);
                     return;
                 }
+                /*
+                // TODO: need find item for aura and triggered spells
+                // Sunwell Exalted Caster Neck (??? neck)
+                // cast ??? Light's Wrath if Exaled by Aldor
+                // cast ??? Arcane Bolt if Exaled by Scryers
+                case 46569:
+                {
+                    if(GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if(!castItem)
+                        return;
+                    // Get Aldor reputation rank 
+                    if (((Player *)this)->GetReputationRank(932) == REP_EXALTED)
+                        CastSpell(this, ???, true, castItem, triggeredByAura);
+                    // Get Scryers reputation rank 
+                    else if (((Player *)this)->GetReputationRank(934) == REP_EXALTED)
+                        CastSpell(pVictim, ???, true, castItem, triggeredByAura);
+                    return;
+                }/**/
+                // Sunwell Exalted Caster Neck (Shattered Sun Pendant of Acumen neck)
+                // cast 45479 Light's Wrath if Exaled by Aldor
+                // cast 45429 Arcane Bolt if Exaled by Scryers
+                case 45481:
+                {
+                    if(GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if(!castItem)
+                        return;
+                    if( ((Player*)this)->HasSpellCooldown(dummySpell->Id))
+                        return;
+                    // Get Aldor reputation rank 
+                    if (((Player *)this)->GetReputationRank(932) == REP_EXALTED)
+                        CastSpell(this, 45479, true, castItem, triggeredByAura);
+                    // Get Scryers reputation rank 
+                    else if (((Player *)this)->GetReputationRank(934) == REP_EXALTED)
+                        CastSpell(pVictim, 45429, true, castItem, triggeredByAura);
+                    ((Player *)this)->AddSpellCooldown(dummySpell->Id, 0, time(NULL) + 45);
+                    return;
+                }
+                // Sunwell Exalted Melee Neck (Shattered Sun Pendant of Might neck)
+                // cast 45480 Light's Strength if Exaled by Aldor
+                // cast 45428 Arcane Strike if Exaled by Scryers
+                case 45482:
+                {
+                    if(GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if(!castItem)
+                        return;
+                    if( ((Player*)this)->HasSpellCooldown(dummySpell->Id))
+                        return;
+                    // Get Aldor reputation rank 
+                    if (((Player *)this)->GetReputationRank(932) == REP_EXALTED)
+                        CastSpell(this, 45480, true, castItem, triggeredByAura);
+                    // Get Scryers reputation rank 
+                    else if (((Player *)this)->GetReputationRank(934) == REP_EXALTED)
+                        CastSpell(pVictim, 45428, true, castItem, triggeredByAura);
+                    ((Player *)this)->AddSpellCooldown(dummySpell->Id, 0, time(NULL) + 45);
+                    return;
+                }
+                // Sunwell Exalted Tank Neck (Shattered Sun Pendant of Resolve neck)
+                // cast 45431 Arcane Insight if Exaled by Aldor
+                // cast 45432 Light's Ward if Exaled by Scryers
+                case 45483:
+                {
+                    if(GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if(!castItem)
+                        return;
+                    if( ((Player*)this)->HasSpellCooldown(dummySpell->Id))
+                        return;
+                    // Get Aldor reputation rank 
+                    if (((Player *)this)->GetReputationRank(932) == REP_EXALTED)
+                        CastSpell(this, 45432, true, castItem, triggeredByAura);
+                    // Get Scryers reputation rank 
+                    else if (((Player *)this)->GetReputationRank(934) == REP_EXALTED)
+                        CastSpell(this, 45431, true, castItem, triggeredByAura);
+                    ((Player *)this)->AddSpellCooldown(dummySpell->Id, 0, time(NULL) + 45);
+                    return;
+                }
+                // Sunwell Exalted Healer Neck (Shattered Sun Pendant of Restoration neck)
+                // cast 45478 Light's Salvation if Exaled by Aldor
+                // cast 45430 Arcane Surge if Exaled by Scryers
+                case 45484:
+                {
+                    if(GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if(!castItem)
+                        return;
+                    if( ((Player*)this)->HasSpellCooldown(dummySpell->Id))
+                        return;
+                    // Get Aldor reputation rank 
+                    if (((Player *)this)->GetReputationRank(932) == REP_EXALTED)
+                        CastSpell(this, 45478, true, castItem, triggeredByAura);
+                    // Get Scryers reputation rank 
+                    else if (((Player *)this)->GetReputationRank(934) == REP_EXALTED)
+                        CastSpell(pVictim, 45430, true, castItem, triggeredByAura);
+                    ((Player *)this)->AddSpellCooldown(dummySpell->Id, 0, time(NULL) + 45);
+                    return;
+                }
             }
             break;
         }
