@@ -517,13 +517,10 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     if(!pl->m_mailsLoaded)
         pl ->_LoadMail();
 
-    // client have limitation (~190) mail to show in mail box and can crash if receive more
-    uint32 MaxMailsCount = 190;
-    uint32 mails_count = 0;
+    // client can't work with packets > max int16 value
+    const uint32 maxPacketSize = 32767;
 
-    // client have limitation (~296) items(stacks) in mails to show in mail box and can crash if receive more
-    uint32 MaxAllItemsCount = 296;
-    uint32 all_items_count = 0;
+    uint32 mails_count = 0;                                 // real send to client mails amount
 
     WorldPacket data(SMSG_MAIL_LIST_RESULT, (200));         // guess size
     data << uint8(0);                                       // mail's count
@@ -536,12 +533,11 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         if ((*itr)->state == MAIL_STATE_DELETED || (*itr)->HasItems() && cur_time < (*itr)->deliver_time)
             continue;
 
-        mails_count += 1;
-        if(mails_count > MaxMailsCount)
-            break;
+        uint8 item_count = (*itr)->items.size();            // max count is MAX_MAIL_ITEMS (12)
 
-        all_items_count += (*itr)->items.size();
-        if(all_items_count > MaxAllItemsCount)
+        size_t next_mail_size = 2+4+1+8+4*8+((*itr)->subject.size()+1)+1+item_count*(1+4+4+6*4+4+4+1+4+4+4);
+
+        if(data.wpos()+next_mail_size > maxPacketSize)
             break;
 
         data << (uint16) 0x0040;                            // unknown 2.3.0, different values
@@ -573,50 +569,44 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << (uint32) 0;                                 // unk
         data << (*itr)->subject;                            // Subject string - once 00, when mail type = 3
 
-        uint8 item_count = (*itr)->items.size();            // max count is MAX_MAIL_ITEMS (12)
+        data << (uint8) item_count;
 
-        if(item_count)
+        for(uint8 i = 0; i < item_count; ++i)
         {
-            data << (uint8) item_count;
-            Mail *m = (*itr);
-            uint8 i = 0;
-            for(std::vector<MailItemInfo>::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
+            Item *item = pl->GetMItem((*itr)->items[i].item_guid);
+            // item index (0-6?)
+            data << (uint8)  i;
+            // item guid low?
+            data << (uint32) (item ? item->GetGUIDLow() : 0);
+            // entry
+            data << (uint32) (item ? item->GetEntry() : 0);
+            for(uint8 j = 0; j < 6; ++j)
             {
-                Item *item = pl->GetMItem(itr2->item_guid);
-                // item index (0-6?)
-                data << (uint8)  i;
-                // item guid low?
-                data << (uint32) (item ? item->GetGUIDLow() : 0);
-                // entry
-                data << (uint32) (item ? item->GetEntry() : 0);
-                for(uint8 j = 0; j < 6; ++j)
-                {
-                    // unsure
-                    data << (uint32) (item ? item->GetEnchantmentCharges((EnchantmentSlot)j) : 0);
-                    // unsure
-                    data << (uint32) (item ? item->GetEnchantmentDuration((EnchantmentSlot)j) : 0);
-                    // unsure
-                    data << (uint32) (item ? item->GetEnchantmentId((EnchantmentSlot)j) : 0);
-                }
-                // can be negative
-                data << (uint32) (item ? item->GetItemRandomPropertyId() : 0);
-                // unk
-                data << (uint32) (item ? item->GetItemSuffixFactor() : 0);
-                // stack count
-                data << (uint8)  (item ? item->GetCount() : 0);
-                // charges
-                data << (uint32) (item ? item->GetSpellCharges() : 0);
-                // durability
-                data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0);
-                // durability
-                data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0);
-                ++i;
+                // unsure
+                data << (uint32) (item ? item->GetEnchantmentCharges((EnchantmentSlot)j) : 0);
+                // unsure
+                data << (uint32) (item ? item->GetEnchantmentDuration((EnchantmentSlot)j) : 0);
+                // unsure
+                data << (uint32) (item ? item->GetEnchantmentId((EnchantmentSlot)j) : 0);
             }
+            // can be negative
+            data << (uint32) (item ? item->GetItemRandomPropertyId() : 0);
+            // unk
+            data << (uint32) (item ? item->GetItemSuffixFactor() : 0);
+            // stack count
+            data << (uint8)  (item ? item->GetCount() : 0);
+            // charges
+            data << (uint32) (item ? item->GetSpellCharges() : 0);
+            // durability
+            data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0);
+            // durability
+            data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0);
         }
-        else
-            data << (uint8) 0;
+
+        mails_count += 1;
     }
-    data.put<uint8>(0, mails_count);
+
+    data.put<uint8>(0, mails_count);                        // set real send mails to client
     SendPacket(&data);
 
     // recalculate m_nextMailDelivereTime and unReadMails
