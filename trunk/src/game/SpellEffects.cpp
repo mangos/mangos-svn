@@ -4650,17 +4650,26 @@ void Spell::EffectSkinning(uint32 /*i*/)
     if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    int32 targetLevel = unitTarget->getLevel();
+    Creature* creature = (Creature*) unitTarget;
+    int32 targetLevel = creature->getLevel();
 
-    ((Player*)m_caster)->SendLoot(unitTarget->GetGUID(),LOOT_SKINNING);
-    unitTarget->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+    uint32 skill;
+    if(creature->GetCreatureInfo()->flag1 & 256)
+        skill = SKILL_HERBALISM;                            // special case
+    else if(creature->GetCreatureInfo()->flag1 & 512)
+        skill = SKILL_MINING;                               // special case
+    else
+        skill = SKILL_SKINNING;                             // normal case
+
+    ((Player*)m_caster)->SendLoot(creature->GetGUID(),LOOT_SKINNING);
+    creature->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
     int32 reqValue = targetLevel < 10 ? 0 : targetLevel < 20 ? (targetLevel-10)*10 : targetLevel*5;
 
-    int32 skinningValue = ((Player*)m_caster)->GetPureSkillValue(SKILL_SKINNING);
+    int32 skillValue = ((Player*)m_caster)->GetPureSkillValue(skill);
 
     // Double chances for elites
-    ((Player*)m_caster)->UpdateGatherSkill(SKILL_SKINNING, skinningValue, reqValue, ((Creature*)unitTarget)->isElite() ? 2 : 1 );
+    ((Player*)m_caster)->UpdateGatherSkill(skill, skillValue, reqValue, creature->isElite() ? 2 : 1 );
 }
 
 void Spell::EffectCharge(uint32 /*i*/)

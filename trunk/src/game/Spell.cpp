@@ -3391,22 +3391,30 @@ uint8 Spell::CanCast(bool strict)
                 if( !(m_targets.getUnitTarget()->GetUInt32Value(UNIT_FIELD_FLAGS) & UNIT_FLAG_SKINNABLE) )
                     return SPELL_FAILED_TARGET_UNSKINNABLE;
 
-                if ( m_targets.getUnitTarget()->GetCreatureType() != CREATURE_TYPE_CRITTER
-                    && ( !((Creature*)m_targets.getUnitTarget())->lootForBody || !((Creature*)m_targets.getUnitTarget())->loot.empty() ) )
+                Creature* creature = (Creature*)m_targets.getUnitTarget();
+                if ( creature->GetCreatureType() != CREATURE_TYPE_CRITTER && ( !creature->lootForBody || !creature->loot.empty() ) )
                 {
                     return SPELL_FAILED_TARGET_NOT_LOOTED;
                 }
 
-                int32 SkinningValue = ((Player*)m_caster)->GetSkillValue(SKILL_SKINNING);
+                uint32 skill;
+                if(creature->GetCreatureInfo()->flag1 & 256)
+                    skill = SKILL_HERBALISM;                // special case
+                else if(creature->GetCreatureInfo()->flag1 & 512)
+                    skill = SKILL_MINING;                   // special case
+                else
+                    skill = SKILL_SKINNING;                 // normal case
+
+                int32 skillValue = ((Player*)m_caster)->GetSkillValue(skill);
                 int32 TargetLevel = m_targets.getUnitTarget()->getLevel();
-                int32 ReqValue = (SkinningValue < 100 ? (TargetLevel-10)*10 : TargetLevel*5);
-                if (ReqValue > SkinningValue)
+                int32 ReqValue = (skillValue < 100 ? (TargetLevel-10)*10 : TargetLevel*5);
+                if (ReqValue > skillValue)
                     return SPELL_FAILED_LOW_CASTLEVEL;
 
                 // chance for fail at orange skinning attempt
                 if( (m_selfContainer && (*m_selfContainer) == this) && 
-                    SkinningValue < sWorld.GetConfigMaxSkillValue() &&
-                    (ReqValue < 0 ? 0 : ReqValue) > irand(SkinningValue-25, SkinningValue+37) )
+                    skillValue < sWorld.GetConfigMaxSkillValue() &&
+                    (ReqValue < 0 ? 0 : ReqValue) > irand(skillValue-25, skillValue+37) )
                     return SPELL_FAILED_TRY_AGAIN;
 
                 break;
