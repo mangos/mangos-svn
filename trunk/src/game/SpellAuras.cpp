@@ -1408,7 +1408,38 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         ((Player*)caster)->AddSpellMod(m_spellmod, apply);
         return;
     }
-
+    // Unstable Power
+    if( GetId()==24658 )
+    {
+        uint32 spellId = 24659;
+        if (apply)
+        {
+            const SpellEntry *spell = sSpellStore.LookupEntry(spellId);
+            if (!spell)
+                return;
+            for (int i=0; i < spell->StackAmount; ++i)
+                caster->CastSpell(m_target, spell->Id, true, NULL, NULL, GetCasterGUID());
+            return;
+        }
+        m_target->RemoveAurasDueToSpell(spellId);
+        return;
+    }
+    // Restless Strength 
+    if( GetId()==24661 )
+    {
+        uint32 spellId = 24662;
+        if (apply)
+        {
+            const SpellEntry *spell = sSpellStore.LookupEntry(spellId);
+            if (!spell)
+                return;
+            for (int i=0; i < spell->StackAmount; ++i)
+                caster->CastSpell(m_target, spell->Id, true, NULL, NULL, GetCasterGUID());
+            return;
+        }
+        m_target->RemoveAurasDueToSpell(spellId);
+        return;
+    }
     // Improved Aspect of the Viper
     if( GetId()==38390 && m_target->GetTypeId()==TYPEID_PLAYER )
     {
