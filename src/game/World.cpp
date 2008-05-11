@@ -415,6 +415,8 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_ALLOW_TWO_SIDE_ADD_FRIEND] = sConfig.GetBoolDefault("AllowTwoSide.AddFriend", false);
 
     m_configs[CONFIG_STRICT_PLAYER_NAMES] = sConfig.GetBoolDefault("StrictPlayerNames", false);
+    m_configs[CONFIG_STRICT_CHARTER_NAMES] = sConfig.GetBoolDefault("StrictCharterNames", false);
+    m_configs[CONFIG_STRICT_PET_NAMES] = sConfig.GetBoolDefault("StrictPetNames", false);
 
     m_configs[CONFIG_MAX_PLAYER_LEVEL] = sConfig.GetIntDefault("MaxPlayerLevel", 60);
     if(m_configs[CONFIG_MAX_PLAYER_LEVEL] > 255)

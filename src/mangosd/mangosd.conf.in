@@ -296,6 +296,16 @@ LogColors = ""
 #        Default: 0 (false)
 #                 1 (true)
 #
+#    StrictCharterNames
+#        Limit guild/arena team charter names to only latin characters/numbers and spaces, not allow create charters with non latin names
+#        Default: 0 (false)
+#                 1 (true)
+#
+#    StrictPetNames
+#        Limit pet names to only latin characters
+#        Default: 0 (false)
+#                 1 (true)
+#
 #    MaxPlayerLevel
 #        Max level that can reached by player for expirience (in range from 1 to 255).
 #        Change not recommended
@@ -382,6 +392,8 @@ GameType = 1
 Expansion = 1
 DBC.Locale = 255
 StrictPlayerNames = 0
+StrictCharterNames = 0
+StrictPetNames = 0
 MaxPlayerLevel = 70
 StartPlayerLevel = 1
 ActivateWeather = 1

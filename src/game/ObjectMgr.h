@@ -614,6 +614,8 @@ class ObjectMgr
 
         // name with valid structure and symbols
         static bool IsValidName( std::string name );
+        static bool IsValidCharterName( std::string name );
+        static bool IsValidPetName( std::string name );
 
         int GetIndexForLocale(LocaleConstant loc);
         LocaleConstant GetLocalForIndex(int);
