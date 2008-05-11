@@ -3897,7 +3897,7 @@ void Spell::EffectScriptEffect(uint32 i)
             unitTarget->RemoveSingleAuraFromStack(24575, 0);
             unitTarget->RemoveSingleAuraFromStack(24575, 1);
             return;
-        // Mercurial Shield - need remove one 26464 Brittle Armor aura 
+        // Mercurial Shield - need remove one 26464 Mercurial Shield aura 
         case 26465:
             unitTarget->RemoveSingleAuraFromStack(26464, 0);
             return;
@@ -4333,6 +4333,10 @@ void Spell::EffectSummonTotem(uint32 i)
     pTotem->SetMaxHealth(damage);
     pTotem->SetHealth(damage);
     pTotem->SetUInt32Value(UNIT_CREATED_BY_SPELL,m_spellInfo->Id);
+
+    pTotem->ApplySpellImmune(m_spellInfo->Id,IMMUNITY_STATE,SPELL_AURA_MOD_FEAR,true);
+    pTotem->ApplySpellImmune(m_spellInfo->Id,IMMUNITY_STATE,SPELL_AURA_TRANSFORM,true);
+
     pTotem->Summon(m_caster);
 }
 
