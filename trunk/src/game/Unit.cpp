@@ -4119,6 +4119,14 @@ bool Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster)
                     continue;
                 }
             }
+
+            // Unstable Affliction
+            if (spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && (spellInfo->SpellFamilyFlags & 0x010000000000LL))
+            {
+                int32 damage = (*i).second->GetModifier()->m_amount*9;
+                CastCustomSpell(pCaster,31117,&damage,NULL,NULL,true,NULL,(*i).second);
+            }
+
             RemoveAurasDueToSpell(spellInfo->Id);
             return true;
         }
