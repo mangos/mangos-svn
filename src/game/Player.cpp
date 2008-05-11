@@ -5798,6 +5798,20 @@ void Player::UpdateArea(uint32 newArea)
     // unmount if enter in this subzone
     if( newArea == 35)
         RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+
+    // Dragonmaw Illusion
+    if ( newArea == 3759 || newArea == 3966 || newArea == 3939 )
+    {
+        AuraList const& m_dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+        for(AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
+        {
+            if ( (*i)->GetSpellProto()->Id == 40214 )
+            {
+                CastSpell(this,40216,true);
+                CastSpell(this,42016,true);
+            }
+        }
+    }
 }
 
 void Player::UpdateZone(uint32 newZone)

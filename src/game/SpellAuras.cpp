@@ -1319,6 +1319,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
             return;
         }
+
+        // Dragonmaw Illusion
+        if ( GetId() == 40214 )
+        {
+            m_isDeathPersist = true;
+            return;
+        }
     }
     // AT REMOVE
     else
