@@ -1448,7 +1448,28 @@ void Spell::EffectTriggerSpell(uint32 i)
         case 23770:                                         // Sayge's Dark Fortune of *
             // not exist, common cooldown can be implemented in scripts if need.
             return;
+        // Brittle Armor - (need add max stack of 24575 Brittle Armor)
+        case 29284:
+        {
+            const SpellEntry *spell = sSpellStore.LookupEntry(24575);
+            if (!spell)
+                return;
 
+            for (int i=0; i < spell->StackAmount; ++i)
+                m_caster->CastSpell(unitTarget,spell->Id, true, m_CastItem, NULL, m_originalCasterGUID);
+            return;
+        }
+        // Mercurial Shield - (need add max stack of 26464 Mercurial Shield)
+        case 29286:
+        {
+            const SpellEntry *spell = sSpellStore.LookupEntry(26464);
+            if (!spell)
+                return;
+
+            for (int i=0; i < spell->StackAmount; ++i)
+                m_caster->CastSpell(unitTarget,spell->Id, true, m_CastItem, NULL, m_originalCasterGUID);
+            return;
+        }
         // Righteous Defense
         case 31980:
         {
@@ -3871,7 +3892,15 @@ void Spell::EffectScriptEffect(uint32 i)
             DoCreateItem( i, itemtype );
             return;
         }
-
+        // Brittle Armor - need remove one 24575 Brittle Armor aura 
+        case 24590:
+            unitTarget->RemoveSingleAuraFromStack(24575, 0);
+            unitTarget->RemoveSingleAuraFromStack(24575, 1);
+            return;
+        // Mercurial Shield - need remove one 26464 Brittle Armor aura 
+        case 26465:
+            unitTarget->RemoveSingleAuraFromStack(26464, 0);
+            return;
         // Orb teleport spells
         case 25140:
         case 25143:
