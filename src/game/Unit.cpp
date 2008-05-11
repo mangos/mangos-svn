@@ -4725,6 +4725,23 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
 
                     return;
                 }
+                // Unstable Power
+                case 24658:
+                {
+                    if (!procSpell || procSpell->Id == 24659)
+                        return;
+                    // Need remove one 24659 aura
+                    RemoveSingleAuraFromStack(24659, 0);
+                    RemoveSingleAuraFromStack(24659, 1);
+                    return;
+                }
+                // Restless Strength
+                case 24661:
+                {
+                    // Need remove one 24662 aura
+                    RemoveSingleAuraFromStack(24662, 0);
+                    return;
+                }
                 // Adaptive Warding (Frostfire Regalia set)
                 case 28764:
                 {
