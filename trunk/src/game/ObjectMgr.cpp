@@ -5527,12 +5527,16 @@ void ObjectMgr::LoadReservedPlayersNames()
     sLog.outString( ">> Loaded %u reserved player names", count );
 }
 
+static char const* notAllowedCharsName  = "\t\v\b\f\a\n\r\\\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789\0";
+static char const* notAllowedCharsTitle = "\t\v\b\f\a\n\r\\\"\'\?<>[](){}_=+-|/!@#$%^&*~`.,\0";
+
+static char const* strictAllowedCharsName  = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+static char const* strictAllowedCharsTitle = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ";
+
 bool ObjectMgr::IsValidName( std::string name )
 {
     // check used symbols in player name at creating and rename
-    std::string notAllowedChars = "\t\v\b\f\a\n\r\\\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789\0";
-
-    if(name.find_first_of(notAllowedChars)!=name.npos)
+    if(name.find_first_of(notAllowedCharsName)!=name.npos)
         return false;
 
     if(name.size() < 1)
@@ -5540,7 +5544,7 @@ bool ObjectMgr::IsValidName( std::string name )
 
     if(sWorld.getConfig(CONFIG_STRICT_PLAYER_NAMES))
     {
-        if(name[0] < 'A' || name[0] > 'Z')
+        if(name[0] < 'A' || name[0] > 'Z')                  // use special check for normalized case
             return false;
 
         for(size_t i=1; i < name.size(); ++i)
@@ -5549,6 +5553,38 @@ bool ObjectMgr::IsValidName( std::string name )
                 return false;
         }
     }
+
+    return true;
+}
+
+bool ObjectMgr::IsValidCharterName( std::string name )
+{
+    // check used symbols in charter(guild/arena) name at creating and rename
+    if(name.find_first_of(notAllowedCharsTitle)!=name.npos)
+        return false;
+
+    if(name.size() < 1)
+        return false;
+
+    if(sWorld.getConfig(CONFIG_STRICT_CHARTER_NAMES))
+        if(name.find_first_not_of(strictAllowedCharsTitle)!=name.npos)
+           return false;
+
+    return true;
+}
+
+bool ObjectMgr::IsValidPetName( std::string name )
+{
+    // check used symbols in charter(guild/arena) name at creating and rename
+    if(name.find_first_of(notAllowedCharsName)!=name.npos)
+        return false;
+
+    if(name.size() < 1)
+        return false;
+
+    if(sWorld.getConfig(CONFIG_STRICT_PET_NAMES))
+        if(name.find_first_not_of(strictAllowedCharsName)!=name.npos)
+           return false;
 
     return true;
 }

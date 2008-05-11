@@ -380,7 +380,8 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
                                                             // check it!
     if(!pet || !pet->isPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET || pet->GetByteValue(UNIT_FIELD_BYTES_2, 2) != 3 || pet->GetOwnerGUID() != _player->GetGUID() || !pet->GetCharmInfo())
         return;
-
+    if(!ObjectMgr::IsValidCharterName(name))
+        return;
     pet->SetName(name);
 
     Unit *owner = pet->GetOwner();
