@@ -115,6 +115,8 @@ bool Player::UpdateAllStats()
     UpdateShieldBlockValue();
     UpdateSpellDamageAndHealingBonus();
     UpdateManaRegen();
+    UpdateExpertise(BASE_ATTACK);
+    UpdateExpertise(OFF_ATTACK);
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; i++)
         UpdateResistances(i);
 
@@ -546,13 +548,37 @@ void Player::UpdateAllSpellCritChances()
         UpdateSpellCritChance(i);
 }
 
-void Player::UpdateExpertise()
+void Player::UpdateExpertise(WeaponAttackType attack)
 {
-    int32 expertise = GetTotalAuraModifier(SPELL_AURA_MOD_EXPERTISE);
-    expertise+= int32(GetRatingBonusValue(PLAYER_FIELD_EXPERTISE_RATING));
+    if(attack==RANGED_ATTACK)
+        return;
+
+    int32 expertise = int32(GetRatingBonusValue(PLAYER_FIELD_EXPERTISE_RATING));
+
+    uint8 slot = GetWeaponSlotByAttack(attack);
+
+    Item *weapon = GetItemByPos( INVENTORY_SLOT_BAG_0, slot );
+
+    AuraList const& expAuars = GetAurasByType(SPELL_AURA_MOD_EXPERTISE);
+    for(AuraList::const_iterator itr = expAuars.begin(); itr != expAuars.end(); ++itr)
+    {
+        // item neutral spell
+        if((*itr)->GetSpellProto()->EquippedItemClass == -1)
+            expertise += (*itr)->GetModifier()->m_amount;
+        // item dependent spell
+        else if(weapon && weapon->IsFitToSpellRequirements((*itr)->GetSpellProto()))
+            expertise += (*itr)->GetModifier()->m_amount;
+    }
+
     if(expertise < 0)
         expertise = 0;
-    SetUInt32Value(PLAYER_EXPERTISE, expertise);
+
+    switch(attack)
+    {
+        case BASE_ATTACK: SetUInt32Value(PLAYER_EXPERTISE, expertise);         break;
+        case OFF_ATTACK:  SetUInt32Value(PLAYER_OFFHAND_EXPERTISE, expertise); break;
+        default: break;
+    }
 }
 
 void Player::UpdateManaRegen()

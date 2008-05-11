@@ -4443,7 +4443,8 @@ void Aura::HandleAuraModExpertise(bool apply, bool Real)
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    ((Player*)m_target)->UpdateExpertise();
+    ((Player*)m_target)->UpdateExpertise(BASE_ATTACK);
+    ((Player*)m_target)->UpdateExpertise(OFF_ATTACK);
 }
 
 void Aura::HandleModTargetResistance(bool apply, bool Real)

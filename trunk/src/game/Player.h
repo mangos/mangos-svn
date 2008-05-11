@@ -1506,14 +1506,14 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetSpellCritDamageReduction(uint32 damage) const;
         uint32 GetDotDamageReduction(uint32 damage) const;
 
-        float GetExpertiseDodgeOrParryReduction() const;
+        float GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const;
         void UpdateBlockPercentage();
         void UpdateCritPercentage(WeaponAttackType attType);
         void UpdateAllCritPercentages();
         void UpdateParryPercentage();
         void UpdateDodgePercentage();
         void UpdateAllSpellCritChances();
-        void UpdateExpertise();
+        void UpdateExpertise(WeaponAttackType attType);
         void UpdateManaRegen();
         void UpdateSpellCritChance(uint32 school);
         uint32 GetSpellSchoolByBaseGroup(BaseModGroup baseGroup) const;
