@@ -4054,9 +4054,18 @@ uint32 Player::GetDotDamageReduction(uint32 damage) const
     return uint32 (spellDot * damage / 100.0f);
 }
 
-float Player::GetExpertiseDodgeOrParryReduction() const
+float Player::GetExpertiseDodgeOrParryReduction(WeaponAttackType attType) const
 {
-    return GetUInt32Value(PLAYER_EXPERTISE) / 4.0f;
+    switch (attType)
+    {
+        case BASE_ATTACK:
+            return GetUInt32Value(PLAYER_EXPERTISE) / 4.0f;
+        case OFF_ATTACK:
+            return GetUInt32Value(PLAYER_OFFHAND_EXPERTISE) / 4.0f;
+        default:
+            break;
+    }
+    return 0.0f;
 }
 
 float Player::OCTRegenHPPerSpirit()
@@ -4178,7 +4187,10 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             break;
         case PLAYER_FIELD_EXPERTISE_RATING:
             if(affectStats)
-                UpdateExpertise();
+            {
+                UpdateExpertise(BASE_ATTACK);
+                UpdateExpertise(OFF_ATTACK);
+            }
             break;
     }
 }
@@ -9666,6 +9678,11 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
             }
 
             ApplyEquipCooldown(pItem);
+
+            if( slot == EQUIPMENT_SLOT_MAINHAND )
+                UpdateExpertise(BASE_ATTACK);
+            else if( slot == EQUIPMENT_SLOT_OFFHAND )
+                UpdateExpertise(OFF_ATTACK);
         }
         else
         {
@@ -9689,6 +9706,7 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
             pItem2->SetState(ITEM_CHANGED, this);
 
             ApplyEquipCooldown(pItem2);
+
             return pItem2;
         }
     }
@@ -9807,6 +9825,11 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
         pItem->SetSlot( NULL_SLOT );
         if( IsInWorld() && update )
             pItem->SendUpdateToPlayer( this );
+
+        if( slot == EQUIPMENT_SLOT_MAINHAND )
+            UpdateExpertise(BASE_ATTACK);
+        else if( slot == EQUIPMENT_SLOT_OFFHAND )
+            UpdateExpertise(OFF_ATTACK);
     }
 }
 
