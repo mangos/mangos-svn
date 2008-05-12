@@ -207,13 +207,6 @@ class GameObject;
 class Item;
 class Pet;
 
-struct DamageShield
-{
-    uint32 m_spellId;
-    uint32 m_damage;
-    uint64 m_caster_guid;
-};
-
 struct SpellImmune
 {
     uint32 type;
