@@ -318,6 +318,7 @@ class BattleGround
         void RewardMark(Player *plr,uint32 count);
         void SendRewardMarkByMail(Player *plr,uint32 mark, uint32 count);
         void UpdateWorldState(uint32 Field, uint32 Value);
+        void UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player *Source);
         void EndBattleGround(uint32 winner);
         void BlockMovement(Player *plr);
 
@@ -350,13 +351,22 @@ class BattleGround
         // must be implemented in BG subclass
         virtual void HandleAreaTrigger(Player* /*Source*/, uint32 /*Trigger*/) {}
         // must be implemented in BG subclass if need AND call base class generic code
-        virtual void HandleKillPlayer(Player* player, Player* killer);
+        virtual void HandleKillPlayer(Player *player, Player *killer);
         // must be implemented in BG subclass if need
-        virtual void HandleDropFlag(Player* /*player*/) {}
+
+        /* Battleground events */
+        /* these functions will return true event is possible, but false if player is bugger */
+        virtual void EventPlayerDroppedFlag(Player* /*player*/) {}
+        virtual void EventPlayerClickedOnFlag(Player* /*player*/, GameObject* /*target_obj*/) {}
+        virtual void EventPlayerCapturedFlag(Player* /*player*/) {}
+
+        /* Death related */
+        virtual WorldSafeLocsEntry const* GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team)  { return NULL; }
 
         virtual void AddPlayer(Player *plr);                // must be implemented in BG subclass
         virtual void RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPacket);
                                                             // can be extended in in BG subclass
+
         // TODO: make this protected:
         typedef std::vector<uint64> BGObjects;
         typedef std::vector<uint64> BGCreatures;

@@ -65,6 +65,7 @@ bool ChatHandler::HandleReloadAllCommand(const char*)
 
     HandleReloadCommandCommand("");
     HandleReloadReservedNameCommand("");
+    HandleReloadMangosStringCommand("");
     return true;
 }
 
@@ -260,6 +261,14 @@ bool ChatHandler::HandleReloadLootTemplatesSkinningCommand(const char*)
     sLog.outString( "Re-Loading Loot Tables... (`skinning_loot_template`)" );
     LootTemplates_Skinning.LoadLootTable();
     SendGlobalSysMessage("DB table `skinning_loot_template` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadMangosStringCommand(const char*)
+{
+    sLog.outString( "Re-Loading mangos_string Table!" );
+    objmgr.LoadMangosStrings();
+    SendGlobalSysMessage("DB table `mangos_string` reloaded.");
     return true;
 }
 

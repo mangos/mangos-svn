@@ -5727,6 +5727,8 @@ void ObjectMgr::LoadGameObjectForQuests()
 
 bool ObjectMgr::LoadMangosStrings()
 {
+    mMangosStringMap.clear();                         // need for reload case
+
     QueryResult *result = WorldDatabase.Query("SELECT entry,content_default FROM mangos_string");
     if(!result)
     {

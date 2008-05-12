@@ -42,10 +42,6 @@
 #include "TargetedMovementGenerator.h"
 #include "Formulas.h"
 #include "BattleGround.h"
-#include "BattleGroundAV.h"
-#include "BattleGroundAB.h"
-#include "BattleGroundEY.h"
-#include "BattleGroundWS.h"
 #include "CreatureAI.h"
 
 #define NULL_AURA_SLOT 0xFF
@@ -2713,7 +2709,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
         // drop flag at stealth in bg
         if(Real && m_target->GetTypeId()==TYPEID_PLAYER && ((Player*)m_target)->InBattleGround())
             if(BattleGround *bg = ((Player*)m_target)->GetBattleGround())
-                bg->HandleDropFlag((Player*)m_target);
+                bg->EventPlayerDroppedFlag((Player*)m_target);
 
         m_target->SetByteValue(UNIT_FIELD_BYTES_1, 2, 0x02);
         if(m_target->GetTypeId()==TYPEID_PLAYER)
@@ -2802,7 +2798,7 @@ void Aura::HandleInvisibility(bool apply, bool Real)
             // drop flag at invisible in bg
             if(((Player*)m_target)->InBattleGround())
                 if(BattleGround *bg = ((Player*)m_target)->GetBattleGround())
-                    bg->HandleDropFlag((Player*)m_target);
+                    bg->EventPlayerDroppedFlag((Player*)m_target);
         }
 
         // apply only if not in GM invisibility
@@ -3138,16 +3134,9 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
                         }
                         case BATTLEGROUND_WS:
                         {
-                            if(((BattleGroundWS*)bg)->IsHordeFlagPickedup())
-                                // Warsong Flag, horde
-                                if(GetSpellProto()->Id == 23333)
-                                    // Horde Flag Drop
-                                    ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_target));
-                            if(((BattleGroundWS*)bg)->IsAllianceFlagPickedup())
-                                // Silverwing Flag, alliance
-                                if(GetSpellProto()->Id == 23335)
-                                    // Alliance Flag Drop
-                                    ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_target));
+                            // Warsong Flag, horde               // Silverwing Flag, alliance
+                            if(GetSpellProto()->Id == 23333 || GetSpellProto()->Id == 23335)
+                                    bg->EventPlayerDroppedFlag(((Player*)m_target));
                             break;
                         }
                         case BATTLEGROUND_AB:
@@ -3156,6 +3145,8 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
                         }
                         case BATTLEGROUND_EY:
                         {
+                           if(GetSpellProto()->Id == 34976)
+                                bg->EventPlayerDroppedFlag(((Player*)m_target));
                             break;
                         }
                     }

@@ -27,7 +27,7 @@
 #include "Opcodes.h"
 #include "Spell.h"
 #include "SpellAuras.h"
-#include "BattleGroundWS.h"
+#include "BattleGround.h"
 #include "MapManager.h"
 #include "ScriptCalls.h"
 
@@ -541,54 +541,8 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 // 15003
                 // 15004
                 // 15005
-                // WS:
-                // 179830 - Silverwing Flag
-                // 179831 - Warsong Flag
-                // EotS:
-                // 184141 - Netherstorm Flag
-                info = obj->GetGOInfo();
-                if(info)
-                {
-                    switch(info->id)
-                    {
-                        case 179830:
-                            // check if it's correct bg
-                            if(bg->GetTypeID() != BATTLEGROUND_WS)
-                                return;
-                            // check if flag dropped
-                            if(((BattleGroundWS*)bg)->GetFlagState(ALLIANCE) != BG_WS_FLAG_STATE_ON_BASE)
-                                return;
-                            // check if it's correct flag
-                            if(((BattleGroundWS*)bg)->m_BgObjects[BG_WS_OBJECT_A_FLAG] != obj->GetGUID())
-                                return;
-                            // check player team
-                            if(_player->GetTeam() == ALLIANCE)
-                                return;
-                            spellId = 23335;                // Silverwing Flag
-                            break;
-                        case 179831:
-                            // check if it's correct bg
-                            if(bg->GetTypeID() != BATTLEGROUND_WS)
-                                return;
-                            // check if flag dropped
-                            if(((BattleGroundWS*)bg)->GetFlagState(HORDE) != BG_WS_FLAG_STATE_ON_BASE)
-                                return;
-                            // check if it's correct flag
-                            if(((BattleGroundWS*)bg)->m_BgObjects[BG_WS_OBJECT_H_FLAG] != obj->GetGUID())
-                                return;
-                            // check player team
-                            if(_player->GetTeam() == HORDE)
-                                return;
-                            spellId = 23333;                // Warsong Flag
-                            break;
-                        case 184141:
-                            // check if it's correct bg
-                            if(bg->GetTypeID() != BATTLEGROUND_EY)
-                                return;
-                            spellId = 34976;                // Netherstorm Flag
-                            break;
-                    }
-                }
+                bg->EventPlayerClickedOnFlag((Player*)spellCaster, obj);
+                return;                                     //we don;t need to delete flag ... it is despawned!
             }
             break;
         case GAMEOBJECT_TYPE_FLAGDROP:                      // 26
@@ -614,44 +568,21 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                     {
                         case 179785:                        // Silverwing Flag
                             // check if it's correct bg
-                            if(bg->GetTypeID() != BATTLEGROUND_WS)
-                                return;
-                            // check if flag dropped
-                            if(((BattleGroundWS*)bg)->GetFlagState(ALLIANCE) != BG_WS_FLAG_STATE_ON_GROUND)
-                                return;
-                            obj->Delete();
-                            if(_player->GetTeam() == ALLIANCE)
-                            {
-                                ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(_player);
-                                return;
-                            }
-                            else
-                            {
-                                _player->CastSpell(_player, 23335, true);
-                                return;
-                            }
+                            if(bg->GetTypeID() == BATTLEGROUND_WS)
+                                bg->EventPlayerClickedOnFlag(_player, obj);
                             break;
                         case 179786:                        // Warsong Flag
-                            // check if it's correct bg
-                            if(bg->GetTypeID() != BATTLEGROUND_WS)
-                                return;
-                            // check if flag dropped
-                            if(((BattleGroundWS*)bg)->GetFlagState(HORDE) != BG_WS_FLAG_STATE_ON_GROUND)
-                                return;
-                            obj->Delete();
-                            if(_player->GetTeam() == HORDE)
-                            {
-                                ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(_player);
-                                return;
-                            }
-                            else
-                            {
-                                _player->CastSpell(_player, 23333, true);
-                                return;
-                            }
+                            if(bg->GetTypeID() == BATTLEGROUND_WS)
+                                bg->EventPlayerClickedOnFlag(_player, obj);
+                            break;
+                        case 184142:                        // Netherstorm Flag
+                            if(bg->GetTypeID() == BATTLEGROUND_EY)
+                                bg->EventPlayerClickedOnFlag(_player, obj);
                             break;
                     }
                 }
+                //this cause to call return, all flags must be deleted here!!
+                spellId = 0;
                 obj->Delete();
             }
             break;

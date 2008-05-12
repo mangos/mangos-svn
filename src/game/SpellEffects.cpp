@@ -1932,38 +1932,46 @@ void Spell::EffectSendEvent(uint32 EffectIndex)
             switch(m_spellInfo->Id)
             {
                 case 23333:                                 // Pickup Horde Flag
+                    /*do not uncomment .
                     if(bg->GetTypeID()==BATTLEGROUND_WS)
-                        ((BattleGroundWS*)bg)->EventPlayerPickedUpFlag(((Player*)m_caster));
+                        bg->EventPlayerClickedOnFlag((Player*)m_caster, this->gameObjTarget);
                     sLog.outDebug("Send Event Horde Flag Picked Up");
                     break;
                     /* not used :
                     case 23334:                                 // Drop Horde Flag
                         if(bg->GetTypeID()==BATTLEGROUND_WS)
-                            ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_caster));
+                            bg->EventPlayerDroppedFlag((Player*)m_caster);
                         sLog.outDebug("Drop Horde Flag");
                         break;
                     */
                 case 23335:                                 // Pickup Alliance Flag
+                    /*do not uncomment ... (it will cause crash, because of null targetobject!) anyway this is a bad way to call that event, because it would cause recursion
                     if(bg->GetTypeID()==BATTLEGROUND_WS)
-                        ((BattleGroundWS*)bg)->EventPlayerPickedUpFlag(((Player*)m_caster));
+                        bg->EventPlayerClickedOnFlag((Player*)m_caster, this->gameObjTarget);
                     sLog.outDebug("Send Event Alliance Flag Picked Up");
                     break;
                     /* not used :
                     case 23336:                                 // Drop Alliance Flag
                         if(bg->GetTypeID()==BATTLEGROUND_WS)
-                            ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_caster));
+                            bg->EventPlayerDroppedFlag((Player*)m_caster);
                         sLog.outDebug("Drop Alliance Flag");
                         break;
                     case 23385:                                 // Alliance Flag Returns
                         if(bg->GetTypeID()==BATTLEGROUND_WS)
-                            ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(((Player*)m_caster));
+                            bg->EventPlayerClickedOnFlag((Player*)m_caster, this->gameObjTarget);
                         sLog.outDebug("Alliance Flag Returned");
                         break;
                     case 23386:                                   // Horde Flag Returns
                         if(bg->GetTypeID()==BATTLEGROUND_WS)
-                            ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(((Player*)m_caster));
+                            bg->EventPlayerClickedOnFlag((Player*)m_caster, this->gameObjTarget);
                         sLog.outDebug("Horde Flag Returned");
                         break;*/
+                case 34976:
+                    /*
+                    if(bg->GetTypeID()==BATTLEGROUND_EY)
+                        bg->EventPlayerClickedOnFlag((Player*)m_caster, this->gameObjTarget);
+                    */
+                    break;
                 default:
                     sLog.outDebug("Unknown spellid %u in BG event", m_spellInfo->Id);
                     break;
@@ -2365,6 +2373,7 @@ void Spell::EffectOpenLock(uint32 /*i*/)
     if(gameObjTarget)
     {
         // Arathi Basin banner opening !
+        BattleGround *bg = player->GetBattleGround();
         if (gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_BUTTON && gameObjTarget->GetGOInfo()->button.isBattlegroundObject ||
             gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_GOOBER && gameObjTarget->GetGOInfo()->goober.isBattlegroundObject )
         {
@@ -2374,12 +2383,17 @@ void Spell::EffectOpenLock(uint32 /*i*/)
                 !player->HasInvisibilityAura() &&           // not invisible
                 player->isAlive())                          // live player
             {
-                BattleGround *bg = player->GetBattleGround();
                 // check if it's correct bg
                 if(bg && bg->GetTypeID() == BATTLEGROUND_AB)
-                    ((BattleGroundAB*)bg)->EventPlayerCapturedBanner(player);
+                    bg->EventPlayerClickedOnFlag(player, gameObjTarget);
                 return;
             }
+        }
+        else if (gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_FLAGSTAND)
+        {
+            if(bg && bg->GetTypeID() == BATTLEGROUND_EY)
+                bg->EventPlayerClickedOnFlag(player, gameObjTarget);
+            return;
         }
         lockId = gameObjTarget->GetLockId();
         guid = gameObjTarget->GetGUID();
@@ -3756,7 +3770,20 @@ void Spell::EffectSummonObjectWild(uint32 i)
                  if(pl->GetTeam() == team)
                      team = HORDE;
 
-                ((BattleGroundWS*)bg)->SetDropedFlagGUID(pGameObj->GetGUID(),team);
+                ((BattleGroundWS*)bg)->SetDroppedFlagGUID(pGameObj->GetGUID(),team);
+            }
+        }
+    }
+
+    if(pGameObj->GetMapId() == 566 && pGameObj->GetGoType() == GAMEOBJECT_TYPE_FLAGDROP)  //EY
+    {
+        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            Player *pl = (Player*)m_caster;
+            BattleGround* bg = ((Player *)m_caster)->GetBattleGround();
+            if(bg && bg->GetTypeID()==BATTLEGROUND_EY && bg->GetStatus() == STATUS_IN_PROGRESS)
+            {
+                ((BattleGroundEY*)bg)->SetDroppedFlagGUID(pGameObj->GetGUID());
             }
         }
     }

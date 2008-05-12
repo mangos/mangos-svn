@@ -20,14 +20,10 @@
 
 class BattleGround;
 
-enum BG_AB_Opcodes
+enum BG_AB_WorldStates
 {
     BG_AB_OP_OCCUPIED_BASES_HORDE       = 1778,
-    BG_AB_OP_OCCUPIED_BASES_ALLY        = 1779
-};
-
-enum BG_AB_ResourcesTypes
-{
+    BG_AB_OP_OCCUPIED_BASES_ALLY        = 1779,
     BG_AB_OP_RESOURCES_ALLY             = 1776,
     BG_AB_OP_RESOURCES_HORDE            = 1777,
     BG_AB_OP_RESOURCES_MAX              = 1780,
@@ -91,6 +87,7 @@ enum BG_AB_ObjectTypes
 
 enum BG_AB_Timers
 {
+    BG_AB_FLAG_CAPTURING_TIME           = 60000,
     BG_AB_BUFF_RESPAWN_TIME             = 180000,
     BG_AB_BUFFCHECK_TIME                = 1000    // How often do we check every player's distance to every spawned buff object ?
 };
@@ -121,12 +118,12 @@ enum BG_AB_BattleGroundNodes
     BG_AB_NODE_LUMBER_MILL      = 3,
     BG_AB_NODE_GOLD_MINE        = 4,
 
-    BG_AB_NODES_COUNT            = 5
+    BG_AB_NODES_COUNT           = 5
 };
 
 enum BG_AB_NodeStatus
 {
-    BG_AB_NODE_TYPE_NEUTRAL           = 0,
+    BG_AB_NODE_TYPE_NEUTRAL             = 0,
     BG_AB_NODE_TYPE_CONTESTED           = 1,
     BG_AB_NODE_STATUS_ALLY_CONTESTED    = 1,
     BG_AB_NODE_STATUS_HORDE_CONTESTED   = 2,
@@ -227,6 +224,7 @@ class BattleGroundAB : public BattleGround
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         virtual bool SetupBattleGround();
         virtual void ResetBGSubclass();
+        virtual WorldSafeLocsEntry const* GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team);
 
         /* Scorekeeping */
         virtual void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
@@ -234,10 +232,7 @@ class BattleGroundAB : public BattleGround
         virtual void FillInitialWorldStates(WorldPacket& data);
 
         /* Nodes occupying */
-        void EventPlayerCapturedBanner(Player *source);
-
-        /* Death related */
-        WorldSafeLocsEntry const* SelectGraveYard(Player* player);
+        virtual void EventPlayerClickedOnFlag(Player *source, GameObject* target_obj);
 
     private:
         /* Gameobject spawning/despawning */

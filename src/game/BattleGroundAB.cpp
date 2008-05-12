@@ -96,7 +96,7 @@ void BattleGroundAB::Update(time_t diff)
     else if(GetStatus() == STATUS_IN_PROGRESS)
     {
         // 3 sec delay to spawn new banner instead previous despawned one
-        for (int node = 0; node < 5; ++node)
+        for (int node = 0; node < BG_AB_NODES_COUNT; ++node)
             if (m_BannerTimers[node].timer)
                 if (m_BannerTimers[node].timer > diff)
                     m_BannerTimers[node].timer -= diff;
@@ -107,7 +107,7 @@ void BattleGroundAB::Update(time_t diff)
                 }
 
         // 1-minute to occupy a node from contested state
-        for (int node = 0; node < 5; ++node)
+        for (int node = 0; node < BG_AB_NODES_COUNT; ++node)
             if (m_NodeTimers[node])
                 if (m_NodeTimers[node] > diff)
                     m_NodeTimers[node] -= diff;
@@ -348,7 +348,7 @@ void BattleGroundAB::_CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool
     // handle aura with banner
     if (!type)
         return;
-    obj = node*8 + ((type == 3) ? (5 + teamIndex) : 7);
+    obj = node*8 + ((type == BG_AB_BODE_TYPE_OCCUPIED) ? (5 + teamIndex) : 7);
     MapManager::Instance().GetMap(GetMapId(), m_bgobjects[obj])->Add(m_bgobjects[obj]);
 }
 
@@ -362,7 +362,7 @@ void BattleGroundAB::_DelBanner(uint8 node, uint8 type, uint8 teamIndex)
 
     // handle aura with banner
     if (!type) return;
-    obj = node*8 + ((type == 3) ? (5 + teamIndex) : 7);
+    obj = node*8 + ((type == BG_AB_BODE_TYPE_OCCUPIED) ? (5 + teamIndex) : 7);
     MapManager::Instance().GetMap(GetMapId(), m_bgobjects[obj])->Remove(m_bgobjects[obj], false);
 }
 
@@ -489,7 +489,7 @@ void BattleGroundAB::_NodeDeOccupied(uint8 node)
             if (!plr)
                 continue;
             if (!ClosestGrave)
-                ClosestGrave = SelectGraveYard(plr);
+                ClosestGrave = GetClosestGraveYard(plr->GetPositionX(),plr->GetPositionY(),plr->GetPositionZ(),plr->GetMapId(),plr->GetTeam());
 
             plr->TeleportTo(GetMapId(), ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, plr->GetOrientation());
         }
@@ -512,7 +512,7 @@ void BattleGroundAB::_NodeDeOccupied(uint8 node)
 }
 
 /* Invoked if a player used a banner as a gameobject */
-void BattleGroundAB::EventPlayerCapturedBanner(Player *source)
+void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target_obj)
 {
     if(GetStatus() != STATUS_IN_PROGRESS)
         return;
@@ -548,31 +548,31 @@ void BattleGroundAB::EventPlayerCapturedBanner(Player *source)
         // create new contested banner
         _CreateBanner(node, BG_AB_NODE_TYPE_CONTESTED, teamIndex, true);
         _SendNodeUpdate(node);
-        m_NodeTimers[node] = 60000;
+        m_NodeTimers[node] = BG_AB_FLAG_CAPTURING_TIME;
         sprintf(buf, GetMangosString(LANG_BG_AB_NODE_CLAIMED), _GetNodeName(node), (teamIndex == 0) ? GetMangosString(LANG_BG_AB_ALLY) : GetMangosString(LANG_BG_AB_HORDE));
         sound = SOUND_NODE_CLAIMED;
     }
     // If node is contested
-    else if ((m_Nodes[node] == 1) || (m_Nodes[node] == 2))
+    else if ((m_Nodes[node] == BG_AB_NODE_STATUS_ALLY_CONTESTED) || (m_Nodes[node] == BG_AB_NODE_STATUS_HORDE_CONTESTED))
     {
         // If last state is NOT occupied, change node to enemy-contested
         if (m_prevNodes[node] < BG_AB_BODE_TYPE_OCCUPIED)
         {
             m_prevNodes[node] = m_Nodes[node];
-            m_Nodes[node] = teamIndex + 1;
+            m_Nodes[node] = teamIndex + BG_AB_NODE_TYPE_CONTESTED;
             // burn current contested banner
             _DelBanner(node, BG_AB_NODE_TYPE_CONTESTED, !teamIndex);
             // create new contested banner
             _CreateBanner(node, BG_AB_NODE_TYPE_CONTESTED, teamIndex, true);
             _SendNodeUpdate(node);
-            m_NodeTimers[node] = 60000;
+            m_NodeTimers[node] = BG_AB_FLAG_CAPTURING_TIME;
             sprintf(buf, GetMangosString(LANG_BG_AB_NODE_ASSAULTED), _GetNodeName(node));
         }
         // If contested, change back to occupied
         else
         {
             m_prevNodes[node] = m_Nodes[node];
-            m_Nodes[node] = teamIndex + 3;
+            m_Nodes[node] = teamIndex + BG_AB_BODE_TYPE_OCCUPIED;
             // burn current contested banner
             _DelBanner(node, BG_AB_NODE_TYPE_CONTESTED, !teamIndex);
             // create new occupied banner
@@ -582,30 +582,30 @@ void BattleGroundAB::EventPlayerCapturedBanner(Player *source)
             _NodeOccupied(node);
             sprintf(buf, GetMangosString(LANG_BG_AB_NODE_DEFENDED), _GetNodeName(node));
         }
-        (teamIndex == 0) ? SOUND_NODE_ASSAULTED_ALLIANCE : SOUND_NODE_ASSAULTED_HORDE;
+        sound = (teamIndex == 0) ? SOUND_NODE_ASSAULTED_ALLIANCE : SOUND_NODE_ASSAULTED_HORDE;
     }
     // If node is occupied, change to enemy-contested
     else
     {
         m_prevNodes[node] = m_Nodes[node];
-        m_Nodes[node] = teamIndex + 1;
+        m_Nodes[node] = teamIndex + BG_AB_NODE_TYPE_CONTESTED;
         // burn current occupied banner
         _DelBanner(node, BG_AB_BODE_TYPE_OCCUPIED, !teamIndex);
         // create new contested banner
         _CreateBanner(node, BG_AB_NODE_TYPE_CONTESTED, teamIndex, true);
         _SendNodeUpdate(node);
         _NodeDeOccupied(node);
-        m_NodeTimers[node] = 60000;
+        m_NodeTimers[node] = BG_AB_FLAG_CAPTURING_TIME;
         sprintf(buf, GetMangosString(LANG_BG_AB_NODE_ASSAULTED), _GetNodeName(node));
-        (teamIndex == 0) ? SOUND_NODE_ASSAULTED_ALLIANCE : SOUND_NODE_ASSAULTED_HORDE;
+        sound = (teamIndex == 0) ? SOUND_NODE_ASSAULTED_ALLIANCE : SOUND_NODE_ASSAULTED_HORDE;
     }
-    UpdatePlayerScore(source, SCORE_HONORABLE_KILLS, 1);
+    UpdatePlayerScore(source, SCORE_KILLING_BLOWS, 1);
     UpdatePlayerScore(source, SCORE_BASES_ASSAULTED, 1);
     WorldPacket data;
     ChatHandler::FillMessageData(&data, source->GetSession(), type, LANG_UNIVERSAL, NULL, source->GetGUID(), buf, NULL);
     SendPacketToAll(&data);
-    // If node is occupied again, send "XY has taken the XY" msg.
-    if (m_Nodes[node] > 2)
+    // If node is occupied again, send "X has taken the Y" msg.
+    if (m_Nodes[node] >= BG_AB_BODE_TYPE_OCCUPIED)
     {
         sprintf(buf, GetMangosString(LANG_BG_AB_NODE_TAKEN), (teamIndex == 0) ? GetMangosString(LANG_BG_AB_ALLY) : GetMangosString(LANG_BG_AB_HORDE), _GetNodeName(node));
         ChatHandler::FillMessageData(&data, NULL, type, LANG_UNIVERSAL, NULL, 0, buf, NULL);
@@ -695,9 +695,9 @@ void BattleGroundAB::ResetBGSubclass()
     m_buffchecktimer = 0;
 }
 
-WorldSafeLocsEntry const* BattleGroundAB::SelectGraveYard(Player* player)
+WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team)
 {
-    uint8 teamIndex = GetTeamIndexByTeamId(player->GetTeam());
+    uint8 teamIndex = GetTeamIndexByTeamId(team);
 
     // Is there any occupied node for this team?
     std::vector<uint8> nodes;
@@ -709,8 +709,6 @@ WorldSafeLocsEntry const* BattleGroundAB::SelectGraveYard(Player* player)
     // If so, select the closest node to place ghost on
     if (!nodes.empty())
     {
-        float x = player->GetPositionX();
-        float y = player->GetPositionY();    // let alone z coordinate...
         float mindist = 999999.0f;
         for (uint8 i = 0; i < nodes.size(); ++i)
         {
@@ -732,7 +730,7 @@ WorldSafeLocsEntry const* BattleGroundAB::SelectGraveYard(Player* player)
     return good_entry;
 }
 
-void BattleGroundAB::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
+void BattleGroundAB::UpdatePlayerScore(Player *Source, uint32 type, uint32 value)
 {
 
     std::map<uint64, BattleGroundScore*>::iterator itr = m_PlayerScores.find(Source->GetGUID());
@@ -753,7 +751,3 @@ void BattleGroundAB::UpdatePlayerScore(Player* Source, uint32 type, uint32 value
             break;
     }
 }
-
-
-
-

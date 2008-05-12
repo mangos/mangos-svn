@@ -19,6 +19,7 @@
 #include "Object.h"
 #include "Player.h"
 #include "BattleGround.h"
+#include "BattleGroundEY.h"
 #include "Creature.h"
 #include "MapManager.h"
 #include "Language.h"                                       // for chat messages
@@ -331,6 +332,13 @@ void BattleGround::UpdateWorldState(uint32 Field, uint32 Value)
     WorldPacket data;
     sBattleGroundMgr.BuildUpdateWorldStatePacket(&data, Field, Value);
     SendPacketToAll(&data);
+}
+
+void BattleGround::UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player *Source)
+{
+    WorldPacket data;
+    sBattleGroundMgr.BuildUpdateWorldStatePacket(&data, Field, Value);
+    Source->GetSession()->SendPacket(&data);
 }
 
 void BattleGround::EndBattleGround(uint32 winner)
@@ -750,7 +758,7 @@ bool BattleGround::HasFreeSlots() const
     return GetPlayersSize() < GetMaxPlayers();
 }
 
-void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
+void BattleGround::UpdatePlayerScore(Player *Source, uint32 type, uint32 value)
 {
     //this procedure is called from virtual function implemented in bg subclass
     std::map<uint64, BattleGroundScore*>::iterator itr = m_PlayerScores.find(Source->GetGUID());
@@ -1023,11 +1031,16 @@ void BattleGround::HandleTriggerBuff(uint64 const& go_guid)
     if(!obj->isSpawned())
         return;                                             // buff not spawned yet
 
-    obj->SetRespawnTime(BUFF_RESPAWN_TIME);
-    obj->SetLootState(GO_JUST_DEACTIVATED);
+    if(GetTypeID() == BATTLEGROUND_EY)
+        ((BattleGroundEY*)this)->HandleBuffUse(go_guid);
+    else
+    {
+        obj->SetRespawnTime(BUFF_RESPAWN_TIME);
+        obj->SetLootState(GO_JUST_DEACTIVATED);
+    }
 }
 
-void BattleGround::HandleKillPlayer( Player* player, Player* killer )
+void BattleGround::HandleKillPlayer( Player *player, Player *killer )
 {
     // add +1 deaths
     UpdatePlayerScore(player, SCORE_DEATHS, 1);
