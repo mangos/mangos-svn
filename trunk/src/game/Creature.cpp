@@ -483,7 +483,31 @@ bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, 
 
     SetOrientation(ang);
     //oX = x;     oY = y;    dX = x;    dY = y;    m_moveTime = 0;    m_startMove = 0;
-    return  CreateFromProto(guidlow, Entry, team, data);
+    const bool bResult = CreateFromProto(guidlow, Entry, team, data);
+
+    if (bResult)
+    {
+        switch (GetCreatureInfo()->rank)
+        {
+        case CREATURE_ELITE_RARE:
+            m_corpseDelay = sWorld.getConfig(CONFIG_CORPSE_DECAY_RARE);
+            break;
+        case CREATURE_ELITE_ELITE:
+            m_corpseDelay = sWorld.getConfig(CONFIG_CORPSE_DECAY_ELITE);
+            break;
+        case CREATURE_ELITE_RAREELITE:
+            m_corpseDelay = sWorld.getConfig(CONFIG_CORPSE_DECAY_RAREELITE);
+            break;
+        case CREATURE_ELITE_WORLDBOSS:
+            m_corpseDelay = sWorld.getConfig(CONFIG_CORPSE_DECAY_WORLDBOSS);
+            break;
+        default:
+            m_corpseDelay = sWorld.getConfig(CONFIG_CORPSE_DECAY_NORMAL);
+            break;
+        }
+    }
+
+    return bResult;
 }
 
 bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
@@ -1267,8 +1291,6 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
 
     m_DBTableGuid = stored_guid;
     LoadCreaturesAddon();
-    if(GetCreatureInfo()->rank > 0)
-        this->m_corpseDelay *= 3;                           //if creature is elite, then remove corpse later
 
     m_respawnradius = data->spawndist;
 
@@ -1859,5 +1881,21 @@ void Creature::GetRespawnCoord( float &x, float &y, float &z, float* ori, float*
             *ori = GetOrientation();
         if(dist)
             *dist = 0;
+    }
+}
+
+void Creature::AllLootRemovedFromCorpse()
+{
+    if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
+    {
+        CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(this->GetEntry());
+
+        uint32 nDeathTimer = 0; // if not changed, corpse will despawn next update (skinned case)
+
+        if (!cinfo || !cinfo->SkinLootId) // corpse was not skinnable -> apply corpse looted timer
+            nDeathTimer = (uint32)((m_corpseDelay * 1000) * sWorld.getRate(RATE_CORPSE_DECAY_LOOTED));
+
+        if (m_deathTimer > nDeathTimer) // update death timer only if looted timer is shorter
+            m_deathTimer = nDeathTimer;
     }
 }

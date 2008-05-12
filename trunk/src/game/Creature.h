@@ -468,6 +468,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool lootForBody;
         Player *GetLootRecipient() const;
         void SetLootRecipient (Player *player);
+        void AllLootRemovedFromCorpse();
 
         SpellEntry const *reachWithSpellAttack(Unit *pVictim);
         SpellEntry const *reachWithSpellCure(Unit *pVictim);

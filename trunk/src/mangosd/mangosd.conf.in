@@ -468,6 +468,82 @@ AllowTwoSide.AddFriend = 0
 TalentsInspecting = 1
 
 ###################################################################################################################
+# CREATURE SETTINGS
+#
+#    Rate.Creature.Aggro
+#        Aggro radius percent or off.
+#        Default: 1   - 100%
+#                 1.5 - 150%
+#                 0   - off (0%)
+#
+#    CreatureFamilyAssistenceRadius
+#        Creature family assistence radius
+#        Default: 10
+#                 0   - off
+#
+#    Corpse.Decay.NORMAL
+#    Corpse.Decay.RARE
+#    Corpse.Decay.ELITE
+#    Corpse.Decay.RAREELITE
+#    Corpse.Decay.WORLDBOSS
+#        Seconds until creature corpse will decay without being looted or skinned.
+#        Default: 60, 300, 300, 300, 3600
+#
+#    Rate.Corpse.Decay.Looted
+#         Controls how long the creature corpse stays after it had been looted, as a multiplier of its Corpse.Decay.* config.
+#         Default: 0.1
+#
+#    Rate.Creature.Normal.Damage
+#    Rate.Creature.Elite.Elite.Damage
+#    Rate.Creature.Elite.RAREELITE.Damage
+#    Rate.Creature.Elite.WORLDBOSS.Damage
+#    Rate.Creature.Elite.RARE.Damage
+#        Creature Damage Rates.
+#        Examples: 2 - creatures will damage 2x, 1.7 - 1.7x.
+#
+#    Rate.Creature.Normal.SpellDamage
+#    Rate.Creature.Elite.Elite.SpellDamage
+#    Rate.Creature.Elite.RAREELITE.SpellDamage
+#    Rate.Creature.Elite.WORLDBOSS.SpellDamag
+#    Rate.Creature.Elite.RARE.SpellDamage
+#        Creature Spell Damage Rates.
+#        Examples: 2 - creatures will damage with spells 2x, 1.7 - 1.7x.
+#
+#    Rate.Creature.Normal.HP
+#    Rate.Creature.Elite.Elite.HP
+#    Rate.Creature.Elite.RAREELITE.HP
+#    Rate.Creature.Elite.WORLDBOSS.HP
+#    Rate.Creature.Elite.RARE.HP
+#        Creature Health Ammount Modifier.
+#        Examples: 2 - creatures have 2x health, 1.7 - 1.7x.
+#
+###################################################################################################################
+
+Rate.Creature.Aggro = 1
+CreatureFamilyAssistenceRadius = 10
+Corpse.Decay.NORMAL = 60
+Corpse.Decay.RARE = 300
+Corpse.Decay.ELITE = 300
+Corpse.Decay.RAREELITE = 300
+Corpse.Decay.WORLDBOSS = 3600
+Rate.Corpse.Decay.Looted = 0.1
+Rate.Creature.Normal.Damage = 1
+Rate.Creature.Elite.Elite.Damage = 1
+Rate.Creature.Elite.RAREELITE.Damage = 1
+Rate.Creature.Elite.WORLDBOSS.Damage = 1
+Rate.Creature.Elite.RARE.Damage = 1
+Rate.Creature.Normal.SpellDamage = 1
+Rate.Creature.Elite.Elite.SpellDamage = 1
+Rate.Creature.Elite.RAREELITE.SpellDamage = 1
+Rate.Creature.Elite.WORLDBOSS.SpellDamage = 1
+Rate.Creature.Elite.RARE.SpellDamage = 1
+Rate.Creature.Normal.HP = 1
+Rate.Creature.Elite.Elite.HP = 1
+Rate.Creature.Elite.RAREELITE.HP = 1
+Rate.Creature.Elite.WORLDBOSS.HP = 1
+Rate.Creature.Elite.RARE.HP = 1
+
+###################################################################################################################
 # CHAT SETTINGS
 #
 #    ChatFakeMessagePreventing
@@ -582,16 +658,6 @@ GM.LogTrade = 1
 #        Visibility grey distance for dynobjects/gameobjects/corpses/creature bodies
 #        Default: 10 (yards)
 #
-#    Rate.Creature.Aggro
-#        Aggro radius percent or off.
-#        Default: 1   - 100%
-#                 1.5 - 150%
-#                 0   - off (0%)
-#
-#    CreatureFamilyAssistenceRadius
-#        Creature family assistence radius
-#        Default: 10
-#                 0   - off
 #
 ###################################################################################################################
 
@@ -602,8 +668,6 @@ Visibility.Distance.Object        = 66
 Visibility.Distance.InFlight      = 66
 Visibility.Distance.Grey.Unit   = 1
 Visibility.Distance.Grey.Object = 10
-Rate.Creature.Aggro = 1
-CreatureFamilyAssistenceRadius = 10
 
 ###################################################################################################################
 # SERVER RATES
@@ -631,30 +695,6 @@ CreatureFamilyAssistenceRadius = 10
 #    Rate.XP.PastLevel70
 #        XP needed per level past 70 (Rates below 1 not recommended)
 #        Default: 1
-#
-#    Rate.Creature.Normal.Damage
-#    Rate.Creature.Elite.Elite.Damage
-#    Rate.Creature.Elite.RAREELITE.Damage
-#    Rate.Creature.Elite.WORLDBOSS.Damage
-#    Rate.Creature.Elite.RARE.Damage
-#        Creature Damage Rates.
-#        Examples: 2 - creatures will damage 2x, 1.7 - 1.7x.
-#
-#    Rate.Creature.Normal.SpellDamage
-#    Rate.Creature.Elite.Elite.SpellDamage
-#    Rate.Creature.Elite.RAREELITE.SpellDamage
-#    Rate.Creature.Elite.WORLDBOSS.SpellDamag
-#    Rate.Creature.Elite.RARE.SpellDamage
-#        Creature Spell Damage Rates.
-#        Examples: 2 - creatures will damage with spells 2x, 1.7 - 1.7x.
-#
-#    Rate.Creature.Normal.HP
-#    Rate.Creature.Elite.Elite.HP
-#    Rate.Creature.Elite.RAREELITE.HP
-#    Rate.Creature.Elite.WORLDBOSS.HP
-#    Rate.Creature.Elite.RARE.HP
-#        Creature Health Ammount Modifier.
-#        Examples: 2 - creatures have 2x health, 1.7 - 1.7x.
 #
 #    Rate.Rest.InGame
 #    Rate.Rest.Offline.InTavernOrCity
@@ -719,21 +759,6 @@ Rate.XP.Kill    = 1
 Rate.XP.Quest   = 1
 Rate.XP.Explore = 1
 Rate.XP.PastLevel70 = 1
-Rate.Creature.Normal.Damage = 1
-Rate.Creature.Elite.Elite.Damage = 1
-Rate.Creature.Elite.RAREELITE.Damage = 1
-Rate.Creature.Elite.WORLDBOSS.Damage = 1
-Rate.Creature.Elite.RARE.Damage = 1
-Rate.Creature.Normal.SpellDamage = 1
-Rate.Creature.Elite.Elite.SpellDamage = 1
-Rate.Creature.Elite.RAREELITE.SpellDamage = 1
-Rate.Creature.Elite.WORLDBOSS.SpellDamage = 1
-Rate.Creature.Elite.RARE.SpellDamage = 1
-Rate.Creature.Normal.HP = 1
-Rate.Creature.Elite.Elite.HP = 1
-Rate.Creature.Elite.RAREELITE.HP = 1
-Rate.Creature.Elite.WORLDBOSS.HP = 1
-Rate.Creature.Elite.RARE.HP = 1
 Rate.Rest.InGame = 1
 Rate.Rest.Offline.InTavernOrCity = 1
 Rate.Rest.Offline.InWilderness = 1
