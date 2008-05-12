@@ -442,6 +442,7 @@ void WorldSession::DoLootRelease( uint64 lguid )
         if (loot->isLooted())
         {
             //this is probably wrong
+            pCreature->AllLootRemovedFromCorpse();
             pCreature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             loot->clear();
         }
