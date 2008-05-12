@@ -23,6 +23,7 @@
 #include "CoordModelMapping.h"
 #include "ModelContainer.h"
 
+#include <limits.h>
 #include <string.h>
 
 #ifdef _ASSEMBLER_DEBUG
