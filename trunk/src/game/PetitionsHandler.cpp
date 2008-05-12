@@ -115,7 +115,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
             return;
         }
 
-        for(uint8 i = 0; i < 3; i++)
+        for(uint8 i = 0; i < MAX_ARENA_SLOT; i++)
         {
             if(_player->GetArenaTeamId(i) && (i == (unk10-1)))
             {
@@ -695,23 +695,11 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
     }
     else
     {
-        uint32 type_slot;
-        switch(type)
-        {
-            case ARENA_TEAM_2v2:
-                type_slot = 0;
-                break;
-            case ARENA_TEAM_3v3:
-                type_slot = 1;
-                break;
-            case ARENA_TEAM_5v5:
-                type_slot = 2;
-                break;
-            default:
-                type_slot = 0;
-                break;
-        }
-        if(_player->GetArenaTeamId(type_slot))
+        uint8 slot = ArenaTeam::GetSlotByType(type);
+        if(slot >= MAX_ARENA_SLOT)
+            return;
+
+        if(_player->GetArenaTeamId(slot))
         {
                 //data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
                 //data << (uint32)PETITION_TURN_ALREADY_IN_GUILD;                          // already in guild

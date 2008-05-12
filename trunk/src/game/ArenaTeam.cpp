@@ -449,32 +449,48 @@ void ArenaTeam::SetStats(uint32 stat_type, uint32 value)
     }
 }
 
-uint8 ArenaTeam::GetSlot()
+uint8 ArenaTeam::GetSlot() const
 {
-    switch(GetType())
+    uint8 slot = GetSlotByType(GetType());
+    if(slot >= MAX_ARENA_SLOT)
     {
-        case ARENA_TEAM_2v2:
-            return 0;
-        case ARENA_TEAM_3v3:
-            return 1;
-        case ARENA_TEAM_5v5:
-            return 2;
-        default:
-            sLog.outError("Unknown arena team type %u for arena team %u", GetType(), GetId());
-            return 0xFF;
+        sLog.outError("Unknown arena team type %u for arena team %u", uint32(GetType()), GetId());
+        return 0;                                           // better return existed slot to prevent untelated data curruption 
     }
+
+    return slot;
 }
 
 void ArenaTeam::BroadcastPacket(WorldPacket *packet)
 {
-    MemberList::iterator itr;
-
-    for (itr = members.begin(); itr != members.end(); itr++)
+    for (MemberList::iterator itr = members.begin(); itr != members.end(); itr++)
     {
         Player *player = objmgr.GetPlayer(itr->guid);
         if(player)
             player->GetSession()->SendPacket(packet);
     }
+}
+
+uint8 ArenaTeam::GetSlotByType( uint32 type )
+{
+    switch(type)
+    {
+        case ARENA_TEAM_2v2: return 0;
+        case ARENA_TEAM_3v3: return 1;
+        case ARENA_TEAM_5v5: return 2;
+        default: 
+            break;
+    }
+    return 0xFF;
+}
+
+bool ArenaTeam::HaveMember( uint64 guid ) const
+{
+    for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
+        if(itr->guid==guid)
+            return true;
+
+    return false;
 }
 
 /*

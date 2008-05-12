@@ -104,6 +104,8 @@ struct ArenaTeamStats
     uint32 rank;
 };
 
+#define MAX_ARENA_SLOT 3                                    // 0..2 slots
+
 class ArenaTeam
 {
     public:
@@ -115,20 +117,21 @@ class ArenaTeam
 
         typedef std::list<ArenaTeamMember> MemberList;
 
-        uint32 GetId() { return Id; }
-        uint32 GetType() { return Type; }
-        uint8 GetSlot();
-        const uint64& GetCaptain() { return CaptainGuid; }
-        std::string GetName() { return Name; }
-        ArenaTeamStats GetStats() { return stats; }
+        uint32 GetId() const { return Id; }
+        uint32 GetType() const { return Type; }
+        uint8 GetSlot() const;
+        static uint8 GetSlotByType(uint32 type);
+        const uint64& GetCaptain() const { return CaptainGuid; }
+        std::string GetName() const { return Name; }
+        ArenaTeamStats GetStats() const { return stats; }
         void SetStats(uint32 stat_type, uint32 value);
-        uint32 GetRating() { return stats.rating; }
+        uint32 GetRating() const { return stats.rating; }
 
-        uint32 GetEmblemStyle(){ return EmblemStyle; }
-        uint32 GetEmblemColor(){ return EmblemColor; }
-        uint32 GetBorderStyle(){ return BorderStyle; }
-        uint32 GetBorderColor(){ return BorderColor; }
-        uint32 GetBackgroundColor(){ return BackgroundColor; }
+        uint32 GetEmblemStyle() const { return EmblemStyle; }
+        uint32 GetEmblemColor() const { return EmblemColor; }
+        uint32 GetBorderStyle() const { return BorderStyle; }
+        uint32 GetBorderColor() const { return BorderColor; }
+        uint32 GetBackgroundColor() const { return BackgroundColor; }
 
         void SetCaptain(uint64 guid);
         bool AddMember(uint64 PlayerGuid);
@@ -136,9 +139,10 @@ class ArenaTeam
 
         void SetEmblem(uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle, uint32 borderColor, uint32 backgroundColor);
 
-        uint32 GetMembersSize(){ return members.size(); }
+        uint32 GetMembersSize() const { return members.size(); }
         MemberList::iterator membersbegin(){ return members.begin(); }
         MemberList::iterator membersEnd(){ return members.end(); }
+        bool HaveMember(uint64 guid) const;
 
         bool LoadArenaTeamFromDB(uint32 ArenaTeamId);
         void LoadMembersFromDB(uint32 ArenaTeamId);

@@ -12895,6 +12895,22 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     _LoadGroup(holder->GetResult(PLAYER_LOGIN_QUERY_LOADGROUP));
 
+    // check arena teams integrity
+    for(uint32 arena_slot = 0; arena_slot < MAX_ARENA_SLOT; ++arena_slot)
+    {
+        uint32 arena_team_id = GetArenaTeamId(arena_slot);
+        if(!arena_team_id)
+            continue;
+
+        if(ArenaTeam * at = objmgr.GetArenaTeamById(arena_team_id))
+            if(at->HaveMember(GetGUID()))
+                continue;
+
+        // arena team not exist or not member, cleanup fields
+        for(int j =0; j < 6; ++j)
+            SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + arena_slot * 6 + j, 0);
+    }
+
     _LoadBoundInstances(holder->GetResult(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES));
 
     SaveRecallPosition();
@@ -15540,7 +15556,7 @@ uint32 Player::GetMaxPersonalArenaRatingRequirement()
     // the personal rating of the arena team must match the required limit as well
     // so return max[in arenateams](min(personalrating[teamtype], teamrating[teamtype]))
     uint32 max_personal_rating = 0;
-    for(int i = 0; i < 3; ++i)
+    for(int i = 0; i < MAX_ARENA_SLOT; ++i)
     {
         if(ArenaTeam * at = objmgr.GetArenaTeamById(GetArenaTeamId(i)))
         {
