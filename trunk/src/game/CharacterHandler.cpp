@@ -248,23 +248,48 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     }
 
     bool AllowTwoSideAccounts = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_ACCOUNTS);
-    if(sWorld.IsPvPRealm()&&!AllowTwoSideAccounts)
+    uint32 skipCinematics = sWorld.getConfig(CONFIG_SKIP_CINEMATICS);
+
+    bool have_oposition_races = false;
+    bool have_same_race = false;
+
+    if(sWorld.IsPvPRealm()&&!AllowTwoSideAccounts || skipCinematics == 1)
     {
-        QueryResult *result2 = CharacterDatabase.PQuery("SELECT race FROM characters WHERE account = '%u' LIMIT 1", GetAccountId());
+        QueryResult *result2 = CharacterDatabase.PQuery("SELECT race FROM characters WHERE account = '%u' %s", GetAccountId(),skipCinematics == 1 ? "" : "LIMIT 1");
         if(result2)
         {
-            Field * field = result2->Fetch();
-            uint8 race = field[0].GetUInt32();
+            uint32 team_= Player::TeamForRace(race_);
+
+            do
+            {
+                Field* field = result2->Fetch();
+                uint8 race = field[0].GetUInt32();
+
+                if(!have_oposition_races)                   // need check only first case, in fact
+                {
+                    uint32 team=0;
+                    if(race > 0)
+                        team = Player::TeamForRace(race);
+
+                    if(team != team_)
+                    {
+                        have_oposition_races = true;
+
+                        if(skipCinematics != 1 || have_same_race)
+                            break;                          // not need iterate
+                    }
+                }
+
+                if(race_ == race)
+                {
+                    have_same_race = true;
+                    break;                                  // have_oposition_races already checked anyway
+                }
+            }
+            while (result->NextRow());
             delete result2;
-            uint32 team=0;
-            if(race > 0)
-                team = Player::TeamForRace(race);
 
-            uint32 team_=0;
-            //if(race_ > 0)
-            team_ = Player::TeamForRace(race_);
-
-            if(team != team_ && GetSecurity() < SEC_GAMEMASTER)
+            if(have_oposition_races && GetSecurity() < SEC_GAMEMASTER)
             {
                 data << (uint8)CHAR_CREATE_PVP_TEAMS_VIOLATION;
                 SendPacket( &data );
@@ -278,6 +303,11 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     if(pNewChar->Create( objmgr.GenerateLowGuid(HIGHGUID_PLAYER), recv_data ))
     {
+        if(have_same_race && skipCinematics == 1 || skipCinematics == 2)
+        {
+            pNewChar->setCinematic(1);                      // not show intro
+        }
+
         // Player create
         pNewChar->SaveToDB();
         charcount+=1;

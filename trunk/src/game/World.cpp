@@ -418,6 +418,13 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_STRICT_CHARTER_NAMES] = sConfig.GetBoolDefault("StrictCharterNames", false);
     m_configs[CONFIG_STRICT_PET_NAMES] = sConfig.GetBoolDefault("StrictPetNames", false);
 
+    m_configs[CONFIG_SKIP_CINEMATICS] = sConfig.GetIntDefault("SkipCinematics", 0);
+    if(m_configs[CONFIG_SKIP_CINEMATICS] < 0 || m_configs[CONFIG_SKIP_CINEMATICS] > 2)
+    {
+        sLog.outError("SkipCinematics (%i) must be in range 0..2. Set to 0.",m_configs[CONFIG_SKIP_CINEMATICS]);
+        m_configs[CONFIG_SKIP_CINEMATICS] = 0;
+    }
+
     m_configs[CONFIG_MAX_PLAYER_LEVEL] = sConfig.GetIntDefault("MaxPlayerLevel", 60);
     if(m_configs[CONFIG_MAX_PLAYER_LEVEL] > 255)
     {
