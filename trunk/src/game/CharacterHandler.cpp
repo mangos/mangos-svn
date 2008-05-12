@@ -247,54 +247,48 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         }
     }
 
-    bool AllowTwoSideAccounts = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_ACCOUNTS);
+    bool AllowTwoSideAccounts = !sWorld.IsPvPRealm() || sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_ACCOUNTS) || GetSecurity() > SEC_PLAYER;
     uint32 skipCinematics = sWorld.getConfig(CONFIG_SKIP_CINEMATICS);
 
-    bool have_oposition_races = false;
     bool have_same_race = false;
-
-    if(sWorld.IsPvPRealm()&&!AllowTwoSideAccounts || skipCinematics == 1)
+    if(!AllowTwoSideAccounts || skipCinematics == 1)
     {
-        QueryResult *result2 = CharacterDatabase.PQuery("SELECT race FROM characters WHERE account = '%u' %s", GetAccountId(),skipCinematics == 1 ? "" : "LIMIT 1");
+        QueryResult *result2 = CharacterDatabase.PQuery("SELECT DISTINCT race FROM characters WHERE account = '%u' %s", GetAccountId(),skipCinematics == 1 ? "" : "LIMIT 1");
         if(result2)
         {
             uint32 team_= Player::TeamForRace(race_);
 
-            do
+            Field* field = result2->Fetch();
+            uint8 race = field[0].GetUInt32();
+
+            // need to check team only for first character
+            // TODO: what to if account already has characters of both races?
+            if (!AllowTwoSideAccounts)
             {
-                Field* field = result2->Fetch();
-                uint8 race = field[0].GetUInt32();
+                uint32 team=0;
+                if(race > 0)
+                    team = Player::TeamForRace(race);
 
-                if(!have_oposition_races)                   // need check only first case, in fact
+                if(team != team_)
                 {
-                    uint32 team=0;
-                    if(race > 0)
-                        team = Player::TeamForRace(race);
-
-                    if(team != team_)
-                    {
-                        have_oposition_races = true;
-
-                        if(skipCinematics != 1 || have_same_race)
-                            break;                          // not need iterate
-                    }
-                }
-
-                if(race_ == race)
-                {
-                    have_same_race = true;
-                    break;                                  // have_oposition_races already checked anyway
+                    data << (uint8)CHAR_CREATE_PVP_TEAMS_VIOLATION;
+                    SendPacket( &data );
+                    delete result2;
+                    return;
                 }
             }
-            while (result->NextRow());
+            
+            if (skipCinematics == 1)
+            {
+                // TODO: check if cinematic already shown? (already logged in?; cinematic field)
+                while (race_ != race && result2->NextRow())
+                {
+                    field = result2->Fetch();
+                    race = field[0].GetUInt32();
+                }
+                have_same_race = race_ == race;
+            }
             delete result2;
-
-            if(have_oposition_races && GetSecurity() < SEC_GAMEMASTER)
-            {
-                data << (uint8)CHAR_CREATE_PVP_TEAMS_VIOLATION;
-                SendPacket( &data );
-                return;
-            }
         }
     }
 
