@@ -63,7 +63,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModStun,                               // 12 SPELL_AURA_MOD_STUN
     &Aura::HandleModDamageDone,                             // 13 SPELL_AURA_MOD_DAMAGE_DONE
     &Aura::HandleNoImmediateEffect,                         // 14 SPELL_AURA_MOD_DAMAGE_TAKEN implemented in Unit::MeleeDamageBonus and Unit::SpellDamageBonus
-    &Aura::HandleAuraDamageShield,                          // 15 SPELL_AURA_DAMAGE_SHIELD
+    &Aura::HandleNoImmediateEffect,                         // 15 SPELL_AURA_DAMAGE_SHIELD    implemented in Unit::DoAttackDamage
     &Aura::HandleModStealth,                                // 16 SPELL_AURA_MOD_STEALTH
     &Aura::HandleNoImmediateEffect,                         // 17 SPELL_AURA_MOD_STEALTH_DETECT
     &Aura::HandleInvisibility,                              // 18 SPELL_AURA_MOD_INVISIBILITY
@@ -1174,8 +1174,6 @@ void Aura::TriggerSpell()
         }
 
         case 9712: trigger_spell_id = 21029; break;         // Thaumaturgy Channel
-        case 29528: trigger_spell_id = 28713; break;        // Inoculation
-        case 29917: trigger_spell_id = 29916; break;        // Feed Captured Animal
 
         case 1010:                                          // Curse of Idiocy
         {
@@ -1214,6 +1212,19 @@ void Aura::TriggerSpell()
             originalCasterGUID = 0;
             break;
         }
+
+        case 29528: trigger_spell_id = 28713; break;        // Inoculation
+        case 29917: trigger_spell_id = 29916; break;        // Feed Captured Animal
+        case 30576: trigger_spell_id = 30571; break;        // Quake
+
+        case 31666:                                         // Master of Subtlety
+        {
+            caster->RemoveAurasDueToSpell(31665);
+            return;
+        }
+
+        case 37027: trigger_spell_id = 37029; break;        // Remote Toy
+
         case 38443:                                         // Skyshatter Regalia (Shaman Tier 6) - bonus
         {
             if( caster->m_TotemSlot[0] && caster->m_TotemSlot[1] &&
@@ -1225,15 +1236,6 @@ void Aura::TriggerSpell()
                 caster->RemoveAurasDueToSpell(38437);
             return;
         }
-        case 31666:                                         // Master of Subtlety
-        {
-            caster->RemoveAurasDueToSpell(31665);
-            return;
-        }
-
-        case 30576: trigger_spell_id = 30571; break;        // Quake
-
-        case 37027: trigger_spell_id = 37029; break;        // Remote Toy
 
         case 39857: trigger_spell_id = 39856; break;        // Tear of Azzinoth Channel - it's not really supposed to do anything,and this only prevents the console spam
     }
@@ -3259,37 +3261,6 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
     }
 }
 
-/*********************************************************/
-/***                  MANA SHIELD                      ***/
-/*********************************************************/
-
-void Aura::HandleAuraDamageShield(bool apply, bool Real)
-{
-    /*if(apply)
-    {
-        for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
-            if(i->m_spellId == GetId() && i->m_caster_guid == m_caster_guid)
-            {
-                m_target->m_damageShields.erase(i);
-                break;
-            }
-        DamageShield* ds = new DamageShield();
-        ds->m_caster_guid = m_caster_guid;
-        ds->m_damage = m_modifier.m_amount;
-        ds->m_spellId = GetId();
-        m_target->m_damageShields.push_back((*ds));
-    }
-    else
-    {
-        for(std::list<struct DamageShield>::iterator i = m_target->m_damageShields.begin();i != m_target->m_damageShields.end();i++)
-            if(i->m_spellId == GetId() && i->m_caster_guid == m_caster_guid)
-        {
-            m_target->m_damageShields.erase(i);
-            break;
-        }
-    }*/
-}
-
 void Aura::HandleAuraModStalked(bool apply, bool Real)
 {
     // used by spells: Hunter's Mark, Mind Vision, Syndicate Tracker (MURP) DND
@@ -3662,15 +3633,19 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
 {
     if((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply)
         m_target->SetStandState(PLAYER_STATE_SIT);
-
-    if(apply && m_periodicTimer <= 0 && m_target->getPowerType() == POWER_MANA)
+    if(apply)
     {
-        m_periodicTimer += m_modifier.periodictime;
-
-        if(m_target->GetPower(POWER_MANA) < m_target->GetMaxPower(POWER_MANA))
+        if(m_modifier.periodictime == 0)
+            m_modifier.periodictime = 1000;
+        if(m_periodicTimer <= 0 && m_target->getPowerType() == POWER_MANA)
         {
-            // PeriodicAuraLog can cast triggered spells with stats changes
-            m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier,GetEffIndex(),m_castItemGuid);
+            m_periodicTimer += m_modifier.periodictime;
+
+            if(m_target->GetPower(POWER_MANA) < m_target->GetMaxPower(POWER_MANA))
+            {
+                // PeriodicAuraLog can cast triggered spells with stats changes
+                m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier,GetEffIndex(),m_castItemGuid);
+            }
         }
     }
 

@@ -4014,15 +4014,6 @@ void Spell::EffectScriptEffect(uint32 i)
             break;
         }
 
-        //Flame Crash
-        case 41126:
-        {
-            if(!unitTarget)
-                return;
-
-           unitTarget->CastSpell(unitTarget, 41131, true);
-           break;
-        }
         // Mirren's Drinking Hat
         case 29830:
         {
@@ -4036,6 +4027,16 @@ void Spell::EffectScriptEffect(uint32 i)
             if (item)
                 DoCreateItem(i,item);
             break;
+        }
+
+        //Flame Crash
+        case 41126:
+        {
+            if(!unitTarget)
+                return;
+
+           unitTarget->CastSpell(unitTarget, 41131, true);
+           break;
         }
     }
 
