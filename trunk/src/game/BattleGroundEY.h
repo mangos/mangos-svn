@@ -80,6 +80,7 @@ enum BG_EY_Sounds
 
 enum BG_EY_Spells
 {
+    BG_EY_PLAYER_CANNOT_PICK_FLAG       = 42792,
     BG_EY_NETHERSTORM_FLAG_SPELL        = 34976,
     BG_EY_PLAYER_DROPPED_FLAG_SPELL     = 34991
 };
@@ -332,15 +333,13 @@ class BattleGroundEY : public BattleGround
 
         /* Scorekeeping */
         uint32 GetTeamScore(uint32 Team) const { return m_TeamScores[GetTeamIndexByTeamId(Team)]; }
-        void AddPoints(uint32 Team, uint32 Points)
-        {
-            m_TeamScores[GetTeamIndexByTeamId(Team)] += Points;
-            UpdateTeamScore(Team);
-        }
+        void AddPoints(uint32 Team, uint32 Points);
+
         void RemovePoint(uint32 TeamID, uint32 Points = 1) { m_TeamScores[GetTeamIndexByTeamId(TeamID)] -= Points; }
         void SetTeamPoint(uint32 TeamID, uint32 Points = 0) { m_TeamScores[GetTeamIndexByTeamId(TeamID)] = Points; }
 
         uint32 m_TeamScores[2];
+        uint32 m_HonorScoreTics[2];
         uint32 m_TeamPointsCount[2];
 
         uint32 m_Buff_Entry[3];
