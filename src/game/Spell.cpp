@@ -149,7 +149,7 @@ void SpellCastTargets::Update(Unit* caster)
 
 bool SpellCastTargets::read ( WorldPacket * data, Unit *caster )
 {
-    if(data->rpos()+2 > data->size())
+    if(data->rpos()+4 > data->size())
         return false;
 
     *data >> m_targetMask;
