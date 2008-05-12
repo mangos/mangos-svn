@@ -893,9 +893,7 @@ Item* Guild::GetItem(uint8 TabId, uint8 SlotId)
 {
     if (TabId >= m_TabListMap.size() || SlotId >= GUILD_BANK_MAX_SLOTS)
         return NULL;
-    if (m_TabListMap[TabId]->Slots[SlotId]!=0)
-        return m_TabListMap[TabId]->Slots[SlotId];
-    return NULL;
+    return m_TabListMap[TabId]->Slots[SlotId];
 }
 
 // *************************************************
