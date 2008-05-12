@@ -3566,6 +3566,10 @@ void Aura::HandleModTotalPercentStat(bool apply, bool Real)
         return;
     }
 
+    //save current and max HP before applying aura
+    uint32 curHPValue = m_target->GetHealth();
+    uint32 maxHPValue = m_target->GetMaxHealth();
+
     for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
         if(m_modifier.m_miscvalue == i || m_modifier.m_miscvalue == -1)
@@ -3577,6 +3581,14 @@ void Aura::HandleModTotalPercentStat(bool apply, bool Real)
                 ((Player*)m_target)->ApplyNegStatPercentMod(Stats(i), m_modifier.m_amount, apply );
             }
         }
+    }
+    
+    //recalculate current HP/MP after applying aura modifications (only for spells with 0x10 flag)
+    if ((m_modifier.m_miscvalue == STAT_STAMINA) && (maxHPValue > 0) && (m_spellProto->Attributes & 0x10))
+    {
+        // newHP = (curHP / maxHP) * newMaxHP = (newMaxHP * curHP) / maxHP -> which is better because no int -> double -> int conversion is needed
+        uint32 newHPValue = (m_target->GetMaxHealth() * curHPValue) / maxHPValue;
+        m_target->SetHealth(newHPValue);
     }
 }
 
