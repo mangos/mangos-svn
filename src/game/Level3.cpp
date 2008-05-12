@@ -4458,9 +4458,8 @@ bool ChatHandler::HandleChangeEntryCommand(const char *args)
     if(!args)
         return false;
 
-    char* newEntry = strtok((char*)args, " ");
-    uint32 newEntryNum = atoi(newEntry);
-    if(!newEntry || !newEntryNum)
+    uint32 newEntryNum = atoi(args);
+    if(!newEntryNum)
         return false;
 
     Unit* unit = getSelectedUnit();

@@ -3341,6 +3341,9 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
         return false;
 
     char* pParam1 = strtok((char*)args, " ");
+    if (!pParam1)
+        return false;
+
     uint32 id = atoi((char*)pParam1);
     if(!id)
         return false;
@@ -3352,7 +3355,7 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     if (!goI)
     {
         PSendSysMessage(LANG_GAMEOBJECT_NOT_EXIST,id);
-        return false;
+        return true;
     }
 
     Player *chr = m_session->GetPlayer();
