@@ -74,7 +74,8 @@ enum BattleGroundTimeIntervals
     START_DELAY3                    = 15000,            // ms used only in arena
     RESPAWN_ONE_DAY                 = 86400,            // secs
     RESPAWN_IMMEDIATELY             = 0,                // secs
-    BUFF_RESPAWN_TIME               = 180               // secs
+    BUFF_RESPAWN_TIME               = 180,              // secs
+    BG_HONOR_SCORE_TICKS            = 330               // points
 };
 
 enum BattleGroundBuffObjects

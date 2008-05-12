@@ -7348,30 +7348,31 @@ void Player::SendInitWorldStates()
                 data << uint32(0xab3) << uint32(0x0);           // 12 2739 Fel Reaver - Alliance conflict
                 data << uint32(0xab2) << uint32(0x0);           // 13 2738 Draenei - Alliance conflict
                 data << uint32(0xab1) << uint32(0x0);           // 14 2737 Draenei - Horde conflict
-                data << uint32(0xab0) << uint32(0x0);           // 15 2736 unk // 1 at start
+                data << uint32(0xab0) << uint32(0x0);           // 15 2736 unk // 0 at start
                 data << uint32(0xaaf) << uint32(0x0);           // 16 2735 unk // 0 at start
                 data << uint32(0xaad) << uint32(0x0);           // 17 2733 Draenei - Horde control
                 data << uint32(0xaac) << uint32(0x0);           // 18 2732 Draenei - Alliance control
-                data << uint32(0xaab) << uint32(0x1);           // 19 2731 Draenei uncontrol? (1 - yes, 0 - no)
+                data << uint32(0xaab) << uint32(0x1);           // 19 2731 Draenei uncontrolled (1 - yes, 0 - no)
                 data << uint32(0xaaa) << uint32(0x0);           // 20 2730 Mage Tower - Alliance control
                 data << uint32(0xaa9) << uint32(0x0);           // 21 2729 Mage Tower - Horde control
-                data << uint32(0xaa8) << uint32(0x1);           // 22 2728 Mage Tower uncontrol? (1 - yes, 0 - no)
+                data << uint32(0xaa8) << uint32(0x1);           // 22 2728 Mage Tower uncontrolled (1 - yes, 0 - no)
                 data << uint32(0xaa7) << uint32(0x0);           // 23 2727 Fel Reaver - Horde control
                 data << uint32(0xaa6) << uint32(0x0);           // 24 2726 Fel Reaver - Alliance control
-                data << uint32(0xaa5) << uint32(0x1);           // 25 2725 Fel Reaver uncontrol? (1 - yes, 0 - no)
+                data << uint32(0xaa5) << uint32(0x1);           // 25 2725 Fel Reaver uncontroled (1 - yes, 0 - no)
                 data << uint32(0xaa4) << uint32(0x0);           // 26 2724 Boold Elf - Horde control
                 data << uint32(0xaa3) << uint32(0x0);           // 27 2723 Boold Elf - Alliance control
-                data << uint32(0xaa2) << uint32(0x1);           // 28 2722 Boold Elf uncontrol? (1 - yes, 0 - no)
+                data << uint32(0xaa2) << uint32(0x1);           // 28 2722 Boold Elf uncontrolled (1 - yes, 0 - no)
                 data << uint32(0xac5) << uint32(0x1);           // 29 2757 Flag (1 - show, 0 - hide) - doesn't work exactly this way!
                 data << uint32(0xad2) << uint32(0x1);           // 30 2770 Horde top-stats (1 - show, 0 - hide) // 02 -> horde picked up the flag
                 data << uint32(0xad1) << uint32(0x1);           // 31 2769 Alliance top-stats (1 - show, 0 - hide) // 02 -> alliance picked up the flag
                 data << uint32(0xabe) << uint32(0x0);           // 32 2750 Horde resources
                 data << uint32(0xabd) << uint32(0x0);           // 33 2749 Alliance resources
-                data << uint32(0xa05) << uint32(0x8e);          // 38 2565 unk, constant?
-                data << uint32(0xaa0) << uint32(0x0);           // 38 2720 Capturing progress-bar (100 -> empty (only grey), 0 -> blue|red (no grey), default 0)
-                data << uint32(0xa9f) << uint32(0x0);           // 38 2719 Capturing progress-bar (0 - left, 100 - right)
-                data << uint32(0xa9e) << uint32(0x0);           // 38 2718 Capturing progress-bar (1 - show, 0 - hide)
+                data << uint32(0xa05) << uint32(0x8e);          // 34 2565 unk, constant?
+                data << uint32(0xaa0) << uint32(0x0);           // 35 2720 Capturing progress-bar (100 -> empty (only grey), 0 -> blue|red (no grey), default 0)
+                data << uint32(0xa9f) << uint32(0x0);           // 36 2719 Capturing progress-bar (0 - left, 100 - right)
+                data << uint32(0xa9e) << uint32(0x0);           // 37 2718 Capturing progress-bar (1 - show, 0 - hide)
                 data << uint32(0xc0d) << uint32(0x17b);         // 38 3085 unk
+                // and some more ... unknown
             }
             break;
         case 3483:                                          // Hellfire Peninsula

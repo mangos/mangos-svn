@@ -156,10 +156,10 @@ void BattleGroundAB::Update(time_t diff)
                     (team == BG_TEAM_ALLIANCE) ? RewardReputationToTeam(509, 10, ALLIANCE) : RewardReputationToTeam(510, 10, HORDE);
                     m_ReputationScoreTics[team] -= 200;
                 }
-                if(m_HonorScoreTics[team] >= 330)
+                if(m_HonorScoreTics[team] >= BG_HONOR_SCORE_TICKS)
                 {
                     (team == BG_TEAM_ALLIANCE) ? RewardHonorToTeam(20, ALLIANCE) : RewardHonorToTeam(20, HORDE);
-                    m_HonorScoreTics[team] -= 330;
+                    m_HonorScoreTics[team] -= BG_HONOR_SCORE_TICKS;
                 }
                 if (!m_IsInformedNearVictory && m_TeamScores[team] > 1800)
                 {
