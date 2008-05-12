@@ -25,30 +25,35 @@
 #define BG_WS_FLAG_RESPAWN_TIME   23000
 #define BG_WS_FLAG_DROP_TIME      10000
 
-#define BG_WS_SOUND_FLAG_CAPTURED_ALLIANCE 8173
-#define BG_WS_SOUND_FLAG_CAPTURED_HORDE    8213
-#define BG_WS_SOUND_FLAG_PLACED            8232
-
-#define BG_WS_SPELL_WARSONG_FLAG      23333
-#define BG_WS_SPELL_SILVERWING_FLAG   23335
-
-// WorldStates
-#define BG_WS_FLAG_UNK_ALLIANCE       1545
-#define BG_WS_FLAG_UNK_HORDE          1546
-//#define FLAG_UNK                1547
-#define BG_WS_FLAG_CAPTURES_ALLIANCE  1581
-#define BG_WS_FLAG_CAPTURES_HORDE     1582
-#define BG_WS_FLAG_CAPTURES_MAX       1601
-#define BG_WS_FLAG_STATE_HORDE        2338
-#define BG_WS_FLAG_STATE_ALLIANCE     2339
-
-class BattleGroundWGScore : public BattleGroundScore
+enum BG_WS_Sound
 {
-    public:
-        BattleGroundWGScore() : FlagCaptures(0), FlagReturns(0) {};
-        virtual ~BattleGroundWGScore() {};
-        uint32 FlagCaptures;
-        uint32 FlagReturns;
+    BG_WS_SOUND_FLAG_CAPTURED_ALLIANCE  = 8173,
+    BG_WS_SOUND_FLAG_CAPTURED_HORDE     = 8213,
+    BG_WS_SOUND_FLAG_PLACED             = 8232,
+    BG_WS_SOUND_FLAG_RETURNED           = 8192,
+    BG_WS_SOUND_HORDE_FLAG_PICKED_UP    = 8212,
+    BG_WS_SOUND_ALLIANCE_FLAG_PICKED_UP = 8174,
+    BG_WS_SOUND_FLAGS_RESPAWNED         = 8232
+};
+
+enum BG_WS_SpellId
+{
+    BG_WS_SPELL_WARSONG_FLAG            = 23333,
+    BG_WS_SPELL_WARSONG_FLAG_DROPPED    = 23334,
+    BG_WS_SPELL_SILVERWING_FLAG         = 23335,
+    BG_WS_SPELL_SILVERWING_FLAG_DROPPED = 23336
+};
+
+enum BG_WS_WorldStates
+{
+    BG_WS_FLAG_UNK_ALLIANCE       = 1545,
+    BG_WS_FLAG_UNK_HORDE          = 1546,
+//    FLAG_UNK                      = 1547,
+    BG_WS_FLAG_CAPTURES_ALLIANCE  = 1581,
+    BG_WS_FLAG_CAPTURES_HORDE     = 1582,
+    BG_WS_FLAG_CAPTURES_MAX       = 1601,
+    BG_WS_FLAG_STATE_HORDE        = 2338,
+    BG_WS_FLAG_STATE_ALLIANCE     = 2339
 };
 
 enum BG_WS_ObjectTypes
@@ -98,18 +103,27 @@ enum BG_WS_FlagState
     BG_WS_FLAG_STATE_ON_GROUND    = 3
 };
 
-enum BattleGroundGraveyardsWS
+enum BG_WS_Graveyards
 {
     WS_GRAVEYARD_MAIN_ALLIANCE   = 771,
     WS_GRAVEYARD_MAIN_HORDE      = 772
 };
 
-enum WSBattleGroundCreaturesTypes
+enum BG_WS_CreatureTypes
 {
     WS_SPIRIT_MAIN_ALLIANCE   = 0,
     WS_SPIRIT_MAIN_HORDE      = 1,
 
     BG_CREATURES_MAX_WS       = 2
+};
+
+class BattleGroundWGScore : public BattleGroundScore
+{
+    public:
+        BattleGroundWGScore() : FlagCaptures(0), FlagReturns(0) {};
+        virtual ~BattleGroundWGScore() {};
+        uint32 FlagCaptures;
+        uint32 FlagReturns;
 };
 
 class BattleGroundWS : public BattleGround
@@ -137,23 +151,21 @@ class BattleGroundWS : public BattleGround
         uint8 GetFlagState(uint32 team)             { return m_FlagState[GetTeamIndexByTeamId(team)]; }
 
         /* Battleground Events */
-        void EventPlayerCapturedFlag(Player *Source);
-        void EventPlayerDroppedFlag(Player *Source);
-        void EventPlayerReturnedFlag(Player *Source);
-        void EventPlayerPickedUpFlag(Player *Source);
+        virtual void EventPlayerDroppedFlag(Player *Source);
+        virtual void EventPlayerClickedOnFlag(Player *Source, GameObject* target_obj);
+        virtual void EventPlayerCapturedFlag(Player *Source);
 
         void RemovePlayer(Player *plr, uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
-        void HandleKillPlayer(Player* player, Player *killer);
-        void HandleDropFlag(Player* player);
+        void HandleKillPlayer(Player *player, Player *killer);
         bool SetupBattleGround();
         virtual void ResetBGSubclass();
 
         void UpdateFlagState(uint32 team, uint32 value);
         void UpdateTeamScore(uint32 team);
         void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
-        void SetDropedFlagGUID(uint64 guid, uint32 TeamID)  { m_DropedFlagsGUID[GetTeamIndexByTeamId(TeamID)] = guid;}
-        uint64 GetDropedFlagGUID(uint32 TeamID)             { return m_DropedFlagsGUID[GetTeamIndexByTeamId(TeamID)];}
+        void SetDroppedFlagGUID(uint64 guid, uint32 TeamID)  { m_DroppedFlagGUID[GetTeamIndexByTeamId(TeamID)] = guid;}
+        uint64 GetDroppedFlagGUID(uint32 TeamID)             { return m_DroppedFlagGUID[GetTeamIndexByTeamId(TeamID)];}
         virtual void FillInitialWorldStates(WorldPacket& data);
 
         /* Scorekeeping */
@@ -164,7 +176,7 @@ class BattleGroundWS : public BattleGround
 
     private:
         uint64 m_FlagKeepers[2];                            // 0 - alliance, 1 - horde
-        uint64 m_DropedFlagsGUID[2];
+        uint64 m_DroppedFlagGUID[2];
         uint8 m_FlagState[2];                               // for checking flag state
         uint32 m_TeamScores[2];
         int32 m_FlagsTimer[2];

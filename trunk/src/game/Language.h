@@ -16,6 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef __MANGOS_LANGUAGE_H
+#define __MANGOS_LANGUAGE_H
+
 enum MangosStrings
 {
     // for chat commands
@@ -527,6 +530,12 @@ enum MangosStrings
     LANG_BG_WS_PICKEDUP_HF              = 611,
     LANG_BG_WS_PICKEDUP_AF              = 612,
     LANG_BG_WS_F_PLACED                 = 613,
+    LANG_BG_WS_ALLIANCE_FLAG_RESPAWNED  = 614,
+    LANG_BG_WS_HORDE_FLAG_RESPAWNED     = 615,
+
+    LANG_BG_EY_ONE_MINUTE               = 636,
+    LANG_BG_EY_HALF_MINUTE              = 637,
+    LANG_BG_EY_BEGIN                    = 638,
 
     LANG_BG_AB_ALLY                     = 650,
     LANG_BG_AB_HORDE                    = 651,
@@ -546,6 +555,28 @@ enum MangosStrings
     LANG_BG_AB_H_NEAR_VICTORY           = 665,
     LANG_BG_MARK_BY_MAIL                = 666,
 
+    LANG_BG_EY_HAS_TAKEN_A_M_TOWER      = 667,
+    LANG_BG_EY_HAS_TAKEN_H_M_TOWER      = 668,
+    LANG_BG_EY_HAS_TAKEN_A_D_RUINS      = 669,
+    LANG_BG_EY_HAS_TAKEN_H_D_RUINS      = 670,
+    LANG_BG_EY_HAS_TAKEN_A_B_TOWER      = 671,
+    LANG_BG_EY_HAS_TAKEN_H_B_TOWER      = 672,
+    LANG_BG_EY_HAS_TAKEN_A_F_RUINS      = 673,
+    LANG_BG_EY_HAS_TAKEN_H_F_RUINS      = 674,
+    LANG_BG_EY_HAS_LOST_A_M_TOWER       = 675,
+    LANG_BG_EY_HAS_LOST_H_M_TOWER       = 676,
+    LANG_BG_EY_HAS_LOST_A_D_RUINS       = 677,
+    LANG_BG_EY_HAS_LOST_H_D_RUINS       = 678,
+    LANG_BG_EY_HAS_LOST_A_B_TOWER       = 679,
+    LANG_BG_EY_HAS_LOST_H_B_TOWER       = 680,
+    LANG_BG_EY_HAS_LOST_A_F_RUINS       = 681,
+    LANG_BG_EY_HAS_LOST_H_F_RUINS       = 682,
+    LANG_BG_EY_HAS_TAKEN_FLAG           = 683,
+    LANG_BG_EY_CAPTURED_FLAG_A          = 684,
+    LANG_BG_EY_CAPTURED_FLAG_H          = 685,
+    LANG_BG_EY_DROPPED_FLAG             = 686,
+    LANG_BG_EY_RESETED_FLAG             = 687,
+
     LANG_ARENA_ONE_TOOLOW               = 700,
     LANG_ARENA_ONE_MINUTE               = 701,
     LANG_ARENA_THIRTY_SECONDS           = 702,
@@ -559,6 +590,7 @@ enum MangosStrings
     LANG_PLAYER_DND_DEFAULT             = 709,
     LANG_PLAYER_AFK_DEFAULT             = 710,
 };
+#endif
 
 /*  NOT USED VALUES
 // alliance ranks

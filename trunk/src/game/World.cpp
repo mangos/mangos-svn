@@ -673,7 +673,7 @@ void World::SetInitialWorldSettings()
     objmgr.LoadPageTextLocales();
     objmgr.SetDBCLocaleIndex(GetDBClang());                 // Get once for all the locale index of dbc language
 
-    sLog.outString( "Loading Page Texts..." );              
+    sLog.outString( "Loading Page Texts..." );
     objmgr.LoadPageTexts();
 
     sLog.outString( "Loading Game Object Templates..." );   // must be after LoadPageTexts
