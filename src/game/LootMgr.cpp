@@ -519,32 +519,32 @@ void Loot::FillLoot(uint32 loot_id, LootStore const& store, Player* loot_owner)
         QuestItemMap::iterator qmapitr = PlayerQuestItems.find(plguid);
         if (qmapitr == PlayerQuestItems.end())
         {
-            FillQuestLoot(pl, this);
+            FillQuestLoot(pl);
         }
         qmapitr = PlayerFFAItems.find(plguid);
         if (qmapitr == PlayerFFAItems.end())
         {
-            FillFFALoot(pl, this);
+            FillFFALoot(pl);
         }
         qmapitr = PlayerNonQuestNonFFAConditionalItems.find(plguid);
         if (qmapitr == PlayerNonQuestNonFFAConditionalItems.end())
         {
-            FillNonQuestNonFFAConditionalLoot(pl, this);
+            FillNonQuestNonFFAConditionalLoot(pl);
         }
     }
 }
 
-QuestItemList* FillFFALoot(Player* player, Loot *loot)
+QuestItemList* Loot::FillFFALoot(Player* player)
 {
     QuestItemList *ql = new QuestItemList();
 
-    for(uint8 i = 0; i < loot->items.size(); i++)
+    for(uint8 i = 0; i < items.size(); i++)
     {
-        LootItem &item = loot->items[i];
+        LootItem &item = items[i];
         if(!item.is_looted && item.freeforall && item.AllowedForPlayer(player) )
         {
             ql->push_back(QuestItem(i));
-            ++loot->unlootedCount;
+            ++unlootedCount;
         }
     }
     if (ql->empty())
@@ -553,18 +553,18 @@ QuestItemList* FillFFALoot(Player* player, Loot *loot)
         return NULL;
     }
 
-    loot->PlayerFFAItems[player->GetGUIDLow()] = ql;
+    PlayerFFAItems[player->GetGUIDLow()] = ql;
     return ql;
 }
 
-QuestItemList* FillQuestLoot(Player* player, Loot *loot)
+QuestItemList* Loot::FillQuestLoot(Player* player)
 {
-    if (loot->items.size() == MAX_NR_LOOT_ITEMS) return NULL;
+    if (items.size() == MAX_NR_LOOT_ITEMS) return NULL;
     QuestItemList *ql = new QuestItemList();
 
-    for(uint8 i = 0; i < loot->quest_items.size(); i++)
+    for(uint8 i = 0; i < quest_items.size(); i++)
     {
-        LootItem &item = loot->quest_items[i];
+        LootItem &item = quest_items[i];
         if(!item.is_looted && item.AllowedForPlayer(player) )
         {
             ql->push_back(QuestItem(i));
@@ -574,11 +574,11 @@ QuestItemList* FillQuestLoot(Player* player, Loot *loot)
             //
             // increase once if one looter only, looter-times if free for all
             if (item.freeforall || !item.is_blocked)
-                ++loot->unlootedCount;
+                ++unlootedCount;
 
             item.is_blocked = true;
 
-            if (loot->items.size() + ql->size() == MAX_NR_LOOT_ITEMS)
+            if (items.size() + ql->size() == MAX_NR_LOOT_ITEMS)
                 break;
         }
     }
@@ -588,23 +588,23 @@ QuestItemList* FillQuestLoot(Player* player, Loot *loot)
         return NULL;
     }
 
-    loot->PlayerQuestItems[player->GetGUIDLow()] = ql;
+    PlayerQuestItems[player->GetGUIDLow()] = ql;
     return ql;
 }
 
-QuestItemList* FillNonQuestNonFFAConditionalLoot(Player* player, Loot *loot)
+QuestItemList* Loot::FillNonQuestNonFFAConditionalLoot(Player* player)
 {
     QuestItemList *ql = new QuestItemList();
 
-    for(uint8 i = 0; i < loot->items.size(); i++)
+    for(uint8 i = 0; i < items.size(); ++i)
     {
-        LootItem &item = loot->items[i];
+        LootItem &item = items[i];
         if(!item.is_looted && !item.freeforall && item.conditionId && item.AllowedForPlayer(player))
         {
             ql->push_back(QuestItem(i));
             if(!item.is_counted)
             {
-                ++loot->unlootedCount;
+                ++unlootedCount;
                 item.is_counted=true;
             }
         }
@@ -615,7 +615,7 @@ QuestItemList* FillNonQuestNonFFAConditionalLoot(Player* player, Loot *loot)
         return NULL;
     }
 
-    loot->PlayerNonQuestNonFFAConditionalItems[player->GetGUIDLow()] = ql;
+    PlayerNonQuestNonFFAConditionalItems[player->GetGUIDLow()] = ql;
     return ql;
 }
 
@@ -684,11 +684,6 @@ void Loot::NotifyQuestItemRemoved(uint8 questIndex)
         else
             PlayersLooting.erase(i);
     }
-}
-
-bool Loot::isLooted()
-{
-    return gold == 0 && unlootedCount == 0;
 }
 
 void Loot::generateMoneyLoot( uint32 minAmount, uint32 maxAmount )

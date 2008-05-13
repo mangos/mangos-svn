@@ -91,8 +91,9 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     if (lootSlot >= loot->items.size())
     {
         lootSlot -= loot->items.size();
-        QuestItemMap::iterator itr = loot->PlayerQuestItems.find(player->GetGUIDLow());
-        if (itr != loot->PlayerQuestItems.end() && lootSlot < itr->second->size())
+        QuestItemMap const& lootPlayerQuestItems = loot->GetPlayerQuestItems();
+        QuestItemMap::const_iterator itr = lootPlayerQuestItems.find(player->GetGUIDLow());
+        if (itr != lootPlayerQuestItems.end() && lootSlot < itr->second->size())
         {
             qitem = &itr->second->at(lootSlot);
             item = &loot->quest_items[qitem->index];
@@ -105,8 +106,9 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         is_looted = item->is_looted;
         if(item->freeforall)
         {
-            QuestItemMap::iterator itr = loot->PlayerFFAItems.find(player->GetGUIDLow());
-            if (itr != loot->PlayerFFAItems.end())
+            QuestItemMap const& lootPlayerFFAItems = loot->GetPlayerFFAItems();
+            QuestItemMap::const_iterator itr = lootPlayerFFAItems.find(player->GetGUIDLow());
+            if (itr != lootPlayerFFAItems.end())
             {
                 for(QuestItemList::iterator iter=itr->second->begin(); iter!= itr->second->end(); ++iter)
                 if(iter->index==lootSlot)
@@ -119,8 +121,9 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         }
         else if(item->conditionId)
         {
-            QuestItemMap::iterator itr = loot->PlayerNonQuestNonFFAConditionalItems.find(player->GetGUIDLow());
-            if (itr != loot->PlayerNonQuestNonFFAConditionalItems.end())
+            QuestItemMap const& lootPlayerNonQuestNonFFAConditionalItems = loot->GetPlayerNonQuestNonFFAConditionalItems();
+            QuestItemMap::const_iterator itr = lootPlayerNonQuestNonFFAConditionalItems.find(player->GetGUIDLow());
+            if (itr != lootPlayerNonQuestNonFFAConditionalItems.end())
             {
                 for(QuestItemList::iterator iter=itr->second->begin(); iter!= itr->second->end(); ++iter)
                 if(iter->index==lootSlot)
@@ -155,7 +158,8 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         if (qitem)
         {
             qitem->is_looted = true;
-            if (item->freeforall || loot->PlayerQuestItems.size() == 1) //freeforall is 1 if everyone's supposed to get the quest item.
+            //freeforall is 1 if everyone's supposed to get the quest item.
+            if (item->freeforall || loot->GetPlayerQuestItems().size() == 1)
                 player->SendNotifyLootItemRemoved(loot->items.size() + lootSlot);
             else
                 loot->NotifyQuestItemRemoved(qitem->index);
@@ -441,8 +445,10 @@ void WorldSession::DoLootRelease( uint64 lguid )
 
         if (loot->isLooted())
         {
-            //this is probably wrong
-            pCreature->AllLootRemovedFromCorpse();
+            // skip pickpocketing loot for speed, skinning timer redunction is no-op in fact
+            if(!pCreature->isAlive())
+                pCreature->AllLootRemovedFromCorpse();
+
             pCreature->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             loot->clear();
         }

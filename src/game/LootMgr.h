@@ -233,14 +233,16 @@ class LootValidatorRefManager : public RefManager<Loot, LootValidatorRef>
 
 struct Loot
 {
-    std::set<uint64> PlayersLooting;
-    QuestItemMap PlayerQuestItems;
-    QuestItemMap PlayerFFAItems;
-    QuestItemMap PlayerNonQuestNonFFAConditionalItems;
+    QuestItemMap const& GetPlayerQuestItems() const { return PlayerQuestItems; }
+    QuestItemMap const& GetPlayerFFAItems() const { return PlayerFFAItems; }
+    QuestItemMap const& GetPlayerNonQuestNonFFAConditionalItems() const { return PlayerNonQuestNonFFAConditionalItems; }
+
+    QuestItemList* FillFFALoot(Player* player);
+    QuestItemList* FillQuestLoot(Player* player);
+    QuestItemList* FillNonQuestNonFFAConditionalLoot(Player* player);
+
     std::vector<LootItem> items;
     std::vector<LootItem> quest_items;
-    // All rolls are registered here. They need to know, when the loot is not valid anymore
-    LootValidatorRefManager i_LootValidatorRefManager;
     uint32 gold;
     uint8 unlootedCount;
 
@@ -276,7 +278,9 @@ struct Loot
     }
 
     bool empty() const { return items.empty() && gold == 0; }
-    bool isLooted();
+    bool isLooted() const { return gold == 0 && unlootedCount == 0; }
+
+
     void NotifyItemRemoved(uint8 lootIndex);
     void NotifyQuestItemRemoved(uint8 questIndex);
     void NotifyMoneyRemoved();
@@ -288,6 +292,16 @@ struct Loot
 
     // Inserts the item into the loot (called by LootTemplate processors)
     void AddItem(LootStoreItem const & item);
+
+    private:
+        std::set<uint64> PlayersLooting;
+        QuestItemMap PlayerQuestItems;
+        QuestItemMap PlayerFFAItems;
+        QuestItemMap PlayerNonQuestNonFFAConditionalItems;
+
+        // All rolls are registered here. They need to know, when the loot is not valid anymore
+        LootValidatorRefManager i_LootValidatorRefManager;
+
 };
 
 struct LootView
@@ -311,9 +325,6 @@ extern LootStore LootTemplates_Skinning;
 extern LootStore LootTemplates_Disenchant;
 extern LootStore LootTemplates_Prospecting;
 
-QuestItemList* FillFFALoot(Player* player, Loot *loot);
-QuestItemList* FillQuestLoot(Player* player, Loot *loot);
-QuestItemList* FillNonQuestNonFFAConditionalLoot(Player* player, Loot *loot);
 void LoadLootTables();
 
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li);
