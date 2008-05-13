@@ -229,6 +229,11 @@ pkgdata_DATA = \
 	5790_mangos_player_classlevelstats.sql \
 	5790_mangos_player_levelstats.sql \
 	5799_mangos_spell_proc_event.sql \
+	5813_mangos_mangos_string.sql \
+	5827_mangos_spell_affect.sql \
+	5827_mangos_spell_chain.sql \
+	5827_mangos_spell_learn_spell.sql \
+	5827_mangos_spell_proc_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -438,4 +443,9 @@ EXTRA_DIST = \
 	5790_mangos_player_classlevelstats.sql \
 	5790_mangos_player_levelstats.sql \
 	5799_mangos_spell_proc_event.sql \
+	5813_mangos_mangos_string.sql \
+	5827_mangos_spell_affect.sql \
+	5827_mangos_spell_chain.sql \
+	5827_mangos_spell_learn_spell.sql \
+	5827_mangos_spell_proc_event.sql \
 	README
