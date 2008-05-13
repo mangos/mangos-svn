@@ -444,7 +444,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     }
 
     ///- Create and send the Addon packet
-    if(sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos()))
+    if(sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked))
         SendPacket(&SendAddonPacked);
 
     if(inQueue)
