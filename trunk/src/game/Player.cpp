@@ -7040,9 +7040,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     QuestItemList *q_list = 0;
     if (permission != NONE_PERMISSION)
     {
-        QuestItemMap::iterator itr = loot->PlayerQuestItems.find(GetGUIDLow());
-        if (itr == loot->PlayerQuestItems.end())
-            q_list = FillQuestLoot(this, loot);
+        QuestItemMap const& lootPlayerQuestItems = loot->GetPlayerQuestItems();
+        QuestItemMap::const_iterator itr = lootPlayerQuestItems.find(GetGUIDLow());
+        if (itr == lootPlayerQuestItems.end())
+            q_list = loot->FillQuestLoot(this);
         else
             q_list = itr->second;
     }
@@ -7050,9 +7051,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     QuestItemList *ffa_list = 0;
     if (permission != NONE_PERMISSION)
     {
-        QuestItemMap::iterator itr = loot->PlayerFFAItems.find(GetGUIDLow());
-        if (itr == loot->PlayerFFAItems.end())
-            ffa_list = FillFFALoot(this, loot);
+        QuestItemMap const& lootPlayerFFAItems = loot->GetPlayerFFAItems();
+        QuestItemMap::const_iterator itr = lootPlayerFFAItems.find(GetGUIDLow());
+        if (itr == lootPlayerFFAItems.end())
+            ffa_list = loot->FillFFALoot(this);
         else
             ffa_list = itr->second;
     }
@@ -7060,9 +7062,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     QuestItemList *conditional_list = 0;
     if (permission != NONE_PERMISSION)
     {
-        QuestItemMap::iterator itr = loot->PlayerNonQuestNonFFAConditionalItems.find(GetGUIDLow());
-        if (itr == loot->PlayerNonQuestNonFFAConditionalItems.end())
-            conditional_list = FillNonQuestNonFFAConditionalLoot(this, loot);
+        QuestItemMap const& lootPlayerNonQuestNonFFAConditionalItems = loot->GetPlayerNonQuestNonFFAConditionalItems();
+        QuestItemMap::const_iterator itr = lootPlayerNonQuestNonFFAConditionalItems.find(GetGUIDLow());
+        if (itr == lootPlayerNonQuestNonFFAConditionalItems.end())
+            conditional_list = loot->FillNonQuestNonFFAConditionalLoot(this);
         else
             conditional_list = itr->second;
     }

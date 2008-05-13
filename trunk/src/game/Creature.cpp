@@ -489,21 +489,21 @@ bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, 
     {
         switch (GetCreatureInfo()->rank)
         {
-        case CREATURE_ELITE_RARE:
-            m_corpseDelay = sWorld.getConfig(CONFIG_CORPSE_DECAY_RARE);
-            break;
-        case CREATURE_ELITE_ELITE:
-            m_corpseDelay = sWorld.getConfig(CONFIG_CORPSE_DECAY_ELITE);
-            break;
-        case CREATURE_ELITE_RAREELITE:
-            m_corpseDelay = sWorld.getConfig(CONFIG_CORPSE_DECAY_RAREELITE);
-            break;
-        case CREATURE_ELITE_WORLDBOSS:
-            m_corpseDelay = sWorld.getConfig(CONFIG_CORPSE_DECAY_WORLDBOSS);
-            break;
-        default:
-            m_corpseDelay = sWorld.getConfig(CONFIG_CORPSE_DECAY_NORMAL);
-            break;
+            case CREATURE_ELITE_RARE:
+                m_corpseDelay = sWorld.getConfig(CONFIG_CORPSE_DECAY_RARE);
+                break;
+            case CREATURE_ELITE_ELITE:
+                m_corpseDelay = sWorld.getConfig(CONFIG_CORPSE_DECAY_ELITE);
+                break;
+            case CREATURE_ELITE_RAREELITE:
+                m_corpseDelay = sWorld.getConfig(CONFIG_CORPSE_DECAY_RAREELITE);
+                break;
+            case CREATURE_ELITE_WORLDBOSS:
+                m_corpseDelay = sWorld.getConfig(CONFIG_CORPSE_DECAY_WORLDBOSS);
+                break;
+            default:
+                m_corpseDelay = sWorld.getConfig(CONFIG_CORPSE_DECAY_NORMAL);
+                break;
         }
     }
 
@@ -1888,14 +1888,11 @@ void Creature::AllLootRemovedFromCorpse()
 {
     if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
     {
-        CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(this->GetEntry());
+        // corpse was not skinnable -> apply corpse looted timer
+        uint32 nDeathTimer = uint32(m_corpseDelay * 1000 * sWorld.getRate(RATE_CORPSE_DECAY_LOOTED));
 
-        uint32 nDeathTimer = 0; // if not changed, corpse will despawn next update (skinned case)
-
-        if (!cinfo || !cinfo->SkinLootId) // corpse was not skinnable -> apply corpse looted timer
-            nDeathTimer = (uint32)((m_corpseDelay * 1000) * sWorld.getRate(RATE_CORPSE_DECAY_LOOTED));
-
-        if (m_deathTimer > nDeathTimer) // update death timer only if looted timer is shorter
+        // update death timer only if looted timer is shorter
+        if (m_deathTimer > nDeathTimer)
             m_deathTimer = nDeathTimer;
     }
 }
