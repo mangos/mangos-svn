@@ -153,6 +153,11 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
             SendGuildCommandResult(GUILD_CREATE_S, name, GUILD_NAME_EXISTS);
             return;
         }
+        if(objmgr.IsReservedName(name))
+        {
+            SendGuildCommandResult(GUILD_CREATE_S, name, GUILD_NAME_INVALID);
+            return;
+        }
         if(!ObjectMgr::IsValidCharterName(name))
         {
             SendGuildCommandResult(GUILD_CREATE_S, name, GUILD_NAME_INVALID);
@@ -164,6 +169,11 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
         if(objmgr.GetArenaTeamByName(name))
         {
             SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, name, "", ERR_ARENA_TEAM_NAME_EXISTS_S);
+            return;
+        }
+        if(objmgr.IsReservedName(name))
+        {
+            SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, name, "", ERR_ARENA_TEAM_NAME_INVALID);
             return;
         }
         if(!ObjectMgr::IsValidCharterName(name))
@@ -419,6 +429,11 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket & recv_data)
             SendGuildCommandResult(GUILD_CREATE_S, newname, GUILD_NAME_EXISTS);
             return;
         }
+        if(objmgr.IsReservedName(newname))
+        {
+            SendGuildCommandResult(GUILD_CREATE_S, newname, GUILD_NAME_INVALID);
+            return;
+        }
         if(!ObjectMgr::IsValidCharterName(newname))
         {
             SendGuildCommandResult(GUILD_CREATE_S, newname, GUILD_NAME_INVALID);
@@ -430,6 +445,11 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket & recv_data)
         if(objmgr.GetArenaTeamByName(newname))
         {
             SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, newname, "", ERR_ARENA_TEAM_NAME_EXISTS_S);
+            return;
+        }
+        if(objmgr.IsReservedName(newname))
+        {
+            SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, newname, "", ERR_ARENA_TEAM_NAME_INVALID);
             return;
         }
         if(!ObjectMgr::IsValidCharterName(newname))
