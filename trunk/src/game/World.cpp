@@ -806,6 +806,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Skill Extra Item Table..." );
     LoadSkillExtraItemTable();
 
+    sLog.outString( "Loading Skill Fishing base level requirements..." );
+    objmgr.LoadFishingBaseSkillLevel();
+
     ///- Load dynamic data tables from the database
     sLog.outString( "Loading Auctions..." );
     objmgr.LoadAuctionItems();

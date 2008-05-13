@@ -383,8 +383,17 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                     // 2) if skill == base_zone_skill => 5% chance
                     // 3) chance is linear dependence from (base_zone_skill-skill)
 
+                    uint32 subzone = obj->GetAreaId();
+
+                    int32 zone_skill = objmgr.GetFishingBaseSkillLevel( subzone );
+                    if(!zone_skill)
+                        zone_skill = objmgr.GetFishingBaseSkillLevel( obj->GetZoneId() );
+
+                    //provide error, no fishable zone or area should be 0
+                    if(!zone_skill)
+                        sLog.outErrorDb("Fishable areaId %u are not properly defined in `skill_fishing_base_level`.",subzone);
+
                     int32 skill = _player->GetSkillValue(SKILL_FISHING);
-                    int32 zone_skill = _player->FishingMinSkillForCurrentZone();
                     int32 chance = skill - zone_skill + 5;
                     int32 roll = irand(1,100);
 

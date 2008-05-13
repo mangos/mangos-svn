@@ -58,6 +58,7 @@ bool ChatHandler::HandleReloadAllCommand(const char*)
     HandleReloadAreaTriggerTeleportCommand("");
     //HandleReloadAreaTriggerTavernCommand(""); -- reloaded in HandleReloadAreaTriggerTavernCommand
     //HandleReloadQuestAreaTriggersCommand(""); -- reloaded in HandleReloadAllQuestCommand
+    HandleReloadSkillFishingBaseLevelCommand("");
 
     HandleReloadAllLootCommand("");
     HandleReloadAllQuestCommand("");
@@ -293,6 +294,14 @@ bool ChatHandler::HandleReloadSkillExtraItemTemplateCommand(const char* /*args*/
     sLog.outString( "Re-Loading Skill Extra Item Table..." );
     LoadSkillExtraItemTable();
     SendGlobalSysMessage("DB table `skill_extra_item_template` (extra item creation when crafting) reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadSkillFishingBaseLevelCommand(const char* /*args*/)
+{
+    sLog.outString( "Re-Loading Skill Fishing base level requirements..." );
+    objmgr.LoadFishingBaseSkillLevel();
+    SendGlobalSysMessage("DB table `skill_fishing_base_level` (fishing base level for zone/subzone) reloaded.");
     return true;
 }
 
