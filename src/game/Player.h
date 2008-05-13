@@ -1719,7 +1719,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendLootRelease( uint64 guid );
         void SendNotifyLootItemRemoved(uint8 lootSlot);
         void SendNotifyLootMoneyRemoved();
-        int32 FishingMinSkillForCurrentZone() const;
 
         /*********************************************************/
         /***               BATTLEGROUND SYSTEM                 ***/

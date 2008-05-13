@@ -470,6 +470,7 @@ class ObjectMgr
         void LoadPetNames();
         void LoadPetNumber();
         void LoadCorpses();
+        void LoadFishingBaseSkillLevel();
 
         void LoadReputationOnKill();
 
@@ -477,6 +478,12 @@ class ObjectMgr
 
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint32 level);
+
+        int32 GetFishingBaseSkillLevel(uint32 entry) const 
+        {
+            FishingBaseSkillMap::const_iterator itr = mFishingBaseForArea.find(entry); 
+            return itr != mFishingBaseForArea.end() ? itr->second : 0;
+        }
 
         void ReturnOrDeleteOldMails(bool serverUp);
 
@@ -699,6 +706,9 @@ class ObjectMgr
 
         typedef std::map<uint32,uint32> BaseXPMap;          // [area level][base xp]
         BaseXPMap mBaseXPTable;
+
+        typedef std::map<uint32,int32> FishingBaseSkillMap; // [areaId][base skill level]
+        FishingBaseSkillMap mFishingBaseForArea;
 
         typedef std::map<uint32,std::vector<std::string> > HalfNameMap;
         HalfNameMap PetHalfName0;

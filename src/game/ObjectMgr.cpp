@@ -5824,3 +5824,49 @@ const char *ObjectMgr::GetMangosString(uint32 entry, int locale_idx)
     }
     return GetMangosStringDefault(entry);
 }
+
+void ObjectMgr::LoadFishingBaseSkillLevel()
+{
+    mFishingBaseForArea.clear();                            // for relaod case
+
+    uint32 count = 0;
+    QueryResult *result = WorldDatabase.Query("SELECT entry,skill FROM skill_fishing_base_level");
+
+    if( !result )
+    {
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outErrorDb(">> Loaded `skill_fishing_base_level`, table is empty!");
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        bar.step();
+
+        Field *fields = result->Fetch();
+        uint32 entry  = fields[0].GetUInt32();
+        int32 skill   = fields[1].GetInt32();
+
+        AreaTableEntry const* fArea = GetAreaEntryByAreaID(entry);
+        if(!fArea)
+        {
+            sLog.outErrorDb("AreaId %u defined in `skill_fishing_base_level` does not exist",entry);
+            continue;
+        }
+
+        mFishingBaseForArea[entry] = skill;
+        ++count;
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u areas for fishing base skill level", count );
+}

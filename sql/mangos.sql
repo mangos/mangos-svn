@@ -10693,6 +10693,26 @@ LOCK TABLES `skill_extra_item_template` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `skill_fishing_base_level`
+--
+
+DROP TABLE IF EXISTS `skill_fishing_base_level`;
+CREATE TABLE `skill_fishing_base_level` (
+  `entry` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Area identifier',
+  `skill` smallint(6) NOT NULL default '0' COMMENT 'Base skill level requirement',
+  PRIMARY KEY  (`entry`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Fishing system';
+
+--
+-- Dumping data for table `skill_fishing_base_level`
+--
+
+LOCK TABLES `skill_fishing_base_level` WRITE;
+/*!40000 ALTER TABLE `skill_fishing_base_level` DISABLE KEYS */;
+/*!40000 ALTER TABLE `skill_fishing_base_level` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `skinning_loot_template`
 --
 
