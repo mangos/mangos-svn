@@ -5592,7 +5592,7 @@ bool ObjectMgr::IsValidCharterName( std::string name )
 
 bool ObjectMgr::IsValidPetName( std::string name )
 {
-    // check used symbols in charter(guild/arena) name at creating and rename
+    // check used symbols in pet name at rename
     if(name.find_first_of(notAllowedCharsName)!=name.npos)
         return false;
 
