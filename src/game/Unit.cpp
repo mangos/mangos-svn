@@ -1004,7 +1004,7 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
             VictimState victimState = VICTIMSTATE_NORMAL;
 
             // Physical Damage
-            if ( GetSpellSchoolMask(spellInfo) & SPELL_SCHOOL_NORMAL )
+            if ( GetSpellSchoolMask(spellInfo) & SPELL_SCHOOL_MASK_NORMAL )
             {
                 uint32 modDamage=*damage;
 
@@ -1356,7 +1356,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                 pdamage = amount;
 
                 //Calculate armor mitigation if it is a physical spell
-                if (GetSpellSchoolMask(spellProto) & SPELL_SCHOOL_MASK_NORMAL)
+                if (GetSpellSchoolMask(spellProto) & SPELL_SCHOOL_MASK_NORMAL && spellProto->Mechanic != MECHANIC_BLEED)
                 {
                     uint32 pdamageReductedArmor = CalcArmorReducedDamage(pVictim, pdamage);
                     cleanDamage.damage += pdamage - pdamageReductedArmor;
