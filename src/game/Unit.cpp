@@ -1693,6 +1693,10 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             if(!pVictim->isAlive() || pVictim->getPowerType() != powerType)
                 return;
 
+            // resilience reduce mana draining effect (added in 2.4)
+            if (powerType == POWER_MANA && pVictim->GetTypeId() == TYPEID_PLAYER)
+                pdamage -= ((Player*)pVictim)->GetDotDamageReduction(pdamage); 
+
             uint32 gain = uint32(- pVictim->ModifyPower(powerType, -pdamage));
 
             gain = uint32(gain * spellProto->EffectMultipleValue[effect_idx]);

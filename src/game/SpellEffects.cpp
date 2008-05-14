@@ -1902,10 +1902,16 @@ void Spell::EffectManaDrain(uint32 i)
     uint32 curPower = unitTarget->GetPower(drain_power);
 
     int32 new_damage;
-    if(curPower < uint32(damage))
+
+    // resilience reduce mana draining effect (added in 2.4)
+    uint32 power = damage;
+    if ( drain_power == POWER_MANA && unitTarget->GetTypeId() == TYPEID_PLAYER )
+        power -= ((Player*)unitTarget)->GetDotDamageReduction(damage);
+    
+    if(curPower < power)
         new_damage = curPower;
     else
-        new_damage = damage;
+        new_damage = power;
 
     unitTarget->ModifyPower(drain_power,-new_damage);
 
@@ -1995,7 +2001,12 @@ void Spell::EffectPowerBurn(uint32 i)
 
     int32 curPower = int32(unitTarget->GetPower(POWER_MANA));
 
-    int32 new_damage = (curPower < damage) ? curPower : damage;
+    // resilience reduce mana draining effect (added in 2.4)
+    uint32 power = damage;
+    if(unitTarget->GetTypeId() == TYPEID_PLAYER)
+        power -= ((Player*)unitTarget)->GetDotDamageReduction(damage);
+
+    int32 new_damage = (curPower < power) ? curPower : power;
 
     unitTarget->ModifyPower(POWER_MANA,-new_damage);
     float multiplier = m_spellInfo->EffectMultipleValue[i];
