@@ -444,15 +444,16 @@ void Player::UpdateBlockPercentage()
 
 void Player::UpdateCritPercentage(WeaponAttackType attType)
 {
-    BaseModGroup modGroup = CRIT_PERCENTAGE;
-    uint16 index = PLAYER_CRIT_PERCENTAGE;
-    uint16 ratingIndex = PLAYER_FIELD_MELEE_CRIT_RATING;
+    BaseModGroup modGroup;
+    uint16 index;
+    uint16 ratingIndex;
 
     switch(attType)
     {
         case OFF_ATTACK:
             modGroup = OFFHAND_CRIT_PERCENTAGE;
             index = PLAYER_OFFHAND_CRIT_PERCENTAGE;
+            ratingIndex = PLAYER_FIELD_MELEE_CRIT_RATING;
             break;
         case RANGED_ATTACK:
             modGroup = RANGED_CRIT_PERCENTAGE;
@@ -461,6 +462,9 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
             break;
         case BASE_ATTACK:
         default:
+            modGroup = CRIT_PERCENTAGE;
+            index = PLAYER_CRIT_PERCENTAGE;
+            ratingIndex = PLAYER_FIELD_MELEE_CRIT_RATING;
             break;
     }
 

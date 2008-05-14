@@ -4417,22 +4417,24 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
                 UpdateSkill(SKILL_UNARMED,weapon_skill_gain);
             else if(tmpitem->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE)
                 UpdateSkill(tmpitem->GetSkill(),weapon_skill_gain);
-
-        };break;
+            break;
+        }
         case OFF_ATTACK:
         {
             Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
             if (tmpitem && tmpitem->GetProto()->Class == ITEM_CLASS_WEAPON && !tmpitem->IsBroken() && IsUseEquipedWeapon(false))
                 UpdateSkill(tmpitem->GetSkill(),weapon_skill_gain);
-        };break;
+            break;
+        }
         case RANGED_ATTACK:
         {
             Item* tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
 
             if (tmpitem && tmpitem->GetProto()->Class == ITEM_CLASS_WEAPON && !tmpitem->IsBroken() && IsUseEquipedWeapon(false))
                 UpdateSkill(tmpitem->GetSkill(),weapon_skill_gain);
-        };break;
+            break;
+        }
     }
 }
 
