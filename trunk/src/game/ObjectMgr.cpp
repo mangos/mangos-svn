@@ -1751,7 +1751,23 @@ void ObjectMgr::LoadPlayerInfo()
 
                 PlayerInfo* pInfo = &playerInfo[current_race][current_class];
 
-                pInfo->item.push_back(PlayerCreateInfoItem( fields[2].GetUInt32(), fields[3].GetUInt32()));
+                uint32 item_id = fields[2].GetUInt32();
+
+                if(!GetItemPrototype(item_id))
+                {
+                    sLog.outErrorDb("Wrong item id %u (class %u race %u) in `playercreateinfo_item` table, ignoring.",item_id,current_race,current_class);
+                    continue;
+                }
+
+                uint32 amount  = fields[3].GetUInt32();
+
+                if(!amount)
+                {
+                    sLog.outErrorDb("Item id %u (class %u race %u) have amount==0 in `playercreateinfo_item` table, ignoring.",item_id,current_race,current_class);
+                    continue;
+                }
+
+                pInfo->item.push_back(PlayerCreateInfoItem( item_id, amount));
 
                 bar.step();
                 ++count;

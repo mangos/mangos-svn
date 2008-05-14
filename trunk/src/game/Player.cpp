@@ -587,33 +587,29 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         uint32 titem_id     = item_id_itr->item_id;
         uint32 titem_amount = item_id_itr->item_amount;
 
-        if (titem_id)
-        {
-            sLog.outDebug("STORAGE: Creating initial item, itemId = %u, count = %u",titem_id, titem_amount);
+        sLog.outDebug("STORAGE: Creating initial item, itemId = %u, count = %u",titem_id, titem_amount);
 
-            if(Item *pItem = Item::CreateItem( titem_id, titem_amount, this))
-            {
-                uint16 eDest;
-                uint8 msg = CanEquipItem( NULL_SLOT, eDest, pItem, false );
-                if( msg == EQUIP_ERR_OK )
-                    EquipItem( eDest, pItem, true);
-                else
-                {
-                    ItemPosCountVec sDest;
-                    // store in main bag to simplify second pass
-                    msg = CanStoreItem( INVENTORY_SLOT_BAG_0, NULL_SLOT, sDest, pItem, false );
-                    if( msg == EQUIP_ERR_OK ) 
-                        StoreItem( sDest, pItem, true);
-                    else
-                    {
-                        sLog.outError("STORAGE: Can't equip or store initial item %u for race %u class %u , error msg = %u",titem_id,race,class_,msg);
-                        delete pItem;
-                    }
-                }
-            }
-            else
-                sLog.outError("STORAGE: Can't create initial item %u (not existed item id) for race %u class %u",titem_id,race,class_);
+        // attempt equip
+        uint16 eDest;
+        uint8 msg = CanEquipNewItem( NULL_SLOT, eDest, titem_id, titem_amount, false );
+        if( msg == EQUIP_ERR_OK )
+        {
+            EquipNewItem( eDest, titem_id, titem_amount, true);
+            continue;                                       // equipped, to next
         }
+
+        // attempt store
+        ItemPosCountVec sDest;
+        // store in main bag to simplify second pass (special bags can be not equipped yet at this moment)
+        msg = CanStoreNewItem( INVENTORY_SLOT_BAG_0, NULL_SLOT, sDest, titem_id, titem_amount );
+        if( msg == EQUIP_ERR_OK ) 
+        {
+            StoreNewItem( sDest, titem_id, true, Item::GenerateItemRandomPropertyId(titem_id) );
+            continue;                                       // stored, to next
+        }
+
+        // item can't be added
+        sLog.outError("STORAGE: Can't equip or store initial item %u for race %u class %u , error msg = %u",titem_id,race,class_,msg);
     }
 
     // bags and main-hand weapon must equipped at this moment
