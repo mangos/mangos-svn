@@ -4047,7 +4047,7 @@ uint32 Player::GetSpellCritDamageReduction(uint32 damage) const
 uint32 Player::GetDotDamageReduction(uint32 damage) const
 {
     float spellDot = GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING);
-    // Dot recilience not limited (limit it by 100%)
+    // Dot resilience not limited (limit it by 100%)
     if (spellDot > 100.0f)
         spellDot = 100.0f;
     return uint32 (spellDot * damage / 100.0f);
