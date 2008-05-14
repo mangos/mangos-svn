@@ -662,6 +662,7 @@ void Spell::AddUnitTarget(Unit* pVictim, uint32 effIndex)
     TargetInfo target;
     target.targetGUID = targetGUID;                         // Store target GUID
     target.effectMask = 1<<effIndex;                        // Store index of effect
+    target.processed  = false;                              // Effects not apply on target  
 
     // Calculate hit result
     target.missCondition = m_caster->SpellHitResult(pVictim, m_spellInfo, m_canReflect);
@@ -733,6 +734,7 @@ void Spell::AddGOTarget(GameObject* pVictim, uint32 effIndex)
     GOTargetInfo target;
     target.targetGUID = targetGUID;
     target.effectMask = 1<<effIndex;
+    target.processed  = false;                              // Effects not apply on target  
 
     // Spell have speed - need calculate incoming time
     if (m_spellInfo->speed > 0.0f)
@@ -862,6 +864,10 @@ void Spell::doTriggers(SpellMissInfo missInfo, uint32 damage, uint32 block, uint
 
 void Spell::DoAllEffectOnTarget(TargetInfo *target)
 {
+    if (target->processed)                                  // Check target
+        return;
+    target->processed = true;                               // Target checked in apply effects procedure
+
     // Get mask of effects for target
     uint32 mask = target->effectMask;
     if (mask == 0)                                          // No effects
@@ -933,6 +939,10 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
 
 void Spell::DoAllEffectOnTarget(GOTargetInfo *target)
 {
+    if (target->processed)                                  // Check target
+        return;
+    target->processed = true;                               // Target checked in apply effects procedure
+
     uint32 effectMask = target->effectMask;
     if(!effectMask)
         return;
@@ -1052,6 +1062,11 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         if(Player* modOwner = m_originalCaster->GetSpellModOwner())
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius,this);
 
+    uint32 EffectChainTarget = m_spellInfo->EffectChainTarget[i];
+    if(m_originalCaster)
+        if(Player* modOwner = m_originalCaster->GetSpellModOwner())
+            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_JUMP_TARGETS, EffectChainTarget, this);
+
     uint32 unMaxTargets = m_spellInfo->MaxAffectedTargets;
     switch(cur)
     {
@@ -1070,7 +1085,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         case TARGET_RANDOM_ENEMY_CHAIN_IN_AREA:
         {
             m_targets.m_targetMask = 0;
-            unMaxTargets = m_spellInfo->EffectChainTarget[i];
+            unMaxTargets = EffectChainTarget;
             float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
 
             CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
@@ -1148,7 +1163,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         }
         case TARGET_CHAIN_DAMAGE:
         {
-            if (m_spellInfo->EffectChainTarget[i] <= 1)
+            if (EffectChainTarget <= 1)
             {
                 Unit* pUnitTarget = SelectMagnetTarget();
                 if(pUnitTarget)
@@ -1160,7 +1175,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 if(!pUnitTarget)
                     break;
 
-                unMaxTargets = m_spellInfo->EffectChainTarget[i];
+                unMaxTargets = EffectChainTarget;
 
                 float max_range;
                 if(m_spellInfo->DmgClass==SPELL_DAMAGE_CLASS_MELEE)
@@ -1589,11 +1604,11 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             if(!pUnitTarget)
                 break;
 
-            if (m_spellInfo->EffectChainTarget[i] <= 1)
+            if (EffectChainTarget <= 1)
                 TagUnitMap.push_back(pUnitTarget);
             else
             {
-                unMaxTargets = m_spellInfo->EffectChainTarget[i];
+                unMaxTargets = EffectChainTarget;
                 float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
 
                 std::list<Unit *> tempUnitMap;
@@ -2000,42 +2015,30 @@ uint64 Spell::handle_delayed(uint64 t_offset)
     }
 
     // now recheck units targeting correctness (need before any effects apply to prevent adding immunity at first effect not allow apply second spell effect and similar cases)
-    std::list<TargetInfo>::iterator inext;
-    for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end();ihit = inext)
+    for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin(); ihit != m_UniqueTargetInfo.end();++ihit)
     {
-        inext = ihit;
-        ++inext;
-        if( ihit->timeDelay <= t_offset )
+        if (ihit->processed == false)
         {
-            DoAllEffectOnTarget(&(*ihit));
-            m_UniqueTargetInfo.erase(ihit);
-        }
-        else
-        {
-            if( next_time == 0 || ihit->timeDelay < next_time )
+            if ( ihit->timeDelay <= t_offset )
+                DoAllEffectOnTarget(&(*ihit));
+            else if( next_time == 0 || ihit->timeDelay < next_time )
                 next_time = ihit->timeDelay;
         }
     }
 
     // now recheck gameobject targeting correctness
-    std::list<GOTargetInfo>::iterator ignext;
-    for(std::list<GOTargetInfo>::iterator ighit= m_UniqueGOTargetInfo.begin(); ighit != m_UniqueGOTargetInfo.end();ighit = ignext)
+    for(std::list<GOTargetInfo>::iterator ighit= m_UniqueGOTargetInfo.begin(); ighit != m_UniqueGOTargetInfo.end();++ighit)
     {
-        ignext = ighit;
-        ++ignext;
-        if( ighit->timeDelay <= t_offset )
+        if (ighit->processed == false)
         {
-            DoAllEffectOnTarget(&(*ighit));
-            m_UniqueGOTargetInfo.erase(ighit);
-        }
-        else
-        {
-            if( next_time == 0 || ighit->timeDelay < next_time )
+            if ( ighit->timeDelay <= t_offset )
+                DoAllEffectOnTarget(&(*ighit));
+            else if( next_time == 0 || ighit->timeDelay < next_time )
                 next_time = ighit->timeDelay;
         }
     }
-
-    if (m_UniqueTargetInfo.empty() && m_UniqueGOTargetInfo.empty())
+    // All targets passed - need finish phase
+    if (next_time == 0)
     {
         // spell is finished, perform some last features of the spell here
         _handle_finish_phase();
@@ -2074,11 +2077,16 @@ void Spell::_handle_immediate_phase()
         if(m_spellInfo->Effect[j] == SPELL_EFFECT_SCHOOL_DAMAGE || m_spellInfo->Effect[j] == 0)
             m_needSpellLog = false;
 
+        uint32 EffectChainTarget = m_spellInfo->EffectChainTarget[j];
+        if(m_originalCaster)
+            if(Player* modOwner = m_originalCaster->GetSpellModOwner())
+                modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_JUMP_TARGETS, EffectChainTarget, this);
+
         // initialize multipliers
         m_damageMultipliers[j] = 1.0f;
         m_applyMultiplier[j] =
             (m_spellInfo->EffectImplicitTargetA[j] == TARGET_CHAIN_DAMAGE || m_spellInfo->EffectImplicitTargetA[j] == TARGET_CHAIN_HEAL) &&
-            (m_spellInfo->EffectChainTarget[j] > 1);
+            (EffectChainTarget > 1);
     }
 
     // process items
@@ -2347,10 +2355,6 @@ void Spell::finish(bool ok)
     if(!ok)
         return;
 
-    // call triggered spell only at successful cast
-    if(!m_TriggerSpells.empty())
-        TriggerSpell();
-
     //handle SPELL_AURA_ADD_TARGET_TRIGGER auras
     Unit::AuraList const& targetTriggers = m_caster->GetAurasByType(SPELL_AURA_ADD_TARGET_TRIGGER);
     for(Unit::AuraList::const_iterator i = targetTriggers.begin(); i != targetTriggers.end(); ++i)
@@ -2369,7 +2373,7 @@ void Spell::finish(bool ok)
                     // Calculate chance at that moment (can be depend for example from combo points)
                     int32 chance = m_caster->CalculateSpellDamage(auraSpellInfo, auraSpellIdx, (*i)->GetBasePoints(),unit);
 
-                    if(roll_chance_i(chance))
+                    if(roll_chance_f(chance))
                         m_caster->CastSpell(unit, auraSpellInfo->EffectTriggerSpell[auraSpellIdx], true, NULL, (*i));
                 }
             }
@@ -2386,6 +2390,10 @@ void Spell::finish(bool ok)
     // Clear combo at finish state
     if(m_caster->GetTypeId() == TYPEID_PLAYER && NeedsComboPoints(m_spellInfo))
         ((Player*)m_caster)->ClearComboPoints();
+
+    // call triggered spell only at successful cast (after clear combo points -> for add some if need)
+    if(!m_TriggerSpells.empty())
+        TriggerSpell();
 }
 
 void Spell::SendCastResult(uint8 result)
