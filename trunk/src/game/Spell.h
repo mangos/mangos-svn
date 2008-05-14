@@ -461,9 +461,10 @@ class Spell
         {
             uint64 targetGUID;
             uint64 timeDelay;
-            SpellMissInfo missCondition;
-            SpellMissInfo reflectResult;
-            uint8  effectMask;
+            SpellMissInfo missCondition:8;
+            SpellMissInfo reflectResult:8;
+            uint8  effectMask:8;
+            bool   processed:1;
         };
         std::list<TargetInfo> m_UniqueTargetInfo;
         uint8 m_needAliveTargetMask;                        // Mask req. alive targets
@@ -472,7 +473,8 @@ class Spell
         {
             uint64 targetGUID;
             uint64 timeDelay;
-            uint8  effectMask;
+            uint8  effectMask:8;
+            bool   processed:1;
         };
         std::list<GOTargetInfo> m_UniqueGOTargetInfo;
 
