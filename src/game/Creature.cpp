@@ -1888,8 +1888,16 @@ void Creature::AllLootRemovedFromCorpse()
 {
     if (!HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE))
     {
+        uint32 nDeathTimer;
+
+        CreatureInfo const *cinfo = GetCreatureInfo();
+
         // corpse was not skinnable -> apply corpse looted timer
-        uint32 nDeathTimer = uint32(m_corpseDelay * 1000 * sWorld.getRate(RATE_CORPSE_DECAY_LOOTED));
+        if (!cinfo || !cinfo->SkinLootId)
+            nDeathTimer = (uint32)((m_corpseDelay * 1000) * sWorld.getRate(RATE_CORPSE_DECAY_LOOTED));
+        // corpse skinnable, but without skinning flag, and then skinned, corpse will despawn next update
+        else
+            nDeathTimer = 0;
 
         // update death timer only if looted timer is shorter
         if (m_deathTimer > nDeathTimer)
