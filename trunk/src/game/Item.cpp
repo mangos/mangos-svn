@@ -388,19 +388,21 @@ uint32 Item::GetSkill()
         0,SKILL_CLOTH,SKILL_LEATHER,SKILL_MAIL,SKILL_PLATE_MAIL,0,SKILL_SHIELD,0,0,0
     };
 
-    switch (GetProto()->Class)
+    ItemPrototype const* proto = GetProto();
+
+    switch (proto->Class)
     {
         case ITEM_CLASS_WEAPON:
-            if( GetProto()->SubClass >= MAX_ITEM_SUBCLASS_WEAPON )
+            if( proto->SubClass >= MAX_ITEM_SUBCLASS_WEAPON )
                 return 0;
             else
-                return item_weapon_skills[GetProto()->SubClass];
+                return item_weapon_skills[proto->SubClass];
 
         case ITEM_CLASS_ARMOR:
-            if( GetProto()->SubClass >= MAX_ITEM_SUBCLASS_ARMOR )
+            if( proto->SubClass >= MAX_ITEM_SUBCLASS_ARMOR )
                 return 0;
             else
-                return item_armor_skills[GetProto()->SubClass];
+                return item_armor_skills[proto->SubClass];
 
         default:
             return 0;
@@ -409,10 +411,12 @@ uint32 Item::GetSkill()
 
 uint32 Item::GetSpell()
 {
-    switch (GetProto()->Class)
+    ItemPrototype const* proto = GetProto();
+
+    switch (proto->Class)
     {
         case ITEM_CLASS_WEAPON:
-            switch (GetProto()->SubClass)
+            switch (proto->SubClass)
             {
                 case ITEM_SUBCLASS_WEAPON_AXE:     return  196;
                 case ITEM_SUBCLASS_WEAPON_AXE2:    return  197;
@@ -432,7 +436,7 @@ uint32 Item::GetSpell()
                 default: return 0;
             }
         case ITEM_CLASS_ARMOR:
-            switch(GetProto()->SubClass)
+            switch(proto->SubClass)
             {
                 case ITEM_SUBCLASS_ARMOR_CLOTH:    return 9078;
                 case ITEM_SUBCLASS_ARMOR_LEATHER:  return 9077;
