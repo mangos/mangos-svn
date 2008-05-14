@@ -10850,7 +10850,7 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
                         ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, enchant_amount, apply);
                         sLog.outDebug("+ %u SPELL_CRIT", enchant_amount);
                         break;
-//                    Values from ITEM_STAT_MELEE_HA_RATING to ITEM_STAT_SPELL_HASTE_RATING are never used
+//                    Values from ITEM_STAT_MELEE_HA_RATING to ITEM_MOD_HASTE_RANGED_RATING are never used
 //                    in Enchantments
 //                    case ITEM_MOD_HIT_TAKEN_MELEE_RATING:
 //                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_TAKEN_MELEE_RATING, enchant_amount, apply);
@@ -10874,11 +10874,11 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
 //                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HASTE_RATING, enchant_amount, apply);
 //                        break;
 //                    case ITEM_MOD_HASTE_RANGED_RATING:
-//                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
+//                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HASTE_RATING, enchant_amount, apply);
 //                        break;
-//                    case ITEM_MOD_HASTE_SPELL_RATING:
-//                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, enchant_amount, apply);
-//                        break;
+                    case ITEM_MOD_HASTE_SPELL_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HASTE_RATING, enchant_amount, apply);
+                        break;
                     case ITEM_MOD_HIT_RATING:
                         ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, enchant_amount, apply);
                         ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
@@ -10908,7 +10908,16 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
                         ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING, enchant_amount, apply);
                         sLog.outDebug("+ %u RESILIENCE", enchant_amount);
                         break;
-                        // Value ITEM_STAT_HASTE_RATING is never used in Enchantment
+                    case ITEM_MOD_HASTE_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HASTE_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HASTE_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HASTE_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u HASTE", enchant_amount);
+                        break;
+                    case ITEM_MOD_EXPERTISE_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_EXPERTISE_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u EXPERTISE", enchant_amount);
+                        break;
                     default:
                         break;
                 }
