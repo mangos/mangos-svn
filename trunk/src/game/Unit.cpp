@@ -830,9 +830,12 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                     uint32 channelInterruptFlags = pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->ChannelInterruptFlags;
                     if( channelInterruptFlags & CHANNEL_FLAG_DELAY )
                     {
-                        int32 delay = int32(0.25f * GetSpellDuration(pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo));
-                        sLog.outDetail("Spell %u delayed (%d) at damage!",pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->Id,delay);
-                        pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->DelayedChannel(delay);
+                        if(pVictim!=this)                   //don't shorten the duration of channeling if you damage yourself
+                        {
+                            int32 delay = int32(0.25f * GetSpellDuration(pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo));
+                            sLog.outDetail("Spell %u delayed (%d) at damage!",pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->Id,delay);
+                            pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->DelayedChannel(delay);
+                        }
                     }
                     else if( (channelInterruptFlags & (CHANNEL_FLAG_DAMAGE | CHANNEL_FLAG_DAMAGE2)) )
                     {
