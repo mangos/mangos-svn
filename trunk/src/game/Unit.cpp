@@ -2514,10 +2514,10 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
             if((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellInfo))
                 crit_chance += (*i)->GetModifier()->m_amount;
 
-        AuraList const& mCanNotBeDodge = GetAurasByType(SPELL_AURA_CANNOT_BE_DODGED);
+        AuraList const& mCanNotBeDodge = GetAurasByType(SPELL_AURA_IGNORE_COMBAT_RESULT);
         for(AuraList::const_iterator i = mCanNotBeDodge.begin(); i != mCanNotBeDodge.end(); ++i)
         {
-            if((*i)->GetModifier()->m_miscvalue == 2)       // can't be dodged rogue finishing move
+            if((*i)->GetModifier()->m_miscvalue == VICTIMSTATE_DODGE)       // can't be dodged rogue finishing move
             {
                 if(spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE && (spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE__FINISHING_MOVE))
                 {
@@ -2644,6 +2644,9 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     // Reduce dodge chance by attacker expertise rating
     if (GetTypeId() == TYPEID_PLAYER)
         dodge_chance -= int32(((Player*)this)->GetExpertiseDodgeOrParryReduction(attType)*100);
+
+    // Modify dodge chance by attacker SPELL_AURA_MOD_COMBAT_RESULT_CHANCE
+    dodge_chance+= GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_COMBAT_RESULT_CHANCE, VICTIMSTATE_DODGE);
 
     tmp = dodge_chance;
     if (   (tmp > 0)                                        // check if unit _can_ dodge
@@ -2900,7 +2903,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     int32 dodgeChance = int32(pVictim->GetUnitDodgeChance()*100.0f) - skillDiff * 4;
     // Reduce dodge chance by attacker expertise rating
     if (GetTypeId() == TYPEID_PLAYER)
-        dodgeChance-=int32(((Player*)this)->GetExpertiseDodgeOrParryReduction() * 100.0f);
+        dodgeChance-=int32(((Player*)this)->GetExpertiseDodgeOrParryReduction(attType) * 100.0f);
     if (dodgeChance < 0)
         dodgeChance = 0;
 
@@ -2909,10 +2912,10 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
         dodgeChance = 0;
 
     // Rogue talent`s cant be dodged 
-    AuraList const& mCanNotBeDodge = GetAurasByType(SPELL_AURA_CANNOT_BE_DODGED);
+    AuraList const& mCanNotBeDodge = GetAurasByType(SPELL_AURA_IGNORE_COMBAT_RESULT);
     for(AuraList::const_iterator i = mCanNotBeDodge.begin(); i != mCanNotBeDodge.end(); ++i)
     {
-        if((*i)->GetModifier()->m_miscvalue == 2)       // can't be dodged rogue finishing move
+        if((*i)->GetModifier()->m_miscvalue == VICTIMSTATE_DODGE)       // can't be dodged rogue finishing move
         {
             if(spell->SpellFamilyName==SPELLFAMILY_ROGUE && (spell->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE__FINISHING_MOVE))
             {
@@ -2930,7 +2933,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     int32 parryChance = int32(pVictim->GetUnitParryChance()*100.0f)  - skillDiff * 4;
     // Reduce parry chance by attacker expertise rating
     if (GetTypeId() == TYPEID_PLAYER)
-        parryChance-=int32(((Player*)this)->GetExpertiseDodgeOrParryReduction() * 100.0f);
+        parryChance-=int32(((Player*)this)->GetExpertiseDodgeOrParryReduction(attType) * 100.0f);
     // Can`t parry from behind
     if (parryChance < 0 || attackFromBehind)
         parryChance = 0;
@@ -3790,6 +3793,64 @@ int32 Unit::GetMaxNegativeAuraModifierByMiscMask(AuraType auratype, uint32 misc_
     return modifier;
 }
 
+int32 Unit::GetTotalAuraModifierByMiscValue(AuraType auratype, int32 misc_value) const
+{
+    int32 modifier = 0;
+
+    AuraList const& mTotalAuraList = GetAurasByType(auratype);
+    for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
+    {
+        Modifier* mod = (*i)->GetModifier();
+        if (mod->m_miscvalue == misc_value)
+            modifier += mod->m_amount;
+    }
+    return modifier;
+}
+
+float Unit::GetTotalAuraMultiplierByMiscValue(AuraType auratype, int32 misc_value) const
+{
+    float multipler = 1.0f;
+
+    AuraList const& mTotalAuraList = GetAurasByType(auratype);
+    for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
+    {
+        Modifier* mod = (*i)->GetModifier();
+        if (mod->m_miscvalue == misc_value)
+            multipler *= (100.0f + mod->m_amount)/100.0f;
+    }
+    return multipler;
+}
+
+int32 Unit::GetMaxPositiveAuraModifierByMiscValue(AuraType auratype, int32 misc_value) const
+{
+    int32 modifier = 0;
+
+    AuraList const& mTotalAuraList = GetAurasByType(auratype);
+    for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
+    {
+        Modifier* mod = (*i)->GetModifier();
+        if (mod->m_miscvalue == misc_value && mod->m_amount > modifier)
+            modifier = mod->m_amount;
+    }
+
+    return modifier;
+}
+
+int32 Unit::GetMaxNegativeAuraModifierByMiscValue(AuraType auratype, int32 misc_value) const
+{
+    int32 modifier = 0;
+
+    AuraList const& mTotalAuraList = GetAurasByType(auratype);
+    for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
+    {
+        Modifier* mod = (*i)->GetModifier();
+        if (mod->m_miscvalue == misc_value && mod->m_amount < modifier)
+            modifier = mod->m_amount;
+    }
+
+    return modifier;
+}
+
 bool Unit::AddAura(Aura *Aur)
 {
     // ghost spell check, allow apply any auras at player loading in ghost mode (will be cleanup after load)
@@ -4510,7 +4571,7 @@ void Unit::SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID,uint32 Damage,
     data << uint8(PhysicalDamage);                          // if 1, then client show spell name (example: %s's ranged shot hit %s for %u school or %s suffers %u school damage from %s's spell_name
     data << uint8(0);                                       // unk isFromAura
     data << uint32(Blocked);                                // blocked
-    data << uint32(CriticalHit ? 0x27 : 0x25);              // hitType, flags: 0x2 - critial, 0x10 - replace caster?
+    data << uint32(CriticalHit ? 0x27 : 0x25);              // hitType, flags: 0x2 - SPELL_HIT_TYPE_CRIT, 0x10 - replace caster?
     data << uint8(0);                                       // isDebug?
     SendMessageToSet( &data, true );
 }
@@ -7384,6 +7445,9 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
 
     float tmpDamage = (float(pdamage)+DoneActualBenefit)*DoneTotalMod;
 
+    // Add flat bonus from spell damage versus
+    tmpDamage += this->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_FLAT_SPELL_DAMAGE_VERSUS, creatureTypeMask);
+
     // apply spellmod to Done damage
     if(Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, tmpDamage);
@@ -8947,12 +9011,21 @@ int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto, Unit const* tar
 
     if (duration > 0)
     {
+        // Find total mod value (negative bonus)
+        int32 durationMod_always = target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD, int32(spellProto->Mechanic));
+        // Find max mod (negative bonus)
+        int32 durationMod_not_stack = target->GetMaxNegativeAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD_NOT_STACK, int32(spellProto->Mechanic));
+
         int32 durationMod = 0;
-        AuraList const& mMechanicMod = target->GetAurasByType(SPELL_AURA_MECHANIC_DURATION_MOD);
-        for(AuraList::const_iterator i = mMechanicMod.begin();i != mMechanicMod.end(); ++i)
-            if((*i)->GetModifier()->m_miscvalue == int32(spellProto->Mechanic))
-                durationMod+= (*i)->GetModifier()->m_amount;
-        duration = int32(int64(duration) * (100+durationMod) /100);
+        // Select strongest negative mod
+        if (durationMod_always > durationMod_not_stack)
+            durationMod = durationMod_not_stack;
+        else
+            durationMod = durationMod_always;
+
+        if (durationMod != 0)
+            duration = int32(int64(duration) * (100+durationMod) /100);
+
         if (duration < 0) duration = 0;
     }
 
