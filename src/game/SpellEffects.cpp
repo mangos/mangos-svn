@@ -345,6 +345,17 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                 }
                 break;
             }
+            case SPELLFAMILY_WARLOCK:
+            {
+                // Incinerate Rank 1 & 2
+                if((m_spellInfo->SpellFamilyFlags & 0x00004000000000LL) && m_spellInfo->SpellIconID==2128)
+                {
+                    // Incinerate does more dmg (dmg*0.25) if the target is Immolated.
+                    if(unitTarget->HasAuraState(AURA_STATE_IMMOLATE))
+                        damage += int32(damage*0.25);
+                }
+                break;
+            }
             case SPELLFAMILY_DRUID:
             {
                 // Ferocious Bite
