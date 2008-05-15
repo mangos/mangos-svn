@@ -269,6 +269,33 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
         return;
     }
 
+    // not accept if some items now can't be trade (cheating)
+    for(int i=0; i<TRADE_SLOT_TRADED_COUNT; i++)
+    {
+        if(_player->tradeItems[i] != NULL_SLOT )
+        {
+            if(Item* item  =_player->GetItemByPos( _player->tradeItems[i] ))
+            {
+                if(!item->CanBeTraded())
+                {
+                    SendTradeStatus(TRADE_STATUS_TRADE_CANCELED);
+                    return;
+                }
+            }
+        }
+        if(_player->pTrader->tradeItems[i] != NULL_SLOT)
+        {
+            if(Item* item  =_player->pTrader->GetItemByPos( _player->pTrader->tradeItems[i]) )
+            {
+                if(!item->CanBeTraded())
+                {
+                    SendTradeStatus(TRADE_STATUS_TRADE_CANCELED);
+                    return;
+                }
+            }
+        }
+    }
+
     _player->acceptTrade = true;
     if (_player->pTrader->acceptTrade )
     {
