@@ -7215,6 +7215,13 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                     TakenTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f; break;
         }
     }
+
+    // .. taken pct: dummy auras
+    AuraList const& mDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
+    for(AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+        if( (*i)->GetSpellProto()->SpellIconID == 2109 )    // Cheat Death
+            if( ((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) )
+                TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
     
     // Distribute Damage over multiple effects, reduce by AoE
     CastingTime = GetCastingTimeForBonus( spellProto, damagetype, CastingTime );   
@@ -8071,6 +8078,13 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
     for(AuraList::const_iterator i = mModDamagePercentTaken.begin(); i != mModDamagePercentTaken.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
             TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+
+    // .. taken pct: dummy auras
+    AuraList const& mDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
+    for(AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+        if( (*i)->GetSpellProto()->SpellIconID == 2109 )    // Cheat Death
+            if( ((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) )
+                TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
 
     if(attType != RANGED_ATTACK)
     {
