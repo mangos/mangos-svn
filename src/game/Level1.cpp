@@ -214,18 +214,13 @@ bool ChatHandler::HandleVisibleCommand(const char* args)
 
 bool ChatHandler::HandleGPSCommand(const char* args)
 {
-    uint32 pguid = 0;
     WorldObject *obj;
     if (*args)
     {
         std::string name = args;
         normalizePlayerName(name);
-        pguid = objmgr.GetPlayerGUIDByName(name.c_str());
-        if (pguid != 0)
-        {
-            obj = objmgr.GetPlayer(name.c_str());
-        }
-        else
+        obj = objmgr.GetPlayer(name.c_str());
+        if(!obj)
         {
             SendSysMessage(LANG_PLAYER_NOT_FOUND);
             return true;
