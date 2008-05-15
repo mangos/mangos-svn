@@ -2270,7 +2270,6 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
     }
 
     // Next arg is: <GUID> <WPNUM> <ARGUMENT>
-    char* arg_str = NULL;
 
     // Did user provide a GUID
     // or did the user select a creature?
@@ -2284,40 +2283,32 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
     {
         sLog.outDebug("DEBUG: HandleWpModifyCommand - User did select an NPC");
 
-        // The visual waypoint
-        Creature* wpCreature = NULL;
-
         wpGuid = target->GetGUIDLow();
 
         // Did the user select a visual spawnpoint?
-        if(target->GetEntry()==VISUAL_WAYPOINT)
-            wpCreature = target;
-        // attempt check creature existence by DB data
-        else
+        if (target->GetEntry() != VISUAL_WAYPOINT )
         {
-            CreatureData const* data = objmgr.GetCreatureData(wpGuid);
-            if(!data)
-            {
-                PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, wpGuid);
-                return true;
-            }
-        }
-        // User did select a visual waypoint?
-        // Check the creature
-        if (wpCreature->GetEntry() != VISUAL_WAYPOINT )
-        {
+            // if not export/import need a certain waypoint
             if( (show != "export") && (show != "import") )
             {
                 PSendSysMessage(LANG_WAYPOINT_VP_SELECT);
                 return true;
             }
             lowguid = wpGuid;
-            arg_str = strtok((char*)NULL, " ");
+
+            // attempt check creature existence by DB data
+            CreatureData const* data = objmgr.GetCreatureData(lowguid);
+            if(!data)
+            {
+                PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, lowguid);
+                return true;
+            }
         }
         else
         {
+            // The visual waypoint
             QueryResult *result =
-                WorldDatabase.PQuery( "SELECT id, point FROM creature_movement WHERE wpguid = %u",
+                WorldDatabase.PQuery( "SELECT id, point FROM creature_movement WHERE wpguid = %u LIMIT 1",
                 target->GetGUIDLow() );
             if(!result)
             {
@@ -2331,8 +2322,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
                 // (0.001) - There is no other way to compare C++ floats with mySQL floats
                 // See also: http://dev.mysql.com/doc/refman/5.0/en/problems-with-float.html
                 const char* maxDIFF = "0.01";
-                result = WorldDatabase.PQuery( "SELECT id, point FROM creature_movement WHERE (abs(position_x - %f) <= %s ) and (abs(position_y - %f) <= %s ) and (abs(position_z - %f) <= %s )",
-                    wpCreature->GetPositionX(), maxDIFF, wpCreature->GetPositionY(), maxDIFF, wpCreature->GetPositionZ(), maxDIFF);
+                result = WorldDatabase.PQuery( "SELECT id, point FROM creature_movement WHERE (abs(position_x - %f) <= %s ) and (abs(position_y - %f) <= %s ) and (abs(position_z - %f) <= %s ) LIMIT 1",
+                    target->GetPositionX(), maxDIFF, target->GetPositionY(), maxDIFF, target->GetPositionZ(), maxDIFF);
                 if(!result)
                 {
                     PSendSysMessage(LANG_WAYPOINT_NOTFOUNDDBPROBLEM, wpGuid);
@@ -2341,61 +2332,24 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             }
             sLog.outDebug("DEBUG: HandleWpModifyCommand - After getting wpGuid");
 
-            do
-            {
-                Field *fields = result->Fetch();
-                lowguid = fields[0].GetUInt32();
-                point   = fields[1].GetUInt32();
-            }while( result->NextRow() );
+            Field *fields = result->Fetch();
+            lowguid = fields[0].GetUInt32();
+            point   = fields[1].GetUInt32();
 
             // Cleanup memory
             sLog.outDebug("DEBUG: HandleWpModifyCommand - Cleanup memory");
             delete result;
-            // We have the waypoint number and the GUID of the "master npc"
-            // Text is enclosed in "<>", all other arguments not
-            if( show.find("text") != std::string::npos )
-            {
-                arg_str = strtok((char*)NULL, "<>");
-            }
-            else
-            {
-                arg_str = strtok((char*)NULL, " ");
-            }
         }
     }
     else
     {
         // User did provide <GUID> <WPNUM>
+
         char* guid_str = strtok((char*)NULL, " ");
-        char* point_str = strtok((char*)NULL, " ");
-
-        // Text is enclosed in "<>", all other arguments not
-        if( show.find("text") != std::string::npos )
-        {
-            arg_str = strtok((char*)NULL, "<>");
-        }
-        else
-        {
-            arg_str = strtok((char*)NULL, " ");
-        }
-
         if( !guid_str )
         {
             SendSysMessage(LANG_WAYPOINT_NOGUID);
             return false;
-        }
-        if( !point_str )
-        {
-            SendSysMessage(LANG_WAYPOINT_NOWAYPOINTGIVEN);
-            return false;
-        }
-        if( (show != "del") && (show != "move") && (show != "add") )
-        {
-            if( !arg_str )
-            {
-                PSendSysMessage(LANG_WAYPOINT_ARGUMENTREQ, show.c_str());
-                return false;
-            }
         }
         lowguid = atoi((char*)guid_str);
 
@@ -2407,29 +2361,26 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         }
 
         PSendSysMessage("DEBUG: GUID provided: %d", lowguid);
+
+        char* point_str = strtok((char*)NULL, " ");
+        if( !point_str )
+        {
+            SendSysMessage(LANG_WAYPOINT_NOWAYPOINTGIVEN);
+            return false;
+        }
         point    = atoi((char*)point_str);
+
         PSendSysMessage("DEBUG: wpNumber provided: %d", point);
 
         // Now we need the GUID of the visual waypoint
         // -> "del", "move", "add" command
 
-        QueryResult *result = WorldDatabase.PQuery( "SELECT wpguid FROM creature_movement WHERE id = '%u' AND point = '%u'", lowguid, point);
-        if(result)
-        {
-            do
-            {
-                Field *fields = result->Fetch();
-                wpGuid  = fields[0].GetUInt32();
-            }while( result->NextRow() );
-
-            // Free memory
-            delete result;
-        }
-        else
+        QueryResult *result = WorldDatabase.PQuery( "SELECT wpguid FROM creature_movement WHERE id = '%u' AND point = '%u' LIMIT 1", lowguid, point);
+        if (!result)
         {
             PSendSysMessage(LANG_WAYPOINT_NOTFOUNDSEARCH, lowguid, point);
             // Select waypoint number from database
-            QueryResult *result = WorldDatabase.PQuery( "SELECT position_x,position_y,position_z FROM creature_movement WHERE point='%d' AND id = '%u'", point, lowguid);
+            QueryResult *result = WorldDatabase.PQuery( "SELECT position_x,position_y,position_z FROM creature_movement WHERE point='%d' AND id = '%u' LIMIT 1", point, lowguid);
             if(!result)
             {
                 PSendSysMessage(LANG_WAYPOINT_NOTFOUND, lowguid);
@@ -2451,35 +2402,41 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             // See also: http://dev.mysql.com/doc/refman/5.0/en/problems-with-float.html
             const char* maxDIFF = "0.01";
 
-            result = WorldDatabase.PQuery( "SELECT guid FROM creature WHERE (abs(position_x - %f) <= %s ) and (abs(position_y - %f) <= %s ) and (abs(position_z - %f) <= %s ) and id=%d",
+            result = WorldDatabase.PQuery( "SELECT guid FROM creature WHERE (abs(position_x - %f) <= %s ) and (abs(position_y - %f) <= %s ) and (abs(position_z - %f) <= %s ) and id=%d LIMIT 1",
                 x, maxDIFF, y, maxDIFF, z, maxDIFF, VISUAL_WAYPOINT);
             if(!result)
             {
                 PSendSysMessage(LANG_WAYPOINT_WPCREATNOTFOUND, VISUAL_WAYPOINT);
                 return true;
             }
-            do
-            {
-                Field *fields = result->Fetch();
-                wpGuid  = fields[0].GetUInt32();
-            }while( result->NextRow() );
-
-            // Free memory
-            delete result;
         }
+
+        Field *fields = result->Fetch();
+        wpGuid  = fields[0].GetUInt32();
+
+        // Free memory
+        delete result;
     }
 
-    sLog.outDebug("DEBUG: HandleWpModifyCommand - Parameters parsed - now execute the command");
-
+    char* arg_str = NULL;
     // Check for argument
     if( (show.find("text") == std::string::npos ) && (show != "del") && (show != "move") && (show != "add") && (show != "aiscript"))
     {
-        if( arg_str == NULL )
+        // Text is enclosed in "<>", all other arguments not
+        if( show.find("text") != std::string::npos )
+            arg_str = strtok((char*)NULL, "<>");
+        else
+            arg_str = strtok((char*)NULL, " ");
+
+        if( !arg_str)
         {
             PSendSysMessage(LANG_WAYPOINT_ARGUMENTREQ, show_str);
             return false;
         }
     }
+
+    sLog.outDebug("DEBUG: HandleWpModifyCommand - Parameters parsed - now execute the command");
+
     // wpGuid  -> GUID of the waypoint creature
     // lowguid -> GUID of the NPC
     // point   -> waypoint number
@@ -2707,7 +2664,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
                 //sLog.outDebug("( ");
                 outfile << "( ";
                 //sLog.outDebug("id");
-                outfile << fields[16].GetUInt32();          // id
+                outfile << fields[15].GetUInt32();          // id
                 outfile << ", ";
                 //sLog.outDebug("point");
                 outfile << fields[0].GetUInt32();           // point
