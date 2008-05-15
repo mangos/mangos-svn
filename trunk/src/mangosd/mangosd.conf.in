@@ -236,6 +236,11 @@ UpdateUptimeInterval = 10
 #        Log file of gm commands
 #        Default: "" (Disable)
 #
+#    GmLogTimestamp
+#        Logfile with timestamp of server start in name
+#        Default: 0 - no timestamp in name
+#                 1 - add timestamp in name in form Logname_YYYY-MM-DD_HH-MM-SS.Ext for Logname.Ext
+#
 #    RaLogFile
 #        Log file of RA commands
 #        Default: "Ra.log" 
@@ -266,6 +271,7 @@ CharLogFile = "Char.log"
 CharLogTimestamp = 0
 CharLogDump = 0
 GmLogFile = ""
+GmLogTimestamp = 0
 RaLogFile = ""
 LogColors = ""
 
