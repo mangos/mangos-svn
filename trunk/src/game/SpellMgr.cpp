@@ -1007,7 +1007,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 return false;
 
             // *Band of Eternal Champion and Seal of Command(multi-family check)
-            if( spellId_1 == 35081 && spellInfo_2->SpellFamilyName == SPELLFAMILY_PALADIN && spellInfo_2->SpellIconID==992 && spellInfo_2->SpellVisual==7992)
+            if( spellId_1 == 35081 && spellInfo_2->SpellFamilyName == SPELLFAMILY_PALADIN && spellInfo_2->SpellIconID==561 && spellInfo_2->SpellVisual==7992)
                 return false;
             break;
         case SPELLFAMILY_MAGE:
@@ -1128,7 +1128,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 return false;
 
             // *Seal of Command and Band of Eternal Champion (multi-family check)
-            if( spellInfo_1->SpellIconID==992 && spellInfo_1->SpellVisual==7992 && spellId_2 == 35081)
+            if( spellInfo_1->SpellIconID==561 && spellInfo_1->SpellVisual==7992 && spellId_2 == 35081)
                 return false;
             break;
         case SPELLFAMILY_SHAMAN:
