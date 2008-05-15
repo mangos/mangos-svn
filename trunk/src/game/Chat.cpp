@@ -716,7 +716,7 @@ bool ChatHandler::ShowHelpForSubCommands(ChatCommand *table, char const* cmd, ch
         if(strlen(table[i].Name) && !hasStringAbbr(table[i].Name, subcmd))
             continue;
 
-        (list += "\r\n    ") += table[i].Name;
+        (list += "\n    ") += table[i].Name;
     }
 
     if(list.empty())
@@ -725,10 +725,10 @@ bool ChatHandler::ShowHelpForSubCommands(ChatCommand *table, char const* cmd, ch
     if(table==getCommandTable())
     {
         SendSysMessage(LANG_AVIABLE_CMD);
-        PSendSysMessage("%s",list.c_str());
+        PSendSysMultilineMessage("%s",list.c_str());
     }
     else
-        PSendSysMessage(LANG_SUBCMDS_LIST,cmd,list.c_str());
+        PSendSysMultilineMessage(LANG_SUBCMDS_LIST,cmd,list.c_str());
 
     return true;
 }
