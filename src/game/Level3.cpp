@@ -2856,6 +2856,82 @@ bool ChatHandler::HandleDieCommand(const char* /*args*/)
     return true;
 }
 
+bool ChatHandler::HandleDamageCommand(const char * args)
+{
+    if (!*args)
+        return false;
+
+    Unit* target = getSelectedUnit();
+
+    if(!target || !m_session->GetPlayer()->GetSelection())
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
+    }
+
+    if( !target->isAlive() )
+        return true;
+
+    char* damageStr = strtok((char*)args, " ");
+    if(!damageStr)
+        return false;
+
+    int32 damage = atoi((char*)damageStr);
+    if(damage <=0)
+        return true;
+
+    char* schoolStr = strtok((char*)NULL, " ");
+
+    // flat melee damage without resistence/etc reduction
+    if(!schoolStr)
+    {
+        m_session->GetPlayer()->DealDamage(target, damage, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+        m_session->GetPlayer()->SendAttackStateUpdate (HITINFO_NORMALSWING2, target, 1, SPELL_SCHOOL_MASK_NORMAL, damage, 0, 0, VICTIMSTATE_NORMAL, 0);
+        return true;
+    }
+
+    uint32 school = schoolStr ? atoi((char*)schoolStr) : SPELL_SCHOOL_NORMAL;
+    if(school >= MAX_SPELL_SCHOOL)
+        return false;
+
+    SpellSchoolMask schoolmask = SpellSchoolMask(1 << school);
+
+    if ( schoolmask & SPELL_SCHOOL_MASK_NORMAL )
+        damage = m_session->GetPlayer()->CalcArmorReducedDamage(target, damage);
+
+    char* spellStr = strtok((char*)NULL, " ");
+
+    // melee damage by specific school
+    if(!spellStr)
+    {
+        uint32 absorb = 0;
+        uint32 resist = 0;
+
+        m_session->GetPlayer()->CalcAbsorbResist(target,schoolmask, SPELL_DIRECT_DAMAGE, damage, &absorb, &resist);
+
+        if (damage <= absorb + resist)
+            return true;
+
+        damage -= absorb + resist;
+
+        m_session->GetPlayer()->DealDamage(target, damage, NULL, DIRECT_DAMAGE, schoolmask, NULL, false);
+        m_session->GetPlayer()->SendAttackStateUpdate (HITINFO_NORMALSWING2, target, 1, schoolmask, damage, absorb, resist, VICTIMSTATE_NORMAL, 0);
+        return true;
+    }
+
+    // non-melee damage
+
+    char* spellStr2 = extractKeyFromLink(spellStr,"Hspell");
+    uint32 spellid = spellStr2 ? atoi(spellStr2) : 0;
+
+    SpellEntry const* spelInfo = sSpellStore.LookupEntry(spellid);
+    if(!spelInfo)
+        return false;
+
+    m_session->GetPlayer()->SpellNonMeleeDamageLog(target, spellid, damage, false);
+    return true;
+}
+
 bool ChatHandler::HandleModifyArenaCommand(const char * args)
 {
     if (!*args)

@@ -450,6 +450,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "unmute",         SEC_GAMEMASTER,     &ChatHandler::HandleUnmuteCommand,              "", NULL },
         { "movegens",       SEC_ADMINISTRATOR,  &ChatHandler::HandleMovegensCommand,            "", NULL },
         { "cometome",       SEC_ADMINISTRATOR,  &ChatHandler::HandleComeToMeCommand,            "", NULL },
+        { "damage",         SEC_ADMINISTRATOR,  &ChatHandler::HandleDamageCommand,              "", NULL },
 
         { NULL,             0,                  NULL,                                           "", NULL }
     };
