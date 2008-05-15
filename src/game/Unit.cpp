@@ -8082,8 +8082,8 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
     // .. taken pct: dummy auras
     AuraList const& mDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
     for(AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
-        if( (*i)->GetSpellProto()->SpellIconID == 2109 )    // Cheat Death
-            if( ((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) )
+        if((*i)->GetSpellProto()->SpellIconID == 2109)      // Cheat Death
+            if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
                 TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
 
     if(attType != RANGED_ATTACK)
