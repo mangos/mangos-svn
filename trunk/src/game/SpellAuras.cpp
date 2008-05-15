@@ -1217,6 +1217,13 @@ void Aura::TriggerSpell()
         case 29917: trigger_spell_id = 29916; break;        // Feed Captured Animal
         case 30576: trigger_spell_id = 30571; break;        // Quake
 
+        case 31347:                                         // Doom
+        {
+            m_target->CastSpell(m_target,31350,true);
+            m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+            return;
+        }
+
         case 31666:                                         // Master of Subtlety
         {
             caster->RemoveAurasDueToSpell(31665);
