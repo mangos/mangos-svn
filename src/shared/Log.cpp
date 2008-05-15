@@ -200,6 +200,16 @@ void Log::Initialize()
     std::string gmlogname = sConfig.GetStringDefault("GMLogFile", "");
     if(!gmlogname.empty())
     {
+        if(sConfig.GetBoolDefault("GmLogTimestamp",false))
+        {
+            std::string gmLogTimestamp = GetTimestampStr();
+            gmLogTimestamp.insert(0,"_");
+            size_t dot_pos = gmlogname.find_last_of(".");
+            if(dot_pos!=gmlogname.npos)
+                gmlogname.insert(dot_pos,gmLogTimestamp);
+            else
+                gmlogname += gmLogTimestamp;
+        }
         gmLogfile = fopen((logsDir+gmlogname).c_str(), "a");
     }
 
