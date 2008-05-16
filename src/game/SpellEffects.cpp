@@ -491,7 +491,7 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
             case SPELLFAMILY_PALADIN:
             {
                 //Judgement of Vengeance
-                if((m_spellInfo->SpellFamilyFlags & 0x800000000LL) && m_spellInfo->SpellIconID==2040)
+                if((m_spellInfo->SpellFamilyFlags & 0x800000000LL) && m_spellInfo->SpellIconID==2292)
                 {
                     uint32 stacks = 0;
                     Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
@@ -1259,10 +1259,10 @@ void Spell::EffectDummy(uint32 i)
                         mod->op = SPELLMOD_DAMAGE;
                         mod->value = -50;
                         mod->type = SPELLMOD_PCT;
-                        mod->spellId = 0;
-                        mod->effectId = 0;
+                        mod->spellId = m_spellInfo->Id;
+                        mod->effectId = i;
                         mod->lastAffected = NULL;
-                        mod->mask = 0x20800000000LL;
+                        mod->mask = 0x0000020000000000LL;
                         mod->charges = 0;
 
                         ((Player*)m_caster)->AddSpellMod(mod, true);

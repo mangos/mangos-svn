@@ -5822,7 +5822,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 mod->op = SPELLMOD_THREAT;
                 mod->value = -100;
                 mod->type = SPELLMOD_PCT;
-                mod->spellId = 0;
+                mod->spellId = dummySpell->Id;
                 mod->effectId = 0;
                 mod->lastAffected = NULL;
                 mod->mask = 0x0000000000000003LL;
