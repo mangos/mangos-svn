@@ -134,10 +134,7 @@ bool ChatHandler::HandleSendOpcodeCommand(const char* args)
 
     FILE *file = fopen("opcode.txt", "r");
     if(!file)
-    {
-        fclose(file);
         return false;
-    }
 
     uint32 type;
 
