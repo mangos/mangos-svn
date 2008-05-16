@@ -3191,7 +3191,11 @@ float Unit::GetUnitDodgeChance() const
 
 float Unit::GetUnitParryChance() const
 {
-    float chance = 0;
+    if ( IsNonMeleeSpellCasted(false) || hasUnitState(UNIT_STAT_STUNDED))
+        return 0.0f;
+
+    float chance = 0.0f;
+
     if(GetTypeId() == TYPEID_PLAYER)
     {
         Player const* player = (Player const*)this;
@@ -3212,7 +3216,7 @@ float Unit::GetUnitParryChance() const
     else if(GetTypeId() == TYPEID_UNIT)
     {
         if(GetCreatureType() == CREATURE_TYPE_HUMANOID)
-            chance = 5;
+            chance = 5.0f;
     }
 
     return chance;
@@ -3220,20 +3224,23 @@ float Unit::GetUnitParryChance() const
 
 float Unit::GetUnitBlockChance() const
 {
+    if ( IsNonMeleeSpellCasted(false) || hasUnitState(UNIT_STAT_STUNDED))
+        return 0.0f;
+
     if(GetTypeId() == TYPEID_PLAYER)
     {
         Item *tmpitem = ((Player const*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
         if(tmpitem && !tmpitem->IsBroken() && tmpitem->GetProto()->Block)
             return GetFloatValue(PLAYER_BLOCK_PERCENTAGE);
         else
-            return 0;
+            return 0.0f;
     }
     else
     {
         if(((Creature const*)this)->isTotem())
-            return 0;
+            return 0.0f;
         else
-            return 5;
+            return 5.0f;
     }
 }
 
@@ -3592,7 +3599,7 @@ void Unit::InterruptSpell(uint32 spellType, bool withDelayed)
     }
 }
 
-bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skipAutorepeat)
+bool Unit::IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled, bool skipAutorepeat) const
 {
     // We don't do loop here to explicitly show that melee spell is excluded.
     // Maybe later some special spells will be excluded too.
