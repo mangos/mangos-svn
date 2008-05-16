@@ -5456,6 +5456,25 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             }
             break;
         }
+        case SPELLFAMILY_ROGUE:
+        {
+            switch(dummySpell->Id)
+            {
+                // Deadly Throw Interrupt
+                case 32748:
+                {
+                    if(GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if(!castItem)
+                        return;
+
+                    CastSpell(pVictim, 32747, true, castItem, triggeredByAura);
+                    return;
+                }
+            }
+            break;
+        }
         case SPELLFAMILY_PALADIN:
         {
             // Seal of Righteousness - melee proc dummy
