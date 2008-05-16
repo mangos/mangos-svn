@@ -1306,8 +1306,7 @@ void Player::BuildEnumData( QueryResult * result, WorldPacket * p_data )
 
     for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; slot++)
     {
-        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
-        uint32 item_id = GetUInt32Value(VisibleBase);
+        uint32 item_id = GetUInt32Value(PLAYER_VISIBLE_ITEM_1_0 + (slot * 16));
         const ItemPrototype * proto = objmgr.GetItemPrototype(item_id);
 
         if (proto != NULL)
@@ -3056,14 +3055,26 @@ void Player::InitVisibleBits()
     //431) = 884 (0x374) = main weapon
     for(uint16 i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
+        // PLAYER_VISIBLE_ITEM_i_CREATOR    // Size: 2
+        // PLAYER_VISIBLE_ITEM_i_0          // Size: 12
+        //    entry                         //      Size: 1
+        //    enchantments                  //      Size: 11 
+        // PLAYER_VISIBLE_ITEM_i_PROPERTIES // Size: 1
+        // PLAYER_VISIBLE_ITEM_i_PAD        // Size: 1 
+        //                                  //     = 16 
+
+        // item creator
+        updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_CREATOR + (i*16) + 0);
+        updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_CREATOR + (i*16) + 1);
+
         uint16 visual_base = PLAYER_VISIBLE_ITEM_1_0 + (i*16);
 
         // item entry
         updateVisualBits.SetBit(visual_base + 0);
 
         // item enchantment IDs
-        for(uint8 j = 0; j < 11; ++j)
-            updateVisualBits.SetBit(visual_base +1 + j);
+        for(uint8 j = 0; j < MAX_ENCHANTMENT_SLOT; ++j)
+            updateVisualBits.SetBit(visual_base + 1 + j);
 
         // random properties
         updateVisualBits.SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_PROPERTIES + (i*16)));
@@ -9673,6 +9684,34 @@ void Player::QuickEquipItem( uint16 pos, Item *pItem)
     }
 }
 
+void Player::SetVisibleItemSlot(uint32 slot, Item *pItem)
+{
+    if(pItem)
+    {
+        SetUInt64Value(PLAYER_VISIBLE_ITEM_1_CREATOR + (slot * 16), pItem->GetUInt64Value(ITEM_FIELD_CREATOR));
+
+        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
+        SetUInt32Value(VisibleBase + 0, pItem->GetEntry());
+
+        for(int i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
+            SetUInt32Value(VisibleBase + 1 + i, pItem->GetEnchantmentId(EnchantmentSlot(i)));
+
+        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + (slot * 16), uint32(pItem->GetItemRandomPropertyId()));
+    }
+    else
+    {
+        SetUInt64Value(PLAYER_VISIBLE_ITEM_1_CREATOR + (slot * 16), 0);
+
+        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
+        SetUInt32Value(VisibleBase + 0, 0);
+
+        for(int i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
+            SetUInt32Value(VisibleBase + 1 + i, 0);
+
+        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + (slot * 16), 0);
+    }
+}
+
 void Player::VisualizeItem( uint16 pos, Item *pItem)
 {
     if(!pItem)
@@ -9695,15 +9734,7 @@ void Player::VisualizeItem( uint16 pos, Item *pItem)
     pItem->SetContainer( NULL );
 
     if( slot < EQUIPMENT_SLOT_END )
-    {
-        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
-        SetUInt32Value(VisibleBase, pItem->GetEntry());
-
-        for(int i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
-            SetUInt32Value(VisibleBase + 1 + i, pItem->GetEnchantmentId(EnchantmentSlot(i)));
-
-        SetUInt32Value(VisibleBase + 8, uint32(pItem->GetItemRandomPropertyId()));
-    }
+        SetVisibleItemSlot(slot,pItem);
 
     pItem->SetState(ITEM_CHANGED, this);
 }
@@ -9753,11 +9784,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
             if ( slot < EQUIPMENT_SLOT_END )
-            {
-                int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
-                for (int i = VisibleBase; i < VisibleBase + 12; ++i)
-                    SetUInt32Value(i, 0);
-            }
+                SetVisibleItemSlot(slot,NULL);
         }
         else
         {
@@ -9855,9 +9882,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
                 RemoveItemDependentAurasAndCasts(pItem);
 
                 // equipment visual show
-                int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
-                for (int i = VisibleBase; i < VisibleBase + 12; ++i)
-                    SetUInt32Value(i, 0);
+                SetVisibleItemSlot(slot,NULL);
             }
 
             m_items[slot] = NULL;
@@ -10679,7 +10704,7 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
     if(!item->IsEquipped())
         return;
 
-    if(slot > MAX_ENCHANTMENT_SLOT)
+    if(slot >= MAX_ENCHANTMENT_SLOT)
         return;
 
     uint32 enchant_id = item->GetEnchantmentId(slot);
@@ -10951,7 +10976,7 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
 
     // visualize enchantment at player and equipped items
     int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (item->GetSlot() * 16);
-    SetUInt32Value(VisibleBase+1 + slot +1, apply? item->GetEnchantmentId(slot) : 0);
+    SetUInt32Value(VisibleBase + 1 + slot, apply? item->GetEnchantmentId(slot) : 0);
 
     if(apply_dur)
     {
@@ -10983,38 +11008,6 @@ void Player::SendItemDurations()
     for(ItemDurationList::iterator itr = m_itemDuration.begin();itr != m_itemDuration.end();++itr)
     {
         (*itr)->SendTimeUpdate(this);
-    }
-}
-
-void Player::ReducePoisonCharges(uint32 enchantId)
-{
-    if(!enchantId)
-        return;
-    uint32 charges = 0;
-    Item *pItem;
-
-    for(int i = EQUIPMENT_SLOT_MAINHAND; i < EQUIPMENT_SLOT_RANGED; i++)
-    {
-        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-        if(!pItem)
-            continue;
-        for(int x=0;x<MAX_ENCHANTMENT_SLOT;x++)
-        {
-            charges = pItem->GetEnchantmentCharges(EnchantmentSlot(x));
-            if(charges == 0)
-                continue;
-            if(charges <= 1)
-            {
-                ApplyEnchantment(pItem,EnchantmentSlot(x),false);
-                pItem->ClearEnchantment(EnchantmentSlot(x));
-                break;
-            }
-            else
-            {
-                pItem->SetEnchantmentCharges(EnchantmentSlot(x),charges-1);
-                break;
-            }
-        }
     }
 }
 
@@ -12750,10 +12743,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     for(uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
     {
         SetUInt64Value( (uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2) ), 0 );
-
-        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
-        for(int i = 0; i < 11; ++i )
-            SetUInt32Value(VisibleBase + i, 0);
+        SetVisibleItemSlot(slot,NULL);
 
         if (m_items[slot])
         {
