@@ -2260,11 +2260,10 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
     std::string show = show_str;
     // Check
     // Remember: "show" must also be the name of a column!
-    if( (show != "emote") && (show != "spell") && (show != "aiscript")
-        && (show != "text1") && (show != "text2") && (show != "text3") && (show != "text4") && (show != "text5")
+    if( (show != "emote") && (show != "spell") && (show != "text1") && (show != "text2") 
+        && (show != "text3") && (show != "text4") && (show != "text5")
         && (show != "waittime") && (show != "del") && (show != "move") && (show != "add")
-        && (show != "model1") && (show != "model2") && (show != "orientation")
-        && (show != "import") && (show != "export") )
+        && (show != "model1") && (show != "model2") && (show != "orientation"))
     {
         return false;
     }
@@ -2283,63 +2282,33 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
     {
         sLog.outDebug("DEBUG: HandleWpModifyCommand - User did select an NPC");
 
-        wpGuid = target->GetGUIDLow();
-
         // Did the user select a visual spawnpoint?
         if (target->GetEntry() != VISUAL_WAYPOINT )
         {
-            // if not export/import need a certain waypoint
-            if( (show != "export") && (show != "import") )
-            {
-                PSendSysMessage(LANG_WAYPOINT_VP_SELECT);
-                return true;
-            }
-            lowguid = wpGuid;
-
-            // attempt check creature existence by DB data
-            CreatureData const* data = objmgr.GetCreatureData(lowguid);
-            if(!data)
-            {
-                PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, lowguid);
-                return true;
-            }
+            PSendSysMessage(LANG_WAYPOINT_VP_SELECT);
+            return true;
         }
-        else
+
+        wpGuid = target->GetGUIDLow();
+
+        // The visual waypoint
+        QueryResult *result =
+            WorldDatabase.PQuery( "SELECT id, point FROM creature_movement WHERE wpguid = %u LIMIT 1",
+            target->GetGUIDLow() );
+        if(!result)
         {
-            // The visual waypoint
-            QueryResult *result =
-                WorldDatabase.PQuery( "SELECT id, point FROM creature_movement WHERE wpguid = %u LIMIT 1",
-                target->GetGUIDLow() );
-            if(!result)
-            {
-                sLog.outDebug("DEBUG: HandleWpModifyCommand - No waypoint found - used 'wpguid'");
-
-                PSendSysMessage(LANG_WAYPOINT_NOTFOUNDSEARCH, target->GetGUIDLow());
-                // Select waypoint number from database
-                // Since we compare float values, we have to deal with
-                // some difficulties.
-                // Here we search for all waypoints that only differ in one from 1 thousand
-                // (0.001) - There is no other way to compare C++ floats with mySQL floats
-                // See also: http://dev.mysql.com/doc/refman/5.0/en/problems-with-float.html
-                const char* maxDIFF = "0.01";
-                result = WorldDatabase.PQuery( "SELECT id, point FROM creature_movement WHERE (abs(position_x - %f) <= %s ) and (abs(position_y - %f) <= %s ) and (abs(position_z - %f) <= %s ) LIMIT 1",
-                    target->GetPositionX(), maxDIFF, target->GetPositionY(), maxDIFF, target->GetPositionZ(), maxDIFF);
-                if(!result)
-                {
-                    PSendSysMessage(LANG_WAYPOINT_NOTFOUNDDBPROBLEM, wpGuid);
-                    return true;
-                }
-            }
-            sLog.outDebug("DEBUG: HandleWpModifyCommand - After getting wpGuid");
-
-            Field *fields = result->Fetch();
-            lowguid = fields[0].GetUInt32();
-            point   = fields[1].GetUInt32();
-
-            // Cleanup memory
-            sLog.outDebug("DEBUG: HandleWpModifyCommand - Cleanup memory");
-            delete result;
+            PSendSysMessage(LANG_WAYPOINT_NOTFOUNDDBPROBLEM, wpGuid);
+            return true;
         }
+        sLog.outDebug("DEBUG: HandleWpModifyCommand - After getting wpGuid");
+
+        Field *fields = result->Fetch();
+        lowguid = fields[0].GetUInt32();
+        point   = fields[1].GetUInt32();
+
+        // Cleanup memory
+        sLog.outDebug("DEBUG: HandleWpModifyCommand - Cleanup memory");
+        delete result;
     }
     else
     {
@@ -2379,36 +2348,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         if (!result)
         {
             PSendSysMessage(LANG_WAYPOINT_NOTFOUNDSEARCH, lowguid, point);
-            // Select waypoint number from database
-            QueryResult *result = WorldDatabase.PQuery( "SELECT position_x,position_y,position_z FROM creature_movement WHERE point='%d' AND id = '%u' LIMIT 1", point, lowguid);
-            if(!result)
-            {
-                PSendSysMessage(LANG_WAYPOINT_NOTFOUND, lowguid);
-                return true;
-            }
-
-            Field *fields = result->Fetch();
-            float x         = fields[0].GetFloat();
-            float y         = fields[1].GetFloat();
-            float z         = fields[2].GetFloat();
-            // Cleanup memory
-            delete result;
-
-            // Select waypoint number from database
-            // Since we compare float values, we have to deal with
-            // some difficulties.
-            // Here we search for all waypoints that only differ in one from 1 thousand
-            // (0.001) - There is no other way to compare C++ floats with mySQL floats
-            // See also: http://dev.mysql.com/doc/refman/5.0/en/problems-with-float.html
-            const char* maxDIFF = "0.01";
-
-            result = WorldDatabase.PQuery( "SELECT guid FROM creature WHERE (abs(position_x - %f) <= %s ) and (abs(position_y - %f) <= %s ) and (abs(position_z - %f) <= %s ) and id=%d LIMIT 1",
-                x, maxDIFF, y, maxDIFF, z, maxDIFF, VISUAL_WAYPOINT);
-            if(!result)
-            {
-                PSendSysMessage(LANG_WAYPOINT_WPCREATNOTFOUND, VISUAL_WAYPOINT);
-                return true;
-            }
+            return true;
         }
 
         Field *fields = result->Fetch();
@@ -2420,7 +2360,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
 
     char* arg_str = NULL;
     // Check for argument
-    if( (show.find("text") == std::string::npos ) && (show != "del") && (show != "move") && (show != "add") && (show != "aiscript"))
+    if( (show.find("text") == std::string::npos ) && (show != "del") && (show != "move") && (show != "add"))
     {
         // Text is enclosed in "<>", all other arguments not
         if( show.find("text") != std::string::npos )
@@ -2641,163 +2581,6 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         return true;
     }                                                       // move
 
-    if(show == "export")
-    {
-        PSendSysMessage("DEBUG: wp export, GUID: %u", lowguid);
-
-        std::ofstream outfile;
-        outfile.open (arg_str);
-
-        QueryResult *result = WorldDatabase.PQuery(
-        //          0      1           2           3           4            5       6       7         8      9      10     11     12     13     14     15
-            "SELECT point, position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, text1, text2, text3, text4, text5, id FROM creature_movement WHERE id = '%u' ORDER BY point", lowguid );
-
-        if( result )
-        {
-            do
-            {
-                Field *fields = result->Fetch();
-
-                outfile << "insert into creature_movement ";
-                outfile << "( id, point, position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, text1, text2, text3, text4, text5 ) values ";
-
-                //sLog.outDebug("( ");
-                outfile << "( ";
-                //sLog.outDebug("id");
-                outfile << fields[15].GetUInt32();          // id
-                outfile << ", ";
-                //sLog.outDebug("point");
-                outfile << fields[0].GetUInt32();           // point
-                outfile << ", ";
-                //sLog.outDebug("position_x");
-                outfile << fields[1].GetFloat();            // position_x
-                outfile << ", ";
-                //sLog.outDebug("position_y");
-                outfile << fields[2].GetFloat();            // position_y
-                outfile << ", ";
-                //sLog.outDebug("position_z");
-                outfile << fields[3].GetUInt32();           // position_z
-                outfile << ", ";
-                //sLog.outDebug("orientation");
-                outfile << fields[4].GetUInt32();           // orientation
-                outfile << ", ";
-                //sLog.outDebug("model1");
-                outfile << fields[5].GetUInt32();           // model1
-                outfile << ", ";
-                //sLog.outDebug("model2");
-                outfile << fields[6].GetUInt32();           // model2
-                outfile << ", ";
-                //sLog.outDebug("waittime");
-                outfile << fields[7].GetUInt16();           // waittime
-                outfile << ", ";
-                //sLog.outDebug("emote");
-                outfile << fields[8].GetUInt32();           // emote
-                outfile << ", ";
-                //sLog.outDebug("spell");
-                outfile << fields[9].GetUInt32();           // spell
-                outfile << ", ";
-                //sLog.outDebug("text1");
-                const char *tmpChar = fields[10].GetString();
-                if( !tmpChar )
-                {
-                    outfile << "NULL";                      // text1
-                }
-                else
-                {
-                    outfile << "'";
-                    outfile << tmpChar;                     // text1
-                    outfile << "'";
-                }
-                outfile << ", ";
-                //sLog.outDebug("text2");
-                tmpChar = fields[11].GetString();
-                if( !tmpChar )
-                {
-                    outfile << "NULL";                      // text2
-                }
-                else
-                {
-                    outfile << "'";
-                    outfile << tmpChar;                     // text2
-                    outfile << "'";
-                }
-                outfile << ", ";
-                //sLog.outDebug("text3");
-                tmpChar = fields[12].GetString();
-                if( !tmpChar )
-                {
-                    outfile << "NULL";                      // text3
-                }
-                else
-                {
-                    outfile << "'";
-                    outfile << tmpChar;                     // text3
-                    outfile << "'";
-                }
-                outfile << ", ";
-                //sLog.outDebug("text4");
-                tmpChar = fields[13].GetString();
-                if( !tmpChar )
-                {
-                    outfile << "NULL";                      // text4
-                }
-                else
-                {
-                    outfile << "'";
-                    outfile << tmpChar;                     // text4
-                    outfile << "'";
-                }
-                outfile << ", ";
-                //sLog.outDebug("text5");
-                tmpChar = fields[14].GetString();
-                if( !tmpChar )
-                {
-                    outfile << "NULL";                      // text5
-                }
-                else
-                {
-                    outfile << "'";
-                    outfile << tmpChar;                     // text5
-                    outfile << "'";
-                }
-                outfile << ");\n ";
-
-            } while( result->NextRow() );
-            delete result;
-
-            PSendSysMessage(LANG_WAYPOINT_EXPORTED);
-        }
-        else
-        {
-            PSendSysMessage(LANG_WAYPOINT_NOTHINGTOEXPORT);
-            outfile << GetMangosString(LANG_WAYPOINT_NOTHINGTOEXPORT);
-        }
-        outfile.close();
-
-        return true;
-    }
-    if(show == "import")
-    {
-        PSendSysMessage("DEBUG: wp import, GUID: %u", lowguid);
-
-        std::string line;
-        std::ifstream infile (arg_str);
-        if (infile.is_open())
-        {
-            while (! infile.eof() )
-            {
-                getline (infile,line);
-                //cout << line << endl;
-                QueryResult *result = WorldDatabase.PQuery(line.c_str());
-                delete result;
-            }
-            infile.close();
-        }
-        PSendSysMessage(LANG_WAYPOINT_IMPORTED);
-
-        return true;
-    }
-
     // Create creature - npc that has the waypoint
     CreatureData const* data = objmgr.GetCreatureData(lowguid);
     if(!data)
@@ -2933,8 +2716,6 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
     }
 
     uint32 lowguid = target->GetDBTableGUIDLow();
-
-    sLog.outDebug("DEBUG: HandleWpShowCommand: danach");
 
     std::string show = show_str;
     uint32 Maxpoint;
@@ -3244,6 +3025,200 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
 
     return true;
 }                                                           // HandleWpShowCommand
+
+bool ChatHandler::HandleWpExportCommand(const char *args)
+{
+    if(!*args)
+        return false;
+
+    // Next arg is: <GUID> <ARGUMENT>
+
+    // Did user provide a GUID
+    // or did the user select a creature?
+    // -> variable lowguid is filled with the GUID of the NPC
+    uint32 lowguid = 0;
+    Creature* target = getSelectedCreature();
+    char* arg_str = NULL;
+    if (target)
+    {
+        if (target->GetEntry() != VISUAL_WAYPOINT)
+            lowguid = target->GetGUIDLow();
+        else
+        {
+            QueryResult *result = WorldDatabase.PQuery( "SELECT id FROM creature_movement WHERE wpguid = %u LIMIT 1", target->GetGUIDLow() );
+            if (!result)
+            {
+                PSendSysMessage(LANG_WAYPOINT_NOTFOUNDDBPROBLEM, target->GetGUIDLow());
+                return true;
+            }
+            Field *fields = result->Fetch();
+            lowguid = fields[0].GetUInt32();;
+            delete result;
+        }
+
+        arg_str = strtok((char*)args, " ");
+    }
+    else
+    {
+        // user provided <GUID>
+        char* guid_str = strtok((char*)args, " ");
+        if( !guid_str )
+        {
+            SendSysMessage(LANG_WAYPOINT_NOGUID);
+            return false;
+        }
+        lowguid = atoi((char*)guid_str);
+
+        arg_str = strtok((char*)NULL, " ");
+    }
+
+    if( !arg_str)
+    {
+        PSendSysMessage(LANG_WAYPOINT_ARGUMENTREQ, "export");
+        return false;
+    }
+
+    PSendSysMessage("DEBUG: wp export, GUID: %u", lowguid);
+
+    QueryResult *result = WorldDatabase.PQuery(
+    //          0      1           2           3           4            5       6       7         8      9      10     11     12     13     14     15
+        "SELECT point, position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, text1, text2, text3, text4, text5, id FROM creature_movement WHERE id = '%u' ORDER BY point", lowguid );
+
+    if (!result)
+    {
+        PSendSysMessage(LANG_WAYPOINT_NOTHINGTOEXPORT);
+        return true;
+    }
+
+    std::ofstream outfile;
+    outfile.open (arg_str);
+
+    do
+    {
+        Field *fields = result->Fetch();
+
+        outfile << "INSERT INTO creature_movement ";
+        outfile << "( id, point, position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, text1, text2, text3, text4, text5 ) VALUES ";
+
+        outfile << "( ";
+        outfile << fields[15].GetUInt32();          // id
+        outfile << ", ";
+        outfile << fields[0].GetUInt32();           // point
+        outfile << ", ";
+        outfile << fields[1].GetFloat();            // position_x
+        outfile << ", ";
+        outfile << fields[2].GetFloat();            // position_y
+        outfile << ", ";
+        outfile << fields[3].GetUInt32();           // position_z
+        outfile << ", ";
+        outfile << fields[4].GetUInt32();           // orientation
+        outfile << ", ";
+        outfile << fields[5].GetUInt32();           // model1
+        outfile << ", ";
+        outfile << fields[6].GetUInt32();           // model2
+        outfile << ", ";
+        outfile << fields[7].GetUInt16();           // waittime
+        outfile << ", ";
+        outfile << fields[8].GetUInt32();           // emote
+        outfile << ", ";
+        outfile << fields[9].GetUInt32();           // spell
+        outfile << ", ";
+        const char *tmpChar = fields[10].GetString();
+        if( !tmpChar )
+        {
+            outfile << "NULL";                      // text1
+        }
+        else
+        {
+            outfile << "'";
+            outfile << tmpChar;                     // text1
+            outfile << "'";
+        }
+        outfile << ", ";
+        tmpChar = fields[11].GetString();
+        if( !tmpChar )
+        {
+            outfile << "NULL";                      // text2
+        }
+        else
+        {
+            outfile << "'";
+            outfile << tmpChar;                     // text2
+            outfile << "'";
+        }
+        outfile << ", ";
+        tmpChar = fields[12].GetString();
+        if( !tmpChar )
+        {
+            outfile << "NULL";                      // text3
+        }
+        else
+        {
+            outfile << "'";
+            outfile << tmpChar;                     // text3
+            outfile << "'";
+        }
+        outfile << ", ";
+        tmpChar = fields[13].GetString();
+        if( !tmpChar )
+        {
+            outfile << "NULL";                      // text4
+        }
+        else
+        {
+            outfile << "'";
+            outfile << tmpChar;                     // text4
+            outfile << "'";
+        }
+        outfile << ", ";
+        tmpChar = fields[14].GetString();
+        if( !tmpChar )
+        {
+            outfile << "NULL";                      // text5
+        }
+        else
+        {
+            outfile << "'";
+            outfile << tmpChar;                     // text5
+            outfile << "'";
+        }
+        outfile << ");\n ";
+
+    } while( result->NextRow() );
+    delete result;
+
+    PSendSysMessage(LANG_WAYPOINT_EXPORTED);
+    outfile.close();
+
+    return true;
+}
+
+bool ChatHandler::HandleWpImportCommand(const char *args)
+{
+    if(!*args)
+        return false;
+
+    char* arg_str = strtok((char*)args, " ");
+    if (!arg_str)
+        return false;
+
+    std::string line;
+    std::ifstream infile (arg_str);
+    if (infile.is_open())
+    {
+        while (! infile.eof() )
+        {
+            getline (infile,line);
+            //cout << line << endl;
+            QueryResult *result = WorldDatabase.PQuery(line.c_str());
+            delete result;
+        }
+        infile.close();
+    }
+    PSendSysMessage(LANG_WAYPOINT_IMPORTED);
+
+    return true;
+}
 
 //rename characters
 bool ChatHandler::HandleRenameCommand(const char* args)
