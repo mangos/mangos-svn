@@ -452,7 +452,9 @@ bool IsSingleTargetSpell(SpellEntry const *spellInfo)
     //Fear
     if ((spellInfo->SpellIconID == 98 && spellInfo->SpellVisual == 336)
         //Banish
-        || (spellInfo->SpellIconID == 96 && spellInfo->SpellVisual == 1305) )
+        || (spellInfo->SpellIconID == 96 && spellInfo->SpellVisual == 1305)
+        //Cyclone
+        || (spellInfo->SpellIconID == 174 && spellInfo->SpellVisual == 8206))
         return true;
 
     // spell with single target specific types
