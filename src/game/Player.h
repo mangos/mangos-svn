@@ -1043,6 +1043,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool CheckAmmoCompatibility(const ItemPrototype *ammo_proto) const;
         void QuickEquipItem( uint16 pos, Item *pItem);
         void VisualizeItem( uint16 pos, Item *pItem);
+        void SetVisibleItemSlot(uint32 slot, Item *pItem);
         Item* BankItem( ItemPosCountVec const& dest, Item *pItem, bool update )
         {
             return StoreItem( dest, pItem, update);
@@ -1088,7 +1089,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void UpdateEnchantTime(uint32 time);
         void UpdateItemDuration(uint32 time, bool realtimeonly=false);
-        void ReducePoisonCharges(uint32 enchantId);
         void AddEnchantmentDurations(Item *item);
         void RemoveEnchantmentDurations(Item *item);
         void AddEnchantmentDuration(Item *item,EnchantmentSlot slot,uint32 duration);
