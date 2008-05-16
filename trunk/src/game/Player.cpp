@@ -5203,14 +5203,16 @@ int32 Player::GetBaseReputation(const FactionEntry *factionEntry) const
     if (!factionEntry)
         return 0;
 
-    uint32 Race = getRace();
+    uint32 raceMask = getRaceMask();
+    uint32 classMask = getClassMask();
     for (int i=0; i < 4; i++)
     {
-        if ( factionEntry->BaseRepMask[i] & (1 << (Race-1)))
+        if( (factionEntry->BaseRepRaceMask[i] & raceMask) && 
+            (factionEntry->BaseRepClassMask[i]==0 || (factionEntry->BaseRepClassMask[i] & classMask) ) )
             return factionEntry->BaseRepValue[i];
     }
 
-    // in faction.dbc exist factions with (RepListId >=0, listed in character reputation list) with all BaseRepMask[i]==0
+    // in faction.dbc exist factions with (RepListId >=0, listed in character reputation list) with all BaseRepRaceMask[i]==0
     return 0;
 }
 

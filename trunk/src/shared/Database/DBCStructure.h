@@ -195,8 +195,8 @@ struct FactionEntry
 {
     uint32      ID;                                         // 0
     int32       reputationListID;                           // 1
-    uint32      BaseRepMask[4];                             // 2-5 Base reputation masks (see enum Races)
-                                                            // 6-9 unused
+    uint32      BaseRepRaceMask[4];                         // 2-5 Base reputation race masks (see enum Races)
+    uint32      BaseRepClassMask[4];                        // 6-9 Base reputation class masks (see enum Classes) 
     int32       BaseRepValue[4];                            // 10-13 Base reputation values
                                                             // 14-17 unused
     uint32      team;                                       // 18
