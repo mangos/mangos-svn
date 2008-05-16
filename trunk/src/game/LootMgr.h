@@ -55,22 +55,6 @@ enum PermissionTypes
     NONE_PERMISSION   = 3
 };
 
-enum LootConditionType
-{                                                           // value1       value2  for the Condition enumed
-    CONDITION_NONE                  = 0,                    // 0            0
-    CONDITION_AURA                  = 1,                    // spell_id     effindex
-    CONDITION_ITEM                  = 2,                    // item_id      count
-    CONDITION_ITEM_EQUIPPED         = 3,                    // item_id      0
-    CONDITION_ZONEID                = 4,                    // zone_id      0
-    CONDITION_REPUTATION_RANK       = 5,                    // faction_id   min_rank
-    CONDITION_TEAM                  = 6,                    // player_team  0,      (469 - Alliance 67 - Horde)
-    CONDITION_SKILL                 = 7,                    // skill_id     skill_value
-    CONDITION_QUESTREWARDED         = 8,                    // quest_id     0
-    CONDITION_QUESTTAKEN            = 9,                    // quest_id     0,      for quest item that can looted in any amount while quest active.
-};
-
-#define MAX_CONDITION                 10                    // maximun value in this enum 
-
 class Player;
 class LootStore;
 
@@ -95,24 +79,6 @@ struct LootStoreItem
     bool Roll() const;                                      // Checks if the entry takes it's chance (at loot generation)
     bool IsValid(LootStore const& store, uint32 entry) const;
                                                             // Checks correctness of values
-};
-
-struct LootCondition
-{
-    LootConditionType condition;                            // additional loot condition type
-    uint32  value1;                                         // data for the condition - see LootConditionType definition
-    uint32  value2;                     
-
-    LootCondition(uint8 _condition = 0, uint32 _value1 = 0, uint32 _value2 = 0)
-        : condition(LootConditionType(_condition)), value1(_value1), value2(_value2) {}
-
-    static bool IsValid(LootStore const& store,uint32 entry,uint32 item,LootConditionType condition, uint32 value1, uint32 value2);
-                                                            // Checks correctness of values
-    bool Meets(Player const * APlayer) const;               // Checks if the player meets the condition 
-    bool operator == (LootCondition const& lc) const
-    {
-        return (lc.condition == condition && lc.value1 == value1 && lc.value2 == value2);
-    }
 };
 
 struct LootItem

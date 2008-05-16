@@ -197,6 +197,40 @@ struct GraveYardData
 };
 typedef std::multimap<uint32,GraveYardData> GraveYardMap;
 
+enum ConditionType
+{                                                           // value1       value2  for the Condition enumed
+    CONDITION_NONE                  = 0,                    // 0            0
+    CONDITION_AURA                  = 1,                    // spell_id     effindex
+    CONDITION_ITEM                  = 2,                    // item_id      count
+    CONDITION_ITEM_EQUIPPED         = 3,                    // item_id      0
+    CONDITION_ZONEID                = 4,                    // zone_id      0
+    CONDITION_REPUTATION_RANK       = 5,                    // faction_id   min_rank
+    CONDITION_TEAM                  = 6,                    // player_team  0,      (469 - Alliance 67 - Horde)
+    CONDITION_SKILL                 = 7,                    // skill_id     skill_value
+    CONDITION_QUESTREWARDED         = 8,                    // quest_id     0
+    CONDITION_QUESTTAKEN            = 9,                    // quest_id     0,      for condition true while quest active.
+};
+
+#define MAX_CONDITION                 10                    // maximun value in this enum 
+
+struct Condition
+{
+    ConditionType condition;                                // additional condition type
+    uint32  value1;                                         // data for the condition - see ConditionType definition
+    uint32  value2;                     
+
+    Condition(uint8 _condition = 0, uint32 _value1 = 0, uint32 _value2 = 0)
+        : condition(ConditionType(_condition)), value1(_value1), value2(_value2) {}
+
+    static bool IsValid(ConditionType condition, uint32 value1, uint32 value2);
+    // Checks correctness of values
+    bool Meets(Player const * APlayer) const;               // Checks if the player meets the condition 
+    bool operator == (Condition const& lc) const
+    {
+        return (lc.condition == condition && lc.value1 == value1 && lc.value2 == value2);
+    }
+};
+
 class PlayerDumpReader;
 
 class ObjectMgr
@@ -629,6 +663,14 @@ class ObjectMgr
         // guild bank tabs
         const uint32 GetGuildBankTabPrice(uint8 Index) { return Index < GUILD_BANK_MAX_TABS ? mGuildBankTabPrice[Index] : 0; }
 
+        uint16 GetConditionId(ConditionType condition, uint32 value1, uint32 value2);
+        bool IsPlayerMeetToCondition(Player const* player, uint16 condition_id) const
+        {
+            if(mConditions.size() >= condition_id)
+                return false;
+
+            return mConditions[condition_id].Meets(player);
+        }
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
@@ -730,6 +772,11 @@ class ObjectMgr
 
         typedef std::vector<uint32> GuildBankTabPriceMap;
         GuildBankTabPriceMap mGuildBankTabPrice;
+
+        // Storage for Conditions. First element (index 0) is reserved for zero-condition (nothing required)
+        typedef std::vector<Condition> ConditionStore;
+        ConditionStore mConditions;
+
 };
 
 #define objmgr MaNGOS::Singleton<ObjectMgr>::Instance()

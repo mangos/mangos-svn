@@ -52,26 +52,6 @@ class LootTemplate::LootGroup                               // A set of loot def
         LootStoreItem const * Roll() const;                 // Rolls an item from the group, returns NULL if all miss their chances
 };
 
-// Storage for loot conditions. First element (index 0) is reserved for zero-condition (nothing required)
-typedef std::vector<LootCondition> LootConditionStore;
-static LootConditionStore LootConditions;
-
-// Searches for the same condition already in LootConditions store
-// Returns Id if found, else checks condition for validity, adds it to LootConditions and returns Id
-// Wrong conditions are reported to DbErrors logfile and ignored
-uint16 GetConditionId(LootConditionType condition, uint32 value1, uint32 value2)
-{
-    LootCondition lc = LootCondition(condition, value1, value2);
-    for (uint16 i=0; i < LootConditions.size(); ++i)
-    {
-        if (lc == LootConditions[i])
-            return i;
-    }
-
-    LootConditions.push_back(lc);
-    return LootConditions.size() - 1;
-}
-
 //Remove all data and free all memory
 void LootStore::Clear()
 {
@@ -120,16 +100,19 @@ void LootStore::LoadLootTable()
             int32  mincountOrRef       = fields[4].GetInt32();
             uint8  maxcount            = fields[5].GetUInt8();
             bool   freeforall          = fields[6].GetBool();
-            LootConditionType condition= (LootConditionType)fields[7].GetUInt8();
+            ConditionType condition    = (ConditionType)fields[7].GetUInt8();
             uint32 cond_value1         = fields[8].GetUInt32();
             uint32 cond_value2         = fields[9].GetUInt32();
 
 
-            if(!LootCondition::IsValid(*this,entry,item,condition,cond_value1, cond_value2))
+            if(!Condition::IsValid(condition,cond_value1, cond_value2))
+            {
+                sLog.outErrorDb("... in table '%s' entry %u item %u", GetName(), entry, item);
                 continue;                                   // error already printed to log/console.
+            }
 
             // (condition + cond_value1/2) are converted into single conditionId
-            uint16 conditionId = GetConditionId(condition, cond_value1, cond_value2);
+            uint16 conditionId = objmgr.GetConditionId(condition, cond_value1, cond_value2);
 
             LootStoreItem storeitem = LootStoreItem(item, chanceOrQuestChance, group, freeforall, conditionId, mincountOrRef, maxcount);
 
@@ -202,9 +185,6 @@ LootTemplate const* LootStore::GetLootFor(uint32 loot_id) const
 
 void LoadLootTables()
 {
-    // Only zero condition left, others will be added while loading loot tables
-    LootConditions.resize(1);    
-
     LootTemplates_Creature.LoadLootTable();
     LootTemplates_Disenchant.LoadLootTable();
     LootTemplates_Fishing.LoadLootTable();
@@ -294,7 +274,7 @@ LootItem::LootItem(LootStoreItem const& li)
 bool LootItem::AllowedForPlayer(Player const * player) const
 {
     // DB conditions check
-    if ( !LootConditions[conditionId].Meets(player) )
+    if ( !objmgr.IsPlayerMeetToCondition(player,conditionId) )
         return false;
 
     // Checking quests for quest drop
@@ -306,160 +286,6 @@ bool LootItem::AllowedForPlayer(Player const * player) const
     if (pProto && pProto->StartQuest && player->GetQuestStatus(pProto->StartQuest) != QUEST_STATUS_NONE )
         return false;
 
-    return true;
-}
-
-//
-// --------- LootCondition ---------
-//
-
-// Checks if player meets the condition
-bool LootCondition::Meets(Player const * player) const
-{
-    if( !player )
-        return false;                                       // player not present, return false
-
-    switch (condition)
-    {
-        case CONDITION_NONE:
-            return true;                                    // empty condition, always met
-        case CONDITION_AURA:
-            return player->HasAura(value1, value2);
-        case CONDITION_ITEM:
-            return player->HasItemCount(value1, value2);
-        case CONDITION_ITEM_EQUIPPED:
-            return player->GetItemOrItemWithGemEquipped(value1) != NULL;
-        case CONDITION_ZONEID:
-            return player->GetZoneId() == value1;
-        case CONDITION_REPUTATION_RANK:
-        {
-            FactionEntry const* faction = sFactionStore.LookupEntry(value1);
-            return faction && player->GetReputationRank(faction) >= value2;
-        }
-        case CONDITION_TEAM:
-            return player->GetTeam() == value1;
-        case CONDITION_SKILL:
-            return player->HasSkill(value1) && player->GetBaseSkillValue(value1) >= value2;
-        case CONDITION_QUESTREWARDED:
-            return player->GetQuestRewardStatus(value1);
-        case CONDITION_QUESTTAKEN:
-        {
-            QuestStatus status = player->GetQuestStatus(value1);
-            return (status == QUEST_STATUS_INCOMPLETE);
-        }
-        default:
-            return false;
-    }
-}
-
-// Verification of condition values validity
-bool LootCondition::IsValid(LootStore const& store,uint32 entry,uint32 item,LootConditionType condition, uint32 value1, uint32 value2)
-{
-    if( condition >= MAX_CONDITION)                         // Wrong condition type
-    {
-        sLog.outErrorDb("Table '%s' entry %u item %u ñondition has bad type of %u, skipped ", store.GetName(), entry, item, condition );
-        return false;
-    }
-
-    switch (condition)
-    {
-        case CONDITION_AURA:
-        {
-            if(!sSpellStore.LookupEntry(value1))
-            {
-                sLog.outErrorDb("Table '%s' entry %u item %u aura condition requires to have non existing spell (Id: %d), skipped", store.GetName(), entry, item, value1);
-                return false;
-            }
-            if(value2 > 2)
-            {
-                sLog.outErrorDb("Table '%s' entry %u item %u aura condition requires to have non existing effect index (%u) (must be 0..2), skipped", store.GetName(), entry, item, value2);
-                return false;
-            }
-            break;
-        }
-        case CONDITION_ITEM:
-        {
-            ItemPrototype const *proto = objmgr.GetItemPrototype(value1);
-            if(!proto)
-            {
-                sLog.outErrorDb("Table '%s' entry %u item %u item condition requires to have non existing item (%u), skipped", store.GetName(), entry, item, value1);
-                return false;
-            }
-            break;
-        }
-        case CONDITION_ITEM_EQUIPPED:
-        {
-            ItemPrototype const *proto = objmgr.GetItemPrototype(value1);
-            if(!proto)
-            {
-                sLog.outErrorDb("Table '%s' entry %u item %u ItemEquipped condition requires to have non existing item (%u) equipped, skipped", store.GetName(), entry, item, value1);
-                return false;
-            }
-            break;
-        }
-        case CONDITION_ZONEID:
-        {
-            AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(value1);
-            if(!areaEntry)
-            {
-                sLog.outErrorDb("Table '%s' entry %u item %u zone condition requires to be in non existing area (%u), skipped", store.GetName(), entry, item, value1);
-                return false;
-            }
-            if(areaEntry->zone != 0)
-            {
-                sLog.outErrorDb("Table '%s' entry %u item %u zone condition requires to be in area (%u) which is a subzone but zone expected, skipped", store.GetName(), entry, item, value1);
-                return false;
-            }
-            break;
-        }
-        case CONDITION_REPUTATION_RANK:
-        {
-            FactionEntry const* factionEntry = sFactionStore.LookupEntry(value1);
-            if(!factionEntry)
-            {
-                sLog.outErrorDb("Table '%s' entry %u item %u reputation condition requires to have reputation non existing faction (%u), skipped", store.GetName(), entry, item, value1);
-                return false;
-            }
-            break;
-        }
-        case CONDITION_TEAM:
-        {
-            if (value1 != ALLIANCE && value1 != HORDE)
-            {
-                sLog.outErrorDb("Table '%s' entry %u item %u team condition specifies unknown team (%u), skipped", store.GetName(), entry, item, value1);
-                return false;
-            }
-            break;
-        }
-        case CONDITION_SKILL:
-        {
-            SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(value1);
-            if (!pSkill)
-            {
-                sLog.outErrorDb("Table '%s' entry %u item %u skill condition specifies non-existing skill (%u), skipped", store.GetName(), entry, item, value1);
-                return false;
-            }
-            if (value2 < 1 || value2 > sWorld.GetConfigMaxSkillValue() )
-            {
-                sLog.outErrorDb("Table '%s' entry %u item %u skill condition specifies invalid skill value (%u), skipped", store.GetName(), entry, item, value2);
-                return false;
-            }
-            break;
-        }
-        case CONDITION_QUESTREWARDED:
-        case CONDITION_QUESTTAKEN:
-        {
-            Quest const *Quest = objmgr.GetQuestTemplate(value1);
-            if (!Quest)
-            {
-                sLog.outErrorDb("Table '%s' entry %u item %u quest condition specifies non-existing quest (%u), skipped", store.GetName(), entry, item, value1);
-                return false;
-            }
-            if(value2)
-                sLog.outErrorDb("Table '%s' entry %u item %u quest condition has useless data in value2 (%u)!", store.GetName(), entry, item, value2);
-            break;
-        }
-    }
     return true;
 }
 
