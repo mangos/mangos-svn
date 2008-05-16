@@ -984,6 +984,10 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     spellInfo_2->SpellVisual == 0 && spellInfo_1->SpellVisual == 78 ) )
                     return false;
 
+                // Personalized Weather (thunder effect should overwrite rainy aura)
+                if(spellInfo_1->SpellIconID == 2606 && spellInfo_2->SpellIconID == 2606)
+                    return false;
+
                 break;
             }
 

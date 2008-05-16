@@ -1245,6 +1245,8 @@ void Aura::TriggerSpell()
         }
 
         case 39857: trigger_spell_id = 39856; break;        // Tear of Azzinoth Channel - it's not really supposed to do anything,and this only prevents the console spam
+
+        case 46736: trigger_spell_id = 46737; break;        // Personalized Weather, lightning
     }
 
     if(!trigger_spell_id)

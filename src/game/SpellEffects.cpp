@@ -4060,6 +4060,32 @@ void Spell::EffectScriptEffect(uint32 i)
            unitTarget->CastSpell(unitTarget, 41131, true);
            break;
         }
+
+        //Goblin Weather Machine
+        case 46203:
+        {
+            if(!unitTarget)
+                return;
+
+            uint32 spellId;
+            switch(rand()%4)
+            {
+                case 0:
+                    spellId=46740;
+                    break;
+                case 1:
+                    spellId=46739;
+                    break;
+                case 2:
+                    spellId=46738;
+                    break;
+                case 3:
+                    spellId=46736;
+                    break;
+            }
+            unitTarget->CastSpell(unitTarget, spellId, true);
+            break;
+        }
     }
 
     // paladin's holy light / flash of light
