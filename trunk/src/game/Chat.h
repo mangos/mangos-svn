@@ -326,6 +326,8 @@ class ChatHandler
         bool HandleWpAddCommand(const char* args);
         bool HandleWpModifyCommand(const char* args);
         bool HandleWpShowCommand(const char* args);
+        bool HandleWpExportCommand(const char* args);
+        bool HandleWpImportCommand(const char* args);
         bool HandleFlyModeCommand(const char* args);
         bool HandleSendOpcodeCommand(const char* args);
         bool HandleSellErrorCommand(const char* args);

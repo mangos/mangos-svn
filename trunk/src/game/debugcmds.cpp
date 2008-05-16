@@ -125,9 +125,6 @@ bool ChatHandler::HandleBuyErrorCommand(const char* args)
 
 bool ChatHandler::HandleSendOpcodeCommand(const char* args)
 {
-    if(!args)
-        return false;
-
     Unit *unit = getSelectedUnit();
     if (!unit || (unit->GetTypeId() != TYPEID_PLAYER))
         unit = m_session->GetPlayer();

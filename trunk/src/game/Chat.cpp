@@ -123,6 +123,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "show",           SEC_GAMEMASTER,     &ChatHandler::HandleWpShowCommand,              "", NULL },
         { "add",            SEC_GAMEMASTER,     &ChatHandler::HandleWpAddCommand,               "", NULL },
         { "modify",         SEC_GAMEMASTER,     &ChatHandler::HandleWpModifyCommand,            "", NULL },
+        { "export",         SEC_ADMINISTRATOR,  &ChatHandler::HandleWpExportCommand,            "", NULL },
+        { "import",         SEC_ADMINISTRATOR,  &ChatHandler::HandleWpImportCommand,            "", NULL },
         { NULL,             0,                  NULL,                                           "", NULL }
     };
 
