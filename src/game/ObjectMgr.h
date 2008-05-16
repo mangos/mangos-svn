@@ -666,7 +666,7 @@ class ObjectMgr
         uint16 GetConditionId(ConditionType condition, uint32 value1, uint32 value2);
         bool IsPlayerMeetToCondition(Player const* player, uint16 condition_id) const
         {
-            if(mConditions.size() >= condition_id)
+            if(condition_id >= mConditions.size())
                 return false;
 
             return mConditions[condition_id].Meets(player);
