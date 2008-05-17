@@ -16133,33 +16133,71 @@ void Player::learnDefaultSpells(bool loading)
 
 void Player::learnQuestRewardedSpells(Quest const* quest)
 {
-    // skip quests without rewarded spell
-    if( !quest->GetRewSpellCast() )
-        return;
-
     uint32 spell_id = quest->GetRewSpellCast();
 
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
+    // skip quests without rewarded spell
+    if( !spell_id )
+        return;
 
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
+    if(!spellInfo)
+        return;
+
+    // check learned spells state
     bool found = false;
     for(int i=0; i < 3; ++i)
     {
         if(spellInfo->Effect[i] == SPELL_EFFECT_LEARN_SPELL && !HasSpell(spellInfo->EffectTriggerSpell[i]))
         {
-            // prevent learn not first ranks spells for ranked spells (prof. specializations)
-            if(spellmgr.GetSpellRank(spellInfo->EffectTriggerSpell[i]) > 1)
-            {
-                found = false;
-                break;
-            }
-
             found = true;
+            break;
         }
     }
 
     // skip quests with not teaching spell or already known spell
     if(!found)
         return;
+
+    // prevent learn non first rank unknown profession and second specialization for same profession)
+    uint32 learned_0 = spellInfo->EffectTriggerSpell[0];
+    if( spellmgr.GetSpellRank(learned_0) > 1 && !HasSpell(learned_0) )
+    {
+        // not have first rank learned (unlearned prof?)
+        uint32 first_spell = spellmgr.GetFirstSpellInChain(learned_0);
+        if( !HasSpell(first_spell) )
+            return;
+
+        SpellEntry const *learnedInfo = sSpellStore.LookupEntry(learned_0);
+        if(!learnedInfo)
+            return;
+
+        // specialization
+        if(learnedInfo->Effect[0]==SPELL_EFFECT_TRADE_SKILL && learnedInfo->Effect[1]==0)
+        {
+            // search other specialization for same prof
+            for(PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
+            {
+                if(itr->second->state == PLAYERSPELL_REMOVED || itr->first==learned_0)
+                    continue;
+
+                SpellEntry const *itrInfo = sSpellStore.LookupEntry(itr->first);
+                if(!itrInfo)
+                    return;
+
+                // compare only specializations
+                if(itrInfo->Effect[0]!=SPELL_EFFECT_TRADE_SKILL || itrInfo->Effect[1]!=0)
+                    continue;
+
+                // compare same chain spells
+                if(spellmgr.GetFirstSpellInChain(itr->first) != first_spell)
+                    continue;
+
+                // now we have 2 specialization, learn possible only if found is lesser specialization rank
+                if(!spellmgr.IsHighRankOfSpell(learned_0,itr->first))
+                    return;
+            }
+        }
+    }
 
     CastSpell( this, spell_id, true);
 }
