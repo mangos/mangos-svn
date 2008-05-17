@@ -3966,15 +3966,59 @@ uint8 Spell::CheckRange(bool strict)
             return SPELL_FAILED_OUT_OF_RANGE;               //0x5A;
         if(dist < min_range * min_range)
             return SPELL_FAILED_TOO_CLOSE;
-        if( !m_IsTriggeredSpell && !m_caster->isInFront( target, max_range) )
+        if( !m_IsTriggeredSpell && !IsPositiveSpell(m_spellInfo->Id) && !m_caster->isInFront( target, max_range) )
         {
-            if (m_rangedShoot)
+            // Spell-Family Related Checks
+            switch (m_spellInfo->SpellFamilyName)
+            {
+                case SPELLFAMILY_PRIEST:
+                {
+                    // Shadow Word: Death, castable without facing
+                    if (m_spellInfo->SpellFamilyFlags & 0x200000000LL)
+                        return 0;                           // this is not TARGET_FLAG_DEST_LOCATION so we can retuhr safely
+                    break;
+                }
+                case SPELLFAMILY_PALADIN:
+                {
+                    // Holy Shock, require facing
+                    if (m_spellInfo->SpellFamilyFlags & 0x200000LL)
+                        return SPELL_FAILED_UNIT_NOT_INFRONT;
+                    break;
+                }
+                case SPELLFAMILY_WARRIOR:
+                {
+                    // Charge, require facing
+                    if (m_spellInfo->SpellFamilyFlags & 1)
+                        return SPELL_FAILED_UNIT_NOT_INFRONT;
+                    break;
+                }
+            }
+
+            // Ranged Weapon
+            if (m_spellInfo->Attributes & 2)
                 return SPELL_FAILED_UNIT_NOT_INFRONT;
 
-            uint32 original_casttime = GetSpellCastTime(sCastTimesStore.LookupEntry(m_spellInfo->CastingTimeIndex));
-
-            if (original_casttime!= 0 && !IsPositiveSpell(m_spellInfo->Id) && !IsSingleTargetSpell(m_spellInfo))
+            // Melee Combat
+            if (m_spellInfo->rangeIndex == 2)
                 return SPELL_FAILED_UNIT_NOT_INFRONT;
+
+            // Missile Effect
+            if (m_spellInfo->speed > 0)
+                return SPELL_FAILED_UNIT_NOT_INFRONT;
+
+            // Channeled Spells need facing
+            if (IsChanneledSpell(m_spellInfo))
+                return SPELL_FAILED_UNIT_NOT_INFRONT;
+
+            // Direct Damage and charge effects
+            for (uint8 i=0;i<3;++i)
+            {
+                if (m_spellInfo->Effect[i] == SPELL_EFFECT_SCHOOL_DAMAGE ||
+                    m_spellInfo->Effect[i] == SPELL_EFFECT_POWER_BURN ||
+                    m_spellInfo->Effect[i] == SPELL_EFFECT_HEALTH_LEECH ||
+                    m_spellInfo->Effect[i] == SPELL_EFFECT_CHARGE)
+                return SPELL_FAILED_UNIT_NOT_INFRONT;
+            }
         }
     }
 
