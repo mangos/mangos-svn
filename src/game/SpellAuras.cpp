@@ -1498,6 +1498,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         }
         else
         {
+            // not heal if canceled, dispel case implemented in Unit::RemoveFirstAuraByDispel
+            if (GetAuraDuration()>0)
+                return;
+
             // have a look if there is still some other lifebloom dummy aura
             Unit::AuraList auras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
             for(Unit::AuraList::iterator itr = auras.begin(); itr!=auras.end(); itr++)

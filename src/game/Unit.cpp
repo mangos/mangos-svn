@@ -4202,6 +4202,22 @@ bool Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster)
                 CastCustomSpell(pCaster,31117,&damage,NULL,NULL,true,NULL,(*i).second);
             }
 
+            // Lifebloom
+            if ( spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && (spellInfo->SpellFamilyFlags & 0x1000000000LL) )
+            {
+                AuraList const& m_dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+                for(AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
+                {
+                    if((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
+                        (*i)->GetSpellProto()->SpellFamilyFlags & 0x1000000000LL)
+                    {
+                        int32 heal = (*i)->GetModifier()->m_amount;
+                        CastCustomSpell(this,33778,&heal,NULL,NULL,true,NULL,*i,(*i)->GetCasterGUID());
+                        break;
+                    }
+                }
+            }
+
             RemoveAurasDueToSpell(spellInfo->Id);
             return true;
         }
