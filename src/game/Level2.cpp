@@ -1988,15 +1988,15 @@ bool ChatHandler::HandleSpawnDistCommand(const char* args)
     if(!*args)
         return false;
 
-    int option = atoi((char*)args);
-    if (option < 0)
+    float option = atof((char*)args);
+    if (option < 0.0f)
     {
         SendSysMessage(LANG_BAD_VALUE);
         return false;
     }
 
     MovementGeneratorType mtype = IDLE_MOTION_TYPE;
-    if (option > 0) 
+    if (option >0.0f) 
         mtype = RANDOM_MOTION_TYPE;
 
     Creature *pCreature = getSelectedCreature();
@@ -2017,7 +2017,7 @@ bool ChatHandler::HandleSpawnDistCommand(const char* args)
         pCreature->Respawn();
     }
 
-    WorldDatabase.PExecuteLog("UPDATE creature SET spawndist=%i, MovementType=%i WHERE guid=%u",option,mtype,u_guid);
+    WorldDatabase.PExecuteLog("UPDATE creature SET spawndist=%f, MovementType=%i WHERE guid=%u",option,mtype,u_guid);
     PSendSysMessage(LANG_COMMAND_SPAWNDIST,option);
     return true;
 }

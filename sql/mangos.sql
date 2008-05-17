@@ -2233,7 +2233,7 @@ INSERT INTO `mangos_string` VALUES
 (294,'All tickets deleted.',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (295,'Character %s ticket deleted.',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (296,'Ticket deleted.',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(297,'Spawn distance changed to: %i',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(297,'Spawn distance changed to: %f',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (298,'Spawn time changed to: %i',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (299,'The honor of %s was set to %u!',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (300,'Your chat has been disabled for %u minutes.',NULL,NULL,NULL,NULL,NULL,NULL,NULL),
