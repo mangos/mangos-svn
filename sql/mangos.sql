@@ -174,6 +174,7 @@ INSERT INTO `command` VALUES
 ('banlist',3,'Syntax is: banlist <account|ip|character> $NameOrIp\r\nsearches the banlist for a pattern.'),
 ('cast',3,'Syntax: .cast #spellid\r\n  Cast #spellid to selected target. If no target selected cast to self.'),
 ('cast back',3,'Syntax: .cast back #spellid\r\n  Selected target will cast #spellid to your character.'),
+('cast self',3,'Syntax: .cast self #spellid\r\nCast #spellid by target at target itself.'),
 ('cast target',3,'Syntax: .cast target #spellid\r\n  Selected target will cast #spellid to his victim.'),
 ('commands',0,'Syntax: .commands\r\n\r\nDisplay a list of available commands for your account level.'),
 ('cooldown',3,'Syntax: .cooldown [#spell_id]\r\n\r\nRemove all (if spell_id not provided) or #spel_id spell cooldown from selected character or you (if no selection).'),

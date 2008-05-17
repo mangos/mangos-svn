@@ -4743,12 +4743,6 @@ bool ChatHandler::HandleCastBackCommand(const char* args)
         return true;
     }
 
-    if(caster->GetCharmerOrOwnerGUID() && caster->GetCharmerOrOwnerGUID() != m_session->GetPlayer()->GetGUID())
-    {
-        SendSysMessage(LANG_SELECT_CREATURE);
-        return true;
-    }
-
     // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
     char* cId = extractKeyFromLink((char*)args,"Hspell");
     if(!cId)
@@ -4778,12 +4772,6 @@ bool ChatHandler::HandleCastTargetCommand(const char* args)
     if(!caster)
     {
         SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-        return true;
-    }
-
-    if(caster->GetCharmerOrOwnerGUID() && caster->GetCharmerOrOwnerGUID() != m_session->GetPlayer()->GetGUID())
-    {
-        SendSysMessage(LANG_SELECT_CREATURE);
         return true;
     }
 
@@ -4830,12 +4818,6 @@ bool ChatHandler::HandleComeToMeCommand(const char *args)
         return true;
     }
 
-    if(caster->GetCharmerOrOwnerGUID() && caster->GetCharmerOrOwnerGUID() != m_session->GetPlayer()->GetGUID())
-    {
-        SendSysMessage(LANG_SELECT_CREATURE);
-        return true;
-    }
-
     char* newFlagStr = strtok((char*)args, " ");
 
     if(!newFlagStr)
@@ -4848,6 +4830,42 @@ bool ChatHandler::HandleComeToMeCommand(const char *args)
     if (caster->GetTypeId() == TYPEID_PLAYER)
         caster->GetMotionMaster()->Mutate(new PointMovementGenerator<Player>(0, m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ()));
     else caster->GetMotionMaster()->Mutate(new PointMovementGenerator<Creature>(0, m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ()));
+
+    return true;
+}
+bool ChatHandler::HandleCastSelfCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    Unit* target = getSelectedUnit();
+
+    if(!target)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
+    }
+
+    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hspell");
+    if(!cId)
+        return false;
+
+    uint32 spell = (uint32)atol((char*)cId);
+    if(!spell)
+        return false;
+
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell);
+    if(!spellInfo)
+        return false;
+
+    if(!SpellMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
+    {
+        PSendSysMessage(LANG_COMMAND_SPELL_BROKEN,spell);
+        return true;
+    }
+
+    target->CastSpell(target,spell,false);
 
     return true;
 }
