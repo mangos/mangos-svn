@@ -915,6 +915,12 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastSpell(m_caster,spell_id,true,NULL);
                     return;
                 }
+                case 29858:                                 // Soulshatter
+                {
+                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->IsHostileTo(m_caster))
+                        m_caster->CastSpell(unitTarget,32835,true);
+                    return;
+                }
             }
 
             //All IconID Check in there
