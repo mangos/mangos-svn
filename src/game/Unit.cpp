@@ -6165,11 +6165,18 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     // Lightning Capacitor
                     case 37657:
                     {
-                        if(!pVictim || !pVictim->isAlive())
+                        // trinket ProcTriggerSpell but for safe checks for player
+                        if(!castItem || !pVictim || !pVictim->isAlive() || GetTypeId()!=TYPEID_PLAYER)
+                            return;
+
+                        if(((Player*)this)->HasSpellCooldown(37657))
                             return;
 
                         // stacking
                         CastSpell(this, 37658, true, castItem, triggeredByAura);
+                        // 2.5s cooldown before it can stack again
+                        ((Player*)this)->AddSpellCooldown(37657,0,time(NULL)+2.5);
+                        
 
                         // counting
                         uint32 count = 0;
