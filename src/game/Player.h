@@ -1125,7 +1125,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver );
         void FailQuest( uint32 quest_id );
         void FailTimedQuest( uint32 quest_id );
-        bool SatisfyQuestClassOrSkill( Quest const* qInfo, bool msg );
+        bool SatisfyQuestSkillOrClass( Quest const* qInfo, bool msg );
         bool SatisfyQuestLevel( Quest const* qInfo, bool msg );
         bool SatisfyQuestLog( bool msg );
         bool SatisfyQuestPreviousQuest( Quest const* qInfo, bool msg );

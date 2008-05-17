@@ -11223,7 +11223,7 @@ Quest const * Player::GetNextQuest( uint64 guid, Quest const *pQuest )
 
 bool Player::CanSeeStartQuest( Quest const *pQuest )
 {
-    if( SatisfyQuestRace( pQuest, false ) && SatisfyQuestClassOrSkill( pQuest, false ) &&
+    if( SatisfyQuestRace( pQuest, false ) && SatisfyQuestSkillOrClass( pQuest, false ) &&
         SatisfyQuestExclusiveGroup( pQuest, false ) && SatisfyQuestReputation( pQuest, false ) &&
         SatisfyQuestPreviousQuest( pQuest, false ) && SatisfyQuestNextChain( pQuest, false ) &&
         SatisfyQuestPrevChain( pQuest, false ) && SatisfyQuestDay( pQuest, false ) )
@@ -11238,7 +11238,7 @@ bool Player::CanTakeQuest( Quest const *pQuest, bool msg )
 {
     return SatisfyQuestStatus( pQuest, msg ) && SatisfyQuestExclusiveGroup( pQuest, msg )
         && SatisfyQuestRace( pQuest, msg ) && SatisfyQuestLevel( pQuest, msg )
-        && SatisfyQuestClassOrSkill( pQuest, msg ) && SatisfyQuestReputation( pQuest, msg )
+        && SatisfyQuestSkillOrClass( pQuest, msg ) && SatisfyQuestReputation( pQuest, msg )
         && SatisfyQuestPreviousQuest( pQuest, msg ) && SatisfyQuestTimed( pQuest, msg )
         && SatisfyQuestNextChain( pQuest, msg ) && SatisfyQuestPrevChain( pQuest, msg )
         && SatisfyQuestDay( pQuest, msg );
@@ -11632,18 +11632,18 @@ void Player::FailTimedQuest( uint32 quest_id )
     }
 }
 
-bool Player::SatisfyQuestClassOrSkill( Quest const* qInfo, bool msg )
+bool Player::SatisfyQuestSkillOrClass( Quest const* qInfo, bool msg )
 {
-    int32 classOrSkill = qInfo->GetClassOrSkill();
+    int32 skillOrClass = qInfo->GetSkillOrClass();
 
     // skip 0 case
-    if( classOrSkill == 0 )
+    if( skillOrClass == 0 )
         return true;
 
     // check class
-    if( classOrSkill < 0 )
+    if( skillOrClass < 0 )
     {
-        uint8 reqClass = -int32(classOrSkill);
+        uint8 reqClass = -int32(skillOrClass);
         if(getClass() != reqClass)
         {
             if( msg )
@@ -11652,9 +11652,9 @@ bool Player::SatisfyQuestClassOrSkill( Quest const* qInfo, bool msg )
         }
     }
     // check skill
-    else if( classOrSkill > 0 )
+    else if( skillOrClass > 0 )
     {
-        uint32 reqSkill = classOrSkill;
+        uint32 reqSkill = skillOrClass;
         if( GetSkillValue( reqSkill ) < qInfo->GetRequiredSkillValue() )
         {
             if( msg )

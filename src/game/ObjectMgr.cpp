@@ -2439,7 +2439,7 @@ void ObjectMgr::LoadQuests()
     mExclusiveQuestGroups.clear();
 
     //                                                0      1           2             3         4           5     6              7
-    QueryResult *result = WorldDatabase.Query("SELECT entry, ZoneOrSort, ClassOrSkill, MinLevel, QuestLevel, Type, RequiredRaces, RequiredSkillValue,"
+    QueryResult *result = WorldDatabase.Query("SELECT entry, ZoneOrSort, SkillOrClass, MinLevel, QuestLevel, Type, RequiredRaces, RequiredSkillValue,"
     //   8                    9                  10                     11                   12                     13                   14                15
         "RepObjectiveFaction, RepObjectiveValue, RequiredMinRepFaction, RequiredMinRepValue, RequiredMaxRepFaction, RequiredMaxRepValue, SuggestedPlayers, LimitTime,"
     //   16          17            18           19           20           21              22                23         24            25
@@ -2527,46 +2527,46 @@ void ObjectMgr::LoadQuests()
                     qinfo->GetQuestId(),qinfo->ZoneOrSort);
                 // no changes, quest not dependent from this value but can have problems at client (note some may be 0, we must allow this so no check)
             }
-            //check for proper ClassOrSkill value (class case)
+            //check for proper SkillOrClass value (class case)
             if(int32 class_id =  ClassByQuestSort(-int32(qinfo->ZoneOrSort)))
             {
-                // class is negative value in ClassOrSkill
-                if(qinfo->ClassOrSkill != -class_id)
+                // class is negative value in SkillOrClass
+                if(qinfo->SkillOrClass != -class_id)
                 {
-                    sLog.outErrorDb("Quest %u has `ZoneOrSort` = %i (class sort case) but `ClassOrSkill` does not have a corresponding value (%i).",
+                    sLog.outErrorDb("Quest %u has `ZoneOrSort` = %i (class sort case) but `SkillOrClass` does not have a corresponding value (%i).",
                         qinfo->GetQuestId(),qinfo->ZoneOrSort,-class_id);
                     //override, and force proper value here?
                 }
             }
-            //check for proper ClassOrSkill value (skill case)
+            //check for proper SkillOrClass value (skill case)
             if(int32 skill_id =  SkillByQuestSort(-int32(qinfo->ZoneOrSort)))
             {
-                // skill is positive value in ClassOrSkill
-                if(qinfo->ClassOrSkill != skill_id )
+                // skill is positive value in SkillOrClass
+                if(qinfo->SkillOrClass != skill_id )
                 {
-                    sLog.outErrorDb("Quest %u has `ZoneOrSort` = %i (skill sort case) but `ClassOrSkill` does not have a corresponding value (%i).",
+                    sLog.outErrorDb("Quest %u has `ZoneOrSort` = %i (skill sort case) but `SkillOrClass` does not have a corresponding value (%i).",
                         qinfo->GetQuestId(),qinfo->ZoneOrSort,skill_id);
                     //override, and force proper value here?
                 }
             }
         }
 
-        // ClassOrSkill (class case)
-        if( qinfo->ClassOrSkill < 0 )
+        // SkillOrClass (class case)
+        if( qinfo->SkillOrClass < 0 )
         {
-            if( !sChrClassesStore.LookupEntry(-int32(qinfo->ClassOrSkill)) )
+            if( !sChrClassesStore.LookupEntry(-int32(qinfo->SkillOrClass)) )
             {
-                sLog.outErrorDb("Quest %u has `ClassOrSkill` = %i (class case) but class (%i) does not exist",
-                    qinfo->GetQuestId(),qinfo->ClassOrSkill,-qinfo->ClassOrSkill);
+                sLog.outErrorDb("Quest %u has `SkillOrClass` = %i (class case) but class (%i) does not exist",
+                    qinfo->GetQuestId(),qinfo->SkillOrClass,-qinfo->SkillOrClass);
             }
         }
-        // ClassOrSkill (skill case)
-        if( qinfo->ClassOrSkill > 0 )
+        // SkillOrClass (skill case)
+        if( qinfo->SkillOrClass > 0 )
         {
-            if( !sSkillLineStore.LookupEntry(qinfo->ClassOrSkill) )
+            if( !sSkillLineStore.LookupEntry(qinfo->SkillOrClass) )
             {
-                sLog.outErrorDb("Quest %u has `ClassOrSkill` = %u (skill case) but skill (%i) does not exist",
-                    qinfo->GetQuestId(),qinfo->ClassOrSkill,qinfo->ClassOrSkill);
+                sLog.outErrorDb("Quest %u has `SkillOrClass` = %u (skill case) but skill (%i) does not exist",
+                    qinfo->GetQuestId(),qinfo->SkillOrClass,qinfo->SkillOrClass);
             }
         }
 
@@ -2579,10 +2579,10 @@ void ObjectMgr::LoadQuests()
                 // no changes, quest can't be done for this requirement
             }
 
-            if( qinfo->ClassOrSkill <= 0 )
+            if( qinfo->SkillOrClass <= 0 )
             {
-                sLog.outErrorDb("Quest %u has `RequiredSkillValue` = %u but `ClassOrSkill` = %i (class case), value ignored.",
-                    qinfo->GetQuestId(),qinfo->RequiredSkillValue,qinfo->ClassOrSkill);
+                sLog.outErrorDb("Quest %u has `RequiredSkillValue` = %u but `SkillOrClass` = %i (class case), value ignored.",
+                    qinfo->GetQuestId(),qinfo->RequiredSkillValue,qinfo->SkillOrClass);
                 // no changes, quest can't be done for this requirement (fail at wrong skill id)
             }
         }
