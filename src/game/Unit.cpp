@@ -7811,11 +7811,11 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
         modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, heal);
 
     // Healing taken percent
-    float minval = GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+    float minval = pVictim->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
     if(minval)
         heal *= (100.0f + minval) / 100.0f;
 
-    float maxval = GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
+    float maxval = pVictim->GetMaxPositiveAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
     if(maxval)
         heal *= (100.0f + maxval) / 100.0f;
 
