@@ -294,11 +294,15 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                 }
 
                 // Meteor like spells (divided damage to targets)
-                switch(m_spellInfo->Id)                     // unklnown better way to check
+                switch(m_spellInfo->Id)                     // better way to check unknown 
                 {
-                    case 24340: case 26558: case 26789: case 28884: 
-                    case 31436: case 35181: case 40810: case 41276: 
-                    case 42384: case 43267: case 43268:
+                    case 24340: case 26558: case 28884: case 41276: 
+                                                            // Meteor
+                    case 26789:                             // Shard of the Fallen Star
+                    case 31436:                             // Malevolent Cleave
+                    case 35181:                             // Dive Bomb
+                    case 40810: case 43267: case 43268:     // Saber Lash
+                    case 42384:                             // Brutal Swipe
                     {
                         uint32 count = 0;
                         for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)

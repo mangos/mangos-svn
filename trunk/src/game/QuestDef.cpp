@@ -24,7 +24,7 @@ Quest::Quest(Field * questRecord)
 {
     QuestId = questRecord[0].GetUInt32();
     ZoneOrSort = questRecord[1].GetInt32();
-    ClassOrSkill = questRecord[2].GetInt32();
+    SkillOrClass = questRecord[2].GetInt32();
     MinLevel = questRecord[3].GetUInt32();
     QuestLevel = questRecord[4].GetUInt32();
     Type = questRecord[5].GetUInt32();
