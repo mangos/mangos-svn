@@ -1382,216 +1382,229 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
     // AT APPLAY & REMOVE
 
-    // Predatory Strikes
-    if(m_target->GetTypeId()==TYPEID_PLAYER && GetSpellProto()->SpellIconID == 1563)
+    switch(m_spellProto->SpellFamilyName)
     {
-        ((Player*)m_target)->UpdateAttackPowerAndDamage();
-        return;
-    }
-
-    // Mangle (Cat) combo && damage
-    if( m_spellProto->SpellFamilyName==SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags == 0x40000000000LL &&
-        caster && caster->GetTypeId()==TYPEID_PLAYER )
-    {
-        if(apply)
+        case SPELLFAMILY_GENERIC:
         {
-            // 1 combo
-            ((Player*)caster)->AddComboPoints(m_target,1);
-
-            // damage%
-            SpellModifier *mod = new SpellModifier;
-            mod->op = SPELLMOD_DAMAGE;
-            mod->value = m_modifier.m_amount;
-            mod->type = SPELLMOD_PCT;
-            mod->spellId = GetId();
-            mod->effectId = m_effIndex;
-            mod->lastAffected = NULL;
-            mod->mask = 0x00008000 | 0x00001000;
-            mod->charges = 0;
-
-            m_spellmod = mod;
-        }
-
-        ((Player*)caster)->AddSpellMod(m_spellmod, apply);
-        return;
-    }
-    // Unstable Power
-    if( GetId()==24658 )
-    {
-        uint32 spellId = 24659;
-        if (apply)
-        {
-            const SpellEntry *spell = sSpellStore.LookupEntry(spellId);
-            if (!spell)
-                return;
-            for (int i=0; i < spell->StackAmount; ++i)
-                caster->CastSpell(m_target, spell->Id, true, NULL, NULL, GetCasterGUID());
-            return;
-        }
-        m_target->RemoveAurasDueToSpell(spellId);
-        return;
-    }
-    // Restless Strength 
-    if( GetId()==24661 )
-    {
-        uint32 spellId = 24662;
-        if (apply)
-        {
-            const SpellEntry *spell = sSpellStore.LookupEntry(spellId);
-            if (!spell)
-                return;
-            for (int i=0; i < spell->StackAmount; ++i)
-                caster->CastSpell(m_target, spell->Id, true, NULL, NULL, GetCasterGUID());
-            return;
-        }
-        m_target->RemoveAurasDueToSpell(spellId);
-        return;
-    }
-    // Improved Aspect of the Viper
-    if( GetId()==38390 && m_target->GetTypeId()==TYPEID_PLAYER )
-    {
-        if(apply)
-        {
-            // + effect value for Aspect of the Viper
-            SpellModifier *mod = new SpellModifier;
-            mod->op = SPELLMOD_EFFECT1;
-            mod->value = m_modifier.m_amount;
-            mod->type = SPELLMOD_FLAT;
-            mod->spellId = GetId();
-            mod->effectId = m_effIndex;
-            mod->lastAffected = NULL;
-            mod->mask = 0x4000000000000LL;
-            mod->charges = 0;
-
-            m_spellmod = mod;
-        }
-
-        ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
-
-        // update active aura
-        Unit::AuraList const& mDummy2Auras = m_target->GetAurasByType(SPELL_AURA_DUMMY_2);
-        for(Unit::AuraList::const_iterator i = mDummy2Auras.begin();i != mDummy2Auras.end(); ++i)
-        {
-            if((*i)->GetId() == 34074)                      // Aspect of the Viper
+            // Unstable Power
+            if( GetId()==24658 )
             {
-                const_cast<int32&>((*i)->GetModifier()->m_amount) += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
-                ((Player*)m_target)->UpdateManaRegen();
-            }
-        }
-        return;
-    }
-
-    // Victorious
-    if(GetId()==32216 && m_target->getClass()==CLASS_WARRIOR)
-    {
-        m_target->ModifyAuraState(AURA_STATE_WARRIOR_VICTORY_RUSH, apply);
-        return;
-    }
-
-    // lifebloom
-    if ( GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID && (GetSpellProto()->SpellFamilyFlags & 0x1000000000LL) )
-    {
-        if ( apply )
-        {
-            if ( caster )
-                m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
-        }
-        else
-        {
-            // not heal if canceled, dispel case implemented in Unit::RemoveFirstAuraByDispel
-            if (GetAuraDuration()>0)
-                return;
-
-            // have a look if there is still some other lifebloom dummy aura
-            Unit::AuraList auras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
-            for(Unit::AuraList::iterator itr = auras.begin(); itr!=auras.end(); itr++)
-                if((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
-                    (*itr)->GetSpellProto()->SpellFamilyFlags & 0x1000000000LL)
+                uint32 spellId = 24659;
+                if (apply)
+                {
+                    const SpellEntry *spell = sSpellStore.LookupEntry(spellId);
+                    if (!spell)
+                        return;
+                    for (int i=0; i < spell->StackAmount; ++i)
+                        caster->CastSpell(m_target, spell->Id, true, NULL, NULL, GetCasterGUID());
                     return;
-
-            // final heal
-            m_target->CastCustomSpell(m_target,33778,&m_modifier.m_amount,NULL,NULL,true,NULL,this,GetCasterGUID());
-        }
-        return;
-    }
-
-    //Fire Elemental Totem
-    if (GetId() == 40133 && caster)
-    {
-        Unit *owner = caster->GetOwner();
-        if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-        {
-            if(apply)
-                owner->CastSpell(owner,8985,true);
-            else
-                ((Player*)owner)->RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
-        }
-        return;
-    }
-
-    //Earth Elemental Totem
-    if (GetId() == 40132 && caster)
-    {
-        Unit *owner = caster->GetOwner();
-        if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-        {
-            if(apply)
-                owner->CastSpell(owner,19704,true);
-            else
-                ((Player*)owner)->RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
-        }
-        return;
-    }
-
-    // Idol of the Emerald Queen
-    if ( GetId() == 34246 && m_target->GetTypeId()==TYPEID_PLAYER )
-    {
-        if(apply)
-        {
-            SpellModifier *mod = new SpellModifier;
-            mod->op = SPELLMOD_DOT;
-            mod->value = m_modifier.m_amount/7;
-            mod->type = SPELLMOD_FLAT;
-            mod->spellId = GetId();
-            mod->effectId = m_effIndex;
-            mod->lastAffected = NULL;
-            mod->mask = 0x001000000000LL;
-            mod->charges = 0;
-
-            m_spellmod = mod;
-        }
-
-        ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
-        return;
-    }
-
-    // Improved Weapon Totems
-    if( GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && GetSpellProto()->SpellIconID == 57 && 
-        m_target->GetTypeId()==TYPEID_PLAYER )
-    {
-        if(apply)
-        {
-            SpellModifier *mod = new SpellModifier;
-            mod->op = SPELLMOD_EFFECT1;
-            mod->value = m_modifier.m_amount;
-            mod->type = SPELLMOD_PCT;
-            mod->spellId = GetId();
-            mod->effectId = m_effIndex;
-            mod->lastAffected = NULL;
-            switch (m_effIndex)
-            {
-                case 0: mod->mask = 0x00200000000LL;        // Windfury Totem
-                    break;
-                case 1: mod->mask = 0x00400000000LL;        // Flametongue Totem
-                    break;
+                }
+                m_target->RemoveAurasDueToSpell(spellId);
+                return;
             }
-            mod->charges = 0;
+            // Restless Strength 
+            if( GetId()==24661 )
+            {
+                uint32 spellId = 24662;
+                if (apply)
+                {
+                    const SpellEntry *spell = sSpellStore.LookupEntry(spellId);
+                    if (!spell)
+                        return;
+                    for (int i=0; i < spell->StackAmount; ++i)
+                        caster->CastSpell(m_target, spell->Id, true, NULL, NULL, GetCasterGUID());
+                    return;
+                }
+                m_target->RemoveAurasDueToSpell(spellId);
+                return;
+            }
+            // Victorious
+            if(GetId()==32216 && m_target->getClass()==CLASS_WARRIOR)
+            {
+                m_target->ModifyAuraState(AURA_STATE_WARRIOR_VICTORY_RUSH, apply);
+                return;
+            }
+            //Summon Fire Elemental
+            if (GetId() == 40133 && caster)
+            {
+                Unit *owner = caster->GetOwner();
+                if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if(apply)
+                        owner->CastSpell(owner,8985,true);
+                    else
+                        ((Player*)owner)->RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
+                }
+                return;
+            }
 
-            m_spellmod = mod;
+            //Summon Earth Elemental
+            if (GetId() == 40132 && caster)
+            {
+                Unit *owner = caster->GetOwner();
+                if (owner && owner->GetTypeId() == TYPEID_PLAYER)
+                {
+                    if(apply)
+                        owner->CastSpell(owner,19704,true);
+                    else
+                        ((Player*)owner)->RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
+                }
+                return;
+            }
+            break;
         }
+        case SPELLFAMILY_DRUID:
+        {
+            // Mangle (Cat) combo && damage
+            if( m_spellProto->SpellFamilyFlags == 0x40000000000LL && caster && caster->GetTypeId()==TYPEID_PLAYER )
+            {
+                if(apply)
+                {
+                    // 1 combo
+                    ((Player*)caster)->AddComboPoints(m_target,1);
 
-        ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
-        return;
+                    // damage%
+                    SpellModifier *mod = new SpellModifier;
+                    mod->op = SPELLMOD_DAMAGE;
+                    mod->value = m_modifier.m_amount;
+                    mod->type = SPELLMOD_PCT;
+                    mod->spellId = GetId();
+                    mod->effectId = m_effIndex;
+                    mod->lastAffected = NULL;
+                    mod->mask = 0x00008000 | 0x00001000;
+                    mod->charges = 0;
+
+                    m_spellmod = mod;
+                }
+
+                ((Player*)caster)->AddSpellMod(m_spellmod, apply);
+                return;
+            }
+
+            // lifebloom
+            if ( GetSpellProto()->SpellFamilyFlags & 0x1000000000LL )
+            {
+                if ( apply )
+                {
+                    if ( caster )
+                        m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
+                }
+                else
+                {
+                    // not heal if canceled, dispel case implemented in Unit::RemoveFirstAuraByDispel
+                    if (GetAuraDuration()>0)
+                        return;
+
+                    // have a look if there is still some other lifebloom dummy aura
+                    Unit::AuraList auras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
+                    for(Unit::AuraList::iterator itr = auras.begin(); itr!=auras.end(); itr++)
+                        if((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
+                            (*itr)->GetSpellProto()->SpellFamilyFlags & 0x1000000000LL)
+                            return;
+
+                    // final heal
+                    m_target->CastCustomSpell(m_target,33778,&m_modifier.m_amount,NULL,NULL,true,NULL,this,GetCasterGUID());
+                }
+                return;
+            }
+
+            // Predatory Strikes
+            if(m_target->GetTypeId()==TYPEID_PLAYER && GetSpellProto()->SpellIconID == 1563)
+            {
+                ((Player*)m_target)->UpdateAttackPowerAndDamage();
+                return;
+            }
+            // Idol of the Emerald Queen
+            if ( GetId() == 34246 && m_target->GetTypeId()==TYPEID_PLAYER )
+            {
+                if(apply)
+                {
+                    SpellModifier *mod = new SpellModifier;
+                    mod->op = SPELLMOD_DOT;
+                    mod->value = m_modifier.m_amount/7;
+                    mod->type = SPELLMOD_FLAT;
+                    mod->spellId = GetId();
+                    mod->effectId = m_effIndex;
+                    mod->lastAffected = NULL;
+                    mod->mask = 0x001000000000LL;
+                    mod->charges = 0;
+
+                    m_spellmod = mod;
+                }
+
+                ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
+                return;
+            }
+            break;
+        }
+        case SPELLFAMILY_HUNTER:
+        {
+            // Improved Aspect of the Viper
+            if( GetId()==38390 && m_target->GetTypeId()==TYPEID_PLAYER )
+            {
+                if(apply)
+                {
+                    // + effect value for Aspect of the Viper
+                    SpellModifier *mod = new SpellModifier;
+                    mod->op = SPELLMOD_EFFECT1;
+                    mod->value = m_modifier.m_amount;
+                    mod->type = SPELLMOD_FLAT;
+                    mod->spellId = GetId();
+                    mod->effectId = m_effIndex;
+                    mod->lastAffected = NULL;
+                    mod->mask = 0x4000000000000LL;
+                    mod->charges = 0;
+
+                    m_spellmod = mod;
+                }
+
+                ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
+
+                // update active aura
+                Unit::AuraList const& mDummy2Auras = m_target->GetAurasByType(SPELL_AURA_DUMMY_2);
+                for(Unit::AuraList::const_iterator i = mDummy2Auras.begin();i != mDummy2Auras.end(); ++i)
+                {
+                    if((*i)->GetId() == 34074)                      // Aspect of the Viper
+                    {
+                        const_cast<int32&>((*i)->GetModifier()->m_amount) += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
+                        ((Player*)m_target)->UpdateManaRegen();
+                    }
+                }
+                return;
+            }
+            break;
+        }
+        case SPELLFAMILY_SHAMAN:
+        {
+            // Improved Weapon Totems
+            if( GetSpellProto()->SpellIconID == 57 && m_target->GetTypeId()==TYPEID_PLAYER )
+            {
+                if(apply)
+                {
+                    SpellModifier *mod = new SpellModifier;
+                    mod->op = SPELLMOD_EFFECT1;
+                    mod->value = m_modifier.m_amount;
+                    mod->type = SPELLMOD_PCT;
+                    mod->spellId = GetId();
+                    mod->effectId = m_effIndex;
+                    mod->lastAffected = NULL;
+                    switch (m_effIndex)
+                    {
+                    case 0: mod->mask = 0x00200000000LL;        // Windfury Totem
+                        break;
+                    case 1: mod->mask = 0x00400000000LL;        // Flametongue Totem
+                        break;
+                    }
+                    mod->charges = 0;
+
+                    m_spellmod = mod;
+                }
+
+                ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
+                return;
+            }
+            break;
+        }
     }
 }
 
