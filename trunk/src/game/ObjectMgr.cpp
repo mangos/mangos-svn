@@ -3902,8 +3902,8 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
 
                 delete resultItems;
             }
-
-            if (m->checked & (AUCTION_CHECKED | COD_PAYMENT_CHECKED | RETURNED_CHECKED))
+            //if it is mail from AH, it shouldn't be returned, but deleted
+            if (m->messageType != MAIL_NORMAL || (m->checked & (AUCTION_CHECKED | COD_PAYMENT_CHECKED | RETURNED_CHECKED)))
             {
                 // mail open and then not returned
                 for(std::vector<MailItemInfo>::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
