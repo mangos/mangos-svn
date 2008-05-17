@@ -342,6 +342,7 @@ class ChatHandler
         bool HandleChangeEntryCommand(const char *args);
         bool HandleCastCommand(const char *args);
         bool HandleCastBackCommand(const char *args);
+        bool HandleCastSelfCommand(const char *args);
         bool HandleCastTargetCommand(const char *args);
         bool HandleComeToMeCommand(const char *args);
 
