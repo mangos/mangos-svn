@@ -279,7 +279,7 @@ void Spell::EffectEnvirinmentalDMG(uint32 i)
         ((Player*)m_caster)->EnvironmentalDamage(m_caster->GetGUID(),DAMAGE_FIRE,damage);
 }
 
-void Spell::EffectSchoolDMG(uint32 /*i*/)
+void Spell::EffectSchoolDMG(uint32 effect_idx)
 {
     if( unitTarget && unitTarget->isAlive())
     {
@@ -291,6 +291,23 @@ void Spell::EffectSchoolDMG(uint32 /*i*/)
                 if(m_spellInfo->SpellIconID == 2269 )
                 {    
                     damage+= rand()%2 ? damage : 0;
+                }
+
+                // Meteor like spells (divided damage to targets)
+                switch(m_spellInfo->Id)                     // unklnown better way to check
+                {
+                    case 24340: case 26558: case 26789: case 28884: 
+                    case 31436: case 35181: case 40810: case 41276: 
+                    case 42384: case 43267: case 43268:
+                    {
+                        uint32 count = 0;
+                        for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
+                            if(ihit->effectMask & (1<<effect_idx))
+                                ++count;
+
+                        damage /= count;                    // divide to all targets
+                        break;
+                    }
                 }
 
                 break;
