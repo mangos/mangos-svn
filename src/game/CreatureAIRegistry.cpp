@@ -27,7 +27,6 @@
 #include "CreatureAIImpl.h"
 #include "MovementGeneratorImpl.h"
 #include "MapManager.h"
-#include "WaypointMovementGenerator.h"
 #include "CreatureAIRegistry.h"
 #include "WaypointMovementGenerator.h"
 
