@@ -93,7 +93,8 @@ inline void Traveller<Player>::Relocation(float x, float y, float z, float orien
 template<>
 inline void Traveller<Player>::MoveTo(float x, float y, float z, uint32 t)
 {
-    i_traveller.SendMonsterMove(x, y, z, 0, i_traveller.GetUnitMovementFlags(), t);
+    //Only send MOVEMENTFLAG_WALK_MODE, client has strange issues with other move flags
+    i_traveller.SendMonsterMove(x, y, z, 0, MOVEMENTFLAG_WALK_MODE, t);
 }
 
 typedef Traveller<Creature> CreatureTraveller;

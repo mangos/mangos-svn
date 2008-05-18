@@ -530,8 +530,8 @@ void Aura::Update(uint32 diff)
                                                             //+vmaps
                 if((z<=pos_z+1.3 && z>=pos_z-1.3) && m_target->IsWithinLOS(x,y,z))
                 {
-                    //Send opposite MOVE_WALK movement flag. Client always set its movementflag to opposite of what we send
-                    m_target->SendMonsterMove(x, y, z, 0, m_target->GetUnitMovementFlags() ^ MOVEMENTFLAG_WALK_MODE, (diff*2));
+                    //Only send MOVEMENTFLAG_WALK_MODE, client has strange issues with other move flags
+                    m_target->SendMonsterMove(x, y, z, 0, MOVEMENTFLAG_WALK_MODE, (diff*2));
 
                     if(m_target->GetTypeId() != TYPEID_PLAYER)
                         MapManager::Instance().GetMap(m_target->GetMapId(), m_target)->CreatureRelocation((Creature*)m_target,x,y,z,m_target->GetOrientation());
@@ -547,8 +547,8 @@ void Aura::Update(uint32 diff)
 
                     if((z<=pos_z+1.3 && z>=pos_z-1.3) && m_target->IsWithinLOS(x,y,z))
                     {
-                        //Send opposite MOVE_WALK movement flag. Client always set its movementflag to opposite of what we send
-                        m_target->SendMonsterMove(x, y, z, 0, m_target->GetUnitMovementFlags() ^ MOVEMENTFLAG_WALK_MODE, (diff*2));
+                        //Only send MOVEMENTFLAG_WALK_MODE, client has strange issues with other move flags
+                        m_target->SendMonsterMove(x, y, z, 0, MOVEMENTFLAG_WALK_MODE, (diff*2));
 
                         if(m_target->GetTypeId() != TYPEID_PLAYER)
                             MapManager::Instance().GetMap(m_target->GetMapId(), m_target)->CreatureRelocation((Creature*)m_target,x,y,z,m_target->GetOrientation());
@@ -2675,7 +2675,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         if(m_target->GetTypeId() != TYPEID_PLAYER)
         {
             ((Creature *)m_target)->StopMoving();
-        }
+        }else m_target->SetUnitMovementFlags(0);    //Clear movement flags
 
         WorldPacket data(SMSG_FORCE_MOVE_ROOT, 8);
 
@@ -2907,6 +2907,9 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
             data.append(m_target->GetPackGUID());
             data << (uint32)2;
             m_target->SendMessageToSet(&data,true);
+
+            //Clear unit movement flags
+            m_target->SetUnitMovementFlags(0);
         }
         else
             ((Creature *)m_target)->StopMoving();
