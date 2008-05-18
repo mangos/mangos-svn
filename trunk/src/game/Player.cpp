@@ -3857,14 +3857,9 @@ void Player::UpdateDefense()
 
     if(UpdateSkill(SKILL_DEFENSE,defense_skill_gain))
     {
-        // update dependent from defense skill part BlockChanceWithoutMods = 5 + (GetDefenseSkillValue() - getLevel()*5)*0.04);
-        UpdateBlockPercentage();
+        // update dependent from defense skill part
+        UpdateDefenseBonusesMod();
     }
-}
-
-int16 Player::GetDefenseSkillTempBonusValue() const
-{
-    return GetSkillTempBonusValue(SKILL_DEFENSE) + int32(GetRatingBonusValue(PLAYER_FIELD_DEFENCE_RATING));
 }
 
 void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, float amount, bool apply, bool affectStats)
@@ -3897,9 +3892,6 @@ void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, floa
     switch(modGroup)
     {
         case CRIT_PERCENTAGE:              UpdateCritPercentage(BASE_ATTACK);                          break;
-        case BLOCK_PERCENTAGE:             UpdateBlockPercentage();                                    break;
-        case DODGE_PERCENTAGE:             UpdateDodgePercentage();                                    break;
-        case PARRY_PERCENTAGE:             UpdateParryPercentage();                                    break;
         case RANGED_CRIT_PERCENTAGE:       UpdateCritPercentage(RANGED_ATTACK);                        break;
         case OFFHAND_CRIT_PERCENTAGE:      UpdateCritPercentage(OFF_ATTACK);                           break;
         case SHIELD_BLOCK_VALUE:           UpdateShieldBlockValue();                                   break;
@@ -4414,6 +4406,7 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
             break;
         }
     }
+    UpdateAllCritPercentages();
 }
 
 void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHitOutcome outcome, bool defence)

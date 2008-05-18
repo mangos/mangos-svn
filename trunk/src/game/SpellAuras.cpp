@@ -3857,7 +3857,7 @@ void Aura::HandleAuraModParryPercent(bool apply, bool Real)
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
 
-    ((Player*)m_target)->HandleBaseModValue(PARRY_PERCENTAGE, FLAT_MOD, float (m_modifier.m_amount), apply);
+    ((Player*)m_target)->UpdateParryPercentage();
 }
 
 void Aura::HandleAuraModDodgePercent(bool apply, bool Real)
@@ -3865,7 +3865,7 @@ void Aura::HandleAuraModDodgePercent(bool apply, bool Real)
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
 
-    ((Player*)m_target)->HandleBaseModValue(DODGE_PERCENTAGE, FLAT_MOD, float (m_modifier.m_amount), apply);
+    ((Player*)m_target)->UpdateDodgePercentage();
     //sLog.outError("BONUS DODGE CHANCE: + %f", float(m_modifier.m_amount));
 }
 
@@ -3874,7 +3874,7 @@ void Aura::HandleAuraModBlockPercent(bool apply, bool Real)
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
 
-    ((Player*)m_target)->HandleBaseModValue(BLOCK_PERCENTAGE, FLAT_MOD, float (m_modifier.m_amount), apply);
+    ((Player*)m_target)->UpdateBlockPercentage();
     //sLog.outError("BONUS BLOCK CHANCE: + %f", float(m_modifier.m_amount));
 }
 
