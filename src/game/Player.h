@@ -1513,10 +1513,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateParryPercentage();
         void UpdateDodgePercentage();
         void UpdateAllSpellCritChances();
+        void UpdateSpellCritChance(uint32 school);
         void UpdateExpertise(WeaponAttackType attType);
         void UpdateManaRegen();
-        void UpdateSpellCritChance(uint32 school);
-        uint32 GetSpellSchoolByBaseGroup(BaseModGroup baseGroup) const;
 
         const uint64& GetLootGUID() const { return m_lootGuid; }
         void SetLootGUID(const uint64 &guid) { m_lootGuid = guid; }

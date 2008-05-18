@@ -527,28 +527,30 @@ void Player::UpdateDodgePercentage()
 
 void Player::UpdateSpellCritChance(uint32 school)
 {
-    if(school == 0)
+    // For normal school set zero crit chance
+    if(school == SPELL_SCHOOL_NORMAL)
+    {
+        SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1, 0.0f);
         return;
+    }
+    // For others recalculate it from:
+    float crit = 0.0f;
+    // Crit from Intellect
+    crit += GetSpellCritFromIntellect();
+    // Increase crit from SPELL_AURA_MOD_SPELL_CRIT_CHANCE
+    crit += GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_CRIT_CHANCE);
+    // Increase crit by school from SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL
+    crit += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, 1<<school);
+    // Increase crit from spell crit ratings
+    crit += GetRatingBonusValue(PLAYER_FIELD_SPELL_CRIT_RATING);
 
-    BaseModGroup modGroup = BaseModGroup(SPELL_CRIT_PERCENTAGE + school);
-
-    //Spell crit
-                                                            //here we store basic % crit chance
-    float base_value = GetBaseModValue(SPELL_CRIT_PERCENTAGE, PCT_MOD);
-                                                            //for ALL spell schools
-    base_value += GetRatingBonusValue(PLAYER_FIELD_SPELL_CRIT_RATING);
-
-    float total_value = base_value + GetBaseModValue(modGroup, FLAT_MOD);
-
-    SetStatFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + school, total_value);
+    // Store crit value
+    SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + school, crit);
 }
 
 void Player::UpdateAllSpellCritChances()
 {
-    float base_value = GetSpellCritFromIntellect();
-    SetBaseModValue(SPELL_CRIT_PERCENTAGE, PCT_MOD, base_value);
-    SetStatFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1, base_value);
-    for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; i++)
+    for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; i++)
         UpdateSpellCritChance(i);
 }
 
@@ -589,12 +591,7 @@ void Player::UpdateManaRegen()
 {
     float Intellect = GetStat(STAT_INTELLECT);
     float SpiritBasedRegen = sqrt(Intellect) * OCTRegenMPPerSpirit();
-    float power_regen_mod = 0;
-
-    AuraList const& ModPowerRegenAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN);
-    for(AuraList::const_iterator i = ModPowerRegenAuras.begin();i != ModPowerRegenAuras.end(); ++i)
-        if ((*i)->GetModifier()->m_miscvalue == POWER_MANA)
-            power_regen_mod += (*i)->GetModifier()->m_amount;
+    float power_regen_mod  = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA);
 
     float power_mana_regen =  GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN);
 
