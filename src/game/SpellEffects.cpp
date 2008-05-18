@@ -2100,7 +2100,9 @@ void Spell::EffectHeal( uint32 /*i*/ )
             }
         }
         uint32 addhealth = caster->SpellHealingBonus(m_spellInfo, uint32(damage),HEAL, unitTarget);
-        bool crit = caster->SpellCriticalBonus(m_spellInfo, &addhealth, NULL);
+        bool crit = caster->isSpellCrit(unitTarget, m_spellInfo, m_spellSchoolMask, m_attackType);
+        if (crit)
+            addhealth = caster->SpellCriticalBonus(m_spellInfo, addhealth, unitTarget);
         caster->SendHealSpellLog(unitTarget, m_spellInfo->Id, addhealth, crit);
 
         int32 gain = unitTarget->ModifyHealth( int32(addhealth) );
