@@ -109,7 +109,7 @@ WaypointMovementGenerator<Creature>::LoadPath(Creature &c)
                 i_wpBehaviour[count] = NULL;
             }
 
-            if(!MaNGOS::IsValidMapCoord(i_path[count].x,i_path[count].y))
+            if(!MaNGOS::IsValidMapCoord(i_path[count].x,i_path[count].y,i_path[count].z,orientation))
             {
                 sLog.outErrorDb("ERROR: Creature (guidlow %d,entry %d) have invalid coordinates in his waypoint %d (X: %d, Y: %d).",
                     c.GetGUIDLow(),c.GetEntry(),count,i_path[count].x,i_path[count].y

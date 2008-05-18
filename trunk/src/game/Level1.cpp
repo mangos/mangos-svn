@@ -1547,7 +1547,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     int mapid = fields[4].GetUInt16();
     delete result;
 
-    if(!MapManager::IsValidMapCoord(mapid,x,y))
+    if(!MapManager::IsValidMapCoord(mapid,x,y,x,ort))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
         return true;
@@ -1791,7 +1791,7 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
     int mapid = fields[4].GetUInt16();
     delete result;
 
-    if(!MapManager::IsValidMapCoord(mapid,x,y))
+    if(!MapManager::IsValidMapCoord(mapid,x,y,x,ort))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
         return true;
@@ -1867,7 +1867,7 @@ bool ChatHandler::HandleGroupTeleCommand(const char * args)
     int mapid = fields[4].GetUInt16();
     delete result;
 
-    if(!MapManager::IsValidMapCoord(mapid,x,y))
+    if(!MapManager::IsValidMapCoord(mapid,x,y,z,ort))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
         return true;
@@ -2070,7 +2070,7 @@ bool ChatHandler::HandleGoXYZCommand(const char* args)
     else
         mapid = _player->GetMapId();
 
-    if(!MapManager::IsValidMapCoord(mapid,x,y))
+    if(!MapManager::IsValidMapCoord(mapid,x,y,z))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
         return true;

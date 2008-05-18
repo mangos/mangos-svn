@@ -4794,7 +4794,7 @@ void Player::SetDontMove(bool dontMove)
 bool Player::SetPosition(float x, float y, float z, float orientation, bool teleport)
 {
     // prevent crash when a bad coord is sent by the client
-    if(!MaNGOS::IsValidMapCoord(x,y))
+    if(!MaNGOS::IsValidMapCoord(x,y,z,orientation))
     {
         sLog.outDebug("Player::SetPosition(%f, %f, %f, %f, %d) .. bad coordinates for player %d!",x,y,z,orientation,teleport,GetGUIDLow());
         return false;
@@ -13762,10 +13762,10 @@ void Player::SaveToDB()
         << m_race << ", "
         << m_class << ", "
         << GetMapId() << ", "
-        << GetPositionX() << ", "
-        << GetPositionY() << ", "
-        << GetPositionZ() << ", "
-        << GetOrientation() << ", '";
+        << finiteAlways(GetPositionX()) << ", "
+        << finiteAlways(GetPositionY()) << ", "
+        << finiteAlways(GetPositionZ()) << ", "
+        << finiteAlways(GetOrientation()) << ", '";
 
     uint16 i;
     for( i = 0; i < m_valuesCount; i++ )
@@ -13790,7 +13790,7 @@ void Player::SaveToDB()
     ss << m_Played_time[1];
 
     ss << ", ";
-    ss << m_rest_bonus;
+    ss << finiteAlways(m_rest_bonus);
     ss << ", ";
     ss << time(NULL);
     ss << ", ";
@@ -13801,13 +13801,13 @@ void Player::SaveToDB()
     ss << (uint64)m_resetTalentsTime;
 
     ss << ", ";
-    ss << m_movementInfo.t_x;
+    ss << finiteAlways(m_movementInfo.t_x);
     ss << ", ";
-    ss << m_movementInfo.t_y;
+    ss << finiteAlways(m_movementInfo.t_y);
     ss << ", ";
-    ss << m_movementInfo.t_z;
+    ss << finiteAlways(m_movementInfo.t_z);
     ss << ", ";
-    ss << m_movementInfo.t_o;
+    ss << finiteAlways(m_movementInfo.t_o);
     ss << ", ";
     if (m_transport)
         ss << m_transport->GetGUIDLow();

@@ -155,5 +155,15 @@ namespace MaNGOS
     {
         return IsValidMapCoord(x) && IsValidMapCoord(y);
     }
+
+    inline bool IsValidMapCoord(float x, float y, float z)
+    {
+        return IsValidMapCoord(x,y) && finite(z);
+    }
+
+    inline bool IsValidMapCoord(float x, float y, float z, float o)
+    {
+        return IsValidMapCoord(x,y,z) && finite(o);
+    }
 }
 #endif

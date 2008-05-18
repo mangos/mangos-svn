@@ -729,7 +729,7 @@ void CliTele(char*command,pPrintf zprintf)
     int mapid = fields[4].GetUInt16();
     delete result;
 
-    if(!MapManager::IsValidMapCoord(mapid,x,y))
+    if(!MapManager::IsValidMapCoord(mapid,x,y,z,ort))
     {
         zprintf(objmgr.GetMangosString(LANG_INVALID_TARGET_COORD),"\r\n",x,y,mapid);
         return;

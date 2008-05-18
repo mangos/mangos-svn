@@ -74,7 +74,21 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
 
         static bool ExistMapAndVMap(uint32 mapid, float x, float y);
         static bool IsValidMAP(uint32 mapid);
-        static bool IsValidMapCoord(uint32 mapid, float x,float y);
+
+        static bool IsValidMapCoord(uint32 mapid, float x,float y)
+        {
+            return IsValidMAP(mapid) && MaNGOS::IsValidMapCoord(x,y);
+        }
+
+        static bool IsValidMapCoord(uint32 mapid, float x,float y,float z)
+        {
+            return IsValidMAP(mapid) && MaNGOS::IsValidMapCoord(x,y,z);
+        }
+
+        static bool IsValidMapCoord(uint32 mapid, float x,float y,float z,float o)
+        {
+            return IsValidMAP(mapid) && MaNGOS::IsValidMapCoord(x,y,z,o);
+        }
 
         void MoveAllCreaturesInMoveList();
 
