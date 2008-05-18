@@ -1723,11 +1723,9 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
 {
     uint32 newdamage = 0;
     float armor = pVictim->GetArmor();
+    // Ignore enemy armor by SPELL_AURA_MOD_TARGET_RESISTANCE aura
+    armor += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, SPELL_SCHOOL_MASK_NORMAL);
 
-    AuraList const& mModTargetRes = GetAurasByType(SPELL_AURA_MOD_TARGET_RESISTANCE);
-    for(AuraList::const_iterator i = mModTargetRes.begin(); i != mModTargetRes.end(); ++i)
-        if ((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL)
-            armor += float((*i)->GetModifier()->m_amount);
     if (armor<0.0f) armor=0.0f;
 
     float tmpvalue = 0.0f;
@@ -1755,12 +1753,11 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchoolMask schoolMask, DamageEffe
     // Magic damage, check for resists
     if ((schoolMask & SPELL_SCHOOL_MASK_NORMAL)==0)
     {
-        float tmpvalue2 = 0.0f;
-        tmpvalue2 += (float)pVictim->GetResistance(GetFirstSchoolInMask(schoolMask));
-        AuraList const& mModTargetRes = GetAurasByType(SPELL_AURA_MOD_TARGET_RESISTANCE);
-        for(AuraList::const_iterator i = mModTargetRes.begin(); i != mModTargetRes.end(); ++i)
-            if ((*i)->GetModifier()->m_miscvalue & schoolMask)
-                tmpvalue2 += (float)((*i)->GetModifier()->m_amount);
+        // Get base victim resistance for school
+        float tmpvalue2 = (float)pVictim->GetResistance(GetFirstSchoolInMask(schoolMask));
+        // Ignore resistance by self SPELL_AURA_MOD_TARGET_RESISTANCE aura
+        tmpvalue2 += (float)GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_TARGET_RESISTANCE, schoolMask);
+
         tmpvalue2 *= (float)(0.15f / getLevel());
         if (tmpvalue2 < 0.0f)
             tmpvalue2 = 0.0f;
@@ -2511,11 +2508,8 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
     // Only players can have Talent&Spell bonuses
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        // Talents
-        AuraList const& mSpellCritSchool = GetAurasByType(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL);
-        for(AuraList::const_iterator i = mSpellCritSchool.begin(); i != mSpellCritSchool.end(); ++i)
-            if((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellInfo))
-                crit_chance += (*i)->GetModifier()->m_amount;
+        // Increase from SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL aura
+        crit_chance += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, spellInfo->SchoolMask);
 
         AuraList const& mCanNotBeDodge = GetAurasByType(SPELL_AURA_IGNORE_COMBAT_RESULT);
         for(AuraList::const_iterator i = mCanNotBeDodge.begin(); i != mCanNotBeDodge.end(); ++i)
@@ -2970,30 +2964,14 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     // Spellmod from SPELLMOD_RESIST_MISS_CHANCE
     if(Player *modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spell->Id, SPELLMOD_RESIST_MISS_CHANCE, modHitChance);  
-
     // Increase from attacker SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT auras
-    AuraList const& mModSpellHit= GetAurasByType(SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT);
-    for(AuraList::const_iterator i = mModSpellHit.begin();i != mModSpellHit.end(); ++i)
-        if((*i)->GetModifier()->m_miscvalue & schoolMask)
-            modHitChance+= (*i)->GetModifier()->m_amount;
-
+    modHitChance+=GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT, schoolMask);
     // Chance hit from victim SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE auras
-    AuraList const& mModMissRes = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE);
-    for(AuraList::const_iterator i = mModMissRes.begin();i != mModMissRes.end(); ++i)
-        if((*i)->GetModifier()->m_miscvalue & schoolMask)
-            modHitChance+= (*i)->GetModifier()->m_amount;
- 
+    modHitChance+= pVictim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE, schoolMask);
     // Chance resist mechanic
-    AuraList const& mModMechanicRes = pVictim->GetAurasByType(SPELL_AURA_MOD_MECHANIC_RESISTANCE);
-    for(AuraList::const_iterator i = mModMechanicRes.begin();i != mModMechanicRes.end(); ++i)
-        if((*i)->GetModifier()->m_miscvalue == int32(spell->Mechanic))
-            modHitChance-= (*i)->GetModifier()->m_amount;
-    
+    modHitChance-=pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MECHANIC_RESISTANCE, int32(spell->Mechanic));
     // Chance resist debuff
-    AuraList const& mModDebuffRes = pVictim->GetAurasByType(SPELL_AURA_MOD_DEBUFF_RESISTANCE);
-    for(AuraList::const_iterator i = mModDebuffRes.begin();i != mModDebuffRes.end(); ++i)
-        if((*i)->GetModifier()->m_miscvalue == int32(spell->Dispel))
-            modHitChance-= (*i)->GetModifier()->m_amount;
+    modHitChance-=pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spell->Dispel));
 
     int32 HitChance = modHitChance * 100; 
     // Increase hit chance from attacker SPELL_AURA_MOD_SPELL_HIT_CHANCE and attacker ratings
@@ -7227,7 +7205,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     float TakenTotalMod = 1.0f;
 
     // ..done
-    AuraList const& mModDamagePercentDone = this->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+    AuraList const& mModDamagePercentDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
     for(AuraList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
     {
         if( ((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) &&
@@ -7505,7 +7483,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     float tmpDamage = (float(pdamage)+DoneActualBenefit)*DoneTotalMod;
 
     // Add flat bonus from spell damage versus
-    tmpDamage += this->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_FLAT_SPELL_DAMAGE_VERSUS, creatureTypeMask);
+    tmpDamage += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_FLAT_SPELL_DAMAGE_VERSUS, creatureTypeMask);
 
     // apply spellmod to Done damage
     if(Player* modOwner = GetSpellModOwner())
@@ -7524,7 +7502,7 @@ int32 Unit::SpellBaseDamageBonus(int32 SchoolMask)
     int32 DoneAdvertisedBenefit = 0;
 
     // ..done
-    AuraList const& mDamageDone = this->GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
+    AuraList const& mDamageDone = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for(AuraList::const_iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
         if(((*i)->GetModifier()->m_miscvalue & SchoolMask) != 0 &&
         (*i)->GetSpellProto()->EquippedItemClass == -1 &&

@@ -3934,10 +3934,13 @@ void Aura::HandleModSpellHitChance(bool apply, bool Real)
 
 void Aura::HandleModSpellCritChance(bool apply, bool Real)
 {
+    // spells required only Real aura add/remove
+    if(!Real)
+        return;
+
     if(m_target->GetTypeId() == TYPEID_PLAYER)
     {
-        for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
-            ((Player*)m_target)->HandleBaseModValue( BaseModGroup(SPELL_CRIT_PERCENTAGE + i), FLAT_MOD, float(m_modifier.m_amount), apply);
+        ((Player*)m_target)->UpdateAllSpellCritChances();
     }
     else
     {
@@ -3947,14 +3950,16 @@ void Aura::HandleModSpellCritChance(bool apply, bool Real)
 
 void Aura::HandleModSpellCritChanceShool(bool apply, bool Real)
 {
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
+    // spells required only Real aura add/remove
+    if(!Real)
         return;
 
-    for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
-    {
-        if(m_modifier.m_miscvalue == -2 || (m_modifier.m_miscvalue & (1<<i)) != 0)
-            ((Player*)m_target)->HandleBaseModValue( BaseModGroup(SPELL_CRIT_PERCENTAGE + i), FLAT_MOD, float(m_modifier.m_amount), apply);
-    }
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+    
+    for(int school = SPELL_SCHOOL_NORMAL; school < MAX_SPELL_SCHOOL; ++school)
+        if (m_modifier.m_miscvalue & (1<<school))
+            ((Player*)m_target)->UpdateSpellCritChance(school);
 }
 
 /********************************/

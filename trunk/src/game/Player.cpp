@@ -3902,13 +3902,6 @@ void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, floa
         case PARRY_PERCENTAGE:             UpdateParryPercentage();                                    break;
         case RANGED_CRIT_PERCENTAGE:       UpdateCritPercentage(RANGED_ATTACK);                        break;
         case OFFHAND_CRIT_PERCENTAGE:      UpdateCritPercentage(OFF_ATTACK);                           break;
-        case SPELL_CRIT_PERCENTAGE:        UpdateAllSpellCritChances();                                break;
-        case HOLY_SPELL_CRIT_PERCENTAGE:
-        case FIRE_SPELL_CRIT_PERCENTAGE:
-        case NATURE_SPELL_CRIT_PERCENTAGE:
-        case FROST_SPELL_CRIT_PERCENTAGE:
-        case SHADOW_SPELL_CRIT_PERCENTAGE:
-        case ARCANE_SPELL_CRIT_PERCENTAGE: UpdateSpellCritChance(GetSpellSchoolByBaseGroup(modGroup)); break;
         case SHIELD_BLOCK_VALUE:           UpdateShieldBlockValue();                                   break;
         default: break;
     }
@@ -3951,30 +3944,6 @@ uint32 Player::GetShieldBlockValue() const
     value = (value < 0) ? 0 : value;
 
     return uint32(value);
-}
-
-uint32 Player::GetSpellSchoolByBaseGroup(BaseModGroup baseGroup) const
-{
-    if(baseGroup >= BASEMOD_END)
-        return MAX_SPELL_SCHOOL;
-
-    uint32 school = MAX_SPELL_SCHOOL;
-
-    switch(baseGroup)
-    {
-        case SPELL_CRIT_PERCENTAGE:         school = SPELL_SCHOOL_NORMAL;          break;
-        case HOLY_SPELL_CRIT_PERCENTAGE:    school = SPELL_SCHOOL_HOLY;            break;
-        case FIRE_SPELL_CRIT_PERCENTAGE:    school = SPELL_SCHOOL_FIRE;               break;
-        case NATURE_SPELL_CRIT_PERCENTAGE:  school = SPELL_SCHOOL_NATURE;          break;
-        case FROST_SPELL_CRIT_PERCENTAGE:   school = SPELL_SCHOOL_FROST;           break;
-        case SHADOW_SPELL_CRIT_PERCENTAGE:  school = SPELL_SCHOOL_SHADOW;          break;
-        case ARCANE_SPELL_CRIT_PERCENTAGE:  school = SPELL_SCHOOL_ARCANE;          break;
-
-        default:
-            break;
-    }
-
-    return school;
 }
 
 float Player::GetMeleeCritFromAgility()
