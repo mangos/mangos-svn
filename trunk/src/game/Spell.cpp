@@ -3150,6 +3150,13 @@ uint8 Spell::CanCast(bool strict)
             return SPELL_FAILED_NOT_MOUNTED;
     }
 
+    // check if target is in combat
+    if (m_spellInfo->AttributesEx & 0x100 && target->isInCombat())
+    {
+        return SPELL_FAILED_TARGET_AFFECTING_COMBAT;
+    }
+
+
     // always (except passive spells) check items (focus object can be required for any type casts)
     if(!IsPassiveSpell(m_spellInfo->Id))
         if(uint8 castResult = CheckItems())
@@ -3618,9 +3625,6 @@ uint8 Spell::CanCast(bool strict)
                 Player* target = objmgr.GetPlayer(((Player*)m_caster)->GetSelection());
                 if( !target || ((Player*)m_caster)==target || !target->IsInSameGroupWith((Player*)m_caster) )
                     return SPELL_FAILED_BAD_TARGETS;
-
-                if( target->isInCombat() )
-                    return SPELL_FAILED_TARGET_IN_COMBAT;
 
                 // check if our map is dungeon
                 if(MapManager::Instance().GetBaseMap(m_caster->GetMapId())->IsDungeon() )

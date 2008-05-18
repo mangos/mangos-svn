@@ -315,7 +315,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
 
             Group *group = GetPlayer()->GetGroup();
-            if(!group || !group->isRaidGroup() || !group->IsLeader(GetPlayer()->GetGUID()))
+            if(!group || !group->isRaidGroup() || !(group->IsLeader(GetPlayer()->GetGUID()) || group->IsAssistant(GetPlayer()->GetGUID())))
                 return;
 
             WorldPacket data;
