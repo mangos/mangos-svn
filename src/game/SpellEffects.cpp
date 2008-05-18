@@ -4803,8 +4803,8 @@ void Spell::EffectCharge(uint32 /*i*/)
     if(unitTarget->GetTypeId() != TYPEID_PLAYER)
         ((Creature *)unitTarget)->StopMoving();
 
-    //Send opposite MOVE_WALK movement flag. Client always set its movementflag to opposite of what we send
-    m_caster->SendMonsterMove(x, y, z, 0, m_caster->GetUnitMovementFlags() ^ MOVEMENTFLAG_WALK_MODE, 1);
+    //Only send MOVEMENTFLAG_WALK_MODE, client has strange issues with other move flags
+    m_caster->SendMonsterMove(x, y, z, 0, MOVEMENTFLAG_WALK_MODE, 1);
 
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->CreatureRelocation((Creature*)m_caster,x,y,z,m_caster->GetOrientation());

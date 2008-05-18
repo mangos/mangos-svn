@@ -611,6 +611,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
         // stop combat
         pVictim->CombatStop();
+        pVictim->getHostilRefManager().deleteReferences();
 
         // clear combat state for killer dependent units (owner/pets)
         if(player)
@@ -685,7 +686,6 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                 WorldPacket data(SMSG_DURABILITY_DAMAGE_DEATH, 0);
                 ((Player*)pVictim)->GetSession()->SendPacket(&data);
             }
-            pVictim->getHostilRefManager().deleteReferences();
 
             Pet *pet = pVictim->GetPet();
             if(pet && pVictim->GetTypeId() != TYPEID_PLAYER)
@@ -701,9 +701,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         {
             DEBUG_LOG("DealDamageNotPlayer");
 
-            if(((Creature*)pVictim)->isPet())
-                pVictim->getHostilRefManager().deleteReferences();
-            else
+            if(!((Creature*)pVictim)->isPet())
             {
                 pVictim->DeleteThreatList();
                 pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
