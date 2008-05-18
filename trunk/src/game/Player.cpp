@@ -11596,11 +11596,23 @@ void Player::FailTimedQuest( uint32 quest_id )
 
 bool Player::SatisfyQuestSkillOrClass( Quest const* qInfo, bool msg )
 {
+    int32 zoneOrSort   = qInfo->GetZoneOrSort();
     int32 skillOrClass = qInfo->GetSkillOrClass();
 
-    // skip 0 case
-    if( skillOrClass == 0 )
+    // skip zone zoneOrSort and 0 case skillOrClass
+    if( zoneOrSort >= 0 && skillOrClass == 0 )
         return true;
+
+    int32 questSort = -zoneOrSort;
+    uint8 reqSortClass = ClassByQuestSort(questSort);
+
+    // check class sort cases in zoneOrSort
+    if( reqSortClass != 0 && getClass() != reqSortClass)
+    {
+        if( msg )
+            SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
+        return false;
+    }
 
     // check class
     if( skillOrClass < 0 )
