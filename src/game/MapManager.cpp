@@ -184,11 +184,6 @@ bool MapManager::IsValidMAP(uint32 mapid)
     return sMapStore.LookupEntry(mapid);
 }
 
-bool MapManager::IsValidMapCoord(uint32 mapid, float x,float y)
-{
-    return IsValidMAP(mapid) && MaNGOS::IsValidMapCoord(x,y);
-}
-
 void MapManager::LoadGrid(int mapid, float x, float y, const WorldObject* obj, bool no_unload)
 {
     CellPair p = MaNGOS::ComputeCellPair(x,y);

@@ -117,6 +117,8 @@
 #define SI64FMTD "%lld"
 #endif
 
+inline float finiteAlways(float f) { return finite(f) ? f : 0.0f; }
+
 #define atol(a) strtoul( a, NULL, 10)
 
 #define STRINGIZE(a) #a

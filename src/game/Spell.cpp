@@ -182,7 +182,7 @@ bool SpellCastTargets::read ( WorldPacket * data, Unit *caster )
             return false;
 
         *data >> m_srcX >> m_srcY >> m_srcZ;
-        if(!MaNGOS::IsValidMapCoord(m_srcX, m_srcY))
+        if(!MaNGOS::IsValidMapCoord(m_srcX, m_srcY, m_srcZ))
             return false;
     }
 
@@ -192,7 +192,7 @@ bool SpellCastTargets::read ( WorldPacket * data, Unit *caster )
             return false;
 
         *data >> m_destX >> m_destY >> m_destZ;
-        if(!MaNGOS::IsValidMapCoord(m_destX, m_destY))
+        if(!MaNGOS::IsValidMapCoord(m_destX, m_destY, m_destZ))
             return false;
     }
 

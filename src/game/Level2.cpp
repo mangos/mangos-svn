@@ -299,7 +299,7 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
         return true;
     }
 
-    if(!MapManager::IsValidMapCoord(mapid,x,y))
+    if(!MapManager::IsValidMapCoord(mapid,x,y,z,ort))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
         return true;
@@ -340,7 +340,7 @@ bool ChatHandler::HandleGoTriggerCommand(const char* args)
         return true;
     }
 
-    if(!MapManager::IsValidMapCoord(at->mapid,at->x,at->y))
+    if(!MapManager::IsValidMapCoord(at->mapid,at->x,at->y,at->z))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,at->x,at->y,at->mapid);
         return true;
@@ -381,7 +381,7 @@ bool ChatHandler::HandleGoGraveyardCommand(const char* args)
         return true;
     }
 
-    if(!MapManager::IsValidMapCoord(gy->map_id,gy->x,gy->y))
+    if(!MapManager::IsValidMapCoord(gy->map_id,gy->x,gy->y,gy->z))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,gy->x,gy->y,gy->map_id);
         return true;
@@ -484,7 +484,7 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
 
     delete result;
 
-    if(!MapManager::IsValidMapCoord(mapid,x,y))
+    if(!MapManager::IsValidMapCoord(mapid,x,y,z,ort))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
         return true;
@@ -1073,7 +1073,7 @@ bool ChatHandler::HandleMoveObjectCommand(const char* args)
         float y = (float)atof(py);
         float z = (float)atof(pz);
 
-        if(!MapManager::IsValidMapCoord(obj->GetMapId(),x,y))
+        if(!MapManager::IsValidMapCoord(obj->GetMapId(),x,y,z))
         {
             PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,obj->GetMapId());
             return true;

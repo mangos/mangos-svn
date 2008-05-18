@@ -34,7 +34,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
     sLog.outDebug( "WORLD: got MSG_MOVE_WORLDPORT_ACK." );
 
     MapEntry const* mEntry = sMapStore.LookupEntry(GetPlayer()->GetMapId());
-    if(!mEntry || !MaNGOS::IsValidMapCoord(GetPlayer()->GetPositionX(),GetPlayer()->GetPositionY()))
+    if(!mEntry || !MaNGOS::IsValidMapCoord(GetPlayer()->GetPositionX(),GetPlayer()->GetPositionY(),GetPlayer()->GetPositionZ(),GetPlayer()->GetOrientation()))
     {
         LogoutPlayer(false);
         return;
@@ -203,7 +203,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         return;
     }
 
-    if (!MaNGOS::IsValidMapCoord(movementInfo.x, movementInfo.y))
+    if (!MaNGOS::IsValidMapCoord(movementInfo.x, movementInfo.y, movementInfo.z, movementInfo.o))
         return;
 
     /* handle special cases */
