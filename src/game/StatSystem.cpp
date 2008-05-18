@@ -429,16 +429,15 @@ void Player::UpdateDefenseBonusesMod()
 
 void Player::UpdateBlockPercentage()
 {
-    BaseModGroup modGroup = BLOCK_PERCENTAGE;
-
-    float chance = 5 - (int32(GetMaxSkillValueForLevel()) - int32(GetBaseDefenseSkillValue())) * 0.04f;
-    chance = chance < 0.0f ? 0.0f : chance;
-
-    SetBaseModValue(BLOCK_PERCENTAGE, PCT_MOD, chance);
-
-    float value  = GetBaseModValue(modGroup, FLAT_MOD) + chance;
-    value += GetDefenseSkillTempBonusValue()*0.04f + GetRatingBonusValue(PLAYER_FIELD_BLOCK_RATING);
-
+    // Base value
+    float value = 5.0f;
+    // Modify value from defence skill
+    value += (GetDefenseSkillValue() - GetMaxSkillValueForLevel()) * 0.04f;
+    // Increase from SPELL_AURA_MOD_BLOCK_PERCENT aura
+    value += GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_PERCENT);
+    // Increase from rating
+    value += GetRatingBonusValue(PLAYER_FIELD_BLOCK_RATING);
+    value = value < 0.0f ? 0.0f : value;
     SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, value);
 }
 
@@ -469,7 +468,9 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
     }
 
     float value = GetTotalPercentageModValue(modGroup) + GetRatingBonusValue(ratingIndex);
-
+    // Modify crit from weapon skill and miximized defence skill of same level victim difference
+    value += (GetWeaponSkillValue(attType) - GetMaxSkillValueForLevel()) * 0.04f;
+    value = value < 0.0f ? 0.0f : value;
     SetStatFloatValue(index, value);
 }
 
@@ -488,18 +489,20 @@ void Player::UpdateAllCritPercentages()
 
 void Player::UpdateParryPercentage()
 {
-    BaseModGroup modGroup = PARRY_PERCENTAGE;
-
-    //pct mods for pct fields act like flat mods
-    float value  = 5.0f + GetBaseModValue(modGroup, FLAT_MOD);
-    value += GetDefenseSkillTempBonusValue()*0.04f + GetRatingBonusValue(PLAYER_FIELD_PARRY_RATING);
-
+    // Base parry
+    float value  = 5.0f;
+    // Modify value from defence skill
+    value += (GetDefenseSkillValue() - GetMaxSkillValueForLevel()) * 0.04f;
+    // Parry from SPELL_AURA_MOD_PARRY_PERCENT aura
+    value += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
+    // Parry from rating
+    value += GetRatingBonusValue(PLAYER_FIELD_PARRY_RATING);
+    value = value < 0.0f ? 0.0f : value;
     SetStatFloatValue(PLAYER_PARRY_PERCENTAGE, value);
 }
 
 void Player::UpdateDodgePercentage()
 {
-    BaseModGroup modGroup = DODGE_PERCENTAGE;
     float classrate;
     float base_dodge;
 
@@ -516,12 +519,15 @@ void Player::UpdateDodgePercentage()
         case CLASS_WARRIOR:
         default:            base_dodge = 0.0f;  classrate = getLevel() > 60 ? 30 : 20; break;
     }
-
-    //pct mods for pct fields act like flat mods
+    // Dodge from agility
     float value  = base_dodge + GetStat(STAT_AGILITY)/classrate;
-    value += GetDefenseSkillTempBonusValue()*0.04f + GetBaseModValue(modGroup, FLAT_MOD);
+    // Modify value from defence skill
+    value += (GetDefenseSkillValue() - GetMaxSkillValueForLevel()) * 0.04f;
+    // Dodge from SPELL_AURA_MOD_DODGE_PERCENT aura
+    value += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT);
+    // Dodfe from rating
     value += GetRatingBonusValue(PLAYER_FIELD_DODGE_RATING);
-
+    value = value < 0.0f ? 0.0f : value;
     SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, value);
 }
 

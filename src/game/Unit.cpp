@@ -2578,24 +2578,9 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
 {
     if(pVictim->GetTypeId()==TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
         return MELEE_HIT_EVADE;
-
-    int32 skillDiff =  GetWeaponSkillValue(attType) - pVictim->GetDefenseSkillValue();
-
-    // Add rating bonuses for attacker
-    if(GetTypeId() == TYPEID_PLAYER)
-    {
-        skillDiff+=int32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_ALL_WEAPONS_SKILL_RATING));
-        switch (attType)
-        {
-            case BASE_ATTACK:   skillDiff+=int32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING));break;
-            case OFF_ATTACK:    skillDiff+=int32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING));break;
-            case RANGED_ATTACK: skillDiff+=int32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING));break;
-        }
-    }
-
+    uint32 attackerWeaponSkill = GetWeaponSkillValue(attType);
     // bonus from skills is 0.04%
-    int32    skillBonus = skillDiff * 4;
-    int32    skillBonus2 = 4 * ( GetWeaponSkillValue(attType) - pVictim->GetBaseDefenseSkillValue() );
+    int32    skillBonus  = 4 * ( attackerWeaponSkill - pVictim->GetMaxSkillValueForLevel() );
     int32    sum = 0, tmp = 0;
     int32    roll = urand (0, 10000);
 
@@ -2645,7 +2630,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
 
     tmp = dodge_chance;
     if (   (tmp > 0)                                        // check if unit _can_ dodge
-        && ((tmp -= skillBonus2) > 0)
+        && ((tmp -= skillBonus) > 0)
         && roll < (sum += tmp))
     {
         DEBUG_LOG ("RollMeleeOutcomeAgainst: DODGE <%d, %d)", sum-tmp, sum);
@@ -2664,7 +2649,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
             parry_chance-= int32(((Player*)this)->GetExpertiseDodgeOrParryReduction(attType)*100);
         int32 tmp = int32(parry_chance);
         if (   (tmp > 0)                                    // check if unit _can_ parry
-            && ((tmp -= skillBonus2) > 0)
+            && ((tmp -= skillBonus) > 0)
             && (roll < (sum += tmp)))
         {
             DEBUG_LOG ("RollMeleeOutcomeAgainst: PARRY <%d, %d)", sum-tmp, sum);
@@ -2673,7 +2658,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
 
         tmp = block_chance;
         if (   (tmp > 0)                                    // check if unit _can_ block
-            && ((tmp -= skillBonus2) > 0)
+            && ((tmp -= skillBonus) > 0)
             && (roll < (sum += tmp)))
         {
             // Critical chance
@@ -2707,7 +2692,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         getLevel() < pVictim->getLevel() )
     {
         // cap possible value (with bonuses > max skill)
-        int32 skill = GetWeaponSkillValue(attType);
+        int32 skill = attackerWeaponSkill;
         int32 maxskill = GetMaxSkillValueForLevel();
         skill = (skill > maxskill) ? maxskill : skill;
 
@@ -2862,19 +2847,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
         attType = RANGED_ATTACK;
 
     // bonus from skills is 0.04% per skill Diff
-    int32 skillDiff =  GetWeaponSkillValue(attType) - pVictim->GetDefenseSkillValue();
-
-    // Add rating bonuses for attacker
-    if(GetTypeId() == TYPEID_PLAYER)
-    {
-        skillDiff+=int32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_ALL_WEAPONS_SKILL_RATING));
-        switch (attType)
-        {
-            case BASE_ATTACK:   skillDiff+=int32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING));break;
-            case OFF_ATTACK:    skillDiff+=int32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING));break;
-            case RANGED_ATTACK: skillDiff+=int32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING));break;
-        }
-    }
+    int32 skillDiff =  GetWeaponSkillValue(attType) - pVictim->GetMaxSkillValueForLevel();
 
     uint32 roll = urand (0, 10000);
     uint32 missChance = uint32(MeleeSpellMissChance(pVictim, attType, skillDiff, spell)*100.0f);
@@ -3268,6 +3241,7 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
 
 uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
 {
+    uint32 value = 0;
     if(GetTypeId() == TYPEID_PLAYER)
     {
         uint16 slot = Player::GetWeaponSlotByAttack(attType);
@@ -3279,14 +3253,22 @@ uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
 
         if(((Player*)this)->IsInFeralForm())
             return GetMaxSkillValueForLevel();              // always maximized SKILL_FERAL_COMBAT in fact
-
         // in range
         uint32  skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon(attType==BASE_ATTACK)
             ? item->GetSkill() : SKILL_UNARMED;
-        return ((Player*)this)->GetSkillValue (skill);
+        value = ((Player*)this)->GetSkillValue (skill);
+        // Modify value from ratings
+        value += uint32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_ALL_WEAPONS_SKILL_RATING));
+        switch (attType)
+        {
+            case BASE_ATTACK:   value+=uint32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING));break;
+            case OFF_ATTACK:    value+=uint32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING));break;
+            case RANGED_ATTACK: value+=uint32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING));break;
+        }
     }
     else
-        return GetUnitMeleeSkill();
+        value = GetUnitMeleeSkill();
+   return value;
 }
 
 uint32 Unit::GetBaseWeaponSkillValue (WeaponAttackType attType) const
