@@ -1222,11 +1222,12 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
             // Calculate damage bonus
             *damage = SpellDamageBonus(pVictim, spellInfo, *damage, SPELL_DIRECT_DAMAGE);
 
-            *crit = SpellCriticalBonus(spellInfo, damage, pVictim);
-
-            if(*crit)
+            *crit = isSpellCrit(pVictim, spellInfo, GetSpellSchoolMask(spellInfo), BASE_ATTACK);
+            if (*crit)
+            {
+                *damage = SpellCriticalBonus(spellInfo, *damage, pVictim);
                 cleanDamage->hitOutCome = MELEE_HIT_CRIT;
-
+            }
             // spell proc all magic damage==0 case in this function
             if(*damage == 0)
             {
@@ -2581,6 +2582,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     uint32 attackerWeaponSkill = GetWeaponSkillValue(attType);
     // bonus from skills is 0.04%
     int32    skillBonus  = 4 * ( attackerWeaponSkill - pVictim->GetMaxSkillValueForLevel() );
+    int32    skillBonus2 = 4 * ( GetMaxSkillValueForLevel() - pVictim->GetDefenseSkillValue());
     int32    sum = 0, tmp = 0;
     int32    roll = urand (0, 10000);
 
@@ -2662,7 +2664,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
             && (roll < (sum += tmp)))
         {
             // Critical chance
-            tmp = crit_chance + skillBonus;
+            tmp = crit_chance + skillBonus2;
             if ( GetTypeId() == TYPEID_PLAYER && SpellCasted && tmp > 0 )
             {
                 if ( roll_chance_f(tmp/100))
@@ -2677,7 +2679,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     }
 
     // Critical chance
-    tmp = crit_chance + skillBonus;
+    tmp = crit_chance + skillBonus2;
 
     if (tmp > 0 && roll < (sum += tmp))
     {
@@ -7540,98 +7542,120 @@ int32 Unit::SpellBaseDamageBonusForVictim(int32 SchoolMask, Unit *pVictim)
     return TakenAdvertisedBenefit;
 }
 
-bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 *damage, Unit *pVictim)
+bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType)
 {
     // not criting spell
     if((spellProto->AttributesEx2 & 0x20000000LL))
         return false;
 
     float crit_chance = 0.0f;
-
-    // base value
-    if (GetTypeId() != TYPEID_PLAYER)
+    switch(spellProto->DmgClass)
     {
-        // flat done
-        // TODO: can creatures have critical chance auras?
-        crit_chance = m_baseSpellCritChance;
-        AuraList const& mSpellCritSchool = GetAurasByType(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL);
-        for(AuraList::const_iterator i = mSpellCritSchool.begin(); i != mSpellCritSchool.end(); ++i)
-            if((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto))
-                crit_chance += (*i)->GetModifier()->m_amount;
+        case SPELL_DAMAGE_CLASS_NONE:
+            return false;
+        case SPELL_DAMAGE_CLASS_MAGIC:
+        {
+            if (schoolMask & SPELL_SCHOOL_MASK_NORMAL)
+                crit_chance = 0.0f;
+            // For other schools
+            else if (GetTypeId() == TYPEID_PLAYER)
+                crit_chance = GetFloatValue( PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(schoolMask));
+            else
+            {
+                crit_chance = m_baseSpellCritChance;
+                crit_chance += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, schoolMask);
+            }
+            // taken
+            if (pVictim)
+            {
+                // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE
+                crit_chance += pVictim->GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE, schoolMask);
+                // Modify critical chance by victim SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE
+                crit_chance += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
+                // Modify by player victim PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING
+                if (pVictim->GetTypeId() == TYPEID_PLAYER)
+                    crit_chance -= ((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING);
+                // scripted (increase crit chance ... against ... target by x%
+                if(pVictim->isFrozen()) // Shatter
+                {
+                    AuraList const& mOverrideClassScript = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                    for(AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
+                    {
+                        switch((*i)->GetModifier()->m_miscvalue)
+                        {
+                            case 849: crit_chance+= 10.0f; break; //Shatter Rank 1
+                            case 910: crit_chance+= 20.0f; break; //Shatter Rank 2
+                            case 911: crit_chance+= 30.0f; break; //Shatter Rank 3
+                            case 912: crit_chance+= 40.0f; break; //Shatter Rank 4
+                            case 913: crit_chance+= 50.0f; break; //Shatter Rank 5
+                        }
+                    }
+                }
+                // Victim Recilience reductin
+                if (pVictim->GetTypeId() == TYPEID_PLAYER)
+                    crit_chance -= ((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING);
+            }
+        }
+        case SPELL_DAMAGE_CLASS_MELEE:
+        case SPELL_DAMAGE_CLASS_RANGED:
+        {
+            if (pVictim)
+            {
+                crit_chance = GetUnitCriticalChance(attackType, pVictim);
+                crit_chance+= (GetMaxSkillValueForLevel() - pVictim->GetDefenseSkillValue()) * 0.04f;
+                crit_chance+= GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, schoolMask);
+            }
+            break;
+        }
+        default:
+            return false;
     }
-    else
-        crit_chance = GetFloatValue( PLAYER_SPELL_CRIT_PERCENTAGE1 + GetFirstSchoolInMask(GetSpellSchoolMask(spellProto)));
-
     // percent done
     // only players use intelligence for critical chance computations
     if(Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
-
-    // taken
-    if (pVictim)
-    {
-        // flat
-        AuraList const& mAttackerSpellCrit = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE);
-        for(AuraList::const_iterator i = mAttackerSpellCrit.begin(); i != mAttackerSpellCrit.end(); ++i)
-            if((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto))
-                crit_chance += (*i)->GetModifier()->m_amount;
-
-        if (pVictim->GetTypeId() == TYPEID_PLAYER)
-            crit_chance -= ((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING);
-
-        // flat: scripted (increase crit chance ... against ... target by x%
-        AuraList const& mOverrideClassScript = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-        for(AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
-        {
-            switch((*i)->GetModifier()->m_miscvalue)
-            {
-                                                            //Shatter Rank 1
-                case 849: if(pVictim->isFrozen()) crit_chance+= 10.0f; break;
-                                                            //Shatter Rank 2
-                case 910: if(pVictim->isFrozen()) crit_chance+= 20.0f; break;
-                                                            //Shatter Rank 3
-                case 911: if(pVictim->isFrozen()) crit_chance+= 30.0f; break;
-                                                            //Shatter Rank 4
-                case 912: if(pVictim->isFrozen()) crit_chance+= 40.0f; break;
-                                                            //Shatter Rank 5
-                case 913: if(pVictim->isFrozen()) crit_chance+= 50.0f; break;
-            }
-        }
-
-        // flat
-        crit_chance += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
-    }
-
+  
     crit_chance = crit_chance > 0.0f ? crit_chance : 0.0f;
     if (roll_chance_f(crit_chance))
-    {
-        int32 crit_bonus = *damage / 2;
-
-        // adds additional damage to crit_bonus (from talents)
-        if(Player* modOwner = GetSpellModOwner())
-            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
-    
-        if(pVictim)
-        {
-            uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
-            AuraList const& mDamageDoneVersus = GetAurasByType(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS);
-            for(AuraList::const_iterator i = mDamageDoneVersus.begin();i != mDamageDoneVersus.end(); ++i)
-                if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
-                    crit_bonus = int32(crit_bonus * ((*i)->GetModifier()->m_amount+100.0f)/100.0f);
-        }
-
-        if(crit_bonus> 0)
-            *damage += crit_bonus;
-
-        // Resilience - reduce crit damage
-        if (pVictim && pVictim->GetTypeId()==TYPEID_PLAYER)
-        {
-            *damage -= ((Player *)pVictim)->GetSpellCritDamageReduction(*damage);
-        }
-
         return true;
-    }
     return false;
+}
+
+uint32 Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 damage, Unit *pVictim)
+{
+    // Calculate critical bonus           
+    int32 crit_bonus;
+    switch(spellProto->DmgClass)
+    {
+        case SPELL_DAMAGE_CLASS_MELEE:                     // for melee based spells is 100%
+        case SPELL_DAMAGE_CLASS_RANGED:
+            // TODO: write here full calculation for melee/ranged spells 
+            crit_bonus = damage;
+            break;
+        default:
+            crit_bonus = damage / 2;                       // for spells is 50%
+            break;
+    }
+
+    // adds additional damage to crit_bonus (from talents)
+    if(Player* modOwner = GetSpellModOwner())
+        modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
+
+    if(pVictim)
+    {
+        uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
+        crit_bonus *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS, creatureTypeMask);
+    }
+
+    if(crit_bonus > 0)
+        damage += crit_bonus;
+
+    // Resilience - reduce crit damage
+    if (pVictim && pVictim->GetTypeId()==TYPEID_PLAYER)
+        damage -= ((Player *)pVictim)->GetSpellCritDamageReduction(damage);
+    if (damage < 0)
+        damage = 0;
+    return damage;
 }
 
 uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, DamageEffectType damagetype, Unit *pVictim)
