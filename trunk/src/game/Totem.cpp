@@ -148,10 +148,14 @@ Unit *Totem::GetOwner()
 
 void Totem::SetTypeBySummonSpell(SpellEntry const * spellProto)
 {
-    //now, spellId is the spell of EffectSummonTotem , not the spell1 of totem!
-    if (GetSpellDuration(sSpellStore.LookupEntry(GetSpell())) != -1)
-        m_type = TOTEM_ACTIVE;
-
+    // Get spell casted by totem
+    SpellEntry const * totemSpell = sSpellStore.LookupEntry(GetSpell());
+    if (totemSpell)
+    {
+        // If spell have cast time -> so its active totem
+        if (GetSpellCastTime(sCastTimesStore.LookupEntry(totemSpell->CastingTimeIndex)))
+            m_type = TOTEM_ACTIVE;
+    }
     if(spellProto->SpellIconID==2056)
         m_type = TOTEM_STATUE;                              //Jewelery statue
 }
