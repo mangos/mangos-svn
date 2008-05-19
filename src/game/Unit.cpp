@@ -5070,7 +5070,8 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 // Deadly Throw Interrupt
                 case 32748:
                 {
-                    if(GetTypeId() != TYPEID_PLAYER)
+                    // Prevent cast Deadly Throw Interrupt on self from last effect (apply dummy) of Deadly Throw
+                    if(GetTypeId() != TYPEID_PLAYER || this == pVictim)
                         return;
 
                     if(!castItem)
