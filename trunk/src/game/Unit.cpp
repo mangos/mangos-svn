@@ -7125,6 +7125,17 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     // Spellmod SpellDamage
     float SpellModSpellDamage = 100.0f;
 
+    // 50% for damage and healing spells for leech spells (heal amount base at damage)
+    for(int j = 0; j < 3; ++j)
+    {
+        if( spellProto->Effect[j] == SPELL_EFFECT_HEALTH_LEECH ||
+            spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA && spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH )
+        {
+            SpellModSpellDamage = 50.0f;
+            break;
+        }
+    }
+
     if(Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_SPELL_BONUS_DAMAGE,SpellModSpellDamage);
 
