@@ -68,7 +68,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectApplyAura,                                //  6 SPELL_EFFECT_APPLY_AURA
     &Spell::EffectEnvirinmentalDMG,                         //  7 SPELL_EFFECT_ENVIRONMENTAL_DAMAGE
     &Spell::EffectManaDrain,                                //  8 SPELL_EFFECT_MANA_DRAIN
-    &Spell::EffectHealthLeach,                              //  9 SPELL_EFFECT_HEALTH_LEECH
+    &Spell::EffectHealthLeech,                              //  9 SPELL_EFFECT_HEALTH_LEECH
     &Spell::EffectHeal,                                     // 10 SPELL_EFFECT_HEAL
     &Spell::EffectNULL,                                     // 11 SPELL_EFFECT_BIND
     &Spell::EffectNULL,                                     // 12 SPELL_EFFECT_PORTAL
@@ -2124,7 +2124,7 @@ void Spell::EffectHeal( uint32 /*i*/ )
     }
 }
 
-void Spell::EffectHealthLeach(uint32 i)
+void Spell::EffectHealthLeech(uint32 i)
 {
     if(!unitTarget)
         return;
@@ -2134,30 +2134,26 @@ void Spell::EffectHealthLeach(uint32 i)
     if(damage < 0)
         return;
 
-    sLog.outDebug("HealthLeach :%i", damage);
+    sLog.outDebug("HealthLeech :%i", damage);
 
+    float multiplier = m_spellInfo->EffectMultipleValue[i];
+
+    if(Player *modOwner = m_caster->GetSpellModOwner())
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
+
+    int32 new_damage = int32(damage*multiplier);
     uint32 curHealth = unitTarget->GetHealth();
-
-    int32 new_damage;
-    if(curHealth < uint32(damage))
+    new_damage = m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage, m_IsTriggeredSpell, true);
+    if(curHealth < new_damage)
         new_damage = curHealth;
-    else
-        new_damage = damage;
 
     if(m_caster->isAlive())
     {
-        float multiplier = m_spellInfo->EffectMultipleValue[i];
+        m_caster->ModifyHealth(new_damage);
 
-        if(Player *modOwner = m_caster->GetSpellModOwner())
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
-
-        int32 tmpvalue = int32(new_damage*multiplier);
-
-        m_caster->ModifyHealth(tmpvalue);
-        m_caster->SendHealSpellLog(m_caster, m_spellInfo->Id, uint32(tmpvalue));
+        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            m_caster->SendHealSpellLog(m_caster, m_spellInfo->Id, uint32(new_damage));
     }
-
-    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage, m_IsTriggeredSpell, true);
 }
 
 void Spell::DoCreateItem(uint32 i, uint32 itemtype)

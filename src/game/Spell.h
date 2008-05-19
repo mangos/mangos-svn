@@ -229,7 +229,7 @@ class Spell
         void EffectPowerBurn(uint32 i);
         void EffectManaDrain(uint32 i);
         void EffectHeal(uint32 i);
-        void EffectHealthLeach(uint32 i);
+        void EffectHealthLeech(uint32 i);
         void EffectQuestComplete(uint32 i);
         void EffectCreateItem(uint32 i);
         void EffectPersistentAA(uint32 i);
