@@ -1897,7 +1897,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             }
 
             // calculate values
-            int32 diff = pVictim->GetDefenseSkillValue() - GetWeaponSkillValue(attType);
+            int32 diff = int32(pVictim->GetDefenseSkillValue()) - int32(GetWeaponSkillValue(attType));
             float lowEnd  = baseLowEnd - ( 0.05f * diff );
             float highEnd = baseHighEnd - ( 0.03f * diff );
 
@@ -2200,10 +2200,10 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
 {
     if(pVictim->GetTypeId()==TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
         return MELEE_HIT_EVADE;
-    uint32 attackerWeaponSkill = GetWeaponSkillValue(attType);
+    int32 attackerWeaponSkill = GetWeaponSkillValue(attType);
     // bonus from skills is 0.04%
-    int32    skillBonus  = 4 * ( attackerWeaponSkill - pVictim->GetMaxSkillValueForLevel() );
-    int32    skillBonus2 = 4 * ( GetMaxSkillValueForLevel() - pVictim->GetDefenseSkillValue());
+    int32    skillBonus  = 4 * ( attackerWeaponSkill - int32(pVictim->GetMaxSkillValueForLevel()) );
+    int32    skillBonus2 = 4 * ( int32(GetMaxSkillValueForLevel()) - int32(pVictim->GetDefenseSkillValue()));
     int32    sum = 0, tmp = 0;
     int32    roll = urand (0, 10000);
 
@@ -2319,7 +2319,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         int32 maxskill = GetMaxSkillValueForLevel();
         skill = (skill > maxskill) ? maxskill : skill;
 
-        tmp = (10 + (pVictim->GetDefenseSkillValue() - skill)) * 100;
+        tmp = (10 + (int32(pVictim->GetDefenseSkillValue()) - skill)) * 100;
         tmp = tmp > 4000 ? 4000 : tmp;
         if (roll < (sum += tmp))
         {
@@ -7269,7 +7269,7 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
             if (pVictim)
             {
                 crit_chance = GetUnitCriticalChance(attackType, pVictim);
-                crit_chance+= (GetMaxSkillValueForLevel() - pVictim->GetDefenseSkillValue()) * 0.04f;
+                crit_chance+= (int32(GetMaxSkillValueForLevel()) - int32(pVictim->GetDefenseSkillValue())) * 0.04f;
                 crit_chance+= GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, schoolMask);
             }
             break;
