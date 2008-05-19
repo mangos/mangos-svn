@@ -123,9 +123,9 @@ AggressorAI::UpdateAI(const uint32 /*diff*/)
 
     i_victimGuid = i_creature.getVictim()->GetGUID();
 
-    if( i_creature.IsWithinDistInMap(i_creature.getVictim(), ATTACK_DISTANCE))
+    if( i_creature.isAttackReady() )
     {
-        if( i_creature.isAttackReady() )
+        if( i_creature.IsWithinDistInMap(i_creature.getVictim(), ATTACK_DISTANCE))
         {
             i_creature.AttackerStateUpdate(i_creature.getVictim());
             i_creature.resetAttackTimer();
