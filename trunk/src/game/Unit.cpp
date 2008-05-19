@@ -5564,15 +5564,11 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         {
             switch(auraSpellInfo->Id)
             {
-                // Health Restore
-                case 33510:
+                // Elune's Touch (moonkin mana restore)
+                case 24905:
                 {
-                    // at melee hit call std triggered spell
-                    if(procFlags & PROC_FLAG_HIT_MELEE)
-                        break;
-
-                    // else (at range hit) called custom case
-                    CastSpell(this, 39557, true, castItem, triggeredByAura);
+                    int32 amount = int32(0.3f * GetTotalAttackPowerValue(BASE_ATTACK));
+                    CastCustomSpell(this, 33926, &amount, NULL, NULL, true, castItem, triggeredByAura);
                     return;
                 }
                 // Enlightenment
@@ -5585,11 +5581,56 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     // fall through
                     break;                                          // normal cast
                 }
-                // Elune's Touch (moonkin mana restore)
-                case 24905:
+                // Health Restore
+                case 33510:
                 {
-                    int32 amount = int32(0.3f * GetTotalAttackPowerValue(BASE_ATTACK));
-                    CastCustomSpell(this, 33926, &amount, NULL, NULL, true, castItem, triggeredByAura);
+                    // at melee hit call std triggered spell
+                    if(procFlags & PROC_FLAG_HIT_MELEE)
+                        break;
+
+                    // else (at range hit) called custom case
+                    CastSpell(this, 39557, true, castItem, triggeredByAura);
+                    return;
+                }
+                //Augment Pain (Timbal's Focusing Crystal trinket bonus)
+                case 45054:
+                {
+                    if(GetTypeId()!=TYPEID_PLAYER || !procSpell || !pVictim || !pVictim->isAlive() || !castItem)
+                        return;
+
+                    //only periodic damage can trigger spell
+                    bool found = false;
+                    for(int j = 0; j < 3; ++j)
+                    {
+                        if( procSpell->EffectApplyAuraName[j]==SPELL_AURA_PERIODIC_DAMAGE         ||
+                            procSpell->EffectApplyAuraName[j]==SPELL_AURA_PERIODIC_DAMAGE_PERCENT ||
+                            procSpell->EffectApplyAuraName[j]==SPELL_AURA_PERIODIC_LEECH          )
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                    if(!found)
+                        return;
+
+                    if(((Player*)this)->HasSpellCooldown(auraSpellInfo->Id))
+                        return;
+
+                    CastSpell(pVictim, 45055, true, castItem, triggeredByAura);
+                    ((Player*)this)->AddSpellCooldown(auraSpellInfo->Id, 0, time(NULL) + 15);
+                    return;
+                }
+                //Sunwell Dungeon Melee Trinket (Shard of Contempt trinket bonus)
+                case 45354:
+                {
+                    if(GetTypeId()!=TYPEID_PLAYER || !castItem)
+                        return;
+
+                    if(((Player*)this)->HasSpellCooldown(auraSpellInfo->Id))
+                        return;
+
+                    CastSpell(this, 45053, true, castItem, triggeredByAura);
+                    ((Player*)this)->AddSpellCooldown(auraSpellInfo->Id, 0, time(NULL) + 45);
                     return;
                 }
             }
