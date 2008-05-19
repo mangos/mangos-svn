@@ -288,23 +288,16 @@ void Creature::Update(uint32 diff)
 
                 SelectLevel(cinfo);
                 SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
-                if (m_isDeadByDefault){
+                if (m_isDeadByDefault)
+                {
                     setDeathState(JUST_DIED);
                     SetHealth(0);
+                    i_motionMaster.Clear();
+                    clearUnitState(UNIT_STAT_ALL_STATE);
+                    LoadCreaturesAddon(true);
                 }
                 else
-                {
-                    RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
-                    AddUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
-
-                    SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
-                    SetHealth(GetMaxHealth());
-                    setDeathState( ALIVE );
-                }
-                clearUnitState(UNIT_STAT_ALL_STATE);
-                i_motionMaster.Clear();
-                LoadCreaturesAddon(true);
-                SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
+                    setDeathState( JUST_ALIVED );
 
                 //Call AI respawn virtual function
                 i_AI->JustRespawned();
@@ -1516,6 +1509,8 @@ void Creature::setDeathState(DeathState s)
         SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);       
         clearUnitState(UNIT_STAT_ALL_STATE);
         i_motionMaster.Clear();
+        SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
+        LoadCreaturesAddon(true);
     }
 }
 

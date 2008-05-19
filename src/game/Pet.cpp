@@ -903,6 +903,8 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
 
     SetLevel( petlevel);
 
+    SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));
+
     SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(petlevel*50));
 
     SetAttackTime(BASE_ATTACK, BASE_ATTACK_TIME);
