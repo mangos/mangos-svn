@@ -277,14 +277,19 @@ bool LootItem::AllowedForPlayer(Player const * player) const
     if ( !objmgr.IsPlayerMeetToCondition(player,conditionId) )
         return false;
 
-    // Checking quests for quest drop
-    if ( needs_quest && !player->HasQuestForItem(itemid) )
-        return false;
-
-    // Checking quest starting items for already accepted non-repeatable quests
-    ItemPrototype const *pProto = objmgr.GetItemPrototype(itemid);
-    if (pProto && pProto->StartQuest && player->GetQuestStatus(pProto->StartQuest) != QUEST_STATUS_NONE )
-        return false;
+    if ( needs_quest )
+    {   
+        // Checking quests for quest-only drop (check only quests requirements in this case)
+        if( !player->HasQuestForItem(itemid) )
+            return false;
+    }
+    else
+    {
+        // Not quest only drop (check quest starting items for already accepted non-repeatable quests)
+        ItemPrototype const *pProto = objmgr.GetItemPrototype(itemid);
+        if (pProto && pProto->StartQuest && player->GetQuestStatus(pProto->StartQuest) != QUEST_STATUS_NONE && !player->HasQuestForItem(itemid))
+            return false;
+    }
 
     return true;
 }
