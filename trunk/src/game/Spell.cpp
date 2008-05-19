@@ -3132,6 +3132,12 @@ uint8 Spell::CanCast(bool strict)
             SendInterrupted(2);
             return SPELL_FAILED_NOT_INFRONT;
         }
+
+        // check if target is in combat
+        if (target != m_caster && m_spellInfo->AttributesEx & 0x100 && target->isInCombat())
+        {
+            return SPELL_FAILED_TARGET_AFFECTING_COMBAT;
+        }
     }
 
     if((m_spellInfo->AttributesEx3 & 0x800) != 0)
@@ -3149,13 +3155,6 @@ uint8 Spell::CanCast(bool strict)
         else
             return SPELL_FAILED_NOT_MOUNTED;
     }
-
-    // check if target is in combat
-    if (m_spellInfo->AttributesEx & 0x100 && target->isInCombat())
-    {
-        return SPELL_FAILED_TARGET_AFFECTING_COMBAT;
-    }
-
 
     // always (except passive spells) check items (focus object can be required for any type casts)
     if(!IsPassiveSpell(m_spellInfo->Id))
