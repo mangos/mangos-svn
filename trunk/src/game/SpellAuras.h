@@ -278,6 +278,8 @@ class MANGOS_DLL_SPEC Aura
 
         // add/remove SPELL_AURA_MOD_SHAPESHIFT (36) linked auras
         void HandleShapeshiftBoosts(bool apply);
+
+        void PeriodicTick();
     protected:
         Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
 
