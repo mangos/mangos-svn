@@ -2433,7 +2433,7 @@ void Aura::HandleModConfuse(bool apply, bool Real)
         if(m_target->GetTypeId() == TYPEID_PLAYER)
         {
             Player *player = (Player*)m_target;
-            WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 10);
+            WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 10);
             data.append(player->GetPackGUID());             // target's viewpoint
             data << uint8(0x00);                            // movement disabled
             player->GetSession()->SendPacket(&data);
@@ -2469,7 +2469,7 @@ void Aura::HandleModConfuse(bool apply, bool Real)
         if(m_target->GetTypeId() == TYPEID_PLAYER)
         {
             Player *player = (Player*)m_target;
-            WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 10);
+            WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 10);
             data.append(player->GetPackGUID());             // target's viewpoint
             data << uint8(0x01);                            // movement enabled
             player->GetSession()->SendPacket(&data);
@@ -2508,7 +2508,7 @@ void Aura::HandleModFear(bool apply, bool Real)
             m_target->GetMotionMaster()->Idle();
 
             // what is this for ? (doesn't work anyway)
-            /*WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 9);
+            /*WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 9);
             data.append(m_target->GetPackGUID());
             data << uint8(0x00);
             m_target->SendMessageToSet(&data,true);*/
@@ -2540,7 +2540,7 @@ void Aura::HandleModFear(bool apply, bool Real)
             }
 
             // what is this for ? (doesn't work anyway)
-            /*WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 9);
+            /*WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 9);
             data.append(m_target->GetPackGUID());
             data << uint8(0x01);
             m_target->SendMessageToSet(&data,true);*/

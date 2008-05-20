@@ -49,17 +49,17 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "CMSG_DESTROYMONSTER",                                  // CMSG_DESTROYMONSTER
     "CMSG_CREATEITEM",                                      // CMSG_CREATEITEM
     "CMSG_CREATEGAMEOBJECT",                                // CMSG_CREATEGAMEOBJECT
-    "CMSG_MAKEMONSTERATTACKME_OBSOLETE",                    // CMSG_MAKEMONSTERATTACKME_OBSOLETE
+    "SMSG_CHECK_FOR_BOTS",                                  // SMSG_CHECK_FOR_BOTS
     "CMSG_MAKEMONSTERATTACKGUID",                           // CMSG_MAKEMONSTERATTACKGUID
-    "CMSG_ENABLEDEBUGCOMBATLOGGING_OBSOLETE",               // CMSG_ENABLEDEBUGCOMBATLOGGING_OBSOLETE
+    "CMSG_BOT_DETECTED2",                                   // CMSG_BOT_DETECTED2
     "CMSG_FORCEACTION",                                     // CMSG_FORCEACTION
     "CMSG_FORCEACTIONONOTHER",                              // CMSG_FORCEACTIONONOTHER
     "CMSG_FORCEACTIONSHOW",                                 // CMSG_FORCEACTIONSHOW
     "SMSG_FORCEACTIONSHOW",                                 // SMSG_FORCEACTIONSHOW
-    "SMSG_ATTACKERSTATEUPDATEDEBUGINFO_OBSOLETE",           // SMSG_ATTACKERSTATEUPDATEDEBUGINFO_OBSOLETE
-    "SMSG_DEBUGINFOSPELL_OBSOLETE",                         // SMSG_DEBUGINFOSPELL_OBSOLETE
+    "CMSG_PETGODMODE",                                      // CMSG_PETGODMODE
+    "SMSG_PETGODMODE",                                      // SMSG_PETGODMODE
     "SMSG_DEBUGINFOSPELLMISS_OBSOLETE",                     // SMSG_DEBUGINFOSPELLMISS_OBSOLETE
-    "SMSG_DEBUG_PLAYER_RANGE_OBSOLETE",                     // SMSG_DEBUG_PLAYER_RANGE_OBSOLETE
+    "CMSG_WEATHER_SPEED_CHEAT",                             // CMSG_WEATHER_SPEED_CHEAT
     "CMSG_UNDRESSPLAYER",                                   // CMSG_UNDRESSPLAYER
     "CMSG_BEASTMASTER",                                     // CMSG_BEASTMASTER
     "CMSG_GODMODE",                                         // CMSG_GODMODE
@@ -67,7 +67,7 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "CMSG_CHEAT_SETMONEY",                                  // CMSG_CHEAT_SETMONEY
     "CMSG_LEVEL_CHEAT",                                     // CMSG_LEVEL_CHEAT
     "CMSG_PET_LEVEL_CHEAT",                                 // CMSG_PET_LEVEL_CHEAT
-    "CMSG_LEVELUP_CHEAT_OBSOLETE",                          // CMSG_LEVELUP_CHEAT_OBSOLETE
+    "CMSG_SET_WORLDSTATE",                                  // CMSG_SET_WORLDSTATE
     "CMSG_COOLDOWN_CHEAT",                                  // CMSG_COOLDOWN_CHEAT
     "CMSG_USE_SKILL_CHEAT",                                 // CMSG_USE_SKILL_CHEAT
     "CMSG_FLAG_QUEST",                                      // CMSG_FLAG_QUEST
@@ -130,8 +130,8 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "SMSG_WHO",                                             // SMSG_WHO
     "CMSG_WHOIS",                                           // CMSG_WHOIS
     "SMSG_WHOIS",                                           // SMSG_WHOIS
-    "CMSG_FRIEND_LIST",                                     // CMSG_FRIEND_LIST
-    "SMSG_FRIEND_LIST",                                     // SMSG_FRIEND_LIST
+    "CMSG_CONTACT_LIST",                                    // CMSG_CONTACT_LIST
+    "SMSG_CONTACT_LIST",                                    // SMSG_CONTACT_LIST
     "SMSG_FRIEND_STATUS",                                   // SMSG_FRIEND_STATUS
     "CMSG_ADD_FRIEND",                                      // CMSG_ADD_FRIEND
     "CMSG_DEL_FRIEND",                                      // CMSG_DEL_FRIEND
@@ -299,8 +299,8 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "CMSG_SWAP_ITEM",                                       // CMSG_SWAP_ITEM
     "CMSG_SWAP_INV_ITEM",                                   // CMSG_SWAP_INV_ITEM
     "CMSG_SPLIT_ITEM",                                      // CMSG_SPLIT_ITEM
-    "CMSG_PICKUP_ITEM",                                     // CMSG_PICKUP_ITEM
-    "CMSG_DROP_ITEM",                                       // CMSG_DROP_ITEM
+    "CMSG_AUTOEQUIP_ITEM_SLOT",                             // CMSG_AUTOEQUIP_ITEM_SLOT
+    "OBSOLETE_DROP_ITEM",                                   // OBSOLETE_DROP_ITEM
     "CMSG_DESTROYITEM",                                     // CMSG_DESTROYITEM
     "SMSG_INVENTORY_CHANGE_FAILURE",                        // SMSG_INVENTORY_CHANGE_FAILURE
     "SMSG_OPEN_CONTAINER",                                  // SMSG_OPEN_CONTAINER
@@ -332,7 +332,7 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "CMSG_NEW_SPELL_SLOT",                                  // CMSG_NEW_SPELL_SLOT
     "CMSG_CAST_SPELL",                                      // CMSG_CAST_SPELL
     "CMSG_CANCEL_CAST",                                     // CMSG_CANCEL_CAST
-    "SMSG_CAST_RESULT",                                     // SMSG_CAST_RESULT
+    "SMSG_CAST_FAILED",                                     // SMSG_CAST_FAILED
     "SMSG_SPELL_START",                                     // SMSG_SPELL_START
     "SMSG_SPELL_GO",                                        // SMSG_SPELL_GO
     "SMSG_SPELL_FAILURE",                                   // SMSG_SPELL_FAILURE
@@ -364,8 +364,8 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "SMSG_DAMAGE_TAKEN_OBSOLETE",                           // SMSG_DAMAGE_TAKEN_OBSOLETE
     "SMSG_CANCEL_COMBAT",                                   // SMSG_CANCEL_COMBAT
     "SMSG_PLAYER_COMBAT_XP_GAIN_OBSOLETE",                  // SMSG_PLAYER_COMBAT_XP_GAIN_OBSOLETE
-    "SMSG_HEALSPELL_ON_PLAYER_OBSOLETE",                    // SMSG_HEALSPELL_ON_PLAYER_OBSOLETE
-    "SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE",               // SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE
+    "SMSG_SPELLHEALLOG",                                    // SMSG_SPELLHEALLOG
+    "SMSG_SPELLENERGIZELOG",                                // SMSG_SPELLENERGIZELOG
     "CMSG_SHEATHE_OBSOLETE",                                // CMSG_SHEATHE_OBSOLETE
     "CMSG_SAVE_PLAYER",                                     // CMSG_SAVE_PLAYER
     "CMSG_SETDEATHBINDPOINT",                               // CMSG_SETDEATHBINDPOINT
@@ -373,7 +373,7 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "CMSG_GETDEATHBINDZONE",                                // CMSG_GETDEATHBINDZONE
     "SMSG_BINDZONEREPLY",                                   // SMSG_BINDZONEREPLY
     "SMSG_PLAYERBOUND",                                     // SMSG_PLAYERBOUND
-    "SMSG_DEATH_NOTIFY_OBSOLETE",                           // SMSG_DEATH_NOTIFY_OBSOLETE
+    "SMSG_CLIENT_CONTROL_UPDATE",                           // SMSG_CLIENT_CONTROL_UPDATE
     "CMSG_REPOP_REQUEST",                                   // CMSG_REPOP_REQUEST
     "SMSG_RESURRECT_REQUEST",                               // SMSG_RESURRECT_REQUEST
     "CMSG_RESURRECT_RESPONSE",                              // CMSG_RESURRECT_RESPONSE
@@ -493,7 +493,7 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "CMSG_QUERY_TIME",                                      // CMSG_QUERY_TIME
     "SMSG_QUERY_TIME_RESPONSE",                             // SMSG_QUERY_TIME_RESPONSE
     "SMSG_LOG_XPGAIN",                                      // SMSG_LOG_XPGAIN
-    "MSG_SPLIT_MONEY",                                      // MSG_SPLIT_MONEY
+    "SMSG_AURACASTLOG",                                     // SMSG_AURACASTLOG
     "CMSG_RECLAIM_CORPSE",                                  // CMSG_RECLAIM_CORPSE
     "CMSG_WRAP_ITEM",                                       // CMSG_WRAP_ITEM
     "SMSG_LEVELUP_INFO",                                    // SMSG_LEVELUP_INFO
@@ -524,20 +524,20 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "CMSG_AUTH_SESSION",                                    // CMSG_AUTH_SESSION
     "SMSG_AUTH_RESPONSE",                                   // SMSG_AUTH_RESPONSE
     "MSG_GM_SHOWLABEL",                                     // MSG_GM_SHOWLABEL
-    "MSG_ADD_DYNAMIC_TARGET_OBSOLETE",                      // MSG_ADD_DYNAMIC_TARGET_OBSOLETE
+    "CMSG_PET_CAST_SPELL",                                  // CMSG_PET_CAST_SPELL
     "MSG_SAVE_GUILD_EMBLEM",                                // MSG_SAVE_GUILD_EMBLEM
     "MSG_TABARDVENDOR_ACTIVATE",                            // MSG_TABARDVENDOR_ACTIVATE
     "SMSG_PLAY_SPELL_VISUAL",                               // SMSG_PLAY_SPELL_VISUAL
     "CMSG_ZONEUPDATE",                                      // CMSG_ZONEUPDATE
     "SMSG_PARTYKILLLOG",                                    // SMSG_PARTYKILLLOG
     "SMSG_COMPRESSED_UPDATE_OBJECT",                        // SMSG_COMPRESSED_UPDATE_OBJECT
-    "SMSG_OBSOLETE",                                        // SMSG_OBSOLETE
+    "SMSG_PLAY_SPELL_IMPACT",                               // SMSG_PLAY_SPELL_IMPACT
     "SMSG_EXPLORATION_EXPERIENCE",                          // SMSG_EXPLORATION_EXPERIENCE
     "CMSG_GM_SET_SECURITY_GROUP",                           // CMSG_GM_SET_SECURITY_GROUP
     "CMSG_GM_NUKE",                                         // CMSG_GM_NUKE
     "MSG_RANDOM_ROLL",                                      // MSG_RANDOM_ROLL
     "SMSG_ENVIRONMENTALDAMAGELOG",                          // SMSG_ENVIRONMENTALDAMAGELOG
-    "CMSG_RWHOIS",                                          // CMSG_RWHOIS
+    "CMSG_RWHOIS_OBSOLETE",                                 // CMSG_RWHOIS_OBSOLETE
     "SMSG_RWHOIS",                                          // SMSG_RWHOIS
     "MSG_LOOKING_FOR_GROUP",                                // MSG_LOOKING_FOR_GROUP
     "CMSG_SET_LOOKING_FOR_GROUP",                           // CMSG_SET_LOOKING_FOR_GROUP
@@ -549,7 +549,7 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "SMSG_GMTICKET_CREATE",                                 // SMSG_GMTICKET_CREATE
     "CMSG_GMTICKET_UPDATETEXT",                             // CMSG_GMTICKET_UPDATETEXT
     "SMSG_GMTICKET_UPDATETEXT",                             // SMSG_GMTICKET_UPDATETEXT
-    "SMSG_ACCOUNT_DATA_MD5",                                // SMSG_ACCOUNT_DATA_MD5
+    "SMSG_ACCOUNT_DATA_TIMES",                              // SMSG_ACCOUNT_DATA_TIMES
     "CMSG_REQUEST_ACCOUNT_DATA",                            // CMSG_REQUEST_ACCOUNT_DATA
     "CMSG_UPDATE_ACCOUNT_DATA",                             // CMSG_UPDATE_ACCOUNT_DATA
     "SMSG_UPDATE_ACCOUNT_DATA",                             // SMSG_UPDATE_ACCOUNT_DATA

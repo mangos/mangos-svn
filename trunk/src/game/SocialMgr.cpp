@@ -105,7 +105,7 @@ void PlayerSocial::SendSocialList()
 
     uint32 size = m_playerSocialMap.size();
 
-    WorldPacket data(SMSG_FRIEND_LIST, (4+4+size*25));      // just can guess size
+    WorldPacket data(SMSG_CONTACT_LIST, (4+4+size*25));     // just can guess size
     data << uint32(7);                                      // unk flag (0x1, 0x2, 0x4), 0x7 if it include ignore list
     data << uint32(size);                                   // friends count
 
@@ -129,7 +129,7 @@ void PlayerSocial::SendSocialList()
     }
 
     plr->GetSession()->SendPacket(&data);
-    sLog.outDebug("WORLD: Sent SMSG_FRIEND_LIST");
+    sLog.outDebug("WORLD: Sent SMSG_CONTACT_LIST");
 }
 
 bool PlayerSocial::HasFriend(uint32 friend_guid)

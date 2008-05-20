@@ -6770,7 +6770,7 @@ void Unit::UnsummonAllTotems()
 void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, bool critical)
 {
     // we guess size
-    WorldPacket data(SMSG_HEALSPELL_ON_PLAYER_OBSOLETE, (8+8+4+4+1));
+    WorldPacket data(SMSG_SPELLHEALLOG, (8+8+4+4+1));
     data.append(pVictim->GetPackGUID());
     data.append(GetPackGUID());
     data << uint32(SpellID);
@@ -6782,7 +6782,7 @@ void Unit::SendHealSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, bool c
 
 void Unit::SendEnergizeSpellLog(Unit *pVictim, uint32 SpellID, uint32 Damage, Powers powertype, bool critical)
 {
-    WorldPacket data(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE, (8+8+4+4+4+1));
+    WorldPacket data(SMSG_SPELLENERGIZELOG, (8+8+4+4+4+1));
     data.append(pVictim->GetPackGUID());
     data.append(GetPackGUID());
     data << uint32(SpellID);

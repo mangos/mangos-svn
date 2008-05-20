@@ -233,7 +233,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             {
                 if(pet->HasAuraType(SPELL_AURA_MOD_POSSESS))
                 {
-                    WorldPacket data(SMSG_CAST_RESULT, (4+2));
+                    WorldPacket data(SMSG_CAST_FAILED, (4+1+1));
                     data << uint32(spellid) << uint8(2) << uint8(result);
                     switch (result)
                     {
@@ -542,7 +542,7 @@ void WorldSession::HandlePetSpellAutocastOpcode( WorldPacket& recvPacket )
 
 void WorldSession::HandleAddDynamicTargetObsoleteOpcode( WorldPacket& recvPacket )
 {
-    sLog.outDetail("WORLD: MSG_ADD_DYNAMIC_TARGET_OBSOLETE");
+    sLog.outDetail("WORLD: CMSG_PET_CAST_SPELL");
 
     CHECK_PACKET_SIZE(recvPacket,8+4);
     uint64 guid;

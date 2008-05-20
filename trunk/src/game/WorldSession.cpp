@@ -123,12 +123,12 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_SET_TARGET_OBSOLETE ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetTargetOpcode               );
     objmgr.opcodeTable[ CMSG_SET_SELECTION ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetSelectionOpcode            );
     objmgr.opcodeTable[ CMSG_STANDSTATECHANGE ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleStandStateChangeOpcode        );
-    objmgr.opcodeTable[ CMSG_FRIEND_LIST ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleFriendListOpcode              );
+    objmgr.opcodeTable[ CMSG_CONTACT_LIST ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleFriendListOpcode              );
     objmgr.opcodeTable[ CMSG_ADD_FRIEND ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAddFriendOpcode               );
     objmgr.opcodeTable[ CMSG_DEL_FRIEND ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDelFriendOpcode               );
     objmgr.opcodeTable[ CMSG_ADD_IGNORE ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAddIgnoreOpcode               );
     objmgr.opcodeTable[ CMSG_DEL_IGNORE ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDelIgnoreOpcode               );
-    objmgr.opcodeTable[ CMSG_FRIEND_SET_NOTE ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetFriendNoteOpcode           );
+    objmgr.opcodeTable[ CMSG_SET_CONTACT_NOTES ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetFriendNoteOpcode           );
     objmgr.opcodeTable[ CMSG_BUG ]                              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBugOpcode                     );
     objmgr.opcodeTable[ CMSG_SET_AMMO ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetAmmoOpcode                 );
     objmgr.opcodeTable[ CMSG_AREATRIGGER ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAreaTriggerOpcode             );
@@ -399,7 +399,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_PET_CANCEL_AURA ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetCancelAuraOpcode           );
     objmgr.opcodeTable[ CMSG_PET_UNLEARN ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetUnlearnOpcode              );
     objmgr.opcodeTable[ CMSG_PET_SPELL_AUTOCAST ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetSpellAutocastOpcode        );
-    objmgr.opcodeTable[ MSG_ADD_DYNAMIC_TARGET_OBSOLETE ]       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAddDynamicTargetObsoleteOpcode);
+    objmgr.opcodeTable[ CMSG_PET_CAST_SPELL ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAddDynamicTargetObsoleteOpcode);
 
     objmgr.opcodeTable[ CMSG_CANCEL_CHANNELLING  ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCancelChanneling              );
 

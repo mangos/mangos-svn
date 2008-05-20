@@ -425,7 +425,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     data << pCurrChar->GetOrientation();
     SendPacket(&data);
 
-    data.Initialize( SMSG_ACCOUNT_DATA_MD5, 128 );
+    data.Initialize( SMSG_ACCOUNT_DATA_TIMES, 128 );
     for(int i = 0; i < 32; i++)
         data << uint32(0);
     SendPacket(&data);

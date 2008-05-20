@@ -246,7 +246,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     data << uint64(guid) << uint32(0xB3);
     SendPacket(&data);
 
-    data.Initialize(SMSG_OBSOLETE, 12);                     // visual effect on player
+    data.Initialize(SMSG_PLAY_SPELL_IMPACT, 12);            // visual effect on player
     data << uint64(_player->GetGUID()) << uint32(0x016A);
     SendPacket(&data);
 

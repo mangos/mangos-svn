@@ -555,7 +555,7 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
 void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 4);
-    sLog.outDebug( "WORLD: Received CMSG_FRIEND_LIST" );
+    sLog.outDebug( "WORLD: Received CMSG_CONTACT_LIST" );
     uint32 unk;
     recv_data >> unk;
     sLog.outDebug("unk value is %u", unk);
