@@ -161,10 +161,10 @@ struct CreatureDisplayInfoEntry
 struct CreatureFamilyEntry
 {
     uint32    ID;                                           // 0
-                                                            // 1 bitmask, unused
-                                                            // 2 0/1 unused
-                                                            // 3 bitmask, unused
-                                                            // 4 0/60, unused
+                                                            // 1 bitmask, unused    minScale
+                                                            // 2 0/1 unused         minScaleLevel
+                                                            // 3 bitmask, unused    maxScale
+                                                            // 4 0/60, unused       maxScaleLevel
                                                             // 5 skillID, unused
     uint32    tamable;                                      // 6 if this = 270 then "is tamable Creature" (or 0 is non-tamable); skillID2
     uint32    petFoodMask;                                  // 7
@@ -452,10 +452,10 @@ struct RandomPropertiesPointsEntry
 //    uint32    skillId;                                      // 1 present some refrences to unknown skill
 //    uint32    raceMask;                                     // 2 
 //    uint32    classMask;                                    // 3
-//    uint32    Unk_4;                                        // 4 mask for some thing
+//    uint32    flags;                                        // 4 mask for some thing
 //    uint32    reqLevel;                                     // 5
 //    uint32    skillTierId;                                  // 6
-//    uint32    Unk_7;                                        // 7
+//    uint32    skillCostID;                                  // 7
 //};
 
 //struct SkillTiersEntry{
@@ -468,7 +468,7 @@ struct SkillLineEntry
 {
     uint32    id;                                           // 0
     uint32    categoryId;                                   // 1 (index from SkillLineCategory.dbc)
-                                                            // 2 unknown, not used
+    //uint32    skillCostID;                                // 2 not used
     char*     name[16];                                     // 3-18
                                                             // 19 string flags, not used
     //char*     description[16];                            // 20-35, not used
@@ -489,7 +489,8 @@ struct SkillLineAbilityEntry
     uint32    spellId;                                      // 2 INDEX
     uint32    racemask;                                     // 3
     uint32    classmask;                                    // 4
-                                                            // 5-6, unknown, always 0
+    //uint32    racemaskNot;                                // 5 not used
+    //uint32    classmaskNot;                               // 6 not used
     uint32    req_skill_value;                              // 7 for trade skill.not for training.
     uint32    forward_spellid;                              // 8
     uint32    learnOnGetSkill;                              // 9 can be 1 or 2 for spells learned on get skill
@@ -503,26 +504,26 @@ struct SpellEntry
 {
     uint32    Id;                                           // 0 normally counted from 0 field (but some tools start counting from 1, check this before tool use for data view!)
     uint32    Category;                                     // 1
-                                                            // 2 not used
+    //uint32     castUI                                     // 2 not used
     uint32    Dispel;                                       // 3
     uint32    Mechanic;                                     // 4
     uint32    Attributes;                                   // 5
     uint32    AttributesEx;                                 // 6
     uint32    AttributesEx2;                                // 7
     uint32    AttributesEx3;                                // 8
-    uint32    AttributesExEx;                               // 9
-                                                            // 10 not used
-                                                            // 11 not used
+    uint32    AttributesEx4;                                // 9
+    //uint32    AttributesEx5;                              // 10 not used
+    //uint32    AttributesEx6;                              // 11 not used
     uint32    Stances;                                      // 12
     uint32    StancesNot;                                   // 13
     uint32    Targets;                                      // 14
     uint32    TargetCreatureType;                           // 15
     uint32    RequiresSpellFocus;                           // 16
-                                                            // 17 not used
+    //uint32    FacingCasterFlags;                          // 17 not used
     uint32    CasterAuraState;                              // 18
     uint32    TargetAuraState;                              // 19
-                                                            // 20 not used CasterAuraStateNot?
-                                                            // 21 not used TargetAuraStateNot?
+    //uint32    CasterAuraStateNot                          // 20 not used
+    //uint32    TargetAuraStateNot                          // 21 not used
     uint32    CastingTimeIndex;                             // 22
     uint32    RecoveryTime;                                 // 23
     uint32    CategoryRecoveryTime;                         // 24
@@ -585,14 +586,17 @@ struct SpellEntry
     uint32    ManaCostPercentage;                           // 192
     uint32    StartRecoveryCategory;                        // 193
     uint32    StartRecoveryTime;                            // 194
-    uint32    AffectedTargetLevel;                          // 195
+    uint32    MaxTargetLevel;                               // 195
     uint32    SpellFamilyName;                              // 196
     uint64    SpellFamilyFlags;                             // 197+198
     uint32    MaxAffectedTargets;                           // 199
-    uint32    DmgClass;                                     // 200
-    //uint32    unk2[2];                                    // 201-202 not used
+    uint32    DmgClass;                                     // 200  defenseType
+    //uint32    PreventionType;                             // 201 not used
+    //uint32    StanceBarOrder;                             // 202 not used
     float     DmgMultiplier[3];                             // 203-205
-    //uint32    unk3[3];                                    // 206-208 not used null
+    //uint32    MinFactionId;                               // 206 not used
+    //uint32    MinReputation;                              // 207 not used
+    //uint32    RequiredAuraVision;                         // 208 not used
     uint32    TotemCategory[2];                             // 209-210
     uint32    AreaId;                                       // 211
     uint32    SchoolMask;                                   // 212 school mask

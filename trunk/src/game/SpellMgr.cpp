@@ -482,7 +482,7 @@ bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellI
         spellInfo1->SpellVisual    == spellInfo2->SpellVisual  &&
         spellInfo1->Attributes     == spellInfo2->Attributes   &&
         spellInfo1->AttributesEx   == spellInfo2->AttributesEx &&
-        spellInfo1->AttributesExEx == spellInfo2->AttributesExEx )
+        spellInfo1->AttributesEx4 == spellInfo2->AttributesEx4 )
         return true;
 
     // base at spell specific
