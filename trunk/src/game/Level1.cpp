@@ -1733,7 +1733,7 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
         return false;
 
     uint32 mailId = objmgr.GenerateMailID();
-    uint64 sender_guidlo = m_session->GetPlayer()->GetGUIDLow();
+    uint32 sender_guidlo = m_session->GetPlayer()->GetGUIDLow();
     uint32 messagetype = MAIL_NORMAL;
     uint32 stationery = MAIL_STATIONERY_GM;
     uint32 itemTextId = 0;
