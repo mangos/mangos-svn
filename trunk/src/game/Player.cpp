@@ -3058,7 +3058,8 @@ void Player::InitVisibleBits()
         // PLAYER_VISIBLE_ITEM_i_CREATOR    // Size: 2
         // PLAYER_VISIBLE_ITEM_i_0          // Size: 12
         //    entry                         //      Size: 1
-        //    enchantments                  //      Size: 11 
+        //    inspected enchantments        //      Size: 6 
+        //    ?                             //      Size: 5 
         // PLAYER_VISIBLE_ITEM_i_PROPERTIES // Size: 1
         // PLAYER_VISIBLE_ITEM_i_PAD        // Size: 1 
         //                                  //     = 16 
@@ -3073,11 +3074,11 @@ void Player::InitVisibleBits()
         updateVisualBits.SetBit(visual_base + 0);
 
         // item enchantment IDs
-        for(uint8 j = 0; j < MAX_ENCHANTMENT_SLOT; ++j)
+        for(uint8 j = 0; j < MAX_INSPECTED_ENCHANTMENT_SLOT; ++j)
             updateVisualBits.SetBit(visual_base + 1 + j);
 
         // random properties
-        updateVisualBits.SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_PROPERTIES + (i*16)));
+        updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_PROPERTIES + (i*16));
     }
 
     updateVisualBits.SetBit(PLAYER_CHOSEN_TITLE);
@@ -9573,8 +9574,7 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
 
         if( !pItem2 )
         {
-            VisualizeItem( pos, pItem);
-            uint8 slot = pos & 255;
+            VisualizeItem( slot, pItem);
 
             if(isAlive())
             {
@@ -9636,7 +9636,8 @@ void Player::QuickEquipItem( uint16 pos, Item *pItem)
 {
     if( pItem )
     {
-        VisualizeItem( pos, pItem);
+        uint8 slot = pos & 255;
+        VisualizeItem( slot, pItem);
 
         if( IsInWorld() )
         {
@@ -9646,7 +9647,7 @@ void Player::QuickEquipItem( uint16 pos, Item *pItem)
     }
 }
 
-void Player::SetVisibleItemSlot(uint32 slot, Item *pItem)
+void Player::SetVisibleItemSlot(uint8 slot, Item *pItem)
 {
     if(pItem)
     {
@@ -9655,7 +9656,7 @@ void Player::SetVisibleItemSlot(uint32 slot, Item *pItem)
         int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
         SetUInt32Value(VisibleBase + 0, pItem->GetEntry());
 
-        for(int i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
+        for(int i = 0; i < MAX_INSPECTED_ENCHANTMENT_SLOT; ++i)
             SetUInt32Value(VisibleBase + 1 + i, pItem->GetEnchantmentId(EnchantmentSlot(i)));
 
         SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + (slot * 16), uint32(pItem->GetItemRandomPropertyId()));
@@ -9667,14 +9668,14 @@ void Player::SetVisibleItemSlot(uint32 slot, Item *pItem)
         int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
         SetUInt32Value(VisibleBase + 0, 0);
 
-        for(int i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
+        for(int i = 0; i < MAX_INSPECTED_ENCHANTMENT_SLOT; ++i)
             SetUInt32Value(VisibleBase + 1 + i, 0);
 
         SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + (slot * 16), 0);
     }
 }
 
-void Player::VisualizeItem( uint16 pos, Item *pItem)
+void Player::VisualizeItem( uint8 slot, Item *pItem)
 {
     if(!pItem)
         return;
@@ -9683,10 +9684,7 @@ void Player::VisualizeItem( uint16 pos, Item *pItem)
     if( pItem->GetProto()->Bonding == BIND_WHEN_EQUIPED || pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP || pItem->GetProto()->Bonding == BIND_QUEST_ITEM )
         pItem->SetBinding( true );
 
-    uint8 bag = pos >> 8;
-    uint8 slot = pos & 255;
-
-    sLog.outDebug( "STORAGE: EquipItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
+    sLog.outDebug( "STORAGE: EquipItem slot = %u, item = %u", slot, pItem->GetEntry());
 
     m_items[slot] = pItem;
     SetUInt64Value( (uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot * 2) ), pItem->GetGUID() );
@@ -10492,14 +10490,25 @@ void Player::RemoveItemFromBuyBackSlot( uint32 slot, bool del )
 void Player::SendEquipError( uint8 msg, Item* pItem, Item *pItem2 )
 {
     sLog.outDebug( "WORLD: Sent SMSG_INVENTORY_CHANGE_FAILURE" );
-    WorldPacket data( SMSG_INVENTORY_CHANGE_FAILURE, ((msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I)?22:18) );
+    WorldPacket data( SMSG_INVENTORY_CHANGE_FAILURE, (msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I ? 22 : 18) );
     data << uint8(msg);
+
     if(msg)
     {
         data << uint64(pItem ? pItem->GetGUID() : 0);
         data << uint64(pItem2 ? pItem2->GetGUID() : 0);
-        data << uint8(0);                                       // not 0 there...
-        data << uint32(0);                                      // new 2.4.0
+        data << uint8(0);                                   // not 0 there...
+
+        if(msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I)
+        {
+            uint32 level = 0;
+            
+            if(pItem)
+                if(ItemPrototype const* proto =  pItem->GetProto())
+                    level = proto->RequiredLevel;
+
+            data << uint32(level);                          // new 2.4.0
+        }
     }
     GetSession()->SendPacket(&data);
 }
@@ -10937,8 +10946,11 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
     }                                                       /*for*/
 
     // visualize enchantment at player and equipped items
-    int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (item->GetSlot() * 16);
-    SetUInt32Value(VisibleBase + 1 + slot, apply? item->GetEnchantmentId(slot) : 0);
+    if(slot < MAX_INSPECTED_ENCHANTMENT_SLOT)
+    {
+        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (item->GetSlot() * 16);
+        SetUInt32Value(VisibleBase + 1 + slot, apply? item->GetEnchantmentId(slot) : 0);
+    }
 
     if(apply_dur)
     {
