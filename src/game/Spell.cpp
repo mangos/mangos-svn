@@ -164,7 +164,8 @@ bool SpellCastTargets::read ( WorldPacket * data, Unit *caster )
         return true;
     }
 
-    if( m_targetMask & TARGET_FLAG_UNIT )
+    // TARGET_FLAG_UNK2 is used for non-combat pets, maybe other?
+    if( m_targetMask & (TARGET_FLAG_UNIT|TARGET_FLAG_UNK2) )
         if(!readGUID(*data, m_unitTargetGUID))
             return false;
 
@@ -1349,6 +1350,12 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         {
             if(m_targets.getUnitTarget())
                 TagUnitMap.push_back(m_targets.getUnitTarget());
+        }break;
+        case TARGET_NONCOMBAT_PET:
+        {
+            if(Unit* target = m_targets.getUnitTarget())
+                if( target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->isPet() && ((Pet*)target)->getPetType() == MINI_PET)
+                    TagUnitMap.push_back(target);
         }break;
         case TARGET_ALL_AROUND_CASTER:
         {
