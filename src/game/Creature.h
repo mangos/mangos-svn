@@ -445,9 +445,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 GetGossipTextId(uint32 action, uint32 zoneid);
         uint32 GetNpcTextId();
         void LoadGossipOptions();
-        std::string GetGossipTitle(uint8 type, uint32 id);
         GossipOption const* GetGossipOption( uint32 id ) const;
-        uint32 GetGossipCount( uint32 gossipid );
         void addGossipOption(GossipOption const& gso) { m_goptions.push_back(gso); }
 
         void setEmoteState(uint8 emote) { m_emoteState = emote; };

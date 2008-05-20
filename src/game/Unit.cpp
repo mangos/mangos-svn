@@ -5800,8 +5800,8 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
 
                         // stacking
                         CastSpell(this, 37658, true, castItem, triggeredByAura);
-                        // 2.5s cooldown before it can stack again
-                        ((Player*)this)->AddSpellCooldown(37657,0,time(NULL)+2.5);
+                        // 2.5s cooldown before it can stack again, current system allow 1 sec step in cooldown
+                        ((Player*)this)->AddSpellCooldown(37657,0,time(NULL)+(rand_chance() < 50 ? 2 : 3));
                         
 
                         // counting
@@ -7310,13 +7310,13 @@ uint32 Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 damage, Uni
     int32 crit_bonus;
     switch(spellProto->DmgClass)
     {
-        case SPELL_DAMAGE_CLASS_MELEE:                     // for melee based spells is 100%
+        case SPELL_DAMAGE_CLASS_MELEE:                      // for melee based spells is 100%
         case SPELL_DAMAGE_CLASS_RANGED:
             // TODO: write here full calculation for melee/ranged spells 
             crit_bonus = damage;
             break;
         default:
-            crit_bonus = damage / 2;                       // for spells is 50%
+            crit_bonus = damage / 2;                        // for spells is 50%
             break;
     }
 
@@ -7327,7 +7327,7 @@ uint32 Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 damage, Uni
     if(pVictim)
     {
         uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
-        crit_bonus *= GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS, creatureTypeMask);
+        crit_bonus = int32(crit_bonus * GetTotalAuraMultiplierByMiscMask(SPELL_AURA_MOD_CRIT_PERCENT_VERSUS, creatureTypeMask));
     }
 
     if(crit_bonus > 0)
