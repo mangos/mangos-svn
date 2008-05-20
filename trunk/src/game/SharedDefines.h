@@ -545,6 +545,7 @@ enum Targets
     TARGET_SINGLE_FRIEND_2             = 57,
     TARGET_AREAEFFECT_PARTY_AND_CLASS  = 61,
     TARGET_SINGLE_ENEMY                = 77,
+    TARGET_NONCOMBAT_PET               = 90,
 };
 
 enum SpellMissInfo
