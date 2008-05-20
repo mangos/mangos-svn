@@ -3149,9 +3149,12 @@ uint8 Spell::CanCast(bool strict)
             return SPELL_FAILED_TARGET_AFFECTING_COMBAT;
         }
     }
-
-    if((m_spellInfo->AttributesEx3 & 0x800) != 0)
-        return SPELL_FAILED_ONLY_BATTLEGROUNDS;
+    // Spell casted only on battleground
+    if((m_spellInfo->AttributesEx3 & 0x800) &&  m_caster->GetTypeId()==TYPEID_PLAYER)
+    {
+        if (((Player*)m_caster)->InBattleGround() == false)
+            return SPELL_FAILED_ONLY_BATTLEGROUNDS;
+    }
 
     // zone check
     if(!IsSpellAllowedInLocation(m_spellInfo,m_caster->GetMapId(),m_caster->GetZoneId(),m_caster->GetAreaId()))
