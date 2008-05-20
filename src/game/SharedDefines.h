@@ -457,8 +457,31 @@ enum Mechanics
     MECHANIC_INVULNERABILITY  = 25,
     MECHANIC_INTERRUPT        = 26,
     MECHANIC_DAZE             = 27,
-    MECHANIC_DISCOVERY        = 28
+    MECHANIC_DISCOVERY        = 28,
+    MECHANIC_IMMUNE_SHIELD    = 29,                         // Divine (Blessing) Shield/Protection and Ice Block
+    MECHANIC_SAPPED           = 30
 };
+
+// Used for spell 42292 Immune Movement Impairment and Loss of Control (0x49967da6)
+// Include follow mechanic
+// MECHANIC_CHARM 
+// MECHANIC_CONFUSED
+// MECHANIC_FEAR
+// MECHANIC_ROOT 
+// MECHANIC_PACIFY
+// MECHANIC_SLEEP
+// MECHANIC_SNARE
+// MECHANIC_STUN
+// MECHANIC_FREEZE
+// MECHANIC_KNOCKOUT
+// MECHANIC_POLYMORPH
+// MECHANIC_BANISH
+// MECHANIC_SHACKLE
+// MECHANIC_TURN
+// MECHANIC_HORROR
+// MECHANIC_DAZE
+// MECHANIC_SAPPED
+#define IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK 0x49967DA6
 
 //To all Immune system,if target has immunes,
 //some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,

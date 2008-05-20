@@ -3109,7 +3109,7 @@ void Aura::HandleModMechanicImmunity(bool apply, bool Real)
 
     //immune movement impairment and loss of control
     if(GetId()==42292)
-        mechanic=0x9967da6;
+        mechanic=IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
 
     if(apply)
     {

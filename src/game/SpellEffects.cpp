@@ -133,8 +133,8 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectPickPocket,                               // 71 SPELL_EFFECT_PICKPOCKET
     &Spell::EffectAddFarsight,                              // 72 SPELL_EFFECT_ADD_FARSIGHT
     &Spell::EffectSummonGuardian,                           // 73 SPELL_EFFECT_SUMMON_POSSESSED
-    &Spell::EffectNULL,                                     // 74 SPELL_EFFECT_SUMMON_TOTEM
-    &Spell::EffectNULL,                                     // 75 SPELL_EFFECT_HEAL_MECHANICAL          one spell: Mechanical Patch Kit
+    &Spell::EffectSummonTotem,                              // 74 SPELL_EFFECT_SUMMON_TOTEM
+    &Spell::EffectHealMechanical,                           // 75 SPELL_EFFECT_HEAL_MECHANICAL          one spell: Mechanical Patch Kit
     &Spell::EffectSummonObjectWild,                         // 76 SPELL_EFFECT_SUMMON_OBJECT_WILD
     &Spell::EffectScriptEffect,                             // 77 SPELL_EFFECT_SCRIPT_EFFECT
     &Spell::EffectNULL,                                     // 78 SPELL_EFFECT_ATTACK
@@ -2121,6 +2121,24 @@ void Spell::EffectHeal( uint32 /*i*/ )
             procHealer |= PROC_FLAG_CRIT_HEAL;
 
         m_caster->ProcDamageAndSpell(unitTarget,procHealer,PROC_FLAG_HEALED,addhealth,m_spellInfo,m_IsTriggeredSpell);
+    }
+}
+
+void Spell::EffectHealMechanical( uint32 /*i*/ )
+{
+    // Mechanic creature type should be correctly checked by targetCreatureType field
+    if( unitTarget && unitTarget->isAlive() && damage >= 0)
+    {
+        // Try to get original caster
+        Unit *caster = m_originalCasterGUID ? m_originalCaster : m_caster;
+
+        // Skip if m_originalCaster not available
+        if (!caster)
+            return;
+
+        uint32 addhealth = caster->SpellHealingBonus(m_spellInfo, uint32(damage), HEAL, unitTarget);
+        caster->SendHealSpellLog(unitTarget, m_spellInfo->Id, addhealth, false);
+        unitTarget->ModifyHealth( int32(damage) );
     }
 }
 
@@ -4395,6 +4413,8 @@ void Spell::EffectSummonTotem(uint32 i)
         case SPELL_EFFECT_SUMMON_TOTEM_SLOT2: slot = 1; break;
         case SPELL_EFFECT_SUMMON_TOTEM_SLOT3: slot = 2; break;
         case SPELL_EFFECT_SUMMON_TOTEM_SLOT4: slot = 3; break;
+        // Battle standard case
+        case SPELL_EFFECT_SUMMON_TOTEM:       slot = 254; break;
         // jewelery statue case, like totem without slot
         case SPELL_EFFECT_SUMMON_GUARDIAN:    slot = 255; break;
         default: return;

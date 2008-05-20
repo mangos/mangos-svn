@@ -326,6 +326,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
     if( m_spellInfo->AttributesEx2 == 0x000020 )            //Auto Shot & Shoot
         m_autoRepeat = true;
 
+    m_powerCost = 0;                                        // setup to correct value in Spell::prepare, don't must be used before.
     m_casttime = 0;                                         // setup to correct value in Spell::prepare, don't must be used before.
     m_timer = 0;                                            // will set to castime in preper
 
@@ -1794,6 +1795,9 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
         return;
     }
 
+    // Fill cost data
+    m_powerCost = CalculatePowerCost();
+
     uint8 result = CanCast(true);
     if(result != 0)
     {
@@ -1885,7 +1889,6 @@ void Spell::cancel()
 
 void Spell::cast(bool skipCheck)
 {
-    uint32 mana = 0;
     uint8 castResult = 0;
 
     // update pointers base at GUIDs to prevent access to non-existed already object
@@ -1901,7 +1904,7 @@ void Spell::cast(bool skipCheck)
     if(m_caster->GetTypeId() != TYPEID_PLAYER && m_targets.getUnitTarget() && m_targets.getUnitTarget() != m_caster)
         m_caster->SetInFront(m_targets.getUnitTarget());
 
-    castResult = CheckMana( &mana);
+    castResult = CheckPower();
     if(castResult != 0)
     {
         SendCastResult(castResult);
@@ -1944,7 +1947,7 @@ void Spell::cast(bool skipCheck)
     // CAST SPELL
     SendSpellCooldown();
 
-    TakePower(mana);
+    TakePower();
     TakeReagents();                                         // we must remove reagents before HandleEffects to allow place crafted item in same slot
     FillTargetMap();
 
@@ -2866,7 +2869,7 @@ void Spell::TakeCastItem()
     }
 }
 
-void Spell::TakePower(uint32 mana)
+void Spell::TakePower()
 {
     if(m_CastItem || m_triggeredByAuraSpell)
         return;
@@ -2874,7 +2877,7 @@ void Spell::TakePower(uint32 mana)
     // health as power used
     if(m_spellInfo->powerType == -2)
     {
-        m_caster->ModifyHealth( -(int32)mana );
+        m_caster->ModifyHealth( -(int32)m_powerCost );
         return;
     }
 
@@ -2886,11 +2889,11 @@ void Spell::TakePower(uint32 mana)
 
     Powers powerType = Powers(m_spellInfo->powerType);
 
-    m_caster->ModifyPower(powerType, -(int32)mana);
+    m_caster->ModifyPower(powerType, -(int32)m_powerCost);
     if (powerType == POWER_MANA)
     {
         // Set the five second timer
-        if (m_caster->GetTypeId() == TYPEID_PLAYER && mana > 0)
+        if (m_caster->GetTypeId() == TYPEID_PLAYER && m_powerCost > 0)
         {
             ((Player *)m_caster)->SetLastManaUse((uint32)getMSTime());
         }
@@ -3273,8 +3276,7 @@ uint8 Spell::CanCast(bool strict)
         return castResult;
 
     {
-        uint32 mana = 0;
-        if(uint8 castResult = CheckMana(&mana))
+        if(uint8 castResult = CheckPower())
             return castResult;
     }
 
@@ -3864,7 +3866,8 @@ uint8 Spell::CheckCasterAuras() const
             mechanic_immune |= 1 << uint32(m_spellInfo->EffectMiscValue[i]);
     }
     //immune movement impairement and loss of control
-    if(m_spellInfo->Id==(uint32)42292)mechanic_immune=0x9967da6;
+    if(m_spellInfo->Id==(uint32)42292)
+        mechanic_immune = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
 
     //Check whether the cast should be prevented by any state you might have.
     uint8 prevented_reason = 0;
@@ -4044,68 +4047,78 @@ uint8 Spell::CheckRange(bool strict)
     return 0;                                               // ok
 }
 
-uint8 Spell::CheckMana(uint32 *mana)
+int32 Spell::CalculatePowerCost()
 {
     // item cast not used power
     if(m_CastItem)
         return 0;
 
-    // health as power used
+    // Base powerCost
+    int32 powerCost = m_spellInfo->manaCost;
+    // PCT cost from total amount
+    if (m_spellInfo->ManaCostPercentage)
+    {
+        switch (m_spellInfo->powerType)
+        {
+            // health as power used
+            case -2:
+                powerCost += m_spellInfo->ManaCostPercentage * m_caster->GetCreateHealth() / 100;
+                break;
+            case POWER_MANA:
+                powerCost += m_spellInfo->ManaCostPercentage * m_caster->GetCreateMana() / 100;
+                break;
+            case POWER_RAGE:
+            case POWER_FOCUS:
+            case POWER_ENERGY:
+            case POWER_HAPPINESS:
+//            case POWER_RUNES:
+                powerCost += m_spellInfo->ManaCostPercentage * m_caster->GetMaxPower(Powers(m_spellInfo->powerType)) / 100;
+                break;
+            default:
+                sLog.outError("Spell::CalculateManaCost: Unknown power type '%d'", m_spellInfo->powerType);
+                break;
+        }
+    }
+    SpellSchools school = GetFirstSchoolInMask(m_spellSchoolMask);
+    // Flat mod from caster auras by spell school
+    powerCost += m_caster->GetInt32Value(UNIT_FIELD_POWER_COST_MODIFIER + school);
+    // Shiv - costs 20 + weaponSpeed*10 energy (apply only to non-triggered spell with energy cost)
+    if ( m_spellInfo->manaCost > 0 && m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellIconID == 1834 )
+        powerCost += m_caster->GetAttackTime(OFF_ATTACK)/100;
+    // Apply cost mod by spell
+    if(Player* modOwner = m_caster->GetSpellModOwner())
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, powerCost, this);
+
+    // PCT mod from user auras by school
+    powerCost *= int32(powerCost * (1.0f+m_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+school)));
+    if (powerCost < 0)
+        powerCost = 0;
+    return powerCost;
+}
+
+uint8 Spell::CheckPower()
+{
+    // item cast not used power
+    if(m_CastItem)
+        return 0;
+
+    // health as power used - need chech health amount
     if(m_spellInfo->powerType == -2)
     {
-        uint32 currentHealth = m_caster->GetHealth();
-
-        uint32 healthCost;
-
-        healthCost = m_spellInfo->manaCost + int32(float(m_spellInfo->ManaCostPercentage)/100.0f * m_caster->GetCreateHealth());
-
-        *mana = healthCost;
-        if(currentHealth <= healthCost)
+        if(m_caster->GetHealth() <= m_powerCost)
             return SPELL_FAILED_CASTER_AURASTATE;
-
         return 0;
     }
-
-    if(m_spellInfo->powerType <0 || m_spellInfo->powerType > POWER_HAPPINESS)
+    // Check valid power type
+    if(m_spellInfo->powerType < 0 || m_spellInfo->powerType > POWER_HAPPINESS)
     {
+
         sLog.outError("Spell::CheckMana: Unknown power type '%d'", m_spellInfo->powerType);
         return SPELL_FAILED_UNKNOWN;
     }
-
+    // Check power amount
     Powers powerType = Powers(m_spellInfo->powerType);
-
-    uint32 currentPower = m_caster->GetPower(powerType);
-    float manaCost = m_spellInfo->manaCost;
-    if(m_spellInfo->manaCostPerlevel)
-        manaCost += m_spellInfo->manaCostPerlevel*m_caster->getLevel();
-    if(m_spellInfo->ManaCostPercentage)
-    {
-        if(powerType==POWER_MANA)
-            manaCost += float(m_spellInfo->ManaCostPercentage)/100.0f * m_caster->GetCreateMana();
-        else
-            manaCost += float(m_spellInfo->ManaCostPercentage)/100.0f * m_caster->GetMaxPower(powerType);
-    }
-
-    SpellSchools school = GetFirstSchoolInMask(GetSpellSchoolMask(m_spellInfo));
-
-    manaCost += m_caster->GetInt32Value(UNIT_FIELD_POWER_COST_MODIFIER+school);
-
-    // Shiv - costs 20 + weaponSpeed*10 energy (apply only to non-triggered spell with energy cost)
-    if ( m_spellInfo->manaCost > 0 && m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellIconID == 1834 )
-    {
-        manaCost += m_caster->GetAttackTime(OFF_ATTACK)/100;
-    }
-
-    if(Player* modOwner = m_caster->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost, this);
-
-    manaCost*= (1.0f+m_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+school));
-    if (manaCost < 0)
-        manaCost = 0;
-
-    *mana = uint32(manaCost);
-
-    if(currentPower < *mana)
+    if(m_caster->GetPower(powerType) < m_powerCost)
         return SPELL_FAILED_NO_POWER;
     else
         return 0;
