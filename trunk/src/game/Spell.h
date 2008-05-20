@@ -247,6 +247,7 @@ class Spell
         void EffectAddFarsight(uint32 i);
         void EffectSummonWild(uint32 i);
         void EffectSummonGuardian(uint32 i);
+        void EffectHealMechanical(uint32 i);
         void EffectTeleUnitsFaceCaster(uint32 i);
         void EffectLearnSkill(uint32 i);
         void EffectAddHonor(uint32 i);
@@ -313,7 +314,7 @@ class Spell
         void update(uint32 difftime);
         void cast(bool skipCheck = false);
         void finish(bool ok = true);
-        void TakePower(uint32 mana);
+        void TakePower();
         void TakeReagents();
         void TakeCastItem();
         void TriggerSpell();
@@ -330,10 +331,11 @@ class Spell
 
         uint8 CheckItems();
         uint8 CheckRange(bool strict);
-        uint8 CheckMana(uint32 *mana);
+        uint8 CheckPower();
         uint8 CheckCasterAuras() const;
 
         int32 CalculateDamage(uint8 i, Unit* target) { return m_caster->CalculateSpellDamage(m_spellInfo,i,m_currentBasePoints[i],target); }
+        int32 CalculatePowerCost();
 
         bool HaveTargetsForEffect(uint8 effect) const;
         void Delayed(int32 delaytime);
@@ -393,6 +395,7 @@ class Spell
 
         Unit* GetCaster() { return m_caster; }
         Unit* GetOriginalCaster() { return m_originalCaster; }
+        int32 GetPowerUsed() { return m_powerCost;}
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
 
@@ -419,12 +422,12 @@ class Spell
         //Spell data
         SpellSchoolMask m_spellSchoolMask;                  // Spell school (can be overwrite for some spells (wand shoot for example)
         WeaponAttackType m_attackType;                      // For weapon based attack
+        int32 m_powerCost;                                  // Calculated spell cost     initialized only in Spell::prepare
+        int32 m_casttime;                                   // Calculated spell cast time initialized only in Spell::prepare
         bool m_canReflect;                                  // can reflect this spell?
         bool m_autoRepeat;
         bool m_meleeSpell;
         bool m_rangedShoot;
-
-        int32 m_casttime;                                   // initialized only in Spell::prepare
 
         // Delayed spells system
         uint64 m_delayStart;                                // time of spell delay start, filled by event handler, zero = just started
