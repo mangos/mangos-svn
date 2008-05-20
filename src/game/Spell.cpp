@@ -4093,7 +4093,7 @@ int32 Spell::CalculatePowerCost()
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, powerCost, this);
 
     // PCT mod from user auras by school
-    powerCost *= int32(powerCost * (1.0f+m_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+school)));
+    powerCost = int32(powerCost * (1.0f+m_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+school)));
     if (powerCost < 0)
         powerCost = 0;
     return powerCost;

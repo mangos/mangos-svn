@@ -383,11 +383,12 @@ void WorldSession::HandleLootRoll( WorldPacket &recv_data )
 
     //sLog.outDebug("WORLD RECIEVE CMSG_LOOT_ROLL, From:%u, Numberofplayers:%u, Choise:%u", (uint32)Guid, NumberOfPlayers, Choise);
 
-    /** error handling **/
-    /********************/
+    Group* group = GetPlayer()->GetGroup();
+    if(!group)
+        return;
 
     // everything's fine, do it
-    GetPlayer()->GetGroup()->CountRollVote(GetPlayer()->GetGUID(), Guid, NumberOfPlayers, Choise);
+    group->CountRollVote(GetPlayer()->GetGUID(), Guid, NumberOfPlayers, Choise);
 }
 
 void WorldSession::HandleMinimapPingOpcode(WorldPacket& recv_data)

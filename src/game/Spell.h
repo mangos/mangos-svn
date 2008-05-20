@@ -395,7 +395,7 @@ class Spell
 
         Unit* GetCaster() { return m_caster; }
         Unit* GetOriginalCaster() { return m_originalCaster; }
-        int32 GetPowerUsed() { return m_powerCost;}
+        int32 GetPowerCost() { return m_powerCost; }
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
 
