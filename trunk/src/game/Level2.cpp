@@ -817,7 +817,7 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
 
     pCreature->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()));
 
-    int32 db_guid = pCreature->GetDBTableGUIDLow();
+    uint32 db_guid = pCreature->GetDBTableGUIDLow();
 
     // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
     pCreature->LoadFromDB(db_guid, chr->GetInstanceId());
@@ -2003,10 +2003,10 @@ bool ChatHandler::HandleSpawnDistCommand(const char* args)
         mtype = RANDOM_MOTION_TYPE;
 
     Creature *pCreature = getSelectedCreature();
-    uint64 u_guid = 0;
+    uint32 u_guidlow = 0;
 
     if (pCreature)
-        u_guid = pCreature->GetDBTableGUIDLow();
+        u_guidlow = pCreature->GetDBTableGUIDLow();
     else
         return false;
 
@@ -2020,7 +2020,7 @@ bool ChatHandler::HandleSpawnDistCommand(const char* args)
         pCreature->Respawn();
     }
 
-    WorldDatabase.PExecuteLog("UPDATE creature SET spawndist=%f, MovementType=%i WHERE guid=%u",option,mtype,u_guid);
+    WorldDatabase.PExecuteLog("UPDATE creature SET spawndist=%f, MovementType=%i WHERE guid=%u",option,mtype,u_guidlow);
     PSendSysMessage(LANG_COMMAND_SPAWNDIST,option);
     return true;
 }
@@ -2044,14 +2044,14 @@ bool ChatHandler::HandleSpawnTimeCommand(const char* args)
     }
 
     Creature *pCreature = getSelectedCreature();
-    uint64 u_guid = 0;
+    uint32 u_guidlow = 0;
 
     if (pCreature)
-        u_guid = pCreature->GetDBTableGUIDLow();
+        u_guidlow = pCreature->GetDBTableGUIDLow();
     else
         return false;
 
-    WorldDatabase.PExecuteLog("UPDATE creature SET spawntimesecs=%i WHERE guid=%u",i_stime,u_guid);
+    WorldDatabase.PExecuteLog("UPDATE creature SET spawntimesecs=%i WHERE guid=%u",i_stime,u_guidlow);
     pCreature->SetRespawnDelay((uint32)i_stime);
     PSendSysMessage(LANG_COMMAND_SPAWNTIME,i_stime);
 
