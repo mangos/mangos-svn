@@ -924,17 +924,6 @@ uint32 Creature::GetGossipTextId(uint32 action, uint32 zoneid)
     return id;
 }
 
-uint32 Creature::GetGossipCount( uint32 gossipid )
-{
-    uint32 count=0;
-    for( GossipOptionList::iterator i = m_goptions.begin( ); i != m_goptions.end( ); i++ )
-    {
-        if(i->GossipId == gossipid )
-            ++count;
-    }
-    return count;
-}
-
 uint32 Creature::GetNpcTextId()
 {
     // already loaded and cached
@@ -952,16 +941,6 @@ uint32 Creature::GetNpcTextId()
         m_NPCTextId = DEFAULT_GOSSIP_MESSAGE;
 
     return m_NPCTextId;
-}
-
-std::string Creature::GetGossipTitle(uint8 type,uint32 id)
-{
-    for( GossipOptionList::iterator i = m_goptions.begin( ); i != m_goptions.end( ); i++ )
-    {
-        if(i->Id==id && i->NpcFlag==(uint32)type)
-            return i->Option;
-    }
-    return "";
 }
 
 GossipOption const* Creature::GetGossipOption( uint32 id ) const
