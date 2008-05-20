@@ -420,7 +420,7 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
         {
             Roll* r=new Roll();
             uint32 newitemGUID = objmgr.GenerateLowGuid(HIGHGUID_ITEM);
-            r->itemGUID = newitemGUID;
+            r->itemGUID = MAKE_NEW_GUID(newitemGUID,0,HIGHGUID_ITEM);
             r->itemid = i->itemid;
             r->itemRandomPropId = i->randomPropertyId;
             r->itemRandomSuffix = i->randomSuffix;
@@ -474,7 +474,7 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
         {
             Roll* r=new Roll();
             uint32 newitemGUID = objmgr.GenerateLowGuid(HIGHGUID_ITEM);
-            r->itemGUID = newitemGUID;
+            r->itemGUID = MAKE_NEW_GUID(newitemGUID,0,HIGHGUID_ITEM);
             r->itemid = i->itemid;
             r->itemRandomPropId = i->randomPropertyId;
             r->itemRandomSuffix = i->randomSuffix;
@@ -946,8 +946,8 @@ void Group::_setLeader(const uint64 &guid)
     {
         // here we must unbind all instances bound to that leader on group members from the
         // leader, and rebind them on the players
-        uint32 old_guid = m_leaderGuid;
-        uint32 new_guid = slot->guid;
+        uint64 old_guid = m_leaderGuid;
+        uint64 new_guid = slot->guid;
         std::set< uint32 > changed_bindings;
         Player* player;
         BoundInstancesMap::iterator i_BoundInstances;

@@ -1207,7 +1207,7 @@ void Pet::_LoadAuras(uint32 timediff)
         do
         {
             Field *fields = result->Fetch();
-            uint32 caster_guid = fields[0].GetUInt64();
+            uint64 caster_guid = fields[0].GetUInt64();
             uint32 spellid = fields[1].GetUInt32();
             uint32 effindex = fields[2].GetUInt32();
             int32 damage     = (int32)fields[3].GetUInt32();

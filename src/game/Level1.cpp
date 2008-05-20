@@ -1727,13 +1727,13 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
 
     normalizePlayerName(name);
 
-    uint32 receiver_guid = objmgr.GetPlayerGUIDByName(name);
+    uint64 receiver_guid = objmgr.GetPlayerGUIDByName(name);
 
     if(!receiver_guid)
         return false;
 
     uint32 mailId = objmgr.GenerateMailID();
-    uint32 sender_guid = m_session->GetPlayer()->GetGUID();
+    uint64 sender_guidlo = m_session->GetPlayer()->GetGUIDLow();
     uint32 messagetype = MAIL_NORMAL;
     uint32 stationery = MAIL_STATIONERY_GM;
     uint32 itemTextId = 0;
@@ -1742,9 +1742,9 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
         itemTextId = objmgr.CreateItemText( text );
     }
 
-    Player *receiver = objmgr.GetPlayer((uint32) receiver_guid);
+    Player *receiver = objmgr.GetPlayer(receiver_guid);
 
-    WorldSession::SendMailTo(receiver,messagetype, stationery, sender_guid, receiver_guid, subject, itemTextId, NULL, 0, 0, NOT_READ);
+    WorldSession::SendMailTo(receiver,messagetype, stationery, sender_guidlo, GUID_LOPART(receiver_guid), subject, itemTextId, NULL, 0, 0, NOT_READ);
 
     PSendSysMessage(LANG_MAIL_SENT, name.c_str());
     return true;
