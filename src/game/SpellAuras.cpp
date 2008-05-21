@@ -1217,12 +1217,6 @@ void Aura::TriggerSpell()
             return;
         }
 
-        case 31666:                                         // Master of Subtlety
-        {
-            caster->RemoveAurasDueToSpell(31665);
-            return;
-        }
-
         case 37027: trigger_spell_id = 37029; break;        // Remote Toy
 
         case 38443:                                         // Skyshatter Regalia (Shaman Tier 6) - bonus
@@ -1615,8 +1609,18 @@ void Aura::HandleAuraDummy2(bool apply, bool Real)
                     ((Player*)m_target)->UpdateManaRegen();
                 return;
             }
+            break;
         }
-        break;
+        case SPELLFAMILY_ROGUE:
+        {
+            // Master of Subtlety
+            if (spell->Id==31666 && !apply && Real)
+            {
+                m_target->RemoveAurasDueToSpell(31665);
+                return;
+            }
+            break;
+        }
     }
 }
 
@@ -2787,6 +2791,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
             }
         }
     }
+
     // Master of Subtlety
     Unit::AuraList const& mDummyAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
     for(Unit::AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
