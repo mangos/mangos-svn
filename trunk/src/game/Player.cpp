@@ -1558,7 +1558,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             }
             GetSession()->SendPacket( &data );
 
-            data.Initialize(SMSG_INSTANCE_RESET_ACTIVATE, 4);
+            data.Initialize(SMSG_UPDATE_INSTANCE_OWNERSHIP, 4);
             data << uint32(0);
             GetSession()->SendPacket( &data );
 
@@ -3402,7 +3402,7 @@ void Player::SendDelayResponse(const uint32 ml_seconds)
 
 void Player::ResurrectPlayer(float restore_percent, bool updateToWorld)
 {
-    WorldPacket data(SMSG_SH_POSITION, 4*4);                // remove spirit healer position
+    WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);                // remove spirit healer position
     data << uint32(-1);
     data << float(0);
     data << float(0);
@@ -3749,7 +3749,7 @@ void Player::RepopAtGraveyard()
 
         if(isDead())                                        // not send if alive, because it used in TeleportTo()
         {
-            WorldPacket data(SMSG_SH_POSITION, 4*4);        // show spirit healer position on minimap
+            WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);        // show spirit healer position on minimap
             data << ClosestGrave->map_id;
             data << ClosestGrave->x;
             data << ClosestGrave->y;
@@ -15880,7 +15880,7 @@ void Player::SendComboPoints()
     Unit *combotarget = ObjectAccessor::GetUnit(*this, m_comboTarget);
     if (combotarget)
     {
-        WorldPacket data(SMSG_SET_COMBO_POINTS, combotarget->GetPackGUID().size()+1);
+        WorldPacket data(SMSG_UPDATE_COMBO_POINTS, combotarget->GetPackGUID().size()+1);
         data.append(combotarget->GetPackGUID());
         data << uint8(m_comboPoints);
         GetSession()->SendPacket(&data);
@@ -16052,7 +16052,7 @@ void Player::SendTransferAborted(uint32 mapid, uint16 reason)
 
 void Player::SendRaidInstanceResetWarning(uint32 type, uint32 mapid, uint32 time)
 {
-    WorldPacket data(SMSG_INSTANCE_RESET_SCHEDULED, 4+4+4);
+    WorldPacket data(SMSG_RAID_INSTANCE_MESSAGE, 4+4+4);
     data << uint32(type);
     data << uint32(mapid);
     data << uint32(time);

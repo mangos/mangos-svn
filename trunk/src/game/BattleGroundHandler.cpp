@@ -450,7 +450,7 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 8+1+1+1);
 
-    sLog.outDebug("WORLD: CMSG_ARENAMASTER_JOIN");
+    sLog.outDebug("WORLD: CMSG_BATTLEMASTER_JOIN_ARENA");
     recv_data.hexlike();
 
     // ignore if we already in BG or BG queue

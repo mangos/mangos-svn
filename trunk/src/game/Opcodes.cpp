@@ -683,7 +683,7 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "SMSG_PVP_CREDIT",                                      // SMSG_PVP_CREDIT
     "SMSG_AUCTION_REMOVED_NOTIFICATION",                    // SMSG_AUCTION_REMOVED_NOTIFICATION
     "CMSG_GROUP_RAID_CONVERT",                              // CMSG_GROUP_RAID_CONVERT
-    "CMSG_GROUP_ASSISTANT",                                 // CMSG_GROUP_ASSISTANT
+    "CMSG_GROUP_ASSISTANT_LEADER",                          // CMSG_GROUP_ASSISTANT_LEADER
     "CMSG_BUYBACK_ITEM",                                    // CMSG_BUYBACK_ITEM
     "SMSG_SERVER_MESSAGE",                                  // SMSG_SERVER_MESSAGE
     "CMSG_MEETINGSTONE_JOIN",                               // CMSG_MEETINGSTONE_JOIN
@@ -697,7 +697,7 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "CMSG_GMTICKETSYSTEM_TOGGLE",                           // CMSG_GMTICKETSYSTEM_TOGGLE
     "CMSG_CANCEL_GROWTH_AURA",                              // CMSG_CANCEL_GROWTH_AURA
     "SMSG_CANCEL_AUTO_REPEAT",                              // SMSG_CANCEL_AUTO_REPEAT
-    "SMSG_STANDSTATE_CHANGE_ACK",                           // SMSG_STANDSTATE_CHANGE_ACK
+    "SMSG_STANDSTATE_UPDATE",                               // SMSG_STANDSTATE_UPDATE
     "SMSG_LOOT_ALL_PASSED",                                 // SMSG_LOOT_ALL_PASSED
     "SMSG_LOOT_ROLL_WON",                                   // SMSG_LOOT_ROLL_WON
     "CMSG_LOOT_ROLL",                                       // CMSG_LOOT_ROLL
@@ -790,63 +790,63 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "SMSG_MINIGAME_STATE",                                  // SMSG_MINIGAME_STATE
     "CMSG_MINIGAME_MOVE",                                   // CMSG_MINIGAME_MOVE
     "SMSG_MINIGAME_MOVE_FAILED",                            // SMSG_MINIGAME_MOVE_FAILED
-    "SMSG_INSTANCE_RESET_SCHEDULED",                        // SMSG_INSTANCE_RESET_SCHEDULED
-    "SMSG_COMPRESSED_MOVE",                                 // SMSG_COMPRESSED_MOVE
-    "CMSG_GUILD_CHANGEINFO",                                // CMSG_GUILD_CHANGEINFO
-    "SMSG_TRIAL_RESTRICTED",                                // SMSG_TRIAL_RESTRICTED
-    "SMSG_SET_MOVE_SPEED",                                  // SMSG_SET_MOVE_SPEED
-    "SMSG_SET_RUN_BACK_SPEED",                              // SMSG_SET_RUN_BACK_SPEED
-    "SMSG_SET_SWIM_SPEED",                                  // SMSG_SET_SWIM_SPEED
-    "UMSG_UNKNOWN_769",                                     // UMSG_UNKNOWN_769
-    "SMSG_SET_SWIM_BACK_SPEED",                             // SMSG_SET_SWIM_BACK_SPEED
-    "SMSG_SET_TURN_RATE",                                   // SMSG_SET_TURN_RATE
-    "SMSG_UNKNOWN_772",                                     // SMSG_UNKNOWN_772
-    "SMSG_UNKNOWN_773",                                     // SMSG_UNKNOWN_773
-    "SMSG_UNKNOWN_774",                                     // SMSG_UNKNOWN_774
-    "SMSG_UNKNOWN_775",                                     // SMSG_UNKNOWN_775
-    "SMSG_UNKNOWN_776",                                     // SMSG_UNKNOWN_776
-    "SMSG_MOVE_SET_WATERWALK",                              // SMSG_MOVE_SET_WATERWALK
-    "SMSG_MOVE_STOP_WATERWALK",                             // SMSG_MOVE_STOP_WATERWALK
-    "SMSG_UNKNOWN_779",                                     // SMSG_UNKNOWN_779
-    "SMSG_UNKNOWN_780",                                     // SMSG_UNKNOWN_780
-    "SMSG_MOVE_STOP_WALK",                                  // SMSG_MOVE_STOP_WALK
-    "SMSG_MOVE_START_WALK",                                 // SMSG_MOVE_START_WALK
+    "SMSG_RAID_INSTANCE_MESSAGE",                           // SMSG_RAID_INSTANCE_MESSAGE
+    "SMSG_COMPRESSED_MOVES",                                // SMSG_COMPRESSED_MOVES
+    "CMSG_GUILD_INFO_TEXT",                                 // CMSG_GUILD_INFO_TEXT
+    "SMSG_CHAT_RESTRICTED",                                 // SMSG_CHAT_RESTRICTED
+    "SMSG_SPLINE_SET_RUN_SPEED",                            // SMSG_SPLINE_SET_RUN_SPEED
+    "SMSG_SPLINE_SET_RUN_BACK_SPEED",                       // SMSG_SPLINE_SET_RUN_BACK_SPEED
+    "SMSG_SPLINE_SET_SWIM_SPEED",                           // SMSG_SPLINE_SET_SWIM_SPEED
+    "SMSG_SPLINE_SET_WALK_SPEED",                           // SMSG_SPLINE_SET_WALK_SPEED
+    "SMSG_SPLINE_SET_SWIM_BACK_SPEED",                      // SMSG_SPLINE_SET_SWIM_BACK_SPEED
+    "SMSG_SPLINE_SET_TURN_RATE",                            // SMSG_SPLINE_SET_TURN_RATE
+    "SMSG_SPLINE_MOVE_UNROOT",                              // SMSG_SPLINE_MOVE_UNROOT
+    "SMSG_SPLINE_MOVE_FEATHER_FALL",                        // SMSG_SPLINE_MOVE_FEATHER_FALL
+    "SMSG_SPLINE_MOVE_NORMAL_FALL",                         // SMSG_SPLINE_MOVE_NORMAL_FALL
+    "SMSG_SPLINE_MOVE_SET_HOVER",                           // SMSG_SPLINE_MOVE_SET_HOVER
+    "SMSG_SPLINE_MOVE_UNSET_HOVER",                         // SMSG_SPLINE_MOVE_UNSET_HOVER
+    "SMSG_SPLINE_MOVE_WATER_WALK",                          // SMSG_SPLINE_MOVE_WATER_WALK
+    "SMSG_SPLINE_MOVE_LAND_WALK",                           // SMSG_SPLINE_MOVE_LAND_WALK
+    "SMSG_SPLINE_MOVE_START_SWIM",                          // SMSG_SPLINE_MOVE_START_SWIM
+    "SMSG_SPLINE_MOVE_STOP_SWIM",                           // SMSG_SPLINE_MOVE_STOP_SWIM
+    "SMSG_SPLINE_MOVE_SET_RUN_MODE",                        // SMSG_SPLINE_MOVE_SET_RUN_MODE
+    "SMSG_SPLINE_MOVE_SET_WALK_MODE",                       // SMSG_SPLINE_MOVE_SET_WALK_MODE
     "UMSG_UNKNOWN_783",                                     // UMSG_UNKNOWN_783
     "UMSG_UNKNOWN_784",                                     // UMSG_UNKNOWN_784
     "UMSG_UNKNOWN_785",                                     // UMSG_UNKNOWN_785
-    "CMSG_ACTIVATETAXI_FAR",                                // CMSG_ACTIVATETAXI_FAR
-    "UMSG_UNKNOWN_787",                                     // UMSG_UNKNOWN_787
+    "CMSG_ACTIVATETAXIEXPRESS",                             // CMSG_ACTIVATETAXIEXPRESS
+    "SMSG_SET_FACTION_ATWAR",                               // SMSG_SET_FACTION_ATWAR
     "UMSG_UNKNOWN_788",                                     // UMSG_UNKNOWN_788
     "UMSG_UNKNOWN_789",                                     // UMSG_UNKNOWN_789
     "UMSG_UNKNOWN_790",                                     // UMSG_UNKNOWN_790
-    "CMSG_FIELD_WATCHED_FACTION_INACTIVE",                  // CMSG_FIELD_WATCHED_FACTION_INACTIVE
-    "CMSG_FIELD_WATCHED_FACTION_SHOW_BAR",                  // CMSG_FIELD_WATCHED_FACTION_SHOW_BAR
-    "SMSG_UNKNOWN_793",                                     // SMSG_UNKNOWN_793
-    "SMSG_UNKNOWN_794",                                     // SMSG_UNKNOWN_794
+    "CMSG_SET_FACTION_INACTIVE",                            // CMSG_SET_FACTION_INACTIVE
+    "CMSG_SET_WATCHED_FACTION",                             // CMSG_SET_WATCHED_FACTION
+    "MSG_MOVE_TIME_SKIPPED",                                // MSG_MOVE_TIME_SKIPPED
+    "SMSG_SPLINE_MOVE_ROOT",                                // SMSG_SPLINE_MOVE_ROOT
     "UMSG_UNKNOWN_795",                                     // UMSG_UNKNOWN_795
-    "SMSG_UNKNOWN_796",                                     // SMSG_UNKNOWN_796
+    "SMSG_INVALIDATE_PLAYER",                               // SMSG_INVALIDATE_PLAYER
     "CMSG_RESET_INSTANCES",                                 // CMSG_RESET_INSTANCES
-    "SMSG_RESET_INSTANCES_SUCCESS",                         // SMSG_RESET_INSTANCES_SUCCESS
-    "SMSG_RESET_INSTANCES_FAILED",                          // SMSG_RESET_INSTANCES_FAILED
-    "SMSG_INSTANCE_SAVE",                                   // SMSG_INSTANCE_SAVE
-    "MSG_RAID_ICON_TARGET",                                 // MSG_RAID_ICON_TARGET
+    "SMSG_INSTANCE_RESET",                                  // SMSG_INSTANCE_RESET
+    "SMSG_INSTANCE_RESET_FAILED",                           // SMSG_INSTANCE_RESET_FAILED
+    "SMSG_UPDATE_LAST_INSTANCE",                            // SMSG_UPDATE_LAST_INSTANCE
+    "MSG_RAID_TARGET_UPDATE",                               // MSG_RAID_TARGET_UPDATE
     "MSG_RAID_READY_CHECK",                                 // MSG_RAID_READY_CHECK
     "UMSG_UNKNOWN_803",                                     // UMSG_UNKNOWN_803
     "SMSG_AI_UNKNOWN",                                      // SMSG_AI_UNKNOWN
     "SMSG_UNKNOWN_805",                                     // SMSG_UNKNOWN_805
     "UMSG_UNKNOWN_806",                                     // UMSG_UNKNOWN_806
     "UMSG_UNKNOWN_807",                                     // UMSG_UNKNOWN_807
-    "SMSG_GM_SURVEY_REQUEST",                               // SMSG_GM_SURVEY_REQUEST
+    "SMSG_GM_TICKET_STATUS_UPDATE",                         // SMSG_GM_TICKET_STATUS_UPDATE
     "MSG_SET_DUNGEON_DIFFICULTY",                           // MSG_SET_DUNGEON_DIFFICULTY
-    "CMSG_GM_SURVEY_RESULTS",                               // CMSG_GM_SURVEY_RESULTS
-    "SMSG_INSTANCE_RESET_ACTIVATE",                         // SMSG_INSTANCE_RESET_ACTIVATE
+    "CMSG_GMSURVEY_SUBMIT",                                 // CMSG_GMSURVEY_SUBMIT
+    "SMSG_UPDATE_INSTANCE_OWNERSHIP",                       // SMSG_UPDATE_INSTANCE_OWNERSHIP
     "UMSG_UNKNOWN_812",                                     // UMSG_UNKNOWN_812
     "UMSG_UNKNOWN_813",                                     // UMSG_UNKNOWN_813
     "UMSG_UNKNOWN_814",                                     // UMSG_UNKNOWN_814
-    "SMSG_SPELL_INSTA_KILL_SELF",                           // SMSG_SPELL_INSTA_KILL_SELF
+    "SMSG_SPELLINSTAKILLLOG",                               // SMSG_SPELLINSTAKILLLOG
     "SMSG_UNKNOWN_816",                                     // SMSG_UNKNOWN_816
     "UMSG_UNKNOWN_817",                                     // UMSG_UNKNOWN_817
-    "SMSG_ANTISPAM",                                        // SMSG_ANTISPAM
+    "SMSG_EXPECTED_SPAM_RECORDS",                           // SMSG_EXPECTED_SPAM_RECORDS
     "UMSG_UNKNOWN_819",                                     // UMSG_UNKNOWN_819
     "UMSG_UNKNOWN_820",                                     // UMSG_UNKNOWN_820
     "UMSG_UNKNOWN_821",                                     // UMSG_UNKNOWN_821
@@ -863,11 +863,11 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "UMSG_UNKNOWN_832",                                     // UMSG_UNKNOWN_832
     "SMSG_UNKNOWN_833",                                     // SMSG_UNKNOWN_833
     "SMSG_UNKNOWN_834",                                     // SMSG_UNKNOWN_834
-    "SMSG_FLY_MODE_START",                                  // SMSG_FLY_MODE_START
-    "SMSG_FLY_MODE_STOP",                                   // SMSG_FLY_MODE_STOP
-    "CMSG_MOVE_FLY_MODE_CHANGE_ACK",                        // CMSG_MOVE_FLY_MODE_CHANGE_ACK
-    "MSG_MOVE_FLY_STATE_CHANGE",                            // MSG_MOVE_FLY_STATE_CHANGE
-    "CMSG_SOCKET_ITEM",                                     // CMSG_SOCKET_ITEM
+    "SMSG_MOVE_SET_CAN_FLY",                                // SMSG_MOVE_SET_CAN_FLY
+    "SMSG_MOVE_UNSET_CAN_FLY",                              // SMSG_MOVE_UNSET_CAN_FLY
+    "CMSG_MOVE_SET_CAN_FLY_ACK",                            // CMSG_MOVE_SET_CAN_FLY_ACK
+    "CMSG_MOVE_SET_FLY",                                    // CMSG_MOVE_SET_FLY
+    "CMSG_SOCKET_GEMS",                                     // CMSG_SOCKET_GEMS
     "UMSG_UNKNOWN_840, CMSG?",                              // UMSG_UNKNOWN_840, CMSG?
     "SMSG_ARENA_TEAM_COMMAND_RESULT",                       // SMSG_ARENA_TEAM_COMMAND_RESULT
     "UMSG_UNKNOWN_842",                                     // UMSG_UNKNOWN_842
@@ -875,86 +875,86 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "SMSG_ARENA_TEAM_QUERY_RESPONSE",                       // SMSG_ARENA_TEAM_QUERY_RESPONSE
     "CMSG_ARENA_TEAM_ROSTER",                               // CMSG_ARENA_TEAM_ROSTER
     "SMSG_ARENA_TEAM_ROSTER",                               // SMSG_ARENA_TEAM_ROSTER
-    "CMSG_ARENA_TEAM_INVITE_BYNAME",                        // CMSG_ARENA_TEAM_INVITE_BYNAME
+    "CMSG_ARENA_TEAM_INVITE",                               // CMSG_ARENA_TEAM_INVITE
     "SMSG_ARENA_TEAM_INVITE",                               // SMSG_ARENA_TEAM_INVITE
     "CMSG_ARENA_TEAM_ACCEPT",                               // CMSG_ARENA_TEAM_ACCEPT
     "CMSG_ARENA_TEAM_DECLINE",                              // CMSG_ARENA_TEAM_DECLINE
     "CMSG_ARENA_TEAM_LEAVE",                                // CMSG_ARENA_TEAM_LEAVE
-    "CMSG_ARENA_TEAM_UNINVITE_BYNAME",                      // CMSG_ARENA_TEAM_UNINVITE_BYNAME
+    "CMSG_ARENA_TEAM_REMOVE",                               // CMSG_ARENA_TEAM_REMOVE
     "CMSG_ARENA_TEAM_DISBAND",                              // CMSG_ARENA_TEAM_DISBAND
-    "CMSG_ARENA_TEAM_SET_LEADER_BYNAME",                    // CMSG_ARENA_TEAM_SET_LEADER_BYNAME
+    "CMSG_ARENA_TEAM_LEADER",                               // CMSG_ARENA_TEAM_LEADER
     "SMSG_ARENA_TEAM_EVENT",                                // SMSG_ARENA_TEAM_EVENT
-    "CMSG_ARENAMASTER_JOIN",                                // CMSG_ARENAMASTER_JOIN
-    "MSG_MOVE_START_FLY_UP",                                // MSG_MOVE_START_FLY_UP
-    "MSG_MOVE_STOP_FLY_UP",                                 // MSG_MOVE_STOP_FLY_UP
+    "CMSG_BATTLEMASTER_JOIN_ARENA",                         // CMSG_BATTLEMASTER_JOIN_ARENA
+    "MSG_MOVE_START_ASCEND",                                // MSG_MOVE_START_ASCEND
+    "MSG_MOVE_STOP_ASCEND",                                 // MSG_MOVE_STOP_ASCEND
     "SMSG_ARENA_TEAM_STATS",                                // SMSG_ARENA_TEAM_STATS
     "CMSG_LFG_SET_AUTOJOIN",                                // CMSG_LFG_SET_AUTOJOIN
-    "CMSG_LFG_UNSET_AUTOJOIN",                              // CMSG_LFG_UNSET_AUTOJOIN
-    "CMSG_LFM_SET_AUTOADD",                                 // CMSG_LFM_SET_AUTOADD
-    "CMSG_LFM_UNSET_AUTOADD",                               // CMSG_LFM_UNSET_AUTOADD
-    "CMSG_LFG_INVITE_ACCEPT",                               // CMSG_LFG_INVITE_ACCEPT
-    "CMSG_LFG_INVITE_CANCEL",                               // CMSG_LFG_INVITE_CANCEL
-    "UMSG_UNKNOWN_866",                                     // UMSG_UNKNOWN_866
-    "CMSG_LOOKING_FOR_GROUP_CLEAR",                         // CMSG_LOOKING_FOR_GROUP_CLEAR
-    "CMSG_SET_LOOKING_FOR_NONE",                            // CMSG_SET_LOOKING_FOR_NONE
+    "CMSG_LFG_CLEAR_AUTOJOIN",                              // CMSG_LFG_CLEAR_AUTOJOIN
+    "CMSG_LFM_SET_AUTOFILL",                                // CMSG_LFM_SET_AUTOFILL
+    "CMSG_LFM_CLEAR_AUTOFILL",                              // CMSG_LFM_CLEAR_AUTOFILL
+    "CMSG_ACCEPT_LFG_MATCH",                                // CMSG_ACCEPT_LFG_MATCH
+    "CMSG_DECLINE_LFG_MATCH",                               // CMSG_DECLINE_LFG_MATCH
+    "CMSG_CANCEL_PENDING_LFG",                              // CMSG_CANCEL_PENDING_LFG
+    "CMSG_CLEAR_LOOKING_FOR_GROUP",                         // CMSG_CLEAR_LOOKING_FOR_GROUP
+    "CMSG_CLEAR_LOOKING_FOR_MORE",                          // CMSG_CLEAR_LOOKING_FOR_MORE
     "CMSG_SET_LOOKING_FOR_MORE",                            // CMSG_SET_LOOKING_FOR_MORE
-    "CMSG_SET_COMMENTARY",                                  // CMSG_SET_COMMENTARY
-    "SMSG_LFG_MATCHMAKING_TIMEDOUT",                        // SMSG_LFG_MATCHMAKING_TIMEDOUT
-    "SMSG_LFG_MATCHMAKING_OTHER_TIMEDOUT",                  // SMSG_LFG_MATCHMAKING_OTHER_TIMEDOUT
-    "SMSG_LFG_MATCHMAKING_AUTOJOIN_FAILED",                 // SMSG_LFG_MATCHMAKING_AUTOJOIN_FAILED
-    "SMSG_LFG_MATCHMAKING_AUTOJOIN_FAILED_NO_PLAYER",       // SMSG_LFG_MATCHMAKING_AUTOJOIN_FAILED_NO_PLAYER
+    "CMSG_SET_LFG_COMMENT",                                 // CMSG_SET_LFG_COMMENT
+    "SMSG_LFG_TIMEDOUT",                                    // SMSG_LFG_TIMEDOUT
+    "SMSG_LFG_OTHER_TIMEDOUT",                              // SMSG_LFG_OTHER_TIMEDOUT
+    "SMSG_LFG_AUTOJOIN_FAILED",                             // SMSG_LFG_AUTOJOIN_FAILED
+    "SMSG_LFG_AUTOJOIN_FAILED_NO_PLAYER",                   // SMSG_LFG_AUTOJOIN_FAILED_NO_PLAYER
     "UMSG_UNKNOWN_875",                                     // UMSG_UNKNOWN_875
     "SMSG_LFG_876",                                         // SMSG_LFG_876
     "SMSG_LFG_877",                                         // SMSG_LFG_877
     "SMSG_LFG_878",                                         // SMSG_LFG_878
     "SMSG_LFG_879",                                         // SMSG_LFG_879
-    "SMSG_LFG_MATCHMAKING_PENDING_INVITE",                  // SMSG_LFG_MATCHMAKING_PENDING_INVITE
-    "SMSG_LFG_MATCHMAKING_PENDING_MATCH",                   // SMSG_LFG_MATCHMAKING_PENDING_MATCH
+    "SMSG_LFG_PENDING_INVITE",                              // SMSG_LFG_PENDING_INVITE
+    "SMSG_LFG_PENDING_MATCH",                               // SMSG_LFG_PENDING_MATCH
     "UMSG_UNKNOWN_882",                                     // UMSG_UNKNOWN_882
-    "SMSG_CHANGE_TITLE",                                    // SMSG_CHANGE_TITLE
-    "CMSG_CHOOSE_TITLE",                                    // CMSG_CHOOSE_TITLE
-    "CMSG_DISMOUNT",                                        // CMSG_DISMOUNT
-    "SMSG_ARENA_NO_TEAM",                                   // SMSG_ARENA_NO_TEAM
-    "MSG_INSPECT_ARENA_STATS",                              // MSG_INSPECT_ARENA_STATS
-    "SMSG_SH_POSITION",                                     // SMSG_SH_POSITION
-    "CMSG_CANCEL_TEMP_ITEM_ENCHANTMENT",                    // CMSG_CANCEL_TEMP_ITEM_ENCHANTMENT
+    "SMSG_TITLE_EARNED",                                    // SMSG_TITLE_EARNED
+    "CMSG_SET_TITLE",                                       // CMSG_SET_TITLE
+    "CMSG_CANCEL_MOUNT_AURA",                               // CMSG_CANCEL_MOUNT_AURA
+    "SMSG_ARENA_ERROR",                                     // SMSG_ARENA_ERROR
+    "MSG_INSPECT_ARENA_TEAMS",                              // MSG_INSPECT_ARENA_TEAMS
+    "SMSG_DEATH_RELEASE_LOC",                               // SMSG_DEATH_RELEASE_LOC
+    "CMSG_CANCEL_TEMP_ENCHANTMENT",                         // CMSG_CANCEL_TEMP_ENCHANTMENT
     "UMSG_UNKNOWN_890",                                     // UMSG_UNKNOWN_890
     "UMSG_UNKNOWN_891",                                     // UMSG_UNKNOWN_891
     "UMSG_UNKNOWN_892",                                     // UMSG_UNKNOWN_892
     "UMSG_UNKNOWN_893",                                     // UMSG_UNKNOWN_893
-    "MSG_MOVE_SET_FLY_SPEED",                               // MSG_MOVE_SET_FLY_SPEED
+    "MSG_MOVE_SET_FLIGHT_SPEED",                            // MSG_MOVE_SET_FLIGHT_SPEED
     "UMSG_UNKNOWN_895",                                     // UMSG_UNKNOWN_895
-    "MSG_MOVE_SET_FLY_BACK_SPEED",                          // MSG_MOVE_SET_FLY_BACK_SPEED
-    "SMSG_FORCE_FLY_SPEED_CHANGE",                          // SMSG_FORCE_FLY_SPEED_CHANGE
-    "CMSG_FORCE_FLY_SPEED_CHANGE_ACK",                      // CMSG_FORCE_FLY_SPEED_CHANGE_ACK
-    "SMSG_FORCE_FLY_BACK_SPEED_CHANGE",                     // SMSG_FORCE_FLY_BACK_SPEED_CHANGE
-    "CMSG_FORCE_FLY_BACK_SPEED_CHANGE_ACK",                 // CMSG_FORCE_FLY_BACK_SPEED_CHANGE_ACK
-    "MSG_MOVE_SET_FLY_SPEED2",                              // MSG_MOVE_SET_FLY_SPEED2
-    "SMSG_MOVE_SET_FLY_BACK_SPEED2",                        // SMSG_MOVE_SET_FLY_BACK_SPEED2
+    "MSG_MOVE_SET_FLIGHT_BACK_SPEED",                       // MSG_MOVE_SET_FLIGHT_BACK_SPEED
+    "SMSG_FORCE_FLIGHT_SPEED_CHANGE",                       // SMSG_FORCE_FLIGHT_SPEED_CHANGE
+    "CMSG_FORCE_FLIGHT_SPEED_CHANGE_ACK",                   // CMSG_FORCE_FLIGHT_SPEED_CHANGE_ACK
+    "SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE",                  // SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE
+    "CMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK",              // CMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK
+    "SMSG_SPLINE_SET_FLIGHT_SPEED",                         // SMSG_SPLINE_SET_FLIGHT_SPEED
+    "SMSG_SPLINE_SET_FLIGHT_BACK_SPEED",                    // SMSG_SPLINE_SET_FLIGHT_BACK_SPEED
     "UMSG_UNKNOWN_903",                                     // UMSG_UNKNOWN_903
     "SMSG_FLIGHT_SPLINE_SYNC",                              // SMSG_FLIGHT_SPLINE_SYNC
     "CMSG_SET_TAXI_BENCHMARK_MODE",                         // CMSG_SET_TAXI_BENCHMARK_MODE
     "UMSG_UNKNOWN_906",                                     // UMSG_UNKNOWN_906
-    "SMSG_REALM_SPLIT_INFO_RESPONSE",                       // SMSG_REALM_SPLIT_INFO_RESPONSE
-    "CMSG_REALM_SPLIT_INFO_REQUEST",                        // CMSG_REALM_SPLIT_INFO_REQUEST
+    "SMSG_REALM_SPLIT",                                     // SMSG_REALM_SPLIT
+    "CMSG_REALM_SPLIT",                                     // CMSG_REALM_SPLIT
     "MSG_MOVE_SHIP_909",                                    // MSG_MOVE_SHIP_909
     "CMSG_GROUP_PROMOTE",                                   // CMSG_GROUP_PROMOTE
-    "SMSG_ALREADY_IN_ARENA_TEAM",                           // SMSG_ALREADY_IN_ARENA_TEAM
+    "SMSG_OFFER_PETITION_ERROR",                            // SMSG_OFFER_PETITION_ERROR
     "SMSG_ALLOW_MOVE",                                      // SMSG_ALLOW_MOVE
     "CMSG_ALLOW_MOVE_ACK",                                  // CMSG_ALLOW_MOVE_ACK
     "UMSG_UNKNOWN_914",                                     // UMSG_UNKNOWN_914
     "UMSG_UNKNOWN_915",                                     // UMSG_UNKNOWN_915
     "UMSG_UNKNOWN_916",                                     // UMSG_UNKNOWN_916
     "UMSG_UNKNOWN_917",                                     // UMSG_UNKNOWN_917
-    "SMSG_RESET_INSTANCE_FAILED_NOTIFY",                    // SMSG_RESET_INSTANCE_FAILED_NOTIFY
+    "SMSG_RESET_FAILED_NOTIFY",                             // SMSG_RESET_FAILED_NOTIFY
     "SMSG_UNKNOWN_919",                                     // SMSG_UNKNOWN_919
-    "SMSG_SYSTEM_DISABLED",                                 // SMSG_SYSTEM_DISABLED
+    "SMSG_LFG_DISABLED",                                    // SMSG_LFG_DISABLED
     "UMSG_UNKNOWN_921",                                     // UMSG_UNKNOWN_921
     "UMSG_UNKNOWN_922",                                     // UMSG_UNKNOWN_922
     "UMSG_UNKNOWN_923",                                     // UMSG_UNKNOWN_923
     "UMSG_UNKNOWN_924",                                     // UMSG_UNKNOWN_924
-    "SMSG_SET_COMBO_POINTS",                                // SMSG_SET_COMBO_POINTS
-    "SMSG_VOICE_SESSION",                                   // SMSG_VOICE_SESSION
+    "SMSG_UPDATE_COMBO_POINTS",                             // SMSG_UPDATE_COMBO_POINTS
+    "SMSG_VOICE_SESSION_ROSTER_UPDATE",                     // SMSG_VOICE_SESSION_ROSTER_UPDATE
     "SMSG_UNKNOWN_927",                                     // SMSG_UNKNOWN_927
     "UMSG_UNKNOWN_928",                                     // UMSG_UNKNOWN_928
     "UMSG_UNKNOWN_929",                                     // UMSG_UNKNOWN_929
@@ -983,9 +983,9 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "CMSG_COMMENTATOR_UPDATE_PLAYER_INFO",                  // CMSG_COMMENTATOR_UPDATE_PLAYER_INFO
     "CMSG_UNKNOWN_953",                                     // CMSG_UNKNOWN_953
     "UMSG_UNKNOWN_954",                                     // UMSG_UNKNOWN_954
-    "UMSG_UNKNOWN_955",                                     // UMSG_UNKNOWN_955
-    "UMSG_UNKNOWN_956",                                     // UMSG_UNKNOWN_956
+    "CMSG_COMMENTATOR_ENTER_INSTANCE",                      // CMSG_COMMENTATOR_ENTER_INSTANCE
     "CMSG_COMMENTATOR_EXIT_INSTANCE",                       // CMSG_COMMENTATOR_EXIT_INSTANCE
+    "CMSG_COMMENTATOR_ADD_OR_REMOVE_PLAYER",                // CMSG_COMMENTATOR_ADD_OR_REMOVE_PLAYER
     "UMSG_UNKNOWN_958",                                     // UMSG_UNKNOWN_958
     "UMSG_UNKNOWN_959",                                     // UMSG_UNKNOWN_959
     "SMSG_UNKNOWN_960",                                     // SMSG_UNKNOWN_960
@@ -999,10 +999,10 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "SMSG_VOICE_SYSTEM_STATUS",                             // SMSG_VOICE_SYSTEM_STATUS
     "UMSG_UNKNOWN_969",                                     // UMSG_UNKNOWN_969
     "UMSG_UNKNOWN_970",                                     // UMSG_UNKNOWN_970
-    "CMSG_CHANNEL_SILENT_VOICE",                            // CMSG_CHANNEL_SILENT_VOICE
-    "CMSG_CHANNEL_SILENT_ALL",                              // CMSG_CHANNEL_SILENT_ALL
-    "CMSG_CHANNEL_UNSILENT_VOICE",                          // CMSG_CHANNEL_UNSILENT_VOICE
-    "CMSG_CHANNEL_UNSILENT_ALL",                            // CMSG_CHANNEL_UNSILENT_ALL
+    "CMSG_CHANNEL_SILENCE_VOICE",                           // CMSG_CHANNEL_SILENCE_VOICE
+    "CMSG_CHANNEL_SILENCE_ALL",                             // CMSG_CHANNEL_SILENCE_ALL
+    "CMSG_CHANNEL_UNSILENCE_VOICE",                         // CMSG_CHANNEL_UNSILENCE_VOICE
+    "CMSG_CHANNEL_UNSILENCE_ALL",                           // CMSG_CHANNEL_UNSILENCE_ALL
     "UMSG_UNKNOWN_975",                                     // UMSG_UNKNOWN_975
     "UMSG_UNKNOWN_976",                                     // UMSG_UNKNOWN_976
     "CMSG_CHANNEL_ROSTER_QUERY",                            // CMSG_CHANNEL_ROSTER_QUERY
@@ -1013,33 +1013,33 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "CMSG_CHANNEL_VOICE_OFF",                               // CMSG_CHANNEL_VOICE_OFF
     "UMSG_UNKNOWN_983",                                     // UMSG_UNKNOWN_983
     "UMSG_UNKNOWN_984",                                     // UMSG_UNKNOWN_984
-    "SMSG_CHANNEL_NOTIFY_AVAILABLE_VOICE_SESSION",          // SMSG_CHANNEL_NOTIFY_AVAILABLE_VOICE_SESSION
-    "CMSG_MUTE_PLAYER",                                     // CMSG_MUTE_PLAYER
-    "CMSG_UNMUTE_PLAYER",                                   // CMSG_UNMUTE_PLAYER
-    "CMSG_SILENCE_MEMBER",                                  // CMSG_SILENCE_MEMBER
-    "CMSG_UNSILENCE_MEMBER",                                // CMSG_UNSILENCE_MEMBER
+    "SMSG_AVAILABLE_VOICE_CHANNEL",                         // SMSG_AVAILABLE_VOICE_CHANNEL
+    "CMSG_ADD_VOICE_IGNORE",                                // CMSG_ADD_VOICE_IGNORE
+    "CMSG_DEL_VOICE_IGNORE",                                // CMSG_DEL_VOICE_IGNORE
+    "CMSG_PARTY_SILENCE",                                   // CMSG_PARTY_SILENCE
+    "CMSG_PARTY_UNSILENCE",                                 // CMSG_PARTY_UNSILENCE
     "SMSG_PLAYER_UNSILENCED",                               // SMSG_PLAYER_UNSILENCED
-    "SMSG_COMSAT_RECONNECT_ATTEMPT",                        // SMSG_COMSAT_RECONNECT_ATTEMPT
+    "SMSG_COMSAT_RECONNECT_TRY",                            // SMSG_COMSAT_RECONNECT_TRY
     "SMSG_COMSAT_DISCONNECT",                               // SMSG_COMSAT_DISCONNECT
     "SMSG_COMSAT_CONNECT_FAIL",                             // SMSG_COMSAT_CONNECT_FAIL
     "UMSG_UNKNOWN_994",                                     // UMSG_UNKNOWN_994
     "UMSG_UNKNOWN_995",                                     // UMSG_UNKNOWN_995
-    "UMSG_UNKNOWN_996",                                     // UMSG_UNKNOWN_996
-    "CMSG_GUILD_BANK",                                      // CMSG_GUILD_BANK
-    "CMSG_GUILDBANK_TAB_COLON",                             // CMSG_GUILDBANK_TAB_COLON
+    "CMSG_REPORT_PVP_AFK_RESULT",                           // CMSG_REPORT_PVP_AFK_RESULT
+    "CMSG_GUILD_BANKER_ACTIVATE",                           // CMSG_GUILD_BANKER_ACTIVATE
+    "CMSG_GUILD_BANK_QUERY_TAB",                            // CMSG_GUILD_BANK_QUERY_TAB
     "SMSG_GUILD_BANK_LIST",                                 // SMSG_GUILD_BANK_LIST
-    "CMSG_UNKNOWN_1000",                                    // CMSG_UNKNOWN_1000
-    "CMSG_BUY_GUILDBANK_TAB",                               // CMSG_BUY_GUILDBANK_TAB
-    "UMSG_UNKNOWN_1002",                                    // UMSG_UNKNOWN_1002
-    "CMSG_GUILDBANK_DEPOSIT",                               // CMSG_GUILDBANK_DEPOSIT
-    "CMSG_GUILDBANK_WITHDRAW",                              // CMSG_GUILDBANK_WITHDRAW
-    "MSG_GUILDBANK_LOG",                                    // MSG_GUILDBANK_LOG
-    "CMSG_CHANNEL_WATCH",                                   // CMSG_CHANNEL_WATCH
+    "CMSG_GUILD_BANK_SWAP_ITEMS",                           // CMSG_GUILD_BANK_SWAP_ITEMS
+    "CMSG_GUILD_BANK_BUY_TAB",                              // CMSG_GUILD_BANK_BUY_TAB
+    "CMSG_GUILD_BANK_UPDATE_TAB",                           // CMSG_GUILD_BANK_UPDATE_TAB
+    "CMSG_GUILD_BANK_DEPOSIT_MONEY",                        // CMSG_GUILD_BANK_DEPOSIT_MONEY
+    "CMSG_GUILD_BANK_WITHDRAW_MONEY",                       // CMSG_GUILD_BANK_WITHDRAW_MONEY
+    "MSG_GUILD_BANK_LOG_QUERY",                             // MSG_GUILD_BANK_LOG_QUERY
+    "CMSG_SET_CHANNEL_WATCH",                               // CMSG_SET_CHANNEL_WATCH
     "SMSG_PLAYER_JOINED_CHANNEL",                           // SMSG_PLAYER_JOINED_CHANNEL
     "SMSG_PLAYER_LEFT_CHANNEL",                             // SMSG_PLAYER_LEFT_CHANNEL
     "SMSG_PLAYER_JOINED_CUSTOM_CHANNEL",                    // SMSG_PLAYER_JOINED_CUSTOM_CHANNEL
     "CMSG_CLEAR_CHANNEL_WATCH",                             // CMSG_CLEAR_CHANNEL_WATCH
-    "SMSG_INSPECT_TALENTS",                                 // SMSG_INSPECT_TALENTS
+    "SMSG_INSPECT_TALENT",                                  // SMSG_INSPECT_TALENT
     "UMSG_UNKNOWN_1012",                                    // UMSG_UNKNOWN_1012
     "UMSG_UNKNOWN_1013",                                    // UMSG_UNKNOWN_1013
     "UMSG_UNKNOWN_1014",                                    // UMSG_UNKNOWN_1014
@@ -1061,8 +1061,8 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "CMSG_UNKNOWN_1030",                                    // CMSG_UNKNOWN_1030
     "SMSG_UNKNOWN_1031",                                    // SMSG_UNKNOWN_1031
     "CMSG_GROUP_PASS_ON_LOOT_TOGGLE",                       // CMSG_GROUP_PASS_ON_LOOT_TOGGLE
-    "MSG_GUILD_BANK_TAB_TEXT",                              // MSG_GUILD_BANK_TAB_TEXT
-    "CMSG_GUILD_BANK_SET_TAB_TEXT",                         // CMSG_GUILD_BANK_SET_TAB_TEXT
+    "MSG_QUERY_GUILD_BANK_TEXT",                            // MSG_QUERY_GUILD_BANK_TEXT
+    "CMSG_SET_GUILD_BANK_TEXT",                             // CMSG_SET_GUILD_BANK_TEXT
     "UMSG_UNKNOWN_1035",                                    // UMSG_UNKNOWN_1035
     "CMSG_UNKNOWN_1036",                                    // CMSG_UNKNOWN_1036
     "UMSG_UNKNOWN_1037",                                    // SMSG_UNKNOWN_1037
@@ -1074,8 +1074,8 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "CMSG_UNKNOWN_1043",                                    // CMSG_UNKNOWN_1043
     "UMSG_UNKNOWN_1044",                                    // UMSG_UNKNOWN_1044
     "UMSG_UNKNOWN_1045",                                    // UMSG_UNKNOWN_1045
-    "CMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE",                // CMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE
-    "SMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE_RESPONSE",       // SMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE_RESPONSE
+    "CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY",                // CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY
+    "SMSG_QUESTGIVER_STATUS_MULTIPLE",                      // SMSG_QUESTGIVER_STATUS_MULTIPLE
     "CMSG_UNKNOWN_1048",                                    // CMSG_UNKNOWN_1048
     "SMSG_UNKNOWN_1049",                                    // SMSG_UNKNOWN_1049
     "UMSG_UNKNOWN_1050",                                    // UMSG_UNKNOWN_1050

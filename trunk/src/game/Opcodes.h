@@ -560,7 +560,7 @@ enum OpCodes
     CMSG_GMTICKET_GETTICKET                         = 529,
     SMSG_GMTICKET_GETTICKET                         = 530,
     CMSG_UNLEARN_TALENTS                            = 531,
-    SMSG_GAMEOBJECT_SPAWN_ANIM                      = 532,
+    SMSG_GAMEOBJECT_SPAWN_ANIM                      = 532,  // obsolete?
     SMSG_GAMEOBJECT_DESPAWN_ANIM                    = 533,
     MSG_CORPSE_QUERY                                = 534,
     CMSG_GMTICKET_DELETETICKET                      = 535,
@@ -603,8 +603,8 @@ enum OpCodes
     CMSG_BATTLEFIELD_LIST                           = 572,
     SMSG_BATTLEFIELD_LIST                           = 573,
     CMSG_BATTLEFIELD_JOIN                           = 574,
-    SMSG_BATTLEFIELD_WIN                            = 575,
-    SMSG_BATTLEFIELD_LOSE                           = 576,
+    SMSG_BATTLEFIELD_WIN                            = 575,  // obsolete?
+    SMSG_BATTLEFIELD_LOSE                           = 576,  // obsolete?
     CMSG_TAXICLEARNODE                              = 577,
     CMSG_TAXIENABLENODE                             = 578,
     CMSG_ITEM_TEXT_QUERY                            = 579,
@@ -637,7 +637,7 @@ enum OpCodes
     SMSG_AUCTION_BIDDER_NOTIFICATION                = 606,
     SMSG_AUCTION_OWNER_NOTIFICATION                 = 607,
     SMSG_PROCRESIST                                 = 608,
-    SMSG_STANDSTATE_CHANGE_FAILURE                  = 609,
+    SMSG_STANDSTATE_CHANGE_FAILURE                  = 609,  // obsolete?
     SMSG_DISPEL_FAILED                              = 610,  // uint64, uint64, uint32, uint32 (for?)
     SMSG_SPELLORDAMAGE_IMMUNE                       = 611,
     CMSG_AUCTION_LIST_BIDDER_ITEMS                  = 612,
@@ -683,7 +683,7 @@ enum OpCodes
     SMSG_PVP_CREDIT                                 = 652,  // uint32, uint64, uint32
     SMSG_AUCTION_REMOVED_NOTIFICATION               = 653,
     CMSG_GROUP_RAID_CONVERT                         = 654,
-    CMSG_GROUP_ASSISTANT                            = 655,
+    CMSG_GROUP_ASSISTANT_LEADER                     = 655,
     CMSG_BUYBACK_ITEM                               = 656,
     SMSG_SERVER_MESSAGE                             = 657,
     CMSG_MEETINGSTONE_JOIN                          = 658,
@@ -697,7 +697,7 @@ enum OpCodes
     CMSG_GMTICKETSYSTEM_TOGGLE                      = 666,
     CMSG_CANCEL_GROWTH_AURA                         = 667,
     SMSG_CANCEL_AUTO_REPEAT                         = 668,
-    SMSG_STANDSTATE_CHANGE_ACK                      = 669,
+    SMSG_STANDSTATE_UPDATE                          = 669,
     SMSG_LOOT_ALL_PASSED                            = 670,
     SMSG_LOOT_ROLL_WON                              = 671,
     CMSG_LOOT_ROLL                                  = 672,
@@ -790,304 +790,304 @@ enum OpCodes
     SMSG_MINIGAME_STATE                             = 759,  // no data?
     CMSG_MINIGAME_MOVE                              = 760,
     SMSG_MINIGAME_MOVE_FAILED                       = 761,
-    SMSG_INSTANCE_RESET_SCHEDULED                   = 762,  // WARNING! %s is scheduled to reset in %u minutes! and other messages...
-    SMSG_COMPRESSED_MOVE                            = 763,
-    CMSG_GUILD_CHANGEINFO                           = 764,
-    SMSG_TRIAL_RESTRICTED                           = 765,  // uint8, Trial accounts cannot send unlimited tells, you must wait before you can send tells to more players.
-    SMSG_SET_MOVE_SPEED                             = 766,  // GUID + float speed, move speed, except swim/turn/fly
-    SMSG_SET_RUN_BACK_SPEED                         = 767,  // GUID + float speed, run back speed
-    SMSG_SET_SWIM_SPEED                             = 768,  // GUID + float speed, swim and swim back speed
-    SMSG_UNKNOWN_769                                = 769,  // pGUID + float
-    SMSG_SET_SWIM_BACK_SPEED                        = 770,  // swim back speed
-    SMSG_SET_TURN_RATE                              = 771,  // turn rate (note: client crashes if fly mode enabled, and turn rate = 0)
-    SMSG_UNKNOWN_772                                = 772,  // packed GUID
-    SMSG_UNKNOWN_773                                = 773,  // set movement flag 0x20000000 (safe fall)
-    SMSG_UNKNOWN_774                                = 774,  // stop effect of 773 opcode
-    SMSG_UNKNOWN_775                                = 775,  // movement related, looks like hover, movement flag 0x40000000, we can't jump if we are lands
-    SMSG_UNKNOWN_776                                = 776,  // stop effect of 775 opcode
-    SMSG_MOVE_SET_WATERWALK                         = 777,  // packed GUID, set movement flag 0x10000000, waterwalking...
-    SMSG_MOVE_STOP_WATERWALK                        = 778,  // packed GUID, stop effect of 777 opcode
-    SMSG_UNKNOWN_779                                = 779,  // packed guid, change animation to swim/fly like
-    SMSG_UNKNOWN_780                                = 780,  // packed guid
-    SMSG_MOVE_STOP_WALK                             = 781,  // packed guid, remove 0x100 movement flag (walk)
-    SMSG_MOVE_START_WALK                            = 782,  // set 0x100 movement flag (walk)
-    // 783 not exist?
-    // 784 not exist?
-    // 785 not exist?
-    CMSG_ACTIVATETAXI_FAR                           = 786,
-    SMSG_UNKNOWN_787                                = 787,  // uint32 + uint8, causes client crash
-    // 788 not exist?
-    // 789 not exist?
-    // 790 not exist?
-    CMSG_FIELD_WATCHED_FACTION_INACTIVE             = 791,
-    CMSG_FIELD_WATCHED_FACTION_SHOW_BAR             = 792,
-    SMSG_UNKNOWN_793                                = 793,  // packed guid + uint32 unk
-    SMSG_UNKNOWN_794                                = 794,  // packed guid, movement related, set 0x1000 movement flag, all speed to 0, except turn rate
-    // 795 not exist?
-    SMSG_UNKNOWN_796                                = 796,  // uint64, guid, chat related?
+    SMSG_RAID_INSTANCE_MESSAGE                      = 762,  // WARNING! %s is scheduled to reset in %u minutes! and other messages...
+    SMSG_COMPRESSED_MOVES                           = 763,
+    CMSG_GUILD_INFO_TEXT                            = 764,
+    SMSG_CHAT_RESTRICTED                            = 765,  // uint8, Trial accounts cannot send unlimited tells, you must wait before you can send tells to more players.
+    SMSG_SPLINE_SET_RUN_SPEED                       = 766,  // GUID + float speed, move speed, except swim/turn/fly
+    SMSG_SPLINE_SET_RUN_BACK_SPEED                  = 767,  // GUID + float speed, run back speed
+    SMSG_SPLINE_SET_SWIM_SPEED                      = 768,  // GUID + float speed, swim and swim back speed
+    SMSG_SPLINE_SET_WALK_SPEED                      = 769,  // pGUID + float
+    SMSG_SPLINE_SET_SWIM_BACK_SPEED                 = 770,  // swim back speed
+    SMSG_SPLINE_SET_TURN_RATE                       = 771,  // turn rate (note: client crashes if fly mode enabled, and turn rate = 0)
+    SMSG_SPLINE_MOVE_UNROOT                         = 772,  // packed GUID
+    SMSG_SPLINE_MOVE_FEATHER_FALL                   = 773,  // set movement flag 0x20000000 (safe fall)
+    SMSG_SPLINE_MOVE_NORMAL_FALL                    = 774,  // stop effect of 773 opcode
+    SMSG_SPLINE_MOVE_SET_HOVER                      = 775,  // movement related, looks like hover, movement flag 0x40000000, we can't jump if we are lands
+    SMSG_SPLINE_MOVE_UNSET_HOVER                    = 776,  // stop effect of 775 opcode
+    SMSG_SPLINE_MOVE_WATER_WALK                     = 777,  // packed GUID, set movement flag 0x10000000, waterwalking...
+    SMSG_SPLINE_MOVE_LAND_WALK                      = 778,  // packed GUID, stop effect of 777 opcode
+    SMSG_SPLINE_MOVE_START_SWIM                     = 779,  // packed guid, change animation to swim/fly like
+    SMSG_SPLINE_MOVE_STOP_SWIM                      = 780,  // packed guid
+    SMSG_SPLINE_MOVE_SET_RUN_MODE                   = 781,  // packed guid, remove 0x100 movement flag (walk)
+    SMSG_SPLINE_MOVE_SET_WALK_MODE                  = 782,  // set 0x100 movement flag (walk)
+    // 783 not exist?                                          CMSG_GM_NUKE_ACCOUNT
+    // 784 not exist?                                          MSG_GM_DESTROY_CORPSE
+    // 785 not exist?                                          CMSG_GM_DESTROY_ONLINE_CORPSE
+    CMSG_ACTIVATETAXIEXPRESS                        = 786,
+    SMSG_SET_FACTION_ATWAR                          = 787,  // uint32 + uint8, causes client crash
+    // 788 not exist?                                          SMSG_GAMETIMEBIAS_SET
+    // 789 not exist?                                          CMSG_DEBUG_ACTIONS_START
+    // 790 not exist?                                          CMSG_DEBUG_ACTIONS_STOP
+    CMSG_SET_FACTION_INACTIVE                       = 791,
+    CMSG_SET_WATCHED_FACTION                        = 792,
+    MSG_MOVE_TIME_SKIPPED                           = 793,  // packed guid + uint32 unk
+    SMSG_SPLINE_MOVE_ROOT                           = 794,  // packed guid, movement related, set 0x1000 movement flag, all speed to 0, except turn rate
+    // 795 not exist?                                          CMSG_SET_EXPLORATION_ALL
+    SMSG_INVALIDATE_PLAYER                          = 796,  // uint64, guid, chat related?
     CMSG_RESET_INSTANCES                            = 797,  // reset instances, empty
-    SMSG_RESET_INSTANCES_SUCCESS                    = 798,  // uint32 mapid, chat message: %s has been reset.
-    SMSG_RESET_INSTANCES_FAILED                     = 799,  // uint32 reason, uint32 mapid
-    SMSG_INSTANCE_SAVE                              = 800,  // uint32 mapid, nstance save from player
-    MSG_RAID_ICON_TARGET                            = 801,  // uint8+uint8+uint64 guid or only uint8(0x01)
+    SMSG_INSTANCE_RESET                             = 798,  // uint32 mapid, chat message: %s has been reset.
+    SMSG_INSTANCE_RESET_FAILED                      = 799,  // uint32 reason, uint32 mapid
+    SMSG_UPDATE_LAST_INSTANCE                       = 800,  // uint32 mapid, nstance save from player
+    MSG_RAID_TARGET_UPDATE                          = 801,  // uint8+uint8+uint64 guid or only uint8(0x01)
     MSG_RAID_READY_CHECK                            = 802,  // uint64(server) or empty(client)
-    // 803 not exist?
+    // 803 not exist?                                       // CMSG_LUA_USAGE
     SMSG_PET_ACTION_SOUND                           = 804,  // GUID + uint32, looks like SMSG_AI_REACTION (pet action sound?)
     SMSG_PET_DISMISS_SOUND                          = 805,  // uint32 unk + x, y, z (pet dismiss sound?)
-    // 806 not exist?
-    // 807 not exist?
-    SMSG_GM_SURVEY_REQUEST                          = 808,  // uint32, 1 - causes client get ticket request, 2 - hide, 3 - show
+    // 806 not exist?                                       // SMSG_GHOSTEE_GONE
+    // 807 not exist?                                       // CMSG_GM_UPDATE_TICKET_STATUS
+    SMSG_GM_TICKET_STATUS_UPDATE                    = 808,  // uint32, 1 - causes client get ticket request, 2 - hide, 3 - show
     MSG_SET_DUNGEON_DIFFICULTY                      = 809,  // uint32+uint32+uint32
-    CMSG_GM_SURVEY_RESULTS                          = 810,  // script function named GMSurveySubmit()
-    SMSG_INSTANCE_RESET_ACTIVATE                    = 811,  // instance can reset
+    CMSG_GMSURVEY_SUBMIT                            = 810,  // script function named GMSurveySubmit()
+    SMSG_UPDATE_INSTANCE_OWNERSHIP                  = 811,  // instance can reset
     SMSG_UNKNOWN_812                                = 812,
-    SMSG_UNKNOWN_813                                = 813,  // string
-    // 814 not exist?
-    SMSG_SPELL_INSTA_KILL_SELF                      = 815,  // spell related, uint64 guid + spellid (You are killed by %s(spell_name))
-    SMSG_UNKNOWN_816                                = 816,  // spell related, uint64 guid + spellid + uint32 count + for(count) uint64 guid (target?)
-    CMSG_UNKNOWN_817                                = 817,  // response to chat message with type 7 in some case
-    SMSG_ANTISPAM                                   = 818,  // 2.0.8, received before server MOTD, strange regexp sequence, looks like anti spam filter for chat messages...
-    SMSG_UNKNOWN_819                                = 819,  // pGUID, pGUID, uint32 unk1, uint8 unk2, uint32 count, for(count) {uint32; if(unk2) {uint32; uint32}}
-    // 820 not exist?
-    // 821 not exist?
-    // 822 not exist?
-    // 823 not exist?
-    // 824 not exist?
-    // 825 not exist?
-    SMSG_OUTDOORPVP_NOTIFY                          = 826,  // looks like chat packets
-    SMSG_UNKNOWN_827                                = 827,  // uint32
-    // 828 not exist?
+    SMSG_UNKNOWN_813                                = 813,  // SMSG_CHAT_PLAYER_AMBIGUOUS string
+    // 814 not exist?                                       // MSG_DELAY_GHOST_TELEPORT
+    SMSG_SPELLINSTAKILLLOG                          = 815,  // spell related, uint64 guid + spellid (You are killed by %s(spell_name))
+    SMSG_UNKNOWN_816                                = 816,  // SMSG_SPELL_UPDATE_CHAIN_TARGETS spell related, uint64 guid + spellid + uint32 count + for(count) uint64 guid (target?)
+    CMSG_UNKNOWN_817                                = 817,  // CMSG_CHAT_FILTERED response to chat message with type 7 in some case
+    SMSG_EXPECTED_SPAM_RECORDS                      = 818,  // 2.0.8, received before server MOTD, strange regexp sequence, looks like anti spam filter for chat messages...
+    SMSG_UNKNOWN_819                                = 819,  // SMSG_SPELLSTEALLOG pGUID, pGUID, uint32 unk1, uint8 unk2, uint32 count, for(count) {uint32; if(unk2) {uint32; uint32}}
+    // 820 not exist?                                          CMSG_LOTTERY_QUERY_OBSOLETE
+    // 821 not exist?                                          SMSG_LOTTERY_QUERY_RESULT_OBSOLETE
+    // 822 not exist?                                          CMSG_BUY_LOTTERY_TICKET_OBSOLETE
+    // 823 not exist?                                          SMSG_LOTTERY_RESULT_OBSOLETE
+    // 824 not exist?                                          SMSG_CHARACTER_PROFILE
+    // 825 not exist?                                          SMSG_CHARACTER_PROFILE_REALM_CONNECTED
+    SMSG_OUTDOORPVP_NOTIFY                          = 826,  // SMSG_DEFENSE_MESSAGE looks like chat packets
+    SMSG_UNKNOWN_827                                = 827,  // SMSG_INSTANCE_DIFFICULTY uint32
+    // 828 not exist?                                       // MSG_GM_RESETINSTANCELIMIT
     SMSG_MOTD                                       = 829,  // server MOTD message, uint32 + message
-    // 830 not exist?
-    // 831 not exist?
-    // 832 not exist?
-    SMSG_UNKNOWN_833                                = 833,  // teleport/movement opcode
-    SMSG_UNKNOWN_834                                = 834,  // teleport/movement opcode
-    SMSG_FLY_MODE_START                             = 835,  // packed guid + uint32, start fly
-    SMSG_FLY_MODE_STOP                              = 836,  // packed guid + uint32, stop fly
-    CMSG_MOVE_FLY_MODE_CHANGE_ACK                   = 837,  // movement related, fly on/off ack
-    MSG_MOVE_FLY_STATE_CHANGE                       = 838,  // movement related, fly start/stop(land) ack, may be MSG
-    CMSG_SOCKET_ITEM                                = 839,  // click on "Socket Gems" button in Jewelcrafting UI, contains uint64 item guid + 3 x uint64 gems guid's
-    // 840 not exist?
+    // 830 not exist?                                       // SMSG_MOVE_SET_FLIGHT_OBSOLETE
+    // 831 not exist?                                       // SMSG_MOVE_UNSET_FLIGHT_OBSOLETE
+    // 832 not exist?                                       // CMSG_MOVE_FLIGHT_ACK_OBSOLETE
+    SMSG_UNKNOWN_833                                = 833,  // MSG_MOVE_START_SWIM_CHEAT teleport/movement opcode
+    SMSG_UNKNOWN_834                                = 834,  // MSG_MOVE_STOP_SWIM_CHEAT teleport/movement opcode
+    SMSG_MOVE_SET_CAN_FLY                           = 835,  // packed guid + uint32, start fly
+    SMSG_MOVE_UNSET_CAN_FLY                         = 836,  // packed guid + uint32, stop fly
+    CMSG_MOVE_SET_CAN_FLY_ACK                       = 837,  // movement related, fly on/off ack
+    CMSG_MOVE_SET_FLY                               = 838,  // movement related, fly start/stop(land) ack, may be MSG
+    CMSG_SOCKET_GEMS                                = 839,  // click on "Socket Gems" button in Jewelcrafting UI, contains uint64 item guid + 3 x uint64 gems guid's
+    // 840 not exist?                                          CMSG_ARENA_TEAM_CREATE
     SMSG_ARENA_TEAM_COMMAND_RESULT                  = 841,  // uint32 command, name1, name2, uint32 errorcode
-    // 842 not exist?
+    // 842 not exist?                                          UMSG_UPDATE_ARENA_TEAM_OBSOLETE
     CMSG_ARENA_TEAM_QUERY                           = 843,
     SMSG_ARENA_TEAM_QUERY_RESPONSE                  = 844,
     CMSG_ARENA_TEAM_ROSTER                          = 845,
     SMSG_ARENA_TEAM_ROSTER                          = 846,
-    CMSG_ARENA_TEAM_INVITE_BYNAME                   = 847,
+    CMSG_ARENA_TEAM_INVITE                          = 847,
     SMSG_ARENA_TEAM_INVITE                          = 848,
     CMSG_ARENA_TEAM_ACCEPT                          = 849,
     CMSG_ARENA_TEAM_DECLINE                         = 850,
     CMSG_ARENA_TEAM_LEAVE                           = 851,
-    CMSG_ARENA_TEAM_UNINVITE_BYNAME                 = 852,
+    CMSG_ARENA_TEAM_REMOVE                          = 852,
     CMSG_ARENA_TEAM_DISBAND                         = 853,
-    CMSG_ARENA_TEAM_SET_LEADER_BYNAME               = 854,  // also must be demote opcode...
+    CMSG_ARENA_TEAM_LEADER                          = 854,  // also must be demote opcode...
     SMSG_ARENA_TEAM_EVENT                           = 855,  // arena team event
-    CMSG_ARENAMASTER_JOIN                           = 856,
-    MSG_MOVE_START_FLY_UP                           = 857,  // movement related, fly up, possible MSG
-    MSG_MOVE_STOP_FLY_UP                            = 858,  // movement related, stop fly up, possible MSG
+    CMSG_BATTLEMASTER_JOIN_ARENA                    = 856,
+    MSG_MOVE_START_ASCEND                           = 857,  // movement related, fly up, possible MSG
+    MSG_MOVE_STOP_ASCEND                            = 858,  // movement related, stop fly up, possible MSG
     SMSG_ARENA_TEAM_STATS                           = 859,
     CMSG_LFG_SET_AUTOJOIN                           = 860,  // lua: SetLFGAutojoin
-    CMSG_LFG_UNSET_AUTOJOIN                         = 861,  // lua: ClearLFGAutojoin
-    CMSG_LFM_SET_AUTOADD                            = 862,  // lua: SetLFMAutofill
-    CMSG_LFM_UNSET_AUTOADD                          = 863,  // lua: ClearLFMAutofill
-    CMSG_LFG_INVITE_ACCEPT                          = 864,  // lua: AcceptLFGMatch
-    CMSG_LFG_INVITE_CANCEL                          = 865,  // lua: DeclineLFGMatch
-    CMSG_LFG_CANCEL_PENDING                         = 866,  // lua: CancelPendingLFG
-    CMSG_LFG_CLEAR                                  = 867,  // lua: ClearLookingForGroup
-    CMSG_LFG_SET_LOOKING_FOR_NONE                   = 868,  // lua: ClearLookingForMore
-    CMSG_LFG_SET_LOOKING_FOR_MORE                   = 869,  // lua: SetLFMType
-    CMSG_LFG_SET_COMMENTARY                         = 870,  // lua: SetLFGComment
-    SMSG_LFG_MATCHMAKING_TIMEDOUT                   = 871,  // Matchmaking timed out.
-    SMSG_LFG_MATCHMAKING_OTHER_TIMEDOUT             = 872,  // Matchmaking timed out waiting for other player.
-    SMSG_LFG_MATCHMAKING_AUTOJOIN_FAILED            = 873,  // Group no longer available.
-    SMSG_LFG_MATCHMAKING_AUTOJOIN_FAILED_NO_PLAYER  = 874,  // Matched Player(s) have gone offline.
-    SMSG_UNKNOWN_875                                = 875,
-    SMSG_LFG_876                                    = 876,  // LFM eye, in progress, uint16+uint32+uint8?, 3 x uint8(0x0)
-    SMSG_LFG_877                                    = 877,  // cause client send CMSG_SET_LOOKING_FOR_GROUP, uint32+uint8?
-    SMSG_LFG_878                                    = 878,  // cause client send CMSG_SET_LOOKING_FOR_GROUP
-    SMSG_LFG_879                                    = 879,  // LFG eye, cause client send CMSG_SET_LOOKING_FOR_GROUP
-    SMSG_LFG_MATCHMAKING_PENDING_INVITE             = 880,  // The LFG system has matched you to a group for %s.
-    SMSG_LFG_MATCHMAKING_PENDING_MATCH              = 881,  // The LFG system is waiting to complete match for %s.
-    SMSG_UNKNOWN_882                                = 882,
-    SMSG_CHANGE_TITLE                               = 883,  // uint32 title_id, causes message and visual effect
-    CMSG_CHOOSE_TITLE                               = 884,  // uint32 title_id
-    CMSG_DISMOUNT                                   = 885,  // /dismount command
-    SMSG_ARENA_NO_TEAM                              = 886,  // uint32(0) + team type
-    MSG_INSPECT_ARENA_STATS                         = 887,
-    SMSG_SH_POSITION                                = 888,  // spirit healer position, map/x/y/z, at player death...
-    CMSG_CANCEL_TEMP_ITEM_ENCHANTMENT               = 889,  // cancel temporary item enchantment
-    SMSG_UNKNOWN_890                                = 890,  // empty
-    // 891 not exist?
-    // 892 not exist?
-    // 893 not exist?
-    MSG_MOVE_SET_FLY_SPEED                          = 894,  // all fly speed, packed guid, uint32 movement_flags, time, x,y,z,o,unk,speed...
-    // 895 not exist?
-    MSG_MOVE_SET_FLY_BACK_SPEED                     = 896,
-    SMSG_FORCE_FLY_SPEED_CHANGE                     = 897,  // packed guid, uint32, speed
-    CMSG_FORCE_FLY_SPEED_CHANGE_ACK                 = 898,
-    SMSG_FORCE_FLY_BACK_SPEED_CHANGE                = 899,
-    CMSG_FORCE_FLY_BACK_SPEED_CHANGE_ACK            = 900,
-    SMSG_MOVE_SET_FLY_SPEED2                        = 901,  // same as 894, strange, packed guid+speed
-    SMSG_MOVE_SET_FLY_BACK_SPEED2                   = 902,  // same as 896, strange,
-    // 903 not exist?
+    CMSG_LFG_CLEAR_AUTOJOIN                         = 861,  // lua: ClearLFGAutojoin
+    CMSG_LFM_SET_AUTOFILL                           = 862,  // lua: SetLFMAutofill
+    CMSG_LFM_CLEAR_AUTOFILL                         = 863,  // lua: ClearLFMAutofill
+    CMSG_ACCEPT_LFG_MATCH                           = 864,  // lua: AcceptLFGMatch
+    CMSG_DECLINE_LFG_MATCH                          = 865,  // lua: DeclineLFGMatch
+    CMSG_CANCEL_PENDING_LFG                         = 866,  // lua: CancelPendingLFG
+    CMSG_CLEAR_LOOKING_FOR_GROUP                    = 867,  // lua: ClearLookingForGroup
+    CMSG_CLEAR_LOOKING_FOR_MORE                     = 868,  // lua: ClearLookingForMore
+    CMSG_SET_LOOKING_FOR_MORE                       = 869,  // lua: SetLFMType
+    CMSG_SET_LFG_COMMENT                            = 870,  // lua: SetLFGComment
+    SMSG_LFG_TIMEDOUT                               = 871,  // Matchmaking timed out.
+    SMSG_LFG_OTHER_TIMEDOUT                         = 872,  // Matchmaking timed out waiting for other player.
+    SMSG_LFG_AUTOJOIN_FAILED                        = 873,  // Group no longer available.
+    SMSG_LFG_AUTOJOIN_FAILED_NO_PLAYER              = 874,  // Matched Player(s) have gone offline.
+    SMSG_UNKNOWN_875                                = 875,  // SMSG_LFG_LEADER_IS_LFM
+    SMSG_LFG_876                                    = 876,  // SMSG_LFG_UPDATE LFM eye, in progress, uint16+uint32+uint8?, 3 x uint8(0x0)
+    SMSG_LFG_877                                    = 877,  // SMSG_LFG_UPDATE_LFM cause client send CMSG_SET_LOOKING_FOR_GROUP, uint32+uint8?
+    SMSG_LFG_878                                    = 878,  // SMSG_LFG_UPDATE_LFG cause client send CMSG_SET_LOOKING_FOR_GROUP
+    SMSG_LFG_879                                    = 879,  // SMSG_LFG_UPDATE_QUEUED LFG eye, cause client send CMSG_SET_LOOKING_FOR_GROUP
+    SMSG_LFG_PENDING_INVITE                         = 880,  // The LFG system has matched you to a group for %s.
+    SMSG_LFG_PENDING_MATCH                          = 881,  // The LFG system is waiting to complete match for %s.
+    SMSG_UNKNOWN_882                                = 882,  // SMSG_LFG_PENDING_MATCH_DONE
+    SMSG_TITLE_EARNED                               = 883,  // uint32 title_id, causes message and visual effect
+    CMSG_SET_TITLE                                  = 884,  // uint32 title_id
+    CMSG_CANCEL_MOUNT_AURA                          = 885,  // /dismount command
+    SMSG_ARENA_ERROR                                = 886,  // uint32(0) + team type
+    MSG_INSPECT_ARENA_TEAMS                         = 887,
+    SMSG_DEATH_RELEASE_LOC                          = 888,  // spirit healer position, map/x/y/z, at player death...
+    CMSG_CANCEL_TEMP_ENCHANTMENT                    = 889,  // cancel temporary item enchantment
+    SMSG_UNKNOWN_890                                = 890,  // SMSG_FORCED_DEATH_UPDATE empty
+    // 891 not exist?                                          CMSG_CHEAT_SET_HONOR_CURRENCY
+    // 892 not exist?                                          CMSG_CHEAT_SET_ARENA_CURRENCY
+    // 893 not exist?                                          MSG_MOVE_SET_FLIGHT_SPEED_CHEAT
+    MSG_MOVE_SET_FLIGHT_SPEED                       = 894,  // all fly speed, packed guid, uint32 movement_flags, time, x,y,z,o,unk,speed...
+    // 895 not exist?                                          MSG_MOVE_SET_FLIGHT_BACK_SPEED_CHEAT
+    MSG_MOVE_SET_FLIGHT_BACK_SPEED                  = 896,
+    SMSG_FORCE_FLIGHT_SPEED_CHANGE                  = 897,  // packed guid, uint32, speed
+    CMSG_FORCE_FLIGHT_SPEED_CHANGE_ACK              = 898,
+    SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE             = 899,
+    CMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK         = 900,
+    SMSG_SPLINE_SET_FLIGHT_SPEED                    = 901,  // same as 894, strange, packed guid+speed
+    SMSG_SPLINE_SET_FLIGHT_BACK_SPEED               = 902,  // same as 896, strange,
+    // 903 not exist?                                          CMSG_MAELSTROM_INVALIDATE_CACHE
     SMSG_FLIGHT_SPLINE_SYNC                         = 904,  // uint32 + packed_guid
     CMSG_SET_TAXI_BENCHMARK_MODE                    = 905,
-    // 906 not exist?
-    SMSG_REALM_SPLIT_INFO_RESPONSE                  = 907,  // response to 908 opcode, uint32+uint32+string(date)
-    CMSG_REALM_SPLIT_INFO_REQUEST                   = 908,  // realm related, uint32, appears at select character screen, uint32 0xFFFFFFFF by default
-    MSG_MOVE_SHIP_909                               = 909,  // movement related, transport related(ships)
-    CMSG_GROUP_PROMOTE                              = 910,  // make main-tank / main-assistant
-    SMSG_ALREADY_IN_ARENA_TEAM                      = 911,  // %s is already in an arena team of that size (uint64 guid)
-    SMSG_ALLOW_MOVE                                 = 912,  // uint32, allow player movement, value increments every time and reset to 0 after far teleport, used for client-server synchronization
-    CMSG_ALLOW_MOVE_ACK                             = 913,  // client response to SMSG_ALLOW_MOVE (counter + client time)
-    // 914 not exist?
-    // 915 not exist?
-    // 916 not exist?
-    // 917 not exist?
-    SMSG_RESET_INSTANCE_FAILED_NOTIFY               = 918,  // chat message: The party leader has attempted to reset the instance you are in.  Please zone out to allow the instance to reset.
-    SMSG_UNKNOWN_919                                = 919,  // uint8(0)+uint32(0/1)+uint64(unk/guid)
-    SMSG_SYSTEM_DISABLED                            = 920,  // notify message: This system is currently disabled.
-    // 921 not exist?
-    // 922 not exist?
-    SMSG_UNKNOWN_923                                = 923,  // uint8 count, for(count) uint32
-    // 924 not exist?
-    SMSG_SET_COMBO_POINTS                           = 925,  // set combo points
-    SMSG_VOICE_SESSION                              = 926,  // VoiceSessionRosterUpdate, uint64, uint16, uint8, string, string, uint32, uin16, uint8 unk, uint64, uint8, uint8, if(unk-1) { for(unk-1) { uint64; uint8; uint8; uint8; } }
-    SMSG_UNKNOWN_927                                = 927,  // uint64 guid + uint64, received after leave voice channel
-    // 928 not exist?
-    // 929 not exist?
-    SMSG_UNKNOWN_930                                = 930,  // uint64 + uint8
-    SMSG_SET_AURA_MULTIPLY                          = 931,  // packed_guid + n * (uint8 slot + uint32 spellid + uint32 duration1 + uint32 duration2)
-    SMSG_SET_AURA_SINGLE                            = 932,  // packed_guid + uint8 slot + uint32 spellid + uint32 duration1 + uint32 duration2
-    SMSG_SET_AURA_SINGLE2                           = 933,  // same handler as 932 opcode
-    SMSG_CAST_SUCCESS                               = 934,
-    MSG_UNKNOWN_935                                 = 935,  // teleport/movement opcode
-    // 936 not exist?
-    SMSG_UNKNOWN_937                                = 937,
-    SMSG_UNKNOWN_938                                = 938,  // uint64, uint64, uint32 spellid, uint32, uint32
-    // 939 not exist?
-    SMSG_UNKNOWN_940                                = 940,  // packed guid (received at spell cast)
-    SMSG_UNKNOWN_941                                = 941,  // teleport/movement opcode
-    SMSG_READY_CHECK_ALL_READY                      = 942,  // uint64, uint8, Everyone is Ready! (message)
+    // 906 not exist?                                          SMSG_JOINED_BATTLEGROUND_QUEUE
+    SMSG_REALM_SPLIT                                = 907,  // response to 908 opcode, uint32+uint32+string(date)
+    CMSG_REALM_SPLIT                                = 908,  // realm related, uint32, appears at select character screen, uint32 0xFFFFFFFF by default
+    MSG_MOVE_SHIP_909                               = 909,  // CMSG_MOVE_CHNG_TRANSPORT movement related, transport related(ships)
+    CMSG_GROUP_PROMOTE                              = 910,  // MSG_PARTY_ASSIGNMENT make main-tank / main-assistant
+    SMSG_OFFER_PETITION_ERROR                       = 911,  // %s is already in an arena team of that size (uint64 guid)
+    SMSG_ALLOW_MOVE                                 = 912,  // SMSG_TIME_SYNC_REQ uint32, allow player movement, value increments every time and reset to 0 after far teleport, used for client-server synchronization
+    CMSG_ALLOW_MOVE_ACK                             = 913,  // CMSG_TIME_SYNC_RESP client response to SMSG_ALLOW_MOVE (counter + client time)
+    // 914 not exist?                                          CMSG_SEND_LOCAL_EVENT
+    // 915 not exist?                                          CMSG_SEND_GENERAL_TRIGGER
+    // 916 not exist?                                          CMSG_SEND_COMBAT_TRIGGER
+    // 917 not exist?                                          CMSG_MAELSTROM_GM_SENT_MAIL
+    SMSG_RESET_FAILED_NOTIFY                        = 918,  // chat message: The party leader has attempted to reset the instance you are in.  Please zone out to allow the instance to reset.
+    SMSG_UNKNOWN_919                                = 919,  // SMSG_REAL_GROUP_UPDATE uint8(0)+uint32(0/1)+uint64(unk/guid)
+    SMSG_LFG_DISABLED                               = 920,  // notify message: This system is currently disabled.
+    // 921 not exist?                                          CMSG_ACTIVE_PVP_CHEAT
+    // 922 not exist?                                          CMSG_CHEAT_DUMP_ITEMS_DEBUG_ONLY
+    SMSG_UNKNOWN_923                                = 923,  // SMSG_CHEAT_DUMP_ITEMS_DEBUG_ONLY_RESPONSE uint8 count, for(count) uint32
+    // 924 not exist?                                          SMSG_CHEAT_DUMP_ITEMS_DEBUG_ONLY_RESPONSE_WRITE_FILE
+    SMSG_UPDATE_COMBO_POINTS                        = 925,  // set combo points
+    SMSG_VOICE_SESSION_ROSTER_UPDATE                = 926,  // VoiceSessionRosterUpdate, uint64, uint16, uint8, string, string, uint32, uin16, uint8 unk, uint64, uint8, uint8, if(unk-1) { for(unk-1) { uint64; uint8; uint8; uint8; } }
+    SMSG_UNKNOWN_927                                = 927,  // SMSG_VOICE_SESSION_LEAVE uint64 guid + uint64, received after leave voice channel
+    // 928 not exist?                                          SMSG_VOICE_SESSION_ADJUST_PRIORITY
+    // 929 not exist?                                          CMSG_VOICE_SET_TALKER_MUTED_REQUEST
+    SMSG_UNKNOWN_930                                = 930,  // SMSG_VOICE_SET_TALKER_MUTED uint64 + uint8
+    SMSG_SET_AURA_MULTIPLY                          = 931,  // SMSG_INIT_EXTRA_AURA_INFO packed_guid + n * (uint8 slot + uint32 spellid + uint32 duration1 + uint32 duration2)
+    SMSG_SET_AURA_SINGLE                            = 932,  // SMSG_SET_EXTRA_AURA_INFO packed_guid + uint8 slot + uint32 spellid + uint32 duration1 + uint32 duration2
+    SMSG_SET_AURA_SINGLE2                           = 933,  // SMSG_SET_EXTRA_AURA_INFO_NEED_UPDATE same handler as 932 opcode
+    SMSG_CAST_SUCCESS                               = 934,  // SMSG_CLEAR_EXTRA_AURA_INFO
+    MSG_UNKNOWN_935                                 = 935,  // MSG_MOVE_START_DESCEND teleport/movement opcode
+    // 936 not exist?                                          CMSG_IGNORE_REQUIREMENTS_CHEAT
+    SMSG_UNKNOWN_937                                = 937,  // SMSG_IGNORE_REQUIREMENTS_CHEAT
+    SMSG_UNKNOWN_938                                = 938,  // SMSG_SPELL_CHANCE_PROC_LOG uint64, uint64, uint32 spellid, uint32, uint32
+    // 939 not exist?                                       // CMSG_MOVE_SET_RUN_SPEED
+    SMSG_UNKNOWN_940                                = 940,  // SMSG_DISMOUNT packed guid (received at spell cast)
+    SMSG_UNKNOWN_941                                = 941,  // MSG_MOVE_UPDATE_CAN_FLY teleport/movement opcode
+    SMSG_READY_CHECK_ALL_READY                      = 942,  // MSG_RAID_READY_CHECK_CONFIRM uint64, uint8, Everyone is Ready! (message)
     CMSG_VOICE_SETTINGS                             = 943,  // uint8 isVoiceEnabled, uint8 isMicrophoneEnabled (id correct for 2.3.0)
-    SMSG_VOICE_CHAT_PARENTAL_DISABLE_ALL            = 944,  // uint8, uint8, Voice chat has been disabled by parental control
-    // 945  not exist?
-    SMSG_UNKNOWN_946                                = 946,  // special chat packet?
-    // 947  not exist?
-    CMSG_COMMENTATOR_SET_MODE                       = 948,
-    SMSG_UNKNOWN_949                                = 949,
-    CMSG_COMMENTATOR_UPDATE_MAP_INFO                = 950,
-    SMSG_UNKNOWN_951                                = 951,
-    CMSG_COMMENTATOR_UPDATE_PLAYER_INFO             = 952,
-    CMSG_UNKNOWN_953                                = 953,  // response to 942 opcode
-    SMSG_UNKNOWN_954                                = 954,
-    CMSG_COMMENTATOR_INSTANCE_ENTER                 = 955,
-    CMSG_COMMENTATOR_INSTANCE_EXIT                  = 956,
-    CMSG_COMMENTATOR_ADD_OR_REMOVE_PLAYER           = 957,
-    SMSG_UNKNOWN_958                                = 958,  // uint64 guid, cause client to send CMSG_SET_SELECTION
-    CMSG_UNKNOWN_959                                = 959,  // uint8, uint8, uint8, string
-    SMSG_UNKNOWN_960                                = 960,  // uint64 player_guid, uint32 drunk_state (0-3), uint32 itemid
-    // 961 not exist?
-    // 962 not exist?
-    // 963 not exist?
-    SMSG_UNKNOWN_964                                = 964,  // uint8, disconnect related?
-    MSG_UNKNOWN_965                                 = 965,  // empty, related to raid ready check...
-    CMSG_REPORT_SPAM                                = 966,  // Report Spam chat button
-    SMSG_REPORT_SPAM_RESULT                         = 967,  // uint8, Complaint Registered. (message)
-    SMSG_VOICE_SYSTEM_STATUS                        = 968,  // uint8, uint8 (id correct for 2.3.0)
-    // 969 not exist?
-    // 970 not exist?
-    CMSG_CHANNEL_SILENT_VOICE                       = 971,
-    CMSG_CHANNEL_SILENT_ALL                         = 972,
-    CMSG_CHANNEL_UNSILENT_VOICE                     = 973,
-    CMSG_CHANNEL_UNSILENT_ALL                       = 974,
-    // 975 not exist?
-    // 976 not exist?
-    CMSG_CHANNEL_ROSTER_QUERY                       = 977,  // string channel name (channel list?)
-    CMSG_CHANNEL_VOICE_CHAT_QUERY                   = 978,  // uint32, string
-    CMSG_CHANNEL_INFO_QUERY                         = 979,  // string channel name
-    SMSG_CHANNEL_INFO_QUERY_RESPONSE                = 980,  // string channel name, uint8 flags, uint32 count
+    SMSG_VOICE_CHAT_PARENTAL_DISABLE_ALL            = 944,  // SMSG_VOICE_PARENTAL_CONTROLS uint8, uint8, Voice chat has been disabled by parental control
+    // 945  not exist?                                      // CMSG_GM_WHISPER
+    SMSG_UNKNOWN_946                                = 946,  // SMSG_GM_MESSAGECHAT special chat packet?
+    // 947  not exist?                                      // MSG_GM_GEARRATING
+    CMSG_COMMENTATOR_SET_MODE                       = 948,  // CMSG_COMMENTATOR_ENABLE
+    SMSG_UNKNOWN_949                                = 949,  // SMSG_COMMENTATOR_STATE_CHANGED
+    CMSG_COMMENTATOR_UPDATE_MAP_INFO                = 950,  // CMSG_COMMENTATOR_GET_MAP_INFO
+    SMSG_UNKNOWN_951                                = 951,  // SMSG_COMMENTATOR_MAP_INFO
+    CMSG_COMMENTATOR_UPDATE_PLAYER_INFO             = 952,  // CMSG_COMMENTATOR_GET_PLAYER_INFO
+    CMSG_UNKNOWN_953                                = 953,  // SMSG_COMMENTATOR_GET_PLAYER_INFO response to 942 opcode
+    SMSG_UNKNOWN_954                                = 954,  // SMSG_COMMENTATOR_PLAYER_INFO
+    CMSG_COMMENTATOR_ENTER_INSTANCE                 = 955,
+    CMSG_COMMENTATOR_EXIT_INSTANCE                  = 956,
+    CMSG_COMMENTATOR_ADD_OR_REMOVE_PLAYER           = 957,  // CMSG_COMMENTATOR_INSTANCE_COMMAND
+    SMSG_UNKNOWN_958                                = 958,  // SMSG_CLEAR_TARGET uint64 guid, cause client to send CMSG_SET_SELECTION
+    CMSG_UNKNOWN_959                                = 959,  // CMSG_BOT_DETECTED uint8, uint8, uint8, string
+    SMSG_UNKNOWN_960                                = 960,  // SMSG_CROSSED_INEBRIATION_THRESHOLD uint64 player_guid, uint32 drunk_state (0-3), uint32 itemid
+    // 961 not exist?                                          CMSG_CHEAT_PLAYER_LOGIN
+    // 962 not exist?                                          CMSG_CHEAT_PLAYER_LOOKUP
+    // 963 not exist?                                          SMSG_CHEAT_PLAYER_LOOKUP
+    SMSG_UNKNOWN_964                                = 964,  // SMSG_KICK_REASON uint8, disconnect related?
+    MSG_UNKNOWN_965                                 = 965,  // MSG_RAID_READY_CHECK_FINISHED empty, related to raid ready check...
+    CMSG_REPORT_SPAM                                = 966,  // CMSG_COMPLAIN Report Spam chat button
+    SMSG_REPORT_SPAM_RESULT                         = 967,  // SMSG_COMPLAIN_RESULT uint8, Complaint Registered. (message)
+    SMSG_VOICE_SYSTEM_STATUS                        = 968,  // SMSG_FEATURE_SYSTEM_STATUS uint8, uint8 (id correct for 2.3.0)
+    // 969 not exist?                                       // CMSG_GM_SHOW_COMPLAINTS
+    // 970 not exist?                                       // CMSG_GM_UNSQUELCH
+    CMSG_CHANNEL_SILENCE_VOICE                      = 971,
+    CMSG_CHANNEL_SILENCE_ALL                        = 972,  // CMSG_CHANNEL_SILENCE_ALL
+    CMSG_CHANNEL_UNSILENCE_VOICE                    = 973,
+    CMSG_CHANNEL_UNSILENCE_ALL                      = 974,
+    // 975 not exist?                                       // CMSG_TARGET_CAST
+    // 976 not exist?                                       // CMSG_TARGET_SCRIPT_CAST
+    CMSG_CHANNEL_ROSTER_QUERY                       = 977,  // CMSG_CHANNEL_DISPLAY_LIST string channel name (channel list?)
+    CMSG_CHANNEL_VOICE_CHAT_QUERY                   = 978,  // CMSG_SET_ACTIVE_VOICE_CHANNEL uint32, string
+    CMSG_CHANNEL_INFO_QUERY                         = 979,  // CMSG_GET_CHANNEL_MEMBER_COUNT string channel name
+    SMSG_CHANNEL_INFO_QUERY_RESPONSE                = 980,  // SMSG_CHANNEL_MEMBER_COUNT string channel name, uint8 flags, uint32 count
     CMSG_CHANNEL_VOICE_ON                           = 981,  // Enable Voice button in channel context menu
     CMSG_CHANNEL_VOICE_OFF                          = 982,  // ??
-    // 983 not exist?
-    // 984 not exist?
-    SMSG_CHANNEL_NOTIFY_AVAILABLE_VOICE_SESSION     = 985,  // uint64, uint8, string, uint64
-    CMSG_MUTE_PLAYER                                = 986,  // ??
-    CMSG_UNMUTE_PLAYER                              = 987,  // ??
-    CMSG_SILENCE_MEMBER                             = 988,  // ??
-    CMSG_UNSILENCE_MEMBER                           = 989,  // ??
-    SMSG_PLAYER_UNSILENCED                          = 990,  // A group leader has restored your voice privileges
-    SMSG_COMSAT_RECONNECT_ATTEMPT                   = 991,  // Voice chat service restored!
+    // 983 not exist?                                       // CMSG_DEBUG_LIST_TARGETS
+    // 984 not exist?                                       // SMSG_DEBUG_LIST_TARGETS
+    SMSG_AVAILABLE_VOICE_CHANNEL                    = 985,  // uint64, uint8, string, uint64
+    CMSG_ADD_VOICE_IGNORE                           = 986,  // ??
+    CMSG_DEL_VOICE_IGNORE                           = 987,  // ??
+    CMSG_PARTY_SILENCE                              = 988,  // ??
+    CMSG_PARTY_UNSILENCE                            = 989,  // ??
+    SMSG_PLAYER_UNSILENCED                          = 990,  // MSG_NOTIFY_PARTY_SQUELCH A group leader has restored your voice privileges
+    SMSG_COMSAT_RECONNECT_TRY                       = 991,  // Voice chat service restored!
     SMSG_COMSAT_DISCONNECT                          = 992,  // Connection lost to voice chat service.
     SMSG_COMSAT_CONNECT_FAIL                        = 993,  // Cannot connect to voice chat service.
-    SMSG_UNKNOWN_994                                = 994,  // uint8, enable voice and mic?
-    CMSG_UNKNOWN_995                                = 995,  // uint64 guid, lua: NotifyUnitIsPVPAFK
-    SMSG_PVP_REPORT_AFK_SYSTEM_STATUS               = 996,  // uint8, uint8, uint8, uint64
-    CMSG_GUILD_BANK                                 = 997,  // click on guildbank object, uint64 guid + uint8 unk
-    CMSG_GUILD_BANK_TAB_COLON                       = 998,  // response to 999, uint64 guid + uint8 + uint8
+    SMSG_UNKNOWN_994                                = 994,  // SMSG_VOICE_CHAT_STATUS uint8, enable voice and mic?
+    CMSG_UNKNOWN_995                                = 995,  // CMSG_REPORT_PVP_AFK uint64 guid, lua: NotifyUnitIsPVPAFK
+    CMSG_REPORT_PVP_AFK_RESULT                      = 996,  // uint8, uint8, uint8, uint64
+    CMSG_GUILD_BANKER_ACTIVATE                      = 997,  // click on guildbank object, uint64 guid + uint8 unk
+    CMSG_GUILD_BANK_QUERY_TAB                       = 998,  // response to 999, uint64 guid + uint8 + uint8
     SMSG_GUILD_BANK_LIST                            = 999,  // uint32 + uint32 + uint8 + uint8 + uint16 count1 + uint8 + uint8 count2 + for (count2) { uint8 unk } + uint16 + for(count1) { uint32 counter + uint8 unk }
-    CMSG_GUILD_BANK_DEPOSIT_ITEM                    = 1000, // uint64 guid, uint8, uint8, uint8 count, for(count) uint8 unk
+    CMSG_GUILD_BANK_SWAP_ITEMS                      = 1000, // uint64 guid, uint8, uint8, uint8 count, for(count) uint8 unk
     CMSG_GUILD_BANK_BUY_TAB                         = 1001, // uint64 guid + uint8 unk
-    CMSG_GUILD_BANK_MODIFY_TAB                      = 1002, // uint64, uint8, string, string, lua: SetGuildBankTabInfo
-    CMSG_GUILD_BANK_DEPOSIT                         = 1003, // uint64 guid + uint32
-    CMSG_GUILD_BANK_WITHDRAW                        = 1004, // uint64 guid + uint32
-    MSG_GUILD_BANK_LOG                              = 1005, // guild bank log client: empty, server: uint8 count, for count (uint8 unk(type?), uint64 guid, uint32 unk(amount?))
-    CMSG_CHANNEL_WATCH                              = 1006, // string channel name
-    SMSG_PLAYER_JOINED_CHANNEL                      = 1007, // uint64, uint8, uint8, uint32, string channel name
-    SMSG_PLAYER_LEFT_CHANNEL                        = 1008, // uint64, uint8, uint32, string channel name
-    SMSG_PLAYER_JOINED_CUSTOM_CHANNEL               = 1009, // uint64, uint8, uint8, uint32, string
+    CMSG_GUILD_BANK_UPDATE_TAB                      = 1002, // uint64, uint8, string, string, lua: SetGuildBankTabInfo
+    CMSG_GUILD_BANK_DEPOSIT_MONEY                   = 1003, // uint64 guid + uint32
+    CMSG_GUILD_BANK_WITHDRAW_MONEY                  = 1004, // uint64 guid + uint32
+    MSG_GUILD_BANK_LOG_QUERY                        = 1005, // guild bank log client: empty, server: uint8 count, for count (uint8 unk(type?), uint64 guid, uint32 unk(amount?))
+    CMSG_SET_CHANNEL_WATCH                          = 1006, // string channel name
+    SMSG_PLAYER_JOINED_CHANNEL                      = 1007, // SMSG_USERLIST_ADD uint64, uint8, uint8, uint32, string channel name
+    SMSG_PLAYER_LEFT_CHANNEL                        = 1008, // SMSG_USERLIST_REMOVE uint64, uint8, uint32, string channel name
+    SMSG_PLAYER_JOINED_CUSTOM_CHANNEL               = 1009, // SMSG_USERLIST_UPDATEuint64, uint8, uint8, uint32, string
     CMSG_CLEAR_CHANNEL_WATCH                        = 1010,
-    SMSG_INSPECT_TALENTS                            = 1011, // uint32 count, for(count) uint8 unk
-    SMSG_UNKNOWN_1012                               = 1012, // uint8, toggle run forward
-    SMSG_UNKNOWN_1013                               = 1013, // uint64, uint32 ERR_PLAYER_SILENCED_ECHO/ERR_PLAYER_UNSILENCED_ECHO
-    // 1014 not exist?
-    CMSG_UNKNOWN_1015                               = 1015, // uint64, click on NPC with 0x1000000 npc_flag
-    SMSG_UNKNOWN_1016                               = 1016, // uint64
-    // 1017 not exist?
-    // 1018 not exist?
+    SMSG_INSPECT_TALENT                             = 1011, // uint32 count, for(count) uint8 unk
+    SMSG_UNKNOWN_1012                               = 1012, // SMSG_GOGOGO_OBSOLETE uint8, toggle run forward
+    SMSG_UNKNOWN_1013                               = 1013, // SMSG_ECHO_PARTY_SQUELCH uint64, uint32 ERR_PLAYER_SILENCED_ECHO/ERR_PLAYER_UNSILENCED_ECHO
+    // 1014 not exist?                                         CMSG_SET_TITLE_SUFFIX
+    CMSG_UNKNOWN_1015                               = 1015, // CMSG_SPELLCLICK uint64, click on NPC with 0x1000000 npc_flag
+    SMSG_UNKNOWN_1016                               = 1016, // SMSG_LOOT_LIST uint64
+    // 1017 not exist?                                         CMSG_GM_CHARACTER_RESTORE
+    // 1018 not exist?                                         CMSG_GM_CHARACTER_SAVE
     SMSG_VOICESESSION_FULL                          = 1019, // The voice session you are attempting to join is full.
-    MSG_GUILD_BANK_GET_RIGHTS                       = 1020, // guild related, client: empty, server: uint32, uint32, uint8, uint32, uint32
-    MSG_GUILD_BANK_GET_MONEY_AMOUNT                 = 1021, // uint32 money
-    MSG_GUILD_EVENT_LOG                             = 1022,
-    // 1023 not exist?
-    CMSG_UNKNOWN_1024                               = 1024, // empty
+    MSG_GUILD_PERMISSIONS                           = 1020, // guild related, client: empty, server: uint32, uint32, uint8, uint32, uint32
+    MSG_GUILD_BANK_MONEY_WITHDRAWN                  = 1021, // uint32 money
+    MSG_GUILD_EVENT_LOG_QUERY                       = 1022,
+    // 1023 not exist?                                      // CMSG_MAELSTROM_RENAME_GUILD
+    CMSG_UNKNOWN_1024                               = 1024, // CMSG_GET_MIRRORIMAGE_DATA empty
     SMSG_MIRRORIMAGE_DATA                           = 1025,
     SMSG_FORCE_DISPLAY_UPDATE                       = 1026,
-    SMSG_UNKNOWN_1027                               = 1027, // uint32, uint32, uint32
-    UMSG_UNKNOWN_1028                               = 1028,
-    SMSG_UNKNOWN_1029                               = 1029, // do nothing at client
-    CMSG_UNKNOWN_1030                               = 1030,
-    SMSG_UNKNOWN_1031                               = 1031, // empty?, message You can't do that yet
-    CMSG_GROUP_PASS_ON_LOOT_TOGGLE                  = 1032, // uint32
-    MSG_GUILD_BANK_TAB_TEXT                         = 1033, // uint8, GuildBankText
-    CMSG_GUILD_BANK_SET_TAB_TEXT                    = 1034, // uint8, string, SetGuildBankText
-    UMSG_UNKNOWN_1035                               = 1035, // not exist?
-    CMSG_UNKNOWN_1036                               = 1036, // lua: GrantLevel
-    UMSG_UNKNOWN_1037                               = 1037, // not exist?
-    UMSG_UNKNOWN_1038                               = 1038, // not exist?
-    CMSG_UNKNOWN_1039                               = 1039, // string, DeclineInvite
-    SMSG_GROUP_ACTION_THROTTLED                     = 1040, // empty
-    SMSG_UNKNOWN_1041                               = 1041, // uint32, uint32, uint32
-    SMSG_UNKNOWN_1042                               = 1042, // uint8, uint64, uint32, uint32
-    CMSG_UNKNOWN_1043                               = 1043, // lua: DestroyTotem(slot)
-    UMSG_UNKNOWN_1044                               = 1044, // not exist?
-    UMSG_UNKNOWN_1045                               = 1045, // not exist?
-    CMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE           = 1046, // quest giver query status multiple (all visible)
-    SMSG_QUESTGIVER_STATUS_QUERY_MULTIPLE_RESPONSE  = 1047, // response to 1046, uint32 count; for(count) { uint64; uint8; }
-    CMSG_UNKNOWN_1048                               = 1048, // lua: DeclineCharacter
-    SMSG_UNKNOWN_1049                               = 1049, // uint32 result, if(!result) uint64, CharacterDeclineResult
-    UMSG_UNKNOWN_1050                               = 1050, // not exist?
-    UMSG_UNKNOWN_1051                               = 1051, // not exist?
-    UMSG_UNKNOWN_1052                               = 1052, // not exist?
-    SMSG_UNKNOWN_1053                               = 1053, // uint32 count; for(count) { uint32; }
-    SMSG_UNKNOWN_1054                               = 1054, // packed guid
-    CMSG_UNKNOWN_1055                               = 1055, // AcceptLevelGrant
-    SMSG_UNKNOWN_1056                               = 1056, // uint32 unk, if(unk==9) string;
-    SMSG_UNKNOWN_1057                               = 1057, // packed guid
-    SMSG_UNKNOWN_1058                               = 1058, // packed guid
-    SMSG_UNKNOWN_1059                               = 1059  // empty
+    SMSG_UNKNOWN_1027                               = 1027, // SMSG_SPELL_CHANCE_RESIST_PUSHBACK uint32, uint32, uint32
+    UMSG_UNKNOWN_1028                               = 1028, // CMSG_IGNORE_DIMINISHING_RETURNS_CHEAT
+    SMSG_UNKNOWN_1029                               = 1029, // SMSG_IGNORE_DIMINISHING_RETURNS_CHEAT do nothing at client
+    CMSG_UNKNOWN_1030                               = 1030, // CMSG_KEEP_ALIVE
+    SMSG_UNKNOWN_1031                               = 1031, // SMSG_RAID_READY_CHECK_ERROR empty?, message You can't do that yet
+    CMSG_GROUP_PASS_ON_LOOT_TOGGLE                  = 1032, // CMSG_OPT_OUT_OF_LOOT uint32
+    MSG_QUERY_GUILD_BANK_TEXT                       = 1033, // uint8, GuildBankText
+    CMSG_SET_GUILD_BANK_TEXT                        = 1034, // uint8, string, SetGuildBankText
+    UMSG_UNKNOWN_1035                               = 1035, // CMSG_SET_GRANTABLE_LEVELS not exist?
+    CMSG_UNKNOWN_1036                               = 1036, // CMSG_GRANT_LEVEL lua: GrantLevel
+    UMSG_UNKNOWN_1037                               = 1037, // CMSG_REFER_A_FRIEND not exist?
+    UMSG_UNKNOWN_1038                               = 1038, // MSG_GM_CHANGE_ARENA_RATING not exist?
+    CMSG_UNKNOWN_1039                               = 1039, // CMSG_DECLINE_CHANNEL_INVITE string, DeclineInvite
+    SMSG_GROUP_ACTION_THROTTLED                     = 1040, // CMSG_GROUPACTION_THROTTLED empty
+    SMSG_UNKNOWN_1041                               = 1041, // SMSG_OVERRIDE_LIGHT uint32, uint32, uint32
+    SMSG_UNKNOWN_1042                               = 1042, // SMSG_TOTEM_CREATED uint8, uint64, uint32, uint32
+    CMSG_UNKNOWN_1043                               = 1043, // CMSG_TOTEM_DESTROYED lua: DestroyTotem(slot)
+    UMSG_UNKNOWN_1044                               = 1044, // CMSG_EXPIRE_RAID_INSTANCE not exist?
+    UMSG_UNKNOWN_1045                               = 1045, // CMSG_NO_SPELL_VARIANCE not exist?
+    CMSG_QUESTGIVER_STATUS_MULTIPLE_QUERY           = 1046, // quest giver query status multiple (all visible)
+    SMSG_QUESTGIVER_STATUS_MULTIPLE                 = 1047, // response to 1046, uint32 count; for(count) { uint64; uint8; }
+    CMSG_UNKNOWN_1048                               = 1048, // CMSG_SET_PLAYER_DECLINED_NAMES lua: DeclineCharacter
+    SMSG_UNKNOWN_1049                               = 1049, // SMSG_SET_PLAYER_DECLINED_NAMES_RESULT uint32 result, if(!result) uint64, CharacterDeclineResult
+    UMSG_UNKNOWN_1050                               = 1050, // CMSG_QUERY_SERVER_BUCK_DATA not exist?
+    UMSG_UNKNOWN_1051                               = 1051, // CMSG_CLEAR_SERVER_BUCK_DATA not exist?
+    UMSG_UNKNOWN_1052                               = 1052, // SMSG_SERVER_BUCK_DATA not exist?
+    SMSG_UNKNOWN_1053                               = 1053, // SMSG_SEND_UNLEARN_SPELLS uint32 count; for(count) { uint32; }
+    SMSG_UNKNOWN_1054                               = 1054, // SMSG_PROPOSE_LEVEL_GRANT packed guid
+    CMSG_UNKNOWN_1055                               = 1055, // CMSG_ACCEPT_LEVEL_GRANT AcceptLevelGrant
+    SMSG_UNKNOWN_1056                               = 1056, // SMSG_REFER_A_FRIEND_FAILURE uint32 unk, if(unk==9) string;
+    SMSG_UNKNOWN_1057                               = 1057, // SMSG_SPLINE_MOVE_SET_FLYING packed guid
+    SMSG_UNKNOWN_1058                               = 1058, // SMSG_SPLINE_MOVE_UNSET_FLYING packed guid
+    SMSG_UNKNOWN_1059                               = 1059  // SMSG_SUMMON_CANCEL empty
 };
 
 //if you add new opcode .. Do NOT forget to change the following define MAX_OPCODE_ID and also add new opcode to table in opcodes.cpp

@@ -8426,10 +8426,10 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
                 data.Initialize(MSG_MOVE_SET_TURN_RATE, 8+4+1+4+4+4+4+4+4+4);
                 break;
             case MOVE_FLY:
-                data.Initialize(MSG_MOVE_SET_FLY_SPEED, 8+4+1+4+4+4+4+4+4+4);
+                data.Initialize(MSG_MOVE_SET_FLIGHT_SPEED, 8+4+1+4+4+4+4+4+4+4);
                 break;
             case MOVE_FLYBACK:
-                data.Initialize(MSG_MOVE_SET_FLY_BACK_SPEED, 8+4+1+4+4+4+4+4+4+4);
+                data.Initialize(MSG_MOVE_SET_FLIGHT_BACK_SPEED, 8+4+1+4+4+4+4+4+4+4);
                 break;
             default:
                 sLog.outError("Unit::SetSpeed: Unsupported move type (%d), data not sent to client.",mtype);
@@ -8474,10 +8474,10 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
                 data.Initialize(SMSG_FORCE_TURN_RATE_CHANGE, 16);
                 break;
             case MOVE_FLY:
-                data.Initialize(SMSG_FORCE_FLY_SPEED_CHANGE, 16);
+                data.Initialize(SMSG_FORCE_FLIGHT_SPEED_CHANGE, 16);
                 break;
             case MOVE_FLYBACK:
-                data.Initialize(SMSG_FORCE_FLY_BACK_SPEED_CHANGE, 16);
+                data.Initialize(SMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE, 16);
                 break;
             default:
                 sLog.outError("Unit::SetSpeed: Unsupported move type (%d), data not sent to client.",mtype);
@@ -9830,7 +9830,7 @@ void Unit::SetStandState(uint8 state)
 
     if(GetTypeId()==TYPEID_PLAYER)
     {
-        WorldPacket data(SMSG_STANDSTATE_CHANGE_ACK, 1);
+        WorldPacket data(SMSG_STANDSTATE_UPDATE, 1);
         data << (uint8)state;
         ((Player*)this)->GetSession()->SendPacket(&data);
     }

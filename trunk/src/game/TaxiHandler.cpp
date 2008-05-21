@@ -165,7 +165,7 @@ void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8+4+4);
 
-    sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXI_FAR" );
+    sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXIEXPRESS" );
 
     uint64 guid;
     uint32 node_count, _totalcost;
@@ -187,7 +187,7 @@ void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
     if(nodes.empty())
         return;
 
-    sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXI_FAR from %d to %d" ,nodes.front(),nodes.back());
+    sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXIEXPRESS from %d to %d" ,nodes.front(),nodes.back());
 
     GetPlayer()->ActivateTaxiPathTo(nodes);
 }

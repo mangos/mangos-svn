@@ -1240,7 +1240,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 
     uint32 talent_points = 0x3D;
     uint32 guid_size = plr->GetPackGUID().size();
-    WorldPacket data(SMSG_INSPECT_TALENTS, 4+talent_points);
+    WorldPacket data(SMSG_INSPECT_TALENT, 4+talent_points);
     data.append(plr->GetPackGUID());
     data << uint32(talent_points);
 
@@ -1486,13 +1486,13 @@ void WorldSession::HandleRealmStateRequestOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 4);
 
-    sLog.outDebug("CMSG_REALM_SPLIT_INFO_REQUEST");
+    sLog.outDebug("CMSG_REALM_SPLIT");
 
     uint32 unk;
     std::string split_date = "01/01/01";
     recv_data >> unk;
 
-    WorldPacket data(SMSG_REALM_SPLIT_INFO_RESPONSE, 4+4+split_date.size()+1);
+    WorldPacket data(SMSG_REALM_SPLIT, 4+4+split_date.size()+1);
     data << unk;
     data << uint32(0x00000000);                             // realm split state
     // split states:
@@ -1532,7 +1532,7 @@ void WorldSession::HandleChooseTitleOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 4);
 
-    sLog.outDebug("CMSG_CHOOSE_TITLE");
+    sLog.outDebug("CMSG_SET_TITLE");
 
     uint32 title;
     recv_data >> title;
@@ -1568,7 +1568,7 @@ void WorldSession::HandleResetInstancesOpcode( WorldPacket & /*recv_data*/ )
     sLog.outDebug("WORLD: CMSG_RESET_INSTANCES");
     /*
         uint32 mapid = 0;
-        WorldPacket data(SMSG_RESET_INSTANCES_SUCCESS, 4);
+        WorldPacket data(SMSG_INSTANCE_RESET, 4);
         data << mapid;
         _player->GetSession()->SendPacket(&data);
     */
@@ -1609,7 +1609,7 @@ void WorldSession::HandleNewUnknownOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleDismountOpcode( WorldPacket & /*recv_data*/ )
 {
-    sLog.outDebug("WORLD: CMSG_DISMOUNT");
+    sLog.outDebug("WORLD: CMSG_CANCEL_MOUNT_AURA");
     //recv_data.hexlike();
 
     //If player is not mounted, so go out :)
@@ -1634,7 +1634,7 @@ void WorldSession::HandleMoveFlyModeChangeAckOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data, 8+4+4);
 
     // fly mode on/off
-    sLog.outDebug("WORLD: CMSG_MOVE_FLY_MODE_CHANGE_ACK");
+    sLog.outDebug("WORLD: CMSG_MOVE_SET_CAN_FLY_ACK");
     //recv_data.hexlike();
 
     uint64 guid;

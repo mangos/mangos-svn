@@ -724,7 +724,7 @@ void Group::SetTargetIcon(uint8 id, uint64 guid)
 
     m_targetIcons[id] = guid;
 
-    WorldPacket data(MSG_RAID_ICON_TARGET, (2+8));
+    WorldPacket data(MSG_RAID_TARGET_UPDATE, (2+1+8));
     data << (uint8)0;
     data << id;
     data << guid;
@@ -754,7 +754,7 @@ void Group::SendTargetIconList(WorldSession *session)
     if(!session)
         return;
 
-    WorldPacket data(MSG_RAID_ICON_TARGET, (1+TARGETICONCOUNT*9));
+    WorldPacket data(MSG_RAID_TARGET_UPDATE, (1+TARGETICONCOUNT*9));
     data << (uint8)1;
 
     for(int i=0; i<TARGETICONCOUNT; i++)
