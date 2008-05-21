@@ -731,29 +731,21 @@ void Group::SetTargetIcon(uint8 id, uint64 guid)
     BroadcastPacket(&data);
 }
 
-Player* Group::GetMemberForXPAtKill(Player *member, Unit const* victim)
-{
-    if(!member || !member->isAlive())
-        return NULL;
-    if(victim->GetDistanceSq(member) > sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
-        return NULL;
-
-    return member;
-}
-
 void Group::GetDataForXPAtKill(Unit const* victim, uint32& count,uint32& sum_level, Player* & memeber_with_max_level)
 {
     for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
-        Player* member = GetMemberForXPAtKill(itr->getSource(),victim);
+        Player* member = itr->getSource();
+        if(!member || !member->isAlive())                   // only for alive
+            continue;
 
-        if(member)
-        {
-            ++count;
-            sum_level += member->getLevel();
-            if(!memeber_with_max_level || memeber_with_max_level->getLevel() < member->getLevel())
-                memeber_with_max_level = member;
-        }
+        if(!member->IsAtGroupRewardDistance(victim))        // at req. distance
+            continue;
+
+        ++count;
+        sum_level += member->getLevel();
+        if(!memeber_with_max_level || memeber_with_max_level->getLevel() < member->getLevel())
+            memeber_with_max_level = member;
     }
 }
 
