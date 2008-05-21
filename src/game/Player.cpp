@@ -3055,15 +3055,6 @@ void Player::InitVisibleBits()
     //431) = 884 (0x374) = main weapon
     for(uint16 i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
-        // PLAYER_VISIBLE_ITEM_i_CREATOR    // Size: 2
-        // PLAYER_VISIBLE_ITEM_i_0          // Size: 12
-        //    entry                         //      Size: 1
-        //    inspected enchantments        //      Size: 6 
-        //    ?                             //      Size: 5 
-        // PLAYER_VISIBLE_ITEM_i_PROPERTIES // Size: 1
-        // PLAYER_VISIBLE_ITEM_i_PAD        // Size: 1 
-        //                                  //     = 16 
-
         // item creator
         updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_CREATOR + (i*16) + 0);
         updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_CREATOR + (i*16) + 1);
@@ -3078,7 +3069,8 @@ void Player::InitVisibleBits()
             updateVisualBits.SetBit(visual_base + 1 + j);
 
         // random properties
-        updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_PROPERTIES + (i*16));
+        updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 0 + (i*16));
+        updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 1 + (i*16));
     }
 
     updateVisualBits.SetBit(PLAYER_CHOSEN_TITLE);
@@ -9649,6 +9641,15 @@ void Player::QuickEquipItem( uint16 pos, Item *pItem)
 
 void Player::SetVisibleItemSlot(uint8 slot, Item *pItem)
 {
+    // PLAYER_VISIBLE_ITEM_i_CREATOR    // Size: 2
+    // PLAYER_VISIBLE_ITEM_i_0          // Size: 12
+    //    entry                         //      Size: 1
+    //    inspected enchantments        //      Size: 6 
+    //    ?                             //      Size: 5 
+    // PLAYER_VISIBLE_ITEM_i_PROPERTIES // Size: 1
+    // PLAYER_VISIBLE_ITEM_i_PAD        // Size: 1 (suffix factor)
+    //                                  //     = 16 
+
     if(pItem)
     {
         SetUInt64Value(PLAYER_VISIBLE_ITEM_1_CREATOR + (slot * 16), pItem->GetUInt64Value(ITEM_FIELD_CREATOR));
@@ -9659,7 +9660,14 @@ void Player::SetVisibleItemSlot(uint8 slot, Item *pItem)
         for(int i = 0; i < MAX_INSPECTED_ENCHANTMENT_SLOT; ++i)
             SetUInt32Value(VisibleBase + 1 + i, pItem->GetEnchantmentId(EnchantmentSlot(i)));
 
-        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + (slot * 16), uint32(pItem->GetItemRandomPropertyId()));
+        // FIXME: not show in inspect random properties with suffix factor (pItem->GetItemRandomPropertyId() < 0)
+        // if enabled it show correctly in inspect but not show equipped at another character
+        // need set something more for correct show in this case
+        if(pItem->GetItemRandomPropertyId() > 0)
+        {
+            SetInt32Value( PLAYER_VISIBLE_ITEM_1_PROPERTIES + 0 + (slot * 16), pItem->GetItemRandomPropertyId());
+            SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 1 + (slot * 16), pItem->GetItemSuffixFactor());
+        }
     }
     else
     {
@@ -9671,7 +9679,8 @@ void Player::SetVisibleItemSlot(uint8 slot, Item *pItem)
         for(int i = 0; i < MAX_INSPECTED_ENCHANTMENT_SLOT; ++i)
             SetUInt32Value(VisibleBase + 1 + i, 0);
 
-        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + (slot * 16), 0);
+        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 0 + (slot * 16), 0);
+        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 1 + (slot * 16), 0);
     }
 }
 

@@ -236,7 +236,7 @@ class MANGOS_DLL_SPEC Item : public Object
         uint32 GetSpell();
 
         // RandomPropertyId (signed but stored as unsigned)
-        int32 GetItemRandomPropertyId() const { return int32(GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID)); }
+        int32 GetItemRandomPropertyId() const { return GetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID); }
         uint32 GetItemSuffixFactor() const { return GetUInt32Value(ITEM_FIELD_SUFFIX_FACTOR); }
         void SetItemRandomProperties(int32 randomPropId);
         static int32 GenerateItemRandomPropertyId(uint32 item_id);
