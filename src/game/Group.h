@@ -199,7 +199,6 @@ class MANGOS_DLL_SPEC Group
         GroupReference* GetFirstMember() { return m_memberMgr.getFirst(); }
         uint32 GetMembersCount() const { return m_memberSlots.size(); }
         void GetDataForXPAtKill(Unit const* victim, uint32& count,uint32& sum_level, Player* & memeber_with_max_level);
-        Player* GetMemberForXPAtKill(Player *member, Unit const* victim);
         uint8  GetMemberGroup(uint64 guid) const
         {
             member_citerator mslot = _getMemberCSlot(guid);

@@ -1604,6 +1604,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
 
+        bool IsAtGroupRewardDistance(Unit const* pVictim) const;
         bool RewardPlayerAndGroupAtKill(Unit* pVictim);
 
         FactionsList m_factions;

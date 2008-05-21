@@ -16579,12 +16579,15 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
 
             for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
             {
-                Player *pGroupGuy = pGroup->GetMemberForXPAtKill(itr->getSource(),pVictim);
+                Player* pGroupGuy = itr->getSource();
                 if(!pGroupGuy)
                     continue;
 
-                // honor can be in PvP and !PvP (racial leader) cases
-                if(pGroupGuy->RewardHonor(pVictim,count) && pGroupGuy==this)
+                if(!pGroupGuy->IsAtGroupRewardDistance(pVictim))
+                    continue;                               // member (alive or dead) or his corpse at req. distance
+
+                // honor can be in PvP and !PvP (racial leader) cases (for alive)
+                if(pGroupGuy->isAlive() && pGroupGuy->RewardHonor(pVictim,count) && pGroupGuy==this)
                     honored_kill = true;
 
                 // xp and reputation only in !PvP case
@@ -16593,17 +16596,26 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
                     float rate = group_rate * float(pGroupGuy->getLevel()) / sum_level;
 
                     // if is in dungeon then all receive full reputation at kill
+                    // rewarded any alive/dead/near_corpse group member
                     pGroupGuy->RewardReputation(pVictim,is_dungeon ? 1.0f : rate);
 
-                    uint32 itr_xp = uint32(xp*rate);
+                    // XP updated only for alive group member
+                    if(pGroupGuy->isAlive())
+                    {
+                        uint32 itr_xp = uint32(xp*rate);
 
-                    pGroupGuy->GiveXP(itr_xp, pVictim);
-                    if(Pet* pet = pGroupGuy->GetPet())
-                        pet->GivePetXP(itr_xp/2);
-    
-                    // normal creature (not pet/etc) can be only in !PvP case
-                    if(pVictim->GetTypeId()==TYPEID_UNIT)
-                        pGroupGuy->KilledMonster(pVictim->GetEntry(), pVictim->GetGUID());
+                        pGroupGuy->GiveXP(itr_xp, pVictim);
+                        if(Pet* pet = pGroupGuy->GetPet())
+                            pet->GivePetXP(itr_xp/2);
+                    }
+
+                    // quest objectives updated only for alive group member or dead but with not released body
+                    if(pGroupGuy->isAlive()|| !pGroupGuy->GetCorpse())
+                    {
+                        // normal creature (not pet/etc) can be only in !PvP case
+                        if(pVictim->GetTypeId()==TYPEID_UNIT)
+                            pGroupGuy->KilledMonster(pVictim->GetEntry(), pVictim->GetGUID());
+                    }
                 }
             }
         }
@@ -16632,6 +16644,23 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
     }
     return xp || honored_kill;
 }
+
+bool Player::IsAtGroupRewardDistance(Unit const* pVictim) const
+{
+    if(pVictim->GetDistanceSq(this) <= sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
+        return true;
+
+    if(isAlive())
+        return false;
+
+    Corpse* corpse = GetCorpse();
+    if(!corpse)
+        return false;
+
+    return pVictim->GetDistanceSq(corpse) <= sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE);
+}
+
+
 
 uint8 Player::GetWeaponSlotByAttack(WeaponAttackType attType)
 {
