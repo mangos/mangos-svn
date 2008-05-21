@@ -9646,8 +9646,8 @@ void Player::SetVisibleItemSlot(uint8 slot, Item *pItem)
     //    entry                         //      Size: 1
     //    inspected enchantments        //      Size: 6 
     //    ?                             //      Size: 5 
-    // PLAYER_VISIBLE_ITEM_i_PROPERTIES // Size: 1
-    // PLAYER_VISIBLE_ITEM_i_PAD        // Size: 1 (suffix factor)
+    // PLAYER_VISIBLE_ITEM_i_PROPERTIES // Size: 1 (property,suffix factor)
+    // PLAYER_VISIBLE_ITEM_i_PAD        // Size: 1
     //                                  //     = 16 
 
     if(pItem)
@@ -9660,14 +9660,9 @@ void Player::SetVisibleItemSlot(uint8 slot, Item *pItem)
         for(int i = 0; i < MAX_INSPECTED_ENCHANTMENT_SLOT; ++i)
             SetUInt32Value(VisibleBase + 1 + i, pItem->GetEnchantmentId(EnchantmentSlot(i)));
 
-        // FIXME: not show in inspect random properties with suffix factor (pItem->GetItemRandomPropertyId() < 0)
-        // if enabled it show correctly in inspect but not show equipped at another character
-        // need set something more for correct show in this case
-        if(pItem->GetItemRandomPropertyId() > 0)
-        {
-            SetInt32Value( PLAYER_VISIBLE_ITEM_1_PROPERTIES + 0 + (slot * 16), pItem->GetItemRandomPropertyId());
-            SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 1 + (slot * 16), pItem->GetItemSuffixFactor());
-        }
+        // Use SetInt16Value to prevent set high part to FFFF for negative value
+        SetInt16Value( PLAYER_VISIBLE_ITEM_1_PROPERTIES + (slot * 16), 0, pItem->GetItemRandomPropertyId());
+        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 1 + (slot * 16), pItem->GetItemSuffixFactor());
     }
     else
     {

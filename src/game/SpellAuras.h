@@ -202,6 +202,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraModExpertise(bool apply, bool Real);
         void HandleAuraModResistenceOfIntellectPercent(bool apply, bool Real);
         void HandleAuraPowerBurn(bool apply, bool Real);
+        void HandleSchoolAbsorb(bool apply, bool Real);
 
         virtual ~Aura();
 

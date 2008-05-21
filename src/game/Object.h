@@ -158,11 +158,18 @@ class MANGOS_DLL_SPEC Object
             return m_floatValues[ index ];
         }
 
-        const uint8& GetByteValue( uint16 index, uint8 offset) const
+        uint8 GetByteValue( uint16 index, uint8 offset) const
         {
             ASSERT( index < m_valuesCount || PrintIndexError( index , false) );
             ASSERT( offset < 4 );
             return *(((uint8*)&m_uint32Values[ index ])+offset);
+        }
+
+        uint8 GetUInt16Value( uint16 index, uint8 offset) const
+        {
+            ASSERT( index < m_valuesCount || PrintIndexError( index , false) );
+            ASSERT( offset < 2 );
+            return *(((uint16*)&m_uint32Values[ index ])+offset);
         }
 
         void SetInt32Value(  uint16 index,        int32  value );
@@ -170,6 +177,8 @@ class MANGOS_DLL_SPEC Object
         void SetUInt64Value( uint16 index, const uint64 &value );
         void SetFloatValue(  uint16 index,       float   value );
         void SetByteValue(   uint16 index, uint8 offset, uint8 value );
+        void SetUInt16Value( uint16 index, uint8 offset, uint16 value );
+        void SetInt16Value(  uint16 index, uint8 offset, int16 value ) { SetUInt16Value(index,offset,(uint16)value); }
         void SetStatFloatValue( uint16 index, float value);
         void SetStatInt32Value( uint16 index, int32 value);
 
