@@ -4936,7 +4936,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     if(!castItem)
                         return;
 
-                    if(!procSpell || (GetSpellSchoolMask(procSpell) & (SPELL_SCHOOL_FROST | SPELL_SCHOOL_SHADOW))==0 )
+                    if(!procSpell || (GetSpellSchoolMask(procSpell) & (SPELL_SCHOOL_MASK_FROST | SPELL_SCHOOL_MASK_SHADOW))==0 )
                         return;
 
                     int32 healamount = int32(damage * 2 / 100);
