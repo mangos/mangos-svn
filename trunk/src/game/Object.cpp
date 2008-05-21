@@ -809,6 +809,32 @@ void Object::SetByteValue( uint16 index, uint8 offset, uint8 value )
     }
 }
 
+void Object::SetUInt16Value( uint16 index, uint8 offset, uint16 value )
+{
+    ASSERT( index < m_valuesCount || PrintIndexError( index , true ) );
+
+    if(offset > 2)
+    {
+        sLog.outError("Object::SetUInt16Value: wrong offset %u", offset);
+        return;
+    }
+
+    if(uint8(m_uint32Values[ index ] >> (offset * 16)) != value)
+    {
+        m_uint32Values[ index ] &= ~uint32(uint32(0xFFFF) << (offset * 16));
+        m_uint32Values[ index ] |= uint32(uint32(value) << (offset * 16));
+
+        if(m_inWorld)
+        {
+            if(!m_objectUpdated)
+            {
+                ObjectAccessor::Instance().AddUpdateObject(this);
+                m_objectUpdated = true;
+            }
+        }
+    }
+}
+
 void Object::SetStatFloatValue( uint16 index, float value)
 {
     if(value < 0)

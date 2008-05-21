@@ -117,7 +117,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleFeignDeath,                                // 66 SPELL_AURA_FEIGN_DEATH
     &Aura::HandleAuraModDisarm,                             // 67 SPELL_AURA_MOD_DISARM
     &Aura::HandleAuraModStalked,                            // 68 SPELL_AURA_MOD_STALKED
-    &Aura::HandleNoImmediateEffect,                         // 69 SPELL_AURA_SCHOOL_ABSORB implemented in Unit::CalcAbsorbResist
+    &Aura::HandleSchoolAbsorb,                              // 69 SPELL_AURA_SCHOOL_ABSORB implemented in Unit::CalcAbsorbResist
     &Aura::HandleUnused,                                    // 70 SPELL_AURA_EXTRA_ATTACKS      Useless, used by only one spell that has only visual effect
     &Aura::HandleModSpellCritChanceShool,                   // 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL
     &Aura::HandleModPowerCostPCT,                           // 72 SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT
@@ -4602,6 +4602,53 @@ void Aura::HandleAuraPowerBurn(bool apply, bool Real)
         m_periodicTimer += m_modifier.periodictime;
 
     m_isPeriodic = apply;
+}
+
+void Aura::HandleSchoolAbsorb(bool apply, bool Real)
+{
+    if(!Real)
+        return;
+
+    if(apply)
+    {
+        float DoneActualBenefit = 0.0f;
+        switch(m_spellProto->SpellFamilyName)
+        {
+            case SPELLFAMILY_PRIEST:
+                if(m_spellProto->SpellFamilyFlags == 0x1) //PW:S
+                {
+                    //+30% from +healing bonus
+                    DoneActualBenefit = GetCaster()->SpellBaseHealingBonus(GetSpellSchoolMask(m_spellProto)) * 0.3f;
+                    break;
+                }
+                break;
+            case SPELLFAMILY_MAGE:
+                if(m_spellProto->SpellFamilyFlags == 0x80100 || m_spellProto->SpellFamilyFlags == 0x8 || m_spellProto->SpellFamilyFlags == 0x100000000LL)
+                {
+                    //+10% from +spd bonus //frost ward, fire ward, ice barrier	
+                    DoneActualBenefit = GetCaster()->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.1f;
+                    break;
+                }
+                break;
+            case SPELLFAMILY_WARLOCK:
+                if(m_spellProto->SpellFamilyFlags == 0x00)
+                {
+                    //+10% from +spd bonus //shadow ward	
+                    DoneActualBenefit = GetCaster()->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.1f;
+                    break;
+                }
+                break;
+            default:
+                break;
+        }
+
+
+        if(Unit* caster = GetCaster())
+            DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellProto());
+
+        m_modifier.m_amount += DoneActualBenefit;
+
+    }
 }
 
 void Aura::PeriodicTick()

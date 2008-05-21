@@ -2392,6 +2392,22 @@ uint32 Unit::CalculateDamage (WeaponAttackType attType, bool normalized)
     return rand32((uint32)min_damage, (uint32)max_damage);
 }
 
+float Unit::CalculateLevelPenalty(SpellEntry const* spellProto) const
+{
+    if(spellProto->spellLevel <= 0)
+        return 1.0f;
+
+    float LvlPenalty = 0.0f;
+
+    if(spellProto->spellLevel < 20)
+        LvlPenalty = 20.0f - spellProto->spellLevel * 3.75f;
+    float LvlFactor = (float(spellProto->spellLevel) + 6.0f) / float(getLevel());
+    if(LvlFactor > 1.0f)
+        LvlFactor = 1.0f;
+
+    return (100.0f - LvlPenalty) * LvlFactor / 100.0f;
+}
+
 void Unit::SendAttackStart(Unit* pVictim)
 {
     WorldPacket data( SMSG_ATTACKSTART, 16 );
@@ -7123,18 +7139,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             break;
     }
 
-    // Level Factor
-    float LvlPenalty = 0.0f;
-    float LvlFactor = 1.0f;
-
-    if(spellProto->spellLevel > 0)
-    {
-        if(spellProto->spellLevel < 20)
-            LvlPenalty = 20.0f - spellProto->spellLevel * 3.75f;
-        float LvlFactor = (float(spellProto->spellLevel) + 6.0f) / float(getLevel());
-        if(LvlFactor > 1.0f)
-            LvlFactor = 1.0f;
-    }
+    float LvlPenalty = CalculateLevelPenalty(spellProto);
 
     // Spellmod SpellDamage
     float SpellModSpellDamage = 100.0f;
@@ -7144,8 +7149,8 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
 
     SpellModSpellDamage /= 100.0f;
 
-    float DoneActualBenefit = DoneAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor * DotFactor * SpellModSpellDamage / 100.0f;
-    float TakenActualBenefit = TakenAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor * DotFactor / 100.0f;
+    float DoneActualBenefit = DoneAdvertisedBenefit * (CastingTime / 3500.0f) * DotFactor * SpellModSpellDamage * LvlPenalty;
+    float TakenActualBenefit = TakenAdvertisedBenefit * (CastingTime / 3500.0f) * DotFactor * LvlPenalty;
 
     float tmpDamage = (float(pdamage)+DoneActualBenefit)*DoneTotalMod;
 
@@ -7461,18 +7466,7 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
             break;
     }
 
-    // Level Factor
-    float LvlPenalty = 0.0f;
-    float LvlFactor = 1.0f;
-
-    if(spellProto->spellLevel > 0)
-    {
-        if(spellProto->spellLevel < 20)
-            LvlPenalty = 20.0f - spellProto->spellLevel * 3.75f;
-        float LvlFactor = (float(spellProto->spellLevel) + 6.0f) / float(getLevel());
-        if(LvlFactor > 1.0f)
-            LvlFactor = 1.0f;
-    }
+    float LvlPenalty = CalculateLevelPenalty(spellProto);
 
     // Spellmod SpellDamage
     float SpellModSpellDamage = 100.0f;
@@ -7482,7 +7476,7 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
 
     SpellModSpellDamage /= 100.0f;
 
-    float ActualBenefit = (float)AdvertisedBenefit * ((float)CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor * DotFactor / 100.0f * SpellModSpellDamage;
+    float ActualBenefit = (float)AdvertisedBenefit * ((float)CastingTime / 3500.0f) * DotFactor * SpellModSpellDamage * LvlPenalty;
 
     // use float as more appropriate for negative values and percent applying
     float heal = healamount + ActualBenefit;
