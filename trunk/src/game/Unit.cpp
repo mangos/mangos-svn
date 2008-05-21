@@ -6901,6 +6901,20 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     // Distribute Damage over multiple effects, reduce by AoE
     CastingTime = GetCastingTimeForBonus( spellProto, damagetype, CastingTime );   
 
+    /* FIXME: need replace hardocded spell modifiers by common leech effects/auras code
+    // 50% for damage and healing spells for leech spells from damage bonus and 0% from healing
+
+    for(int j = 0; j < 3; ++j)
+    {
+        if( spellProto->Effect[j] == SPELL_EFFECT_HEALTH_LEECH ||
+            spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA && spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH )
+        {
+            CastingTime /= 2;
+            break;
+        }
+    }
+    */
+
     switch(spellProto->SpellFamilyName)
     {
         case SPELLFAMILY_MAGE:
@@ -7124,17 +7138,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
 
     // Spellmod SpellDamage
     float SpellModSpellDamage = 100.0f;
-
-    // 50% for damage and healing spells for leech spells (heal amount base at damage)
-    for(int j = 0; j < 3; ++j)
-    {
-        if( spellProto->Effect[j] == SPELL_EFFECT_HEALTH_LEECH ||
-            spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA && spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH )
-        {
-            SpellModSpellDamage = 50.0f;
-            break;
-        }
-    }
 
     if(Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_SPELL_BONUS_DAMAGE,SpellModSpellDamage);
@@ -7413,6 +7416,19 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
 
     // distribute healing to all effects, reduce AoE damage
     CastingTime = GetCastingTimeForBonus( spellProto, damagetype, CastingTime );   
+
+    /*
+    // 0% bonus for damage and healing spells for leech spells from healing bonus
+    for(int j = 0; j < 3; ++j)
+    {
+        if( spellProto->Effect[j] == SPELL_EFFECT_HEALTH_LEECH ||
+            spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA && spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH )
+        {
+            CastingTime = 0;
+            break;
+        }
+    }
+    */
 
     // Exception
     switch (spellProto->SpellFamilyName)
@@ -10059,7 +10075,7 @@ uint32 Unit::GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectT
 
     // Area Effect Spells receive only half of bonus
     if ( AreaEffect )
-        CastingTime = uint32(CastingTime * 0.5f);
+        CastingTime /= 2;
 
     // -5% of total per any additional effect
     for ( uint8 i=0; i<effects; ++i)
