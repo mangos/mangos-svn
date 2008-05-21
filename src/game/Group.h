@@ -93,7 +93,9 @@ static const uint8 GroupUpdateLength[GROUP_UPDATE_FLAGS_COUNT] = { 0, 2, 2, 2, 1
 class Roll : public LootValidatorRef
 {
     public:
-        Roll(): itemGUID(0), itemid(0), itemRandomPropId(0), totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), itemSlot(0) {}
+        Roll(uint64 _guid, LootItem const& li)
+            : itemGUID(_guid), itemid(li.itemid), itemRandomPropId(li.randomPropertyId), itemRandomSuffix(li.randomSuffix), 
+            totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), itemSlot(0) {}
         ~Roll() { }
         void setLoot(Loot *pLoot) { link(pLoot, this); }
         Loot *getLoot() { return getTarget(); }
@@ -101,8 +103,8 @@ class Roll : public LootValidatorRef
 
         uint64 itemGUID;
         uint32 itemid;
-        uint32 itemRandomSuffix;
         int32  itemRandomPropId;
+        uint32 itemRandomSuffix;
         typedef std::map<uint64, RollVote> PlayerVote;
         PlayerVote playerVote;                              //vote position correspond with player position (in group)
         uint8 totalPlayersRolling;
@@ -256,10 +258,10 @@ class MANGOS_DLL_SPEC Group
         /***                   LOOT SYSTEM                     ***/
         /*********************************************************/
 
-        void SendLootStartRoll(uint64 Guid, uint32 CountDown, const Roll &r);
+        void SendLootStartRoll(uint32 CountDown, const Roll &r);
         void SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber, uint8 RollType, const Roll &r);
         void SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber, uint8 RollType, const Roll &r);
-        void SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, const Roll &r);
+        void SendLootAllPassed(uint32 NumberOfPlayers, const Roll &r);
         void GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature);
         void NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature);
         void MasterLoot(uint64 playerGUID, Loot *loot, Creature *creature);
