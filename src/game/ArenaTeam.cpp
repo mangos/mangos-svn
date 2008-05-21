@@ -392,7 +392,7 @@ void ArenaTeam::Stats(WorldSession *session)
 
 void ArenaTeam::InspectStats(WorldSession *session, uint64 guid)
 {
-    WorldPacket data(MSG_INSPECT_ARENA_STATS, 8+1+4*6);
+    WorldPacket data(MSG_INSPECT_ARENA_TEAMS, 8+1+4*6);
     data << uint64(guid);                                   // player guid
     data << uint8(GetSlot());                               // slot (0...2)
     data << uint32(GetId());                                // arena team id

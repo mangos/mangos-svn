@@ -1097,10 +1097,10 @@ void Guild::UnloadGuildBank()
 
 void Guild::SendMoneyInfo(WorldSession *session, uint32 LowGuid)
 {
-    WorldPacket data(MSG_GUILD_BANK_GET_MONEY_AMOUNT, 4);
+    WorldPacket data(MSG_GUILD_BANK_MONEY_WITHDRAWN, 4);
     data << uint32(GetMemberMoneyWithdrawRem(LowGuid));
     session->SendPacket(&data);
-    sLog.outDebug("WORLD: Sent (MSG_GUILD_BANK_GET_MONEY_AMOUNT)");
+    sLog.outDebug("WORLD: Sent (MSG_GUILD_BANK_MONEY_WITHDRAWN)");
 }
 
 bool Guild::MemberMoneyWithdraw(uint32 amount, uint32 LowGuid)
@@ -1402,7 +1402,7 @@ void Guild::DisplayGuildBankLogs(WorldSession *session, uint8 TabId)
     if (TabId == GUILD_BANK_MAX_TABS)
     {
         // Here we display money logs
-        WorldPacket data(MSG_GUILD_BANK_LOG, m_GuildBankEventLog_Money.size()*(4*4+1)+1+1);
+        WorldPacket data(MSG_GUILD_BANK_LOG_QUERY, m_GuildBankEventLog_Money.size()*(4*4+1)+1+1);
         data << uint8(TabId);                               // Here GUILD_BANK_MAX_TABS
         data << uint8(m_GuildBankEventLog_Money.size());    // number of log entries
         for (GuildBankEventLog::const_iterator itr = m_GuildBankEventLog_Money.begin(); itr != m_GuildBankEventLog_Money.end(); ++itr)
@@ -1418,7 +1418,7 @@ void Guild::DisplayGuildBankLogs(WorldSession *session, uint8 TabId)
     else
     {
         // here we display current tab logs
-        WorldPacket data(MSG_GUILD_BANK_LOG, m_GuildBankEventLog_Item[TabId].size()*(4*4+1+1)+1+1);
+        WorldPacket data(MSG_GUILD_BANK_LOG_QUERY, m_GuildBankEventLog_Item[TabId].size()*(4*4+1+1)+1+1);
         data << uint8(TabId);                               // Here a real Tab Id
                                                             // number of log entries
         data << uint8(m_GuildBankEventLog_Item[TabId].size());
@@ -1435,7 +1435,7 @@ void Guild::DisplayGuildBankLogs(WorldSession *session, uint8 TabId)
         }
         session->SendPacket(&data);
     }
-    sLog.outDebug("WORLD: Sent (MSG_GUILD_BANK_LOG)");
+    sLog.outDebug("WORLD: Sent (MSG_GUILD_BANK_LOG_QUERY)");
 }
 
 void Guild::LogBankEvent(uint8 LogEntry, uint8 TabId, uint32 PlayerGuidLow, uint32 ItemOrMoney, uint8 ItemStackCount, uint8 DestTabId)
@@ -1773,7 +1773,7 @@ void Guild::SendGuildBankTabText(WorldSession *session, uint8 TabId)
     if (!tab)
         return;
 
-    WorldPacket data(MSG_GUILD_BANK_TAB_TEXT, 1+tab->Text.size()+1);
+    WorldPacket data(MSG_QUERY_GUILD_BANK_TEXT, 1+tab->Text.size()+1);
     data << uint8(TabId);
     data << tab->Text;
     session->SendPacket(&data);

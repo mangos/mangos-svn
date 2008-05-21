@@ -176,7 +176,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendSaveGuildEmblem( uint32 msg );
 
         // Looking For Group
-        // TRUE values set by client sending CMSG_LFG_SET_AUTOJOIN and CMSG_LFM_UNSET_AUTOADD before player login
+        // TRUE values set by client sending CMSG_LFG_SET_AUTOJOIN and CMSG_LFM_CLEAR_AUTOFILL before player login
         bool LookingForGroup_auto_join;
         bool LookingForGroup_auto_add;
 

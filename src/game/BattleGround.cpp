@@ -529,7 +529,7 @@ void BattleGround::SendRewardMarkByMail(Player *plr,uint32 mark, uint32 count)
 
 void BattleGround::BlockMovement(Player *plr)
 {
-    WorldPacket data(SMSG_UNKNOWN_794, 8);                  // this must block movement
+    WorldPacket data(SMSG_SPLINE_MOVE_ROOT, 8);             // this must block movement
     data.append(plr->GetPackGUID());
     plr->GetSession()->SendPacket(&data);
 }

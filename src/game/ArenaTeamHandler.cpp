@@ -28,7 +28,7 @@
 
 void WorldSession::HandleInspectArenaStatsOpcode(WorldPacket & recv_data)
 {
-    sLog.outDebug("MSG_INSPECT_ARENA_STATS");
+    sLog.outDebug("MSG_INSPECT_ARENA_TEAMS");
     //recv_data.hexlike();
 
     CHECK_PACKET_SIZE(recv_data, 8);
@@ -411,7 +411,7 @@ void WorldSession::BuildArenaTeamEventPacket(WorldPacket *data, uint8 eventid, u
 
 void WorldSession::SendNotInArenaTeamPacket(uint8 type)
 {
-    WorldPacket data(SMSG_ARENA_NO_TEAM, 4+1);              // 886 - You are not in a %uv%u arena team
+    WorldPacket data(SMSG_ARENA_ERROR, 4+1);                // 886 - You are not in a %uv%u arena team
     uint32 unk = 0;
     data << uint32(unk);                                    // unk(0)
     if(!unk)

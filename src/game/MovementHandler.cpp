@@ -402,14 +402,14 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     uint16 opcode = recv_data.GetOpcode();
     switch(opcode)
     {
-        case CMSG_FORCE_WALK_SPEED_CHANGE_ACK:      move_type = MOVE_WALK;     force_move_type = MOVE_WALK;     break;
-        case CMSG_FORCE_RUN_SPEED_CHANGE_ACK:       move_type = MOVE_RUN;      force_move_type = MOVE_RUN;      break;
-        case CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK:  move_type = MOVE_WALKBACK; force_move_type = MOVE_WALKBACK; break;
-        case CMSG_FORCE_SWIM_SPEED_CHANGE_ACK:      move_type = MOVE_SWIM;     force_move_type = MOVE_SWIM;     break;
-        case CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK: move_type = MOVE_SWIMBACK; force_move_type = MOVE_SWIMBACK; break;
-        case CMSG_FORCE_TURN_RATE_CHANGE_ACK:       move_type = MOVE_TURN;     force_move_type = MOVE_TURN;     break;
-        case CMSG_FORCE_FLY_SPEED_CHANGE_ACK:       move_type = MOVE_FLY;      force_move_type = MOVE_FLY;      break;
-        case CMSG_FORCE_FLY_BACK_SPEED_CHANGE_ACK:  move_type = MOVE_FLYBACK;  force_move_type = MOVE_FLYBACK;  break;
+        case CMSG_FORCE_WALK_SPEED_CHANGE_ACK:          move_type = MOVE_WALK;     force_move_type = MOVE_WALK;     break;
+        case CMSG_FORCE_RUN_SPEED_CHANGE_ACK:           move_type = MOVE_RUN;      force_move_type = MOVE_RUN;      break;
+        case CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK:      move_type = MOVE_WALKBACK; force_move_type = MOVE_WALKBACK; break;
+        case CMSG_FORCE_SWIM_SPEED_CHANGE_ACK:          move_type = MOVE_SWIM;     force_move_type = MOVE_SWIM;     break;
+        case CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK:     move_type = MOVE_SWIMBACK; force_move_type = MOVE_SWIMBACK; break;
+        case CMSG_FORCE_TURN_RATE_CHANGE_ACK:           move_type = MOVE_TURN;     force_move_type = MOVE_TURN;     break;
+        case CMSG_FORCE_FLIGHT_SPEED_CHANGE_ACK:        move_type = MOVE_FLY;      force_move_type = MOVE_FLY;      break;
+        case CMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK:   move_type = MOVE_FLYBACK;  force_move_type = MOVE_FLYBACK;  break;
         default:
             sLog.outError("WorldSession::HandleForceSpeedChangeAck: Unknown move type opcode: %u",opcode);
             return;

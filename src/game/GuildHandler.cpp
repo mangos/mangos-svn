@@ -861,7 +861,7 @@ void WorldSession::HandleGuildChangeInfoOpcode(WorldPacket& recvPacket)
 {
     CHECK_PACKET_SIZE(recvPacket, 1);
 
-    //sLog.outDebug("WORLD: Received CMSG_GUILD_CHANGEINFO");
+    //sLog.outDebug("WORLD: Received CMSG_GUILD_INFO_TEXT");
 
     std::string GINFO;
 
@@ -951,12 +951,12 @@ void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildEventLogOpcode(WorldPacket& /* recvPacket */)
 {
-    sLog.outDebug("WORLD: Received (MSG_GUILD_EVENT_LOG)"); // empty
+    sLog.outDebug("WORLD: Received (MSG_GUILD_EVENT_LOG_QUERY)"); // empty
     //recvPacket.hexlike();
 
     uint8 count = 0,type = 0;
 
-    WorldPacket data(MSG_GUILD_EVENT_LOG, 0);
+    WorldPacket data(MSG_GUILD_EVENT_LOG_QUERY, 0);
     data << uint8(count);                                   // count, max count == 100
     for(int i = 0; i < count; ++i)
     {
@@ -973,14 +973,14 @@ void WorldSession::HandleGuildEventLogOpcode(WorldPacket& /* recvPacket */)
 
     }
     SendPacket(&data);
-    sLog.outDebug("WORLD: Sent (MSG_GUILD_EVENT_LOG)");
+    sLog.outDebug("WORLD: Sent (MSG_GUILD_EVENT_LOG_QUERY)");
 }
 
 /******  GUILD BANK  *******/
 
 void WorldSession::HandleGuildBankGetMoneyAmount( WorldPacket & /* recv_data */ )
 {
-    sLog.outDebug("WORLD: Received (MSG_GUILDBANK_GET_MONEY_AMOUNT)");
+    sLog.outDebug("WORLD: Received (MSG_GUILD_BANK_MONEY_WITHDRAWN)");
     //recv_data.hexlike();
 
     uint32 GuildId = GetPlayer()->GetGuildId();
@@ -996,7 +996,7 @@ void WorldSession::HandleGuildBankGetMoneyAmount( WorldPacket & /* recv_data */ 
 
 void WorldSession::HandleGuildBankGetRights( WorldPacket& /* recv_data */ )
 {
-    sLog.outDebug("WORLD: Received (MSG_GUILDBANK_GET_RIGHTS)");
+    sLog.outDebug("WORLD: Received (MSG_GUILD_PERMISSIONS)");
 
     uint32 GuildId = GetPlayer()->GetGuildId();
     if (GuildId == 0)
@@ -1008,7 +1008,7 @@ void WorldSession::HandleGuildBankGetRights( WorldPacket& /* recv_data */ )
 
     uint32 rankId = GetPlayer()->GetRank();
 
-    WorldPacket data(MSG_GUILD_BANK_GET_RIGHTS, 4*15+1);
+    WorldPacket data(MSG_GUILD_PERMISSIONS, 4*15+1);
     data << uint32(rankId);                                 // guild rank id
     data << uint32(pGuild->GetRankRights(rankId));          // rank rights
                                                             // money per day left
@@ -1020,13 +1020,13 @@ void WorldSession::HandleGuildBankGetRights( WorldPacket& /* recv_data */ )
         data << uint32(pGuild->GetMemberSlotWithdrawRem(GetPlayer()->GetGUIDLow(), uint8(i)));
     }
     SendPacket(&data);
-    sLog.outDebug("WORLD: Sent (MSG_GUILD_BANK_GET_RIGHTS)");
+    sLog.outDebug("WORLD: Sent (MSG_GUILD_PERMISSIONS)");
 }
 
 /* Called when clicking on Guild bank gameobject */
 void WorldSession::HandleGuildBankQuery( WorldPacket & recv_data )
 {
-    sLog.outDebug("WORLD: Received (CMSG_GUILD_BANK)");
+    sLog.outDebug("WORLD: Received (CMSG_GUILD_BANKER_ACTIVATE)");
     CHECK_PACKET_SIZE(recv_data,8+1);
     uint64 GoGuid;
     uint8  unk;
@@ -1050,7 +1050,7 @@ void WorldSession::HandleGuildBankQuery( WorldPacket & recv_data )
 /* Called when opening guild bank tab only (first one) */
 void WorldSession::HandleGuildBankTabColon( WorldPacket & recv_data )
 {
-    sLog.outDebug("WORLD: Received (CMSG_GUILDBANK_TAB_COLON)");
+    sLog.outDebug("WORLD: Received (CMSG_GUILD_BANK_QUERY_TAB)");
     CHECK_PACKET_SIZE(recv_data,8+1+1);
     uint64 GoGuid;
     uint8 TabId,unk1;
@@ -1076,7 +1076,7 @@ void WorldSession::HandleGuildBankTabColon( WorldPacket & recv_data )
 
 void WorldSession::HandleGuildBankDeposit( WorldPacket & recv_data )
 {
-    sLog.outDebug("WORLD: Received (CMSG_GUILDBANK_DEPOSIT)");
+    sLog.outDebug("WORLD: Received (CMSG_GUILD_BANK_DEPOSIT_MONEY)");
     CHECK_PACKET_SIZE(recv_data,8+4);
     uint64 GoGuid;
     uint32 money;
@@ -1123,7 +1123,7 @@ void WorldSession::HandleGuildBankDeposit( WorldPacket & recv_data )
 
 void WorldSession::HandleGuildBankWithdraw( WorldPacket & recv_data )
 {
-    sLog.outDebug("WORLD: Received (CMSG_GUILDBANK_WITHDRAW)");
+    sLog.outDebug("WORLD: Received (CMSG_GUILD_BANK_WITHDRAW_MONEY)");
     CHECK_PACKET_SIZE(recv_data,8+4);
     uint64 GoGuid;
     uint32 money;
@@ -1172,7 +1172,7 @@ void WorldSession::HandleGuildBankWithdraw( WorldPacket & recv_data )
 
 void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
 {
-    sLog.outDebug("WORLD: Received (CMSG_GUILD_BANK_DEPOSIT_ITEM)");
+    sLog.outDebug("WORLD: Received (CMSG_GUILD_BANK_SWAP_ITEMS)");
     //recv_data.hexlike();
 
     uint64 GoGuid;
@@ -1726,7 +1726,7 @@ void WorldSession::HandleGuildBankBuyTab( WorldPacket & recv_data )
 
 void WorldSession::HandleGuildBankModifyTab( WorldPacket & recv_data )
 {
-    sLog.outDebug("WORLD: Received (CMSG_GUILD_BANK_MODIFY_TAB)");
+    sLog.outDebug("WORLD: Received (CMSG_GUILD_BANK_UPDATE_TAB)");
     //recv_data.hexlike();
     CHECK_PACKET_SIZE(recv_data, 8+1+1+1);
     uint64 GoGuid;
@@ -1763,7 +1763,7 @@ void WorldSession::HandleGuildBankModifyTab( WorldPacket & recv_data )
 
 void WorldSession::HandleGuildBankLog( WorldPacket & recv_data )
 {
-    sLog.outDebug("WORLD: Received (MSG_GUILDBANK_LOG)");
+    sLog.outDebug("WORLD: Received (MSG_GUILD_BANK_LOG_QUERY)");
     CHECK_PACKET_SIZE(recv_data, 1);
 
     uint32 GuildId = GetPlayer()->GetGuildId();
@@ -1782,7 +1782,7 @@ void WorldSession::HandleGuildBankLog( WorldPacket & recv_data )
 
 void WorldSession::HandleGuildBankTabText(WorldPacket &recv_data)
 {
-    sLog.outDebug("WORLD: Received MSG_GUILD_BANK_TAB_INFO");
+    sLog.outDebug("WORLD: Received MSG_QUERY_GUILD_BANK_TEXT");
     CHECK_PACKET_SIZE(recv_data, 1);
 
     uint32 GuildId = GetPlayer()->GetGuildId();
@@ -1801,7 +1801,7 @@ void WorldSession::HandleGuildBankTabText(WorldPacket &recv_data)
 
 void WorldSession::HandleGuildBankSetTabText(WorldPacket &recv_data)
 {
-    sLog.outDebug("WORLD: Received CMSG_GUILD_BANK_SET_TAB_INFO");
+    sLog.outDebug("WORLD: Received CMSG_SET_GUILD_BANK_TEXT");
     CHECK_PACKET_SIZE(recv_data, 1+1);
 
     uint32 GuildId = GetPlayer()->GetGuildId();

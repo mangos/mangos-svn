@@ -1047,7 +1047,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
 {
-    sLog.outDebug("WORLD: CMSG_SOCKET_ITEM");
+    sLog.outDebug("WORLD: CMSG_SOCKET_GEMS");
 
     CHECK_PACKET_SIZE(recv_data,8*4);
 
@@ -1176,7 +1176,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleCancelTempItemEnchantmentOpcode(WorldPacket& recv_data)
 {
-    sLog.outDebug("WORLD: CMSG_CANCEL_TEMP_ITEM_ENCHANTMENT");
+    sLog.outDebug("WORLD: CMSG_CANCEL_TEMP_ENCHANTMENT");
 
     CHECK_PACKET_SIZE(recv_data,4);
 
