@@ -400,13 +400,19 @@ void LoadDBCStores(std::string dataPath)
         exit(1);
     }
 
-    // check at up-to-date DBC files (47653 is last added spell in 2.4.1)
-    // check at up-to-date DBC files (47280 is last added spell in abilities in 2.4.1)
-    // check at up-to-date DBC files (598 is last map added in 2.4.1)
-    // check at up-to-date DBC files (1768 is last area added in 2.4.1)
+    // check at up-to-date DBC files (47653 is last added spell in 2.4.1/2.4.2)
+    // check at up-to-date DBC files (47280 is last added spell in abilities in 2.4.1/2.4.2)
+    // check at up-to-date DBC files (598 is last map added in 2.4.1/2.4.2)
+    // check at up-to-date DBC files (1041 is last gem property added in 2.4.2)
+    // check at up-to-date DBC files (2406 is last item extended cost added in 2.4.2)
+    // check at up-to-date DBC files (71 is last char title added in 2.4.2)
+    // check at up-to-date DBC files (1768 is last area added in 2.4.1/2.4.2)
     if( !sSpellStore.LookupEntry(47653)            || 
         !sSkillLineAbilityStore.LookupEntry(47280) || 
         !sMapStore.LookupEntry(598)                ||
+        !sGemPropertiesStore.LookupEntry(1041)     || 
+        !sItemExtendedCostStore.LookupEntry(2406)  || 
+        !sCharTitlesStore.LookupEntry(71)          ||
         !sAreaStore.LookupEntry(1768)              )
     {
         sLog.outError("\nYou have _outdated_ DBC files. Please extract correct versions from current using client.");
