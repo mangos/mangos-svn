@@ -777,7 +777,7 @@ void Guild::DisplayGuildBankContent(WorldSession *session, uint8 TabId)
 
 void Guild::DisplayGuildBankMoneyUpdate()
 {
-    WorldPacket data(SMSG_GUILD_BANK_LIST,1200);
+    WorldPacket data(SMSG_GUILD_BANK_LIST, 8+1+4+1+1);
 
     data << uint64(GetGuildBankMoney());
     data << uint8(0);
@@ -1524,16 +1524,16 @@ void Guild::AppendDisplayGuildBankSlot( WorldPacket& data, GuildBankTab const *t
         // +12 // ITEM_FIELD_STACK_COUNT
         data << uint8(pItem->GetCount());
         data << uint32(0);                                  // +16 // Unknown value
-        //data << uint8(0);
+        data << uint8(0);                                   // unknown 2.4.2
         uint32 Enchant0 = pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT);
         if (Enchant0)
         {
-            data << uint8(1);                               // nb of enchantements (max 3)
+            data << uint8(1);                               // number of enchantments (max 3) why max 3?
             data << uint8(PERM_ENCHANTMENT_SLOT);           // enchantment slot (range: 0:2)
             data << uint32(Enchant0);                       // enchantment id
         }
         else
-            data << uint8(0);
+            data << uint8(0);                               // no enchantments (0)
     }
 }
 

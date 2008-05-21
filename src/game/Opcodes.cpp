@@ -1082,6 +1082,12 @@ const char* g_worldOpcodeNames[MAX_OPCODE_ID] =
     "UMSG_UNKNOWN_1051",                                    // UMSG_UNKNOWN_1051
     "UMSG_UNKNOWN_1052",                                    // UMSG_UNKNOWN_1052
     "SMSG_UNKNOWN_1053",                                    // SMSG_UNKNOWN_1053
-    //there would be declared new opcode, id 1054
+    "SMSG_UNKNOWN_1054",                                    // SMSG_UNKNOWN_1054
+    "CMSG_UNKNOWN_1055",                                    // CMSG_UNKNOWN_1055
+    "SMSG_UNKNOWN_1056",                                    // SMSG_UNKNOWN_1056
+    "SMSG_UNKNOWN_1057",                                    // SMSG_UNKNOWN_1057
+    "SMSG_UNKNOWN_1058",                                    // SMSG_UNKNOWN_1058
+    "SMSG_UNKNOWN_1059",                                    // SMSG_UNKNOWN_1059
+    //there would be declared new opcode, id 1060
     //do not forget to change MAX_OPCODE_ID, if you add a line here!
 };

@@ -374,10 +374,9 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         }
         data << pProto->socketBonus;
         data << pProto->GemProperties;
-        //data << pProto->ExtendedCost;    deleted in 0.4.0 PTR
-        //data << pProto->CondExtendedCost;
         data << pProto->RequiredDisenchantSkill;
         data << pProto->ArmorDamageModifier;
+        data << uint32(0);                                  // added in 2.4.2.8209, duration (seconds)
         SendPacket( &data );
     }
     else
