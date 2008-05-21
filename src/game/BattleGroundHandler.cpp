@@ -186,6 +186,12 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket & /*recv
         uint32 count1 = 0;
         uint32 count2 = 0;
 
+        Player *ap = objmgr.GetPlayer(((BattleGroundWS*)bg)->GetAllianceFlagPickerGUID());
+        if(ap) ++count2;
+
+        Player *hp = objmgr.GetPlayer(((BattleGroundWS*)bg)->GetHordeFlagPickerGUID());
+        if(hp) ++count2;
+
         WorldPacket data(MSG_BATTLEGROUND_PLAYER_POSITIONS, (4+4+16*count1+16*count2));
         data << count1;                                     // alliance flag holders count
         /*for(uint8 i = 0; i < count1; i++)
@@ -195,23 +201,18 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket & /*recv
             data << (float)0;                               // y
         }*/
         data << count2;                                     // horde flag holders count
-        Player *ap = objmgr.GetPlayer(((BattleGroundWS*)bg)->GetAllianceFlagPickerGUID());
         if(ap)
         {
-            data << ap->GetGUID();
-            data << ap->GetPositionX();
-            data << ap->GetPositionY();
-            ++count2;
+            data << (uint64)ap->GetGUID();
+            data << (float)ap->GetPositionX();
+            data << (float)ap->GetPositionY();
         }
-        Player *hp = objmgr.GetPlayer(((BattleGroundWS*)bg)->GetHordeFlagPickerGUID());
         if(hp)
         {
-            data << hp->GetGUID();
-            data << hp->GetPositionX();
-            data << hp->GetPositionY();
-            ++count2;
+            data << (uint64)hp->GetGUID();
+            data << (float)hp->GetPositionX();
+            data << (float)hp->GetPositionY();
         }
-        data.put<uint32>(4, count2);
 
         SendPacket(&data);
     }

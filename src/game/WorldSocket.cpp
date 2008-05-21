@@ -354,7 +354,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     AccountTypes allowedAccountType = sWorld.GetPlayerSecurityLimit();
     if( allowedAccountType > SEC_PLAYER && security < allowedAccountType)
     {
-        WorldPacket Packet(SMSG_AUTH_RESPONSE, 15);
+        WorldPacket Packet(SMSG_AUTH_RESPONSE, 1);
         Packet << uint8(AUTH_UNAVAILABLE);
         SendPacket(&Packet);
         return;

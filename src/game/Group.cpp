@@ -357,7 +357,7 @@ void Group::SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber,
 
 void Group::SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber, uint8 RollType, const Roll &r)
 {
-    WorldPacket data(SMSG_LOOT_ROLL_WON, (8+4+4+4+4+1+1));
+    WorldPacket data(SMSG_LOOT_ROLL_WON, (8+4+4+4+4+8+1+1));
     data << uint64(SourceGuid);                             // guid of the item rolled
     data << uint32(0);                                      // unknown, maybe amount of players
     data << uint32(r.itemid);                               // the itemEntryId for the item that shall be rolled for
@@ -779,7 +779,7 @@ void Group::SendUpdate()
         if(!player || !player->GetSession())
             continue;
                                                             // guess size
-        WorldPacket data(SMSG_GROUP_LIST, (6+8+8+1+2+GetMembersCount()*20));
+        WorldPacket data(SMSG_GROUP_LIST, (1+1+1+1+8+4+GetMembersCount()*20));
         data << (uint8)m_groupType;                         // group type
         data << (uint8)(isBGGroup() ? 1 : 0);               // 2.0.x, isBattleGroundGroup?
         data << (uint8)(citr->group);                       // groupid
@@ -792,7 +792,7 @@ void Group::SendUpdate()
                 continue;
 
             data << citr2->name;
-            data << citr2->guid;
+            data << (uint64)citr2->guid;
                                                             // online-state
             data << (uint8)(objmgr.GetPlayer(citr2->guid) ? 1 : 0);
             data << (uint8)(citr2->group);                  // groupid

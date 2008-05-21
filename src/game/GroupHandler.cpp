@@ -433,7 +433,7 @@ void WorldSession::HandleRandomRollOpcode(WorldPacket& recv_data)
 
     //sLog.outDebug("ROLL: MIN: %u, MAX: %u, ROLL: %u", minimum, maximum, roll);
 
-    WorldPacket data(MSG_RANDOM_ROLL, 24);
+    WorldPacket data(MSG_RANDOM_ROLL, 4+4+4+8);
     data << minimum;
     data << maximum;
     data << roll;
@@ -777,7 +777,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
     Player *player = objmgr.GetPlayer(Guid);
     if(!player)
     {
-        WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 2+4+2);
+        WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 3+4+2);
         data.appendPackGUID(Guid);
         data << (uint32) GROUP_UPDATE_FLAG_STATUS;
         data << (uint16) MEMBER_STATUS_OFFLINE;
