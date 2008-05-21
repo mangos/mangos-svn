@@ -687,7 +687,7 @@ void WorldSession::LogoutPlayer(bool Save)
             guild->LoadPlayerStatsByGuid(_player->GetGUID());
             guild->UpdateLogoutTime(_player->GetGUID());
 
-            WorldPacket data(SMSG_GUILD_EVENT, (5+12));     // name limited to 12 in character table.
+            WorldPacket data(SMSG_GUILD_EVENT, (1+1+12+8)); // name limited to 12 in character table.
             data<<(uint8)GE_SIGNED_OFF;
             data<<(uint8)1;
             data<<_player->GetName();

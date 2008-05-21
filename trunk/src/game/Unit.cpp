@@ -4170,7 +4170,7 @@ void Unit::RemoveGameObject(uint32 spellid, bool del)
 void Unit::SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID,uint32 Damage, SpellSchoolMask damageSchoolMask,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked, bool CriticalHit)
 {
     sLog.outDebug("Sending: SMSG_SPELLNONMELEEDAMAGELOG");
-    WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (16+31)); // we guess size
+    WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (16+4+4+1+4+4+1+1+4+4+1)); // we guess size
     data.append(target->GetPackGUID());
     data.append(GetPackGUID());
     data << uint32(SpellID);
@@ -9774,7 +9774,7 @@ void Unit::SendPetSpellCooldown (uint32 spellid, time_t cooltime)
     if(!owner || owner->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    WorldPacket data(SMSG_SPELL_COOLDOWN, 8+8);
+    WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4+4);
     data << uint64(GetGUID());
     data << uint8(0x0);
     data << uint32(spellid);

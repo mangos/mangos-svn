@@ -644,7 +644,7 @@ void Guild::Disband()
 void Guild::Roster(WorldSession *session)
 {
                                                             // we can only guess size
-    WorldPacket data(SMSG_GUILD_ROSTER, (4+MOTD.length()+1+GINFO.length()+1+4+6*8+m_ranks.size()*4+members.size()*50));
+    WorldPacket data(SMSG_GUILD_ROSTER, (4+MOTD.length()+1+GINFO.length()+1+4+m_ranks.size()*(4+4+GUILD_BANK_MAX_TABS*(4+4))+members.size()*50));
     data << (uint32)members.size();
     data << MOTD;
     data << GINFO;
@@ -652,12 +652,12 @@ void Guild::Roster(WorldSession *session)
     data << (uint32)m_ranks.size();
     for (RankList::iterator ritr = m_ranks.begin(); ritr != m_ranks.end();++ritr)
     {
-        data << ritr->rights;
-        data << ritr->BankMoneyPerDay;                      // count of: withdraw gold(gold/day) Note: in game set gold, in packet set bronze.
+        data << (uint32)ritr->rights;
+        data << (uint32)ritr->BankMoneyPerDay;              // count of: withdraw gold(gold/day) Note: in game set gold, in packet set bronze.
         for (int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
         {
-            data << ritr->TabRight[i];                      // for TAB_i rights: view tabs = 0x01, deposit items =0x02
-            data << ritr->TabSlotPerDay[i];                 // for TAB_i count of: withdraw items(stack/day)
+            data << (uint32)ritr->TabRight[i];              // for TAB_i rights: view tabs = 0x01, deposit items =0x02
+            data << (uint32)ritr->TabSlotPerDay[i];         // for TAB_i count of: withdraw items(stack/day)
         }
     }
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
