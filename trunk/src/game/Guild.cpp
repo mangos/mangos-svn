@@ -789,14 +789,7 @@ void Guild::DisplayGuildBankMoneyUpdate()
 
     data << uint8(0);                                       // not send items
 
-    for(MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
-    {
-        Player *player = ObjectAccessor::FindPlayer(MAKE_NEW_GUID(itr->first, 0, HIGHGUID_PLAYER));
-        if(!player)
-            continue;
-
-        player->GetSession()->SendPacket(&data);
-    }
+    BroadcastPacket(&data);
 
     sLog.outDebug("WORLD: Sent (SMSG_GUILD_BANK_LIST)");
 }
@@ -921,6 +914,7 @@ void Guild::DisplayGuildBankTabsInfo(WorldSession *session)
     }
     data << uint8(0);                                       // Do not send tab content
     session->SendPacket(&data);
+
     sLog.outDebug("WORLD: Sent (SMSG_GUILD_BANK_LIST)");
 }
 
@@ -950,6 +944,9 @@ void Guild::SetGuildBankTabInfo(uint8 TabId, std::string Name, std::string Icon)
         return;
 
     if (!m_TabListMap[TabId])
+        return;
+
+    if(m_TabListMap[TabId]->Name == Name || m_TabListMap[TabId]->Icon == Icon)
         return;
 
     m_TabListMap[TabId]->Name = Name;
@@ -1756,6 +1753,9 @@ void Guild::SetGuildBankTabText(uint8 TabId, std::string text)
     if (TabId >= m_TabListMap.size())
         return;
     if (!m_TabListMap[TabId])
+        return;
+
+    if(m_TabListMap[TabId]->Text==text)
         return;
 
     m_TabListMap[TabId]->Text = text;
