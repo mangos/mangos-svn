@@ -4611,42 +4611,43 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
 
     if(apply)
     {
-        float DoneActualBenefit = 0.0f;
-        switch(m_spellProto->SpellFamilyName)
-        {
-            case SPELLFAMILY_PRIEST:
-                if(m_spellProto->SpellFamilyFlags == 0x1) //PW:S
-                {
-                    //+30% from +healing bonus
-                    DoneActualBenefit = GetCaster()->SpellBaseHealingBonus(GetSpellSchoolMask(m_spellProto)) * 0.3f;
-                    break;
-                }
-                break;
-            case SPELLFAMILY_MAGE:
-                if(m_spellProto->SpellFamilyFlags == 0x80100 || m_spellProto->SpellFamilyFlags == 0x8 || m_spellProto->SpellFamilyFlags == 0x100000000LL)
-                {
-                    //+10% from +spd bonus //frost ward, fire ward, ice barrier	
-                    DoneActualBenefit = GetCaster()->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.1f;
-                    break;
-                }
-                break;
-            case SPELLFAMILY_WARLOCK:
-                if(m_spellProto->SpellFamilyFlags == 0x00)
-                {
-                    //+10% from +spd bonus //shadow ward	
-                    DoneActualBenefit = GetCaster()->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.1f;
-                    break;
-                }
-                break;
-            default:
-                break;
-        }
-
-
         if(Unit* caster = GetCaster())
+        {
+            float DoneActualBenefit = 0.0f;
+            switch(m_spellProto->SpellFamilyName)
+            {
+                case SPELLFAMILY_PRIEST:
+                    if(m_spellProto->SpellFamilyFlags == 0x1) //PW:S
+                    {
+                        //+30% from +healing bonus
+                        DoneActualBenefit = caster->SpellBaseHealingBonus(GetSpellSchoolMask(m_spellProto)) * 0.3f;
+                        break;
+                    }
+                    break;
+                case SPELLFAMILY_MAGE:
+                    if(m_spellProto->SpellFamilyFlags == 0x80100 || m_spellProto->SpellFamilyFlags == 0x8 || m_spellProto->SpellFamilyFlags == 0x100000000LL)
+                    {
+                        //+10% from +spd bonus //frost ward, fire ward, ice barrier	
+                        DoneActualBenefit = caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.1f;
+                        break;
+                    }
+                    break;
+                case SPELLFAMILY_WARLOCK:
+                    if(m_spellProto->SpellFamilyFlags == 0x00)
+                    {
+                        //+10% from +spd bonus //shadow ward	
+                        DoneActualBenefit = caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.1f;
+                        break;
+                    }
+                    break;
+                default:
+                    break;
+            }
+
             DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellProto());
 
-        m_modifier.m_amount += DoneActualBenefit;
+            m_modifier.m_amount += DoneActualBenefit;
+        }
 
     }
 }
