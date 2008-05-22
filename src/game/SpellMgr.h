@@ -322,6 +322,17 @@ inline bool IsAreaEffectTarget( Targets target )
     return false;
 }
 
+inline bool IsAreaOfEffectSpell(SpellEntry const *spellInfo)
+{
+    if(IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[0])) || IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[0])))
+        return true;
+    if(IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[1])) || IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[1])))
+        return true;
+    if(IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetA[2])) || IsAreaEffectTarget(Targets(spellInfo->EffectImplicitTargetB[2])))
+        return true;
+    return false;
+}
+
 inline bool CanBeUsedWhileStealthed(SpellEntry const* spellInfo)
 {
     return ( (spellInfo->AttributesEx & 32) == 32 || spellInfo->AttributesEx2 == 0x200000);
