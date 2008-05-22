@@ -594,8 +594,8 @@ struct SpellEntry
     //uint32    PreventionType;                             // 201 not used
     //uint32    StanceBarOrder;                             // 202 not used
     float     DmgMultiplier[3];                             // 203-205
-    //uint32    MinFactionId;                               // 206 not used
-    //uint32    MinReputation;                              // 207 not used
+    //uint32    MinFactionId;                               // 206 not used, and 0 in 2.4.2
+    //uint32    MinReputation;                              // 207 not used, and 0 in 2.4.2
     //uint32    RequiredAuraVision;                         // 208 not used
     uint32    TotemCategory[2];                             // 209-210
     uint32    AreaId;                                       // 211
