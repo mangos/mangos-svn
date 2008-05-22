@@ -73,7 +73,7 @@ class MANGOS_DLL_SPEC WorldSession
         WorldSession(uint32 id, WorldSocket *sock, uint32 sec, bool tbc, time_t mute_time, LocaleConstant locale);
         ~WorldSession();
 
-        bool PlayerLoading() { return m_playerLoading; }
+        bool PlayerLoading() const { return m_playerLoading; }
         bool PlayerLogout() const { return m_playerLogout; }
 
         void SizeError(WorldPacket const& packet, uint32 size) const;

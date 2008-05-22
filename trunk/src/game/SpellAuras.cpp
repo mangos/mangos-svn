@@ -1310,7 +1310,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         // Earth Shield
         if ( caster && GetSpellProto()->SpellFamilyName == SPELLFAMILY_SHAMAN && (GetSpellProto()->SpellFamilyFlags & 0x40000000000LL))
         {
-            m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
+            // prevent double apply bonuses
+            if(m_target->GetTypeId()!=TYPEID_PLAYER || !((Player*)m_target)->GetSession()->PlayerLoading())
+                m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
             return;
         }
 
@@ -1474,7 +1476,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 if ( apply )
                 {
                     if ( caster )
-                        m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
+                        // prevent double apply bonuses
+                        if(m_target->GetTypeId()!=TYPEID_PLAYER || !((Player*)m_target)->GetSession()->PlayerLoading())
+                            m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
                 }
                 else
                 {
@@ -4609,7 +4613,8 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
     if(!Real)
         return;
 
-    if(apply)
+    // prevent double apply bonuses
+    if(apply && (m_target->GetTypeId()!=TYPEID_PLAYER || !((Player*)m_target)->GetSession()->PlayerLoading()))
     {
         if(Unit* caster = GetCaster())
         {
