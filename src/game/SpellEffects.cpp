@@ -2336,6 +2336,39 @@ void Spell::EffectEnergize(uint32 i)
     if(m_spellInfo->EffectMiscValue[i] < 0 || m_spellInfo->EffectMiscValue[i] >= MAX_POWERS)
         return;
 
+    // Some level depends spells
+    int multipler  = 0;
+    int level_diff = 0;
+    switch (m_spellInfo->Id)
+    {
+        // Restore Energy
+        case 9512:
+        {
+            level_diff = m_caster->getLevel() - 40;
+            multipler  = 2;
+            break;
+        }
+        // Blood Fury
+        case 24571:
+        {
+            level_diff = m_caster->getLevel() - 60;
+            multipler  = 10;
+            break;
+        }
+        // Burst of Energy
+        case 24532:
+        {
+            level_diff = m_caster->getLevel() - 60;
+            multipler  = 4;
+            break;
+        }
+        default:
+            break;
+    }
+
+    if (level_diff)
+        damage -= multipler * level_diff;
+
     if(damage < 0)
         return;
 
