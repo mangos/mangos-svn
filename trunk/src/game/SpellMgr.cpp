@@ -1096,6 +1096,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             if (spellId_1 == 42016 && spellId_2 == 40216 )
                 return false;
 
+            //  Tree of Life (Shapeshift) and 34123 Tree of Life (Passive)
+            if ((spellId_1 == 33891 && spellId_2 == 34123) || 
+                (spellId_2 == 33891 && spellId_1 == 34123))
+                return false;
+
             break;
         case SPELLFAMILY_ROGUE:
             if( spellInfo_2->SpellFamilyName == SPELLFAMILY_ROGUE )
