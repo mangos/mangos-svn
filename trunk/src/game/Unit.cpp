@@ -1226,6 +1226,17 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
             if (*crit)
             {
                 *damage = SpellCriticalBonus(spellInfo, *damage, pVictim);
+
+                // Resilience - reduce crit damage
+                if (pVictim && pVictim->GetTypeId()==TYPEID_PLAYER)
+                {
+                    uint32 damage_reduction = ((Player *)pVictim)->GetSpellCritDamageReduction(*damage);
+                    if(*damage > damage_reduction)
+                        *damage -= damage_reduction;
+                    else
+                        *damage = 0;
+                }
+
                 cleanDamage->hitOutCome = MELEE_HIT_CRIT;
             }
             // spell proc all magic damage==0 case in this function
@@ -7344,11 +7355,6 @@ uint32 Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 damage, Uni
     if(crit_bonus > 0)
         damage += crit_bonus;
 
-    // Resilience - reduce crit damage
-    if (pVictim && pVictim->GetTypeId()==TYPEID_PLAYER)
-        damage -= ((Player *)pVictim)->GetSpellCritDamageReduction(damage);
-    if (damage < 0)
-        damage = 0;
     return damage;
 }
 
