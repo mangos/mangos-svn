@@ -2974,6 +2974,24 @@ void Aura::HandleModThreat(bool apply, bool Real)
     if(!caster || !caster->isAlive())
         return;
 
+    int level_diff = 0;
+    int multiplier = 0;
+    switch (GetId())
+    {
+        // Arcane Shroud 
+        case 26400:
+            level_diff = m_target->getLevel() - 60;
+            multiplier = 2;
+            break;
+        // The Eye of Diminution
+        case 28862:
+            level_diff = m_target->getLevel() - 60;
+            multiplier = 1;
+            break;
+    }
+    if (level_diff)
+        m_modifier.m_amount += multiplier * level_diff;
+
     bool positive = m_modifier.m_miscvalue2 == 0;
 
     for(int8 x=0;x < MAX_SPELL_SCHOOL;x++)
