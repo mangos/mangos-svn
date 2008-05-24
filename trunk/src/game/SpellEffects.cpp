@@ -5328,11 +5328,11 @@ void Spell::EffectStealBeneficialBuff(uint32 /*i*/)
     sLog.outDebug("Effect: StealBeneficialBuff");
 
     // get the auras of the target
-    Unit::AuraMap& Auras = unitTarget->GetAuras();
+    Unit::AuraMap const& auras = unitTarget->GetAuras();
 
     // count possible for steal auras
     uint32 count = 0;
-    for(Unit::AuraMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
+    for(Unit::AuraMap::const_iterator iter = auras.begin(); iter != auras.end(); ++iter)
     {
         if( iter->second->IsPositive() &&                   //only steel positive spell
             !iter->second->IsPassive() &&                   //don't steal passive abilities
@@ -5354,7 +5354,7 @@ void Spell::EffectStealBeneficialBuff(uint32 /*i*/)
 
     // select aura by index
     count = 0;
-    for(Unit::AuraMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
+    for(Unit::AuraMap::const_iterator iter = auras.begin(); iter != auras.end(); ++iter)
     {
         if( iter->second->IsPositive() &&                   //only steel positive spell
             !iter->second->IsPassive() &&                   //don't steal passive abilities

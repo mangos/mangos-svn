@@ -4863,8 +4863,8 @@ void Aura::PeriodicTick()
 
                         // count affliction effects and calc additional damage in percentage
                         int32 modPercent = 0;
-                        Unit::AuraMap& victimAuras = m_target->GetAuras();
-                        for (Unit::AuraMap::iterator itr = victimAuras.begin(); itr != victimAuras.end(); ++itr)
+                        Unit::AuraMap const& victimAuras = m_target->GetAuras();
+                        for (Unit::AuraMap::const_iterator itr = victimAuras.begin(); itr != victimAuras.end(); ++itr)
                         {
                             Aura* aura = itr->second;
                             if (aura->IsPositive())continue;

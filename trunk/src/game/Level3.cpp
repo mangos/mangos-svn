@@ -3755,9 +3755,9 @@ bool ChatHandler::HandleListAurasCommand (const char * /*args*/)
         return true;
     }
 
-    Unit::AuraMap& uAuras = unit->GetAuras();
+    Unit::AuraMap const& uAuras = unit->GetAuras();
     PSendSysMessage(LANG_COMMAND_TARGET_LISTAURAS, uAuras.size());
-    for (Unit::AuraMap::iterator itr = uAuras.begin(); itr != uAuras.end(); ++itr)
+    for (Unit::AuraMap::const_iterator itr = uAuras.begin(); itr != uAuras.end(); ++itr)
     {
         PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, itr->second->GetId(), itr->second->GetEffIndex(),
             itr->second->GetModifier()->m_auraname, itr->second->GetAuraDuration(), itr->second->GetAuraMaxDuration(),

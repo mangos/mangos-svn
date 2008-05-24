@@ -5989,8 +5989,8 @@ void Player::DuelComplete(DuelCompleteType type)
 
     /* remove auras */
     std::vector<uint32> auras2remove;
-    AuraMap& vAuras = duel->opponent->GetAuras();
-    for (AuraMap::iterator i = vAuras.begin(); i != vAuras.end(); i++)
+    AuraMap const& vAuras = duel->opponent->GetAuras();
+    for (AuraMap::const_iterator i = vAuras.begin(); i != vAuras.end(); i++)
     {
         if (!i->second->IsPositive() && i->second->GetCasterGUID() == GetGUID() && i->second->GetAuraApplyTime() >= duel->startTime)
             auras2remove.push_back(i->second->GetId());
@@ -6000,8 +6000,8 @@ void Player::DuelComplete(DuelCompleteType type)
         duel->opponent->RemoveAurasDueToSpell(auras2remove[i]);
 
     auras2remove.clear();
-    AuraMap& Auras = GetAuras();
-    for (AuraMap::iterator i = Auras.begin(); i != Auras.end(); i++)
+    AuraMap const& auras = GetAuras();
+    for (AuraMap::const_iterator i = auras.begin(); i != auras.end(); i++)
     {
         if (!i->second->IsPositive() && i->second->GetCasterGUID() == duel->opponent->GetGUID() && i->second->GetAuraApplyTime() >= duel->startTime)
             auras2remove.push_back(i->second->GetId());

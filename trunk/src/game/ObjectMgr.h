@@ -209,9 +209,10 @@ enum ConditionType
     CONDITION_SKILL                 = 7,                    // skill_id     skill_value
     CONDITION_QUESTREWARDED         = 8,                    // quest_id     0
     CONDITION_QUESTTAKEN            = 9,                    // quest_id     0,      for condition true while quest active.
+    CONDITION_AD_COMMISSION_AURA    = 10,                   // 0            0,      for condition true while one from AD ñommission aura active 
 };
 
-#define MAX_CONDITION                 10                    // maximun value in this enum 
+#define MAX_CONDITION                 11                    // maximum value in ConditionType enum 
 
 struct Condition
 {
