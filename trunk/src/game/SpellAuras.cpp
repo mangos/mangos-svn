@@ -1155,8 +1155,40 @@ void Aura::TriggerSpell()
     {
         // trigger_spell_id not set and unknown effect triggered in this case, ignoring for while
         case   768:                                         // Cat Form (passive)
-        case 17947:                                         // Firestone Passive
             return;
+        case 758:                                           // Firestone Passive
+        case 17945:
+        case 17947:
+        case 17949:
+        case 27252:
+        {
+            Item* item = ((Player*)caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+
+            if (!item)
+                return;
+
+            uint32 enchant_id = NULL;
+            switch (GetId())
+            {
+                case 758: enchant_id = 1803; break;     // Rank 1
+                case 17945: enchant_id = 1823; break;   // Rank 2
+                case 17947: enchant_id = 1824; break;   // Rank 3
+                case 17949: enchant_id = 1825; break;   // Rank 4
+                case 27252: enchant_id = 2645; break;   // Rank 5
+                default:
+                    return;
+            }
+
+            // remove old enchanting before applying new
+            ((Player*)caster)->ApplyEnchantment(item,TEMP_ENCHANTMENT_SLOT,false);
+            
+            item->SetEnchantment(TEMP_ENCHANTMENT_SLOT, enchant_id, m_modifier.periodictime, 0);
+            
+            // add new enchanting
+            ((Player*)caster)->ApplyEnchantment(item,TEMP_ENCHANTMENT_SLOT,true);
+            
+            return;
+        }
 
         case 66:
         {
