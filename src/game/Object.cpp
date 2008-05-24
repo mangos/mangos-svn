@@ -1408,7 +1408,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     float first_y = y;
     bool first_los_conflict = false;                        // first point LOS problems
 
-    // prepare selector for for work
+    // prepare selector for work
     ObjectPosSelector selector(GetPositionX(),GetPositionY(),GetObjectSize(),distance2d+size);
 
     // adding used positions around object
