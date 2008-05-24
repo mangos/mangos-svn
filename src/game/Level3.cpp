@@ -554,13 +554,7 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
     if(targetPlayer)
     {
         if( targetPlayer != m_session->GetPlayer() )
-        {
-            WorldPacket data;
-            char buf[256];
-            sprintf((char*)buf,ChatHandler(targetPlayer).GetMangosString(LANG_YOURS_SECURITY_CHANGED), m_session->GetPlayer()->GetName(), gm);
-            FillSystemMessageData(&data, buf);
-            targetPlayer->GetSession()->SendPacket(&data);
-        }
+            ChatHandler(targetPlayer).PSendSysMessage(LANG_YOURS_SECURITY_CHANGED,m_session->GetPlayer()->GetName(), gm);
 
         targetPlayer->GetSession()->SetSecurity(gm);
     }
@@ -3241,28 +3235,15 @@ bool ChatHandler::HandleExploreCheatCommand(const char* args)
     if (flag != 0)
     {
         PSendSysMessage(LANG_YOU_SET_EXPLORE_ALL, chr->GetName());
+        if(chr!=m_session->GetPlayer())
+            ChatHandler(chr).PSendSysMessage(LANG_YOURS_EXPLORE_SET_ALL,m_session->GetPlayer()->GetName());
     }
     else
     {
         PSendSysMessage(LANG_YOU_SET_EXPLORE_NOTHING, chr->GetName());
+        if(chr!=m_session->GetPlayer())
+            ChatHandler(chr).PSendSysMessage(LANG_YOURS_EXPLORE_SET_NOTHING,m_session->GetPlayer()->GetName());
     }
-
-    char buf[256];
-
-    if (flag != 0)
-    {
-        sprintf((char*)buf,ChatHandler(chr).GetMangosString(LANG_YOURS_EXPLORE_SET_ALL),
-            m_session->GetPlayer()->GetName());
-    }
-    else
-    {
-        sprintf((char*)buf,ChatHandler(chr).GetMangosString(LANG_YOURS_EXPLORE_SET_NOTHING),
-            m_session->GetPlayer()->GetName());
-    }
-
-    WorldPacket data;
-    FillSystemMessageData(&data, buf);
-    chr->GetSession()->SendPacket(&data);
 
     for (uint8 i=0; i<64; i++)
     {
