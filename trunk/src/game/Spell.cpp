@@ -4160,6 +4160,10 @@ uint8 Spell::CheckItems()
             {
                 for (int i = 0; i < 3; i++)
                 {
+                    // skip check, pet not required like checks, and for TARGET_PET m_targets.getUnitTarget() is not the real target but the caster
+                    if (m_spellInfo->EffectImplicitTargetA[i] == TARGET_PET)
+                        continue;
+
                     if (m_spellInfo->Effect[i] == SPELL_EFFECT_HEAL)
                         if (m_targets.getUnitTarget()->GetHealth() == m_targets.getUnitTarget()->GetMaxHealth())
                             return (uint8)SPELL_FAILED_ALREADY_AT_FULL_HEALTH;
