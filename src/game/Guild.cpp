@@ -1405,8 +1405,7 @@ void Guild::DisplayGuildBankLogs(WorldSession *session, uint8 TabId)
         for (GuildBankEventLog::const_iterator itr = m_GuildBankEventLog_Money.begin(); itr != m_GuildBankEventLog_Money.end(); ++itr)
         {
             data << uint8((*itr)->LogEntry);
-            data << uint32((*itr)->PlayerGuid);
-            data << uint32(0);                              // second part of 64bits guid
+            data << uint64(MAKE_NEW_GUID((*itr)->PlayerGuid,0,HIGHGUID_PLAYER));
             data << uint32((*itr)->ItemOrMoney);
             data << uint32(time(NULL)-(*itr)->TimeStamp);
         }
@@ -1422,8 +1421,7 @@ void Guild::DisplayGuildBankLogs(WorldSession *session, uint8 TabId)
         for (GuildBankEventLog::const_iterator itr = m_GuildBankEventLog_Item[TabId].begin(); itr != m_GuildBankEventLog_Item[TabId].end(); ++itr)
         {
             data << uint8((*itr)->LogEntry);
-            data << uint32((*itr)->PlayerGuid);
-            data << uint32(0);                              // second part of 64 bits guid
+            data << uint64(MAKE_NEW_GUID((*itr)->PlayerGuid,0,HIGHGUID_PLAYER));
             data << uint32((*itr)->ItemOrMoney);
             data << uint8((*itr)->ItemStackCount);
             if ((*itr)->LogEntry == GUILD_BANK_LOG_MOVE_ITEM || (*itr)->LogEntry == GUILD_BANK_LOG_MOVE_ITEM2)

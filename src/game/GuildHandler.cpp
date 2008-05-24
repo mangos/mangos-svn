@@ -1450,7 +1450,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     return;
 
                 CharacterDatabase.BeginTransaction();
-                pGuild->LogBankEvent(GUILD_BANK_LOG_WITHDRAW_ITEM, BankTab, pl->GetGUIDLow(), pItemBank->GetEntry(), SplitedAmount);
+                pGuild->LogBankEvent(GUILD_BANK_LOG_WITHDRAW_ITEM, BankTab, pl->GetGUIDLow(), pItemBank->GetEntry(), pItemBank->GetCount());
 
                 pGuild->RemoveItem(BankTab, BankTabSlot);
                 pl->MoveItemToInventory(dest,pItemBank,true);

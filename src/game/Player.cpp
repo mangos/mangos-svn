@@ -10493,7 +10493,7 @@ void Player::RemoveItemFromBuyBackSlot( uint32 slot, bool del )
 
 void Player::SendEquipError( uint8 msg, Item* pItem, Item *pItem2 )
 {
-    sLog.outDebug( "WORLD: Sent SMSG_INVENTORY_CHANGE_FAILURE" );
+    sLog.outDebug( "WORLD: Sent SMSG_INVENTORY_CHANGE_FAILURE (%u)",msg);
     WorldPacket data( SMSG_INVENTORY_CHANGE_FAILURE, (msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I ? 22 : 18) );
     data << uint8(msg);
 
