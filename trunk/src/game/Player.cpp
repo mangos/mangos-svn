@@ -12796,6 +12796,16 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     SaveRecallPosition();
 
+    if(!IsPositionValid())
+    {
+        sLog.outError("ERROR: Player (guidlow %d) have invalid coordinates (X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.",guid,GetPositionX(),GetPositionY(),GetPositionZ(),GetOrientation());
+
+        SetMapId(info->mapId);
+        Relocate(info->positionX,info->positionY,info->positionZ);
+
+        transGUID = 0;
+    }
+
     if (transGUID != 0)
     {
         m_movementInfo.t_x = fields[20].GetFloat();
@@ -12803,6 +12813,28 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         m_movementInfo.t_z = fields[22].GetFloat();
         m_movementInfo.t_o = fields[23].GetFloat();
 
+        if( !MaNGOS::IsValidMapCoord(
+            GetPositionX()+m_movementInfo.t_x,GetPositionY()+m_movementInfo.t_y,
+            GetPositionZ()+m_movementInfo.t_z,GetOrientation()+m_movementInfo.t_o) )
+        {
+            sLog.outError("ERROR: Player (guidlow %d) have invalid transport coordinates (X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.",
+                guid,GetPositionX()+m_movementInfo.t_x,GetPositionY()+m_movementInfo.t_y,
+                GetPositionZ()+m_movementInfo.t_z,GetOrientation()+m_movementInfo.t_o);
+
+            SetMapId(info->mapId);
+            Relocate(info->positionX,info->positionY,info->positionZ);
+
+            m_movementInfo.t_x = 0.0f;
+            m_movementInfo.t_y = 0.0f;
+            m_movementInfo.t_z = 0.0f;
+            m_movementInfo.t_o = 0.0f;
+
+            transGUID = 0;
+        }
+    }
+
+    if (transGUID != 0)
+    {
         for (MapManager::TransportSet::iterator iter = MapManager::Instance().m_Transports.begin(); iter != MapManager::Instance().m_Transports.end(); ++iter)
         {
             if( (*iter)->GetGUIDLow() == transGUID)
@@ -12830,14 +12862,6 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
             : bubble0*sWorld.getRate(RATE_REST_OFFLINE_IN_WILDERNESS);
 
         SetRestBonus(GetRestBonus()+ time_diff*((float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/72000)*bubble);
-    }
-
-    if(!IsPositionValid())
-    {
-        sLog.outError("ERROR: Player (guidlow %d) have invalid coordinates (X: %f Y: %f). Teleport to default race/class locations.",guid,GetPositionX(),GetPositionY());
-
-        SetMapId(info->mapId);
-        Relocate(info->positionX,info->positionY,info->positionZ);
     }
 
     m_cinematic = fields[12].GetUInt32();

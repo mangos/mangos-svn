@@ -209,6 +209,10 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     /* handle special cases */
     if (MovementFlags & MOVEMENTFLAG_ONTRANSPORT)
     {
+        if( !MaNGOS::IsValidMapCoord(movementInfo.x+movementInfo.t_x, movementInfo.y+movementInfo.t_y,
+            movementInfo.z+movementInfo.t_z, movementInfo.o+movementInfo.t_o) )
+            return;
+
         // if we boarded a transport, add us to it
         if (!GetPlayer()->m_transport)
         {
