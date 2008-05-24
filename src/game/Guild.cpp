@@ -946,7 +946,7 @@ void Guild::SetGuildBankTabInfo(uint8 TabId, std::string Name, std::string Icon)
     if (!m_TabListMap[TabId])
         return;
 
-    if(m_TabListMap[TabId]->Name == Name || m_TabListMap[TabId]->Icon == Icon)
+    if(m_TabListMap[TabId]->Name == Name && m_TabListMap[TabId]->Icon == Icon)
         return;
 
     m_TabListMap[TabId]->Name = Name;
