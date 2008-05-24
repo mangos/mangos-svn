@@ -263,7 +263,7 @@ bool ChatHandler::HandleGPSCommand(const char* args)
     uint32 have_map = Map::ExistMap(obj->GetMapId(),gx,gy) ? 1 : 0;
     uint32 have_vmap = Map::ExistVMap(obj->GetMapId(),gx,gy) ? 1 : 0;
 
-    PSendSysMultilineMessage(LANG_MAP_POSITION,
+    PSendSysMessage(LANG_MAP_POSITION,
         obj->GetMapId(), (mapEntry ? mapEntry->name[sWorld.GetDBClang()] : "<unknown>" ),
         zone_id, (zoneEntry ? zoneEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ),
         area_id, (areaEntry ? areaEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ),
@@ -1637,7 +1637,7 @@ bool ChatHandler::HandleLookupTeleCommand(const char * args)
     else
     {
         reply = GetMangosString(LANG_COMMAND_TELE_LOCATION) + reply;
-        SendSysMultilineMessage(reply.c_str());
+        SendSysMessage(reply.c_str());
     }
     return true;
 }

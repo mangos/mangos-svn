@@ -519,7 +519,7 @@ bool ChatHandler::hasStringAbbr(const char* s1, const char* s2)
     }
 }
 
-void ChatHandler::SendSysMultilineMessage(const char *str)
+void ChatHandler::SendSysMessage(const char *str)
 {
     char buf[256];
     WorldPacket data;
@@ -552,42 +552,38 @@ void ChatHandler::SendSysMultilineMessage(const char *str)
 
 void ChatHandler::SendGlobalSysMessage(const char *str)
 {
+    char buf[256];
     WorldPacket data;
-    FillSystemMessageData(&data, str);
+
+    const char* line = str;
+    const char* pos = strchr(line, '\n');
+    while(pos != NULL)
+    {
+        if (pos-line > sizeof(buf)-1)
+        {
+            strncpy(buf, line, sizeof(buf)-1);
+            buf[sizeof(buf)-1]=0;
+            line += sizeof(buf) - 1;
+        }
+        else
+        {
+            strncpy(buf, line, pos-line);
+            buf[pos-line]=0;
+            line = pos+1;
+            pos = strchr(line, '\n');
+        }
+
+        FillSystemMessageData(&data, buf);
+        sWorld.SendGlobalMessage(&data);
+    }
+
+    FillSystemMessageData(&data, line);
     sWorld.SendGlobalMessage(&data);
 }
 
 void ChatHandler::SendSysMessage(uint32 entry)
 {
     SendSysMessage(GetMangosString(entry));
-}
-
-void ChatHandler::SendSysMessage(const char *str)
-{
-    WorldPacket data;
-    FillSystemMessageData(&data, str);
-    m_session->SendPacket(&data);
-}
-
-void ChatHandler::PSendSysMultilineMessage(uint32 entry, ...)
-{
-    const char *format = GetMangosString(entry);
-    va_list ap;
-    char str [1024];
-    va_start(ap, entry);
-    vsnprintf(str,1024,format, ap );
-    va_end(ap);
-    SendSysMultilineMessage(str);
-}
-
-void ChatHandler::PSendSysMultilineMessage(const char *format, ...)
-{
-    va_list ap;
-    char str [1024];
-    va_start(ap, format);
-    vsnprintf(str,1024,format, ap );
-    va_end(ap);
-    SendSysMultilineMessage(str);
 }
 
 void ChatHandler::PSendSysMessage(uint32 entry, ...)
@@ -668,7 +664,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text, st
         else
         {
             if(!table[i].Help.empty())
-                SendSysMultilineMessage(table[i].Help.c_str());
+                SendSysMessage(table[i].Help.c_str());
             else
                 SendSysMessage(LANG_CMD_SYNTAX);
         }
@@ -728,10 +724,10 @@ bool ChatHandler::ShowHelpForSubCommands(ChatCommand *table, char const* cmd, ch
     if(table==getCommandTable())
     {
         SendSysMessage(LANG_AVIABLE_CMD);
-        PSendSysMultilineMessage("%s",list.c_str());
+        PSendSysMessage("%s",list.c_str());
     }
     else
-        PSendSysMultilineMessage(LANG_SUBCMDS_LIST,cmd,list.c_str());
+        PSendSysMessage(LANG_SUBCMDS_LIST,cmd,list.c_str());
 
     return true;
 }
@@ -758,7 +754,7 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
             }
 
             if(!table[i].Help.empty())
-                SendSysMultilineMessage(table[i].Help.c_str());
+                SendSysMessage(table[i].Help.c_str());
 
             if(table[i].ChildCommands)
                 if(ShowHelpForSubCommands(table[i].ChildCommands,table[i].Name,subcmd ? subcmd : ""))
@@ -778,7 +774,7 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
                 continue;
 
             if(!table[i].Help.empty())
-                SendSysMultilineMessage(table[i].Help.c_str());
+                SendSysMessage(table[i].Help.c_str());
 
             if(table[i].ChildCommands)
                 if(ShowHelpForSubCommands(table[i].ChildCommands,"",""))
