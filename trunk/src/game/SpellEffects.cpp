@@ -2343,25 +2343,19 @@ void Spell::EffectEnergize(uint32 i)
     {
         // Restore Energy
         case 9512:
-        {
             level_diff = m_caster->getLevel() - 40;
             multipler  = 2;
             break;
-        }
         // Blood Fury
         case 24571:
-        {
             level_diff = m_caster->getLevel() - 60;
             multipler  = 10;
             break;
-        }
         // Burst of Energy
         case 24532:
-        {
             level_diff = m_caster->getLevel() - 60;
             multipler  = 4;
             break;
-        }
         default:
             break;
     }
