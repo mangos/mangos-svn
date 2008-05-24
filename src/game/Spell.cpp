@@ -3896,9 +3896,9 @@ uint8 Spell::CheckCasterAuras() const
             {
                 if(itr->second)
                 {
+                    uint32 auraMechanic = GetSpellMechanicMask(itr->second->GetSpellProto(), itr->second->GetEffIndex());
                     if( (GetSpellSchoolMask(itr->second->GetSpellProto()) & school_immune) ||
-                        ((1 << itr->second->GetSpellProto()->Mechanic) & mechanic_immune)  ||
-                        ((1 << itr->second->GetSpellProto()->EffectMechanic[itr->second->GetEffIndex()]) & mechanic_immune))
+                        (auraMechanic & mechanic_immune))
                         continue;
 
                     //Make a second check for spell failed so the right SPELL_FAILED message is returned.
@@ -4312,7 +4312,16 @@ uint8 Spell::CheckItems()
 
                 if( targetItem->GetProto()->ItemLevel < m_spellInfo->baseLevel )
                     return SPELL_FAILED_LOWLEVEL;
-
+                // Not allow enchant in trade slot for some enchant type
+                if( targetItem->GetOwner() != m_caster )
+                {
+                    uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
+                    SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+                    if(!pEnchant)
+                        return SPELL_FAILED_ERROR;
+                    if (pEnchant->slot & ENCHANTMENT_CAN_SOULBOUND)
+                        return SPELL_FAILED_ITEM_NOT_FOUND;
+                }
                 break;
             }
             case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
@@ -4320,9 +4329,16 @@ uint8 Spell::CheckItems()
                 Item *item = m_targets.getItemTarget();
                 if(!item)
                     return SPELL_FAILED_ITEM_NOT_FOUND;
-                // not allow apply temporary enchantments in trade slot
+                // Not allow enchant in trade slot for some enchant type
                 if( item->GetOwner() != m_caster )
-                    return SPELL_FAILED_ITEM_NOT_FOUND;
+                {
+                    uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
+                    SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+                    if(!pEnchant)
+                        return SPELL_FAILED_ERROR;
+                    if (pEnchant->slot & ENCHANTMENT_CAN_SOULBOUND)
+                        return SPELL_FAILED_ITEM_NOT_FOUND;
+                }
                 break;
             }
             case SPELL_EFFECT_ENCHANT_HELD_ITEM:
