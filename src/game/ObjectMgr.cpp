@@ -37,6 +37,7 @@
 #include "GameEvent.h"
 #include "Spell.h"
 #include "Chat.h"
+#include "SpellAuras.h"
 
 INSTANTIATE_SINGLETON_1(ObjectMgr);
 
@@ -5945,6 +5946,14 @@ bool Condition::Meets(Player const * player) const
             QuestStatus status = player->GetQuestStatus(value1);
             return (status == QUEST_STATUS_INCOMPLETE);
         }
+        case CONDITION_AD_COMMISSION_AURA:
+        {
+            Unit::AuraMap const& auras = player->GetAuras();
+            for(Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                if((itr->second->GetSpellProto()->Attributes & 0x1000010) && itr->second->GetSpellProto()->SpellVisual==3580)
+                    return true;
+            return false;
+        }
         default:
             return false;
     }
@@ -6053,6 +6062,14 @@ bool Condition::IsValid(ConditionType condition, uint32 value1, uint32 value2)
                 sLog.outErrorDb("Quest condition specifies non-existing quest (%u), skipped", value1);
                 return false;
             }
+            if(value2)
+                sLog.outErrorDb("Quest condition has useless data in value2 (%u)!", value2);
+            break;
+        }
+        case CONDITION_AD_COMMISSION_AURA:
+        {
+            if(value1)
+                sLog.outErrorDb("Quest condition has useless data in value1 (%u)!", value1);
             if(value2)
                 sLog.outErrorDb("Quest condition has useless data in value2 (%u)!", value2);
             break;

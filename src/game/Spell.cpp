@@ -3891,8 +3891,8 @@ uint8 Spell::CheckCasterAuras() const
         if(school_immune || mechanic_immune)
         {
             //Checking auras is needed now, because you are prevented by some state but the spell grants immunity.
-            Unit::AuraMap auras = m_caster->GetAuras();
-            for(Unit::AuraMap::iterator itr = auras.begin(); itr != auras.end(); itr++)
+            Unit::AuraMap const& auras = m_caster->GetAuras();
+            for(Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); itr++)
             {
                 if(itr->second)
                 {
