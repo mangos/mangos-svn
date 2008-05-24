@@ -1126,176 +1126,573 @@ void Aura::HandleAddModifier(bool apply, bool Real)
 
 void Aura::TriggerSpell()
 {
-    // custom triggering code (triggered spell not set or not exist
-
-    // Frenzied Regeneration
-    if (GetSpellProto()->Category == 1011)
-    {
-        int32 LifePerRage = GetModifier()->m_amount;
-
-        int32 lRage = m_target->GetPower(POWER_RAGE);
-        if(lRage > 100)                                     // rage stored as rage*10
-            lRage = 100;
-
-        m_target->ModifyPower(POWER_RAGE, -lRage);
-
-        int32 FRTriggerBasePoints = int32(lRage*LifePerRage/10);
-        m_target->CastCustomSpell(m_target,22845,&FRTriggerBasePoints,NULL,NULL,true,NULL,this);
-        return;
-    }
-
-    // generic casting code with custom spells and target/caster customs
-    uint32 trigger_spell_id = GetSpellProto()->EffectTriggerSpell[m_effIndex];
     Unit* caster = GetCaster();
     Unit* target = GetTriggerTarget();
-    uint64 originalCasterGUID = GetCasterGUID();
-
-    // specific code for cases with no trigger spell provided in field
-    switch(GetId())
-    {
-        // trigger_spell_id not set and unknown effect triggered in this case, ignoring for while
-        case   768:                                         // Cat Form (passive)
-            return;
-        case 758:                                           // Firestone Passive
-        case 17945:
-        case 17947:
-        case 17949:
-        case 27252:
-        {
-            Item* item = ((Player*)caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-
-            if (!item)
-                return;
-
-            uint32 enchant_id = NULL;
-            switch (GetId())
-            {
-                case 758: enchant_id = 1803; break;     // Rank 1
-                case 17945: enchant_id = 1823; break;   // Rank 2
-                case 17947: enchant_id = 1824; break;   // Rank 3
-                case 17949: enchant_id = 1825; break;   // Rank 4
-                case 27252: enchant_id = 2645; break;   // Rank 5
-                default:
-                    return;
-            }
-
-            // remove old enchanting before applying new
-            ((Player*)caster)->ApplyEnchantment(item,TEMP_ENCHANTMENT_SLOT,false);
-            
-            item->SetEnchantment(TEMP_ENCHANTMENT_SLOT, enchant_id, m_modifier.periodictime, 0);
-            
-            // add new enchanting
-            ((Player*)caster)->ApplyEnchantment(item,TEMP_ENCHANTMENT_SLOT,true);
-            
-            return;
-        }
-
-        case 66:
-        {
-            // Invisibility - overwrite non existing triggered spell call in spell.dbc
-            if(!m_duration)
-                m_target->CastSpell(m_target, 32612, true, NULL, this);
-            return;
-        }
-
-        case 9712: trigger_spell_id = 21029; break;         // Thaumaturgy Channel
-
-        case 1010:                                          // Curse of Idiocy
-        {
-            // TODO: spell casted by result in correct way mostly
-            // BUT:
-            // 1) target show casting at each triggered cast: target don't must show casting animation for any triggered spell
-            //      but must show affect apply like item casting
-            // 2) maybe aura must be replace by new with accumulative stat mods insteed stacking
-
-            // prevent cast by triggered auras
-            if(m_caster_guid == m_target->GetGUID())
-                return;
-
-            // stop triggering after each affected stats lost > 90
-            int32 intelectLoss = 0;
-            int32 spiritLoss = 0;
-
-            Unit::AuraList const& mModStat = m_target->GetAurasByType(SPELL_AURA_MOD_STAT);
-            for(Unit::AuraList::const_iterator i = mModStat.begin(); i != mModStat.end(); ++i)
-            {
-                if ((*i)->GetId() == 1010)
-                {
-                    switch((*i)->GetModifier()->m_miscvalue)
-                    {
-                        case STAT_INTELLECT: intelectLoss += (*i)->GetModifier()->m_amount; break;
-                        case STAT_SPIRIT:    spiritLoss   += (*i)->GetModifier()->m_amount; break;
-                        default: break;
-                    }
-                }
-            }
-
-            if(intelectLoss <= -90 && spiritLoss <= -90)
-                return;
-
-            caster = target;
-            originalCasterGUID = 0;
-            break;
-        }
-
-        case 29528: trigger_spell_id = 28713; break;        // Inoculation
-        case 29917: trigger_spell_id = 29916; break;        // Feed Captured Animal
-        case 30576: trigger_spell_id = 30571; break;        // Quake
-
-        case 31347:                                         // Doom
-        {
-            m_target->CastSpell(m_target,31350,true);
-            m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
-            return;
-        }
-
-        case 37027: trigger_spell_id = 37029; break;        // Remote Toy
-
-        case 38443:                                         // Skyshatter Regalia (Shaman Tier 6) - bonus
-        {
-            if( caster->m_TotemSlot[0] && caster->m_TotemSlot[1] &&
-                caster->m_TotemSlot[2] && caster->m_TotemSlot[3] )
-            {
-                caster->CastSpell(caster,38437,true);
-            }
-            else
-                caster->RemoveAurasDueToSpell(38437);
-            return;
-        }
-
-        case 39857: trigger_spell_id = 39856; break;        // Tear of Azzinoth Channel - it's not really supposed to do anything,and this only prevents the console spam
-
-        case 46736: trigger_spell_id = 46737; break;        // Personalized Weather, lightning
-    }
-
-    if(!trigger_spell_id)
-    {
-        sLog.outError("Aura::TriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?",GetId(),GetEffIndex());
-        return;
-    }
-
+    
     if(!caster || !target)
         return;
 
-    // custom points code
-    switch(GetId())
+    // generic casting code with custom spells and target/caster customs
+    uint32 trigger_spell_id = GetSpellProto()->EffectTriggerSpell[m_effIndex];
+
+    uint64 originalCasterGUID = GetCasterGUID();
+
+    SpellEntry const *triggredSpellInfo = sSpellStore.LookupEntry(trigger_spell_id);
+    SpellEntry const *auraSpellInfo = GetSpellProto();
+    uint32 auraId = auraSpellInfo->Id;
+
+    // specific code for cases with no trigger spell provided in field
+    if (triggredSpellInfo == NULL)
     {
-        // Mana Tide
-        case 16191:
+        switch(auraSpellInfo->SpellFamilyName)
         {
-            caster->CastCustomSpell(target,trigger_spell_id,&m_modifier.m_amount,NULL,NULL,true,NULL,this,originalCasterGUID);
+            case SPELLFAMILY_GENERIC:
+            {
+                switch(auraId)
+                {
+                    // Firestone Passive (1-5 rangs)
+                    case 758:
+                    case 17945:
+                    case 17947:
+                    case 17949:
+                    case 27252:
+                    {
+                        if (caster->GetTypeId()!=TYPEID_PLAYER)
+                            return;
+                        Item* item = ((Player*)caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                        if (!item)
+                            return;
+                        uint32 enchant_id = NULL;
+                        switch (GetId())
+                        {
+                             case   758: enchant_id = 1803; break;   // Rank 1
+                             case 17945: enchant_id = 1823; break;   // Rank 2
+                             case 17947: enchant_id = 1824; break;   // Rank 3
+                             case 17949: enchant_id = 1825; break;   // Rank 4
+                             case 27252: enchant_id = 2645; break;   // Rank 5
+                             default:
+                                 return;
+                        }
+                        // remove old enchanting before applying new
+                        ((Player*)caster)->ApplyEnchantment(item,TEMP_ENCHANTMENT_SLOT,false);
+                        item->SetEnchantment(TEMP_ENCHANTMENT_SLOT, enchant_id, m_modifier.periodictime+1000, 0);
+                        // add new enchanting
+                        ((Player*)caster)->ApplyEnchantment(item,TEMP_ENCHANTMENT_SLOT,true);
+                        return;
+                    }
+//                    // Periodic Mana Burn
+//                    case 812: break;
+//                    // Polymorphic Ray
+//                    case 6965: break;
+//                    // Fire Nova (1-7 Rangs)
+//                    case 8350:
+//                    case 8508:
+//                    case 8509:
+//                    case 11312:
+//                    case 11313:
+//                    case 25540:
+//                    case 25544:
+//                        break;
+                    // Thaumaturgy Channel
+                    case 9712: trigger_spell_id = 21029; break;
+//                    // Egan's Blaster
+//                    case 17368: break;
+//                    // Haunted
+//                    case 18347: break;
+//                    // Ranshalla Waiting
+//                    case 18953: break;
+//                    // Inferno
+//                    case 19695: break;
+//                    // Frostwolf Muzzle DND
+//                    case 21794: break;
+//                    // Alterac Ram Collar DND
+//                    case 21866: break;
+//                    // Celebras Waiting
+//                    case 21916: break;
+//                    // Brood Affliction: Bronze
+//                    case 23170: break;
+//                    // Mark of Frost
+//                    case 23184: break;
+//                    // Restoration
+//                    case 23493: break;
+//                    // Stoneclaw Totem Passive TEST
+//                    case 23792: break;
+//                    // Axe Flurry
+//                    case 24018: break;
+//                    // Mark of Arlokk
+//                    case 24210: break;
+//                    // Restoration
+//                    case 24379: break;
+//                    // Happy Pet
+//                    case 24716: break;
+//                    // Dream Fog
+//                    case 24780: break;
+//                    // Cannon Prep
+//                    case 24832: break;
+//                    // Shadow Bolt Whirl
+//                    case 24834: break;
+//                    // Stink Trap
+//                    case 24918: break;
+//                    // Mark of Nature
+//                    case 25041: break;
+//                    // Agro Drones
+//                    case 25152: break;
+//                    // Consume
+//                    case 25371: break;
+//                    // Pain Spike
+//                    case 25572: break;
+//                    // Rotate 360
+//                    case 26009: break;
+//                    // Rotate -360
+//                    case 26136: break;
+//                    // Consume
+//                    case 26196: break;
+//                    // Berserk
+//                    case 26615: break;
+//                    // Defile
+//                    case 27177: break;
+//                    // Teleport: IF/UC
+//                    case 27601: break;
+//                    // Five Fat Finger Exploding Heart Technique
+//                    case 27673: break;
+//                    // Nitrous Boost
+//                    case 27746: break;
+//                    // Steam Tank Passive
+//                    case 27747: break;
+//                    // Frost Blast
+//                    case 27808: break;
+//                    // Detonate Mana
+//                    case 27819: break;
+//                    // Controller Timer
+//                    case 28095: break;
+//                    // Stalagg Chain
+//                    case 28096: break;
+//                    // Stalagg Tesla Passive
+//                    case 28097: break;
+//                    // Feugen Tesla Passive
+//                    case 28109: break;
+//                    // Feugen Chain
+//                    case 28111: break;
+//                    // Mark of Didier
+//                    case 28114: break;
+//                    // Communique Timer, camp
+//                    case 28346: break;
+//                    // Icebolt
+//                    case 28522: break;
+//                    // Silithyst
+//                    case 29519: break;
+//                    // Inoculate Nestlewood Owlkin
+                    case 29528: trigger_spell_id = 28713; break;
+//                    // Overload
+//                    case 29768: break;
+//                    // Return Fire
+//                    case 29788: break;
+//                    // Return Fire
+//                    case 29793: break;
+//                    // Return Fire
+//                    case 29794: break;
+//                    // Guardian of Icecrown Passive
+//                    case 29897: break;
+                    // Feed Captured Animal
+                    case 29917: trigger_spell_id = 29916; break;
+//                    // Flame Wreath
+//                    case 29946: break;
+//                    // Flame Wreath
+//                    case 29947: break;
+//                    // Mind Exhaustion Passive
+//                    case 30025: break;
+//                    // Nether Beam - Serenity
+//                    case 30401: break;
+//                    // Extract Gas
+//                    case 30427: break;
+                    // Quake
+                    case 30576: trigger_spell_id = 30571; break;
+//                    // Burning Maul
+//                    case 30598: break;
+//                    // Regeneration
+//                    case 30799:
+//                    case 30800:
+//                    case 30801:
+//                        break;
+//                    // Despawn Self - Smoke cloud
+//                    case 31269: break;
+//                    // Time Rift Periodic
+//                    case 31320: break;
+//                    // Corrupt Medivh
+//                    case 31326: break;
+                    // Doom
+                    case 31347:
+                    {
+                        m_target->CastSpell(m_target,31350,true);
+                        m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
+                        return;
+                    }
+//                    // Spellcloth
+//                    case 31373: break;
+//                    // Bloodmyst Tesla
+//                    case 31611: break;
+//                    // Doomfire
+//                    case 31944: break;
+//                    // Teleport Test
+//                    case 32236: break;
+//                    // Earthquake
+//                    case 32686: break;
+//                    // Possess
+//                    case 33401: break;
+//                    // Draw Shadows
+//                    case 33563: break;
+//                    // Murmur's Touch
+//                    case 33711: break;
+//                    // Flame Quills
+//                    case 34229: break;
+//                    // Gravity Lapse
+//                    case 34480: break;
+//                    // Tornado
+//                    case 34683: break;
+//                    // Frostbite Rotate
+//                    case 34748: break;
+//                    // Arcane Flurry
+//                    case 34821: break;
+//                    // Interrupt Shutdown
+//                    case 35016: break;
+//                    // Interrupt Shutdown
+//                    case 35176: break;
+//                    // Inferno
+//                    case 35268: break;
+//                    // Salaadin's Tesla
+//                    case 35515: break;
+//                    // Ethereal Channel (Red)
+//                    case 35518: break;
+//                    // Nether Vapor
+//                    case 35879: break;
+//                    // Dark Portal Storm
+//                    case 36018: break;
+//                    // Burning Maul
+//                    case 36056: break;
+//                    // Living Grove Defender Lifespan
+//                    case 36061: break;
+//                    // Professor Dabiri Talks
+//                    case 36064: break;
+//                    // Kael Gaining Power
+//                    case 36091: break;
+//                    // They Must Burn Bomb Aura
+//                    case 36344: break;
+//                    // They Must Burn Bomb Aura (self)
+//                    case 36350: break;
+//                    // Stolen Ravenous Ravager Egg
+//                    case 36401: break;
+//                    // Activated Cannon
+//                    case 36410: break;
+//                    // Stolen Ravenous Ravager Egg
+//                    case 36418: break;
+//                    // Enchanted Weapons
+//                    case 36510: break;
+//                    // Cursed Scarab Periodic
+//                    case 36556: break;
+//                    // Cursed Scarab Despawn Periodic
+//                    case 36561: break;
+//                    // Vision Guide
+//                    case 36573: break;
+//                    // Cannon Charging (platform)
+//                    case 36785: break;
+//                    // Cannon Charging (self)
+//                    case 36860: break;
+                    // Remote Toy
+                    case 37027: trigger_spell_id = 37029; break;
+//                    // Mark of Death
+//                    case 37125: break;
+//                    // Arcane Flurry
+//                    case 37268: break;
+//                    // Spout
+//                    case 37429: break;
+//                    // Spout
+//                    case 37430: break;
+//                    // Karazhan - Chess NPC AI, Snapshot timer
+//                    case 37440: break;
+//                    // Karazhan - Chess NPC AI, action timer
+//                    case 37504: break;
+//                    // Karazhan - Chess: Is Square OCCUPIED aura (DND)
+//                    case 39400: break;
+//                    // Banish
+//                    case 37546: break;
+//                    // Shriveling Gaze
+//                    case 37589: break;
+//                    // Fake Aggro Radius (2 yd)
+//                    case 37815: break;
+//                    // Corrupt Medivh
+//                    case 37853: break;
+//                    // Eye of Grillok
+//                    case 38495: break;
+//                    // Absorb Eye of Grillok
+//                    case 38554: break;
+//                    // Magic Sucker Device timer
+//                    case 38672: break;
+//                    // Tomb Guarding Charging
+//                    case 38751: break;
+//                    // Murmur's Touch
+//                    case 38794: break;
+//                    // Activate Nether-wraith Beacon
+//                    case 39105: break;
+//                    // Drain World Tree Visual
+//                    case 39140: break;
+//                    // Quest - Dustin's Undead Dragon Visual aura
+//                    case 39259: break;
+//                    // Hellfire - The Exorcism, Jules releases darkness, aura
+//                    case 39306: break;
+//                    // Inferno
+//                    case 39346: break;
+//                    // Enchanted Weapons
+//                    case 39489: break;
+//                    // Shadow Bolt Whirl
+//                    case 39630: break;
+//                    // Shadow Bolt Whirl
+//                    case 39634: break;
+//                    // Shadow Inferno
+//                    case 39645: break;
+                    // Tear of Azzinoth Summon Channel - it's not really supposed to do anything,and this only prevents the console spam
+                    case 39857: trigger_spell_id = 39856; break;        
+//                    // Soulgrinder Ritual Visual (Smashed)
+//                    case 39974: break;
+//                    // Simon Game Pre-game timer
+//                    case 40041: break;
+//                    // Knockdown Fel Cannon: The Aggro Check Aura
+//                    case 40113: break;
+//                    // Spirit Lance
+//                    case 40157: break;
+//                    // Demon Transform 2
+//                    case 40398: break;
+//                    // Demon Transform 1
+//                    case 40511: break;
+//                    // Ancient Flames
+//                    case 40657: break;
+//                    // Ethereal Ring Cannon: Cannon Aura
+//                    case 40734: break;
+//                    // Cage Trap
+//                    case 40760: break;
+//                    // Random Periodic
+//                    case 40867: break;
+//                    // Prismatic Shield
+//                    case 40879: break;
+//                    // Aura of Desire
+//                    case 41350: break;
+//                    // Dementia
+//                    case 41404: break;
+//                    // Chaos Form
+//                    case 41629: break;
+//                    // Alert Drums
+//                    case 42177: break;
+//                    // Spout
+//                    case 42581: break;
+//                    // Spout
+//                    case 42582: break;
+//                    // Return to the Spirit Realm
+//                    case 44035: break;
+//                    // Curse of Boundless Agony
+//                    case 45050: break;
+//                    // Earthquake
+//                    case 46240: break;
+                    // Personalized Weather
+                    case 46736: trigger_spell_id = 46737; break;
+//                    // Stay Submerged
+//                    case 46981: break;
+//                    // Dragonblight Ram
+//                    case 47015: break;
+                    default:
+                        break;
+                }
+                break;
+            }
+            case SPELLFAMILY_MAGE:
+            {
+                switch(auraId)
+                {
+                    // Invisibility
+                    case 66:
+                    {
+                        if(!m_duration)
+                            m_target->CastSpell(m_target, 32612, true, NULL, this);
+                        return;
+                    }
+                    default:
+                        break;
+                }
+                break;
+            }
+//            case SPELLFAMILY_WARRIOR:
+//            {
+//                switch(auraId)
+//                {
+//                    // Wild Magic
+//                    case 23410: break;
+//                    // Corrupted Totems
+//                    case 23425: break;
+//                    default:
+//                        break;
+//                }
+//                break;
+//            }
+//            case SPELLFAMILY_PRIEST:
+//            {
+//                switch(auraId)
+//                {
+//                    // Blue Beam
+//                    case 32930: break;
+//                    // Fury of the Dreghood Elders
+//                    case 35460: break;
+//                    default:
+//                        break;
+//                }
+ //               break;
+ //           }
+            case SPELLFAMILY_DRUID:
+            {
+                switch(auraId)
+                {
+                    // Cat Form 
+                    // trigger_spell_id not set and unknown effect triggered in this case, ignoring for while
+                    case 768:
+                        return;
+                    // Frenzied Regeneration
+                    case 22842:
+                    case 22895:
+                    case 22896:
+                    case 26999:
+                    {
+                        int32 LifePerRage = GetModifier()->m_amount;
+
+                        int32 lRage = m_target->GetPower(POWER_RAGE);
+                        if(lRage > 100)                                     // rage stored as rage*10
+                            lRage = 100;
+                        m_target->ModifyPower(POWER_RAGE, -lRage);
+                        int32 FRTriggerBasePoints = int32(lRage*LifePerRage/10);
+                        m_target->CastCustomSpell(m_target,22845,&FRTriggerBasePoints,NULL,NULL,true,NULL,this);
+                        return;
+                    }
+                    default:
+                        break;
+                }
+                break;
+            }
+
+//            case SPELLFAMILY_HUNTER:
+//            {
+//                switch(auraId)
+//                {
+//                    //Frost Trap Aura
+//                    case 13810:
+//                        return;
+//                    //Rizzle's Frost Trap
+//                    case 39900:
+//                        return;
+//                    // Tame spells
+//                    case 19597:         // Tame Ice Claw Bear
+//                    case 19676:         // Tame Snow Leopard
+//                    case 19677:         // Tame Large Crag Boar
+//                    case 19678:         // Tame Adult Plainstrider
+//                    case 19679:         // Tame Prairie Stalker
+//                    case 19680:         // Tame Swoop
+//                    case 19681:         // Tame Dire Mottled Boar
+//                    case 19682:         // Tame Surf Crawler
+//                    case 19683:         // Tame Armored Scorpid
+//                    case 19684:         // Tame Webwood Lurker
+//                    case 19685:         // Tame Nightsaber Stalker
+//                    case 19686:         // Tame Strigid Screecher
+//                    case 30100:         // Tame Crazed Dragonhawk
+//                    case 30103:         // Tame Elder Springpaw
+//                    case 30104:         // Tame Mistbat
+//                    case 30647:         // Tame Barbed Crawler
+//                    case 30648:         // Tame Greater Timberstrider
+//                    case 30652:         // Tame Nightstalker
+//                        return;
+//                    default:
+//                        break;
+//                }
+//                break;
+//            }
+            case SPELLFAMILY_SHAMAN:
+            {
+                switch(auraId)
+                {
+                    // Lightning Shield
+//                    case 28820:
+//                        return;
+                    // Totemic Mastery (Skyshatter Regalia (Shaman Tier 6) - bonus)
+                    case 38443:
+                    {
+                        if( caster->m_TotemSlot[0] && caster->m_TotemSlot[1] && caster->m_TotemSlot[2] && caster->m_TotemSlot[3] )
+                            caster->CastSpell(caster,38437,true);
+                        else
+                            caster->RemoveAurasDueToSpell(38437);
+                        return;
+                    }
+                    default:
+                        break;
+                }
+                break;
+            }
+            default:
+                break;
+        }
+        // Reget trigger spell proto
+        triggredSpellInfo = sSpellStore.LookupEntry(trigger_spell_id);
+        if(triggredSpellInfo == NULL)
+        {
+            sLog.outError("Aura::TriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?",GetId(),GetEffIndex());
             return;
         }
     }
-
-    SpellEntry const *triggredSpellInfo = sSpellStore.LookupEntry(trigger_spell_id);
-
-    if(!triggredSpellInfo)
+    else
     {
-        sLog.outError("WORLD: unknown aura triggered spell id %i\n", trigger_spell_id);
-        return;
-    }
+        // Spell exist but require costum code
+        switch(auraId)
+        {
+            // Curse of Idiocy
+            case 1010:
+            {
+                // TODO: spell casted by result in correct way mostly
+                // BUT:
+                // 1) target show casting at each triggered cast: target don't must show casting animation for any triggered spell
+                //      but must show affect apply like item casting
+                // 2) maybe aura must be replace by new with accumulative stat mods insteed stacking
 
+                // prevent cast by triggered auras
+                if(m_caster_guid == m_target->GetGUID())
+                    return;
+
+                // stop triggering after each affected stats lost > 90
+                int32 intelectLoss = 0;
+                int32 spiritLoss = 0;
+
+                Unit::AuraList const& mModStat = m_target->GetAurasByType(SPELL_AURA_MOD_STAT);
+                for(Unit::AuraList::const_iterator i = mModStat.begin(); i != mModStat.end(); ++i)
+                {
+                    if ((*i)->GetId() == 1010)
+                    {
+                        switch((*i)->GetModifier()->m_miscvalue)
+                        {
+                            case STAT_INTELLECT: intelectLoss += (*i)->GetModifier()->m_amount; break;
+                            case STAT_SPIRIT:    spiritLoss   += (*i)->GetModifier()->m_amount; break;
+                            default: break;
+                        }
+                    }
+                }
+
+                if(intelectLoss <= -90 && spiritLoss <= -90)
+                    return;
+
+                caster = target;
+                originalCasterGUID = 0;
+                break;
+            }
+            // Mana Tide
+            case 16191:
+            {
+                caster->CastCustomSpell(target, trigger_spell_id, &m_modifier.m_amount, NULL, NULL, true, NULL, this, originalCasterGUID);
+                return;
+            }
+        }
+    }
+    // All ok cast by default case
     Spell *spell = new Spell(caster, triggredSpellInfo, true, originalCasterGUID );
 
     SpellCastTargets targets;
@@ -3183,7 +3580,8 @@ void Aura::HandleModMechanicImmunity(bool apply, bool Real)
                 && spell->Id != GetId())
             {
                 //check for mechanic mask
-                if( ((1<<spell->Mechanic) & mechanic) || ((1<<spell->EffectMechanic[iter->second->GetEffIndex()]) & mechanic))
+                uint32 auraMechanic = GetSpellMechanicMask(spell, iter->second->GetEffIndex());
+                if(auraMechanic & mechanic)
                 {
                     m_target->RemoveAurasDueToSpell(spell->Id);
                     if(Auras.empty())

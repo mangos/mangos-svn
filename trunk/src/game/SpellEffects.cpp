@@ -4120,7 +4120,33 @@ void Spell::EffectScriptEffect(uint32 i)
                 DoCreateItem(i,item);
             break;
         }
-
+        // Improved Sprint
+        case 30918:
+        {
+            // Removes snares and roots.
+            uint32 mechanic = (1<<MECHANIC_ROOT) | (1<<MECHANIC_SNARE);
+            Unit::AuraMap& Auras = unitTarget->GetAuras();
+            for(Unit::AuraMap::iterator iter = Auras.begin(), next; iter != Auras.end(); iter = next)
+            {
+                next = iter;
+                ++next;
+                Aura *aur = iter->second;
+                if (!aur->IsPositive())             //only remove negative spells
+                {
+                    // check for mechanic mask
+                    uint32 auraMechanic = GetSpellMechanicMask(aur->GetSpellProto(), aur->GetEffIndex());
+                    if(auraMechanic & mechanic)
+                    {
+                        unitTarget->RemoveAurasDueToSpell(aur->GetId());
+                        if(Auras.empty())
+                            break;
+                        else
+                            next = Auras.begin();
+                    }
+                }
+            }
+            break;
+        }
         //Flame Crash
         case 41126:
         {

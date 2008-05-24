@@ -171,6 +171,14 @@ enum EnchantmentOffset
 
 #define MAX_ENCHANTMENT_OFFSET    3
 
+enum EnchantmentSlotMask
+{
+    ENCHANTMENT_CAN_SOULBOUND  = 0x01,
+    ENCHANTMENT_UNK1           = 0x02,
+    ENCHANTMENT_UNK2           = 0x04,
+    ENCHANTMENT_UNK3           = 0x08
+};
+
 enum ItemUpdateState
 {
     ITEM_UNCHANGED                               = 0,
@@ -200,7 +208,7 @@ class MANGOS_DLL_SPEC Item : public Object
         void SetBinding(bool val) { ApplyModFlag(ITEM_FIELD_FLAGS,ITEM_FLAGS_BINDED,val); }
         bool IsSoulBound() const { return HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_BINDED); }
         bool IsBindedNotWith(uint64 guid) const { return IsSoulBound() && GetOwnerGUID()!= guid; }
-
+        bool IsBoundByEnchant() const;
         virtual void SaveToDB();
         virtual bool LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result = NULL);
         virtual void DeleteFromDB();

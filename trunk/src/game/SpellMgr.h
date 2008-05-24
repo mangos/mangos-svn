@@ -355,6 +355,16 @@ inline SpellSchoolMask GetSpellSchoolMask(SpellEntry const* spellInfo)
     return SpellSchoolMask(spellInfo->SchoolMask);
 }
 
+inline uint32 GetSpellMechanicMask(SpellEntry const* spellInfo, int32 effect)
+{
+    uint32 mask = 0;
+    if (spellInfo->Mechanic)
+        mask |= 1<<spellInfo->Mechanic;
+    if (spellInfo->EffectMechanic[effect])
+        mask |= 1<<spellInfo->EffectMechanic[effect];
+    return mask;
+}
+
 // Spell affects related declarations (accessed using SpellMgr functions)
 struct SpellAffection
 {

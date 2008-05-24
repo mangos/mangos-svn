@@ -346,6 +346,10 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
     if(GetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID) < 0)
         SetUInt32Value(ITEM_FIELD_SUFFIX_FACTOR,GenerateEnchSuffixFactor(GetEntry()));
 
+    // Remove bind flag for items vs NO_BIND set
+    if (IsSoulBound() && GetProto()->Bonding == NO_BIND)
+        ApplyModFlag(ITEM_FIELD_FLAGS,ITEM_FLAGS_BINDED, false);
+
     if(owner_guid != 0)
         SetOwnerGUID(owner_guid);
 
@@ -635,7 +639,29 @@ bool Item::CanBeTraded() const
             return false;
     }
 
+    if (IsBoundByEnchant())
+        return false;
+
     return true;
+}
+
+bool Item::IsBoundByEnchant() const
+{
+    // Check all enchants for soulbound
+    for(uint32 enchant_slot = PERM_ENCHANTMENT_SLOT; enchant_slot < MAX_ENCHANTMENT_SLOT; ++enchant_slot)
+    {
+        uint32 enchant_id = GetEnchantmentId(EnchantmentSlot(enchant_slot));
+        if(!enchant_id)
+            continue;
+
+        SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+        if(!enchantEntry)
+            continue;
+
+        if(enchantEntry->slot & ENCHANTMENT_CAN_SOULBOUND)
+            return true;
+    }
+    return false;
 }
 
 bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
