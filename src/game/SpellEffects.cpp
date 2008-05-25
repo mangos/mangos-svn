@@ -4134,8 +4134,7 @@ void Spell::EffectScriptEffect(uint32 i)
                 if (!aur->IsPositive())             //only remove negative spells
                 {
                     // check for mechanic mask
-                    uint32 auraMechanic = GetSpellMechanicMask(aur->GetSpellProto(), aur->GetEffIndex());
-                    if(auraMechanic & mechanic)
+                    if(GetSpellMechanicMask(aur->GetSpellProto(), aur->GetEffIndex()) & mechanic)
                     {
                         unitTarget->RemoveAurasDueToSpell(aur->GetId());
                         if(Auras.empty())
