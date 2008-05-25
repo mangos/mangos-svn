@@ -616,6 +616,8 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
             sLog.outDebug( "WORLD: %s's friend list is full.", GetPlayer()->GetName());
         }
 
+        _player->GetSocial()->SetFriendNote(GUID_LOPART(friendGuid), friendNote);
+
         sLog.outDebug( "WORLD: %s Guid found '%u'.", friendName.c_str(), GUID_LOPART(friendGuid));
     }
     else if(friendResult==FRIEND_ALREADY)
@@ -1475,7 +1477,7 @@ void WorldSession::HandleReportSpamOpcode( WorldPacket & recv_data )
     // if it's mail spam - ALL mails from this spammer automatically removed by client
 
     // Complaint Received message
-    WorldPacket data(SMSG_REPORT_SPAM_RESULT, 1);
+    WorldPacket data(SMSG_COMPLAIN_RESULT, 1);
     data << uint8(0);
     SendPacket(&data);
 

@@ -432,8 +432,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
     pCurrChar->GetSocial()->SendSocialList();
 
-    // added in 2.2.0
-    data.Initialize(SMSG_VOICE_SYSTEM_STATUS, 2);
+    data.Initialize(SMSG_FEATURE_SYSTEM_STATUS, 2);         // added in 2.2.0
     data << uint8(2);                                       // unknown value
     data << uint8(0);                                       // enable(1)/disable(0) voice chat interface in client
     SendPacket(&data);

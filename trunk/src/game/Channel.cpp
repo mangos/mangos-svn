@@ -971,9 +971,9 @@ void Channel::JoinNotify(uint64 guid)
     WorldPacket data;
 
     if(IsConstant())
-        data.Initialize(SMSG_PLAYER_JOINED_CHANNEL, 8+1+1+4+GetName().size()+1);
+        data.Initialize(SMSG_USERLIST_ADD, 8+1+1+4+GetName().size()+1);
     else
-        data.Initialize(SMSG_PLAYER_JOINED_CUSTOM_CHANNEL, 8+1+1+4+GetName().size()+1);
+        data.Initialize(SMSG_USERLIST_UPDATE, 8+1+1+4+GetName().size()+1);
 
     data << uint64(guid);
     data << uint8(GetPlayerFlags(guid));
@@ -985,7 +985,7 @@ void Channel::JoinNotify(uint64 guid)
 
 void Channel::LeaveNotify(uint64 guid)
 {
-    WorldPacket data(SMSG_PLAYER_LEFT_CHANNEL, 8+1+4+GetName().size()+1);
+    WorldPacket data(SMSG_USERLIST_REMOVE, 8+1+4+GetName().size()+1);
     data << uint64(guid);
     data << uint8(GetFlags());
     data << uint32(GetNumPlayers());

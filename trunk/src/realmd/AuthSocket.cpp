@@ -710,7 +710,7 @@ bool AuthSocket::_HandleRealmList()
         pkt << i->second.address;
         pkt << i->second.populationLevel;
         pkt << AmountOfCharacters;
-        pkt << i->second.timezone;
+        pkt << i->second.timezone;                          // realm category
         pkt << (uint8) 0x2C;                                // unk, may be realm number/id?
     }
     pkt << (uint8) 0x10;
@@ -723,7 +723,7 @@ bool AuthSocket::_HandleRealmList()
 
     SendBuf((char const*)hdr.contents(), hdr.size());
 
-    // Set check field before possable relogin to realm
+    // Set check field before possible relogin to realm
     _SetVSFields(rI);
     return true;
 }

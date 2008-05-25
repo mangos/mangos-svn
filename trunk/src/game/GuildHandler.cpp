@@ -956,7 +956,7 @@ void WorldSession::HandleGuildEventLogOpcode(WorldPacket& /* recvPacket */)
 
     uint8 count = 0,type = 0;
 
-    WorldPacket data(MSG_GUILD_EVENT_LOG_QUERY, 0);
+    WorldPacket data(MSG_GUILD_EVENT_LOG_QUERY, 1);
     data << uint8(count);                                   // count, max count == 100
     for(int i = 0; i < count; ++i)
     {

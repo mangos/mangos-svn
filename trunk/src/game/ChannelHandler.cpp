@@ -381,7 +381,7 @@ void WorldSession::HandleChannelInfoQuery(WorldPacket &recvPacket)
     {
         if(Channel *chn = cMgr->GetChannel(channelname, _player))
         {
-            WorldPacket data(SMSG_CHANNEL_INFO_QUERY_RESPONSE, chn->GetName().size()+1+1+4);
+            WorldPacket data(SMSG_CHANNEL_MEMBER_COUNT, chn->GetName().size()+1+1+4);
             data << chn->GetName();
             data << uint8(chn->GetFlags());
             data << uint32(chn->GetNumPlayers());

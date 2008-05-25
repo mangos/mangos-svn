@@ -218,18 +218,24 @@ void SpellCastTargets::write ( WorldPacket * data )
 {
     *data << uint32(m_targetMask);
 
-    if(m_targetMask & TARGET_FLAG_UNIT)
+    if( m_targetMask & ( TARGET_FLAG_UNIT | TARGET_FLAG_PVP_CORPSE | TARGET_FLAG_OBJECT | TARGET_FLAG_CORPSE | TARGET_FLAG_UNK2 ) )
     {
-        if(m_unitTarget)
-            data->append(m_unitTarget->GetPackGUID());
-        else
-            *data << uint8(0);
-    }
-
-    if( m_targetMask & ( TARGET_FLAG_OBJECT | TARGET_FLAG_OBJECT_UNK ) )
-    {
-        if(m_GOTarget)
-            data->append(m_GOTarget->GetPackGUID());
+        if(m_targetMask & TARGET_FLAG_UNIT)
+        {
+            if(m_unitTarget)
+                data->append(m_unitTarget->GetPackGUID());
+            else
+                *data << uint8(0);
+        }
+        else if( m_targetMask & ( TARGET_FLAG_OBJECT | TARGET_FLAG_OBJECT_UNK ) )
+        {
+            if(m_GOTarget)
+                data->append(m_GOTarget->GetPackGUID());
+            else
+                *data << uint8(0);
+        }
+        else if( m_targetMask & ( TARGET_FLAG_CORPSE | TARGET_FLAG_PVP_CORPSE ) )
+            data->appendPackGUID(m_CorpseTargetGUID);
         else
             *data << uint8(0);
     }
@@ -250,9 +256,6 @@ void SpellCastTargets::write ( WorldPacket * data )
 
     if( m_targetMask & TARGET_FLAG_STRING )
         *data << m_strTarget;
-
-    if( m_targetMask & ( TARGET_FLAG_CORPSE | TARGET_FLAG_PVP_CORPSE ) )
-        data->appendPackGUID(m_CorpseTargetGUID);
 }
 
 Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 originalCasterGUID, Spell** triggeringContainer )
@@ -2457,7 +2460,7 @@ void Spell::SendCastResult(uint8 result)
     }
     else
     {
-        WorldPacket data(SMSG_CAST_SUCCESS, (8+4));
+        WorldPacket data(SMSG_CLEAR_EXTRA_AURA_INFO, (8+4));
         data.append(m_caster->GetPackGUID());
         data << uint32(m_spellInfo->Id);
         ((Player*)m_caster)->GetSession()->SendPacket(&data);
@@ -2527,7 +2530,6 @@ void Spell::SendSpellGo()
 
     data.append(m_caster->GetPackGUID());
     data << uint32(m_spellInfo->Id);
-
     data << uint16(castFlags);
     data << uint32(getMSTime());                            // timestamp
 
@@ -4105,7 +4107,7 @@ uint8 Spell::CheckPower()
     if(m_CastItem)
         return 0;
 
-    // health as power used - need chech health amount
+    // health as power used - need check health amount
     if(m_spellInfo->powerType == -2)
     {
         if(m_caster->GetHealth() <= m_powerCost)
@@ -4113,9 +4115,8 @@ uint8 Spell::CheckPower()
         return 0;
     }
     // Check valid power type
-    if(m_spellInfo->powerType < 0 || m_spellInfo->powerType > POWER_HAPPINESS)
+    if(m_spellInfo->powerType < 0 || m_spellInfo->powerType >= MAX_POWERS)
     {
-
         sLog.outError("Spell::CheckMana: Unknown power type '%d'", m_spellInfo->powerType);
         return SPELL_FAILED_UNKNOWN;
     }
