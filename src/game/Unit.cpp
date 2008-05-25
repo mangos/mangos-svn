@@ -2595,8 +2595,32 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     // Reduce spell hit chance for Area of effect spells from victim SPELL_AURA_MOD_AOE_AVOIDANCE aura
     if (IsAreaOfEffectSpell(spell))
         modHitChance-=pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_AOE_AVOIDANCE);
-    // Chance resist mechanic
-    modHitChance-=pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MECHANIC_RESISTANCE, int32(spell->Mechanic));
+
+    // Chance resist mechanic (selegt max value from every mechanic spell effect)
+    int32 resist_mech = 0;
+    // Get 0 effect mechanic and chance
+    int32 effect_mech = GetEffectMechanic(spell, 0);
+    if (effect_mech)
+        resist_mech = pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MECHANIC_RESISTANCE, effect_mech);
+    // Get 1 effect mechanic and if chance greater than effect 0 store chance
+    effect_mech = GetEffectMechanic(spell, 1);
+    if (effect_mech)
+    {
+        int32 temp = pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MECHANIC_RESISTANCE, effect_mech);
+        if (resist_mech < temp)
+            resist_mech = temp;
+    }
+    // Get 2 effect mechanic  and if chance greater than effect 0 or 1 store chance
+    effect_mech = GetEffectMechanic(spell, 2);
+    if (effect_mech)
+    {
+        int32 temp = pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MECHANIC_RESISTANCE, effect_mech);
+        if (resist_mech < temp)
+            resist_mech = temp;
+    }
+    // Apply mod
+    modHitChance-=resist_mech;
+
     // Chance resist debuff
     modHitChance-=pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_DEBUFF_RESISTANCE, int32(spell->Dispel));
 
@@ -7785,7 +7809,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
             }
         }
 
-        DoneFlatBenefit += int32(APbonus/14.0f * GetAPMultiplier(attType,normalized)/1000.0f);
+        DoneFlatBenefit += int32(APbonus/14.0f * GetAPMultiplier(attType,normalized));
     }
 
     // ..taken
@@ -8749,7 +8773,7 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
     return value;
 }
 
-int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto, Unit const* target)
+int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto, uint8 effect_index, Unit const* target)
 {
     Player* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? (Player*)this : NULL;
 
@@ -8767,10 +8791,11 @@ int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto, Unit const* tar
 
     if (duration > 0)
     {
+        int32 mechanic = GetEffectMechanic(spellProto, effect_index);
         // Find total mod value (negative bonus)
-        int32 durationMod_always = target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD, int32(spellProto->Mechanic));
+        int32 durationMod_always = target->GetTotalAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD, mechanic);
         // Find max mod (negative bonus)
-        int32 durationMod_not_stack = target->GetMaxNegativeAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD_NOT_STACK, int32(spellProto->Mechanic));
+        int32 durationMod_not_stack = target->GetMaxNegativeAuraModifierByMiscValue(SPELL_AURA_MECHANIC_DURATION_MOD_NOT_STACK, mechanic);
 
         int32 durationMod = 0;
         // Select strongest negative mod

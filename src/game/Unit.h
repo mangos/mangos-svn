@@ -1088,7 +1088,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void _ApplyAllAuraMods();
 
         int32 CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_index, int32 basePoints, Unit const* target);
-        int32 CalculateSpellDuration(SpellEntry const* spellProto, Unit const* target);
+        int32 CalculateSpellDuration(SpellEntry const* spellProto, uint8 effect_index, Unit const* target);
         float CalculateLevelPenalty(SpellEntry const* spellProto) const;
 
         void addFollower(FollowerReference* pRef) { m_FollowingRefManager.insertFirst(pRef); }

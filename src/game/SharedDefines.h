@@ -430,6 +430,7 @@ enum AuraState
 // Spell mechanics
 enum Mechanics
 {
+    MECHANIC_NONE             = 0,
     MECHANIC_CHARM            = 1,
     MECHANIC_CONFUSED         = 2,
     MECHANIC_DISARM           = 3,

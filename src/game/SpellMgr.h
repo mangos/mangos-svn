@@ -365,6 +365,16 @@ inline uint32 GetSpellMechanicMask(SpellEntry const* spellInfo, int32 effect)
     return mask;
 }
 
+inline Mechanics GetEffectMechanic(SpellEntry const* spellInfo, int32 effect)
+{
+    if (spellInfo->EffectMechanic[effect])
+        return Mechanics(spellInfo->EffectMechanic[effect]);
+    if (spellInfo->Mechanic)
+        return Mechanics(spellInfo->Mechanic);
+    return MECHANIC_NONE;
+
+}
+
 // Spell affects related declarations (accessed using SpellMgr functions)
 struct SpellAffection
 {
