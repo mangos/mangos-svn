@@ -298,6 +298,8 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                         return false;
                     break;
                 }
+                case SPELL_AURA_ADD_TARGET_TRIGGER:
+                    return true;
                 case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
                     if(spellId != spellproto->EffectTriggerSpell[effIndex])
                     {
@@ -987,6 +989,11 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                 // Personalized Weather (thunder effect should overwrite rainy aura)
                 if(spellInfo_1->SpellIconID == 2606 && spellInfo_2->SpellIconID == 2606)
                     return false;
+
+                // Brood Affliction: Bronze
+                if((spellInfo_1->Id == 23170 && spellInfo_2->Id == 23171) ||
+                   (spellInfo_2->Id == 23170 && spellInfo_1->Id == 23171))
+                   return false;
 
                 break;
             }

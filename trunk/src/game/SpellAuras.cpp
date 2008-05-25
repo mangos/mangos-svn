@@ -1209,8 +1209,12 @@ void Aura::TriggerSpell()
 //                    case 21866: break;
 //                    // Celebras Waiting
 //                    case 21916: break;
-//                    // Brood Affliction: Bronze
-//                    case 23170: break;
+                    // Brood Affliction: Bronze
+                    case 23170: 
+                    {
+                        m_target->CastSpell(m_target, 23171, true, 0, this);
+                        return;
+                    }
 //                    // Mark of Frost
 //                    case 23184: break;
 //                    // Restoration
@@ -3580,8 +3584,7 @@ void Aura::HandleModMechanicImmunity(bool apply, bool Real)
                 && spell->Id != GetId())
             {
                 //check for mechanic mask
-                uint32 auraMechanic = GetSpellMechanicMask(spell, iter->second->GetEffIndex());
-                if(auraMechanic & mechanic)
+                if(GetSpellMechanicMask(spell, iter->second->GetEffIndex()) & mechanic)
                 {
                     m_target->RemoveAurasDueToSpell(spell->Id);
                     if(Auras.empty())
