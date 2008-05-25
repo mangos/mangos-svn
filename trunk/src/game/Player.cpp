@@ -2192,7 +2192,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
         SetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+i,0.0f);
     }
     // Init data for form but skip reaply item mods for form
-    InitDataForForm(!reapplyMods);
+    InitDataForForm(reapplyMods);
 
     // save new stats
     for (int i = POWER_MANA; i < MAX_POWERS; i++)
@@ -15228,8 +15228,8 @@ void Player::InitDataForForm(bool reapplyMods)
         }
     }
 
-    // apply auras in this form
-    if (reapplyMods)
+    // update auras at form change, ignore this at mods reapply (.reset stats/etc) when form not change.
+    if (!reapplyMods)
     {
         for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
         {

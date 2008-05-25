@@ -2412,7 +2412,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     HandleShapeshiftBoosts(apply);
 
     if(m_target->GetTypeId()==TYPEID_PLAYER)
-        ((Player*)m_target)->InitDataForForm(true);
+        ((Player*)m_target)->InitDataForForm();
 }
 
 void Aura::HandleAuraTransform(bool apply, bool Real)
