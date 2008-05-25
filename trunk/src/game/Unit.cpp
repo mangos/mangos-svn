@@ -2596,27 +2596,18 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     if (IsAreaOfEffectSpell(spell))
         modHitChance-=pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_AOE_AVOIDANCE);
 
-    // Chance resist mechanic (selegt max value from every mechanic spell effect)
+    // Chance resist mechanic (select max value from every mechanic spell effect)
     int32 resist_mech = 0;
-    // Get 0 effect mechanic and chance
-    int32 effect_mech = GetEffectMechanic(spell, 0);
-    if (effect_mech)
-        resist_mech = pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MECHANIC_RESISTANCE, effect_mech);
-    // Get 1 effect mechanic and if chance greater than effect 0 store chance
-    effect_mech = GetEffectMechanic(spell, 1);
-    if (effect_mech)
+    // Get effects mechanic and chance
+    for(int eff = 0; eff < 3; ++eff)
     {
-        int32 temp = pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MECHANIC_RESISTANCE, effect_mech);
-        if (resist_mech < temp)
-            resist_mech = temp;
-    }
-    // Get 2 effect mechanic  and if chance greater than effect 0 or 1 store chance
-    effect_mech = GetEffectMechanic(spell, 2);
-    if (effect_mech)
-    {
-        int32 temp = pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MECHANIC_RESISTANCE, effect_mech);
-        if (resist_mech < temp)
-            resist_mech = temp;
+        int32 effect_mech = GetEffectMechanic(spell, eff);
+        if (effect_mech)
+        {
+            int32 temp = pVictim->GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_MECHANIC_RESISTANCE, effect_mech);
+            if (resist_mech < temp)
+                resist_mech = temp;
+        }
     }
     // Apply mod
     modHitChance-=resist_mech;
