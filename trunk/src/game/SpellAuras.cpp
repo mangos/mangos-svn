@@ -1331,8 +1331,15 @@ void Aura::TriggerSpell()
                         m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
                         return;
                     }
-//                    // Spellcloth
-//                    case 31373: break;
+                    // Spellcloth
+                    case 31373:
+                    {
+                        // Summon Elemental after create item
+                        float px, py, pz;
+                        caster->GetClosePoint(px, py, pz);
+                        caster->SummonCreature(17870, px, py, pz, caster->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
+                        return;
+                    }
 //                    // Bloodmyst Tesla
 //                    case 31611: break;
 //                    // Doomfire
@@ -4521,6 +4528,7 @@ void Aura::HandleAuraAttackPowerAttacker(bool apply, bool Real)
                 int32 ranged_bonus = caster->CalculateSpellDamage(m_spellProto, 1, m_spellProto->EffectBasePoints[1], m_target);
                 // Set melee attack power bonus % from ranged depends from Improved mask aura
                 m_modifier.m_amount = mod->m_amount * ranged_bonus / 100;
+                m_currentBasePoints = m_modifier.m_amount;
                 break;
             }
         }
