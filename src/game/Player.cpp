@@ -2191,7 +2191,8 @@ void Player::InitStatsForLevel(bool reapplyMods)
         SetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER+i,0.0f);
         SetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+i,0.0f);
     }
-    InitDataForForm();
+    // Init data for form but skip reaply item mods for form
+    InitDataForForm(!reapplyMods);
 
     // save new stats
     for (int i = POWER_MANA; i < MAX_POWERS; i++)
@@ -15191,7 +15192,7 @@ void Player::ProhibitSpellScholl(SpellSchoolMask idSchoolMask, uint32 unTimeMs )
     GetSession()->SendPacket(&data);
 }
 
-void Player::InitDataForForm()
+void Player::InitDataForForm(bool reapplyMods)
 {
     SpellShapeshiftEntry const* ssEntry = sSpellShapeshiftStore.LookupEntry(m_form);
     if(ssEntry && ssEntry->attackSpeed)
@@ -15228,15 +15229,17 @@ void Player::InitDataForForm()
     }
 
     // apply auras in this form
-    for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
+    if (reapplyMods)
     {
-        if(m_items[i])
+        for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
         {
-            ApplyItemEquipSpell(m_items[i],false,true);     // remove spells that not fit to form
-            ApplyItemEquipSpell(m_items[i],true,true);      // add spells that fit form but not active
+            if(m_items[i])
+            {
+                ApplyItemEquipSpell(m_items[i],false,true);     // remove spells that not fit to form
+                ApplyItemEquipSpell(m_items[i],true,true);      // add spells that fit form but not active
+            }
         }
     }
-
     UpdateAttackPowerAndDamage();
     UpdateAttackPowerAndDamage(true);
 }
