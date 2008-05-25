@@ -1210,7 +1210,7 @@ void Aura::TriggerSpell()
 //                    // Celebras Waiting
 //                    case 21916: break;
                     // Brood Affliction: Bronze
-                    case 23170: 
+                    case 23170:
                     {
                         m_target->CastSpell(m_target, 23171, true, 0, this);
                         return;

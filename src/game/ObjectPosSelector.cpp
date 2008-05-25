@@ -69,8 +69,8 @@ void ObjectPosSelector::InitializeAngle()
     m_smallStepAngle[USED_POS_PLUS]  = 0;
     m_smallStepAngle[USED_POS_MINUS] = 0;
 
-    m_smallStepOk[USED_POS_PLUS]  = false;
-    m_smallStepOk[USED_POS_MINUS] = false;
+    m_smallStepOk[USED_POS_PLUS]  = true;
+    m_smallStepOk[USED_POS_MINUS] = true;
 }
 
 bool ObjectPosSelector::FirstAngle(float& angle)
@@ -139,6 +139,19 @@ bool ObjectPosSelector::NextPosibleAngle( float& angle )
             ++m_nextUsedPos[USED_POS_MINUS];
         return ok;
     }
+    else                                                    // both list empty
+    {
+        if( m_smallStepOk[USED_POS_PLUS] && (!m_smallStepOk[USED_POS_MINUS] || m_smallStepAngle[USED_POS_PLUS] <= m_smallStepAngle[USED_POS_MINUS]) )
+        {
+            return NextSmallStepAngle(1.0,USED_POS_PLUS,angle);
+        }
+        // -- direction less updated
+        else if( m_smallStepOk[USED_POS_MINUS] )
+        {
+            return NextSmallStepAngle(-1.0,USED_POS_MINUS,angle);
+        }
+    }
 
+    // no angles
     return false;
 }
