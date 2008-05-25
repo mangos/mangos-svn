@@ -1617,9 +1617,21 @@ void Aura::TriggerSpell()
             {
                 switch(auraId)
                 {
-                    // Lightning Shield
-//                    case 28820:
-//                        return;
+                    // Lightning Shield (The Earthshatterer set trigger after cast Lighting Shield)
+                    case 28820:
+                    {
+                        // Need remove self if Lightning Shield not active
+                        Unit::AuraMap const& auras = target->GetAuras();
+                        for(Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                        {
+                            SpellEntry const* spell = itr->second->GetSpellProto();
+                            if( spell->SpellFamilyName == SPELLFAMILY_SHAMAN && 
+                                spell->SpellFamilyFlags & 0x0000000000000400L)
+                                return;
+                        }
+                        target->RemoveAurasDueToSpell(28820);
+                        return;
+                    }
                     // Totemic Mastery (Skyshatter Regalia (Shaman Tier 6) - bonus)
                     case 38443:
                     {

@@ -3819,7 +3819,7 @@ bool Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster)
             {
                 bool positive = true;
 
-                if(!IsPositiveTarget(spellInfo->EffectImplicitTargetA[eff],spellInfo->EffectImplicitTargetB[eff]))
+                if (!(*i).second->IsPositive())
                     positive = false;
                 else
                     positive = (spellInfo->AttributesEx & (1<<7))==0;
@@ -5283,7 +5283,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     float  chance = 0.0f;
 
                     // Flash of light/Holy light
-                    if( procSpell->SpellFamilyFlags & 0x0000000000006000LL)
+                    if( procSpell->SpellFamilyFlags & 0x00000000C0000000LL)
                     {
                         triggerId = 40471; chance = 15.f;
                     }
@@ -6010,49 +6010,10 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                         return;
 
                     // procspell is triggered spell but we need mana cost of original casted spell
-                    uint32 originalSpellId = 0;
+                    uint32 originalSpellId = procSpell->Id;
                     if(procSpell->SpellFamilyName == SPELLFAMILY_PALADIN)
                     {
-                        // at Flash of Light
-                        if(procSpell->SpellFamilyFlags & 0x00002000)
-                        {
-                            switch(procSpell->Id)
-                            {
-                                case 19993: originalSpellId = 19750; break;
-                                case 35211: originalSpellId = 19939; break;
-                                case 35212: originalSpellId = 19940; break;
-                                case 35213: originalSpellId = 19941; break;
-                                case 35214: originalSpellId = 19942; break;
-                                case 35215: originalSpellId = 19943; break;
-                                case 35216: originalSpellId = 27137; break;
-                                default:
-                                    sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in FoL",procSpell->Id);
-                                    return;
-                            }
-                        }
-                        // at Holy Light
-                        else if(procSpell->SpellFamilyFlags & 0x00004000)
-                        {
-                            switch(procSpell->Id)
-                            {
-                                case 19982: originalSpellId =   635; break;
-                                case 19981: originalSpellId =   639; break;
-                                case 19980: originalSpellId =   647; break;
-                                case 19968: originalSpellId =  1026; break;
-                                case 35217: originalSpellId =  1042; break;
-                                case 35218: originalSpellId =  3472; break;
-                                case 35219: originalSpellId = 10328; break;
-                                case 35220: originalSpellId = 10329; break;
-                                case 35221: originalSpellId = 25292; break;
-                                case 35222: originalSpellId = 27135; break;
-                                case 35223: originalSpellId = 27136; break;
-                                default:
-                                    sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in HLight",procSpell->Id);
-                                    return;
-                            }
-                        }
-                        // at Holy Shock
-                        else if(procSpell->SpellFamilyFlags & 0x00200000)
+                        if(procSpell->SpellFamilyFlags & 0x00200000)
                         {
                             switch(procSpell->Id)
                             {
@@ -7413,10 +7374,10 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
             if((*i)->GetSpellProto()->SpellVisual == 9180)
             {
                                                             //Flash of Light
-                if ((spellProto->SpellFamilyFlags & 0x2000) && (*i)->GetEffIndex() == 1)
+                if ((spellProto->SpellFamilyFlags & 0x0000000040000000LL) && (*i)->GetEffIndex() == 1)
                     AdvertisedBenefit += (*i)->GetModifier()->m_amount;
                                                             //Holy Light
-                else if ((spellProto->SpellFamilyFlags & 0x4000) && (*i)->GetEffIndex() == 0)
+                else if ((spellProto->SpellFamilyFlags & 0x0000000080000000LL) && (*i)->GetEffIndex() == 0)
                     AdvertisedBenefit += (*i)->GetModifier()->m_amount;
             }
         }
