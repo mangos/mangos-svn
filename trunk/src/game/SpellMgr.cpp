@@ -991,9 +991,9 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     return false;
 
                 // Brood Affliction: Bronze
-                if((spellInfo_1->Id == 23170 && spellInfo_2->Id == 23171) ||
-                   (spellInfo_2->Id == 23170 && spellInfo_1->Id == 23171))
-                   return false;
+                if( (spellInfo_1->Id == 23170 && spellInfo_2->Id == 23171) ||
+                    (spellInfo_2->Id == 23170 && spellInfo_1->Id == 23171) )
+                    return false;
 
                 break;
             }
