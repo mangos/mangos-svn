@@ -380,10 +380,11 @@ enum ItemSubclassJunk
     ITEM_SUBCLASS_JUNK_REAGENT                  = 1,
     ITEM_SUBCLASS_JUNK_PET                      = 2,
     ITEM_SUBCLASS_JUNK_HOLIDAY                  = 3,
-    ITEM_SUBCLASS_JUNK_OTHER                    = 4
+    ITEM_SUBCLASS_JUNK_OTHER                    = 4,
+    ITEM_SUBCLASS_JUNK_MOUNT                    = 5
 };
 
-#define MAX_ITEM_SUBCLASS_JUNK                    5
+#define MAX_ITEM_SUBCLASS_JUNK                    6
 
 const uint32 MaxItemSubclassValues[MAX_ITEM_CLASS] =
 {
