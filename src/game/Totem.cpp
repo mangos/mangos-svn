@@ -69,7 +69,7 @@ void Totem::Summon(Unit* owner)
             SetDisplayId(cinfo->DisplayID_A);
     }
 
-    WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);
+    WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
     data << GetGUID();
     SendMessageToSet(&data,true);
 

@@ -415,7 +415,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
         case CMSG_FORCE_FLIGHT_SPEED_CHANGE_ACK:        move_type = MOVE_FLY;      force_move_type = MOVE_FLY;      break;
         case CMSG_FORCE_FLIGHT_BACK_SPEED_CHANGE_ACK:   move_type = MOVE_FLYBACK;  force_move_type = MOVE_FLYBACK;  break;
         default:
-            sLog.outError("WorldSession::HandleForceSpeedChangeAck: Unknown move type opcode: %u",opcode);
+            sLog.outError("WorldSession::HandleForceSpeedChangeAck: Unknown move type opcode: %u", opcode);
             return;
     }
 
@@ -454,7 +454,7 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
     uint64 guid;
     recv_data >> guid;
 
-    WorldPacket data(SMSG_ALLOW_MOVE, 4);                   // new 2.0.x, enable movement
+    WorldPacket data(SMSG_TIME_SYNC_REQ, 4);                // new 2.0.x, enable movement
     data << uint32(0x00000000);                             // on blizz it increments periodically
     SendPacket(&data);
 }
@@ -516,6 +516,3 @@ void WorldSession::HandleSummonResponseOpcode(WorldPacket& /*recv_data*/)
 
     _player->SummonIfPossible();
 }
-
-
-

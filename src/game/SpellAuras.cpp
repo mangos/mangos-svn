@@ -729,7 +729,7 @@ void PersistentAreaAura::Update(uint32 diff)
 void Aura::ApplyModifier(bool apply, bool Real)
 {
     AuraType aura = m_modifier.m_auraname;
-    
+
     m_in_use = true;
     if(aura<TOTAL_AURAS)
         (*this.*AuraHandler [aura])(apply,Real);
@@ -747,7 +747,7 @@ void Aura::UpdateAuraDuration()
         data << (uint8)m_auraSlot << (uint32)m_duration;
         ((Player*)m_target)->SendDirectMessage(&data);
 
-        data.Initialize(SMSG_SET_AURA_SINGLE, (8+1+4+4+4));
+        data.Initialize(SMSG_SET_EXTRA_AURA_INFO, (8+1+4+4+4));
         data.append(m_target->GetPackGUID());
         data << uint8(m_auraSlot);
         data << uint32(GetId());
@@ -768,7 +768,7 @@ void Aura::UpdateAuraDuration()
 
 void Aura::SendAuraDurationForCaster(Player* caster)
 {
-    WorldPacket data(SMSG_SET_AURA_SINGLE2, (8+1+4+4+4));
+    WorldPacket data(SMSG_SET_EXTRA_AURA_INFO_NEED_UPDATE, (8+1+4+4+4));
     data.append(m_target->GetPackGUID());
     data << uint8(m_auraSlot);
     data << uint32(GetId());
@@ -882,11 +882,11 @@ void Aura::_AddAura()
 
         // Update Seals information
         if( IsSealSpell(GetSpellProto()) )
-            m_target->ModifyAuraState(AURA_STATE_JUDGEMENT,true);
+            m_target->ModifyAuraState(AURA_STATE_JUDGEMENT, true);
 
         // Conflagrate aura state
         if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellProto()->SpellFamilyFlags & 4))
-            m_target->ModifyAuraState(AURA_STATE_IMMOLATE,true);
+            m_target->ModifyAuraState(AURA_STATE_IMMOLATE, true);
 
         if(GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID
             && (GetSpellProto()->SpellFamilyFlags == 0x40 || GetSpellProto()->SpellFamilyFlags == 0x10))
@@ -1077,7 +1077,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
 
     if (apply)
     {
-        // Add custum charges for some mod aura
+        // Add custom charges for some mod aura
         switch (m_spellProto->Id)
         {
             case 17941:    // Shadow Trance
@@ -1733,13 +1733,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
     Unit* caster = GetCaster();
 
-    // AT APPLAY
+    // AT APPLY
     if(apply)
     {
         // Tame beast
         if( GetId()==1515 && caster && m_target->CanHaveThreatList())
         {
-            // FIX_ME: this is 2.0.12 threat effect relaced in 2.1.x by dummy aura, must be checked for correctness
+            // FIX_ME: this is 2.0.12 threat effect replaced in 2.1.x by dummy aura, must be checked for correctness
             m_target->AddThreat(caster, 10.0f);
             return;
         }
@@ -1811,10 +1811,9 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 caster->CastSpell(m_target,finalSpelId,true,NULL,this);
             return;
         }
-
     }
 
-    // AT APPLAY & REMOVE
+    // AT APPLY & REMOVE
 
     switch(m_spellProto->SpellFamilyName)
     {
@@ -1915,7 +1914,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 return;
             }
 
-            // lifebloom
+            // Lifebloom
             if ( GetSpellProto()->SpellFamilyFlags & 0x1000000000LL )
             {
                 if ( apply )
@@ -1931,7 +1930,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     if (GetAuraDuration()>0)
                         return;
 
-                    // have a look if there is still some other lifebloom dummy aura
+                    // have a look if there is still some other Lifebloom dummy aura
                     Unit::AuraList auras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
                     for(Unit::AuraList::iterator itr = auras.begin(); itr!=auras.end(); itr++)
                         if((*itr)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
@@ -2309,7 +2308,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 case FORM_BERSERKERSTANCE:
                 {
                     uint32 Rage_val = 0;
-                    // Stance mastery + Tactical mastery (both passive, and last have aura only in defence stance, but need apply at any stance switch)
+                    // Stance mastery + Tactical mastery (both passive, and last have aura only in defense stance, but need apply at any stance switch)
                     if(m_target->GetTypeId() == TYPEID_PLAYER)
                     {
                         PlayerSpellMap const& sp_list = ((Player *)m_target)->GetSpellMap();
@@ -2477,7 +2476,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
                     }
                     break;
                 }
-                // murloc costume
+                // Murloc costume
                 case 42365: m_target->SetDisplayId(21723); break;
                 default: break;
             }
@@ -3533,7 +3532,7 @@ void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
         else
             data.Initialize(SMSG_MOVE_UNSET_CAN_FLY, 12);
         data.append(m_target->GetPackGUID());
-        data << uint32(0);                                      // unk
+        data << uint32(0);                                      // unknown
         m_target->SendMessageToSet(&data, true);
     }
 
@@ -3669,7 +3668,6 @@ void Aura::HandleAuraModStateImmunity(bool apply, bool Real)
             else
                 ++itr;
         }
-
     }
 
     m_target->ApplySpellImmune(GetId(),IMMUNITY_STATE,m_modifier.m_miscvalue,apply);
@@ -3746,7 +3744,7 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
         // some spell have charges by functionality not have its in spell data
         switch (GetId())
         {
-            case 28200:                         // Ascendance (Talisman of Ascendance trinket
+            case 28200:                         // Ascendance (Talisman of Ascendance trinket)
                 m_procCharges = 6; 
                 UpdateAuraCharges(); 
                 break;
@@ -3966,7 +3964,7 @@ void Aura::HandleAuraModStat(bool apply, bool Real)
 
     for(int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
-        // -1 or -2 is all stats ( misc < -2 checked in function beggining )
+        // -1 or -2 is all stats ( misc < -2 checked in function beginning )
         if (m_modifier.m_miscvalue < 0 || m_modifier.m_miscvalue == i)
         {
             //m_target->ApplyStatMod(Stats(i), m_modifier.m_amount,apply);
@@ -4076,7 +4074,7 @@ void Aura::HandleModTotalPercentStat(bool apply, bool Real)
             }
         }
     }
-    
+
     //recalculate current HP/MP after applying aura modifications (only for spells with 0x10 flag)
     if ((m_modifier.m_miscvalue == STAT_STAMINA) && (maxHPValue > 0) && (m_spellProto->Attributes & 0x10))
     {
@@ -5148,7 +5146,6 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
 
             m_modifier.m_amount += DoneActualBenefit;
         }
-
     }
 }
 

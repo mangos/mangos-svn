@@ -547,7 +547,7 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
     std::map<uint64, BattleGroundScore*>::iterator itr2 = m_PlayerScores.find(guid);
     if(itr2 != m_PlayerScores.end())
     {
-        delete itr2->second;                                 // delete player's score
+        delete itr2->second;                                // delete player's score
         m_PlayerScores.erase(itr2);
     }
 

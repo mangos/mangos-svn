@@ -4476,7 +4476,7 @@ bool ChatHandler::HandleFlyModeCommand(const char* args)
         return false;
     }
     data.append(unit->GetPackGUID());
-    data << uint32(0);                                      // unk
+    data << uint32(0);                                      // unknown
     unit->SendMessageToSet(&data, true);
     PSendSysMessage(LANG_COMMAND_FLYMODE_STATUS, unit->GetName(), args);
     return true;

@@ -1097,7 +1097,7 @@ void Guild::SendMoneyInfo(WorldSession *session, uint32 LowGuid)
     WorldPacket data(MSG_GUILD_BANK_MONEY_WITHDRAWN, 4);
     data << uint32(GetMemberMoneyWithdrawRem(LowGuid));
     session->SendPacket(&data);
-    sLog.outDebug("WORLD: Sent (MSG_GUILD_BANK_MONEY_WITHDRAWN)");
+    sLog.outDebug("WORLD: Sent MSG_GUILD_BANK_MONEY_WITHDRAWN");
 }
 
 bool Guild::MemberMoneyWithdraw(uint32 amount, uint32 LowGuid)

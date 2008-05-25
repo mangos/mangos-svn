@@ -1983,17 +1983,17 @@ void Player::GiveLevel(uint32 level)
     objmgr.GetPlayerClassLevelInfo(getClass(),level,&classInfo);
 
     // send levelup info to client
-    WorldPacket data(SMSG_LEVELUP_INFO, (7*4+(MAX_STATS-STAT_STRENGTH)*4));
+    WorldPacket data(SMSG_LEVELUP_INFO, (4+4+5*4+5*4));
     data << uint32(level);
     data << uint32(int32(classInfo.basehealth) - int32(GetCreateHealth()));
-    // it's for(5)
+    // for(int i = 0; i < 5; ++i)                           // Powers loop (0-6)
     data << uint32(int32(classInfo.basemana)   - int32(GetCreateMana()));
     data << uint32(0);
     data << uint32(0);
     data << uint32(0);
     data << uint32(0);
-
-    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+    // end for
+    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)          // Stats loop (0-4)
         data << uint32(int32(info.stats[i]) - GetCreateStat(Stats(i)));
 
     GetSession()->SendPacket(&data);
@@ -3402,7 +3402,7 @@ void Player::SendDelayResponse(const uint32 ml_seconds)
 
 void Player::ResurrectPlayer(float restore_percent, bool updateToWorld)
 {
-    WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);                // remove spirit healer position
+    WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);          // remove spirit healer position
     data << uint32(-1);
     data << float(0);
     data << float(0);
@@ -3749,7 +3749,7 @@ void Player::RepopAtGraveyard()
 
         if(isDead())                                        // not send if alive, because it used in TeleportTo()
         {
-            WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);        // show spirit healer position on minimap
+            WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);  // show spirit healer position on minimap
             data << ClosestGrave->map_id;
             data << ClosestGrave->x;
             data << ClosestGrave->y;
@@ -15309,7 +15309,7 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             SendEquipError(EQUIP_ERR_NOT_ENOUGH_ARENA_POINTS, NULL, NULL);
             return false;
         }
-        
+
         // item base price
         for (uint8 i = 0; i < 5; ++i)
         {
@@ -15319,7 +15319,7 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
                 return false;
             }
         }
-        
+
         // check for personal arena rating requirement
         if( GetMaxPersonalArenaRatingRequirement() < iece->reqpersonalarenarating )
         {
@@ -15995,7 +15995,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
 
     SendInitialSpells();
 
-    data.Initialize(SMSG_UNKNOWN_1053, 4);
+    data.Initialize(SMSG_SEND_UNLEARN_SPELLS, 4);
     data << uint32(0);                                      // count, for(count) uint32;
     GetSession()->SendPacket(&data);
 

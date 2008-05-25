@@ -372,7 +372,6 @@ inline Mechanics GetEffectMechanic(SpellEntry const* spellInfo, int32 effect)
     if (spellInfo->Mechanic)
         return Mechanics(spellInfo->Mechanic);
     return MECHANIC_NONE;
-
 }
 
 // Spell affects related declarations (accessed using SpellMgr functions)
