@@ -3411,6 +3411,23 @@ uint8 Spell::CanCast(bool strict)
 
                 break;
             }
+            case SPELL_EFFECT_POWER_BURN:
+            {
+                if (!m_targets.getUnitTarget())
+                    return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+
+                if(m_targets.getUnitTarget()->getPowerType()!=POWER_MANA)
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                break;
+            }
+            case SPELL_EFFECT_CHARGE:
+            {
+                if (m_caster->hasUnitState(UNIT_STAT_ROOT))
+                    return SPELL_FAILED_ROOTED;
+
+                break;
+            }
             case SPELL_EFFECT_SKINNING:
             {
                 if (m_caster->GetTypeId() != TYPEID_PLAYER || !m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetTypeId() != TYPEID_UNIT)
