@@ -1699,7 +1699,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot);
         void ToggleMetaGemsActive(uint8 exceptslot, bool apply);
         void CorrectMetaGemEnchants(uint8 slot, bool apply);
-        void InitDataForForm(bool reapplyMods);
+        void InitDataForForm(bool reapplyMods = false);
 
         void ApplyItemEquipSpell(Item *item, bool apply, bool form_change = false);
         void CastItemCombatSpell(Item *item,Unit* Target, WeaponAttackType attType);
