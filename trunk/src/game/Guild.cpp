@@ -236,8 +236,10 @@ bool Guild::LoadGuildFromDB(uint32 GuildId)
 
     sLog.outDebug("Guild %u Creation time Loaded day: %u, month: %u, year: %u", GuildId, CreatedDay, CreatedMonth, CreatedYear);
     m_bankloaded = false;
+    m_eventlogloaded = false;
     m_onlinemembers = 0;
     RenumBankLogs();
+    RenumGuildEventlog();
     return true;
 }
 
@@ -637,6 +639,7 @@ void Guild::Disband()
     CharacterDatabase.PExecute("DELETE FROM guild_bank_item WHERE guildid = '%u'",Id);
     CharacterDatabase.PExecute("DELETE FROM guild_bank_right WHERE guildid = '%u'",Id);
     CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid = '%u'",Id);
+    CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE guildid = '%u'",Id);
     CharacterDatabase.CommitTransaction();
     objmgr.RemoveGuild(this);
 }
@@ -741,7 +744,148 @@ void Guild::UpdateLogoutTime(uint64 guid)
     if (m_onlinemembers > 0)
         --m_onlinemembers;
     else
+    {
         UnloadGuildBank();
+        UnloadGuildEventlog();
+    }
+}
+
+// *************************************************
+// Guild Eventlog part
+// *************************************************
+// Display guild eventlog
+void Guild::DisplayGuildEventlog(WorldSession *session)
+{
+    // Load guild eventlog, if not already done
+    if (!m_eventlogloaded)
+        LoadGuildEventlogFromDB();
+
+    // Sending result
+    WorldPacket data(MSG_GUILD_EVENT_LOG_QUERY, 0);
+    // count, max count == 100
+    data << uint8(m_GuildEventlog.size());
+    for (GuildEventlog::const_iterator itr = m_GuildEventlog.begin(); itr != m_GuildEventlog.end(); ++itr)
+    {
+        // Event type
+        data << uint8((*itr)->EventType);
+        // Player 1
+        data << uint64((*itr)->PlayerGuid1);
+        // Player 2 not for left/join guild events
+        if( (*itr)->EventType != 2 && (*itr)->EventType != 6 )
+            data << uint64((*itr)->PlayerGuid2);
+        // New Rank - only for promote/demote guild events
+        if( (*itr)->EventType == 3 || (*itr)->EventType == 4 )
+            data << uint8((*itr)->NewRank);
+        // Event timestamp
+        data << uint32(time(NULL)-(*itr)->TimeStamp);
+    }
+    session->SendPacket(&data);
+    sLog.outDebug("WORLD: Sent (MSG_GUILD_EVENT_LOG_QUERY)");
+}
+
+// Load guild eventlog from DB
+void Guild::LoadGuildEventlogFromDB()
+{
+    // Return if already loaded
+    if (m_eventlogloaded)
+        return;
+
+    QueryResult *result = CharacterDatabase.PQuery("SELECT LogGuid, EventType, PlayerGuid1, PlayerGuid2, NewRank, TimeStamp FROM guild_eventlog WHERE guildid='%u' ORDER BY TimeStamp DESC", Id);
+    if(!result)
+        return;
+    do
+    {
+        Field *fields = result->Fetch();
+        GuildEventlogEntry *NewEvent = new GuildEventlogEntry;
+        // Fill entry
+        NewEvent->LogGuid = fields[0].GetUInt32();
+        NewEvent->EventType = fields[1].GetUInt8();
+        NewEvent->PlayerGuid1 = fields[2].GetUInt32();
+        NewEvent->PlayerGuid2 = fields[3].GetUInt32();
+        NewEvent->NewRank = fields[4].GetUInt8();
+        NewEvent->TimeStamp = fields[5].GetUInt64();
+        // Add entry to map
+        m_GuildEventlog.push_front(NewEvent);
+
+    } while( result->NextRow() );
+    delete result;
+
+    // Check lists size in case to many event entries in db
+    // This cases can happen only if a crash occured somewhere and table has too many log entries
+    if (m_GuildEventlog.size() > GUILD_EVENTLOG_MAX_ENTRIES)
+    {
+        do
+        {
+            GuildEventlogEntry *EventLogEntry = *(m_GuildEventlog.begin());
+            m_GuildEventlog.pop_front();
+            CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE guildid='%u' AND LogGuid='%u'", Id, EventLogEntry->LogGuid);
+            delete EventLogEntry;
+        } while( m_GuildEventlog.size() > GUILD_EVENTLOG_MAX_ENTRIES );
+    }
+    m_eventlogloaded = true;
+}
+// Unload guild eventlog
+void Guild::UnloadGuildEventlog()
+{
+    if (!m_eventlogloaded)
+        return;
+    GuildEventlogEntry *EventLogEntry;
+    if( !m_GuildEventlog.empty() )
+    {
+        do
+        {
+            EventLogEntry = *(m_GuildEventlog.begin());
+            m_GuildEventlog.pop_front();
+            delete EventLogEntry;
+        }while( !m_GuildEventlog.empty() );
+    }
+    m_eventlogloaded = false;
+}
+
+// This will renum guids used at load to prevent always going up until infinit
+void Guild::RenumGuildEventlog()
+{
+    GuildEventlogMaxGuid = 1;
+
+    QueryResult *result = CharacterDatabase.PQuery("SELECT LogGuid FROM guild_eventlog WHERE guildid = '%u' ORDER BY LogGuid", Id);
+    if(!result)
+        return;
+
+    CharacterDatabase.BeginTransaction();
+    do
+    {
+        Field *fields = result->Fetch();
+        uint32 OldGuid = fields[0].GetUInt32();
+        CharacterDatabase.PExecute("UPDATE guild_eventlog SET LogGuid='%u' WHERE guildid='%u' AND LogGuid='%u'", GuildEventlogMaxGuid, Id, OldGuid);
+        ++GuildEventlogMaxGuid;
+    }while( result->NextRow() );
+    delete result;
+    CharacterDatabase.CommitTransaction();
+}
+// Add entry to guild eventlog
+void Guild::LogGuildEvent(uint8 EventType, uint32 PlayerGuid1, uint32 PlayerGuid2, uint8 NewRank)
+{
+    GuildEventlogEntry *NewEvent = new GuildEventlogEntry;
+    // Fill entry
+    NewEvent->LogGuid = GuildEventlogMaxGuid++;
+    NewEvent->EventType = EventType;
+    NewEvent->PlayerGuid1 = PlayerGuid1;
+    NewEvent->PlayerGuid2 = PlayerGuid2;
+    NewEvent->NewRank = NewRank;
+    NewEvent->TimeStamp = uint32(time(NULL));
+    // Check max entry limit and delete from db if needed
+    if (m_GuildEventlog.size() > GUILD_EVENTLOG_MAX_ENTRIES)
+    {
+            GuildEventlogEntry *OldEvent = *(m_GuildEventlog.begin());
+            m_GuildEventlog.pop_front();
+            CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE guildid='%u' AND LogGuid='%u'", Id, OldEvent->LogGuid);
+            delete OldEvent;
+    }
+    // Add entry to map
+    m_GuildEventlog.push_back(NewEvent);
+    // Add new eventlog entry into DB
+    CharacterDatabase.PExecute("INSERT INTO guild_eventlog (guildid, LogGuid, EventType, PlayerGuid1, PlayerGuid2, NewRank, TimeStamp) VALUES ('%u','%u','%u','%u','%u','%u','" I64FMTD "')",
+        Id, NewEvent->LogGuid, uint32(NewEvent->EventType), NewEvent->PlayerGuid1, NewEvent->PlayerGuid2, uint32(NewEvent->NewRank), NewEvent->TimeStamp);
 }
 
 // *************************************************
