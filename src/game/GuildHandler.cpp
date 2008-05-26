@@ -501,7 +501,7 @@ void WorldSession::HandleGuildLeaveOpcode(WorldPacket& /*recvPacket*/)
 
     //sLog.outDebug("WORLD: Sent (SMSG_GUILD_EVENT)");
 
-    SendGuildCommandResult(GUILD_QUIT_S, plName, GUILD_PLAYER_NO_MORE_IN_GUILD);
+    SendGuildCommandResult(GUILD_QUIT_S, guild->GetName(), GUILD_PLAYER_NO_MORE_IN_GUILD);
 }
 
 void WorldSession::HandleGuildDisbandOpcode(WorldPacket& /*recvPacket*/)
