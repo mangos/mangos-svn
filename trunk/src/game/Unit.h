@@ -1032,6 +1032,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         int32 GetMaxPositiveAuraModifierByMiscValue(AuraType auratype, int32 misc_value) const;
         int32 GetMaxNegativeAuraModifierByMiscValue(AuraType auratype, int32 misc_value) const;
 
+        bool HaveDummyAura(uint32 spell_id) const;
+
         void SendMoveToPacket(float x, float y, float z, uint32 MovementFlags, uint32 transitTime = 0);
         uint32 GetDisplayId() { return GetUInt32Value(UNIT_FIELD_DISPLAYID); }
         void SetDisplayId(uint32 modelId);

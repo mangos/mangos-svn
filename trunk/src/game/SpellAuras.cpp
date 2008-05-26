@@ -2379,29 +2379,15 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             case FORM_DIREBEAR:
             case FORM_CAT:
             {
-                Unit::AuraList const& m_dummyAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
-                for(Unit::AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
-                {
-                    if ( (*i)->GetId() == 37315 )
-                    {
-                        m_target->CastSpell(m_target,37316,true,NULL,*i);
-                        break;
-                    }
-                }
+                if(m_target->HaveDummyAura(37315) )
+                    m_target->CastSpell(m_target,37316,true,NULL,*i);
                 break;
             }
             // Nordrassil Regalia - bonus
             case FORM_MOONKIN:
             {
-                Unit::AuraList const& m_dummyAuras = m_target->GetAurasByType(SPELL_AURA_DUMMY);
-                for(Unit::AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
-                {
-                    if ( (*i)->GetId() == 37324 )
-                    {
-                        m_target->CastSpell(m_target,37325,true,NULL,*i);
-                        break;
-                    }
-                }
+                if(m_target->HaveDummyAura(37324) )
+                    m_target->CastSpell(m_target,37325,true,NULL,*i);
                 break;
             }
         }
