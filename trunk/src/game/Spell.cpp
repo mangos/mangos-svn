@@ -3899,9 +3899,9 @@ uint8 Spell::CheckCasterAuras() const
         prevented_reason = SPELL_FAILED_CONFUSED;
     else if(m_caster->hasUnitState(UNIT_STAT_FLEEING))
         prevented_reason = SPELL_FAILED_FLEEING;
-    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && (GetSpellSchoolMask(m_spellInfo) & SPELL_SCHOOL_MASK_NORMAL)==0)
+    else if(m_spellInfo->PreventionType==1 && m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
         prevented_reason = SPELL_FAILED_SILENCED;
-    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && (GetSpellSchoolMask(m_spellInfo) & SPELL_SCHOOL_MASK_NORMAL) && !m_triggeredByAuraSpell)
+    else if(m_spellInfo->PreventionType==2 && m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
         prevented_reason = SPELL_FAILED_PACIFIED;
 
     // Attr must make flag drop spell totally immuned from all effects
