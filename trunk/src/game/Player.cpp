@@ -5770,7 +5770,7 @@ void Player::UpdateArea(uint32 newArea)
     // Dragonmaw Illusion
     if ( newArea == 3759 || newArea == 3966 || newArea == 3939 )
     {
-        if( HaveDummyAura(40214) )
+        if( GetDummyAura(40214) )
         {
             CastSpell(this,40216,true);
             CastSpell(this,42016,true);
@@ -15732,7 +15732,7 @@ void Player::LeaveBattleground()
 bool Player::CanJoinToBattleground() const
 {
     // check Deserter debuff
-    if(HaveDummyAura(26013))
+    if(GetDummyAura(26013))
         return false;
 
     return true;

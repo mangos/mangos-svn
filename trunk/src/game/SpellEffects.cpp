@@ -452,7 +452,7 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                         damage += int32(((Player*)m_caster)->GetTotalAttackPowerValue(BASE_ATTACK) * 0.03f * doses);
 
                         // Eviscerate and Envenom Bonus Damage (item set effect)
-                        if(m_caster->HaveDummyAura(37169))
+                        if(m_caster->GetDummyAura(37169))
                             damage += ((Player*)m_caster)->GetComboPoints()*40;
                     }
                 }
@@ -464,7 +464,7 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                         damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * combo * 0.03f);
 
                         // Eviscerate and Envenom Bonus Damage (item set effect)
-                        if(m_caster->HaveDummyAura(37169))
+                        if(m_caster->GetDummyAura(37169))
                             damage += combo*40;
                     }
                 }
@@ -4056,7 +4056,7 @@ void Spell::EffectScriptEffect(uint32 i)
                 return;
 
             // Onyxia Scale Cloak
-            if(unitTarget->HaveDummyAura(22683))
+            if(unitTarget->GetDummyAura(22683))
                 return;
 
             // Shadow Flame
@@ -4369,7 +4369,7 @@ void Spell::EffectSummonPlayer(uint32 /*i*/)
         return;
 
     // Evil Twin (ignore player summon, but hide this for summoner)
-    if(unitTarget->HaveDummyAura(23445))
+    if(unitTarget->GetDummyAura(23445))
         return;
 
     float x,y,z;

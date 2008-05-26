@@ -10125,12 +10125,12 @@ float Unit::GetAPMultiplier(WeaponAttackType attType, bool normalized)
     }
 }
 
-bool Unit::HaveDummyAura( uint32 spell_id ) const
+Aura* Unit::GetDummyAura( uint32 spell_id ) const
 {
     Unit::AuraList const& mDummy = GetAurasByType(SPELL_AURA_DUMMY);
     for(Unit::AuraList::const_iterator itr = mDummy.begin(); itr != mDummy.end(); ++itr)
         if ((*itr)->GetId() == spell_id)
-            return true;
+            return *itr;
 
-    return false;
+    return NULL;
 }
