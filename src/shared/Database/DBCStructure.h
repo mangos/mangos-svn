@@ -591,7 +591,7 @@ struct SpellEntry
     uint64    SpellFamilyFlags;                             // 197+198
     uint32    MaxAffectedTargets;                           // 199
     uint32    DmgClass;                                     // 200  defenseType
-    //uint32    PreventionType;                             // 201 not used
+    uint32    PreventionType;                               // 201
     //uint32    StanceBarOrder;                             // 202 not used
     float     DmgMultiplier[3];                             // 203-205
     //uint32    MinFactionId;                               // 206 not used, and 0 in 2.4.2
