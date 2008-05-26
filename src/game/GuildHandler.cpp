@@ -138,6 +138,8 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
     sLog.outDebug("Player %s Invited %s to Join his Guild", GetPlayer()->GetName(), Invitedname.c_str());
 
     player->SetGuildIdInvited(GetPlayer()->GetGuildId());
+    // Put record into guildlog
+    guild->LogGuildEvent(GUILD_EVENT_LOG_INVITE_PLAYER, GetPlayer()->GetGUIDLow(), player->GetGUIDLow(), 0);
 
     WorldPacket data(SMSG_GUILD_INVITE, (8+10));            // guess size
     data << GetPlayer()->GetName();
@@ -212,6 +214,8 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
     }
 
     guild->DelMember(plGuid);
+    // Put record into guildlog
+    guild->LogGuildEvent(GUILD_EVENT_LOG_UNINVITE_PLAYER, GetPlayer()->GetGUIDLow(), GUID_LOPART(plGuid), 0);
 
     WorldPacket data(SMSG_GUILD_EVENT, (2+20));             // guess size
     data << (uint8)GE_REMOVED;
@@ -238,6 +242,8 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& /*recvPacket*/)
 
     if(!guild->AddMember(GetPlayer()->GetGUID(),guild->GetLowestRank()))
         return;
+    // Put record into guildlog
+    guild->LogGuildEvent(GUILD_EVENT_LOG_JOIN_GUILD, GetPlayer()->GetGUIDLow(), 0, 0);
 
     WorldPacket data(SMSG_GUILD_EVENT, (2+10));             // guess size
     data << (uint8)GE_JOINED;
@@ -362,6 +368,8 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
     uint32 newRankId = plRankId < guild->GetNrRanks() ? plRankId-1 : guild->GetNrRanks()-1;
 
     guild->ChangeRank(plGuid, newRankId);
+    // Put record into guildlog
+    guild->LogGuildEvent(GUILD_EVENT_LOG_PROMOTE_PLAYER, GetPlayer()->GetGUIDLow(), GUID_LOPART(plGuid), newRankId);
 
     WorldPacket data(SMSG_GUILD_EVENT, (2+30));             // guess size
     data << (uint8)GE_PROMOTION;
@@ -442,6 +450,8 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
         return;
 
     guild->ChangeRank(plGuid, (plRankId+1));
+    // Put record into guildlog
+    guild->LogGuildEvent(GUILD_EVENT_LOG_DEMOTE_PLAYER, GetPlayer()->GetGUIDLow(), GUID_LOPART(plGuid), (plRankId+1));
 
     WorldPacket data(SMSG_GUILD_EVENT, (2+30));             // guess size
     data << (uint8)GE_DEMOTION;
@@ -480,6 +490,8 @@ void WorldSession::HandleGuildLeaveOpcode(WorldPacket& /*recvPacket*/)
     plName = _player->GetName();
 
     guild->DelMember(_player->GetGUID());
+    // Put record into guildlog
+    guild->LogGuildEvent(GUILD_EVENT_LOG_LEAVE_GUILD, _player->GetGUIDLow(), 0, 0);
 
     WorldPacket data(SMSG_GUILD_EVENT, (2+10));             // guess size
     data << (uint8)GE_LEFT;
@@ -954,26 +966,16 @@ void WorldSession::HandleGuildEventLogOpcode(WorldPacket& /* recvPacket */)
     sLog.outDebug("WORLD: Received (MSG_GUILD_EVENT_LOG_QUERY)"); // empty
     //recvPacket.hexlike();
 
-    uint8 count = 0,type = 0;
+    uint32 GuildId = GetPlayer()->GetGuildId();
+    if (GuildId == 0)
+        return;
 
-    WorldPacket data(MSG_GUILD_EVENT_LOG_QUERY, 1);
-    data << uint8(count);                                   // count, max count == 100
-    for(int i = 0; i < count; ++i)
-    {
+    Guild *pGuild = objmgr.GetGuildById(GuildId);
+    if(!pGuild)
+        return;
 
-        data << uint8(type);
-        data << uint64(0);                                  // guid
-        if( type != 2 && type != 6 )
-            data << uint64(0);                              // guid
+    pGuild->DisplayGuildEventlog(this);
 
-        if( type == 3 || type == 4 )
-            data << uint8(0);
-
-        data << uint32(0);                                  // time
-
-    }
-    SendPacket(&data);
-    sLog.outDebug("WORLD: Sent (MSG_GUILD_EVENT_LOG_QUERY)");
 }
 
 /******  GUILD BANK  *******/

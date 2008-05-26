@@ -156,6 +156,26 @@ enum GuildBankLogEntries
     GUILD_BANK_LOG_MOVE_ITEM2       = 7,
 };
 
+enum GuildEventLogEntryTypes
+{
+    GUILD_EVENT_LOG_INVITE_PLAYER     = 1,
+    GUILD_EVENT_LOG_JOIN_GUILD        = 2,
+    GUILD_EVENT_LOG_PROMOTE_PLAYER    = 3,
+    GUILD_EVENT_LOG_DEMOTE_PLAYER     = 4,
+    GUILD_EVENT_LOG_UNINVITE_PLAYER   = 5,
+    GUILD_EVENT_LOG_LEAVE_GUILD       = 6,
+};
+
+struct GuildEventlogEntry
+{
+    uint32 LogGuid;
+    uint8  EventType;
+    uint32 PlayerGuid1;
+    uint32 PlayerGuid2;
+    uint8  NewRank;
+    uint64 TimeStamp;
+};
+
 enum GuildEmblem
 {
     ERR_GUILDEMBLEM_SUCCESS               = 0,
@@ -165,7 +185,7 @@ enum GuildEmblem
     ERR_GUILDEMBLEM_NOTENOUGHMONEY        = 4,
     ERR_GUILDEMBLEM_INVALIDVENDOR         = 5
 };
-    
+
 struct GuildBankEvent
 {
     uint32 LogGuid;
@@ -300,6 +320,12 @@ class Guild
         void Query(WorldSession *session);
 
         void UpdateLogoutTime(uint64 guid);
+        // Guild eventlog
+        void   LoadGuildEventlogFromDB();
+        void   UnloadGuildEventlog();
+        void   DisplayGuildEventlog(WorldSession *session);
+        void   LogGuildEvent(uint8 EventType, uint32 PlayerGuid1, uint32 PlayerGuid2, uint8 NewRank);
+        void   RenumGuildEventlog();
 
         // ** Guild bank **
         // Content & item deposit/withdraw
@@ -377,16 +403,20 @@ class Guild
 
         typedef std::vector<GuildBankTab*> TabListMap;
         TabListMap m_TabListMap;
+        typedef std::list<GuildEventlogEntry*> GuildEventlog;
+        GuildEventlog m_GuildEventlog;
         typedef std::list<GuildBankEvent*> GuildBankEventLog;
         GuildBankEventLog m_GuildBankEventLog_Money;
         GuildBankEventLog m_GuildBankEventLog_Item[GUILD_BANK_MAX_TABS];
 
         bool m_bankloaded;
+        bool m_eventlogloaded;
         uint32 m_onlinemembers;
         uint64 guildbank_money;
         uint8 purchased_tabs;
 
         uint32 LogMaxGuid;
+        uint32 GuildEventlogMaxGuid;
     private:
         // internal common parts for CanStore/StoreItem functions
         void AppendDisplayGuildBankSlot( WorldPacket& data, GuildBankTab const *tab, int32 slot );

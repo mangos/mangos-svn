@@ -1826,7 +1826,7 @@ bool ChatHandler::HandleTicketCommand(const char* args)
     int num = atoi(px);
     if(num > 0)
     {
-        QueryResult *result = CharacterDatabase.PQuery("SELECT guid,ticket_category,ticket_text,ticket_lastchange FROM character_ticket ORDER BY `ticket_id` ASC LIMIT %d,1",num-1);
+        QueryResult *result = CharacterDatabase.PQuery("SELECT guid,ticket_category,ticket_text,ticket_lastchange FROM character_ticket ORDER BY ticket_id ASC LIMIT %d,1",num-1);
 
         if(!result)
         {
@@ -1857,7 +1857,7 @@ bool ChatHandler::HandleTicketCommand(const char* args)
         return false;
 
     // ticket $char_name
-    QueryResult *result = CharacterDatabase.PQuery("SELECT ticket_category,ticket_text,ticket_lastchange FROM character_ticket WHERE guid = '%u' ORDER BY `ticket_id` ASC",GUID_LOPART(guid));
+    QueryResult *result = CharacterDatabase.PQuery("SELECT ticket_category,ticket_text,ticket_lastchange FROM character_ticket WHERE guid = '%u' ORDER BY ticket_id ASC",GUID_LOPART(guid));
 
     if(!result)
         return false;
