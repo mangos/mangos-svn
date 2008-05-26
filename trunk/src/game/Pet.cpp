@@ -399,7 +399,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
                 << m_charmInfo->GetPetNumber() << ", "
                 << GetEntry() << ", "
                 << owner << ", "
-                << GetDisplayId() << ", "
+                << GetNativeDisplayId() << ", "
                 << getLevel() << ", "
                 << GetUInt32Value(UNIT_FIELD_PETEXPERIENCE) << ", "
                 << uint32(m_charmInfo->GetReactState()) << ", "
