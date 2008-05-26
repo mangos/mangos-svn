@@ -5770,14 +5770,10 @@ void Player::UpdateArea(uint32 newArea)
     // Dragonmaw Illusion
     if ( newArea == 3759 || newArea == 3966 || newArea == 3939 )
     {
-        AuraList const& m_dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
-        for(AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
+        if( HaveDummyAura(40214) )
         {
-            if ( (*i)->GetSpellProto()->Id == 40214 )
-            {
-                CastSpell(this,40216,true);
-                CastSpell(this,42016,true);
-            }
+            CastSpell(this,40216,true);
+            CastSpell(this,42016,true);
         }
     }
 }
@@ -15736,10 +15732,8 @@ void Player::LeaveBattleground()
 bool Player::CanJoinToBattleground() const
 {
     // check Deserter debuff
-    AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
-    for(AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
-        if((*i)->GetId() == 26013)
-            return false;
+    if(HaveDummyAura(26013))
+        return false;
 
     return true;
 }

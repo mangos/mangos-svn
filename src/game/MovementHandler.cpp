@@ -270,6 +270,10 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                     if (damage > target->GetMaxHealth())
                         damage = target->GetMaxHealth();
 
+                    // Gust of Wind
+                    if (target->HaveDummyAura(43621))
+                        damage = target->GetMaxHealth()/2;
+
                     target->EnvironmentalDamage(target->GetGUID(), DAMAGE_FALL, damage);
                 }
 

@@ -451,16 +451,9 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                         damage *= doses;
                         damage += int32(((Player*)m_caster)->GetTotalAttackPowerValue(BASE_ATTACK) * 0.03f * doses);
 
-                        Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-                        for(Unit::AuraList::const_iterator itr = auraDummy.begin(); itr!=auraDummy.end(); ++itr)
-                        {
-                            // Eviscerate and Envenom Bonus Damage (item set effect)
-                            if((*itr)->GetId()==37169)
-                            {
-                                damage += ((Player*)m_caster)->GetComboPoints()*40;
-                                break;
-                            }
-                        }
+                        // Eviscerate and Envenom Bonus Damage (item set effect)
+                        if(m_caster->HaveDummyAura(37169))
+                            damage += ((Player*)m_caster)->GetComboPoints()*40;
                     }
                 }
                 // Eviscerate
@@ -470,16 +463,9 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                     {
                         damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * combo * 0.03f);
 
-                        Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-                        for(Unit::AuraList::const_iterator itr = auraDummy.begin(); itr!=auraDummy.end(); ++itr)
-                        {
-                            // Eviscerate and Envenom Bonus Damage (item set effect)
-                            if((*itr)->GetId()==37169)
-                            {
-                                damage += combo*40;
-                                break;
-                            }
-                        }
+                        // Eviscerate and Envenom Bonus Damage (item set effect)
+                        if(m_caster->HaveDummyAura(37169))
+                            damage += combo*40;
                     }
                 }
                 break;
@@ -4069,12 +4055,11 @@ void Spell::EffectScriptEffect(uint32 i)
             if(!unitTarget || !unitTarget->isAlive())
                 return;
 
-            Unit::AuraList const& mDummyAuras = unitTarget->GetAurasByType(SPELL_AURA_DUMMY);
+            // Onyxia Scale Cloak
+            if(unitTarget->HaveDummyAura(22683))
+                return;
 
-            for(Unit::AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
-                if((*i)->GetId() == 22683)
-                    return;
-
+            // Shadow Flame
             m_caster->CastSpell(unitTarget, 22682, true);
             return;
         }
@@ -4195,7 +4180,6 @@ void Spell::EffectScriptEffect(uint32 i)
 
                 // all seals have aura dummy
                 Unit::AuraList const& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-
                 for(Unit::AuraList::const_iterator itr = m_dummyAuras.begin(); itr != m_dummyAuras.end(); ++itr)
                 {
                     SpellEntry const *spellInfo = (*itr)->GetSpellProto();
@@ -4385,10 +4369,8 @@ void Spell::EffectSummonPlayer(uint32 /*i*/)
         return;
 
     // Evil Twin (ignore player summon, but hide this for summoner)
-    Unit::AuraList const& mDummy = unitTarget->GetAurasByType(SPELL_AURA_DUMMY);
-    for(Unit::AuraList::const_iterator itr = mDummy.begin(); itr != mDummy.end(); ++itr)
-        if ((*itr)->GetId() == 23445)
-            return;
+    if(unitTarget->HaveDummyAura(23445))
+        return;
 
     float x,y,z;
     m_caster->GetClosePoint(x,y,z);
