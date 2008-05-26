@@ -7476,6 +7476,20 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     if(Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, heal);
 
+    // Healing Wave cast
+    if (spellProto->SpellFamilyName == SPELLFAMILY_SHAMAN && spellProto->SpellFamilyFlags & 0x0000000000000040LL)
+    {
+        // Search for Healing Way on Victim (stack up to 3 time)
+        int32 pctMod = 0;
+        Unit::AuraList const& auraDummy = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
+        for(Unit::AuraList::const_iterator itr = auraDummy.begin(); itr!=auraDummy.end(); ++itr)
+            if((*itr)->GetId() == 29203)
+                pctMod += (*itr)->GetModifier()->m_amount;
+        // Apply bonus
+        if (pctMod)
+            heal = heal * (100 + pctMod) / 100;
+    }
+
     // Healing taken percent
     float minval = pVictim->GetMaxNegativeAuraModifier(SPELL_AURA_MOD_HEALING_PCT);
     if(minval)
