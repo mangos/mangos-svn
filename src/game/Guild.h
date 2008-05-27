@@ -397,7 +397,6 @@ class Guild
         uint32 BackgroundColor;
 
         RankList m_ranks;
-        uint32 maxrank;
 
         MemberList members;
 

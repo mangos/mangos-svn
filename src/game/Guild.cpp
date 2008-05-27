@@ -93,7 +93,6 @@ bool Guild::create(uint64 lGuid, std::string gname)
         Id, gname.c_str(), GUID_LOPART(leaderGuid), dbGINFO.c_str(), dbMOTD.c_str(), EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor, guildbank_money);
     CharacterDatabase.CommitTransaction();
 
-    maxrank = 0;
     rname = "Guild Master";
     CreateRank(rname,GR_RIGHT_ALL);
     rname = "Officer";
@@ -251,14 +250,50 @@ bool Guild::LoadRanksFromDB(uint32 GuildId)
     if(!result)
         return false;
 
+    bool broken_ranks = false;
+
     do
     {
         fields = result->Fetch();
-        AddRank(fields[0].GetCppString(),fields[1].GetUInt32(),fields[2].GetUInt32());
-        maxrank=fields[3].GetUInt32();
+
+        std::string rankName = fields[0].GetCppString();
+        uint32 rankRights    = fields[1].GetUInt32();
+        uint32 rankMoney     = fields[2].GetUInt32();
+        uint32 rankRID       = fields[3].GetUInt32();
+
+        if(rankRID != m_ranks.size()+1)                     // guild_rank.rid always store rank+1
+            broken_ranks =  true;
+
+        if(m_ranks.size()==GR_GUILDMASTER)                  // prevent loss leader rights
+            rankRights |= GR_RIGHT_ALL;
+
+        AddRank(rankName,rankRights,rankMoney);
 
     }while( result->NextRow() );
     delete result;
+
+    if(m_ranks.size()==0)                                   // empty rank table?
+    {
+        AddRank("Guild Master",GR_RIGHT_ALL,0);
+        broken_ranks = true;
+    }
+
+    // guild_rank have wrong numbered ranks, repair
+    if(broken_ranks)
+    {
+        sLog.outError("Guild %u have broken `guild_rank` data, repairing...",GuildId);
+        CharacterDatabase.BeginTransaction();
+        CharacterDatabase.PExecute("DELETE FROM guild_rank WHERE guildid='%u'", GuildId);
+        for(size_t i =0; i < m_ranks.size(); ++i)
+        {
+            // guild_rank.rid always store rank+1
+            std::string name = m_ranks[i].name;
+            uint32 rights = m_ranks[i].rights;
+            CharacterDatabase.escape_string(name);
+            CharacterDatabase.PExecute( "INSERT INTO guild_rank (guildid,rid,rname,rights) VALUES ('%u', '%u', '%s', '%u')", GuildId, i+1, name.c_str(), rights);
+        }
+        CharacterDatabase.CommitTransaction();
+    }
 
     return true;
 }
@@ -558,12 +593,14 @@ void Guild::CreateRank(std::string name_,uint32 rights)
 
     for (int i = 0; i < purchased_tabs; ++i)
     {
-        CreateBankRightForTab(maxrank, uint8(i));
+        CreateBankRightForTab(m_ranks.size()-1, uint8(i));
     }
+
+    // guild_rank.rid always store rank+1 value
 
     // name now can be used for encoding to DB
     CharacterDatabase.escape_string(name_);
-    CharacterDatabase.PExecute( "INSERT INTO guild_rank (guildid,rid,rname,rights) VALUES ('%u', '%u', '%s', '%u')", Id, (++maxrank), name_.c_str(), rights );
+    CharacterDatabase.PExecute( "INSERT INTO guild_rank (guildid,rid,rname,rights) VALUES ('%u', '%u', '%s', '%u')", Id, m_ranks.size(), name_.c_str(), rights );
 }
 
 void Guild::AddRank(std::string name_,uint32 rights, uint32 money)
@@ -576,6 +613,7 @@ void Guild::DelRank()
     if(m_ranks.empty())
         return;
 
+    // guild_rank.rid always store rank+1 value
     uint32 rank = m_ranks.size()-1;
     CharacterDatabase.PExecute("DELETE FROM guild_rank WHERE rid>='%u' AND guildid='%u'", (rank+1), Id);
 
@@ -1438,6 +1476,7 @@ void Guild::LoadBankRightsFromDB(uint32 GuildId)
         uint32 rankId = fields[1].GetUInt32();
         uint16 right = fields[2].GetUInt16();
         uint16 SlotPerDay = fields[3].GetUInt16();
+
         SetBankRightsAndSlots(rankId, TabId, right, SlotPerDay, false);
 
     }while( result->NextRow() );
