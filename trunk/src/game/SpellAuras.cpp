@@ -3712,12 +3712,12 @@ void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
 
     if(m_target->IsHostileTo(caster) && (m_target->GetTypeId()!=TYPEID_PLAYER || !((Player*)m_target)->isGameMaster()))
     {
-        if (m_target->HasStealthAura() && m_modifier.m_miscvalue == 5)
+        if (m_target->HasStealthAura() && m_modifier.m_miscvalue == DISPEL_STEALTH)
         {
             m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         }
 
-        if (m_target->HasInvisibilityAura() && m_modifier.m_miscvalue == 6)
+        if (m_target->HasInvisibilityAura() && m_modifier.m_miscvalue == DISPEL_INVISIBILITY)
         {
             m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
         }

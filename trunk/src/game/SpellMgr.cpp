@@ -123,7 +123,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         case SPELLFAMILY_WARLOCK:
         {
             // only warlock curses have this
-            if (spellInfo->Dispel == IMMUNE_DISPEL_CURSE)
+            if (spellInfo->Dispel == DISPEL_CURSE)
                 return SPELL_CURSE;
 
             // family flag 37 (only part spells have family name)
@@ -135,7 +135,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         case SPELLFAMILY_HUNTER:
         {
             // only hunter stings have this
-            if (spellInfo->Dispel == IMMUNE_DISPEL_POISON)
+            if (spellInfo->Dispel == DISPEL_POISON)
                 return SPELL_STING;
 
             break;

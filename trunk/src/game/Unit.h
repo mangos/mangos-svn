@@ -996,7 +996,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool waterbreath;
         AuraList      & GetSingleCastAuras()       { return m_scAuras; }
         AuraList const& GetSingleCastAuras() const { return m_scAuras; }
-        SpellImmuneList m_spellImmune[6];
+        SpellImmuneList m_spellImmune[MAX_SPELL_IMMUNITY];
 
         // Threat related methodes
         bool CanHaveThreatList() const;

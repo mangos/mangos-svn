@@ -472,6 +472,29 @@ enum Mechanics
     (1<<MECHANIC_SHACKLE )|(1<<MECHANIC_TURN     )|(1<<MECHANIC_HORROR)| \
     (1<<MECHANIC_DAZE    )|(1<<MECHANIC_SAPPED   ) )
 
+// Spell dispell type
+enum DispelType
+{
+    DISPEL_NONE         = 0,
+    DISPEL_MAGIC        = 1,
+    DISPEL_CURSE        = 2,
+    DISPEL_DISEASE      = 3,
+    DISPEL_POISON       = 4,
+    DISPEL_STEALTH      = 5,
+    DISPEL_INVISIBILITY = 6,
+    DISPEL_ALL          = 7,
+    DISPEL_SPE_NPC_ONLY = 8,
+    DISPEL_ENRAGE       = 9,
+    DISPEL_ZG_TICKET    = 10
+};
+
+#define DISPEL_ALL_MASK   ( \
+    (1<<IMMUNE_DISPEL_MAGIC) | \
+    (1<<IMMUNE_DISPEL_CURSE) | \
+    (1<<IMMUNE_DISPEL_DISEASE) | \
+    (1<<IMMUNE_DISPEL_POISON) )
+
+
 //To all Immune system,if target has immunes,
 //some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,
 //some spell_effects that related to ImmuneToEffect<effect>(only this effect in the spell) can't cast to it,
@@ -485,6 +508,8 @@ enum SpellImmunity
     IMMUNITY_DISPEL                = 4,
     IMMUNITY_MECHANIC              = 5
 };
+
+#define MAX_SPELL_IMMUNITY         6
 
 enum ImmuneToDispel
 {

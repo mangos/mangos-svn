@@ -173,7 +173,7 @@ Unit::Unit( WorldObject *instantiator )
     m_ShapeShiftForm = 0;
     m_canModifyStats = false;
 
-    for (int i = 0; i < IMMUNITY_MECHANIC; i++)
+    for (int i = 0; i < MAX_SPELL_IMMUNITY; i++)
         m_spellImmune[i].clear();
     for (int i = 0; i < UNIT_MOD_END; i++)
     {
@@ -3799,17 +3799,27 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
     return true;
 }
 
+bool use_test = true;
 bool Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster)
 {
     AuraMap::iterator i;
+    // Create dispel mask by dispel type
+    uint32 dispelMask;
+    // If dispell all
+    if (dispel_type == DISPEL_ALL)
+        dispelMask = DISPEL_ALL_MASK;
+    else
+        dispelMask = (1 << dispel_type);
+
     for (i = m_Auras.begin(); i != m_Auras.end();)
     {
-        if ((*i).second && (*i).second->GetSpellProto()->Dispel == dispel_type)
+        Aura *aur = (*i).second;
+        if (aur && (1<<aur->GetSpellProto()->Dispel) & dispelMask)
         {
             SpellEntry const* spellInfo = (*i).second->GetSpellProto();
             uint32 eff = (*i).second->GetEffIndex();
 
-            if(dispel_type == 1)
+            if(dispel_type == DISPEL_MAGIC)
             {
                 bool positive = true;
 
