@@ -6907,9 +6907,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     // Distribute Damage over multiple effects, reduce by AoE
     CastingTime = GetCastingTimeForBonus( spellProto, damagetype, CastingTime );   
 
-    /* FIXME: need replace hardocded spell modifiers by common leech effects/auras code
     // 50% for damage and healing spells for leech spells from damage bonus and 0% from healing
-
     for(int j = 0; j < 3; ++j)
     {
         if( spellProto->Effect[j] == SPELL_EFFECT_HEALTH_LEECH ||
@@ -6919,7 +6917,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             break;
         }
     }
-    */
 
     switch(spellProto->SpellFamilyName)
     {
@@ -6984,25 +6981,10 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             {
                 CastingTime = 4025;
             }
-            // Death Coil - 21.4% of Shadow Damage
-            else if((spellProto->SpellFamilyFlags & 0x80000LL) && spellProto->SpellIconID == 88)
-            {
-                CastingTime = 749;
-            } 
             // Curse of Agony - 120% of Shadow Damage
             else if((spellProto->SpellFamilyFlags & 0x0000000400LL) && spellProto->SpellIconID == 544)
             {
                 DotFactor = 1.2f;
-            }
-            // Siphon Life - 100% of Shadow Damage
-            else if((spellProto->SpellFamilyFlags & 0x0100000000LL) && spellProto->SpellIconID == 152)
-            {
-                DotFactor = 1.0f; 
-            }
-            // Drain Life 
-            else if((spellProto->SpellFamilyFlags & 0x8LL) && spellProto->SpellIconID == 546)
-            {
-                CastingTime = 2500; 
             }
             // Drain Mana - 0% of Shadow Damage
             else if((spellProto->SpellFamilyFlags & 0x10LL) && spellProto->SpellIconID == 548)
@@ -7106,11 +7088,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             else if ((spellProto->SpellFamilyFlags & 0x80000LL) && spellProto->SpellIconID == 1591) 
             {
                 CastingTime = 350;
-            }
-            // Devouring Plague - 80%
-            else if ((spellProto->SpellFamilyFlags & 0x2000000000LL) && spellProto->SpellIconID == 9) 
-            {
-                DotFactor = 0.8f;
             }
             break;
         case SPELLFAMILY_DRUID:
@@ -7407,7 +7384,6 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     // distribute healing to all effects, reduce AoE damage
     CastingTime = GetCastingTimeForBonus( spellProto, damagetype, CastingTime );   
 
-    /*
     // 0% bonus for damage and healing spells for leech spells from healing bonus
     for(int j = 0; j < 3; ++j)
     {
@@ -7418,7 +7394,6 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
             break;
         }
     }
-    */
 
     // Exception
     switch (spellProto->SpellFamilyName)
