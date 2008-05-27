@@ -1120,6 +1120,7 @@ void WorldSession::HandleGuildBankDeposit( WorldPacket & recv_data )
     pGuild->LogBankEvent(GUILD_BANK_LOG_DEPOSIT_MONEY, uint8(0), GetPlayer()->GetGUIDLow(), money);
 
     pGuild->DisplayGuildBankTabsInfo(this);
+    pGuild->DisplayGuildBankContent(this, 0);
     pGuild->DisplayGuildBankMoneyUpdate();
 }
 
