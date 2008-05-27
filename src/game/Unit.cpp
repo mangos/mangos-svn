@@ -2132,9 +2132,25 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
 
     // Critical hit chance
     float crit_chance = GetUnitCriticalChance(attType, pVictim);
+    // this is to avoid compiler issue when declaring variables inside if
+    float block_chance, parry_chance, dodge_chance;
 
-    // stunned target cannot dodge and this is check in GetUnitDodgeChance()
-    float dodge_chance = pVictim->GetUnitDodgeChance();
+    // cannot be dodged/parried/blocked
+    if(spellInfo->Attributes & 0x200000)
+    {
+        block_chance = 0.0f;
+        parry_chance = 0.0f;
+        dodge_chance = 0.0f;
+    }
+    else
+    {
+        // parry can be avoided only by some abilites
+        parry_chance = pVictim->GetUnitParryChance();
+        // block might be bypassed by it as well
+        block_chance = pVictim->GetUnitBlockChance();
+        // stunned target cannot dodge and this is check in GetUnitDodgeChance()
+        dodge_chance = pVictim->GetUnitDodgeChance();
+    }
 
     // Only players can have Talent&Spell bonuses
     if (GetTypeId() == TYPEID_PLAYER)
@@ -2154,19 +2170,6 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
                 }
             }
         }
-    }
-
-    // pary can be avoided only by some abilites
-    float parry_chance = pVictim->GetUnitParryChance();
-    // block might be bypassed by it as well
-    float block_chance = pVictim->GetUnitBlockChance();
-
-    // cannot be dodged/parried/blocked
-    if(spellInfo->Attributes & 0x200000)
-    {
-        block_chance = 0.0f;
-        parry_chance = 0.0f;
-        dodge_chance = 0.0f;
     }
 
     // Spellmods
