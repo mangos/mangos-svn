@@ -3755,13 +3755,17 @@ bool ChatHandler::HandleListAurasCommand (const char * /*args*/)
         return true;
     }
 
+    char const* talentStr = GetMangosString(LANG_TALENT);
+    char const* passiveStr = GetMangosString(LANG_PASSIVE);
+
     Unit::AuraMap const& uAuras = unit->GetAuras();
     PSendSysMessage(LANG_COMMAND_TARGET_LISTAURAS, uAuras.size());
     for (Unit::AuraMap::const_iterator itr = uAuras.begin(); itr != uAuras.end(); ++itr)
     {
+        bool talent = GetTalentSpellCost(itr->second->GetId()) > 0;
         PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, itr->second->GetId(), itr->second->GetEffIndex(),
             itr->second->GetModifier()->m_auraname, itr->second->GetAuraDuration(), itr->second->GetAuraMaxDuration(),
-            itr->second->GetSpellProto()->SpellName[sWorld.GetDBClang()],
+            itr->second->GetSpellProto()->SpellName[sWorld.GetDBClang()],(itr->second->IsPassive() ? passiveStr : ""),(talent ? talentStr : ""),
             IS_PLAYER_GUID(itr->second->GetCasterGUID()) ? "player" : "creature",GUID_LOPART(itr->second->GetCasterGUID()));
     }
     for (int i = 0; i < TOTAL_AURAS; i++)
@@ -3771,8 +3775,9 @@ bool ChatHandler::HandleListAurasCommand (const char * /*args*/)
         PSendSysMessage(LANG_COMMAND_TARGET_LISTAURATYPE, uAuraList.size(), i);
         for (Unit::AuraList::const_iterator itr = uAuraList.begin(); itr != uAuraList.end(); ++itr)
         {
+            bool talent = GetTalentSpellCost((*itr)->GetId()) > 0;
             PSendSysMessage(LANG_COMMAND_TARGET_AURASIMPLE, (*itr)->GetId(), (*itr)->GetEffIndex(),
-                (*itr)->GetSpellProto()->SpellName[sWorld.GetDBClang()],
+                (*itr)->GetSpellProto()->SpellName[sWorld.GetDBClang()],((*itr)->IsPassive() ? passiveStr : ""),(talent ? talentStr : ""),
                 IS_PLAYER_GUID((*itr)->GetCasterGUID()) ? "player" : "creature",GUID_LOPART((*itr)->GetCasterGUID()));
         }
     }
