@@ -3803,13 +3803,7 @@ bool Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster)
 {
     AuraMap::iterator i;
     // Create dispel mask by dispel type
-    uint32 dispelMask;
-    // If dispell all
-    if (dispel_type == DISPEL_ALL)
-        dispelMask = DISPEL_ALL_MASK;
-    else
-        dispelMask = (1 << dispel_type);
-
+    uint32 dispelMask = GetDispellMask( DispelType(dispel_type) );
     for (i = m_Auras.begin(); i != m_Auras.end();)
     {
         Aura *aur = (*i).second;

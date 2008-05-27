@@ -374,6 +374,15 @@ inline Mechanics GetEffectMechanic(SpellEntry const* spellInfo, int32 effect)
     return MECHANIC_NONE;
 }
 
+inline uint32 GetDispellMask(DispelType dispel)
+{
+    // If dispell all
+    if (dispel == DISPEL_ALL)
+        return DISPEL_ALL_MASK;
+    else
+        return (1 << dispel);
+}
+
 // Spell affects related declarations (accessed using SpellMgr functions)
 struct SpellAffection
 {

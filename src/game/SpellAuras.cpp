@@ -3704,23 +3704,37 @@ void Aura::HandleAuraModDmgImmunity(bool apply, bool Real)
 
 void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
 {
+    // all applied/removed only at real aura add/remove
+    if(!Real)
+        return;
+
     Unit* caster = GetCaster();
     if (!caster)
         return;
 
     m_target->ApplySpellImmune(GetId(),IMMUNITY_DISPEL,m_modifier.m_miscvalue,apply);
 
+    if (apply)
+    {
+        // Create dispel mask by dispel type
+        uint32 dispelMask = GetDispellMask( DispelType(m_modifier.m_miscvalue) );
+        // Dispel all existing auras vs current dispell type
+        Unit::AuraMap& auras = m_target->GetAuras();
+        for(Unit::AuraMap::iterator itr = auras.begin(); itr != auras.end(); )
+        {
+            SpellEntry const* spell = itr->second->GetSpellProto();
+            if( (1<<spell->Dispel) & dispelMask )
+            {
+                // Dispel aura
+                m_target->RemoveAurasDueToSpell(spell->Id);
+                itr = auras.begin();
+            }
+            else
+                ++itr;
+        }
+    }
     if(m_target->IsHostileTo(caster) && (m_target->GetTypeId()!=TYPEID_PLAYER || !((Player*)m_target)->isGameMaster()))
     {
-        if (m_target->HasStealthAura() && m_modifier.m_miscvalue == DISPEL_STEALTH)
-        {
-            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-        }
-
-        if (m_target->HasInvisibilityAura() && m_modifier.m_miscvalue == DISPEL_INVISIBILITY)
-        {
-            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
-        }
 
         if( caster->GetTypeId()==TYPEID_PLAYER && !caster->IsPvP() && m_target->IsPvP())
             ((Player*)caster)->UpdatePvP(true, true);
