@@ -3799,7 +3799,6 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
     return true;
 }
 
-bool use_test = true;
 bool Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster)
 {
     AuraMap::iterator i;
@@ -5046,40 +5045,6 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         {
             switch(dummySpell->Id)
             {
-                // Druid Tier 6 Trinket
-                case 40442:
-                {
-                    if(GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    if(!castItem)
-                        return;
-
-                    uint32 triggerId;
-                    float  chance;
-
-                    // Starfire
-                    if( procSpell->SpellFamilyFlags & 0x0000000000000004LL )
-                    {
-                        triggerId = 40445; chance = 25.f;
-                    }
-                    // Rejuvenation
-                    else if( procSpell->SpellFamilyFlags & 0x0000000000000010LL )
-                    {
-                        triggerId = 40446; chance = 25.f;
-                    }
-                    // Mangle (cat/bear)
-                    else if( procSpell->SpellFamilyFlags & 0x0000044000000000LL )
-                    {
-                        triggerId = 40452; chance = 40.f;
-                    }
-                    else
-                        return;
-
-                    if (roll_chance_f(chance))
-                        CastSpell(this, triggerId, true, castItem, triggeredByAura);
-                    return;
-                }
                 // Healing Touch (Dreamwalker Raiment set)
                 case 28719:
                 {
@@ -5116,6 +5081,49 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                         return;
 
                     CastSpell(this, 37238, true, castItem, triggeredByAura);
+                    return;
+                }
+                // Druid Tier 6 Trinket
+                case 40442:
+                {
+                    if(GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if(!castItem)
+                        return;
+
+                    uint32 triggerId;
+                    float  chance;
+
+                    // Starfire
+                    if( procSpell->SpellFamilyFlags & 0x0000000000000004LL )
+                    {
+                        triggerId = 40445; chance = 25.f;
+                    }
+                    // Rejuvenation
+                    else if( procSpell->SpellFamilyFlags & 0x0000000000000010LL )
+                    {
+                        triggerId = 40446; chance = 25.f;
+                    }
+                    // Mangle (cat/bear)
+                    else if( procSpell->SpellFamilyFlags & 0x0000044000000000LL )
+                    {
+                        triggerId = 40452; chance = 40.f;
+                    }
+                    else
+                        return;
+
+                    if (roll_chance_f(chance))
+                        CastSpell(this, triggerId, true, castItem, triggeredByAura);
+                    return;
+                }
+                // Maim Interrupt
+                case 44835:
+                {
+                    if(!castItem || pVictim || !pVictim->isAlive())
+                        return;
+                    // Deadly Interrupt Effect
+                    CastSpell(pVictim, 32747, true, castItem, triggeredByAura);
                     return;
                 }
             }
