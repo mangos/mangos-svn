@@ -303,6 +303,7 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                     case 35181:                             // Dive Bomb
                     case 40810: case 43267: case 43268:     // Saber Lash
                     case 42384:                             // Brutal Swipe
+                    case 45150:                             // Meteor Slash
                     {
                         uint32 count = 0;
                         for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
