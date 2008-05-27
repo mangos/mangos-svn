@@ -1100,7 +1100,7 @@ void Spell::EffectDummy(uint32 i)
                             continue;
 
                         SpellEntry const* combatEntry = sSpellStore.LookupEntry(pEnchant->spellid[s]);
-                        if(!combatEntry || combatEntry->Dispel!=IMMUNE_DISPEL_POISON)
+                        if(!combatEntry || combatEntry->Dispel != DISPEL_POISON)
                             continue;
 
                         m_caster->CastSpell(unitTarget, combatEntry, true, item);
@@ -3651,7 +3651,7 @@ void Spell::EffectWeaponDmg(uint32 i)
                 Unit::AuraMap const& auras = unitTarget->GetAuras();
                 for(Unit::AuraMap::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
                 {
-                    if(itr->second->GetSpellProto()->Dispel==IMMUNE_DISPEL_POISON)
+                    if(itr->second->GetSpellProto()->Dispel == DISPEL_POISON)
                     {
                         // 150% damage
                         damagePercentMod *= 1.5f;
