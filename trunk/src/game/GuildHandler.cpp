@@ -793,6 +793,10 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
 
     guild->SetBankMoneyPerDay(rankId, MoneyPerDay);
     guild->SetRankName(rankId, rankname);
+
+    if(rankId==GR_GUILDMASTER)                              // prevent loss leader rights
+        rights |= GR_RIGHT_ALL;
+
     guild->SetRankRights(rankId, rights);
 
     guild->Query(this);
@@ -1170,6 +1174,7 @@ void WorldSession::HandleGuildBankWithdraw( WorldPacket & recv_data )
 
     pGuild->SendMoneyInfo(this, GetPlayer()->GetGUIDLow());
     pGuild->DisplayGuildBankTabsInfo(this);
+    pGuild->DisplayGuildBankContent(this, 0);
     pGuild->DisplayGuildBankMoneyUpdate();
 }
 
