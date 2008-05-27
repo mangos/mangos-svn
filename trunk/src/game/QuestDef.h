@@ -141,13 +141,15 @@ enum __QuestFlags
 
 struct QuestLocale
 {
+    QuestLocale() { ObjectiveText.resize(QUEST_OBJECTIVES_COUNT); }
+
     std::vector<std::string> Title;
     std::vector<std::string> Details;
     std::vector<std::string> Objectives;
     std::vector<std::string> OfferRewardText;
     std::vector<std::string> RequestItemsText;
     std::vector<std::string> EndText;
-    std::vector<std::string> ObjectiveText[QUEST_OBJECTIVES_COUNT];
+    std::vector< std::vector<std::string> > ObjectiveText;
 };
 
 // This Quest class provides a convenient way to access a few pretotaled (cached) quest details,
