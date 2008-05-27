@@ -37,8 +37,8 @@ void Usage(char* prg)
 
 void ExtractMapsFromMpq()
 {
-    char mpq_filename[128];
-    char output_filename[256];
+    char mpq_filename[1024];
+    char output_filename[1024];
     //  char tmp[256];
     //  sprintf(tmp,"%s/Data/%s",input_path,filename);
 
