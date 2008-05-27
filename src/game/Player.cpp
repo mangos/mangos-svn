@@ -5772,8 +5772,10 @@ void Player::UpdateArea(uint32 newArea)
     {
         if( GetDummyAura(40214) )
         {
-            CastSpell(this,40216,true);
-            CastSpell(this,42016,true);
+            if( !GetAura(40216,0) )
+                CastSpell(this,40216,true);
+            if( !GetAura(42016,0) )
+                CastSpell(this,42016,true);
         }
     }
 }
