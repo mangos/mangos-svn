@@ -262,12 +262,14 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & /*recv_data*/ )
                     playersNear.push_back(playerGroup);
             }
 
+            uint32 money_per_player = uint32((pLoot->gold)/(playersNear.size()));
+
             for (std::vector<Player*>::iterator i = playersNear.begin(); i != playersNear.end(); ++i)
             {
-                (*i)->ModifyMoney( uint32((pLoot->gold)/(playersNear.size())) );
+                (*i)->ModifyMoney( money_per_player );
                 //Offset surely incorrect, but works
                 WorldPacket data( SMSG_LOOT_MONEY_NOTIFY, 4 );
-                data << uint32((pLoot->gold)/(playersNear.size()));
+                data << uint32(money_per_player);
                 (*i)->GetSession()->SendPacket( &data );
             }
         }
