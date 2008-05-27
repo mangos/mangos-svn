@@ -475,7 +475,7 @@ void GameEvent::GameEventUnspawn(int16 event_id)
 
             if( Creature* pCreature = ObjectAccessor::Instance().GetObjectInWorld(MAKE_NEW_GUID(*itr, data->id, HIGHGUID_UNIT), (Creature*)NULL) )
             {
-                pCreature->CombatStop();
+                pCreature->CleanupsBeforeDelete();
                 ObjectAccessor::Instance().AddObjectToRemoveList(pCreature);
             }
         }

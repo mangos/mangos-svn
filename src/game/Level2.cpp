@@ -2481,8 +2481,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         if( wpGuid != 0 )
         {
             wpCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_NEW_GUID(wpGuid, VISUAL_WAYPOINT, HIGHGUID_UNIT));
-            wpCreature->CombatStop();
             wpCreature->DeleteFromDB();
+            wpCreature->CleanupsBeforeDelete();
             ObjectAccessor::Instance().AddObjectToRemoveList(wpCreature);
         }
 
@@ -2547,8 +2547,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             if( wpGuid != 0 )
             {
                 wpCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_NEW_GUID(wpGuid, VISUAL_WAYPOINT, HIGHGUID_UNIT));
-                wpCreature->CombatStop();
                 wpCreature->DeleteFromDB();
+                wpCreature->CleanupsBeforeDelete();
                 ObjectAccessor::Instance().AddObjectToRemoveList(wpCreature);
                 // re-create
                 Creature* wpCreature2 = new Creature(chr);
@@ -2833,8 +2833,8 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
                 }
                 else
                 {
-                    pCreature->CombatStop();
                     pCreature->DeleteFromDB();
+                    pCreature->CleanupsBeforeDelete();
                     ObjectAccessor::Instance().AddObjectToRemoveList(pCreature);
                 }
 
@@ -3000,10 +3000,8 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             }
             else
             {
-                pCreature->CombatStop();
-
                 pCreature->DeleteFromDB();
-
+                pCreature->CleanupsBeforeDelete();
                 ObjectAccessor::Instance().AddObjectToRemoveList(pCreature);
             }
         }while(result->NextRow());
