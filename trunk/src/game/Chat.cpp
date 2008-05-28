@@ -521,64 +521,36 @@ bool ChatHandler::hasStringAbbr(const char* s1, const char* s2)
 
 void ChatHandler::SendSysMessage(const char *str)
 {
-    char buf[256];
     WorldPacket data;
 
-    const char* line = str;
-    const char* pos = strchr(line, '\n');
-    while(pos != NULL)
-    {
-        if (pos-line > sizeof(buf)-1)
-        {
-            strncpy(buf, line, sizeof(buf)-1);
-            buf[sizeof(buf)-1]=0;
-            line += sizeof(buf) - 1;
-        }
-        else
-        {
-            strncpy(buf, line, pos-line);
-            buf[pos-line]=0;
-            line = pos+1;
-            pos = strchr(line, '\n');
-        }
+    // need copy to prevent corruption by strtok call in LineFromMessage original string
+    char* buf = strdup(str);
+    char* pos = buf;
 
-        FillSystemMessageData(&data, buf);
+    while(char* line = LineFromMessage(pos))
+    {
+        FillSystemMessageData(&data, line);
         m_session->SendPacket(&data);
     }
 
-    FillSystemMessageData(&data, line);
-    m_session->SendPacket(&data);
+    free(buf);
 }
 
 void ChatHandler::SendGlobalSysMessage(const char *str)
 {
-    char buf[256];
     WorldPacket data;
 
-    const char* line = str;
-    const char* pos = strchr(line, '\n');
-    while(pos != NULL)
-    {
-        if (pos-line > sizeof(buf)-1)
-        {
-            strncpy(buf, line, sizeof(buf)-1);
-            buf[sizeof(buf)-1]=0;
-            line += sizeof(buf) - 1;
-        }
-        else
-        {
-            strncpy(buf, line, pos-line);
-            buf[pos-line]=0;
-            line = pos+1;
-            pos = strchr(line, '\n');
-        }
+    // need copy to prevent corruption by strtok call in LineFromMessage original string
+    char* buf = strdup(str);
+    char* pos = buf;
 
-        FillSystemMessageData(&data, buf);
+    while(char* line = LineFromMessage(pos))
+    {
+        FillSystemMessageData(&data, line);
         sWorld.SendGlobalMessage(&data);
     }
 
-    FillSystemMessageData(&data, line);
-    sWorld.SendGlobalMessage(&data);
+    free(buf);
 }
 
 void ChatHandler::SendSysMessage(uint32 entry)
