@@ -393,20 +393,7 @@ void WorldSession::SendSpiritResurrect()
     if (!_player)
         return;
 
-    uint32 level = _player->getLevel();
-
-    //Characters from level 1-10 are not affected by resurrection sickness.
-    //Characters from level 11-19 will suffer from one minute of sickness
-    //for each level they are above 10.
-    //Characters level 20 and up suffer from ten minutes of sickness.
-    if (level > 10)
-    {
-        // prepare resurrection sickness setup (will be set in ResurrectPlayer())
-        uint32 spellLvl = level < 20 ? level : 20;
-        _player->m_resurrectingSicknessExpire = time(NULL) + (spellLvl-10)*MINUTE;
-    }
-
-    _player->ResurrectPlayer(0.5f,false);
+    _player->ResurrectPlayer(0.5f,false, true);
 
     _player->DurabilityLossAll(0.25f);
 
