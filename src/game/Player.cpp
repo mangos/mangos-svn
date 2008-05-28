@@ -5214,9 +5214,9 @@ void Player::SetInitialFactions()
             // show(1) and disable AtWar button(16) of own team factions
             if( GetTeam() == factionEntry->team || GetTeam() == factionEntry->ID)
             {
-                newFaction.Flags = FACTION_FLAG_OWN_TEAM;
+                newFaction.Flags |= FACTION_FLAG_OWN_TEAM;
                 if(GetTeam() != factionEntry->ID)           // not show own 'root' team faction
-                    newFaction.Flags = FACTION_FLAG_VISIBLE;
+                    newFaction.Flags |= FACTION_FLAG_VISIBLE;
             }
             // opposition team
             else if( GetTeam()==ALLIANCE && (factionEntry->team == HORDE    || factionEntry->ID == HORDE) || 
