@@ -7335,8 +7335,8 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
 
     // Healing Done
 
-    // These Spells are doing fixed amount of healing (TODO reuse dmgClass2 from Spell.DBC )
-    if(spellProto->Id == 15290 || spellProto->Id == 39373 || spellProto->Id == 33778 || spellProto->Id == 379)
+    // These Spells are doing fixed amount of healing (TODO found less hack-like check)
+    if(spellProto->Id == 15290 || spellProto->Id == 39373 || spellProto->Id == 33778 || spellProto->Id == 379 || spellProto->Id == 38395)
         return healamount;
 
     bool Channeled = IsChanneledSpell(spellProto);
