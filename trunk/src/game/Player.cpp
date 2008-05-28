@@ -3738,7 +3738,7 @@ void Player::RepopAtGraveyard()
 {
     AreaTableEntry const *zone = GetAreaEntryByAreaID(GetAreaId());
 
-    if(zone && zone->flags & 0x1000)                        //Such zones are considered unreachable without flying and the player must be automatically revived
+    if(zone && zone->flags & AREA_FLAG_NEED_FLY)            //Such zones are considered unreachable without flying and the player must be automatically revived
     {
         ResurrectPlayer(0.5f);
         SpawnCorpseBones();
@@ -5839,25 +5839,8 @@ void Player::UpdateZone(uint32 newZone)
             pvpInfo.endTimer = time(0);                     // start toggle-off
     }
 
-    // zonetype is flags
-    // flags & 0x00000001   (1)     - snow (only Dun Morogh, Naxxramas, Razorfen Downs and Winterspring)
-    // flags & 0x00000002   (2)     - unknown, (only Naxxramas and Razorfen Downs)
-    // flags & 0x00000004   (4)     - On Map Dungeon
-    // flags & 0x00000008   (8)     - slave capital city flag?
-    // flags & 0x00000010   (16)    - unknown
-    // flags & 0x00000020   (32)    - slave capital city flag?
-    // flags & 0x00000040   (64)    - many zones have this flag
-    // flags & 0x00000080   (128)   - arena
-    // flags & 0x00000100   (256)   - main capital city flag
-    // flags & 0x00000200   (512)   - only for one zone named "City" (where it located?)
-    // flags & 0x00000400   (1024)  - outland zones? (only Eye of the Storm not have this flag, but have 0x00004000 flag)
-    // flags & 0x00000800   (2048)  - sanctuary area (PvP disabled)
-    // flags & 0x00001000   (4096)  - only Netherwing Ledge, Socrethar's Seat, Tempest Keep, The Arcatraz, The Botanica, The Mechanar
-    // flags & 0x00002000   (8192)  - not used now (no area/zones with this flag set) ...
-    // flags & 0x00004000   (16384) - outland zones? (only Circle of Blood Arena not have this flag, but have 0x00000400 flag)
-    // flags & 0x00008000   (32768) - pvp objective area?
 
-    if(zone->flags & 0x800)                                 // in sanctuary
+    if(zone->flags & AREA_FLAG_SANCTUARY)                   // in sanctuary
     {
         UpdatePvP(false, true);                             // i'm right? need disable PvP in this area...
 
@@ -5865,7 +5848,7 @@ void Player::UpdateZone(uint32 newZone)
             RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
     }
 
-    if(zone->flags & 0x100)                                 // in capital city
+    if(zone->flags & AREA_FLAG_CAPITAL)                     // in capital city
     {
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
         SetRestType(REST_TYPE_IN_CITY);
