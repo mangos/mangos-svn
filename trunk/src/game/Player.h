@@ -1554,7 +1554,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void KillPlayer();
         uint32 GetResurrectionSpellId();
-        void ResurrectPlayer(float restore_percent, bool updateToWorld = true);
+        void ResurrectPlayer(float restore_percent, bool updateToWorld = true, bool applySickness = false);
         void BuildPlayerRepop();
         void DurabilityLossAll(double percent);
         void DurabilityLoss(uint8 equip_pos, double percent);
@@ -2093,7 +2093,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_areaUpdateId;
 
         uint32 m_deathTimer;
-        time_t m_resurrectingSicknessExpire;
 
         uint32 m_restTime;
 

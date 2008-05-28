@@ -3979,9 +3979,9 @@ void Aura::HandleAuraModStat(bool apply, bool Real)
             if(m_target->GetTypeId() == TYPEID_PLAYER || ((Creature*)m_target)->isPet())
             {
                 if (m_modifier.m_miscvalue2 == 0)
-                    ((Player*)m_target)->ApplyPosStatMod(Stats(i),m_modifier.m_amount,apply);
+                    m_target->ApplyPosStatMod(Stats(i),m_modifier.m_amount,apply);
                 else
-                    ((Player*)m_target)->ApplyNegStatMod(Stats(i),m_modifier.m_amount,apply);
+                    m_target->ApplyNegStatMod(Stats(i),m_modifier.m_amount,apply);
             }
         }
     }

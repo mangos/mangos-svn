@@ -299,7 +299,6 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_restTime = 0;
     m_lastManaUse = 0;
     m_deathTimer = 0;
-    m_resurrectingSicknessExpire = 0;
 
     m_DetectInvTimer = 1000;
 
@@ -1145,8 +1144,6 @@ void Player::setDeathState(DeathState s)
         // lost combo points at any target (targeted combo points clear in Unit::setDeathState)
         ClearComboPoints();
 
-        // remove resurrection sickness before other mods to prevent incorrect stats calculation
-        RemoveAurasDueToSpell(SPELL_PASSIVE_RESURRECTION_SICKNESS);
         // remove form before other mods to prevent incorrect stats calculation
         RemoveAurasDueToSpell(m_ShapeShiftForm);
 
@@ -3451,7 +3448,7 @@ void Player::SendDelayResponse(const uint32 ml_seconds)
     GetSession()->SendPacket( &data );
 }
 
-void Player::ResurrectPlayer(float restore_percent, bool updateToWorld)
+void Player::ResurrectPlayer(float restore_percent, bool updateToWorld, bool applySickness)
 {
     WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);          // remove spirit healer position
     data << uint32(-1);
@@ -3490,21 +3487,18 @@ void Player::ResurrectPlayer(float restore_percent, bool updateToWorld)
     // some items limited to specific map
     DestroyZoneLimitedItem( true, GetZoneId());
 
-    // set resurrection sickness if not expired
-    if(!m_resurrectingSicknessExpire)
+    if(!applySickness || getLevel() <= 10)
         return;
 
-    // check expire
-    time_t curTime = time(NULL);
-    if(m_resurrectingSicknessExpire <= curTime)
-    {
-        m_resurrectingSicknessExpire = 0;
-        return;
-    }
+    //Characters from level 1-10 are not affected by resurrection sickness.
+    //Characters from level 11-19 will suffer from one minute of sickness
+    //for each level they are above 10.
+    //Characters level 20 and up suffer from ten minutes of sickness.
 
-    // set resurrection sickness!
-    uint32 delta = m_resurrectingSicknessExpire-time(NULL);
+    uint32 spellLvl = getLevel() < 20 ? getLevel() : 20;
+    uint32 delta = (spellLvl-10)*MINUTE;
 
+    // set resurrection sickness
     CastSpell(this,SPELL_PASSIVE_RESURRECTION_SICKNESS,true);
 
     for(int i =0; i < 3; ++i)
