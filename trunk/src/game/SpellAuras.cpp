@@ -3058,6 +3058,9 @@ void Aura::HandleAuraModDisarm(bool apply, bool Real)
     if(!Real)
         return;
 
+    if(!apply && m_target->HasAuraType(SPELL_AURA_MOD_DISARM))
+        return;
+
     // not sure for it's correctness
     if(apply)
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISARMED);
@@ -3177,13 +3180,13 @@ void Aura::HandleModStealth(bool apply, bool Real)
             if(BattleGround *bg = ((Player*)m_target)->GetBattleGround())
                 bg->EventPlayerDroppedFlag((Player*)m_target);
 
-        m_target->SetByteValue(UNIT_FIELD_BYTES_1, 2, 0x02);
-        if(m_target->GetTypeId()==TYPEID_PLAYER)
-            m_target->SetByteValue(PLAYER_FIELD_BYTES2, 1, 0x20);
-
         // only at real aura add
         if(Real)
         {
+            m_target->SetByteValue(UNIT_FIELD_BYTES_1, 2, 0x02);
+            if(m_target->GetTypeId()==TYPEID_PLAYER)
+                m_target->SetByteValue(PLAYER_FIELD_BYTES2, 1, 0x20);
+
             // apply only if not in GM invisibility
             if(m_target->GetVisibility()!=VISIBILITY_OFF)
             {
@@ -3195,40 +3198,28 @@ void Aura::HandleModStealth(bool apply, bool Real)
 
             // for RACE_NIGHTELF stealth
             if(m_target->GetTypeId()==TYPEID_PLAYER && GetId()==20580)
-            {
                 m_target->CastSpell(m_target, 21009, true, NULL, this);
-            }
         }
     }
     else
     {
-        m_target->SetByteValue(UNIT_FIELD_BYTES_1, 2, 0x00);
-        if(m_target->GetTypeId()==TYPEID_PLAYER)
-            m_target->SetByteValue(PLAYER_FIELD_BYTES2, 1, 0x00);
-
         // only at real aura remove
         if(Real)
         {
-            bool reallyRemove =true;
-            SpellEntry const *spellInfo = GetSpellProto();
-            if( spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE &&
-                (spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_VANISH) &&
-                (m_target->HasStealthAura() || m_target->HasInvisibilityAura()) )
-                reallyRemove = false;                       // vanish it timed out, but we have stealth active as well
-            if(reallyRemove)
+            // for RACE_NIGHTELF stealth
+            if(m_target->GetTypeId()==TYPEID_PLAYER && GetId()==20580)
+                m_target->RemoveAurasDueToSpell(21009);
+
+            // if last SPELL_AURA_MOD_STEALTH and no GM invisibility
+            if(!m_target->HasAuraType(SPELL_AURA_MOD_STEALTH) && m_target->GetVisibility()!=VISIBILITY_OFF)
             {
-                // apply only if not in GM invisibility
-                if(m_target->GetVisibility()!=VISIBILITY_OFF)
-                {
-                    m_target->SetVisibility(VISIBILITY_ON);
-                    if(m_target->GetTypeId() == TYPEID_PLAYER)
-                        m_target->SendUpdateToPlayer((Player*)m_target);
-                }
-                // for RACE_NIGHTELF stealth
-                if(m_target->GetTypeId()==TYPEID_PLAYER && GetId()==20580)
-                {
-                    m_target->RemoveAurasDueToSpell(21009);
-                }
+                m_target->SetByteValue(UNIT_FIELD_BYTES_1, 2, 0x00);
+                if(m_target->GetTypeId()==TYPEID_PLAYER)
+                    m_target->SetByteValue(PLAYER_FIELD_BYTES2, 1, 0x00);
+
+                m_target->SetVisibility(VISIBILITY_ON);
+                if(m_target->GetTypeId() == TYPEID_PLAYER)
+                    m_target->SendUpdateToPlayer((Player*)m_target);
             }
         }
     }
