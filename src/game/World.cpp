@@ -1664,8 +1664,18 @@ void World::SendGlobalMessage(WorldPacket *packet, WorldSession *self, uint32 te
 void World::SendWorldText(const char* text, WorldSession *self)
 {
     WorldPacket data;
-    ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, text, NULL);
-    SendGlobalMessage(&data, self);
+
+    // need copy to prevent corruption by strtok call in LineFromMessage original string
+    char* buf = strdup(text);
+    char* pos = buf;
+
+    while(char* line = ChatHandler::LineFromMessage(pos))
+    {
+        ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, line, NULL);
+        SendGlobalMessage(&data, self);
+    }
+
+    free(buf);
 }
 
 /// Send a packet to all players (or players selected team) in the zone (except self if mentioned)

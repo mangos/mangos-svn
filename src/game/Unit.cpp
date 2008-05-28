@@ -7104,6 +7104,11 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             {
                 CastingTime = 350;
             }
+            // Reflective Shield (back damage) - 0% (other spells fit to check not have damage effects/auras)
+            else if (spellProto->SpellFamilyFlags == 0 && spellProto->SpellIconID == 566) 
+            {
+                CastingTime = 0;
+            }
             break;
         case SPELLFAMILY_DRUID:
             // Hurricane triggered spell
