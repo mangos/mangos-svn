@@ -3082,12 +3082,13 @@ void Spell::EffectLearnSkill(uint32 i)
 {
     if(unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
+
     if(damage < 0)
         return;
 
     uint32 skillid =  m_spellInfo->EffectMiscValue[i];
     uint16 skillval = ((Player*)unitTarget)->GetPureSkillValue(skillid);
-    ((Player*)unitTarget)->SetSkill(skillid,skillval?skillval:1,damage*75);
+    ((Player*)unitTarget)->SetSkill(skillid, skillval?skillval:1, damage*75);
 }
 
 void Spell::EffectAddHonor(uint32 /*i*/)

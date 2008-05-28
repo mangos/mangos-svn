@@ -5321,14 +5321,20 @@ void Aura::PeriodicTick()
                             SpellEntry const* m_spell = aura->GetSpellProto();
                             if (m_spell->SpellFamilyName != SPELLFAMILY_WARLOCK)
                                 continue;
-                            SkillLineAbilityEntry const* skillLine = sSkillLineAbilityStore.LookupEntry(m_spell->Id);
-                            if (skillLine && skillLine->skillId == SKILL_AFFLICTION)
+
+                            SkillLineAbilityMap::const_iterator lower = spellmgr.GetBeginSkillLineAbilityMap(m_spell->Id);
+                            SkillLineAbilityMap::const_iterator upper = spellmgr.GetEndSkillLineAbilityMap(m_spell->Id);
+
+                            for(SkillLineAbilityMap::const_iterator _spell_idx = lower; _spell_idx != upper; ++_spell_idx)
                             {
-                                modPercent += stepPercent;
-                                if (modPercent >= maxPercent)
+                                if(_spell_idx->second->skillId == SKILL_AFFLICTION)
                                 {
-                                    modPercent = maxPercent;
-                                    break;
+                                    modPercent += stepPercent;
+                                    if (modPercent >= maxPercent)
+                                    {
+                                        modPercent = maxPercent;
+                                        break;
+                                    }
                                 }
                             }
                         }

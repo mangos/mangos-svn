@@ -24,7 +24,7 @@
 #include "World.h"
 #include "Util.h"
 #include "SkillDiscovery.h"
-
+#include "SpellMgr.h"
 #include <map>
 
 struct SkillDiscoveryEntry
@@ -69,6 +69,12 @@ void LoadSkillDiscoveryTable()
             int32  reqSkillOrSpell = fields[1].GetInt32();
             float  chance          = fields[2].GetFloat();
 
+            if( chance <= 0 )                               // chance
+            {
+                ssNonDiscoverableEntries << "spellId = " << spellId << " reqSkillOrSpell = " << reqSkillOrSpell << " chance = " << chance << "\n";
+                continue;
+            }
+
             if(reqSkillOrSpell > 0)                         // spell case
             {
                 SpellEntry const* spellEntry = sSpellStore.LookupEntry(reqSkillOrSpell);
@@ -83,16 +89,25 @@ void LoadSkillDiscoveryTable()
                     sLog.outErrorDb("Spell (ID: %u) not have have MECHANIC_DISCOVERY (28) value in Mechanic field in spell.dbc but listed in `skill_discovery_template` table",spellId);
                     continue;
                 }
+
+                SkillDiscoveryStore[reqSkillOrSpell].push_back( SkillDiscoveryEntry(spellId, chance) );
+
             }
             else if( reqSkillOrSpell == 0 )                 // skill case
             {
-                SkillLineAbilityEntry const *pAbility = sSkillLineAbilityStore.LookupEntry(spellId);
-                if ( pAbility )
-                    reqSkillOrSpell = -int32(pAbility->skillId);
-                else
+
+                SkillLineAbilityMap::const_iterator lower = spellmgr.GetBeginSkillLineAbilityMap(spellId);
+                SkillLineAbilityMap::const_iterator upper = spellmgr.GetEndSkillLineAbilityMap(spellId);
+
+                if(lower==upper)
                 {
                     sLog.outErrorDb("Spell (ID: %u) not listed in `SkillLineAbility.dbc` but listed with `reqSpell`=0 in `skill_discovery_template` table",spellId);
                     continue;
+                }
+
+                for(SkillLineAbilityMap::const_iterator _spell_idx = lower; _spell_idx != upper; ++_spell_idx)
+                {
+                    SkillDiscoveryStore[-int32(_spell_idx->second->skillId)].push_back( SkillDiscoveryEntry(spellId, chance) );
                 }
             }
             else
@@ -100,15 +115,6 @@ void LoadSkillDiscoveryTable()
                 sLog.outErrorDb("Spell (ID: %u) have negative value in `reqSpell` field in `skill_discovery_template` table",spellId);
                 continue;
             }
-
-            if( chance <= 0 )                               // chance
-            {
-                ssNonDiscoverableEntries << "spellId = " << spellId << " reqSkillOrSpell = " << reqSkillOrSpell << " chance = " << chance << "\n";
-                continue;
-            }
-
-            SkillDiscoveryStore[reqSkillOrSpell].push_back( SkillDiscoveryEntry(spellId, chance) );
-
             ++count;
         } while (result->NextRow());
 

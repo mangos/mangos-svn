@@ -1837,61 +1837,6 @@ void ObjectMgr::LoadPlayerInfo()
         }
     }
 
-    // Load playercreate skills
-    {
-        //                                                0     1      2
-        QueryResult *result = WorldDatabase.Query("SELECT race, class, Skill FROM playercreateinfo_skill");
-
-        uint32 count = 0;
-
-        if (!result)
-        {
-            barGoLink bar( 1 );
-
-            sLog.outString();
-            sLog.outString( ">> Loaded %u player create skills", count );
-            sLog.outErrorDb( "Error loading `playercreateinfo_skill` table or empty table.");
-        }
-        else
-        {
-            barGoLink bar( result->GetRowCount() );
-
-            do
-            {
-                Field* fields = result->Fetch();
-
-                uint32 current_race = fields[0].GetUInt32();
-                if(current_race >= MAX_RACES)
-                {
-                    sLog.outErrorDb("Wrong race %u in `playercreateinfo_skill` table, ignoring.",current_race);
-                    continue;
-                }
-
-                uint32 current_class = fields[1].GetUInt32();
-                if(current_class >= MAX_CLASSES)
-                {
-                    sLog.outErrorDb("Wrong class %u in `playercreateinfo_skill` table, ignoring.",current_class);
-                    continue;
-                }
-
-                PlayerInfo* pInfo = &playerInfo[current_race][current_class];
-
-                uint32 skill = fields[2].GetUInt16();
-
-                pInfo->skill.push_back(skill);
-
-                bar.step();
-                ++count;
-            }
-            while( result->NextRow() );
-
-            delete result;
-
-            sLog.outString();
-            sLog.outString( ">> Loaded %u player create skills", count );
-        }
-    }
-
     // Load playercreate actions
     {
         //                                                0     1      2       3       4     5

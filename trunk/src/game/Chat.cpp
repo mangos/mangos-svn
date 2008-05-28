@@ -205,7 +205,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "spell_affect",                SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellAffectCommand,             "", NULL },
         { "spell_chain",                 SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellChainCommand,              "", NULL },
         { "spell_elixir",                SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellElixirCommand,             "", NULL },
-        { "spell_learn_skill",           SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellLearnSkillCommand,         "", NULL },
         { "spell_learn_spell",           SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellLearnSpellCommand,         "", NULL },
         { "spell_proc_event",            SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellProcEventCommand,          "", NULL },
         { "spell_script_target",         SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellScriptTargetCommand,       "", NULL },
