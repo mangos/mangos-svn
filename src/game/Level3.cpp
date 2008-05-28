@@ -121,7 +121,6 @@ bool ChatHandler::HandleReloadAllSpellCommand(const char*)
     HandleReloadSpellAffectCommand("a");
     HandleReloadSpellChainCommand("a");
     HandleReloadSpellElixirCommand("a");
-    HandleReloadSpellLearnSkillCommand("a");
     HandleReloadSpellLearnSpellCommand("a");
     HandleReloadSpellProcEventCommand("a");
     HandleReloadSpellScriptTargetCommand("a");
@@ -326,14 +325,6 @@ bool ChatHandler::HandleReloadSpellElixirCommand(const char*)
     sLog.outString( "Re-Loading Spell Elixir types..." );
     spellmgr.LoadSpellElixirs();
     SendGlobalSysMessage("DB table `spell_elixir` (spell exlixir types) reloaded.");
-    return true;
-}
-
-bool ChatHandler::HandleReloadSpellLearnSkillCommand(const char*)
-{
-    sLog.outString( "Re-Loading Spell Learn Skills..." );
-    spellmgr.LoadSpellLearnSkills();
-    SendGlobalSysMessage("DB table `spell_learn_skill` reloaded.");
     return true;
 }
 

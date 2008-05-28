@@ -663,6 +663,9 @@ void World::SetInitialWorldSettings()
     LoadDBCStores(m_dataPath);
     DetectDBCLang();
 
+    sLog.outString( "Loading SkillLineAbilityMultiMap Data..." );
+    spellmgr.LoadSkillLineAbilityMap();
+
     ///- Clean up and pack instances
     sLog.outString( "Cleaning up instances..." );
     objmgr.CleanupInstances();                              // must be called before `creature_respawn`/`gameobject_respawn` tables

@@ -504,7 +504,7 @@ bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellI
             if( IsElementalShield(spellInfo2) &&
                 spellInfo1->SpellFamilyFlags & 0x40000000000LL &&
                 spellInfo2->SpellFamilyFlags & 0x40000000000LL )
-                    return true;
+                return true;
             break;
     }
 
@@ -515,7 +515,7 @@ uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form)
 {
     // talents that learn spells can have stance requirements that need ignore
     // (this requirement only for client-side stance show in talent description)
-    if( GetTalentSpellCost(spellInfo->Id) > 0 && 
+    if( GetTalentSpellCost(spellInfo->Id) > 0 &&
         (spellInfo->Effect[0]==SPELL_EFFECT_LEARN_SPELL || spellInfo->Effect[1]==SPELL_EFFECT_LEARN_SPELL || spellInfo->Effect[2]==SPELL_EFFECT_LEARN_SPELL) )
         return 0;
 
@@ -538,7 +538,7 @@ uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form)
         }
         actAsShifted = !(shapeInfo->flags1 & 1);            // shapeshift acts as normal form for spells
     }
-    
+
     if(actAsShifted)
     {
         if (spellInfo->Attributes & 0x10000)                // not while shapeshifted
@@ -835,10 +835,18 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spell
         return false;
     if(spellProcEvent->skillId)
     {
-        if (!procSpell) return false;
-        SkillLineAbilityEntry const *skillLineEntry = sSkillLineAbilityStore.LookupEntry(procSpell->Id);
-        if(!skillLineEntry || skillLineEntry->skillId != spellProcEvent->skillId)
+        if (!procSpell)
             return false;
+
+        SkillLineAbilityMap::const_iterator lower = spellmgr.GetBeginSkillLineAbilityMap(procSpell->Id);
+        SkillLineAbilityMap::const_iterator upper = spellmgr.GetEndSkillLineAbilityMap(procSpell->Id);
+
+        for(SkillLineAbilityMap::const_iterator _spell_idx = lower; _spell_idx != upper; ++_spell_idx)
+        {
+            if(_spell_idx->second->skillId == spellProcEvent->skillId)
+                return true;
+        }
+        return false;
     }
     if(spellProcEvent->spellFamilyName && (!procSpell || spellProcEvent->spellFamilyName != procSpell->SpellFamilyName))
         return false;
@@ -850,7 +858,7 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spell
 
 void SpellMgr::LoadSpellElixirs()
 {
-    mSpellElixirs.clear();                                // need for reload case
+    mSpellElixirs.clear();                                  // need for reload case
 
     uint32 count = 0;
 
@@ -928,7 +936,7 @@ bool SpellMgr::canStackSpellRanks(SpellEntry const *spellInfo)
     for (int i = 0; i < 3; i++)
     {
         // Paladin aura Spell
-        if(spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN 
+        if(spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN
             && spellInfo->Effect[i]==SPELL_EFFECT_APPLY_AREA_AURA)
             return false;
         // Druid form Spell
@@ -1000,20 +1008,20 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             }
 
             // Improved Hamstring -> Hamstring (multi-family check)
-            if( (spellInfo_2->SpellFamilyName == SPELLFAMILY_WARRIOR && (spellInfo_2->SpellFamilyFlags & 2) && spellInfo_1->Id == 23694) ) 
+            if( (spellInfo_2->SpellFamilyName == SPELLFAMILY_WARRIOR && (spellInfo_2->SpellFamilyFlags & 2) && spellInfo_1->Id == 23694) )
                 return false;
 
             // Improved Wing Clip -> Wing Clip (multi-family check)
-            if( (spellInfo_2->SpellFamilyName == SPELLFAMILY_HUNTER && (spellInfo_2->SpellFamilyFlags & 0x40) && spellInfo_1->Id == 19229) ) 
+            if( (spellInfo_2->SpellFamilyName == SPELLFAMILY_HUNTER && (spellInfo_2->SpellFamilyFlags & 0x40) && spellInfo_1->Id == 19229) )
                 return false;
 
             // Garrote-Silence -> Garrote (multi-family check)
-            if( spellInfo_1->SpellIconID == 498 && spellInfo_1->SpellVisual == 0 && 
+            if( spellInfo_1->SpellIconID == 498 && spellInfo_1->SpellVisual == 0 &&
                 spellInfo_2->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo_1->SpellIconID == 498  )
                 return false;
 
             // Unstable Currents and other -> *Sanctity Aura (multi-family check)
-            if( spellInfo_2->SpellIconID==502 && spellInfo_2->SpellFamilyName == SPELLFAMILY_PALADIN && spellInfo_1->SpellIconID==502 && spellInfo_1->SpellVisual==969 ) 
+            if( spellInfo_2->SpellIconID==502 && spellInfo_2->SpellFamilyName == SPELLFAMILY_PALADIN && spellInfo_1->SpellIconID==502 && spellInfo_1->SpellVisual==969 )
                 return false;
 
             // Dragonmaw Illusion (multi-family check)
@@ -1073,7 +1081,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             }
 
             // Hamstring -> Improved Hamstring (multi-family check)
-            if( (spellInfo_1->SpellFamilyFlags & 2) && spellInfo_2->Id == 23694 ) 
+            if( (spellInfo_1->SpellFamilyFlags & 2) && spellInfo_2->Id == 23694 )
                 return false;
 
             break;
@@ -1137,7 +1145,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
             }
 
             // Wing Clip -> Improved Wing Clip (multi-family check)
-            if( (spellInfo_1->SpellFamilyFlags & 0x40) && spellInfo_2->Id == 19229 ) 
+            if( (spellInfo_1->SpellFamilyFlags & 0x40) && spellInfo_2->Id == 19229 )
                 return false;
             break;
         case SPELLFAMILY_PALADIN:
@@ -1148,7 +1156,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     return true;
             }
             // *Sanctity Aura -> Unstable Currents and other (multi-family check)
-            if( spellInfo_1->SpellIconID==502 && spellInfo_2->SpellFamilyName == SPELLFAMILY_GENERIC && spellInfo_2->SpellIconID==502 && spellInfo_2->SpellVisual==969 ) 
+            if( spellInfo_1->SpellIconID==502 && spellInfo_2->SpellFamilyName == SPELLFAMILY_GENERIC && spellInfo_2->SpellIconID==502 && spellInfo_2->SpellVisual==969 )
                 return false;
 
             // *Seal of Command and Band of Eternal Champion (multi-family check)
@@ -1381,56 +1389,6 @@ void SpellMgr::LoadSpellLearnSkills()
 {
     mSpellLearnSkills.clear();                              // need for reload case
 
-    QueryResult *result = WorldDatabase.PQuery("SELECT entry, SkillID, Value, MaxValue FROM spell_learn_skill");
-    if(!result)
-    {
-        barGoLink bar( 1 );
-        bar.step();
-
-        sLog.outString();
-        sLog.outString( ">> Loaded 0 spell learn skills" );
-        sLog.outErrorDb("`spell_learn_skill` table is empty!");
-        return;
-    }
-
-    uint32 count = 0;
-
-    uint16 maxconfskill = sWorld.GetConfigMaxSkillValue();
-
-    barGoLink bar( result->GetRowCount() );
-    do
-    {
-        bar.step();
-        Field *fields = result->Fetch();
-
-        uint32 spell_id = fields[0].GetUInt32();
-        int32 skill_val = fields[2].GetInt32();
-        int32 skill_max = fields[3].GetInt32();
-
-        SpellLearnSkillNode node;
-        node.skill    = fields[1].GetUInt32();
-        node.value    = skill_val < 0 ? maxconfskill : skill_val;
-        node.maxvalue = skill_max < 0 ? maxconfskill : skill_max;
-
-        if(!sSpellStore.LookupEntry(spell_id))
-        {
-            sLog.outErrorDb("Spell %u listed in `spell_learn_skill` does not exist",spell_id);
-            continue;
-        }
-
-        if(!sSkillLineStore.LookupEntry(node.skill))
-        {
-            sLog.outErrorDb("Skill %u listed in `spell_learn_skill` does not exist",node.skill);
-            continue;
-        }
-
-        mSpellLearnSkills[spell_id] = node;
-
-        ++count;
-    } while( result->NextRow() );
-
-    delete result;
-
     // search auto-learned skills and add its to map also for use in unlearn spells/talents
     uint32 dbc_count = 0;
     for(uint32 spell = 0; spell < sSpellStore.nCount; ++spell)
@@ -1451,14 +1409,6 @@ void SpellMgr::LoadSpellLearnSkills()
 
                 SpellLearnSkillNode const* db_node = GetSpellLearnSkill(spell);
 
-                if(db_node)
-                {
-                    if(db_node->skill != dbc_node.skill)
-                        sLog.outErrorDb("Spell %u auto-learn skill %u in spell.dbc but learn skill %u in `spell_learn_skill`, please fix DB.",
-                            spell,dbc_node.skill,db_node->skill);
-
-                    continue;                               // skip already added spell-skill pair
-                }
 
                 mSpellLearnSkills[spell] = dbc_node;
                 ++dbc_count;
@@ -1468,7 +1418,7 @@ void SpellMgr::LoadSpellLearnSkills()
     }
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u spell learn skills + %u found in DBC", count, dbc_count );
+    sLog.outString( ">> Loaded %u Spell Learn Skills from DBC", dbc_count );
 }
 
 void SpellMgr::LoadSpellLearnSpells()
@@ -1775,11 +1725,11 @@ bool IsSpellAllowedInLocation(SpellEntry const *spellInfo,uint32 map_id,uint32 z
             }
             if(mask & ELIXIR_UNSTABLE_MASK)
             {
-                // in Tempest Keep, Serpentshrine Cavern, Caverns of Time: Mount Hyjal, Black Temple 
+                // in Tempest Keep, Serpentshrine Cavern, Caverns of Time: Mount Hyjal, Black Temple
                 // TODO: and the Sunwell Plateau
                 if(zone_id ==3607 || map_id==534 || map_id==564)
                     return true;
-                
+
                 MapEntry const* mapEntry = sMapStore.LookupEntry(map_id);
                 if(!mapEntry)
                     return false;
@@ -1825,4 +1775,24 @@ bool IsSpellAllowedInLocation(SpellEntry const *spellInfo,uint32 map_id,uint32 z
     }
 
     return true;
+}
+
+void SpellMgr::LoadSkillLineAbilityMap()
+{
+    mSkillLineAbilityMap.clear();
+
+    uint32 count = 0;
+
+    for (uint32 i = 0; i < sSkillLineAbilityStore.GetNumRows(); i++)
+    {
+        SkillLineAbilityEntry const *SkillInfo = sSkillLineAbilityStore.LookupEntry(i);
+        if(!SkillInfo)
+            continue;
+
+        mSkillLineAbilityMap.insert(SkillLineAbilityMap::value_type(SkillInfo->spellId,SkillInfo));
+        ++count;
+    }
+
+    sLog.outString();
+    sLog.outString(">> Loaded %u SkillLineAbility MultiMap", count);
 }

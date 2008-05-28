@@ -222,7 +222,7 @@ struct FactionEntry
     uint32      BaseRepRaceMask[4];                         // 2-5 Base reputation race masks (see enum Races)
     uint32      BaseRepClassMask[4];                        // 6-9 Base reputation class masks (see enum Classes) 
     int32       BaseRepValue[4];                            // 10-13 Base reputation values
-                                                            // 14-17 unused
+    //int32     reputationFlags[4];                         // 14-17 unused
     uint32      team;                                       // 18
     char*       name[16];                                   // 19-34
                                                             // 35 string flags, unused
@@ -508,13 +508,13 @@ enum AbilytyLearnType
 
 struct SkillLineAbilityEntry
 {
-    //uint32    id;                                         // 0, unused
+    uint32    id;                                           // 0, INDEX
     uint32    skillId;                                      // 1
-    uint32    spellId;                                      // 2 INDEX
+    uint32    spellId;                                      // 2 
     uint32    racemask;                                     // 3
     uint32    classmask;                                    // 4
-    //uint32    racemaskNot;                                // 5 not used
-    //uint32    classmaskNot;                               // 6 not used
+    //uint32    racemaskNot;                                // 5 always 0 in 2.4.2
+    //uint32    classmaskNot;                               // 6 always 0 in 2.4.2
     uint32    req_skill_value;                              // 7 for trade skill.not for training.
     uint32    forward_spellid;                              // 8
     uint32    learnOnGetSkill;                              // 9 can be 1 or 2 for spells learned on get skill

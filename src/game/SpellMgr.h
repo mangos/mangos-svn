@@ -337,6 +337,7 @@ inline bool CanBeUsedWhileStealthed(SpellEntry const* spellInfo)
 {
     return ( (spellInfo->AttributesEx & 32) == 32 || spellInfo->AttributesEx2 == 0x200000);
 }
+
 bool IsMechanicInvulnerabilityImmunityToSpell(SpellEntry const* spellInfo);
 uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form);
 
@@ -510,6 +511,25 @@ struct SpellLearnSpellNode
 
 typedef std::multimap<uint32, SpellLearnSpellNode> SpellLearnSpellMap;
 
+typedef std::multimap<uint32, SkillLineAbilityEntry const*> SkillLineAbilityMap;
+
+inline bool IsPrimaryProfessionSkill(uint32 skill)
+{
+    SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(skill);
+    if(!pSkill)
+        return false;
+
+    if(pSkill->categoryId != SKILL_CATEGORY_PROFESSION)
+        return false;
+
+    return true;
+}
+
+inline bool IsProfessionSkill(uint32 skill)
+{
+    return  IsPrimaryProfessionSkill(skill) || skill == SKILL_FISHING || skill == SKILL_COOKING || skill == SKILL_FIRST_AID;
+}
+
 class SpellMgr
 {
     // Constructors
@@ -681,13 +701,23 @@ class SpellMgr
         // Spell correctess for client using
         static bool IsSpellValid(SpellEntry const * spellInfo, Player* pl = NULL, bool msg = true);
 
+        SkillLineAbilityMap::const_iterator GetBeginSkillLineAbilityMap(uint32 spell_id) const
+        {
+            return mSkillLineAbilityMap.lower_bound(spell_id);
+        }
+
+        SkillLineAbilityMap::const_iterator GetEndSkillLineAbilityMap(uint32 spell_id) const
+        {
+            return mSkillLineAbilityMap.upper_bound(spell_id);
+        }
+
         // Modifiers
     public:
         static SpellMgr& Instance();
 
         // Loading data at server startup
         void LoadSpellChains();
-        void LoadSpellLearnSkills();
+        void LoadSpellLearnSkills();        
         void LoadSpellLearnSpells();
         void LoadSpellScriptTarget();
         void LoadSpellAffects();
@@ -695,6 +725,7 @@ class SpellMgr
         void LoadSpellProcEvents();
         void LoadSpellTeleports();
         void LoadSpellThreats();
+        void LoadSkillLineAbilityMap();
 
     private:
         SpellScriptTarget  mSpellScriptTarget;
@@ -706,6 +737,7 @@ class SpellMgr
         SpellAffectMap     mSpellAffectMap;
         SpellElixirMap     mSpellElixirs;
         SpellProcEventMap  mSpellProcEventMap;
+        SkillLineAbilityMap mSkillLineAbilityMap;
 };
 
 #define spellmgr SpellMgr::Instance()

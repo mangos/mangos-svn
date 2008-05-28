@@ -713,30 +713,49 @@ bool Pet::HasTPForSpell(uint32 spellid)
     return true;
 }
 
+
 int32 Pet::GetTPForSpell(uint32 spellid)
 {
-    SkillLineAbilityEntry const *newAbility = sSkillLineAbilityStore.LookupEntry(spellid);
-    if(!newAbility || !newAbility->reqtrainpoints)
-        return 0;
+    uint32 basetrainp = 0;
 
-    uint32 basetrainp = newAbility->reqtrainpoints;
+    SkillLineAbilityMap::const_iterator lower = spellmgr.GetBeginSkillLineAbilityMap(spellid);
+    SkillLineAbilityMap::const_iterator upper = spellmgr.GetEndSkillLineAbilityMap(spellid);
+    for(SkillLineAbilityMap::const_iterator _spell_idx = lower; _spell_idx != upper; ++_spell_idx)
+    {
+        if(!_spell_idx->second->reqtrainpoints)
+            return 0;
+
+        basetrainp = _spell_idx->second->reqtrainpoints;
+        break;
+    }
+
     uint32 spenttrainp = 0;
     uint32 chainstart = spellmgr.GetFirstSpellInChain(spellid);
 
     for (PetSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
-        if(itr->second->state == PETSPELL_REMOVED) continue;
+        if(itr->second->state == PETSPELL_REMOVED) 
+            continue;
 
         if(spellmgr.GetFirstSpellInChain(itr->first) == chainstart)
         {
-            SkillLineAbilityEntry const *oldAbility = sSkillLineAbilityStore.LookupEntry(itr->first);
-            if(oldAbility && oldAbility->reqtrainpoints > spenttrainp)
-                spenttrainp = oldAbility->reqtrainpoints;
+            SkillLineAbilityMap::const_iterator _lower = spellmgr.GetBeginSkillLineAbilityMap(itr->first);
+            SkillLineAbilityMap::const_iterator _upper = spellmgr.GetEndSkillLineAbilityMap(itr->first);
+
+            for(SkillLineAbilityMap::const_iterator _spell_idx2 = _lower; _spell_idx2 != _upper; ++_spell_idx2)
+            {
+                if(_spell_idx2->second->reqtrainpoints > spenttrainp)
+                {
+                    spenttrainp = _spell_idx2->second->reqtrainpoints;
+                    break;
+                }
+            }
         }
     }
 
     return int32(basetrainp) - int32(spenttrainp);
 }
+
 
 uint32 Pet::GetMaxLoyaltyPoints(uint32 level)
 {
@@ -1462,11 +1481,15 @@ void Pet::InitPetCreateSpells()
 
             addSpell(petspellid);
 
-            SkillLineAbilityEntry const *Ability = sSkillLineAbilityStore.LookupEntry(learn_spellproto->EffectTriggerSpell[0]);
-            if(Ability)
-                usedtrainpoints += Ability->reqtrainpoints;
-        }
+            SkillLineAbilityMap::const_iterator lower = spellmgr.GetBeginSkillLineAbilityMap(learn_spellproto->EffectTriggerSpell[0]);
+            SkillLineAbilityMap::const_iterator upper = spellmgr.GetEndSkillLineAbilityMap(learn_spellproto->EffectTriggerSpell[0]);
 
+            for(SkillLineAbilityMap::const_iterator _spell_idx = lower; _spell_idx != upper; ++_spell_idx)
+            {
+                usedtrainpoints += _spell_idx->second->reqtrainpoints;
+                break;
+            }
+        }
         //family passive
         SpellEntry const *learn_spellproto = sSpellStore.LookupEntry(CreateSpells->familypassive);
         if(learn_spellproto)

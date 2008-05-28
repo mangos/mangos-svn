@@ -183,7 +183,6 @@ struct PlayerInfo
     uint16 displayId_f;
     PlayerCreateInfoItems item;
     std::list<CreateSpellPair> spell;
-    std::list<uint16> skill;
     std::list<uint16> action[4];
 
     PlayerLevelInfo* levelInfo;                             //[level-1] 0..MaxPlayerLevel-1
