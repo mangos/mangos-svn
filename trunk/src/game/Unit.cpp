@@ -5724,18 +5724,15 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             //Pyroclasm
             if(auraSpellInfo->SpellFamilyFlags == 0x0000000000000000 && auraSpellInfo->SpellIconID==1137)
             {
-                if(!pVictim || !pVictim->isAlive())
+                // last case for Hellfire that damage caster also but don't must stun caster
+                if(!pVictim || !pVictim->isAlive() || pVictim == this )
                     return;
 
                 float chance = 0;
-                switch (triggeredByAura->GetSpellProto()->Id)
+                switch (triggeredByAura->GetId())
                 {
-                    case 18096:
-                        chance = 13.0f;
-                        break;
-                    case 18073:
-                        chance = 26.0f;
-                        break;
+                    case 18096: chance = 13.0f; break;
+                    case 18073: chance = 26.0f; break;
                 }
                 if (roll_chance_f(chance))
                     CastSpell(pVictim, 18093, true, castItem, triggeredByAura);
