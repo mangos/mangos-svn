@@ -381,9 +381,12 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
             case SPELLFAMILY_DRUID:
             {
                 // Ferocious Bite
-                if((m_spellInfo->SpellFamilyFlags & 0x000800000) && m_spellInfo->SpellVisual==6587)
+                if(m_caster->GetTypeId()==TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags & 0x000800000) && m_spellInfo->SpellVisual==6587)
                 {
-                    damage += m_caster->GetPower(POWER_ENERGY);
+                    // 15% for 5 combo
+                    float percent = ((Player*)m_caster)->GetComboPoints() * 0.031f;
+                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * percent);
+                    damage += int32(m_caster->GetPower(POWER_ENERGY) * m_spellInfo->DmgMultiplier[effect_idx]);
                     m_caster->SetPower(POWER_ENERGY,0);
                 }
                 // Swipe
