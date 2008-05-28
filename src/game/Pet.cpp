@@ -442,15 +442,20 @@ void Pet::SavePetToDB(PetSaveMode mode)
         {
             RemoveAllAuras();
             uint32 owner = GUID_LOPART(GetOwnerGUID());
-            CharacterDatabase.PExecute("DELETE FROM character_pet WHERE owner = '%u' AND id = '%u'", owner,m_charmInfo->GetPetNumber());
-            CharacterDatabase.PExecute("DELETE FROM pet_aura WHERE guid = '%u'", m_charmInfo->GetPetNumber());
-            CharacterDatabase.PExecute("DELETE FROM pet_spell WHERE guid = '%u'", m_charmInfo->GetPetNumber());
-            CharacterDatabase.PExecute("DELETE FROM pet_spell_cooldown WHERE guid = '%u'", m_charmInfo->GetPetNumber());
+            DeleteFromDB(m_charmInfo->GetPetNumber());
             break;
         }
         default:
             sLog.outError("Unknown pet save/remove mode: %d",mode);
     }
+}
+
+void Pet::DeleteFromDB(uint32 guidlow)
+{
+    CharacterDatabase.PExecute("DELETE FROM character_pet WHERE id = '%u'", guidlow);
+    CharacterDatabase.PExecute("DELETE FROM pet_aura WHERE guid = '%u'", guidlow);
+    CharacterDatabase.PExecute("DELETE FROM pet_spell WHERE guid = '%u'", guidlow);
+    CharacterDatabase.PExecute("DELETE FROM pet_spell_cooldown WHERE guid = '%u'", guidlow);
 }
 
 void Pet::setDeathState(DeathState s)                       // overwrite virtual Creature::setDeathState and Unit::setDeathState

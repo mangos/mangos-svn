@@ -3294,10 +3294,23 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
         delete resultMail;
     }
 
-    // unsummon and delete for pets is not required: player deleted from CLI or character list with not loaded pet.
+    // unsummon and delete for pets in world is not required: player deleted from CLI or character list with not loaded pet.
+    // Get guids of character's pets, will deleted in transaction
+    QueryResult *resultPets = CharacterDatabase.PQuery("SELECT id FROM character_pet WHERE owner = '%u'",guid);
 
     // NOW we can finally clear other DB data related to character
     CharacterDatabase.BeginTransaction();
+    if (resultPets)
+    {
+        do
+        {
+            Field *fields3 = resultPets->Fetch();
+            uint32 petguidlow = fields3[0].GetUInt32();
+            Pet::DeleteFromDB(petguidlow);
+        } while (resultPets->NextRow());
+        delete resultPets;
+    }
+
     CharacterDatabase.PExecute("DELETE FROM characters WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_action WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = '%u'",guid);
