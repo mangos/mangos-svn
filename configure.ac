@@ -213,6 +213,7 @@ AC_CONFIG_FILES([
    doc/Makefile
    Makefile
    sql/Makefile
+   sql/tools/Makefile
    sql/updates/Makefile
    src/Makefile
    src/framework/Makefile
