@@ -2349,7 +2349,7 @@ void Spell::EffectEnergize(uint32 i)
             break;
     }
 
-    if (level_diff)
+    if (level_diff > 0)
         damage -= multipler * level_diff;
 
     if(damage < 0)

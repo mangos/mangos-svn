@@ -267,8 +267,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModCastingSpeed,                           //216 SPELL_AURA_HASTE_SPELLS
     &Aura::HandleUnused,                                    //217                                   unused
     &Aura::HandleAuraModRangedHaste,                        //218 SPELL_AURA_HASTE_RANGED
-    &Aura::HandleModManaRegen,                              //219 SPELL_AURA_MOD_MANA_REGEN
-    &Aura::HandleNoImmediateEffect,                         //220 SPELL_AURA_MOD_SPELL_HEALING_OF_STRENGTH implemented in Unit::SpellHealingBonus
+    &Aura::HandleModManaRegen,                              //219 SPELL_AURA_MOD_MANA_REGEN_FROM_STAT
+    &Aura::HandleNULL,                                      //220 SPELL_AURA_MOD_RATING_FROM_STAT
     &Aura::HandleNULL,                                      //221 ignored
     &Aura::HandleUnused,                                    //222 unused
     &Aura::HandleNULL,                                      //223 Cold Stare
@@ -277,23 +277,23 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraDummy2,                                //226 SPELL_AURA_DUMMY_2 dummy like aura
     &Aura::HandleNULL,                                      //227 periodic trigger spell
     &Aura::HandleNULL,                                      //228 stealth detection
-    &Aura::HandleNULL,                                      //229 avoidance (reduce damage from area of effect attacks)
+    &Aura::HandleNULL,                                      //229 SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE
     &Aura::HandleAuraModIncreaseMaxHealth,                  //230 Commanding Shout
     &Aura::HandleNULL,                                      //231
-    &Aura::HandleNoImmediateEffect,                         //232 SPELL_AURA_MECHANIC_DURATION_MOD           imlement in Unit::CalculateSpellDuration
+    &Aura::HandleNoImmediateEffect,                         //232 SPELL_AURA_MECHANIC_DURATION_MOD           implement in Unit::CalculateSpellDuration
     &Aura::HandleNULL,                                      //233 set model id to the one of the creature with id m_modifier.m_miscvalue
-    &Aura::HandleNoImmediateEffect,                         //234 SPELL_AURA_MECHANIC_DURATION_MOD_NOT_STACK imlement in Unit::CalculateSpellDuration
-    &Aura::HandleNULL,                                      //235 Pain Suppression, increase chance to resist dispel
+    &Aura::HandleNoImmediateEffect,                         //234 SPELL_AURA_MECHANIC_DURATION_MOD_NOT_STACK implement in Unit::CalculateSpellDuration
+    &Aura::HandleNoImmediateEffect,                         //235 SPELL_AURA_MOD_DISPEL_RESIST               implement in Unit::MagicSpellHitResult
     &Aura::HandleUnused,                                    //236 unused
     &Aura::HandleModSpellDamagePercentFromAttackPower,      //237 SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER  implemented in Unit::SpellBaseDamageBonus
     &Aura::HandleModSpellHealingPercentFromAttackPower,     //238 SPELL_AURA_MOD_SPELL_HEALING_OF_ATTACK_POWER implemented in Unit::SpellBaseHealingBonus
     &Aura::HandleAuraModScale,                              //239 SPELL_AURA_MOD_SCALE_2 only in Noggenfogger Elixir (16595) before 2.3.0 aura 61
     &Aura::HandleAuraModExpertise,                          //240 SPELL_AURA_MOD_EXPERTISE
     &Aura::HandleNULL,                                      //241 Brewfest Racing Ram
-    &Aura::HandleUnused,                                    //242 used by two test spells
+    &Aura::HandleUnused,                                    //242 SPELL_AURA_MOD_SPELL_DAMAGE_FROM_HEALING
     &Aura::HandleUnused,                                    //243 used by two test spells
     &Aura::HandleUnused,                                    //244 used by only one test spell
-    &Aura::HandleUnused,                                    //245 used by only one test spell
+    &Aura::HandleUnused,                                    //245 SPELL_AURA_MOD_DURATION_OF_MAGIC_EFFECTS
     &Aura::HandleUnused,                                    //246 unused
     &Aura::HandleUnused,                                    //247 unused
     &Aura::HandleNoImmediateEffect,                         //248 SPELL_AURA_MOD_COMBAT_RESULT_CHANCE         implemented in Unit::RollMeleeOutcomeAgainst
@@ -383,8 +383,7 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_fearMoveAngle(0)
     m_effIndex = eff;
     SetModifier(AuraType(m_spellProto->EffectApplyAuraName[eff]), damage, m_spellProto->EffectAmplitude[eff], m_spellProto->EffectMiscValue[eff], type);
 
-    //(spellproto->AttributesEx3 & 0x100000) all death persistent spells have this flag
-    m_isDeathPersist = (m_spellProto->AttributesEx3 & 0x100000) != 0;
+    m_isDeathPersist = IsDeathPersistentSpell(m_spellProto);
 
     if(m_spellProto->procCharges)
     {
@@ -569,7 +568,7 @@ void Aura::Update(uint32 diff)
                 m_modifier.m_auraname == SPELL_AURA_OBS_MOD_HEALTH ||
                                                             // Eating items and other spells
                 m_modifier.m_auraname == SPELL_AURA_OBS_MOD_MANA ||
-                m_modifier.m_auraname == SPELL_AURA_MOD_MANA_REGEN )
+                m_modifier.m_auraname == SPELL_AURA_MOD_MANA_REGEN_FROM_STAT )
             {
                 ApplyModifier(true);
                 return;
@@ -818,7 +817,7 @@ void Aura::_AddAura()
             break;
         case SPELL_AURA_MOD_REGEN:
         case SPELL_AURA_MOD_POWER_REGEN:
-        case SPELL_AURA_MOD_MANA_REGEN:
+        case SPELL_AURA_MOD_MANA_REGEN_FROM_STAT:
             m_periodicTimer = 5000;
             break;
     }
@@ -3417,7 +3416,7 @@ void Aura::HandleModThreat(bool apply, bool Real)
             multiplier = 1;
             break;
     }
-    if (level_diff)
+    if (level_diff > 0)
         m_modifier.m_amount += multiplier * level_diff;
 
     bool positive = m_modifier.m_miscvalue2 == 0;
