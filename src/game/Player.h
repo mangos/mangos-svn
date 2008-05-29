@@ -1691,6 +1691,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void InitDataForForm(bool reapplyMods = false);
 
         void ApplyItemEquipSpell(Item *item, bool apply, bool form_change = false);
+        void ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply, bool form_change = false);
+        void UpdateEquipSpellsAtFormChange();
         void CastItemCombatSpell(Item *item,Unit* Target, WeaponAttackType attType);
 
         void SendInitWorldStates();

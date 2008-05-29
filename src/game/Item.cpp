@@ -97,7 +97,8 @@ void AddItemsSetItem(Player*player,Item *item)
                     break;
                 }
 
-                player->CastSpell(player,set->spells[x],true,item);
+                // spell casted only if fit form requirement, in other case will casted at form change
+                player->ApplyEquipSpell(spellInfo,NULL,true);
                 eff->spells[y] = spellInfo;
                 break;
             }
@@ -147,7 +148,8 @@ void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
         {
             if(eff->spells[z] && eff->spells[z]->Id==set->spells[x])
             {
-                player->RemoveAurasDueToSpell(set->spells[x]);
+                // spell can be not active if not fit form requirement
+                player->ApplyEquipSpell(eff->spells[z],NULL,false);
                 eff->spells[z]=NULL;
                 break;
             }
