@@ -28,12 +28,12 @@ struct SpellEntry;
 class Bag;
 class QueryResult;
 
-typedef struct
+struct ItemSetEffect
 {
     uint32 setid;
     uint32 item_count;
     SpellEntry const *spells[8];
-}ItemSetEffect;
+};
 
 enum InventoryChangeFailure
 {

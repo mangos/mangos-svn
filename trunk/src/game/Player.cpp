@@ -6498,58 +6498,93 @@ void Player::ApplyItemEquipSpell(Item *item, bool apply, bool form_change)
         if(!spellData.SpellId )
             continue;
 
+        // wrong triggering type
+        if(apply && spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_EQUIP)
+            continue;
+
         // check if it is valid spell
         SpellEntry const* spellproto = sSpellStore.LookupEntry(spellData.SpellId);
         if(!spellproto)
             continue;
 
-        if(apply)
+        ApplyEquipSpell(spellproto,item,apply,form_change);
+    }
+}
+
+void Player::ApplyEquipSpell(SpellEntry const* spellInfo, Item* item, bool apply, bool form_change)
+{
+    if(apply)
+    {
+        // Cannot be used in this stance/form
+        if(GetErrorAtShapeshiftedCast(spellInfo, m_form)!=0)
+            return;
+
+        if(form_change)                                     // check aura active state from other form
         {
-            // wrong triggering type
-            if(spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_EQUIP)
-                continue;
-
-            // Cannot be used in this stance/form
-            if(GetErrorAtShapeshiftedCast(spellproto, m_form)!=0)
-                continue;
-
-            if(form_change)                                 // check aura active state from other form
+            bool found = false;
+            for (int k=0; k < 3; ++k)
             {
-                bool found = false;
-                for (int k=0; k < 3; ++k)
+                spellEffectPair spair = spellEffectPair(spellInfo->Id, k);
+                for (AuraMap::iterator iter = m_Auras.lower_bound(spair); iter != m_Auras.upper_bound(spair); ++iter)
                 {
-                    spellEffectPair spair = spellEffectPair(spellData.SpellId, k);
-                    for (AuraMap::iterator iter = m_Auras.lower_bound(spair); iter != m_Auras.upper_bound(spair); ++iter)
+                    if(!item || iter->second->GetCastItemGUID() == item->GetGUID())
                     {
-                        if(iter->second->GetCastItemGUID() == item->GetGUID())
-                        {
-                            found = true;
-                            break;
-                        }
-                    }
-                    if(found)
+                        found = true;
                         break;
+                    }
                 }
-
-                if(found)                                   // and skip re-cast already active aura at form change
-                    continue;
+                if(found)
+                    break;
             }
 
-            DEBUG_LOG("WORLD: cast Item spellId - %i", spellData.SpellId);
-
-            CastSpell(this,spellData.SpellId,true,item);
+            if(found)                                       // and skip re-cast already active aura at form change
+                return;
         }
-        else
-        {
-            if(form_change)                                 // check aura compatibility
-            {
-                // Cannot be used in this stance/form
-                if(GetErrorAtShapeshiftedCast(spellproto, m_form)==0)
-                    continue;                               // and remove only not compatible at form change
-            }
 
-            // un-apply all spells , not only at-equipped
-            RemoveAurasDueToItemSpell(item,spellData.SpellId);
+        DEBUG_LOG("WORLD: cast %s Equip spellId - %i", (item ? "item" : "itemset"), spellInfo->Id);
+
+        CastSpell(this,spellInfo,true,item);
+    }
+    else
+    {
+        if(form_change)                                     // check aura compatibility
+        {
+            // Cannot be used in this stance/form
+            if(GetErrorAtShapeshiftedCast(spellInfo, m_form)==0)
+                return;                                     // and remove only not compatible at form change
+        }
+
+        if(item)
+            RemoveAurasDueToItemSpell(item,spellInfo->Id);  // un-apply all spells , not only at-equipped
+        else
+            RemoveAurasDueToSpell(spellInfo->Id);           // un-apply spell (item set case)
+    }
+}
+
+void Player::UpdateEquipSpellsAtFormChange()
+{
+    for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        if(m_items[i])
+        {
+            ApplyItemEquipSpell(m_items[i],false,true);     // remove spells that not fit to form
+            ApplyItemEquipSpell(m_items[i],true,true);      // add spells that fit form but not active
+        }
+    }
+    for(size_t setindex = 0; setindex < ItemSetEff.size(); ++setindex)
+    {
+        ItemSetEffect* eff = ItemSetEff[setindex];
+        if(!eff)
+            continue;
+
+        for(uint32 y=0;y<8; ++y)
+        {
+            SpellEntry const* spellInfo = eff->spells[y];
+            if(!spellInfo)
+                continue;
+
+            ApplyEquipSpell(spellInfo,NULL,false,true);       // remove spells that not fit to form
+            ApplyEquipSpell(spellInfo,NULL,true,true);        // add spells that fit form but not active
         }
     }
 }
@@ -15284,16 +15319,8 @@ void Player::InitDataForForm(bool reapplyMods)
 
     // update auras at form change, ignore this at mods reapply (.reset stats/etc) when form not change.
     if (!reapplyMods)
-    {
-        for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
-        {
-            if(m_items[i])
-            {
-                ApplyItemEquipSpell(m_items[i],false,true);     // remove spells that not fit to form
-                ApplyItemEquipSpell(m_items[i],true,true);      // add spells that fit form but not active
-            }
-        }
-    }
+        UpdateEquipSpellsAtFormChange();
+
     UpdateAttackPowerAndDamage();
     UpdateAttackPowerAndDamage(true);
 }
