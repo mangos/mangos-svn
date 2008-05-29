@@ -249,4 +249,7 @@ EXTRA_DIST += \
 	zthread/Waitable.h \
 	zthread/ZThread.h
 
+# Mersenne Twister random number generator header files
+EXTRA_DIST += \
+	mersennetwister/MersenneTwister.h
 

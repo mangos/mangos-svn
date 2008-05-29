@@ -245,7 +245,7 @@ Player::Player (WorldSession *session): Unit( 0 )
 
     // randomize first save time in range [CONFIG_INTERVAL_SAVE] around [CONFIG_INTERVAL_SAVE]
     // this must help in case next save after mass player load after server startup
-    m_nextSave = rand32(m_nextSave/2,m_nextSave*3/2);
+    m_nextSave = urand(m_nextSave/2,m_nextSave*3/2);
 
     m_resurrectGUID = 0;
     m_resurrectMap = 0;

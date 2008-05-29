@@ -2403,7 +2403,7 @@ uint32 Unit::CalculateDamage (WeaponAttackType attType, bool normalized)
     if(max_damage == 0.0f)
         max_damage = 5.0f;
 
-    return rand32((uint32)min_damage, (uint32)max_damage);
+    return urand((uint32)min_damage, (uint32)max_damage);
 }
 
 float Unit::CalculateLevelPenalty(SpellEntry const* spellProto) const
@@ -8700,7 +8700,7 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
     int32 randomPoints = int32(spellProto->EffectDieSides[effect_index] + level * randomPointsPerLevel);
     float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
 
-    int32 value = basePoints + rand32(spellProto->EffectBaseDice[effect_index], randomPoints);
+    int32 value = basePoints + irand(spellProto->EffectBaseDice[effect_index], randomPoints);
     //random damage
     if(int32(spellProto->EffectBaseDice[effect_index]) != randomPoints && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->isPet())
         value += ((Pet*)this)->GetBonusDamage();            //bonus damage only on spells without fixed basePoints?)
@@ -9972,7 +9972,7 @@ Unit* Unit::SelectNearbyTarget() const
         return NULL;
 
     // select random
-    uint32 rIdx = rand32(0,targets.size()-1);
+    uint32 rIdx = urand(0,targets.size()-1);
     std::list<Unit *>::const_iterator tIter = targets.begin();
     for(uint32 i = 0; i < rIdx; ++i)
         ++tIter;
