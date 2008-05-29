@@ -316,12 +316,20 @@ LogColors = ""
 #        Disable in-game script movie at first character's login(allows to prevent buggy intro in case of custom start location coordinates)
 #        Default: 0 - show intro for each new characrer
 #                 1 - show intro only for first character of selected race
-#                 2 - diable intro show in all cases
+#                 2 - disable intro show in all cases
 #
 #    MaxPlayerLevel
-#        Max level that can reached by player for expirience (in range from 1 to 255).
+#        Max level that can be reached by player for experience (in range from 1 to 255).
 #        Change not recommended
 #        Default: 70
+#
+#    MaxHonorPoints
+#        Max honor points that player can have.
+#        Default: 75000
+#
+#    MaxArenaPoints
+#        Max arena points that player can have.
+#        Default: 5000
 #
 #    StartPlayerLevel
 #        Staring level that have character at creating (in range 1 to MaxPlayerLevel)
@@ -408,6 +416,8 @@ StrictCharterNames = 0
 StrictPetNames = 0
 SkipCinematics = 0
 MaxPlayerLevel = 70
+MaxHonorPoints = 75000
+MaxArenaPoints = 5000
 StartPlayerLevel = 1
 ActivateWeather = 1
 Battleground.CastDeserter = 1
