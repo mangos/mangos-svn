@@ -45,7 +45,7 @@ static DumpTable dumpTables[DUMP_TABLE_COUNT] =
     { "character_ticket",         DTT_CHAR_TABLE },
     { "character_tutorial",       DTT_CHAR_TABLE },
     { "character_inventory",      DTT_INVENTORY  },
-    { "mail",                     DTT_MAIL       },                      
+    { "mail",                     DTT_MAIL       },
     { "mail_items",               DTT_MAIL_ITEM  },
     { "item_instance",            DTT_ITEM       },
     { "character_gifts",          DTT_ITEM_GIFT  },
@@ -260,13 +260,13 @@ bool PlayerDumpWriter::DumpTable(std::string& dump, uint32 guid, char const*tabl
     switch ( type )
     {
         case DTT_ITEM:
-            if(items.empty())                                // nothing
+            if(items.empty())                               // nothing
                 return true;
 
             wherestr = GenerateWhereStr("guid",items);
             break;
         case DTT_ITEM_GIFT:
-            if(items.empty())                                // nothing
+            if(items.empty())                               // nothing
                 return true;
 
             wherestr = GenerateWhereStr("item_guid",items);

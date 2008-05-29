@@ -156,53 +156,53 @@ bool ItemCanGoIntoBag(ItemPrototype const *pProto, ItemPrototype const *pBagProt
         case ITEM_CLASS_CONTAINER:
             switch(pBagProto->SubClass)
             {
-            case ITEM_SUBCLASS_CONTAINER:
-                return true;
-            case ITEM_SUBCLASS_SOUL_CONTAINER:
-                if(!(pProto->BagFamily & BAG_FAMILY_MASK_SHARDS))
+                case ITEM_SUBCLASS_CONTAINER:
+                    return true;
+                case ITEM_SUBCLASS_SOUL_CONTAINER:
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_SHARDS))
+                        return false;
+                    return true;
+                case ITEM_SUBCLASS_HERB_CONTAINER:
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_HERBS))
+                        return false;
+                    return true;
+                case ITEM_SUBCLASS_ENCHANTING_CONTAINER:
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_ENCHANTING_SUPP))
+                        return false;
+                    return true;
+                case ITEM_SUBCLASS_MINING_CONTAINER:
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_MINING_SUPP))
+                        return false;
+                    return true;
+                case ITEM_SUBCLASS_ENGINEERING_CONTAINER:
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_ENGINEERING_SUPP))
+                        return false;
+                    return true;
+                case ITEM_SUBCLASS_GEM_CONTAINER:
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_GEMS))
+                        return false;
+                    return true;
+                case ITEM_SUBCLASS_LEATHERWORKING_CONTAINER:
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_LEATHERWORKING_SUPP))
+                        return false;
+                    return true;
+                default:
                     return false;
-                return true;
-            case ITEM_SUBCLASS_HERB_CONTAINER:
-                if(!(pProto->BagFamily & BAG_FAMILY_MASK_HERBS))
-                    return false;
-                return true;
-            case ITEM_SUBCLASS_ENCHANTING_CONTAINER:
-                if(!(pProto->BagFamily & BAG_FAMILY_MASK_ENCHANTING_SUPP))
-                    return false;
-                return true;
-            case ITEM_SUBCLASS_MINING_CONTAINER:
-                if(!(pProto->BagFamily & BAG_FAMILY_MASK_MINING_SUPP))
-                    return false;
-                return true;
-            case ITEM_SUBCLASS_ENGINEERING_CONTAINER:
-                if(!(pProto->BagFamily & BAG_FAMILY_MASK_ENGINEERING_SUPP))
-                    return false;
-                return true;
-            case ITEM_SUBCLASS_GEM_CONTAINER:
-                if(!(pProto->BagFamily & BAG_FAMILY_MASK_GEMS))
-                    return false;
-                return true;
-            case ITEM_SUBCLASS_LEATHERWORKING_CONTAINER:
-                if(!(pProto->BagFamily & BAG_FAMILY_MASK_LEATHERWORKING_SUPP))
-                    return false;
-                return true;
-            default:
-                return false;
-        }
+            }
         case ITEM_CLASS_QUIVER:
             switch(pBagProto->SubClass)
             {
-            case ITEM_SUBCLASS_QUIVER:
-                if(!(pProto->BagFamily & BAG_FAMILY_MASK_ARROWS))
+                case ITEM_SUBCLASS_QUIVER:
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_ARROWS))
+                        return false;
+                    return true;
+                case ITEM_SUBCLASS_AMMO_POUCH:
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_BULLETS))
+                        return false;
+                    return true;
+                default:
                     return false;
-                return true;
-            case ITEM_SUBCLASS_AMMO_POUCH:
-                if(!(pProto->BagFamily & BAG_FAMILY_MASK_BULLETS))
-                    return false;
-                return true;
-            default:
-                return false;
-        }
+            }
     }
     return false;
 }
@@ -810,8 +810,8 @@ void Item::SendTimeUpdate(Player* owner)
 Item* Item::CreateItem( uint32 item, uint32 count, Player const* player )
 {
     if ( count < 1 )
-        return NULL;                                    //don't create item at zero count
-    
+        return NULL;                                        //don't create item at zero count
+
     ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
     if( pProto )
     {

@@ -185,7 +185,7 @@ void Map::LoadMapAndVMap(uint32 mapid, uint32 instanceid, int x,int y)
 {
     LoadMap(mapid,instanceid,x,y);
     if(instanceid == 0)
-        LoadVMap(x, y); // Only load the data for the base map
+        LoadVMap(x, y);                                     // Only load the data for the base map
 }
 
 void Map::InitStateMachine()
@@ -579,7 +579,7 @@ bool Map::CanEnter(Player* player) const
         {
             // let enter in ghost mode in instance that connected to inner instance with corpse
             uint32 instance_map = corpse->GetMapId();
-            do 
+            do
             {
                 if(instance_map==GetId())
                     break;
@@ -728,7 +728,7 @@ void Map::Update(const uint32 &t_diff)
     {
         NGridType *grid = i->getSource();
         GridInfo *info = i->getSource()->getGridInfoRef();
-        ++i; // The update might delete the map and we need the next map before the iterator gets invalid
+        ++i;                                                // The update might delete the map and we need the next map before the iterator gets invalid
         assert(grid->GetGridState() >= 0 && grid->GetGridState() < MAX_GRID_STATE);
         si_GridStates[grid->GetGridState()]->Update(*this, *grid, *info, grid->getX(), grid->getY(), t_diff);
     }
@@ -1083,7 +1083,7 @@ void Map::UnloadAll(bool pForce)
     {
         NGridType &grid(*i->getSource());
         ++i;
-        UnloadGrid(grid.getX(), grid.getY(), pForce); // deletes the grid and removes it from the GridRefManager
+        UnloadGrid(grid.getX(), grid.getY(), pForce);       // deletes the grid and removes it from the GridRefManager
     }
 
     //Delete instance data
@@ -1161,7 +1161,7 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps) const
     else
     {
         if(!pUseVmaps)
-            return mapHeight;                               // explicitly use map data (if have) 
+            return mapHeight;                               // explicitly use map data (if have)
         else if(mapHeight > INVALID_HEIGHT && (z < mapHeight || z == MAX_HEIGHT))
             return mapHeight;                               // explicitly use map data if original z < mapHeight but map found (z+2 > mapHeight)
         else

@@ -36,7 +36,7 @@
 
 bool ChatHandler::HandleSayCommand(const char* args)
 {
-    if(!*args) 
+    if(!*args)
         return false;
 
     Creature* pCreature = getSelectedCreature();
@@ -53,7 +53,7 @@ bool ChatHandler::HandleSayCommand(const char* args)
 
 bool ChatHandler::HandleYellCommand(const char* args)
 {
-    if(!*args) 
+    if(!*args)
         return false;
 
     Creature* pCreature = getSelectedCreature();
@@ -71,7 +71,7 @@ bool ChatHandler::HandleYellCommand(const char* args)
 //show text emote by creature in chat
 bool ChatHandler::HandleTextEmoteCommand(const char* args)
 {
-    if(!*args) 
+    if(!*args)
         return false;
 
     Creature* pCreature = getSelectedCreature();
@@ -90,7 +90,7 @@ bool ChatHandler::HandleTextEmoteCommand(const char* args)
 // make npc whisper to player
 bool ChatHandler::HandleNpcWhisperCommand(const char* args)
 {
-    if(!*args) 
+    if(!*args)
         return false;
 
     char* receiver = strtok((char*)args, " ");

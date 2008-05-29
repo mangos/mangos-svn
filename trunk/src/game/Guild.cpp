@@ -862,6 +862,7 @@ void Guild::LoadGuildEventlogFromDB()
     }
     m_eventlogloaded = true;
 }
+
 // Unload guild eventlog
 void Guild::UnloadGuildEventlog()
 {
@@ -900,6 +901,7 @@ void Guild::RenumGuildEventlog()
     delete result;
     CharacterDatabase.CommitTransaction();
 }
+
 // Add entry to guild eventlog
 void Guild::LogGuildEvent(uint8 EventType, uint32 PlayerGuid1, uint32 PlayerGuid2, uint8 NewRank)
 {
@@ -914,10 +916,10 @@ void Guild::LogGuildEvent(uint8 EventType, uint32 PlayerGuid1, uint32 PlayerGuid
     // Check max entry limit and delete from db if needed
     if (m_GuildEventlog.size() > GUILD_EVENTLOG_MAX_ENTRIES)
     {
-            GuildEventlogEntry *OldEvent = *(m_GuildEventlog.begin());
-            m_GuildEventlog.pop_front();
-            CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE guildid='%u' AND LogGuid='%u'", Id, OldEvent->LogGuid);
-            delete OldEvent;
+        GuildEventlogEntry *OldEvent = *(m_GuildEventlog.begin());
+        m_GuildEventlog.pop_front();
+        CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE guildid='%u' AND LogGuid='%u'", Id, OldEvent->LogGuid);
+        delete OldEvent;
     }
     // Add entry to map
     m_GuildEventlog.push_back(NewEvent);

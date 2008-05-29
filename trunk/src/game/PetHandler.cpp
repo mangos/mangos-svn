@@ -384,7 +384,7 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     if((!ObjectMgr::IsValidPetName(name)) || (objmgr.IsReservedName(name)))
     {
         SendNotification("Invalid name");
-        return; 
+        return;
     }
     pet->SetName(name);
 

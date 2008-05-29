@@ -163,7 +163,7 @@ struct CreatureInfo
     uint32  faction_H;
     uint32  npcflag;
     float   speed;
-    float   scale;    
+    float   scale;
     uint32  rank;
     float   mindmg;
     float   maxdmg;
@@ -376,7 +376,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool HasSpell(uint32 spellID) const;
 
-
         bool UpdateEntry(uint32 entry, uint32 team=ALLIANCE, const CreatureData* data=NULL);
         bool UpdateStats(Stats stat);
         bool UpdateAllStats();
@@ -458,8 +457,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool LoadFromDB(uint32 guid, uint32 InstanceId);
         void SaveToDB();
-        virtual void SaveToDB(uint32 mapid, uint8 spawnMask); // overwrited in Pet
-        virtual void DeleteFromDB();                          // overwrited in Pet
+                                                            // overwrited in Pet
+        virtual void SaveToDB(uint32 mapid, uint8 spawnMask);
+        virtual void DeleteFromDB();                        // overwrited in Pet
 
         Loot loot;
         bool lootForPickPocketed;

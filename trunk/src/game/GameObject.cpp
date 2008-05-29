@@ -233,7 +233,8 @@ void GameObject::Update(uint32 /*p_time*/)
                         default:
                             if(!m_spawnedByDefault)         // despawn timer
                             {
-                                SetLootState(GO_JUST_DEACTIVATED);    // can be despawned or destroyed
+                                                            // can be despawned or destroyed
+                                SetLootState(GO_JUST_DEACTIVATED);
                                 return;
                             }
                                                             // respawn timer
@@ -260,14 +261,14 @@ void GameObject::Update(uint32 /*p_time*/)
                 float radius = goInfo->trap.radius;
                 if(!radius)
                 {
-                    if(goInfo->trap._data5 != 3)               // cast in other case (at some triggring/linked go/etc explicit call)
+                    if(goInfo->trap._data5 != 3)            // cast in other case (at some triggring/linked go/etc explicit call)
                         return;
                     else
                     {
                         if(m_respawnTime > 0)
                             break;
 
-                        radius = goInfo->trap._data5;          // battlegrounds gameobjects has data2 == 0 && data5 == 3
+                        radius = goInfo->trap._data5;       // battlegrounds gameobjects has data2 == 0 && data5 == 3
                         IsBattleGroundTrap = true;
                     }
                 }
@@ -327,7 +328,7 @@ void GameObject::Update(uint32 /*p_time*/)
                         SetLootState(GO_JUST_DEACTIVATED);  // can be despawned or destroyed
 
                     if(IsBattleGroundTrap && ok->GetTypeId() == TYPEID_PLAYER)
-                    {                
+                    {
                         //BattleGround gameobjects case
                         if(((Player*)ok)->InBattleGround())
                             if(BattleGround *bg = ((Player*)ok)->GetBattleGround())
@@ -568,7 +569,8 @@ bool GameObject::LoadFromDB(uint32 guid, uint32 InstanceId)
                 m_respawnDelayTime=data->spawntimesecs;
                 m_respawnTime=objmgr.GetGORespawnTime(stored_guid,InstanceId);
 
-                if(m_respawnTime && m_respawnTime <= time(NULL))    // ready to respawn
+                                                            // ready to respawn
+                if(m_respawnTime && m_respawnTime <= time(NULL))
                 {
                     m_respawnTime = 0;
                     objmgr.SaveGORespawnTime(m_DBTableGuid,GetInstanceId(),0);
@@ -715,7 +717,7 @@ void GameObject::TriggeringLinkedGameObject( uint32 trapEntry, Unit* target)
     SpellEntry const* trapSpell = sSpellStore.LookupEntry(trapInfo->trap.spellId);
     if(!trapSpell)                                          // checked at load already
         return;
-    
+
     float range = GetSpellMaxRange(sSpellRangeStore.LookupEntry(trapSpell->rangeIndex));
 
     // search nearest linked GO
@@ -754,7 +756,7 @@ GameObject* GameObject::LookupFishingHoleAround(float range)
 
     TypeContainerVisitor<MaNGOS::GameObjectSearcher<MaNGOS::NearestGameObjectFishingHole>, GridTypeMapContainer > grid_object_checker(checker);
     cell_lock->Visit(cell_lock, grid_object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
-    
+
     return ok;
 }
 

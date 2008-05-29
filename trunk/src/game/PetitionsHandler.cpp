@@ -721,11 +721,11 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
 
         if(_player->GetArenaTeamId(slot))
         {
-                //data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
-                //data << (uint32)PETITION_TURN_ALREADY_IN_GUILD;                          // already in guild
-                //_player->GetSession()->SendPacket(&data);
-                SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, name, "", ERR_ALREADY_IN_ARENA_TEAM);
-                return;
+            //data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
+            //data << (uint32)PETITION_TURN_ALREADY_IN_GUILD;                          // already in guild
+            //_player->GetSession()->SendPacket(&data);
+            SendArenaTeamCommandResult(ERR_ARENA_TEAM_CREATE_S, name, "", ERR_ALREADY_IN_ARENA_TEAM);
+            return;
         }
     }
 

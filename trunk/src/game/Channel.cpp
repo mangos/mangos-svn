@@ -338,7 +338,7 @@ void Channel::SetMode(uint64 p, const char *p2n, bool mod, bool set)
             return;
         }
 
-        // allow make moderator from another team only if both is GMs 
+        // allow make moderator from another team only if both is GMs
         // at this moment this only way to show channel post for GM from another team
         if( (plr->GetSession()->GetSecurity() < SEC_GAMEMASTER || newp->GetSession()->GetSecurity() < SEC_GAMEMASTER) &&
             plr->GetTeam() != newp->GetTeam() && !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL) )

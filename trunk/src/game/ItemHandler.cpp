@@ -124,7 +124,7 @@ void WorldSession::HandleAutoEquipItemOpcode( WorldPacket & recv_data )
         return;
 
     Item *pDstItem = _player->GetItemByPos( dest );
-    if( !pDstItem )                                           // empty slot, simple case
+    if( !pDstItem )                                         // empty slot, simple case
     {
         _player->RemoveItem( srcbag, srcslot, true );
         _player->EquipItem( dest, pSrcItem, true );
@@ -434,7 +434,7 @@ void WorldSession::HandlePageQuerySkippedOpcode( WorldPacket & recv_data )
 
     recv_data >> itemid >> guid;
 
-    sLog.outDetail( "Packet Info: itemid: %u guidlow: %u guidentry: %u guidhigh: %u", 
+    sLog.outDetail( "Packet Info: itemid: %u guidlow: %u guidentry: %u guidhigh: %u",
         itemid, GUID_LOPART(guid), GUID_ENPART(guid), GUID_HIPART(guid));
 }
 
@@ -519,7 +519,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
                         _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
                         return;
                     }
-                    
+
                     pItem->SetCount( pItem->GetCount() - count );
                     _player->ItemRemovedQuestCheck( pItem->GetEntry(), count );
                     if( _player->IsInWorld() )

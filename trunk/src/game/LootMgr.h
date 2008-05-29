@@ -63,7 +63,7 @@ struct LootStoreItem
     uint32  itemid;                                         // id of the item
     float   chance;                                         // always positive, chance to drop for both quest and non-quest items, chance to be used for refs
     int32   mincountOrRef;                                  // mincount for drop items (positive) or minus referenced TemplateleId (negative)
-    uint8   group       :8;           
+    uint8   group       :8;
     uint8   maxcount    :8;                                 // max drop count for the item (mincountOrRef positive) or Ref multiplicator (mincountOrRef negative)
     uint16  conditionId :16;                                // additional loot condition Id
     bool    freeforall  :1;                                 // free for all (clone for every looter)
@@ -72,9 +72,9 @@ struct LootStoreItem
     // Constructor, converting ChanceOrQuestChance -> (chance, needs_quest)
     // displayid is filled in IsValid() which must be called after
     LootStoreItem(uint32 _itemid, float _chanceOrQuestChance, int8 _group, bool _freeforall, uint8 _conditionId, int32 _mincountOrRef, uint8 _maxcount)
-        : itemid(_itemid), chance(fabs(_chanceOrQuestChance)), mincountOrRef(_mincountOrRef), 
-          group(_group), maxcount(_maxcount), conditionId(_conditionId), freeforall(_freeforall), 
-          needs_quest(_chanceOrQuestChance < 0) {}
+        : itemid(_itemid), chance(fabs(_chanceOrQuestChance)), mincountOrRef(_mincountOrRef),
+        group(_group), maxcount(_maxcount), conditionId(_conditionId), freeforall(_freeforall),
+        needs_quest(_chanceOrQuestChance < 0) {}
 
     bool Roll() const;                                      // Checks if the entry takes it's chance (at loot generation)
     bool IsValid(LootStore const& store, uint32 entry) const;
@@ -97,8 +97,8 @@ struct LootItem
 
     // Constructor, copies most fields from LootStoreItem, generates random count and random suffixes/properties
     // Should be called for non-reference LootStoreItem entries only (mincountOrRef > 0)
-    explicit LootItem(LootStoreItem const& li);      
-                
+    explicit LootItem(LootStoreItem const& li);
+
     // Basic checks for player/item compatibility - if false no chance to see the item in the loot
     bool AllowedForPlayer(Player const * player) const;
 };
@@ -148,7 +148,7 @@ class LootStore
 
 class LootTemplate
 {
-    class  LootGroup;       // A set of loot definitions for items (refs are not allowed inside)
+    class  LootGroup;                                       // A set of loot definitions for items (refs are not allowed inside)
     typedef std::vector<LootGroup> LootGroups;
 
     public:
@@ -165,8 +165,8 @@ class LootTemplate
         // Checks integrity of the template
         void Verify(LootStore const& store, uint32 Id) const;
     private:
-        LootStoreItemList Entries;  // not grouped only 
-        LootGroups        Groups;   // groups have own (optimised) processing, grouped entries go there
+        LootStoreItemList Entries;                          // not grouped only
+        LootGroups        Groups;                           // groups have own (optimised) processing, grouped entries go there
 };
 
 //=====================================================
@@ -245,7 +245,6 @@ struct Loot
 
     bool empty() const { return items.empty() && gold == 0; }
     bool isLooted() const { return gold == 0 && unlootedCount == 0; }
-
 
     void NotifyItemRemoved(uint8 lootIndex);
     void NotifyQuestItemRemoved(uint8 questIndex);

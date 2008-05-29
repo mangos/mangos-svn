@@ -80,14 +80,14 @@ inline bool IsGuidHaveEnPart(uint64 const& guid)
         case HIGHGUID_PLAYER:
         case HIGHGUID_DYNAMICOBJECT:
         case HIGHGUID_CORPSE:
-            return false; 
+            return false;
         case HIGHGUID_GAMEOBJECT:
         case HIGHGUID_TRANSPORT:
         case HIGHGUID_UNIT:
         case HIGHGUID_PET:
         case HIGHGUID_MO_TRANSPORT:
         default:
-            return true; 
+            return true;
     }
 }
 
@@ -111,5 +111,4 @@ inline char const* GetLogNameForGuid(uint64 guid)
             return "<unknown>";
     }
 }
-
 #endif

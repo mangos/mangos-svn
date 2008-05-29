@@ -717,7 +717,7 @@ class SpellMgr
 
         // Loading data at server startup
         void LoadSpellChains();
-        void LoadSpellLearnSkills();        
+        void LoadSpellLearnSkills();
         void LoadSpellLearnSpells();
         void LoadSpellScriptTarget();
         void LoadSpellAffects();

@@ -360,8 +360,8 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
     }
     else
 
-        if(!Script->GossipSelect( _player, unit, _player->PlayerTalkClass->GossipOptionSender( option ), _player->PlayerTalkClass->GossipOptionAction( option )) )
-            unit->OnGossipSelect( _player, option );
+    if(!Script->GossipSelect( _player, unit, _player->PlayerTalkClass->GossipOptionSender( option ), _player->PlayerTalkClass->GossipOptionAction( option )) )
+        unit->OnGossipSelect( _player, option );
 }
 
 void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )

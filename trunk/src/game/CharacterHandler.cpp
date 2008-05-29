@@ -277,7 +277,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
                     return;
                 }
             }
-            
+
             if (skipCinematics == 1)
             {
                 // TODO: check if cinematic already shown? (already logged in?; cinematic field)

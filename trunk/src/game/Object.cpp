@@ -114,7 +114,7 @@ void Object::_Create( uint32 guidlow, uint32 entry, HighGuid guidhigh )
 {
     if(!m_uint32Values) _InitValues();
 
-    uint64 guid = MAKE_NEW_GUID(guidlow, entry, guidhigh);    // required more changes to make it working
+    uint64 guid = MAKE_NEW_GUID(guidlow, entry, guidhigh);  // required more changes to make it working
     SetUInt64Value( OBJECT_FIELD_GUID, guid );
     SetUInt32Value( OBJECT_FIELD_TYPE, m_objectType );
     m_PackGUID.clear();
@@ -1213,7 +1213,7 @@ void WorldObject::MonsterWhisper(const uint64 receiver, const char* text)
     {
         data << (uint32)1;                                  // target name lenth
         data << (uint8)0;                                   // target name
-    } 
+    }
     data << (uint32)(strlen(text)+1);
     data << text;
     data << (uint8)0;                                       // ChatTag

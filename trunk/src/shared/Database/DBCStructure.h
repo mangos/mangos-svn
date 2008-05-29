@@ -220,7 +220,7 @@ struct FactionEntry
     uint32      ID;                                         // 0
     int32       reputationListID;                           // 1
     uint32      BaseRepRaceMask[4];                         // 2-5 Base reputation race masks (see enum Races)
-    uint32      BaseRepClassMask[4];                        // 6-9 Base reputation class masks (see enum Classes) 
+    uint32      BaseRepClassMask[4];                        // 6-9 Base reputation class masks (see enum Classes)
     int32       BaseRepValue[4];                            // 10-13 Base reputation values
     //int32     reputationFlags[4];                         // 14-17 unused
     uint32      team;                                       // 18
@@ -472,9 +472,9 @@ struct RandomPropertiesPointsEntry
 //};
 
 //struct SkillRaceClassInfoEntry{
-//    uint32    id;                                           // 0 
+//    uint32    id;                                           // 0
 //    uint32    skillId;                                      // 1 present some refrences to unknown skill
-//    uint32    raceMask;                                     // 2 
+//    uint32    raceMask;                                     // 2
 //    uint32    classMask;                                    // 3
 //    uint32    flags;                                        // 4 mask for some thing
 //    uint32    reqLevel;                                     // 5
@@ -510,7 +510,7 @@ struct SkillLineAbilityEntry
 {
     uint32    id;                                           // 0, INDEX
     uint32    skillId;                                      // 1
-    uint32    spellId;                                      // 2 
+    uint32    spellId;                                      // 2
     uint32    racemask;                                     // 3
     uint32    classmask;                                    // 4
     //uint32    racemaskNot;                                // 5 always 0 in 2.4.2

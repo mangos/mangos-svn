@@ -1103,10 +1103,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void StopMoving();
 
         void AddUnitMovementFlag(uint32 f) { m_unit_movement_flags |= f; }
-        void RemoveUnitMovementFlag(uint32 f) 
-        { 
+        void RemoveUnitMovementFlag(uint32 f)
+        {
             uint32 oldval = m_unit_movement_flags;
-            m_unit_movement_flags = oldval & ~f; 
+            m_unit_movement_flags = oldval & ~f;
         }
         uint32 HasUnitMovementFlag(uint32 f) const { return m_unit_movement_flags & f; }
         uint32 GetUnitMovementFlags() const { return m_unit_movement_flags; }

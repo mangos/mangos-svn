@@ -28,7 +28,8 @@ class Field
             DB_TYPE_UNKNOWN = 0x00,
             DB_TYPE_STRING  = 0x01,
             DB_TYPE_INTEGER = 0x02,
-            DB_TYPE_FLOAT   = 0x03
+            DB_TYPE_FLOAT   = 0x03,
+            DB_TYPE_BOOL    = 0x04
         };
 
         Field();

@@ -73,7 +73,7 @@ class MANGOS_DLL_SPEC UnitBaseEvent
         uint32 iType;
     public:
         UnitBaseEvent(uint32 pType) { iType = pType; }
-        uint16 getType() const { return iType; }
+        uint32 getType() const { return iType; }
         bool matchesTypeMask(uint32 pMask) const { return iType & pMask; }
 
         void setType(uint32 pType) { iType = pType; }

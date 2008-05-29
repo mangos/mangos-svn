@@ -1108,7 +1108,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     return false;
 
                 //  Tree of Life (Shapeshift) and 34123 Tree of Life (Passive)
-                if ((spellId_1 == 33891 && spellId_2 == 34123) || 
+                if ((spellId_1 == 33891 && spellId_2 == 34123) ||
                     (spellId_2 == 33891 && spellId_1 == 34123))
                     return false;
             }
@@ -1404,11 +1404,13 @@ void SpellMgr::LoadSpellLearnSkills()
             {
                 SpellLearnSkillNode dbc_node;
                 dbc_node.skill    = entry->EffectMiscValue[i];
-                dbc_node.value    = 1;
+                if ( dbc_node.skill != SKILL_RIDING )
+                    dbc_node.value    = 1;
+                else
+                    dbc_node.value    = (entry->EffectBasePoints[i]+1)*75;
                 dbc_node.maxvalue = (entry->EffectBasePoints[i]+1)*75;
 
                 SpellLearnSkillNode const* db_node = GetSpellLearnSkill(spell);
-
 
                 mSpellLearnSkills[spell] = dbc_node;
                 ++dbc_count;

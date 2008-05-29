@@ -24,8 +24,8 @@
 class BattleGround;
 
 #define EY_MAX_TEAM_SCORE         2000
-#define BG_EY_FLAG_RESPAWN_TIME   10000   //10 seconds
-#define BG_EY_FPOINTS_TICK_TIME   2000    //2 seconds
+#define BG_EY_FLAG_RESPAWN_TIME   10000                     //10 seconds
+#define BG_EY_FPOINTS_TICK_TIME   2000                      //2 seconds
 
 enum BG_EY_WorldStates
 {
@@ -45,9 +45,9 @@ enum BG_EY_WorldStates
     BLOOD_ELF_HORDE_CONTROL         = 2724,
     BLOOD_ELF_ALLIANCE_CONTROL      = 2723,
     BLOOD_ELF_UNCONTROL             = 2722,
-    PROGRESS_BAR_PERCENT_GREY       = 2720, //100 = empty (only grey), 0 = blue|red (no grey)
-    PROGRESS_BAR_STATUS             = 2719, //50 init!, 48 ... hordak bere .. 33 .. 0 = full 100% hordacky , 100 = full alliance
-    PROGRESS_BAR_SHOW               = 2718, //1 init, 0 druhy send - bez messagu, 1 = controlled aliance
+    PROGRESS_BAR_PERCENT_GREY       = 2720,                 //100 = empty (only grey), 0 = blue|red (no grey)
+    PROGRESS_BAR_STATUS             = 2719,                 //50 init!, 48 ... hordak bere .. 33 .. 0 = full 100% hordacky , 100 = full alliance
+    PROGRESS_BAR_SHOW               = 2718,                 //1 init, 0 druhy send - bez messagu, 1 = controlled aliance
     NETHERSTORM_FLAG                = 2757,
     //set to 2 when flag is picked up, and to 1 if it is dropped
     NETHERSTORM_FLAG_STATE_ALLIANCE = 2769,
@@ -87,18 +87,18 @@ enum BG_EY_Spells
 
 enum EYBattleGroundObjectEntry
 {
-    BG_OBJECT_A_DOOR_EY_ENTRY         = 184719, //Alliance door
-    BG_OBJECT_H_DOOR_EY_ENTRY         = 184720, //Horde door
-    BG_OBJECT_FLAG1_EY_ENTRY          = 184493, //Netherstorm flag (generic)
-    BG_OBJECT_FLAG2_EY_ENTRY          = 184141, //Netherstorm flag (flagstand)
-    BG_OBJECT_FLAG3_EY_ENTRY          = 184142, //Netherstorm flag (flagdrop)
-    BG_OBJECT_A_BANNER_EY_ENTRY       = 184381, //Visual Banner (Alliance)
-    BG_OBJECT_H_BANNER_EY_ENTRY       = 184380, //Visual Banner (Horde)
-    BG_OBJECT_N_BANNER_EY_ENTRY       = 184382, //Visual Banner (Neutral)
-    BG_OBJECT_BE_TOWER_CAP_EY_ENTRY   = 184080, //BE Tower Cap Pt
-    BG_OBJECT_FR_TOWER_CAP_EY_ENTRY   = 184081, //Fel Reaver Cap Pt
-    BG_OBJECT_HU_TOWER_CAP_EY_ENTRY   = 184082, //Human Tower Cap Pt
-    BG_OBJECT_DR_TOWER_CAP_EY_ENTRY   = 184083  //Draenei Tower Cap Pt
+    BG_OBJECT_A_DOOR_EY_ENTRY         = 184719,             //Alliance door
+    BG_OBJECT_H_DOOR_EY_ENTRY         = 184720,             //Horde door
+    BG_OBJECT_FLAG1_EY_ENTRY          = 184493,             //Netherstorm flag (generic)
+    BG_OBJECT_FLAG2_EY_ENTRY          = 184141,             //Netherstorm flag (flagstand)
+    BG_OBJECT_FLAG3_EY_ENTRY          = 184142,             //Netherstorm flag (flagdrop)
+    BG_OBJECT_A_BANNER_EY_ENTRY       = 184381,             //Visual Banner (Alliance)
+    BG_OBJECT_H_BANNER_EY_ENTRY       = 184380,             //Visual Banner (Horde)
+    BG_OBJECT_N_BANNER_EY_ENTRY       = 184382,             //Visual Banner (Neutral)
+    BG_OBJECT_BE_TOWER_CAP_EY_ENTRY   = 184080,             //BE Tower Cap Pt
+    BG_OBJECT_FR_TOWER_CAP_EY_ENTRY   = 184081,             //Fel Reaver Cap Pt
+    BG_OBJECT_HU_TOWER_CAP_EY_ENTRY   = 184082,             //Human Tower Cap Pt
+    BG_OBJECT_DR_TOWER_CAP_EY_ENTRY   = 184083              //Draenei Tower Cap Pt
 };
 
 enum EYBattleGroundPointsTrigger
@@ -253,19 +253,22 @@ const uint8  BG_EY_TickPoints[EY_POINTS_MAX] = {1, 2, 5, 10};
 const uint32 BG_EY_FlagPoints[EY_POINTS_MAX] = {75, 85, 100, 500};
 
 //constant arrays:
-const BattleGroundEYPointIconsStruct m_PointsIconStruct[EY_POINTS_MAX] = {
+const BattleGroundEYPointIconsStruct m_PointsIconStruct[EY_POINTS_MAX] =
+{
     BattleGroundEYPointIconsStruct(FEL_REAVER_UNCONTROL, FEL_REAVER_ALLIANCE_CONTROL, FEL_REAVER_HORDE_CONTROL),
     BattleGroundEYPointIconsStruct(BLOOD_ELF_UNCONTROL, BLOOD_ELF_ALLIANCE_CONTROL, BLOOD_ELF_HORDE_CONTROL),
     BattleGroundEYPointIconsStruct(DRAENEI_RUINS_UNCONTROL, DRAENEI_RUINS_ALLIANCE_CONTROL, DRAENEI_RUINS_HORDE_CONTROL),
     BattleGroundEYPointIconsStruct(MAGE_TOWER_UNCONTROL, MAGE_TOWER_ALLIANCE_CONTROL, MAGE_TOWER_HORDE_CONTROL)
 };
-const BattleGroundEYLoosingPointStruct m_LoosingPointTypes[EY_POINTS_MAX] = {
+const BattleGroundEYLoosingPointStruct m_LoosingPointTypes[EY_POINTS_MAX] =
+{
     BattleGroundEYLoosingPointStruct(BG_EY_OBJECT_N_BANNER_FEL_REALVER_CENTER, BG_EY_OBJECT_A_BANNER_FEL_REALVER_CENTER, LANG_BG_EY_HAS_LOST_A_F_RUINS, BG_EY_OBJECT_H_BANNER_FEL_REALVER_CENTER, LANG_BG_EY_HAS_LOST_H_F_RUINS),
     BattleGroundEYLoosingPointStruct(BG_EY_OBJECT_N_BANNER_BLOOD_ELF_CENTER, BG_EY_OBJECT_A_BANNER_BLOOD_ELF_CENTER, LANG_BG_EY_HAS_LOST_A_B_TOWER, BG_EY_OBJECT_H_BANNER_BLOOD_ELF_CENTER, LANG_BG_EY_HAS_LOST_H_B_TOWER),
     BattleGroundEYLoosingPointStruct(BG_EY_OBJECT_N_BANNER_DRAENEI_RUINS_CENTER, BG_EY_OBJECT_A_BANNER_DRAENEI_RUINS_CENTER, LANG_BG_EY_HAS_LOST_A_D_RUINS, BG_EY_OBJECT_H_BANNER_DRAENEI_RUINS_CENTER, LANG_BG_EY_HAS_LOST_H_D_RUINS),
     BattleGroundEYLoosingPointStruct(BG_EY_OBJECT_N_BANNER_MAGE_TOWER_CENTER, BG_EY_OBJECT_A_BANNER_MAGE_TOWER_CENTER, LANG_BG_EY_HAS_LOST_A_M_TOWER, BG_EY_OBJECT_H_BANNER_MAGE_TOWER_CENTER, LANG_BG_EY_HAS_LOST_H_M_TOWER)
 };
-const BattleGroundEYCapturingPointStruct m_CapturingPointTypes[EY_POINTS_MAX] = {
+const BattleGroundEYCapturingPointStruct m_CapturingPointTypes[EY_POINTS_MAX] =
+{
     BattleGroundEYCapturingPointStruct(BG_EY_OBJECT_N_BANNER_FEL_REALVER_CENTER, BG_EY_OBJECT_A_BANNER_FEL_REALVER_CENTER, LANG_BG_EY_HAS_TAKEN_A_F_RUINS, BG_EY_OBJECT_H_BANNER_FEL_REALVER_CENTER, LANG_BG_EY_HAS_TAKEN_H_F_RUINS, EY_GRAVEYARD_FEL_REALVER),
     BattleGroundEYCapturingPointStruct(BG_EY_OBJECT_N_BANNER_BLOOD_ELF_CENTER, BG_EY_OBJECT_A_BANNER_BLOOD_ELF_CENTER, LANG_BG_EY_HAS_TAKEN_A_B_TOWER, BG_EY_OBJECT_H_BANNER_BLOOD_ELF_CENTER, LANG_BG_EY_HAS_TAKEN_H_B_TOWER, EY_GRAVEYARD_BLOOD_ELF),
     BattleGroundEYCapturingPointStruct(BG_EY_OBJECT_N_BANNER_DRAENEI_RUINS_CENTER, BG_EY_OBJECT_A_BANNER_DRAENEI_RUINS_CENTER, LANG_BG_EY_HAS_TAKEN_A_D_RUINS, BG_EY_OBJECT_H_BANNER_DRAENEI_RUINS_CENTER, LANG_BG_EY_HAS_TAKEN_H_D_RUINS, EY_GRAVEYARD_DRAENEI_RUINS),

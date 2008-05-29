@@ -110,7 +110,7 @@ bool AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target)
                 *Target << (uint8)unk2;
                 if (unk2)
                     Target->append(tdata, sizeof(tdata));
-                
+
                 *Target << (uint32)0;
             }
 

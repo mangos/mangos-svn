@@ -396,7 +396,7 @@ namespace MaNGOS
 
     // WorldObject check classes
     class CannibalizeObjectCheck
-        {
+    {
         public:
             CannibalizeObjectCheck(Unit* funit, float range) : i_funit(funit), i_range(range) {}
             bool operator()(Player* u)
@@ -425,7 +425,7 @@ namespace MaNGOS
         private:
             Unit* const i_funit;
             float i_range;
-        };
+    };
 
     // WorldObject do classes
 

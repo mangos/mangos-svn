@@ -65,22 +65,22 @@ TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
         i_target->GetClosePoint(x,y,z,owner.GetObjectSize() + i_offset,i_angle);
     }
 
-/*
-    We MUST not check the distance difference and avoid setting the new location for smaller distances.
-    By that we risk having far too many GetContactPoint() calls freezing the whole system.
-    In TargetedMovementGenerator<T>::Update() we check the distance to the target and at
-    some range we calculate a new position. The calculation takes some processor cycles due to vmaps.
-    If the distance to the target it too large to ignore,
-    but the distance to the new contact point is short enough to be ignored,
-    we will calculate a new contact point each update loop, but will never move to it.
-    The system will freeze.
-    ralf
+    /*
+        We MUST not check the distance difference and avoid setting the new location for smaller distances.
+        By that we risk having far too many GetContactPoint() calls freezing the whole system.
+        In TargetedMovementGenerator<T>::Update() we check the distance to the target and at
+        some range we calculate a new position. The calculation takes some processor cycles due to vmaps.
+        If the distance to the target it too large to ignore,
+        but the distance to the new contact point is short enough to be ignored,
+        we will calculate a new contact point each update loop, but will never move to it.
+        The system will freeze.
+        ralf
 
-    //We don't update Mob Movement, if the difference between New destination and last destination is < BothObjectSize
-    float  bothObjectSize = i_target->GetObjectSize() + owner.GetObjectSize() + CONTACT_DISTANCE;
-    if( i_destinationHolder.HasDestination() && i_destinationHolder.GetDestinationDiff(x,y,z) < bothObjectSize )
-        return;
-*/
+        //We don't update Mob Movement, if the difference between New destination and last destination is < BothObjectSize
+        float  bothObjectSize = i_target->GetObjectSize() + owner.GetObjectSize() + CONTACT_DISTANCE;
+        if( i_destinationHolder.HasDestination() && i_destinationHolder.GetDestinationDiff(x,y,z) < bothObjectSize )
+            return;
+    */
     Traveller<T> traveller(owner);
     i_destinationHolder.SetDestination(traveller, x, y, z);
     owner.addUnitState(UNIT_STAT_CHASE);
