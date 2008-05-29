@@ -284,6 +284,13 @@ inline bool IsElementalShield(SpellEntry const *spellInfo)
 int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
 bool IsSingleFromSpellSpecificPerCaster(uint32 spellSpec1,uint32 spellSpec2);
 bool IsPassiveSpell(uint32 spellId);
+
+// AttributesEx3 & 0x100000 all death persistent spells have this flag
+inline bool IsDeathPersistentSpell(SpellEntry const *spellInfo)
+{
+    return spellInfo->AttributesEx3 & 0x100000;
+}
+
 inline bool IsNonCombatSpell(SpellEntry const *spellInfo)
 {
     return (spellInfo->Attributes & (1<<28)) != 0;
@@ -333,6 +340,14 @@ inline bool IsAreaOfEffectSpell(SpellEntry const *spellInfo)
     return false;
 }
 
+inline bool IsDispelSpell(SpellEntry const *spellInfo)
+{
+    if (spellInfo->Effect[0] == SPELL_EFFECT_DISPEL ||
+        spellInfo->Effect[1] == SPELL_EFFECT_DISPEL ||
+        spellInfo->Effect[2] == SPELL_EFFECT_DISPEL )
+        return true;
+    return false;
+}
 inline bool CanBeUsedWhileStealthed(SpellEntry const* spellInfo)
 {
     return ( (spellInfo->AttributesEx & 32) == 32 || spellInfo->AttributesEx2 == 0x200000);

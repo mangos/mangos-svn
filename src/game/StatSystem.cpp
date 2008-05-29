@@ -68,17 +68,16 @@ bool Player::UpdateStats(Stats stat)
             UpdateAllSpellCritChances();
             UpdateAttackPowerAndDamage(true);               //SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT, only intelect currently
             UpdateArmor();                                  //SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT, only armor currently
-            UpdateManaRegen();
             break;
 
         case STAT_SPIRIT:
-            UpdateManaRegen();
             break;
 
         default:
             break;
     }
     UpdateSpellDamageAndHealingBonus();
+    UpdateManaRegen();
     return true;
 }
 
@@ -596,22 +595,31 @@ void Player::UpdateExpertise(WeaponAttackType attack)
 void Player::UpdateManaRegen()
 {
     float Intellect = GetStat(STAT_INTELLECT);
-    float SpiritBasedRegen = sqrt(Intellect) * OCTRegenMPPerSpirit();
-    float power_regen_mod  = GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA);
+    // Mana regen from spirit and intellect
+    float power_regen = sqrt(Intellect) * OCTRegenMPPerSpirit();
 
-    float power_mana_regen =  GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN);
+    // Mana regen from SPELL_AURA_MOD_POWER_REGEN aura
+    power_regen += GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA) / 5.0f;
 
+    // Set regen rate in cast state
+    float modManaRegenInterrupt = (float(GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT))/100.00f);
+    SetStatFloatValue(PLAYER_FIELD_MOD_MANA_REGEN_INTERRUPT, power_regen * modManaRegenInterrupt);
+
+    // Get bonus from SPELL_AURA_MOD_MANA_REGEN_FROM_STAT aura
+    AuraList const& regenAura = GetAurasByType(SPELL_AURA_MOD_MANA_REGEN_FROM_STAT);
+    for(AuraList::const_iterator i = regenAura.begin();i != regenAura.end(); ++i)
+    {
+        Modifier* mod = (*i)->GetModifier();
+        power_regen += GetStat(Stats(mod->m_miscvalue)) * mod->m_amount / 500.0f;
+    }
+
+    // Bonus from some dummy auras
     AuraList const& mDummy2Auras = GetAurasByType(SPELL_AURA_DUMMY_2);
     for(AuraList::const_iterator i = mDummy2Auras.begin();i != mDummy2Auras.end(); ++i)
         if((*i)->GetId() == 34074)                          // Aspect of the Viper
-            power_mana_regen += (*i)->GetModifier()->m_amount;
+            power_regen += (*i)->GetModifier()->m_amount * Intellect / 500.0f;
 
-    float Mp5 = power_regen_mod/5.00f + (power_mana_regen * Intellect / 500.0f);
-
-    float modManaRegenInterrupt = (float(GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT))/100.00f);
-    SetStatFloatValue(PLAYER_FIELD_MOD_MANA_REGEN_INTERRUPT,(Mp5 + (SpiritBasedRegen * modManaRegenInterrupt)));
-    SpiritBasedRegen += Mp5;
-    SetStatFloatValue(PLAYER_FIELD_MOD_MANA_REGEN, SpiritBasedRegen);
+    SetStatFloatValue(PLAYER_FIELD_MOD_MANA_REGEN, power_regen);
 }
 
 void Player::_ApplyAllStatBonuses()
