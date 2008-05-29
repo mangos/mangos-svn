@@ -4651,26 +4651,7 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
                     (*i)->ApplyModifier(true);
 
             // Learn all spells for skill
-            uint32 raceMask  = getRaceMask();
-            uint32 classMask = getClassMask();
-            for (uint32 j=0; j<sSkillLineAbilityStore.GetNumRows(); ++j)
-            {
-                SkillLineAbilityEntry const *pAbility = sSkillLineAbilityStore.LookupEntry(j);
-                if (!pAbility || pAbility->skillId!=id || pAbility->learnOnGetSkill != ABILITY_LEARNED_ON_GET_PROFESSION_SKILL)
-                    continue;
-                // Check race if set
-                if (pAbility->racemask && !(pAbility->racemask & raceMask))
-                    continue;
-                // Check class if set
-                if (pAbility->classmask && !(pAbility->classmask & classMask))
-                    continue;
-
-                if (SpellEntry const* spellentry = sSpellStore.LookupEntry(pAbility->spellId))
-                {
-                    // Ok need learn spell
-                    learnSpell(pAbility->spellId);
-                }
-            }
+            learnSkillRewardedSpells(id);
             return;
         }
     }
@@ -13040,6 +13021,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     // after spell load
     InitTalentForLevel();
+    learnSkillRewardedSpells();
 
     // after spell load, learn rewarded spell if need also
     _LoadQuestStatus(holder->GetResult(PLAYER_LOGIN_QUERY_LOADQUESTSTATUS));
@@ -16303,6 +16285,43 @@ void Player::learnQuestRewardedSpells()
             continue;
 
         learnQuestRewardedSpells(quest);
+    }
+}
+
+void Player::learnSkillRewardedSpells(uint32 skill_id )
+{
+    uint32 raceMask  = getRaceMask();
+    uint32 classMask = getClassMask();
+    for (uint32 j=0; j<sSkillLineAbilityStore.GetNumRows(); ++j)
+    {
+        SkillLineAbilityEntry const *pAbility = sSkillLineAbilityStore.LookupEntry(j);
+        if (!pAbility || pAbility->skillId!=skill_id || pAbility->learnOnGetSkill != ABILITY_LEARNED_ON_GET_PROFESSION_SKILL)
+            continue;
+        // Check race if set
+        if (pAbility->racemask && !(pAbility->racemask & raceMask))
+            continue;
+        // Check class if set
+        if (pAbility->classmask && !(pAbility->classmask & classMask))
+            continue;
+
+        if (SpellEntry const* spellentry = sSpellStore.LookupEntry(pAbility->spellId))
+        {
+            // Ok need learn spell
+            learnSpell(pAbility->spellId);
+        }
+    }
+}
+
+void Player::learnSkillRewardedSpells()
+{
+    for (uint16 i=0; i < PLAYER_MAX_SKILLS; i++)
+    {
+        if(!GetUInt32Value(PLAYER_SKILL_INDEX(i)))
+            continue;
+
+        uint32 pskill = GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF;
+
+        learnSkillRewardedSpells(pskill);
     }
 }
 
