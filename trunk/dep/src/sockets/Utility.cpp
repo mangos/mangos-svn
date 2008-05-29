@@ -952,7 +952,7 @@ std::string Utility::ToString(double d)
 
 unsigned long Utility::Rnd()
 {
-static	Utility::Rng generator( time(NULL) );
+static	Utility::Rng generator( (unsigned long)time(NULL) );
 	return generator.Get();
 }
 

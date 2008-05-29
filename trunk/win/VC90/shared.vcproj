@@ -542,6 +542,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\dep\include\mersennetwister\MersenneTwister.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\shared\Mthread.cpp"
 				>
 			</File>
