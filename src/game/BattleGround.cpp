@@ -1045,9 +1045,12 @@ void BattleGround::HandleKillPlayer( Player *player, Player *killer )
     // add +1 deaths
     UpdatePlayerScore(player, SCORE_DEATHS, 1);
 
-    // add +1 kills
+    // add +1 kills and killing_blows
     if(killer)
+    {
         UpdatePlayerScore(killer, SCORE_HONORABLE_KILLS, 1);
+        bg->UpdatePlayerScore(killer, SCORE_KILLING_BLOWS, 1);
+    }
 
     // to be able to remove insignia
     player->SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE );

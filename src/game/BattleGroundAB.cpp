@@ -599,7 +599,7 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target
         sprintf(buf, GetMangosString(LANG_BG_AB_NODE_ASSAULTED), _GetNodeName(node));
         sound = (teamIndex == 0) ? SOUND_NODE_ASSAULTED_ALLIANCE : SOUND_NODE_ASSAULTED_HORDE;
     }
-    UpdatePlayerScore(source, SCORE_KILLING_BLOWS, 1);
+    //only bases assaulted is updated
     UpdatePlayerScore(source, SCORE_BASES_ASSAULTED, 1);
     WorldPacket data;
     ChatHandler::FillMessageData(&data, source->GetSession(), type, LANG_UNIVERSAL, NULL, source->GetGUID(), buf, NULL);
