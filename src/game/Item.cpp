@@ -36,16 +36,18 @@ void AddItemsSetItem(Player*player,Item *item)
         return;
     }
 
-    if(set->required_skill_id )
-        if(player->GetSkillValue(set->required_skill_id) < set->required_skill_value) return;
+    if( set->required_skill_id && player->GetSkillValue(set->required_skill_id) < set->required_skill_value )
+        return;
 
-    ItemSetEffect *eff=NULL;
+    ItemSetEffect *eff = NULL;
 
-    for(size_t x = 0; x < player->ItemSetEff.size(); x++)
-        if(player->ItemSetEff[x] && player->ItemSetEff[x]->setid == setid)
+    for(size_t x = 0; x < player->ItemSetEff.size(); ++x)
     {
-        eff = player->ItemSetEff[x];
-        break;
+        if(player->ItemSetEff[x] && player->ItemSetEff[x]->setid == setid)
+        {
+            eff = player->ItemSetEff[x];
+            break;
+        }
     }
 
     if(!eff)
@@ -68,32 +70,39 @@ void AddItemsSetItem(Player*player,Item *item)
     ++eff->item_count;
 
     for(uint32 x=0;x<8;x++)
-        if(set->spells [x])
-                                                            //enough for  spell
-            if(set->items_to_triggerspell[x] <= eff->item_count)
+    {
+        if(!set->spells [x])
+            continue;
+        //not enough for  spell
+        if(set->items_to_triggerspell[x] > eff->item_count)
+            continue;
+
+        uint32 z=0;
+        for(;z<8;z++)
+            if(eff->spells[z] && eff->spells[z]->Id==set->spells[x])
+                break;
+
+        if(z < 8)
+            continue;
+
+        //new spell
+        for(uint32 y=0;y<8;y++)
+        {
+            if(!eff->spells[y])                             // free slot
             {
-                uint32 z=0;
-                for(;z<8;z++)
-                    if(eff->spells[z])
-                        if(eff->spells[z]->Id==set->spells[x])break;
+                SpellEntry const *spellInfo = sSpellStore.LookupEntry(set->spells[x]);
+                if(!spellInfo)
+                {
+                    sLog.outError("WORLD: unknown spell id %u in items set %u effects", set->spells[x],setid);
+                    break;
+                }
 
-                if(z==8)                                    //new spell
-                    for(uint32 y=0;y<8;y++)
-                        if(!eff->spells[y])
-                        {
-                            SpellEntry const *spellInfo = sSpellStore.LookupEntry(set->spells[x]);
-                            if(!spellInfo)
-                            {
-                                sLog.outError("WORLD: unknown spell id %u in items set %u effects", set->spells[x],setid);
-                                break;
-                            }
-
-                            player->CastSpell(player,set->spells[x],true,item);
-                            eff->spells[y] = spellInfo;
-                            break;
-                        }
+                player->CastSpell(player,set->spells[x],true,item);
+                eff->spells[y] = spellInfo;
+                break;
             }
-
+        }
+    }
 }
 
 void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
@@ -111,10 +120,12 @@ void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
     ItemSetEffect *eff = NULL;
     size_t setindex = 0;
     for(;setindex < player->ItemSetEff.size(); setindex++)
-        if(player->ItemSetEff[setindex] && player->ItemSetEff[setindex]->setid == setid)
     {
-        eff = player->ItemSetEff[setindex];
-        break;
+        if(player->ItemSetEff[setindex] && player->ItemSetEff[setindex]->setid == setid)
+        {
+            eff = player->ItemSetEff[setindex];
+            break;
+        }
     }
 
     // can be in case now enough skill requirement for set appling but set has been appliend when skill requirement not enough
@@ -124,19 +135,24 @@ void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
     --eff->item_count;
 
     for(uint32 x=0;x<8;x++)
-        if(set->spells[x])
-                                                            //not enough for spell
-            if(set->items_to_triggerspell[x] > eff->item_count)
+    {
+        if(!set->spells[x])
+            continue;
+
+        // enough for spell
+        if(set->items_to_triggerspell[x] <= eff->item_count)
+            continue;
+
+        for(uint32 z=0;z<8;z++)
+        {
+            if(eff->spells[z] && eff->spells[z]->Id==set->spells[x])
             {
-                for(uint32 z=0;z<8;z++)
-                    if(eff->spells[z])
-                        if(eff->spells[z]->Id==set->spells[x])
-                        {
-                            player->RemoveAurasDueToSpell(set->spells[x]);
-                            eff->spells[z]=NULL;
-                            break;
-                        }
+                player->RemoveAurasDueToSpell(set->spells[x]);
+                eff->spells[z]=NULL;
+                break;
             }
+        }
+    }
 
     if(!eff->item_count)                                    //all items of a set were removed
     {

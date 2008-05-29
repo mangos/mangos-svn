@@ -3722,30 +3722,6 @@ uint8 Spell::CanCast(bool strict)
                 if(int32(m_targets.getUnitTarget()->getLevel()) > CalculateDamage(i,m_targets.getUnitTarget()))
                     return SPELL_FAILED_HIGHLEVEL;
             };break;
-            case SPELL_AURA_MOD_STEALTH:
-            case SPELL_AURA_MOD_INVISIBILITY:
-            {
-                /*
-                Using stealth does not depend on the distance to mobs (as far as I know: ralf)
-                If this this code is in place, it is not possible to use stealth while in Vanish mode
-                                //detect if any mod is in x range.if true,can't steath.FIX ME!
-                                if(m_spellInfo->Attributes == 169148432 || m_caster->GetTypeId() != TYPEID_PLAYER)
-                                    break;
-
-                                // Find nearby creatures
-                                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                                Cell cell(p);
-                                cell.data.Part.reserved = ALL_DISTRICT;
-
-                                Creature* found_creature = NULL;
-
-                                MaNGOS::InAttackDistanceFromAnyHostileCreatureCheck u_check(m_caster);
-                                MaNGOS::CreatureSearcher<MaNGOS::InAttackDistanceFromAnyHostileCreatureCheck> checker(found_creature, u_check);
-                                TypeContainerVisitor<MaNGOS::CreatureSearcher<MaNGOS::InAttackDistanceFromAnyHostileCreatureCheck>, GridTypeMapContainer > object_checker(checker);
-                                CellLock<GridReadGuard> cell_lock(cell, p);
-                                cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-                */
-            };break;
             case SPELL_AURA_MOUNTED:
             {
                 if (m_caster->IsInWater())
