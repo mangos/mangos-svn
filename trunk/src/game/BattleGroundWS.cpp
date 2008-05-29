@@ -252,7 +252,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
 
     UpdateFlagState(Source->GetTeam(), 1);                  // flag state none
     UpdateTeamScore(Source->GetTeam());
-    UpdatePlayerScore(Source, SCORE_KILLING_BLOWS, 3);      // +3 kills for flag capture...
+    // only flag capture should be updated
     UpdatePlayerScore(Source, SCORE_FLAG_CAPTURES, 1);      // +1 flag captures...
 
     if(GetTeamScore(ALLIANCE) == BG_WS_MAX_TEAM_SCORE)
