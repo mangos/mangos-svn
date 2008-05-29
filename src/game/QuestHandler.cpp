@@ -248,6 +248,12 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid >> quest >> reward;
 
+    if(reward >= QUEST_REWARD_CHOICES_COUNT)
+    {
+        sLog.outError("Error in CMSG_QUESTGIVER_CHOOSE_REWARD: player %s (guid %d) tried to get invalid reward (%u) (probably packet hacking)", _player->GetName(), _player->GetGUIDLow(), reward);
+        return;
+    }
+
     if(!GetPlayer()->isAlive())
         return;
 
