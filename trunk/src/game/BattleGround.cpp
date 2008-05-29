@@ -1049,7 +1049,7 @@ void BattleGround::HandleKillPlayer( Player *player, Player *killer )
     if(killer)
     {
         UpdatePlayerScore(killer, SCORE_HONORABLE_KILLS, 1);
-        bg->UpdatePlayerScore(killer, SCORE_KILLING_BLOWS, 1);
+        UpdatePlayerScore(killer, SCORE_KILLING_BLOWS, 1);
     }
 
     // to be able to remove insignia

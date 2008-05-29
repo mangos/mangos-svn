@@ -1650,20 +1650,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool RewardHonor(Unit *pVictim, uint32 groupsize, float honor = -1);
         uint32 GetHonorPoints() { return GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY); }
         uint32 GetArenaPoints() { return GetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY); }
-        void ModifyHonorPoints( int32 d )
-        {
-            if(d < 0)
-                SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, GetHonorPoints() > uint32(-d) ? GetHonorPoints() + d : 0);
-            else
-                SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, GetHonorPoints() < MAX_MONEY_AMOUNT - d ? GetHonorPoints() + d : MAX_MONEY_AMOUNT);
-        }
-        void ModifyArenaPoints( int32 d )
-        {
-            if(d < 0)
-                SetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY, GetArenaPoints() > uint32(-d) ? GetArenaPoints() + d : 0);
-            else
-                SetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY, GetArenaPoints() < MAX_MONEY_AMOUNT - d ? GetArenaPoints() + d : MAX_MONEY_AMOUNT);
-        }
+        void ModifyHonorPoints( int32 value );
+        void ModifyArenaPoints( int32 value );
         uint32 GetMaxPersonalArenaRatingRequirement();
 
         //End of PvP System
