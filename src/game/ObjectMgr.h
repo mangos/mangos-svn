@@ -209,23 +209,23 @@ enum ConditionType
     CONDITION_SKILL                 = 7,                    // skill_id     skill_value
     CONDITION_QUESTREWARDED         = 8,                    // quest_id     0
     CONDITION_QUESTTAKEN            = 9,                    // quest_id     0,      for condition true while quest active.
-    CONDITION_AD_COMMISSION_AURA    = 10,                   // 0            0,      for condition true while one from AD ñommission aura active 
+    CONDITION_AD_COMMISSION_AURA    = 10,                   // 0            0,      for condition true while one from AD ñommission aura active
 };
 
-#define MAX_CONDITION                 11                    // maximum value in ConditionType enum 
+#define MAX_CONDITION                 11                    // maximum value in ConditionType enum
 
 struct Condition
 {
     ConditionType condition;                                // additional condition type
     uint32  value1;                                         // data for the condition - see ConditionType definition
-    uint32  value2;                     
+    uint32  value2;
 
     Condition(uint8 _condition = 0, uint32 _value1 = 0, uint32 _value2 = 0)
         : condition(ConditionType(_condition)), value1(_value1), value2(_value2) {}
 
     static bool IsValid(ConditionType condition, uint32 value1, uint32 value2);
     // Checks correctness of values
-    bool Meets(Player const * APlayer) const;               // Checks if the player meets the condition 
+    bool Meets(Player const * APlayer) const;               // Checks if the player meets the condition
     bool operator == (Condition const& lc) const
     {
         return (lc.condition == condition && lc.value1 == value1 && lc.value2 == value2);
@@ -514,9 +514,9 @@ class ObjectMgr
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint32 level);
 
-        int32 GetFishingBaseSkillLevel(uint32 entry) const 
+        int32 GetFishingBaseSkillLevel(uint32 entry) const
         {
-            FishingBaseSkillMap::const_iterator itr = mFishingBaseForArea.find(entry); 
+            FishingBaseSkillMap::const_iterator itr = mFishingBaseForArea.find(entry);
             return itr != mFishingBaseForArea.end() ? itr->second : 0;
         }
 
@@ -686,7 +686,6 @@ class ObjectMgr
         uint32 m_hiCorpseGuid;
 
         uint32 m_hiPetNumber;
-
 
         QuestMap mQuestTemplates;
 

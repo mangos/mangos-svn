@@ -287,15 +287,15 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
 
     for (size_t i = 0; i < keyFrames.size(); i++)
     {
-        if (keyFrames[i].distSinceStop < (30 * 30 * 0.5))
+        if (keyFrames[i].distSinceStop < (30 * 30 * 0.5f))
             keyFrames[i].tFrom = sqrt(2 * keyFrames[i].distSinceStop);
         else
-            keyFrames[i].tFrom = ((keyFrames[i].distSinceStop - (30 * 30 * 0.5)) / 30) + 30;
+            keyFrames[i].tFrom = ((keyFrames[i].distSinceStop - (30 * 30 * 0.5f)) / 30) + 30;
 
-        if (keyFrames[i].distUntilStop < (30 * 30 * 0.5))
+        if (keyFrames[i].distUntilStop < (30 * 30 * 0.5f))
             keyFrames[i].tTo = sqrt(2 * keyFrames[i].distUntilStop);
         else
-            keyFrames[i].tTo = ((keyFrames[i].distUntilStop - (30 * 30 * 0.5)) / 30) + 30;
+            keyFrames[i].tTo = ((keyFrames[i].distUntilStop - (30 * 30 * 0.5f)) / 30) + 30;
 
         keyFrames[i].tFrom *= 1000;
         keyFrames[i].tTo *= 1000;
@@ -355,11 +355,11 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
                 {
                     if (tFrom <= 30000)
                     {
-                        d = 0.5 * (tFrom / 1000) * (tFrom / 1000);
+                        d = 0.5f * (tFrom / 1000) * (tFrom / 1000);
                     }
                     else
                     {
-                        d = 0.5 * 30 * 30 + 30 * ((tFrom - 30000) / 1000);
+                        d = 0.5f * 30 * 30 + 30 * ((tFrom - 30000) / 1000);
                     }
                     d = d - keyFrames[i].distSinceStop;
                 }
@@ -367,11 +367,11 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
                 {
                     if (tTo <= 30000)
                     {
-                        d = 0.5 * (tTo / 1000) * (tTo / 1000);
+                        d = 0.5f * (tTo / 1000) * (tTo / 1000);
                     }
                     else
                     {
-                        d = 0.5 * 30 * 30 + 30 * ((tTo - 30000) / 1000);
+                        d = 0.5f * 30 * 30 + 30 * ((tTo - 30000) / 1000);
                     }
                     d = keyFrames[i].distUntilStop - d;
                 }

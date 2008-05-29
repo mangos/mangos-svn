@@ -248,7 +248,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
         //Players with Feather Fall or low fall time, or physical immunity are ignored
         if (movementInfo.fallTime > 1100 && !target->isDead() && !target->isGameMaster() &&
-            !target->HasAuraType(SPELL_AURA_HOVER) && !target->HasAuraType(SPELL_AURA_FEATHER_FALL) && 
+            !target->HasAuraType(SPELL_AURA_HOVER) && !target->HasAuraType(SPELL_AURA_FEATHER_FALL) &&
             !target->HasAuraType(SPELL_AURA_FLY) && !target->IsImmunedToPhysicalDamage() )
         {
             //Safe fall, fall time reduction

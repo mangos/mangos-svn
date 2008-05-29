@@ -150,7 +150,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         // check if target is globally visible for player
         if (!(itr->second->IsVisibleGloballyFor(_player)))
             continue;
-        
+
         // check if target's level is in level range
         uint32 lvl = itr->second->getLevel();
         if (lvl < level_min || lvl > level_max)
@@ -160,14 +160,14 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         uint32 class_ = itr->second->getClass();
         if (!(classmask & (1 << class_)))
             continue;
-        
+
         // check if race matches racemask
         uint32 race = itr->second->getRace();
         if (!(racemask & (1 << race)))
             continue;
 
         uint32 pzoneid = itr->second->GetZoneId();
-        
+
         bool z_show = true;
         for(uint32 i = 0; i < zones_count; i++)
         {
@@ -206,13 +206,13 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         if (!s_show)
             continue;
 
-        data << pname;                                  // player name
-        data << gname;                                  // guild name
-        data << uint32( lvl );                          // player level
-        data << uint32( class_ );                       // player class
-        data << uint32( race );                         // player race
-        data << uint8(0);                               // new 2.4.0
-        data << uint32( pzoneid );                      // player zone id
+        data << pname;                                      // player name
+        data << gname;                                      // guild name
+        data << uint32( lvl );                              // player level
+        data << uint32( class_ );                           // player class
+        data << uint32( race );                             // player race
+        data << uint8(0);                                   // new 2.4.0
+        data << uint32( pzoneid );                          // player zone id
 
         // 49 is maximum player count sent to client
         if ((++clientcount) == 49)
@@ -974,7 +974,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         if(at->requiredItem)
         {
             if(!GetPlayer()->HasItemCount(at->requiredItem, 1) &&
-               (!at->requiredItem2 || !GetPlayer()->HasItemCount(at->requiredItem2, 1)))
+                (!at->requiredItem2 || !GetPlayer()->HasItemCount(at->requiredItem2, 1)))
                 missingItem = at->requiredItem;
         }
         else if(at->requiredItem2 && !GetPlayer()->HasItemCount(at->requiredItem2, 1))
@@ -986,7 +986,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             if(at->heroicKey)
             {
                 if(!GetPlayer()->HasItemCount(at->heroicKey, 1) &&
-                   (!at->heroicKey2 || !GetPlayer()->HasItemCount(at->heroicKey2, 1)))
+                    (!at->heroicKey2 || !GetPlayer()->HasItemCount(at->heroicKey2, 1)))
                     missingKey = at->heroicKey;
             }
             else if(at->heroicKey2 && !GetPlayer()->HasItemCount(at->heroicKey2, 1))

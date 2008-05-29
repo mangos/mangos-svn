@@ -4810,6 +4810,7 @@ bool ChatHandler::HandleComeToMeCommand(const char *args)
 
     return true;
 }
+
 bool ChatHandler::HandleCastSelfCommand(const char* args)
 {
     if(!*args)

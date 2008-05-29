@@ -494,7 +494,6 @@ enum DispelType
     (1<<IMMUNE_DISPEL_DISEASE) | \
     (1<<IMMUNE_DISPEL_POISON) )
 
-
 //To all Immune system,if target has immunes,
 //some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,
 //some spell_effects that related to ImmuneToEffect<effect>(only this effect in the spell) can't cast to it,

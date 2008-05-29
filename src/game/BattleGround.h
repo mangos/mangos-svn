@@ -63,19 +63,19 @@ enum BattleGroundSpells
 
 enum BattleGroundTimeIntervals
 {
-    RESURRECTION_INTERVAL           = 30000,            // ms
-    REMIND_INTERVAL                 = 30000,            // ms
-    INVITE_ACCEPT_WAIT_TIME         = 120000,           // ms
-    TIME_TO_AUTOREMOVE              = 120000,           // ms
-    MAX_OFFLINE_TIME                = 300000,           // ms
-    START_DELAY0                    = 120000,           // ms
-    START_DELAY1                    = 60000,            // ms
-    START_DELAY2                    = 30000,            // ms
-    START_DELAY3                    = 15000,            // ms used only in arena
-    RESPAWN_ONE_DAY                 = 86400,            // secs
-    RESPAWN_IMMEDIATELY             = 0,                // secs
-    BUFF_RESPAWN_TIME               = 180,              // secs
-    BG_HONOR_SCORE_TICKS            = 330               // points
+    RESURRECTION_INTERVAL           = 30000,                // ms
+    REMIND_INTERVAL                 = 30000,                // ms
+    INVITE_ACCEPT_WAIT_TIME         = 120000,               // ms
+    TIME_TO_AUTOREMOVE              = 120000,               // ms
+    MAX_OFFLINE_TIME                = 300000,               // ms
+    START_DELAY0                    = 120000,               // ms
+    START_DELAY1                    = 60000,                // ms
+    START_DELAY2                    = 30000,                // ms
+    START_DELAY3                    = 15000,                // ms used only in arena
+    RESPAWN_ONE_DAY                 = 86400,                // secs
+    RESPAWN_IMMEDIATELY             = 0,                    // secs
+    BUFF_RESPAWN_TIME               = 180,                  // secs
+    BG_HONOR_SCORE_TICKS            = 330                   // points
 };
 
 enum BattleGroundBuffObjects
@@ -179,7 +179,9 @@ class BattleGroundScore
 {
     public:
         BattleGroundScore() : KillingBlows(0), HonorableKills(0), Deaths(0), DamageDone(0), HealingDone(0), BonusHonor(0) {};
-        virtual ~BattleGroundScore() {};    //virtual destructor is used when deleting score from scores map
+        virtual ~BattleGroundScore()                        //virtual destructor is used when deleting score from scores map
+        {
+        };
         uint32 KillingBlows;
         uint32 Deaths;
         uint32 HonorableKills;
@@ -209,7 +211,9 @@ class BattleGround
             return true;
         }
         void Reset();                                       // resets all common properties for battlegrounds
-        virtual void ResetBGSubclass() {}                   // must be implemented in BG subclass
+        virtual void ResetBGSubclass()                      // must be implemented in BG subclass
+        {
+        }
 
         /* Battleground */
         // Get methods:
@@ -258,8 +262,8 @@ class BattleGround
         void SetMaxPlayersPerTeam(uint32 MaxPlayers) { m_MaxPlayersPerTeam = MaxPlayers; }
         void SetMinPlayersPerTeam(uint32 MinPlayers) { m_MinPlayersPerTeam = MinPlayers; }
 
-        void AddToBGFreeSlotQueue();                            //this queue will be useful when more battlegrounds instances will be available
-        void RemoveFromBGFreeSlotQueue();                       //this method could delete whole BG instance, if another free is available
+        void AddToBGFreeSlotQueue();                        //this queue will be useful when more battlegrounds instances will be available
+        void RemoveFromBGFreeSlotQueue();                   //this method could delete whole BG instance, if another free is available
 
         void DecreaseInvitedCount(uint32 team)      { (team == ALLIANCE) ? --m_InvitedAlliance : --m_InvitedHorde; }
         void IncreaseInvitedCount(uint32 team)      { (team == ALLIANCE) ? ++m_InvitedAlliance : ++m_InvitedHorde; }
@@ -390,13 +394,15 @@ class BattleGround
         void EndNow();
 
         /* Scorekeeping */
-        std::map<uint64, BattleGroundScore*>    m_PlayerScores;// Player scores
+                                                            // Player scores
+        std::map<uint64, BattleGroundScore*>    m_PlayerScores;
         // must be implemented in BG subclass
         virtual void RemovePlayer(Player * /*player*/, uint64 /*guid*/) {}
 
         /* Player lists, those need to be accessible by inherited classes */
         std::map<uint64, BattleGroundPlayer>    m_Players;
-        std::map<uint64, std::vector<uint64> >  m_ReviveQueue;// Spirit Guide guid + Player list GUIDS
+                                                            // Spirit Guide guid + Player list GUIDS
+        std::map<uint64, std::vector<uint64> >  m_ReviveQueue;
 
         /*
         this is important variable used for invitation messages
@@ -433,7 +439,7 @@ class BattleGround
         uint32 m_InvitedHorde;
 
         /* Raid Group */
-        Group *m_BgRaids[2];                                  // 0 - alliance, 1 - horde
+        Group *m_BgRaids[2];                                // 0 - alliance, 1 - horde
 
         /* Players count by team */
         uint32 m_PlayersCount[2];

@@ -48,7 +48,7 @@ lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGrou
 m_itemsLoaded(false), m_trainerSpellsLoaded(false), m_trainer_type(0), m_lootMoney(0), m_lootRecipient(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0f),
 m_gossipOptionLoaded(false),m_NPCTextId(0), m_emoteState(0), m_isPet(false), m_isTotem(false),
-m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0), 
+m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0),
 m_AlreadyCallAssistence(false), m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false),
 m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL)
 {
@@ -166,7 +166,7 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
         sLog.outErrorDb("Creature::UpdateEntry creature entry %u does not exist.", Entry);
         return false;
     }
-    
+
     SetUInt32Value(OBJECT_FIELD_ENTRY, Entry);
     m_regenHealth = cinfo->RegenHealth;
     if (cinfo->DisplayID_A == 0 || cinfo->DisplayID_H == 0) // Cancel load if no model defined
@@ -347,7 +347,7 @@ void Creature::Update(uint32 diff)
                     RemoveCorpse();
                     DEBUG_LOG("Removing alive corpse... %u ", GetUInt32Value(OBJECT_FIELD_ENTRY));
                 }
-                else 
+                else
                 {
                     m_deathTimer -= diff;
                 }
@@ -1229,7 +1229,6 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
     if(!UpdateEntry(Entry, team, data))
         return false;
 
-
     //Notify the map's instance data.
     //Only works if you create the object in it, not if it is moves to that map.
     //Normally non-players do not teleport to other maps.
@@ -1358,7 +1357,7 @@ void Creature::LoadGoods()
             sLog.outErrorDb("Vendor %u have in item list non-existed item %u",GetEntry(),item_id);
             continue;
         }
-        
+
         uint32 ExtendedCost = fields[3].GetUInt32();
         if(ExtendedCost && !sItemExtendedCostStore.LookupEntry(ExtendedCost))
             sLog.outErrorDb("Item (Entry: %u) has wrong ExtendedCost (%u) for vendor (%u)",item_id,ExtendedCost,GetEntry());
@@ -1485,7 +1484,7 @@ void Creature::setDeathState(DeathState s)
         SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
         RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
         AddUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
-        SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);       
+        SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
         clearUnitState(UNIT_STAT_ALL_STATE);
         i_motionMaster.Clear();
         SetMeleeDamageSchool(SpellSchools(cinfo->dmgschool));

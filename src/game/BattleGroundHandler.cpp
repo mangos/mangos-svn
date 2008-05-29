@@ -128,7 +128,8 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
                 continue;
 
             WorldPacket data;
-            uint32 queueSlot = member->AddBattleGroundQueueId(bgTypeId);           // add to queue
+                                                            // add to queue
+            uint32 queueSlot = member->AddBattleGroundQueueId(bgTypeId);
             if (queueSlot == PLAYER_MAX_BATTLEGROUND_QUEUES)
             {
                 // fill data packet
@@ -527,7 +528,8 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
                 //player is already in this queue
                 continue;
 
-            uint32 queueSlot = member->AddBattleGroundQueueId(BATTLEGROUND_AA);// add to queue
+                                                            // add to queue
+            uint32 queueSlot = member->AddBattleGroundQueueId(BATTLEGROUND_AA);
             if (queueSlot == PLAYER_MAX_BATTLEGROUND_QUEUES)
             {
                 WorldPacket data;

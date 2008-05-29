@@ -169,4 +169,3 @@ bool Database::DirectPExecute(const char * format,...)
 
     return DirectExecute(szQuery);
 }
-

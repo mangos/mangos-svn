@@ -38,7 +38,8 @@
 #include <fstream>
 #include <map>
 
-static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] = {
+static uint32 ReputationRankStrIndex[MAX_REPUTATION_RANK] =
+{
     LANG_REP_HATED,    LANG_REP_HOSTILE, LANG_REP_UNFRIENDLY, LANG_REP_NEUTRAL,
     LANG_REP_FRIENDLY, LANG_REP_HONORED, LANG_REP_REVERED,    LANG_REP_EXALTED
 };
@@ -528,7 +529,7 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
     }
 
     for (uint32 id = 0; id < sFactionStore.GetNumRows(); id++)
-    //for(FactionsList::const_iterator itr = target->m_factions.begin(); itr != target->m_factions.end(); ++itr)
+        //for(FactionsList::const_iterator itr = target->m_factions.begin(); itr != target->m_factions.end(); ++itr)
     {
         FactionEntry const *factionEntry = sFactionStore.LookupEntry(id);
         //FactionEntry const *factionEntry = sFactionStore.LookupEntry(itr->second.ID);
@@ -549,7 +550,7 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
                 // or              "id - [faction] [no reputation]" format
                 std::ostringstream ss;
                 ss << id << " - |cffffffff|Hfaction:" << id << "|h[" << factionEntry->name[sWorld.GetDBClang()] << "]|h|r";
-    
+
                 if (repItr != target->m_factions.end())
                 {
                     ReputationRank rank = target->GetReputationRank(factionEntry);
@@ -574,8 +575,8 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
                     ss << GetMangosString(LANG_FACTION_NOREPUTATION);
 
                 SendSysMessage(ss.str().c_str());
-                 counter++;
-           }
+                counter++;
+            }
         }
     }
 
@@ -584,7 +585,8 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleModifyRepCommand(const char * args) {
+bool ChatHandler::HandleModifyRepCommand(const char * args)
+{
     if (!*args) return false;
 
     Player* target = NULL;
@@ -609,7 +611,7 @@ bool ChatHandler::HandleModifyRepCommand(const char * args) {
 
     std::string rankStr = rankTxt;
     std::transform( rankStr.begin(), rankStr.end(), rankStr.begin(), ::tolower );
-    
+
     amount = atoi(rankTxt);
     if ((amount == 0) && (rankTxt[0] != '-') && !isdigit(rankTxt[0]))
     {
@@ -620,7 +622,7 @@ bool ChatHandler::HandleModifyRepCommand(const char * args) {
             std::string rank = GetMangosString(ReputationRankStrIndex[r]);
             std::transform( rank.begin(), rank.end(), rank.begin(), ::tolower );
 
-            if (rankStr == rank) 
+            if (rankStr == rank)
             {
                 char *deltaTxt = strtok(NULL, " ");
                 if (deltaTxt)
@@ -1146,7 +1148,7 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
 
     char* fextendedcost = strtok(NULL, " ");                //add ExtendedCost, default: 0
     uint32 extendedcost = fextendedcost ? atol(fextendedcost) : 0;
-    
+
     ItemPrototype const *pProto = objmgr.GetItemPrototype(itemId);
     if(!pProto)
     {
@@ -1155,7 +1157,7 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
     }
 
     if(extendedcost && !sItemExtendedCostStore.LookupEntry(extendedcost))
-    { 
+    {
         PSendSysMessage(LANG_BAD_VALUE, extendedcost);
         return true;
     }
@@ -1999,7 +2001,7 @@ bool ChatHandler::HandleSpawnDistCommand(const char* args)
     }
 
     MovementGeneratorType mtype = IDLE_MOTION_TYPE;
-    if (option >0.0f) 
+    if (option >0.0f)
         mtype = RANDOM_MOTION_TYPE;
 
     Creature *pCreature = getSelectedCreature();
@@ -2213,7 +2215,7 @@ bool ChatHandler::HandleWpAddCommand(const char* args)
     {
         target->SetDefaultMovementType(WAYPOINT_MOTION_TYPE);
         target->GetMotionMaster()->Initialize();
-        if(target->isAlive())                            // dead creature will reset movement generator at respawn
+        if(target->isAlive())                               // dead creature will reset movement generator at respawn
         {
             target->setDeathState(JUST_DIED);
             target->RemoveCorpse();
@@ -2263,7 +2265,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
     std::string show = show_str;
     // Check
     // Remember: "show" must also be the name of a column!
-    if( (show != "emote") && (show != "spell") && (show != "text1") && (show != "text2") 
+    if( (show != "emote") && (show != "spell") && (show != "text1") && (show != "text2")
         && (show != "text3") && (show != "text4") && (show != "text5")
         && (show != "waittime") && (show != "del") && (show != "move") && (show != "add")
         && (show != "model1") && (show != "model2") && (show != "orientation"))
@@ -3102,85 +3104,85 @@ bool ChatHandler::HandleWpExportCommand(const char *args)
         outfile << "( id, point, position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, text1, text2, text3, text4, text5 ) VALUES ";
 
         outfile << "( ";
-        outfile << fields[15].GetUInt32();          // id
+        outfile << fields[15].GetUInt32();                  // id
         outfile << ", ";
-        outfile << fields[0].GetUInt32();           // point
+        outfile << fields[0].GetUInt32();                   // point
         outfile << ", ";
-        outfile << fields[1].GetFloat();            // position_x
+        outfile << fields[1].GetFloat();                    // position_x
         outfile << ", ";
-        outfile << fields[2].GetFloat();            // position_y
+        outfile << fields[2].GetFloat();                    // position_y
         outfile << ", ";
-        outfile << fields[3].GetUInt32();           // position_z
+        outfile << fields[3].GetUInt32();                   // position_z
         outfile << ", ";
-        outfile << fields[4].GetUInt32();           // orientation
+        outfile << fields[4].GetUInt32();                   // orientation
         outfile << ", ";
-        outfile << fields[5].GetUInt32();           // model1
+        outfile << fields[5].GetUInt32();                   // model1
         outfile << ", ";
-        outfile << fields[6].GetUInt32();           // model2
+        outfile << fields[6].GetUInt32();                   // model2
         outfile << ", ";
-        outfile << fields[7].GetUInt16();           // waittime
+        outfile << fields[7].GetUInt16();                   // waittime
         outfile << ", ";
-        outfile << fields[8].GetUInt32();           // emote
+        outfile << fields[8].GetUInt32();                   // emote
         outfile << ", ";
-        outfile << fields[9].GetUInt32();           // spell
+        outfile << fields[9].GetUInt32();                   // spell
         outfile << ", ";
         const char *tmpChar = fields[10].GetString();
         if( !tmpChar )
         {
-            outfile << "NULL";                      // text1
+            outfile << "NULL";                              // text1
         }
         else
         {
             outfile << "'";
-            outfile << tmpChar;                     // text1
+            outfile << tmpChar;                             // text1
             outfile << "'";
         }
         outfile << ", ";
         tmpChar = fields[11].GetString();
         if( !tmpChar )
         {
-            outfile << "NULL";                      // text2
+            outfile << "NULL";                              // text2
         }
         else
         {
             outfile << "'";
-            outfile << tmpChar;                     // text2
+            outfile << tmpChar;                             // text2
             outfile << "'";
         }
         outfile << ", ";
         tmpChar = fields[12].GetString();
         if( !tmpChar )
         {
-            outfile << "NULL";                      // text3
+            outfile << "NULL";                              // text3
         }
         else
         {
             outfile << "'";
-            outfile << tmpChar;                     // text3
+            outfile << tmpChar;                             // text3
             outfile << "'";
         }
         outfile << ", ";
         tmpChar = fields[13].GetString();
         if( !tmpChar )
         {
-            outfile << "NULL";                      // text4
+            outfile << "NULL";                              // text4
         }
         else
         {
             outfile << "'";
-            outfile << tmpChar;                     // text4
+            outfile << tmpChar;                             // text4
             outfile << "'";
         }
         outfile << ", ";
         tmpChar = fields[14].GetString();
         if( !tmpChar )
         {
-            outfile << "NULL";                      // text5
+            outfile << "NULL";                              // text5
         }
         else
         {
             outfile << "'";
-            outfile << tmpChar;                     // text5
+            outfile << tmpChar;                             // text5
             outfile << "'";
         }
         outfile << ");\n ";
@@ -3326,7 +3328,7 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
         delete pGameObj;
         return false;
     }
-    
+
     sLog.outDebug(GetMangosString(LANG_GAMEOBJECT_CURRENT), goI->name, db_lowGUID, x, y, z, o);
 
     map->Add(pGameObj);

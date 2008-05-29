@@ -68,7 +68,7 @@ ObjectMgr::ObjectMgr()
     mGuildBankTabPrice[5] = 5000;
 
     // Only zero condition left, others will be added while loading DB tables
-    mConditions.resize(1);    
+    mConditions.resize(1);
 }
 
 ObjectMgr::~ObjectMgr()
@@ -536,7 +536,7 @@ void ObjectMgr::LoadCreatureTemplates()
             sLog.outErrorDb("Creature (Entry: %u) has wrong movement generator type (%u), ignore and set to IDLE.",cInfo->Entry,cInfo->MovementType);
             const_cast<CreatureInfo*>(cInfo)->MovementType = IDLE_MOTION_TYPE;
         }
-        
+
         /// if not set custom creature scale then load scale from CreatureDisplayInfo.dbc
         if(cInfo->scale <= 0.0f)
         {
@@ -737,7 +737,6 @@ void ObjectMgr::LoadCreatures()
     //   12         13       14          15            16         17
         "curhealth, curmana, DeathState, MovementType, spawnMask, event "
         "FROM creature LEFT OUTER JOIN game_event_creature ON creature.guid = game_event_creature.guid");
-
 
     if(!result)
     {
@@ -2354,7 +2353,7 @@ void ObjectMgr::LoadGroups()
                     continue;
                 }
             }
-            
+
             group->LoadMemberFromDB(fields[0].GetUInt32(), fields[2].GetUInt8(), fields[1].GetBool());
         }while( result->NextRow() );
         delete result;
@@ -4749,32 +4748,32 @@ void ObjectMgr::LoadGameobjectInfo()
                 break;
             }
             case GAMEOBJECT_TYPE_CHEST:                     //3
+            {
+                if(goInfo->chest.lockId)
                 {
-                    if(goInfo->chest.lockId)
-                    {
-                        if(!sLockStore.LookupEntry(goInfo->chest.lockId))
-                            sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data0=%u but lock (Id: %u) not found.",
-                                id,goInfo->type,goInfo->chest.lockId,goInfo->chest.lockId);
-                    }
-                    if(goInfo->chest.linkedTrapId)          // linked trap
-                    {
-                        if(GameObjectInfo const* trapInfo = sGOStorage.LookupEntry<GameObjectInfo>(goInfo->chest.linkedTrapId))
-                        {
-                            if(trapInfo->type!=GAMEOBJECT_TYPE_TRAP)
-                                sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data7=%u but GO (Entry %u) have not GAMEOBJECT_TYPE_TRAP (%u) type.",
-                                    id,goInfo->type,goInfo->chest.linkedTrapId,goInfo->chest.linkedTrapId,GAMEOBJECT_TYPE_TRAP);
-                        }
-                        /* disable check for while 
-                        else
-                            sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data2=%u but trap GO (Entry %u) not exist in `gameobject_template`.",
-                                id,goInfo->type,goInfo->chest.linkedTrapId,goInfo->chest.linkedTrapId);
-                        */
-                    }
-                    break;
+                    if(!sLockStore.LookupEntry(goInfo->chest.lockId))
+                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data0=%u but lock (Id: %u) not found.",
+                            id,goInfo->type,goInfo->chest.lockId,goInfo->chest.lockId);
                 }
+                if(goInfo->chest.linkedTrapId)              // linked trap
+                {
+                    if(GameObjectInfo const* trapInfo = sGOStorage.LookupEntry<GameObjectInfo>(goInfo->chest.linkedTrapId))
+                    {
+                        if(trapInfo->type!=GAMEOBJECT_TYPE_TRAP)
+                            sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data7=%u but GO (Entry %u) have not GAMEOBJECT_TYPE_TRAP (%u) type.",
+                                id,goInfo->type,goInfo->chest.linkedTrapId,goInfo->chest.linkedTrapId,GAMEOBJECT_TYPE_TRAP);
+                    }
+                    /* disable check for while
+                    else
+                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data2=%u but trap GO (Entry %u) not exist in `gameobject_template`.",
+                            id,goInfo->type,goInfo->chest.linkedTrapId,goInfo->chest.linkedTrapId);
+                    */
+                }
+                break;
+            }
             case GAMEOBJECT_TYPE_TRAP:                      //6
             {
-                /* disable check for while 
+                /* disable check for while
                 if(goInfo->trap.spellId)                    // spell
                 {
                     if(!sSpellStore.LookupEntry(goInfo->trap.spellId))
@@ -4811,7 +4810,7 @@ void ObjectMgr::LoadGameobjectInfo()
                             sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data2=%u but GO (Entry %u) have not GAMEOBJECT_TYPE_TRAP (%u) type.",
                                 id,goInfo->type,goInfo->spellFocus.linkedTrapId,goInfo->spellFocus.linkedTrapId,GAMEOBJECT_TYPE_TRAP);
                     }
-                    /* disable check for while 
+                    /* disable check for while
                     else
                         sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data2=%u but trap GO (Entry %u) not exist in `gameobject_template`.",
                             id,goInfo->type,goInfo->spellFocus.linkedTrapId,goInfo->spellFocus.linkedTrapId);
@@ -4827,7 +4826,7 @@ void ObjectMgr::LoadGameobjectInfo()
                         sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data7=%u but PageText (Entry %u) not exist.",
                             id,goInfo->type,goInfo->goober.pageId,goInfo->goober.pageId);
                 }
-                /* disable check for while 
+                /* disable check for while
                 if(goInfo->goober.spellId)                  // spell
                 {
                     if(!sSpellStore.LookupEntry(goInfo->goober.spellId))
@@ -4843,7 +4842,7 @@ void ObjectMgr::LoadGameobjectInfo()
                             sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data12=%u but GO (Entry %u) have not GAMEOBJECT_TYPE_TRAP (%u) type.",
                                 id,goInfo->type,goInfo->goober.linkedTrapId,goInfo->goober.linkedTrapId,GAMEOBJECT_TYPE_TRAP);
                     }
-                    /* disable check for while 
+                    /* disable check for while
                     else
                         sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data12=%u but trap GO (Entry %u) not exist in `gameobject_template`.",
                             id,goInfo->type,goInfo->goober.linkedTrapId,goInfo->goober.linkedTrapId);
@@ -4863,7 +4862,7 @@ void ObjectMgr::LoadGameobjectInfo()
             }
             case GAMEOBJECT_TYPE_SUMMONING_RITUAL:          //18
             {
-                /* disabled 
+                /* disabled
                 if(goInfo->summoningRitual.spellId)
                 {
                     if(!sSpellStore.LookupEntry(goInfo->summoningRitual.spellId))
@@ -5549,7 +5548,7 @@ bool ObjectMgr::IsValidCharterName( std::string name )
 
     if(sWorld.getConfig(CONFIG_STRICT_CHARTER_NAMES))
         if(name.find_first_not_of(strictAllowedCharsTitle)!=name.npos)
-           return false;
+            return false;
 
     return true;
 }
@@ -5565,7 +5564,7 @@ bool ObjectMgr::IsValidPetName( std::string name )
 
     if(sWorld.getConfig(CONFIG_STRICT_PET_NAMES))
         if(name.find_first_not_of(strictAllowedCharsName)!=name.npos)
-           return false;
+            return false;
 
     return true;
 }
@@ -5691,7 +5690,7 @@ void ObjectMgr::LoadGameObjectForQuests()
 
 bool ObjectMgr::LoadMangosStrings()
 {
-    mMangosStringMap.clear();                         // need for reload case
+    mMangosStringMap.clear();                               // need for reload case
 
     QueryResult *result = WorldDatabase.Query("SELECT entry,content_default FROM mangos_string");
     if(!result)

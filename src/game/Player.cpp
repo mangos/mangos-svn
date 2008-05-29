@@ -2575,6 +2575,7 @@ bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading
 
     if(spellLearnSkill)
     {
+
         uint32 skill_value = GetPureSkillValue(spellLearnSkill->skill);
         uint32 skill_max_value = GetPureMaxSkillValue(spellLearnSkill->skill);
 

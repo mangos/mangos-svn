@@ -154,31 +154,31 @@ bool ChatHandler::HandleSendOpcodeCommand(const char* args)
     {
         switch(type)
         {
-            case 0: // uint8
+            case 0:                                         // uint8
                 fscanf(file, "%u", &val1);
                 data << uint8(val1);
                 break;
-            case 1: // uint16
+            case 1:                                         // uint16
                 fscanf(file, "%u", &val1);
                 data << uint16(val1);
                 break;
-            case 2: // uint32
+            case 2:                                         // uint32
                 fscanf(file, "%u", &val1);
                 data << uint32(val1);
                 break;
-            case 3: // uint64
+            case 3:                                         // uint64
                 fscanf(file, "%llu", &val2);
                 data << uint64(val2);
                 break;
-            case 4: // float
+            case 4:                                         // float
                 fscanf(file, "%f", &val3);
                 data << float(val3);
                 break;
-            case 5: // string
+            case 5:                                         // string
                 fscanf(file, "%s", val4, 101);
                 data << val4;
                 break;
-            case 6: // packed guid
+            case 6:                                         // packed guid
                 data.append(unit->GetPackGUID());
                 break;
             default:

@@ -219,9 +219,9 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
             SetByteValue(UNIT_FIELD_BYTES_1, 1, fields[9].GetUInt32());
 
             if(fields[13].GetBool())
-                SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00022801); // can't be renamed (byte 0x02)
+                SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00022801);// can't be renamed (byte 0x02)
             else
-                SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00032801); // can be renamed (byte 0x03)
+                SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00032801);// can be renamed (byte 0x03)
 
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);
                                                             // this enables popup window (pet abandon, cancel)
@@ -713,7 +713,6 @@ bool Pet::HasTPForSpell(uint32 spellid)
     return true;
 }
 
-
 int32 Pet::GetTPForSpell(uint32 spellid)
 {
     uint32 basetrainp = 0;
@@ -734,7 +733,7 @@ int32 Pet::GetTPForSpell(uint32 spellid)
 
     for (PetSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
-        if(itr->second->state == PETSPELL_REMOVED) 
+        if(itr->second->state == PETSPELL_REMOVED)
             continue;
 
         if(spellmgr.GetFirstSpellInChain(itr->first) == chainstart)
@@ -755,7 +754,6 @@ int32 Pet::GetTPForSpell(uint32 spellid)
 
     return int32(basetrainp) - int32(spenttrainp);
 }
-
 
 uint32 Pet::GetMaxLoyaltyPoints(uint32 level)
 {

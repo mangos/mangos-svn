@@ -796,23 +796,23 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
         case CHAT_MSG_MONSTER_EMOTE:
         case CHAT_MSG_RAID_BOSS_WHISPER:
         case CHAT_MSG_RAID_BOSS_EMOTE:
+        {
+            *data << uint64(speaker->GetGUID());
+            *data << uint32(0);                             // 2.1.0
+            *data << uint32(strlen(speaker->GetName()) + 1);
+            *data << speaker->GetName();
+            uint64 listener_guid = 0;
+            *data << uint64(listener_guid);
+            if(listener_guid && !IS_PLAYER_GUID(listener_guid))
             {
-                *data << uint64(speaker->GetGUID());
-                *data << uint32(0);                         // 2.1.0
-                *data << uint32(strlen(speaker->GetName()) + 1);
-                *data << speaker->GetName();
-                uint64 listener_guid = 0;
-                *data << uint64(listener_guid);
-                if(listener_guid && !IS_PLAYER_GUID(listener_guid))
-                {
-                    *data << uint32(1);                     // string listener_name_length
-                    *data << uint8(0);                      // string listener_name
-                }
-                *data << uint32(messageLength);
-                *data << message;
-                *data << uint8(0);
-                return;
+                *data << uint32(1);                         // string listener_name_length
+                *data << uint8(0);                          // string listener_name
             }
+            *data << uint32(messageLength);
+            *data << message;
+            *data << uint8(0);
+            return;
+        }
         default:
             if (type != CHAT_MSG_REPLY && type != CHAT_MSG_IGNORED && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
                 target_guid = 0;                            // only for CHAT_MSG_WHISPER_INFORM used original value target_guid

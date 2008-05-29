@@ -39,7 +39,7 @@ size_t DatabasePostgre::db_count = 0;
 
 DatabasePostgre::DatabasePostgre() : Database(), mPGconn(NULL)
 {
-        // before first connection
+    // before first connection
     if( db_count++ == 0 )
     {
 
@@ -122,9 +122,9 @@ QueryResult* DatabasePostgre::Query(const char *sql)
 
     // guarded block for thread-safe request
     ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
-#ifdef MANGOS_DEBUG
-        uint32 _s = getMSTime();
-#endif
+    #ifdef MANGOS_DEBUG
+    uint32 _s = getMSTime();
+    #endif
     // Send the query
     PGresult * result = PQexec(mPGconn, sql);
     if (!result )
@@ -141,9 +141,9 @@ QueryResult* DatabasePostgre::Query(const char *sql)
     }
     else
     {
-#ifdef MANGOS_DEBUG
+        #ifdef MANGOS_DEBUG
         sLog.outDebug("[%u ms] SQL: %s", getMSTime() - _s, sql );
-#endif
+        #endif
     }
 
     rowCount = PQntuples(result);
@@ -193,9 +193,9 @@ bool DatabasePostgre::DirectExecute(const char* sql)
     {
         // guarded block for thread-safe  request
         ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
-#ifdef MANGOS_DEBUG
+        #ifdef MANGOS_DEBUG
         uint32 _s = getMSTime();
-#endif
+        #endif
         PGresult *res = PQexec(mPGconn, sql);
         if (PQresultStatus(res) != PGRES_COMMAND_OK)
         {
@@ -205,9 +205,9 @@ bool DatabasePostgre::DirectExecute(const char* sql)
         }
         else
         {
-#ifdef MANGOS_DEBUG
-        sLog.outDebug("[%u ms] SQL: %s", getMSTime() - _s, sql );
-#endif
+            #ifdef MANGOS_DEBUG
+            sLog.outDebug("[%u ms] SQL: %s", getMSTime() - _s, sql );
+            #endif
         }
         PQclear(res);
 
@@ -242,13 +242,13 @@ bool DatabasePostgre::BeginTransaction()
     // don't use queued execution if it has not been initialized
     if (!m_threadBody)
     {
-        
+
         if (tranThread==ZThread::ThreadImpl::current())
-            return false;                                       // huh? this thread already started transaction
+            return false;                                   // huh? this thread already started transaction
         mMutex.acquire();
         if (!_TransactionCmd("START TRANSACTION"))
         {
-            mMutex.release();                                   // can't start transaction
+            mMutex.release();                               // can't start transaction
             return false;
         }
         return true;
@@ -274,7 +274,7 @@ bool DatabasePostgre::CommitTransaction()
     // don't use queued execution if it has not been initialized
     if (!m_threadBody)
     {
-        
+
         if (tranThread!=ZThread::ThreadImpl::current())
             return false;
         bool _res = _TransactionCmd("COMMIT");
@@ -292,7 +292,7 @@ bool DatabasePostgre::CommitTransaction()
     }
     else
         return false;
-    
+
 }
 
 bool DatabasePostgre::RollbackTransaction()
@@ -302,7 +302,7 @@ bool DatabasePostgre::RollbackTransaction()
     // don't use queued execution if it has not been initialized
     if (!m_threadBody)
     {
-        
+
         if (tranThread!=ZThread::ThreadImpl::current())
             return false;
         bool _res = _TransactionCmd("ROLLBACK");
@@ -318,7 +318,7 @@ bool DatabasePostgre::RollbackTransaction()
         i->second = NULL;
     }
     return true;
-    
+
 }
 
 unsigned long DatabasePostgre::escape_string(char *to, const char *from, unsigned long length)
@@ -347,5 +347,4 @@ void DatabasePostgre::HaltDelayThread()
     m_delayThread = NULL;
     m_threadBody = NULL;
 }
-
 #endif

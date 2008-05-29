@@ -134,7 +134,7 @@ bool Group::LoadGroupFromDB(const uint64 &leaderGuid, QueryResult *result, bool 
         do
         {
             LoadMemberFromDB((*result)[0].GetUInt32(), (*result)[2].GetUInt8(), (*result)[1].GetBool());
-        } while( result->NextRow() );     
+        } while( result->NextRow() );
         delete result;
         // group too small
         if(GetMembersCount() < 2)
@@ -535,7 +535,7 @@ void Group::MasterLoot(uint64 playerGUID, Loot* /*loot*/, Creature *creature)
     }
 
     data.put<uint8>(0,real_count);
-            
+
     for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
         Player *looter = itr->getSource();

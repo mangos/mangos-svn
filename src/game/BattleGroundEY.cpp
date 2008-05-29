@@ -187,7 +187,7 @@ void BattleGroundEY::CheckSomeoneJoinedPoint()
                     ++j;
             }
         }
-    }    
+    }
 }
 
 void BattleGroundEY::CheckSomeoneLeftPoint()
@@ -218,7 +218,7 @@ void BattleGroundEY::CheckSomeoneLeftPoint()
                     //move player out of point (add him to players that are out of points
                 {
                     m_PlayersNearPoint[EY_POINTS_MAX].push_back(m_PlayersNearPoint[i][j]);
-                    m_PlayersNearPoint[i].erase(m_PlayersNearPoint[i].begin() + j);                    
+                    m_PlayersNearPoint[i].erase(m_PlayersNearPoint[i].begin() + j);
                     this->UpdateWorldStateForPlayer(PROGRESS_BAR_SHOW, BG_EY_PROGRESS_BAR_DONT_SHOW, plr);
                 }
                 else
@@ -240,7 +240,7 @@ void BattleGroundEY::UpdatePointStatuses()
             continue;
         //count new point bar status:
         m_PointBarStatus[point] += (m_CurrentPointPlayersCount[2 * point] - m_CurrentPointPlayersCount[2 * point + 1] < BG_EY_POINT_MAX_CAPTURERS_COUNT) ? m_CurrentPointPlayersCount[2 * point] - m_CurrentPointPlayersCount[2 * point + 1] : BG_EY_POINT_MAX_CAPTURERS_COUNT;
-        
+
         if (m_PointBarStatus[point] > BG_EY_PROGRESS_BAR_ALI_CONTROLLED)
             //point is fully alliance's
             m_PointBarStatus[point] = BG_EY_PROGRESS_BAR_ALI_CONTROLLED;
@@ -263,12 +263,13 @@ void BattleGroundEY::UpdatePointStatuses()
             if (plr)
             {
                 this->UpdateWorldStateForPlayer(PROGRESS_BAR_STATUS, m_PointBarStatus[point], plr);
-                if (pointOwnerTeamId != m_PointOwnedByTeam[point]) //if point owner changed we must evoke event!
+                                                            //if point owner changed we must evoke event!
+                if (pointOwnerTeamId != m_PointOwnedByTeam[point])
                 {
                     //point was uncontrolled and player is from team which captured point
                     if (m_PointState[point] == EY_POINT_STATE_UNCONTROLLED && plr->GetTeam() == pointOwnerTeamId)
                         this->EventTeamCapturedPoint(plr, point);
-                    
+
                     //point was under control and player isn't from team which controlled it
                     if (m_PointState[point] == EY_POINT_UNDER_CONTROL && plr->GetTeam() != m_PointOwnedByTeam[point])
                         this->EventTeamLostPoint(plr, point);
@@ -380,7 +381,7 @@ void BattleGroundEY::HandleBuffUse(uint64 const& buff_guid)
         SpawnBuff(BG_EY_OBJECT_BUFF_MAGE_TOWER,MAGE_TOWER,BUFF_RESPAWN_TIME);
     }
     else
-       sLog.outError("unknown buff on bg");
+        sLog.outError("unknown buff on bg");
 }
 
 void BattleGroundEY::HandleAreaTrigger(Player *Source, uint32 Trigger)
@@ -388,7 +389,7 @@ void BattleGroundEY::HandleAreaTrigger(Player *Source, uint32 Trigger)
     if(GetStatus() != STATUS_IN_PROGRESS)
         return;
 
-    if(!Source->isAlive())                                                      //hack code, must be removed later
+    if(!Source->isAlive())                                  //hack code, must be removed later
         return;
 
     switch(Trigger)
@@ -433,7 +434,7 @@ void BattleGroundEY::HandleAreaTrigger(Player *Source, uint32 Trigger)
 
 bool BattleGroundEY::SetupBattleGround()
 {
-        // doors
+    // doors
     if(    !AddObject(BG_EY_OBJECT_DOOR_A, BG_OBJECT_A_DOOR_EY_ENTRY, 2527.6f, 1596.91f, 1262.13f, -3.12414f, -0.173642f, -0.001515f, 0.98477f, -0.008594f, RESPAWN_IMMEDIATELY)
         || !AddObject(BG_EY_OBJECT_DOOR_H, BG_OBJECT_H_DOOR_EY_ENTRY, 1803.21f, 1539.49f, 1261.09f, 3.14159f, 0.173648f, 0, 0.984808f, 0, RESPAWN_IMMEDIATELY)
         // banners (alliance)
@@ -524,14 +525,14 @@ void BattleGroundEY::ResetBGSubclass()
     m_DroppedFlagGUID = 0;
     m_PointAddingTimer = 0;
     m_TowerCapCheckTimer = 0;
-    
+
     for(uint8 i = 0; i < EY_POINTS_MAX; ++i)
     {
         m_PointOwnedByTeam[i] = EY_POINT_NO_OWNER;
         m_PointState[i] = EY_POINT_STATE_UNCONTROLLED;
         m_PointBarStatus[i] = BG_EY_PROGRESS_BAR_STATE_MIDDLE;
         m_PlayersNearPoint[i].clear();
-        m_PlayersNearPoint[i].reserve(15);                   //tip size
+        m_PlayersNearPoint[i].reserve(15);                  //tip size
     }
     m_PlayersNearPoint[EY_PLAYERS_OUT_OF_POINTS].clear();
     m_PlayersNearPoint[EY_PLAYERS_OUT_OF_POINTS].reserve(30);
@@ -594,7 +595,7 @@ void BattleGroundEY::RespawnFlag(bool send_message)
     if(send_message)
     {
         SendMessageToAll(GetMangosString(LANG_BG_EY_RESETED_FLAG));
-        PlaySoundToAll(BG_EY_SOUND_FLAG_RESET);            // flags respawned sound...
+        PlaySoundToAll(BG_EY_SOUND_FLAG_RESET);             // flags respawned sound...
     }
 
     UpdateWorldState(NETHERSTORM_FLAG, 1);
@@ -669,7 +670,7 @@ void BattleGroundEY::EventPlayerClickedOnFlag(Player *Source, GameObject* target
     const char *message;
     uint8 type = 0;
     message = GetMangosString(LANG_BG_EY_HAS_TAKEN_FLAG);
-    
+
     if(Source->GetTeam() == ALLIANCE)
     {
         UpdateWorldState(NETHERSTORM_FLAG_STATE_ALLIANCE, BG_EY_FLAG_STATE_ON_PLAYER);
@@ -682,7 +683,7 @@ void BattleGroundEY::EventPlayerClickedOnFlag(Player *Source, GameObject* target
         type = CHAT_MSG_BG_SYSTEM_HORDE;
         PlaySoundToAll(BG_EY_SOUND_FLAG_PICKED_UP_HORDE);
     }
-    
+
     if (m_FlagState == BG_EY_FLAG_STATE_ON_BASE)
         UpdateWorldState(NETHERSTORM_FLAG, 0);
     m_FlagState = BG_EY_FLAG_STATE_ON_PLAYER;
@@ -728,7 +729,7 @@ void BattleGroundEY::EventTeamLostPoint(Player *Source, uint32 Point)
         SpawnBGObject(m_LoosingPointTypes[Point].DespawnObjectTypeHorde + 1, RESPAWN_ONE_DAY);
         SpawnBGObject(m_LoosingPointTypes[Point].DespawnObjectTypeHorde + 2, RESPAWN_ONE_DAY);
     }
-    
+
     SpawnBGObject(m_LoosingPointTypes[Point].SpawnNeutralObjectType, RESPAWN_IMMEDIATELY);
     SpawnBGObject(m_LoosingPointTypes[Point].SpawnNeutralObjectType + 1, RESPAWN_IMMEDIATELY);
     SpawnBGObject(m_LoosingPointTypes[Point].SpawnNeutralObjectType + 2, RESPAWN_IMMEDIATELY);
@@ -787,7 +788,6 @@ void BattleGroundEY::EventTeamCapturedPoint(Player *Source, uint32 Point)
     WorldPacket data;
     ChatHandler::FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
     SendPacketToAll(&data);
-
 
     if(m_BgCreatures[Point])
         DelCreature(Point);
@@ -892,9 +892,9 @@ void BattleGroundEY::FillInitialWorldStates(WorldPacket& data)
     data << uint32(DRAENEI_RUINS_UNCONTROL)         << uint32(m_PointState[DRAENEI_RUINS] != EY_POINT_UNDER_CONTROL);
 
     data << uint32(MAGE_TOWER_ALLIANCE_CONTROL)     << uint32(m_PointOwnedByTeam[MAGE_TOWER] == ALLIANCE && m_PointState[MAGE_TOWER] == EY_POINT_UNDER_CONTROL);
-        
+
     data << uint32(MAGE_TOWER_HORDE_CONTROL)        << uint32(m_PointOwnedByTeam[MAGE_TOWER] == HORDE && m_PointState[MAGE_TOWER] == EY_POINT_UNDER_CONTROL);
-        
+
     data << uint32(MAGE_TOWER_UNCONTROL)            << uint32(m_PointState[MAGE_TOWER] != EY_POINT_UNDER_CONTROL);
 
     data << uint32(FEL_REAVER_HORDE_CONTROL)        << uint32(m_PointOwnedByTeam[FEL_REALVER] == HORDE && m_PointState[FEL_REALVER] == EY_POINT_UNDER_CONTROL);
@@ -902,11 +902,11 @@ void BattleGroundEY::FillInitialWorldStates(WorldPacket& data)
     data << uint32(FEL_REAVER_ALLIANCE_CONTROL)     << uint32(m_PointOwnedByTeam[FEL_REALVER] == ALLIANCE && m_PointState[FEL_REALVER] == EY_POINT_UNDER_CONTROL);
 
     data << uint32(FEL_REAVER_UNCONTROL)            << uint32(m_PointState[FEL_REALVER] != EY_POINT_UNDER_CONTROL);
-        
+
     data << uint32(BLOOD_ELF_HORDE_CONTROL)         << uint32(m_PointOwnedByTeam[BLOOD_ELF] == HORDE && m_PointState[BLOOD_ELF] == EY_POINT_UNDER_CONTROL);
 
     data << uint32(BLOOD_ELF_ALLIANCE_CONTROL)      << uint32(m_PointOwnedByTeam[BLOOD_ELF] == ALLIANCE && m_PointState[BLOOD_ELF] == EY_POINT_UNDER_CONTROL);
-        
+
     data << uint32(BLOOD_ELF_UNCONTROL)             << uint32(m_PointState[BLOOD_ELF] != EY_POINT_UNDER_CONTROL);
 
     data << uint32(NETHERSTORM_FLAG)                << uint32(m_FlagState == BG_EY_FLAG_STATE_ON_BASE);

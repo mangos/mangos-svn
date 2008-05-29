@@ -1102,6 +1102,5 @@ inline const char* LookupOpcodeName(uint16 id)
         return "Received unknown opcode, it's more than max!";
     return g_worldOpcodeNames[id];
 }
-
 #endif
 /// @}

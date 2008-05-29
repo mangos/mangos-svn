@@ -107,7 +107,7 @@ bool DatabaseMysql::Initialize(const char *infoString)
         database = *iter++;
 
     mysql_options(mysqlInit,MYSQL_SET_CHARSET_NAME,"utf8");
-#ifdef WIN32
+    #ifdef WIN32
     if(host==".")                                           // named pipe use option (Windows)
     {
         unsigned int opt = MYSQL_PROTOCOL_PIPE;
@@ -120,7 +120,7 @@ bool DatabaseMysql::Initialize(const char *infoString)
         port = atoi(port_or_socket.c_str());
         unix_socket = 0;
     }
-#else
+    #else
     if(host==".")                                           // socket use option (Unix/Linux)
     {
         unsigned int opt = MYSQL_PROTOCOL_SOCKET;
@@ -134,7 +134,7 @@ bool DatabaseMysql::Initialize(const char *infoString)
         port = atoi(port_or_socket.c_str());
         unix_socket = 0;
     }
-#endif
+    #endif
 
     mMysql = mysql_real_connect(mysqlInit, host.c_str(), user.c_str(),
         password.c_str(), database.c_str(), port, unix_socket, 0);
@@ -182,9 +182,9 @@ QueryResult* DatabaseMysql::Query(const char *sql)
     {
         // guarded block for thread-safe mySQL request
         ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
-#ifdef MANGOS_DEBUG
+        #ifdef MANGOS_DEBUG
         uint32 _s = getMSTime();
-#endif
+        #endif
         if(mysql_query(mMysql, sql))
         {
             sLog.outErrorDb( "SQL: %s", sql );
@@ -193,9 +193,9 @@ QueryResult* DatabaseMysql::Query(const char *sql)
         }
         else
         {
-#ifdef MANGOS_DEBUG
+            #ifdef MANGOS_DEBUG
             sLog.outDebug("[%u ms] SQL: %s", getMSTime() - _s, sql );
-#endif
+            #endif
         }
 
         result = mysql_store_result(mMysql);
@@ -252,9 +252,9 @@ bool DatabaseMysql::DirectExecute(const char* sql)
     {
         // guarded block for thread-safe mySQL request
         ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
-#ifdef MANGOS_DEBUG
+        #ifdef MANGOS_DEBUG
         uint32 _s = getMSTime();
-#endif
+        #endif
         if(mysql_query(mMysql, sql))
         {
             sLog.outErrorDb("SQL: %s", sql);
@@ -263,9 +263,9 @@ bool DatabaseMysql::DirectExecute(const char* sql)
         }
         else
         {
-#ifdef MANGOS_DEBUG
+            #ifdef MANGOS_DEBUG
             sLog.outDebug("[%u ms] SQL: %s", getMSTime() - _s, sql );
-#endif
+            #endif
         }
         // end guarded block
     }

@@ -286,7 +286,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 if(info->chair.slots > 0)
                 {
                     float lowestDist = DEFAULT_VISIBILITY_DISTANCE;
-                    
+
                     float x_lowest = obj->GetPositionX();
                     float y_lowest = obj->GetPositionY();
 

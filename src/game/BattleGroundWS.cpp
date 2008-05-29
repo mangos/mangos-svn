@@ -167,7 +167,7 @@ void BattleGroundWS::RespawnFlag(uint32 Team, bool captured)
         SpawnBGObject(BG_WS_OBJECT_H_FLAG, RESPAWN_IMMEDIATELY);
         SpawnBGObject(BG_WS_OBJECT_A_FLAG, RESPAWN_IMMEDIATELY);
         SendMessageToAll(GetMangosString(LANG_BG_WS_F_PLACED));
-        PlaySoundToAll(BG_WS_SOUND_FLAGS_RESPAWNED);       // flag respawned sound...
+        PlaySoundToAll(BG_WS_SOUND_FLAGS_RESPAWNED);        // flag respawned sound...
     }
 }
 
@@ -217,7 +217,8 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
         SetHordeFlagPicker(0);                              // must be before aura remove to prevent 2 events (drop+capture) at the same time
                                                             // horde flag in base (but not respawned yet)
         m_FlagState[BG_TEAM_HORDE] = BG_WS_FLAG_STATE_WAIT_RESPAWN;
-        Source->RemoveAurasDueToSpell(BG_WS_SPELL_WARSONG_FLAG); // Drop Horde Flag from Player
+                                                            // Drop Horde Flag from Player
+        Source->RemoveAurasDueToSpell(BG_WS_SPELL_WARSONG_FLAG);
         message = GetMangosString(LANG_BG_WS_CAPTURED_HF);
         type = CHAT_MSG_BG_SYSTEM_ALLIANCE;
         if(GetTeamScore(ALLIANCE) < BG_WS_MAX_TEAM_SCORE)
@@ -233,7 +234,8 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
         SetAllianceFlagPicker(0);                           // must be before aura remove to prevent 2 events (drop+capture) at the same time
                                                             // alliance flag in base (but not respawned yet)
         m_FlagState[BG_TEAM_ALLIANCE] = BG_WS_FLAG_STATE_WAIT_RESPAWN;
-        Source->RemoveAurasDueToSpell(BG_WS_SPELL_SILVERWING_FLAG); // Drop Alliance Flag from Player
+                                                            // Drop Alliance Flag from Player
+        Source->RemoveAurasDueToSpell(BG_WS_SPELL_SILVERWING_FLAG);
         message = GetMangosString(LANG_BG_WS_CAPTURED_AF);
         type = CHAT_MSG_BG_SYSTEM_HORDE;
         if(GetTeamScore(HORDE) < BG_WS_MAX_TEAM_SCORE)
@@ -356,7 +358,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
         UpdateWorldState(BG_WS_FLAG_UNK_ALLIANCE, 1);
         Source->CastSpell(Source, BG_WS_SPELL_SILVERWING_FLAG, true);
     }
-    
+
     //horde flag picked up from base
     if (Source->GetTeam() == ALLIANCE && this->GetFlagState(HORDE) == BG_WS_FLAG_STATE_ON_BASE
         && this->m_BgObjects[BG_WS_OBJECT_H_FLAG] == target_obj->GetGUID())
@@ -432,7 +434,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
     }
 
     if (!type)
-        return;    
+        return;
 
     WorldPacket data;
     ChatHandler::FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
@@ -652,7 +654,6 @@ void BattleGroundWS::FillInitialWorldStates(WorldPacket& data)
         data << uint32(BG_WS_FLAG_UNK_HORDE) << uint32(1);
     else
         data << uint32(BG_WS_FLAG_UNK_HORDE) << uint32(0);
-
 
     data << uint32(BG_WS_FLAG_CAPTURES_MAX) << uint32(BG_WS_MAX_TEAM_SCORE);
 

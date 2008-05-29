@@ -960,14 +960,15 @@ void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
     guild->SetEmblem(EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor);
 
     //"Guild Emblem saved."
-    SendSaveGuildEmblem(ERR_GUILDEMBLEM_SUCCESS);        
+    SendSaveGuildEmblem(ERR_GUILDEMBLEM_SUCCESS);
 
     guild->Query(this);
 }
 
 void WorldSession::HandleGuildEventLogOpcode(WorldPacket& /* recvPacket */)
 {
-    sLog.outDebug("WORLD: Received (MSG_GUILD_EVENT_LOG_QUERY)"); // empty
+                                                            // empty
+    sLog.outDebug("WORLD: Received (MSG_GUILD_EVENT_LOG_QUERY)");
     //recvPacket.hexlike();
 
     uint32 GuildId = GetPlayer()->GetGuildId();
@@ -1285,7 +1286,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
         }
 
         if (SplitedAmount)
-        {                                               // Bank -> Bank item split (in empty or non empty slot
+        {                                                   // Bank -> Bank item split (in empty or non empty slot
             GuildItemPosCountVec dest;
             uint8 msg = pGuild->CanStoreItem(BankTabDst,BankTabSlotDst,dest,SplitedAmount,pItemSrc,true);
             if( msg != EQUIP_ERR_OK )
@@ -1541,7 +1542,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
         }
         pGuild->DisplayGuildBankContentUpdate(BankTab,BankTabSlot);
         return;
-    }                                                   // End "To char" part
+    }                                                       // End "To char" part
 
     // Char -> Bank cases
 
@@ -1832,5 +1833,5 @@ void WorldSession::SendSaveGuildEmblem( uint32 msg )
 {
     WorldPacket data(MSG_SAVE_GUILD_EMBLEM, 4);
     data << uint32(msg);                                    // not part of guild
-    SendPacket( &data );   
+    SendPacket( &data );
 }

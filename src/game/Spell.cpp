@@ -272,17 +272,18 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
     // Get data for type of attack
     switch (m_spellInfo->DmgClass)
     {
-     case SPELL_DAMAGE_CLASS_MELEE:
-         if (m_spellInfo->AttributesEx3 & 0x1000000) m_attackType = OFF_ATTACK;
-         else                                        m_attackType = BASE_ATTACK;
-         break;
-     case SPELL_DAMAGE_CLASS_RANGED: 
-         m_attackType = RANGED_ATTACK; 
-         break;
-     default:
-         if (m_spellInfo->Id == 5019) m_attackType = RANGED_ATTACK; // Wands
-         else                         m_attackType = BASE_ATTACK;
-         break;
+        case SPELL_DAMAGE_CLASS_MELEE:
+            if (m_spellInfo->AttributesEx3 & 0x1000000) m_attackType = OFF_ATTACK;
+            else                                        m_attackType = BASE_ATTACK;
+            break;
+        case SPELL_DAMAGE_CLASS_RANGED:
+            m_attackType = RANGED_ATTACK;
+            break;
+        default:
+                                                            // Wands
+            if (m_spellInfo->Id == 5019) m_attackType = RANGED_ATTACK;
+            else                         m_attackType = BASE_ATTACK;
+            break;
     }
 
     m_spellSchoolMask = GetSpellSchoolMask(info);           // Can be override for some spell (wand shoot for example)
@@ -667,7 +668,7 @@ void Spell::AddUnitTarget(Unit* pVictim, uint32 effIndex)
     TargetInfo target;
     target.targetGUID = targetGUID;                         // Store target GUID
     target.effectMask = 1<<effIndex;                        // Store index of effect
-    target.processed  = false;                              // Effects not apply on target  
+    target.processed  = false;                              // Effects not apply on target
 
     // Calculate hit result
     target.missCondition = m_caster->SpellHitResult(pVictim, m_spellInfo, m_canReflect);
@@ -739,7 +740,7 @@ void Spell::AddGOTarget(GameObject* pVictim, uint32 effIndex)
     GOTargetInfo target;
     target.targetGUID = targetGUID;
     target.effectMask = 1<<effIndex;
-    target.processed  = false;                              // Effects not apply on target  
+    target.processed  = false;                              // Effects not apply on target
 
     // Spell have speed - need calculate incoming time
     if (m_spellInfo->speed > 0.0f)
@@ -816,7 +817,7 @@ void Spell::doTriggers(SpellMissInfo missInfo, uint32 damage, uint32 block, uint
                 // Overpower
                 if (m_caster->GetTypeId() == TYPEID_PLAYER && m_caster->getClass() == CLASS_WARRIOR)
                 {
-                   ((Player*) m_caster)->AddComboPoints(unitTarget, 1);
+                    ((Player*) m_caster)->AddComboPoints(unitTarget, 1);
                     m_caster->StartReactiveTimer( REACTIVE_OVERPOWER );
                 }
 
@@ -844,21 +845,21 @@ void Spell::doTriggers(SpellMissInfo missInfo, uint32 damage, uint32 block, uint
                     unitTarget->ModifyAuraState(AURA_STATE_DEFENSE, true);
                     unitTarget->StartReactiveTimer( REACTIVE_DEFENSE );
                 }
-                m_caster->CastMeleeProcDamageAndSpell(unitTarget, 0, m_attackType, MELEE_HIT_PARRY, m_spellInfo, m_IsTriggeredSpell);              
+                m_caster->CastMeleeProcDamageAndSpell(unitTarget, 0, m_attackType, MELEE_HIT_PARRY, m_spellInfo, m_IsTriggeredSpell);
                 break;
             case SPELL_MISS_BLOCK:
                 unitTarget->ModifyAuraState(AURA_STATE_DEFENSE, true);
                 unitTarget->StartReactiveTimer( REACTIVE_DEFENSE );
 
-                m_caster->CastMeleeProcDamageAndSpell(unitTarget, 0, m_attackType, MELEE_HIT_BLOCK, m_spellInfo, m_IsTriggeredSpell);              
+                m_caster->CastMeleeProcDamageAndSpell(unitTarget, 0, m_attackType, MELEE_HIT_BLOCK, m_spellInfo, m_IsTriggeredSpell);
                 break;
-            // Trigger from this events not supported
+                // Trigger from this events not supported
             case SPELL_MISS_EVADE:
             case SPELL_MISS_IMMUNE:
             case SPELL_MISS_IMMUNE2:
             case SPELL_MISS_DEFLECT:
             case SPELL_MISS_ABSORB:
-            // Trigger from reflects need do after get reflect result
+                // Trigger from reflects need do after get reflect result
             case SPELL_MISS_REFLECT:
                 break;
             default:
@@ -1336,8 +1337,8 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                     Player* Target = itr->getSource();
 
                     // IsHostileTo check duel and controlled by enemy
-                    if( Target && Target != pTarget && m_caster->IsWithinDistInMap(Target, radius) && 
-                        !Target->HasStealthAura() && !Target->HasInvisibilityAura() 
+                    if( Target && Target != pTarget && m_caster->IsWithinDistInMap(Target, radius) &&
+                        !Target->HasStealthAura() && !Target->HasInvisibilityAura()
                         && !m_caster->IsHostileTo(Target) )
                         nearMembers.push_back(Target);
                 }
@@ -1393,7 +1394,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
             cell_lock->Visit(cell_lock, grid_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
         }break;
-        // TARGET_SINGLE_PARTY means that the spells can only be casted on a party member and not on the caster (some sceals, fire shield from imp, etc..) 
+        // TARGET_SINGLE_PARTY means that the spells can only be casted on a party member and not on the caster (some sceals, fire shield from imp, etc..)
         case TARGET_SINGLE_PARTY:
         {
             Unit *target = m_targets.getUnitTarget();
@@ -1426,13 +1427,13 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                     }
                     pGroup = ((Player*)m_caster)->GetGroup();
                 }
- 
+
                 if(pGroup)
                 {
                     // Our target can also be a player's pet who's grouped with us or our pet. But can't be controlled player
                     if(targetOwner)
                     {
-                        if( targetOwner->GetTypeId() == TYPEID_PLAYER && 
+                        if( targetOwner->GetTypeId() == TYPEID_PLAYER &&
                             target->GetTypeId()==TYPEID_UNIT && (((Creature*)target)->isPet()) &&
                             target->GetOwnerGUID()==targetOwner->GetGUID() &&
                             pGroup->IsMember(((Player*)targetOwner)->GetGUID()))
@@ -3457,7 +3458,7 @@ uint8 Spell::CanCast(bool strict)
                     return SPELL_FAILED_LOW_CASTLEVEL;
 
                 // chance for fail at orange skinning attempt
-                if( (m_selfContainer && (*m_selfContainer) == this) && 
+                if( (m_selfContainer && (*m_selfContainer) == this) &&
                     skillValue < sWorld.GetConfigMaxSkillValue() &&
                     (ReqValue < 0 ? 0 : ReqValue) > irand(skillValue-25, skillValue+37) )
                     return SPELL_FAILED_TRY_AGAIN;
@@ -3761,7 +3762,7 @@ uint8 Spell::CanCast(bool strict)
                     return SPELL_FAILED_NO_MOUNTS_ALLOWED;
 
                 uint32 form = m_caster->m_form;
-                if( form == FORM_CAT          || form == FORM_TREE      || form == FORM_TRAVEL   || 
+                if( form == FORM_CAT          || form == FORM_TREE      || form == FORM_TRAVEL   ||
                     form == FORM_AQUA         || form == FORM_BEAR      || form == FORM_DIREBEAR ||
                     form == FORM_CREATUREBEAR || form == FORM_GHOSTWOLF || form == FORM_FLIGHT   ||
                     form == FORM_FLIGHT_EPIC  || form == FORM_MOONKIN )
@@ -3784,7 +3785,7 @@ uint8 Spell::CanCast(bool strict)
                 // not allow cast fly spells at old maps by players (all spells is self target)
                 if(m_caster->GetTypeId()==TYPEID_PLAYER)
                 {
-                    if( !((Player*)m_caster)->isGameMaster() && 
+                    if( !((Player*)m_caster)->isGameMaster() &&
                         GetVirtualMapForMapAndZone(m_caster->GetMapId(),m_caster->GetZoneId()) != 530)
                         return SPELL_FAILED_NOT_HERE;
                 }
@@ -4052,7 +4053,7 @@ uint8 Spell::CheckRange(bool strict)
                     m_spellInfo->Effect[i] == SPELL_EFFECT_POWER_BURN ||
                     m_spellInfo->Effect[i] == SPELL_EFFECT_HEALTH_LEECH ||
                     m_spellInfo->Effect[i] == SPELL_EFFECT_CHARGE)
-                return SPELL_FAILED_UNIT_NOT_INFRONT;
+                    return SPELL_FAILED_UNIT_NOT_INFRONT;
             }
         }
     }
@@ -4093,7 +4094,7 @@ int32 Spell::CalculatePowerCost()
             case POWER_FOCUS:
             case POWER_ENERGY:
             case POWER_HAPPINESS:
-//            case POWER_RUNES:
+                //            case POWER_RUNES:
                 powerCost += m_spellInfo->ManaCostPercentage * m_caster->GetMaxPower(Powers(m_spellInfo->powerType)) / 100;
                 break;
             default:
@@ -4703,7 +4704,7 @@ Unit* Spell::SelectMagnetTarget()
 
 bool Spell::IsNeedSendToClient() const
 {
-    return m_spellInfo->SpellVisual!=0 || IsChanneledSpell(m_spellInfo) || 
+    return m_spellInfo->SpellVisual!=0 || IsChanneledSpell(m_spellInfo) ||
         m_spellInfo->speed > 0.0f || !m_triggeredByAuraSpell && !m_IsTriggeredSpell;
 }
 
