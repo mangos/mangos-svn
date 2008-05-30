@@ -274,7 +274,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //223 Cold Stare
     &Aura::HandleUnused,                                    //224 unused
     &Aura::HandleNoImmediateEffect,                         //225 SPELL_AURA_DUMMY_3 Prayer of Mending
-    &Aura::HandleAuraDummy2,                                //226 SPELL_AURA_DUMMY_2 dummy like aura
+    &Aura::HandleAuraPeriodicDummy,                         //226 SPELL_AURA_PERIODIC_DUMMY
     &Aura::HandleNULL,                                      //227 periodic trigger spell
     &Aura::HandleNULL,                                      //228 stealth detection
     &Aura::HandleNULL,                                      //229 SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE
@@ -1995,17 +1995,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
 
                 ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
-
-                // update active aura
-                Unit::AuraList const& mDummy2Auras = m_target->GetAurasByType(SPELL_AURA_DUMMY_2);
-                for(Unit::AuraList::const_iterator i = mDummy2Auras.begin();i != mDummy2Auras.end(); ++i)
-                {
-                    if((*i)->GetId() == 34074)                      // Aspect of the Viper
-                    {
-                        const_cast<int32&>((*i)->GetModifier()->m_amount) += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
-                        ((Player*)m_target)->UpdateManaRegen();
-                    }
-                }
                 return;
             }
             break;
@@ -2044,33 +2033,27 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     }
 }
 
-void Aura::HandleAuraDummy2(bool apply, bool Real)
+void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
 {
     SpellEntry const*spell = GetSpellProto(); 
     switch( spell->SpellFamilyName)
     {
-        case SPELLFAMILY_HUNTER:
-        {
-            // Aspect of the Viper
-            if (spell->SpellFamilyFlags&0x0004000000000000LL)
-            {
-                if (m_target->GetTypeId()==TYPEID_PLAYER)
-                    ((Player*)m_target)->UpdateManaRegen();
-                return;
-            }
-            break;
-        }
         case SPELLFAMILY_ROGUE:
         {
             // Master of Subtlety
             if (spell->Id==31666 && !apply && Real)
             {
                 m_target->RemoveAurasDueToSpell(31665);
-                return;
+                break;
             }
             break;
         }
     }
+
+    if (m_periodicTimer <= 0)
+        m_periodicTimer += m_modifier.periodictime;
+
+    m_isPeriodic = apply;
 }
 
 void Aura::HandleAuraMounted(bool apply, bool Real)
@@ -4166,13 +4149,6 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
     if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply)
         m_target->SetStandState(PLAYER_STATE_SIT);
 
-    // Some mana regen auras have 0 in m_amount, but correct value in second SPELL_AURA_DUMMY_2 aura
-    if(m_effIndex < 2 && m_spellProto->EffectApplyAuraName[m_effIndex+1]==SPELL_AURA_DUMMY_2)
-    {
-        if (Unit *caster = GetCaster())
-            m_modifier.m_amount = caster->CalculateSpellDamage(m_spellProto,m_effIndex+1,m_spellProto->EffectBasePoints[m_effIndex+1],m_target);
-    }
-
     if(apply && m_periodicTimer <= 0)
     {
         m_periodicTimer += 2000;
@@ -5578,5 +5554,286 @@ void Aura::PeriodicTick()
             pCaster->SpellNonMeleeDamageLog(m_target, GetId(), gain);
             break;
         }
+        // Here tick dummy auras
+        case SPELL_AURA_PERIODIC_DUMMY:
+        {
+            PeriodicDummyTick();
+            break;
+        }
+        default:
+            break;
+    }
+}
+
+void Aura::PeriodicDummyTick()
+{
+    SpellEntry const* spell = GetSpellProto();
+    switch (spell->Id)
+    {
+        // Drink
+        case 430:
+        case 431:
+        case 432:
+        case 1133:
+        case 1135:
+        case 1137:
+        case 10250:
+        case 22734:
+        case 27089:
+        case 34291:
+        case 43706:
+        case 46755:
+        {
+            if (m_target->GetTypeId() != TYPEID_PLAYER)
+                return;
+            // Search SPELL_AURA_MOD_POWER_REGEN aura for this spell and add bonus
+            Unit::AuraList const& aura = m_target->GetAurasByType(SPELL_AURA_MOD_POWER_REGEN);
+            for(Unit::AuraList::const_iterator i = aura.begin(); i != aura.end(); ++i)
+                if ((*i)->GetId() == GetId())
+                {
+                    // Here need increase mana regen per tick (6 second rule)
+                    // on 0 tick -   0  (handled in 2 second)
+                    // on 1 tick - 166% (handled in 4 second)
+                    // on 2 tick - 133% (handled in 6 second)
+                    // Get tick on activate
+                    int32 tick = (m_maxduration - m_duration) / m_modifier.periodictime;
+                    // Not need update after 3 tick
+                    if (tick > 3)
+                        return;
+                    // Apply bonus for 0 - 3 tick
+                    switch (tick)
+                    {
+                        case 0:   // 0%
+                            (*i)->GetModifier()->m_amount = m_modifier.m_amount = 0;
+                            break;
+                        case 1:   // 166%
+                            (*i)->GetModifier()->m_amount = m_modifier.m_amount * 5 / 3;
+                            break;
+                        case 2:   // 133%
+                            (*i)->GetModifier()->m_amount = m_modifier.m_amount * 4 / 3;
+                            break;
+                        default:  // 100% - normal regen
+                            (*i)->GetModifier()->m_amount = m_modifier.m_amount;
+                            break;
+                    }
+                    ((Player*)m_target)->UpdateManaRegen();
+                    return;
+                }
+            return;
+        }
+//        // Panda
+//        case 19230: break;
+//        // Master of Subtlety
+//        case 31666: break;
+//        // Gossip NPC Periodic - Talk
+//        case 33208: break;
+//        // Gossip NPC Periodic - Despawn
+//        case 33209: break;
+//        // Force of Nature
+//        case 33831: break;
+        // Aspect of the Viper
+        case 34074:
+        {
+            if (m_target->GetTypeId() != TYPEID_PLAYER)
+                return;
+            // Should be manauser
+            if (m_target->getPowerType()!=POWER_MANA)
+                return;
+            Unit *caster = GetCaster();
+            if (!caster)
+                return;
+            // Regen amount is max (100% from spell) on 21% or less mana and min on 92.5% or greater mana (20% from spell)
+            int mana = m_target->GetPower(POWER_MANA);
+            int max_mana = m_target->GetMaxPower(POWER_MANA);
+            int32 base_regen = caster->CalculateSpellDamage(m_spellProto, m_effIndex, m_currentBasePoints, m_target);
+            float regen_pct = 1.20f - 1.1f * mana / max_mana;
+            if      (regen_pct > 1.0f) regen_pct = 1.0f;
+            else if (regen_pct < 0.2f) regen_pct = 0.2f;
+            m_modifier.m_amount = int32 (base_regen * regen_pct);
+            ((Player*)m_target)->UpdateManaRegen();
+            return;
+        }
+//        // Steal Weapon
+//        case 36207: break;
+//        // Simon Game START timer, (DND)
+//        case 39993: break;
+//        // Harpooner's Mark
+//        case 40084: break;
+//        // Knockdown Fel Cannon: break; The Aggro Burst
+//        case 40119: break;
+//        // Old Mount Spell
+//        case 40154: break;
+//        // Magnetic Pull
+//        case 40581: break;
+//        // Ethereal Ring: break; The Bolt Burst
+//        case 40801: break;
+//        // Crystal Prison
+//        case 40846: break;
+//        // Copy Weapon
+//        case 41054: break;
+//        // Ethereal Ring Visual, Lightning Aura
+//        case 41477: break;
+//        // Ethereal Ring Visual, Lightning Aura (Fork)
+//        case 41525: break;
+//        // Ethereal Ring Visual, Lightning Jumper Aura
+//        case 41567: break;
+//        // No Man's Land
+//        case 41955: break;
+//        // Headless Horseman - Fire
+//        case 42074: break;
+//        // Headless Horseman - Visual - Large Fire
+//        case 42075: break;
+//        // Headless Horseman - Start Fire, Periodic Aura
+//        case 42140: break;
+//        // Ram Speed Boost
+//        case 42152: break;
+//        // Headless Horseman - Fires Out Victory Aura
+//        case 42235: break;
+//        // Pumpkin Life Cycle
+//        case 42280: break;
+//        // Brewfest Request Chick Chuck Mug Aura
+//        case 42537: break;
+//        // Squashling
+//        case 42596: break;
+//        // Headless Horseman Climax, Head: Periodic
+//        case 42603: break;
+//        // Fire Bomb
+//        case 42621: break;
+//        // Headless Horseman - Conflagrate, Periodic Aura
+//        case 42637: break;
+//        // Headless Horseman - Create Pumpkin Treats Aura
+//        case 42774: break;
+//        // Headless Horseman Climax - Summoning Rhyme Aura
+//        case 42879: break;
+//        // Tricky Treat
+//        case 42919: break;
+//        // Giddyup!
+//        case 42924: break;
+//        // Ram - Trot
+//        case 42992: break;
+//        // Ram - Canter
+//        case 42993: break;
+//        // Ram - Gallop
+//        case 42994: break;
+//        // Ram Level - Neutral
+//        case 43310: break;
+//        // Headless Horseman - Maniacal Laugh, Maniacal, Delayed 17
+//        case 43884: break;
+//        // Headless Horseman - Maniacal Laugh, Maniacal, other, Delayed 17
+//        case 44000: break;
+//        // Energy Feedback
+//        case 44328: break;
+//        // Romantic Picnic
+//        case 45102: break;
+//        // Romantic Picnic
+//        case 45123: break;
+//        // Looking for Love
+//        case 45124: break;
+//        // Kite - Lightning Strike Kite Aura
+//        case 45197: break;
+//        // Rocket Chicken
+//        case 45202: break;
+//        // Copy Offhand Weapon
+//        case 45205: break;
+//        // Upper Deck - Kite - Lightning Periodic Aura
+//        case 45207: break;
+//        // Kite -Sky  Lightning Strike Kite Aura
+//        case 45251: break;
+//        // Ribbon Pole Dancer Check Aura
+//        case 45390: break;
+//        // Holiday - Midsummer, Ribbon Pole Periodic Visual
+//        case 45406: break;
+//        // Parachute
+//        case 45472: break;
+//        // Alliance Flag, Extra Damage Debuff
+//        case 45898: break;
+//        // Horde Flag, Extra Damage Debuff
+//        case 45899: break;
+//        // Ahune - Summoning Rhyme Aura
+//        case 45926: break;
+//        // Ahune - Slippery Floor
+//        case 45945: break;
+//        // Ahune's Shield
+//        case 45954: break;
+//        // Nether Vapor Lightning
+//        case 45960: break;
+//        // Darkness
+//        case 45996: break;
+//        // Summon Blood Elves Periodic
+//        case 46041: break;
+//        // Transform Visual Missile Periodic
+//        case 46205: break;
+//        // Find Opening Beam End
+//        case 46333: break;
+//        // Ice Spear Control Aura
+//        case 46371: break;
+//        // Hailstone Chill
+//        case 46458: break;
+//        // Hailstone Chill, Internal
+//        case 46465: break;
+//        // Chill, Internal Shifter
+//        case 46549: break;
+//        // Raise Dead
+//        case 46585: break;
+//        // Summon Ice Spear Knockback Delayer
+//        case 46878: break;
+//        // Burninate Effect
+//        case 47214: break;
+//        // Fizzcrank Practice Parachute
+//        case 47228: break;
+//        // Send Mug Control Aura
+//        case 47369: break;
+//        // Direbrew's Disarm (precast)
+//        case 47407: break;
+//        // Chains of Ice
+//        case 47805: break;
+//        // Crystal Spike
+//        case 47941: break;
+//        // Healer Aura
+//        case 48200: break;
+//        // Summon Gauntlet Mobs Periodic
+//        case 48630: break;
+//        // Bladed Armor
+//        case 48978: break;
+//        // Ride Rocket Propelled Warhead
+//        case 49177: break;
+//        // Summon Gargoyle
+//        case 49206: break;
+//        // Proximity Mine Area Aura
+//        case 49313: break;
+//        // Bladed Armor
+//        case 49390: break;
+//        // Bladed Armor
+//        case 49391: break;
+//        // Bladed Armor
+//        case 49392: break;
+//        // Bladed Armor
+//        case 49393: break;
+//        // Mole Machine Portal Schedule
+//        case 49466: break;
+//        // Drink Coffee
+//        case 49472: break;
+//        // Corpse Explode
+//        case 49555: break;
+//        // Temporal Rift
+//        case 49592: break;
+//        // Raise Gargoyle
+//        case 49641: break;
+//        // Missile Impact
+//        case 49761: break;
+//        // Cutting Laser
+//        case 49957: break;
+//        // Slow Fall
+//        case 50085: break;
+//        // Listening to Music
+//        case 50493: break;
+//        // Raise Dead
+//        case 50525: break;
+//        // Love Rocket Barrage
+//        case 50530: break;
+//        // Parachute
+//        case 50550: break;
+        default:
+            break;
     }
 }

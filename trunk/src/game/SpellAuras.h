@@ -81,7 +81,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleModPossess(bool Apply, bool Real);
         void HandlePeriodicDamage(bool Apply, bool Real);
         void HandleAuraDummy(bool Apply, bool Real);
-        void HandleAuraDummy2(bool apply, bool Real);
+        void HandleAuraPeriodicDummy(bool apply, bool Real);
         void HandleModConfuse(bool Apply, bool Real);
         void HandleModCharm(bool Apply, bool Real);
         void HandleModFear(bool Apply, bool Real);
@@ -281,6 +281,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleShapeshiftBoosts(bool apply);
 
         void PeriodicTick();
+        void PeriodicDummyTick();
     protected:
         Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
 
