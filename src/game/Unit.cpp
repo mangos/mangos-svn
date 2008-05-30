@@ -8700,7 +8700,9 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
     int32 randomPoints = int32(spellProto->EffectDieSides[effect_index] + level * randomPointsPerLevel);
     float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
 
-    int32 value = basePoints + irand(spellProto->EffectBaseDice[effect_index], randomPoints);
+    // prevent random generator from getting confused by spells casted with Unit::CastCustomSpell
+    int32 randvalue = spellProto->EffectBaseDice[effect_index] >= randomPoints ? spellProto->EffectBaseDice[effect_index]:irand(spellProto->EffectBaseDice[effect_index], randomPoints);
+    int32 value = basePoints + randvalue;
     //random damage
     if(int32(spellProto->EffectBaseDice[effect_index]) != randomPoints && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->isPet())
         value += ((Pet*)this)->GetBonusDamage();            //bonus damage only on spells without fixed basePoints?)
