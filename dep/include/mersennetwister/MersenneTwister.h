@@ -60,6 +60,8 @@
 // Not thread safe (unless auto-initialization is avoided and each thread has
 // its own MTRand object)
 
+#include"Platform/Define.h"
+
 #include <limits.h>
 #include <time.h>
 #include <math.h>
@@ -67,8 +69,7 @@
 class MTRand {
 // Data
 public:
-	typedef unsigned long uint32;  // unsigned integer type, at least 32 bits
-	
+    typedef ::uint32 uint32;
 	enum { N = 624 };       // length of state vector
 	enum { SAVE = N + 1 };  // length of array for save()
 
