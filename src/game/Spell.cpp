@@ -4634,7 +4634,8 @@ bool Spell::CheckTarget( Unit* target, uint32 eff, bool hitPhase )
                 break;
             //fall through
         case SPELL_EFFECT_RESURRECT_NEW:
-            if(!target->IsWithinLOSInMap(m_caster))         // player far away, maybe his corpse near?
+            // player far away, maybe his corpse near?
+            if(target!=m_caster && !target->IsWithinLOSInMap(m_caster))
             {
                 if(!m_targets.getCorpseTargetGUID())
                     return false;
@@ -4653,7 +4654,7 @@ bool Spell::CheckTarget( Unit* target, uint32 eff, bool hitPhase )
             // all ok by some way or another, skip normal check
             break;
         default:                                            // normal case
-            if(!target->IsWithinLOSInMap(m_caster))
+            if(target!=m_caster && !target->IsWithinLOSInMap(m_caster))
                 return false;
             break;
     }
