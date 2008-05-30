@@ -614,10 +614,14 @@ void Player::UpdateManaRegen()
     }
 
     // Bonus from some dummy auras
-    AuraList const& mDummy2Auras = GetAurasByType(SPELL_AURA_DUMMY_2);
-    for(AuraList::const_iterator i = mDummy2Auras.begin();i != mDummy2Auras.end(); ++i)
+    AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_PERIODIC_DUMMY);
+    for(AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
         if((*i)->GetId() == 34074)                          // Aspect of the Viper
+        {
             power_regen += (*i)->GetModifier()->m_amount * Intellect / 500.0f;
+            // Add regen bonus from level in this dummy
+            power_regen += getLevel() * 35 / 100;
+        }
 
     SetStatFloatValue(PLAYER_FIELD_MOD_MANA_REGEN, power_regen);
 }
