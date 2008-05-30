@@ -6169,7 +6169,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 if(val > 0)
                     ApplyPosStatMod(STAT_AGILITY,         val, apply);
                 else
-                    ApplyNegStatMod(STAT_AGILITY,        -val, apply);
+                    ApplyNegStatMod(STAT_AGILITY,         val, apply);
                 //typestr = "AGILITY";
                 break;
             case ITEM_MOD_STRENGTH:                         //modify strength
@@ -6177,7 +6177,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 if(val > 0)
                     ApplyPosStatMod(STAT_STRENGTH,        val, apply);
                 else
-                    ApplyNegStatMod(STAT_STRENGTH,       -val, apply);
+                    ApplyNegStatMod(STAT_STRENGTH,        val, apply);
                 //typestr = "STRENGHT";
                 break;
             case ITEM_MOD_INTELLECT:                        //modify intellect
@@ -6185,7 +6185,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 if(val > 0)
                     ApplyPosStatMod(STAT_INTELLECT,       val, apply);
                 else
-                    ApplyNegStatMod(STAT_INTELLECT,      -val, apply);
+                    ApplyNegStatMod(STAT_INTELLECT,       val, apply);
                 //ApplyMaxPowerMod(POWER_MANA,              val*15, apply);
                 //typestr = "INTELLECT";
                 break;
@@ -6194,7 +6194,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 if(val > 0)
                     ApplyPosStatMod(STAT_SPIRIT,          val, apply);
                 else
-                    ApplyNegStatMod(STAT_SPIRIT,         -val, apply);
+                    ApplyNegStatMod(STAT_SPIRIT,          val, apply);
                 //typestr = "SPIRIT";
                 break;
             case ITEM_MOD_STAMINA:                          //modify stamina
@@ -6202,7 +6202,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 if(val > 0)
                     ApplyPosStatMod(STAT_STAMINA,         val, apply);
                 else
-                    ApplyNegStatMod(STAT_STAMINA,        -val, apply);
+                    ApplyNegStatMod(STAT_STAMINA,         val, apply);
                 //typestr = "STAMINA";
                 break;
 
