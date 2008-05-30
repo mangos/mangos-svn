@@ -322,10 +322,6 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_fearMoveAngle(0)
     
     m_applyTime = time(NULL);
 
-    uint32 type = 0;
-    if(!m_positive)
-        type = 1;
-
     int32 damage;
     if(!caster)
     {
@@ -381,7 +377,7 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_fearMoveAngle(0)
     sLog.outDebug("Aura: construct Spellid : %u, Aura : %u Duration : %d Target : %d Damage : %d", m_spellProto->Id, m_spellProto->EffectApplyAuraName[eff], m_maxduration, m_spellProto->EffectImplicitTargetA[eff],damage);
 
     m_effIndex = eff;
-    SetModifier(AuraType(m_spellProto->EffectApplyAuraName[eff]), damage, m_spellProto->EffectAmplitude[eff], m_spellProto->EffectMiscValue[eff], type);
+    SetModifier(AuraType(m_spellProto->EffectApplyAuraName[eff]), damage, m_spellProto->EffectAmplitude[eff], m_spellProto->EffectMiscValue[eff]);
 
     m_isDeathPersist = IsDeathPersistentSpell(m_spellProto);
 
@@ -474,12 +470,11 @@ Unit* Aura::GetCaster() const
     return ObjectAccessor::GetObjectInWorld(m_caster_guid, (Unit*)NULL);
 }
 
-void Aura::SetModifier(AuraType t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2)
+void Aura::SetModifier(AuraType t, int32 a, uint32 pt, int32 miscValue)
 {
     m_modifier.m_auraname = t;
     m_modifier.m_amount   = a;
     m_modifier.m_miscvalue = miscValue;
-    m_modifier.m_miscvalue2 = miscValue2;
     m_modifier.periodictime = pt;
 }
 
@@ -3419,14 +3414,12 @@ void Aura::HandleModThreat(bool apply, bool Real)
     if (level_diff > 0)
         m_modifier.m_amount += multiplier * level_diff;
 
-    bool positive = m_modifier.m_miscvalue2 == 0;
-
     for(int8 x=0;x < MAX_SPELL_SCHOOL;x++)
     {
         if(m_modifier.m_miscvalue & int32(1<<x))
         {
             if(m_target->GetTypeId() == TYPEID_PLAYER)
-                ApplyPercentModFloatVar(m_target->m_threatModifier[x], positive ? m_modifier.m_amount : -m_modifier.m_amount, apply);
+                ApplyPercentModFloatVar(m_target->m_threatModifier[x], m_positive ? m_modifier.m_amount : -m_modifier.m_amount, apply);
         }
     }
 }
@@ -3863,30 +3856,26 @@ void Aura::HandlePeriodicManaLeech(bool apply, bool Real)
 
 void Aura::HandleAuraModResistanceExclusive(bool apply, bool Real)
 {
-    bool positive = m_modifier.m_miscvalue2 == 0;
-
     for(int8 x = SPELL_SCHOOL_NORMAL; x < MAX_SPELL_SCHOOL;x++)
     {
         if(m_modifier.m_miscvalue & int32(1<<x))
         {
             m_target->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + x), BASE_VALUE, float(m_modifier.m_amount), apply);
             if(m_target->GetTypeId() == TYPEID_PLAYER)
-                m_target->ApplyResistanceBuffModsMod(SpellSchools(x),positive,m_modifier.m_amount, apply);
+                m_target->ApplyResistanceBuffModsMod(SpellSchools(x),m_positive,m_modifier.m_amount, apply);
         }
     }
 }
 
 void Aura::HandleAuraModResistance(bool apply, bool Real)
 {
-    bool positive = m_modifier.m_miscvalue2 == 0;
-
     for(int8 x = SPELL_SCHOOL_NORMAL; x < MAX_SPELL_SCHOOL;x++)
     {
         if(m_modifier.m_miscvalue & int32(1<<x))
         {
             m_target->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + x), TOTAL_VALUE, float(m_modifier.m_amount), apply);
             if(m_target->GetTypeId() == TYPEID_PLAYER || ((Creature*)m_target)->isPet())
-                m_target->ApplyResistanceBuffModsMod(SpellSchools(x),positive,m_modifier.m_amount, apply);
+                m_target->ApplyResistanceBuffModsMod(SpellSchools(x),m_positive,m_modifier.m_amount, apply);
         }
     }
 }
@@ -3967,12 +3956,7 @@ void Aura::HandleAuraModStat(bool apply, bool Real)
             //m_target->ApplyStatMod(Stats(i), m_modifier.m_amount,apply);
             m_target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_VALUE, float(m_modifier.m_amount), apply);
             if(m_target->GetTypeId() == TYPEID_PLAYER || ((Creature*)m_target)->isPet())
-            {
-                if (m_modifier.m_miscvalue2 == 0)
-                    m_target->ApplyPosStatMod(Stats(i),m_modifier.m_amount,apply);
-                else
-                    m_target->ApplyNegStatMod(Stats(i),m_modifier.m_amount,apply);
-            }
+                m_target->ApplyStatBuffMod(Stats(i),m_modifier.m_amount,apply);
         }
     }
 }
@@ -4064,11 +4048,8 @@ void Aura::HandleModTotalPercentStat(bool apply, bool Real)
         if(m_modifier.m_miscvalue == i || m_modifier.m_miscvalue == -1)
         {
             m_target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_PCT, float(m_modifier.m_amount), apply);
-            if (m_target->GetTypeId() == TYPEID_PLAYER)
-            {
-                ((Player*)m_target)->ApplyPosStatPercentMod(Stats(i), m_modifier.m_amount, apply );
-                ((Player*)m_target)->ApplyNegStatPercentMod(Stats(i), m_modifier.m_amount, apply );
-            }
+            if(m_target->GetTypeId() == TYPEID_PLAYER || ((Creature*)m_target)->isPet())
+                m_target->ApplyStatPercentBuffMod(Stats(i), m_modifier.m_amount, apply );
         }
     }
 
@@ -4604,10 +4585,10 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
 
         if(m_target->GetTypeId() == TYPEID_PLAYER)
         {
-            if(m_modifier.m_miscvalue2)
-                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
-            else
+            if(m_positive)
                 m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,m_modifier.m_amount,apply);
+            else
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG,m_modifier.m_amount,apply);
         }
     }
 
@@ -4628,12 +4609,12 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
     // This information for client side use only
     if(m_target->GetTypeId() == TYPEID_PLAYER)
     {
-        if(m_modifier.m_miscvalue2)
+        if(m_positive)
         {
             for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; i++)
             {
                 if((m_modifier.m_miscvalue & (1<<i)) != 0)
-                    m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+i,m_modifier.m_amount,apply);
+                    m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i,m_modifier.m_amount,apply);
             }
         }
         else
@@ -4641,7 +4622,7 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
             for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; i++)
             {
                 if((m_modifier.m_miscvalue & (1<<i)) != 0)
-                    m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i,m_modifier.m_amount,apply);
+                    m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+i,m_modifier.m_amount,apply);
             }
         }
         Pet* pet = m_target->GetPet();
@@ -4652,7 +4633,7 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
 
 void Aura::HandleModDamagePercentDone(bool apply, bool Real)
 {
-    sLog.outDebug("AURA MOD DAMAGE type:%u type2:%u", m_modifier.m_miscvalue, m_modifier.m_miscvalue2);
+    sLog.outDebug("AURA MOD DAMAGE type:%u negative:%u", m_modifier.m_miscvalue, m_positive ? 0 : 1);
 
     // apply item specific bonuses for already equipped weapon
     if(Real && m_target->GetTypeId()==TYPEID_PLAYER)
@@ -4955,8 +4936,6 @@ void Aura::HandleAuraAllowFlight(bool apply, bool Real)
         return;
 
     // allow fly
-    sLog.outDebug("%u %u %u %u %u", m_modifier.m_amount, m_modifier.m_auraname, m_modifier.m_miscvalue, m_modifier.m_miscvalue2, m_modifier.periodictime);
-
     WorldPacket data;
     if(apply)
         data.Initialize(SMSG_MOVE_SET_CAN_FLY, 12);

@@ -2092,11 +2092,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     SetArmor(int32(m_createStats[STAT_AGILITY]*2));
 
-    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        SetPosStat(Stats(i), 0);
-
-    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
-        SetNegStat(Stats(i), 0);
+    InitStatBuffMods();
 
     //reset rating fields values
     for(uint16 index = PLAYER_FIELD_COMBAT_RATING_1; index < PLAYER_FIELD_ARENA_TEAM_INFO_1_1; ++index)
@@ -6144,12 +6140,9 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
 {
     if(slot >= INVENTORY_SLOT_BAG_END || !proto) return;
 
-    float val;
-    std::string typestr;
-    std::string applystr = apply ? "Add" : "Remove";
     for (int i = 0; i < 10; i++)
     {
-        val = float (proto->ItemStat[i].ItemStatValue);
+        float val = float (proto->ItemStat[i].ItemStatValue);
 
         if(val==0)
             continue;
@@ -6158,54 +6151,30 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
         {
             case ITEM_MOD_MANA:
                 HandleStatModifier(UNIT_MOD_MANA, BASE_VALUE, float(val), apply);
-                //typestr = "Mana";
                 break;
             case ITEM_MOD_HEALTH:                           // modify HP
                 HandleStatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(val), apply);
-                //typestr = "Health";
                 break;
             case ITEM_MOD_AGILITY:                          // modify agility
                 HandleStatModifier(UNIT_MOD_STAT_AGILITY, BASE_VALUE, float(val), apply);
-                if(val > 0)
-                    ApplyPosStatMod(STAT_AGILITY,         val, apply);
-                else
-                    ApplyNegStatMod(STAT_AGILITY,         val, apply);
-                //typestr = "AGILITY";
+                ApplyStatBuffMod(STAT_AGILITY, val, apply);
                 break;
             case ITEM_MOD_STRENGTH:                         //modify strength
                 HandleStatModifier(UNIT_MOD_STAT_STRENGTH, BASE_VALUE, float(val), apply);
-                if(val > 0)
-                    ApplyPosStatMod(STAT_STRENGTH,        val, apply);
-                else
-                    ApplyNegStatMod(STAT_STRENGTH,        val, apply);
-                //typestr = "STRENGHT";
+                ApplyStatBuffMod(STAT_STRENGTH, val, apply);
                 break;
             case ITEM_MOD_INTELLECT:                        //modify intellect
                 HandleStatModifier(UNIT_MOD_STAT_INTELLECT, BASE_VALUE, float(val), apply);
-                if(val > 0)
-                    ApplyPosStatMod(STAT_INTELLECT,       val, apply);
-                else
-                    ApplyNegStatMod(STAT_INTELLECT,       val, apply);
-                //ApplyMaxPowerMod(POWER_MANA,              val*15, apply);
-                //typestr = "INTELLECT";
+                ApplyStatBuffMod(STAT_INTELLECT, val, apply);
                 break;
             case ITEM_MOD_SPIRIT:                           //modify spirit
                 HandleStatModifier(UNIT_MOD_STAT_SPIRIT, BASE_VALUE, float(val), apply);
-                if(val > 0)
-                    ApplyPosStatMod(STAT_SPIRIT,          val, apply);
-                else
-                    ApplyNegStatMod(STAT_SPIRIT,          val, apply);
-                //typestr = "SPIRIT";
+                ApplyStatBuffMod(STAT_SPIRIT, val, apply);
                 break;
             case ITEM_MOD_STAMINA:                          //modify stamina
                 HandleStatModifier(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(val), apply);
-                if(val > 0)
-                    ApplyPosStatMod(STAT_STAMINA,         val, apply);
-                else
-                    ApplyNegStatMod(STAT_STAMINA,         val, apply);
-                //typestr = "STAMINA";
+                ApplyStatBuffMod(STAT_STAMINA, val, apply);
                 break;
-
             case ITEM_MOD_DEFENSE_SKILL_RATING:
                 ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, int32(val), apply);
                 break;
@@ -6297,56 +6266,31 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 ApplyRatingMod(PLAYER_FIELD_EXPERTISE_RATING, int32(val), apply);
                 break;
         }
-        //sLog.outDebug("%s %s: \t\t%u", applystr.c_str(), typestr.c_str(), val);
     }
 
     if (proto->Armor)
-    {
         HandleStatModifier(UNIT_MOD_ARMOR, BASE_VALUE, float(proto->Armor), apply);
-        //sLog.outDebug("%s Armor: \t\t%u", applystr.c_str(),  proto->Armor);
-    }
 
     if (proto->Block)
-    {
         HandleBaseModValue(SHIELD_BLOCK_VALUE, FLAT_MOD, float(proto->Block), apply);
-        //sLog.outDebug("%s Block: \t\t%u", applystr.c_str(),  proto->Block);
-    }
 
     if (proto->HolyRes)
-    {
         HandleStatModifier(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(proto->HolyRes), apply);
-        //sLog.outDebug("%s HolyRes: \t\t%u", applystr.c_str(),  proto->HolyRes);
-    }
 
     if (proto->FireRes)
-    {
         HandleStatModifier(UNIT_MOD_RESISTANCE_FIRE, BASE_VALUE, float(proto->FireRes), apply);
-        //sLog.outDebug("%s FireRes: \t\t%u", applystr.c_str(),  proto->FireRes);
-    }
 
     if (proto->NatureRes)
-    {
         HandleStatModifier(UNIT_MOD_RESISTANCE_NATURE, BASE_VALUE, float(proto->NatureRes), apply);
-        //sLog.outDebug("%s NatureRes: \t\t%u", applystr.c_str(),  proto->NatureRes);
-    }
 
     if (proto->FrostRes)
-    {
         HandleStatModifier(UNIT_MOD_RESISTANCE_FROST, BASE_VALUE, float(proto->FrostRes), apply);
-        //sLog.outDebug("%s FrostRes: \t\t%u", applystr.c_str(),  proto->FrostRes);
-    }
 
     if (proto->ShadowRes)
-    {
         HandleStatModifier(UNIT_MOD_RESISTANCE_SHADOW, BASE_VALUE, float(proto->ShadowRes), apply);
-        //sLog.outDebug("%s ShadowRes: \t\t%u", applystr.c_str(),  proto->ShadowRes);
-    }
 
     if (proto->ArcaneRes)
-    {
         HandleStatModifier(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(proto->ArcaneRes), apply);
-        //sLog.outDebug("%s ArcaneRes: \t\t%u", applystr.c_str(),  proto->ArcaneRes);
-    }
 
     WeaponAttackType attType = BASE_ATTACK;
     float damage = 0.0f;
@@ -6356,16 +6300,10 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
         proto->InventoryType == INVTYPE_RANGEDRIGHT ))
     {
         attType = RANGED_ATTACK;
-        //typestr = "Ranged";
-    }
-    else if(slot==EQUIPMENT_SLOT_MAINHAND)
-    {
-        //typestr = "Mainhand";
     }
     else if(slot==EQUIPMENT_SLOT_OFFHAND)
     {
         attType = OFF_ATTACK;
-        //typestr = "Offhand";
     }
 
     if (proto->Damage[0].DamageMin > 0 )
@@ -6379,7 +6317,6 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
     {
         damage = apply ? proto->Damage[0].DamageMax : BASE_MAXDAMAGE;
         SetBaseWeaponDamage(attType, MAXDAMAGE, damage);
-        //sLog.outError("applying maxdam: assigning %f to weapon maxdamage, now is: %f", damage, GetWeaponDamageRange(attType, MAXDAMAGE));
     }
 
     if(!IsUseEquipedWeapon(slot==EQUIPMENT_SLOT_MAINHAND))
@@ -6388,23 +6325,11 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
     if (proto->Delay)
     {
         if(slot == EQUIPMENT_SLOT_RANGED)
-        {
             SetAttackTime(RANGED_ATTACK, apply ? proto->Delay: BASE_ATTACK_TIME);
-            //typestr = "Range";
-            //sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
-        }
         else if(slot==EQUIPMENT_SLOT_MAINHAND)
-        {
             SetAttackTime(BASE_ATTACK, apply ? proto->Delay: BASE_ATTACK_TIME);
-            //typestr = "Mainhand";
-            //sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
-        }
         else if(slot==EQUIPMENT_SLOT_OFFHAND)
-        {
             SetAttackTime(OFF_ATTACK, apply ? proto->Delay: BASE_ATTACK_TIME);
-            //typestr = "Offhand";
-            //sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
-        }
     }
 
     if(CanModifyStats() && (damage || proto->Delay))
@@ -10881,27 +10806,27 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
                     case ITEM_MOD_AGILITY:
                         sLog.outDebug("+ %u AGILITY",enchant_amount);
                         HandleStatModifier(UNIT_MOD_STAT_AGILITY, TOTAL_VALUE, float(enchant_amount), apply);
-                        ApplyPosStatMod(STAT_AGILITY, enchant_amount, apply);
+                        ApplyStatBuffMod(STAT_AGILITY, enchant_amount, apply);
                         break;
                     case ITEM_MOD_STRENGTH:
                         sLog.outDebug("+ %u STRENGTH",enchant_amount);
                         HandleStatModifier(UNIT_MOD_STAT_STRENGTH, TOTAL_VALUE, float(enchant_amount), apply);
-                        ApplyPosStatMod(STAT_STRENGTH, enchant_amount, apply);
+                        ApplyStatBuffMod(STAT_STRENGTH, enchant_amount, apply);
                         break;
                     case ITEM_MOD_INTELLECT:
                         sLog.outDebug("+ %u INTELLECT",enchant_amount);
                         HandleStatModifier(UNIT_MOD_STAT_INTELLECT, TOTAL_VALUE, float(enchant_amount), apply);
-                        ApplyPosStatMod(STAT_INTELLECT, enchant_amount, apply);
+                        ApplyStatBuffMod(STAT_INTELLECT, enchant_amount, apply);
                         break;
                     case ITEM_MOD_SPIRIT:
                         sLog.outDebug("+ %u SPIRIT",enchant_amount);
                         HandleStatModifier(UNIT_MOD_STAT_SPIRIT, TOTAL_VALUE, float(enchant_amount), apply);
-                        ApplyPosStatMod(STAT_SPIRIT, enchant_amount, apply);
+                        ApplyStatBuffMod(STAT_SPIRIT, enchant_amount, apply);
                         break;
                     case ITEM_MOD_STAMINA:
                         sLog.outDebug("+ %u STAMINA",enchant_amount);
                         HandleStatModifier(UNIT_MOD_STAT_STAMINA, TOTAL_VALUE, float(enchant_amount), apply);
-                        ApplyPosStatMod(STAT_STAMINA, enchant_amount, apply);
+                        ApplyStatBuffMod(STAT_STAMINA, enchant_amount, apply);
                         break;
                     case ITEM_MOD_DEFENSE_SKILL_RATING:
                         ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, enchant_amount, apply);
