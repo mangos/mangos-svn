@@ -668,8 +668,27 @@ void GameObject::SaveRespawnTime()
 
 bool GameObject::isVisibleForInState(Player const* u, bool inVisibleList) const
 {
-    return IsInWorld() && u->IsInWorld() && ( IsTransport() && IsInMap(u) ||
-        (isSpawned() || u->isGameMaster()) && IsWithinDistInMap(u,World::GetMaxVisibleDistanceForObject()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f)) );
+    // Not in world
+    if(!IsInWorld() || !u->IsInWorld())
+        return false;
+
+    // Transport always visible at this step implementation
+    if(IsTransport() && IsInMap(u))
+        return true;
+
+    // despawned and then not visible for non-GM in GM-mode
+    if(!isSpawned() && !u->isGameMaster())
+        return false;
+
+    // special invisibility cases
+
+    // Smuggled Mana Cell required 10 invisibility type detection/state
+    if(GetEntry()==187039 && ((u->m_detectInvisibilityMask | u->m_invisibilityMask) & (1<<10))==0)
+        return false;
+
+    // check distance
+    return IsWithinDistInMap(u,World::GetMaxVisibleDistanceForObject() + 
+        (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f) );
 }
 
 void GameObject::Respawn()
