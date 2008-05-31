@@ -214,19 +214,19 @@ enum ConditionType
 
 #define MAX_CONDITION                 11                    // maximum value in ConditionType enum
 
-struct Condition
+struct PlayerCondition
 {
     ConditionType condition;                                // additional condition type
     uint32  value1;                                         // data for the condition - see ConditionType definition
     uint32  value2;
 
-    Condition(uint8 _condition = 0, uint32 _value1 = 0, uint32 _value2 = 0)
+    PlayerCondition(uint8 _condition = 0, uint32 _value1 = 0, uint32 _value2 = 0)
         : condition(ConditionType(_condition)), value1(_value1), value2(_value2) {}
 
     static bool IsValid(ConditionType condition, uint32 value1, uint32 value2);
     // Checks correctness of values
     bool Meets(Player const * APlayer) const;               // Checks if the player meets the condition
-    bool operator == (Condition const& lc) const
+    bool operator == (PlayerCondition const& lc) const
     {
         return (lc.condition == condition && lc.value1 == value1 && lc.value2 == value2);
     }
@@ -774,7 +774,7 @@ class ObjectMgr
         GuildBankTabPriceMap mGuildBankTabPrice;
 
         // Storage for Conditions. First element (index 0) is reserved for zero-condition (nothing required)
-        typedef std::vector<Condition> ConditionStore;
+        typedef std::vector<PlayerCondition> ConditionStore;
         ConditionStore mConditions;
 
 };

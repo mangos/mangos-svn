@@ -103,7 +103,7 @@ void LootStore::LoadLootTable()
             uint32 cond_value1         = fields[8].GetUInt32();
             uint32 cond_value2         = fields[9].GetUInt32();
 
-            if(!Condition::IsValid(condition,cond_value1, cond_value2))
+            if(!PlayerCondition::IsValid(condition,cond_value1, cond_value2))
             {
                 sLog.outErrorDb("... in table '%s' entry %u item %u", GetName(), entry, item);
                 continue;                                   // error already printed to log/console.

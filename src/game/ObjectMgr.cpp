@@ -5838,7 +5838,7 @@ void ObjectMgr::LoadFishingBaseSkillLevel()
 // Returns Id if found, else adds it to Conditions and returns Id
 uint16 ObjectMgr::GetConditionId( ConditionType condition, uint32 value1, uint32 value2 )
 {
-    Condition lc = Condition(condition, value1, value2);
+    PlayerCondition lc = PlayerCondition(condition, value1, value2);
     for (uint16 i=0; i < mConditions.size(); ++i)
     {
         if (lc == mConditions[i])
@@ -5857,7 +5857,7 @@ uint16 ObjectMgr::GetConditionId( ConditionType condition, uint32 value1, uint32
 }
 
 // Checks if player meets the condition
-bool Condition::Meets(Player const * player) const
+bool PlayerCondition::Meets(Player const * player) const
 {
     if( !player )
         return false;                                       // player not present, return false
@@ -5904,7 +5904,7 @@ bool Condition::Meets(Player const * player) const
 }
 
 // Verification of condition values validity
-bool Condition::IsValid(ConditionType condition, uint32 value1, uint32 value2)
+bool PlayerCondition::IsValid(ConditionType condition, uint32 value1, uint32 value2)
 {
     if( condition >= MAX_CONDITION)                         // Wrong condition type
     {
