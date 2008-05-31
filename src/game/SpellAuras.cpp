@@ -1156,7 +1156,7 @@ void Aura::TriggerSpell()
                         Item* item = ((Player*)caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
                         if (!item)
                             return;
-                        uint32 enchant_id = NULL;
+                        uint32 enchant_id = 0;
                         switch (GetId())
                         {
                              case   758: enchant_id = 1803; break;   // Rank 1
@@ -5098,7 +5098,7 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
 
             DoneActualBenefit *= caster->CalculateLevelPenalty(GetSpellProto());
 
-            m_modifier.m_amount += DoneActualBenefit;
+            m_modifier.m_amount += (int32)DoneActualBenefit;
         }
     }
 }
