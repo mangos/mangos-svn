@@ -5310,9 +5310,9 @@ void Aura::PeriodicTick()
             SpellEntry const* spellProto = GetSpellProto();
             float multiplier = spellProto->EffectMultipleValue[GetEffIndex()] > 0 ? spellProto->EffectMultipleValue[GetEffIndex()] : 1;
 
-            pCaster->DealDamage(m_target, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), false);
+            uint32 new_damage = pCaster->DealDamage(m_target, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), false);
 
-            pCaster->ProcDamageAndSpell(target, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
+            pCaster->ProcDamageAndSpell(target, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, new_damage, spellProto);
             if (!target->isAlive() && pCaster->IsNonMeleeSpellCasted(false))
             {
                 for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
@@ -5326,10 +5326,10 @@ void Aura::PeriodicTick()
             if(Player *modOwner = pCaster->GetSpellModOwner())
                 modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
 
-            int32 gain = pCaster->ModifyHealth(int32(pdamage * multiplier));
+            int32 gain = pCaster->ModifyHealth(int32(new_damage * multiplier));
             pCaster->getHostilRefManager().threatAssist(pCaster, float(gain) * 0.5f, spellProto);
 
-            pCaster->SendHealSpellLog(pCaster, spellProto->Id, uint32(pdamage * multiplier));
+            pCaster->SendHealSpellLog(pCaster, spellProto->Id, uint32(new_damage * multiplier));
             break;
         }
         case SPELL_AURA_PERIODIC_HEAL:
