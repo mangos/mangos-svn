@@ -38,7 +38,8 @@ class MANGOS_DLL_SPEC QueryResult
                 if(iter->second == name)
                     return iter->first;
             }
-            return -1;
+            assert(false && "unknown field name");
+            return uint32(-1);
         }
 
         Field *Fetch() const { return mCurrentRow; }
