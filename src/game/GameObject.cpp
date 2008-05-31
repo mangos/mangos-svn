@@ -676,15 +676,19 @@ bool GameObject::isVisibleForInState(Player const* u, bool inVisibleList) const
     if(IsTransport() && IsInMap(u))
         return true;
 
-    // despawned and then not visible for non-GM in GM-mode
-    if(!isSpawned() && !u->isGameMaster())
-        return false;
+    // quick check visibility false cases for non-GM-mode
+    if(!u->isGameMaster())
+    {
+        // despawned and then not visible for non-GM in GM-mode
+        if(!isSpawned())
+            return false;
 
-    // special invisibility cases
+        // special invisibility cases
 
-    // Smuggled Mana Cell required 10 invisibility type detection/state
-    if(GetEntry()==187039 && ((u->m_detectInvisibilityMask | u->m_invisibilityMask) & (1<<10))==0)
-        return false;
+        // Smuggled Mana Cell required 10 invisibility type detection/state
+        if(GetEntry()==187039 && ((u->m_detectInvisibilityMask | u->m_invisibilityMask) & (1<<10))==0)
+            return false;
+    }
 
     // check distance
     return IsWithinDistInMap(u,World::GetMaxVisibleDistanceForObject() + 
