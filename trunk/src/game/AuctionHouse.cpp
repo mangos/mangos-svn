@@ -25,6 +25,7 @@
 #include "Player.h"
 #include "UpdateMask.h"
 #include "AuctionHouseObject.h"
+#include "Util.h"
 
 //please DO NOT use iterator++, because it is slower than ++iterator!!!
 //post-incrementation is always slower than pre-incrementation !
@@ -662,7 +663,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
     totalcount = 0;
     data << (uint32) 0;
 
-    std::transform( searchedname.begin(), searchedname.end(), searchedname.begin(), ::tolower );
+    strToLower( searchedname );
 
     for (AuctionHouseObject::AuctionEntryMap::iterator itr = mAuctions->GetAuctionsBegin();itr != mAuctions->GetAuctionsEnd();++itr)
     {
@@ -699,7 +700,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                                             }
                                         }
 
-                                        std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+                                        strToLower( name );
                                         if( searchedname.empty() || name.find( searchedname ) != std::string::npos )
                                         {
                                             if ((count < 50) && (totalcount >= listfrom))

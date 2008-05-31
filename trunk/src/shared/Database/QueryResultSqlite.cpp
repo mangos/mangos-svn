@@ -27,8 +27,7 @@ QueryResult(rowCount, fieldCount), mTableData(tableData), mTableIndex(0)
 
     for (uint32 i = 0; i < mFieldCount; i++)
     {
-        mCurrentRow[i].SetName(mTableData[i]);
-
+        mFieldNames[i] = mTableData[i];
         mCurrentRow[i].SetType(Field::DB_TYPE_UNKNOWN);
     }
 }

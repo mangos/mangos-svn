@@ -30,6 +30,7 @@
 #include "ObjectAccessor.h"
 #include "Language.h"
 #include "CellImpl.h"
+#include "Util.h"
 #ifdef _DEBUG_VMAPS
 #include "VMapFactory.h"
 #endif
@@ -1568,7 +1569,7 @@ bool ChatHandler::HandleLookupAreaCommand(const char* args)
     uint32 counter = 0;                                     // Counter for figure out that we found smth.
 
     // converting string that we try to find to lower case
-    std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+    strToLower( namepart );
 
     // Search in AreaTable.dbc
     for (uint32 areaflag = 0; areaflag < sAreaStore.GetNumRows(); ++areaflag)
@@ -1580,7 +1581,7 @@ bool ChatHandler::HandleLookupAreaCommand(const char* args)
             std::string name = areaEntry->area_name[sWorld.GetDBClang()];
 
             // converting SpellName to lower case
-            std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+            strToLower( name );
 
             if (name.find(namepart) != std::string::npos)
             {

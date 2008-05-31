@@ -33,6 +33,7 @@
 #include "World.h"
 #include "WaypointMovementGenerator.h"
 #include "GameEvent.h"
+#include "Util.h"
 #include <cctype>
 #include <iostream>
 #include <fstream>
@@ -539,10 +540,10 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
             std::string name = factionEntry->name[sWorld.GetDBClang()];
 
             // converting name to lower case
-            std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+            strToLower( name );
 
             // converting string that we try to find to lower case
-            std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+            strToLower( namepart );
 
             if (name.find(namepart) != std::string::npos)
             {
@@ -610,7 +611,7 @@ bool ChatHandler::HandleModifyRepCommand(const char * args)
         return false;
 
     std::string rankStr = rankTxt;
-    std::transform( rankStr.begin(), rankStr.end(), rankStr.begin(), ::tolower );
+    strToLower( rankStr );
 
     amount = atoi(rankTxt);
     if ((amount == 0) && (rankTxt[0] != '-') && !isdigit(rankTxt[0]))
@@ -620,7 +621,7 @@ bool ChatHandler::HandleModifyRepCommand(const char * args)
         for (; r < MAX_REPUTATION_RANK; ++r)
         {
             std::string rank = GetMangosString(ReputationRankStrIndex[r]);
-            std::transform( rank.begin(), rank.end(), rank.begin(), ::tolower );
+            strToLower( rank );
 
             if (rankStr == rank)
             {
