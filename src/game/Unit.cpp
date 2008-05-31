@@ -6826,7 +6826,12 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     bool Channeled = IsChanneledSpell(spellProto);
 
     // Damage Done
-    uint32 CastingTime = GetSpellCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
+    uint32 CastingTime;
+    if ( !Channeled )
+        CastingTime = GetSpellCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
+    else
+        CastingTime = GetSpellDuration(spellProto);
+
     if (CastingTime > 7000) CastingTime = 7000;             // Plus Damage efficient maximum 200% ( 7.0 seconds )
     if (CastingTime < 1500) CastingTime = 1500;
 
