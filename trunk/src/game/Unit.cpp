@@ -776,8 +776,9 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
             if(spellProto && IsDamageToThreatSpell(spellProto))
-                damage *= 2;
-            pVictim->AddThreat(this, damage, damageSchoolMask, spellProto);
+                pVictim->AddThreat(this, damage*2, damageSchoolMask, spellProto);
+            else
+                pVictim->AddThreat(this, damage, damageSchoolMask, spellProto);
         }
         else                                                // victim is a player
         {
