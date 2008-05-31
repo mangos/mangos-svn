@@ -65,7 +65,7 @@ class MANGOS_DLL_SPEC HostilReference : public Reference<Unit, ThreatManager>
 
         void setThreat(float pThreat) { addThreat(pThreat - getThreat()); }
 
-        void addThreatPercent(int32 pPercent) { float tmpThreat = iThreat; tmpThreat *= (pPercent+100)/100; addThreat(tmpThreat-iThreat); }
+        void addThreatPercent(int32 pPercent) { float tmpThreat = iThreat; tmpThreat = tmpThreat * (pPercent+100) / 100; addThreat(tmpThreat-iThreat); }
 
         float getThreat() const { return iThreat; }
 
@@ -147,7 +147,7 @@ class MANGOS_DLL_SPEC ThreatContainer
 
         HostilReference* addThreat(Unit* pVictim, float pThreat);
 
-        HostilReference* modifyThreatPercent(Unit *pVictim, int32 percent);
+        void modifyThreatPercent(Unit *pVictim, int32 percent);
 
         HostilReference* selectNextVictim(Creature* pAttacker, HostilReference* pCurrentVictim);
 
