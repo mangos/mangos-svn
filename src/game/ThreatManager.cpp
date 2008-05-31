@@ -99,7 +99,7 @@ void HostilReference::addThreat(float pMod)
         updateOnlineStatus();
     if(pMod != 0.0f)
         fireStatusChanged(ThreatRefStatusChangeEvent(UEV_THREAT_REF_THREAT_CHANGE, this, pMod));
-    if(isValid())
+    if(isValid() && pMod >= 0)
     {
         Unit* victim_owner = getTarget()->GetOwner();
         if(victim_owner && victim_owner->isAlive())
@@ -231,12 +231,10 @@ HostilReference* ThreatContainer::addThreat(Unit* pVictim, float pThreat)
 
 //============================================================
 
-HostilReference* ThreatContainer::modifyThreatPercent(Unit *pVictim, int32 pPercent)
+void ThreatContainer::modifyThreatPercent(Unit *pVictim, int32 pPercent)
 {
-    HostilReference* ref = getReferenceByTarget(pVictim);
-    assert(ref);                                            // for a modification the reference must be there. (or not?)
-    ref->addThreatPercent(pPercent);
-    return ref;
+    if(HostilReference* ref = getReferenceByTarget(pVictim))
+        ref->addThreatPercent(pPercent);
 }
 
 //============================================================
