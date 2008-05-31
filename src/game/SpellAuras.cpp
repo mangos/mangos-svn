@@ -2035,6 +2035,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
 void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
 {
+    // spells required only Real aura add/remove
+    if(!Real)
+        return;
+
     SpellEntry const*spell = GetSpellProto(); 
     switch( spell->SpellFamilyName)
     {
@@ -2049,9 +2053,6 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
             break;
         }
     }
-
-    if (m_periodicTimer <= 0)
-        m_periodicTimer += m_modifier.periodictime;
 
     m_isPeriodic = apply;
 }
@@ -5589,15 +5590,30 @@ void Aura::PeriodicDummyTick()
             // Search SPELL_AURA_MOD_POWER_REGEN aura for this spell and add bonus
             Unit::AuraList const& aura = m_target->GetAurasByType(SPELL_AURA_MOD_POWER_REGEN);
             for(Unit::AuraList::const_iterator i = aura.begin(); i != aura.end(); ++i)
+            {
                 if ((*i)->GetId() == GetId())
                 {
+                    // Get tick number
+                    int32 tick = (m_maxduration - m_duration) / m_modifier.periodictime;
+                    // Default case (not on arenas)
+                    if (tick == 0)
+                    {
+                        (*i)->GetModifier()->m_amount = m_modifier.m_amount;
+                        ((Player*)m_target)->UpdateManaRegen();
+                        // Disable continue
+                        m_isPeriodic = false;
+                    }
+                    return;
+                    //**********************************************
+                    // Code commended since arena patch not added
+                    // This feature uses only in arenas
+                    //**********************************************
                     // Here need increase mana regen per tick (6 second rule)
                     // on 0 tick -   0  (handled in 2 second)
                     // on 1 tick - 166% (handled in 4 second)
                     // on 2 tick - 133% (handled in 6 second)
-                    // Get tick on activate
-                    int32 tick = (m_maxduration - m_duration) / m_modifier.periodictime;
                     // Not need update after 3 tick
+                    /*
                     if (tick > 3)
                         return;
                     // Apply bonus for 0 - 3 tick
@@ -5617,8 +5633,9 @@ void Aura::PeriodicDummyTick()
                             break;
                     }
                     ((Player*)m_target)->UpdateManaRegen();
-                    return;
+                    return;*/
                 }
+            }
             return;
         }
 //        // Panda
