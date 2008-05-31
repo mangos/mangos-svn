@@ -21,6 +21,7 @@
 #include "ObjectMgr.h"
 #include "Player.h"
 #include "Policies/SingletonImp.h"
+#include "Util.h"
 
 #ifdef DO_POSTGRESQL
 extern DatabasePostgre loginDatabase;
@@ -41,7 +42,7 @@ int AccountMgr::CreateAccount(std::string username, std::string password)
     if(username.length() > 16)
         return 1;                                           // username's too long
 
-    std::transform( username.begin(), username.end(), username.begin(), ::toupper );
+    strToUpper( username );
 
     loginDatabase.escape_string(username);
     QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM account WHERE username='%s'", username.c_str());
@@ -134,7 +135,7 @@ int AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
 
 uint32 AccountMgr::GetId(std::string username)
 {
-    std::transform( username.begin(), username.end(), username.begin(), ::toupper );
+    strToUpper( username );
     loginDatabase.escape_string(username);
 
     QueryResult *result = loginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", username.c_str());

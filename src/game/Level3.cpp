@@ -44,6 +44,7 @@
 #include "SkillExtraItems.h"
 #include "SystemConfig.h"
 #include "Config/ConfigEnv.h"
+#include "Util.h"
 
 //reload commands
 bool ChatHandler::HandleReloadCommand(const char* arg)
@@ -2140,7 +2141,7 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
     uint32 counter = 0;
 
     // converting string that we try to find to lower case
-    std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+    strToLower( namepart );
 
     // Search in `item_template`
     for (uint32 id = 0; id < sItemStorage.MaxEntry; id++)
@@ -2160,7 +2161,7 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
                     std::string Name = il->Name[loc_idx];
 
                     // converting Name to lower case
-                    std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
+                    strToLower( Name );
 
                     if (Name.find(namepart) != std::string::npos)
                     {
@@ -2175,7 +2176,7 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
         std::string Name = pProto->Name1;
 
         // converting Name to lower case
-        std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
+        strToLower( Name );
 
         if (Name.find(namepart) != std::string::npos)
         {
@@ -2198,7 +2199,7 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
     uint32 counter = 0;                                     // Counter for figure out that we found smth.
 
     // converting string that we try to find to lower case
-    std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+    strToLower( namepart );
 
     // Search in ItemSet.dbc
     for (uint32 id = 0; id < sItemSetStore.GetNumRows(); id++)
@@ -2209,7 +2210,7 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
             std::string name = set->name[sWorld.GetDBClang()];
 
             // converting name to lower case
-            std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+            strToLower( name );
 
             if (name.find(namepart) != std::string::npos)
             {
@@ -2240,7 +2241,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
     uint32 counter = 0;                                     // Counter for figure out that we found smth.
 
     // converting string that we try to find to lower case
-    std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+    strToLower( namepart );
 
     // Search in SkillLine.dbc
     for (uint32 id = 0; id < sSkillLineStore.GetNumRows(); id++)
@@ -2252,7 +2253,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
             std::string name = skillInfo->name[sWorld.GetDBClang()];
 
             // converting SkillName to lower case
-            std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+            strToLower( name );
 
             if (name.find(namepart) != std::string::npos)
             {
@@ -2283,7 +2284,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
     uint32 counter = 0;                                     // Counter for figure out that we found smth.
 
     // converting string that we try to find to lower case
-    std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+    strToLower( namepart );
 
     // Search in Spell.dbc
     for (uint32 id = 0; id < sSpellStore.GetNumRows(); id++)
@@ -2295,7 +2296,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
             std::string name = spellInfo->SpellName[sWorld.GetDBClang()];
 
             // converting SpellName to lower case
-            std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+            strToLower( name );
 
             if (name.find(namepart) != std::string::npos)
             {
@@ -2360,7 +2361,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
     uint32 counter = 0 ;
 
     // converting string that we try to find to lower case
-    std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+    strToLower( namepart );
 
     ObjectMgr::QuestMap const& qTemplates = objmgr.GetQuestTemplates();
     for (ObjectMgr::QuestMap::const_iterator iter = qTemplates.begin(); iter != qTemplates.end(); ++iter)
@@ -2378,7 +2379,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
                     std::string Title = il->Title[loc_idx];
 
                     // converting string that we try to find to lower case
-                    std::transform( Title.begin(), Title.end(), Title.begin(), ::tolower );
+                    strToLower( Title );
 
                     if (Title.find(namepart) != std::string::npos)
                     {
@@ -2406,7 +2407,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
         std::string Title = qinfo->GetTitle();
 
         // converting string that we try to find to lower case
-        std::transform( Title.begin(), Title.end(), Title.begin(), ::tolower );
+        strToLower( Title );
 
         if (Title.find(namepart) != std::string::npos)
         {
@@ -2443,7 +2444,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
     uint32 counter = 0;
 
     // converting string that we try to find to lower case
-    std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+    strToLower( namepart );
 
     for (uint32 id = 0; id< sCreatureStorage.MaxEntry; id++ )
     {
@@ -2462,7 +2463,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
                     std::string Name = cl->Name[loc_idx];
 
                     // converting Name to lower case
-                    std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
+                    strToLower( Name );
 
                     if (Name.find(namepart) != std::string::npos)
                     {
@@ -2477,7 +2478,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
         std::string Name = cInfo->Name;
 
         // converting Name to lower case
-        std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
+        strToLower( Name );
 
         if (Name.find(namepart) != std::string::npos)
         {
@@ -2501,7 +2502,7 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
     uint32 counter = 0;
 
     // converting string that we try to find to lower case
-    std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+    strToLower( namepart );
 
     for (uint32 id = 0; id< sGOStorage.MaxEntry; id++ )
     {
@@ -2519,7 +2520,7 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
                 {
                     std::string Name = gl->Name[loc_idx];
                     // converting Name to lower case
-                    std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
+                    strToLower( Name );
 
                     if (Name.find(namepart) != std::string::npos)
                     {
@@ -2534,7 +2535,7 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
         std::string Name = gInfo->name;
 
         // converting Name to lower case
-        std::transform( Name.begin(), Name.end(), Name.begin(), ::tolower );
+        strToLower( Name );
 
         if (Name.find(namepart) != std::string::npos)
         {

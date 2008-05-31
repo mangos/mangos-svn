@@ -34,11 +34,10 @@ class Field
 
         Field();
         Field(Field &f);
-        Field(const char *value, const char *name, enum DataTypes type);
+        Field(const char *value, enum DataTypes type);
 
         ~Field();
 
-        const char *GetName() const { return mName; }
         enum DataTypes GetType() const { return mType; }
 
         const char *GetString() const { return mValue; }
@@ -65,14 +64,12 @@ class Field
                 return 0;
         }
 
-        void SetName(const char *name);
         void SetType(enum DataTypes type) { mType = type; }
 
         void SetValue(const char *value);
 
     private:
         char *mValue;
-        char *mName;
         enum DataTypes mType;
 };
 #endif

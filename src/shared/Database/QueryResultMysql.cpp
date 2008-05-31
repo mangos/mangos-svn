@@ -31,7 +31,7 @@ QueryResult(rowCount, fieldCount), mResult(result)
 
     for (uint32 i = 0; i < mFieldCount; i++)
     {
-        mCurrentRow[i].SetName(fields[i].name);
+        mFieldNames[i] = fields[i].name;
         mCurrentRow[i].SetType(ConvertNativeType(fields[i].type));
     }
 }

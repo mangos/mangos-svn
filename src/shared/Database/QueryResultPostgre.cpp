@@ -29,7 +29,7 @@ QueryResult(rowCount, fieldCount), mResult(result),  mTableIndex(0)
 
     for (uint32 i = 0; i < mFieldCount; i++)
     {
-        mCurrentRow[i].SetName(PQfname(result, i));
+        mFieldNames[i] = PQfname(result, i);
         mCurrentRow[i].SetType(ConvertNativeType(PQftype( result, i )));
     }
 }

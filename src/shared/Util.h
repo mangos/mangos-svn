@@ -119,6 +119,16 @@ inline void normalizePlayerName(std::string& name)
         name[i] = tolower(name[i]);
 }
 
+inline void strToUpper(std::string& str)
+{
+    std::transform( str.begin(), str.end(), str.begin(), ::toupper );
+}
+
+inline void strToLower(std::string& str)
+{
+    std::transform( str.begin(), str.end(), str.begin(), ::tolower );
+}
+
 bool IsIPAddress(char const* ipaddress);
 uint32 CreatePIDFile(std::string filename);
 
