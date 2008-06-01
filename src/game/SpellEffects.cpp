@@ -56,6 +56,7 @@
 #include "VMapFactory.h"
 #include "Language.h"
 #include "SocialMgr.h"
+#include "Util.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {

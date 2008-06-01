@@ -21,6 +21,7 @@
 #include "ObjectMgr.h"
 #include "ProgressBar.h"
 #include "World.h"
+#include "Util.h"
 
 using std::remove_copy_if;
 
@@ -202,7 +203,7 @@ void LoadLootTables()
 // RATE_DROP_ITEMS is used for all types of entries
 bool LootStoreItem::Roll() const
 {
-    return rand_chance() < chance*sWorld.getRate(RATE_DROP_ITEMS);
+    return roll_chance_i(chance*sWorld.getRate(RATE_DROP_ITEMS));
 }
 
 // Checks correctness of values
