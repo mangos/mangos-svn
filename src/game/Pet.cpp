@@ -568,15 +568,26 @@ void Pet::RegenerateFocus()
 {
     uint32 curValue = GetPower(POWER_FOCUS);
     uint32 maxValue = GetMaxPower(POWER_FOCUS);
-    if (curValue >= maxValue) return;
-    uint32 addvalue = 25;
+    
+    if (curValue >= maxValue) 
+        return;
+
+    float FocusIncreaseRate = sWorld.getRate(RATE_POWER_FOCUS);
+    uint32 addvalue = 25 * FocusIncreaseRate;
+
+    AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+    for(AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
+        if ((*i)->GetModifier()->m_miscvalue == POWER_FOCUS)
+            addvalue *= ((*i)->GetModifier()->m_amount + 100) / 100.0f;
+
     ModifyPower(POWER_FOCUS, addvalue);
 }
 
 void Pet::LooseHappiness()
 {
     uint32 curValue = GetPower(POWER_HAPPINESS);
-    if (curValue <= 0) return;
+    if (curValue <= 0) 
+        return;
     int32 addvalue = (140 >> GetLoyaltyLevel()) * 125;      //value is 70/35/17/8/4 (per min) * 1000 / 8 (timer 7.5 secs)
     if(isInCombat())                                        //we know in combat happiness fades faster, multiplier guess
         addvalue = int32(addvalue * 1.5);
@@ -883,7 +894,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
 
     if(cinfo->type == CREATURE_TYPE_CRITTER)
     {
-        m_petType = MINI_PET;
+        setPetType(MINI_PET);
         return true;
     }
     SetDisplayId(creature->GetDisplayId());
