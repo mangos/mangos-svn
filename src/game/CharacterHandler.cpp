@@ -681,7 +681,7 @@ void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,4+1);
 
-    //sLog.outDebug("WORLD SESSION: HandleSetFactionAtWar");
+    DEBUG_LOG( "WORLD: Received CMSG_SET_FACTION_ATWAR" );
 
     uint32 repListID;
     uint8  flag;

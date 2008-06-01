@@ -222,8 +222,8 @@ struct FactionEntry
     uint32      BaseRepRaceMask[4];                         // 2-5 Base reputation race masks (see enum Races)
     uint32      BaseRepClassMask[4];                        // 6-9 Base reputation class masks (see enum Classes)
     int32       BaseRepValue[4];                            // 10-13 Base reputation values
-    //int32     reputationFlags[4];                         // 14-17 unused
-    uint32      team;                                       // 18
+    uint32      ReputationFlags[4];                         // 14-17 Default flags to apply
+    uint32      team;                                       // 18 enum Team
     char*       name[16];                                   // 19-34
                                                             // 35 string flags, unused
     //char*     description[16];                            // 36-51 unused
