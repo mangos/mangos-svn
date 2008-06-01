@@ -4454,6 +4454,22 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
 
                     return;
                 }
+                // Sweeping Strikes
+                case 12328:
+                case 18765:
+                case 35429:
+                {
+                    Unit* additionalTarget = SelectNearbyTarget();
+                    if(!additionalTarget)
+                        return;
+
+                    // prevent chain of triggred spell from same triggred spell
+                    if(procSpell && procSpell->Id==26654)
+                        return;
+
+                    CastSpell(additionalTarget, 26654, true, castItem,triggeredByAura);
+                    return;
+                }
                 // Unstable Power
                 case 24658:
                 {
@@ -4475,9 +4491,6 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 case 28764:
                 {
                     if(!procSpell || GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    if(!castItem)
                         return;
 
                     // find Mage Armor
@@ -4642,7 +4655,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                             return;
                     }
                     CastSpell(this, spellId, true, castItem, triggeredByAura);
-                    if (roll_chance_i(10))
+                    if (roll_chance_f(10))
                         ((Player*)this)->Say("This is Madness!", LANG_UNIVERSAL);
                     return;
                 }
@@ -4764,7 +4777,18 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 CastCustomSpell(this, 29442, &manaReward, NULL, NULL, true, castItem, triggeredByAura);
                 return;
             }
+            // Master of Elements
+            if (dummySpell->SpellIconID == 1920)
+            {
+                if(!procSpell)
+                    return;
 
+                int32 MEManaCostSave = procSpell->manaCost * triggeredByAura->GetModifier()->m_amount/100;
+
+                if( MEManaCostSave > 0 )
+                    CastCustomSpell(this, 29077, &MEManaCostSave, NULL, NULL, true, castItem, triggeredByAura);
+                return;
+            }
             switch(dummySpell->Id)
             {
                 // Ignite
@@ -4885,13 +4909,10 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     CastCustomSpell(this,30294,&HealthBasePoints0,NULL,NULL,true,castItem,triggeredByAura);
                     return;
                 }
-                // Shadowflame (item set effect)
+                // Shadowflame (Voidheart Raiment set bonus)
                 case 37377:
                 {
                     if(GetTypeId() != TYPEID_PLAYER || !pVictim || !pVictim->isAlive())
-                        return;
-
-                    if(!castItem)
                         return;
 
                     CastSpell(pVictim,37379,true,castItem,triggeredByAura);
@@ -4903,9 +4924,6 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     if(GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    if(!castItem)
-                        return;
-
                     if (Unit *pet = GetPet())
                     {
                         int32 healamount = damage * triggeredByAura->GetModifier()->m_amount/100;
@@ -4913,13 +4931,10 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     }
                     return;
                 }
-                // Shadowflame Hellfire (item set effect)
+                // Shadowflame Hellfire (Voidheart Raiment set bonus)
                 case 39437:
                 {
                     if(GetTypeId() != TYPEID_PLAYER || !pVictim || !pVictim->isAlive())
-                        return;
-
-                    if(!castItem)
                         return;
 
                     CastSpell(pVictim,37378,true,castItem,triggeredByAura);
@@ -4930,6 +4945,19 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         }
         case SPELLFAMILY_PRIEST:
         {
+            // Vampiric Touch
+            if( dummySpell->SpellFamilyFlags & 0x0000040000000000LL )
+            {
+                if(!pVictim || !pVictim->isAlive())
+                    return;
+
+                if(triggeredByAura->GetCasterGUID() == pVictim->GetGUID())
+                {
+                    int32 VTEnergizeBasePoints0 = triggeredByAura->GetModifier()->m_amount*damage/100;
+                    pVictim->CastCustomSpell(pVictim,34919,&VTEnergizeBasePoints0,NULL,NULL,true,castItem, triggeredByAura);
+                }
+                return;
+            }
             switch(dummySpell->Id)
             {
                 // Vampiric Embrace
@@ -4974,9 +5002,6 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     if( GetTypeId() != TYPEID_PLAYER )
                         return;
 
-                    if(!castItem)
-                        return;
-
                     int32 healamount = int32(damage * 10/100);
                     CastCustomSpell(this, 26170, &healamount, NULL, NULL, true, castItem, triggeredByAura);
                     return;
@@ -4985,9 +5010,6 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 case 39372:
                 {
                     if( GetTypeId() != TYPEID_PLAYER )
-                        return;
-
-                    if(!castItem)
                         return;
 
                     if(!procSpell || (GetSpellSchoolMask(procSpell) & (SPELL_SCHOOL_MASK_FROST | SPELL_SCHOOL_MASK_SHADOW))==0 )
@@ -5048,9 +5070,6 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     if(GetTypeId() != TYPEID_PLAYER)
                         return;
 
-                    if(!castItem)
-                        return;
-
                     int32 manaback = int32(procSpell->manaCost * 30 / 100);
                     CastCustomSpell(this, 28742, &manaback, NULL, NULL, true, castItem, triggeredByAura);
                     return;
@@ -5072,9 +5091,6 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 case 37295:
                 {
                     if(GetTypeId() != TYPEID_PLAYER)
-                        return;
-
-                    if(!castItem)
                         return;
 
                     CastSpell(this, 37238, true, castItem, triggeredByAura);
@@ -5143,6 +5159,48 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     CastSpell(pVictim, 32747, true, castItem, triggeredByAura);
                     return;
                 }
+                // Blade Flurry
+                case 13877:
+                case 33735:
+                {
+                    Unit* additionalTarget = SelectNearbyTarget();
+                    if(!additionalTarget)
+                        return;
+                    int32 basePoint0 = damage;
+                    CastCustomSpell(additionalTarget, 22482, &basePoint0, 0, 0, true, castItem, triggeredByAura);
+                    return;
+                }
+            }
+            // Quick Recovery
+            if( dummySpell->SpellIconID == 2116 )
+            {
+                if(!procSpell)
+                    return;
+
+                // only rogue's finishing moves (maybe need additional checks)
+                if( procSpell->SpellFamilyName!=SPELLFAMILY_ROGUE ||
+                    (procSpell->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE__FINISHING_MOVE) == 0)
+                    return;
+
+                int32 QREnegyCostSave = procSpell->manaCost * triggeredByAura->GetModifier()->m_amount/100;
+                if(QREnegyCostSave > 0)
+                    CastCustomSpell(this, 31663, &QREnegyCostSave, NULL, NULL, true, castItem, triggeredByAura);
+
+                return;
+            }
+            break;
+        }
+        case SPELLFAMILY_HUNTER:
+        {
+            // Thrill of the Hunt
+            if ( dummySpell->SpellIconID == 2236 )
+            {
+                if(!procSpell)
+                    return;
+                int32 THManaCostSave = procSpell->manaCost * 40/100;
+                if(THManaCostSave > 0)
+                    CastCustomSpell(this,34720,&THManaCostSave,NULL,NULL,true,castItem, triggeredByAura);
+                return;
             }
             break;
         }
@@ -5218,9 +5276,6 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 case 28789:
                 {
                     if(GetTypeId() != TYPEID_PLAYER || !pVictim || !pVictim->isAlive())
-                        return;
-
-                    if(!castItem)
                         return;
 
                     // Set class defined buff
@@ -5317,9 +5372,6 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 case 28823:
                 {
                     if(GetTypeId() != TYPEID_PLAYER || !pVictim || !pVictim->isAlive())
-                        return;
-
-                    if(!castItem)
                         return;
 
                     // Set class defined buff
@@ -5511,110 +5563,6 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         }
         default:
             break;
-    }
-
-    // Non SpellID checks
-    switch(dummySpell->SpellIconID)
-    {
-        case 515:
-        {
-            //Sweeping Strikes
-            if(dummySpell->SpellVisual == 211)
-            {
-                Unit* additionalTarget = SelectNearbyTarget();
-                if(!additionalTarget)
-                    return;
-
-                // prevent chain of triggred spell from same triggred spell
-                if(procSpell && procSpell->Id==26654)
-                    return;
-
-                CastSpell(additionalTarget, 26654, true, castItem,triggeredByAura);
-                return;
-            }
-            break;
-        }
-        case 1477:
-        {
-            //Blade Flurry
-            if(dummySpell->SpellVisual == 211)
-            {
-                Unit* additionalTarget = SelectNearbyTarget();
-                if(!additionalTarget)
-                    return;
-
-                int32 basePoint0 = damage;
-                CastCustomSpell(additionalTarget, 22482, &basePoint0, 0, 0, true, castItem, triggeredByAura);
-                return;
-            }
-            break;
-        }
-        // Master of Elements
-        case 1920:
-        {
-            if(!procSpell)
-                return;
-
-            if(dummySpell->SpellFamilyName!=SPELLFAMILY_MAGE)
-                return;
-
-            int32 MEManaCostSave = procSpell->manaCost * triggeredByAura->GetModifier()->m_amount/100;
-            if(MEManaCostSave <= 0)
-                return;
-            CastCustomSpell(this,29077,&MEManaCostSave,NULL,NULL,true,castItem, triggeredByAura);
-
-            return;
-        }
-        // Vampiric Touch
-        case 2213:
-        {
-            if(!pVictim || !pVictim->isAlive())
-                return;
-
-            if(triggeredByAura->GetCasterGUID() == pVictim->GetGUID())
-            {
-                int32 VTEnergizeBasePoints0 = triggeredByAura->GetModifier()->m_amount*damage/100;
-                pVictim->CastCustomSpell(pVictim,34919,&VTEnergizeBasePoints0,NULL,NULL,true,castItem, triggeredByAura);
-            }
-            return;
-        }
-        // Quick Recovery
-        case 2116:
-        {
-            if(!procSpell)
-                return;
-
-            if(dummySpell->SpellFamilyName!=SPELLFAMILY_ROGUE)
-                return;
-
-            // only rogue's finishing moves (maybe need additional checks)
-            if( procSpell->SpellFamilyName!=SPELLFAMILY_ROGUE ||
-                (procSpell->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE__FINISHING_MOVE) == 0)
-                return;
-
-            int32 QREnegyCostSave = procSpell->manaCost * triggeredByAura->GetModifier()->m_amount/100;
-            if(QREnegyCostSave <= 0)
-                return;
-            CastCustomSpell(this,31663,&QREnegyCostSave,NULL,NULL,true,castItem, triggeredByAura);
-
-            return;
-        }
-        // Thrill of the Hunt
-        case 2236:
-        {
-            if(!procSpell)
-                return;
-
-            if(dummySpell->SpellFamilyName!=SPELLFAMILY_HUNTER)
-                return;
-
-            int32 THManaCostSave = procSpell->manaCost * 40/100;
-            if(THManaCostSave <= 0)
-                return;
-            CastCustomSpell(this,34720,&THManaCostSave,NULL,NULL,true,castItem, triggeredByAura);
-
-            return;
-        }
     }
 }
 

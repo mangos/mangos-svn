@@ -5379,9 +5379,9 @@ void Aura::PeriodicTick()
             bool haveCastItem = GetCastItemGUID()!=0;
 
             // heal for caster damage
-            if(m_target!=pCaster && GetSpellProto()->SpellVisual==163)
+            if(m_target!=pCaster && spellProto->SpellVisual==163)
             {
-                uint32 dmg = GetSpellProto()->manaPerSecond;
+                uint32 dmg = spellProto->manaPerSecond;
                 if(pCaster->GetHealth() <= dmg && pCaster->GetTypeId()==TYPEID_PLAYER)
                 {
                     pCaster->RemoveAurasDueToSpell(GetId());
@@ -5403,6 +5403,35 @@ void Aura::PeriodicTick()
 
                     CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
                     pCaster->DealDamage(pCaster, gain, &cleanDamage, NODAMAGE, GetSpellSchoolMask(GetSpellProto()), GetSpellProto(), true);
+                }
+            }
+
+            // Rejuvenation tick
+            if (spellProto->SpellFamilyName == SPELLFAMILY_DRUID && spellProto->SpellFamilyFlags & 0x0000000000000010LL)
+            {
+                // Check Dreamwalker Raiment set bonus on caster
+                Unit::AuraList const& mOverrideClassScript = pCaster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                for(Unit::AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
+                {
+                    if ((*i)->GetModifier()->m_miscvalue == 4533)
+                    {
+                        // Chance 50%
+                        if (roll_chance_f(50))
+                        {
+                            uint32 spellId = 0;
+                            switch (m_target->getPowerType())
+                            {
+                                case POWER_MANA:   spellId = 28722; break;
+                                case POWER_RAGE:   spellId = 28723; break;
+                                case POWER_ENERGY: spellId = 28724; break;
+                                default:
+                                    break;
+                            }
+                            if (spellId)
+                                pCaster->CastSpell(m_target, spellId, true, 0, this);
+                        }
+                        break;
+                    }
                 }
             }
 
