@@ -45,6 +45,7 @@
 #include "LootMgr.h"
 #include "VMapFactory.h"
 #include "BattleGround.h"
+#include "Util.h"
 
 #define SPELL_CHANNEL_UPDATE_INTERVAL 1000
 
@@ -2387,7 +2388,7 @@ void Spell::finish(bool ok)
                     // Calculate chance at that moment (can be depend for example from combo points)
                     int32 chance = m_caster->CalculateSpellDamage(auraSpellInfo, auraSpellIdx, (*i)->GetBasePoints(),unit);
 
-                    if(roll_chance_f(chance))
+                    if(roll_chance_i(chance))
                         m_caster->CastSpell(unit, auraSpellInfo->EffectTriggerSpell[auraSpellIdx], true, NULL, (*i));
                 }
             }
@@ -4484,7 +4485,7 @@ void Spell::Delayed(int32 delaytime)
     int32 resistChance = 100;                               //must be initialized to 100 for percent modifiers
     ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id,SPELLMOD_NOT_LOSE_CASTING_TIME,resistChance, this);
     resistChance += m_caster->GetTotalAuraModifier(SPELL_AURA_RESIST_PUSHBACK) - 100;
-    if (roll_chance_f(resistChance))
+    if (roll_chance_i(resistChance))
         return;
 
     m_timer += delaytime;
@@ -4508,7 +4509,7 @@ void Spell::DelayedChannel(int32 delaytime)
     int32 resistChance = 100;                               //must be initialized to 100 for percent modifiers
     ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id,SPELLMOD_NOT_LOSE_CASTING_TIME,resistChance, this);
     resistChance += m_caster->GetTotalAuraModifier(SPELL_AURA_RESIST_PUSHBACK) - 100;
-    if (roll_chance_f(resistChance))
+    if (roll_chance_i(resistChance))
         return;
 
     int32 appliedDelayTime = delaytime;

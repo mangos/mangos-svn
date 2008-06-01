@@ -43,6 +43,7 @@
 #include "Formulas.h"
 #include "BattleGround.h"
 #include "CreatureAI.h"
+#include "Util.h"
 
 #define NULL_AURA_SLOT 0xFF
 
@@ -5416,7 +5417,7 @@ void Aura::PeriodicTick()
                     if ((*i)->GetModifier()->m_miscvalue == 4533)
                     {
                         // Chance 50%
-                        if (roll_chance_f(50))
+                        if (roll_chance_i(50))
                         {
                             uint32 spellId = 0;
                             switch (m_target->getPowerType())

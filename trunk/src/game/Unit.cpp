@@ -1639,8 +1639,8 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
 
         Probability *= AttackerMeleeSkill/(float)VictimDefense;
 
-        if(Probability > 40)
-            Probability = 40;
+        if(Probability > 40.0f)
+            Probability = 40.0f;
 
         if(roll_chance_f(Probability))
             CastSpell(pVictim, 1604, true);
@@ -2303,7 +2303,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
             tmp = crit_chance + skillBonus2;
             if ( GetTypeId() == TYPEID_PLAYER && SpellCasted && tmp > 0 )
             {
-                if ( roll_chance_f(tmp/100))
+                if ( roll_chance_i(tmp/100))
                 {
                     DEBUG_LOG ("RollMeleeOutcomeAgainst: BLOCKED CRIT");
                     return MELEE_HIT_BLOCK_CRIT;
@@ -4655,7 +4655,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                             return;
                     }
                     CastSpell(this, spellId, true, castItem, triggeredByAura);
-                    if (roll_chance_f(10))
+                    if (roll_chance_i(10))
                         ((Player*)this)->Say("This is Madness!", LANG_UNIVERSAL);
                     return;
                 }
@@ -5833,7 +5833,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                         // stacking
                         CastSpell(this, 37658, true, castItem, triggeredByAura);
                         // 2.5s cooldown before it can stack again, current system allow 1 sec step in cooldown
-                        ((Player*)this)->AddSpellCooldown(37657,0,time(NULL)+(rand_chance() < 50 ? 2 : 3));
+                        ((Player*)this)->AddSpellCooldown(37657,0,time(NULL)+(roll_chance_i(50) ? 2 : 3));
                         
 
                         // counting

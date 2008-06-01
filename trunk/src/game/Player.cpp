@@ -4484,10 +4484,10 @@ void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHi
     if(!defence)
     {
         if(getClass() == CLASS_WARRIOR || getClass() == CLASS_ROGUE)
-            chance *= 0.1 * GetStat(STAT_INTELLECT);
+            chance *= 0.1f * GetStat(STAT_INTELLECT);
     }
 
-    chance = chance < 1.0 ? 1.0 : chance;                   //minimum chance to increase skill is 1%
+    chance = chance < 1.0f ? 1.0f : chance;                 //minimum chance to increase skill is 1%
 
     if(roll_chance_f(chance))
     {
@@ -6552,7 +6552,7 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target, WeaponAttackType attTy
             uint32 WeaponSpeed = GetAttackTime(attType);
             chance = GetPPMProcChance(WeaponSpeed, spellData.SpellPPMRate);
         }
-        else if(chance > 100)
+        else if(chance > 100.0f)
         {
             chance = GetWeaponProcChance();
         }
