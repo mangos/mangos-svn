@@ -700,6 +700,23 @@ void SpellMgr::LoadSpellAffects()
 
         sa.SpellFamilyMask = fields[2].GetUInt64();
 
+        // Spell.dbc have own data for low part of SpellFamilyMask
+        if( spellInfo->EffectItemType[effectId])
+        {
+            if(spellInfo->EffectItemType[effectId] == sa.SpellFamilyMask)
+            {
+                sLog.outErrorDb("Spell %u listed in `spell_affect` have redundant (same with EffectItemType%d) data for effect index (%u) and not needed, skipped.", entry,effectId+1,effectId);
+                continue;
+            }
+
+            // 24429 have wrong data in EffectItemType and overwrites by DB, possible bug in client
+            if(spellInfo->Id!=24429 && spellInfo->EffectItemType[effectId] != sa.SpellFamilyMask)
+            {
+                sLog.outErrorDb("Spell %u listed in `spell_affect` have different low part from EffectItemType%d for effect index (%u) and not needed, skipped.", entry,effectId+1,effectId);
+                continue;
+            }
+        }
+
         mSpellAffectMap.insert(SpellAffectMap::value_type((entry<<8) + effectId,sa));
 
         ++count;
@@ -720,14 +737,19 @@ void SpellMgr::LoadSpellAffects()
 
         for (int effectId = 0; effectId < 3; ++effectId)
         {
-            if (spellInfo->Effect[effectId] != SPELL_EFFECT_APPLY_AURA ||
-            (spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_FLAT_MODIFIER &&
-            spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_PCT_MODIFIER  &&
-            spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_TARGET_TRIGGER))
+            if( spellInfo->Effect[effectId] != SPELL_EFFECT_APPLY_AURA ||
+                (spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_FLAT_MODIFIER &&
+                spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_PCT_MODIFIER  &&
+                spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_TARGET_TRIGGER) )
                 continue;
 
-            if (!(spellInfo->EffectItemType[effectId]) && !GetSpellAffection(id,effectId))
-                sLog.outErrorDb("Spell %u (%s) misses spell_affect for effect %u",id,spellInfo->SpellName[sWorld.GetDBClang()], effectId);
+            if(GetSpellAffection(id,effectId))
+                continue;
+
+            if(spellInfo->EffectItemType[effectId] != 0)
+                continue;
+
+            sLog.outErrorDb("Spell %u (%s) misses spell_affect for effect %u",id,spellInfo->SpellName[sWorld.GetDBClang()], effectId);
         }
     }
     */
@@ -821,6 +843,35 @@ void SpellMgr::LoadSpellProcEvents()
 
     sLog.outString();
     sLog.outString( ">> Loaded %u spell proc event conditions", count  );
+
+    /*
+    // Commented for now, as it still produces many errors (still quite many spells miss spell_proc_event)
+    for (uint32 id = 0; id < sSpellStore.GetNumRows(); ++id)
+    {
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(id);
+        if (!spellInfo)
+            continue;
+
+        bool found = false;
+        for (int effectId = 0; effectId < 3; ++effectId)
+        {
+            // at this moment check only SPELL_AURA_PROC_TRIGGER_SPELL
+            if( spellInfo->EffectApplyAuraName[effectId] == SPELL_AURA_PROC_TRIGGER_SPELL )
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if(!found)
+            continue;
+
+        if(GetSpellProcEvent(id))
+            continue;
+
+        sLog.outErrorDb("Spell %u (%s) misses spell_proc_event",id,spellInfo->SpellName[sWorld.GetDBClang()]);
+    }
+    */
 }
 
 bool SpellMgr::IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spellProcEvent, SpellEntry const * procSpell, uint32 procFlags )
