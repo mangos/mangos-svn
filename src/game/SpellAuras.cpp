@@ -5464,6 +5464,10 @@ void Aura::PeriodicTick()
                 break;
 
             Powers power = Powers(m_modifier.m_miscvalue);
+            
+            // power type might have changed between aura applying and tick (druid's shapeshift)
+            if(m_target->getPowerType() != power)
+                break;
 
             int32 drain_amount = m_target->GetPower(power) > pdamage ? pdamage : m_target->GetPower(power);
 
