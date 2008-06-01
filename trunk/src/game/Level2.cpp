@@ -563,12 +563,12 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
                         ss << GetMangosString(LANG_FACTION_VISIBLE);
                     if(repItr->second.Flags & FACTION_FLAG_AT_WAR)
                         ss << GetMangosString(LANG_FACTION_ATWAR);
-                    if(repItr->second.Flags & FACTION_FLAG_OWN_TEAM)
-                        ss << GetMangosString(LANG_FACTION_OWNTEAM);
-                    if(repItr->second.Flags & FACTION_FLAG_UNKNOWN)
-                        ss << GetMangosString(LANG_FACTION_UNKNOWN);
-                    if(repItr->second.Flags & FACTION_FLAG_INVISIBLE)
-                        ss << GetMangosString(LANG_FACTION_INVISIBLE);
+                    if(repItr->second.Flags & FACTION_FLAG_PEACE_FORCED)
+                        ss << GetMangosString(LANG_FACTION_PEACE_FORCED);
+                    if(repItr->second.Flags & FACTION_FLAG_HIDDEN)
+                        ss << GetMangosString(LANG_FACTION_HIDDEN);
+                    if(repItr->second.Flags & FACTION_FLAG_INVISIBLE_FORCED)
+                        ss << GetMangosString(LANG_FACTION_INVISIBLE_FORCED);
                     if(repItr->second.Flags & FACTION_FLAG_INACTIVE)
                         ss << GetMangosString(LANG_FACTION_INACTIVE);
                 }
@@ -1762,12 +1762,12 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
                 ss << GetMangosString(LANG_FACTION_VISIBLE);
             if(itr->second.Flags & FACTION_FLAG_AT_WAR)
                 ss << GetMangosString(LANG_FACTION_ATWAR);
-            if(itr->second.Flags & FACTION_FLAG_OWN_TEAM)
-                ss << GetMangosString(LANG_FACTION_OWNTEAM);
-            if(itr->second.Flags & FACTION_FLAG_UNKNOWN)
-                ss << GetMangosString(LANG_FACTION_UNKNOWN);
-            if(itr->second.Flags & FACTION_FLAG_INVISIBLE)
-                ss << GetMangosString(LANG_FACTION_INVISIBLE);
+            if(itr->second.Flags & FACTION_FLAG_PEACE_FORCED)
+                ss << GetMangosString(LANG_FACTION_PEACE_FORCED);
+            if(itr->second.Flags & FACTION_FLAG_HIDDEN)
+                ss << GetMangosString(LANG_FACTION_HIDDEN);
+            if(itr->second.Flags & FACTION_FLAG_INVISIBLE_FORCED)
+                ss << GetMangosString(LANG_FACTION_INVISIBLE_FORCED);
             if(itr->second.Flags & FACTION_FLAG_INACTIVE)
                 ss << GetMangosString(LANG_FACTION_INACTIVE);
 

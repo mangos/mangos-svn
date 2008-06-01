@@ -5081,7 +5081,7 @@ bool Player::IsFactionAtWar(const FactionEntry *factionEntry) const
     FactionsList::const_iterator itr = m_factions.find(factionEntry->reputationListID);
     if (itr != m_factions.end())
     {
-        if((itr->second.Flags & FACTION_FLAG_AT_WAR) != 0)
+        if(itr->second.Flags & FACTION_FLAG_AT_WAR)
             return true;
     }
     return false;
@@ -5097,7 +5097,7 @@ void Player::SetFactionAtWar(uint32 repListID, bool atWar)
 void Player::SetFactionAtWar(Faction* faction, bool atWar)
 {
     // not allow declare war to own faction
-    if(atWar && ((faction->Flags & FACTION_FLAG_OWN_TEAM) != 0))
+    if(atWar && (faction->Flags & FACTION_FLAG_PEACE_FORCED) )
         return;
 
     // already set
@@ -5117,11 +5117,12 @@ void Player::SetFactionInactive(uint32 repListID, bool inactive)
     FactionsList::iterator itr = m_factions.find(repListID);
     if (itr != m_factions.end())
     {
-                                                            // already set
-        if(((itr->second.Flags & FACTION_FLAG_INACTIVE) != 0) == inactive)
+        // always invisible or hidden faction can't be inactive
+        if(itr->second.Flags & (FACTION_FLAG_INVISIBLE_FORCED|FACTION_FLAG_HIDDEN) )
             return;
 
-        if(itr->second.Flags & FACTION_FLAG_INVISIBLE)      // invisible faction can't be inactive
+        // already set
+        if(((itr->second.Flags & FACTION_FLAG_INACTIVE) != 0) == inactive)
             return;
 
         if(inactive)
@@ -5158,8 +5159,12 @@ void Player::SetFactionVisible(uint32 repListID)
     FactionsList::iterator itr = m_factions.find(repListID);
     if (itr != m_factions.end())
     {
-                                                            // already set
-        if(((itr->second.Flags & FACTION_FLAG_VISIBLE) != 0))
+        // always invisible or hidden faction can't be make visible
+        if(itr->second.Flags & (FACTION_FLAG_INVISIBLE_FORCED|FACTION_FLAG_HIDDEN))
+            return;
+
+        // already set
+        if(itr->second.Flags & FACTION_FLAG_VISIBLE)
             return;
 
         itr->second.Flags |= FACTION_FLAG_VISIBLE;
@@ -5174,42 +5179,39 @@ void Player::SetFactionVisible(uint32 repListID)
 
 void Player::SetInitialFactions()
 {
-    Faction newFaction;
-    FactionEntry const *factionEntry = NULL;
-
     for(unsigned int i = 1; i < sFactionStore.GetNumRows(); i++)
     {
-        factionEntry = sFactionStore.LookupEntry(i);
+        FactionEntry const *factionEntry = sFactionStore.LookupEntry(i);
 
         if( factionEntry && (factionEntry->reputationListID >= 0))
         {
+            Faction newFaction;
             newFaction.ID = factionEntry->ID;
             newFaction.ReputationListID = factionEntry->reputationListID;
             newFaction.Standing = 0;
-            newFaction.Flags = 0x0;
+            newFaction.Flags = GetDefaultReputationFlags(factionEntry);
             newFaction.Changed = true;
-
-            // show(1) and disable AtWar button(16) of own team factions
-            if( GetTeam() == factionEntry->team || GetTeam() == factionEntry->ID)
-            {
-                newFaction.Flags |= FACTION_FLAG_OWN_TEAM;
-                if(GetTeam() != factionEntry->ID)           // not show own 'root' team faction
-                    newFaction.Flags |= FACTION_FLAG_VISIBLE;
-            }
-            // opposition team
-            else if( GetTeam()==ALLIANCE && (factionEntry->team == HORDE    || factionEntry->ID == HORDE) || 
-                     GetTeam()==HORDE    && (factionEntry->team == ALLIANCE || factionEntry->ID == ALLIANCE) )
-            {
-                newFaction.Flags = FACTION_FLAG_AT_WAR | FACTION_FLAG_INVISIBLE;
-            }
-
-            //If the faction is Hostile or Hated  of my one we are at war!
-            if(GetBaseReputationRank(factionEntry) <= REP_HOSTILE)
-                newFaction.Flags |= FACTION_FLAG_AT_WAR;
 
             m_factions[newFaction.ReputationListID] = newFaction;
         }
     }
+}
+
+uint32 Player::GetDefaultReputationFlags(const FactionEntry *factionEntry) const
+{
+    if (!factionEntry)
+        return 0;
+
+    uint32 raceMask = getRaceMask();
+    uint32 classMask = getClassMask();
+    for (int i=0; i < 4; i++)
+    {
+        if( (factionEntry->BaseRepRaceMask[i] & raceMask) && 
+            (factionEntry->BaseRepClassMask[i]==0 || 
+            (factionEntry->BaseRepClassMask[i] & classMask) ) )
+            return factionEntry->ReputationFlags[i];
+    }
+    return 0;
 }
 
 int32 Player::GetBaseReputation(const FactionEntry *factionEntry) const
@@ -5222,7 +5224,8 @@ int32 Player::GetBaseReputation(const FactionEntry *factionEntry) const
     for (int i=0; i < 4; i++)
     {
         if( (factionEntry->BaseRepRaceMask[i] & raceMask) && 
-            (factionEntry->BaseRepClassMask[i]==0 || (factionEntry->BaseRepClassMask[i] & classMask) ) )
+            (factionEntry->BaseRepClassMask[i]==0 || 
+            (factionEntry->BaseRepClassMask[i] & classMask) ) )
             return factionEntry->BaseRepValue[i];
     }
 
@@ -13616,35 +13619,25 @@ void Player::_LoadReputation(QueryResult *result)
             FactionEntry const *factionEntry = sFactionStore.LookupEntry(fields[0].GetUInt32());
             if( factionEntry && (factionEntry->reputationListID >= 0))
             {
-                Faction* oldFaction = &m_factions[factionEntry->reputationListID];
-                uint32 oldFlags = oldFaction ? oldFaction->Flags : 0;
+                Faction* faction = &m_factions[factionEntry->reputationListID];
 
-                Faction newFaction;
-                newFaction.ID               = factionEntry->ID;
-                newFaction.ReputationListID = factionEntry->reputationListID;
-                newFaction.Standing         = int32(fields[1].GetUInt32());
-                newFaction.Flags            = fields[2].GetUInt32();
-                newFaction.Changed          = false;
+                // update standing to current
+                faction->Standing = int32(fields[1].GetUInt32());
 
-                // fix flags base at initial values
-                if(oldFlags & FACTION_FLAG_OWN_TEAM)        // own team
-                {
-                    newFaction.Flags |= (FACTION_FLAG_OWN_TEAM);
-                    newFaction.Flags &= ~FACTION_FLAG_AT_WAR;
+                uint32 dbFactionFlags = fields[2].GetUInt32();
 
-                    if(oldFlags & FACTION_FLAG_VISIBLE)
-                        newFaction.Flags |= FACTION_FLAG_VISIBLE;
-                    else
-                        newFaction.Flags &= ~FACTION_FLAG_VISIBLE;
-                }
+                if( (dbFactionFlags & FACTION_FLAG_AT_WAR) &&
+                    (faction->Flags & FACTION_FLAG_PEACE_FORCED)==0 )
+                    faction->Flags |= FACTION_FLAG_AT_WAR;
+            
+                if( (dbFactionFlags & FACTION_FLAG_VISIBLE) &&
+                    (faction->Flags & (FACTION_FLAG_INVISIBLE_FORCED | FACTION_FLAG_HIDDEN))==0 )
+                    faction->Flags |= FACTION_FLAG_VISIBLE;
 
-                if((oldFlags & FACTION_FLAG_INVISIBLE) != 0)// opposition team
-                {
-                    newFaction.Flags |= (FACTION_FLAG_AT_WAR | FACTION_FLAG_INVISIBLE);
-                    newFaction.Flags &= ~FACTION_FLAG_INACTIVE;
-                }
-
-                m_factions[newFaction.ReputationListID] = newFaction;
+                if( (dbFactionFlags & FACTION_FLAG_INACTIVE) &&
+                    (faction->Flags & (FACTION_FLAG_INVISIBLE_FORCED | FACTION_FLAG_HIDDEN))==0 &&
+                    (faction->Flags & FACTION_FLAG_VISIBLE) )
+                    faction->Flags |= FACTION_FLAG_INACTIVE;
 
                 // set atWar for hostile
                 if(GetReputationRank(factionEntry) <= REP_HOSTILE)
