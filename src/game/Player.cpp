@@ -2587,6 +2587,7 @@ bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading
     }
     else
     {
+        // not ranked skills
         SkillLineAbilityMap::const_iterator lower = spellmgr.GetBeginSkillLineAbilityMap(spell_id);
         SkillLineAbilityMap::const_iterator upper = spellmgr.GetEndSkillLineAbilityMap(spell_id);
 
@@ -2608,7 +2609,7 @@ bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading
                         SetSkill(pSkill->id, 300, 300 );
                         break;
                     case SKILL_CATEGORY_WEAPON:
-                        SetSkill(pSkill->id, 1, 5 );
+                        SetSkill(pSkill->id, 1, GetMaxSkillValueForLevel() );
                         break;
                     case SKILL_CATEGORY_ARMOR:
                     case SKILL_CATEGORY_CLASS:
@@ -2744,6 +2745,22 @@ void Player::removeSpell(uint32 spell_id)
             }
         }
 
+    }
+    else
+    {
+        // not ranked skills
+        SkillLineAbilityMap::const_iterator lower = spellmgr.GetBeginSkillLineAbilityMap(spell_id);
+        SkillLineAbilityMap::const_iterator upper = spellmgr.GetEndSkillLineAbilityMap(spell_id);
+
+        for(SkillLineAbilityMap::const_iterator _spell_idx = lower; _spell_idx != upper; ++_spell_idx)
+        {
+            SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(_spell_idx->second->skillId);
+            if(!pSkill)
+                continue;
+
+            if(_spell_idx->second->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL)
+                SetSkill(pSkill->id, 0, 0 );
+        }
     }
 
     // remove dependent spells
