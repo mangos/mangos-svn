@@ -129,7 +129,7 @@ void TemporarySummon::Update( uint32 diff )
                 return;
             }
 
-            if (!isInCombat())
+            if (!isInCombat() && isAlive() )
             {
                 if (m_timer <= diff)
                 {
