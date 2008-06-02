@@ -4682,11 +4682,18 @@ Unit* Spell::SelectMagnetTarget()
 
     if(target && target->HasAuraType(SPELL_AURA_SPELL_MAGNET) && !(m_spellInfo->Attributes & 0x10))
     {
-        Aura* magnet = target->GetAurasByType(SPELL_AURA_SPELL_MAGNET).front();
-        if(Unit* caster = magnet->GetCaster())
+        Unit::AuraList const& magnetAuars = target->GetAurasByType(SPELL_AURA_SPELL_MAGNET);
+        for(Unit::AuraList::const_iterator itr = magnetAuars.begin(); itr != magnetAuars.end(); ++itr)
         {
-            target = caster;
-            m_targets.setUnitTarget(target);
+            if(Unit* magnet = (*itr)->GetCaster())
+            {
+                if(magnet->IsWithinLOSInMap(m_caster))
+                {
+                    target = magnet;
+                    m_targets.setUnitTarget(target);
+                    break;
+                }
+            }
         }
     }
 
