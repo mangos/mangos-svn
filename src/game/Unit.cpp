@@ -772,6 +772,9 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         // polymorphed and other negative transformed cases
         if(pVictim->getTransForm() && pVictim->hasUnitState(UNIT_STAT_CONFUSED))
             pVictim->RemoveAurasDueToSpell(pVictim->getTransForm());
+        
+        if(damagetype == DIRECT_DAMAGE|| damagetype == SPELL_DIRECT_DAMAGE)
+            pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE);
 
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
