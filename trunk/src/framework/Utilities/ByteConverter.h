@@ -40,4 +40,15 @@ namespace ByteConverter
         convert<sizeof(T)>((char *)(val));
     }
 }
+
+#ifdef __BIG_ENDIAN
+template<typename T> inline void EndianConvert(T& val) { ByteConverter::apply<T>(&val); }
+#else
+template<typename T> inline void EndianConvert(T& val) { }
+#endif
+
+template<typename T> inline void EndianConvert(T*) { }
+template<> inline void EndianConvert(uint8 const&) { }
+template<> inline void EndianConvert( int8 const&) { }
+
 #endif
