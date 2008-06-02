@@ -379,11 +379,10 @@ void Creature::Update(uint32 diff)
                 break;
 
             if (!isInCombat() || IsPolymorphed())
-            {
                 RegenerateHealth();
-                if (!isInCombat())
-                    RegenerateMana();
-            }
+
+            RegenerateMana();
+
             m_regenTimer = 2000;
             break;
         }
@@ -402,13 +401,13 @@ void Creature::RegenerateMana()
 
     uint32 addvalue = 0;
 
-    // Combat and any controelled creature
+    // Combat and any controlled creature
     if (isInCombat() || GetCharmerOrOwnerGUID())
     {
         float ManaIncreaseRate = sWorld.getRate(RATE_POWER_MANA);
         float Spirit = GetStat(STAT_SPIRIT);
 
-        addvalue = uint32((Spirit/5 + 17) * ManaIncreaseRate);
+        addvalue = uint32((Spirit/5.0f + 17.0f) * ManaIncreaseRate);
     }
     else
         addvalue = maxValue/3;
