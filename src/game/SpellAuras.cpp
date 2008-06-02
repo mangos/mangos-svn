@@ -3775,35 +3775,105 @@ void Aura::HandlePeriodicHeal(bool apply, bool Real)
 
 void Aura::HandlePeriodicDamage(bool apply, bool Real)
 {
+    // spells required only Real aura add/remove
+    if(!Real)
+        return;
+
     if (m_periodicTimer <= 0)
         m_periodicTimer += m_modifier.periodictime;
 
     m_isPeriodic = apply;
+    
+    // For prevent double apply bonuses
+    bool loading = false;
+    if(m_target->GetTypeId() == TYPEID_PLAYER && ((Player*)m_target)->GetSession()->PlayerLoading())
+        loading = true;
+    Unit *caster = GetCaster();
 
-    // Deadly poison aura state
-    if(Real && m_spellProto->SpellFamilyName==SPELLFAMILY_ROGUE && (m_spellProto->SpellFamilyFlags & 0x10000) && m_spellProto->SpellVisual==5100)
+    switch (m_spellProto->SpellFamilyName)
     {
-        if(apply)
-            m_target->ModifyAuraState(AURA_STATE_DEADLY_POISON,true);
-        else
+        case SPELLFAMILY_WARRIOR:
         {
-            // current aura already removed, search present of another
-            bool found = false;
-            Unit::AuraList const& auras = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-            for(Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+            // Rend
+            if (m_spellProto->SpellFamilyFlags & 0x0000000000000020LL)
             {
-                SpellEntry const* itr_spell = (*itr)->GetSpellProto();
-                if(itr_spell && itr_spell->SpellFamilyName==SPELLFAMILY_ROGUE && (itr_spell->SpellFamilyFlags & 0x10000) && itr_spell->SpellVisual==5100)
+                // 0.00743*(($MWB+$mwb)/2+$AP/14*$MWS) bonus per tick
+                if (apply && !loading && caster)
                 {
-                    found = true;
-                    break;
+                    int32 ap = caster->GetTotalAttackPowerValue(BASE_ATTACK);
+                    int32 mws = caster->GetAttackTime(BASE_ATTACK);
+                    int32 mwb_min = caster->GetWeaponDamageRange(BASE_ATTACK,MINDAMAGE);
+                    int32 mwb_max = caster->GetWeaponDamageRange(BASE_ATTACK,MAXDAMAGE);
+                    // WARNING! in 3.0 multipler 0.00743f change to 0.6
+                    m_modifier.m_amount+=int32(((mwb_min+mwb_max)/2+ap*mws/14000)*0.00743f);
+                }
+                return;
+            }
+            break;
+        }
+        case SPELLFAMILY_DRUID:
+        {
+            // Rake
+            if (m_spellProto->SpellFamilyFlags & 0x0000000000001000LL)
+            {
+                // $AP*0.06/3 bonus per tick
+                if (apply && !loading && caster)
+                    m_modifier.m_amount += caster->GetTotalAttackPowerValue(BASE_ATTACK) * 2 / 100;
+                return;
+            }
+            break;
+        }
+        case SPELLFAMILY_ROGUE:
+        {
+            // Deadly poison aura state
+            if((m_spellProto->SpellFamilyFlags & 0x10000) && m_spellProto->SpellVisual==5100)
+            {
+                if(apply)
+                    m_target->ModifyAuraState(AURA_STATE_DEADLY_POISON,true);
+                else
+                {
+                    // current aura already removed, search present of another
+                    bool found = false;
+                    Unit::AuraList const& auras = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                    for(Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+                    {
+                        SpellEntry const* itr_spell = (*itr)->GetSpellProto();
+                        if(itr_spell && itr_spell->SpellFamilyName==SPELLFAMILY_ROGUE && (itr_spell->SpellFamilyFlags & 0x10000) && itr_spell->SpellVisual==5100)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+                    // this has been last deadly poison aura
+                    if(!found)
+                        m_target->ModifyAuraState(AURA_STATE_DEADLY_POISON,false);
                 }
             }
-
-            // this has been last deadly poison aura
-            if(!found)
-                m_target->ModifyAuraState(AURA_STATE_DEADLY_POISON,false);
+            break;
         }
+        case SPELLFAMILY_HUNTER:
+        {
+            // Serpent Sting
+            if (m_spellProto->SpellFamilyFlags & 0x0000000000004000LL)
+            {
+                // $RAP*0.1/5 bonus per tick
+                if (apply && !loading && caster)
+                    m_modifier.m_amount += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 10 / 500;
+                return;
+            }
+            // Immolation Trap
+            if (m_spellProto->SpellFamilyFlags & 0x0000000000000004LL && m_spellProto->SpellIconID == 678)
+            {
+                // $RAP*0.1/5 bonus per tick
+                if (apply && !loading && caster)
+                    m_modifier.m_amount += caster->GetTotalAttackPowerValue(RANGED_ATTACK) * 10 / 500;
+                return;
+            }
+            break;
+        }
+
+        default:
+            break;
     }
 }
 
