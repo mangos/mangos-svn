@@ -2984,7 +2984,6 @@ CREATE TABLE `petcreateinfo_spell` (
   `Spell2` mediumint(8) unsigned NOT NULL default '0',
   `Spell3` mediumint(8) unsigned NOT NULL default '0',
   `Spell4` mediumint(8) unsigned NOT NULL default '0',
-  `FamilyPassive` mediumint(8) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet Create Spells';
 

@@ -254,13 +254,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
         CharacterDatabase.CommitTransaction();
     }
 
-    //init AB
-    if(is_temporary_summoned)
-    {
-        // Temporary summoned pets always have initial spell list at load
-        InitPetCreateSpells();
-    }
-    else
+    if(!is_temporary_summoned)
     {
         // permanent controlled pets store state in DB
         Tokens tokens = StrSplit(fields[17].GetString(), " ");
@@ -303,6 +297,18 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     //load spells/cooldowns/auras
     SetCanModifyStats(true);
     _LoadAuras(timediff);
+
+    //init AB
+    if(is_temporary_summoned)
+    {
+        // Temporary summoned pets always have initial spell list at load
+        InitPetCreateSpells();
+    }
+    else
+    {
+        LearnPetPassives();
+    }
+
 
     if(getPetType() == SUMMON_PET && !current)              //all (?) summon pets come with full health when called, but not when they are current
     {
@@ -572,15 +578,14 @@ void Pet::RegenerateFocus()
     if (curValue >= maxValue) 
         return;
 
-    float FocusIncreaseRate = sWorld.getRate(RATE_POWER_FOCUS);
-    uint32 addvalue = 25 * FocusIncreaseRate;
+    float addvalue = 25 * sWorld.getRate(RATE_POWER_FOCUS);
 
     AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
     for(AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
         if ((*i)->GetModifier()->m_miscvalue == POWER_FOCUS)
             addvalue *= ((*i)->GetModifier()->m_amount + 100) / 100.0f;
 
-    ModifyPower(POWER_FOCUS, addvalue);
+    ModifyPower(POWER_FOCUS, (int32)addvalue);
 }
 
 void Pet::LooseHappiness()
@@ -1499,11 +1504,10 @@ void Pet::InitPetCreateSpells()
                 break;
             }
         }
-        //family passive
-        SpellEntry const *learn_spellproto = sSpellStore.LookupEntry(CreateSpells->familypassive);
-        if(learn_spellproto)
-            addSpell(CreateSpells->familypassive);
     }
+
+    LearnPetPassives();
+
     SetTP(-usedtrainpoints);
 }
 
@@ -1647,4 +1651,23 @@ bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float 
 bool Pet::HasSpell(uint32 spell) const
 {
     return (m_spells.find(spell) != m_spells.end());
+}
+
+// Get all passive spells in our skill line
+void Pet::LearnPetPassives()
+{
+    CreatureInfo const* cInfo = GetCreatureInfo();
+    if(!cInfo)
+        return;
+
+    CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cInfo->family);
+    if(!cFamily)
+        return;
+
+    PetFamilySpellsStore::const_iterator petStore = sPetFamilySpellsStore.find(cFamily->ID);
+    if(petStore != sPetFamilySpellsStore.end())
+    {
+        for(PetFamilySpellsSet::const_iterator petSet = petStore->second.begin(); petSet != petStore->second.end(); ++petSet)
+            addSpell(*petSet);
+    }
 }

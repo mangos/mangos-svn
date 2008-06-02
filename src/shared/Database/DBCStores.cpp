@@ -87,6 +87,7 @@ DBCStorage <SpellItemEnchantmentEntry> sSpellItemEnchantmentStore(SpellItemEncha
 DBCStorage <SpellItemEnchantmentConditionEntry> sSpellItemEnchantmentConditionStore(SpellItemEnchantmentConditionfmt);
 DBCStorage <SpellEntry> sSpellStore(SpellEntryfmt);
 SpellCategoryStore sSpellCategoryStore;
+PetFamilySpellsStore sPetFamilySpellsStore;
 
 DBCStorage <SpellCastTimesEntry> sCastTimesStore(SpellCastTimefmt);
 DBCStorage <SpellDurationEntry> sSpellDurationStore(SpellDurationfmt);
@@ -255,6 +256,31 @@ void LoadDBCStores(std::string dataPath)
         SpellEntry const * spell = sSpellStore.LookupEntry(i);
         if(spell && spell->Category)
             sSpellCategoryStore[spell->Category].insert(i);
+    }
+
+    for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+    {
+        SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
+    
+        if(!skillLine)
+            continue;
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
+
+        if(spellInfo && (spellInfo->Attributes & 0x1D0) == 0x1D0)
+        {      
+            for (unsigned int i = 1; i < sCreatureFamilyStore.nCount; ++i)
+            {
+                CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(i);
+                if(!cFamily)
+                    continue;
+
+                if(skillLine->skillId != cFamily->skillLine && skillLine->skillId != cFamily->skillLine2)
+                    continue;
+
+                sPetFamilySpellsStore[i].insert(spellInfo->Id);
+            }
+        }
     }
 
     LoadDBC(bar,bad_dbc_files,sCastTimesStore,           dataPath+"dbc/SpellCastTimes.dbc");

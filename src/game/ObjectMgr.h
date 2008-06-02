@@ -156,7 +156,6 @@ struct ReputationOnKillEntry
 struct PetCreateSpellEntry
 {
     uint32 spellid[4];
-    uint32 familypassive;
 };
 
 #define WEATHER_SEASONS 4
