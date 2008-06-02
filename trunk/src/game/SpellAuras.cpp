@@ -5080,7 +5080,8 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                 case SPELLFAMILY_MAGE:
                     if(m_spellProto->SpellFamilyFlags == 0x80100 || m_spellProto->SpellFamilyFlags == 0x8 || m_spellProto->SpellFamilyFlags == 0x100000000LL)
                     {
-                        //+10% from +spd bonus //frost ward, fire ward, ice barrier	
+                        //frost ward, fire ward, ice barrier
+                        //+10% from +spd bonus
                         DoneActualBenefit = caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.1f;
                         break;
                     }
@@ -5088,7 +5089,8 @@ void Aura::HandleSchoolAbsorb(bool apply, bool Real)
                 case SPELLFAMILY_WARLOCK:
                     if(m_spellProto->SpellFamilyFlags == 0x00)
                     {
-                        //+10% from +spd bonus //shadow ward	
+                        //shadow ward
+                        //+10% from +spd bonus
                         DoneActualBenefit = caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellProto)) * 0.1f;
                         break;
                     }

@@ -185,12 +185,12 @@ struct CreatureDisplayInfoEntry
 struct CreatureFamilyEntry
 {
     uint32    ID;                                           // 0
-                                                            // 1 bitmask, unused    minScale
-                                                            // 2 0/1 unused         minScaleLevel
-                                                            // 3 bitmask, unused    maxScale
-                                                            // 4 0/60, unused       maxScaleLevel
-                                                            // 5 skillID, unused
-    uint32    tamable;                                      // 6 if this = 270 then "is tamable Creature" (or 0 is non-tamable); skillID2
+    //float     minScale;                                   // 1 unused    
+    //uint32    minScaleLevel;                              // 2 0/1 unused         
+    //float     maxScale;                                   // 3 unused
+    //uint32    maxScaleLevel;                              // 4 0/60, unused
+    uint32    skillLine;                                    // 5
+    uint32    skillLine2;                                   // 6 if == SKILL_PET_TALENTS then is tamable creature
     uint32    petFoodMask;                                  // 7
     char*     Name[16];                                     // 8-23
                                                             // 24 string flags, unused
@@ -632,6 +632,8 @@ struct SpellEntry
 
 typedef std::set<uint32> SpellCategorySet;
 typedef std::map<uint32,SpellCategorySet > SpellCategoryStore;
+typedef std::set<uint32> PetFamilySpellsSet;
+typedef std::map<uint32,PetFamilySpellsSet > PetFamilySpellsStore;
 
 struct SpellCastTimesEntry
 {
