@@ -81,7 +81,8 @@ enum SpellAuraInterruptFlags
     AURA_INTERRUPT_FLAG_UNK20               = 0x00100000,   // 20
     AURA_INTERRUPT_FLAG_UNK21               = 0x00200000,   // 21
     AURA_INTERRUPT_FLAG_UNK22               = 0x00400000,   // 22
-    AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT    = 0x00800000    // 23   removed by entering pvp combat
+    AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT    = 0x00800000,   // 23   removed by entering pvp combat
+    AURA_INTERRUPT_FLAG_DIRECT_DAMAGE       = 0x01000000    // 24   removed by any direct damage
 };
 
 enum SpellModOp
