@@ -363,7 +363,7 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                 // Victory Rush
                 else if(m_spellInfo->SpellFamilyFlags & 0x10000000000LL)
                 {
-                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.45);
+                    damage = uint32(damage * m_caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100);
                     m_caster->ModifyAuraState(AURA_STATE_WARRIOR_VICTORY_RUSH, false);
                 }
                 break;
@@ -382,13 +382,17 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
             case SPELLFAMILY_DRUID:
             {
                 // Ferocious Bite
-                if(m_caster->GetTypeId()==TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags & 0x000800000) && m_spellInfo->SpellVisual==6587)
+                if((m_spellInfo->SpellFamilyFlags & 0x000800000) && m_spellInfo->SpellVisual==6587)
                 {
-                    // 15% for 5 combo
-                    float percent = ((Player*)m_caster)->GetComboPoints() * 0.031f;
-                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) * percent);
-                    damage += int32(m_caster->GetPower(POWER_ENERGY) * m_spellInfo->DmgMultiplier[effect_idx]);
+                    // converts each extra point of energy into ($f1+$AP/630) additional damage
+                    float multiple = m_caster->GetTotalAttackPowerValue(BASE_ATTACK) / 630 + m_spellInfo->DmgMultiplier[effect_idx];
+                    damage += int32(m_caster->GetPower(POWER_ENERGY) * multiple);
                     m_caster->SetPower(POWER_ENERGY,0);
+                }
+                // Rake
+                else if(m_spellInfo->SpellFamilyFlags & 0x0000000000001000LL)
+                {
+                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100);
                 }
                 // Swipe
                 else if(m_spellInfo->SpellFamilyFlags & 0x0010000000000000LL)
