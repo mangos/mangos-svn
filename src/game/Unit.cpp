@@ -7686,19 +7686,6 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
 
     uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
 
-    if(GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->isPet())
-    {
-        if(getPowerType() == POWER_FOCUS)
-        {
-            uint32 happiness = GetPower(POWER_HAPPINESS);
-            if(happiness>=666000)
-                *pdamage = uint32(*pdamage * 1.25);
-            else if(happiness<333000)
-                *pdamage = uint32(*pdamage * 0.75);
-            else *pdamage = uint32(*pdamage * 1.0);
-        }
-    }
-
     // Taken/Done fixed damage bonus auras
     int32 DoneFlatBenefit = 0;
     int32 TakenFlatBenefit = 0;
@@ -9208,6 +9195,12 @@ void Unit::SetPower(Powers power, uint32 val)
             Unit *owner = GetOwner();
             if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
                 ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_CUR_POWER);
+        }
+
+        // Update the pet's character sheet with happiness damage bonus
+        if(pet->getPetType() == HUNTER_PET && power == POWER_HAPPINESS)
+        {
+            pet->UpdateDamagePhysical(BASE_ATTACK);
         }
     }
 }
