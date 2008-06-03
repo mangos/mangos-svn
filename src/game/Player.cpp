@@ -297,7 +297,6 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_drunkTimer = 0;
     m_drunk = 0;
     m_restTime = 0;
-    m_lastManaUse = 0;
     m_deathTimer = 0;
 
     m_DetectInvTimer = 1000;
@@ -1663,16 +1662,19 @@ void Player::Regenerate(Powers power)
     uint32 maxValue = GetMaxPower(power);
 
     float addvalue = 0.0f;
-    uint32 msecSinceLastCast = (uint32)getMSTime() - m_lastManaUse;
+
+    bool recentCast = IsUnderLastManaUseEffect();
 
     switch (power)
     {
         case POWER_MANA:
         {
             float ManaIncreaseRate = sWorld.getRate(RATE_POWER_MANA);
-            if (msecSinceLastCast < 5000)
+            if (recentCast)
+            {
                 // Mangos Updates Mana in intervals of 2s, which is correct
                 addvalue = GetFloatValue(PLAYER_FIELD_MOD_MANA_REGEN_INTERRUPT) *  ManaIncreaseRate * 2.00f;
+            }
             else
             {
                 addvalue = GetFloatValue(PLAYER_FIELD_MOD_MANA_REGEN)* ManaIncreaseRate * 2.00f;
@@ -1691,7 +1693,7 @@ void Player::Regenerate(Powers power)
             break;
     }
 
-    if(!(msecSinceLastCast < 5000 && power == POWER_MANA))
+    if(!(recentCast && power == POWER_MANA))
     {
         AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
         for(AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
