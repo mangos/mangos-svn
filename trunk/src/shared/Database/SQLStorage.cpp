@@ -27,7 +27,7 @@ extern DatabasePostgre  WorldDatabase;
 extern DatabaseMysql  WorldDatabase;
 #endif
 
-const char CreatureInfofmt[]="iiiiisssiiiiiiiiiiffiffiiiiiiiiiiiffiiliiiiiiiiiiiiiiiisiilliis";
+const char CreatureInfofmt[]="iiiiisssiiiiiiiiiiffiffiiiiiiiiiiiffiiliiiiiiiiiiiiiiiiisiilliis";
 const char CreatureDataAddonInfofmt[]="iiiiiiis";
 const char CreatureModelfmt[]="iffbi";
 const char CreatureInfoAddonInfofmt[]="iiiiiiis";

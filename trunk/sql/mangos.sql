@@ -677,6 +677,7 @@ CREATE TABLE `creature_template` (
   `spell2` mediumint(8) unsigned NOT NULL default '0',
   `spell3` mediumint(8) unsigned NOT NULL default '0',
   `spell4` mediumint(8) unsigned NOT NULL default '0',
+  `PetSpellDataId` mediumint(8) unsigned NOT NULL default '0',
   `mingold` mediumint(8) unsigned NOT NULL default '0',
   `maxgold` mediumint(8) unsigned NOT NULL default '0',
   `AIName` char(64) NOT NULL default '',

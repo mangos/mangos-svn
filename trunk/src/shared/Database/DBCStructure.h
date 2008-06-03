@@ -197,6 +197,12 @@ struct CreatureFamilyEntry
                                                             // 25 icon, unused
 };
 
+struct CreatureSpellDataEntry
+{
+    uint32    ID;                                           // 0
+    //uint32    spellId[4];                                 // 1-4 hunter pet learned spell (for later use)
+};
+
 struct DurabilityCostsEntry
 {
     uint32    Itemlvl;                                      // 0

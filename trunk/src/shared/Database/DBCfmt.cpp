@@ -27,6 +27,7 @@ const char ChrClassesEntryfmt[]="nxixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 const char ChrRacesEntryfmt[]="nxixiixxixxxxissssssssssssssssxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";
 const char CreatureDisplayInfofmt[]="nxxxfxxxxxxxxx";
 const char CreatureFamilyfmt[]="nxxxxiiissssssssssssssssxx";
+const char CreatureSpellDatafmt[]="nxxxxxxxx";
 const char DurabilityCostsfmt[]="niiiiiiiiiiiiiiiiiiiiiiiiiiiii";
 const char DurabilityQualityfmt[]="nf";
 const char EmoteEntryfmt[]="nxixxxxxxxxxxxxxxxx";
