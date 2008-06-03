@@ -3331,8 +3331,11 @@ uint8 Spell::CanCast(bool strict)
                     return SPELL_FAILED_HIGHLEVEL;
 
                 CreatureInfo const *cinfo = ((Creature*)m_targets.getUnitTarget())->GetCreatureInfo();
-                CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family);
-                if( cinfo->type != CREATURE_TYPE_BEAST || !cFamily || cFamily->skillLine2 != SKILL_PET_TALENTS )
+                if( cinfo->type != CREATURE_TYPE_BEAST )
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                // use SMSG_PET_TAME_FAILURE?
+                if( !(cinfo->flag1 & 1) || !(cinfo->family) )
                     return SPELL_FAILED_BAD_TARGETS;
 
                 if(m_caster->GetPetGUID())

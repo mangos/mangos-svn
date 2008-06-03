@@ -190,7 +190,7 @@ struct CreatureFamilyEntry
     //float     maxScale;                                   // 3 unused
     //uint32    maxScaleLevel;                              // 4 0/60, unused
     uint32    skillLine;                                    // 5
-    uint32    skillLine2;                                   // 6 if == SKILL_PET_TALENTS then is tamable creature
+    uint32    skillLine2;                                   // 6
     uint32    petFoodMask;                                  // 7
     char*     Name[16];                                     // 8-23
                                                             // 24 string flags, unused
