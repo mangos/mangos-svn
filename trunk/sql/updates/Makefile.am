@@ -264,6 +264,8 @@ pkgdata_DATA = \
 	6032_mangos_petcreateinfo_spell.sql \
 	6037_mangos_spell_affect.sql \
 	6038_mangos_creature_template.sql \
+	6047_characters_character_social.sql \
+	6047_characters_guild_bank_tab.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -508,4 +510,6 @@ EXTRA_DIST = \
 	6032_mangos_petcreateinfo_spell.sql \
 	6037_mangos_spell_affect.sql \
 	6038_mangos_creature_template.sql \
+	6047_characters_character_social.sql \
+	6047_characters_guild_bank_tab.sql \
 	README
