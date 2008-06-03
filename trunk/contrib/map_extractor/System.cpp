@@ -110,8 +110,8 @@ int main(int argc, char * arg[])
     char* LANG;
     LANG="ERro";
 
-    char* langs[]={"deDE", "enUS", "enGB", "frFR", "esES"};
-    for (size_t i = 0; i < 5; i++) {
+    char* langs[]={"deDE", "enUS", "enGB", "frFR", "esES", "zhCN", "zhTW" };
+    for (size_t i = 0; i < 7; i++) {
         sprintf(tmp1, "%s/Data/%s/locale-%s.MPQ", input_path, langs[i], langs[i]);
         pDatei=fopen(tmp1, "rb");
         if (pDatei!=NULL) {
