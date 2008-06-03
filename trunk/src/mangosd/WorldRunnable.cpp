@@ -52,11 +52,7 @@ void WorldRunnable::run()
     {
         realCurrTime = getMSTime();
 
-        uint32 diff;
-        if (realPrevTime > realCurrTime)                    // getMSTime() have limited data range and this is case when it overflow in this tick
-            diff = 0xFFFFFFFF - (realPrevTime - realCurrTime);
-        else
-            diff = realCurrTime - realPrevTime;
+        uint32 diff = getMSTimeDiff(realPrevTime,realCurrTime);
 
         sWorld.Update( diff );
         realPrevTime = realCurrTime;

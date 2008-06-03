@@ -264,13 +264,6 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     data.Initialize(SMSG_TRAINER_BUY_SUCCEEDED, 12);
     data << uint64(guid) << uint32(spellId);
     SendPacket(&data);
-
-    // trainer always see at customer in time of training (part of client functionality)
-    float u_oprientation = unit->GetOrientation();
-    unit->SetInFront(_player);
-
-    // trainer always return to original orientation
-    unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
 }
 
 void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )

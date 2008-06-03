@@ -95,7 +95,6 @@ DestinationHolder<TRAVELLER>::StartTravel(TRAVELLER &traveller, bool sendMove)
         speed = 2.5f;
     speed *=  0.001f;                                       // speed is in seconds so convert from second to millisecond
     i_totalTravelTime = static_cast<uint32>( dist/speed + 0.5 );
-    i_timeStarted = getMSTime();
     i_timeElapsed = 0;
     if(sendMove) traveller.MoveTo(i_destX, i_destY, i_destZ, i_totalTravelTime);
     return i_totalTravelTime;

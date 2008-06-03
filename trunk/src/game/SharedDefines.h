@@ -153,6 +153,11 @@ enum SpellSchoolMask
     SPELL_SCHOOL_MASK_ARCANE  = (1 << SPELL_SCHOOL_ARCANE)
 };
 
+#define SPELL_SCHOOL_MASK_MAGIC                            \
+    ( SPELL_SCHOOL_MASK_FIRE | SPELL_SCHOOL_MASK_NATURE |  \
+      SPELL_SCHOOL_MASK_FROST | SPELL_SCHOOL_MASK_SHADOW | \
+      SPELL_SCHOOL_MASK_ARCANE )
+
 inline SpellSchools GetFirstSchoolInMask(SpellSchoolMask mask)
 {
     for(int i = 0; i < MAX_SPELL_SCHOOL; ++i)
