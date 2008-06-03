@@ -219,7 +219,7 @@ void Master::Run()
             realPrevTime = 0;
 
         realCurrTime = getMSTime();
-        sWorldSocketMgr.Update( realCurrTime - realPrevTime );
+        sWorldSocketMgr.Update( getMSTimeDiff(realPrevTime,realCurrTime) );
         realPrevTime = realCurrTime;
 
         h.Select(0, socketSelecttime);

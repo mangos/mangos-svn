@@ -194,7 +194,7 @@ QueryResult* DatabaseMysql::Query(const char *sql)
         else
         {
             #ifdef MANGOS_DEBUG
-            sLog.outDebug("[%u ms] SQL: %s", getMSTime() - _s, sql );
+            sLog.outDebug("[%u ms] SQL: %s", getMSTimeDiff(_s,getMSTime()), sql );
             #endif
         }
 
@@ -264,7 +264,7 @@ bool DatabaseMysql::DirectExecute(const char* sql)
         else
         {
             #ifdef MANGOS_DEBUG
-            sLog.outDebug("[%u ms] SQL: %s", getMSTime() - _s, sql );
+            sLog.outDebug("[%u ms] SQL: %s", getMSTimeDiff(_s,getMSTime()), sql );
             #endif
         }
         // end guarded block

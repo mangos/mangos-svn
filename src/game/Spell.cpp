@@ -2894,14 +2894,10 @@ void Spell::TakePower()
     Powers powerType = Powers(m_spellInfo->powerType);
 
     m_caster->ModifyPower(powerType, -(int32)m_powerCost);
-    if (powerType == POWER_MANA)
-    {
-        // Set the five second timer
-        if (m_caster->GetTypeId() == TYPEID_PLAYER && m_powerCost > 0)
-        {
-            ((Player *)m_caster)->SetLastManaUse((uint32)getMSTime());
-        }
-    }
+
+    // Set the five second timer
+    if (powerType == POWER_MANA && m_powerCost > 0)
+        m_caster->SetLastManaUse(getMSTime());
 }
 
 void Spell::TakeReagents()

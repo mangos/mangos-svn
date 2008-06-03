@@ -412,7 +412,6 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
     m_next = GetNextWayPoint();
     m_pathTime = timer;
 
-    m_lastMovement = getMSTime();
     m_nextNodeTime = m_curr->first;
 
     return true;
@@ -483,8 +482,6 @@ void Transport::Update(uint32 /*p_time*/)
     m_timer = getMSTime() % m_period;
     while (((m_timer - m_curr->first) % m_pathTime) > ((m_next->first - m_curr->first) % m_pathTime))
     {
-        m_lastMovement = getMSTime();
-
         m_curr = GetNextWayPoint();
         m_next = GetNextWayPoint();
 

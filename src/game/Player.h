@@ -1604,8 +1604,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         static uint32 getFactionForRace(uint8 race);
         void setFactionForRace(uint8 race);
 
-        void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
-
         bool IsAtGroupRewardDistance(Unit const* pVictim) const;
         bool RewardPlayerAndGroupAtKill(Unit* pVictim);
 
@@ -2079,7 +2077,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_breathTimer;
         uint32 m_drunkTimer;
         uint16 m_drunk;
-        time_t m_lastManaUse;
         uint32 m_weaponChangeTimer;
 
         uint32 m_zoneUpdateId;

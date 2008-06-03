@@ -1070,6 +1070,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool   isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType);
         uint32 SpellCriticalBonus(SpellEntry const *spellProto, uint32 damage, Unit *pVictim);
 
+        void SetLastManaUse(uint32 spellCastTime) { m_lastManaUse = spellCastTime; }
+        bool IsUnderLastManaUseEffect() const;
+
         void MeleeDamageBonus(Unit *pVictim, uint32 *damage, WeaponAttackType attType, SpellEntry const *spellProto = NULL);
         uint32 GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectType damagetype, uint32 CastingTime );
 
@@ -1197,6 +1200,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
+        uint32 m_lastManaUse;                               // msecs
 
         UnitVisibility m_Visibility;
 

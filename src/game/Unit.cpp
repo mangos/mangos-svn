@@ -200,6 +200,8 @@ Unit::Unit( WorldObject *instantiator )
     m_baseSpellCritChance = 5;
 
     m_CombatTimer = 0;
+    m_lastManaUse = 0;
+
     //m_victimThreat = 0.0f;
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
         m_threatModifier[i] = 1.0f;
@@ -8767,7 +8769,7 @@ DiminishingLevels Unit::GetDiminishing(DiminishingMechanics mech)
         if(!i->hitCount) return DIMINISHING_LEVEL_1;
         if(!i->hitTime)  return DIMINISHING_LEVEL_1;
         // If last spell was casted more than 15 seconds ago - reset the count.
-        if((getMSTime() - i->hitTime) > 15000)
+        if(getMSTimeDiff(i->hitTime,getMSTime()) > 15000)
         {
             i->hitCount = DIMINISHING_LEVEL_1;
             return DIMINISHING_LEVEL_1;
@@ -10122,4 +10124,9 @@ Aura* Unit::GetDummyAura( uint32 spell_id ) const
             return *itr;
 
     return NULL;
+}
+
+bool Unit::IsUnderLastManaUseEffect() const
+{
+    return  getMSTimeDiff(m_lastManaUse,getMSTime()) < 5000;
 }

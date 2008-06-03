@@ -102,7 +102,6 @@ class Transport : private GameObject
 
     public:
         WayPointMap m_WayPoints;
-        uint32 m_lastMovement;
         uint32 m_nextNodeTime;
         uint32 m_period;
 

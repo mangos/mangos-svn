@@ -1560,7 +1560,7 @@ void WorldSession::HandleAllowMoveAckOpcode( WorldPacket & recv_data )
     recv_data >> counter >> time_;
 
     // time_ seems always more than getMSTime()
-    uint32 diff = time_ - getMSTime();
+    uint32 diff = getMSTimeDiff(getMSTime(),time_);
 
     sLog.outDebug("response sent: counter %u, time %u (HEX: %X), ms. time %u, diff %u", counter, time_, time_, getMSTime(), diff);
 }

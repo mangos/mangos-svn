@@ -66,16 +66,18 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     // Check if it requires another talent
     if (talentInfo->DependsOn > 0)
     {
-        TalentEntry const *depTalentInfo = sTalentStore.LookupEntry(talentInfo->DependsOn);
-        bool hasEnoughRank = false;
-        for (int i = talentInfo->DependsOnRank; i <= 4; i++)
+        if(TalentEntry const *depTalentInfo = sTalentStore.LookupEntry(talentInfo->DependsOn))
         {
-            if (depTalentInfo->RankID[i] != 0)
-                if (player->HasSpell(depTalentInfo->RankID[i]))
-                    hasEnoughRank = true;
+            bool hasEnoughRank = false;
+            for (int i = talentInfo->DependsOnRank; i <= 4; i++)
+            {
+                if (depTalentInfo->RankID[i] != 0)
+                    if (player->HasSpell(depTalentInfo->RankID[i]))
+                        hasEnoughRank = true;
+            }
+            if (!hasEnoughRank)
+                return;
         }
-        if (!hasEnoughRank)
-            return;
     }
 
     // Find out how many points we have in this field
