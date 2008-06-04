@@ -92,7 +92,7 @@ enum ITEM_FLAGS
     ITEM_FLAGS_OPENABLE                       = 0x00000004,
     ITEM_FLAGS_WRAPPED                        = 0x00000008,
     ITEM_FLAGS_WRAPPER                        = 0x00000200, // used or not used wrapper
-    ITEM_FLAGS_QUEST_OBJECTIVE                = 0x00000800,
+    ITEM_FLAGS_PARTY_LOOT                     = 0x00000800, // determines if item is party loot or not
     ITEM_FLAGS_CHARTER                        = 0x00002000, // arena/guild charter
     ITEM_FLAGS_UNIQUE_EQUIPPED                = 0x00080000,
     ITEM_FLAGS_THROWABLE                      = 0x00400000, // not used in game for check trow possibility, only for item in game tooltip

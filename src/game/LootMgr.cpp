@@ -81,8 +81,8 @@ void LootStore::LoadLootTable()
 
     sLog.outString( "%s :", GetName());
 
-    //                                                 0      1     2                    3        4              5         6           7              8                 9
-    QueryResult *result = WorldDatabase.PQuery("SELECT entry, item, ChanceOrQuestChance, groupid, mincountOrRef, maxcount, freeforall, lootcondition, condition_value1, condition_value2 FROM %s",GetName());
+    //                                                 0      1     2                    3        4              5         6              7                 8
+    QueryResult *result = WorldDatabase.PQuery("SELECT entry, item, ChanceOrQuestChance, groupid, mincountOrRef, maxcount, lootcondition, condition_value1, condition_value2 FROM %s",GetName());
 
     if (result)
     {
@@ -99,10 +99,9 @@ void LootStore::LoadLootTable()
             uint8  group               = fields[3].GetUInt8();
             int32  mincountOrRef       = fields[4].GetInt32();
             uint8  maxcount            = fields[5].GetUInt8();
-            bool   freeforall          = fields[6].GetBool();
-            ConditionType condition    = (ConditionType)fields[7].GetUInt8();
-            uint32 cond_value1         = fields[8].GetUInt32();
-            uint32 cond_value2         = fields[9].GetUInt32();
+            ConditionType condition    = (ConditionType)fields[6].GetUInt8();
+            uint32 cond_value1         = fields[7].GetUInt32();
+            uint32 cond_value2         = fields[8].GetUInt32();
 
             if(!PlayerCondition::IsValid(condition,cond_value1, cond_value2))
             {
@@ -113,7 +112,7 @@ void LootStore::LoadLootTable()
             // (condition + cond_value1/2) are converted into single conditionId
             uint16 conditionId = objmgr.GetConditionId(condition, cond_value1, cond_value2);
 
-            LootStoreItem storeitem = LootStoreItem(item, chanceOrQuestChance, group, freeforall, conditionId, mincountOrRef, maxcount);
+            LootStoreItem storeitem = LootStoreItem(item, chanceOrQuestChance, group, conditionId, mincountOrRef, maxcount);
 
             if (!storeitem.IsValid(*this,entry))            // Validity checks
                 continue;
@@ -258,7 +257,10 @@ LootItem::LootItem(LootStoreItem const& li)
 {
     itemid      = li.itemid;
     conditionId = li.conditionId;
-    freeforall  = li.freeforall;
+
+    ItemPrototype const* proto = objmgr.GetItemPrototype(itemid);
+    freeforall  = proto && (proto->Flags & ITEM_FLAGS_PARTY_LOOT);
+
     needs_quest = li.needs_quest;
 
     count       = urand(li.mincountOrRef, li.maxcount);     // constructor called for mincountOrRef > 0 only
@@ -313,8 +315,13 @@ void Loot::AddItem(LootStoreItem const & item)
         // non-conditional one-player only items are counted here,
         // free for all items are counted in FillFFALoot(),
         // non-ffa conditionals are counted in FillNonQuestNonFFAConditionalLoot()
-        if( ! item.freeforall && ! item.conditionId)
-            ++unlootedCount;
+        if( !item.conditionId )
+        {
+            ItemPrototype const* proto = objmgr.GetItemPrototype(item.itemid);
+            if( !proto || (proto->Flags & ITEM_FLAGS_PARTY_LOOT)==0 )
+                ++unlootedCount;
+        }
+
     }
 }
 
