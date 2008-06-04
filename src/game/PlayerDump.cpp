@@ -210,22 +210,28 @@ std::string CreateDumpString(char const* tableName, QueryResult *result)
     return ss.str();
 }
 
-std::string GenerateWhereStr(char const* field, uint32 guid)
+std::string PlayerDumpWriter::GenerateWhereStr(char const* field, uint32 guid)
 {
     std::ostringstream wherestr;
     wherestr << field << " = '" << guid << "'";
     return wherestr.str();
 }
 
-std::string GenerateWhereStr(char const* field, std::set<uint32> const& guids)
+std::string PlayerDumpWriter::GenerateWhereStr(char const* field, GUIDs const& guids, GUIDs::const_iterator& itr)
 {
     std::ostringstream wherestr;
     wherestr << field << " IN ('";
-    for(std::set<uint32>::const_iterator itr = guids.begin(); itr != guids.end(); ++itr)
+    for(; itr != guids.end(); ++itr)
     {
         wherestr << *itr;
 
-        std::set<uint32>::const_iterator itr2 = itr;
+        if(wherestr.str().size() > MAX_QUERY_LEN - 500)            // near to max query
+        {
+            ++itr;
+            break;
+        }
+
+        GUIDs::const_iterator itr2 = itr;
         if(++itr2 != guids.end())
             wherestr << "','";
     }
@@ -253,70 +259,56 @@ void StoreGUID(QueryResult *result,uint32 data,uint32 field, std::set<uint32>& g
 // Writing - High-level functions
 bool PlayerDumpWriter::DumpTable(std::string& dump, uint32 guid, char const*tableFrom, char const*tableTo, DumpTableType type)
 {
-    std::string wherestr;
-    uint32 whereguid = 0;
-    QueryResult *result_pet = NULL;
-
-    switch ( type )
-    {
-        case DTT_ITEM:
-            if(items.empty())                               // nothing
-                return true;
-
-            wherestr = GenerateWhereStr("guid",items);
-            break;
-        case DTT_ITEM_GIFT:
-            if(items.empty())                               // nothing
-                return true;
-
-            wherestr = GenerateWhereStr("item_guid",items);
-            break;
-        case DTT_PET:
-            wherestr = GenerateWhereStr("owner",guid);
-            break;
-        case DTT_PET_TABLE:
-            if(pets.empty())                                // nothing
-                return true;
-
-            wherestr = GenerateWhereStr("guid",pets);
-            break;
-        case DTT_MAIL:
-            wherestr = GenerateWhereStr("receiver",guid);
-            break;
-        case DTT_MAIL_ITEM:
-            if(mails.empty())                               // nothing
-                return true;
-
-            wherestr = GenerateWhereStr("mail_id",mails);
-            break;
-        case DTT_ITEM_TEXT:
-            if(texts.empty())                               // nothing
-                return true;
-
-            wherestr = GenerateWhereStr("id",texts);
-            break;
-        default:
-            wherestr = GenerateWhereStr("guid",guid);
-            break;
-    }
-
     if (!tableFrom || !tableTo)
         return false;
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT * FROM %s WHERE %s", tableFrom, wherestr.c_str());
-    if (!result)
-        return false;
+    GUIDs const* guids = NULL;
+    char const* fieldname = NULL;
+
+    switch ( type )
+    {
+        case DTT_ITEM:      fieldname = "guid";      guids = &items; break;
+        case DTT_ITEM_GIFT: fieldname = "item_guid"; guids = &items; break;
+        case DTT_PET:       fieldname = "owner";                     break;
+        case DTT_PET_TABLE: fieldname = "guid";      guids = &pets;  break;
+        case DTT_MAIL:      fieldname = "receiver";                  break;
+        case DTT_MAIL_ITEM: fieldname = "mail_id";   guids = &mails; break;
+        case DTT_ITEM_TEXT: fieldname = "id";        guids = &texts; break;
+        default:            fieldname = "guid";                      break;
+    }
+
+    // for guid set stop if set is empty
+    if(guids && guids->empty())
+        return true;                                        // nothing to do
+
+    // setup for guids case start position
+    GUIDs::const_iterator guids_itr;
+    if(guids)
+        guids_itr = guids->begin();
 
     do
     {
-        // collect guids
-        switch ( type )
+        std::string wherestr;
+
+        if(guids)                                           // set case, get next guids string
+            wherestr = GenerateWhereStr(fieldname,*guids,guids_itr);
+        else                                                // not set case, get single guid string
+            wherestr = GenerateWhereStr(fieldname,guid);
+
+        QueryResult *result = CharacterDatabase.PQuery("SELECT * FROM %s WHERE %s", tableFrom, wherestr.c_str());
+        if(!result)
+            return false;
+
+        do
         {
+            // collect guids
+            switch ( type )
+            {
             case DTT_INVENTORY:
                 StoreGUID(result,3,items); break;           // item guid collection
             case DTT_ITEM:
                 StoreGUID(result,0,ITEM_FIELD_ITEM_TEXT_ID,texts); break;
-                                                            // item text id collection
+                // item text id collection
             case DTT_PET:
                 StoreGUID(result,0,pets);  break;           // pet guid collection
             case DTT_MAIL:
@@ -325,14 +317,16 @@ bool PlayerDumpWriter::DumpTable(std::string& dump, uint32 guid, char const*tabl
             case DTT_MAIL_ITEM:
                 StoreGUID(result,1,items); break;           // item guid collection
             default:                       break;
+            }
+
+            dump += CreateDumpString(tableTo, result);
+            dump += "\n";
         }
+        while (result->NextRow());
 
-        dump += CreateDumpString(tableTo, result);
-        dump += "\n";
+        delete result;
     }
-    while (result->NextRow());
-
-    delete result;
+    while(guids && guids_itr != guids->end());              // not set case iterate single time, set case iterate for all guids
 
     return true;
 }

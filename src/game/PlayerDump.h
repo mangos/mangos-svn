@@ -85,9 +85,12 @@ class PlayerDumpWriter : public PlayerDump
         std::string GetDump(uint32 guid);
         bool WriteDump(std::string file, uint32 guid);
     private:
-        bool DumpTable(std::string& dump, uint32 guid, char const*tableFrom, char const*tableTo, DumpTableType type);
-
         typedef std::set<uint32> GUIDs;
+
+        bool DumpTable(std::string& dump, uint32 guid, char const*tableFrom, char const*tableTo, DumpTableType type);
+        std::string GenerateWhereStr(char const* field, GUIDs const& guids, GUIDs::const_iterator& itr);
+        std::string GenerateWhereStr(char const* field, uint32 guid);
+
         GUIDs pets;
         GUIDs mails;
         GUIDs items;
