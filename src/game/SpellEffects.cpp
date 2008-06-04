@@ -211,7 +211,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //148 SPELL_EFFECT_148                      unused
     &Spell::EffectNULL,                                     //149 SPELL_EFFECT_149
     &Spell::EffectNULL,                                     //150 SPELL_EFFECT_150                      unused
-    &Spell::EffectTriggerSpell,                             //151 SPELL_EFFECT_TRIGGER_SPELL_2
+    &Spell::EffectTriggerRitualOfSummoning,                 //151 SPELL_EFFECT_TRIGGER_SPELL_2
     &Spell::EffectNULL,                                     //152 SPELL_EFFECT_152                      RAFS
     &Spell::EffectNULL,                                     //153 SPELL_EFFECT_CREATE_PET               misc value is creature entry
 };
@@ -1467,6 +1467,29 @@ void Spell::EffectTriggerSpellWithValue(uint32 i)
 
     int32 bp = damage;
     m_caster->CastCustomSpell(unitTarget,triggered_spell_id,&bp,&bp,&bp,true,NULL,NULL,m_originalCasterGUID);
+}
+
+void Spell::EffectTriggerRitualOfSummoning(uint32 i)
+{
+    uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[i];
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry( triggered_spell_id );
+
+    if(!spellInfo)
+    {
+        sLog.outError("EffectTriggerRitualOfSummoning of spell %u: triggering unknown spell id %i", m_spellInfo->Id,triggered_spell_id);
+        return;
+    }
+
+    finish();
+    Spell *spell = new Spell(m_caster, spellInfo, true);
+
+    SpellCastTargets targets;
+    targets.setUnitTarget( unitTarget);
+    spell->prepare(&targets);
+
+    m_caster->SetCurrentCastedSpell(spell);
+    spell->m_selfContainer = &(m_caster->m_currentSpells[spell->GetCurrentContainer()]);
+
 }
 
 void Spell::EffectTriggerSpell(uint32 i)
@@ -5138,7 +5161,10 @@ void Spell::EffectTransmitted(uint32 i)
         case GAMEOBJECT_TYPE_SUMMONING_RITUAL:
         {
             if(m_caster->GetTypeId()==TYPEID_PLAYER)
+            {
                 pGameObj->AddUniqueUse((Player*)m_caster);
+                m_caster->AddGameObject(pGameObj);          // will removed at spell cancel
+            }
             break;
         }
         case GAMEOBJECT_TYPE_FISHINGHOLE:

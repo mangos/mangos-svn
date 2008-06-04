@@ -4250,15 +4250,15 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
             m_target->HandleEmoteCommand(398);
         }
 
-        // Prevent rage regeneration in combat with rage loss slowdown warrior talent and 0<->1 switching range out combat.
-        if( !(pt == POWER_RAGE && (m_target->isInCombat() || m_target->GetPower(POWER_RAGE) == 0)) )
+        // Warrior talent, gain 1 rage every 3 seconds while in combat
+        if(pt == POWER_RAGE && m_target->isInCombat())
         {
-            if(pt != POWER_MANA)
-                m_target->ModifyPower(pt, m_modifier.m_amount*2/5);
+            m_target->ModifyPower(pt, m_modifier.m_amount*10/17);
+            m_periodicTimer += 1000;
         }
     }
     m_isPeriodic = apply;
-    if (Real && m_target->GetTypeId() == TYPEID_PLAYER)
+    if (Real && m_target->GetTypeId() == TYPEID_PLAYER && m_modifier.m_miscvalue == POWER_MANA)
         ((Player*)m_target)->UpdateManaRegen();
 }
 
