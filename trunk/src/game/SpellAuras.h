@@ -151,6 +151,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleModBaseResistance(bool Apply, bool Real);
         void HandleModRegen(bool Apply, bool Real);
         void HandleModPowerRegen(bool Apply, bool Real);
+        void HandleModPowerRegenPCT(bool Apply, bool Real);
         void HandleChannelDeathItem(bool Apply, bool Real);
         void HandlePeriodicDamagePCT(bool Apply, bool Real);
         void HandleAuraModAttackPower(bool Apply, bool Real);

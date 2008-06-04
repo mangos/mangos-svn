@@ -1663,12 +1663,11 @@ void Player::Regenerate(Powers power)
 
     float addvalue = 0.0f;
 
-    bool recentCast = IsUnderLastManaUseEffect();
-
     switch (power)
     {
         case POWER_MANA:
         {
+            bool recentCast = IsUnderLastManaUseEffect();
             float ManaIncreaseRate = sWorld.getRate(RATE_POWER_MANA);
             if (recentCast)
             {
@@ -1677,7 +1676,7 @@ void Player::Regenerate(Powers power)
             }
             else
             {
-                addvalue = GetFloatValue(PLAYER_FIELD_MOD_MANA_REGEN)* ManaIncreaseRate * 2.00f;
+                addvalue = GetFloatValue(PLAYER_FIELD_MOD_MANA_REGEN) * ManaIncreaseRate * 2.00f;
             }
         }   break;
         case POWER_RAGE:                                    // Regenerate rage
@@ -1693,7 +1692,9 @@ void Player::Regenerate(Powers power)
             break;
     }
 
-    if(!(recentCast && power == POWER_MANA))
+    // Mana regen calculated in Player::UpdateManaRegen()
+    // Exist only for POWER_MANA, POWER_ENERGY, POWER_FOCUS auras
+    if(power != POWER_MANA)
     {
         AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
         for(AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)

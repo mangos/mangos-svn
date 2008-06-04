@@ -159,7 +159,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAddModifier,                               //107 SPELL_AURA_ADD_FLAT_MODIFIER
     &Aura::HandleAddModifier,                               //108 SPELL_AURA_ADD_PCT_MODIFIER
     &Aura::HandleNoImmediateEffect,                         //109 SPELL_AURA_ADD_TARGET_TRIGGER
-    &Aura::HandleNoImmediateEffect,                         //110 SPELL_AURA_MOD_POWER_REGEN_PERCENT
+    &Aura::HandleModPowerRegenPCT,                          //110 SPELL_AURA_MOD_POWER_REGEN_PERCENT
     &Aura::HandleNULL,                                      //111 SPELL_AURA_ADD_CASTER_HIT_TRIGGER
     &Aura::HandleNoImmediateEffect,                         //112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS
     &Aura::HandleNoImmediateEffect,                         //113 SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN implemented in Unit::MeleeDamageBonus
@@ -491,12 +491,12 @@ void Aura::Update(uint32 diff)
         Unit* caster = GetCaster();
         if(caster && m_timeCla <= 0)
         {
+            SpellEntry const *spellInfo = GetSpellProto();                   
             Powers powertype = caster->getPowerType();
-            int32 manaPerSecond = GetSpellProto()->manaPerSecond;
-            int32 manaPerSecondPerLevel = uint32(GetSpellProto()->manaPerSecondPerLevel*caster->getLevel());
+            int32 manaPerSecond = spellInfo->manaPerSecond + spellInfo->manaPerSecondPerLevel * caster->getLevel();
             m_timeCla = 1000;
-            caster->ModifyPower(powertype,-manaPerSecond);
-            caster->ModifyPower(powertype,-manaPerSecondPerLevel);
+            if (manaPerSecond)
+                caster->ModifyPower(powertype,-manaPerSecond);
         }
         if(caster && m_target->isAlive() && m_target->HasFlag(UNIT_FIELD_FLAGS,(UNIT_STAT_FLEEING<<16)))
         {
@@ -563,8 +563,7 @@ void Aura::Update(uint32 diff)
                                                             // Cannibalize, eating items and other spells
                 m_modifier.m_auraname == SPELL_AURA_OBS_MOD_HEALTH ||
                                                             // Eating items and other spells
-                m_modifier.m_auraname == SPELL_AURA_OBS_MOD_MANA ||
-                m_modifier.m_auraname == SPELL_AURA_MOD_MANA_REGEN_FROM_STAT )
+                m_modifier.m_auraname == SPELL_AURA_OBS_MOD_MANA )
             {
                 ApplyModifier(true);
                 return;
@@ -2049,6 +2048,18 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
             if (spell->Id==31666 && !apply && Real)
             {
                 m_target->RemoveAurasDueToSpell(31665);
+                break;
+            }
+            break;
+        }
+        case SPELLFAMILY_HUNTER:
+        {
+            // Aspect of the Viper
+            if (spell->SpellFamilyFlags&0x0004000000000000LL)
+            {
+                // Update regen on remove
+                if (!apply && m_target->GetTypeId() == TYPEID_PLAYER)
+                    ((Player*)m_target)->UpdateManaRegen();
                 break;
             }
             break;
@@ -4251,6 +4262,20 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
         ((Player*)m_target)->UpdateManaRegen();
 }
 
+void Aura::HandleModPowerRegenPCT(bool apply, bool Real)
+{
+    // spells required only Real aura add/remove
+    if(!Real)
+        return;
+
+    if (m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    // Update manaregen value
+    if (m_modifier.m_miscvalue == POWER_MANA)
+        ((Player*)m_target)->UpdateManaRegen();
+}
+
 void Aura::HandleModManaRegen(bool apply, bool Real)
 {
     // spells required only Real aura add/remove
@@ -4259,7 +4284,7 @@ void Aura::HandleModManaRegen(bool apply, bool Real)
 
     if (m_target->GetTypeId() != TYPEID_PLAYER)
         return;
-    //Already calculated in Player::UpdateManaRegen()
+
     //Note: an increase in regen does NOT cause threat.
     ((Player*)m_target)->UpdateManaRegen();
 }

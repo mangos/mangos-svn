@@ -168,7 +168,12 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
         return;
 
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(i_dynobject.GetSpellId());
-    PersistentAreaAura* Aur = new PersistentAreaAura(spellInfo, i_dynobject.GetEffIndex(), NULL, target, i_dynobject.GetCaster());
+    uint32 eff_index  = i_dynobject.GetEffIndex();
+    // Check target immune to spell or aura
+    if (target->IsImmunedToSpell(spellInfo) || target->IsImmunedToSpellEffect(spellInfo->Effect[eff_index], spellInfo->EffectMechanic[eff_index]))
+        return;
+    // Apply PersistentAreaAura on target
+    PersistentAreaAura* Aur = new PersistentAreaAura(spellInfo, eff_index, NULL, target, i_dynobject.GetCaster());
     target->AddAura(Aur);
     i_dynobject.AddAffected(target);
 }
