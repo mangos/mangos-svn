@@ -225,7 +225,7 @@ std::string PlayerDumpWriter::GenerateWhereStr(char const* field, GUIDs const& g
     {
         wherestr << *itr;
 
-        if(wherestr.str().size() > MAX_QUERY_LEN - 500)            // near to max query
+        if(wherestr.str().size() > MAX_QUERY_LEN - 50)      // near to max query
         {
             ++itr;
             break;
