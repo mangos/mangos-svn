@@ -2142,7 +2142,7 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
     float block_chance, parry_chance, dodge_chance;
 
     // cannot be dodged/parried/blocked
-    if(spellInfo->Attributes & SPELL_ATTR_UMPOSSIBLE_DODGE_PARRY_BLOCK)
+    if(spellInfo->Attributes & SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK)
     {
         block_chance = 0.0f;
         parry_chance = 0.0f;
@@ -2517,7 +2517,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
         return SPELL_MISS_MISS;
 
     // Same spells cannot be parry/dodge
-    if (spell->Attributes & SPELL_ATTR_UMPOSSIBLE_DODGE_PARRY_BLOCK)
+    if (spell->Attributes & SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK)
         return SPELL_MISS_NONE;
 
     // Ranged attack can`t miss too

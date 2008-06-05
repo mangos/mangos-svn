@@ -362,7 +362,7 @@ inline bool IsChanneledSpell(SpellEntry const* spellInfo)
 
 inline bool NeedsComboPoints(SpellEntry const* spellInfo)
 {
-    return (spellInfo->AttributesEx & 0x500000);
+    return (spellInfo->AttributesEx & (SPELL_ATTR_EX_REQ_COMBO_POINTS1 | SPELL_ATTR_EX_REQ_COMBO_POINTS2));
 }
 
 inline SpellSchoolMask GetSpellSchoolMask(SpellEntry const* spellInfo)

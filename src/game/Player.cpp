@@ -263,7 +263,7 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_groupUpdateMask = 0;
     m_auraUpdateMask = 0;
 
-    duel = 0;
+    duel = NULL;
 
     m_GuildIdInvited = 0;
     m_ArenaTeamIdInvited = 0;
@@ -5998,7 +5998,8 @@ void Player::UpdateZone(uint32 newZone)
 //If players are too far way of duel flag... then player loose the duel
 void Player::CheckDuelDistance(time_t currTime)
 {
-    if(!duel) return;
+    if(!duel)
+        return;
 
     uint64 duelFlagGUID = GetUInt64Value(PLAYER_DUEL_ARBITER);
     GameObject* obj = ObjectAccessor::GetGameObject(*this, duelFlagGUID);
@@ -6112,9 +6113,9 @@ void Player::DuelComplete(DuelCompleteType type)
     duel->opponent->SetUInt32Value(PLAYER_DUEL_TEAM, 0);
 
     delete duel->opponent->duel;
-    duel->opponent->duel = 0;
+    duel->opponent->duel = NULL;
     delete duel;
-    duel = 0;
+    duel = NULL;
 }
 
 //---------------------------------------------------------//

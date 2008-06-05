@@ -3165,7 +3165,8 @@ uint8 Spell::CanCast(bool strict)
         return SPELL_FAILED_REQUIRES_AREA;
 
     // not let players cast spells at mount (and let do it to creatures)
-    if(m_caster->IsMounted() && m_caster->GetTypeId()==TYPEID_PLAYER && !m_IsTriggeredSpell && !IsPassiveSpell(m_spellInfo->Id) && !(m_spellInfo->Attributes & 0x1000000))
+    if( m_caster->IsMounted() && m_caster->GetTypeId()==TYPEID_PLAYER && !m_IsTriggeredSpell &&
+        !IsPassiveSpell(m_spellInfo->Id) && !(m_spellInfo->Attributes & SPELL_ATTR_CASTABLE_WHILE_MOUNTED) )
     {
         if(m_caster->isInFlight())
             return SPELL_FAILED_NOT_FLYING;
