@@ -22,6 +22,7 @@
 #include "Common.h"
 #include "Errors.h"
 #include "Log.h"
+#include "Utilities/ByteConverter.h"
 
 class ByteBuffer
 {
@@ -49,10 +50,12 @@ class ByteBuffer
 
         template <typename T> void append(T value)
         {
+            EndianConvert(value);
             append((uint8 *)&value, sizeof(value));
         }
         template <typename T> void put(size_t pos,T value)
         {
+            EndianConvert(value);
             put(pos,(uint8 *)&value,sizeof(value));
         }
 
@@ -235,7 +238,9 @@ class ByteBuffer
         template <typename T> T read(size_t pos) const
         {
             ASSERT(pos + sizeof(T) <= size() || PrintPosError(false,pos,sizeof(T)));
-            return *((T const*)&_storage[pos]);
+            T val = *((T const*)&_storage[pos]);
+            EndianConvert(val);
+            return val;
         }
 
         void read(uint8 *dest, size_t len)

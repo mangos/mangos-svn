@@ -41,15 +41,20 @@ bool DBCFile::Load(const char *filename, const char *fmt)
     if(!f)return false;
 
     fread(&header,4,1,f);                                   // Number of records
+    EndianConvert(header);
     if(header!=0x43424457)
     {
         //printf("not dbc file");
         return false;                                       //'WDBC'
     }
     fread(&recordCount,4,1,f);                              // Number of records
+    EndianConvert(recordCount);
     fread(&fieldCount,4,1,f);                               // Number of fields
+    EndianConvert(fieldCount);
     fread(&recordSize,4,1,f);                               // Size of a record
+    EndianConvert(recordSize);
     fread(&stringSize,4,1,f);                               // String size
+    EndianConvert(stringSize);
 
     fieldsOffset = new uint32[fieldCount];
     fieldsOffset[0] = 0;
