@@ -116,7 +116,7 @@ enum __QuestFlags
     QUEST_FLAGS_STAY_ALIVE     = 1,                         // Not used currently
     QUEST_FLAGS_EVENT          = 2,                         // Not used currently
     QUEST_FLAGS_EXPLORATION    = 4,                         // Not used currently
-    QUEST_FLAGS_UNK1           = 8,                         // Not used currently
+    QUEST_FLAGS_SHARABLE       = 8,                         // Can be shared: Player::CanShareQuest()
     //QUEST_FLAGS_NONE2        = 16,                        // Not used currently
     QUEST_FLAGS_EPIC           = 32,                        // Not used currently: Unsure of content
     QUEST_FLAGS_RAID           = 64,                        // Not used currently

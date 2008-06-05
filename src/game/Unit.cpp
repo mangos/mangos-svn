@@ -486,8 +486,6 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         {
             pVictim->setDeathState(JUST_DIED);
             pVictim->SetHealth(0);
-            pVictim->CombatStop();
-            pVictim->DeleteThreatList();
 
             // allow loot only if has loot_id in creature_template
             CreatureInfo const* cInfo = ((Creature*)pVictim)->GetCreatureInfo();
@@ -696,7 +694,6 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             if(pet && pVictim->GetTypeId() != TYPEID_PLAYER)
             {
                 pet->setDeathState(JUST_DIED);
-                pet->CombatStop();
                 pet->SetHealth(0);
                 pet->addUnitState(UNIT_STAT_DIED);
                 pet->getHostilRefManager().deleteReferences();
@@ -8471,6 +8468,7 @@ void Unit::setDeathState(DeathState s)
     if (s != ALIVE && s!= JUST_ALIVED)
     {
         CombatStop();
+        DeleteThreatList();
         ClearComboPointHolders();                           // any combo points pointed to unit lost at it death
 
         if(IsNonMeleeSpellCasted(false))
