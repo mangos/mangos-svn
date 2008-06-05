@@ -2604,20 +2604,26 @@ bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading
             if(HasSkill(pSkill->id))
                 continue;
 
-            if(_spell_idx->second->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL)
+            if(_spell_idx->second->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL || 
+                pSkill->id==SKILL_POISONS )                 // poison special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
             {
-
                 switch(pSkill->categoryId)
                 {
                     case SKILL_CATEGORY_LANGUAGES:
                         SetSkill(pSkill->id, 300, 300 );
                         break;
                     case SKILL_CATEGORY_WEAPON:
-                        SetSkill(pSkill->id, 1, GetMaxSkillValueForLevel() );
+                        if(pSkill->id!=SKILL_FIST_WEAPONS)
+                            SetSkill(pSkill->id, 1, GetMaxSkillValueForLevel() );
+                        else
+                            SetSkill(pSkill->id, 1, 1 );
                         break;
                     case SKILL_CATEGORY_ARMOR:
                     case SKILL_CATEGORY_CLASS:
-                        SetSkill(pSkill->id, 1, 1 );
+                        if(pSkill->id!=SKILL_POISONS)
+                            SetSkill(pSkill->id, 1, 1 );
+                        else
+                            SetSkill(pSkill->id, 1, GetMaxSkillValueForLevel() );
                         break;
                     case SKILL_CATEGORY_SECONDARY:
                     case SKILL_CATEGORY_PROFESSION:
@@ -2762,8 +2768,11 @@ void Player::removeSpell(uint32 spell_id)
             if(!pSkill)
                 continue;
 
-            if(_spell_idx->second->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL)
+            if(_spell_idx->second->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL ||
+                pSkill->id==SKILL_POISONS )                 // poison special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
+            {
                 SetSkill(pSkill->id, 0, 0 );
+            }
         }
     }
 
@@ -12076,14 +12085,13 @@ QuestStatus Player::GetQuestStatus( uint32 quest_id ) const
 
 bool Player::CanShareQuest(uint32 quest_id) const
 {
-    if( quest_id )
+    Quest const* qInfo = objmgr.GetQuestTemplate(quest_id);
+    if( qInfo && qInfo->HasFlag(QUEST_FLAGS_SHARABLE) )
     {
         QuestStatusMap::const_iterator itr = mQuestStatus.find( quest_id );
         if( itr != mQuestStatus.end() )
-            return itr->second.m_status == QUEST_STATUS_NONE ||
-                itr->second.m_status == QUEST_STATUS_INCOMPLETE;
+            return itr->second.m_status == QUEST_STATUS_NONE || itr->second.m_status == QUEST_STATUS_INCOMPLETE;
     }
-
     return false;
 }
 
