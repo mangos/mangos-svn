@@ -186,46 +186,46 @@ enum ItemQualities
 
 #define SPELL_ATTR_UNK0                           0x00000001
 #define SPELL_ATTR_RANGED                         0x00000002            // All ranged abilites have this flag
-#define SPELL_ATTR_UNK2                           0x00000004
+#define SPELL_ATTR_UNK2                           0x00000004            // on next swing?
 #define SPELL_ATTR_UNK3                           0x00000008
 #define SPELL_ATTR_UNK4                           0x00000010
-#define SPELL_ATTR_UNK5                           0x00000020
+#define SPELL_ATTR_UNK5                           0x00000020            // trade spells?
 #define SPELL_ATTR_PASSIVE                        0x00000040            // Passive spell
-#define SPELL_ATTR_UNK7                           0x00000080
+#define SPELL_ATTR_UNK7                           0x00000080            // visible?
 #define SPELL_ATTR_UNK8                           0x00000100
 #define SPELL_ATTR_UNK9                           0x00000200
 #define SPELL_ATTR_UNK10                          0x00000400
 #define SPELL_ATTR_UNK11                          0x00000800
-#define SPELL_ATTR_UNK12                          0x00001000
-#define SPELL_ATTR_UNK13                          0x00002000
-#define SPELL_ATTR_UNK14                          0x00004000
+#define SPELL_ATTR_DAYTIME_ONLY                   0x00001000            // only useable at daytime, not set in 2.4.2
+#define SPELL_ATTR_NIGHT_ONLY                     0x00002000            // only useable at night, not set in 2.4.2
+#define SPELL_ATTR_INDOORS_ONLY                   0x00004000            // only useable indoors, not set in 2.4.2
 #define SPELL_ATTR_OUTDOORS_ONLY                  0x00008000            // Only useable outdoors.
 #define SPELL_ATTR_NOT_SHAPESHIFT                 0x00010000            // Not while shapeshifted
 #define SPELL_ATTR_ONLY_STEALTHED                 0x00020000            // Must be in stealth
 #define SPELL_ATTR_UNK18                          0x00040000
 #define SPELL_ATTR_UNK19                          0x00080000
 #define SPELL_ATTR_UNK20                          0x00100000
-#define SPELL_ATTR_UMPOSSIBLE_DODGE_PARRY_BLOCK   0x00200000            // Cannot be dodged/parried/blocked
+#define SPELL_ATTR_IMPOSSIBLE_DODGE_PARRY_BLOCK   0x00200000            // Cannot be dodged/parried/blocked
 #define SPELL_ATTR_UNK22                          0x00400000
-#define SPELL_ATTR_UNK23                          0x00800000
-#define SPELL_ATTR_UNK24                          0x01000000
-#define SPELL_ATTR_UNK25                          0x02000000
+#define SPELL_ATTR_UNK23                          0x00800000            // castable while dead?
+#define SPELL_ATTR_CASTABLE_WHILE_MOUNTED         0x01000000            // castable while mounted
+#define SPELL_ATTR_UNK25                          0x02000000            // shaded while active aura?
 #define SPELL_ATTR_UNK26                          0x04000000
-#define SPELL_ATTR_UNK27                          0x08000000
+#define SPELL_ATTR_CASTABLE_WHILE_SITTING         0x08000000            // castable while sitting
 #define SPELL_ATTR_CANT_USED_IN_COMBAT            0x10000000            // Cannot be used in combat
 #define SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY  0x20000000            // unaffected by invulnerability (hmm possible not...)
-#define SPELL_ATTR_UNK30                          0x40000000
+#define SPELL_ATTR_UNK30                          0x40000000            // breakable by damage?
 #define SPELL_ATTR_UNK31                          0x80000000
 
 #define SPELL_ATTR_EX_UNK0                        0x00000001
-#define SPELL_ATTR_EX_UNK1                        0x00000002
-#define SPELL_ATTR_EX_UNK2                        0x00000004
+#define SPELL_ATTR_EX_UNK1                        0x00000002            // use all power
+#define SPELL_ATTR_EX_UNK2                        0x00000004            // channeled 1
 #define SPELL_ATTR_EX_UNK3                        0x00000008
 #define SPELL_ATTR_EX_UNK4                        0x00000010
 #define SPELL_ATTR_EX_UNK5                        0x00000020            // Not break stealth??
-#define SPELL_ATTR_EX_UNK6                        0x00000040
+#define SPELL_ATTR_EX_UNK6                        0x00000040            // channeled 2
 #define SPELL_ATTR_EX_NEGATIVE                    0x00000080
-#define SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET        0x00000100            // Spell req not in combat state target
+#define SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET        0x00000100            // Spell req target not to be in combat state
 #define SPELL_ATTR_EX_UNK9                        0x00000200
 #define SPELL_ATTR_EX_UNK10                       0x00000400
 #define SPELL_ATTR_EX_UNK11                       0x00000800
@@ -237,9 +237,9 @@ enum ItemQualities
 #define SPELL_ATTR_EX_UNK17                       0x00020000
 #define SPELL_ATTR_EX_UNK18                       0x00040000
 #define SPELL_ATTR_EX_UNK19                       0x00080000
-#define SPELL_ATTR_EX_REQ_COMBO_POINTS            0x00100000            // Req combo points on target
+#define SPELL_ATTR_EX_REQ_COMBO_POINTS1           0x00100000            // Req combo points on target
 #define SPELL_ATTR_EX_UNK21                       0x00200000
-#define SPELL_ATTR_EX_UNK22                       0x00400000
+#define SPELL_ATTR_EX_REQ_COMBO_POINTS2           0x00400000            // Req combo points on target
 #define SPELL_ATTR_EX_UNK23                       0x00800000
 #define SPELL_ATTR_EX_UNK24                       0x01000000            // Req fishing pole??
 #define SPELL_ATTR_EX_UNK25                       0x02000000
@@ -247,7 +247,7 @@ enum ItemQualities
 #define SPELL_ATTR_EX_UNK27                       0x08000000
 #define SPELL_ATTR_EX_UNK28                       0x10000000
 #define SPELL_ATTR_EX_UNK29                       0x20000000
-#define SPELL_ATTR_EX_UNK30                       0x40000000
+#define SPELL_ATTR_EX_UNK30                       0x40000000            // overpower
 #define SPELL_ATTR_EX_UNK31                       0x80000000
 
 #define SPELL_ATTR_EX2_UNK0                       0x00000001
@@ -269,14 +269,14 @@ enum ItemQualities
 #define SPELL_ATTR_EX2_UNK16                      0x00010000
 #define SPELL_ATTR_EX2_UNK17                      0x00020000            // Hunters Shot and Stings only have this flag
 #define SPELL_ATTR_EX2_UNK18                      0x00040000            // Only Revive pet - possible req dead pet
-#define SPELL_ATTR_EX2_ONLY_SHAPESHIFT            0x00080000            // Can cast only in snapeshift
+#define SPELL_ATTR_EX2_NOT_NEED_SHAPESHIFT        0x00080000            // does not necessarly need shapeshift
 #define SPELL_ATTR_EX2_UNK20                      0x00100000
 #define SPELL_ATTR_EX2_UNK21                      0x00200000
 #define SPELL_ATTR_EX2_UNK22                      0x00400000
 #define SPELL_ATTR_EX2_UNK23                      0x00800000            // Only mage Arcane Concentration have this flag
 #define SPELL_ATTR_EX2_UNK24                      0x01000000
 #define SPELL_ATTR_EX2_UNK25                      0x02000000
-#define SPELL_ATTR_EX2_UNK26                      0x04000000
+#define SPELL_ATTR_EX2_UNK26                      0x04000000            // unaffected by school immunity
 #define SPELL_ATTR_EX2_UNK27                      0x08000000
 #define SPELL_ATTR_EX2_UNK28                      0x10000000
 #define SPELL_ATTR_EX2_CANT_CRIT                  0x20000000            // Spell can`t crit
@@ -317,7 +317,7 @@ enum ItemQualities
 #define SPELL_ATTR_EX3_UNK31                      0x80000000
 
 #define SPELL_ATTR_EX4_UNK0                       0x00000001
-#define SPELL_ATTR_EX4_UNK1                       0x00000002
+#define SPELL_ATTR_EX4_UNK1                       0x00000002            // proc on finishing move?
 #define SPELL_ATTR_EX4_UNK2                       0x00000004
 #define SPELL_ATTR_EX4_UNK3                       0x00000008
 #define SPELL_ATTR_EX4_UNK4                       0x00000010
@@ -332,8 +332,8 @@ enum ItemQualities
 #define SPELL_ATTR_EX4_UNK13                      0x00002000
 #define SPELL_ATTR_EX4_UNK14                      0x00004000
 #define SPELL_ATTR_EX4_UNK15                      0x00008000
-#define SPELL_ATTR_EX4_UNK16                      0x00010000
-#define SPELL_ATTR_EX4_UNK17                      0x00020000
+#define SPELL_ATTR_EX4_UNK16                      0x00010000            // not usable in arena
+#define SPELL_ATTR_EX4_UNK17                      0x00020000            // usable in arena
 #define SPELL_ATTR_EX4_UNK18                      0x00040000
 #define SPELL_ATTR_EX4_UNK19                      0x00080000
 #define SPELL_ATTR_EX4_UNK20                      0x00100000
@@ -341,7 +341,7 @@ enum ItemQualities
 #define SPELL_ATTR_EX4_UNK22                      0x00400000
 #define SPELL_ATTR_EX4_UNK23                      0x00800000
 #define SPELL_ATTR_EX4_UNK24                      0x01000000
-#define SPELL_ATTR_EX4_UNK25                      0x02000000
+#define SPELL_ATTR_EX4_UNK25                      0x02000000            // pet scaling auras
 #define SPELL_ATTR_EX4_CAST_ONLY_IN_OUTLAND       0x04000000            // Can only be used in Outland.
 #define SPELL_ATTR_EX4_UNK27                      0x08000000
 #define SPELL_ATTR_EX4_UNK28                      0x10000000
@@ -350,9 +350,9 @@ enum ItemQualities
 #define SPELL_ATTR_EX4_UNK31                      0x80000000
 
 #define SPELL_ATTR_EX5_UNK0                       0x00000001
-#define SPELL_ATTR_EX5_UNK1                       0x00000002
+#define SPELL_ATTR_EX5_UNK1                       0x00000002            // not need reagents if UNIT_FLAG_RESTING
 #define SPELL_ATTR_EX5_UNK2                       0x00000004
-#define SPELL_ATTR_EX5_UNK3                       0x00000008
+#define SPELL_ATTR_EX5_UNK3                       0x00000008            // usable while stunned
 #define SPELL_ATTR_EX5_UNK4                       0x00000010
 #define SPELL_ATTR_EX5_UNK5                       0x00000020
 #define SPELL_ATTR_EX5_UNK6                       0x00000040
@@ -366,8 +366,8 @@ enum ItemQualities
 #define SPELL_ATTR_EX5_UNK14                      0x00004000
 #define SPELL_ATTR_EX5_UNK15                      0x00008000
 #define SPELL_ATTR_EX5_UNK16                      0x00010000
-#define SPELL_ATTR_EX5_UNK17                      0x00020000
-#define SPELL_ATTR_EX5_UNK18                      0x00040000
+#define SPELL_ATTR_EX5_UNK17                      0x00020000            // usable while feared
+#define SPELL_ATTR_EX5_UNK18                      0x00040000            // usable while confused
 #define SPELL_ATTR_EX5_UNK19                      0x00080000
 #define SPELL_ATTR_EX5_UNK20                      0x00100000
 #define SPELL_ATTR_EX5_UNK21                      0x00200000
