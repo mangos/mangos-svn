@@ -285,15 +285,14 @@ int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, ui
 bool IsSingleFromSpellSpecificPerCaster(uint32 spellSpec1,uint32 spellSpec2);
 bool IsPassiveSpell(uint32 spellId);
 
-// AttributesEx3 & 0x100000 all death persistent spells have this flag
 inline bool IsDeathPersistentSpell(SpellEntry const *spellInfo)
 {
-    return spellInfo->AttributesEx3 & 0x100000;
+    return spellInfo->AttributesEx3 & SPELL_ATTR_EX3_DEATH_PERSISTENT;
 }
 
 inline bool IsNonCombatSpell(SpellEntry const *spellInfo)
 {
-    return (spellInfo->Attributes & (1<<28)) != 0;
+    return (spellInfo->Attributes & SPELL_ATTR_CANT_USED_IN_COMBAT) != 0;
 }
 
 bool IsPositiveSpell(uint32 spellId);

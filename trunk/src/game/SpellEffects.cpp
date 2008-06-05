@@ -1575,7 +1575,7 @@ void Spell::EffectTriggerSpell(uint32 i)
         Player* p_caster = (Player*)m_caster;
 
         // main hand weapon required
-        if(spellInfo->AttributesEx3 & 0x0000000000000400)
+        if(spellInfo->AttributesEx3 & SPELL_ATTR_EX3_MAIN_HAND)
         {
             Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
 
@@ -1589,7 +1589,7 @@ void Spell::EffectTriggerSpell(uint32 i)
         }
 
         // offhand hand weapon required
-        if(spellInfo->AttributesEx3 & 0x0000000001000000)
+        if(spellInfo->AttributesEx3 & SPELL_ATTR_EX3_REQ_OFFHAND)
         {
             Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
