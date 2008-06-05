@@ -13776,8 +13776,7 @@ CREATE TABLE `spell_learn_spell` (
 LOCK TABLES `spell_learn_spell` WRITE;
 /*!40000 ALTER TABLE `spell_learn_spell` DISABLE KEYS */;
 INSERT INTO `spell_learn_spell` VALUES
-(71,355),
-(71,7386),
+(2842,8681),
 (5784,33388), 
 (13819,33388), 
 (17002,24867),
