@@ -274,16 +274,20 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
     switch (m_spellInfo->DmgClass)
     {
         case SPELL_DAMAGE_CLASS_MELEE:
-            if (m_spellInfo->AttributesEx3 & 0x1000000) m_attackType = OFF_ATTACK;
-            else                                        m_attackType = BASE_ATTACK;
+            if (m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_REQ_OFFHAND)
+                m_attackType = OFF_ATTACK;
+            else
+                m_attackType = BASE_ATTACK;
             break;
         case SPELL_DAMAGE_CLASS_RANGED:
             m_attackType = RANGED_ATTACK;
             break;
         default:
                                                             // Wands
-            if (m_spellInfo->Id == 5019) m_attackType = RANGED_ATTACK;
-            else                         m_attackType = BASE_ATTACK;
+            if (m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_REQ_WAND) 
+                m_attackType = RANGED_ATTACK;
+            else
+                m_attackType = BASE_ATTACK;
             break;
     }
 
@@ -3029,7 +3033,7 @@ uint8 Spell::CanCast(bool strict)
         if(uint8 shapeError = GetErrorAtShapeshiftedCast(m_spellInfo, m_caster->m_form))
             return shapeError;
 
-        if ((m_spellInfo->Attributes & 0x20000) && !(m_caster->HasStealthAura()))
+        if ((m_spellInfo->Attributes & SPELL_ATTR_ONLY_STEALTHED) && !(m_caster->HasStealthAura()))
             return SPELL_FAILED_ONLY_STEALTHED;
     }
 
@@ -3144,13 +3148,13 @@ uint8 Spell::CanCast(bool strict)
         }
 
         // check if target is in combat
-        if (target != m_caster && m_spellInfo->AttributesEx & 0x100 && target->isInCombat())
+        if (target != m_caster && (m_spellInfo->AttributesEx & SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET) && target->isInCombat())
         {
             return SPELL_FAILED_TARGET_AFFECTING_COMBAT;
         }
     }
     // Spell casted only on battleground
-    if((m_spellInfo->AttributesEx3 & 0x800) &&  m_caster->GetTypeId()==TYPEID_PLAYER)
+    if((m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_BATTLEGROUND) &&  m_caster->GetTypeId()==TYPEID_PLAYER)
     {
         if (((Player*)m_caster)->InBattleGround() == false)
             return SPELL_FAILED_ONLY_BATTLEGROUNDS;
@@ -4095,7 +4099,7 @@ int32 Spell::CalculatePowerCost()
     // Flat mod from caster auras by spell school
     powerCost += m_caster->GetInt32Value(UNIT_FIELD_POWER_COST_MODIFIER + school);
     // Shiv - costs 20 + weaponSpeed*10 energy (apply only to non-triggered spell with energy cost)
-    if ( m_spellInfo->manaCost > 0 && m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellIconID == 1834 )
+    if ( m_spellInfo->AttributesEx4 & SPELL_ATTR_EX4_SPELL_VS_EXTEND_COST )
         powerCost += m_caster->GetAttackTime(OFF_ATTACK)/100;
     // Apply cost mod by spell
     if(Player* modOwner = m_caster->GetSpellModOwner())
@@ -4328,7 +4332,7 @@ uint8 Spell::CheckItems()
                     if(!pEnchant)
                         return SPELL_FAILED_ERROR;
                     if (pEnchant->slot & ENCHANTMENT_CAN_SOULBOUND)
-                        return SPELL_FAILED_ITEM_NOT_FOUND;
+                        return SPELL_FAILED_NOT_TRADEABLE;
                 }
                 break;
             }
@@ -4345,7 +4349,7 @@ uint8 Spell::CheckItems()
                     if(!pEnchant)
                         return SPELL_FAILED_ERROR;
                     if (pEnchant->slot & ENCHANTMENT_CAN_SOULBOUND)
-                        return SPELL_FAILED_ITEM_NOT_FOUND;
+                        return SPELL_FAILED_NOT_TRADEABLE;
                 }
                 break;
             }

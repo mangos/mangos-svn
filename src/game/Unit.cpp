@@ -2142,7 +2142,7 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
     float block_chance, parry_chance, dodge_chance;
 
     // cannot be dodged/parried/blocked
-    if(spellInfo->Attributes & 0x200000)
+    if(spellInfo->Attributes & SPELL_ATTR_UMPOSSIBLE_DODGE_PARRY_BLOCK)
     {
         block_chance = 0.0f;
         parry_chance = 0.0f;
@@ -2517,7 +2517,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
         return SPELL_MISS_MISS;
 
     // Same spells cannot be parry/dodge
-    if (spell->Attributes & 0x200000)
+    if (spell->Attributes & SPELL_ATTR_UMPOSSIBLE_DODGE_PARRY_BLOCK)
         return SPELL_MISS_NONE;
 
     // Ranged attack can`t miss too
@@ -3827,7 +3827,7 @@ bool Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster)
                 if (!(*i).second->IsPositive())
                     positive = false;
                 else
-                    positive = (spellInfo->AttributesEx & (1<<7))==0;
+                    positive = (spellInfo->AttributesEx & SPELL_ATTR_EX_NEGATIVE)==0;
 
                 // do not remove positive auras if friendly target
                 //               negative auras if non-friendly target
@@ -7202,7 +7202,7 @@ int32 Unit::SpellBaseDamageBonusForVictim(int32 SchoolMask, Unit *pVictim)
 bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType)
 {
     // not criting spell
-    if((spellProto->AttributesEx2 & 0x20000000LL))
+    if((spellProto->AttributesEx2 & SPELL_ATTR_EX2_CANT_CRIT))
         return false;
 
     float crit_chance = 0.0f;
@@ -7603,7 +7603,7 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, bool useCharges)
         if(itr->type == spellInfo->Dispel)
             return true;
 
-    if( !(spellInfo->AttributesEx & 0x10000))               // unaffected by school immunity
+    if( !(spellInfo->AttributesEx & SPELL_ATTR_EX_UNAFFECTED_BY_SCHOOL_IMMUNE))               // unaffected by school immunity
     {
         // not have spells with charges currently
         SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];

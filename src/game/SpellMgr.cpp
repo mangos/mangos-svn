@@ -63,7 +63,7 @@ bool IsPassiveSpell(uint32 spellId)
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo)
         return false;
-    return (spellInfo->Attributes & (1<<6)) != 0;
+    return (spellInfo->Attributes & SPELL_ATTR_PASSIVE) != 0;
 }
 
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2)
@@ -542,7 +542,7 @@ uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form)
 
     if(actAsShifted)
     {
-        if (spellInfo->Attributes & 0x10000)                // not while shapeshifted
+        if (spellInfo->Attributes & SPELL_ATTR_NOT_SHAPESHIFT) // not while shapeshifted
             return SPELL_FAILED_NOT_SHAPESHIFT;
         else if (spellInfo->Stances != 0)                   // needs other shapeshift
             return SPELL_FAILED_ONLY_SHAPESHIFT;
@@ -550,7 +550,7 @@ uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form)
     else
     {
         // needs shapeshift
-        if(!(spellInfo->AttributesEx2 & 0x80000) && spellInfo->Stances != 0)
+        if(!(spellInfo->AttributesEx2 & SPELL_ATTR_EX2_ONLY_SHAPESHIFT) && spellInfo->Stances != 0)
             return SPELL_FAILED_ONLY_SHAPESHIFT;
     }
 

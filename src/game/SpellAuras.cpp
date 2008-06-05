@@ -3562,8 +3562,8 @@ void Aura::HandleModMechanicImmunity(bool apply, bool Real)
             next = iter;
             ++next;
             SpellEntry const *spell = iter->second->GetSpellProto();
-            if (!( spell->Attributes & 0x20000000)          //spells unaffected by invulnerability
-                && !iter->second->IsPositive()              //only remove negative spells
+            if (!( spell->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)  // spells unaffected by invulnerability
+                && !iter->second->IsPositive()                                    // only remove negative spells
                 && spell->Id != GetId())
             {
                 //check for mechanic mask
@@ -3661,7 +3661,7 @@ void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
                 ++next;
                 SpellEntry const *spell = iter->second->GetSpellProto();
                 if((GetSpellSchoolMask(spell) & school_mask)//Check for school mask
-                    && !( spell->Attributes & 0x20000000)   //Spells unaffected by invulnerability
+                    && !( spell->Attributes & SPELL_ATTR_UNAFFECTED_BY_INVULNERABILITY)   //Spells unaffected by invulnerability
                     && !iter->second->IsPositive()          //Don't remove positive spells
                     && spell->Id != GetId() )               //Don't remove self
                 {
