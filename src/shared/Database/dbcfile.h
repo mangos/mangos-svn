@@ -19,6 +19,7 @@
 #ifndef DBCFILE_H
 #define DBCFILE_H
 #include "Platform/Define.h"
+#include "Utilities/ByteConverter.h"
 #include <cassert>
 
 enum
@@ -48,12 +49,16 @@ class DBCFile
                 float getFloat(size_t field) const
                 {
                     assert(field < file.fieldCount);
-                    return *reinterpret_cast<float*>(offset+file.GetOffset(field));
+                    float val = *reinterpret_cast<float*>(offset+file.GetOffset(field));
+                    EndianConvert(val);
+                    return val;
                 }
                 uint32 getUInt(size_t field) const
                 {
                     assert(field < file.fieldCount);
-                    return *reinterpret_cast<uint32*>(offset+file.GetOffset(field));
+                    uint32 val = *reinterpret_cast<uint32*>(offset+file.GetOffset(field));
+                    EndianConvert(val);
+                    return val;
                 }
                 uint8 getUInt8(size_t field) const
                 {

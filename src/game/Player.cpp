@@ -13414,13 +13414,13 @@ void Player::_LoadMailedItems(Mail *mail)
 
         if(!proto)
         {
-            sLog.outError( "Player %u have unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail, skipped.", GetGUIDLow(), item_guid_low, item_template);
+            sLog.outError( "Player %u have unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail (%u), skipped.", GetGUIDLow(), item_guid_low, item_template,mail->messageID);
             continue;
         }
         Item *item = NewItemOrBag(proto);
         if(!item->LoadFromDB(item_guid_low, 0))
         {
-            sLog.outError( "Player::_LoadMailedItems - Mailed Item doesn't exist!!!! - item guid: %u", item_guid_low);
+            sLog.outError( "Player::_LoadMailedItems - Item in mail (%u) doesn't exist !!!! - item guid: %u", mail->messageID, item_guid_low);
             delete item;
             continue;
         }

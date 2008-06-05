@@ -1821,7 +1821,7 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
     }
 
     // calculate cast time (calculated after first CanCast check to prevent charge counting for first CanCast fail)
-    m_casttime = GetSpellCastTime(sCastTimesStore.LookupEntry(m_spellInfo->CastingTimeIndex));
+    m_casttime = GetSpellCastTime(sSpellCastTimesStore.LookupEntry(m_spellInfo->CastingTimeIndex));
 
     if(Player* modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_CASTING_TIME, m_casttime,this);

@@ -23,6 +23,9 @@
     for cross platform where they have different endians.
  */
 
+#include<Platform/Define.h>
+#include<algorithm>
+
 namespace ByteConverter
 {
     template<size_t T>
@@ -41,7 +44,7 @@ namespace ByteConverter
     }
 }
 
-#ifdef __BIG_ENDIAN
+#if MANGOS_ENDIAN == MANGOS_BIGENDIAN
 template<typename T> inline void EndianConvert(T& val) { ByteConverter::apply<T>(&val); }
 #else
 template<typename T> inline void EndianConvert(T& val) { }

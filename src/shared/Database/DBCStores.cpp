@@ -90,7 +90,7 @@ DBCStorage <SpellEntry> sSpellStore(SpellEntryfmt);
 SpellCategoryStore sSpellCategoryStore;
 PetFamilySpellsStore sPetFamilySpellsStore;
 
-DBCStorage <SpellCastTimesEntry> sCastTimesStore(SpellCastTimefmt);
+DBCStorage <SpellCastTimesEntry> sSpellCastTimesStore(SpellCastTimefmt);
 DBCStorage <SpellDurationEntry> sSpellDurationStore(SpellDurationfmt);
 DBCStorage <SpellFocusObjectEntry> sSpellFocusObjectStore(SpellFocusObjectfmt);
 DBCStorage <SpellRadiusEntry> sSpellRadiusStore(SpellRadiusfmt);
@@ -258,6 +258,12 @@ void LoadDBCStores(std::string dataPath)
         SpellEntry const * spell = sSpellStore.LookupEntry(i);
         if(spell && spell->Category)
             sSpellCategoryStore[spell->Category].insert(i);
+
+        // DBC not support uint64 fields but SpellEntry have SpellFamilyFlags mapped at 2 uint32 fields
+        // uint32 field already converted to bigendian if need, but must be swapped fro correct uint64 bigendian view
+        #if MANGOS_ENDIAN == MANGOS_BIGENDIAN
+        std::swap(*((uint32*)spell->SpellFamilyFlags),*(((uint32*)spell->SpellFamilyFlags)+1))
+        #endif
     }
 
     for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
@@ -285,7 +291,7 @@ void LoadDBCStores(std::string dataPath)
         }
     }
 
-    LoadDBC(bar,bad_dbc_files,sCastTimesStore,           dataPath+"dbc/SpellCastTimes.dbc");
+    LoadDBC(bar,bad_dbc_files,sSpellCastTimesStore,      dataPath+"dbc/SpellCastTimes.dbc");
     LoadDBC(bar,bad_dbc_files,sSpellDurationStore,       dataPath+"dbc/SpellDuration.dbc");
     LoadDBC(bar,bad_dbc_files,sSpellFocusObjectStore,    dataPath+"dbc/SpellFocusObject.dbc");
     LoadDBC(bar,bad_dbc_files,sSpellItemEnchantmentStore,dataPath+"dbc/SpellItemEnchantment.dbc");
