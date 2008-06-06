@@ -431,80 +431,36 @@ bool IsPositiveSpell(uint32 spellId)
 
 bool IsSingleTargetSpell(SpellEntry const *spellInfo)
 {
-    // cheap shot is an exception
-    if ( spellInfo->Id == 1833 || spellInfo->Id == 14902 )
-        return false;
-
-    // hunter's mark and similar
-    if(spellInfo->SpellVisual == 3239)
+    // all other single target spells have if it has AttributesEx5
+    if ( spellInfo->AttributesEx5 & SPELL_ATTR_EX5_SINGLE_TARGET_SPELL )
         return true;
 
-    // Slow
-    if(spellInfo->Id==31589)
-        return true;
-
-    // cannot be cast on another target while not cooled down anyway
-    int32 duration = GetSpellDuration(spellInfo);
-    if ( duration >= 0 && duration < int32(GetSpellRecoveryTime(spellInfo)))
-        return false;
-
-    // all other single target spells have if it has AttributesEx
-    if ( spellInfo->AttributesEx & (1<<18) )
-        return true;
-
-    // other single target
-    //Fear
-    if ((spellInfo->SpellIconID == 98 && spellInfo->SpellVisual == 336)
-        //Banish
-        || (spellInfo->SpellIconID == 96 && spellInfo->SpellVisual == 1305)
-        //Cyclone
-        || (spellInfo->SpellIconID == 174 && spellInfo->SpellVisual == 8206))
-        return true;
-
-    // spell with single target specific types
+    // TODO - need found Judgements rule
     switch(GetSpellSpecific(spellInfo->Id))
     {
-        case SPELL_TRACKER:
-        case SPELL_ELEMENTAL_SHIELD:
-        case SPELL_MAGE_POLYMORPH:
         case SPELL_JUDGEMENT:
             return true;
     }
 
-    // all other single target spells have if it has Attributes
-    //if ( spellInfo->Attributes & (1<<30) ) return true;
     return false;
 }
 
 bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellInfo2)
 {
 
-    // similar spell
-    // FIX ME: this is not very good check for this
-    if( spellInfo1->Category       == spellInfo2->Category     &&
-        spellInfo1->SpellIconID    == spellInfo2->SpellIconID  &&
-        spellInfo1->SpellVisual    == spellInfo2->SpellVisual  &&
-        spellInfo1->Attributes     == spellInfo2->Attributes   &&
-        spellInfo1->AttributesEx   == spellInfo2->AttributesEx &&
-        spellInfo1->AttributesEx4 == spellInfo2->AttributesEx4 )
+    // TODO - need better check
+    // Equal icon and spellfamily
+    if( spellInfo1->SpellFamilyName == spellInfo2->SpellFamilyName &&
+        spellInfo1->SpellIconID == spellInfo2->SpellIconID )
         return true;
 
-    // base at spell specific
+    // TODO - need found Judgements rule
     SpellSpecific spec1 = GetSpellSpecific(spellInfo1->Id);
     // spell with single target specific types
     switch(spec1)
     {
-        case SPELL_TRACKER:
-        case SPELL_MAGE_POLYMORPH:
         case SPELL_JUDGEMENT:
             if(GetSpellSpecific(spellInfo2->Id) == spec1)
-                return true;
-            break;
-        case SPELL_ELEMENTAL_SHIELD:
-            // only Earth shield
-            if( IsElementalShield(spellInfo2) &&
-                spellInfo1->SpellFamilyFlags & 0x40000000000LL &&
-                spellInfo2->SpellFamilyFlags & 0x40000000000LL )
                 return true;
             break;
     }
