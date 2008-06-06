@@ -90,12 +90,9 @@ void BattleGroundEY::Update(time_t diff)
             PlaySoundToAll(SOUND_BG_START);
             SetStatus(STATUS_IN_PROGRESS);
 
-            for(std::map<uint64, BattleGroundPlayer>::const_iterator itr = GetPlayers()->begin(); itr != GetPlayers()->end(); ++itr)
-            {
-                Player *plr = objmgr.GetPlayer(itr->first);
-                if(plr)
+            for(BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+                if(Player *plr = objmgr.GetPlayer(itr->first))
                     plr->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
-            }
         }
     }
     else if(GetStatus() == STATUS_IN_PROGRESS)
