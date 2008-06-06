@@ -5221,7 +5221,8 @@ void Aura::PeriodicTick()
             if( GetSpellProto()->Effect[GetEffIndex()]==SPELL_EFFECT_PERSISTENT_AREA_AURA &&
                 pCaster->SpellHitResult(m_target,GetSpellProto(),false)!=SPELL_MISS_NONE)
                 return;
-
+            if(m_target->IsImmunedToSpellDamage(GetSpellProto()))
+                return;
             // some auras remove at specific health level or more
             if(m_modifier.m_auraname==SPELL_AURA_PERIODIC_DAMAGE)
             {
@@ -5320,6 +5321,8 @@ void Aura::PeriodicTick()
 
             if( GetSpellProto()->Effect[GetEffIndex()]==SPELL_EFFECT_PERSISTENT_AREA_AURA &&
                 pCaster->SpellHitResult(m_target,GetSpellProto(),false)!=SPELL_MISS_NONE)
+                return;
+            if(m_target->IsImmunedToSpellDamage(GetSpellProto()))
                 return;
 
             uint32 absorb=0;
@@ -5553,6 +5556,8 @@ void Aura::PeriodicTick()
             if( GetSpellProto()->Effect[GetEffIndex()]==SPELL_EFFECT_PERSISTENT_AREA_AURA &&
                 pCaster->SpellHitResult(m_target,GetSpellProto(),false)!=SPELL_MISS_NONE)
                 return;
+            if(m_target->IsImmunedToSpellDamage(GetSpellProto()))
+                return;
 
             // ignore non positive values (can be result apply spellmods to aura damage
             uint32 pdamage = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
@@ -5668,6 +5673,8 @@ void Aura::PeriodicTick()
         {
             Unit *pCaster = GetCaster();
             if(!pCaster)
+                return;
+            if(m_target->IsImmunedToSpellDamage(GetSpellProto()))
                 return;
 
             int32 pdamage = m_modifier.m_amount > 0 ? m_modifier.m_amount : 0;
