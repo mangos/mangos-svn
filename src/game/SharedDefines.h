@@ -218,7 +218,7 @@ enum ItemQualities
 #define SPELL_ATTR_UNK31                          0x80000000
 
 #define SPELL_ATTR_EX_UNK0                        0x00000001
-#define SPELL_ATTR_EX_UNK1                        0x00000002            // use all power
+#define SPELL_ATTR_EX_DRAIN_ALL_POWER             0x00000002            // use all power (Only paladin Lay of Hands and Bunyanize)
 #define SPELL_ATTR_EX_UNK2                        0x00000004            // channeled 1
 #define SPELL_ATTR_EX_UNK3                        0x00000008
 #define SPELL_ATTR_EX_UNK4                        0x00000010
@@ -354,7 +354,7 @@ enum ItemQualities
 #define SPELL_ATTR_EX5_UNK2                       0x00000004
 #define SPELL_ATTR_EX5_UNK3                       0x00000008            // usable while stunned
 #define SPELL_ATTR_EX5_UNK4                       0x00000010
-#define SPELL_ATTR_EX5_UNK5                       0x00000020
+#define SPELL_ATTR_EX5_SINGLE_TARGET_SPELL        0x00000020            // Only one target can be apply at a time
 #define SPELL_ATTR_EX5_UNK6                       0x00000040
 #define SPELL_ATTR_EX5_UNK7                       0x00000080
 #define SPELL_ATTR_EX5_UNK8                       0x00000100

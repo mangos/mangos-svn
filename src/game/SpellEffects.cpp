@@ -3806,9 +3806,6 @@ void Spell::EffectHealMaxHealth(uint32 /*i*/)
 
     uint32 heal = m_caster->GetMaxHealth();
 
-    if(m_spellInfo->SpellVisual == 132)                     // drain all caster's mana
-        m_caster->SetPower(POWER_MANA, 0);
-
     int32 gain = unitTarget->ModifyHealth(heal);
     unitTarget->getHostilRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
 
