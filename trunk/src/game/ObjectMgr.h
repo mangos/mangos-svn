@@ -375,6 +375,7 @@ class ObjectMgr
             QuestMap::const_iterator itr = mQuestTemplates.find(quest_id);
             return itr != mQuestTemplates.end() ? itr->second : NULL;
         }
+        QuestMap const& GetQuestTemplates() const { return mQuestTemplates; }
 
         uint32 GetQuestForAreaTrigger(uint32 Trigger_ID) const
         {
@@ -434,8 +435,6 @@ class ObjectMgr
                 return &itr->second;
             return NULL;
         }
-
-        QuestMap const& GetQuestTemplates() const { return mQuestTemplates; }
 
         void LoadGuilds();
         void LoadArenaTeams();

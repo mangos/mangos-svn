@@ -122,14 +122,18 @@ typedef std::map<uint32, QuestItemList *> QuestItemMap;
 typedef std::vector<LootStoreItem> LootStoreItemList;
 typedef HM_NAMESPACE::hash_map<uint32, LootTemplate*> LootTemplateMap;
 
+typedef std::set<uint32> LootIdSet;
+
 class LootStore
 {
     public:
         explicit LootStore(char const* name) : m_name(name) {}
         virtual ~LootStore() { Clear(); }
 
-        void LoadLootTable();
         void Verify() const;
+
+        void LoadAndCollectLootIds(LootIdSet& set);
+        void RemoveLootRefsAndReport(LootIdSet& set, char const* keyname) const;
 
         bool HaveLootFor(uint32 loot_id) const { return m_LootTemplates.find(loot_id) != m_LootTemplates.end(); }
         bool HaveQuestLootFor(uint32 loot_id) const;
@@ -139,6 +143,7 @@ class LootStore
 
         char const* GetName() const { return m_name; }
     protected:
+        void LoadLootTable();
         void Clear();
     private:
         LootTemplateMap m_LootTemplates;
@@ -163,6 +168,7 @@ class LootTemplate
 
         // Checks integrity of the template
         void Verify(LootStore const& store, uint32 Id) const;
+        void RemoveLootRefs(LootTemplateMap const& store, LootIdSet& set) const;
     private:
         LootStoreItemList Entries;                          // not grouped only
         LootGroups        Groups;                           // groups have own (optimised) processing, grouped entries go there
@@ -291,7 +297,28 @@ extern LootStore LootTemplates_Disenchant;
 extern LootStore LootTemplates_Prospecting;
 extern LootStore LootTemplates_QuestMail;
 
-void LoadLootTables();
+void LoadLootTemplates_Creature();
+void LoadLootTemplates_Fishing();
+void LoadLootTemplates_Gameobject();
+void LoadLootTemplates_Item();
+void LoadLootTemplates_Pickpocketing();
+void LoadLootTemplates_Skinning();
+void LoadLootTemplates_Disenchant();
+void LoadLootTemplates_Prospecting();
+void LoadLootTemplates_QuestMail();
+
+inline void LoadLootTables()
+{
+    LoadLootTemplates_Creature();
+    LoadLootTemplates_Fishing();
+    LoadLootTemplates_Gameobject();
+    LoadLootTemplates_Item();
+    LoadLootTemplates_Pickpocketing();
+    LoadLootTemplates_Skinning();
+    LoadLootTemplates_Disenchant();
+    LoadLootTemplates_Prospecting();
+    LoadLootTemplates_QuestMail();
+}
 
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li);
 ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);
