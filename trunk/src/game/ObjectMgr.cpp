@@ -2414,10 +2414,12 @@ void ObjectMgr::LoadQuests()
         "RewItemId1, RewItemId2, RewItemId3, RewItemId4, RewItemCount1, RewItemCount2, RewItemCount3, RewItemCount4,"
     //   88              89              90              91              92              93            94            95            96            97
         "RewRepFaction1, RewRepFaction2, RewRepFaction3, RewRepFaction4, RewRepFaction5, RewRepValue1, RewRepValue2, RewRepValue3, RewRepValue4, RewRepValue5,"
-    //   98             99                100       101           102         103     104     105       106            107            108            109
-        "RewOrReqMoney, RewMoneyMaxLevel, RewSpell, RewSpellCast, PointMapId, PointX, PointY, PointOpt, DetailsEmote1, DetailsEmote2, DetailsEmote3, DetailsEmote4,"
-    //   110              111            112                113                114                115                116          117
-        "IncompleteEmote, CompleteEmote, OfferRewardEmote1, OfferRewardEmote2, OfferRewardEmote3, OfferRewardEmote4, StartScript, CompleteScript"
+    //   98             99                100       101           102                103               104         105     106     107
+        "RewOrReqMoney, RewMoneyMaxLevel, RewSpell, RewSpellCast, RewMailTemplateId, RewMailDelaySecs, PointMapId, PointX, PointY, PointOpt,"
+    //   108            109            110            111           112              113            114                115                116                117
+        "DetailsEmote1, DetailsEmote2, DetailsEmote3, DetailsEmote4,IncompleteEmote, CompleteEmote, OfferRewardEmote1, OfferRewardEmote2, OfferRewardEmote3, OfferRewardEmote4,"
+    //   118          119 
+        "StartScript, CompleteScript"
         " FROM quest_template");
     if(result == NULL)
     {
@@ -2945,6 +2947,17 @@ void ObjectMgr::LoadQuests()
                 qinfo->RewSpellCast = 0;                    // no spell will be casted on player
             }
 
+        }
+
+        if(qinfo->RewMailTemplateId)
+        {
+            if(!sMailTemplateStore.LookupEntry(qinfo->RewMailTemplateId))
+            {
+                sLog.outErrorDb("Quest %u has `RewMailTemplateId` = %u but mail template  %u does not exist, quest will not have a mail reward.",
+                    qinfo->GetQuestId(),qinfo->RewMailTemplateId,qinfo->RewMailTemplateId);
+                qinfo->RewMailTemplateId = 0;               // no mail will send to player
+                qinfo->RewMailDelaySecs = 0;                // no mail will send to player
+            }
         }
 
         if(qinfo->NextQuestInChain)
@@ -3798,7 +3811,8 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
     //delete all old mails without item and without body immediately, if starting server
     if (!serverUp)
         CharacterDatabase.PExecute("DELETE FROM mail WHERE expire_time < '" I64FMTD "' AND has_items = '0' AND itemTextId = 0", (uint64)basetime);
-    QueryResult* result = CharacterDatabase.PQuery("SELECT id,messageType,sender,receiver,itemTextId,has_items,expire_time,cod,checked FROM mail WHERE expire_time < '" I64FMTD "'", (uint64)basetime);
+    //                                                     0  1           2      3        4          5         6           7   8       9
+    QueryResult* result = CharacterDatabase.PQuery("SELECT id,messageType,sender,receiver,itemTextId,has_items,expire_time,cod,checked,mailTemplateId FROM mail WHERE expire_time < '" I64FMTD "'", (uint64)basetime);
     if ( !result )
         return;                                             // any mails need to be returned or deleted
     Field *fields;
@@ -3820,6 +3834,8 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
         m->deliver_time = 0;
         m->COD = fields[7].GetUInt32();
         m->checked = fields[8].GetUInt32();
+        m->mailTemplateId = fields[9].GetInt16();
+
         Player *pl = 0;
         if (serverUp)
             pl = objmgr.GetPlayer((uint64)m->receiver);
@@ -3863,10 +3879,10 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
                 continue;
             }
         }
+
         if (m->itemTextId)
-        {
             CharacterDatabase.PExecute("DELETE FROM item_text WHERE id = '%u'", m->itemTextId);
-        }
+
         //deletemail = true;
         //delmails << m->messageID << ", ";
         CharacterDatabase.PExecute("DELETE FROM mail WHERE id = '%u'", m->messageID);

@@ -257,6 +257,14 @@ bool ChatHandler::HandleReloadLootTemplatesProspectingCommand(const char*)
     return true;
 }
 
+bool ChatHandler::HandleReloadLootTemplatesQuestMailCommand(const char*)
+{
+    sLog.outString( "Re-Loading Loot Tables... (`quest_mail_loot_template`)" );
+    LootTemplates_QuestMail.LoadLootTable();
+    SendGlobalSysMessage("DB table `quest_mail_loot_template` reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadLootTemplatesSkinningCommand(const char*)
 {
     sLog.outString( "Re-Loading Loot Tables... (`skinning_loot_template`)" );

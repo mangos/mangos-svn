@@ -75,6 +75,7 @@ DBCStorage <ItemSetEntry> sItemSetStore(ItemSetEntryfmt);
 
 DBCStorage <LockEntry> sLockStore(LockEntryfmt);
 
+DBCStorage <MailTemplateEntry> sMailTemplateStore(MailTemplateEntryfmt);
 DBCStorage <MapEntry> sMapStore(MapEntryfmt);
 
 DBCStorage <QuestSortEntry> sQuestSortStore(QuestSortEntryfmt);
@@ -179,7 +180,7 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 53;
+    const uint32 DBCFilesCount = 54;
 
     barGoLink bar( DBCFilesCount );
 
@@ -247,6 +248,7 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sItemRandomSuffixStore,    dataPath+"dbc/ItemRandomSuffix.dbc");
     LoadDBC(bar,bad_dbc_files,sItemSetStore,             dataPath+"dbc/ItemSet.dbc");
     LoadDBC(bar,bad_dbc_files,sLockStore,                dataPath+"dbc/Lock.dbc");
+    LoadDBC(bar,bad_dbc_files,sMailTemplateStore,        dataPath+"dbc/MailTemplate.dbc");
     LoadDBC(bar,bad_dbc_files,sMapStore,                 dataPath+"dbc/Map.dbc");
     LoadDBC(bar,bad_dbc_files,sQuestSortStore,           dataPath+"dbc/QuestSort.dbc");
     LoadDBC(bar,bad_dbc_files,sRandomPropertiesPointsStore, dataPath+"dbc/RandPropPoints.dbc");

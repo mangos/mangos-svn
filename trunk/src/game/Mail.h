@@ -108,14 +108,7 @@ struct MailItem
     uint32 item_template;                                   // item entry
     Item *item;                                             // item pointer
 
-    void deleteItem()
-    {
-        if(item)
-        {
-            delete item;
-            item=NULL;
-        }
-    }
+    void deleteItem(bool inDB = false);
 };
 
 typedef std::map<uint32, MailItem> MailItemMap;
@@ -149,12 +142,12 @@ class MailItemsInfo
         uint8 size() const { return i_MailItemMap.size(); }
         bool empty() const { return i_MailItemMap.empty(); }
 
-        void deleteIncludedItems()
+        void deleteIncludedItems(bool inDB = false)
         {
             for(MailItemMap::iterator mailItemIter = begin(); mailItemIter != end(); ++mailItemIter)
             {
                 MailItem& mailItem = mailItemIter->second;
-                mailItem.deleteItem();
+                mailItem.deleteItem(inDB);
             }
         }
     private:
@@ -166,6 +159,7 @@ struct Mail
     uint32 messageID;
     uint8 messageType;
     uint8 stationery;
+    uint16 mailTemplateId;
     uint32 sender;
     uint32 receiver;
     std::string subject;

@@ -257,6 +257,7 @@ struct Loot
     // Inserts the item into the loot (called by LootTemplate processors)
     void AddItem(LootStoreItem const & item);
 
+    LootItem* LootItemInSlot(uint32 lootslot, Player* player, QuestItem** qitem = NULL, QuestItem** ffaitem = NULL, QuestItem** conditem = NULL);
     private:
         std::set<uint64> PlayersLooting;
         QuestItemMap PlayerQuestItems;
@@ -288,6 +289,7 @@ extern LootStore LootTemplates_Pickpocketing;
 extern LootStore LootTemplates_Skinning;
 extern LootStore LootTemplates_Disenchant;
 extern LootStore LootTemplates_Prospecting;
+extern LootStore LootTemplates_QuestMail;
 
 void LoadLootTables();
 

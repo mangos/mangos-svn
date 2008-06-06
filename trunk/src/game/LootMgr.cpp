@@ -33,6 +33,7 @@ LootStore LootTemplates_Item(         "item_loot_template");
 LootStore LootTemplates_Pickpocketing("pickpocketing_loot_template");
 LootStore LootTemplates_Skinning(     "skinning_loot_template");
 LootStore LootTemplates_Prospecting(  "prospecting_loot_template");
+LootStore LootTemplates_QuestMail(    "quest_mail_loot_template");
 
 class LootTemplate::LootGroup                               // A set of loot definitions for items (refs are not allowed)
 {
@@ -192,6 +193,7 @@ void LoadLootTables()
     LootTemplates_Pickpocketing.LoadLootTable();
     LootTemplates_Skinning.LoadLootTable();
     LootTemplates_Prospecting.LoadLootTable();
+    LootTemplates_QuestMail.LoadLootTable();
 }
 
 //
@@ -535,6 +537,69 @@ void Loot::generateMoneyLoot( uint32 minAmount, uint32 maxAmount )
         else
             gold = uint32(urand(minAmount >> 8, maxAmount >> 8) * sWorld.getRate(RATE_DROP_MONEY)) << 8;
     }
+}
+
+LootItem* Loot::LootItemInSlot(uint32 lootSlot, Player* player, QuestItem **qitem, QuestItem **ffaitem, QuestItem **conditem)
+{
+    LootItem* item = NULL;
+    bool is_looted = true;
+    if (lootSlot >= items.size())
+    {
+        lootSlot -= items.size();
+        QuestItemMap::const_iterator itr = PlayerQuestItems.find(player->GetGUIDLow());
+        if (itr != PlayerQuestItems.end() && lootSlot < itr->second->size())
+        {
+            QuestItem *qitem2 = &itr->second->at(lootSlot);
+            if(qitem)
+                *qitem = qitem2;
+            item = &quest_items[qitem2->index];
+            is_looted = qitem2->is_looted;
+        }
+    }
+    else
+    {
+        item = &items[lootSlot];
+        is_looted = item->is_looted;
+        if(item->freeforall)
+        {
+            QuestItemMap::const_iterator itr = PlayerFFAItems.find(player->GetGUIDLow());
+            if (itr != PlayerFFAItems.end())
+            {
+                for(QuestItemList::iterator iter=itr->second->begin(); iter!= itr->second->end(); ++iter)
+                    if(iter->index==lootSlot)
+                    {
+                        QuestItem *ffaitem2 = (QuestItem*)&(*iter);
+                        if(ffaitem)
+                            *ffaitem = ffaitem2;
+                        is_looted = ffaitem2->is_looted;
+                        break;
+                    }
+            }
+        }
+        else if(item->conditionId)
+        {
+            QuestItemMap::const_iterator itr = PlayerNonQuestNonFFAConditionalItems.find(player->GetGUIDLow());
+            if (itr != PlayerNonQuestNonFFAConditionalItems.end())
+            {
+                for(QuestItemList::iterator iter=itr->second->begin(); iter!= itr->second->end(); ++iter)
+                {
+                    if(iter->index==lootSlot)
+                    {
+                        QuestItem *conditem2 = (QuestItem*)&(*iter);
+                        if(conditem)
+                            *conditem = conditem2;
+                        is_looted = conditem2->is_looted;
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
+    if(is_looted)
+        return NULL;
+
+    return item;
 }
 
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li)
