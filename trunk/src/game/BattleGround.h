@@ -281,7 +281,8 @@ class BattleGround
         bool isBattleGround() const { return !m_IsArena; }
         bool isRated() const        { return m_IsRated; }
 
-        std::map<uint64, BattleGroundPlayer> *GetPlayers() { return &m_Players; }
+        typedef std::map<uint64, BattleGroundPlayer> BattleGroundPlayerMap;
+        BattleGroundPlayerMap const& GetPlayers() const { return m_Players; }
         uint32 GetPlayersSize() const { return m_Players.size(); }
         uint32 GetRemovedPlayersSize() const { return m_RemovedPlayers.size(); }
 
@@ -400,7 +401,7 @@ class BattleGround
         virtual void RemovePlayer(Player * /*player*/, uint64 /*guid*/) {}
 
         /* Player lists, those need to be accessible by inherited classes */
-        std::map<uint64, BattleGroundPlayer>    m_Players;
+        BattleGroundPlayerMap  m_Players;
                                                             // Spirit Guide guid + Player list GUIDS
         std::map<uint64, std::vector<uint64> >  m_ReviveQueue;
 

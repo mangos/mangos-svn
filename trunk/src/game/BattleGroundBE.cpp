@@ -83,12 +83,9 @@ void BattleGroundBE::Update(time_t diff)
             SetStatus(STATUS_IN_PROGRESS);
             SetStartDelayTime(0);
 
-            for(std::map<uint64, BattleGroundPlayer>::const_iterator itr = GetPlayers()->begin(); itr != GetPlayers()->end(); ++itr)
-            {
-                Player *plr = objmgr.GetPlayer(itr->first);
-                if(plr)
+            for(BattleGroundPlayerMap::const_iterator itr = GetPlayers().begin(); itr != GetPlayers().end(); ++itr)
+                if(Player *plr = objmgr.GetPlayer(itr->first))
                     plr->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
-            }
         }
     }
 

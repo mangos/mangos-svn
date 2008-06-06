@@ -4323,7 +4323,7 @@ void Spell::EffectDuel(uint32 i)
     }
 
     AreaTableEntry const* targetAreaEntry = GetAreaEntryByAreaID(target->GetZoneId());
-    if(targetAreaEntry&& (targetAreaEntry->flags & AREA_FLAG_CAPITAL) )
+    if(targetAreaEntry && (targetAreaEntry->flags & AREA_FLAG_CAPITAL) )
     {
         SendCastResult(SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
         return;
