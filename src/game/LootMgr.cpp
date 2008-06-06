@@ -47,6 +47,8 @@ class LootTemplate::LootGroup                               // A set of loot def
         float TotalChance() const;                          // Overall chance for the group
 
         void Verify(LootStore const& lootstore, uint32 id, uint32 group_id) const;
+        void CollectLootIds(LootIdSet& set) const;
+        void RemoveLootRefs(LootTemplateMap const& store, LootIdSet& set) const;
     private:
         LootStoreItemList ExplicitlyChanced;                // Entries with chances defined in DB
         LootStoreItemList EqualChanced;                     // Zero chances - every entry takes the same chance
@@ -183,17 +185,22 @@ LootTemplate const* LootStore::GetLootFor(uint32 loot_id) const
     return tab->second;
 }
 
-void LoadLootTables()
+void LootStore::LoadAndCollectLootIds(LootIdSet& set)
 {
-    LootTemplates_Creature.LoadLootTable();
-    LootTemplates_Disenchant.LoadLootTable();
-    LootTemplates_Fishing.LoadLootTable();
-    LootTemplates_Gameobject.LoadLootTable();
-    LootTemplates_Item.LoadLootTable();
-    LootTemplates_Pickpocketing.LoadLootTable();
-    LootTemplates_Skinning.LoadLootTable();
-    LootTemplates_Prospecting.LoadLootTable();
-    LootTemplates_QuestMail.LoadLootTable();
+    LoadLootTable();
+
+    for(LootTemplateMap::const_iterator tab = m_LootTemplates.begin(); tab != m_LootTemplates.end(); ++tab)
+        set.insert(tab->first);
+}
+
+void LootStore::RemoveLootRefsAndReport(LootIdSet& set, char const* keyname) const
+{
+    for(LootTemplateMap::const_iterator ltItr = m_LootTemplates.begin(); !set.empty() && ltItr != m_LootTemplates.end(); ++ltItr)
+        ltItr->second->RemoveLootRefs(m_LootTemplates,set);
+
+    // all still listed ids isn't referenced
+    for(LootIdSet::const_iterator itr = set.begin(); itr != set.end(); ++itr)
+        sLog.outErrorDb("Table '%s' entry %d isn't %s and not referenced from loot, and then useless.", GetName(), *itr,keyname);
 }
 
 //
@@ -815,6 +822,19 @@ void LootTemplate::LootGroup::Verify(LootStore const& lootstore, uint32 id, uint
     }
 }
 
+void LootTemplate::LootGroup::RemoveLootRefs(LootTemplateMap const& store, LootIdSet& set) const
+{
+    for (LootStoreItemList::const_iterator ieItr=ExplicitlyChanced.begin(); ieItr != ExplicitlyChanced.end(); ++ieItr)
+        if(ieItr->mincountOrRef < 0)
+            if(store.find(-ieItr->mincountOrRef)!=store.end())
+                set.erase(-ieItr->mincountOrRef);
+
+    for (LootStoreItemList::const_iterator ieItr=EqualChanced.begin(); ieItr != EqualChanced.end(); ++ieItr)
+        if(ieItr->mincountOrRef < 0)
+            if(store.find(-ieItr->mincountOrRef)!=store.end())
+                set.erase(-ieItr->mincountOrRef);
+}
+
 //
 // --------- LootTemplate ---------
 //
@@ -942,4 +962,146 @@ void LootTemplate::Verify(LootStore const& lootstore, uint32 id) const
         Groups[i].Verify(lootstore,id,i+1);
 
     // TODO: References validity checks
+}
+
+void LootTemplate::RemoveLootRefs(LootTemplateMap const& store, LootIdSet& set) const
+{
+    for(LootStoreItemList::const_iterator ieItr = Entries.begin(); !set.empty() && ieItr != Entries.end(); ++ieItr)
+        if(ieItr->mincountOrRef < 0)
+            if(store.find(-ieItr->mincountOrRef)!=store.end())
+                set.erase(-ieItr->mincountOrRef);
+
+    for(LootGroups::const_iterator grItr = Groups.begin(); !set.empty() && grItr != Groups.end(); ++grItr)
+        grItr->RemoveLootRefs(store,set);
+}
+
+void LoadLootTemplates_Creature()
+{
+    LootIdSet set;
+    LootTemplates_Creature.LoadAndCollectLootIds(set);
+
+    // remove real entries
+    for(uint32 i = 1; i < sCreatureStorage.MaxEntry; ++i )
+        if(CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
+            if(uint32 lootid = cInfo->lootid)
+                set.erase(lootid);
+
+    // remove reference entries and output error for any still listed
+    LootTemplates_Creature.RemoveLootRefsAndReport(set,"creature entry");
+}
+
+void LoadLootTemplates_Disenchant()
+{
+    LootIdSet set;
+    LootTemplates_Disenchant.LoadAndCollectLootIds(set);
+
+    // remove real entries
+    for(uint32 i = 1; i < sItemStorage.MaxEntry; ++i )
+        if(ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype>(i))
+            if(uint32 lootid = proto->DisenchantID)
+                set.erase(lootid);
+
+    // remove reference entries and output error for any still listed
+    LootTemplates_Disenchant.RemoveLootRefsAndReport(set,"item disenchant id");
+}
+
+void LoadLootTemplates_Fishing()
+{
+    LootIdSet set;
+    LootTemplates_Fishing.LoadAndCollectLootIds(set);
+
+    // remove real entries
+    for(uint32 i = 1; i < sAreaStore.nCount; ++i )
+        if(AreaTableEntry const* areaEntry = sAreaStore.LookupEntry(i))
+            set.erase(areaEntry->ID);
+
+    // remove reference entries and output error for any still listed
+    LootTemplates_Fishing.RemoveLootRefsAndReport(set,"area id");
+}
+
+void LoadLootTemplates_Gameobject()
+{
+    LootIdSet set;
+    LootTemplates_Gameobject.LoadAndCollectLootIds(set);
+
+    // remove real entries
+    for(uint32 i = 1; i < sGOStorage.MaxEntry; ++i )
+        if(GameObjectInfo const* gInfo = sGOStorage.LookupEntry<GameObjectInfo>(i))
+            if(uint32 lootid = GameObject::GetLootId(gInfo))
+                set.erase(lootid);
+
+    // remove reference entries and output error for any still listed
+    LootTemplates_Gameobject.RemoveLootRefsAndReport(set,"gameobject entry");
+}
+
+void LoadLootTemplates_Item()
+{
+    LootIdSet set;
+    LootTemplates_Item.LoadAndCollectLootIds(set);
+
+    // remove real entries
+    for(uint32 i = 1; i < sItemStorage.MaxEntry; ++i )
+        if(ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype>(i))
+            set.erase(proto->ItemId);
+
+    // remove reference entries and output error for any still listed
+    LootTemplates_Item.RemoveLootRefsAndReport(set,"item entry");
+}
+
+void LoadLootTemplates_Pickpocketing()
+{
+    LootIdSet set;
+    LootTemplates_Pickpocketing.LoadAndCollectLootIds(set);
+
+    // remove real entries
+    for(uint32 i = 1; i < sCreatureStorage.MaxEntry; ++i )
+        if(CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
+            if(uint32 lootid = cInfo->pickpocketLootId)
+                set.erase(lootid);
+
+    // remove reference entries and output error for any still listed
+    LootTemplates_Pickpocketing.RemoveLootRefsAndReport(set,"creature pickpocket lootid");
+}
+
+void LoadLootTemplates_Prospecting()
+{
+    LootIdSet set;
+    LootTemplates_Prospecting.LoadAndCollectLootIds(set);
+
+    // remove real entries
+    for(uint32 i = 1; i < sItemStorage.MaxEntry; ++i )
+        if(ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype>(i))
+            set.erase(proto->ItemId);
+
+    // remove reference entries and output error for any still listed
+    LootTemplates_Prospecting.RemoveLootRefsAndReport(set,"item entry");
+}
+
+void LoadLootTemplates_QuestMail()
+{
+    LootIdSet set;
+    LootTemplates_QuestMail.LoadAndCollectLootIds(set);
+
+    // remove real entries
+    ObjectMgr::QuestMap const& questMap = objmgr.GetQuestTemplates();
+    for(ObjectMgr::QuestMap::const_iterator itr = questMap.begin(); itr != questMap.end(); ++itr )
+        set.erase(itr->first);
+
+    // remove reference entries and output error for any still listed
+    LootTemplates_QuestMail.RemoveLootRefsAndReport(set,"quest id");
+}
+
+void LoadLootTemplates_Skinning()
+{
+    LootIdSet set;
+    LootTemplates_Skinning.LoadAndCollectLootIds(set);
+
+    // remove real entries
+    for(uint32 i = 1; i < sCreatureStorage.MaxEntry; ++i )
+        if(CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
+            if(uint32 lootid = cInfo->SkinLootId)
+                set.erase(lootid);
+
+    // remove reference entries and output error for any still listed
+    LootTemplates_Skinning.RemoveLootRefsAndReport(set,"creature skinning id");
 }

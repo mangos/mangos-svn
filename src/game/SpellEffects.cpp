@@ -4309,9 +4309,21 @@ void Spell::EffectDuel(uint32 i)
 
     // Players can only fight a duel with each other outside (=not inside dungeons and not in capital cities)
     // Don't have to check the target's map since you cannot challenge someone across maps
-    if ((caster->GetMapId() != 0 && caster->GetMapId() != 1 && caster->GetMapId() != 530) ||
-        (GetAreaEntryByAreaID(caster->GetZoneId()) && (GetAreaEntryByAreaID(caster->GetZoneId())->flags & AREA_FLAG_CAPITAL) != 0) ||
-        (GetAreaEntryByAreaID(target->GetZoneId()) && (GetAreaEntryByAreaID(target->GetZoneId())->flags & AREA_FLAG_CAPITAL) != 0))
+    if( caster->GetMapId() != 0 && caster->GetMapId() != 1 && caster->GetMapId() != 530)
+    {
+        SendCastResult(SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
+        return;
+    }
+
+    AreaTableEntry const* casterAreaEntry = GetAreaEntryByAreaID(caster->GetZoneId());
+    if(casterAreaEntry && (casterAreaEntry->flags & AREA_FLAG_CAPITAL) )
+    {
+        SendCastResult(SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
+        return;
+    }
+
+    AreaTableEntry const* targetAreaEntry = GetAreaEntryByAreaID(target->GetZoneId());
+    if(targetAreaEntry&& (targetAreaEntry->flags & AREA_FLAG_CAPITAL) )
     {
         SendCastResult(SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
         return;
