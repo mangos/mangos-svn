@@ -406,6 +406,14 @@ struct LockEntry
                                                             // 19-32, not used
 };
 
+struct MailTemplateEntry
+{
+    uint32      ID;                                         // 0
+    //char*       subject[16];                              // 1-16
+                                                            // 17 name flags, unused
+    //char*       content[16];                              // 18-33
+};
+
 enum MapTypes
 {
     MAP_COMMON          = 0,

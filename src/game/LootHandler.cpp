@@ -84,60 +84,13 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         loot = &pCreature->loot;
     }
 
-    LootItem *item = NULL;
     QuestItem *qitem = NULL;
     QuestItem *ffaitem = NULL;
     QuestItem *conditem = NULL;
-    bool is_looted = true;
-    if (lootSlot >= loot->items.size())
-    {
-        lootSlot -= loot->items.size();
-        QuestItemMap const& lootPlayerQuestItems = loot->GetPlayerQuestItems();
-        QuestItemMap::const_iterator itr = lootPlayerQuestItems.find(player->GetGUIDLow());
-        if (itr != lootPlayerQuestItems.end() && lootSlot < itr->second->size())
-        {
-            qitem = &itr->second->at(lootSlot);
-            item = &loot->quest_items[qitem->index];
-            is_looted = qitem->is_looted;
-        }
-    }
-    else
-    {
-        item = &loot->items[lootSlot];
-        is_looted = item->is_looted;
-        if(item->freeforall)
-        {
-            QuestItemMap const& lootPlayerFFAItems = loot->GetPlayerFFAItems();
-            QuestItemMap::const_iterator itr = lootPlayerFFAItems.find(player->GetGUIDLow());
-            if (itr != lootPlayerFFAItems.end())
-            {
-                for(QuestItemList::iterator iter=itr->second->begin(); iter!= itr->second->end(); ++iter)
-                if(iter->index==lootSlot)
-                {
-                    ffaitem = (QuestItem*)&(*iter);
-                    is_looted = ffaitem->is_looted;
-                    break;
-                }
-            }
-        }
-        else if(item->conditionId)
-        {
-            QuestItemMap const& lootPlayerNonQuestNonFFAConditionalItems = loot->GetPlayerNonQuestNonFFAConditionalItems();
-            QuestItemMap::const_iterator itr = lootPlayerNonQuestNonFFAConditionalItems.find(player->GetGUIDLow());
-            if (itr != lootPlayerNonQuestNonFFAConditionalItems.end())
-            {
-                for(QuestItemList::iterator iter=itr->second->begin(); iter!= itr->second->end(); ++iter)
-                if(iter->index==lootSlot)
-                {
-                    conditem = (QuestItem*)&(*iter);
-                    is_looted = conditem->is_looted;
-                    break;
-                }
-            }
-        }
-    }
 
-    if ((item == NULL) || is_looted)
+    LootItem *item = loot->LootItemInSlot(lootSlot,player,&qitem,&ffaitem,&conditem);
+
+    if(!item)
     {
         player->SendEquipError( EQUIP_ERR_ALREADY_LOOTED, NULL, NULL );
         return;

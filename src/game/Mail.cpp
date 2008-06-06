@@ -27,6 +27,19 @@
 #include "Unit.h"
 #include "Language.h"
 
+void MailItem::deleteItem( bool inDB )
+{
+    if(item)
+    {
+        if(inDB)
+            CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid='%u'", item->GetGUIDLow());
+
+        delete item;
+        item=NULL;
+    }
+}
+
+
 void WorldSession::HandleSendMail(WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8+1+1+1+4+4+1+4+4+8+1);
@@ -324,56 +337,57 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
         }
     }
 
-    SendReturnToSender(MAIL_NORMAL, GetAccountId(), m->receiver, m->sender, m->subject, m->itemTextId, &mi, m->money, 0);
+    SendReturnToSender(MAIL_NORMAL, GetAccountId(), m->receiver, m->sender, m->subject, m->itemTextId, &mi, m->money, 0, m->mailTemplateId);
 
     delete m;                                               //we can deallocate old mail
     pl->SendMailResult(mailId, MAIL_RETURNED_TO_SENDER, 0);
 }
 
-void WorldSession::SendReturnToSender(uint8 messageType, uint32 sender_acc, uint32 sender_guid, uint32 receiver_guid, std::string subject, uint32 itemTextId, MailItemsInfo *mi, uint32 money, uint32 COD)
+void WorldSession::SendReturnToSender(uint8 messageType, uint32 sender_acc, uint32 sender_guid, uint32 receiver_guid, std::string subject, uint32 itemTextId, MailItemsInfo *mi, uint32 money, uint32 COD, uint16 mailTemplateId )
 {
+    if(messageType != MAIL_NORMAL)                          // return only to players
+    {
+        mi->deleteIncludedItems(true);
+        return;
+    }
+
     Player *receiver = objmgr.GetPlayer(MAKE_NEW_GUID(receiver_guid, 0, HIGHGUID_PLAYER));
 
     uint32 rc_account = 0;
     if(!receiver)
         rc_account = objmgr.GetPlayerAccountIdByGUID(MAKE_NEW_GUID(receiver_guid, 0, HIGHGUID_PLAYER));
 
-    if(receiver || rc_account)
+    if(!receiver && !rc_account)                            // sender not exist
     {
-        bool needItemDelay = false;
-
-        if(mi && !mi->empty())
-        {
-            // if item send to character at another account, then apply item delivery delay
-            needItemDelay = sender_acc != rc_account;
-
-            // set owner to new receiver (to prevent delete item with sender char deleting)
-            CharacterDatabase.BeginTransaction();
-            for(MailItemMap::iterator mailItemIter = mi->begin(); mailItemIter != mi->end(); ++mailItemIter)
-            {
-                MailItem& mailItem = mailItemIter->second;
-                mailItem.item->SaveToDB();                  // item not in inventory and can be save standalone
-                // owner in data will set at mail receive and item extracting
-                CharacterDatabase.PExecute("UPDATE item_instance SET owner_guid = '%u' WHERE guid='%u'", receiver_guid, mailItem.item->GetGUIDLow());
-            }
-            CharacterDatabase.CommitTransaction();
-        }
-
-        // If theres is an item, there is a one hour delivery delay.
-        uint32 deliver_delay = needItemDelay ? sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY) : 0;
-
-        // will delete item or place to receiver mail list
-        WorldSession::SendMailTo(receiver, MAIL_NORMAL, MAIL_STATIONERY_NORMAL, sender_guid, receiver_guid, subject, itemTextId, mi, money, 0, RETURNED_CHECKED,deliver_delay);
+        mi->deleteIncludedItems(true);
+        return;
     }
-    else if(mi)
+
+    // preper mail and send in other case
+    bool needItemDelay = false;
+
+    if(mi && !mi->empty())
     {
+        // if item send to character at another account, then apply item delivery delay
+        needItemDelay = sender_acc != rc_account;
+
+        // set owner to new receiver (to prevent delete item with sender char deleting)
+        CharacterDatabase.BeginTransaction();
         for(MailItemMap::iterator mailItemIter = mi->begin(); mailItemIter != mi->end(); ++mailItemIter)
         {
             MailItem& mailItem = mailItemIter->second;
-            CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid='%u'", mailItem.item->GetGUIDLow());
-            mailItem.deleteItem();
+            mailItem.item->SaveToDB();                  // item not in inventory and can be save standalone
+            // owner in data will set at mail receive and item extracting
+            CharacterDatabase.PExecute("UPDATE item_instance SET owner_guid = '%u' WHERE guid='%u'", receiver_guid, mailItem.item->GetGUIDLow());
         }
+        CharacterDatabase.CommitTransaction();
     }
+
+    // If theres is an item, there is a one hour delivery delay.
+    uint32 deliver_delay = needItemDelay ? sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY) : 0;
+
+    // will delete item or place to receiver mail list
+    WorldSession::SendMailTo(receiver, MAIL_NORMAL, MAIL_STATIONERY_NORMAL, sender_guid, receiver_guid, subject, itemTextId, mi, money, 0, RETURNED_CHECKED,deliver_delay,mailTemplateId);
 }
 
 //called when player takes item attached in mail
@@ -566,7 +580,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << (uint32) 0x04;                              // unknown, 0x4 - auction, 0x10 - normal
                                                             // Time
         data << (float)  ((*itr)->expire_time-time(NULL))/DAY;
-        data << (uint32) 0;                                 // unk
+        data << (uint32) (*itr)->mailTemplateId;            // mail template (MailTemplate.dbc)
         data << (*itr)->subject;                            // Subject string - once 00, when mail type = 3
 
         data << (uint8) item_count;
@@ -739,13 +753,19 @@ void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & /*recv_data*/ )
     SendPacket(&data);
 }
 
-void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 stationery, uint32 sender_guidlow_or_entry, uint32 receiver_guidlow, std::string subject, uint32 itemTextId, MailItemsInfo* mi, uint32 money, uint32 COD, uint32 checked, uint32 deliver_delay)
+void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 stationery, uint32 sender_guidlow_or_entry, uint32 receiver_guidlow, std::string subject, uint32 itemTextId, MailItemsInfo* mi, uint32 money, uint32 COD, uint32 checked, uint32 deliver_delay, uint16 mailTemplateId)
 {
     uint32 mailId = objmgr.GenerateMailID();
 
     //time if COD 3 days, if no COD 30 days
     time_t deliver_time = time(NULL) + deliver_delay;
     time_t expire_time = deliver_time + DAY * ((COD > 0)? 3 : 30);
+
+    if(mailTemplateId && !sMailTemplateStore.LookupEntry(mailTemplateId))
+    {
+        sLog.outError( "WorldSession::SendMailTo - Mail have not existed MailTemplateId (%u), remove at send", mailTemplateId);
+        mailTemplateId = 0;
+    }
 
     if(receiver)
     {
@@ -757,6 +777,7 @@ void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 station
             m->messageID = mailId;
             m->messageType = messageType;
             m->stationery = stationery;
+            m->mailTemplateId = mailTemplateId;
             m->sender = sender_guidlow_or_entry;
             m->receiver = receiver->GetGUIDLow();
             m->subject = subject;
@@ -791,9 +812,9 @@ void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 station
         mi->deleteIncludedItems();
 
     CharacterDatabase.escape_string(subject);
-    CharacterDatabase.PExecute("INSERT INTO mail (id,messageType,stationery,sender,receiver,subject,itemTextId,has_items,expire_time,deliver_time,money,cod,checked) "
-        "VALUES ('%u', '%u', '%u', '%u', '%u', '%s', '%u', '%u', '" I64FMTD "','" I64FMTD "', '%u', '%u', '%d')",
-        mailId, messageType, stationery, sender_guidlow_or_entry, receiver_guidlow, subject.c_str(), itemTextId, (mi && !mi->empty() ? 1 : 0), (uint64)expire_time, (uint64)deliver_time, money, COD, checked);
+    CharacterDatabase.PExecute("INSERT INTO mail (id,messageType,stationery,mailTemplateId,sender,receiver,subject,itemTextId,has_items,expire_time,deliver_time,money,cod,checked) "
+        "VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%s', '%u', '%u', '" I64FMTD "','" I64FMTD "', '%u', '%u', '%d')",
+        mailId, messageType, stationery, mailTemplateId, sender_guidlow_or_entry, receiver_guidlow, subject.c_str(), itemTextId, (mi && !mi->empty() ? 1 : 0), (uint64)expire_time, (uint64)deliver_time, money, COD, checked);
 
     if(mi)
     {

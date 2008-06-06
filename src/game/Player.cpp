@@ -3293,8 +3293,8 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     // remove signs from petitions (also remove petitions if owner);
     RemovePetitionsAndSigns(playerguid, 10);
 
-    // return back all mails with COD and Item
-    QueryResult *resultMail = CharacterDatabase.PQuery("SELECT id,sender,subject,itemTextId,money,has_items FROM mail WHERE receiver='%u' AND has_items<>0 AND cod<>0", guid);
+    // return back all mails with COD and Item                 0  1              2      3       4          5     6
+    QueryResult *resultMail = CharacterDatabase.PQuery("SELECT id,mailTemplateId,sender,subject,itemTextId,money,has_items FROM mail WHERE receiver='%u' AND has_items<>0 AND cod<>0", guid);
     if(resultMail)
     {
         do
@@ -3302,11 +3302,12 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             Field *fields = resultMail->Fetch();
 
             uint32 mail_id       = fields[0].GetUInt32();
-            uint32 sender        = fields[1].GetUInt32();
-            std::string subject  = fields[2].GetCppString();
-            uint32 itemTextId    = fields[3].GetUInt32();
-            uint32 money         = fields[4].GetUInt32();
-            bool has_items       = fields[5].GetBool();
+            uint16 mailTemplateId= fields[1].GetUInt16();
+            uint32 sender        = fields[2].GetUInt32();
+            std::string subject  = fields[3].GetCppString();
+            uint32 itemTextId    = fields[4].GetUInt32();
+            uint32 money         = fields[5].GetUInt32();
+            bool has_items       = fields[6].GetBool();
 
             //we can return mail now
             //so firstly delete the old one
@@ -3327,12 +3328,16 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
 
                         ItemPrototype const* itemProto = objmgr.GetItemPrototype(item_template);
                         if(!itemProto)
+                        {
+                            CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid = '%u'", item_guidlow);
                             continue;
+                        }
 
-                        Item* pItem = NewItemOrBag(itemProto);
+                        Item *pItem = NewItemOrBag(itemProto);
                         if(!pItem->LoadFromDB(item_guidlow, MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER)))
                         {
-                            delete pItem;
+                            pItem->FSetState(ITEM_REMOVED);
+                            pItem->SaveToDB();              // it also deletes item object !
                             continue;
                         }
 
@@ -3348,7 +3353,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
 
             uint32 pl_account = objmgr.GetPlayerAccountIdByGUID(MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER));
 
-            WorldSession::SendReturnToSender(MAIL_NORMAL, pl_account, guid, sender, subject, itemTextId, &mi, money, 0);
+            WorldSession::SendReturnToSender(MAIL_NORMAL, pl_account, guid, sender, subject, itemTextId, &mi, money, 0, mailTemplateId);
         }
         while (resultMail->NextRow());
 
@@ -11612,6 +11617,55 @@ void Player::RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver
     // Give player extra money if GetRewOrReqMoney > 0 and get ReqMoney if negative
     ModifyMoney( pQuest->GetRewOrReqMoney() );
 
+    // Send reward mail
+    if(pQuest->GetRewMailTemplateId())
+    {
+        MailMessageType mailType;
+        uint32 senderGuidOrEntry;
+        switch(questGiver->GetTypeId())
+        {
+            case TYPEID_UNIT:
+                mailType = MAIL_CREATURE;
+                senderGuidOrEntry = questGiver->GetEntry();
+                break;
+            case TYPEID_GAMEOBJECT:
+                mailType = MAIL_GAMEOBJECT;
+                senderGuidOrEntry = questGiver->GetEntry();
+                break;
+            case TYPEID_ITEM:
+                mailType = MAIL_ITEM;
+                senderGuidOrEntry = questGiver->GetEntry();
+                break;
+            case TYPEID_PLAYER:
+                mailType = MAIL_NORMAL;
+                senderGuidOrEntry = questGiver->GetGUIDLow();
+                break;
+            default:
+                mailType = MAIL_NORMAL;
+                senderGuidOrEntry = GetGUIDLow();
+                break;
+        }
+
+        Loot questMailLoot;
+
+        questMailLoot.FillLoot(pQuest->GetQuestId(), LootTemplates_QuestMail, this);
+
+        // fill mail
+        MailItemsInfo mi;                                   // item list preparing
+
+        for(size_t i = 0; mi.size() < MAX_MAIL_ITEMS && i < questMailLoot.items.size(); ++i)
+            if(LootItem* lootitem = questMailLoot.LootItemInSlot(i,this))
+                if(Item* item = Item::CreateItem(lootitem->itemid,lootitem->count,this))
+                    mi.AddItem(item->GetGUIDLow(), item->GetEntry(), item);
+
+        for(size_t i = 0; mi.size() < MAX_MAIL_ITEMS && i < questMailLoot.quest_items.size(); ++i)
+            if(LootItem* lootitem = questMailLoot.LootItemInSlot(i+questMailLoot.items.size(),this))
+                if(Item* item = Item::CreateItem(lootitem->itemid,lootitem->count,this))
+                    mi.AddItem(item->GetGUIDLow(), item->GetEntry(), item);
+
+        WorldSession::SendMailTo(this, mailType, MAIL_STATIONERY_NORMAL, senderGuidOrEntry, GetGUIDLow(), "", 0, &mi, 0, 0, NOT_READ,pQuest->GetRewMailDelaySecs(),pQuest->GetRewMailTemplateId());
+    }
+
     if(pQuest->IsDaily())
         SetDailyQuestStatus(quest_id);
 
@@ -13414,16 +13468,21 @@ void Player::_LoadMailedItems(Mail *mail)
 
         if(!proto)
         {
-            sLog.outError( "Player %u have unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail (%u), skipped.", GetGUIDLow(), item_guid_low, item_template,mail->messageID);
+            sLog.outError( "Player %u have unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail (%u), deleted.", GetGUIDLow(), item_guid_low, item_template,mail->messageID);
+            CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid = '%u'", item_guid_low);
             continue;
         }
+
         Item *item = NewItemOrBag(proto);
+
         if(!item->LoadFromDB(item_guid_low, 0))
         {
             sLog.outError( "Player::_LoadMailedItems - Item in mail (%u) doesn't exist !!!! - item guid: %u", mail->messageID, item_guid_low);
-            delete item;
+            item->FSetState(ITEM_REMOVED);
+            item->SaveToDB();                               // it also deletes item object !
             continue;
         }
+
         AddMItem(item);
     } while (result->NextRow());
 
@@ -13454,8 +13513,8 @@ void Player::_LoadMailInit(QueryResult *resultUnread, QueryResult *resultDeliver
 void Player::_LoadMail()
 {
     m_mail.clear();
-    //mails are in right order
-    QueryResult *result = CharacterDatabase.PQuery("SELECT id,messageType,sender,receiver,subject,itemTextId,has_items,expire_time,deliver_time,money,cod,checked,stationery FROM mail WHERE receiver = '%u' ORDER BY id DESC",GetGUIDLow());
+    //mails are in right order                             0  1           2      3        4       5          6         7           8            9     10  11      12         13
+    QueryResult *result = CharacterDatabase.PQuery("SELECT id,messageType,sender,receiver,subject,itemTextId,has_items,expire_time,deliver_time,money,cod,checked,stationery,mailTemplateId FROM mail WHERE receiver = '%u' ORDER BY id DESC",GetGUIDLow());
     if(result)
     {
         do
@@ -13475,6 +13534,14 @@ void Player::_LoadMail()
             m->COD = fields[10].GetUInt32();
             m->checked = fields[11].GetUInt32();
             m->stationery = fields[12].GetUInt8();
+            m->mailTemplateId = fields[13].GetInt16();
+
+            if(m->mailTemplateId && !sMailTemplateStore.LookupEntry(m->mailTemplateId))
+            {
+                sLog.outError( "Player::_LoadMail - Mail (%u) have not existed MailTemplateId (%u), remove at load", m->messageID, m->mailTemplateId);
+                m->mailTemplateId = 0;
+            }
+
             m->state = MAIL_STATE_UNCHANGED;
 
             if (has_items)
