@@ -272,6 +272,7 @@ pkgdata_DATA = \
 	6061_characters_mail.sql \
 	6061_mangos_quest_mail_loot_template.sql \
 	6061_mangos_quest_template.sql \
+	6062_mangos_spell_proc_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -524,4 +525,5 @@ EXTRA_DIST = \
 	6061_characters_mail.sql \
 	6061_mangos_quest_mail_loot_template.sql \
 	6061_mangos_quest_template.sql \
+	6062_mangos_spell_proc_event.sql \
 	README
