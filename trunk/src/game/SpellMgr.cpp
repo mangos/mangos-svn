@@ -893,12 +893,17 @@ bool SpellMgr::IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spell
         SkillLineAbilityMap::const_iterator lower = spellmgr.GetBeginSkillLineAbilityMap(procSpell->Id);
         SkillLineAbilityMap::const_iterator upper = spellmgr.GetEndSkillLineAbilityMap(procSpell->Id);
 
+        bool found = false;
         for(SkillLineAbilityMap::const_iterator _spell_idx = lower; _spell_idx != upper; ++_spell_idx)
         {
             if(_spell_idx->second->skillId == spellProcEvent->skillId)
-                return true;
+            {
+                found = true;
+                break;
+            }
         }
-        return false;
+        if (!found)
+            return false;
     }
     if(spellProcEvent->spellFamilyName && (!procSpell || spellProcEvent->spellFamilyName != procSpell->SpellFamilyName))
         return false;
