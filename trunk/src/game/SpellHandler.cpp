@@ -60,6 +60,13 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    // some item classes can be used only in equipped state
+    if(proto->InventoryType != INVTYPE_NON_EQUIP && !pItem->IsEquipped())
+    {
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, pItem, NULL );
+        return;
+    }
+
     uint8 msg = pUser->CanUseItem(pItem);
     if( msg != EQUIP_ERR_OK )
     {

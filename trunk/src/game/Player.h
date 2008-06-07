@@ -1634,10 +1634,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendSetFactionStanding(const Faction* faction) const;
         void SendInitialReputations();
         bool IsFactionAtWar(const FactionEntry *factionEntry) const;
-        void SetFactionAtWar(uint32 repListID, bool atWar);
         void SetFactionAtWar(Faction* faction, bool atWar);
-        void SetFactionInactive(uint32 repListID, bool inactive);
-        void SetFactionVisible(uint32 repListID);
+        void SetFactionInactive(Faction* faction, bool inactive);
+        void SetFactionVisible(Faction* faction);
         void SetFactionVisibleForFactionTemplateId(uint32 FactionTemplateId);
         void SetFactionVisibleForFactionId(uint32 FactionId);
         void UpdateMaxSkills();
@@ -1890,7 +1889,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void UpdateHomebindTime(uint32 time);
 
-        bool m_Loaded;
         uint32 m_HomebindTimer;
         bool m_InstanceValid;
         BoundInstancesMap m_BoundInstances;
