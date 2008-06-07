@@ -349,7 +349,6 @@ Player::Player (WorldSession *session): Unit( 0 )
 
     /////////////////// Instance System /////////////////////
 
-    m_Loaded = false;
     m_HomebindTimer = 0;
     m_InstanceValid = true;
 
@@ -5122,13 +5121,6 @@ bool Player::IsFactionAtWar(const FactionEntry *factionEntry) const
     return false;
 }
 
-void Player::SetFactionAtWar(uint32 repListID, bool atWar)
-{
-    FactionsList::iterator itr = m_factions.find(repListID);
-    if (itr != m_factions.end())
-        SetFactionAtWar(&itr->second,atWar);
-}
-
 void Player::SetFactionAtWar(Faction* faction, bool atWar)
 {
     // not allow declare war to own faction
@@ -5147,26 +5139,22 @@ void Player::SetFactionAtWar(Faction* faction, bool atWar)
     faction->Changed = true;
 }
 
-void Player::SetFactionInactive(uint32 repListID, bool inactive)
+void Player::SetFactionInactive(Faction* faction, bool inactive)
 {
-    FactionsList::iterator itr = m_factions.find(repListID);
-    if (itr != m_factions.end())
-    {
-        // always invisible or hidden faction can't be inactive
-        if(itr->second.Flags & (FACTION_FLAG_INVISIBLE_FORCED|FACTION_FLAG_HIDDEN) )
-            return;
+    // always invisible or hidden faction can't be inactive
+    if(inactive && ((faction->Flags & (FACTION_FLAG_INVISIBLE_FORCED|FACTION_FLAG_HIDDEN)) || !(faction->Flags & FACTION_FLAG_VISIBLE) ) )
+        return;
 
-        // already set
-        if(((itr->second.Flags & FACTION_FLAG_INACTIVE) != 0) == inactive)
-            return;
+    // already set
+    if(((faction->Flags & FACTION_FLAG_INACTIVE) != 0) == inactive)
+        return;
 
-        if(inactive)
-            itr->second.Flags |= FACTION_FLAG_INACTIVE;
-        else
-            itr->second.Flags &= ~FACTION_FLAG_INACTIVE;
+    if(inactive)
+        faction->Flags |= FACTION_FLAG_INACTIVE;
+    else
+        faction->Flags &= ~FACTION_FLAG_INACTIVE;
 
-        itr->second.Changed = true;
-    }
+    faction->Changed = true;
 }
 
 void Player::SetFactionVisibleForFactionTemplateId(uint32 FactionTemplateId)
@@ -5185,29 +5173,34 @@ void Player::SetFactionVisibleForFactionId(uint32 FactionId)
     if(!factionEntry)
         return;
 
-    if(factionEntry->reputationListID >= 0)
-        SetFactionVisible(factionEntry->reputationListID);
+    if(factionEntry->reputationListID < 0)
+        return;
+
+    FactionsList::iterator itr = m_factions.find(factionEntry->reputationListID);
+    if (itr == m_factions.end())
+        return;
+
+    SetFactionVisible(&itr->second);
 }
 
-void Player::SetFactionVisible(uint32 repListID)
+void Player::SetFactionVisible(Faction* faction)
 {
-    FactionsList::iterator itr = m_factions.find(repListID);
-    if (itr != m_factions.end())
+    // always invisible or hidden faction can't be make visible
+    if(faction->Flags & (FACTION_FLAG_INVISIBLE_FORCED|FACTION_FLAG_HIDDEN))
+        return;
+
+    // already set
+    if(faction->Flags & FACTION_FLAG_VISIBLE)
+        return;
+
+    faction->Flags |= FACTION_FLAG_VISIBLE;
+    faction->Changed = true;
+
+    if(!m_session->PlayerLoading())
     {
-        // always invisible or hidden faction can't be make visible
-        if(itr->second.Flags & (FACTION_FLAG_INVISIBLE_FORCED|FACTION_FLAG_HIDDEN))
-            return;
-
-        // already set
-        if(itr->second.Flags & FACTION_FLAG_VISIBLE)
-            return;
-
-        itr->second.Flags |= FACTION_FLAG_VISIBLE;
-        itr->second.Changed = true;
-
         // make faction visible in reputation list at client
         WorldPacket data(SMSG_SET_FACTION_VISIBLE, 4);
-        data << repListID;
+        data << faction->ReputationListID;
         GetSession()->SendPacket(&data);
     }
 }
@@ -5382,8 +5375,9 @@ bool Player::ModifyOneFactionReputation(FactionEntry const* factionEntry, int32 
             SetFactionAtWar(&itr->second,true);
 
         itr->second.Standing = new_rep - BaseRep;
-        itr->second.Flags |= FACTION_FLAG_VISIBLE;
         itr->second.Changed = true;
+
+        SetFactionVisible(&itr->second);
 
         for( int i = 0; i < MAX_QUEST_LOG_SIZE; i++ )
         {
@@ -5462,13 +5456,14 @@ bool Player::SetOneFactionReputation(FactionEntry const* factionEntry, int32 sta
         if (standing < Reputation_Bottom)
             standing = Reputation_Bottom;
 
-        if(ReputationToRank(standing) <= REP_HOSTILE)
-            SetFactionAtWar(&itr->second,true);
-
         int32 BaseRep = GetBaseReputation(factionEntry);
         itr->second.Standing = standing - BaseRep;
-        itr->second.Flags |= FACTION_FLAG_VISIBLE;
         itr->second.Changed = true;
+
+        SetFactionVisible(&itr->second);
+
+        if(ReputationToRank(standing) <= REP_HOSTILE)
+            SetFactionAtWar(&itr->second,true);
 
         SendSetFactionStanding(&(itr->second));
         return true;
@@ -13176,8 +13171,6 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
     }
 
-    m_Loaded = true;
-
     return true;
 }
 
@@ -13723,22 +13716,28 @@ void Player::_LoadReputation(QueryResult *result)
 
                 uint32 dbFactionFlags = fields[2].GetUInt32();
 
-                if( (dbFactionFlags & FACTION_FLAG_AT_WAR) &&
-                    (faction->Flags & FACTION_FLAG_PEACE_FORCED)==0 )
-                    faction->Flags |= FACTION_FLAG_AT_WAR;
-            
-                if( (dbFactionFlags & FACTION_FLAG_VISIBLE) &&
-                    (faction->Flags & (FACTION_FLAG_INVISIBLE_FORCED | FACTION_FLAG_HIDDEN))==0 )
-                    faction->Flags |= FACTION_FLAG_VISIBLE;
+                if( dbFactionFlags & FACTION_FLAG_VISIBLE )
+                    SetFactionVisible(faction);             // have internal checks for forced invisibility
 
-                if( (dbFactionFlags & FACTION_FLAG_INACTIVE) &&
-                    (faction->Flags & (FACTION_FLAG_INVISIBLE_FORCED | FACTION_FLAG_HIDDEN))==0 &&
-                    (faction->Flags & FACTION_FLAG_VISIBLE) )
-                    faction->Flags |= FACTION_FLAG_INACTIVE;
+                if( dbFactionFlags & FACTION_FLAG_INACTIVE)
+                    SetFactionInactive(faction,true);       // have internal checks for visibility requirement
+
+                if( dbFactionFlags & FACTION_FLAG_AT_WAR )  // DB at war
+                    SetFactionAtWar(faction,true);          // have internal checks for FACTION_FLAG_PEACE_FORCED
+                else                                        // DB not at war
+                {
+                    // allow remove if visible (and then not FACTION_FLAG_INVISIBLE_FORCED or FACTION_FLAG_HIDDEN)
+                    if( faction->Flags & FACTION_FLAG_VISIBLE )
+                        SetFactionAtWar(faction,false);     // have internal checks for FACTION_FLAG_PEACE_FORCED
+                }
 
                 // set atWar for hostile
                 if(GetReputationRank(factionEntry) <= REP_HOSTILE)
-                    SetFactionAtWar(factionEntry->reputationListID,true);
+                    SetFactionAtWar(faction,true);
+
+                // reset changed flag if values similar to saved in DB
+                if(faction->Flags==dbFactionFlags)
+                    faction->Changed = false;
             }
         }
         while( result->NextRow() );

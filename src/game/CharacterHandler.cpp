@@ -689,7 +689,15 @@ void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
     recv_data >> repListID;
     recv_data >> flag;
 
-    GetPlayer()->SetFactionAtWar(repListID,flag);
+    FactionsList::iterator itr = GetPlayer()->m_factions.find(repListID);
+    if (itr == GetPlayer()->m_factions.end())
+        return;
+
+    // always invisible or hidden faction can't change war state
+    if(itr->second.Flags & (FACTION_FLAG_INVISIBLE_FORCED|FACTION_FLAG_HIDDEN) )
+        return;
+
+    GetPlayer()->SetFactionAtWar(&itr->second,flag);
 }
 
 //I think this function is never used :/ I dunno, but i guess this opcode not exists
@@ -781,7 +789,12 @@ void WorldSession::HandleSetWatchedFactionInactiveOpcode(WorldPacket & recv_data
     uint32 replistid;
     uint8 inactive;
     recv_data >> replistid >> inactive;
-    _player->SetFactionInactive(replistid, inactive);
+
+    FactionsList::iterator itr = _player->m_factions.find(replistid);
+    if (itr == _player->m_factions.end())
+        return;
+
+    _player->SetFactionInactive(&itr->second, inactive);
 }
 
 void WorldSession::HandleToggleHelmOpcode( WorldPacket & /*recv_data*/ )
