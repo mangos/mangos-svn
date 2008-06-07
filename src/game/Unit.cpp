@@ -6803,7 +6803,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     // Damage Done
     uint32 CastingTime;
     if ( !Channeled )
-        CastingTime = GetSpellCastTime(sSpellCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
+        CastingTime = GetSpellCastTime(spellProto);
     else
         CastingTime = GetSpellDuration(spellProto);
 
@@ -7326,7 +7326,7 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
 
     bool Channeled = IsChanneledSpell(spellProto);
     int32 AdvertisedBenefit = SpellBaseHealingBonus(GetSpellSchoolMask(spellProto));
-    uint32 CastingTime = GetSpellCastTime(sSpellCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
+    uint32 CastingTime = GetSpellCastTime(spellProto);
     if (CastingTime > 7000) CastingTime = 7000;
     if (CastingTime < 1500) CastingTime = 1500;
 
@@ -10024,7 +10024,7 @@ uint32 Unit::GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectT
     if ( overTime > 0 && CastingTime > 0 && DirectDamage )
     {
         // mainly for DoTs which are 3500 here otherwise
-        uint32 OriginalCastTime = GetSpellCastTime(sSpellCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
+        uint32 OriginalCastTime = GetSpellCastTime(spellProto);
         if (OriginalCastTime > 7000) OriginalCastTime = 7000;
         if (OriginalCastTime < 1500) OriginalCastTime = 1500;
         // Portion to Over Time

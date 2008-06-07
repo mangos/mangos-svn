@@ -381,8 +381,10 @@ class Spell
         void SetAutoRepeat(bool rep) { m_autoRepeat = rep; }
         void ReSetTimer() { m_timer = m_casttime > 0 ? m_casttime : 0; }
         bool IsMeleeSpell() const { return m_meleeSpell; }
+        bool IsRangedSpell() const { return m_rangedShoot; }
         bool IsChannelActive() const { return m_caster->GetUInt32Value(UNIT_CHANNEL_SPELL) != 0; }
         bool IsMeleeAttackResetSpell() const { return !m_IsTriggeredSpell && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_AUTOATTACK);  }
+        bool IsRangedAttackResetSpell() const { return !m_IsTriggeredSpell && m_rangedShoot && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_AUTOATTACK); }
 
         bool IsDeletable() const { return m_deletable; }
         void SetDeletable(bool deletable) { m_deletable = deletable; }
@@ -394,9 +396,9 @@ class Spell
 
         CurrentSpellTypes GetCurrentContainer();
 
-        Unit* GetCaster() { return m_caster; }
-        Unit* GetOriginalCaster() { return m_originalCaster; }
-        int32 GetPowerCost() { return m_powerCost; }
+        Unit* GetCaster() const { return m_caster; }
+        Unit* GetOriginalCaster() const { return m_originalCaster; }
+        int32 GetPowerCost() const { return m_powerCost; }
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
 

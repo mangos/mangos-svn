@@ -30,6 +30,7 @@
 #include <map>
 
 class Player;
+class Spell;
 
 extern SQLStorage sSpellThreatStore;
 
@@ -259,7 +260,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId);
 
 // Different spell properties
 inline float GetSpellRadius(SpellRadiusEntry const *radius) { return (radius ? radius->Radius : 0); }
-inline uint32 GetSpellCastTime(SpellCastTimesEntry const*time) { return (time ? time->CastTime : 0); }
+uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell = NULL);
 inline float GetSpellMinRange(SpellRangeEntry const *range) { return (range ? range->minRange : 0); }
 inline float GetSpellMaxRange(SpellRangeEntry const *range) { return (range ? range->maxRange : 0); }
 inline uint32 GetSpellRecoveryTime(SpellEntry const *spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
@@ -409,39 +410,39 @@ typedef HM_NAMESPACE::hash_map<uint32, SpellAffection> SpellAffectMap;
 // Spell proc event related declarations (accessed using SpellMgr functions)
 enum ProcFlags
 {
-    PROC_FLAG_NONE               = 0x00000000,              // None
-    PROC_FLAG_HIT_MELEE          = 0x00000001,              // On melee hit
-    PROC_FLAG_STRUCK_MELEE       = 0x00000002,              // On being struck melee
-    PROC_FLAG_KILL_XP_GIVER      = 0x00000004,              // On kill target giving XP or honor
-    PROC_FLAG_SPECIAL_DROP       = 0x00000008,              //
-    PROC_FLAG_DODGE              = 0x00000010,              // On dodge melee attack
-    PROC_FLAG_PARRY              = 0x00000020,              // On parry melee attack
-    PROC_FLAG_BLOCK              = 0x00000040,              // On block attack
-    PROC_FLAG_TOUCH              = 0x00000080,              // On being touched (for bombs, probably?)
-    PROC_FLAG_TARGET_LOW_HEALTH  = 0x00000100,              // On deal damage to enemy with 20% or less health
-    PROC_FLAG_LOW_HEALTH         = 0x00000200,              // On health dropped below 20%
-    PROC_FLAG_STRUCK_RANGED      = 0x00000400,              // On being struck ranged
-    PROC_FLAG_HIT_SPECIAL        = 0x00000800,              // (!)Removed, may be reassigned in future
-    PROC_FLAG_CRIT_MELEE         = 0x00001000,              // On crit melee
-    PROC_FLAG_STRUCK_CRIT_MELEE  = 0x00002000,              // On being critically struck in melee
-    PROC_FLAG_CAST_SPELL         = 0x00004000,              // On cast spell
-    PROC_FLAG_TAKE_DAMAGE        = 0x00008000,              // On take damage
-    PROC_FLAG_CRIT_SPELL         = 0x00010000,              // On crit spell
-    PROC_FLAG_HIT_SPELL          = 0x00020000,              // On hit spell
-    PROC_FLAG_STRUCK_CRIT_SPELL  = 0x00040000,              // On being critically struck by a spell
-    PROC_FLAG_HIT_RANGED         = 0x00080000,              // On getting ranged hit
-    PROC_FLAG_STRUCK_SPELL       = 0x00100000,              // On being struck by a spell
-    PROC_FLAG_TRAP               = 0x00200000,              // On trap activation (?)
-    PROC_FLAG_CRIT_RANGED        = 0x00400000,              // On getting ranged crit
-    PROC_FLAG_STRUCK_CRIT_RANGED = 0x00800000,              // On being critically struck by a ranged attack
-    PROC_FLAG_RESIST_SPELL       = 0x01000000,              // On resist enemy spell
-    PROC_FLAG_TARGET_RESISTS     = 0x02000000,              // On enemy resisted spell
-    PROC_FLAG_TARGET_DODGE_OR_PARRY= 0x04000000,            // On enemy dodges/parries
-    PROC_FLAG_HEAL               = 0x08000000,              // On heal
-    PROC_FLAG_CRIT_HEAL          = 0x10000000,              // On critical healing effect
-    PROC_FLAG_HEALED             = 0x20000000,              // On healing
-    PROC_FLAG_TARGET_BLOCK       = 0x40000000,              // On enemy blocks
-    PROC_FLAG_MISS               = 0x80000000               // On miss melee attack
+    PROC_FLAG_NONE                  = 0x00000000,           // None
+    PROC_FLAG_HIT_MELEE             = 0x00000001,           // On melee hit
+    PROC_FLAG_STRUCK_MELEE          = 0x00000002,           // On being struck melee
+    PROC_FLAG_KILL_XP_GIVER         = 0x00000004,           // On kill target giving XP or honor
+    PROC_FLAG_SPECIAL_DROP          = 0x00000008,           //
+    PROC_FLAG_DODGE                 = 0x00000010,           // On dodge melee attack
+    PROC_FLAG_PARRY                 = 0x00000020,           // On parry melee attack
+    PROC_FLAG_BLOCK                 = 0x00000040,           // On block attack
+    PROC_FLAG_TOUCH                 = 0x00000080,           // On being touched (for bombs, probably?)
+    PROC_FLAG_TARGET_LOW_HEALTH     = 0x00000100,           // On deal damage to enemy with 20% or less health
+    PROC_FLAG_LOW_HEALTH            = 0x00000200,           // On health dropped below 20%
+    PROC_FLAG_STRUCK_RANGED         = 0x00000400,           // On being struck ranged
+    PROC_FLAG_HIT_SPECIAL           = 0x00000800,           // (!)Removed, may be reassigned in future
+    PROC_FLAG_CRIT_MELEE            = 0x00001000,           // On crit melee
+    PROC_FLAG_STRUCK_CRIT_MELEE     = 0x00002000,           // On being critically struck in melee
+    PROC_FLAG_CAST_SPELL            = 0x00004000,           // On cast spell
+    PROC_FLAG_TAKE_DAMAGE           = 0x00008000,           // On take damage
+    PROC_FLAG_CRIT_SPELL            = 0x00010000,           // On crit spell
+    PROC_FLAG_HIT_SPELL             = 0x00020000,           // On hit spell
+    PROC_FLAG_STRUCK_CRIT_SPELL     = 0x00040000,           // On being critically struck by a spell
+    PROC_FLAG_HIT_RANGED            = 0x00080000,           // On getting ranged hit
+    PROC_FLAG_STRUCK_SPELL          = 0x00100000,           // On being struck by a spell
+    PROC_FLAG_TRAP                  = 0x00200000,           // On trap activation (?)
+    PROC_FLAG_CRIT_RANGED           = 0x00400000,           // On getting ranged crit
+    PROC_FLAG_STRUCK_CRIT_RANGED    = 0x00800000,           // On being critically struck by a ranged attack
+    PROC_FLAG_RESIST_SPELL          = 0x01000000,           // On resist enemy spell
+    PROC_FLAG_TARGET_RESISTS        = 0x02000000,           // On enemy resisted spell
+    PROC_FLAG_TARGET_DODGE_OR_PARRY = 0x04000000,           // On enemy dodges/parries
+    PROC_FLAG_HEAL                  = 0x08000000,           // On heal
+    PROC_FLAG_CRIT_HEAL             = 0x10000000,           // On critical healing effect
+    PROC_FLAG_HEALED                = 0x20000000,           // On healing
+    PROC_FLAG_TARGET_BLOCK          = 0x40000000,           // On enemy blocks
+    PROC_FLAG_MISS                  = 0x80000000            // On miss melee attack
 };
 
 struct SpellProcEventEntry

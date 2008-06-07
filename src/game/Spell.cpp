@@ -343,7 +343,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
 
     m_meleeSpell = false;
 
-    m_rangedShoot = ((m_spellInfo->Attributes & 18) == 18);
+    m_rangedShoot = m_spellInfo->Attributes & SPELL_ATTR_RANGED;
     if( m_spellInfo->StartRecoveryTime == 0 && !m_autoRepeat && !m_rangedShoot )
     {
         for (int i = 0; i < 3; i++)
@@ -1821,12 +1821,7 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
     }
 
     // calculate cast time (calculated after first CanCast check to prevent charge counting for first CanCast fail)
-    m_casttime = GetSpellCastTime(sSpellCastTimesStore.LookupEntry(m_spellInfo->CastingTimeIndex));
-
-    if(Player* modOwner = m_caster->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_CASTING_TIME, m_casttime,this);
-
-    m_casttime = int32(m_casttime*m_caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
+    m_casttime = GetSpellCastTime(m_spellInfo, this);
 
     // set timer base at cast time
     ReSetTimer();
@@ -2405,6 +2400,9 @@ void Spell::finish(bool ok)
         if(m_caster->haveOffhandWeapon())
             m_caster->resetAttackTimer(OFF_ATTACK);
     }
+
+    if (IsRangedAttackResetSpell())
+        m_caster->resetAttackTimer(RANGED_ATTACK);
 
     // Clear combo at finish state
     if(m_caster->GetTypeId() == TYPEID_PLAYER && NeedsComboPoints(m_spellInfo))
