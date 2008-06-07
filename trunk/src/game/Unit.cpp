@@ -271,10 +271,10 @@ void Unit::Update( uint32 p_time )
     //update combat timer only for players and pets
     if (isInCombat() && (GetTypeId() == TYPEID_PLAYER || ((Creature*)this)->isPet() || ((Creature*)this)->isCharmed()))
     {
-        // Check UNIT_STAT_ATTACKING or UNIT_STAT_CHASE so pets can reach far away
+        // Check UNIT_STAT_ATTACKING or UNIT_STAT_CHASE (without UNIT_STAT_FOLLOW in this case) so pets can reach far away
         // targets without stopping half way there and running off.
         // These flags are reset after target dies or another command is given.
-        if( m_HostilRefManager.isEmpty() && !hasUnitState(UNIT_STAT_ATTACKING | UNIT_STAT_CHASE) )
+        if( m_HostilRefManager.isEmpty() && !hasUnitState(UNIT_STAT_ATTACKING) && !(hasUnitState(UNIT_STAT_CHASE) && !hasUnitState(UNIT_STAT_FOLLOW) ) )
         {
             // m_CombatTimer set at aura start and it will be freeze until aura removing
             if ( m_CombatTimer <= p_time )
