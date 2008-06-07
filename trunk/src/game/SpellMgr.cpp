@@ -23,6 +23,7 @@
 #include "Database/DBCStores.h"
 #include "World.h"
 #include "Chat.h"
+#include "Spell.h"
 
 SpellMgr::SpellMgr()
 {
@@ -56,6 +57,37 @@ int32 GetSpellMaxDuration(SpellEntry const *spellInfo)
     if(!du)
         return 0;
     return (du->Duration[2] == -1) ? -1 : abs(du->Duration[2]);
+}
+
+uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
+{
+    SpellCastTimesEntry const *spellCastTimeEntry = sSpellCastTimesStore.LookupEntry(spellInfo->CastingTimeIndex);
+    if (!spellCastTimeEntry)
+    {
+        sLog.outError("SpellCastTimeEntry %u used by spell %u does not exist.", spellInfo->CastingTimeIndex, spellInfo->Id);
+        return 0;
+    }
+
+    int32 castTime = spellCastTimeEntry->CastTime;
+
+    if (spell)
+    {
+        if(Player* modOwner = spell->GetCaster()->GetSpellModOwner())
+            modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CASTING_TIME, castTime, spell);
+
+        if (!(spellInfo->Attributes & 0x30))
+            castTime = int32(castTime * spell->GetCaster()->GetFloatValue(UNIT_MOD_CAST_SPEED));
+        else
+        {
+            if (spell->IsRangedSpell() && !spell->IsAutoRepeat())
+                castTime = int32(castTime * spell->GetCaster()->m_modAttackSpeedPct[RANGED_ATTACK]);
+        }
+    }
+
+    if (spellInfo->Attributes & SPELL_ATTR_RANGED && (!spell || !(spell->IsAutoRepeat())))
+        castTime += 500;
+
+    return (castTime > 0) ? uint32(castTime) : 0;
 }
 
 bool IsPassiveSpell(uint32 spellId)

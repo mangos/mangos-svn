@@ -471,10 +471,9 @@ void BattleGround::RewardMark(Player *plr,uint32 count)
 
     if(IsSpell)
         plr->CastSpell(plr, mark, true);
-    else
+    else if ( objmgr.GetItemPrototype( mark ) )
     {
         ItemPosCountVec dest;
-        Item *item = NULL;
         uint32 no_space_count = 0;
         uint8 msg = plr->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, mark, count, &no_space_count );
         if( msg != EQUIP_ERR_OK )                       // convert to possible store amount
@@ -482,6 +481,7 @@ void BattleGround::RewardMark(Player *plr,uint32 count)
 
         if( count != 0 && !dest.empty())                // can add some
         {
+            Item *item = NULL;
             if(item = plr->StoreNewItem( dest, mark, true, 0))
             {
                 plr->SendNewItem(item,count,false,true);
