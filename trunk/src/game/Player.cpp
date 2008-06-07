@@ -2604,7 +2604,10 @@ bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading
                 continue;
 
             if(_spell_idx->second->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL || 
-                pSkill->id==SKILL_POISONS )                 // poison special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
+                // poison special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
+                pSkill->id==SKILL_POISONS && _spell_idx->second->max_value==0 ||
+                // lockpicking special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
+                pSkill->id==SKILL_LOCKPICKING && _spell_idx->second->max_value==0 )
             {
                 switch(pSkill->categoryId)
                 {
@@ -2619,7 +2622,8 @@ bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading
                         break;
                     case SKILL_CATEGORY_ARMOR:
                     case SKILL_CATEGORY_CLASS:
-                        if(pSkill->id!=SKILL_POISONS)
+
+                        if(pSkill->id != SKILL_POISONS && pSkill->id != SKILL_LOCKPICKING)
                             SetSkill(pSkill->id, 1, 1 );
                         else
                             SetSkill(pSkill->id, 1, GetMaxSkillValueForLevel() );
@@ -2768,7 +2772,10 @@ void Player::removeSpell(uint32 spell_id)
                 continue;
 
             if(_spell_idx->second->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL ||
-                pSkill->id==SKILL_POISONS )                 // poison special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
+                // poison special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
+                pSkill->id==SKILL_POISONS && _spell_idx->second->max_value==0 ||
+                // lockpicking special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
+                pSkill->id==SKILL_LOCKPICKING && _spell_idx->second->max_value==0 )
             {
                 SetSkill(pSkill->id, 0, 0 );
             }
