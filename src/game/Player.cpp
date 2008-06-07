@@ -13462,6 +13462,7 @@ void Player::_LoadMailedItems(Mail *mail)
         if(!proto)
         {
             sLog.outError( "Player %u have unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail (%u), deleted.", GetGUIDLow(), item_guid_low, item_template,mail->messageID);
+            CharacterDatabase.PExecute("DELETE FROM mail_items WHERE item_guid = '%u'", item_guid_low);
             CharacterDatabase.PExecute("DELETE FROM item_instance WHERE guid = '%u'", item_guid_low);
             continue;
         }
@@ -13470,7 +13471,8 @@ void Player::_LoadMailedItems(Mail *mail)
 
         if(!item->LoadFromDB(item_guid_low, 0))
         {
-            sLog.outError( "Player::_LoadMailedItems - Item in mail (%u) doesn't exist !!!! - item guid: %u", mail->messageID, item_guid_low);
+            sLog.outError( "Player::_LoadMailedItems - Item in mail (%u) doesn't exist !!!! - item guid: %u, deleted from mail", mail->messageID, item_guid_low);
+            CharacterDatabase.PExecute("DELETE FROM mail_items WHERE item_guid = '%u'", item_guid_low);
             item->FSetState(ITEM_REMOVED);
             item->SaveToDB();                               // it also deletes item object !
             continue;

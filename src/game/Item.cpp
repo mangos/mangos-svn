@@ -331,6 +331,11 @@ void Item::SaveToDB()
 
 bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
 {
+    // create item before any checks for store correct guid
+    // and allow use "FSetState(ITEM_REMOVED); SaveToDB();" for deleting item from DB
+    Object::_Create(guid, 0, HIGHGUID_ITEM);
+ 
+
     bool delete_result = false;
     if(!result)
     {
@@ -345,8 +350,6 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
     }
 
     Field *fields = result->Fetch();
-
-    Object::_Create(guid, 0, HIGHGUID_ITEM);
 
     if(!LoadValues(fields[0].GetString()))
     {
