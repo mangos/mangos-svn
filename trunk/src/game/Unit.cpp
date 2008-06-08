@@ -6302,6 +6302,10 @@ bool Unit::IsHostileTo(Unit const* unit) const
         if(((Player*)tester)->GetGroup() && ((Player*)tester)->GetGroup()==((Player*)target)->GetGroup())
             return false;
 
+        // Sanctuary
+        if(target->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY) && tester->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
+            return false;
+
         // PvP FFA state
         if(((Player*)tester)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP) && ((Player*)target)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP))
             return true;
@@ -6407,6 +6411,10 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
 
         // Group
         if(((Player*)tester)->GetGroup() && ((Player*)tester)->GetGroup()==((Player*)target)->GetGroup())
+            return true;
+
+        // Sanctuary
+        if(target->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY) && tester->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
             return true;
 
         // PvP FFA state
