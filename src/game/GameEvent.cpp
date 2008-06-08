@@ -245,6 +245,16 @@ void GameEvent::LoadFromDB()
             newModelEquipSet.equipment_id = fields[3].GetUInt32();
             newModelEquipSet.equipement_id_prev = 0;
             newModelEquipSet.modelid_prev = 0;
+
+            if(newModelEquipSet.equipment_id > 0)
+            {
+                if(!objmgr.GetEquipmentInfo(newModelEquipSet.equipment_id))
+                {
+                    sLog.outErrorDb("Table `game_event_model_equip` have creature (Guid: %u) with equipment_id %u not found in table `creature_equip_template`, set to no equipment.", guid, newModelEquipSet.equipment_id);
+                    continue;
+                }
+            }
+
             equiplist.push_back(std::pair<uint32, ModelEquip>(guid, newModelEquipSet));
 
         } while( result->NextRow() );

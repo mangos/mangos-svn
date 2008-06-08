@@ -544,13 +544,21 @@ void ObjectMgr::LoadCreatureTemplates()
             const_cast<CreatureInfo*>(cInfo)->MovementType = IDLE_MOTION_TYPE;
         }
 
+        if(cInfo->equipmentId > 0)                          // 0 no equipment
+        {
+            if(!GetEquipmentInfo(cInfo->equipmentId))
+            {
+                sLog.outErrorDb("Table `creature_template` have creature (Entry: %u) with equipment_id %u not found in table `creature_equip_template`, set to no equipment.", cInfo->Entry, cInfo->equipmentId);
+                const_cast<CreatureInfo*>(cInfo)->equipmentId = 0;
+            }
+        }
+
         /// if not set custom creature scale then load scale from CreatureDisplayInfo.dbc
         if(cInfo->scale <= 0.0f)
         {
             CreatureDisplayInfoEntry const* ScaleEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->DisplayID_A);
             const_cast<CreatureInfo*>(cInfo)->scale = ScaleEntry ? ScaleEntry->scale : 1.0f;
         }
-
     }
 }
 
@@ -785,6 +793,56 @@ void ObjectMgr::LoadCreatures()
         data.spawnMask      = fields[16].GetUInt8();
         int16 gameEvent     = fields[17].GetInt16();
 
+        CreatureInfo const* cInfo = GetCreatureTemplate(data.id);
+        if(!cInfo)
+        {
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u) with not existed creature entry %u, skipped.",guid,data.id );
+            continue;
+        }
+
+        if(data.equipmentId > 0)                            // -1 no equipment, 0 use default
+        {
+            if(!GetEquipmentInfo(data.equipmentId))
+            {
+                sLog.outErrorDb("Table `creature` have creature (Entry: %u) with equipment_id %u not found in table `creature_equip_template`, set to no equipment.", data.id, data.equipmentId);
+                data.equipmentId = -1;
+            }
+        }
+
+        if(cInfo->RegenHealth && data.curhealth < cInfo->minhealth)
+        {
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `creature_template`.`RegenHealth`=1 and low current health (%u), `creature_template`.`minhealth`=%u.",guid,data.id,data.curhealth, cInfo->minhealth );
+            data.curhealth = cInfo->minhealth;
+        }
+
+        if(data.curmana < cInfo->minmana)
+        {
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with low current mana (%u), `creature_template`.`minmana`=%u.",guid,data.id,data.curmana, cInfo->minmana );
+            data.curmana = cInfo->minmana;
+        }
+
+        if(data.spawndist < 0.0f)
+        {
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `spawndist`< 0, set to 0.",guid,data.id );
+            data.spawndist = 0.0f;
+        }
+        else if(data.movementType == RANDOM_MOTION_TYPE)
+        {
+            if(data.spawndist == 0.0f)
+            {
+                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `MovementType`=1 (random movement) but with `spawndist`=0, replace by idle movement type (0).",guid,data.id );
+                data.movementType = IDLE_MOTION_TYPE;
+            }
+        }
+        else if(data.movementType == IDLE_MOTION_TYPE)
+        {
+            if(data.spawndist != 0.0f)
+            {
+                sLog.outErrorDb("Table `creature` have creature (GUID: %u Entry: %u) with `MovementType`=0 (idle) have `spawndist`<>0, set to 0.",guid,data.id );
+                data.spawndist = 0.0f;
+            }
+        }
+
         if (gameEvent==0)                                   // if not this is to be managed by GameEvent System
             AddCreatureToGrid(guid, &data);
         ++count;
@@ -876,6 +934,13 @@ void ObjectMgr::LoadGameobjects()
         data.go_state       = fields[13].GetUInt32();
         data.spawnMask      = fields[14].GetUInt8();
         int16 gameEvent     = fields[15].GetInt16();
+
+        GameObjectInfo const* gInfo = GetGameObjectInfo(data.id);
+        if(!gInfo)
+        {
+            sLog.outErrorDb("Table `gameobject` have gameobject (GUID: %u) with not existed gameobject entry %u, skipped.",guid,data.id );
+            continue;
+        }
 
         if (gameEvent==0)                                   // if not this is to be managed by GameEvent System
             AddGameobjectToGrid(guid, &data);
@@ -2459,6 +2524,15 @@ void ObjectMgr::LoadQuests()
             sLog.outErrorDb("Quest %u has `SpecialFlags` = %u > max allowed value. Correct `SpecialFlags` to value <= %u",
                 qinfo->GetQuestId(),qinfo->QuestFlags,QUEST_MANGOS_FLAGS_DB_ALLOWED >> 16);
             qinfo->QuestFlags &= QUEST_MANGOS_FLAGS_DB_ALLOWED;
+        }
+
+        if(qinfo->QuestFlags & QUEST_FLAGS_DAILY)
+        {
+            if(!(qinfo->QuestFlags & QUEST_MANGOS_FLAGS_REPEATABLE))
+            {
+                sLog.outErrorDb("Daily Quest %u not marked as repeatable in `SpecialFlags`, added.",qinfo->GetQuestId());
+                qinfo->QuestFlags |= QUEST_MANGOS_FLAGS_REPEATABLE;
+            }
         }
 
         // client quest log visual (area case)
@@ -5119,6 +5193,12 @@ void ObjectMgr::LoadReputationOnKill()
         repOnKill.repvalue2            = fields[8].GetInt32();
         repOnKill.team_dependent       = fields[9].GetUInt8();
 
+        if(!GetCreatureTemplate(creature_id))
+        {
+            sLog.outErrorDb("Table `creature_onkill_reputation` have data for not existed creature entry (%u), skipped",creature_id);
+            continue;
+        }
+
         if(repOnKill.repfaction1)
         {
             FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(repOnKill.repfaction1);
@@ -5483,6 +5563,42 @@ void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map,char const* table)
 
     sLog.outString();
     sLog.outString(">> Loaded %u quest relations from %s", count,table);
+}
+
+void ObjectMgr::LoadGameobjectQuestRelations()
+{
+    LoadQuestRelationsHelper(mGOQuestRelations,"gameobject_questrelation");
+
+    for(QuestRelations::iterator itr = mGOQuestRelations.begin(); itr != mGOQuestRelations.end(); ++itr)
+        if(!GetGameObjectInfo(itr->first))
+            sLog.outErrorDb("Table `gameobject_questrelation` have data for not existed gameobject entry (%u) and existed quest %u",itr->first,itr->second);
+}
+
+void ObjectMgr::LoadGameobjectInvolvedRelations()
+{
+    LoadQuestRelationsHelper(mGOQuestInvolvedRelations,"gameobject_involvedrelation");
+
+    for(QuestRelations::iterator itr = mGOQuestInvolvedRelations.begin(); itr != mGOQuestInvolvedRelations.end(); ++itr)
+        if(!GetGameObjectInfo(itr->first))
+            sLog.outErrorDb("Table `gameobject_involvedrelation` have data for not existed gameobject entry (%u) and existed quest %u",itr->first,itr->second);
+}
+
+void ObjectMgr::LoadCreatureQuestRelations()
+{
+    LoadQuestRelationsHelper(mCreatureQuestRelations,"creature_questrelation");
+
+    for(QuestRelations::iterator itr = mCreatureQuestRelations.begin(); itr != mCreatureQuestRelations.end(); ++itr)
+        if(!GetCreatureTemplate(itr->first))
+            sLog.outErrorDb("Table `creature_questrelation` have data for not existed creature entry (%u) and existed quest %u",itr->first,itr->second);
+}
+
+void ObjectMgr::LoadCreatureInvolvedRelations()
+{
+    LoadQuestRelationsHelper(mCreatureQuestInvolvedRelations,"creature_involvedrelation");
+
+    for(QuestRelations::iterator itr = mCreatureQuestInvolvedRelations.begin(); itr != mCreatureQuestInvolvedRelations.end(); ++itr)
+        if(!GetCreatureTemplate(itr->first))
+            sLog.outErrorDb("Table `creature_involvedrelation` have data for not existed creature entry (%u) and existed quest %u",itr->first,itr->second);
 }
 
 void ObjectMgr::LoadReservedPlayersNames()

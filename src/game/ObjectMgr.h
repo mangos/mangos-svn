@@ -442,12 +442,16 @@ class ObjectMgr
         void LoadQuests();
         void LoadQuestRelations()
         {
-            LoadQuestRelationsHelper(mGOQuestRelations,"gameobject_questrelation");
-            LoadQuestRelationsHelper(mGOQuestInvolvedRelations,"gameobject_involvedrelation");
-            LoadQuestRelationsHelper(mCreatureQuestRelations,"creature_questrelation");
-            LoadQuestRelationsHelper(mCreatureQuestInvolvedRelations,"creature_involvedrelation");
+            LoadGameobjectQuestRelations();
+            LoadGameobjectInvolvedRelations();
+            LoadCreatureQuestRelations();
+            LoadCreatureInvolvedRelations();
         }
-        void LoadQuestRelationsHelper(QuestRelations& map,char const* table);
+        void LoadGameobjectQuestRelations();
+        void LoadGameobjectInvolvedRelations();
+        void LoadCreatureQuestRelations();
+        void LoadCreatureInvolvedRelations();
+
         QuestRelations mGOQuestRelations;
         QuestRelations mGOQuestInvolvedRelations;
         QuestRelations mCreatureQuestRelations;
@@ -734,6 +738,7 @@ class ObjectMgr
     private:
         void LoadScripts(ScriptMapMap& scripts, char const* tablename);
         void ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* table, char const* guidEntryStr);
+        void LoadQuestRelationsHelper(QuestRelations& map,char const* table);
 
         typedef std::map<uint32,PetLevelInfo*> PetLevelInfoMap;
         // PetLevelInfoMap[creature_id][level]
