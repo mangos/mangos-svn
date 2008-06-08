@@ -1786,7 +1786,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             m_bgEntryPointO = PosO;
         }
 
-        void LeaveBattleground();
+        void LeaveBattleground(bool teleportToEntryPoint = true);
         bool CanJoinToBattleground() const;
 
         bool GetBGAccessByLevel(uint32 bgTypeId) const;
