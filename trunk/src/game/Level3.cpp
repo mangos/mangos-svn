@@ -156,7 +156,7 @@ bool ChatHandler::HandleReloadCommandCommand(const char*)
 bool ChatHandler::HandleReloadCreatureQuestRelationsCommand(const char*)
 {
     sLog.outString( "Loading Quests Relations... (`creature_questrelation`)" );
-    objmgr.LoadQuestRelationsHelper(objmgr.mCreatureQuestRelations,"creature_questrelation");
+    objmgr.LoadCreatureQuestRelations();
     SendGlobalSysMessage("DB table `creature_questrelation` (creature quest givers) reloaded.");
     return true;
 }
@@ -164,7 +164,7 @@ bool ChatHandler::HandleReloadCreatureQuestRelationsCommand(const char*)
 bool ChatHandler::HandleReloadCreatureQuestInvRelationsCommand(const char*)
 {
     sLog.outString( "Loading Quests Relations... (`creature_involvedrelation`)" );
-    objmgr.LoadQuestRelationsHelper(objmgr.mCreatureQuestInvolvedRelations,"creature_involvedrelation");
+    objmgr.LoadCreatureInvolvedRelations();
     SendGlobalSysMessage("DB table `creature_involvedrelation` (creature quest takers) reloaded.");
     return true;
 }
@@ -172,7 +172,7 @@ bool ChatHandler::HandleReloadCreatureQuestInvRelationsCommand(const char*)
 bool ChatHandler::HandleReloadGOQuestRelationsCommand(const char*)
 {
     sLog.outString( "Loading Quests Relations... (`gameobject_questrelation`)" );
-    objmgr.LoadQuestRelationsHelper(objmgr.mGOQuestRelations,"gameobject_questrelation");
+    objmgr.LoadGameobjectQuestRelations();
     SendGlobalSysMessage("DB table `gameobject_questrelation` (gameobject quest givers) reloaded.");
     return true;
 }
@@ -180,7 +180,7 @@ bool ChatHandler::HandleReloadGOQuestRelationsCommand(const char*)
 bool ChatHandler::HandleReloadGOQuestInvRelationsCommand(const char*)
 {
     sLog.outString( "Loading Quests Relations... (`gameobject_involvedrelation`)" );
-    objmgr.LoadQuestRelationsHelper(objmgr.mGOQuestInvolvedRelations,"gameobject_involvedrelation");
+    objmgr.LoadGameobjectInvolvedRelations();
     SendGlobalSysMessage("DB table `gameobject_involvedrelation` (gameobject quest takers) reloaded.");
     return true;
 }
@@ -357,7 +357,7 @@ bool ChatHandler::HandleReloadSpellScriptTargetCommand(const char*)
 {
     sLog.outString( "Re-Loading SpellsScriptTarget..." );
     spellmgr.LoadSpellScriptTarget();
-    SendGlobalSysMessage("DB table `spell_script_target` (spell targets selection in case specific creature/GO requirements.");
+    SendGlobalSysMessage("DB table `spell_script_target` (spell targets selection in case specific creature/GO requirements) reloaded.");
     return true;
 }
 
@@ -365,7 +365,7 @@ bool ChatHandler::HandleReloadSpellTeleportCommand(const char*)
 {
     sLog.outString( "Re-Loading Spell teleport coordinates..." );
     spellmgr.LoadSpellTeleports();
-    SendGlobalSysMessage("DB table `spell_teleport` reloaded.");
+    SendGlobalSysMessage("DB table `spell_teleport` (destination coordinates for spell teleports) reloaded.");
     return true;
 }
 
@@ -373,7 +373,7 @@ bool ChatHandler::HandleReloadSpellThreatsCommand(const char*)
 {
     sLog.outString( "Re-Loading Aggro Spells Definitions...");
     spellmgr.LoadSpellThreats();
-    SendGlobalSysMessage("DB table `spell_threat` (spell aggro definistions) reloaded.");
+    SendGlobalSysMessage("DB table `spell_threat` (spell aggro definitions) reloaded.");
     return true;
 }
 

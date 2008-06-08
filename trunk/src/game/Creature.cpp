@@ -194,13 +194,11 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
     // Load creature equipment
     if(!data || data->equipmentId == 0)
     {                                                       // use default from the template
-        if(!LoadEquipment(cinfo->equipmentId))
-            sLog.outErrorDb("Creature (Entry: %u) has equipment_id %u (default from creature template) not found in table `creature_equip_template`.", Entry, cinfo->equipmentId);
+        LoadEquipment(cinfo->equipmentId);
     }
     else if(data && data->equipmentId != -1)
     {                                                       // override, -1 means no equipment
-        if(!LoadEquipment(data->equipmentId))
-            sLog.outErrorDb("Creature (Entry: %u) has equipment_id %u (override from creature data) not found in table `equipment`. ", data->id, data->equipmentId);
+        LoadEquipment(data->equipmentId);
     }
 
     SetName(cinfo->Name);
@@ -1300,7 +1298,7 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
     return true;
 }
 
-bool Creature::LoadEquipment(uint32 equip_entry, bool force)
+void Creature::LoadEquipment(uint32 equip_entry, bool force)
 {
     if(equip_entry == 0)
     {
@@ -1314,12 +1312,12 @@ bool Creature::LoadEquipment(uint32 equip_entry, bool force)
             }
             m_equipmentId = 0;
         }
-        return true;
+        return;
     }
 
     EquipmentInfo const *einfo = objmgr.GetEquipmentInfo(equip_entry);
     if (!einfo)
-        return false;
+        return;
 
     m_equipmentId = equip_entry;
     for (uint8 i=0;i<3;i++)
@@ -1328,7 +1326,6 @@ bool Creature::LoadEquipment(uint32 equip_entry, bool force)
         SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + (i * 2), einfo->equipinfo[i]);
         SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + (i * 2) + 1, einfo->equipslot[i]);
     }
-    return true;
 }
 
 void Creature::LoadGoods()

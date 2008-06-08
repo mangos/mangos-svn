@@ -1609,8 +1609,7 @@ bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float 
         return false;
     }
 
-    if(!LoadEquipment(cinfo->equipmentId))
-        sLog.outErrorDb("Pet (GUID: %u Entry: %u) has equipment_id %u (default from creature template) not found in table `creature_equip_template`. ", guidlow, Entry, cinfo->equipmentId);
+    LoadEquipment(cinfo->equipmentId);
 
     CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(cinfo->DisplayID_A);
     if(!minfo)
