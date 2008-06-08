@@ -289,15 +289,10 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
     switch(action)
     {
         case 1:                                             // port to battleground
+            // cheating?
             if(!_player->IsInvitedForBattleGroundType(bgTypeId))
-                return;                                     // cheating?
+                return;
 
-            _player->RemoveFromGroup();
-            queueSlot = _player->GetBattleGroundQueueIndex(bgTypeId);
-            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), queueSlot, STATUS_IN_PROGRESS, 0, bg->GetStartTime());
-            _player->GetSession()->SendPacket(&data);
-            // remove battleground queue status from BGmgr
-            sBattleGroundMgr.m_BattleGroundQueues[bgTypeId].RemovePlayer(_player->GetGUID(), false);
             // check if player is not deserter
             if( !_player->CanJoinToBattleground() )
             {
@@ -307,6 +302,22 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
                 SendPacket(&data2);
                 return;
             }
+
+            // if the player is dead, resurrect him before teleport
+            if(!_player->isAlive())
+                _player->ResurrectPlayer(1.0f,false);
+
+            // leave current group
+            _player->RemoveFromGroup();
+
+            // packet to player about BG status
+            queueSlot = _player->GetBattleGroundQueueIndex(bgTypeId);
+            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), queueSlot, STATUS_IN_PROGRESS, 0, bg->GetStartTime());
+            _player->GetSession()->SendPacket(&data);
+
+            // remove battleground queue status from BGmgr
+            sBattleGroundMgr.m_BattleGroundQueues[bgTypeId].RemovePlayer(_player->GetGUID(), false);
+
             // if player is in battleground already, remove him and port him to new battleground
             if (BattleGround *currentBg = _player->GetBattleGround())
                 currentBg->RemovePlayerAtLeave(_player->GetGUID(), false, true);
