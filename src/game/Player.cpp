@@ -5856,7 +5856,7 @@ void Player::UpdateArea(uint32 newArea)
 
     AreaTableEntry const* area = GetAreaEntryByAreaID(newArea);
 
-    if(area && (area->flags & 0x80))
+    if(area && (area->flags & AREA_FLAG_ARENA))
     {
         if(!isGameMaster())
             SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
@@ -5945,10 +5945,13 @@ void Player::UpdateZone(uint32 newZone)
 
     if(zone->flags & AREA_FLAG_SANCTUARY)                   // in sanctuary
     {
-        UpdatePvP(false, true);                             // i'm right? need disable PvP in this area...
-
+        SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY);
         if(sWorld.IsFFAPvPRealm())
             RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
+    }
+    else
+    {
+        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY);
     }
 
     if(zone->flags & AREA_FLAG_CAPITAL)                     // in capital city
