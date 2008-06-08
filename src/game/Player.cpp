@@ -15832,14 +15832,14 @@ void Player::ToggleMetaGemsActive(uint8 exceptslot, bool apply)
     }
 }
 
-void Player::LeaveBattleground()
+void Player::LeaveBattleground(bool teleportToEntryPoint)
 {
     if(BattleGround *bg = GetBattleGround())
     {
-        bg->RemovePlayerAtLeave(GetGUID(), true, true);
-
         if(bg->isBattleGround() && (bg->GetStatus() == STATUS_IN_PROGRESS) && sWorld.getConfig(CONFIG_BATTLEGROUND_CAST_DESERTER))
             CastSpell(this, 26013, true);                   // Deserter
+
+        bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
     }
 }
 

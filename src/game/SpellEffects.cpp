@@ -4393,6 +4393,9 @@ void Spell::EffectStuck(uint32 /*i*/)
     if(pTarget->isInFlight())
         return;
 
+    if(pTarget->InBattleGround())
+        pTarget->LeaveBattleground(false);
+
     // homebind location is loaded always
     pTarget->TeleportTo(pTarget->m_homebindMapId,pTarget->m_homebindX,pTarget->m_homebindY,pTarget->m_homebindZ,pTarget->GetOrientation());
 
