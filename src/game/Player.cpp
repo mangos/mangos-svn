@@ -2630,7 +2630,8 @@ bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading
                         break;
                     case SKILL_CATEGORY_SECONDARY:
                     case SKILL_CATEGORY_PROFESSION:
-                        if(!IsProfessionSkill(pSkill->id))
+                        // not set skills for professions and racial abilities
+                        if(!IsProfessionSkill(pSkill->id) && _spell_idx->second->racemask==0)
                             SetSkill(pSkill->id, 1, 1 );
                         break;
                     case SKILL_CATEGORY_ATTRIBUTES:            //not found in dbc
@@ -2777,6 +2778,11 @@ void Player::removeSpell(uint32 spell_id)
                 // lockpicking special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
                 pSkill->id==SKILL_LOCKPICKING && _spell_idx->second->max_value==0 )
             {
+                // not reset skills for professions and racial abilities
+                if( (pSkill->categoryId==SKILL_CATEGORY_SECONDARY || pSkill->categoryId==SKILL_CATEGORY_PROFESSION) &&
+                    (IsProfessionSkill(pSkill->id) || _spell_idx->second->racemask!=0) )
+                    continue;
+
                 SetSkill(pSkill->id, 0, 0 );
             }
         }
