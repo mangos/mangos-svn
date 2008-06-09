@@ -62,11 +62,10 @@ int32 GetSpellMaxDuration(SpellEntry const *spellInfo)
 uint32 GetSpellCastTime(SpellEntry const* spellInfo, Spell const* spell)
 {
     SpellCastTimesEntry const *spellCastTimeEntry = sSpellCastTimesStore.LookupEntry(spellInfo->CastingTimeIndex);
-    if (!spellCastTimeEntry)
-    {
-        sLog.outError("SpellCastTimeEntry %u used by spell %u does not exist.", spellInfo->CastingTimeIndex, spellInfo->Id);
+
+    // not all spells have cast time index and this is all is pasiive abilities
+    if(!spellCastTimeEntry)
         return 0;
-    }
 
     int32 castTime = spellCastTimeEntry->CastTime;
 
