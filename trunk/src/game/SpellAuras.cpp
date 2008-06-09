@@ -1301,8 +1301,45 @@ void Aura::TriggerSpell()
 //                    case 30025: break;
 //                    // Nether Beam - Serenity
 //                    case 30401: break;
-//                    // Extract Gas
-//                    case 30427: break;
+                    // Extract Gas
+                    case 30427:
+                    {
+                        // move loot to player inventory and despawn target
+                        if(caster->GetTypeId() ==TYPEID_PLAYER &&
+                                target->GetTypeId() == TYPEID_UNIT && 
+                                ((Creature*)target)->GetCreatureInfo()->type == CREATURE_TYPE_GAS_CLOUD)
+                        {
+                            Player* player = (Player*)caster;
+                            Creature* creature = (Creature*)target;
+                            // missing lootid has been reported on startup - just return
+                            if (!creature->GetCreatureInfo()->SkinLootId)
+                            {
+                                return;
+                            }
+                            Loot *loot = &creature->loot;
+                            loot->clear();
+                            loot->FillLoot(creature->GetCreatureInfo()->SkinLootId, LootTemplates_Skinning, NULL);
+                            for(uint8 i=0;i<loot->items.size();i++)
+                            {
+                                LootItem *item = loot->LootItemInSlot(i,player);
+                                ItemPosCountVec dest;
+                                uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item->itemid, item->count );
+                                if ( msg == EQUIP_ERR_OK )
+                                {
+                                    Item * newitem = player->StoreNewItem( dest, item->itemid, true, item->randomPropertyId);
+
+                                    player->SendNewItem(newitem, uint32(item->count), false, false, true);
+                                }
+                                else
+                                    player->SendEquipError( msg, NULL, NULL );
+                            }
+                            target->setDeathState(JUST_DIED);
+                            creature->RemoveCorpse();
+
+                        }
+                        return;
+                        break;
+                    }
                     // Quake
                     case 30576: trigger_spell_id = 30571; break;
 //                    // Burning Maul
