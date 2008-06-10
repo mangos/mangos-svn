@@ -315,7 +315,6 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_canParry = false;
     m_canDualWield = false;
     m_ammoDPS = 0.0f;
-    m_extraAttacks = 0;
 
     m_oldpetnumber = 0;
     //cache for UNIT_CREATED_BY_SPELL to allow
@@ -908,12 +907,6 @@ void Player::Update( uint32 p_time )
             // TODO add weapon,skill check
 
             float pldistance = ATTACK_DISTANCE;
-
-            if (m_extraAttacks)
-            {
-                AttackerStateUpdate(pVictim, BASE_ATTACK);
-                --m_extraAttacks;
-            }
 
             if (isAttackReady(BASE_ATTACK))
             {
@@ -2525,7 +2518,7 @@ bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading
 
     // cast talents with SPELL_EFFECT_LEARN_SPELL (other dependent spells will learned later as not auto-learned)
     // note: all spells with SPELL_EFFECT_LEARN_SPELL isn't passive
-    if( talentCost > 0 && (spellInfo->Effect[0]==SPELL_EFFECT_LEARN_SPELL || spellInfo->Effect[1]==SPELL_EFFECT_LEARN_SPELL || spellInfo->Effect[2]==SPELL_EFFECT_LEARN_SPELL) )
+    if( talentCost > 0 && IsSpellHaveEffect(spellInfo,SPELL_EFFECT_LEARN_SPELL) )
     {
         // ignore stance requirement for talent learn spell (stance set for spell only for client spell description show)
         CastSpell(this, spell_id, true);
@@ -2551,7 +2544,7 @@ bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading
             if (!spellInfo->CasterAuraState || HasAuraState(AuraState(spellInfo->CasterAuraState)))
                 CastSpell(this, spell_id, true);
     }
-    else if( spellInfo->Effect[0]==SPELL_EFFECT_SKILL_STEP || spellInfo->Effect[1]==SPELL_EFFECT_SKILL_STEP || spellInfo->Effect[2]==SPELL_EFFECT_SKILL_STEP )
+    else if( IsSpellHaveEffect(spellInfo,SPELL_EFFECT_SKILL_STEP) )
     {
         CastSpell(this, spell_id, true);
         return false;
@@ -6594,6 +6587,10 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target, WeaponAttackType attTy
             sLog.outError("WORLD: unknown Item spellid %i", spellData.SpellId);
             continue;
         }
+
+        // not allow proc extra attack spell at extra attack
+        if( m_extraAttacks && IsSpellHaveEffect(spellInfo,SPELL_EFFECT_ADD_EXTRA_ATTACKS) )
+            return;
 
         float chance = spellInfo->procChance;
 

@@ -634,6 +634,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool isAttackReady(WeaponAttackType type = BASE_ATTACK) const { return m_attackTimer[type] == 0; }
         bool haveOffhandWeapon() const;
         bool canReachWithAttack(Unit *pVictim) const;
+        uint32 m_extraAttacks;
 
         void _addAttacker(Unit *pAttacker)                  // must be called only from Unit::Attack(Unit*)
         {
@@ -756,7 +757,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttackType attType, MeleeHitOutcome outcome, SpellEntry const *spellCasted = NULL, bool isTriggeredSpell = false);
         void ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVictim, uint32 damage = 0, SpellEntry const *procSpell = NULL, bool isTriggeredSpell = false, WeaponAttackType attType = BASE_ATTACK);
         void HandleEmoteCommand(uint32 anim_id);
-        void AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType = BASE_ATTACK);
+        void AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType = BASE_ATTACK, bool extra = false );
 
         float MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) const;
         SpellMissInfo MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell);

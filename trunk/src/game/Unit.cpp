@@ -150,6 +150,8 @@ Unit::Unit( WorldObject *instantiator )
     m_modAttackSpeedPct[OFF_ATTACK] = 1.0f;
     m_modAttackSpeedPct[RANGED_ATTACK] = 1.0f;
 
+    m_extraAttacks = 0;
+
     m_state = 0;
     m_form = 0;
     m_deathState = ALIVE;
@@ -2056,7 +2058,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
     }
 }
 
-void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType )
+void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool extra )
 {
     if(hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_STUNDED | UNIT_STAT_FLEEING) || HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) )
         return;
@@ -2067,20 +2069,34 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType )
     if(IsNonMeleeSpellCasted(false))
         return;
 
-    // melee attack spell casted at main hand attack only
-    if (m_currentSpells[CURRENT_MELEE_SPELL] && attType == BASE_ATTACK)
-    {
-        m_currentSpells[CURRENT_MELEE_SPELL]->cast();
-        return;
-    }
-
     uint32 hitInfo;
     if (attType == BASE_ATTACK)
         hitInfo = HITINFO_NORMALSWING2;
     else if (attType == OFF_ATTACK)
         hitInfo = HITINFO_LEFTSWING;
     else
+        return;                                             // ignore ranaged case
+
+    uint32 extraAttacks = m_extraAttacks;
+
+    // melee attack spell casted at main hand attack only
+    if (attType == BASE_ATTACK && m_currentSpells[CURRENT_MELEE_SPELL])
+    {
+        m_currentSpells[CURRENT_MELEE_SPELL]->cast();
+
+        // not recent extra attack only at any non extra attack (melee spell case)
+        if(!extra && extraAttacks)
+        {
+            while(m_extraAttacks)
+            {
+                AttackerStateUpdate(pVictim, BASE_ATTACK, true);
+                if(m_extraAttacks > 0)
+                    --m_extraAttacks;
+            }
+        }
+
         return;
+    }
 
     VictimState victimState = VICTIMSTATE_NORMAL;
 
@@ -2094,6 +2110,18 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType )
     if( (meleeSchoolMask & SPELL_SCHOOL_MASK_NORMAL) && pVictim->IsImmunedToPhysicalDamage() )
     {
         SendAttackStateUpdate (HITINFO_MISS, pVictim, 1, meleeSchoolMask, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
+
+        // not recent extra attack only at any non extra attack (miss case)
+        if(!extra && extraAttacks)
+        {
+            while(m_extraAttacks)
+            {
+                AttackerStateUpdate(pVictim, BASE_ATTACK, true);
+                if(m_extraAttacks > 0)
+                    --m_extraAttacks;
+            }
+        }
+
         return;
     }
 
@@ -2129,6 +2157,17 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType )
     else
         DEBUG_LOG("AttackerStateUpdate: (NPC)    %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
             GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damage, absorbed_dmg, blocked_dmg, resisted_dmg);
+
+    // extra attack only at any non extra attack (normal case)
+    if(!extra && extraAttacks)
+    {
+        while(m_extraAttacks)
+        {
+            AttackerStateUpdate(pVictim, BASE_ATTACK, true);
+            if(m_extraAttacks > 0)
+                --m_extraAttacks;
+        }
+    }
 }
 
 MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAttackType attType, SpellEntry const *spellInfo)
@@ -6067,11 +6106,17 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         return;
     }
 
-    if(!sSpellStore.LookupEntry(trigger_spell_id))
+    SpellEntry const* triggerEntry = sSpellStore.LookupEntry(trigger_spell_id);
+
+    if(!triggerEntry)
     {
         sLog.outError("Unit::HandleProcTriggerSpell: Spell %u have not existed EffectTriggered[%d]=%u, not handled custom case?",auraSpellInfo->Id,triggeredByAura->GetEffIndex(),trigger_spell_id);
         return;
     }
+
+    // not allow proc extra attack spell at extra attack
+    if( m_extraAttacks && IsSpellHaveEffect(triggerEntry,SPELL_EFFECT_ADD_EXTRA_ATTACKS) )
+        return;
 
     // custom check for proc spell
     switch(auraSpellInfo->Id)

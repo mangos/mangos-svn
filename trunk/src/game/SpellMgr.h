@@ -266,6 +266,13 @@ inline float GetSpellMaxRange(SpellRangeEntry const *range) { return (range ? ra
 inline uint32 GetSpellRecoveryTime(SpellEntry const *spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
 int32 GetSpellDuration(SpellEntry const *spellInfo);
 int32 GetSpellMaxDuration(SpellEntry const *spellInfo);
+inline bool IsSpellHaveEffect(SpellEntry const *spellInfo, SpellEffects effect)
+{
+    for(int i= 0; i < 3; ++i)
+        if(spellInfo->Effect[i]==effect)
+            return true;
+    return false;
+}
 
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
 

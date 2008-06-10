@@ -4689,13 +4689,13 @@ void Spell::EffectResurrect(uint32 i)
 
 void Spell::EffectAddExtraAttacks(uint32 /*i*/)
 {
-    if(!unitTarget || !unitTarget->isAlive() || unitTarget->GetTypeId()!= TYPEID_PLAYER)
+    if(!unitTarget || !unitTarget->isAlive())
         return;
 
-    if(((Player*)unitTarget)->m_extraAttacks )
+    if( unitTarget->m_extraAttacks )
         return;
 
-    ((Player*)unitTarget)->m_extraAttacks = damage;
+    unitTarget->m_extraAttacks = damage;
 }
 
 void Spell::EffectParry(uint32 /*i*/)
