@@ -5881,7 +5881,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                                 // Holy Shock
                                 if(procSpell->SpellFamilyName == SPELLFAMILY_PALADIN)
                                 {
-                                    if(procSpell->SpellFamilyFlags & 0x0001000000000000)
+                                    if(procSpell->SpellFamilyFlags & 0x0001000000000000LL)
                                     {
                                         switch(procSpell->Id)
                                         {
