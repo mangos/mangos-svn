@@ -6001,7 +6001,8 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                             return;
 
                         // damage taken that reduces below 30% health
-                        if (10*(int32(GetHealth())-int32(damage)) < 3*GetMaxHealth() && 10*(GetHealth()) >= 3*GetMaxHealth())
+                        // does NOT mean you must have been >= 30% before
+                        if (10*(int32(GetHealth())-int32(damage)) < 3*GetMaxHealth())
                         {
                             int32 healPoints = triggeredByAura->GetModifier()->m_amount * GetMaxHealth() / 100;
                             CastCustomSpell(this, 31616, &healPoints, NULL, NULL, true, castItem, triggeredByAura);
