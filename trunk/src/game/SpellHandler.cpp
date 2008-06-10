@@ -350,12 +350,8 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 SendPacket(&data);
             }
 
-            // quest objective
-            if (info->goober.questId)
-            {
-                if(_player->GetQuestStatus(info->goober.questId) == QUEST_STATUS_INCOMPLETE)
-                    _player->CastedCreatureOrGO(info->id, obj->GetGUID(), 0);
-            }
+            // possible quest objective for active quests
+            _player->CastedCreatureOrGO(info->id, obj->GetGUID(), 0);
 
             // cast this spell later if provided
             spellId = info->goober.spellId;

@@ -12362,6 +12362,8 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
 
 void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
 {
+    bool isCreature = IS_CREATURE_GUID(guid);
+
     uint32 addCastCount = 1;
     for( int i = 0; i < MAX_QUEST_LOG_SIZE; i++ )
     {
@@ -12381,39 +12383,41 @@ void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
                         continue;
 
                     uint32 reqTarget = 0;
-                    // GO activate objective
-                    if(qInfo->ReqCreatureOrGOId[j] < 0)
+
+                    if(isCreature)
                     {
-                        // checked at quest_template loading
-                        reqTarget = - qInfo->ReqCreatureOrGOId[j];
+                        // creature activate objectives
+                        if(qInfo->ReqCreatureOrGOId[j] > 0)
+                            // checked at quest_template loading
+                            reqTarget = qInfo->ReqCreatureOrGOId[j];
                     }
-                    // creature activate objectives
-                    else if(qInfo->ReqCreatureOrGOId[j] > 0)
-                    {
-                        // checked at quest_template loading
-                        reqTarget = qInfo->ReqCreatureOrGOId[j];
-                    }
-                    // other not creature/GO related objectives
                     else
-                        continue;
-
-                    if ( reqTarget == entry )
                     {
-                        uint32 reqCastCount = qInfo->ReqCreatureOrGOCount[j];
-                        uint32 curCastCount = mQuestStatus[questid].m_creatureOrGOcount[j];
-                        if ( curCastCount < reqCastCount )
-                        {
-                            mQuestStatus[questid].m_creatureOrGOcount[j] = curCastCount + addCastCount;
-                            if (mQuestStatus[questid].uState != QUEST_NEW) mQuestStatus[questid].uState = QUEST_CHANGED;
-
-                            SendQuestUpdateAddCreatureOrGo( qInfo, guid, j, curCastCount, addCastCount);
-                        }
-                        if ( CanCompleteQuest( questid ) )
-                            CompleteQuest( questid );
-
-                        // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
-                        continue;
+                        // GO activate objective
+                        if(qInfo->ReqCreatureOrGOId[j] < 0)
+                            // checked at quest_template loading
+                            reqTarget = - qInfo->ReqCreatureOrGOId[j];
                     }
+
+                    // other not this creature/GO related objectives
+                    if( reqTarget != entry )
+                        continue;
+
+                    uint32 reqCastCount = qInfo->ReqCreatureOrGOCount[j];
+                    uint32 curCastCount = mQuestStatus[questid].m_creatureOrGOcount[j];
+                    if ( curCastCount < reqCastCount )
+                    {
+                        mQuestStatus[questid].m_creatureOrGOcount[j] = curCastCount + addCastCount;
+                        if (mQuestStatus[questid].uState != QUEST_NEW) mQuestStatus[questid].uState = QUEST_CHANGED;
+
+                        SendQuestUpdateAddCreatureOrGo( qInfo, guid, j, curCastCount, addCastCount);
+                    }
+
+                    if ( CanCompleteQuest( questid ) )
+                        CompleteQuest( questid );
+
+                    // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
+                    break;
                 }
             }
         }
