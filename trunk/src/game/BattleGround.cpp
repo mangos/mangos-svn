@@ -1045,6 +1045,17 @@ void BattleGround::HandleKillPlayer( Player *player, Player *killer )
     {
         UpdatePlayerScore(killer, SCORE_HONORABLE_KILLS, 1);
         UpdatePlayerScore(killer, SCORE_KILLING_BLOWS, 1);
+
+        for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+        {
+            Player *plr = objmgr.GetPlayer(itr->first);
+
+            if(!plr || plr == killer)
+                continue;
+
+            if(plr->GetTeam() == killer->GetTeam() && plr->IsAtGroupRewardDistance(player))
+                UpdatePlayerScore(plr, SCORE_HONORABLE_KILLS, 1);
+        }
     }
 
     // to be able to remove insignia
