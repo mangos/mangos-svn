@@ -2654,7 +2654,7 @@ void Aura::HandleAuraTrackStealthed(bool apply, bool Real)
     if(apply)
         m_target->RemoveNoStackAurasDueToAura(this);
 
-    m_target->ApplyModFlag(PLAYER_FIELD_BYTES,0x02,apply);
+    m_target->ApplyModFlag(PLAYER_FIELD_BYTES,PLAYER_FIELD_BYTE_TRACK_STEALTHED,apply);
 }
 
 void Aura::HandleAuraModScale(bool apply, bool Real)

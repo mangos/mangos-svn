@@ -559,12 +559,6 @@ void ObjectMgr::LoadCreatureTemplates()
             CreatureDisplayInfoEntry const* ScaleEntry = sCreatureDisplayInfoStore.LookupEntry(cInfo->DisplayID_A);
             const_cast<CreatureInfo*>(cInfo)->scale = ScaleEntry ? ScaleEntry->scale : 1.0f;
         }
-
-        if(cInfo->type == CREATURE_TYPE_GAS_CLOUD)
-        {
-            if(!cInfo->SkinLootId)
-                sLog.outErrorDb("Table `creature_template` has a creature (Entry: %u) with type GAS_CLOUD but no skinlootid. Gas extraction will not work for this creature.", cInfo->Entry);
-        }
     }
 }
 
