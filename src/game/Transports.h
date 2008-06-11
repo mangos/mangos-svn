@@ -65,6 +65,9 @@ class Transport : private GameObject
         using GameObject::GetGUID;
         using GameObject::GetGUIDLow;
         using GameObject::GetMapId;
+        using GameObject::GetPositionX;
+        using GameObject::GetPositionY;
+        using GameObject::GetPositionZ;
         using GameObject::BuildCreateUpdateBlockForPlayer;
         using GameObject::BuildOutOfRangeUpdateBlock;
 

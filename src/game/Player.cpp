@@ -1561,6 +1561,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             // set position
             SetMapId(mapid);
             Relocate(final_x, final_y, final_z, final_o);
+            ApplyModFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTE_RELEASE_TIMER, !MapManager::Instance().GetBaseMap(GetMapId())->Instanceable());
 
             // move packet sent by client always after far teleport
             // SetPosition(final_x, final_y, final_z, final_o, true);
@@ -13142,6 +13143,8 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
         // flight will started later
     }
+
+    ApplyModFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTE_RELEASE_TIMER, !MapManager::Instance().GetBaseMap(GetMapId())->Instanceable());
 
     _LoadSpellCooldowns(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS));
 

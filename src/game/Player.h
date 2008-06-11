@@ -452,6 +452,14 @@ enum PlayerKnownTitles2
     PLAYER_TITLE_UNUSED34             = 0x40000000
 };
 
+// used in PLAYER_FIELD_BYTES values
+enum PlayerFieldByteFlags
+{
+    PLAYER_FIELD_BYTE_TRACK_STEALTHED   = 0x00000002,
+    PLAYER_FIELD_BYTE_RELEASE_TIMER     = 0x00000008,       // Display time till auto release spirit
+    PLAYER_FIELD_BYTE_NO_RELEASE_WINDOW = 0x00000010        // Display no "release spirit" window at all
+};
+
 // used in PLAYER_FIELD_BYTES2 values
 enum PlayerFieldByte2Flags
 {

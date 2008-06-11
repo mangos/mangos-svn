@@ -1730,6 +1730,13 @@ void SpellMgr::LoadSpellScriptTarget()
                     sLog.outErrorDb("Table `spell_script_target`: creature template entry %u does not exist.",targetEntry);
                     continue;
                 }
+                const CreatureInfo* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(targetEntry);
+
+                if(spellId == 30427 && !cInfo->SkinLootId)
+                {
+                    sLog.outErrorDb("Table `spell_script_target` has creature %u as a target of spellid 30427, but this creature has no skinlootid. Gas extraction will not work!", cInfo->Entry);
+                    continue;
+                }
                 break;
             }
         }
