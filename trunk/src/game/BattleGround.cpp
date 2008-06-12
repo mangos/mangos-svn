@@ -396,15 +396,6 @@ void BattleGround::EndBattleGround(uint32 winner)
             RewardMark(plr,ITEM_LOSER_COUNT);
         }
 
-        /* old way of rewarding honor, now it is done instantly, code is obsolete
-        std::map<uint64, BattleGroundScore*>::iterator itr1 = m_PlayerScores.find(plr->GetGUID());
-
-        if(!(itr1 == m_PlayerScores.end()))
-        {
-            if(itr1->second->BonusHonor)
-                plr->RewardHonor(NULL, 1, itr1->second->BonusHonor);
-        }*/
-
         plr->CombatStop();
 
         BlockMovement(plr);
@@ -526,9 +517,9 @@ void BattleGround::SendRewardMarkByMail(Player *plr,uint32 mark, uint32 count)
 
 void BattleGround::BlockMovement(Player *plr)
 {
-    WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 10);             // this must block movement
+    WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, plr->GetPackGUID().size()+1);
     data.append(plr->GetPackGUID());
-    data << uint8(0x00);                            // movement disabled NOTE: the effect will be automatically removed by client when the player is teleported from the battleground, so no need to send with uint8(1) in RemovePlayerAtLeave()
+    data << uint8(0x00);                                    // movement disabled NOTE: the effect will be automatically removed by client when the player is teleported from the battleground, so no need to send with uint8(1) in RemovePlayerAtLeave()
     plr->GetSession()->SendPacket(&data);
 }
 

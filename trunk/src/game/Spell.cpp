@@ -3024,9 +3024,9 @@ uint8 Spell::CanCast(bool strict)
     }
 
     // only allow triggered spells if at an ended battleground
-    if( !m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->InBattleGround() )
-        if( BattleGround *bg = ((Player*)m_caster)->GetBattleGround() )
-            if( bg->GetStatus() == STATUS_WAIT_LEAVE )
+    if( !m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER)
+        if(BattleGround * bg = ((Player*)m_caster)->GetBattleGround())
+            if(bg->GetStatus() == STATUS_WAIT_LEAVE)
                 return SPELL_FAILED_DONT_REPORT;
 
     // only check at first call, Stealth auras are already removed at second call
