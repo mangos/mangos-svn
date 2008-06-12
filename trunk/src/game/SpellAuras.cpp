@@ -277,7 +277,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //225 SPELL_AURA_DUMMY_3 Prayer of Mending
     &Aura::HandleAuraPeriodicDummy,                         //226 SPELL_AURA_PERIODIC_DUMMY
     &Aura::HandleNULL,                                      //227 periodic trigger spell
-    &Aura::HandleNULL,                                      //228 stealth detection
+    &Aura::HandleNoImmediateEffect,                         //228 stealth detection
     &Aura::HandleNULL,                                      //229 SPELL_AURA_MOD_AOE_DAMAGE_AVOIDANCE
     &Aura::HandleAuraModIncreaseMaxHealth,                  //230 Commanding Shout
     &Aura::HandleNULL,                                      //231
@@ -5509,6 +5509,11 @@ void Aura::PeriodicTick()
             m_target->SendMessageToSet(&data,true);
 
             int32 gain = m_target->ModifyHealth(pdamage);
+
+            // add HoTs to amount healed in bgs
+            if( pCaster->GetTypeId() == TYPEID_PLAYER )
+                if( BattleGround *bg = ((Player*)pCaster)->GetBattleGround() )
+                    bg->UpdatePlayerScore(((Player*)pCaster), SCORE_HEALING_DONE, gain);
 
             //Do check before because m_modifier.auraName can be invalidate by DealDamage.
             bool procSpell = (m_modifier.m_auraname == SPELL_AURA_PERIODIC_HEAL && m_target != pCaster);
