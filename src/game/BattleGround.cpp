@@ -405,6 +405,8 @@ void BattleGround::EndBattleGround(uint32 winner)
                 plr->RewardHonor(NULL, 1, itr1->second->BonusHonor);
         }*/
 
+        plr->CombatStop();
+
         BlockMovement(plr);
 
         sBattleGroundMgr.BuildPvpLogDataPacket(&data, this);
@@ -524,8 +526,9 @@ void BattleGround::SendRewardMarkByMail(Player *plr,uint32 mark, uint32 count)
 
 void BattleGround::BlockMovement(Player *plr)
 {
-    WorldPacket data(SMSG_SPLINE_MOVE_ROOT, 8);             // this must block movement
+    WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 10);             // this must block movement
     data.append(plr->GetPackGUID());
+    data << uint8(0x00);                            // movement disabled NOTE: the effect will be automatically removed by client when the player is teleported from the battleground, so no need to send with uint8(1) in RemovePlayerAtLeave()
     plr->GetSession()->SendPacket(&data);
 }
 

@@ -354,7 +354,7 @@ void WorldSession::HandleBattleGroundLeaveOpcode( WorldPacket & /*recv_data*/ )
     //if(bgTypeId >= MAX_BATTLEGROUND_TYPES)                  // cheating? but not important in this case
     //    return;
 
-    if(_player->isInCombat())                               // not allow leave battleground in combat
+    if(_player->isInCombat() && _player->InBattleGround() && _player->GetBattleGround() && _player->GetBattleGround()->GetStatus() != STATUS_WAIT_LEAVE)                               // not allow leave battleground in combat
         return;
 
     _player->LeaveBattleground();

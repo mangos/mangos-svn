@@ -8235,26 +8235,30 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
             return false;
     }
 
-    //Calculation if target is in front
+    // if doesn't have stealth detection (Shadow Sight), then check how stealthy the unit is, otherwise just check los
+    if(!u->HasAuraType(SPELL_AURA_DETECT_STEALTH))
+    {
+        //Calculation if target is in front
 
-    //Visible distance based on stealth value (stealth rank 4 300MOD, 10.5 - 3 = 7.5)
-    float visibleDistance = 10.5f - (GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH)/100.0f);
+        //Visible distance based on stealth value (stealth rank 4 300MOD, 10.5 - 3 = 7.5)
+        float visibleDistance = 10.5f - (GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH)/100.0f);
 
-    //Visible distance is modified by
-    //-Level Diff (every level diff = 1.0f in visible distance)
-    visibleDistance += int32(u->getLevel()) - int32(this->getLevel());
+        //Visible distance is modified by
+        //-Level Diff (every level diff = 1.0f in visible distance)
+        visibleDistance += int32(u->getLevel()) - int32(this->getLevel());
 
-    //This allows to check talent tree and will add addition stealth dependent on used points)
-    int32 stealthMod = GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_LEVEL);
-    if(stealthMod < 0)
-        stealthMod = 0;
+        //This allows to check talent tree and will add addition stealth dependent on used points)
+        int32 stealthMod = GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_LEVEL);
+        if(stealthMod < 0)
+            stealthMod = 0;
 
-    //-Stealth Mod(positive like Master of Deception) and Stealth Detection(negative like paranoia)
-    //based on wowwiki every 5 mod we have 1 more level diff in calculation
-    visibleDistance += (int32(u->GetTotalAuraModifier(SPELL_AURA_MOD_DETECT)) - stealthMod)/5.0f;
+        //-Stealth Mod(positive like Master of Deception) and Stealth Detection(negative like paranoia)
+        //based on wowwiki every 5 mod we have 1 more level diff in calculation
+        visibleDistance += (int32(u->GetTotalAuraModifier(SPELL_AURA_MOD_DETECT)) - stealthMod)/5.0f;
 
-    if(distance > visibleDistance)
-        return false;
+        if(distance > visibleDistance)
+            return false;
+    }
 
     // Now check is target visible with LoS
     float ox,oy,oz;
