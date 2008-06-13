@@ -23,6 +23,7 @@
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "ByteBuffer.h"
+#include "Config/ConfigEnv.h"
 #include "Log.h"
 #include "RealmList.h"
 #include "AuthSocket.h"
@@ -622,10 +623,10 @@ bool AuthSocket::_HandleLogonProof()
     {
         sLog.outBasic("User '%s' successfully authenticated", _login.c_str());
 
-        ///- Update the sessionkey, last_ip and last login time in the account table for this account
+        ///- Update the sessionkey, last_ip, last login time and reset number of failed logins in the account table for this account
         // No SQL injection (escaped user name) and IP address as received by socket
         const char* K_hex = K.AsHexStr();
-        dbRealmServer.PExecute("UPDATE account SET sessionkey = '%s', last_ip = '%s', last_login = NOW(), locale = '%u' WHERE username = '%s'", K_hex, GetRemoteAddress().c_str(),  _localization, _safelogin.c_str() );
+        dbRealmServer.PExecute("UPDATE account SET sessionkey = '%s', last_ip = '%s', last_login = NOW(), locale = '%u', failed_logins = 0 WHERE username = '%s'", K_hex, GetRemoteAddress().c_str(),  _localization, _safelogin.c_str() );
         OPENSSL_free((void*)K_hex);
 
         ///- Finish SRP6 and send the final result to the client
@@ -650,6 +651,41 @@ bool AuthSocket::_HandleLogonProof()
     {
         char data[4]={AUTH_LOGON_PROOF,REALM_AUTH_NO_MATCH,3,0};
         SendBuf(data,sizeof(data));
+        sLog.outBasic("[AuthChallenge] account %s tried to login with wrong password!",_login.c_str ());
+
+        uint32 MaxWrongPassCount = sConfig.GetIntDefault("WrongPass.MaxCount", 0);
+        if(MaxWrongPassCount > 0)
+        {
+            //Increment number of failed logins by one and if it reaches the limit temporarily ban that account or IP
+            dbRealmServer.PExecute("UPDATE account SET failed_logins = failed_logins + 1 WHERE username = '%s'",_safelogin.c_str());
+
+            if(QueryResult *loginfail = dbRealmServer.PQuery("SELECT id, last_ip, failed_logins FROM account WHERE username = '%s'", _safelogin.c_str()))
+            {
+                Field* fields = loginfail->Fetch();
+                uint32 failed_logins = fields[2].GetUInt32();
+
+                if( failed_logins >= MaxWrongPassCount )
+                {
+                    uint32 WrongPassBanTime = sConfig.GetIntDefault("WrongPass.BanTime", 600);
+                    bool WrongPassBanType = sConfig.GetBoolDefault("WrongPass.BanType", false);
+
+                    if(WrongPassBanType)
+                    {
+                        uint32 acc_id = fields[0].GetUInt32();
+                        dbRealmServer.PExecute("INSERT INTO account_banned VALUES ('%u',UNIX_TIMESTAMP(),UNIX_TIMESTAMP()+'%u','MaNGOS realmd','Failed login autoban',1)", acc_id, WrongPassBanTime);
+                        sLog.outBasic("[AuthChallenge] account %s got banned for '%u' seconds because it failed to authenticale '%u' times",_login.c_str(), WrongPassBanTime, failed_logins);
+                    }
+                    else
+                    {
+                        std::string last_ip = fields[1].GetCppString();
+                        dbRealmServer.escape_string(last_ip);
+                        dbRealmServer.PExecute("INSERT INTO ip_banned VALUES ('%s',UNIX_TIMESTAMP(),UNIX_TIMESTAMP()+'%u','MaNGOS realmd','Failed login autoban')",last_ip.c_str(), WrongPassBanTime);
+                        sLog.outBasic("[AuthChallenge] IP %s got banned for '%u' seconds because it failed to authenticale '%u' times", (*loginfail)[1].GetString(), WrongPassBanTime, failed_logins);
+                    }
+                }
+                delete loginfail;
+            }
+        }
     }
     return true;
 }

@@ -81,8 +81,18 @@ ConfVersion=2007062001
 #        Default: 20 
 #                 0  (Disabled)
 #
+#    WrongPass.MaxCount
+#        Number of login attemps with wrong password before the account or IP is banned
+#        Default: 0  (Never ban)
 #
-#	
+#    WrongPass.BanTime
+#        Duration of the ban in seconds (0 means permanent ban)
+#        Default: 600
+#
+#    WrongPass.BanType
+#        Ban the IP or account on which login is attempted
+#        Default: 0 (Ban IP)
+#                 1 (Ban Account)
 #
 ###################################################################################################################
 
@@ -101,3 +111,6 @@ LogColors = ""
 UseProcessors = 0
 ProcessPriority = 1
 RealmsStateUpdateDelay = 20
+WrongPass.MaxCount = 0
+WrongPass.BanTime = 600
+WrongPass.BanType = 0
