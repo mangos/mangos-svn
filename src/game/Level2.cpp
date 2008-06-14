@@ -176,7 +176,7 @@ bool ChatHandler::HandleTargetObjectCommand(const char* args)
 {
     Player* pl = m_session->GetPlayer();
     QueryResult *result;
-    const GameEvent::ActiveEvents *ActiveEventsList = gameeventmgr.GetActiveEventList();
+    GameEvent::ActiveEvents const& activeEventsList = gameeventmgr.GetActiveEventList();
     if(*args)
     {
         int32 id = atoi((char*)args);
@@ -199,7 +199,7 @@ bool ChatHandler::HandleTargetObjectCommand(const char* args)
         eventFilter << " AND (event IS NULL ";
         bool initString = true;
 
-        for (GameEvent::ActiveEvents::const_iterator itr = ActiveEventsList->begin(); itr != ActiveEventsList->end(); ++itr)
+        for (GameEvent::ActiveEvents::const_iterator itr = activeEventsList.begin(); itr != activeEventsList.end(); ++itr)
         {
             if (initString)
             {
@@ -3410,3 +3410,173 @@ bool ChatHandler::HandleUpdateHonorFieldsCommand(const char* /*args*/)
     target->UpdateHonorFields(true);
     return true;
 }
+
+bool ChatHandler::HandleLookupEventCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    std::string namepart = args;
+    uint32 counter = 0;
+
+    // converting string that we try to find to lower case
+    strToLower( namepart );
+
+    GameEvent::GameEventDataMap const& events = gameeventmgr.GetEventMap();
+    GameEvent::ActiveEvents const& activeEvents = gameeventmgr.GetActiveEventList();
+
+    for(uint32 id = 0; id < events.size(); ++id )
+    {
+        GameEventData const& eventData = events[id];
+
+        std::string descr = eventData.description;
+
+        // converting to lower case
+        strToLower( descr );
+
+        if (descr.find(namepart) != std::string::npos)
+        {
+            char const* active = activeEvents.find(id) != activeEvents.end() ? GetMangosString(LANG_ACTIVE) : "";
+            PSendSysMessage(LANG_EVENT_ENTRY_LIST,id,id,eventData.description.c_str(),active );
+            ++counter;
+        }
+    }
+
+    if (counter==0)
+        SendSysMessage(LANG_NOEVENTFOUND);
+
+    return true;
+}
+
+bool ChatHandler::HandleEventActiveListCommand(const char* args)
+{
+    uint32 counter = 0;
+
+    GameEvent::GameEventDataMap const& events = gameeventmgr.GetEventMap();
+    GameEvent::ActiveEvents const& activeEvents = gameeventmgr.GetActiveEventList();
+
+    char const* active = GetMangosString(LANG_ACTIVE);
+
+    for(GameEvent::ActiveEvents::const_iterator itr = activeEvents.begin(); itr != activeEvents.end(); ++itr )
+    {
+        uint32 event_id = *itr;
+        GameEventData const& eventData = events[event_id];
+
+        PSendSysMessage(LANG_EVENT_ENTRY_LIST,event_id,event_id,eventData.description.c_str(),active );
+        ++counter;
+    }
+
+    if (counter==0)
+        SendSysMessage(LANG_NOEVENTFOUND);
+
+    return true;
+}
+
+bool ChatHandler::HandleEventInfoCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hgameevent");
+    if(!cId)
+        return false;
+
+    uint32 event_id = atoi(cId);
+
+    GameEvent::GameEventDataMap const& events = gameeventmgr.GetEventMap();
+
+    if(event_id >=events.size())
+    {
+        SendSysMessage(LANG_EVENT_NOT_EXIST);
+        return true;
+    }
+
+    GameEventData const& eventData = events[event_id];
+
+    GameEvent::ActiveEvents const& activeEvents = gameeventmgr.GetActiveEventList();
+    bool active = activeEvents.find(event_id) != activeEvents.end();
+    char const* activeStr = active ? GetMangosString(LANG_ACTIVE) : "";
+
+    std::string startTimeStr = TimeToTimestampStr(eventData.start);
+    std::string endTimeStr = TimeToTimestampStr(eventData.end);
+
+    uint32 delay = gameeventmgr.NextCheck(event_id);
+    time_t nextTime = time(NULL)+delay;
+    std::string nextStr = nextTime >= eventData.start && nextTime < eventData.end ? TimeToTimestampStr(time(NULL)+delay) : "-";
+
+    std::string occurenceStr = secsToTimeString(eventData.occurence * MINUTE);
+    std::string lengthStr = secsToTimeString(eventData.length * MINUTE);
+
+    PSendSysMessage(LANG_EVENT_INFO,event_id,eventData.description.c_str(),activeStr,
+        startTimeStr.c_str(),endTimeStr.c_str(),occurenceStr.c_str(),lengthStr.c_str(),
+        nextStr.c_str());
+    return true;
+}
+
+bool ChatHandler::HandleEventStartCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hgameevent");
+    if(!cId)
+        return false;
+
+    int32 event_id = atoi(cId);
+
+    GameEvent::GameEventDataMap const& events = gameeventmgr.GetEventMap();
+
+    if(event_id < 0 || event_id >=events.size())
+    {
+        SendSysMessage(LANG_EVENT_NOT_EXIST);
+        return true;
+    }
+
+    GameEvent::ActiveEvents const& activeEvents = gameeventmgr.GetActiveEventList();
+    GameEventData const& eventData = events[event_id];
+
+    if(activeEvents.find(event_id) != activeEvents.end())
+    {
+        PSendSysMessage(LANG_EVENT_ALREADY_ACTIVE,event_id);
+        return true;
+    }
+
+    gameeventmgr.StartEvent(event_id,true);
+    return true;
+}
+
+bool ChatHandler::HandleEventStopCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    // id or [name] Shift-click form |color|Hgameevent:id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hgameevent");
+    if(!cId)
+        return false;
+
+    int32 event_id = atoi(cId);
+
+    GameEvent::GameEventDataMap const& events = gameeventmgr.GetEventMap();
+
+    if(event_id < 0 || event_id >=events.size())
+    {
+        SendSysMessage(LANG_EVENT_NOT_EXIST);
+        return true;
+    }
+
+    GameEvent::ActiveEvents const& activeEvents = gameeventmgr.GetActiveEventList();
+    GameEventData const& eventData = events[event_id];
+
+    if(activeEvents.find(event_id) == activeEvents.end())
+    {
+        PSendSysMessage(LANG_EVENT_NOT_ACTIVE,event_id);
+        return true;
+    }
+
+    gameeventmgr.StopEvent(event_id,true);
+    return true;
+}
+

@@ -119,6 +119,11 @@ class ChatHandler
         bool HandleGroupTeleCommand(const char* args);
         bool HandleDrunkCommand(const char* args);
 
+        bool HandleEventActiveListCommand(const char* args);
+        bool HandleEventStartCommand(const char* args);
+        bool HandleEventStopCommand(const char* args);
+        bool HandleEventInfoCommand(const char* args);
+
         bool HandleModifyKnownTitlesCommand(const char* args);
         bool HandleModifyHPCommand(const char* args);
         bool HandleModifyManaCommand(const char* args);
@@ -313,12 +318,13 @@ class ChatHandler
         bool HandleListObjectCommand(const char* args);
         bool HandleNearObjectCommand(const char* args);
         bool HandleLookupAreaCommand(const char* args);
+        bool HandleLookupCreatureCommand(const char* args);
+        bool HandleLookupEventCommand(const char* args);
         bool HandleLookupFactionCommand(const char * args);
+        bool HandleLookupObjectCommand(const char* args);
+        bool HandleLookupQuestCommand(const char* args);
         bool HandleLookupSkillCommand(const char* args);
         bool HandleLookupSpellCommand(const char* args);
-        bool HandleLookupQuestCommand(const char* args);
-        bool HandleLookupCreatureCommand(const char* args);
-        bool HandleLookupObjectCommand(const char* args);
         bool HandlePasswordCommand(const char* args);
         bool HandleLockAccountCommand(const char* args);
         bool HandleRespawnCommand(const char* args);
@@ -367,7 +373,6 @@ class ChatHandler
         // Utility methods for commands
         void ShowTicket(uint64 guid, uint32 category, char const* text, char const* time);
         uint32 GetTicketIDByNum(uint32 num);
-
         // common global flag
         static bool load_command_table;
 };

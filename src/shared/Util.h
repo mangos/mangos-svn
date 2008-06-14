@@ -35,6 +35,7 @@ void stripLineInvisibleChars(std::string &src);
 
 std::string secsToTimeString(uint32 timeInSecs, bool shortText = false, bool hoursOnly = false);
 uint32 TimeStringToSecs(std::string timestring);
+std::string TimeToTimestampStr(time_t t);
 
 /* Return a random number in the range min..max; (max-min) must be smaller than 32768.
  * Note: Not reentrant - if two threads call this simultaneously, they will likely
