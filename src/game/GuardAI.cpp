@@ -45,7 +45,7 @@ void GuardAI::MoveInLineOfSight(Unit *u)
         float attackRadius = i_creature.GetAttackDistance(u);
         if(i_creature.IsWithinDistInMap(u,attackRadius) && i_creature.GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
         {
-            //Need add code to let guard suport player
+            //Need add code to let guard support player
             AttackStart(u);
             u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         }

@@ -51,14 +51,10 @@ AggressorAI::MoveInLineOfSight(Unit *u)
         u->isInAccessablePlaceFor(&i_creature) )
     {
         float attackRadius = i_creature.GetAttackDistance(u);
-        if(i_creature.IsWithinDistInMap(u, attackRadius))
+        if(i_creature.IsWithinDistInMap(u, attackRadius) && i_creature.IsWithinLOSInMap(u) )
         {
-            // Check first that object is in an angle in front of this one before LoS check
-            if( i_creature.HasInArc(M_PI/2.0f, u) && i_creature.IsWithinLOSInMap(u) )
-            {
-                AttackStart(u);
-                u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-            }
+            AttackStart(u);
+            u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         }
     }
 }
