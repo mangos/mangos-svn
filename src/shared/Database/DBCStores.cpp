@@ -65,7 +65,7 @@ DBCStorage <GtOCTRegenHPEntry>            sGtOCTRegenHPStore(GtOCTRegenHPfmt);
 //DBCStorage <GtOCTRegenMPEntry>            sGtOCTRegenMPStore(GtOCTRegenMPfmt);  -- not used currently
 DBCStorage <GtRegenHPPerSptEntry>         sGtRegenHPPerSptStore(GtRegenHPPerSptfmt);
 DBCStorage <GtRegenMPPerSptEntry>         sGtRegenMPPerSptStore(GtRegenMPPerSptfmt);
-
+DBCStorage <ItemEntry>                    sItemStore(Itemfmt);
 //DBCStorage <ItemCondExtCostsEntry> sItemCondExtCostsStore(ItemCondExtCostsEntryfmt);
 //DBCStorage <ItemDisplayInfoEntry> sItemDisplayInfoStore(ItemDisplayTemplateEntryfmt); -- not used currently
 DBCStorage <ItemExtendedCostEntry> sItemExtendedCostStore(ItemExtendedCostEntryfmt);
@@ -180,7 +180,7 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 54;
+    const uint32 DBCFilesCount = 55;
 
     barGoLink bar( DBCFilesCount );
 
@@ -240,7 +240,7 @@ void LoadDBCStores(std::string dataPath)
 //    LoadDBC(bar,bad_dbc_files,sGtOCTRegenMPStore,        dataPath+"dbc/gtOCTRegenMP.dbc");       -- not used currently
     LoadDBC(bar,bad_dbc_files,sGtRegenHPPerSptStore,     dataPath+"dbc/gtRegenHPPerSpt.dbc");
     LoadDBC(bar,bad_dbc_files,sGtRegenMPPerSptStore,     dataPath+"dbc/gtRegenMPPerSpt.dbc");
-
+    LoadDBC(bar,bad_dbc_files,sItemStore,                dataPath+"dbc/Item.dbc");
     //LoadDBC(bar,bad_dbc_files,sItemDisplayInfoStore,     dataPath+"dbc/ItemDisplayInfo.dbc");     -- not used currently
     //LoadDBC(bar,bad_dbc_files,sItemCondExtCostsStore,    dataPath+"dbc/ItemCondExtCosts.dbc");
     LoadDBC(bar,bad_dbc_files,sItemExtendedCostStore,    dataPath+"dbc/ItemExtendedCost.dbc");

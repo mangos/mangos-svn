@@ -337,6 +337,14 @@ struct GtRegenMPPerSptEntry
     float    ratio;
 };
 
+struct ItemEntry
+{
+   uint32 ID;
+   uint32 DisplayId;
+   uint32 InventoryType;
+   uint32 Sheath;
+};
+
 struct ItemDisplayInfoEntry
 {
     uint32      ID;
