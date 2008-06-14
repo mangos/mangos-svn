@@ -1307,8 +1307,38 @@ void ObjectMgr::LoadItemPrototypes()
     for(uint32 i = 1; i < sItemStorage.MaxEntry; ++i)
     {
         ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype >(i);
+        ItemEntry const *dbcitem = sItemStore.LookupEntry(i);
         if(!proto)
+        {
+            /* to many errors, and possible not all items really used in game
+            if (dbcitem)
+                sLog.outErrorDb("Item (Entry: %u) doesn't exists in DB, but must exist.",i);
+            */
             continue;
+        }
+
+        if(dbcitem)
+        {
+            if(proto->InventoryType != dbcitem->InventoryType)
+            {
+                sLog.outErrorDb("Item (Entry: %u) not correct %u inventory type, must be %u (using it).",i,proto->InventoryType,dbcitem->InventoryType);
+                const_cast<ItemPrototype*>(proto)->InventoryType = dbcitem->InventoryType;
+            }
+            if(proto->DisplayInfoID != dbcitem->DisplayId)
+            {
+                sLog.outErrorDb("Item (Entry: %u) not correct %u display id, must be %u (using it).",i,proto->DisplayInfoID,dbcitem->DisplayId);
+                const_cast<ItemPrototype*>(proto)->DisplayInfoID = dbcitem->DisplayId;
+            }
+            if(proto->Sheath != dbcitem->Sheath)
+            {
+                sLog.outErrorDb("Item (Entry: %u) not correct %u sheath, must be %u  (using it).",i,proto->Sheath,dbcitem->Sheath);
+                const_cast<ItemPrototype*>(proto)->Sheath = dbcitem->Sheath;
+            }
+        }
+        else
+        {
+            sLog.outErrorDb("Item (Entry: %u) not correct (not listed in list of existed items).",i);
+        }
 
         if(proto->Class >= MAX_ITEM_CLASS)
         {
@@ -1562,6 +1592,9 @@ void ObjectMgr::LoadItemPrototypes()
             const_cast<ItemPrototype*>(proto)->FoodType = 0;
         }
     }
+
+    // this DBC used currently only for check item templates in DB.
+    sItemStorage.Free();
 }
 
 void ObjectMgr::LoadAuctionItems()
