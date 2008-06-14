@@ -1594,7 +1594,7 @@ void ObjectMgr::LoadItemPrototypes()
     }
 
     // this DBC used currently only for check item templates in DB.
-    sItemStorage.Free();
+    sItemStore.Clear();
 }
 
 void ObjectMgr::LoadAuctionItems()
