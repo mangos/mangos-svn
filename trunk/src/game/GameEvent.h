@@ -48,12 +48,17 @@ class GameEvent
         GameEvent();
         ~GameEvent() {};
         typedef std::set<uint16> ActiveEvents;
-        ActiveEvents const* GetActiveEventList() const { return &m_ActiveEvents; }
-        bool CheckOneGameEvent(uint16 entry);
+        typedef std::vector<GameEventData> GameEventDataMap;
+        ActiveEvents const& GetActiveEventList() const { return m_ActiveEvents; }
+        GameEventDataMap const& GetEventMap() const { return mGameEvent; }
+        bool CheckOneGameEvent(uint16 entry) const;
+        uint32 NextCheck(uint16 entry) const;
         void LoadFromDB();
         uint32 Update();
         bool IsActiveEvent(uint16 event_id) { return ( m_ActiveEvents.find(event_id)!=m_ActiveEvents.end()); }
         uint32 Initialize();
+        void StartEvent(uint16 event_id, bool overwrite = false);
+        void StopEvent(uint16 event_id, bool overwrite = false);
     private:
         void AddActiveEvent(uint16 event_id) { m_ActiveEvents.insert(event_id); }
         void RemoveActiveEvent(uint16 event_id) { m_ActiveEvents.erase(event_id); }
@@ -63,9 +68,7 @@ class GameEvent
         void GameEventUnspawn(int16 event_id);
         void ChangeEquipOrModel(int16 event_id, bool activate);
         void UpdateEventQuests(uint16 event_id, bool Activate);
-        uint32 NextCheck(uint16 entry);
     protected:
-        typedef std::vector<GameEventData> GameEventDataMap;
         typedef std::list<uint32> GuidList;
         typedef std::vector<GuidList> GameEventGuidMap;
         typedef std::pair<uint32, ModelEquip> ModelEquipPair;
@@ -81,7 +84,6 @@ class GameEvent
         GameEventDataMap  mGameEvent;
         ActiveEvents m_ActiveEvents;
         bool isSystemInit;
-        uint16 max_event_id;
 };
 
 #define gameeventmgr MaNGOS::Singleton<GameEvent>::Instance()

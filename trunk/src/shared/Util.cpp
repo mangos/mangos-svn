@@ -131,6 +131,20 @@ uint32 TimeStringToSecs(std::string timestring)
     return secs;
 }
 
+std::string TimeToTimestampStr(time_t t)
+{
+    tm* aTm = localtime(&t);
+    //       YYYY   year
+    //       MM     month (2 digits 01-12)
+    //       DD     day (2 digits 01-31)
+    //       HH     hour (2 digits 00-23)
+    //       MM     minutes (2 digits 00-59)
+    //       SS     seconds (2 digits 00-59)
+    char buf[20];
+    snprintf(buf,20,"%04d-%02d-%02d_%02d-%02d-%02d",aTm->tm_year+1900,aTm->tm_mon+1,aTm->tm_mday,aTm->tm_hour,aTm->tm_min,aTm->tm_sec);
+    return std::string(buf);
+}
+
 /// Check if the string is a valid ip address representation
 bool IsIPAddress(char const* ipaddress)
 {

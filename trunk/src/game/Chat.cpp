@@ -153,6 +153,15 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  NULL,                                           "", NULL }
     };
 
+    static ChatCommand eventCommandTable[] =
+    {
+        { "activelist",     SEC_GAMEMASTER,     &ChatHandler::HandleEventActiveListCommand,     "", NULL },
+        { "start",          SEC_GAMEMASTER,     &ChatHandler::HandleEventStartCommand,          "", NULL },
+        { "stop",           SEC_GAMEMASTER,     &ChatHandler::HandleEventStopCommand,           "", NULL },
+        { "",               SEC_GAMEMASTER,     &ChatHandler::HandleEventInfoCommand,           "", NULL },
+        { NULL,             0,                  NULL,                                           "", NULL }
+    };
+
     static ChatCommand learnCommandTable[] =
     {
         { "all",            SEC_ADMINISTRATOR,  &ChatHandler::HandleLearnAllCommand,            "", NULL },
@@ -237,14 +246,15 @@ ChatCommand * ChatHandler::getCommandTable()
     static ChatCommand lookupCommandTable[] =
     {
         { "area",           SEC_MODERATOR,      &ChatHandler::HandleLookupAreaCommand,          "", NULL },
+        { "creature",       SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupCreatureCommand,      "", NULL },
+        { "event",          SEC_GAMEMASTER,     &ChatHandler::HandleLookupEventCommand,         "", NULL },
         { "faction",        SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupFactionCommand,       "", NULL },
         { "item",           SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupItemCommand,          "", NULL },
         { "itemset",        SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupItemSetCommand,       "", NULL },
+        { "object",         SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupObjectCommand,        "", NULL },
+        { "quest",          SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupQuestCommand,         "", NULL },
         { "skill",          SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupSkillCommand,         "", NULL },
         { "spell",          SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupSpellCommand,         "", NULL },
-        { "quest",          SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupQuestCommand,         "", NULL },
-        { "creature",       SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupCreatureCommand,      "", NULL },
-        { "object",         SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupObjectCommand,        "", NULL },
         { "tele",           SEC_MODERATOR,      &ChatHandler::HandleLookupTeleCommand,          "", NULL },
         { NULL,             0,                  NULL,                                           "", NULL }
     };
@@ -377,6 +387,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "modify",         SEC_MODERATOR,      NULL,                                           "", modifyCommandTable },
         { "debug",          SEC_MODERATOR,      NULL,                                           "", debugCommandTable },
         { "tele",           SEC_MODERATOR,      NULL,                                           "", teleCommandTable },
+        { "event",          SEC_GAMEMASTER,     NULL,                                           "", eventCommandTable },
         { "gobject",        SEC_GAMEMASTER,     NULL,                                           "", gobjectCommandTable },
         { "honor",          SEC_GAMEMASTER,     NULL,                                           "", honorCommandTable },
         { "wp",             SEC_GAMEMASTER,     NULL,                                           "", wpCommandTable },

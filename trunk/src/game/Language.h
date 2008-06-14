@@ -514,6 +514,13 @@ enum MangosStrings
     LANG_COMMAND_NEAROBJMESSAGE         = 581,
     LANG_COMMAND_RAWPAWNTIMES           = 582,
 
+    LANG_EVENT_ENTRY_LIST               = 583,
+    LANG_NOEVENTFOUND                   = 584,
+    LANG_EVENT_NOT_EXIST                = 585,
+    LANG_EVENT_INFO                     = 586,
+    LANG_EVENT_ALREADY_ACTIVE           = 587,
+    LANG_EVENT_NOT_ACTIVE               = 588,
+
     // Battleground
     LANG_BG_A_WINS                      = 600,
     LANG_BG_H_WINS                      = 601,

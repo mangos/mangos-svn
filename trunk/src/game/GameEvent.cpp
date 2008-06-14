@@ -27,17 +27,18 @@
 
 INSTANTIATE_SINGLETON_1(GameEvent);
 
-bool GameEvent::CheckOneGameEvent(uint16 entry)
+bool GameEvent::CheckOneGameEvent(uint16 entry) const
 {
     // Get the event information
     time_t currenttime = time(NULL);
-    if ((mGameEvent[entry].start < currenttime) && (currenttime < mGameEvent[entry].end) && (((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 60)) < (mGameEvent[entry].length * 60)))
+    if( mGameEvent[entry].start < currenttime && currenttime < mGameEvent[entry].end &&
+        ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * MINUTE)) < (mGameEvent[entry].length * MINUTE) )
         return true;
     else
         return false;
 }
 
-uint32 GameEvent::NextCheck(uint16 entry)
+uint32 GameEvent::NextCheck(uint16 entry) const
 {
     time_t currenttime = time(NULL);
 
@@ -53,9 +54,9 @@ uint32 GameEvent::NextCheck(uint16 entry)
     // in event, we return the end of it
     if ((((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 60)) < (mGameEvent[entry].length * 60)))
         // we return the delay before it ends
-        delay = (mGameEvent[entry].length * 60) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 60));
+        delay = (mGameEvent[entry].length * MINUTE) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * MINUTE));
     else                                                    // not in window, we return the delay before next start
-        delay = (mGameEvent[entry].occurence * 60) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 60));
+        delay = (mGameEvent[entry].occurence * MINUTE) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * MINUTE));
     // In case the end is before next check
     if (mGameEvent[entry].end  < time_t(currenttime + delay))
         return (mGameEvent[entry].end - currenttime);
@@ -63,25 +64,50 @@ uint32 GameEvent::NextCheck(uint16 entry)
         return delay;
 }
 
+void GameEvent::StartEvent( uint16 event_id, bool overwrite )
+{
+    AddActiveEvent(event_id);
+    ApplyNewEvent(event_id);
+    if(overwrite)
+    {
+        mGameEvent[event_id].start = time(NULL);
+        if(mGameEvent[event_id].end <= mGameEvent[event_id].start)
+            mGameEvent[event_id].end = mGameEvent[event_id].start+mGameEvent[event_id].length;
+    }
+}
+
+void GameEvent::StopEvent( uint16 event_id, bool overwrite )
+{
+    RemoveActiveEvent(event_id);
+    UnApplyEvent(event_id);
+    if(overwrite)
+    {
+        mGameEvent[event_id].start = time(NULL) - mGameEvent[event_id].length * MINUTE;
+        if(mGameEvent[event_id].end <= mGameEvent[event_id].start)
+            mGameEvent[event_id].end = mGameEvent[event_id].start+mGameEvent[event_id].length;
+    }
+}
+
 void GameEvent::LoadFromDB()
 {
-    QueryResult *result = WorldDatabase.Query("SELECT MAX(entry) FROM game_event");
-    if( !result )
     {
-        sLog.outString(">> Table game_event is empty.");
-        sLog.outString();
-        return;
-    }
-    else
-    {
+        QueryResult *result = WorldDatabase.Query("SELECT MAX(entry) FROM game_event");
+        if( !result )
+        {
+            sLog.outString(">> Table game_event is empty.");
+            sLog.outString();
+            return;
+        }
+
         Field *fields = result->Fetch();
-        max_event_id = fields[0].GetUInt16();
+
+        uint32 max_event_id = fields[0].GetUInt16();
         delete result;
+
+        mGameEvent.resize(max_event_id+1);
     }
 
-    mGameEvent.resize(max_event_id + 1);
-
-    result = WorldDatabase.Query("SELECT entry,UNIX_TIMESTAMP(start_time),UNIX_TIMESTAMP(end_time),occurence,length,description FROM game_event");
+    QueryResult *result = WorldDatabase.Query("SELECT entry,UNIX_TIMESTAMP(start_time),UNIX_TIMESTAMP(end_time),occurence,length,description FROM game_event");
     if( !result )
     {
         mGameEvent.clear();
@@ -117,7 +143,7 @@ void GameEvent::LoadFromDB()
     sLog.outString( ">> Loaded %u game events", count );
     delete result;
 
-    mGameEventCreatureGuids.resize((max_event_id * 2) + 1);
+    mGameEventCreatureGuids.resize(mGameEvent.size()*2-1);
     //                                   1              2
     result = WorldDatabase.Query("SELECT creature.guid, game_event_creature.event "
         "FROM creature JOIN game_event_creature ON creature.guid = game_event_creature.guid");
@@ -144,14 +170,16 @@ void GameEvent::LoadFromDB()
             uint32 guid    = fields[0].GetUInt32();
             int16 event_id = fields[1].GetInt16();
 
-            if(max_event_id + event_id >= mGameEventCreatureGuids.size())
+            int32 internal_event_id = mGameEvent.size() + event_id - 1;
+
+            if(internal_event_id < 0 || internal_event_id >= mGameEventCreatureGuids.size())
             {
                 sLog.outErrorDb("`game_event_creature` game event id (%i) is out of range compared to max event id in `game_event`",event_id);
                 continue;
             }
 
             ++count;
-            GuidList& crelist = mGameEventCreatureGuids[max_event_id + event_id];
+            GuidList& crelist = mGameEventCreatureGuids[internal_event_id];
             crelist.push_back(guid);
 
         } while( result->NextRow() );
@@ -160,7 +188,7 @@ void GameEvent::LoadFromDB()
         delete result;
     }
 
-    mGameEventGameobjectGuids.resize((max_event_id * 2) + 1);
+    mGameEventGameobjectGuids.resize(mGameEvent.size()*2-1);
     //                                   1                2
     result = WorldDatabase.Query("SELECT gameobject.guid, game_event_gameobject.event "
         "FROM gameobject JOIN game_event_gameobject ON gameobject.guid=game_event_gameobject.guid");
@@ -187,14 +215,16 @@ void GameEvent::LoadFromDB()
             uint32 guid    = fields[0].GetUInt32();
             int16 event_id = fields[1].GetInt16();
 
-            if(max_event_id + event_id >= mGameEventGameobjectGuids.size())
+            int32 internal_event_id = mGameEvent.size() + event_id - 1;
+
+            if(internal_event_id < 0 || internal_event_id >= mGameEventGameobjectGuids.size())
             {
                 sLog.outErrorDb("`game_event_gameobject` game event id (%i) is out of range compared to max event id in `game_event`",event_id);
                 continue;
             }
 
             ++count;
-            GuidList& golist = mGameEventGameobjectGuids[max_event_id + event_id];
+            GuidList& golist = mGameEventGameobjectGuids[internal_event_id];
             golist.push_back(guid);
 
         } while( result->NextRow() );
@@ -204,7 +234,7 @@ void GameEvent::LoadFromDB()
         delete result;
     }
 
-    mGameEventModelEquip.resize(max_event_id + 1);
+    mGameEventModelEquip.resize(mGameEvent.size());
     //                                   0              1                             2
     result = WorldDatabase.Query("SELECT creature.guid, game_event_model_equip.event, game_event_model_equip.modelid,"
     //   3
@@ -264,7 +294,7 @@ void GameEvent::LoadFromDB()
         delete result;
     }
 
-    mGameEventQuests.resize(max_event_id + 1);
+    mGameEventQuests.resize(mGameEvent.size());
     //                                   0   1      2
     result = WorldDatabase.Query("SELECT id, quest, event FROM game_event_creature_quest");
 
@@ -321,26 +351,20 @@ uint32 GameEvent::Update()                                  // return the next e
 {
     uint32 nextEventDelay = max_ge_check_delay;             // 1 day
     uint32 calcDelay;
-    for (uint16 itr = 1; itr <= max_event_id; itr++)
+    for (uint16 itr = 1; itr < mGameEvent.size(); itr++)
     {
         //sLog.outErrorDb("Checking event %u",itr);
         if (CheckOneGameEvent(itr))
         {
             //sLog.outDebug("GameEvent %u is active",itr->first);
             if (!IsActiveEvent(itr))
-            {
-                AddActiveEvent(itr);
-                ApplyNewEvent(itr);
-            }
+                StartEvent(itr);
         }
         else
         {
             //sLog.outDebug("GameEvent %u is not active",itr->first);
             if (IsActiveEvent(itr))
-            {
-                RemoveActiveEvent(itr);
-                UnApplyEvent(itr);
-            }
+                StopEvent(itr);
             else
             {
                 if (!isSystemInit)
@@ -400,13 +424,15 @@ void GameEvent::ApplyNewEvent(uint16 event_id)
 
 void GameEvent::GameEventSpawn(int16 event_id)
 {
-    if(max_event_id + event_id >= mGameEventCreatureGuids.size())
+    int32 internal_event_id = mGameEvent.size() + event_id - 1;
+
+    if(internal_event_id < 0 || internal_event_id >= mGameEventCreatureGuids.size())
     {
-        sLog.outError("GameEvent::GameEventSpawn attempt access to out of range mGameEventCreatureGuids element %u (size: %u)",max_event_id + event_id,mGameEventCreatureGuids.size());
+        sLog.outError("GameEvent::GameEventSpawn attempt access to out of range mGameEventCreatureGuids element %i (size: %u)",internal_event_id,mGameEventCreatureGuids.size());
         return;
     }
 
-    for (GuidList::iterator itr = mGameEventCreatureGuids[max_event_id + event_id].begin();itr != mGameEventCreatureGuids[max_event_id + event_id].end();++itr)
+    for (GuidList::iterator itr = mGameEventCreatureGuids[internal_event_id].begin();itr != mGameEventCreatureGuids[internal_event_id].end();++itr)
     {
         // Add to correct cell
         CreatureData const* data = objmgr.GetCreatureData(*itr);
@@ -433,13 +459,13 @@ void GameEvent::GameEventSpawn(int16 event_id)
         }
     }
 
-    if(max_event_id + event_id >= mGameEventGameobjectGuids.size())
+    if(internal_event_id < 0 || internal_event_id >= mGameEventGameobjectGuids.size())
     {
-        sLog.outError("GameEvent::GameEventSpawn attempt access to out of range mGameEventGameobjectGuids element %u (size: %u)",max_event_id + event_id,mGameEventGameobjectGuids.size());
+        sLog.outError("GameEvent::GameEventSpawn attempt access to out of range mGameEventGameobjectGuids element %i (size: %u)",internal_event_id,mGameEventGameobjectGuids.size());
         return;
     }
 
-    for (GuidList::iterator itr = mGameEventGameobjectGuids[max_event_id + event_id].begin();itr != mGameEventGameobjectGuids[max_event_id + event_id].end();++itr)
+    for (GuidList::iterator itr = mGameEventGameobjectGuids[internal_event_id].begin();itr != mGameEventGameobjectGuids[internal_event_id].end();++itr)
     {
         // Add to correct cell
         GameObjectData const* data = objmgr.GetGOData(*itr);
@@ -470,13 +496,15 @@ void GameEvent::GameEventSpawn(int16 event_id)
 
 void GameEvent::GameEventUnspawn(int16 event_id)
 {
-    if(max_event_id + event_id >= mGameEventCreatureGuids.size())
+    int32 internal_event_id = mGameEvent.size() + event_id - 1;
+
+    if(internal_event_id < 0 || internal_event_id >= mGameEventCreatureGuids.size())
     {
-        sLog.outError("GameEvent::GameEventUnspawn attempt access to out of range mGameEventCreatureGuids element %u (size: %u)",max_event_id + event_id,mGameEventCreatureGuids.size());
+        sLog.outError("GameEvent::GameEventUnspawn attempt access to out of range mGameEventCreatureGuids element %i (size: %u)",internal_event_id,mGameEventCreatureGuids.size());
         return;
     }
 
-    for (GuidList::iterator itr = mGameEventCreatureGuids[max_event_id + event_id].begin();itr != mGameEventCreatureGuids[event_id + max_event_id].end();++itr)
+    for (GuidList::iterator itr = mGameEventCreatureGuids[internal_event_id].begin();itr != mGameEventCreatureGuids[internal_event_id].end();++itr)
     {
         // Remove the creature from grid
         if( CreatureData const* data = objmgr.GetCreatureData(*itr) )
@@ -491,13 +519,13 @@ void GameEvent::GameEventUnspawn(int16 event_id)
         }
     }
 
-    if(max_event_id + event_id >= mGameEventGameobjectGuids.size())
+    if(internal_event_id < 0 || internal_event_id >= mGameEventGameobjectGuids.size())
     {
-        sLog.outError("GameEvent::GameEventUnspawn attempt access to out of range mGameEventGameobjectGuids element %u (size: %u)",max_event_id + event_id,mGameEventGameobjectGuids.size());
+        sLog.outError("GameEvent::GameEventUnspawn attempt access to out of range mGameEventGameobjectGuids element %i (size: %u)",internal_event_id,mGameEventGameobjectGuids.size());
         return;
     }
 
-    for (GuidList::iterator itr = mGameEventGameobjectGuids[max_event_id + event_id].begin();itr != mGameEventGameobjectGuids[max_event_id + event_id].end();++itr)
+    for (GuidList::iterator itr = mGameEventGameobjectGuids[internal_event_id].begin();itr != mGameEventGameobjectGuids[internal_event_id].end();++itr)
     {
         // Remove the gameobject from grid
         if(GameObjectData const* data = objmgr.GetGOData(*itr))
@@ -618,5 +646,4 @@ void GameEvent::UpdateEventQuests(uint16 event_id, bool Activate)
 GameEvent::GameEvent()
 {
     isSystemInit = false;
-    max_event_id = 0;
 }
