@@ -141,7 +141,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandlePeriodicDamagePCT,                         // 89 SPELL_AURA_PERIODIC_DAMAGE_PERCENT
     &Aura::HandleUnused,                                    // 90 SPELL_AURA_MOD_RESIST_CHANCE  Useless
     &Aura::HandleNoImmediateEffect,                         // 91 SPELL_AURA_MOD_DETECT_RANGE implemented in Creature::GetAttackDistance
-    &Aura::HandleNULL,                                      // 92 SPELL_AURA_PREVENTS_FLEEING
+    &Aura::HandlePreventFleeing,                            // 92 SPELL_AURA_PREVENTS_FLEEING
     &Aura::HandleModUnattackable,                           // 93 SPELL_AURA_MOD_UNATTACKABLE
     &Aura::HandleNoImmediateEffect,                         // 94 SPELL_AURA_INTERRUPT_REGEN implemented in Player::RegenerateAll
     &Aura::HandleAuraGhost,                                 // 95 SPELL_AURA_GHOST
@@ -232,7 +232,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //180 SPELL_AURA_MOD_FLAT_SPELL_DAMAGE_VERSUS   implemented in Unit::SpellDamageBonus
     &Aura::HandleUnused,                                    //181 SPELL_AURA_MOD_FLAT_SPELL_CRIT_DAMAGE_VERSUS unused
     &Aura::HandleAuraModResistenceOfIntellectPercent,       //182 SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT
-    &Aura::HandleNULL,                                      //183 SPELL_AURA_MOD_CRITICAL_THREAT unused
+    &Aura::HandleNULL,                                      //183 SPELL_AURA_MOD_CRITICAL_THREAT
     &Aura::HandleNoImmediateEffect,                         //184 SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE  implemented in Unit::RollMeleeOutcomeAgainst
     &Aura::HandleNoImmediateEffect,                         //185 SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE implemented in Unit::RollMeleeOutcomeAgainst
     &Aura::HandleNoImmediateEffect,                         //186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE  implemented in Unit::MagicSpellHitResult
@@ -259,11 +259,11 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModIncreaseFlightSpeed,                //207 SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED
     &Aura::HandleAuraModIncreaseFlightSpeed,                //208 SPELL_AURA_MOD_SPEED_FLIGHT, used only in spell: Flight Form (Passive)
     &Aura::HandleAuraModIncreaseFlightSpeed,                //209 SPELL_AURA_MOD_FLIGHT_SPEED_ALWAYS
-    &Aura::HandleNULL,                                      //210
+    &Aura::HandleNULL,                                      //210 Commentator's Command
     &Aura::HandleAuraModIncreaseFlightSpeed,                //211 SPELL_AURA_MOD_FLIGHT_SPEED_NOT_STACK
     &Aura::HandleAuraModRangedAttackPowerOfStatPercent,     //212 SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT
     &Aura::HandleNoImmediateEffect,                         //213 SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT implemented in Player::RewardRage
-    &Aura::HandleNULL,                                      //214
+    &Aura::HandleNULL,                                      //214 Tamed Pet Passive
     &Aura::HandleNULL,                                      //215 Arena Prep.
     &Aura::HandleModCastingSpeed,                           //216 SPELL_AURA_HASTE_SPELLS
     &Aura::HandleUnused,                                    //217                                   unused
@@ -498,7 +498,7 @@ void Aura::Update(uint32 diff)
             if (manaPerSecond)
                 caster->ModifyPower(powertype,-manaPerSecond);
         }
-        if(caster && m_target->isAlive() && m_target->HasFlag(UNIT_FIELD_FLAGS,(UNIT_STAT_FLEEING<<16)))
+        if(caster && m_target->isAlive() && m_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING))
         {
             int q = rand() % 80;
             if(q == 8) m_fearMoveAngle += (float)(urand(45, 90));
@@ -2965,59 +2965,10 @@ void Aura::HandleModConfuse(bool apply, bool Real)
 
 void Aura::HandleModFear(bool apply, bool Real)
 {
-    if( apply )
-    {
-        m_target->addUnitState(UNIT_STAT_FLEEING);
-        m_target->CastStop(m_target->GetGUID()==GetCasterGUID() ? GetId() : 0);
-        m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+    if (!Real)
+        return;
 
-        // only at real add aura
-        if(Real)
-        {
-            //FIX ME: we need Mutate to now not existed FleeMovementGenerator (see Aura::Update hack code)
-            // at this moment Idle instead
-            m_target->GetMotionMaster()->MovementExpired(false);
-            m_target->GetMotionMaster()->Idle();
-
-            // what is this for ? (doesn't work anyway)
-            /*WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 9);
-            data.append(m_target->GetPackGUID());
-            data << uint8(0x00);
-            m_target->SendMessageToSet(&data,true);*/
-        }
-    }
-    else
-    {
-        m_target->clearUnitState(UNIT_STAT_FLEEING);
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
-
-        // only at real remove aura
-        if(Real)
-        {
-            m_target->GetMotionMaster()->MovementExpired(false);
-
-            if( m_target->GetTypeId() != TYPEID_PLAYER && m_target->isAlive() )
-            {
-                // restore appropriate movement generator
-                if(m_target->getVictim())
-                    m_target->GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*m_target->getVictim()));
-                else
-                    m_target->GetMotionMaster()->Initialize();
-
-                // attack caster if can
-                Unit* caster = GetCaster();
-                if(caster && caster != m_target->getVictim())
-                    if (((Creature*)m_target)->AI())
-                        ((Creature*)m_target)->AI()->AttackStart(caster);
-            }
-
-            // what is this for ? (doesn't work anyway)
-            /*WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 9);
-            data.append(m_target->GetPackGUID());
-            data << uint8(0x01);
-            m_target->SendMessageToSet(&data,true);*/
-        }
-    }
+    m_target->SetFeared(apply, GetCasterGUID(), GetId());
 }
 
 void Aura::HandleFeignDeath(bool apply, bool Real)
@@ -6035,5 +5986,20 @@ void Aura::PeriodicDummyTick()
 //        case 50550: break;
         default:
             break;
+    }
+}
+
+void Aura::HandlePreventFleeing(bool apply, bool Real)
+{
+    if(!Real)
+        return;
+    
+    Unit::AuraList const& fearAuras = m_target->GetAurasByType(SPELL_AURA_MOD_FEAR);
+    if( !fearAuras.empty() )
+    {
+        if (apply)
+            m_target->SetFeared(false, fearAuras.front()->GetCasterGUID());
+        else
+            m_target->SetFeared(true);
     }
 }

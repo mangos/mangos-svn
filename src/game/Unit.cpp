@@ -40,6 +40,7 @@
 #include "Totem.h"
 #include "BattleGround.h"
 #include "MovementGenerator.h"
+#include "TargetedMovementGenerator.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 
@@ -9844,6 +9845,54 @@ void Unit::StopMoving()
     WorldPacket data;
     BuildHeartBeatMsg(&data);
     SendMessageToSet(&data,false);
+}
+
+void Unit::SetFeared(bool apply, uint64 casterGUID, uint32 spellID)
+{
+    if( apply )
+    {
+        if(HasAuraType(SPELL_AURA_PREVENTS_FLEEING))
+            return;
+
+        addUnitState(UNIT_STAT_FLEEING);
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+
+        //FIX ME: we need Mutate to now not existed FleeMovementGenerator (see Aura::Update hack code)
+        // at this moment Idle instead
+        GetMotionMaster()->MovementExpired(false);
+        GetMotionMaster()->Idle();
+
+        CastStop(GetGUID()==casterGUID ? spellID : 0);
+    }
+    else
+    {
+        clearUnitState(UNIT_STAT_FLEEING);
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+
+        GetMotionMaster()->MovementExpired(false);
+
+        if( GetTypeId() != TYPEID_PLAYER && isAlive() )
+        {
+            // restore appropriate movement generator
+            if(getVictim())
+                GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*getVictim()));
+            else
+                GetMotionMaster()->Initialize();
+
+            // attack caster if can
+            Unit* caster = ObjectAccessor::GetObjectInWorld(casterGUID, (Unit*)NULL);
+            if(caster && caster != getVictim() && ((Creature*)this)->AI())
+                ((Creature*)this)->AI()->AttackStart(caster);
+        }
+    }
+
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, GetPackGUID().size()+1);
+        data.append(GetPackGUID());
+        data << uint8(!apply);
+        ((Player*)this)->GetSession()->SendPacket(&data);
+    }
 }
 
 bool Unit::IsStandState() const
