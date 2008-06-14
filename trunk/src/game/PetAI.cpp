@@ -44,16 +44,19 @@ PetAI::PetAI(Creature &c) : i_pet(c), i_victimGuid(0), i_tracker(TIME_INTERVAL_L
 
 void PetAI::MoveInLineOfSight(Unit *u)
 {
-    if( !i_pet.getVictim() && (i_pet.isPet() || i_pet.isCharmed()) && i_pet.GetCharmInfo()->HasReactState(REACT_AGGRESSIVE) &&
-        u->isTargetableForAttack() && i_pet.IsHostileTo( u )  &&
+    if( !i_pet.getVictim() && i_pet.GetCharmInfo() && 
+        i_pet.GetCharmInfo()->HasReactState(REACT_AGGRESSIVE) &&
+        u->isTargetableForAttack() && i_pet.IsHostileTo( u ) &&
         u->isInAccessablePlaceFor(&i_pet))
     {
         float attackRadius = i_pet.GetAttackDistance(u);
         if(i_pet.IsWithinDistInMap(u, attackRadius) && i_pet.GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
         {
-            if(!i_pet.IsWithinLOSInMap(u)) return;
-            AttackStart(u);
-            u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            if(i_pet.IsWithinLOSInMap(u))
+            {
+                AttackStart(u);
+                u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            }
         }
     }
 }
