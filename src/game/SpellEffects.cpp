@@ -916,6 +916,21 @@ void Spell::EffectDummy(uint32 i)
                         m_caster->CastSpell(unitTarget,32835,true);
                     return;
                 }
+                case 28730:                                 // Arcane Torrent (Mana)
+                {
+                    int32 count = 0;
+                    Unit::AuraList const& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                    for(Unit::AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
+                        if ((*i)->GetId() == 28734)
+                            ++count;
+                    if (count)
+                    {
+                        m_caster->RemoveAurasDueToSpell(28734);
+                        int32 bp = damage * count;
+                        m_caster->CastCustomSpell(m_caster, 28733, &bp, NULL, NULL, true);
+                    }
+                    return;
+                }
             }
 
             //All IconID Check in there

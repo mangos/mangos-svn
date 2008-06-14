@@ -3354,7 +3354,46 @@ void Aura::HandleAuraModSilence(bool apply, bool Real)
     if(apply)
     {
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED);
-        m_target->InterruptNonMeleeSpells(false);
+        // Stop cast only spells vs PreventionType == 1
+        for (uint32 i = CURRENT_MELEE_SPELL; i < CURRENT_MAX_SPELL;i++)
+        {
+            Spell* currentSpell = m_target->m_currentSpells[i];
+            if (currentSpell && currentSpell->m_spellInfo->PreventionType == 1)
+            {
+                uint32 state = currentSpell->getState();
+                // Stop spells on prepere or casting state
+                if ( state == SPELL_STATE_PREPARING || state == SPELL_STATE_CASTING )
+                {
+                    currentSpell->cancel();
+                    currentSpell->SetDeletable(true);
+                    m_target->m_currentSpells[i] = NULL;
+                }
+            }
+        }
+
+        switch (GetId())
+        {
+            // Arcane Torrent (Energy)
+            case 25046:
+            {
+                Unit * caster = GetCaster();
+                if (!caster)
+                    return;
+
+                // Search Mana Tap auras on caster
+                int32 energy = 0;
+                Unit::AuraList const& m_dummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);        
+                for(Unit::AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
+                    if ((*i)->GetId() == 28734)
+                        ++energy;
+                if (energy)
+                {
+                    energy *= 10;
+                    caster->CastCustomSpell(caster, 25048, &energy, NULL, NULL, true);
+                    caster->RemoveAurasDueToSpell(28734);
+                }
+            }
+        }
     }
     else
     {

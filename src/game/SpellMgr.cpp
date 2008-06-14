@@ -294,6 +294,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
         case 34976:                                         // BG spell
             return true;
         case 28441:                                         // not positive dummy spell
+        case 37675:                                         // Chaos Blast
             return false;
     }
 
@@ -358,7 +359,6 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                     if(effIndex==0 && spellproto->Effect[1]==0 && spellproto->Effect[2]==0)
                         return false;                       // but all single stun aura spells is negative
                     break;
-                case SPELL_AURA_MOD_DAMAGE_TAKEN:
                 case SPELL_AURA_MOD_ROOT:
                 case SPELL_AURA_MOD_SILENCE:
                 case SPELL_AURA_GHOST:
