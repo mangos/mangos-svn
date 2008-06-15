@@ -3607,6 +3607,30 @@ void Aura::HandleModMechanicImmunity(bool apply, bool Real)
     }
 
     m_target->ApplySpellImmune(GetId(),IMMUNITY_MECHANIC,m_modifier.m_miscvalue,apply);
+
+    // special cases
+
+    // Bestial Wrath
+    if ( GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1680)
+    {
+        // The Beast Within cast on owner if talent present
+        if ( Unit* owner = m_target->GetOwner() )
+        {
+            // Search talent
+            Unit::AuraList const& m_dummyAuras = owner->GetAurasByType(SPELL_AURA_DUMMY);
+            for(Unit::AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
+            {
+                if ( (*i)->GetSpellProto()->SpellIconID == 2229 )
+                {
+                    if (apply)
+                        owner->CastSpell(owner, 34471, true, 0, this);
+                    else
+                        owner->RemoveAurasDueToSpell(34471);
+                    break;
+                }
+            }
+        }
+    }
 }
 
 void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
@@ -3829,6 +3853,18 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
 
     switch (m_spellProto->SpellFamilyName)
     {
+        case SPELLFAMILY_GENERIC:
+        {
+            // Pounce Bleed
+            if ( m_spellProto->SpellIconID == 147 && m_spellProto->SpellVisual == 0 )
+            {
+                // $AP*0.18/6 bonus per tick
+                if (apply && !loading && caster)
+                    m_modifier.m_amount += caster->GetTotalAttackPowerValue(BASE_ATTACK) * 3 / 100;
+                return;
+            }
+            break;
+        }
         case SPELLFAMILY_WARRIOR:
         {
             // Rend
@@ -3858,6 +3894,26 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                     m_modifier.m_amount += caster->GetTotalAttackPowerValue(BASE_ATTACK) * 2 / 100;
                 return;
             }
+            // Lacerate
+            if (m_spellProto->SpellFamilyFlags & 0x000000010000000000LL)
+            {
+                // $AP*0.05/5 bonus per tick
+                if (apply && !loading && caster)
+                    m_modifier.m_amount += caster->GetTotalAttackPowerValue(BASE_ATTACK) / 100;
+                return;
+            }
+            // Rip
+            if (m_spellProto->SpellFamilyFlags & 0x000000000000800000LL)
+            {
+                // $AP * min(0.06*$cp, 0.24)/6 [Yes, there is no difference, wheather 4 or 5 CPs are being used]
+                if (apply && !loading && caster && caster->GetTypeId() == TYPE_PLAYER)
+                {
+                    int32 cp = ((Player*)caster)->GetComboPoints();
+                    if (cp > 4) cp = 4;
+                    m_modifier.m_amount += caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100;
+                }
+                return;
+            } 
             break;
         }
         case SPELLFAMILY_ROGUE:
@@ -3885,6 +3941,27 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                     if(!found)
                         m_target->ModifyAuraState(AURA_STATE_DEADLY_POISON,false);
                 }
+                return;
+            }
+            // Rupture
+            if (m_spellProto->SpellFamilyFlags & 0x000000000000100000LL)
+            {
+                // Dmg/tick = $AP*min(0.01*$cp, 0.03) [Like Rip: only the first three CP inrease the contribution from AP]
+                if (apply && !loading && caster && caster->GetTypeId() == TYPE_PLAYER)
+                {
+                    int32 cp = ((Player*)caster)->GetComboPoints();
+                    if (cp > 3) cp = 3;
+                    m_modifier.m_amount += caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100;
+                }
+                return;
+            }
+            // Garrote
+            if (m_spellProto->SpellFamilyFlags & 0x000000000000000100LL)
+            {
+                // $AP*0.18/6 bonus per tick
+                if (apply && !loading && caster)
+                    m_modifier.m_amount += caster->GetTotalAttackPowerValue(BASE_ATTACK) * 3 / 100;
+                return;
             }
             break;
         }
@@ -5294,8 +5371,10 @@ void Aura::PeriodicTick()
             {
                 pdamage = amount;
 
-                //Calculate armor mitigation if it is a physical spell
-                if (GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_NORMAL && GetSpellProto()->Mechanic != MECHANIC_BLEED)
+                // Calculate armor mitigation if it is a physical spell
+                // But not for bleed mechanic spells
+                if ( GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_NORMAL && 
+                     GetEffectMechanic(GetSpellProto(), m_effIndex) != MECHANIC_BLEED)
                 {
                     uint32 pdamageReductedArmor = pCaster->CalcArmorReducedDamage(m_target, pdamage);
                     cleanDamage.damage += pdamage - pdamageReductedArmor;
