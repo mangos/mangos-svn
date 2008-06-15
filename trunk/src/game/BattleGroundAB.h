@@ -83,23 +83,33 @@ enum BG_AB_ObjectType
     BG_AB_OBJECT_AURA_ALLY          = 5,
     BG_AB_OBJECT_AURA_HORDE         = 6,
     BG_AB_OBJECT_AURA_CONTESTED     = 7,
-
+    //gates
     BG_AB_OBJECT_GATE_A             = 40,
     BG_AB_OBJECT_GATE_H             = 41,
+    //buffs
+    BG_AB_OBJECT_SPEEDBUFF_STABLES       = 42,
+    BG_AB_OBJECT_REGENBUFF_STABLES       = 43,
+    BG_AB_OBJECT_BERSERKBUFF_STABLES     = 44,
+    BG_AB_OBJECT_SPEEDBUFF_BLACKSMITH    = 45,
+    BG_AB_OBJECT_REGENBUFF_BLACKSMITH    = 46,
+    BG_AB_OBJECT_BERSERKBUFF_BLACKSMITH  = 47,
+    BG_AB_OBJECT_SPEEDBUFF_FARM          = 48,
+    BG_AB_OBJECT_REGENBUFF_FARM          = 49,
+    BG_AB_OBJECT_BERSERKBUFF_FARM        = 50,
+    BG_AB_OBJECT_SPEEDBUFF_LUMBER_MILL   = 51,
+    BG_AB_OBJECT_REGENBUFF_LUMBER_MILL   = 52,
+    BG_AB_OBJECT_BERSERKBUFF_LUMBER_MILL = 53,
+    BG_AB_OBJECT_SPEEDBUFF_GOLD_MINE     = 54,
+    BG_AB_OBJECT_REGENBUFF_GOLD_MINE     = 55,
+    BG_AB_OBJECT_BERSERKBUFF_GOLD_MINE   = 56,
+    BG_AB_OBJECT_MAX                     = 57,
 
-    BG_AB_OBJECT_MAX                = 42,
-
-    BG_AB_CREATURES_MAX             = 7
+    BG_AB_CREATURES_MAX                  = 7
 };
 
 /* Object id templates from DB */
 enum BG_AB_ObjectTypes
 {
-    /*
-    BG_AB_BUFFSPELLID_SPEEDBUFF         = 23451,
-    BG_AB_BUFFSPELLID_REGENBUFF         = 23493,
-    BG_AB_BUFFSPELLID_BERSERKERBUFF     = 23505,*/
-
     BG_AB_OBJECTID_BANNER_A             = 180058,
     BG_AB_OBJECTID_BANNER_CONT_A        = 180059,
     BG_AB_OBJECTID_BANNER_H             = 180060,
@@ -116,8 +126,6 @@ enum BG_AB_ObjectTypes
 enum BG_AB_Timers
 {
     BG_AB_FLAG_CAPTURING_TIME           = 60000,
-    BG_AB_BUFF_RESPAWN_TIME             = 180000,
-    BG_AB_BUFFCHECK_TIME                = 1000    // How often do we check every player's distance to every spawned buff object ?
 };
 
 enum BG_AB_Score
@@ -125,17 +133,6 @@ enum BG_AB_Score
     BG_AB_MAX_TEAM_SCORE                = 2000,
     BG_AB_WARNING_SCORE                 = 1800
 };
-
-enum BG_AB_BuffObjectType
-{
-    BG_AB_OBJECT_SPEEDBUFF              = 0,
-    BG_AB_OBJECT_REGENBUFF              = 1,
-    BG_AB_OBJECT_BERSERKERBUFF          = 2
-};
-
-// buff objectid, spellid
-//                                       0-speed,         1-regen,         2-berserker
-const uint32 BG_AB_BuffObjects[3][2] = { {179871, 23451}, {179904, 23493}, {179905, 23505} };
 
 /* do NOT change the order, else wrong behaviour */
 enum BG_AB_BattleGroundNodes
@@ -215,13 +212,6 @@ const float BG_AB_SpiritGuidePos[7][4] = {
 const uint32 BG_AB_SpiritGuideId[2]     = {13116, 13117};
 const uint32 BG_AB_SpiritGuideTeamId[2] = { ALLIANCE, HORDE };
 
-struct BG_AB_BuffObjectInfo
-{
-    GameObject  *object;
-    uint32      timer;
-    uint32      spellId;
-};
-
 struct BG_AB_BannerTimer
 {
     uint32      timer;
@@ -270,7 +260,7 @@ class BattleGroundAB : public BattleGround
 
         /* Creature spawning/despawning */
         // TODO: working, scripted peons spawning
-        void _NodeOccupied(uint8 node);
+        void _NodeOccupied(uint8 node,Team team);
         void _NodeDeOccupied(uint8 node);
 
         const char* _GetNodeName(uint8 node);
@@ -285,15 +275,10 @@ class BattleGroundAB : public BattleGround
         uint8             m_prevNodes[BG_AB_NODES_COUNT];
         BG_AB_BannerTimer m_BannerTimers[BG_AB_NODES_COUNT];
         int32             m_NodeTimers[BG_AB_NODES_COUNT];
-        Creature*         m_spiritGuides[7];
         uint32            m_TeamScores[2];
         uint32            m_lastTick[2];
         uint32            m_HonorScoreTics[2];
         uint32            m_ReputationScoreTics[2];
-        uint32            m_buffchecktimer;
         bool              m_IsInformedNearVictory;
-
-        GameObject* m_bgobjects[BG_AB_OBJECT_MAX];
-        BG_AB_BuffObjectInfo m_bgbuffobjects[5];
 };
 #endif

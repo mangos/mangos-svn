@@ -28,11 +28,9 @@
 
 BattleGroundEY::BattleGroundEY()
 {
+    m_BuffChange = true;
     m_BgObjects.resize(BG_EY_OBJECT_MAX);
     m_BgCreatures.resize(BG_EY_CREATURES_MAX);
-    m_Buff_Entry[0] = BG_OBJECTID_SPEEDBUFF_ENTRY;
-    m_Buff_Entry[1] = BG_OBJECTID_REGENBUFF_ENTRY;
-    m_Buff_Entry[2] = BG_OBJECTID_BERSERKERBUFF_ENTRY;
     m_Points_Trigger[FEL_REALVER] = TR_FEL_REALVER_BUFF;
     m_Points_Trigger[BLOOD_ELF] = TR_BLOOD_ELF_BUFF;
     m_Points_Trigger[DRAENEI_RUINS] = TR_DRAENEI_RUINS_BUFF;
@@ -58,7 +56,7 @@ void BattleGroundEY::Update(time_t diff)
             SpawnBGObject(BG_EY_OBJECT_DOOR_A, RESPAWN_IMMEDIATELY);
             SpawnBGObject(BG_EY_OBJECT_DOOR_H, RESPAWN_IMMEDIATELY);
 
-            for(uint32 i = BG_EY_OBJECT_A_BANNER_FEL_REALVER_CENTER; i <= BG_EY_OBJECT_FLAG_MAGE_TOWER; ++i)
+            for(uint32 i = BG_EY_OBJECT_A_BANNER_FEL_REALVER_CENTER; i < BG_EY_OBJECT_MAX; ++i)
                 SpawnBGObject(i, RESPAWN_ONE_DAY);
 
             SetStartDelayTime(START_DELAY0);
@@ -84,6 +82,12 @@ void BattleGroundEY::Update(time_t diff)
 
             for(uint32 i = BG_EY_OBJECT_N_BANNER_FEL_REALVER_CENTER; i <= BG_EY_OBJECT_FLAG_NETHERSTORM; ++i)
                 SpawnBGObject(i, RESPAWN_IMMEDIATELY);
+            for(uint32 i = 0; i < EY_POINTS_MAX; ++i)
+            {
+                //randomly spawn buff
+                uint8 buff = urand(0, 2);
+                SpawnBGObject(BG_EY_OBJECT_SPEEDBUFF_FEL_REALVER + buff + i * 3, RESPAWN_IMMEDIATELY);
+            }
 
             SendMessageToAll(GetMangosString(LANG_BG_EY_BEGIN));
 
@@ -355,32 +359,6 @@ void BattleGroundEY::RemovePlayer(Player *plr, uint64 guid)
     }
 }
 
-void BattleGroundEY::HandleBuffUse(uint64 const& buff_guid)
-{
-    if(m_BgObjects[BG_EY_OBJECT_BUFF_FEL_REALVER] == buff_guid)
-    {
-        DelObject(BG_EY_OBJECT_BUFF_FEL_REALVER);
-        SpawnBuff(BG_EY_OBJECT_BUFF_FEL_REALVER,FEL_REALVER,BUFF_RESPAWN_TIME);
-    }
-    else if(m_BgObjects[BG_EY_OBJECT_BUFF_BLOOD_ELF] == buff_guid)
-    {
-        DelObject(BG_EY_OBJECT_BUFF_BLOOD_ELF);
-        SpawnBuff(BG_EY_OBJECT_BUFF_BLOOD_ELF,BLOOD_ELF,BUFF_RESPAWN_TIME);
-    }
-    else if(m_BgObjects[BG_EY_OBJECT_BUFF_DRAENEI_RUINS] == buff_guid)
-    {
-        DelObject(BG_EY_OBJECT_BUFF_DRAENEI_RUINS);
-        SpawnBuff(BG_EY_OBJECT_BUFF_DRAENEI_RUINS,DRAENEI_RUINS,BUFF_RESPAWN_TIME);
-    }
-    else if(m_BgObjects[BG_EY_OBJECT_BUFF_MAGE_TOWER] == buff_guid)
-    {
-        DelObject(BG_EY_OBJECT_BUFF_MAGE_TOWER);
-        SpawnBuff(BG_EY_OBJECT_BUFF_MAGE_TOWER,MAGE_TOWER,BUFF_RESPAWN_TIME);
-    }
-    else
-        sLog.outError("unknown buff on bg");
-}
-
 void BattleGroundEY::HandleAreaTrigger(Player *Source, uint32 Trigger)
 {
     if(GetStatus() != STATUS_IN_PROGRESS)
@@ -431,7 +409,7 @@ void BattleGroundEY::HandleAreaTrigger(Player *Source, uint32 Trigger)
 
 bool BattleGroundEY::SetupBattleGround()
 {
-    // doors
+        // doors
     if(    !AddObject(BG_EY_OBJECT_DOOR_A, BG_OBJECT_A_DOOR_EY_ENTRY, 2527.6f, 1596.91f, 1262.13f, -3.12414f, -0.173642f, -0.001515f, 0.98477f, -0.008594f, RESPAWN_IMMEDIATELY)
         || !AddObject(BG_EY_OBJECT_DOOR_H, BG_OBJECT_H_DOOR_EY_ENTRY, 1803.21f, 1539.49f, 1261.09f, 3.14159f, 0.173648f, 0, 0.984808f, 0, RESPAWN_IMMEDIATELY)
         // banners (alliance)
@@ -486,22 +464,38 @@ bool BattleGroundEY::SetupBattleGround()
         || !AddObject(BG_EY_OBJECT_TOWER_CAP_MAGE_TOWER, BG_OBJECT_HU_TOWER_CAP_EY_ENTRY, 2282.121582f, 1760.006958f, 1189.707153f, 1.919862f, 0, 0, 0.819152f, 0.573576f, RESPAWN_ONE_DAY)
         )
     {
-        sLog.outErrorDb("BatteGroundAB: Failed to spawn some object BattleGround not created!");
+        sLog.outErrorDb("BatteGroundEY: Failed to spawn some object BattleGround not created!");
         return false;
+    }
+
+    //buffs
+    for (int i = 0; i < EY_POINTS_MAX; ++i)
+    {
+        AreaTriggerEntry const* at = sAreaTriggerStore.LookupEntry(m_Points_Trigger[i]);
+        if( !at )
+        {
+            sLog.outError("BattleGroundEY: Unknown trigger: %u", m_Points_Trigger[i]);
+            continue;
+        }
+        if (   !AddObject(BG_EY_OBJECT_SPEEDBUFF_FEL_REALVER + i * 3, Buff_Entries[0], at->x, at->y, at->z, 0.907571f, 0, 0, 0.438371f, 0.898794f, RESPAWN_ONE_DAY)
+            || !AddObject(BG_EY_OBJECT_SPEEDBUFF_FEL_REALVER + i * 3 + 1, Buff_Entries[1], at->x, at->y, at->z, 0.907571f, 0, 0, 0.438371f, 0.898794f, RESPAWN_ONE_DAY)
+            || !AddObject(BG_EY_OBJECT_SPEEDBUFF_FEL_REALVER + i * 3 + 2, Buff_Entries[2], at->x, at->y, at->z, 0.907571f, 0, 0, 0.438371f, 0.898794f, RESPAWN_ONE_DAY)
+            )
+            sLog.outError("BattleGroundEY: Cannot spawn buff");
     }
 
     WorldSafeLocsEntry const *sg = NULL;
     sg = sWorldSafeLocsStore.LookupEntry(EY_GRAVEYARD_MAIN_ALLIANCE);
-    if(!sg || !AddSpiritGuide(EY_SPIRIT_MAIN_ALLIANCE, sg->x, sg->y, sg->z, 3.124139f, ALLIANCE))
+    if( !sg || !AddSpiritGuide(EY_SPIRIT_MAIN_ALLIANCE, sg->x, sg->y, sg->z, 3.124139f, ALLIANCE) )
     {
-        sLog.outErrorDb("Failed to spawn spirit guide! BattleGround not created!");
+        sLog.outErrorDb("BatteGroundEY: Failed to spawn spirit guide! BattleGround not created!");
         return false;
     }
 
     sg = sWorldSafeLocsStore.LookupEntry(EY_GRAVEYARD_MAIN_HORDE);
-    if(!sg || !AddSpiritGuide(EY_SPIRIT_MAIN_HORDE, sg->x, sg->y, sg->z, 3.193953f, HORDE))
+    if( !sg || !AddSpiritGuide(EY_SPIRIT_MAIN_HORDE, sg->x, sg->y, sg->z, 3.193953f, HORDE) )
     {
-        sLog.outErrorDb("Failed to spawn spirit guide! BattleGround not created!");
+        sLog.outErrorDb("BatteGroundEY: Failed to spawn spirit guide! BattleGround not created!");
         return false;
     }
 
@@ -533,51 +527,6 @@ void BattleGroundEY::ResetBGSubclass()
     }
     m_PlayersNearPoint[EY_PLAYERS_OUT_OF_POINTS].clear();
     m_PlayersNearPoint[EY_PLAYERS_OUT_OF_POINTS].reserve(30);
-}
-
-bool BattleGroundEY::SpawnBuff(uint32 type, uint32 entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint32 spawntime)
-{
-    GameObjectInfo const* goinfo = objmgr.GetGameObjectInfo(entry);
-    if(!goinfo)
-    {
-        sLog.outErrorDb("Gameobject template %u not found in database! BattleGround not created!", entry);
-        return false;
-    }
-
-    uint32 guid = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
-
-    GameObject* pGameObj = new GameObject(NULL);
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, GetMapId(), x, y, z, o, rotation0, rotation1, rotation2, rotation3, 0, 1))
-    {
-        sLog.outError("Can't create creature entry: %u",entry);
-        delete pGameObj;
-        return false;
-    }
-    pGameObj->SetMapId(GetMapId());
-    //pGameObj->SetInstanceId(GetInstanceID());
-    pGameObj->SetRespawnTime(spawntime);
-    if(spawntime)
-        pGameObj->SetLootState(GO_JUST_DEACTIVATED);
-    MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
-    m_BgObjects[type] = pGameObj->GetGUID();
-
-    return true;
-}
-
-void BattleGroundEY::SpawnBuff(uint32 type, uint8 point, uint32 respawntime)
-{
-    AreaTriggerEntry const* at = sAreaTriggerStore.LookupEntry(m_Points_Trigger[point]);
-    if(!at)
-    {
-        sLog.outError("unknown trigger: %u",m_Points_Trigger[point]);
-        return;
-    }
-    uint8 buff = urand(0, 2);
-    if(!SpawnBuff(type, m_Buff_Entry[buff], at->x, at->y, at->z, 0.907571f, 0, 0, 0.438371f, 0.898794f, respawntime))
-    {
-        sLog.outError("Can't create SpawnBuff");
-        return;
-    }
 }
 
 void BattleGroundEY::RespawnFlag(bool send_message)
@@ -688,7 +637,7 @@ void BattleGroundEY::EventPlayerClickedOnFlag(Player *Source, GameObject* target
     SpawnBGObject(BG_EY_OBJECT_FLAG_NETHERSTORM, RESPAWN_ONE_DAY);
     SetFlagPicker(Source->GetGUID());
     //get flag aura on player
-    Source->CastSpell(Source, 34976, true);
+    Source->CastSpell(Source, BG_EY_NETHERSTORM_FLAG_SPELL, true);
 
     WorldPacket data;
     ChatHandler::FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
@@ -731,10 +680,7 @@ void BattleGroundEY::EventTeamLostPoint(Player *Source, uint32 Point)
     SpawnBGObject(m_LoosingPointTypes[Point].SpawnNeutralObjectType + 1, RESPAWN_IMMEDIATELY);
     SpawnBGObject(m_LoosingPointTypes[Point].SpawnNeutralObjectType + 2, RESPAWN_IMMEDIATELY);
 
-    uint32 type = BG_EY_OBJECT_BUFF_FEL_REALVER + Point;
-    //buff despawn
-    if(m_BgObjects[type])
-        SpawnBGObject(type, RESPAWN_ONE_DAY);
+    //buff isn't despawned
 
     m_PointOwnedByTeam[Point] = EY_POINT_NO_OWNER;
     m_PointState[Point] = EY_POINT_NO_OWNER;
@@ -779,6 +725,8 @@ void BattleGroundEY::EventTeamCapturedPoint(Player *Source, uint32 Point)
         SpawnBGObject(m_CapturingPointTypes[Point].SpawnObjectTypeHorde + 2, RESPAWN_IMMEDIATELY);
     }
 
+    //buff isn't respawned
+
     m_PointOwnedByTeam[Point] = Team;
     m_PointState[Point] = EY_POINT_UNDER_CONTROL;
 
@@ -792,17 +740,7 @@ void BattleGroundEY::EventTeamCapturedPoint(Player *Source, uint32 Point)
     WorldSafeLocsEntry const *sg = NULL;
     sg = sWorldSafeLocsStore.LookupEntry(m_CapturingPointTypes[Point].GraveYardId);
     if(!sg || !AddSpiritGuide(Point, sg->x, sg->y, sg->z, 3.124139f, Team))
-        sLog.outError("Failed to spawn spirit guide! point: %u, team: u, graveyard_id: %u", Point, Team, m_CapturingPointTypes[Point].GraveYardId);
-    // Spawn buffs
-    type = BG_EY_OBJECT_BUFF_FEL_REALVER + Point;
-    if(!m_BgObjects[type])
-    {
-        //buff not spawned, spawn it
-        SpawnBuff(type, Point, RESPAWN_IMMEDIATELY);
-    }
-    else
-        //buff spawned ... respawn it
-        SpawnBGObject(type, RESPAWN_IMMEDIATELY);
+        sLog.outError("BatteGroundEY: Failed to spawn spirit guide! point: %u, team: u, graveyard_id: %u", Point, Team, m_CapturingPointTypes[Point].GraveYardId);
 
     UpdatePointsIcons(Team, Point);
     UpdatePointsCount(Team);

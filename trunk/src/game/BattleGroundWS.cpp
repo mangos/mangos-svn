@@ -20,7 +20,6 @@
 #include "Player.h"
 #include "BattleGround.h"
 #include "BattleGroundWS.h"
-#include "ObjectAccessor.h"
 #include "Creature.h"
 #include "GameObject.h"
 #include "Chat.h"
@@ -51,8 +50,10 @@ void BattleGroundWS::Update(time_t diff)
             m_Events |= 0x01;
 
             for(uint32 i = BG_WS_OBJECT_DOOR_A_1; i <= BG_WS_OBJECT_DOOR_H_4; i++)
+            {
                 SpawnBGObject(i, RESPAWN_IMMEDIATELY);
-
+                DoorClose(i);
+            }
             for(uint32 i = BG_WS_OBJECT_A_FLAG; i <= BG_WS_OBJECT_BERSERKBUFF_2; i++)
                 SpawnBGObject(i, RESPAWN_ONE_DAY);
 
@@ -76,7 +77,6 @@ void BattleGroundWS::Update(time_t diff)
             m_Events |= 0x10;
             for(uint32 i = BG_WS_OBJECT_DOOR_A_1; i <= BG_WS_OBJECT_DOOR_A_4; i++)
                 DoorOpen(i);
-
             for(uint32 i = BG_WS_OBJECT_DOOR_H_1; i <= BG_WS_OBJECT_DOOR_H_2; i++)
                 DoorOpen(i);
 

@@ -229,7 +229,10 @@ void GameObject::Update(uint32 /*p_time*/)
                         }
                         case GAMEOBJECT_TYPE_DOOR:
                         case GAMEOBJECT_TYPE_BUTTON:
-                            break;
+                            //we need to open doors if they are closed (add there another condition if this code breaks some usage, but it need to be here for battlegrounds)
+                            if( !GetUInt32Value(GAMEOBJECT_STATE) )
+                                SwitchDoorOrButton(false);
+                            //flags in AB are type_button and we need to add them here so no break!
                         default:
                             if(!m_spawnedByDefault)         // despawn timer
                             {
@@ -376,9 +379,8 @@ void GameObject::Update(uint32 /*p_time*/)
 
                     m_unique_users.clear();
                     m_usetimes = 0;
-                    SetLootState(GO_READY);
-                    break;
                 }
+                //any return here in case battleground traps
             }
 
             if(GetOwnerGUID())
@@ -386,6 +388,14 @@ void GameObject::Update(uint32 /*p_time*/)
                 m_respawnTime = 0;
                 Delete();
                 return;
+            }
+
+            //burning flags in some battlegrounds, if you find better condition, just add it
+            if (this->GetUInt32Value(GAMEOBJECT_ANIMPROGRESS) > 0)
+            {
+                this->SendObjectDeSpawnAnim(this->GetGUID());
+                //reset flags
+                SetUInt32Value(GAMEOBJECT_FLAGS, m_flags);
             }
 
             loot.clear();
@@ -555,19 +565,20 @@ bool GameObject::LoadFromDB(uint32 guid, uint32 InstanceId)
 
     switch(GetGOInfo()->type)
     {
-        case GAMEOBJECT_TYPE_DOOR:                          // not depawnable
+        case GAMEOBJECT_TYPE_DOOR:
         case GAMEOBJECT_TYPE_BUTTON:
+            /* this code (in comment) isn't correct because in battlegrounds we need despawnable doors and buttons, pls remove
             SetFlag(GAMEOBJECT_FLAGS, GO_FLAG_NODESPAWN);
             m_spawnedByDefault = true;
             m_respawnDelayTime = 0;
             m_respawnTime = 0;
-            break;
+            break;*/
         default:
             if(data->spawntimesecs >= 0)
             {
                 m_spawnedByDefault = true;
-                m_respawnDelayTime=data->spawntimesecs;
-                m_respawnTime=objmgr.GetGORespawnTime(stored_guid,InstanceId);
+                m_respawnDelayTime = data->spawntimesecs;
+                m_respawnTime = objmgr.GetGORespawnTime(stored_guid,InstanceId);
 
                                                             // ready to respawn
                 if(m_respawnTime && m_respawnTime <= time(NULL))
@@ -579,7 +590,7 @@ bool GameObject::LoadFromDB(uint32 guid, uint32 InstanceId)
             else
             {
                 m_spawnedByDefault = false;
-                m_respawnDelayTime=-data->spawntimesecs;
+                m_respawnDelayTime = -data->spawntimesecs;
                 m_respawnTime = 0;
             }
             break;
