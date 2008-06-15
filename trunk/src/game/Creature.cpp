@@ -1412,8 +1412,8 @@ float Creature::GetAttackDistance(Unit const* pl) const
     if(aggroRate==0)
         return 0.0f;
 
-    int32 playerlevel   = pl->getLevel();
-    int32 creaturelevel = getLevel();
+    int32 playerlevel   = pl->getLevelForTarget(this);
+    int32 creaturelevel = getLevelForTarget(pl);
 
     int32 leveldif       = playerlevel - creaturelevel;
 
@@ -1428,7 +1428,7 @@ float Creature::GetAttackDistance(Unit const* pl) const
     // radius grow if playlevel < creaturelevel
     RetDistance -= (float)leveldif;
 
-    if(getLevel()+5 <= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+    if(creaturelevel+5 <= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
     {
         // detect range auras
         RetDistance += GetTotalAuraModifier(SPELL_AURA_MOD_DETECT_RANGE);
@@ -1875,4 +1875,17 @@ void Creature::AllLootRemovedFromCorpse()
         if (m_deathTimer > nDeathTimer)
             m_deathTimer = nDeathTimer;
     }
+}
+
+uint32 Creature::getLevelForTarget( Unit const* target ) const
+{
+    if(!isWorldBoss())
+        return Unit::getLevelForTarget(target);
+
+    uint32 level = target->getLevel()+sWorld.getConfig(CONFIG_WORLD_BOSS_LEVEL_DIFF);
+    if(level < 1)
+        return 1;
+    if(level > 255)
+        return 255;
+    return level;
 }

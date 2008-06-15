@@ -497,6 +497,10 @@ TalentsInspecting = 1
 #        Default: 10
 #                 0   - off
 #
+#    WorldBossLevelDiff
+#        Difference for boss dynamic level with target
+#        Default: 3
+#
 #    Corpse.Decay.NORMAL
 #    Corpse.Decay.RARE
 #    Corpse.Decay.ELITE
@@ -537,6 +541,7 @@ TalentsInspecting = 1
 
 Rate.Creature.Aggro = 1
 CreatureFamilyAssistenceRadius = 10
+WorldBossLevelDiff = 3
 Corpse.Decay.NORMAL = 60
 Corpse.Decay.RARE = 300
 Corpse.Decay.ELITE = 300

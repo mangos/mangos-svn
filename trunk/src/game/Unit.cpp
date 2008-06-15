@@ -1642,8 +1642,8 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
         if( pVictim->getLevel() < 30 )
             Probability = 0.65f*pVictim->getLevel()+0.5;
 
-        uint32 VictimDefense=pVictim->GetDefenseSkillValue();
-        uint32 AttackerMeleeSkill=GetUnitMeleeSkill();
+        uint32 VictimDefense=pVictim->GetDefenseSkillValue(this);
+        uint32 AttackerMeleeSkill=GetUnitMeleeSkill(pVictim);
 
         Probability *= AttackerMeleeSkill/(float)VictimDefense;
 
@@ -1917,7 +1917,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             }
 
             // calculate values
-            int32 diff = int32(pVictim->GetDefenseSkillValue()) - int32(GetWeaponSkillValue(attType));
+            int32 diff = int32(pVictim->GetDefenseSkillValue(this)) - int32(GetWeaponSkillValue(attType,pVictim));
             float lowEnd  = baseLowEnd - ( 0.05f * diff );
             float highEnd = baseHighEnd - ( 0.03f * diff );
 
@@ -2260,17 +2260,22 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
 {
     if(pVictim->GetTypeId()==TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
         return MELEE_HIT_EVADE;
-    int32 attackerWeaponSkill = GetWeaponSkillValue(attType);
+
+    int32 attackerMaxSkillValueForLevel = GetMaxSkillValueForLevel(pVictim);
+    int32 victimMaxSkillValueForLevel = pVictim->GetMaxSkillValueForLevel(this);
+
+    int32 attackerWeaponSkill = GetWeaponSkillValue(attType,pVictim);
+    int32 victimDefenseSkill = pVictim->GetDefenseSkillValue(this);
+
     // bonus from skills is 0.04%
-    int32    skillBonus  = 4 * ( attackerWeaponSkill - int32(pVictim->GetMaxSkillValueForLevel()) );
-    int32    skillBonus2 = 4 * ( int32(GetMaxSkillValueForLevel()) - int32(pVictim->GetDefenseSkillValue()));
+    int32    skillBonus  = 4 * ( attackerWeaponSkill - victimMaxSkillValueForLevel );
+    int32    skillBonus2 = 4 * ( attackerMaxSkillValueForLevel - victimDefenseSkill );
     int32    sum = 0, tmp = 0;
     int32    roll = urand (0, 10000);
 
     DEBUG_LOG ("RollMeleeOutcomeAgainst: skill bonus of %d for attacker", skillBonus);
-    DEBUG_LOG ("RollMeleeOutcomeAgainst: rolled %d, +hit %d, dodge %u, parry %u, block %u, crit %u",
-        roll, hit_chance, (uint32)(pVictim->GetUnitDodgeChance()*100), (uint32)(pVictim->GetUnitParryChance()*100),
-        (uint32)(pVictim->GetUnitBlockChance()*100), crit_chance);
+    DEBUG_LOG ("RollMeleeOutcomeAgainst: rolled %d, +hit %d, dodge %d, parry %d, block %d, crit %d",
+        roll, hit_chance, dodge_chance, parry_chance, block_chance, crit_chance);
 
     if(attType == RANGED_ATTACK)
     {
@@ -2372,14 +2377,14 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     if( attType != RANGED_ATTACK && !SpellCasted &&
         (GetTypeId() == TYPEID_PLAYER || ((Creature*)this)->isPet()) &&
         pVictim->GetTypeId() != TYPEID_PLAYER && !((Creature*)pVictim)->isPet() &&
-        getLevel() < pVictim->getLevel() )
+        getLevel() < pVictim->getLevelForTarget(this) )
     {
         // cap possible value (with bonuses > max skill)
         int32 skill = attackerWeaponSkill;
-        int32 maxskill = GetMaxSkillValueForLevel();
+        int32 maxskill = attackerMaxSkillValueForLevel;
         skill = (skill > maxskill) ? maxskill : skill;
 
-        tmp = (10 + (int32(pVictim->GetDefenseSkillValue()) - skill)) * 100;
+        tmp = (10 + (victimDefenseSkill - skill)) * 100;
         tmp = tmp > 4000 ? 4000 : tmp;
         if (roll < (sum += tmp))
         {
@@ -2390,12 +2395,12 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
 
     // mobs can score crushing blows if they're 3 or more levels above victim
     // or when their weapon skill is 15 or more above victim's defense skill
-    tmp = pVictim->GetDefenseSkillValue();
-    int32 tmpmax = pVictim->GetMaxSkillValueForLevel();
+    tmp = victimDefenseSkill;
+    int32 tmpmax = victimMaxSkillValueForLevel;
     // having defense above your maximum (from items, talents etc.) has no effect
     tmp = tmp > tmpmax ? tmpmax : tmp;
     // tmp = mob's level * 5 - player's current defense skill
-    tmp = GetMaxSkillValueForLevel() - tmp;
+    tmp = attackerMaxSkillValueForLevel - tmp;
     if (GetTypeId() != TYPEID_PLAYER && !((Creature*)this)->isPet() && (tmp >= 15))
     {
         // add 2% chance per lacking skill point, min. is 15%
@@ -2504,7 +2509,7 @@ float Unit::MeleeSpellMissChance(Unit *pVictim, WeaponAttackType attType, int32 
 
     // PvP - PvE melee chances
     int32 lchance = pVictim->GetTypeId() == TYPEID_PLAYER ? 5 : 7;
-    int32 leveldif = pVictim->getLevel() - getLevel();
+    int32 leveldif = pVictim->getLevelForTraget(this) - getLevelForTarget(pVictim);
     if(leveldif < 3)
         HitChance = 95 - leveldif;
     else
@@ -2546,7 +2551,7 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
         attType = RANGED_ATTACK;
 
     // bonus from skills is 0.04% per skill Diff
-    int32 skillDiff =  GetWeaponSkillValue(attType) - pVictim->GetMaxSkillValueForLevel();
+    int32 skillDiff =  int32(GetWeaponSkillValue(attType,pVictim)) - int32(pVictim->GetMaxSkillValueForLevel(this));
 
     uint32 roll = urand (0, 10000);
     uint32 missChance = uint32(MeleeSpellMissChance(pVictim, attType, skillDiff, spell)*100.0f);
@@ -2625,7 +2630,7 @@ SpellMissInfo Unit::MagicSpellHitResult(Unit *pVictim, SpellEntry const *spell)
     SpellSchoolMask schoolMask = GetSpellSchoolMask(spell);
     // PvP - PvE spell misschances per leveldif > 2
     int32 lchance = pVictim->GetTypeId() == TYPEID_PLAYER ? 7 : 11;
-    int32 leveldif = int32(pVictim->getLevel()) - int32(getLevel());
+    int32 leveldif = int32(pVictim->getLevelForTarget(this)) - int32(getLevelForTarget(pVictim));
 
     // Base hit chance from attacker and victim levels
     int32 modHitChance;
@@ -2801,7 +2806,7 @@ float Unit::MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) c
     // PvP : PvE melee misschances per leveldif > 2
     int32 chance = pVictim->GetTypeId() == TYPEID_PLAYER ? 5 : 7;
 
-    int32 leveldif = int32(pVictim->getLevel()) - int32(getLevel());
+    int32 leveldif = int32(pVictim->getLevelForTarget(this)) - int32(getLevelForTarget(pVictim));
     if(leveldif < 0)
         leveldif = 0;
 
@@ -2828,21 +2833,13 @@ float Unit::MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) c
     return misschance > 60.f ? 60.f : misschance;
 }
 
-uint32 Unit::GetDefenseSkillValue() const
+uint32 Unit::GetDefenseSkillValue(Unit const* target) const
 {
     if(GetTypeId() == TYPEID_PLAYER)
         return ((Player*)this)->GetSkillValue (SKILL_DEFENSE)+
             uint32(((Player*)this)->GetRatingBonusValue(PLAYER_FIELD_DEFENCE_RATING));
     else
-        return GetUnitMeleeSkill();
-}
-
-uint32 Unit::GetBaseDefenseSkillValue() const
-{
-    if(GetTypeId() == TYPEID_PLAYER)
-        return ((Player*)this)->GetBaseSkillValue(SKILL_DEFENSE);
-    else
-        return GetUnitMeleeSkill();
+        return GetUnitMeleeSkill(target);
 }
 
 float Unit::GetUnitDodgeChance() const
@@ -2961,7 +2958,7 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
     return crit;
 }
 
-uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
+uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType, Unit const* target) const
 {
     uint32 value = 0;
     if(GetTypeId() == TYPEID_PLAYER)
@@ -2989,28 +2986,8 @@ uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
         }
     }
     else
-        value = GetUnitMeleeSkill();
+        value = GetUnitMeleeSkill(target);
    return value;
-}
-
-uint32 Unit::GetBaseWeaponSkillValue (WeaponAttackType attType) const
-{
-    if(GetTypeId() == TYPEID_PLAYER)
-    {
-        uint16 slot = Player::GetWeaponSlotByAttack(attType);
-        Item* item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
-
-        if(slot != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() ||
-            item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon(false) ))
-            return 0;
-
-        // in range
-        uint32  skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon(attType==BASE_ATTACK)
-            ? item->GetSkill() : SKILL_UNARMED;
-        return ((Player*)this)->GetBaseSkillValue(skill);
-    }
-    else
-        return GetUnitMeleeSkill();
 }
 
 void Unit::_UpdateSpells( uint32 time )
@@ -7317,7 +7294,7 @@ bool Unit::isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolM
             if (pVictim)
             {
                 crit_chance = GetUnitCriticalChance(attackType, pVictim);
-                crit_chance+= (int32(GetMaxSkillValueForLevel()) - int32(pVictim->GetDefenseSkillValue())) * 0.04f;
+                crit_chance+= (int32(GetMaxSkillValueForLevel(pVictim)) - int32(pVictim->GetDefenseSkillValue(this))) * 0.04f;
                 crit_chance+= GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, schoolMask);
             }
             break;
@@ -8246,7 +8223,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
 
         //Visible distance is modified by
         //-Level Diff (every level diff = 1.0f in visible distance)
-        visibleDistance += int32(u->getLevel()) - int32(this->getLevel());
+        visibleDistance += int32(u->getLevelForTarget(this)) - int32(this->getLevelForTarget(u));
 
         //This allows to check talent tree and will add addition stealth dependent on used points)
         int32 stealthMod = GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_LEVEL);
