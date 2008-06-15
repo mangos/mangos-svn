@@ -58,25 +58,25 @@ enum BG_WS_WorldStates
 
 enum BG_WS_ObjectTypes
 {
-    BG_WS_OBJECT_A_FLAG        = 0,
-    BG_WS_OBJECT_H_FLAG        = 1,
-    BG_WS_OBJECT_SPEEDBUFF_1   = 2,
-    BG_WS_OBJECT_SPEEDBUFF_2   = 3,
-    BG_WS_OBJECT_REGENBUFF_1   = 4,
-    BG_WS_OBJECT_REGENBUFF_2   = 5,
-    BG_WS_OBJECT_BERSERKBUFF_1 = 6,
-    BG_WS_OBJECT_BERSERKBUFF_2 = 7,
-    BG_WS_OBJECT_DOOR_A_1      = 8,
-    BG_WS_OBJECT_DOOR_A_2      = 9,
-    BG_WS_OBJECT_DOOR_A_3      = 10,
-    BG_WS_OBJECT_DOOR_A_4      = 11,
-    BG_WS_OBJECT_DOOR_A_5      = 12,
-    BG_WS_OBJECT_DOOR_A_6      = 13,
-    BG_WS_OBJECT_DOOR_H_1      = 14,
-    BG_WS_OBJECT_DOOR_H_2      = 15,
-    BG_WS_OBJECT_DOOR_H_3      = 16,
-    BG_WS_OBJECT_DOOR_H_4      = 17,
-    BG_WS_OBJECT_MAX           = 18
+    BG_WS_OBJECT_DOOR_A_1       = 0,
+    BG_WS_OBJECT_DOOR_A_2       = 1,
+    BG_WS_OBJECT_DOOR_A_3       = 2,
+    BG_WS_OBJECT_DOOR_A_4       = 3,
+    BG_WS_OBJECT_DOOR_A_5       = 4,
+    BG_WS_OBJECT_DOOR_A_6       = 5,
+    BG_WS_OBJECT_DOOR_H_1       = 6,
+    BG_WS_OBJECT_DOOR_H_2       = 7,
+    BG_WS_OBJECT_DOOR_H_3       = 8,
+    BG_WS_OBJECT_DOOR_H_4       = 9,
+    BG_WS_OBJECT_A_FLAG         = 10,
+    BG_WS_OBJECT_H_FLAG         = 11,
+    BG_WS_OBJECT_SPEEDBUFF_1    = 12,
+    BG_WS_OBJECT_SPEEDBUFF_2    = 13,
+    BG_WS_OBJECT_REGENBUFF_1    = 14,
+    BG_WS_OBJECT_REGENBUFF_2    = 15,
+    BG_WS_OBJECT_BERSERKBUFF_1  = 16,
+    BG_WS_OBJECT_BERSERKBUFF_2  = 17,
+    BG_WS_OBJECT_MAX            = 18
 };
 
 enum BG_WS_ObjectEntry

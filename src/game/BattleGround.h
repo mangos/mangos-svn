@@ -85,6 +85,8 @@ enum BattleGroundBuffObjects
     BG_OBJECTID_BERSERKERBUFF_ENTRY = 179905
 };
 
+const uint32 Buff_Entries[3] = { BG_OBJECTID_SPEEDBUFF_ENTRY, BG_OBJECTID_REGENBUFF_ENTRY, BG_OBJECTID_BERSERKERBUFF_ENTRY };
+
 enum BattleGroundStatus
 {
     STATUS_NONE         = 0,
@@ -269,7 +271,7 @@ class BattleGround
         void IncreaseInvitedCount(uint32 team)      { (team == ALLIANCE) ? ++m_InvitedAlliance : ++m_InvitedHorde; }
         uint32 GetInvitedCount(uint32 team) const
         {
-            if (team == ALLIANCE)
+            if( team == ALLIANCE )
                 return m_InvitedAlliance;
             else
                 return m_InvitedHorde;
@@ -358,7 +360,6 @@ class BattleGround
         virtual void HandleAreaTrigger(Player* /*Source*/, uint32 /*Trigger*/) {}
         // must be implemented in BG subclass if need AND call base class generic code
         virtual void HandleKillPlayer(Player *player, Player *killer);
-        // must be implemented in BG subclass if need
 
         /* Battleground events */
         /* these functions will return true event is possible, but false if player is bugger */
@@ -373,22 +374,23 @@ class BattleGround
         virtual void RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPacket);
                                                             // can be extended in in BG subclass
 
+        void HandleTriggerBuff(uint64 const& go_guid);
+
         // TODO: make this protected:
         typedef std::vector<uint64> BGObjects;
         typedef std::vector<uint64> BGCreatures;
         BGObjects m_BgObjects;
         BGCreatures m_BgCreatures;
         void SpawnBGObject(uint32 type, uint32 respawntime);
-        bool AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawntime = 0);
+        bool AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime = 0);
         Creature* AddCreature(uint32 entry, uint32 type, uint32 teamval, float x, float y, float z, float o);
         bool DelCreature(uint32 type);
         bool DelObject(uint32 type);
         bool AddSpiritGuide(uint32 type, float x, float y, float z, float o, uint32 team);
 
         void DoorOpen(uint32 type);
+        void DoorClose(uint32 type);
         const char *GetMangosString(uint32 entry);
-
-        void HandleTriggerBuff(uint64 const& go_guid);
 
     protected:
         //this method is called, when BG cannot spawn its own spirit guide, or something is wrong, It correctly ends BattleGround
@@ -409,6 +411,8 @@ class BattleGround
         this is important variable used for invitation messages
         */
         uint8 m_Events;
+
+        bool   m_BuffChange;
 
     private:
         /* Battleground */

@@ -195,11 +195,20 @@ enum EYBattleGroundObjectTypes
     BG_EY_OBJECT_FLAG_BLOOD_ELF                 = 44,
     BG_EY_OBJECT_FLAG_DRAENEI_RUINS             = 45,
     BG_EY_OBJECT_FLAG_MAGE_TOWER                = 46,
-    BG_EY_OBJECT_BUFF_FEL_REALVER               = 47,
-    BG_EY_OBJECT_BUFF_BLOOD_ELF                 = 48,
-    BG_EY_OBJECT_BUFF_DRAENEI_RUINS             = 49,
-    BG_EY_OBJECT_BUFF_MAGE_TOWER                = 50,
-    BG_EY_OBJECT_MAX                            = 51
+    //buffs
+    BG_EY_OBJECT_SPEEDBUFF_FEL_REALVER          = 47,
+    BG_EY_OBJECT_REGENBUFF_FEL_REALVER          = 48,
+    BG_EY_OBJECT_BERSERKBUFF_FEL_REALVER        = 49,
+    BG_EY_OBJECT_SPEEDBUFF_BLOOD_ELF            = 50,
+    BG_EY_OBJECT_REGENBUFF_BLOOD_ELF            = 51,
+    BG_EY_OBJECT_BERSERKBUFF_BLOOD_ELF          = 52,
+    BG_EY_OBJECT_SPEEDBUFF_DRAENEI_RUINS        = 53,
+    BG_EY_OBJECT_REGENBUFF_DRAENEI_RUINS        = 54,
+    BG_EY_OBJECT_BERSERKBUFF_DRAENEI_RUINS      = 55,
+    BG_EY_OBJECT_SPEEDBUFF_MAGE_TOWER           = 56,
+    BG_EY_OBJECT_REGENBUFF_MAGE_TOWER           = 57,
+    BG_EY_OBJECT_BERSERKBUFF_MAGE_TOWER         = 58,
+    BG_EY_OBJECT_MAX                            = 59
 };
 
 enum BG_EY_FlagState
@@ -307,8 +316,6 @@ class BattleGroundEY : public BattleGround
         void HandleBuffUse(uint64 const& buff_guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         void HandleKillPlayer(Player *player, Player *killer);
-        void SpawnBuff(uint32 type, uint8 point, uint32 respawntime);
-        bool SpawnBuff(uint32 type, uint32 entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint32 spawntime);
         virtual WorldSafeLocsEntry const* GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team);
         virtual bool SetupBattleGround();
         virtual void ResetBGSubclass();
@@ -345,7 +352,6 @@ class BattleGroundEY : public BattleGround
         uint32 m_HonorScoreTics[2];
         uint32 m_TeamPointsCount[2];
 
-        uint32 m_Buff_Entry[3];
         uint32 m_Points_Trigger[EY_POINTS_MAX];
 
         uint64 m_FlagKeeper;                                // keepers guid

@@ -19,10 +19,9 @@
 #include "Object.h"
 #include "Player.h"
 #include "BattleGround.h"
-#include "BattleGroundEY.h"
 #include "Creature.h"
 #include "MapManager.h"
-#include "Language.h"                                       // for chat messages
+#include "Language.h"
 #include "Chat.h"
 #include "SpellAuras.h"
 #include "World.h"
@@ -43,6 +42,7 @@ BattleGround::BattleGround()
     m_StartTime         = 0;
     m_Events            = 0;
     m_IsRated           = false;
+    m_BuffChange        = false;
     m_Name              = "";
     m_LevelMin          = 0;
     m_LevelMax          = 0;
@@ -649,23 +649,6 @@ void BattleGround::StartBattleGround(time_t diff)
     SetStartTime(0);
 
     SetLastResurrectTime(0);
-
-    /// this code seems not correct:
-    if(GetTypeID() == BATTLEGROUND_AA)
-    {
-        // we must select one of running arena
-        uint8 arenas[3] = { BATTLEGROUND_NA, BATTLEGROUND_BE, BATTLEGROUND_RL };
-        uint8 arena_type = arenas[urand(0, 2)];
-
-        BattleGround *bg = sBattleGroundMgr.GetBattleGround(arena_type);
-        if(!bg)
-            return;
-
-        bg->SetStatus(STATUS_WAIT_JOIN);
-
-        bg->SetStartTime(0);
-        bg->SetLastResurrectTime(0);
-    }
 }
 
 void BattleGround::AddPlayer(Player *plr)
@@ -823,7 +806,7 @@ void BattleGround::RemovePlayerFromResurrectQueue(uint64 player_guid)
     }
 }
 
-bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint32 spawntime)
+bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawnTime)
 {
     GameObjectInfo const* goinfo = objmgr.GetGameObjectInfo(entry);
     if(!goinfo)
@@ -846,7 +829,7 @@ bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float 
     data.rotation1      = rotation1;
     data.rotation2      = rotation2;
     data.rotation3      = rotation3;
-    data.spawntimesecs  = spawntime;
+    data.spawntimesecs  = respawnTime;
     data.animprogress   = 100;
     data.go_state       = 1;
     data.spawnMask      = 1;
@@ -857,29 +840,53 @@ bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float 
     return true;
 }
 
+//some doors aren't despawned so we cannot handle their closing in gameobject::update()
+//it would be nice to correctly implement GO_ACTIVATED state and open/close doors in gameobject code
+void BattleGround::DoorClose(uint32 type)
+{
+    GameObject *obj = HashMapHolder<GameObject>::Find(m_BgObjects[type]);
+    if(obj)
+    {
+        //if doors are open, close it
+        if( obj->getLootState() == GO_ACTIVATED && !obj->GetUInt32Value(GAMEOBJECT_STATE) )
+        {
+            //change state to allow door to be closed
+            obj->SetLootState(GO_READY);
+            obj->UseDoorOrButton(RESPAWN_ONE_DAY);
+        }
+    }
+    else
+    {
+        sLog.outError("BattleGround: Door object not found (cannot close doors)");
+    }
+}
+
 void BattleGround::DoorOpen(uint32 type)
 {
     GameObject *obj = HashMapHolder<GameObject>::Find(m_BgObjects[type]);
     if(obj)
     {
+        //change state to be sure they will be opened
+        obj->SetLootState(GO_READY);
         obj->UseDoorOrButton(RESPAWN_ONE_DAY);
     }
     else
     {
-        sLog.outError("Object not found");
+        sLog.outError("BattleGround: Door object not found! - doors will be closed.");
     }
 }
 
 void BattleGround::SpawnBGObject(uint32 type, uint32 respawntime)
 {
-    if(respawntime == 0)
+    if( respawntime == 0 )
     {
         GameObject *obj = HashMapHolder<GameObject>::Find(m_BgObjects[type]);
         if(obj)
         {
-            //obj->Respawn();                               // bugged
-            obj->SetRespawnTime(0);
-            //objmgr.SaveGORespawnTime(obj->GetGUIDLow(), 0, 0);
+            //we need to change state from GO_JUST_DEACTIVATED to GO_READY in case battleground is starting again
+            if( obj->getLootState() == GO_JUST_DEACTIVATED )
+                obj->SetLootState(GO_READY);
+            obj->Respawn();
         }
         else
             objmgr.SaveGORespawnTime(GUID_LOPART(m_BgObjects[type]), 0, 0);
@@ -1005,37 +1012,55 @@ const char *BattleGround::GetMangosString(uint32 entry)
     return objmgr.GetMangosString(entry);
 }
 
+/*
+important notice:
+buffs aren't spawned/despawned when players captures anything
+buffs are in their positions when battleground starts
+*/
 void BattleGround::HandleTriggerBuff(uint64 const& go_guid)
 {
     GameObject *obj = HashMapHolder<GameObject>::Find(go_guid);
-    if(!obj)
+    if(!obj || obj->GetGoType() != GAMEOBJECT_TYPE_TRAP || !obj->isSpawned())
         return;
 
-    if(obj->GetGoType()!=GAMEOBJECT_TYPE_TRAP)
+    //change buff type, when buff is used:
+    int32 index = m_BgObjects.size() - 1;
+    while (index >= 0 && m_BgObjects[index] != go_guid)
+        index--;
+    if (index < 0)
     {
-        sLog.outError("Battleground (Type: %u) have buff gameobject (Entry: %u Type:%u) as trap gameobject.",GetTypeID(),obj->GetEntry(),obj->GetGoType());
+        sLog.outError("BattleGround (Type: %u) has buff gameobject (Guid: %u Entry: %u Type:%u) but it hasn't that object in its internal data",GetTypeID(),GUID_LOPART(go_guid),obj->GetEntry(),obj->GetGoType());
         return;
     }
 
-    if(!obj->isSpawned())
-        return;                                             // buff not spawned yet
-
-    if(GetTypeID() == BATTLEGROUND_EY)
-        ((BattleGroundEY*)this)->HandleBuffUse(go_guid);
-    else
+    //randomly select new buff
+    uint8 buff = urand(0, 2);
+    uint32 entry = obj->GetEntry();
+    if( m_BuffChange && entry != Buff_Entries[buff] )
     {
-        obj->SetRespawnTime(BUFF_RESPAWN_TIME);
-        obj->SetLootState(GO_JUST_DEACTIVATED);
+        //despawn current buff
+        SpawnBGObject(index, RESPAWN_ONE_DAY);
+        //set index for new one
+        for (uint8 currBuffTypeIndex = 0; currBuffTypeIndex < 3; ++currBuffTypeIndex)
+            if( entry == Buff_Entries[currBuffTypeIndex] )
+            {
+                index -= currBuffTypeIndex;
+                index += buff;
+            }
     }
+
+    SpawnBGObject(index, BUFF_RESPAWN_TIME);
 }
 
 void BattleGround::HandleKillPlayer( Player *player, Player *killer )
 {
+    //keep in mind that for arena this will have to be changed a bit
+
     // add +1 deaths
     UpdatePlayerScore(player, SCORE_DEATHS, 1);
 
-    // add +1 kills and killing_blows
-    if(killer)
+    // add +1 kills to group and +1 killing_blows to killer
+    if( killer )
     {
         UpdatePlayerScore(killer, SCORE_HONORABLE_KILLS, 1);
         UpdatePlayerScore(killer, SCORE_KILLING_BLOWS, 1);
@@ -1047,7 +1072,7 @@ void BattleGround::HandleKillPlayer( Player *player, Player *killer )
             if(!plr || plr == killer)
                 continue;
 
-            if(plr->GetTeam() == killer->GetTeam() && plr->IsAtGroupRewardDistance(player))
+            if( plr->GetTeam() == killer->GetTeam() && plr->IsAtGroupRewardDistance(player) )
                 UpdatePlayerScore(plr, SCORE_HONORABLE_KILLS, 1);
         }
     }
