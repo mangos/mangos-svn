@@ -1507,6 +1507,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateDefenseBonusesMod();
         void ApplyRatingMod(uint16 index, int32 value, bool apply);
         float GetMeleeCritFromAgility();
+        float GetDodgeFromAgility();
         float GetSpellCritFromIntellect();
         float OCTRegenHPPerSpirit();
         float OCTRegenMPPerSpirit();
