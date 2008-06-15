@@ -502,24 +502,8 @@ void Player::UpdateParryPercentage()
 
 void Player::UpdateDodgePercentage()
 {
-    float classrate;
-    float base_dodge;
-
-    switch(getClass())
-    {
-        case CLASS_DRUID:   base_dodge = 0.75f; classrate = getLevel() > 60 ? 14.7 : 10.0f; break;
-        case CLASS_HUNTER:  base_dodge = 0.64f; classrate = getLevel() > 60 ? 25 : 26.5f; break;
-        case CLASS_ROGUE:   base_dodge = 0.0f;  classrate = getLevel() > 60 ? 20 : 14.5f; break;
-        case CLASS_PALADIN: base_dodge = 0.75f; classrate = getLevel() > 60 ? 25 : 20; break;
-        case CLASS_SHAMAN:  base_dodge = 1.75f; classrate = getLevel() > 60 ? 25 : 20; break;
-        case CLASS_MAGE:    base_dodge = 3.25f; classrate = getLevel() > 60 ? 25 : 20; break;
-        case CLASS_PRIEST:  base_dodge = 3.0f;  classrate = getLevel() > 60 ? 25 : 20; break;
-        case CLASS_WARLOCK: base_dodge = 2.0f;  classrate = getLevel() > 60 ? 25 : 20; break;
-        case CLASS_WARRIOR:
-        default:            base_dodge = 0.0f;  classrate = getLevel() > 60 ? 30 : 20; break;
-    }
     // Dodge from agility
-    float value  = base_dodge + GetStat(STAT_AGILITY)/classrate;
+    float value = GetDodgeFromAgility();
     // Modify value from defence skill
     value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
     // Dodge from SPELL_AURA_MOD_DODGE_PERCENT aura
