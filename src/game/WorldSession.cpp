@@ -621,7 +621,7 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->getHostilRefManager().deleteReferences();
             _player->BuildPlayerRepop();
         }
-        else if (_player->isAttacked())
+        else if (!_player->getAttackers().empty())
         {
             _player->CombatStop();
             _player->getHostilRefManager().setOnlineOfflineState(false);

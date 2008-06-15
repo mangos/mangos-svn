@@ -1320,7 +1320,7 @@ void Spell::EffectDummy(uint32 i)
                     // 31989 -> dummy effect (step 1) + dummy effect (step 2) -> 31709 (taunt like spell for each target)
 
                     // non-standard cast requirement check
-                    if (!unitTarget || !unitTarget->hasUnitState(UNIT_STAT_ATTACK_BY))
+                    if (!unitTarget || !unitTarget->getAttackers().empty())
                     {
                         // clear cooldown at fail
                         if(m_caster->GetTypeId()==TYPEID_PLAYER)

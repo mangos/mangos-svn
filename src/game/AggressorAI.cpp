@@ -142,7 +142,7 @@ AggressorAI::AttackStart(Unit *u)
     if( !u )
         return;
 
-    if(i_creature.Attack(u))
+    if(i_creature.Attack(u,true))
     {
         i_creature.AddThreat(u, 0.0f);
         //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", i_creature.GetName(), u->GetGUIDLow());

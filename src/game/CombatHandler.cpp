@@ -57,14 +57,6 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
         return;
     }
 
-    // ignore swing changes out of melee combat distance
-    if( !_player->IsWithinDistInMap(pEnemy, ATTACK_DISTANCE) )
-    {
-        // stop attack state at client
-        SendAttackStop(pEnemy);
-        return;
-    }
-
     _player->Attack(pEnemy,true);
 }
 

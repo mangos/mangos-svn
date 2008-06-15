@@ -325,7 +325,7 @@ void ScriptedAI::EnterEvadeMode()
 
 void ScriptedAI::DoStartAttack(Unit* victim)
 {
-    if( m_creature->Attack(victim) )
+    if( m_creature->Attack(victim, true) )
     {
         m_creature->GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*victim));
     }

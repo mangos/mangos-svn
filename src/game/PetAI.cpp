@@ -66,7 +66,7 @@ void PetAI::AttackStart(Unit *u)
     if( i_pet.getVictim() || !u || i_pet.isPet() && ((Pet&)i_pet).getPetType()==MINI_PET )
         return;
 
-    if(i_pet.Attack(u))
+    if(i_pet.Attack(u,true))
     {
         i_pet.clearUnitState(UNIT_STAT_FOLLOW);
         // TMGs call CreatureRelocation which via MoveInLineOfSight can call this function
