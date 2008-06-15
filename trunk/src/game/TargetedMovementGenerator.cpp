@@ -176,7 +176,7 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
 
             owner.StopMoving();
             if(owner.canReachWithAttack(i_target.getTarget()) && !owner.hasUnitState(UNIT_STAT_FOLLOW))
-                owner.Attack(i_target.getTarget());
+                owner.Attack(i_target.getTarget(),true);
         }
     }
     return true;

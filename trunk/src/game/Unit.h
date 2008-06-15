@@ -301,23 +301,21 @@ enum DeathState
 
 enum UnitState
 {
-    UNIT_STAT_STOPPED       = 0,
-    UNIT_STAT_DIED          = 1,
-    UNIT_STAT_ATTACKING     = 2,                            // player is attacking someone
-    UNIT_STAT_ATTACK_BY     = 4,                            // player is attack by someone
-                                                            // player is in combat mode
-    UNIT_STAT_IN_COMBAT     = (UNIT_STAT_ATTACKING | UNIT_STAT_ATTACK_BY),
-    UNIT_STAT_STUNDED       = 8,
-    UNIT_STAT_ROAMING       = 16,
-    UNIT_STAT_CHASE         = 32,
-    UNIT_STAT_SEARCHING     = 64,
-    UNIT_STAT_FLEEING       = 128,
-    UNIT_STAT_MOVING        = (UNIT_STAT_ROAMING | UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING),
-    UNIT_STAT_IN_FLIGHT     = 256,                          // player is in flight mode
-    UNIT_STAT_FOLLOW        = 512,
-    UNIT_STAT_ROOT          = 1024,
-    UNIT_STAT_CONFUSED      = 2048,
-    UNIT_STAT_ALL_STATE     = 0xffff                        //(UNIT_STAT_STOPPED | UNIT_STAT_MOVING | UNIT_STAT_IN_COMBAT | UNIT_STAT_IN_FLIGHT)
+    UNIT_STAT_STOPPED         = 0,
+    UNIT_STAT_DIED            = 1,
+    UNIT_STAT_MELEE_ATTACKING = 2,                          // player is melee attacking someone
+    //UNIT_STAT_MELEE_ATTACK_BY = 4,                          // player is melee attack by someone
+    UNIT_STAT_STUNDED         = 8,
+    UNIT_STAT_ROAMING         = 16,
+    UNIT_STAT_CHASE           = 32,
+    UNIT_STAT_SEARCHING       = 64,
+    UNIT_STAT_FLEEING         = 128,
+    UNIT_STAT_MOVING          = (UNIT_STAT_ROAMING | UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING),
+    UNIT_STAT_IN_FLIGHT       = 256,                        // player is in flight mode
+    UNIT_STAT_FOLLOW          = 512,
+    UNIT_STAT_ROOT            = 1024,
+    UNIT_STAT_CONFUSED        = 2048,
+    UNIT_STAT_ALL_STATE       = 0xffff                      //(UNIT_STAT_STOPPED | UNIT_STAT_MOVING | UNIT_STAT_IN_COMBAT | UNIT_STAT_IN_FLIGHT)
 };
 
 enum UnitMoveType
@@ -641,7 +639,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
             AttackerSet::iterator itr = m_attackers.find(pAttacker);
             if(itr == m_attackers.end())
                 m_attackers.insert(pAttacker);
-            addUnitState(UNIT_STAT_ATTACK_BY);
             SetInCombat();
         }
         void _removeAttacker(Unit *pAttacker)               // must be called only from Unit::AttackStop()
@@ -652,7 +649,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
             if (m_attackers.empty())
             {
-                clearUnitState(UNIT_STAT_ATTACK_BY);
                 if(!m_attacking)
                     ClearInCombat();
             }
@@ -667,7 +663,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
             return NULL;
         }
-        bool Attack(Unit *victim, bool playerMeleeAttack = false);
+        bool Attack(Unit *victim, bool meleeAttack);
         void CastStop(uint32 except_spellid = 0);
         bool AttackStop();
         void RemoveAllAttackers();
@@ -811,9 +807,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool isInCombat()  const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
         void SetInCombat();
         void ClearInCombat();
-
-        bool isAttacking() const { return hasUnitState(UNIT_STAT_ATTACKING); }
-        bool isAttacked()  const { return hasUnitState(UNIT_STAT_ATTACK_BY); }
 
         bool HasAuraType(AuraType auraType) const;
         bool HasAura(uint32 spellId, uint32 effIndex) const

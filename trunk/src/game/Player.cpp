@@ -880,8 +880,6 @@ void Player::Update( uint32 p_time )
         std::set<uint32>::iterator iter = m_timedquests.begin();
         while (iter != m_timedquests.end())
         {
-            //if( mQuestStatus[*iter].m_timer > 0 )
-            //{
             if( mQuestStatus[*iter].m_timer <= p_time )
             {
                 uint32 quest_id  = *iter;
@@ -894,11 +892,10 @@ void Player::Update( uint32 p_time )
                 if (mQuestStatus[*iter].uState != QUEST_NEW) mQuestStatus[*iter].uState = QUEST_CHANGED;
                 ++iter;
             }
-            //}
         }
     }
 
-    if (isAttacking())
+    if (hasUnitState(UNIT_STAT_MELEE_ATTACKING))
     {
         Unit *pVictim = getVictim();
         if( !IsNonMeleeSpellCasted(false) && pVictim)
@@ -962,17 +959,6 @@ void Player::Update( uint32 p_time )
             if(u->IsPvP() && (!duel || duel->opponent != u))
                 UpdatePvP(true);
         }
-    }
-
-    else if (isAttacked())
-    {
-        // Leave here so we don't forget this case
-        // Attacked, but not necessarily attacking
-    }
-    else
-    {
-        // Leave here so we don't forget this case
-        // Not attacking or attacked
     }
 
     if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))

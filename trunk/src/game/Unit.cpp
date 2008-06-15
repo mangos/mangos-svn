@@ -274,10 +274,10 @@ void Unit::Update( uint32 p_time )
     //update combat timer only for players and pets
     if (isInCombat() && (GetTypeId() == TYPEID_PLAYER || ((Creature*)this)->isPet() || ((Creature*)this)->isCharmed()))
     {
-        // Check UNIT_STAT_ATTACKING or UNIT_STAT_CHASE (without UNIT_STAT_FOLLOW in this case) so pets can reach far away
+        // Check UNIT_STAT_MELEE_ATTACKING or UNIT_STAT_CHASE (without UNIT_STAT_FOLLOW in this case) so pets can reach far away
         // targets without stopping half way there and running off.
         // These flags are reset after target dies or another command is given.
-        if( m_HostilRefManager.isEmpty() && !hasUnitState(UNIT_STAT_ATTACKING) && !(hasUnitState(UNIT_STAT_CHASE) && !hasUnitState(UNIT_STAT_FOLLOW) ) )
+        if( m_HostilRefManager.isEmpty() && !hasUnitState(UNIT_STAT_MELEE_ATTACKING) && !(hasUnitState(UNIT_STAT_CHASE) && !hasUnitState(UNIT_STAT_FOLLOW) ) )
         {
             // m_CombatTimer set at aura start and it will be freeze until aura removing
             if ( m_CombatTimer <= p_time )
@@ -6528,7 +6528,7 @@ bool Unit::IsNeutralToAll() const
     return my_faction->IsNeutralToAll();
 }
 
-bool Unit::Attack(Unit *victim, bool playerMeleeAttack)
+bool Unit::Attack(Unit *victim, bool meleeAttack)
 {
     if(!victim || victim == this)
         return false;
@@ -6556,14 +6556,24 @@ bool Unit::Attack(Unit *victim, bool playerMeleeAttack)
     if (m_attacking)
     {
         if (m_attacking == victim)
+        {
+            // switch to melee attack from ranged/magic
+            if( meleeAttack && !hasUnitState(UNIT_STAT_MELEE_ATTACKING) )
+            {
+                addUnitState(UNIT_STAT_MELEE_ATTACKING);
+                SendAttackStart(victim);
+                return true;
+            }
             return false;
+        }
         AttackStop();
     }
 
     //Set our target
     SetUInt64Value(UNIT_FIELD_TARGET, victim->GetGUID());
 
-    addUnitState(UNIT_STAT_ATTACKING);
+    if(meleeAttack)
+        addUnitState(UNIT_STAT_MELEE_ATTACKING);
     SetInCombat();
     m_attacking = victim;
     m_attacking->_addAttacker(this);
@@ -6588,7 +6598,7 @@ bool Unit::Attack(Unit *victim, bool playerMeleeAttack)
     if(haveOffhandWeapon())
         resetAttackTimer(OFF_ATTACK);
 
-    if(GetTypeId()!=TYPEID_PLAYER || playerMeleeAttack)
+    if(meleeAttack)
         SendAttackStart(victim);
 
     return true;
@@ -6607,7 +6617,7 @@ bool Unit::AttackStop()
     //Clear our target
     SetUInt64Value(UNIT_FIELD_TARGET, 0);
 
-    clearUnitState(UNIT_STAT_ATTACKING);
+    clearUnitState(UNIT_STAT_MELEE_ATTACKING);
 
     InterruptSpell(CURRENT_MELEE_SPELL);
 
@@ -8184,7 +8194,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
     // Special cases
 
     // If is attacked then stealth is lost, some creature can use stealth too
-    if(this->isAttacked())
+    if( !getAttackers().empty() )
         return true;
 
     // If there is collision rogue is seen regardless of level difference

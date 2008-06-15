@@ -123,7 +123,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     }
                     else                                    // charmed player
                     {
-                        pet->Attack(TargetUnit);
+                        pet->Attack(TargetUnit,true);
                         pet->SendPetAIReaction(guid1);
                     }
                     break;
