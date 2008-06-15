@@ -464,8 +464,13 @@ void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    for(PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)
-        pet->removeSpell(itr->first);
+    for(PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end();)
+    {
+        uint32 spell_id = itr->first;                       // Pet::removeSpell can invalidate iterator at erase NEW spell
+        ++itr;
+        pet->removeSpell(spell_id);
+    }
+
     pet->SetTP(pet->getLevel() * (pet->GetLoyaltyLevel() - 1));
 
     for(uint8 i = 0; i < 10; i++)
