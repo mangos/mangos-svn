@@ -114,7 +114,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
             qitem->is_looted = true;
             //freeforall is 1 if everyone's supposed to get the quest item.
             if (item->freeforall || loot->GetPlayerQuestItems().size() == 1)
-                player->SendNotifyLootItemRemoved(loot->items.size() + lootSlot);
+                player->SendNotifyLootItemRemoved(lootSlot);
             else
                 loot->NotifyQuestItemRemoved(qitem->index);
         }
