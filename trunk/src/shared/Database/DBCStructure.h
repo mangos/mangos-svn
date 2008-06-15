@@ -185,10 +185,10 @@ struct CreatureDisplayInfoEntry
 struct CreatureFamilyEntry
 {
     uint32    ID;                                           // 0
-    //float     minScale;                                   // 1 unused    
-    //uint32    minScaleLevel;                              // 2 0/1 unused         
-    //float     maxScale;                                   // 3 unused
-    //uint32    maxScaleLevel;                              // 4 0/60, unused
+    float     minScale;                                     // 1  
+    uint32    minScaleLevel;                                // 2 0/1      
+    float     maxScale;                                     // 3
+    uint32    maxScaleLevel;                                // 4 0/60
     uint32    skillLine;                                    // 5
     uint32    skillLine2;                                   // 6
     uint32    petFoodMask;                                  // 7

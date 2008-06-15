@@ -97,7 +97,8 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     pet->clearUnitState(UNIT_STAT_FOLLOW);
                     uint64 selguid = _player->GetSelection();
                     Unit *TargetUnit = ObjectAccessor::GetUnit(*_player, selguid);
-                    if(TargetUnit == NULL) return;
+                    if(!TargetUnit)
+                        return;
 
                     // not let attack friendly units.
                     if( GetPlayer()->IsFriendlyTo(TargetUnit))

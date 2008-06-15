@@ -949,9 +949,19 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
 
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0);
 
-    // Hunter pets' size does depend on level
-    if(getPetType() == HUNTER_PET)
-        SetFloatValue(OBJECT_FIELD_SCALE_X, 0.4 + float(petlevel) / 100);
+    CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(cinfo->family);
+    if(cFamily && cFamily->minScale > 0.0f)
+    {
+        float scale;
+        if (getLevel() >= cFamily->maxScaleLevel)
+            scale = cFamily->maxScale;
+        else if (getLevel() <= cFamily->minScaleLevel)
+            scale = cFamily->minScale;
+        else
+            scale = cFamily->minScale + (getLevel() - cFamily->minScaleLevel) / cFamily->maxScaleLevel * (cFamily->maxScale - cFamily->minScale);
+        
+        SetFloatValue(OBJECT_FIELD_SCALE_X, scale);
+    }
     m_bonusdamage = 0;
 
     int32 createResistance[MAX_SPELL_SCHOOL] = {0,0,0,0,0,0,0};
