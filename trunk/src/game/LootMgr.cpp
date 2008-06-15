@@ -552,11 +552,11 @@ LootItem* Loot::LootItemInSlot(uint32 lootSlot, Player* player, QuestItem **qite
     bool is_looted = true;
     if (lootSlot >= items.size())
     {
-        lootSlot -= items.size();
+        uint32 questSlot = lootSlot - items.size();
         QuestItemMap::const_iterator itr = PlayerQuestItems.find(player->GetGUIDLow());
-        if (itr != PlayerQuestItems.end() && lootSlot < itr->second->size())
+        if (itr != PlayerQuestItems.end() && questSlot < itr->second->size())
         {
-            QuestItem *qitem2 = &itr->second->at(lootSlot);
+            QuestItem *qitem2 = &itr->second->at(questSlot);
             if(qitem)
                 *qitem = qitem2;
             item = &quest_items[qitem2->index];
