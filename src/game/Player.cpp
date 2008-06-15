@@ -16849,3 +16849,19 @@ uint8 Player::GetWeaponSlotByAttack(WeaponAttackType attType)
         default:            return EQUIPMENT_SLOT_MAINHAND;
     }
 }
+
+uint32 Player::GetBaseWeaponSkillValue (WeaponAttackType attType) const
+{
+    uint16 slot = GetWeaponSlotByAttack(attType);
+    Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+
+    if(slot != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() ||
+        item->GetProto()->Class != ITEM_CLASS_WEAPON || !IsUseEquipedWeapon(false) ))
+        return 0;
+
+    // in range
+    uint32  skill = item && !item->IsBroken() && IsUseEquipedWeapon(attType==BASE_ATTACK)
+        ? item->GetSkill() : SKILL_UNARMED;
+    return GetBaseSkillValue(skill);
+}
+
