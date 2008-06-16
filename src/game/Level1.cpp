@@ -530,7 +530,7 @@ bool ChatHandler::HandleModifyKnownTitlesCommand(const char* args)
     if(!*args)
         return false;
 
-    uint32 titles = atoi((char*)args);
+    uint64 titles = atoi((char*)args);
 
     Player *chr = getSelectedPlayer();
     if (!chr)
@@ -539,15 +539,15 @@ bool ChatHandler::HandleModifyKnownTitlesCommand(const char* args)
         return true;
     }
 
-    uint32 titles2 = titles;
+    uint64 titles2 = titles;
 
     for(int i=1; i < sCharTitlesStore.nCount; ++i)
         if(CharTitlesEntry const* tEntry = sCharTitlesStore.LookupEntry(i))
-            titles2 &= ~(1 << (tEntry->bit_index-1));
+            titles2 &= ~(uint64(1) << tEntry->bit_index);
 
     titles &= ~titles2;                                     // remove not existed titles
 
-    chr->SetUInt32Value(PLAYER__FIELD_KNOWN_TITLES, titles);
+    chr->SetUInt64Value(PLAYER__FIELD_KNOWN_TITLES, titles);
     SendSysMessage(LANG_DONE);
 
     return true;

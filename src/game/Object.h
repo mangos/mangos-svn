@@ -195,7 +195,6 @@ class MANGOS_DLL_SPEC Object
         }
 
         void SetFlag( uint16 index, uint32 newFlag );
-
         void RemoveFlag( uint16 index, uint32 oldFlag );
 
         void ToggleFlag( uint16 index, uint32 flag)
@@ -215,6 +214,39 @@ class MANGOS_DLL_SPEC Object
         void ApplyModFlag( uint16 index, uint32 flag, bool apply)
         {
             if(apply) SetFlag(index,flag); else RemoveFlag(index,flag);
+        }
+
+        void SetFlag64( uint16 index, uint64 newFlag )
+        {
+            uint64 oldval = GetUInt64Value(index);
+            uint64 newval = oldval | newFlag;
+            SetUInt64Value(index,newval);
+        }
+
+        void RemoveFlag64( uint16 index, uint64 oldFlag )
+        {
+            uint64 oldval = GetUInt64Value(index);
+            uint64 newval = oldval & ~oldFlag;
+            SetUInt64Value(index,newval);
+        }
+
+        void ToggleFlag64( uint16 index, uint64 flag)
+        {
+            if(HasFlag64(index, flag))
+                RemoveFlag64(index, flag);
+            else
+                SetFlag64(index, flag);
+        }
+
+        bool HasFlag64( uint16 index, uint64 flag ) const
+        {
+            ASSERT( index < m_valuesCount || PrintIndexError( index , false ) );
+            return (GetUInt64Value( index ) & flag) != 0;
+        }
+
+        void ApplyModFlag64( uint16 index, uint64 flag, bool apply)
+        {
+            if(apply) SetFlag64(index,flag); else RemoveFlag64(index,flag);
         }
 
         void ClearUpdateMask(bool remove);
