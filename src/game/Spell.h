@@ -259,6 +259,7 @@ class Spell
         void EffectLearnPetSpell(uint32 i);
         void EffectWeaponDmg(uint32 i);
         void EffectTriggerSpell(uint32 i);
+        void EffectTriggerMissaleSpell(uint32 i);
         void EffectThreat(uint32 i);
         void EffectHealMaxHealth(uint32 i);
         void EffectInterruptCast(uint32 i);
