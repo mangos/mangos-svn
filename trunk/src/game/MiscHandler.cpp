@@ -1536,18 +1536,19 @@ void WorldSession::HandleChooseTitleOpcode( WorldPacket & recv_data )
 
     sLog.outDebug("CMSG_SET_TITLE");
 
-    uint32 title;
+    int32 title;
     recv_data >> title;
 
-    uint32 available = GetPlayer()->GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES);
-    if(!(available & (1<<title)))
-        title=0;
+    // -1 at none
+    if(title > 0)
+    {
+       if(!GetPlayer()->HasFlag64(PLAYER__FIELD_KNOWN_TITLES,uint64(1) << title))
+            return;
+    }
+    else
+        title = 0;
 
     GetPlayer()->SetUInt32Value(PLAYER_CHOSEN_TITLE, title);
-    /*
-    PLAYER_FIELD_KNOWN_TITLES:
-    1 << title# (0=none)
-    */
 }
 
 void WorldSession::HandleAllowMoveAckOpcode( WorldPacket & recv_data )

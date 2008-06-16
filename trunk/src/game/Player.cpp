@@ -519,7 +519,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value( PLAYER_GUILDRANK, 0 );
     SetUInt32Value( PLAYER_GUILD_TIMESTAMP, 0 );
 
-    SetUInt32Value( PLAYER__FIELD_KNOWN_TITLES, 0 );        // 0=disabled
+    SetUInt64Value( PLAYER__FIELD_KNOWN_TITLES, 0 );        // 0=disabled
     SetUInt32Value( PLAYER_CHOSEN_TITLE, 0 );
     SetUInt32Value( PLAYER_FIELD_KILLS, 0 );
     SetUInt32Value( PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 0 );
@@ -5667,8 +5667,8 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
                 //  [0]      Just name
                 //  [1..14]  Alliance honor titles and player name
                 //  [15..28] Horde honor titles and player name
-                //  [29..37] Other title and player name
-                //  [38+]    Nothing
+                //  [29..38] Other title and player name
+                //  [39+]    Nothing
                 uint32 victim_title = pVictim->GetUInt32Value(PLAYER_CHOSEN_TITLE);
                                                             // Get Killer titles, CharTitlesEntry::bit_index
                 // Ranks:
@@ -11550,6 +11550,11 @@ void Player::AddQuest( Quest const *pQuest, Object *questGiver )
     if( pQuest->HasFlag( QUEST_MANGOS_FLAGS_TIMED ) )
     {
         uint32 limittime = pQuest->GetLimitTime();
+
+        // shared timed quest
+        if(questGiver && questGiver->GetTypeId()==TYPEID_PLAYER)
+            limittime = ((Player*)questGiver)->getQuestStatusMap()[quest_id].m_timer / 1000;
+
         AddTimedQuest( quest_id );
         questStatusData.m_timer = limittime * 1000;
         qtime = static_cast<uint32>(time(NULL)) + limittime;
@@ -11656,6 +11661,13 @@ void Player::RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver
 
     // Give player extra money if GetRewOrReqMoney > 0 and get ReqMoney if negative
     ModifyMoney( pQuest->GetRewOrReqMoney() );
+
+    // title reward
+    if(pQuest->GetCharTitleId())
+    {
+        if(CharTitlesEntry const* titleEntry = sCharTitlesStore.LookupEntry(pQuest->GetCharTitleId()))
+            SetFlag64(PLAYER__FIELD_KNOWN_TITLES, (uint64(1) << titleEntry->bit_index));
+    }
 
     // Send reward mail
     if(pQuest->GetRewMailTemplateId())
@@ -13138,6 +13150,14 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     if(!_LoadHomeBind(holder->GetResult(PLAYER_LOGIN_QUERY_LOADHOMEBIND)))
         return false;
 
+    // check PLAYER_CHOSEN_TITLE compatibility with PLAYER__FIELD_KNOWN_TITLES
+    // note: PLAYER__FIELD_KNOWN_TITLES updated at quest status loaded
+    if(uint32 curTitle = GetUInt32Value(PLAYER_CHOSEN_TITLE))
+    {
+        if(!HasFlag64(PLAYER__FIELD_KNOWN_TITLES,uint64(1) << curTitle))
+            SetUInt32Value(PLAYER_CHOSEN_TITLE,0);
+    }
+
     // Not finish taxi flight path
     if(!m_taxi.LoadTaxiDestinationsFromString(taxi_nodes))
     {
@@ -13684,9 +13704,18 @@ void Player::_LoadQuestStatus(QueryResult *result)
                     ++slot;
                 }
 
-                // learn rewarded spell if unknown
                 if(questStatusData.m_rewarded)
+                {
+                    // learn rewarded spell if unknown
                     learnQuestRewardedSpells(pQuest);
+
+                    // set rewarded title if any
+                    if(pQuest->GetCharTitleId())
+                    {
+                        if(CharTitlesEntry const* titleEntry = sCharTitlesStore.LookupEntry(pQuest->GetCharTitleId()))
+                            SetFlag64(PLAYER__FIELD_KNOWN_TITLES, (uint64(1) << titleEntry->bit_index));
+                    }
+                }
 
                 sLog.outDebug("Quest status is {%u} for quest {%u} for player (GUID: %u)", mQuestStatus[quest_id].m_status, quest_id, GetGUIDLow());
             }
