@@ -145,11 +145,11 @@ DestinationHolder<TRAVELLER>::GetLocationNow(float &x, float &y, float &z) const
 
 template<typename TRAVELLER>
 float
-DestinationHolder<TRAVELLER>::GetDistanceFromDestSq(const WorldObject &obj) const
+DestinationHolder<TRAVELLER>::GetDistance2dFromDestSq(const WorldObject &obj) const
 {
     float x,y,z;
     obj.GetPosition(x,y,z);
-    return (i_destX-x)*(i_destX-x)+(i_destY-y)*(i_destY-y)+(i_destZ-z)*(i_destZ-z);
+    return (i_destX-x)*(i_destX-x)+(i_destY-y)*(i_destY-y);
 }
 
 template<typename TRAVELLER>

@@ -22,6 +22,7 @@
 #include "Creature.h"
 #include "MapManager.h"
 #include "DestinationHolderImp.h"
+#include "World.h"
 
 #define SMALL_ALPHA 0.05f
 
@@ -156,10 +157,12 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
         if (owner.GetObjectSize())
             i_destinationHolder.ResetUpdate(50);
 
-        float dist = i_target->GetObjectSize() + owner.GetObjectSize() + CONTACT_DISTANCE;
+        float dist = i_target->GetObjectSize() + owner.GetObjectSize() + sWorld.getRate(RATE_TARGET_POS_RECALCULATION_RANGE);
+
+        //More distance let have better performance, less distance let have more sensitive reaction at target move.
 
         // try to counter precision differences
-        if( i_destinationHolder.GetDistanceFromDestSq(*i_target.getTarget()) > dist * dist + 0.8)
+        if( i_destinationHolder.GetDistance2dFromDestSq(*i_target.getTarget()) >= dist * dist)
         {
             owner.SetInFront(i_target.getTarget());         // Set new Angle For Map::
             _setTargetLocation(owner);                      //Calculate New Dest and Send data To Player

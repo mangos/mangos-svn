@@ -51,7 +51,7 @@ class MANGOS_DLL_DECL DestinationHolder
         bool UpdateTraveller(TRAVELLER &traveller, uint32 diff, bool force_update);
         uint32 StartTravel(TRAVELLER &traveller, bool sendMove = true);
         void GetLocationNow(float &x, float &y, float &z) const;
-        float GetDistanceFromDestSq(const WorldObject &obj) const;
+        float GetDistance2dFromDestSq(const WorldObject &obj) const;
 
     private:
         void _findOffSetPoint(float x1, float y1, float x2, float y2, float offset, float &x, float &y);
