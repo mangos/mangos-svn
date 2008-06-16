@@ -2869,11 +2869,15 @@ void Spell::EffectDispel(uint32 i)
         return;
 
     for(int n = 0 ; n < damage; ++n)
-        if(unitTarget->RemoveFirstAuraByDispel(m_spellInfo->EffectMiscValue[i], m_caster))
-            sLog.outDebug("Spell: Removed aura type %u from %s %u (removed by %s %u)",
-                m_spellInfo->EffectMiscValue[i],
-                unitTarget->GetTypeId()==TYPEID_PLAYER ? "player" : "creature", unitTarget->GetGUIDLow(),
-        m_caster->GetTypeId()==TYPEID_PLAYER ? "player" : "creature", m_caster->GetGUIDLow() );
+    {
+        if(!unitTarget->RemoveFirstAuraByDispel(m_spellInfo->EffectMiscValue[i], m_caster))
+            break;                                          // not found aura for dispel
+
+        sLog.outDebug("Spell: Removed aura type %u from %s %u (removed by %s %u)",
+            m_spellInfo->EffectMiscValue[i],
+            unitTarget->GetTypeId()==TYPEID_PLAYER ? "player" : "creature", unitTarget->GetGUIDLow(),
+            m_caster->GetTypeId()==TYPEID_PLAYER ? "player" : "creature", m_caster->GetGUIDLow() );
+    }
 }
 
 void Spell::EffectDualWield(uint32 /*i*/)

@@ -5603,8 +5603,13 @@ void ObjectMgr::LoadGameobjectQuestRelations()
     LoadQuestRelationsHelper(mGOQuestRelations,"gameobject_questrelation");
 
     for(QuestRelations::iterator itr = mGOQuestRelations.begin(); itr != mGOQuestRelations.end(); ++itr)
+    {
         if(!GetGameObjectInfo(itr->first))
             sLog.outErrorDb("Table `gameobject_questrelation` have data for not existed gameobject entry (%u) and existed quest %u",itr->first,itr->second);
+
+        if(GetGameObjectInfo(itr->first)->type != GAMEOBJECT_TYPE_QUESTGIVER)
+            sLog.outErrorDb("Table `gameobject_questrelation` have data gameobject entry (%u) for quest %u, but GO is not GAMEOBJECT_TYPE_QUESTGIVER",itr->first,itr->second);
+    }
 }
 
 void ObjectMgr::LoadGameobjectInvolvedRelations()
@@ -5612,8 +5617,13 @@ void ObjectMgr::LoadGameobjectInvolvedRelations()
     LoadQuestRelationsHelper(mGOQuestInvolvedRelations,"gameobject_involvedrelation");
 
     for(QuestRelations::iterator itr = mGOQuestInvolvedRelations.begin(); itr != mGOQuestInvolvedRelations.end(); ++itr)
+    {
         if(!GetGameObjectInfo(itr->first))
             sLog.outErrorDb("Table `gameobject_involvedrelation` have data for not existed gameobject entry (%u) and existed quest %u",itr->first,itr->second);
+
+        if(GetGameObjectInfo(itr->first)->type != GAMEOBJECT_TYPE_QUESTGIVER)
+            sLog.outErrorDb("Table `gameobject_involvedrelation` have data gameobject entry (%u) for quest %u, but GO is not GAMEOBJECT_TYPE_QUESTGIVER",itr->first,itr->second);
+    }
 }
 
 void ObjectMgr::LoadCreatureQuestRelations()
@@ -5621,8 +5631,13 @@ void ObjectMgr::LoadCreatureQuestRelations()
     LoadQuestRelationsHelper(mCreatureQuestRelations,"creature_questrelation");
 
     for(QuestRelations::iterator itr = mCreatureQuestRelations.begin(); itr != mCreatureQuestRelations.end(); ++itr)
+    {
         if(!GetCreatureTemplate(itr->first))
             sLog.outErrorDb("Table `creature_questrelation` have data for not existed creature entry (%u) and existed quest %u",itr->first,itr->second);
+
+        if(!(GetCreatureTemplate(itr->first)->npcflag & UNIT_NPC_FLAG_QUESTGIVER))
+            sLog.outErrorDb("Table `creature_questrelation` has creature entry (%u) for quest %u, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER",itr->first,itr->second);
+    }
 }
 
 void ObjectMgr::LoadCreatureInvolvedRelations()
@@ -5630,8 +5645,13 @@ void ObjectMgr::LoadCreatureInvolvedRelations()
     LoadQuestRelationsHelper(mCreatureQuestInvolvedRelations,"creature_involvedrelation");
 
     for(QuestRelations::iterator itr = mCreatureQuestInvolvedRelations.begin(); itr != mCreatureQuestInvolvedRelations.end(); ++itr)
+    {
         if(!GetCreatureTemplate(itr->first))
             sLog.outErrorDb("Table `creature_involvedrelation` have data for not existed creature entry (%u) and existed quest %u",itr->first,itr->second);
+
+        if(!(GetCreatureTemplate(itr->first)->npcflag & UNIT_NPC_FLAG_QUESTGIVER))
+            sLog.outErrorDb("Table `creature_involvedrelation` has creature entry (%u) for quest %u, but npcflag does not include UNIT_NPC_FLAG_QUESTGIVER",itr->first,itr->second);
+    }
 }
 
 void ObjectMgr::LoadReservedPlayersNames()
