@@ -35,11 +35,20 @@ AC_PROG_CXX
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 
-AC_PATH_PROG(DOXYGENPATH, doxygen)
-if test "_$DOXYGENPATH" = _ ; then
-    AC_MSG_WARN([doxygen is required to build the API documentation.])
+# Check for doxygen
+AC_ARG_ENABLE(doxygen, AC_HELP_STRING([--enable-doxygen], [turn on generating documentation]))
+
+enable_doxygen_support=no
+
+if test "x$enable_doxygen" = "xyes";
+then
+  AC_PATH_PROG(DOXYGEN, doxygen, no)
+  if test "x$DOXYGEN" = "xno"; then
+    AC_MSG_ERROR([You need to install the doxygen package])
+  fi
+  enable_doxygen_support=yes
 fi
-AM_CONDITIONAL([USE_DOXYGEN], [test "_$DOXYGENPATH" != _])
+AM_CONDITIONAL(DOXYGEN_ENABLED, test x$enable_doxygen_support = xyes)
 
 ## Check for required libraries.
 AC_CHECK_LIB( pthread, pthread_create, [], 
@@ -193,7 +202,7 @@ AC_SUBST(MYSQL_INCLUDES)
 AC_SUBST(MYSQL_LIBS)
 AC_SUBST(POSTGRE_INCLUDES)
 AC_SUBST(POSTGRE_LIBS)
-AC_SUBST(DOXYGENPATH)
+AC_SUBST(DOXYGEN)
 AC_SUBST(MANGOSD_DEBUG_INFO)
 AC_SUBST(MANGOSD_ENABLE_CLI)
 AC_SUBST(MANGOSD_ENABLE_RA)

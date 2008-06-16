@@ -24,3 +24,26 @@
 EXTRA_DIST = \
 	DocStructure.dox \
 	Doxyfile
+
+DOC_DIR = .
+DOXYFILE = $(DOC_DIR)/Doxyfile
+DOC_HTML = $(DOC_OUT)/index.html
+DOC_OUT_HTML = $(DOC_DIR)/html
+DOXYGEN = @DOXYGEN@
+
+if DOXYGEN_ENABLED
+doc: $(DOC_HTML)
+	@echo ""
+	@echo "Type \"firefox $(DOC_OUT_HTML)/index.html\" to see the html document."
+	@echo ""
+
+$(DOC_HTML): $(DOXYFILE)
+	$(DOXYGEN) $(DOXYFILE)
+else
+.PHONY: doc
+doc:
+	@echo "You must enable at configure time: ./configure --enable-doxygen"
+endif
+
+clean-local: 
+	rm -rf $(DOC_OUT_HTML)
