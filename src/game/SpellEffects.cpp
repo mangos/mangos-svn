@@ -5089,10 +5089,7 @@ void Spell::EffectDestroyAllTotems(uint32 /*i*/)
             uint32 spell_id = totem->GetUInt32Value(UNIT_CREATED_BY_SPELL);
             SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
             if(spellInfo)
-            {
-                float percent = float(damage);
-                mana += spellInfo->manaCost*percent/100;
-            }
+                mana += spellInfo->manaCost * damage / 100;
             ((Totem*)totem)->UnSummon();
         }
     }
@@ -5108,15 +5105,16 @@ void Spell::EffectDurabilityDamage(uint32 i)
 
     int32 slot = m_spellInfo->EffectMiscValue[i];
 
-    // FIXME: some spells effects have value -1/-2 (don't know what do for its :/ )
+    // FIXME: some spells effects have value -1/-2
+    // Possibly its mean -1 all player equipped items and -2 all items
     if(slot < 0)
+    {
+        for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_BAG_END; ++i)
+            ((Player*)unitTarget)->DurabilityPointsLoss(i, damage);
         return;
-
+    }
     // invalid slot value
     if(slot >= INVENTORY_SLOT_BAG_END)
-        return;
-
-    if(damage <= 0)
         return;
 
     ((Player*)unitTarget)->DurabilityPointsLoss(slot,damage);
