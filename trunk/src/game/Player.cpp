@@ -3641,24 +3641,33 @@ void Player::DurabilityLoss(uint8 equip_pos, double percent)
     DurabilityPointsLoss(equip_pos,pDurabilityLoss);
 }
 
-void Player::DurabilityPointsLoss(uint8 equip_pos, uint32 points)
+void Player::DurabilityPointsLoss(uint8 equip_pos, int32 points)
 {
     if(!m_items[equip_pos])
         return;
+    int32 pMaxDurability = m_items[equip_pos]->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+    int32 pOldDurability = m_items[equip_pos]->GetUInt32Value(ITEM_FIELD_DURABILITY);
+    int32 pNewDurability = pOldDurability - points;
 
-    uint32 pDurability =  m_items[equip_pos]->GetUInt32Value(ITEM_FIELD_DURABILITY);
+    if (pNewDurability < 0)
+        pNewDurability = 0;
+    else if (pNewDurability > pMaxDurability)
+        pNewDurability = pMaxDurability;
 
-    if(!pDurability)
-        return;
+    if (pOldDurability != pNewDurability)
+    {
+        // modify item stats _before_ Durability set to 0 to pass _ApplyItemMods internal check
+        if ( pNewDurability == 0 && pOldDurability > 0)
+            _ApplyItemMods(m_items[equip_pos],equip_pos, false);
 
-    uint32 pNewDurability = pDurability >= points ? pDurability - points : 0;
+        m_items[equip_pos]->SetUInt32Value(ITEM_FIELD_DURABILITY, pNewDurability);
 
-    // modify item stats _before_ Durability set to 0 to pass _ApplyItemMods internal check
-    if ( pNewDurability == 0 )
-        _ApplyItemMods(m_items[equip_pos],equip_pos, false);
+        // modify item stats _after_ restore durability to pass _ApplyItemMods internal check
+        if ( pNewDurability > 0 && pOldDurability == 0)
+            _ApplyItemMods(m_items[equip_pos],equip_pos, true);
 
-    m_items[equip_pos]->SetUInt32Value(ITEM_FIELD_DURABILITY, pNewDurability);
-    m_items[equip_pos]->SetState(ITEM_CHANGED, this);
+        m_items[equip_pos]->SetState(ITEM_CHANGED, this);
+    }
 }
 
 uint32 Player::DurabilityRepairAll(bool cost, float discountMod, bool guildBank)
