@@ -677,7 +677,8 @@ namespace MaNGOS
                 if(u->getFaction() != i_funit->getFaction() )
                     return false;
 
-                if(!u->IsWithinLOSInMap(i_enemy) )
+                // only if see assisted creature
+                if(!u->IsWithinLOSInMap(i_funit) )
                     return false;
 
                 return true;
