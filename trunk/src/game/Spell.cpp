@@ -4029,7 +4029,7 @@ uint8 Spell::CheckRange(bool strict)
             }
 
             // Ranged Weapon
-            if (m_spellInfo->Attributes & 2)
+            if (m_spellInfo->Attributes & SPELL_ATTR_RANGED)
                 return SPELL_FAILED_UNIT_NOT_INFRONT;
 
             // Melee Combat

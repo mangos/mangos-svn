@@ -2123,21 +2123,9 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5.0f);
 
     SetUInt32Value(PLAYER_SHIELD_BLOCK, 0);
-
-    // Base dodge values
-    switch(getClass())
-    {
-        case CLASS_PALADIN: SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.75f); break;
-        case CLASS_HUNTER:  SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.64f); break;
-        case CLASS_PRIEST:  SetFloatValue(PLAYER_DODGE_PERCENTAGE, 3.0f ); break;
-        case CLASS_SHAMAN:  SetFloatValue(PLAYER_DODGE_PERCENTAGE, 1.75f); break;
-        case CLASS_MAGE:    SetFloatValue(PLAYER_DODGE_PERCENTAGE, 3.25f); break;
-        case CLASS_WARLOCK: SetFloatValue(PLAYER_DODGE_PERCENTAGE, 2.0f ); break;
-        case CLASS_DRUID:   SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.75f); break;
-        case CLASS_ROGUE:
-        case CLASS_WARRIOR:
-        default:            SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.0f ); break;
-    }
+    
+    // Dodge percentage
+    SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.0f);
 
     // set armor (resistance 0) to original value (create_agility*2)
     SetArmor(int32(m_createStats[STAT_AGILITY]*2));
