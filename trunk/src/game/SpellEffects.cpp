@@ -1320,15 +1320,15 @@ void Spell::EffectDummy(uint32 i)
                     // 31989 -> dummy effect (step 1) + dummy effect (step 2) -> 31709 (taunt like spell for each target)
 
                     // non-standard cast requirement check
-                    if (!unitTarget || !unitTarget->getAttackers().empty())
+                    if (!unitTarget || unitTarget->getAttackers().empty())
                     {
                         // clear cooldown at fail
                         if(m_caster->GetTypeId()==TYPEID_PLAYER)
                         {
-                            ((Player*)m_caster)->RemoveSpellCooldown(31989);
+                            ((Player*)m_caster)->RemoveSpellCooldown(m_spellInfo->Id);
 
                             WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8));
-                            data << uint32(31789);                  // spell id
+                            data << uint32(m_spellInfo->Id);
                             data << uint64(m_caster->GetGUID());
                             ((Player*)m_caster)->GetSession()->SendPacket(&data);
                         }
@@ -1340,17 +1340,13 @@ void Spell::EffectDummy(uint32 i)
                     // Righteous Defense (step 2) (in old version 31980 dummy effect)
                     // Clear targets for eff 1
                     for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
-                        if( ihit->effectMask & 0x01 )
-                            ihit->effectMask = 0;
+                        ihit->effectMask &= ~(1<<1);
 
+                    // not empty (checked)
                     Unit::AttackerSet const& attackers = unitTarget->getAttackers();
 
-                    // not attacker or list empty
-                    if(attackers.empty())
-                        return;
-
                     // chance to be selected from list
-                    float chance = 100.0f/(attackers.size());
+                    float chance = 100.0f/attackers.size();
                     uint32 count=0;
                     for(Unit::AttackerSet::const_iterator aItr = attackers.begin(); aItr != attackers.end() && count < 3; ++aItr)
                     {

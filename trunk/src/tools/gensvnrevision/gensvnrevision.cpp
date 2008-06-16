@@ -23,12 +23,9 @@
 
 int main(int argc, char **argv)
 {
-    FILE* EntriesFile = fopen(".svn\\entries", "r");
+    FILE* EntriesFile = fopen(".svn/entries", "r");
     if(!EntriesFile)
-    {
-        fclose(EntriesFile);
         return 1;
-    }
 
     char buf[200];
     int revision;
