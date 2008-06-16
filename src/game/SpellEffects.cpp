@@ -92,7 +92,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectMomentMove,                               // 29 SPELL_EFFECT_LEAP
     &Spell::EffectEnergize,                                 // 30 SPELL_EFFECT_ENERGIZE
     &Spell::EffectWeaponDmg,                                // 31 SPELL_EFFECT_WEAPON_PERCENT_DAMAGE
-    &Spell::EffectTriggerMissaleSpell,                      // 32 SPELL_EFFECT_TRIGGER_MISSILE
+    &Spell::EffectTriggerMissileSpell,                      // 32 SPELL_EFFECT_TRIGGER_MISSILE
     &Spell::EffectOpenLock,                                 // 33 SPELL_EFFECT_OPEN_LOCK
     &Spell::EffectSummonChangeItem,                         // 34 SPELL_EFFECT_SUMMON_CHANGE_ITEM
     &Spell::EffectApplyAA,                                  // 35 SPELL_EFFECT_APPLY_AREA_AURA
@@ -1639,7 +1639,7 @@ void Spell::EffectTriggerSpell(uint32 i)
         m_TriggerSpells.push_back(spellInfo);
 }
 
-void Spell::EffectTriggerMissaleSpell(uint32 effect_idx)
+void Spell::EffectTriggerMissileSpell(uint32 effect_idx)
 {
     uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[effect_idx];
 
@@ -1648,7 +1648,7 @@ void Spell::EffectTriggerMissaleSpell(uint32 effect_idx)
 
     if(!spellInfo)
     {
-        sLog.outError("EffectTriggerMissaleSpell of spell %u: triggering unknown spell id %effect_idx", m_spellInfo->Id,triggered_spell_id);
+        sLog.outError("EffectTriggerMissileSpell of spell %u: triggering unknown spell id %effect_idx", m_spellInfo->Id,triggered_spell_id);
         return;
     }
 
