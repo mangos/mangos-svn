@@ -1288,7 +1288,7 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
         if (SplitedAmount)
         {                                                   // Bank -> Bank item split (in empty or non empty slot
             GuildItemPosCountVec dest;
-            uint8 msg = pGuild->CanStoreItem(BankTabDst,BankTabSlotDst,dest,SplitedAmount,pItemSrc,true);
+            uint8 msg = pGuild->CanStoreItem(BankTabDst,BankTabSlotDst,dest,SplitedAmount,pItemSrc,false);
             if( msg != EQUIP_ERR_OK )
             {
                 pl->SendEquipError( msg, pItemSrc, NULL );
