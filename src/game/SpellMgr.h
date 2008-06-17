@@ -319,6 +319,7 @@ inline bool IsAreaEffectTarget( Targets target )
         case TARGET_AREAEFFECT_CUSTOM:
         case TARGET_ALL_ENEMY_IN_AREA:
         case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
+        case TARGET_ALL_ENEMY_IN_TARGET_AREA_INSTANT:
         case TARGET_ALL_PARTY_AROUND_CASTER:
         case TARGET_ALL_AROUND_CASTER:
         case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:

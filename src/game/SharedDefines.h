@@ -823,6 +823,7 @@ enum Targets
     TARGET_RANDOM_RAID_MEMBER          = 56,
     TARGET_SINGLE_FRIEND_2             = 57,
     TARGET_AREAEFFECT_PARTY_AND_CLASS  = 61,
+    TARGET_ALL_ENEMY_IN_TARGET_AREA_INSTANT = 63,
     TARGET_SINGLE_ENEMY                = 77,
     TARGET_NONCOMBAT_PET               = 90,
 };
