@@ -211,7 +211,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
             petlevel=owner->getLevel();
 
             SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
-            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);
+            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
                                                             // this enables popup window (pet dismiss, cancel)
             break;
         case HUNTER_PET:
@@ -223,7 +223,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
             else
                 SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00032801);// can be renamed (byte 0x03)
 
-            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);
+            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
                                                             // this enables popup window (pet abandon, cancel)
             SetTP(fields[10].GetInt32());
             SetMaxPower(POWER_HAPPINESS,GetCreatePowers(POWER_HAPPINESS));
@@ -910,7 +910,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
     SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32((MaNGOS::XP::xp_to_level(creature->getLevel()))/4));
-    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);
+    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
     SetUInt32Value(UNIT_NPC_FLAGS , 0);
     SetName(creature->GetName());
     m_loyaltyPoints = 1000;
@@ -1633,7 +1633,7 @@ bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float 
     SetByteValue(UNIT_FIELD_BYTES_2, 0, 0x01);              // let creature used equiped weapon in fight
 
     if(getPetType() == MINI_PET)                            // always non-attackable
-        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_ATTACKABLE);
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
 
     SetName(GetCreatureInfo()->Name);
 

@@ -507,7 +507,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( race ) | ( class_ << 8 ) | ( gender << 16 ) | ( powertype << 24 ) ) );
     SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield );
     SetByteValue(UNIT_FIELD_BYTES_2, 1, 0x28);
-    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );
+    SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE );
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);               // fix cast time showed in spell tooltip on client
 
                                                             //-1 is default value
@@ -2079,11 +2079,6 @@ void Player::InitStatsForLevel(bool reapplyMods)
     //set create powers
     SetCreateMana(classInfo.basemana);
 
-    // restore if need some important flags
-    SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );
-    RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);     // set only at death at battleground
-    SetUInt32Value(PLAYER_FIELD_BYTES2, 0 );                // flags empty by default
-
     SetArmor(int32(m_createStats[STAT_AGILITY]*2));
 
     InitStatBuffMods();
@@ -2172,12 +2167,18 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     // cleanup unit flags (will be re-applied if need at aura load).
     RemoveFlag( UNIT_FIELD_FLAGS,
-        UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE   | UNIT_FLAG_PET_IN_COMBAT  | UNIT_FLAG_SILENCED |
-        UNIT_FLAG_PACIFIED       | UNIT_FLAG_DISABLE_ROTATE | UNIT_FLAG_IN_COMBAT      | UNIT_FLAG_DISARMED |
-        UNIT_FLAG_CONFUSED       | UNIT_FLAG_FLEEING        | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_MOUNT );
+        UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_ATTACKABLE_1 | 
+        UNIT_FLAG_PET_IN_COMBAT  | UNIT_FLAG_SILENCED     | UNIT_FLAG_PACIFIED         |
+        UNIT_FLAG_DISABLE_ROTATE | UNIT_FLAG_IN_COMBAT    | UNIT_FLAG_DISARMED         |
+        UNIT_FLAG_CONFUSED       | UNIT_FLAG_FLEEING      | UNIT_FLAG_NOT_SELECTABLE   |
+        UNIT_FLAG_SKINNABLE      | UNIT_FLAG_MOUNT );
+    SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE );   // must be set
 
     // cleanup player flags (will be re-applied if need at aura load), to avoid have ghost flag without ghost aura, for example.
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK | PLAYER_FLAGS_DND | PLAYER_FLAGS_GM | PLAYER_FLAGS_GHOST | PLAYER_FLAGS_FFA_PVP);
+
+    // restore if need some important flags
+    SetUInt32Value(PLAYER_FIELD_BYTES2, 0 );                // flags empty by default
 
     if(reapplyMods)                                         //reapply stats values only on .reset stats (level) command
         _ApplyAllStatBonuses();

@@ -1826,16 +1826,6 @@ enum CorpseDynFlags
     CORPSE_DYNFLAG_LOOTABLE        = 0x0001
 };
 
-enum UnitFlags1
-{
-    UNIT_FLAG_NOT_ATTACKABLE       = 0x0002,
-    UNIT_FLAG_ATTACKABLE           = 0x0008,
-    UNIT_FLAG_NOT_ATTACKABLE_1     = 0x0080,
-    UNIT_FLAG_NON_PVP_PLAYER       = (UNIT_FLAG_ATTACKABLE + UNIT_FLAG_NOT_ATTACKABLE_1),
-    UNIT_FLAG_ANIMATION_FROZEN     = 0x0400,
-    UNIT_FLAG_WAR_PLAYER           = 0x1000
-};
-
 #define SPELL_ID_AGGRO                    38192             //Tap Mob and Aggro Summoner
 
 enum WeatherType
