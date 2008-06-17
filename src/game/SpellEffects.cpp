@@ -3518,7 +3518,7 @@ void Spell::EffectSummonPet(uint32 i)
                                                             // this enables pet details window (Shift+P)
 
         // this enables popup window (pet dismiss, cancel), hunter pet additional flags set later
-        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1);
+        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_PVP_ATTACKABLE);
 
         NewSummon->InitStatsForLevel( petlevel);
         NewSummon->InitPetCreateSpells();
@@ -4523,6 +4523,7 @@ void Spell::EffectSummonTotem(uint32 i)
     pTotem->SetMaxHealth(damage);
     pTotem->SetHealth(damage);
     pTotem->SetUInt32Value(UNIT_CREATED_BY_SPELL,m_spellInfo->Id);
+    pTotem->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_PVP_ATTACKABLE);
 
     pTotem->ApplySpellImmune(m_spellInfo->Id,IMMUNITY_STATE,SPELL_AURA_MOD_FEAR,true);
     pTotem->ApplySpellImmune(m_spellInfo->Id,IMMUNITY_STATE,SPELL_AURA_TRANSFORM,true);
