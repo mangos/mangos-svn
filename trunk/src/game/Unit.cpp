@@ -5603,6 +5603,12 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         {
             switch(auraSpellInfo->Id)
             {
+                // Aegis of Preservation
+                case 23780:
+                    //Aegis Heal (instead non-existed triggered spell)
+                    CastSpell(this, 23781, true, castItem, triggeredByAura);
+                    return;
+
                 // Elune's Touch (moonkin mana restore)
                 case 24905:
                 {
