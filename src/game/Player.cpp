@@ -299,6 +299,8 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_restTime = 0;
     m_deathTimer = 0;
 
+    m_swingErrorMsg = 0;
+
     m_DetectInvTimer = 1000;
 
     m_bgBattleGroundID = 0;
@@ -909,17 +911,27 @@ void Player::Update( uint32 p_time )
             {
                 if(!IsWithinDistInMap(pVictim, pldistance))
                 {
-                    setAttackTimer(BASE_ATTACK,1000);
-                    SendAttackSwingNotInRange();
+                    setAttackTimer(BASE_ATTACK,100);
+                    if(m_swingErrorMsg != 1)                // send single time (client auto repeat)
+                    {
+                        SendAttackSwingNotInRange();
+                        m_swingErrorMsg = 1;
+                    }
                 }
                 //120 degrees of radiant range
                 else if( !HasInArc( 2*M_PI/3, pVictim ))
                 {
-                    setAttackTimer(BASE_ATTACK,1000);
-                    SendAttackSwingBadFacingAttack();
+                    setAttackTimer(BASE_ATTACK,100);
+                    if(m_swingErrorMsg != 2)                // send single time (client auto repeat)
+                    {
+                        SendAttackSwingBadFacingAttack();
+                        m_swingErrorMsg = 2;
+                    }
                 }
                 else
                 {
+                    m_swingErrorMsg = 0;                    // reset swing error state
+
                     // prevent base and off attack in same time, delay attack at 0.2 sec
                     if(haveOffhandWeapon())
                     {
@@ -936,11 +948,11 @@ void Player::Update( uint32 p_time )
             {
                 if(!IsWithinDistInMap(pVictim, pldistance))
                 {
-                    setAttackTimer(OFF_ATTACK,1000);
+                    setAttackTimer(OFF_ATTACK,100);
                 }
                 else if( !HasInArc( 2*M_PI/3, pVictim ))
                 {
-                    setAttackTimer(OFF_ATTACK,1000);
+                    setAttackTimer(OFF_ATTACK,100);
                 }
                 else
                 {

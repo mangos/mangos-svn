@@ -2101,6 +2101,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_ArmorProficiency;
         bool m_canParry;
         bool m_canDualWield;
+        uint8 m_swingErrorMsg;
         float m_ammoDPS;
         ////////////////////Rest System/////////////////////
         int time_inn_enter;
