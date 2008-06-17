@@ -3544,7 +3544,7 @@ void Spell::EffectSummonPet(uint32 i)
                 NewSummon->SetName(new_name);
         }
         else if(NewSummon->getPetType()==HUNTER_PET)
-            NewSummon->SetByteValue(UNIT_FIELD_BYTES_2, 2, 0x02);
+            NewSummon->SetByteValue(UNIT_FIELD_BYTES_2, 2, UNIT_RENAME_NOT_ALLOWED);
 
         NewSummon->AIM_Initialize();
         NewSummon->SetHealth(NewSummon->GetMaxHealth());

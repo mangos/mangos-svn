@@ -2201,8 +2201,8 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
     uint32 modelid = 0;
     Powers PowerType = POWER_MANA;
-    uint32 new_bytes_1 = m_modifier.m_miscvalue;
-    switch(m_modifier.m_miscvalue)
+    uint32 form = m_modifier.m_miscvalue;
+    switch(form)
     {
         case FORM_CAT:
             if(Player::TeamForRace(m_target->getRace())==ALLIANCE)
@@ -2289,7 +2289,8 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             m_target->RemoveAurasDueToSpell(m_target->m_ShapeShiftForm,this);
         }
 
-        m_target->SetByteValue(UNIT_FIELD_BYTES_2, 3, new_bytes_1);
+        m_target->SetByteValue(UNIT_FIELD_BYTES_2, 3, form);
+
         if(modelid > 0)
         {
             m_target->SetDisplayId(modelid);
@@ -2301,7 +2302,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             if(m_target->getPowerType()!=PowerType)
                 m_target->setPowerType(PowerType);
 
-            switch(m_modifier.m_miscvalue)
+            switch(form)
             {
                 case FORM_CAT:
                 case FORM_BEAR:
@@ -2365,7 +2366,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         }
 
         m_target->m_ShapeShiftForm = GetId();
-        m_target->m_form = m_modifier.m_miscvalue;
+        m_target->m_form = form;
 
         switch ( m_target->m_form )
         {
@@ -2399,7 +2400,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         m_target->m_ShapeShiftForm = 0;
         m_target->m_form = FORM_NONE;
 
-        switch(m_modifier.m_miscvalue)
+        switch(form)
         {
             // Nordrassil Harness - bonus
             case FORM_BEAR:
