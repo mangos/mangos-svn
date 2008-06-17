@@ -139,7 +139,7 @@ bool IsPassiveStackableSpell( uint32 spellId )
 Unit::Unit( WorldObject *instantiator )
 : WorldObject( instantiator ), i_motionMaster(this), m_ThreatManager(this), m_HostilRefManager(this)
 {
-    m_objectType |= TYPE_UNIT;
+    m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
                                                             // 2.3.2 - 0x70
     m_updateFlag = (UPDATEFLAG_HIGHGUID | UPDATEFLAG_LIVING | UPDATEFLAG_HASPOSITION);

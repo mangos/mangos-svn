@@ -33,7 +33,7 @@
 
 DynamicObject::DynamicObject( WorldObject *instantiator ) : WorldObject( instantiator )
 {
-    m_objectType |= TYPE_DYNAMICOBJECT;
+    m_objectType |= TYPEMASK_DYNAMICOBJECT;
     m_objectTypeId = TYPEID_DYNAMICOBJECT;
                                                             // 2.3.2 - 0x58
     m_updateFlag = (UPDATEFLAG_LOWGUID | UPDATEFLAG_HIGHGUID | UPDATEFLAG_HASPOSITION);

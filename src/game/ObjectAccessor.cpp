@@ -167,31 +167,31 @@ Object* ObjectAccessor::GetObjectByTypeMask(Player const &p, uint64 guid, uint32
 {
     Object *obj = NULL;
 
-    if(typemask & TYPE_PLAYER)
+    if(typemask & TYPEMASK_PLAYER)
     {
         obj = FindPlayer(guid);
         if(obj) return obj;
     }
 
-    if(typemask & TYPE_UNIT)
+    if(typemask & TYPEMASK_UNIT)
     {
         obj = GetCreatureOrPet(p,guid);
         if(obj) return obj;
     }
 
-    if(typemask & TYPE_GAMEOBJECT)
+    if(typemask & TYPEMASK_GAMEOBJECT)
     {
         obj = GetGameObject(p,guid);
         if(obj) return obj;
     }
 
-    if(typemask & TYPE_DYNAMICOBJECT)
+    if(typemask & TYPEMASK_DYNAMICOBJECT)
     {
         obj = GetDynamicObject(p,guid);
         if(obj) return obj;
     }
 
-    if(typemask & TYPE_ITEM)
+    if(typemask & TYPEMASK_ITEM)
     {
         obj = p.GetItemByGuid( guid );
         if(obj) return obj;
@@ -367,7 +367,7 @@ ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_player
 {
     bool build_for_all = true;
     Player *pl = NULL;
-    if( obj->isType(TYPE_ITEM ))
+    if( obj->isType(TYPEMASK_ITEM) )
     {
         Item *item = static_cast<Item *>(obj);
         pl = item->GetOwner();

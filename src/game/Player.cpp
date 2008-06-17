@@ -208,7 +208,7 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_speakTime = 0;
     m_speakCount = 0;
 
-    m_objectType |= TYPE_PLAYER;
+    m_objectType |= TYPEMASK_PLAYER;
     m_objectTypeId = TYPEID_PLAYER;
 
     m_valuesCount = PLAYER_END;
@@ -15204,7 +15204,7 @@ void Player::HandleStealthedUnitsDetection()
 
             // target aura duration for caster show only if target exist at caster client
             // send data at target visibility change (adding to client)
-            if((*i)!=this && (*i)->isType(TYPE_UNIT))
+            if((*i)!=this && (*i)->isType(TYPEMASK_UNIT))
                 SendAuraDurationsForTarget(*i);
 
             i = stealthedUnits.erase(i);
@@ -16013,7 +16013,7 @@ void Player::UpdateVisibilityOf(WorldObject* target)
 
             // target aura duration for caster show only if target exist at caster client
             // send data at target visibility change (adding to client)
-            if(target!=this && target->isType(TYPE_UNIT))
+            if(target!=this && target->isType(TYPEMASK_UNIT))
                 SendAuraDurationsForTarget((Unit*)target);
         }
     }

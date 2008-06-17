@@ -227,7 +227,7 @@ bool ItemCanGoIntoBag(ItemPrototype const *pProto, ItemPrototype const *pBagProt
 
 Item::Item( )
 {
-    m_objectType |= TYPE_ITEM;
+    m_objectType |= TYPEMASK_ITEM;
     m_objectTypeId = TYPEID_ITEM;
                                                             // 2.3.2 - 0x18
     m_updateFlag = (UPDATEFLAG_LOWGUID | UPDATEFLAG_HIGHGUID);

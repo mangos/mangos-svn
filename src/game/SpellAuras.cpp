@@ -3906,7 +3906,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
             if (m_spellProto->SpellFamilyFlags & 0x000000000000800000LL)
             {
                 // $AP * min(0.06*$cp, 0.24)/6 [Yes, there is no difference, wheather 4 or 5 CPs are being used]
-                if (apply && !loading && caster && caster->GetTypeId() == TYPE_PLAYER)
+                if (apply && !loading && caster && caster->GetTypeId() == TYPEID_PLAYER)
                 {
                     int32 cp = ((Player*)caster)->GetComboPoints();
                     if (cp > 4) cp = 4;
@@ -3947,7 +3947,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
             if (m_spellProto->SpellFamilyFlags & 0x000000000000100000LL)
             {
                 // Dmg/tick = $AP*min(0.01*$cp, 0.03) [Like Rip: only the first three CP inrease the contribution from AP]
-                if (apply && !loading && caster && caster->GetTypeId() == TYPE_PLAYER)
+                if (apply && !loading && caster && caster->GetTypeId() == TYPEID_PLAYER)
                 {
                     int32 cp = ((Player*)caster)->GetComboPoints();
                     if (cp > 3) cp = 3;
