@@ -356,9 +356,9 @@ inline bool IsDispelSpell(SpellEntry const *spellInfo)
         return true;
     return false;
 }
-inline bool CanBeUsedWhileStealthed(SpellEntry const* spellInfo)
+inline bool isSpellBreakStealth(SpellEntry const* spellInfo)
 {
-    return ( (spellInfo->AttributesEx & 32) == 32 || spellInfo->AttributesEx2 == 0x200000);
+    return !(spellInfo->AttributesEx & SPELL_ATTR_EX_NOT_BREAK_STEALTH);
 }
 
 bool IsMechanicInvulnerabilityImmunityToSpell(SpellEntry const* spellInfo);
@@ -366,7 +366,7 @@ uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form);
 
 inline bool IsChanneledSpell(SpellEntry const* spellInfo)
 {
-    return (spellInfo->AttributesEx & 0x44);
+    return (spellInfo->AttributesEx & (SPELL_ATTR_EX_CHANNELED_1 | SPELL_ATTR_EX_CHANNELED_2));
 }
 
 inline bool NeedsComboPoints(SpellEntry const* spellInfo)

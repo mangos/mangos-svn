@@ -122,7 +122,8 @@ enum Powers
     POWER_FOCUS                         = 2,
     POWER_ENERGY                        = 3,
     POWER_HAPPINESS                     = 4,
-    POWER_RUNES                         = 5
+    POWER_RUNES                         = 5,
+    POWER_HEALTH                        = 0xFFFFFFFE    // (-2 as signed value)
 };
 
 #define MAX_POWERS                        5                 // not count POWER_RUNES for now
@@ -186,7 +187,7 @@ enum ItemQualities
 
 #define SPELL_ATTR_UNK0                           0x00000001            // 0
 #define SPELL_ATTR_RANGED                         0x00000002            // 1 All ranged abilites have this flag
-#define SPELL_ATTR_UNK2                           0x00000004            // 2 on next swing?
+#define SPELL_ATTR_ON_NEXT_SWING_1                0x00000004            // 2 on next swing
 #define SPELL_ATTR_UNK3                           0x00000008            // 3 not set in 2.4.2
 #define SPELL_ATTR_UNK4                           0x00000010            // 4
 #define SPELL_ATTR_UNK5                           0x00000020            // 5 trade spells?
@@ -194,7 +195,7 @@ enum ItemQualities
 #define SPELL_ATTR_UNK7                           0x00000080            // 7 visible?
 #define SPELL_ATTR_UNK8                           0x00000100            // 8
 #define SPELL_ATTR_UNK9                           0x00000200            // 9
-#define SPELL_ATTR_UNK10                          0x00000400            // 10
+#define SPELL_ATTR_ON_NEXT_SWING_2                0x00000400            // 10 on next swing 2
 #define SPELL_ATTR_UNK11                          0x00000800            // 11
 #define SPELL_ATTR_DAYTIME_ONLY                   0x00001000            // 12 only useable at daytime, not set in 2.4.2
 #define SPELL_ATTR_NIGHT_ONLY                     0x00002000            // 13 only useable at night, not set in 2.4.2
@@ -219,11 +220,11 @@ enum ItemQualities
 
 #define SPELL_ATTR_EX_UNK0                        0x00000001            // 0
 #define SPELL_ATTR_EX_DRAIN_ALL_POWER             0x00000002            // 1 use all power (Only paladin Lay of Hands and Bunyanize)
-#define SPELL_ATTR_EX_UNK2                        0x00000004            // 2 channeled 1
+#define SPELL_ATTR_EX_CHANNELED_1                 0x00000004            // 2 channeled 1
 #define SPELL_ATTR_EX_UNK3                        0x00000008            // 3
 #define SPELL_ATTR_EX_UNK4                        0x00000010            // 4
-#define SPELL_ATTR_EX_UNK5                        0x00000020            // 5 Not break stealth??
-#define SPELL_ATTR_EX_UNK6                        0x00000040            // 6 channeled 2
+#define SPELL_ATTR_EX_NOT_BREAK_STEALTH           0x00000020            // 5 Not break stealth
+#define SPELL_ATTR_EX_CHANNELED_2                 0x00000040            // 6 channeled 2
 #define SPELL_ATTR_EX_NEGATIVE                    0x00000080            // 7
 #define SPELL_ATTR_EX_NOT_IN_COMBAT_TARGET        0x00000100            // 8 Spell req target not to be in combat state
 #define SPELL_ATTR_EX_UNK9                        0x00000200            // 9
