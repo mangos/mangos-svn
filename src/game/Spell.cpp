@@ -3638,11 +3638,10 @@ uint8 Spell::CanCast(bool strict)
                 break;
             }
             case SPELL_EFFECT_SUMMON:
-                //case SPELL_EFFECT_SUMMON_WILD:                //not store in pet field
-                //case SPELL_EFFECT_SUMMON_GUARDIAN:            //not store in pet field
+            // Don't make this check for SPELL_EFFECT_SUMMON_CRITTER, SPELL_EFFECT_SUMMON_WILD or SPELL_EFFECT_SUMMON_GUARDIAN.
+            // These won't show up in m_caster->GetPetGUID()
             case SPELL_EFFECT_SUMMON_POSSESSED:
             case SPELL_EFFECT_SUMMON_PHANTASM:
-            case SPELL_EFFECT_SUMMON_CRITTER:               //not store in pet field
             case SPELL_EFFECT_SUMMON_DEMON:
             {
                 if(m_caster->GetPetGUID())

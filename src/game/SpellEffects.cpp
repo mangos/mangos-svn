@@ -4911,70 +4911,60 @@ void Spell::EffectCharge(uint32 /*i*/)
 
 void Spell::EffectSummonCritter(uint32 i)
 {
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+    Player* player = (Player*)m_caster;
+
     uint32 pet_entry = m_spellInfo->EffectMiscValue[i];
     if(!pet_entry)
         return;
 
-    Unit* old_critter = NULL;
+    Pet* old_critter = player->GetMiniPet();
 
+    // for same pet just despawn
+    if(old_critter && old_critter->GetEntry() == pet_entry)
     {
-        CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-        Cell cell(p);
-        cell.data.Part.reserved = ALL_DISTRICT;
-        cell.SetNoCreate();
-
-        PetWithIdCheck u_check(m_caster, pet_entry);
-        MaNGOS::UnitSearcher<PetWithIdCheck> checker(old_critter, u_check);
-        TypeContainerVisitor<MaNGOS::UnitSearcher<PetWithIdCheck>, WorldTypeMapContainer > object_checker(checker);
-        CellLock<GridReadGuard> cell_lock(cell, p);
-        cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-    }
-
-    if (old_critter)                                        // find old critter, unsummon
-    {
-        // PetWithIdCheck return only Pets
-        ((Pet*)old_critter)->Remove(PET_SAVE_AS_DELETED);
+        player->RemoveMiniPet();
         return;
     }
-    else                                                    // in another case summon new
+    
+    // despawn old pet before summon new
+    if(old_critter)
+        player->RemoveMiniPet();
+
+    // summon new pet
+    Pet* critter = new Pet(m_caster, MINI_PET);
+
+    // before caster
+    float x,y,z;
+    m_caster->GetClosePoint(x,y,z);
+
+    uint32 pet_number = objmgr.GeneratePetNumber();
+    if(!critter->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),
+        m_caster->GetMapId(),x,y,z,m_caster->GetOrientation(),pet_entry, pet_number))
     {
-        Pet* critter = new Pet(m_caster, MINI_PET);
-
-        // before caster
-        float x,y,z;
-        m_caster->GetClosePoint(x,y,z);
-
-        uint32 pet_number = objmgr.GeneratePetNumber();
-        if(!critter->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),
-            m_caster->GetMapId(),x,y,z,m_caster->GetOrientation(),m_spellInfo->EffectMiscValue[i], pet_number))
-        {
-            sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
-            delete critter;
-            return;
-        }
-
-        critter->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
-        critter->SetUInt64Value(UNIT_FIELD_CREATEDBY,m_caster->GetGUID());
-        critter->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
-        critter->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-
-        critter->AIM_Initialize();
-        critter->InitPetCreateSpells();                     // e.g. disgusting oozeling has a create spell as critter...
-        critter->SetMaxHealth(1);
-        critter->SetHealth(1);
-        critter->SetLevel(1);
-
-        std::string name;
-        if(m_caster->GetTypeId() == TYPEID_PLAYER)
-            name = ((Player*)m_caster)->GetName();
-        else
-            name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
-        name.append(petTypeSuffix[critter->getPetType()]);
-        critter->SetName( name );
-        //m_caster->SetPet(critter);
-
-        MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Add((Creature*)critter);
+        sLog.outError("Spell::EffectSummonCritter, spellid %u: no such creature entry %u", m_spellInfo->Id, pet_entry);
+        delete critter;
+        return;
     }
+
+    critter->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
+    critter->SetUInt64Value(UNIT_FIELD_CREATEDBY,m_caster->GetGUID());
+    critter->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
+    critter->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+
+    critter->AIM_Initialize();
+    critter->InitPetCreateSpells();                         // e.g. disgusting oozeling has a create spell as critter...
+    critter->SetMaxHealth(1);
+    critter->SetHealth(1);
+    critter->SetLevel(1);
+
+    std::string name = player->GetName();
+    name.append(petTypeSuffix[critter->getPetType()]);
+    critter->SetName( name );
+    player->SetMiniPet(critter);
+
+    MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Add((Creature*)critter);
 }
 
 void Spell::EffectKnockBack(uint32 i)
