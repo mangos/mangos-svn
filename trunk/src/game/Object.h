@@ -36,21 +36,21 @@
 #define MAX_VISIBILITY_DISTANCE     (5*SIZE_OF_GRID_CELL/2) // max distance for visible object show, limited by active zone for player based at cell size (active zone = 5x5 cells)
 #define DEFAULT_VISIBILITY_DISTANCE (SIZE_OF_GRID_CELL)     // default visible distance
 
-enum TYPE
+enum TypeMask
 {
-    TYPE_OBJECT         = 1,
-    TYPE_ITEM           = 2,
-    TYPE_CONTAINER      = 6,
-    TYPE_UNIT           = 8,
-    TYPE_PLAYER         = 16,
-    TYPE_GAMEOBJECT     = 32,
-    TYPE_DYNAMICOBJECT  = 64,
-    TYPE_CORPSE         = 128,
-    TYPE_AIGROUP        = 256,
-    TYPE_AREATRIGGER    = 512
+    TYPEMASK_OBJECT         = 0x0001,
+    TYPEMASK_ITEM           = 0x0002,
+    TYPEMASK_CONTAINER      = 0x0006,                       // TYPEMASK_ITEM | 0x0004
+    TYPEMASK_UNIT           = 0x0008,
+    TYPEMASK_PLAYER         = 0x0010,
+    TYPEMASK_GAMEOBJECT     = 0x0020,
+    TYPEMASK_DYNAMICOBJECT  = 0x0040,
+    TYPEMASK_CORPSE         = 0x0080,
+    TYPEMASK_AIGROUP        = 0x0100,
+    TYPEMASK_AREATRIGGER    = 0x0200
 };
 
-enum TYPEID
+enum TypeID
 {
     TYPEID_OBJECT        = 0,
     TYPEID_ITEM          = 1,
@@ -121,8 +121,8 @@ class MANGOS_DLL_SPEC Object
         const ByteBuffer& GetPackGUID() const { return m_PackGUID; }
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
 
-        const uint8& GetTypeId() const { return m_objectTypeId; }
-        bool isType(uint8 mask) const { return (mask & m_objectType); }
+        uint8 GetTypeId() const { return m_objectTypeId; }
+        bool isType(uint16 mask) const { return (mask & m_objectType); }
 
         virtual void BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void SendUpdateToPlayer(Player* player);

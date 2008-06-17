@@ -1411,7 +1411,7 @@ void World::ScriptsProcess()
                 }
 
                 // attack only creatures/players/pets
-                if(summoner->isType(TYPE_UNIT))
+                if(summoner->isType(TYPEMASK_UNIT))
                 {
                     Unit* unitSummoner = (Unit *)summoner;
                     if (pCreature->AI())
@@ -1495,7 +1495,7 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                if(!source->isType(TYPE_UNIT))              // must be any Unit (creature or player)
+                if(!source->isType(TYPEMASK_UNIT))          // must be any Unit (creature or player)
                 {
                     sLog.outError("SCRIPT_COMMAND_OPEN_DOOR call for non-unit (TypeId: %u), skipping.",source->GetTypeId());
                     break;
@@ -1533,7 +1533,7 @@ void World::ScriptsProcess()
 
                 door->UseDoorOrButton(time_to_close);
 
-                if(target && target->isType(TYPE_GAMEOBJECT) && ((GameObject*)target)->GetGoType()==GAMEOBJECT_TYPE_BUTTON)
+                if(target && target->isType(TYPEMASK_GAMEOBJECT) && ((GameObject*)target)->GetGoType()==GAMEOBJECT_TYPE_BUTTON)
                     ((GameObject*)target)->UseDoorOrButton(time_to_close);
                 break;
             }
@@ -1551,7 +1551,7 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                if(!source->isType(TYPE_UNIT))              // must be any Unit (creature or player)
+                if(!source->isType(TYPEMASK_UNIT))          // must be any Unit (creature or player)
                 {
                     sLog.outError("SCRIPT_COMMAND_CLOSE_DOOR call for non-unit (TypeId: %u), skipping.",source->GetTypeId());
                     break;
@@ -1589,7 +1589,7 @@ void World::ScriptsProcess()
 
                 door->UseDoorOrButton(time_to_open);
 
-                if(target && target->isType(TYPE_GAMEOBJECT) && ((GameObject*)target)->GetGoType()==GAMEOBJECT_TYPE_BUTTON)
+                if(target && target->isType(TYPEMASK_GAMEOBJECT) && ((GameObject*)target)->GetGoType()==GAMEOBJECT_TYPE_BUTTON)
                     ((GameObject*)target)->UseDoorOrButton(time_to_open);
 
                 break;

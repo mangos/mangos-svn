@@ -65,7 +65,7 @@ uint32 GuidHigh2TypeId(uint32 guid_hi)
 Object::Object( )
 {
     m_objectTypeId      = TYPEID_OBJECT;
-    m_objectType        = TYPE_OBJECT;
+    m_objectType        = TYPEMASK_OBJECT;
 
     m_uint32Values      = 0;
     m_uint32Values_mirror = 0;
@@ -157,7 +157,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
     if(flags & UPDATEFLAG_HASPOSITION)
     {
         // UPDATETYPE_CREATE_OBJECT2 dynamic objects, corpses...
-        if(isType(TYPE_DYNAMICOBJECT) || isType(TYPE_CORPSE) || isType(TYPE_PLAYER))
+        if(isType(TYPEMASK_DYNAMICOBJECT) || isType(TYPEMASK_CORPSE) || isType(TYPEMASK_PLAYER))
             updatetype = UPDATETYPE_CREATE_OBJECT2;
 
         // UPDATETYPE_CREATE_OBJECT2 for pets...
@@ -165,7 +165,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
             updatetype = UPDATETYPE_CREATE_OBJECT2;
 
         // UPDATETYPE_CREATE_OBJECT2 for some gameobject types...
-        if(isType(TYPE_GAMEOBJECT))
+        if(isType(TYPEMASK_GAMEOBJECT))
         {
             switch(m_uint32Values[GAMEOBJECT_TYPE_ID])
             {
@@ -533,7 +533,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
     bool IsActivateToQuest = false;
     if (updatetype == UPDATETYPE_CREATE_OBJECT || updatetype == UPDATETYPE_CREATE_OBJECT2)
     {
-        if (isType(TYPE_GAMEOBJECT) && !((GameObject*)this)->IsTransport())
+        if (isType(TYPEMASK_GAMEOBJECT) && !((GameObject*)this)->IsTransport())
         {
             if ( ((GameObject*)this)->ActivateToQuest(target) || target->isGameMaster())
             {
@@ -544,7 +544,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
     }
     else                                                    //case UPDATETYPE_VALUES
     {
-        if (isType(TYPE_GAMEOBJECT) && !((GameObject*)this)->IsTransport())
+        if (isType(TYPEMASK_GAMEOBJECT) && !((GameObject*)this)->IsTransport())
         {
             if ( ((GameObject*)this)->ActivateToQuest(target) || target->isGameMaster())
             {
@@ -561,7 +561,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
     data->append( updateMask->GetMask(), updateMask->GetLength() );
 
     // 2 specialized loops for speed optimization in non-unit case
-    if(isType(TYPE_UNIT))                                   // unit (creature/player) case
+    if(isType(TYPEMASK_UNIT))                               // unit (creature/player) case
     {
         for( uint16 index = 0; index < m_valuesCount; index ++ )
         {
@@ -597,7 +597,7 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
             }
         }
     }
-    else if(isType(TYPE_GAMEOBJECT))                        // gameobject case
+    else if(isType(TYPEMASK_GAMEOBJECT))                    // gameobject case
     {
         for( uint16 index = 0; index < m_valuesCount; index ++ )
         {
@@ -1227,7 +1227,7 @@ void WorldObject::MonsterWhisper(const uint64 receiver, const char* text)
 void WorldObject::BuildHeartBeatMsg(WorldPacket *data) const
 {
     //Heartbeat message cannot be used for non-units
-    if (!isType(TYPE_UNIT))
+    if (!isType(TYPEMASK_UNIT))
         return;
 
     data->Initialize(MSG_MOVE_HEARTBEAT, 32);
@@ -1245,7 +1245,7 @@ void WorldObject::BuildHeartBeatMsg(WorldPacket *data) const
 void WorldObject::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, float ang) const
 {
     //TeleportAck message cannot be used for non-units
-    if (!isType(TYPE_UNIT))
+    if (!isType(TYPEMASK_UNIT))
         return;
 
     data->Initialize(MSG_MOVE_TELEPORT_ACK, 41);

@@ -38,7 +38,7 @@
 
 GameObject::GameObject( WorldObject *instantiator ) : WorldObject( instantiator )
 {
-    m_objectType |= TYPE_GAMEOBJECT;
+    m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
                                                             // 2.3.2 - 0x58
     m_updateFlag = (UPDATEFLAG_LOWGUID | UPDATEFLAG_HIGHGUID | UPDATEFLAG_HASPOSITION);
