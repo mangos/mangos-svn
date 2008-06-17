@@ -341,22 +341,6 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
 
     m_needAliveTargetMask = 0;
 
-    m_meleeSpell = false;
-
-    m_rangedShoot = m_spellInfo->Attributes & SPELL_ATTR_RANGED;
-    if( m_spellInfo->StartRecoveryTime == 0 && !m_autoRepeat && !m_rangedShoot )
-    {
-        for (int i = 0; i < 3; i++)
-        {
-            if (m_spellInfo->Effect[i]==SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL ||
-                m_spellInfo->Effect[i]==SPELL_EFFECT_WEAPON_DAMAGE)
-            {
-                m_meleeSpell = true;
-                break;
-            }
-        }
-    }
-
     // determine reflection
     m_canReflect = false;
 
@@ -911,7 +895,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
     {
         // cast at creature (or GO) quest objectives update at successful cast finished (+channel finished)
         // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
-        if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsMeleeSpell() && !IsChannelActive() )
+        if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsNextMeleeSwingSpell() && !IsChannelActive() )
             ((Player*)m_caster)->CastedCreatureOrGO(unit->GetEntry(),unit->GetGUID(),m_spellInfo->Id);
 
         if(((Creature*)unit)->AI())
@@ -969,7 +953,7 @@ void Spell::DoAllEffectOnTarget(GOTargetInfo *target)
 
     // cast at creature (or GO) quest objectives update at succesful cast finished (+channel finished)
     // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
-    if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsMeleeSpell() && !IsChannelActive() )
+    if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsNextMeleeSwingSpell() && !IsChannelActive() )
         ((Player*)m_caster)->CastedCreatureOrGO(go->GetEntry(),go->GetGUID(),m_spellInfo->Id);
 }
 
@@ -1847,7 +1831,7 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
 
     // stealth must be removed at cast starting (at show channel bar)
     // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
-    if ( !m_IsTriggeredSpell && !CanBeUsedWhileStealthed(m_spellInfo) )
+    if ( !m_IsTriggeredSpell && isSpellBreakStealth(m_spellInfo) )
     {
         m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         m_caster->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
@@ -2277,7 +2261,7 @@ void Spell::update(uint32 difftime)
         if( m_spellState == SPELL_STATE_CASTING )
             cancel();
         // don't cancel for melee, autorepeat and instant spells
-        else if(!m_meleeSpell && !m_autoRepeat && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT))
+        else if(!IsNextMeleeSwingSpell() && !m_autoRepeat && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT))
             cancel();
     }
 
@@ -2293,7 +2277,7 @@ void Spell::update(uint32 difftime)
                     m_timer -= difftime;
             }
 
-            if(m_timer == 0 && !m_meleeSpell)
+            if(m_timer == 0 && !IsNextMeleeSwingSpell())
                 cast();
         } break;
         case SPELL_STATE_CASTING:
@@ -2335,7 +2319,7 @@ void Spell::update(uint32 difftime)
                 // channeled spell processed independently for quest targeting
                 // cast at creature (or GO) quest objectives update at succesful cast channel finished
                 // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
-                if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsMeleeSpell() )
+                if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsNextMeleeSwingSpell() )
                 {
                     for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
                     {
@@ -2498,7 +2482,7 @@ void Spell::SendSpellStart()
     sLog.outDebug("Sending SMSG_SPELL_START id=%u",m_spellInfo->Id);
 
     uint16 castFlags = CAST_FLAG_UNKNOWN1;
-    if(m_rangedShoot)
+    if(IsRangedSpell())
         castFlags |= CAST_FLAG_AMMO;
 
     Unit * target;
@@ -2542,7 +2526,7 @@ void Spell::SendSpellGo()
         target = m_targets.getUnitTarget();
 
     uint16 castFlags = CAST_FLAG_UNKNOWN3;
-    if(m_rangedShoot)
+    if(IsRangedSpell())
         castFlags |= CAST_FLAG_AMMO;
 
     WorldPacket data(SMSG_SPELL_GO, 50);                    // guess size
@@ -2900,13 +2884,13 @@ void Spell::TakePower()
         return;
 
     // health as power used
-    if(m_spellInfo->powerType == -2)
+    if(m_spellInfo->powerType == POWER_HEALTH)
     {
         m_caster->ModifyHealth( -(int32)m_powerCost );
         return;
     }
-
-    if(m_spellInfo->powerType <0 || m_spellInfo->powerType > POWER_HAPPINESS)
+    
+    if(m_spellInfo->powerType >= MAX_POWERS)
     {
         sLog.outError("Spell::TakePower: Unknown power type '%d'", m_spellInfo->powerType);
         return;
@@ -4047,7 +4031,7 @@ uint8 Spell::CheckRange(bool strict)
             }
 
             // Ranged Weapon
-            if (m_spellInfo->Attributes & SPELL_ATTR_RANGED)
+            if (IsRangedSpell())
                 return SPELL_FAILED_UNIT_NOT_INFRONT;
 
             // Melee Combat
@@ -4094,7 +4078,16 @@ int32 Spell::CalculatePowerCost()
 
     // Spell drain all exist power on cast (Only paladin lay of Hands)
     if (m_spellInfo->AttributesEx & SPELL_ATTR_EX_DRAIN_ALL_POWER)
-        return m_caster->GetPower(Powers(m_spellInfo->powerType));
+    {
+        // If power type - health drain all
+        if (m_spellInfo->powerType == POWER_HEALTH)
+            return m_caster->GetHealth();
+        // Else drain all power
+        if (m_spellInfo->powerType < MAX_POWERS)
+            return m_caster->GetPower(Powers(m_spellInfo->powerType));
+        sLog.outError("Spell::CalculateManaCost: Unknown power type '%d' in spell %d", m_spellInfo->powerType, m_spellInfo->Id);
+        return 0;
+    }
 
     // Base powerCost
     int32 powerCost = m_spellInfo->manaCost;
@@ -4104,7 +4097,7 @@ int32 Spell::CalculatePowerCost()
         switch (m_spellInfo->powerType)
         {
             // health as power used
-            case -2:
+            case POWER_HEALTH:
                 powerCost += m_spellInfo->ManaCostPercentage * m_caster->GetCreateHealth() / 100;
                 break;
             case POWER_MANA:
@@ -4118,8 +4111,8 @@ int32 Spell::CalculatePowerCost()
                 powerCost += m_spellInfo->ManaCostPercentage * m_caster->GetMaxPower(Powers(m_spellInfo->powerType)) / 100;
                 break;
             default:
-                sLog.outError("Spell::CalculateManaCost: Unknown power type '%d'", m_spellInfo->powerType);
-                break;
+                sLog.outError("Spell::CalculateManaCost: Unknown power type '%d' in spell %d", m_spellInfo->powerType, m_spellInfo->Id);
+                return 0;
         }
     }
     SpellSchools school = GetFirstSchoolInMask(m_spellSchoolMask);
@@ -4146,14 +4139,14 @@ uint8 Spell::CheckPower()
         return 0;
 
     // health as power used - need check health amount
-    if(m_spellInfo->powerType == -2)
+    if(m_spellInfo->powerType == POWER_HEALTH)
     {
         if(m_caster->GetHealth() <= m_powerCost)
             return SPELL_FAILED_CASTER_AURASTATE;
         return 0;
     }
     // Check valid power type
-    if(m_spellInfo->powerType < 0 || m_spellInfo->powerType >= MAX_POWERS)
+    if( m_spellInfo->powerType >= MAX_POWERS )
     {
         sLog.outError("Spell::CheckMana: Unknown power type '%d'", m_spellInfo->powerType);
         return SPELL_FAILED_UNKNOWN;
@@ -4623,7 +4616,7 @@ bool Spell::CheckTargetCreatureType(Unit* target) const
 
 CurrentSpellTypes Spell::GetCurrentContainer()
 {
-    if (IsMeleeSpell())
+    if (IsNextMeleeSwingSpell())
         return(CURRENT_MELEE_SPELL);
     else if (IsAutoRepeat())
         return(CURRENT_AUTOREPEAT_SPELL);

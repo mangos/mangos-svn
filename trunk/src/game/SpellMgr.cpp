@@ -973,7 +973,7 @@ bool SpellMgr::IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spellI
 
 bool SpellMgr::canStackSpellRanks(SpellEntry const *spellInfo)
 {
-    if(spellInfo->powerType != 0 && spellInfo->powerType != -2)
+    if(spellInfo->powerType != POWER_MANA && spellInfo->powerType != POWER_HEALTH)
         return false;
     if(IsProfessionSpell(spellInfo->Id))
         return false;

@@ -2222,13 +2222,9 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
     if(Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
 
-    float modHitChance = 0.0f;
-    if (attType == RANGED_ATTACK) modHitChance = m_modRangedHitChance;
-    else                          modHitChance = m_modMeleeHitChance;
+    DEBUG_LOG("PHYSICAL OUTCOME: miss %f crit %f dodge %f parry %f block %f",miss_chance,crit_chance,dodge_chance,parry_chance, block_chance);
 
-    DEBUG_LOG("PHYSICAL OUTCOME: hit %f crit %f miss %f dodge %f parry %f block %f",modHitChance,crit_chance,miss_chance,dodge_chance,parry_chance, block_chance);
-
-    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance*100), int32(miss_chance*100), int32(modHitChance),int32(dodge_chance*100),int32(parry_chance*100),int32(block_chance*100), true);
+    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance*100), int32(miss_chance*100),int32(dodge_chance*100),int32(parry_chance*100),int32(block_chance*100), true);
 }
 
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit *pVictim, WeaponAttackType attType) const
@@ -2241,22 +2237,18 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst(const Unit *pVictim, WeaponAttackT
     // Critical hit chance
     float crit_chance = GetUnitCriticalChance(attType, pVictim);
 
-    float modHitChance = 0.0f;
-    if (attType == RANGED_ATTACK) modHitChance = m_modRangedHitChance;
-    else                          modHitChance = m_modMeleeHitChance;
-
     // stunned target cannot dodge and this is check in GetUnitDodgeChance() (returned 0 in this case)
     float dodge_chance = pVictim->GetUnitDodgeChance();
     float block_chance = pVictim->GetUnitBlockChance();
     float parry_chance = pVictim->GetUnitParryChance();
 
     // Useful if want to specify crit & miss chances for melee, else it could be removed
-    DEBUG_LOG("MELEE OUTCOME: hit %f crit %f miss %f dodge %f parry %f block %f", modHitChance,crit_chance,miss_chance,dodge_chance,parry_chance,block_chance);
+    DEBUG_LOG("MELEE OUTCOME: miss %f crit %f dodge %f parry %f block %f", miss_chance,crit_chance,dodge_chance,parry_chance,block_chance);
 
-    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance*100), int32(miss_chance*100), int32(modHitChance),int32(dodge_chance*100),int32(parry_chance*100),int32(block_chance*100), false);
+    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance*100), int32(miss_chance*100), int32(dodge_chance*100),int32(parry_chance*100),int32(block_chance*100), false);
 }
 
-MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 hit_chance, int32 dodge_chance, int32 parry_chance, int32 block_chance, bool SpellCasted ) const
+MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 dodge_chance, int32 parry_chance, int32 block_chance, bool SpellCasted ) const
 {
     if(pVictim->GetTypeId()==TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
         return MELEE_HIT_EVADE;
@@ -2274,27 +2266,10 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     int32    roll = urand (0, 10000);
 
     DEBUG_LOG ("RollMeleeOutcomeAgainst: skill bonus of %d for attacker", skillBonus);
-    DEBUG_LOG ("RollMeleeOutcomeAgainst: rolled %d, +hit %d, dodge %d, parry %d, block %d, crit %d",
-        roll, hit_chance, dodge_chance, parry_chance, block_chance, crit_chance);
+    DEBUG_LOG ("RollMeleeOutcomeAgainst: rolled %d, miss %d, dodge %d, parry %d, block %d, crit %d",
+        roll, miss_chance, dodge_chance, parry_chance, block_chance, crit_chance);
 
-    if(attType == RANGED_ATTACK)
-    {
-        int32 mod = pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE);
-        miss_chance -= mod * 100;
-    }
-    else
-    {
-        int32 mod = pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE);
-        miss_chance -= mod * 100;
-    }
-
-    // Inherit if passed
-    tmp = miss_chance - skillBonus;
-
-    if(tmp > 6000)
-        tmp = 6000;
-
-    if (tmp > 0 && roll < (sum += tmp ))
+    if (tmp > 0 && roll < (sum += miss_chance ))
     {
         DEBUG_LOG ("RollMeleeOutcomeAgainst: MISS");
         return MELEE_HIT_MISS;
@@ -2537,8 +2512,11 @@ float Unit::MeleeSpellMissChance(Unit *pVictim, WeaponAttackType attType, int32 
     // bonus from skills is 0.04%
     miss_chance -= skillDiff * 0.04f;
 
-    if      (miss_chance <  1.0f) miss_chance =  1.0f;
-    else if (miss_chance > 99.0f) miss_chance = 99.0f;
+    // Limint miss chance from 0 to 60%
+    if (miss_chance < 0.0f)
+        return 0.0f;
+    if (miss_chance > 60.0f) 
+        return 60.0f;
     return miss_chance;
 }
 
@@ -2551,10 +2529,12 @@ SpellMissInfo Unit::MeleeSpellHitResult(Unit *pVictim, SpellEntry const *spell)
         attType = RANGED_ATTACK;
 
     // bonus from skills is 0.04% per skill Diff
-    int32 skillDiff =  int32(GetWeaponSkillValue(attType,pVictim)) - int32(pVictim->GetMaxSkillValueForLevel(this));
+    int32 attackerWeaponSkill = int32(GetWeaponSkillValue(attType,pVictim));
+    int32 skillDiff = attackerWeaponSkill - int32(pVictim->GetMaxSkillValueForLevel(this));
+    int32 fullSkillDiff = attackerWeaponSkill - int32(pVictim->GetDefenseSkillValue(this));
 
     uint32 roll = urand (0, 10000);
-    uint32 missChance = uint32(MeleeSpellMissChance(pVictim, attType, skillDiff, spell)*100.0f);
+    uint32 missChance = uint32(MeleeSpellMissChance(pVictim, attType, fullSkillDiff, spell)*100.0f);
 
     // Roll miss
     uint32 tmp = missChance;
@@ -2782,7 +2762,7 @@ float Unit::MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) c
     float misschance = 5.0f;
 
     // DualWield - Melee spells and physical dmg spells - 5% , white damage 24%
-    if (haveOffhandWeapon())
+    if (haveOffhandWeapon() && attType != RANGED_ATTACK)
     {
         bool isNormal = false;
         for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
@@ -2830,7 +2810,24 @@ float Unit::MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) c
         else
             misschance += ((Player*)pVictim)->GetRatingBonusValue(PLAYER_FIELD_HIT_TAKEN_MELEE_RATING);
     }
-    return misschance > 60.f ? 60.f : misschance;
+
+    // Modify miss chance by victim auras
+    if(attType == RANGED_ATTACK)
+        misschance -= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE);
+    else
+        misschance -= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE);
+
+    // Modify miss chance from skill diffrence ( bonus from skills is 0.04% )
+    int32 skillBonus = int32(GetWeaponSkillValue(attType,pVictim)) - int32(pVictim->GetDefenseSkillValue(this));
+    misschance -= skillBonus * 0.04f;
+
+    // Limint miss chance from 0 to 60%
+    if ( misschance < 0.0f)
+        return 0.0f;
+    if ( misschance > 60.0f)
+        return 60.0f;
+
+    return misschance;
 }
 
 uint32 Unit::GetDefenseSkillValue(Unit const* target) const
