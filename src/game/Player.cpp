@@ -505,8 +505,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     setFactionForRace(m_race);
 
     SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( race ) | ( class_ << 8 ) | ( gender << 16 ) | ( powertype << 24 ) ) );
-    SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield );
-    SetByteValue(UNIT_FIELD_BYTES_2, 1, 0x28);
+    SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield);
+    SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_UNK5 );
     SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE );
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);               // fix cast time showed in spell tooltip on client
 
@@ -7621,12 +7621,12 @@ void Player::SetSheath( uint32 sheathed )
     Item* item;
     switch (sheathed)
     {
-        case 0:                                             // no prepeared weapon
+        case SHEATH_STATE_UNARMED:                          // no prepared weapon
             SetVirtualItemSlot(0,NULL);
             SetVirtualItemSlot(1,NULL);
             SetVirtualItemSlot(2,NULL);
             break;
-        case 1:                                             // prepeared melee weapon
+        case SHEATH_STATE_MELEE:                            // prepared melee weapon
         {
             item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
             SetVirtualItemSlot(0,item && !item->IsBroken() && IsUseEquipedWeapon(true) ? item : NULL);
@@ -7634,7 +7634,7 @@ void Player::SetSheath( uint32 sheathed )
             SetVirtualItemSlot(1,item && !item->IsBroken() && IsUseEquipedWeapon(false) ? item : NULL);
             SetVirtualItemSlot(2,NULL);
         };  break;
-        case 2:                                             // prepeared ranged weapon
+        case SHEATH_STATE_RANGED:                           // prepared ranged weapon
             SetVirtualItemSlot(0,NULL);
             SetVirtualItemSlot(1,NULL);
             item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);

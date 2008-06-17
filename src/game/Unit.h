@@ -123,6 +123,7 @@ enum SpellModOp
 #define BASE_MAXDAMAGE 2.0f
 #define BASE_ATTACK_TIME 2000
 
+// high byte (3 from 0..3) of UNIT_FIELD_BYTES_2 
 enum ShapeshiftForm
 {
     FORM_NONE               = 0x00,
@@ -148,6 +149,34 @@ enum ShapeshiftForm
     FORM_STEALTH            = 0x1E,
     FORM_MOONKIN            = 0x1F,
     FORM_SPIRITOFREDEMPTION = 0x20
+};
+
+// low byte ( 0 from 0..3 ) of UNIT_FIELD_BYTES_2
+enum SheathState
+{
+    SHEATH_STATE_UNARMED  = 0,                              // non prepared weapon
+    SHEATH_STATE_MELEE    = 1,                              // prepared melee weapon
+    SHEATH_STATE_RANGED   = 2                               // prepared ranged weapon
+};
+
+// byte (1 from 0..3) of UNIT_FIELD_BYTES_2
+enum UnitBytes2_Flags
+{
+    UNIT_BYTE2_FLAG_UNK0  = 0x01,
+    UNIT_BYTE2_FLAG_UNK1  = 0x02,
+    UNIT_BYTE2_FLAG_UNK2  = 0x04,
+    UNIT_BYTE2_FLAG_UNK3  = 0x08,
+    UNIT_BYTE2_FLAG_AURAS = 0x10,                           // show possitive auras as positive, and allow its dispel
+    UNIT_BYTE2_FLAG_UNK5  = 0x20,
+    UNIT_BYTE2_FLAG_UNK6  = 0x40,
+    UNIT_BYTE2_FLAG_UNK7  = 0x80
+};
+
+// byte (2 from 0..3) of UNIT_FIELD_BYTES_2
+enum UnitRaname
+{
+    UNIT_RENAME_NOT_ALLOWED = 0x02,
+    UNIT_RENAME_ALLOWED     = 0x03
 };
 
 #define CREATURE_MAX_SPELLS     4

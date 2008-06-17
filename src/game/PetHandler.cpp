@@ -379,7 +379,9 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
 
     Pet* pet = ObjectAccessor::GetPet(petguid);
                                                             // check it!
-    if(!pet || !pet->isPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET || pet->GetByteValue(UNIT_FIELD_BYTES_2, 2) != 3 || pet->GetOwnerGUID() != _player->GetGUID() || !pet->GetCharmInfo())
+    if( !pet || !pet->isPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET ||
+        pet->GetByteValue(UNIT_FIELD_BYTES_2, 2) != UNIT_RENAME_ALLOWED ||
+        pet->GetOwnerGUID() != _player->GetGUID() || !pet->GetCharmInfo() )
         return;
 
     if((!ObjectMgr::IsValidPetName(name)) || (objmgr.IsReservedName(name)))
@@ -393,7 +395,7 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     if(owner && (owner->GetTypeId() == TYPEID_PLAYER) && ((Player*)owner)->GetGroup())
         ((Player*)owner)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_PET_NAME);
 
-    pet->SetByteValue(UNIT_FIELD_BYTES_2, 2, 0x02);
+    pet->SetByteValue(UNIT_FIELD_BYTES_2, 2, UNIT_RENAME_NOT_ALLOWED);
 
     CharacterDatabase.escape_string(name);
     CharacterDatabase.PExecute("UPDATE character_pet SET name = '%s', renamed = '1' WHERE owner = '%u' AND id = '%u'", name.c_str(),_player->GetGUIDLow(),pet->GetCharmInfo()->GetPetNumber() );

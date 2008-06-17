@@ -217,11 +217,13 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
         case HUNTER_PET:
             SetUInt32Value(UNIT_FIELD_BYTES_0, 0x02020100);
             SetByteValue(UNIT_FIELD_BYTES_1, 1, fields[9].GetUInt32());
+            SetByteValue(UNIT_FIELD_BYTES_2, 0, SHEATH_STATE_MELEE );
+            SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5 );
 
             if(fields[13].GetBool())
-                SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00022801);// can't be renamed (byte 0x02)
+                SetByteValue(UNIT_FIELD_BYTES_2, 2, UNIT_RENAME_NOT_ALLOWED);
             else
-                SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00032801);// can be renamed (byte 0x03)
+                SetByteValue(UNIT_FIELD_BYTES_2, 2, UNIT_RENAME_ALLOWED);
 
             SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP_ATTACKABLE);
                                                             // this enables popup window (pet abandon, cancel)
@@ -415,7 +417,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
                 << m_TrainingPoints << ", "
                 << uint32(mode) << ", '"
                 << name.c_str() << "', "
-                << uint32((GetByteValue(UNIT_FIELD_BYTES_2, 2) == 0x03)?0:1) << ", "
+                << uint32((GetByteValue(UNIT_FIELD_BYTES_2, 2) == UNIT_RENAME_ALLOWED)?0:1) << ", "
                 << (curhealth<1?1:curhealth) << ", "
                 << curmana << ", "
                 << GetPower(POWER_HAPPINESS) << ", '";
@@ -917,7 +919,9 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     if(cinfo->type == CREATURE_TYPE_BEAST)
     {
         SetUInt32Value(UNIT_FIELD_BYTES_0, 0x02020100);
-        SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00032801);     // can be renamed (byte 0x03)...
+        SetByteValue(UNIT_FIELD_BYTES_2, 0, SHEATH_STATE_MELEE );
+        SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5 );
+        SetByteValue(UNIT_FIELD_BYTES_2, 2, UNIT_RENAME_ALLOWED);
 
         SetUInt32Value(UNIT_MOD_CAST_SPEED, creature->GetUInt32Value(UNIT_MOD_CAST_SPEED) );
         SetLoyaltyLevel(REBELLIOUS);
@@ -1630,7 +1634,8 @@ bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float 
 
     SetDisplayId(minfo->modelid);
     SetNativeDisplayId(minfo->modelid);
-    SetByteValue(UNIT_FIELD_BYTES_2, 0, 0x01);              // let creature used equiped weapon in fight
+    SetByteValue(UNIT_FIELD_BYTES_2, 0, SHEATH_STATE_MELEE );
+    SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5 );
 
     if(getPetType() == MINI_PET)                            // always non-attackable
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
