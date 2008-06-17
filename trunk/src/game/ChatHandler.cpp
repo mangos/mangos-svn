@@ -438,6 +438,13 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
     if(!GetPlayer()->isAlive())
         return;
 
+    if (!GetPlayer()->CanSpeak())
+    {
+        std::string timeStr = secsToTimeString(m_muteTime - time(NULL));
+        SendNotification(objmgr.GetMangosString(LANG_WAIT_BEFORE_SPEAKING, GetSessionLocaleIndex()),timeStr.c_str());
+        return;
+    }
+
     CHECK_PACKET_SIZE(recv_data,4+4+8);
 
     uint32 text_emote, emoteNum;

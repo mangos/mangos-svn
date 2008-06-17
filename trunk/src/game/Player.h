@@ -981,6 +981,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateInnerTime (int time) { time_inn_enter = time; };
 
         void RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent = false);
+        void RemoveMiniPet();
+        Pet* GetMiniPet();
+        void SetMiniPet(Pet* pet) {m_miniPet = pet->GetGUID();};
         void Uncharm();
 
         void Say(const std::string text, const uint32 language);
@@ -2132,6 +2135,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         // Temporarily removed pet cache
         uint32 m_oldpetnumber;
         uint32 m_oldpetspell;
+
+        uint64 m_miniPet;
 
         // Player summoning
         time_t m_summon_expire;
