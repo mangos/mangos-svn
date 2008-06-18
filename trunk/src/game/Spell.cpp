@@ -2575,6 +2575,11 @@ void Spell::WriteAmmoToPacket( WorldPacket * data )
                         ammoInventoryType = pProto->InventoryType;
                     }
                 }
+                else if(m_caster->GetDummyAura(46699))      // Requires No Ammo
+                {
+                    ammoDisplayID = 5996;                   // normal arrow
+                    ammoInventoryType = INVTYPE_AMMO;
+                }
             }
         }
     }
@@ -4451,7 +4456,13 @@ uint8 Spell::CheckItems()
                     {
                         uint32 ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID);
                         if(!ammo)
+                        {
+                            // Requires No Ammo
+                            if(m_caster->GetDummyAura(46699))
+                                break;                      // skip other checks
+
                             return SPELL_FAILED_NO_AMMO;
+                        }
 
                         ItemPrototype const *ammoProto = objmgr.GetItemPrototype( ammo );
                         if(!ammoProto)
