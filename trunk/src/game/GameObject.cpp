@@ -304,20 +304,17 @@ void GameObject::Update(uint32 /*p_time*/)
                 else                                        // environmental trap
                 {
                     // environmental damage spells already have around enemies targeting but this not help in case not existed GO casting support
-                    MaNGOS::AnyUnitInObjectRangeCheck u_check(this, radius);
-                    MaNGOS::UnitSearcher<MaNGOS::AnyUnitInObjectRangeCheck> checker(ok, u_check);
+
+                    // affect only players
+                    Player* p_ok = NULL;
+                    MaNGOS::AnyPlayerInObjectRangeCheck p_check(this, radius);
+                    MaNGOS::PlayerSearcher<MaNGOS::AnyPlayerInObjectRangeCheck>  checker(p_ok, p_check);
 
                     CellLock<GridReadGuard> cell_lock(cell, p);
 
-                    TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnitInObjectRangeCheck>, GridTypeMapContainer > grid_object_checker(checker);
-                    cell_lock->Visit(cell_lock, grid_object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
-
-                    // or player/pet
-                    if(!ok)
-                    {
-                        TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::AnyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_object_checker(checker);
-                        cell_lock->Visit(cell_lock, world_object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
-                    }
+                    TypeContainerVisitor<MaNGOS::PlayerSearcher<MaNGOS::AnyPlayerInObjectRangeCheck>, WorldTypeMapContainer > world_object_checker(checker);
+                    cell_lock->Visit(cell_lock, world_object_checker, *MapManager::Instance().GetMap(GetMapId(), this));
+                    ok = p_ok;
                 }
 
                 if (ok)

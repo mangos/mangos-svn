@@ -374,14 +374,10 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
         return false;
 
     // recalculate suffix factor
-    if(GetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID) < 0)
+    if(GetItemRandomPropertyId() < 0)
     {
-        uint32 new_suffix = GenerateEnchSuffixFactor(GetEntry());
-        if(GetItemSuffixFactor()!=new_suffix)
-        {
-            SetUInt32Value(ITEM_FIELD_PROPERTY_SEED,GenerateEnchSuffixFactor(GetEntry()));
+        if(UpdateItemSuffixFactor())
             need_save = true;
-        }
     }
 
     // Remove bind flag for items vs NO_BIND set
@@ -572,9 +568,9 @@ void Item::SetItemRandomProperties(int32 randomPropId)
         ItemRandomPropertiesEntry const *item_rand = sItemRandomPropertiesStore.LookupEntry(randomPropId);
         if(item_rand)
         {
-            if(GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID) != item_rand->ID)
+            if(GetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID) != int32(item_rand->ID))
             {
-                SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
+                SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
                 SetState(ITEM_CHANGED);
             }
             for(uint32 i = PROP_ENCHANTMENT_SLOT_2; i < PROP_ENCHANTMENT_SLOT_2 + 3; ++i)
@@ -586,11 +582,11 @@ void Item::SetItemRandomProperties(int32 randomPropId)
         ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(-randomPropId);
         if(item_rand)
         {
-            if( GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID)!=(uint32)(-int32(item_rand->ID)) ||
+            if( GetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID) != -int32(item_rand->ID) ||
                 !GetItemSuffixFactor())
             {
-                SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,(uint32)(-int32(item_rand->ID)));
-                SetUInt32Value(ITEM_FIELD_PROPERTY_SEED, GenerateEnchSuffixFactor(GetEntry()));
+                SetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,-int32(item_rand->ID));
+                UpdateItemSuffixFactor();
                 SetState(ITEM_CHANGED);
             }
 
@@ -598,6 +594,16 @@ void Item::SetItemRandomProperties(int32 randomPropId)
                 SetEnchantment(EnchantmentSlot(i),item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_0],0,0);
         }
     }
+}
+
+
+bool Item::UpdateItemSuffixFactor()
+{
+    uint32 suffixFactor = GenerateEnchSuffixFactor(GetEntry());
+    if(GetItemSuffixFactor()==suffixFactor)
+        return false;
+    SetUInt32Value(ITEM_FIELD_PROPERTY_SEED,suffixFactor);
+    return true;
 }
 
 void Item::SetState(ItemUpdateState state, Player *forplayer)

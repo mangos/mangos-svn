@@ -392,6 +392,22 @@ namespace MaNGOS
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
+    // Player searchers
+
+    template<class Check>
+    struct MANGOS_DLL_DECL PlayerSearcher
+    {
+        Player* &i_object;
+        Check & i_check;
+
+        PlayerSearcher(Player* & result, Check & check) : i_object(result),i_check(check) {}
+
+        void Visit(PlayerMapType &m);
+
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+    };
+
+
     // CHECKS && DO classes
 
     // WorldObject check classes
@@ -714,6 +730,22 @@ namespace MaNGOS
 
             // prevent clone this object
             NearestCreatureEntryWithLiveStateInObjectRangeCheck(NearestCreatureEntryWithLiveStateInObjectRangeCheck const&);
+    };
+
+    class AnyPlayerInObjectRangeCheck
+    {
+    public:
+        AnyPlayerInObjectRangeCheck(WorldObject const* obj, float range) : i_obj(obj), i_range(range) {}
+        bool operator()(Player* u)
+        {
+            if(u->isAlive() && i_obj->IsWithinDistInMap(u, i_range))
+                return true;
+
+            return false;
+        }
+    private:
+        WorldObject const* i_obj;
+        float i_range;
     };
 
     #ifndef WIN32

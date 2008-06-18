@@ -2479,27 +2479,31 @@ void Spell::EffectOpenLock(uint32 /*i*/)
     // Get lockId
     if(gameObjTarget)
     {
+        GameObjectInfo const* goInfo = gameObjTarget->GetGOInfo();
         // Arathi Basin banner opening !
-        BattleGround *bg = player->GetBattleGround();
-        if (gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_BUTTON && gameObjTarget->GetGOInfo()->button.isBattlegroundObject ||
-            gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_GOOBER && gameObjTarget->GetGOInfo()->goober.isBattlegroundObject )
+        if( goInfo->type == GAMEOBJECT_TYPE_BUTTON && goInfo->button.isBattlegroundObject ||
+            goInfo->type == GAMEOBJECT_TYPE_GOOBER && goInfo->goober.isBattlegroundObject )
         {
-            if( player->InBattleGround() &&                 // in battleground
-                !player->IsMounted() &&                     // not mounted
-                !player->HasStealthAura() &&                // not stealthed
-                !player->HasInvisibilityAura() &&           // not invisible
-                player->isAlive())                          // live player
+            if(BattleGround *bg = player->GetBattleGround())// in battleground
             {
-                // check if it's correct bg
-                if(bg && bg->GetTypeID() == BATTLEGROUND_AB)
-                    bg->EventPlayerClickedOnFlag(player, gameObjTarget);
-                return;
+                if( !player->IsMounted() &&                 // not mounted
+                    !player->HasStealthAura() &&            // not stealthed
+                    !player->HasInvisibilityAura() &&       // not invisible
+                    player->isAlive() )                     // live player
+                {
+                    // check if it's correct bg
+                    if(bg && bg->GetTypeID() == BATTLEGROUND_AB)
+                        bg->EventPlayerClickedOnFlag(player, gameObjTarget);
+
+                    return;
+                }
             }
         }
-        else if (gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_FLAGSTAND)
+        else if (goInfo->type == GAMEOBJECT_TYPE_FLAGSTAND)
         {
-            if(bg && bg->GetTypeID() == BATTLEGROUND_EY)
-                bg->EventPlayerClickedOnFlag(player, gameObjTarget);
+            if(BattleGround *bg = player->GetBattleGround())
+                if(bg->GetTypeID() == BATTLEGROUND_EY)
+                    bg->EventPlayerClickedOnFlag(player, gameObjTarget);
             return;
         }
         lockId = gameObjTarget->GetLockId();
