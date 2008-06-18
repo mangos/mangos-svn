@@ -3695,7 +3695,7 @@ uint8 Spell::CanCast(bool strict)
                         return SPELL_FAILED_TARGET_NOT_IN_INSTANCE;
                     if ( instance->levelMin > target->getLevel() )
                         return SPELL_FAILED_LOWLEVEL;
-                    if ( instance->levelMax < target->getLevel() )
+                    if ( instance->levelMax && instance->levelMax < target->getLevel() )
                         return SPELL_FAILED_HIGHLEVEL;
                 }
                 break;
