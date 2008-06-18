@@ -468,4 +468,22 @@ void MaNGOS::CreatureListSearcher<Check>::Visit(CreatureMapType &m)
         if(i_check(itr->getSource()))
             i_objects.push_back(itr->getSource());
 }
+
+template<class Check>
+void MaNGOS::PlayerSearcher<Check>::Visit(PlayerMapType &m)
+{
+    // already found
+    if(i_object)
+        return;
+
+    for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(i_check(itr->getSource()))
+        {
+            i_object = itr->getSource();
+            return;
+        }
+    }
+}
+
 #endif                                                      // MANGOS_GRIDNOTIFIERSIMPL_H
