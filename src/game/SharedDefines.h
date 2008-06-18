@@ -1966,7 +1966,6 @@ enum DiminishingGroup
     DIMINISHING_LIMITONLY
 };
 
-
 enum DungeonDifficulties
 {
     DIFFICULTY_NORMAL = 0,

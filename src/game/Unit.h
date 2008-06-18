@@ -123,7 +123,7 @@ enum SpellModOp
 #define BASE_MAXDAMAGE 2.0f
 #define BASE_ATTACK_TIME 2000
 
-// high byte (3 from 0..3) of UNIT_FIELD_BYTES_2 
+// high byte (3 from 0..3) of UNIT_FIELD_BYTES_2
 enum ShapeshiftForm
 {
     FORM_NONE               = 0x00,

@@ -2908,7 +2908,7 @@ void Spell::TakePower()
         m_caster->ModifyHealth( -(int32)m_powerCost );
         return;
     }
-    
+
     if(m_spellInfo->powerType >= MAX_POWERS)
     {
         sLog.outError("Spell::TakePower: Unknown power type '%d'", m_spellInfo->powerType);
@@ -3994,7 +3994,6 @@ bool Spell::CanAutoCast(Unit* target)
 
 uint8 Spell::CheckRange(bool strict)
 {
-
     float range_mod;
 
     // self cast doesn't need range checking -- also for Starshards fix
@@ -4030,7 +4029,7 @@ uint8 Spell::CheckRange(bool strict)
                 {
                     // Shadow Word: Death, castable without facing
                     if (m_spellInfo->SpellFamilyFlags & 0x200000000LL)
-                        return 0;                           // this is not TARGET_FLAG_DEST_LOCATION so we can retuhr safely
+                        return 0;                           // this is not TARGET_FLAG_DEST_LOCATION so we can return safely
                     break;
                 }
                 case SPELLFAMILY_PALADIN:

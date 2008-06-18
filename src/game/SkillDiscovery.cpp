@@ -91,11 +91,9 @@ void LoadSkillDiscoveryTable()
                 }
 
                 SkillDiscoveryStore[reqSkillOrSpell].push_back( SkillDiscoveryEntry(spellId, chance) );
-
             }
             else if( reqSkillOrSpell == 0 )                 // skill case
             {
-
                 SkillLineAbilityMap::const_iterator lower = spellmgr.GetBeginSkillLineAbilityMap(spellId);
                 SkillLineAbilityMap::const_iterator upper = spellmgr.GetEndSkillLineAbilityMap(spellId);
 

@@ -147,7 +147,7 @@ void WorldSession::HandleCharEnum(QueryResult * result)
 
 void WorldSession::HandleCharEnumOpcode( WorldPacket & /*recv_data*/ )
 {
-    /// get all the data necesary for loading all characters (along with their pets) on the account
+    /// get all the data necessary for loading all characters (along with their pets) on the account
     CharacterDatabase.AsyncPQuery(&chrHandler, &CharacterHandler::HandleCharEnumCallback, GetAccountId(),
     //          0                1                2                      3                      4                      5               6                     7                     8
         "SELECT characters.data, characters.name, characters.position_x, characters.position_y, characters.position_z, characters.map, characters.totaltime, characters.leveltime, characters.at_login, "

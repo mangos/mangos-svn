@@ -983,7 +983,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent = false);
         void RemoveMiniPet();
         Pet* GetMiniPet();
-        void SetMiniPet(Pet* pet) {m_miniPet = pet->GetGUID();};
+        void SetMiniPet(Pet* pet) { m_miniPet = pet->GetGUID(); }
         void Uncharm();
 
         void Say(const std::string text, const uint32 language);
@@ -1860,7 +1860,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         float  m_recallO;
         void   SaveRecallPosition();
 
-        //homebind coordinates
+        // Homebind coordinates
         uint32 m_homebindMapId;
         uint16 m_homebindZoneId;
         float m_homebindX;

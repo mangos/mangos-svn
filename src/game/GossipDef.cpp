@@ -454,11 +454,9 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
         data << uint32(pQuest->GetRewOrReqMoney());
     }
 
-    data << uint32(0);                                      // Honor points reward, not impelmented, and possible depricated
-
+    data << uint32(0);                                      // Honor points reward, not implemented
     data << uint32(pQuest->GetRewSpell());                  // reward spell, this spell will display (icon) (casted if RewSpellCast==0)
     data << uint32(pQuest->GetRewSpellCast());              // casted spell
-
     data << uint32(pQuest->GetCharTitleId());               // CharTitleId, new 2.4.0, player gets this title (id from CharTitles)
 
     data << uint32(QUEST_EMOTE_COUNT);
@@ -519,13 +517,13 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
     data << uint32(0);                                      // RequiredOpositeRepValue, required faction value with another (oposite) faction (objective)
 
     data << uint32(pQuest->GetNextQuestInChain());          // client will request this quest from NPC, if not 0
- 
+
     if (pQuest->HasFlag(QUEST_FLAGS_HIDDEN_REWARDS))
         data << uint32(0);                                  // Hide money rewarded
     else
         data << uint32(pQuest->GetRewOrReqMoney());
-    data << uint32(pQuest->GetRewMoneyMaxLevel());          // used in XP claculation at client
 
+    data << uint32(pQuest->GetRewMoneyMaxLevel());          // used in XP calculation at client
     data << uint32(pQuest->GetRewSpell());                  // reward spell, this spell will display (icon) (casted if RewSpellCast==0)
     data << uint32(pQuest->GetRewSpellCast());              // casted spell
 
@@ -665,12 +663,9 @@ void PlayerMenu::SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID,
     data << uint32(pQuest->GetRewOrReqMoney());
     data << uint32(0x00);                                   // new 2.3.0. Honor points
     data << uint32(0x08);                                   // unused by client?
-
     data << uint32(pQuest->GetRewSpell());                  // reward spell, this spell will display (icon) (casted if RewSpellCast==0)
     data << uint32(pQuest->GetRewSpellCast());              // casted spell
-
-    data << uint32(0);                                      // Honor points reward, not impelmented, and possible depricated
-
+    data << uint32(0);                                      // Honor points reward, not implemented
     pSession->SendPacket( &data );
     //sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),pQuest->GetQuestId() );
 }
@@ -710,7 +705,7 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest const *pQuest, uint64 npcGUID
     data << Title;
     data << RequestItemsText;
 
-    data << uint32(0x00);                                   // unk
+    data << uint32(0x00);                                   // unknown
 
     if(Completable)
         data << pQuest->GetCompleteEmote();
@@ -723,10 +718,10 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest const *pQuest, uint64 npcGUID
     else
         data << uint32(0x00);
 
-    // Req Money
+    // Required Money
     data << uint32(pQuest->GetRewOrReqMoney() < 0 ? -pQuest->GetRewOrReqMoney() : 0);
 
-    data << uint32(0x00);                                   // unk
+    data << uint32(0x00);                                   // unknown
 
     data << uint32( pQuest->GetReqItemsCount() );
     ItemPrototype const *pItem;

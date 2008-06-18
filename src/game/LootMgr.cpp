@@ -330,7 +330,6 @@ void Loot::AddItem(LootStoreItem const & item)
             if( !proto || (proto->Flags & ITEM_FLAGS_PARTY_LOOT)==0 )
                 ++unlootedCount;
         }
-
     }
 }
 

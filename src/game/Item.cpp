@@ -334,7 +334,6 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
     // create item before any checks for store correct guid
     // and allow use "FSetState(ITEM_REMOVED); SaveToDB();" for deleting item from DB
     Object::_Create(guid, 0, HIGHGUID_ITEM);
- 
 
     bool delete_result = false;
     if(!result)
@@ -378,9 +377,9 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
     if(GetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID) < 0)
     {
         uint32 new_suffix = GenerateEnchSuffixFactor(GetEntry());
-        if(GetUInt32Value(ITEM_FIELD_SUFFIX_FACTOR)!=new_suffix)
+        if(GetItemSuffixFactor()!=new_suffix)
         {
-            SetUInt32Value(ITEM_FIELD_SUFFIX_FACTOR,GenerateEnchSuffixFactor(GetEntry()));
+            SetUInt32Value(ITEM_FIELD_PROPERTY_SEED,GenerateEnchSuffixFactor(GetEntry()));
             need_save = true;
         }
     }
@@ -588,10 +587,10 @@ void Item::SetItemRandomProperties(int32 randomPropId)
         if(item_rand)
         {
             if( GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID)!=(uint32)(-int32(item_rand->ID)) ||
-                !GetUInt32Value(ITEM_FIELD_SUFFIX_FACTOR))
+                !GetItemSuffixFactor())
             {
                 SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,(uint32)(-int32(item_rand->ID)));
-                SetUInt32Value(ITEM_FIELD_SUFFIX_FACTOR,GenerateEnchSuffixFactor(GetEntry()));
+                SetUInt32Value(ITEM_FIELD_PROPERTY_SEED, GenerateEnchSuffixFactor(GetEntry()));
                 SetState(ITEM_CHANGED);
             }
 

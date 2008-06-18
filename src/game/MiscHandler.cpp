@@ -156,7 +156,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         if (lvl < level_min || lvl > level_max)
             continue;
 
-        // check if class machtes classmask
+        // check if class matches classmask
         uint32 class_ = itr->second->getClass();
         if (!(classmask & (1 << class_)))
             continue;

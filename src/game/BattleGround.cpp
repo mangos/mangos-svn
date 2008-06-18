@@ -1079,5 +1079,4 @@ void BattleGround::HandleKillPlayer( Player *player, Player *killer )
 
     // to be able to remove insignia
     player->SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE );
-
 }

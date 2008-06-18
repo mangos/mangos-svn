@@ -39,7 +39,6 @@ void MailItem::deleteItem( bool inDB )
     }
 }
 
-
 void WorldSession::HandleSendMail(WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8+1+1+1+4+4+1+4+4+8+1);

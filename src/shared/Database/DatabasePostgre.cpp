@@ -242,7 +242,6 @@ bool DatabasePostgre::BeginTransaction()
     // don't use queued execution if it has not been initialized
     if (!m_threadBody)
     {
-
         if (tranThread==ZThread::ThreadImpl::current())
             return false;                                   // huh? this thread already started transaction
         mMutex.acquire();
@@ -274,7 +273,6 @@ bool DatabasePostgre::CommitTransaction()
     // don't use queued execution if it has not been initialized
     if (!m_threadBody)
     {
-
         if (tranThread!=ZThread::ThreadImpl::current())
             return false;
         bool _res = _TransactionCmd("COMMIT");
@@ -292,7 +290,6 @@ bool DatabasePostgre::CommitTransaction()
     }
     else
         return false;
-
 }
 
 bool DatabasePostgre::RollbackTransaction()
@@ -302,7 +299,6 @@ bool DatabasePostgre::RollbackTransaction()
     // don't use queued execution if it has not been initialized
     if (!m_threadBody)
     {
-
         if (tranThread!=ZThread::ThreadImpl::current())
             return false;
         bool _res = _TransactionCmd("ROLLBACK");
@@ -318,7 +314,6 @@ bool DatabasePostgre::RollbackTransaction()
         i->second = NULL;
     }
     return true;
-
 }
 
 unsigned long DatabasePostgre::escape_string(char *to, const char *from, unsigned long length)

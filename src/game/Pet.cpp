@@ -311,7 +311,6 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
         LearnPetPassives();
     }
 
-
     if(getPetType() == SUMMON_PET && !current)              //all (?) summon pets come with full health when called, but not when they are current
     {
         SetHealth(GetMaxHealth());
@@ -576,7 +575,7 @@ void Pet::RegenerateFocus()
 {
     uint32 curValue = GetPower(POWER_FOCUS);
     uint32 maxValue = GetMaxPower(POWER_FOCUS);
-    
+
     if (curValue >= maxValue) 
         return;
 
@@ -593,7 +592,7 @@ void Pet::RegenerateFocus()
 void Pet::LooseHappiness()
 {
     uint32 curValue = GetPower(POWER_HAPPINESS);
-    if (curValue <= 0) 
+    if (curValue <= 0)
         return;
     int32 addvalue = (140 >> GetLoyaltyLevel()) * 125;      //value is 70/35/17/8/4 (per min) * 1000 / 8 (timer 7.5 secs)
     if(isInCombat())                                        //we know in combat happiness fades faster, multiplier guess
