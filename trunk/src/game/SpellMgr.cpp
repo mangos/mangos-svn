@@ -1935,3 +1935,137 @@ void SpellMgr::LoadSkillLineAbilityMap()
     sLog.outString();
     sLog.outString(">> Loaded %u SkillLineAbility MultiMap", count);
 }
+
+DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto, bool triggered)
+{
+    // Explicit Diminishing Groups
+    switch(spellproto->SpellFamilyName)
+    {
+        case SPELLFAMILY_MAGE:
+        {
+            // Polymorph
+            if ((spellproto->SpellFamilyFlags & 0x00001000000LL) && spellproto->EffectApplyAuraName[0]==SPELL_AURA_MOD_CONFUSE)
+                return DIMINISHING_POLYMORPH;
+            break;
+        }
+        case SPELLFAMILY_ROGUE:
+        {
+            // Kidney Shot
+            if (spellproto->SpellFamilyFlags & 0x00000200000LL)
+                return DIMINISHING_KIDNEYSHOT;
+            // Blind
+            else if (spellproto->SpellFamilyFlags & 0x00001000000LL)
+                return DIMINISHING_BLIND_CYCLONE;
+            break;
+        }
+        case SPELLFAMILY_WARLOCK:
+        {
+            // Death Coil
+            if (spellproto->SpellFamilyFlags & 0x00000080000LL)
+                return DIMINISHING_DEATHCOIL;
+            // Fear
+            else if (spellproto->SpellFamilyFlags & 0x40840000000LL)
+                return DIMINISHING_WARLOCK_FEAR;
+            // Curses/etc
+            else if (spellproto->SpellFamilyFlags & 0x00080000000LL)
+                return DIMINISHING_LIMITONLY;
+            break;
+        }
+        case SPELLFAMILY_DRUID:
+        {
+            // Cyclone
+            if (spellproto->SpellFamilyFlags & 0x02000000000LL)
+                return DIMINISHING_BLIND_CYCLONE;
+            break;
+        }
+        case SPELLFAMILY_WARRIOR:
+        {
+            // Hamstring - limit duration to 10s in PvP
+            if (spellproto->SpellFamilyFlags & 0x00000000002LL)
+                return DIMINISHING_LIMITONLY;
+            break;
+        }
+        default:
+            break;
+    }
+
+    // Get by mechanic
+    for (uint8 i=0;i<3;++i)
+    {
+        if (spellproto->Mechanic      == MECHANIC_STUN    || spellproto->EffectMechanic[i] == MECHANIC_STUN)
+            return triggered ? DIMINISHING_TRIGGER_STUN : DIMINISHING_CONTROL_STUN;
+        else if (spellproto->Mechanic == MECHANIC_SLEEP   || spellproto->EffectMechanic[i] == MECHANIC_SLEEP)
+            return DIMINISHING_SLEEP;
+        else if (spellproto->Mechanic == MECHANIC_ROOT    || spellproto->EffectMechanic[i] == MECHANIC_ROOT)
+            return triggered ? DIMINISHING_TRIGGER_ROOT : DIMINISHING_CONTROL_ROOT;
+        else if (spellproto->Mechanic == MECHANIC_FEAR    || spellproto->EffectMechanic[i] == MECHANIC_FEAR)
+            return DIMINISHING_FEAR;
+        else if (spellproto->Mechanic == MECHANIC_CHARM   || spellproto->EffectMechanic[i] == MECHANIC_CHARM)
+            return DIMINISHING_CHARM;
+        else if (spellproto->Mechanic == MECHANIC_SILENCE || spellproto->EffectMechanic[i] == MECHANIC_SILENCE)
+            return DIMINISHING_SILENCE;
+        else if (spellproto->Mechanic == MECHANIC_DISARM  || spellproto->EffectMechanic[i] == MECHANIC_DISARM)
+            return DIMINISHING_DISARM;
+        else if (spellproto->Mechanic == MECHANIC_FREEZE  || spellproto->EffectMechanic[i] == MECHANIC_FREEZE)
+            return DIMINISHING_FREEZE;
+        else if (spellproto->Mechanic == MECHANIC_KNOCKOUT|| spellproto->EffectMechanic[i] == MECHANIC_KNOCKOUT ||
+                 spellproto->Mechanic == MECHANIC_SAPPED  || spellproto->EffectMechanic[i] == MECHANIC_SAPPED)
+            return DIMINISHING_KNOCKOUT;
+        else if (spellproto->Mechanic == MECHANIC_BANISH  || spellproto->EffectMechanic[i] == MECHANIC_BANISH)
+            return DIMINISHING_BANISH;
+    }
+
+    return DIMINISHING_NONE;
+}
+
+bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group)
+{
+    switch(group)
+    {
+        case DIMINISHING_CONTROL_STUN:
+        case DIMINISHING_TRIGGER_STUN:
+        case DIMINISHING_KIDNEYSHOT:
+        case DIMINISHING_SLEEP:
+        case DIMINISHING_CONTROL_ROOT:
+        case DIMINISHING_TRIGGER_ROOT:
+        case DIMINISHING_FEAR:
+        case DIMINISHING_WARLOCK_FEAR:
+        case DIMINISHING_CHARM:
+        case DIMINISHING_POLYMORPH:
+        case DIMINISHING_FREEZE:
+        case DIMINISHING_KNOCKOUT:
+        case DIMINISHING_BLIND_CYCLONE:
+        case DIMINISHING_BANISH:
+        case DIMINISHING_LIMITONLY:
+            return true;
+    }
+    return false;
+}
+
+DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group)
+{
+    switch(group)
+    {
+        case DIMINISHING_BLIND_CYCLONE:
+        case DIMINISHING_CONTROL_STUN:
+        case DIMINISHING_TRIGGER_STUN:
+        case DIMINISHING_KIDNEYSHOT:
+            return DRTYPE_ALL;
+        case DIMINISHING_SLEEP:
+        case DIMINISHING_CONTROL_ROOT:
+        case DIMINISHING_TRIGGER_ROOT:
+        case DIMINISHING_FEAR:
+        case DIMINISHING_CHARM:
+        case DIMINISHING_POLYMORPH:
+        case DIMINISHING_SILENCE:
+        case DIMINISHING_DISARM:
+        case DIMINISHING_DEATHCOIL:
+        case DIMINISHING_FREEZE:
+        case DIMINISHING_BANISH:
+        case DIMINISHING_WARLOCK_FEAR:
+        case DIMINISHING_KNOCKOUT:
+            return DRTYPE_PLAYER;
+    }
+
+    return DRTYPE_NONE;
+}

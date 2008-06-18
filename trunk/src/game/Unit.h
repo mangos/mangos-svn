@@ -490,17 +490,6 @@ enum MovementFlags
     MOVEMENTFLAG_UNK3           = 0x40000000
 };
 
-enum DiminishingMechanics
-{
-    DIMINISHING_NONE                = 0,
-    DIMINISHING_MECHANIC_CONFUSE    = 1,                    // incapacitate, confuse
-    DIMINISHING_MECHANIC_CHARM      = 2,                    // fear, mind control, sleep
-    DIMINISHING_MECHANIC_STUN       = 3,                    // stun
-    DIMINISHING_MECHANIC_ROOT       = 4,                    // roots, freeze
-    DIMINISHING_MECHANIC_SNARE      = 5,                    // speed reduction (snares)
-    DIMINISHING_MECHANIC_BANISH     = 6                     // banish and cyclone
-};
-
 enum DiminishingLevels
 {
     DIMINISHING_LEVEL_1             = 0,
@@ -511,9 +500,10 @@ enum DiminishingLevels
 
 struct DiminishingReturn
 {
-    DiminishingReturn(DiminishingMechanics mech, uint32 t, uint32 count) : Mechanic(mech), hitTime(t), hitCount(count) {}
+    DiminishingReturn(DiminishingGroup group, uint32 t, uint32 count) : DRGroup(group), hitTime(t), hitCount(count), stack(0) {}
 
-    DiminishingMechanics    Mechanic;
+    DiminishingGroup        DRGroup:16;
+    uint16                  stack:16;
     uint32                  hitTime;
     uint32                  hitCount;
 };
@@ -646,12 +636,11 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void CleanupsBeforeDelete();                        // used in ~Creature/~Player (or before mass creature delete to remove cross-references to already deleted units)
 
-        static DiminishingMechanics Mechanic2DiminishingMechanics(uint32 mech);
-        void AddDiminishing(DiminishingMechanics mech, uint32 hitTime, uint32 hitCount);
-        DiminishingLevels GetDiminishing(DiminishingMechanics  mech);
-        void IncrDiminishing(DiminishingMechanics  mech, uint32 duration);
-        void UpdateDiminishingTime(DiminishingMechanics  mech);
-        void ApplyDiminishingToDuration(DiminishingMechanics  mech, int32& duration,Unit* caster);
+        DiminishingLevels GetDiminishing(DiminishingGroup  group);
+        void IncrDiminishing(DiminishingGroup group);
+        void ApplyDiminishingToDuration(DiminishingGroup  group, int32 &duration,Unit* caster, DiminishingLevels Level);
+        void ApplyDiminishingAura(DiminishingGroup  group, bool apply);
+        void ClearDiminishings() { m_Diminishing.clear(); }
 
         virtual void Update( uint32 time );
 

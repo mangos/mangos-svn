@@ -1927,6 +1927,46 @@ enum AiReaction
     AI_REACTION_UNK4    = 4
 };
 
+// Diminishing Returns Types
+enum DiminishingReturnsType
+{
+    DRTYPE_NONE         = 0,                                // this spell is not diminished, but may have limited it's duration to 10s
+    DRTYPE_PLAYER       = 1,                                // this spell is diminished only when applied on players
+    DRTYPE_ALL          = 2                                 // this spell is diminished in every case
+};
+
+// Diminishing Return Groups
+enum DiminishingGroup
+{
+    // Common Groups
+    DIMINISHING_NONE,
+    DIMINISHING_CONTROL_STUN,                               // Player Controlled stuns
+    DIMINISHING_TRIGGER_STUN,                               // By aura proced stuns, usualy chance on hit talents
+    DIMINISHING_SLEEP,
+    DIMINISHING_CONTROL_ROOT,                               // Immobilizing effects from casted spells
+    DIMINISHING_TRIGGER_ROOT,                               // Immobilizing effects from triggered spells like Frostbite
+    DIMINISHING_FEAR,                                       // Non-warlock fears
+    DIMINISHING_CHARM,
+    // Mage Specific
+    DIMINISHING_POLYMORPH,
+    // Rogue Specific
+    DIMINISHING_KIDNEYSHOT,                                 // Kidney Shot is not diminished with Cheap Shot
+    // Warlock Specific
+    DIMINISHING_DEATHCOIL,                                  // Death Coil Diminish only with another Death Coil
+    DIMINISHING_WARLOCK_FEAR,                               // Also with Sedduction
+    // Shared Class Specific
+    DIMINISHING_BLIND_CYCLONE,                              // From 2.3.0
+    DIMINISHING_DISARM,                                     // From 2.3.0
+    DIMINISHING_SILENCE,                                    // From 2.3.0
+    DIMINISHING_FREEZE,                                     // Hunter's Freezing Trap
+    DIMINISHING_KNOCKOUT,                                   // Also with Sap, all Knockout mechanics are here
+    DIMINISHING_BANISH,
+    // Other
+    // Don't Diminish, but limit duration to 10s
+    DIMINISHING_LIMITONLY
+};
+
+
 enum DungeonDifficulties
 {
     DIFFICULTY_NORMAL = 0,

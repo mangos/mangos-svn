@@ -407,6 +407,11 @@ inline uint32 GetDispellMask(DispelType dispel)
         return (1 << dispel);
 }
 
+// Diminishing Returns interaction with spells
+DiminishingGroup GetDiminishingReturnsGroupForSpell(SpellEntry const* spellproto, bool triggered);
+bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group);
+DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group);
+
 // Spell affects related declarations (accessed using SpellMgr functions)
 struct SpellAffection
 {
