@@ -1858,55 +1858,22 @@ void Spell::EffectApplyAura(uint32 i)
         }
     }
 
-    // Update aura duration based at diminishingMod
+    // Now Reduce spell duration using data recieved at spell hit
+    int32 duration = Aur->GetAuraMaxDuration();
+    unitTarget->ApplyDiminishingToDuration(m_diminishGroup,duration,m_caster,m_diminishLevel);
+    Aur->setDiminishGroup(m_diminishGroup);
+
+    // if Aura removed and deleted, do not continue.
+    if(duration== 0 && !(Aur->IsPermanent()))
     {
-        // Use Effect mechanic
-        DiminishingMechanics mech = Unit::Mechanic2DiminishingMechanics(Aur->GetSpellProto()->EffectMechanic[i]);
+        delete Aur;
+        return;
+    }
 
-        // Use Spell mechanic
-        if (mech == DIMINISHING_NONE)
-            mech = Unit::Mechanic2DiminishingMechanics(Aur->GetSpellProto()->Mechanic);
-
-        if(mech == DIMINISHING_NONE)
-        {
-            switch(m_spellInfo->EffectApplyAuraName[i])
-            {
-                case SPELL_AURA_MOD_CONFUSE:
-                    mech = DIMINISHING_MECHANIC_CONFUSE; break;
-                case SPELL_AURA_MOD_CHARM:
-                case SPELL_AURA_MOD_FEAR:
-                    mech = DIMINISHING_MECHANIC_CHARM; break;
-                case SPELL_AURA_MOD_STUN:
-                    mech = DIMINISHING_MECHANIC_STUN; break;
-                case SPELL_AURA_MOD_ROOT:
-                    mech = DIMINISHING_MECHANIC_ROOT; break;
-                case SPELL_AURA_MOD_DECREASE_SPEED:
-                    mech = DIMINISHING_MECHANIC_SNARE; break;
-                default: break;
-            }
-        }
-
-        // Death Coil and Curse of Exhaustion are not diminished.
-        if((m_spellInfo->SpellVisual == 64 && m_spellInfo->SpellIconID == 88) ||
-            (m_spellInfo->SpellVisual == 185 && m_spellInfo->SpellIconID == 228))
-            mech = DIMINISHING_NONE;
-
-        int32 duration = Aur->GetAuraMaxDuration();
-
-        unitTarget->ApplyDiminishingToDuration(mech,duration,caster);
-
-        // if Aura removed and deleted, do not continue.
-        if(duration== 0 && !(Aur->IsPermanent()))
-        {
-            delete Aur;
-            return;
-        }
-
-        if(duration != Aur->GetAuraMaxDuration())
-        {
-            Aur->SetAuraMaxDuration(duration);
-            Aur->SetAuraDuration(duration);
-        }
+    if(duration != Aur->GetAuraMaxDuration())
+    {
+        Aur->SetAuraMaxDuration(duration);
+        Aur->SetAuraDuration(duration);
     }
 
     bool added = unitTarget->AddAura(Aur);

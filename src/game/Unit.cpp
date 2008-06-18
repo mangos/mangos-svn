@@ -4046,18 +4046,6 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
     // remove from list before mods removing (prevent cyclic calls, mods added before including to aura list - use reverse order)
     Aura* Aur = i->second;
 
-    DiminishingMechanics mech = DIMINISHING_NONE;
-    if(Aur->GetSpellProto()->Mechanic || Aur->GetSpellProto()->EffectMechanic[Aur->GetEffIndex()])
-    {
-        mech = Unit::Mechanic2DiminishingMechanics(Aur->GetSpellProto()->EffectMechanic[Aur->GetEffIndex()]);
-
-        if (mech == DIMINISHING_NONE)
-            mech = Unit::Mechanic2DiminishingMechanics(Aur->GetSpellProto()->Mechanic);
-
-        if(mech == DIMINISHING_MECHANIC_STUN || GetTypeId() == TYPEID_PLAYER && mech != DIMINISHING_NONE)
-            UpdateDiminishingTime(mech);
-    }
-
     // some ShapeshiftBoosts at remove trigger removing other auras including parent Shapeshift aura
     // remove aura from list before to prevent deleting it before
     m_Auras.erase(i);
@@ -8535,6 +8523,7 @@ void Unit::setDeathState(DeathState s)
         ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
         // remove aurastates allowing special moves
         ClearAllReactives();
+        ClearDiminishings();
     }
     else if(s == JUST_ALIVED)
     {
@@ -8795,20 +8784,21 @@ int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto, uint8 effect_in
     return duration;
 }
 
-void Unit::AddDiminishing(DiminishingMechanics mech, uint32 hitTime, uint32 hitCount)
-{
-    m_Diminishing.push_back(DiminishingReturn(mech,hitTime,hitCount));
-}
-
-DiminishingLevels Unit::GetDiminishing(DiminishingMechanics mech)
+DiminishingLevels Unit::GetDiminishing(DiminishingGroup group)
 {
     for(Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
     {
-        if(i->Mechanic != mech) continue;
-        if(!i->hitCount) return DIMINISHING_LEVEL_1;
-        if(!i->hitTime)  return DIMINISHING_LEVEL_1;
+        if(i->DRGroup != group)
+            continue;
+
+        if(!i->hitCount)
+            return DIMINISHING_LEVEL_1;
+
+        if(!i->hitTime)
+            return DIMINISHING_LEVEL_1;
+
         // If last spell was casted more than 15 seconds ago - reset the count.
-        if(getMSTimeDiff(i->hitTime,getMSTime()) > 15000)
+        if(i->stack==0 && getMSTimeDiff(i->hitTime,getMSTime()) > 15000)
         {
             i->hitCount = DIMINISHING_LEVEL_1;
             return DIMINISHING_LEVEL_1;
@@ -8816,97 +8806,39 @@ DiminishingLevels Unit::GetDiminishing(DiminishingMechanics mech)
         // or else increase the count.
         else
         {
-            if(i->hitCount > DIMINISHING_LEVEL_2)
-            {
-                i->hitCount = DIMINISHING_LEVEL_IMMUNE;
-                return DIMINISHING_LEVEL_IMMUNE;
-            }
-            else return DiminishingLevels(i->hitCount);
+            return DiminishingLevels(i->hitCount);
         }
     }
     return DIMINISHING_LEVEL_1;
 }
 
-void Unit::IncrDiminishing(DiminishingMechanics mech, uint32 duration)
+void Unit::IncrDiminishing(DiminishingGroup group)
 {
     // Checking for existing in the table
     bool IsExist = false;
     for(Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
     {
-        if(i->Mechanic != mech)
+        if(i->DRGroup != group)
             continue;
 
         IsExist = true;
         if(i->hitCount < DIMINISHING_LEVEL_IMMUNE)
-        {
             i->hitCount += 1;
-            switch(i->hitCount)
-            {
-                case DIMINISHING_LEVEL_2:       i->hitTime = uint32(getMSTime() + duration); break;
-                case DIMINISHING_LEVEL_3:       i->hitTime = uint32(getMSTime() + duration*0.5); break;
-                case DIMINISHING_LEVEL_IMMUNE:  i->hitTime = uint32(getMSTime() + duration*0.25); break;
-                default: break;
-            }
-        }
+
         break;
     }
 
     if(!IsExist)
-        AddDiminishing(mech,uint32(getMSTime() + duration),DIMINISHING_LEVEL_2);
+        m_Diminishing.push_back(DiminishingReturn(group,getMSTime(),DIMINISHING_LEVEL_2));
 }
 
-void Unit::UpdateDiminishingTime(DiminishingMechanics mech)
+void Unit::ApplyDiminishingToDuration(DiminishingGroup group, int32 &duration,Unit* caster,DiminishingLevels Level)
 {
-    // Checking for existing in the table
-    bool IsExist = false;
-    for(Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
-    {
-        if(i->Mechanic != mech)
-            continue;
-
-        IsExist = true;
-        i->hitTime = getMSTime();
-        break;
-    }
-
-    if(!IsExist)
-        AddDiminishing(mech,getMSTime(),DIMINISHING_LEVEL_1);
-}
-
-DiminishingMechanics Unit::Mechanic2DiminishingMechanics(uint32 mech)
-{
-    switch(mech)
-    {
-        case MECHANIC_CHARM: case MECHANIC_FEAR: case MECHANIC_SLEEP:
-            return DIMINISHING_MECHANIC_CHARM;
-
-        case MECHANIC_CONFUSED: case MECHANIC_KNOCKOUT: case MECHANIC_POLYMORPH:
-            return DIMINISHING_MECHANIC_CONFUSE;
-
-        case MECHANIC_ROOT: case MECHANIC_FREEZE:
-            return DIMINISHING_MECHANIC_ROOT;
-
-        case MECHANIC_STUN:
-            return DIMINISHING_MECHANIC_STUN;
-
-        case MECHANIC_SNARE:
-            return DIMINISHING_MECHANIC_SNARE;
-
-        case MECHANIC_BANISH:
-            return DIMINISHING_MECHANIC_BANISH;
-        default:
-            break;
-    }
-    return DIMINISHING_NONE;
-}
-
-void Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32 &duration,Unit* caster)
-{
-    if(duration == -1 || mech == DIMINISHING_NONE || caster->IsFriendlyTo(this) )
+    if(duration == -1 || group == DIMINISHING_NONE || caster->IsFriendlyTo(this) )
         return;
 
     // Duration of crowd control abilities on pvp target is limited by 10 sec. (2.2.0)
-    if(duration > 10000)
+    if(duration > 10000 && IsDiminishingReturnsGroupDurationLimited(group))
     {
         // test pet/charm masters instead pets/charmeds
         Unit const* targetOwner = GetCharmerOrOwner();
@@ -8921,21 +8853,40 @@ void Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32 &duratio
 
     float mod = 1.0f;
 
-    // Stun diminishing is applies to mobs too
-    if(mech == DIMINISHING_MECHANIC_STUN || GetTypeId() == TYPEID_PLAYER)
+    // Some diminishings applies to mobs too (for example, Stun)
+    if((GetDiminishingReturnsGroupType(group) == DRTYPE_PLAYER && GetTypeId() == TYPEID_PLAYER) || GetDiminishingReturnsGroupType(group) == DRTYPE_ALL)
     {
-        DiminishingLevels diminish = GetDiminishing(mech);
+        DiminishingLevels diminish = Level;
         switch(diminish)
         {
-            case DIMINISHING_LEVEL_1: IncrDiminishing(mech, duration); break;
-            case DIMINISHING_LEVEL_2: IncrDiminishing(mech, duration); mod = 0.5f; break;
-            case DIMINISHING_LEVEL_3: IncrDiminishing(mech, duration); mod = 0.25f; break;
-            case DIMINISHING_LEVEL_IMMUNE: mod = 0.0f; break;
+            case DIMINISHING_LEVEL_1: break;
+            case DIMINISHING_LEVEL_2: mod = 0.5f; break;
+            case DIMINISHING_LEVEL_3: mod = 0.25f; break;
+            case DIMINISHING_LEVEL_IMMUNE: mod = 0.0f;break;
             default: break;
         }
     }
 
     duration = int32(duration * mod);
+}
+
+void Unit::ApplyDiminishingAura( DiminishingGroup group, bool apply )
+{
+    // Checking for existing in the table
+    for(Diminishing::iterator i = m_Diminishing.begin(); i != m_Diminishing.end(); ++i)
+    {
+        if(i->DRGroup != group)
+            continue;
+
+        i->hitTime = getMSTime();
+
+        if(apply)
+            i->stack += 1;
+        else if(i->stack)
+            i->stack -= 1;
+
+        break;
+    }
 }
 
 Unit* Unit::GetUnit(WorldObject& object, uint64 guid)

@@ -445,7 +445,7 @@ class Spell
         // These vars are used in both delayed spell system and modified immediate spell system
         bool m_deletable;                                   // is the spell pending deletion or must be updated till permitted to delete?
         bool m_needSpellLog;                                // need to send spell log?
-        bool m_applyMultiplier[3];                          // by effect: damage multiplier needed?
+        uint8 m_applyMultiplierMask;                        // by effect: damage multiplier needed?
         float m_damageMultipliers[3];                       // by effect: damage multiplier
 
         // Current targets, to be used in SpellEffects (MUST BE USED ONLY IN SPELL EFFECTS)
@@ -453,6 +453,10 @@ class Spell
         Item* itemTarget;
         GameObject* gameObjTarget;
         int32 damage;
+
+        // this is set in Spell Hit, but used in Apply Aura handler
+        DiminishingLevels m_diminishLevel;
+        DiminishingGroup m_diminishGroup;
 
         // -------------------------------------------
         GameObject* focusObject;

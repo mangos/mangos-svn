@@ -282,6 +282,10 @@ class MANGOS_DLL_SPEC Aura
         // add/remove SPELL_AURA_MOD_SHAPESHIFT (36) linked auras
         void HandleShapeshiftBoosts(bool apply);
 
+        // Allow Apply Aura Handler to modify and access m_AuraDRGroup
+        void setDiminishGroup(DiminishingGroup group) { m_AuraDRGroup = group; }
+        DiminishingGroup getDiminishGroup() const { return m_AuraDRGroup; }
+
         void PeriodicTick();
         void PeriodicDummyTick();
     protected:
@@ -318,6 +322,7 @@ class MANGOS_DLL_SPEC Aura
 
         int32 m_periodicTimer;
         uint32 m_PeriodicEventId;
+        DiminishingGroup m_AuraDRGroup;
     private:
         void UpdateSlotCounterAndDuration(bool add);
         void CleanupTriggeredSpells();

@@ -270,6 +270,8 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
     m_triggeringContainer = triggeringContainer;
     m_deletable = true;
 
+    m_applyMultiplierMask = 0;
+
     // Get data for type of attack
     switch (m_spellInfo->DmgClass)
     {
@@ -915,12 +917,19 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
         return;
     }
 
+    // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
+    m_diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo,m_triggeredByAuraSpell);
+    m_diminishLevel = unit->GetDiminishing(m_diminishGroup);
+    // Increase Diminishing on unit, current informations for actualy casts will use values above
+    if((GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_PLAYER && unit->GetTypeId() == TYPEID_PLAYER) || GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_ALL)
+        unit->IncrDiminishing(m_diminishGroup);
+
     for(uint32 effectNumber=0;effectNumber<3;effectNumber++)
     {
         if (effectMask & (1<<effectNumber))
         {
             HandleEffects(unit,NULL,NULL,effectNumber,m_damageMultipliers[effectNumber]);
-            if ( m_applyMultiplier[effectNumber] )
+            if ( m_applyMultiplierMask & (1 << effectNumber) )
             {
                 // Get multiplier
                 float multiplier = m_spellInfo->DmgMultiplier[effectNumber];
@@ -2101,10 +2110,14 @@ void Spell::_handle_immediate_phase()
 
         // initialize multipliers
         m_damageMultipliers[j] = 1.0f;
-        m_applyMultiplier[j] =
-            (m_spellInfo->EffectImplicitTargetA[j] == TARGET_CHAIN_DAMAGE || m_spellInfo->EffectImplicitTargetA[j] == TARGET_CHAIN_HEAL) &&
-            (EffectChainTarget > 1);
+        if( (m_spellInfo->EffectImplicitTargetA[j] == TARGET_CHAIN_DAMAGE || m_spellInfo->EffectImplicitTargetA[j] == TARGET_CHAIN_HEAL) &&
+            (EffectChainTarget > 1) )
+            m_applyMultiplierMask |= 1 << j;
     }
+
+    // initialize Diminishing Returns Data
+    m_diminishLevel = DIMINISHING_LEVEL_1;
+    m_diminishGroup = DIMINISHING_NONE;
 
     // process items
     for(std::list<ItemTargetInfo>::iterator ihit= m_UniqueItemInfo.begin();ihit != m_UniqueItemInfo.end();++ihit)
