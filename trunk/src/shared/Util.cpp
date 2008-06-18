@@ -125,7 +125,6 @@ uint32 TimeStringToSecs(std::string timestring)
             secs+=buffer;
             buffer=0;
         }
-
     }
 
     return secs;
@@ -174,5 +173,3 @@ uint32 CreatePIDFile(std::string filename)
 
     return (uint32)pid;
 }
-
-

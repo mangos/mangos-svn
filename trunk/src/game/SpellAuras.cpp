@@ -3862,7 +3862,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
         m_periodicTimer += m_modifier.periodictime;
 
     m_isPeriodic = apply;
-    
+
     // For prevent double apply bonuses
     bool loading = (m_target->GetTypeId() == TYPEID_PLAYER && ((Player*)m_target)->GetSession()->PlayerLoading());
 
@@ -5697,7 +5697,7 @@ void Aura::PeriodicTick()
                 break;
 
             Powers power = Powers(m_modifier.m_miscvalue);
-            
+
             // power type might have changed between aura applying and tick (druid's shapeshift)
             if(m_target->getPowerType() != power)
                 break;

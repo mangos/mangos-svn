@@ -3579,4 +3579,3 @@ bool ChatHandler::HandleEventStopCommand(const char* args)
     gameeventmgr.StopEvent(event_id,true);
     return true;
 }
-

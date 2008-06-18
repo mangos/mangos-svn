@@ -74,6 +74,43 @@
 #define SKILL_PERM_BONUS(x)    PAIR32_HIPART(x)
 #define MAKE_SKILL_BONUS(t, p) MAKE_PAIR32(t,p)
 
+enum CharacterFlags
+{
+    CHARACTER_FLAG_NONE                 = 0x00000000,
+    CHARACTER_FLAG_UNK1                 = 0x00000001,
+    CHARACTER_FLAG_UNK2                 = 0x00000002,
+    CHARACTER_LOCKED_FOR_TRANSFER       = 0x00000004,
+    CHARACTER_FLAG_UNK4                 = 0x00000008,
+    CHARACTER_FLAG_UNK5                 = 0x00000010,
+    CHARACTER_FLAG_UNK6                 = 0x00000020,
+    CHARACTER_FLAG_UNK7                 = 0x00000040,
+    CHARACTER_FLAG_UNK8                 = 0x00000080,
+    CHARACTER_FLAG_UNK9                 = 0x00000100,
+    CHARACTER_FLAG_UNK10                = 0x00000200,
+    CHARACTER_FLAG_HIDE_HELM            = 0x00000400,
+    CHARACTER_FLAG_HIDE_CLOAK           = 0x00000800,
+    CHARACTER_FLAG_UNK13                = 0x00001000,
+    CHARACTER_FLAG_GHOST                = 0x00002000,
+    CHARACTER_FLAG_RENAME               = 0x00004000,
+    CHARACTER_FLAG_UNK16                = 0x00008000,
+    CHARACTER_FLAG_UNK17                = 0x00010000,
+    CHARACTER_FLAG_UNK18                = 0x00020000,
+    CHARACTER_FLAG_UNK19                = 0x00040000,
+    CHARACTER_FLAG_UNK20                = 0x00080000,
+    CHARACTER_FLAG_UNK21                = 0x00100000,
+    CHARACTER_FLAG_UNK22                = 0x00200000,
+    CHARACTER_FLAG_UNK23                = 0x00400000,
+    CHARACTER_FLAG_UNK24                = 0x00800000,
+    CHARACTER_FLAG_LOCKED_BY_BILLING    = 0x01000000,
+    CHARACTER_FLAG_UNK26                = 0x02000000,
+    CHARACTER_FLAG_UNK27                = 0x04000000,
+    CHARACTER_FLAG_UNK28                = 0x08000000,
+    CHARACTER_FLAG_UNK29                = 0x10000000,
+    CHARACTER_FLAG_UNK30                = 0x20000000,
+    CHARACTER_FLAG_UNK31                = 0x40000000,
+    CHARACTER_FLAG_UNK32                = 0x80000000
+};
+
 //== PlayerTaxi ================================================
 
 PlayerTaxi::PlayerTaxi()
@@ -1199,38 +1236,17 @@ void Player::BuildEnumData( QueryResult * result, WorldPacket * p_data )
 
     *p_data << GetUInt32Value(PLAYER_GUILDID);              // guild id
 
-    // it's uint32, not 4 x uint8
-    *p_data << uint8(0x0);                                  // different values on off, looks like flags
-    // 0x01
-    // 0x02
-    // 0x04 - CHAR_LOGIN_LOCKED_FOR_TRANSFER
-    // 0x08
-    // 0x10
-    // 0x20
-    // 0x40
-
-    uint8 flags = 0;
+    uint32 char_flags = 0;
     if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
-        flags |= 0x04;
+        char_flags |= CHARACTER_FLAG_HIDE_HELM;
     if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
-        flags |= 0x08;
+        char_flags |= CHARACTER_FLAG_HIDE_CLOAK;
     if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
-        flags |= 0x20;
+        char_flags |= CHARACTER_FLAG_GHOST;
     if(HasAtLoginFlag(AT_LOGIN_RENAME))
-        flags |= 0x40;
-    *p_data << uint8(flags);                                // flags description below
-    // 0x01 - unknown
-    // 0x02 - unknown
-    // 0x04 - hide helm
-    // 0x08 - hide cloak
-    // 0x10 - unknown
-    // 0x20 - dead(ghost)
-    // 0x40 - need rename
+        char_flags |= CHARACTER_FLAG_RENAME;
 
-    *p_data << uint8(0xa0);                                 // unknown
-
-    *p_data << uint8(0x0);                                  // ?
-    // 0x01 - CHAR_LOGIN_LOCKED_BY_BILLING
+    *p_data << (uint32)char_flags;                          // character flags
 
     *p_data << (uint8)1;                                    // unknown
 
@@ -2096,7 +2112,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     //reset attack power, damage and attack speed fields
     SetFloatValue(UNIT_FIELD_BASEATTACKTIME, 2000.0f );
-    SetFloatValue(UNIT_FIELD_OFFHANDATTACKTIME, 2000.0f );
+    SetFloatValue(UNIT_FIELD_BASEATTACKTIME + 1, 2000.0f ); // offhand attack time
     SetFloatValue(UNIT_FIELD_RANGEDATTACKTIME, 2000.0f );
 
     SetFloatValue(UNIT_FIELD_MINDAMAGE, 0.0f );
@@ -2129,7 +2145,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5.0f);
 
     SetUInt32Value(PLAYER_SHIELD_BLOCK, 0);
-    
+
     // Dodge percentage
     SetFloatValue(PLAYER_DODGE_PERCENTAGE, 0.0f);
 
@@ -2152,7 +2168,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
         SetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER+i,0.0f);
         SetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+i,0.0f);
     }
-    // Init data for form but skip reaply item mods for form
+    // Init data for form but skip reapply item mods for form
     InitDataForForm(reapplyMods);
 
     // save new stats
@@ -2549,12 +2565,11 @@ bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading
 
     // add dependent skills
     uint16 maxskill     = GetMaxSkillValueForLevel();
- 
+
     SpellLearnSkillNode const* spellLearnSkill = spellmgr.GetSpellLearnSkill(spell_id);
 
     if(spellLearnSkill)
     {
-
         uint32 skill_value = GetPureSkillValue(spellLearnSkill->skill);
         uint32 skill_max_value = GetPureMaxSkillValue(spellLearnSkill->skill);
 
@@ -2602,7 +2617,6 @@ bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading
                         break;
                     case SKILL_CATEGORY_ARMOR:
                     case SKILL_CATEGORY_CLASS:
-
                         if(pSkill->id != SKILL_POISONS && pSkill->id != SKILL_LOCKPICKING)
                             SetSkill(pSkill->id, 1, 1 );
                         else
@@ -4203,7 +4217,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
 
     switch (index)
     {
-        case PLAYER_FIELD_ALL_WEAPONS_SKILL_RATING:         // Implemended in Unit::RollMeleeOutcomeAgainst
+        case PLAYER_FIELD_ALL_WEAPONS_SKILL_RATING:         // Implemented in Unit::RollMeleeOutcomeAgainst
         case PLAYER_FIELD_DEFENCE_RATING:
             UpdateDefenseBonusesMod();
             break;
@@ -4243,12 +4257,12 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             if(affectStats)
                 UpdateAllSpellCritChances();
             break;
-        case PLAYER_FIELD_HIT_TAKEN_MELEE_RATING:           // Implemended in Unit::MeleeMissChanceCalc
+        case PLAYER_FIELD_HIT_TAKEN_MELEE_RATING:           // Implemented in Unit::MeleeMissChanceCalc
         case PLAYER_FIELD_HIT_TAKEN_RANGED_RATING:
             break;
-        case PLAYER_FIELD_HIT_TAKEN_SPELL_RATING:           // Implemended in Unit::MagicSpellHitResult
+        case PLAYER_FIELD_HIT_TAKEN_SPELL_RATING:           // Implemented in Unit::MagicSpellHitResult
             break;
-        case PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING:          // Implemended in Unit::RollMeleeOutcomeAgainst (only for chance to crit)
+        case PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING:          // Implemented in Unit::RollMeleeOutcomeAgainst (only for chance to crit)
         case PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING:
             break;
         case PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING:          // Implemented in Unit::SpellCriticalBonus (only for chance to crit)
@@ -4266,7 +4280,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             RatingChange = value / RatingCoeffecient;
             ApplyCastTimePercentMod(RatingChange,apply);
             break;
-        case PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING:        // Implemended in Unit::RollMeleeOutcomeAgainst
+        case PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING:        // Implemented in Unit::RollMeleeOutcomeAgainst
         case PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING:
         case PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING:
             break;
@@ -5977,7 +5991,6 @@ void Player::UpdateZone(uint32 newZone)
         if(IsPvP() && !HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_IN_PVP) && pvpInfo.endTimer == 0)
             pvpInfo.endTimer = time(0);                     // start toggle-off
     }
-
 
     if(zone->flags & AREA_FLAG_SANCTUARY)                   // in sanctuary
     {
@@ -14729,7 +14742,6 @@ void Player::Uncharm()
 
     charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
     charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
-
 }
 
 void Player::Say(const std::string text, const uint32 language)
@@ -16967,4 +16979,3 @@ uint32 Player::GetBaseWeaponSkillValue (WeaponAttackType attType) const
         ? item->GetSkill() : SKILL_UNARMED;
     return GetBaseSkillValue(skill);
 }
-

@@ -480,7 +480,6 @@ bool IsSingleTargetSpell(SpellEntry const *spellInfo)
 
 bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellInfo2)
 {
-
     // TODO - need better check
     // Equal icon and spellfamily
     if( spellInfo1->SpellFamilyName == spellInfo2->SpellFamilyName &&

@@ -66,7 +66,7 @@ bool AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target)
 
     *Source >> TempValue;                                   //get real size of the packed structure
 
-    // empty addon packet, nothing proccess, can't be recieve from real client
+    // empty addon packet, nothing process, can't be received from real client
     if(!TempValue)
         return false;
 

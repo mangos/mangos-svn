@@ -209,17 +209,20 @@ enum SpellFailedReason
 
 enum SpellFamilyNames
 {
-    SPELLFAMILY_GENERIC = 0,
-    SPELLFAMILY_MAGE    = 3,
-    SPELLFAMILY_WARRIOR = 4,
-    SPELLFAMILY_WARLOCK = 5,
-    SPELLFAMILY_PRIEST  = 6,
-    SPELLFAMILY_DRUID   = 7,
-    SPELLFAMILY_ROGUE   = 8,
-    SPELLFAMILY_HUNTER  = 9,
-    SPELLFAMILY_PALADIN = 10,
-    SPELLFAMILY_SHAMAN  = 11,
-    SPELLFAMILY_POTION  = 13
+    SPELLFAMILY_GENERIC     = 0,
+    SPELLFAMILY_UNK1        = 1,                            // events, holidays
+    // 2 - unused
+    SPELLFAMILY_MAGE        = 3,
+    SPELLFAMILY_WARRIOR     = 4,
+    SPELLFAMILY_WARLOCK     = 5,
+    SPELLFAMILY_PRIEST      = 6,
+    SPELLFAMILY_DRUID       = 7,
+    SPELLFAMILY_ROGUE       = 8,
+    SPELLFAMILY_HUNTER      = 9,
+    SPELLFAMILY_PALADIN     = 10,
+    SPELLFAMILY_SHAMAN      = 11,
+    SPELLFAMILY_UNK2        = 12,
+    SPELLFAMILY_POTION      = 13
 };
 
 //Some SpellFamilyFlags
@@ -237,23 +240,23 @@ enum SpellFamilyNames
 // Spell clasification
 enum SpellSpecific
 {
-    SPELL_NORMAL = 0,
-    SPELL_SEAL = 1,
-    SPELL_BLESSING = 2,
-    SPELL_AURA = 3,
-    SPELL_STING = 4,
-    SPELL_CURSE = 5,
-    SPELL_ASPECT = 6,
-    SPELL_TRACKER = 7,
-    SPELL_WARLOCK_ARMOR = 8,
-    SPELL_MAGE_ARMOR = 9,
-    SPELL_ELEMENTAL_SHIELD = 10,
-    SPELL_MAGE_POLYMORPH = 11,
-    SPELL_POSITIVE_SHOUT = 12,
-    SPELL_JUDGEMENT = 13,
-    SPELL_BATTLE_ELIXIR = 14,
-    SPELL_GUARDIAN_ELIXIR = 15,
-    SPELL_FLASK_ELIXIR = 16
+    SPELL_NORMAL            = 0,
+    SPELL_SEAL              = 1,
+    SPELL_BLESSING          = 2,
+    SPELL_AURA              = 3,
+    SPELL_STING             = 4,
+    SPELL_CURSE             = 5,
+    SPELL_ASPECT            = 6,
+    SPELL_TRACKER           = 7,
+    SPELL_WARLOCK_ARMOR     = 8,
+    SPELL_MAGE_ARMOR        = 9,
+    SPELL_ELEMENTAL_SHIELD  = 10,
+    SPELL_MAGE_POLYMORPH    = 11,
+    SPELL_POSITIVE_SHOUT    = 12,
+    SPELL_JUDGEMENT         = 13,
+    SPELL_BATTLE_ELIXIR     = 14,
+    SPELL_GUARDIAN_ELIXIR   = 15,
+    SPELL_FLASK_ELIXIR      = 16
 };
 
 SpellSpecific GetSpellSpecific(uint32 spellId);
@@ -266,6 +269,7 @@ inline float GetSpellMaxRange(SpellRangeEntry const *range) { return (range ? ra
 inline uint32 GetSpellRecoveryTime(SpellEntry const *spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
 int32 GetSpellDuration(SpellEntry const *spellInfo);
 int32 GetSpellMaxDuration(SpellEntry const *spellInfo);
+
 inline bool IsSpellHaveEffect(SpellEntry const *spellInfo, SpellEffects effect)
 {
     for(int i= 0; i < 3; ++i)

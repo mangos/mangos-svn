@@ -271,7 +271,7 @@ void Unit::Update( uint32 p_time )
     m_Events.Update( p_time );
     _UpdateSpells( p_time );
 
-    //update combat timer only for players and pets
+    // update combat timer only for players and pets
     if (isInCombat() && (GetTypeId() == TYPEID_PLAYER || ((Creature*)this)->isPet() || ((Creature*)this)->isCharmed()))
     {
         // Check UNIT_STAT_MELEE_ATTACKING or UNIT_STAT_CHASE (without UNIT_STAT_FOLLOW in this case) so pets can reach far away
@@ -777,7 +777,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         // polymorphed and other negative transformed cases
         if(pVictim->getTransForm() && pVictim->hasUnitState(UNIT_STAT_CONFUSED))
             pVictim->RemoveAurasDueToSpell(pVictim->getTransForm());
-        
+
         if(damagetype == DIRECT_DAMAGE|| damagetype == SPELL_DIRECT_DAMAGE)
             pVictim->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_DIRECT_DAMAGE);
 
@@ -2512,7 +2512,7 @@ float Unit::MeleeSpellMissChance(Unit *pVictim, WeaponAttackType attType, int32 
     // bonus from skills is 0.04%
     miss_chance -= skillDiff * 0.04f;
 
-    // Limint miss chance from 0 to 60%
+    // Limit miss chance from 0 to 60%
     if (miss_chance < 0.0f)
         return 0.0f;
     if (miss_chance > 60.0f) 
@@ -5847,7 +5847,6 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                         CastSpell(this, 37658, true, castItem, triggeredByAura);
                         // 2.5s cooldown before it can stack again, current system allow 1 sec step in cooldown
                         ((Player*)this)->AddSpellCooldown(37657,0,time(NULL)+(roll_chance_i(50) ? 2 : 3));
-                        
 
                         // counting
                         uint32 count = 0;

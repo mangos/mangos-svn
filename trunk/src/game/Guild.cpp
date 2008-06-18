@@ -268,7 +268,6 @@ bool Guild::LoadRanksFromDB(uint32 GuildId)
             rankRights |= GR_RIGHT_ALL;
 
         AddRank(rankName,rankRights,rankMoney);
-
     }while( result->NextRow() );
     delete result;
 

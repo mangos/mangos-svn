@@ -19,7 +19,7 @@
 #ifndef _UPDATEFIELDS_AUTO_H
 #define _UPDATEFIELDS_AUTO_H
 
-// Auto generated for version 2, 4, 1, 8125
+// Auto generated for version 2, 4, 2, 8278
 
 enum EObjectFields
 {
@@ -43,10 +43,6 @@ enum EItemFields
     ITEM_FIELD_FLAGS                          = OBJECT_END + 0x000F, // Size: 1, Type: INT, Flags: PUBLIC
     ITEM_FIELD_ENCHANTMENT                    = OBJECT_END + 0x0010, // Size: 33, Type: INT, Flags: PUBLIC
     ITEM_FIELD_PROPERTY_SEED                  = OBJECT_END + 0x0031, // Size: 1, Type: INT, Flags: PUBLIC
-
-    // custom
-    ITEM_FIELD_SUFFIX_FACTOR                  = ITEM_FIELD_PROPERTY_SEED,
-
     ITEM_FIELD_RANDOM_PROPERTIES_ID           = OBJECT_END + 0x0032, // Size: 1, Type: INT, Flags: PUBLIC
     ITEM_FIELD_ITEM_TEXT_ID                   = OBJECT_END + 0x0033, // Size: 1, Type: INT, Flags: OWNER_ONLY
     ITEM_FIELD_DURABILITY                     = OBJECT_END + 0x0034, // Size: 1, Type: INT, Flags: OWNER_ONLY, UNK2
@@ -97,10 +93,6 @@ enum EUnitFields
     UNIT_FIELD_AURAAPPLICATIONS               = OBJECT_END + 0x007E, // Size: 14, Type: BYTES, Flags: PUBLIC
     UNIT_FIELD_AURASTATE                      = OBJECT_END + 0x008C, // Size: 1, Type: INT, Flags: PUBLIC
     UNIT_FIELD_BASEATTACKTIME                 = OBJECT_END + 0x008D, // Size: 2, Type: INT, Flags: PUBLIC
-
-    // custom
-    UNIT_FIELD_OFFHANDATTACKTIME              = UNIT_FIELD_BASEATTACKTIME + 1,
-
     UNIT_FIELD_RANGEDATTACKTIME               = OBJECT_END + 0x008F, // Size: 1, Type: INT, Flags: PRIVATE
     UNIT_FIELD_BOUNDINGRADIUS                 = OBJECT_END + 0x0090, // Size: 1, Type: FLOAT, Flags: PUBLIC
     UNIT_FIELD_COMBATREACH                    = OBJECT_END + 0x0091, // Size: 1, Type: FLOAT, Flags: PUBLIC
@@ -445,12 +437,6 @@ enum EUnitFields
     PLAYER_FIELD_EXPERTISE_RATING             = PLAYER_FIELD_COMBAT_RATING_1+23,
 
     PLAYER_FIELD_ARENA_TEAM_INFO_1_1          = UNIT_END + 0x04DE, // Size: 18, Type: INT, Flags: PRIVATE
-
-    // custom
-    PLAYER_FIELD_ARENA_TEAM_ID_2v2            = PLAYER_FIELD_ARENA_TEAM_INFO_1_1,
-    PLAYER_FIELD_ARENA_TEAM_ID_3v3            = PLAYER_FIELD_ARENA_TEAM_INFO_1_1+6,
-    PLAYER_FIELD_ARENA_TEAM_ID_5v5            = PLAYER_FIELD_ARENA_TEAM_INFO_1_1+12,
-
     PLAYER_FIELD_HONOR_CURRENCY               = UNIT_END + 0x04F0, // Size: 1, Type: INT, Flags: PRIVATE
     PLAYER_FIELD_ARENA_CURRENCY               = UNIT_END + 0x04F1, // Size: 1, Type: INT, Flags: PRIVATE
     PLAYER_FIELD_MOD_MANA_REGEN               = UNIT_END + 0x04F2, // Size: 1, Type: FLOAT, Flags: PRIVATE

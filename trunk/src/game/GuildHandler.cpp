@@ -981,7 +981,6 @@ void WorldSession::HandleGuildEventLogOpcode(WorldPacket& /* recvPacket */)
         return;
 
     pGuild->DisplayGuildEventlog(this);
-
 }
 
 /******  GUILD BANK  *******/

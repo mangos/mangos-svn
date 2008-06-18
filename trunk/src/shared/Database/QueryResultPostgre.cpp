@@ -82,7 +82,6 @@ void QueryResultPostgre::EndQuery()
 // see types in #include <postgre/pg_type.h>
 enum Field::DataTypes QueryResultPostgre::ConvertNativeType(Oid  pOid ) const
 {
-
     switch (pOid)
     {
         case BPCHAROID:
@@ -139,5 +138,5 @@ enum Field::DataTypes QueryResultPostgre::ConvertNativeType(Oid  pOid ) const
             return Field::DB_TYPE_UNKNOWN;
     }
     return Field::DB_TYPE_UNKNOWN;
-} 
+}
 #endif

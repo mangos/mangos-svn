@@ -282,7 +282,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             }
         }
 
-        //handle fall and logout at the sametime (logout started before fall finished)
+        //handle fall and logout at the same time (logout started before fall finished)
         /* outdated and create problems with sit at stun sometime
         if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE))
         {
@@ -298,7 +298,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     if(((MovementFlags & MOVEMENTFLAG_SWIMMING) != 0) != GetPlayer()->IsInWater())
     {
-        // now client not include swimming flag in case juming under water
+        // now client not include swimming flag in case jumping under water
         GetPlayer()->SetInWater( !GetPlayer()->IsInWater() || GetPlayer()->GetBaseMap()->IsUnderWater(movementInfo.x, movementInfo.y, movementInfo.z) );
     }
 

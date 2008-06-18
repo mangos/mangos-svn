@@ -79,6 +79,7 @@ enum ResponseCodes
     CHAR_LIST_RETRIEVING                                   = 0x2B,
     CHAR_LIST_RETRIEVED                                    = 0x2C,
     CHAR_LIST_FAILED                                       = 0x2D,
+
     CHAR_CREATE_IN_PROGRESS                                = 0x2E,
     CHAR_CREATE_SUCCESS                                    = 0x2F,
     CHAR_CREATE_ERROR                                      = 0x30,
