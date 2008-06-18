@@ -1805,6 +1805,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             m_isDeathPersist = true;
             return;
         }
+
+        // Requires No Ammo
+        if(GetId()==46699 && m_target->GetTypeId()==TYPEID_PLAYER)
+        {
+            ((Player*)m_target)->RemoveAmmo();              // not use ammo and not allow use
+            return;
+        }
     }
     // AT REMOVE
     else

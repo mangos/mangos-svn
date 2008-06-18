@@ -9463,6 +9463,11 @@ uint8 Player::CanUseAmmo( uint32 item ) const
         */
         if( getLevel() < pProto->RequiredLevel )
             return EQUIP_ERR_CANT_EQUIP_LEVEL_I;
+
+        // Requires No Ammo
+        if(GetDummyAura(46699))
+            return EQUIP_ERR_BAG_FULL6;
+
         return EQUIP_ERR_OK;
     }
     return EQUIP_ERR_ITEM_NOT_FOUND;
@@ -9667,6 +9672,7 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
     if( pItem )
     {
         AddEnchantmentDurations(pItem);
+        AddItemDurations(pItem);
 
         uint8 bag = pos >> 8;
         uint8 slot = pos & 255;
@@ -9718,7 +9724,7 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
             }
 
             RemoveEnchantmentDurations(pItem);
-            // AddItemDurations(pItem2); - pItem2 already have duration listed for player
+            RemoveItemDurations(pItem);
 
             pItem->SetOwnerGUID(GetGUID());                 // prevent error at next SetState in case trade/mail/buy from vendor
             pItem->SetState(ITEM_REMOVED, this);
@@ -9737,6 +9743,9 @@ void Player::QuickEquipItem( uint16 pos, Item *pItem)
 {
     if( pItem )
     {
+        AddEnchantmentDurations(pItem);
+        AddItemDurations(pItem);
+
         uint8 slot = pos & 255;
         VisualizeItem( slot, pItem);
 

@@ -358,21 +358,64 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
         return false;
     }
 
+    bool need_save = false;                                 // need explicit save data at load fixes
+
     // overwrite possible wrong/corrupted guid
-    SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid,0, HIGHGUID_ITEM));
+    uint64 new_item_guid = MAKE_NEW_GUID(guid,0, HIGHGUID_ITEM);
+    if(GetUInt64Value(OBJECT_FIELD_GUID) != new_item_guid)
+    {
+        SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid,0, HIGHGUID_ITEM));
+        need_save = true;
+    }
 
     if (delete_result) delete result;
 
+    ItemPrototype const* proto = GetProto();
+    if(!proto)
+        return false;
+
     // recalculate suffix factor
     if(GetInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID) < 0)
-        SetUInt32Value(ITEM_FIELD_SUFFIX_FACTOR,GenerateEnchSuffixFactor(GetEntry()));
+    {
+        uint32 new_suffix = GenerateEnchSuffixFactor(GetEntry());
+        if(GetUInt32Value(ITEM_FIELD_SUFFIX_FACTOR)!=new_suffix)
+        {
+            SetUInt32Value(ITEM_FIELD_SUFFIX_FACTOR,GenerateEnchSuffixFactor(GetEntry()));
+            need_save = true;
+        }
+    }
 
     // Remove bind flag for items vs NO_BIND set
-    if (IsSoulBound() && GetProto()->Bonding == NO_BIND)
+    if (IsSoulBound() && proto->Bonding == NO_BIND)
+    {
         ApplyModFlag(ITEM_FIELD_FLAGS,ITEM_FLAGS_BINDED, false);
+        need_save = true;
+    }
 
-    if(owner_guid != 0)
+    // update duration if need, and remove if not need
+    if((proto->Duration==0) != (GetUInt32Value(ITEM_FIELD_DURATION)==0))
+    {
+        SetUInt32Value(ITEM_FIELD_DURATION,abs(proto->Duration));
+        need_save = true;
+    }
+
+    // set correct owner
+    if(owner_guid != 0 && GetOwnerGUID() != owner_guid)
+    {
         SetOwnerGUID(owner_guid);
+        need_save = true;
+    }
+
+    if(need_save)                                           // normal item changed state set not work at loading
+    {
+        std::ostringstream ss;
+        ss << "UPDATE item_instance SET data = '";
+        for(uint16 i = 0; i < m_valuesCount; i++ )
+            ss << GetUInt32Value(i) << " ";
+        ss << "', owner_guid = '" << GUID_LOPART(GetOwnerGUID()) << "' WHERE guid = '" << guid << "'";
+
+        CharacterDatabase.Execute( ss.str().c_str() );
+    }
 
     return true;
 }

@@ -1321,9 +1321,10 @@ void ObjectMgr::LoadItemPrototypes()
         {
             if(proto->InventoryType != dbcitem->InventoryType)
             {
-                sLog.outErrorDb("Item (Entry: %u) not correct %u inventory type, must be %u (using it).",i,proto->InventoryType,dbcitem->InventoryType);
-                const_cast<ItemPrototype*>(proto)->InventoryType = dbcitem->InventoryType;
+                sLog.outErrorDb("Item (Entry: %u) not correct %u inventory type, must be %u (still using DB value).",i,proto->InventoryType,dbcitem->InventoryType);
+                // It safe let use InventoryType from DB
             }
+
             if(proto->DisplayInfoID != dbcitem->DisplayId)
             {
                 sLog.outErrorDb("Item (Entry: %u) not correct %u display id, must be %u (using it).",i,proto->DisplayInfoID,dbcitem->DisplayId);
