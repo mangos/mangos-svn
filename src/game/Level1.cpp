@@ -1653,7 +1653,7 @@ bool ChatHandler::HandleWhispersCommand(const char* args)
     }
 
     std::string argstr = (char*)args;
-    // ticket on
+    // whisper on
     if (argstr == "on")
     {
         m_session->GetPlayer()->SetAcceptWhispers(true);
@@ -1661,7 +1661,7 @@ bool ChatHandler::HandleWhispersCommand(const char* args)
         return true;
     }
 
-    // ticket off
+    // whisper off
     if (argstr == "off")
     {
         m_session->GetPlayer()->SetAcceptWhispers(false);

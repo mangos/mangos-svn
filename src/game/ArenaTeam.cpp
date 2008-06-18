@@ -231,7 +231,8 @@ void ArenaTeam::LoadPlayerStats(ArenaTeamMember *member)
     Field *fields;
 
     QueryResult *result = CharacterDatabase.PQuery("SELECT name,class FROM characters WHERE guid = '%u'", GUID_LOPART(member->guid));
-    if(!result) return;
+    if(!result)
+        return;
     fields = result->Fetch();
     member->name  = fields[0].GetCppString();
     member->Class = fields[1].GetUInt8();

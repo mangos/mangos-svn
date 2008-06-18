@@ -223,10 +223,14 @@ void Spell::EffectNULL(uint32 /*i*/)
 
 void Spell::EffectResurrectNew(uint32 i)
 {
-    if(!unitTarget) return;
-    if(unitTarget->GetTypeId() != TYPEID_PLAYER) return;
-    if(unitTarget->isAlive()) return;
-    if(!unitTarget->IsInWorld()) return;
+    if(!unitTarget || unitTarget->isAlive())
+        return;
+
+    if(unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    if(!unitTarget->IsInWorld())
+        return;
 
     uint32 health = damage;
     uint32 mana = m_spellInfo->EffectMiscValue[i];
@@ -4791,10 +4795,12 @@ void Spell::EffectQuestComplete(uint32 i)
 
 void Spell::EffectSelfResurrect(uint32 i)
 {
-    if(!unitTarget) return;
-    if(unitTarget->GetTypeId() != TYPEID_PLAYER) return;
-    if(unitTarget->isAlive()) return;
-    if(!unitTarget->IsInWorld()) return;
+    if(!unitTarget || unitTarget->isAlive())
+        return;
+    if(unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+    if(!unitTarget->IsInWorld())
+        return;
 
     uint32 health = 0;
     uint32 mana = 0;
@@ -4983,7 +4989,8 @@ void Spell::EffectPlayerPull(uint32 i)
 
 void Spell::EffectDispelMechanic(uint32 i)
 {
-    if(!unitTarget) return;
+    if(!unitTarget)
+        return;
 
     uint32 mechanic = m_spellInfo->EffectMiscValue[i];
 
@@ -5309,10 +5316,12 @@ void Spell::EffectSummonDemon(uint32 i)
 void Spell::EffectSpiritHeal(uint32 /*i*/)
 {
     /*
-    if(!unitTarget) return;
-    if(unitTarget->GetTypeId() != TYPEID_PLAYER) return;
-    if(unitTarget->isAlive()) return;
-    if(!unitTarget->IsInWorld()) return;
+    if(!unitTarget || unitTarget->isAlive())
+        return;
+    if(unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+    if(!unitTarget->IsInWorld())
+        return;
 
     //m_spellInfo->EffectBasePoints[i]; == 99 (percent?)
     //((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), unitTarget->GetMaxHealth(), unitTarget->GetMaxPower(POWER_MANA));

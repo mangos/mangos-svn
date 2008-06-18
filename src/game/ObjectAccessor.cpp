@@ -306,7 +306,8 @@ ObjectAccessor::RemoveUpdateObject(Object *obj)
 
 void ObjectAccessor::AddObjectToRemoveList(WorldObject *obj)
 {
-    if(!obj) return;
+    if(!obj)
+        return;
 
     Guard guard(i_removeGuard);
     i_objectsToRemove.insert(obj);

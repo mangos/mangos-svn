@@ -299,7 +299,8 @@ std::string Log::GetTimestampStr()
 
 void Log::outTitle( const char * str)
 {
-    if( !str ) return;
+    if( !str )
+        return;
 
     if(m_colored)
         SetColor(true,WHITE);
@@ -336,7 +337,8 @@ void Log::outString()
 
 void Log::outString( const char * str, ... )
 {
-    if( !str ) return;
+    if( !str )
+        return;
 
     if(m_colored)
         SetColor(true,m_colors[LogNormal]);
@@ -367,7 +369,8 @@ void Log::outString( const char * str, ... )
 
 void Log::outError( const char * err, ... )
 {
-    if( !err ) return;
+    if( !err )
+        return;
 
     if(m_colored)
         SetColor(false,m_colors[LogError]);
@@ -399,7 +402,8 @@ void Log::outError( const char * err, ... )
 
 void Log::outErrorDb( const char * err, ... )
 {
-    if( !err ) return;
+    if( !err )
+        return;
 
     if(m_colored)
         SetColor(false,m_colors[LogError]);
@@ -442,7 +446,8 @@ void Log::outErrorDb( const char * err, ... )
 
 void Log::outBasic( const char * str, ... )
 {
-    if( !str ) return;
+    if( !str )
+        return;
     va_list ap;
 
     if( m_logLevel > 0 )
@@ -477,7 +482,8 @@ void Log::outBasic( const char * str, ... )
 
 void Log::outDetail( const char * str, ... )
 {
-    if( !str ) return;
+    if( !str )
+        return;
     va_list ap;
     if( m_logLevel > 1 )
     {
@@ -512,7 +518,8 @@ void Log::outDetail( const char * str, ... )
 
 void Log::outDebugInLine( const char * str, ... )
 {
-    if( !str ) return;
+    if( !str )
+        return;
     va_list ap;
     if( m_logLevel > 2 )
     {
@@ -536,7 +543,8 @@ void Log::outDebugInLine( const char * str, ... )
 
 void Log::outDebug( const char * str, ... )
 {
-    if( !str ) return;
+    if( !str )
+        return;
     va_list ap;
     if( m_logLevel > 2 )
     {
@@ -569,7 +577,8 @@ void Log::outDebug( const char * str, ... )
 
 void Log::outCommand( const char * str, ... )
 {
-    if( !str ) return;
+    if( !str )
+        return;
     va_list ap;
     if( m_logLevel > 1 )
     {
@@ -612,7 +621,8 @@ void Log::outCommand( const char * str, ... )
 void Log::outChar(const char * str, ... )
 {
 
-    if(!str) return;
+    if (!str)
+        return;
 
     if(charLogfile)
     {
@@ -637,7 +647,8 @@ void Log::outCharDump( const char * str, uint32 account_id, uint32 guid, const c
 
 void Log::outMenu( const char * str, ... )
 {
-    if( !str ) return;
+    if( !str )
+        return;
 
     SetColor(true,m_colors[LogNormal]);
 
@@ -665,7 +676,8 @@ void Log::outMenu( const char * str, ... )
 
 void Log::outRALog(    const char * str, ... )
 {
-    if( !str ) return;
+    if( !str )
+        return;
     va_list ap;
     if (raLogfile)
     {
@@ -681,7 +693,8 @@ void Log::outRALog(    const char * str, ... )
 
 void outstring_log(const char * str, ...)
 {
-    if( !str ) return;
+    if( !str )
+        return;
 
     char buf[256];
     va_list ap;
@@ -694,7 +707,8 @@ void outstring_log(const char * str, ...)
 
 void debug_log(const char * str, ...)
 {
-    if( !str ) return;
+    if( !str )
+        return;
 
     char buf[256];
     va_list ap;
@@ -707,7 +721,8 @@ void debug_log(const char * str, ...)
 
 void error_log(const char * str, ...)
 {
-    if( !str ) return;
+    if( !str )
+        return;
 
     char buf[256];
     va_list ap;

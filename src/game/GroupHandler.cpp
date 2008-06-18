@@ -270,7 +270,8 @@ void WorldSession::HandleGroupUninviteNameOpcode(WorldPacket & recv_data)
 void WorldSession::HandleGroupUninvite(uint64 guid, std::string name)
 {
     Group *group = GetPlayer()->GetGroup();
-    if(!group) return;
+    if(!group)
+        return;
 
     if(_player->InBattleGround())
     {
@@ -307,7 +308,8 @@ void WorldSession::HandleGroupSetLeaderOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,8);
 
     Group *group = GetPlayer()->GetGroup();
-    if(!group) return;
+    if(!group)
+        return;
 
     uint64 guid;
     recv_data >> guid;
@@ -348,7 +350,8 @@ void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,4+8+4);
 
     Group *group = GetPlayer()->GetGroup();
-    if(!group) return;
+    if(!group)
+        return;
 
     uint32 lootMethod;
     uint64 lootMaster;
@@ -480,7 +483,8 @@ void WorldSession::HandleRaidIconTargetOpcode( WorldPacket & recv_data )
 void WorldSession::HandleRaidConvertOpcode( WorldPacket & /*recv_data*/ )
 {
     Group *group = GetPlayer()->GetGroup();
-    if(!group) return;
+    if(!group)
+        return;
 
     if(_player->InBattleGround())
         return;
@@ -526,7 +530,8 @@ void WorldSession::HandleGroupAssistantOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,8+1);
 
     Group *group = GetPlayer()->GetGroup();
-    if(!group) return;
+    if(!group)
+        return;
 
     uint64 guid;
     uint8 flag;
@@ -547,7 +552,8 @@ void WorldSession::HandleGroupPromoteOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data, 1+1+8);
 
     Group *group = GetPlayer()->GetGroup();
-    if(!group) return;
+    if(!group)
+        return;
 
     uint8 flag1, flag2;
     uint64 guid;
@@ -573,7 +579,8 @@ void WorldSession::HandleGroupPromoteOpcode( WorldPacket & recv_data )
 void WorldSession::HandleRaidReadyCheckOpcode( WorldPacket & recv_data )
 {
     Group *group = GetPlayer()->GetGroup();
-    if(!group) return;
+    if(!group)
+        return;
 
     if(recv_data.empty())                                   // request
     {

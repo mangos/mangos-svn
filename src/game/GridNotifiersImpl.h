@@ -202,7 +202,8 @@ template<class Check>
 void MaNGOS::WorldObjectSearcher<Check>::Visit(GameObjectMapType &m)
 {
     // already found
-    if(i_object) return;
+    if(i_object)
+        return;
 
     for(GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
@@ -218,7 +219,8 @@ template<class Check>
 void MaNGOS::WorldObjectSearcher<Check>::Visit(PlayerMapType &m)
 {
     // already found
-    if(i_object) return;
+    if(i_object)
+        return;
 
     for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
@@ -234,7 +236,8 @@ template<class Check>
 void MaNGOS::WorldObjectSearcher<Check>::Visit(CreatureMapType &m)
 {
     // already found
-    if(i_object) return;
+    if(i_object)
+        return;
 
     for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
@@ -250,7 +253,8 @@ template<class Check>
 void MaNGOS::WorldObjectSearcher<Check>::Visit(CorpseMapType &m)
 {
     // already found
-    if(i_object) return;
+    if(i_object)
+        return;
 
     for(CorpseMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
@@ -266,7 +270,8 @@ template<class Check>
 void MaNGOS::WorldObjectSearcher<Check>::Visit(DynamicObjectMapType &m)
 {
     // already found
-    if(i_object) return;
+    if(i_object)
+        return;
 
     for(DynamicObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
@@ -324,7 +329,8 @@ template<class Check>
 void MaNGOS::GameObjectSearcher<Check>::Visit(GameObjectMapType &m)
 {
     // already found
-    if(i_object) return;
+    if(i_object)
+        return;
 
     for(GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
@@ -360,7 +366,8 @@ template<class Check>
 void MaNGOS::UnitSearcher<Check>::Visit(CreatureMapType &m)
 {
     // already found
-    if(i_object) return;
+    if(i_object)
+        return;
 
     for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
@@ -376,7 +383,8 @@ template<class Check>
 void MaNGOS::UnitSearcher<Check>::Visit(PlayerMapType &m)
 {
     // already found
-    if(i_object) return;
+    if(i_object)
+        return;
 
     for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
@@ -430,7 +438,8 @@ template<class Check>
 void MaNGOS::CreatureSearcher<Check>::Visit(CreatureMapType &m)
 {
     // already found
-    if(i_object) return;
+    if(i_object)
+        return;
 
     for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {

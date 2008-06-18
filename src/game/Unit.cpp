@@ -7714,7 +7714,8 @@ bool Unit::IsDamageToThreatSpell(SpellEntry const * spellInfo) const
 
 void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attType, SpellEntry const *spellProto)
 {
-    if(!pVictim) return;
+    if(!pVictim)
+        return;
 
     if(*pdamage == 0)
         return;

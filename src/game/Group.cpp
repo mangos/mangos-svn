@@ -1100,7 +1100,8 @@ bool Group::SameSubGroup(Player const* member1, Player const* member2) const
 // allows setting subgroup for offline members
 void Group::ChangeMembersGroup(const uint64 &guid, const uint8 &group)
 {
-    if(!isRaidGroup()) return;
+    if(!isRaidGroup())
+        return;
     Player *player = objmgr.GetPlayer(guid);
     if (!player)
     {
@@ -1113,7 +1114,8 @@ void Group::ChangeMembersGroup(const uint64 &guid, const uint8 &group)
 // only for online members
 void Group::ChangeMembersGroup(Player *player, const uint8 &group)
 {
-    if(!player || !isRaidGroup()) return;
+    if(!player || !isRaidGroup())
+        return;
     if(_setMembersGroup(player->GetGUID(), group))
     {
         player->GetGroupRef().setSubGroup(group);

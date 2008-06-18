@@ -1057,7 +1057,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
             SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)) );
             //damage is increased afterwards as strength and pet scaling modify attack power
 
-            //stored standart pet stats are entry 1 in pet_levelinfo
+            //stored standard pet stats are entry 1 in pet_levelinfo
             PetLevelInfo const* pInfo = objmgr.GetPetLevelInfo(creature_ID, petlevel);
             if(pInfo)                                       // exist in DB
             {
