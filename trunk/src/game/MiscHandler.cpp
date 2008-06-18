@@ -318,7 +318,7 @@ void WorldSession::SendGMTicketGetTicket(uint32 status, char const* text)
 {
     int len = text ? strlen(text) : 0;
     WorldPacket data( SMSG_GMTICKET_GETTICKET, (4+len+1+4+2+4+4) );
-    data << uint32(status);                                 // standart 0x0A, 0x06 if text present
+    data << uint32(status);                                 // standard 0x0A, 0x06 if text present
     if(status == 6)
     {
         data << text;                                       // ticket text
@@ -461,6 +461,42 @@ void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & /*recv_data*/
     data << uint32(1);                                      // we can also disable ticket system by sending 0 value
 
     SendPacket( &data );
+}
+
+void WorldSession::HandleGMSurveySubmit( WorldPacket & recv_data)
+{
+    // GM survey is shown after SMSG_GM_TICKET_STATUS_UPDATE with status = 3
+    CHECK_PACKET_SIZE(recv_data,4+4);
+    uint32 x;
+    recv_data >> x;                                         // answer range? (6 = 0-5?)
+    sLog.outDebug("SURVEY: X = %u", x);
+    
+    uint8 result[10];
+    memset(result, 0, sizeof(result));
+    for( int i = 0; i < 10; ++i)
+    {
+        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
+        uint32 questionID;
+        recv_data >> questionID;                            // GMSurveyQuestions.dbc
+        if (!questionID)
+            break;
+
+        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+1+1);
+        uint8 value;
+        std::string unk_text;
+        recv_data >> value;                                 // answer
+        recv_data >> unk_text;                              // always empty?
+
+        result[i] = value;
+        sLog.outDebug("SURVEY: ID %u, value %u, text %s", questionID, value, unk_text.c_str());
+    }
+
+    CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+1);
+    std::string comment;
+    recv_data >> comment;                                   // addional comment
+    sLog.outDebug("SURVEY: comment %s", comment.c_str());
+
+    // TODO: chart this data in some way
 }
 
 void WorldSession::HandleTogglePvP(WorldPacket& /*recvPacket*/)
@@ -961,7 +997,8 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
     // NULL if all values default (non teleport trigger)
     AreaTrigger const* at = objmgr.GetAreaTrigger(Trigger_ID);
-    if(!at) return;
+    if(!at)
+        return;
 
     if(!GetPlayer()->isGameMaster())
     {

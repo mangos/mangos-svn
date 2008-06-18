@@ -1072,7 +1072,8 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         return;
 
     SpellEntry const *spellInfo = GetSpellProto();
-    if(!spellInfo) return;
+    if(!spellInfo)
+        return;
 
     if(m_modifier.m_miscvalue >= MAX_SPELLMOD)
         return;

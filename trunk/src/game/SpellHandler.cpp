@@ -255,7 +255,8 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%u]", guid);
     GameObject *obj = ObjectAccessor::GetGameObject(*_player, guid);
 
-    if(!obj) return;
+    if(!obj)
+        return;
     //obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
     //obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
 

@@ -98,6 +98,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_GMTICKET_SYSTEMSTATUS ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGMTicketSystemStatusOpcode    );
     objmgr.opcodeTable[ CMSG_GMTICKET_DELETETICKET ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGMTicketDeleteOpcode          );
     objmgr.opcodeTable[ CMSG_GMTICKET_UPDATETEXT ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGMTicketUpdateTextOpcode      );
+    objmgr.opcodeTable[ CMSG_GMSURVEY_SUBMIT ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGMSurveySubmit                );
     objmgr.opcodeTable[ CMSG_TOGGLE_PVP ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTogglePvP                     );
 
     // played time

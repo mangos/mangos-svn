@@ -99,7 +99,8 @@ void Creature::LoadTrainerSpells()
     Field *fields;
     QueryResult *result = WorldDatabase.PQuery("SELECT spell,spellcost,reqskill,reqskillvalue,reqlevel FROM npc_trainer WHERE entry = '%u'", GetEntry());
 
-    if(!result) return;
+    if(!result)
+        return;
 
     do
     {
@@ -1339,7 +1340,8 @@ void Creature::LoadGoods()
 
     QueryResult *result = WorldDatabase.PQuery("SELECT item, maxcount, incrtime, ExtendedCost FROM npc_vendor WHERE entry = '%u'", GetEntry());
 
-    if(!result) return;
+    if(!result)
+        return;
 
     do
     {

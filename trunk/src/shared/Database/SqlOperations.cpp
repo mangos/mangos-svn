@@ -31,7 +31,8 @@ void SqlStatement::Execute(Database *db)
 
 void SqlTransaction::Execute(Database *db)
 {
-    if(m_queue.empty()) return;
+    if(m_queue.empty())
+        return;
     db->DirectExecute("START TRANSACTION");
     while(!m_queue.empty())
     {
@@ -59,7 +60,8 @@ void SqlTransaction::Execute(Database *db)
 
 void SqlQuery::Execute(Database *db)
 {
-    if(!m_callback || !m_queue) return;
+    if(!m_callback || !m_queue)
+        return;
     /// execute the query and store the result in the callback
     m_callback->SetResult(db->Query(m_sql));
     /// add the callback to the sql result queue of the thread it originated from
@@ -79,7 +81,8 @@ void SqlResultQueue::Update()
 
 void SqlQueryHolder::Execute(MaNGOS::IQueryCallback * callback, SqlDelayThread *thread, SqlResultQueue *queue)
 {
-    if(!callback || !thread || !queue) return;
+    if(!callback || !thread || !queue)
+        return;
 
     /// delay the execution of the queries, sync them with the delay thread
     /// which will in turn resync on execution (via the queue) and call back
@@ -176,7 +179,8 @@ void SqlQueryHolder::SetSize(size_t size)
 
 void SqlQueryHolderEx::Execute(Database *db)
 {
-    if(!m_holder || !m_callback || !m_queue) return;
+    if(!m_holder || !m_callback || !m_queue)
+        return;
 
     /// we can do this, we are friends
     std::vector<SqlQueryHolder::SqlResultPair> &queries = m_holder->m_queries;

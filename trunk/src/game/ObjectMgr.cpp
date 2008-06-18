@@ -2200,8 +2200,9 @@ void ObjectMgr::LoadPlayerInfo()
 
 void ObjectMgr::GetPlayerClassLevelInfo(uint32 class_, uint32 level, PlayerClassLevelInfo* info) const
 {
-    if(level < 1) return;
-    if(class_ >= MAX_CLASSES) return;
+    if(level < 1 || class_ >= MAX_CLASSES)
+        return;
+
     PlayerClassInfo const* pInfo = &playerClassInfo[class_];
 
     if(level > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
@@ -2212,11 +2213,12 @@ void ObjectMgr::GetPlayerClassLevelInfo(uint32 class_, uint32 level, PlayerClass
 
 void ObjectMgr::GetPlayerLevelInfo(uint32 race, uint32 class_, uint32 level, PlayerLevelInfo* info) const
 {
-    if(level < 1) return;
-    if(race   >= MAX_RACES)   return;
-    if(class_ >= MAX_CLASSES) return;
+    if(level < 1 || race   >= MAX_RACES || class_ >= MAX_CLASSES)
+        return;
+
     PlayerInfo const* pInfo = &playerInfo[race][class_];
-    if(pInfo->displayId_m==0 || pInfo->displayId_f==0) return;
+    if(pInfo->displayId_m==0 || pInfo->displayId_f==0)
+        return;
 
     if(level <= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
         *info = pInfo->levelInfo[level-1];

@@ -153,7 +153,7 @@ enum LocaleConstant
     MAX_LOCALE = 8
 };
 
-// we always use stdlibc++ std::max/std::min, undefine some not C++ standart defines (Win API and some pother platforms)
+// we always use stdlibc++ std::max/std::min, undefine some not C++ standard defines (Win API and some pother platforms)
 #ifdef max
 #undef max
 #endif

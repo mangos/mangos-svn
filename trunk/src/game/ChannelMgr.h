@@ -63,7 +63,8 @@ class ChannelMgr
         {
             ChannelMap::const_iterator i = channels.find(name);
 
-            if(i == channels.end()) return;
+            if(i == channels.end())
+                return;
 
             Channel* channel = i->second;
 

@@ -902,7 +902,8 @@ Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang
 
 void Map::AddCreatureToMoveList(Creature *c, float x, float y, float z, float ang)
 {
-    if(!c) return;
+    if(!c)
+        return;
 
     i_creaturesToMove[c] = CreatureMover(x,y,z,ang);
 }

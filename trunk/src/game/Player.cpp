@@ -1753,11 +1753,6 @@ void Player::RegenerateHealth()
     ModifyHealth(int32(addvalue));
 }
 
-bool Player::isAcceptTickets() const
-{
-    return GetSession()->GetSecurity() >= SEC_GAMEMASTER && (m_GMFlags & GM_ACCEPT_TICKETS);
-}
-
 bool Player::CanInteractWithNPCs(bool alive) const
 {
     if(alive && !isAlive())
@@ -4658,7 +4653,8 @@ void Player::UpdateSkillsToMaxSkillsForLevel()
 // To "remove" a skill line, set it's values to zero
 void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
 {
-    if(!id) return;
+    if(!id)
+        return;
 
     uint16 i=0;
     for (; i < PLAYER_MAX_SKILLS; i++)
@@ -5008,7 +5004,8 @@ void Player::CheckExploreSystem()
         return;
 
     uint16 areaFlag=MapManager::Instance().GetBaseMap(GetMapId())->GetAreaFlag(GetPositionX(),GetPositionY());
-    if(areaFlag==0xffff)return;
+    if(areaFlag==0xffff)
+        return;
     int offset = areaFlag / 32;
 
     if(offset >= 64)
@@ -6189,14 +6186,17 @@ void Player::FlightComplete()
 
 void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 {
-    if(slot >= INVENTORY_SLOT_BAG_END || !item) return;
+    if(slot >= INVENTORY_SLOT_BAG_END || !item)
+        return;
 
     // not apply/remove mods for broken item
-    if(item->IsBroken()) return;
+    if(item->IsBroken())
+        return;
 
     ItemPrototype const *proto = item->GetProto();
 
-    if(!proto) return;
+    if(!proto)
+        return;
 
     sLog.outDetail("applying mods for item %u ",item->GetGUIDLow());
 
@@ -6227,7 +6227,8 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
 void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
 {
-    if(slot >= INVENTORY_SLOT_BAG_END || !proto) return;
+    if(slot >= INVENTORY_SLOT_BAG_END || !proto)
+        return;
 
     for (int i = 0; i < 10; i++)
     {
@@ -14611,16 +14612,18 @@ void Player::SendDungeonDifficulty()
 
 void Player::UpdatePvPFlag(time_t currTime)
 {
-    if(!IsPvP() || pvpInfo.endTimer == 0) return;
-    if(currTime < (pvpInfo.endTimer + 300)) return;
+    if(!IsPvP())
+        return;
+    if(pvpInfo.endTimer == 0 || currTime < (pvpInfo.endTimer + 300))
+        return;
 
     UpdatePvP(false);
 }
 
 void Player::UpdateDuelFlag(time_t currTime)
 {
-    if(!duel || duel->startTimer == 0) return;
-    if(currTime < duel->startTimer + 3) return;
+    if(!duel || duel->startTimer == 0 ||currTime < duel->startTimer + 3)
+        return;
 
     SetUInt32Value(PLAYER_DUEL_TEAM, 1);
     duel->opponent->SetUInt32Value(PLAYER_DUEL_TEAM, 2);
@@ -14721,7 +14724,8 @@ Pet* Player::GetMiniPet()
 void Player::Uncharm()
 {
     Unit* charm = GetCharm();
-    if(!charm) return;
+    if(!charm)
+        return;
 
     charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
     charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);

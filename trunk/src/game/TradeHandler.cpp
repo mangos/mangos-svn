@@ -107,7 +107,8 @@ void WorldSession::SendUpdateTrade()
 {
     Item *item = NULL;
 
-    if( !_player || !_player->pTrader ) return;
+    if( !_player || !_player->pTrader )
+        return;
 
     // reset trade status
     if (_player->acceptTrade)
