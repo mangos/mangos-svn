@@ -9796,9 +9796,9 @@ void Unit::SetFeared(bool apply, uint64 casterGUID, uint32 spellID)
         GetMotionMaster()->MovementExpired(false);
         CastStop(GetGUID()==casterGUID ? spellID : 0);
 
-        Unit* caster = ObjectAccessor::GetObjectInWorld(casterGUID, (Unit*)NULL);
+        Unit* caster = ObjectAccessor::GetUnit(*this,casterGUID);
 
-        GetMotionMaster()->MoveFleeing(caster);
+        GetMotionMaster()->MoveFleeing(caster ? caster : this );
     }
     else
     {
