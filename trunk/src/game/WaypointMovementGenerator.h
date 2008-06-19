@@ -37,8 +37,6 @@
 
 #define FLIGHT_TRAVEL_UPDATE  100
 
-#define VISUAL_WAYPOINT 1
-
 struct WaypointBehavior
 {
     uint32 emote;

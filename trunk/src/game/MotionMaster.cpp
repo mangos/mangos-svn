@@ -20,8 +20,15 @@
 #include "CreatureAISelector.h"
 #include "Creature.h"
 #include "Traveller.h"
+
+#include "ConfusedMovementGenerator.h"
+#include "FleeingMovementGenerator.h"
 #include "HomeMovementGenerator.h"
 #include "IdleMovementGenerator.h"
+#include "PointMovementGenerator.h"
+#include "TargetedMovementGenerator.h"
+#include "WaypointMovementGenerator.h"
+
 #include <cassert>
 
 inline bool isStatic(MovementGenerator *mv)
@@ -119,22 +126,147 @@ MotionMaster::MovementExpired(bool reset)
     if (reset) top()->Reset(*i_owner);
 }
 
+void MotionMaster::MoveIdle(void)
+{
+    if( empty() || !isStatic( top() ) )
+        push( &si_idleMovement );
+}
+
 void
-MotionMaster::TargetedHome()
+MotionMaster::MoveTargetedHome()
 {
     if(i_owner->hasUnitState(UNIT_STAT_FLEEING))
         return;
 
-    DEBUG_LOG("Target home location %u", i_owner->GetGUIDLow());
-
     Clear(false);
-    Mutate(new HomeMovementGenerator<Creature>());
+
+    if(i_owner->GetTypeId()==TYPEID_UNIT && !((Creature*)i_owner)->GetCharmerOrOwnerGUID())
+    {
+        DEBUG_LOG("Creature (Entry: %u GUID: %u) targeted home", i_owner->GetEntry(), i_owner->GetGUIDLow());
+        Mutate(new HomeMovementGenerator<Creature>());
+    }
+    if(i_owner->GetTypeId()==TYPEID_UNIT && ((Creature*)i_owner)->GetCharmerOrOwnerGUID())
+    {
+        sLog.outError("Pet or controlled creature (Entry: %u GUID: %u) attempt targeted home", 
+            i_owner->GetEntry(), i_owner->GetGUIDLow() );
+    }
+    else
+    {
+        sLog.outError("Player (GUID: %u) attempt targeted home", i_owner->GetGUIDLow() );
+    }
 }
 
-void MotionMaster::Idle(void)
+void
+MotionMaster::MoveConfused()
 {
-    if( empty() || !isStatic( top() ) )
-        push( &si_idleMovement );
+    if(i_owner->GetTypeId()==TYPEID_PLAYER)
+    {
+        DEBUG_LOG("Player (GUID: %u) move confused", i_owner->GetGUIDLow() );
+        Mutate(new ConfusedMovementGenerator<Player>());
+    }
+    else
+    {
+        DEBUG_LOG("Creature (Entry: %u GUID: %u) move confused", 
+            i_owner->GetEntry(), i_owner->GetGUIDLow() );
+        Mutate(new ConfusedMovementGenerator<Creature>());
+    }
+}
+
+void
+MotionMaster::MoveChase(Unit* target, float dist, float angle)
+{
+    i_owner->clearUnitState(UNIT_STAT_FOLLOW);
+    if(i_owner->GetTypeId()==TYPEID_PLAYER)
+    {
+        DEBUG_LOG("Player (GUID: %u) chase to %s (GUID: %u)", 
+            target->GetTypeId()==TYPEID_PLAYER ? "player" : "creature",
+            target->GetTypeId()==TYPEID_PLAYER ? i_owner->GetGUIDLow() : ((Creature*)i_owner)->GetDBTableGUIDLow() );
+        Mutate(new TargetedMovementGenerator<Player>(*target,dist,angle));
+    }
+    else
+    {
+        DEBUG_LOG("Creature (Entry: %u GUID: %u) chase to %s (GUID: %u)", 
+            i_owner->GetEntry(), i_owner->GetGUIDLow(),
+            target->GetTypeId()==TYPEID_PLAYER ? "player" : "creature",
+            target->GetTypeId()==TYPEID_PLAYER ? target->GetGUIDLow() : ((Creature*)target)->GetDBTableGUIDLow() );
+        Mutate(new TargetedMovementGenerator<Creature>(*target,dist,angle));
+    }
+}
+
+void
+MotionMaster::MoveFollow(Unit* target, float dist, float angle)
+{
+    Clear();
+    i_owner->addUnitState(UNIT_STAT_FOLLOW);
+    if(i_owner->GetTypeId()==TYPEID_PLAYER)
+    {
+        DEBUG_LOG("Player (GUID: %u) follow to %s (GUID: %u)", i_owner->GetGUIDLow(),
+            target->GetTypeId()==TYPEID_PLAYER ? "player" : "creature",
+            target->GetTypeId()==TYPEID_PLAYER ? i_owner->GetGUIDLow() : ((Creature*)i_owner)->GetDBTableGUIDLow() );
+        Mutate(new TargetedMovementGenerator<Player>(*target,dist,angle));
+    }
+    else
+    {
+        DEBUG_LOG("Creature (Entry: %u GUID: %u) follow to %s (GUID: %u)", 
+            i_owner->GetEntry(), i_owner->GetGUIDLow(),
+            target->GetTypeId()==TYPEID_PLAYER ? "player" : "creature",
+            target->GetTypeId()==TYPEID_PLAYER ? target->GetGUIDLow() : ((Creature*)target)->GetDBTableGUIDLow() );
+        Mutate(new TargetedMovementGenerator<Creature>(*target,dist,angle));
+    }
+}
+
+void
+MotionMaster::MovePoint(uint32 id, float x, float y, float z)
+{
+    if(i_owner->GetTypeId()==TYPEID_PLAYER)
+    {
+        DEBUG_LOG("Player (GUID: %u) targeted point (Id: %u X: %f Y: %f Z: %f)", i_owner->GetGUIDLow(), id, x, y, z );
+        Mutate(new PointMovementGenerator<Player>(id,x,y,z));
+    }
+    else
+    {
+        DEBUG_LOG("Creature (Entry: %u GUID: %u) targeted point (ID: %u X: %f Y: %f Z: %f)", 
+            i_owner->GetEntry(), i_owner->GetGUIDLow(), id, x, y, z );
+        Mutate(new PointMovementGenerator<Creature>(id,x,y,z));
+    }
+}
+
+void
+MotionMaster::MoveFleeing(Unit* enemy)
+{
+    if(i_owner->GetTypeId()==TYPEID_PLAYER)
+    {
+        DEBUG_LOG("Player (GUID: %u) flee from %s (GUID: %u)", i_owner->GetGUIDLow(),
+            enemy->GetTypeId()==TYPEID_PLAYER ? "player" : "creature",
+            enemy->GetTypeId()==TYPEID_PLAYER ? enemy->GetGUIDLow() : ((Creature*)enemy)->GetDBTableGUIDLow() );
+        Mutate(new FleeingMovementGenerator<Player>(*enemy));
+    }
+    else
+    {
+        DEBUG_LOG("Creature (Entry: %u GUID: %u) flee from %s (GUID: %u)", 
+            i_owner->GetEntry(), i_owner->GetGUIDLow(),
+            enemy->GetTypeId()==TYPEID_PLAYER ? "player" : "creature",
+            enemy->GetTypeId()==TYPEID_PLAYER ? enemy->GetGUIDLow() : ((Creature*)enemy)->GetDBTableGUIDLow() );
+        Mutate(new FleeingMovementGenerator<Creature>(*enemy));
+    }
+}
+
+FlightPathMovementGenerator*
+MotionMaster::MoveTaxiFlight(uint32 path, uint32 pathnode)
+{
+    if(i_owner->GetTypeId()==TYPEID_PLAYER)
+    {
+        DEBUG_LOG("Player (GUID: %u) taxi to (Path %u node %u)", i_owner->GetGUIDLow(), path, pathnode);
+        FlightPathMovementGenerator* mgen = new FlightPathMovementGenerator(path,pathnode);
+        Mutate(mgen);
+        return mgen;
+    }
+    else
+    {
+        sLog.outError("Creature (Entry: %u GUID: %u) attempt taxi to (Path %u node %u)", 
+            i_owner->GetEntry(), i_owner->GetGUIDLow(), path, pathnode );
+    }
+    return NULL;
 }
 
 void MotionMaster::Mutate(MovementGenerator *m)
@@ -153,4 +285,12 @@ void MotionMaster::propagateSpeedChange()
     {
         (*it)->unitSpeedChanged();
     }
+}
+
+MovementGeneratorType MotionMaster::GetCurrentMovementGeneratorType() const
+{
+   if(empty())
+       return IDLE_MOTION_TYPE;
+
+   return top()->GetMovementGeneratorType();
 }

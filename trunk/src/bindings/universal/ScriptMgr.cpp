@@ -18,9 +18,10 @@
 
 #include "config.h"
 #include "ScriptMgr.h"
-#include "../../game/TargetedMovementGenerator.h"
 #include "../../game/GossipDef.h"
 #include "../../game/GameObject.h"
+#include "../../game/Player.h"
+#include "../../game/Map.h"
 
 //uint8 loglevel = 0;
 int nrscripts;
@@ -326,9 +327,7 @@ void ScriptedAI::EnterEvadeMode()
 void ScriptedAI::DoStartAttack(Unit* victim)
 {
     if( m_creature->Attack(victim, true) )
-    {
-        m_creature->GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*victim));
-    }
+        m_creature->GetMotionMaster()->MoveChase(victim);
 }
 
 void ScriptedAI::DoStopAttack()
@@ -342,5 +341,5 @@ void ScriptedAI::DoStopAttack()
 void ScriptedAI::DoGoHome()
 {
     if( !m_creature->getVictim() && m_creature->isAlive() )
-        m_creature->GetMotionMaster()->TargetedHome();
+        m_creature->GetMotionMaster()->MoveTargetedHome();
 }

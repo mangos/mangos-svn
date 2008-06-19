@@ -20,7 +20,6 @@
 #include "Errors.h"
 #include "Creature.h"
 #include "Player.h"
-#include "TargetedMovementGenerator.h"
 #include "ObjectAccessor.h"
 #include "World.h"
 
@@ -58,7 +57,7 @@ void GuardAI::EnterEvadeMode()
     {
         DEBUG_LOG("Creature stopped attacking because he's dead [guid=%u]", i_creature.GetGUIDLow());
         i_creature.StopMoving();
-        i_creature.GetMotionMaster()->Idle();
+        i_creature.GetMotionMaster()->MoveIdle();
 
         i_state = STATE_NORMAL;
 
@@ -98,8 +97,8 @@ void GuardAI::EnterEvadeMode()
     i_state = STATE_NORMAL;
 
     // Remove TargetedMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
-    if( i_creature.GetMotionMaster()->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
-        i_creature.GetMotionMaster()->TargetedHome();
+    if( i_creature.GetMotionMaster()->GetCurrentMovementGeneratorType() == TARGETED_MOTION_TYPE )
+        i_creature.GetMotionMaster()->MoveTargetedHome();
 }
 
 void GuardAI::UpdateAI(const uint32 /*diff*/)
@@ -139,6 +138,6 @@ void GuardAI::AttackStart(Unit *u)
     {
         i_creature.AddThreat(u, 0.0f);
         i_victimGuid = u->GetGUID();
-        i_creature.GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*u));
+        i_creature.GetMotionMaster()->MoveChase(u);
     }
 }

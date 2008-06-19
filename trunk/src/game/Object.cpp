@@ -34,9 +34,9 @@
 #include "ObjectAccessor.h"
 #include "Log.h"
 #include "Transports.h"
-#include "VMapFactory.h"
-#include "WaypointMovementGenerator.h"
 #include "TargetedMovementGenerator.h"
+#include "WaypointMovementGenerator.h"
+#include "VMapFactory.h"
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
@@ -270,7 +270,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
             break;
             case TYPEID_PLAYER:
             {
-                flags2 = ((Unit*)this)->GetUnitMovementFlags();
+                flags2 = ((Player*)this)->GetUnitMovementFlags();
 
                 if(((Player*)this)->GetTransport())
                     flags2 |= MOVEMENTFLAG_ONTRANSPORT;
@@ -282,7 +282,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
 
                 if(((Player*)this)->isInFlight())
                 {
-                    WPAssert(!((Player*)this)->GetMotionMaster()->empty() && ((Player*)this)->GetMotionMaster()->top()->GetMovementGeneratorType() == FLIGHT_MOTION_TYPE);
+                    WPAssert(((Player*)this)->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE);
                     flags2 = (MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_SPLINE2);
                 }
             }
@@ -398,7 +398,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
                 return;
             }
 
-            WPAssert(!((Player*)this)->GetMotionMaster()->empty() && ((Player*)this)->GetMotionMaster()->top()->GetMovementGeneratorType() == FLIGHT_MOTION_TYPE);
+            WPAssert(((Player*)this)->GetMotionMaster()->GetCurrentMovementGeneratorType() == FLIGHT_MOTION_TYPE);
 
             FlightPathMovementGenerator *fmg = (FlightPathMovementGenerator*)(((Player*)this)->GetMotionMaster()->top());
 
@@ -1324,7 +1324,7 @@ namespace MaNGOS
 
                 float x,y,z;
 
-                if( !c->isAlive() || c->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED) || c->GetMotionMaster()->top()->GetMovementGeneratorType() != TARGETED_MOTION_TYPE ||
+                if( !c->isAlive() || c->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED) || c->GetMotionMaster()->GetCurrentMovementGeneratorType() != TARGETED_MOTION_TYPE ||
                     !((TargetedMovementGenerator<Creature>*)(c->GetMotionMaster()->top()))->GetDestination(x,y,z) )
                 {
                     x = c->GetPositionX();

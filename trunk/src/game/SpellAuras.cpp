@@ -38,8 +38,6 @@
 #include "Policies/SingletonImp.h"
 #include "Totem.h"
 #include "Creature.h"
-#include "ConfusedMovementGenerator.h"
-#include "TargetedMovementGenerator.h"
 #include "Formulas.h"
 #include "BattleGround.h"
 #include "CreatureAI.h"
@@ -497,59 +495,6 @@ void Aura::Update(uint32 diff)
             m_timeCla = 1000;
             if (manaPerSecond)
                 caster->ModifyPower(powertype,-manaPerSecond);
-        }
-        if(caster && m_target->isAlive() && m_target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING))
-        {
-            int q = rand() % 80;
-            if(q == 8) m_fearMoveAngle += (float)(urand(45, 90));
-            else if(q == 23) m_fearMoveAngle -= (float)(urand(45, 90));
-
-            // If the m_target is player,and if the speed is too slow,change it :P
-            float speed = m_target->GetSpeed(MOVE_RUN);
-            // Speed modifier, may need to find correct one
-            float mod = m_target->GetTypeId() != TYPEID_PLAYER ? 10 : 6;
-            float pos_x = m_target->GetPositionX();
-            float pos_y = m_target->GetPositionY();
-            float pos_z = m_target->GetPositionZ();
-            uint32 mapid = m_target->GetMapId();
-            // Control the max Distance; 28 for temp.
-            if(m_target->IsWithinDistInMap(caster, 28))
-            {
-                float x = m_target->GetPositionX() - (speed*cosf(m_fearMoveAngle))/mod;
-                float y = m_target->GetPositionY() - (speed*sinf(m_fearMoveAngle))/mod;
-                float z = pos_z;
-                m_target->UpdateGroundPositionZ(x,y,z);
-
-                // Control the target to not climb or drop when dz > |x|,x = 1.3 for temp.
-                // fixed me if it needs checking when the position will be in water?
-                                                            //+vmaps
-                if((z<=pos_z+1.3 && z>=pos_z-1.3) && m_target->IsWithinLOS(x,y,z))
-                {
-                    //Only send MOVEMENTFLAG_WALK_MODE, client has strange issues with other move flags
-                    m_target->SendMonsterMove(x, y, z, 0, MOVEMENTFLAG_WALK_MODE, (diff*2));
-
-                    if(m_target->GetTypeId() != TYPEID_PLAYER)
-                        MapManager::Instance().GetMap(m_target->GetMapId(), m_target)->CreatureRelocation((Creature*)m_target,x,y,z,m_target->GetOrientation());
-                }
-                else
-                {
-                    //Complete the move only if z coord is now correct
-                    m_fearMoveAngle += 120;
-                    x = m_target->GetPositionX() + (speed*sinf(m_fearMoveAngle))/mod;
-                    y = m_target->GetPositionY() + (speed*cosf(m_fearMoveAngle))/mod;
-                    float z = pos_z;
-                    m_target->UpdateGroundPositionZ(x,y,z);
-
-                    if((z<=pos_z+1.3 && z>=pos_z-1.3) && m_target->IsWithinLOS(x,y,z))
-                    {
-                        //Only send MOVEMENTFLAG_WALK_MODE, client has strange issues with other move flags
-                        m_target->SendMonsterMove(x, y, z, 0, MOVEMENTFLAG_WALK_MODE, (diff*2));
-
-                        if(m_target->GetTypeId() != TYPEID_PLAYER)
-                            MapManager::Instance().GetMap(m_target->GetMapId(), m_target)->CreatureRelocation((Creature*)m_target,x,y,z,m_target->GetOrientation());
-                    }
-                }
-            }
         }
     }
 
@@ -2707,7 +2652,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
             {
                 m_target->StopMoving();
                 m_target->GetMotionMaster()->Clear();
-                m_target->GetMotionMaster()->Idle();
+                m_target->GetMotionMaster()->MoveIdle();
                 CharmInfo *charmInfo = ((Creature*)m_target)->InitCharmInfo(m_target);
                 charmInfo->InitPossessCreateSpells();
             }
@@ -2944,10 +2889,7 @@ void Aura::HandleModConfuse(bool apply, bool Real)
                 (GetSpellProto()->Mechanic == MECHANIC_CONFUSED || GetSpellProto()->EffectMechanic[GetEffIndex()] == MECHANIC_CONFUSED))
                 caster->AttackStop();
 
-            if (m_target->GetTypeId() == TYPEID_UNIT)
-                m_target->GetMotionMaster()->Mutate(new ConfusedMovementGenerator<Creature>(*((Creature*)m_target)));
-            else
-                m_target->GetMotionMaster()->Mutate(new ConfusedMovementGenerator<Player>(*((Player*)m_target)));
+            m_target->GetMotionMaster()->MoveConfused();
         }
     }
     else
@@ -2974,7 +2916,7 @@ void Aura::HandleModConfuse(bool apply, bool Real)
                 Creature* c = (Creature*)m_target;
                 // if in combat restore movement generator
                 if(c->getVictim())
-                    c->GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*c->getVictim()));
+                    c->GetMotionMaster()->MoveChase(c->getVictim());
             }
         }
     }

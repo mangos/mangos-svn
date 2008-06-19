@@ -39,8 +39,6 @@
 #include "Util.h"
 #include "Totem.h"
 #include "BattleGround.h"
-#include "MovementGenerator.h"
-#include "TargetedMovementGenerator.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 
@@ -8674,7 +8672,7 @@ bool Unit::SelectHostilTarget()
     // it in combat but attacker not make any damage and not enter to aggro radius to have record in threat list
     // for example at owner command to pet attack some far away creature
     // Note: creature not have targeted movement generator but have attacker in this case
-    if( GetMotionMaster()->empty() || GetMotionMaster()->top()->GetMovementGeneratorType() != TARGETED_MOTION_TYPE )
+    if( GetMotionMaster()->GetCurrentMovementGeneratorType() != TARGETED_MOTION_TYPE )
     {
         for(AttackerSet::const_iterator itr = m_attackers.begin(); itr != m_attackers.end(); ++itr)
         {
@@ -9795,15 +9793,12 @@ void Unit::SetFeared(bool apply, uint64 casterGUID, uint32 spellID)
         if(HasAuraType(SPELL_AURA_PREVENTS_FLEEING))
             return;
 
-        addUnitState(UNIT_STAT_FLEEING);
-        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
-
-        //FIX ME: we need Mutate to now not existed FleeMovementGenerator (see Aura::Update hack code)
-        // at this moment Idle instead
         GetMotionMaster()->MovementExpired(false);
-        GetMotionMaster()->Idle();
-
         CastStop(GetGUID()==casterGUID ? spellID : 0);
+
+        Unit* caster = ObjectAccessor::GetObjectInWorld(casterGUID, (Unit*)NULL);
+
+        GetMotionMaster()->MoveFleeing(caster);
     }
     else
     {
@@ -9816,7 +9811,7 @@ void Unit::SetFeared(bool apply, uint64 casterGUID, uint32 spellID)
         {
             // restore appropriate movement generator
             if(getVictim())
-                GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*getVictim()));
+                GetMotionMaster()->MoveChase(getVictim());
             else
                 GetMotionMaster()->Initialize();
 

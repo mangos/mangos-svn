@@ -25,7 +25,8 @@
 class MovementGenerator;
 class Unit;
 
-#define     CANNOT_HANDLE_TYPE   -1
+// Creature Entry ID used for waypoints show, visible only for GMs
+#define VISUAL_WAYPOINT 1
 
 // values 0 ... MAX_DB_MOTION_TYPE-1 used in DB
 enum MovementGeneratorType
@@ -40,7 +41,10 @@ enum MovementGeneratorType
     HOME_MOTION_TYPE      = 6,                              // HomeMovementGenerator.h
     FLIGHT_MOTION_TYPE    = 7,                              // WaypointMovementGenerator.h
     POINT_MOTION_TYPE     = 8,                              // PointMovementGenerator.h
+    FLEEING_MOTION_TYPE   = 9,                              // FleeingMovementGenerator.h
 };
+
+class FlightPathMovementGenerator;
 
 class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
 {
@@ -63,19 +67,24 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
         const_iterator end() const { return Impl::c.end(); }
 
         void UpdateMotion(const uint32 &diff);
-
         void Clear(bool reset = true);
-
         void MovementExpired(bool reset = true);
 
-        void Idle(void);
+        void MoveIdle();
+        void MoveTargetedHome();
+        void MoveFollow(Unit* target, float dist, float angle);
+        void MoveChase(Unit* target, float dist = 0.0f, float angle = 0.0f);
+        void MoveConfused();
+        void MoveFleeing(Unit* enemy);
+        void MovePoint(uint32 id, float x,float y,float z);
+        FlightPathMovementGenerator* MoveTaxiFlight(uint32 path, uint32 pathnode);
 
-        void TargetedHome();
-
-        void Mutate(MovementGenerator *m);
+        MovementGeneratorType GetCurrentMovementGeneratorType() const;
 
         void propagateSpeedChange();
     private:
+        void Mutate(MovementGenerator *m);                  // use Move* functions instead
+
         Unit *i_owner;
 };
 #endif

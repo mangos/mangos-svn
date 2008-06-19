@@ -30,7 +30,7 @@ class MANGOS_DLL_SPEC ConfusedMovementGenerator
 : public MovementGeneratorMedium< T, ConfusedMovementGenerator<T> >
 {
     public:
-        ConfusedMovementGenerator(const Unit &) : i_nextMoveTime(0) {}
+        explicit ConfusedMovementGenerator() : i_nextMoveTime(0) {}
 
         void Initialize(T &);
         void Finalize(T &) {}
