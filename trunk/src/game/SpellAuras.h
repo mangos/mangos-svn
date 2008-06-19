@@ -301,8 +301,7 @@ class MANGOS_DLL_SPEC Aura
         int32 m_maxduration;
         int32 m_duration;
         int32 m_timeCla;
-        // it is NOT safe to keep a pointer to the item because it may get deleted
-        uint64 m_castItemGuid;
+        uint64 m_castItemGuid;                              // it is NOT safe to keep a pointer to the item because it may get deleted
         time_t m_applyTime;
 
         uint8 m_auraSlot;
@@ -330,8 +329,6 @@ class MANGOS_DLL_SPEC Aura
         void SetAuraFlag(uint32 slot, bool add);
         void SetAuraLevel(uint32 slot, uint32 level);
         void SetAuraApplication(uint32 slot, int8 count);
-
-        float m_fearMoveAngle;
 };
 
 class MANGOS_DLL_SPEC AreaAura : public Aura

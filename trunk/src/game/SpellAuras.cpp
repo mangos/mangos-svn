@@ -306,7 +306,7 @@ m_procCharges(0), m_spellmod(NULL), m_effIndex(eff), m_caster_guid(0), m_target(
 m_timeCla(1000), m_castItemGuid(castItem?castItem->GetGUID():0), m_auraSlot(MAX_AURAS),
 m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false), 
 m_isPersistent(false), m_updated(false), m_removeOnDeath(false), m_isRemovedOnShapeLost(true), m_in_use(false),
-m_periodicTimer(0), m_PeriodicEventId(0), m_AuraDRGroup(DIMINISHING_NONE), m_fearMoveAngle(0)
+m_periodicTimer(0), m_PeriodicEventId(0), m_AuraDRGroup(DIMINISHING_NONE)
 {
     assert(target);
 
