@@ -29,7 +29,7 @@ class MANGOS_DLL_SPEC FleeingMovementGenerator
 : public MovementGeneratorMedium< T, FleeingMovementGenerator<T> >
 {
     public:
-        FleeingMovementGenerator(Unit &fright, float _flee_distance = 30.0f) : i_fright(fright), flee_distance(_flee_distance), i_nextMoveTime(0), i_nextCheckTime(0) {}
+        FleeingMovementGenerator(Unit& fright, float _flee_distance = 40.0f) : i_fright(&fright), i_center_x(0.0f), i_center_y(0.0f), flee_distance(_flee_distance), i_nextMoveTime(0), i_nextCheckTime(0) {}
 
         void Initialize(T &);
         void Finalize(T &);
@@ -46,7 +46,10 @@ class MANGOS_DLL_SPEC FleeingMovementGenerator
         float flee_distance;
         TimeTracker i_nextMoveTime;
         TimeTracker i_nextCheckTime;
-        Unit& i_fright;
+        Unit* i_fright;
+        float i_center_x;
+        float i_center_y;
+
         DestinationHolder< Traveller<T> > i_destinationHolder;
 };
 #endif

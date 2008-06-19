@@ -62,18 +62,22 @@ FleeingMovementGenerator<T>::_getPoint(T &owner, float &x, float &y, float &z)
     y = owner.GetPositionY();
     z = owner.GetPositionZ();
 
+    float cur_dist;
+    float cur_angle;
 
-    float cur_dist = i_fright.GetDistance(&owner);
-    float cur_angle = i_fright.GetAngle(&owner);
-
-    if(Unit *pet = i_fright.GetPet())
+    if(i_fright)                                            // fear just applied by i_fright, run away
     {
-        float pet_dist = pet->GetDistance(&owner);
-        if(pet_dist < cur_dist)
-        {
-            cur_dist = pet_dist;
-            cur_angle = pet->GetAngle(&owner);
-        }
+        i_center_x = owner.GetPositionX();
+        i_center_y = owner.GetPositionY();
+
+        cur_dist = rand_norm()*flee_distance;
+        cur_angle = i_fright->GetAngle(&owner);
+        i_fright = NULL;
+    }
+    else                                                    // random target point
+    {
+        cur_dist = rand_norm()*flee_distance;
+        cur_angle = rand_norm()*2*M_PI;
     }
 
     float temp_x, temp_y, angle;
@@ -81,7 +85,7 @@ FleeingMovementGenerator<T>::_getPoint(T &owner, float &x, float &y, float &z)
     //primitive path-finding
     for(uint8 i = 0; i < 18; i++)
     {
-        float distance = flee_distance - cur_dist;
+        float distance = cur_dist;
 
         if(distance < 1.0f)
             return false;
@@ -161,8 +165,9 @@ FleeingMovementGenerator<T>::_getPoint(T &owner, float &x, float &y, float &z)
         temp_x = x + distance * cos(angle);
         temp_y = y + distance * sin(angle);
         MaNGOS::NormalizeMapCoord(temp_x);
-        MaNGOS::NormalizeMapCoord(temp_x);
-        if(owner.IsWithinLOS(temp_x,temp_y,z))
+        MaNGOS::NormalizeMapCoord(temp_y);
+        if( owner.IsWithinLOS(temp_x,temp_y,z) && 
+            (i_center_x-temp_x)*(i_center_x-temp_x)+(i_center_y-temp_y)*(i_center_y-temp_y) <= flee_distance*flee_distance )
         {
             bool is_water_now = _map->IsInWater(x,y,z);
 
@@ -242,7 +247,7 @@ template<class T>
 bool
 FleeingMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
 {
-    if( !&owner || !owner.isAlive() || !&i_fright || !i_fright.isAlive())
+    if( !&owner || !owner.isAlive() )
         return false;
     if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED) )
         return true;
