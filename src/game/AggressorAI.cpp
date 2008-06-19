@@ -20,7 +20,6 @@
 #include "Errors.h"
 #include "Creature.h"
 #include "Player.h"
-#include "TargetedMovementGenerator.h"
 #include "ObjectAccessor.h"
 #include "VMapFactory.h"
 #include "World.h"
@@ -100,8 +99,8 @@ void AggressorAI::EnterEvadeMode()
         i_creature.RemoveAllAuras();
 
         // Remove TargetedMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
-        if( i_creature.GetMotionMaster()->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
-            i_creature.GetMotionMaster()->TargetedHome();
+        if( i_creature.GetMotionMaster()->GetCurrentMovementGeneratorType() == TARGETED_MOTION_TYPE )
+            i_creature.GetMotionMaster()->MoveTargetedHome();
     }
 
     i_creature.DeleteThreatList();
@@ -149,7 +148,7 @@ AggressorAI::AttackStart(Unit *u)
         i_victimGuid = u->GetGUID();
 
         i_creature.resetAttackTimer();
-        i_creature.GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*u));
+        i_creature.GetMotionMaster()->MoveChase(u);
         if (u->GetTypeId() == TYPEID_PLAYER)
             i_creature.SetLootRecipient((Player*)u);
     }

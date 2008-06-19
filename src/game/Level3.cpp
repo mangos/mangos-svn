@@ -39,7 +39,6 @@
 #include "CellImpl.h"
 #include "Weather.h"
 #include "TargetedMovementGenerator.h"
-#include "PointMovementGenerator.h"
 #include "SkillDiscovery.h"
 #include "SkillExtraItems.h"
 #include "SystemConfig.h"
@@ -4814,10 +4813,9 @@ bool ChatHandler::HandleComeToMeCommand(const char *args)
 
     caster->SetUnitMovementFlags(newFlags);
 
-    if (caster->GetTypeId() == TYPEID_PLAYER)
-        caster->GetMotionMaster()->Mutate(new PointMovementGenerator<Player>(0, m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ()));
-    else caster->GetMotionMaster()->Mutate(new PointMovementGenerator<Creature>(0, m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ()));
+    Player* pl = m_session->GetPlayer();
 
+    caster->GetMotionMaster()->MovePoint(0, pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ());
     return true;
 }
 

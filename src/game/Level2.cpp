@@ -31,7 +31,6 @@
 #include "MapManager.h"
 #include "Language.h"
 #include "World.h"
-#include "WaypointMovementGenerator.h"
 #include "GameEvent.h"
 #include "Util.h"
 #include <cctype>

@@ -20,7 +20,6 @@
 #include "ReactorAI.h"
 #include "Errors.h"
 #include "Creature.h"
-#include "TargetedMovementGenerator.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
 
@@ -51,7 +50,7 @@ ReactorAI::AttackStart(Unit *p)
         DEBUG_LOG("Tag unit GUID: %u (TypeId: %u) as a victim", p->GetGUIDLow(), p->GetTypeId());
         i_creature.AddThreat(p, 0.0f);
         i_victimGuid = p->GetGUID();
-        i_creature.GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*p));
+        i_creature.GetMotionMaster()->MoveChase(p);
         if (p->GetTypeId() == TYPEID_PLAYER)
             i_creature.SetLootRecipient((Player*)p);
     }
@@ -89,7 +88,7 @@ ReactorAI::EnterEvadeMode()
     {
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
         i_creature.GetMotionMaster()->MovementExpired();
-        i_creature.GetMotionMaster()->Idle();
+        i_creature.GetMotionMaster()->MoveIdle();
         i_victimGuid = 0;
         i_creature.CombatStop();
         i_creature.DeleteThreatList();
@@ -121,6 +120,6 @@ ReactorAI::EnterEvadeMode()
     i_creature.CombatStop();
 
     // Remove TargetedMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
-    if( i_creature.GetMotionMaster()->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
-        i_creature.GetMotionMaster()->TargetedHome();
+    if( i_creature.GetMotionMaster()->GetCurrentMovementGeneratorType() == TARGETED_MOTION_TYPE )
+        i_creature.GetMotionMaster()->MoveTargetedHome();
 }

@@ -867,6 +867,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\FleeingMovementGenerator.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\FleeingMovementGenerator.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\Formulas.h"
 				>
 			</File>

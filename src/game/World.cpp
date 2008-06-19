@@ -45,7 +45,6 @@
 #include "Policies/SingletonImp.h"
 #include "BattleGroundMgr.h"
 #include "TemporarySummon.h"
-#include "TargetedMovementGenerator.h"
 #include "WaypointMovementGenerator.h"
 #include "VMapFactory.h"
 #include "GlobalEvents.h"

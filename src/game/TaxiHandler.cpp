@@ -126,13 +126,12 @@ void WorldSession::SendDoFlight( uint16 MountId, uint32 path, uint32 pathNode )
 
     GetPlayer()->Mount( MountId );
 
-    while(GetPlayer()->GetMotionMaster()->top()->GetMovementGeneratorType()==FLIGHT_MOTION_TYPE)
+    while(GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType()==FLIGHT_MOTION_TYPE)
         GetPlayer()->GetMotionMaster()->MovementExpired(false);
 
     _player->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
 
-    FlightPathMovementGenerator *flight = new FlightPathMovementGenerator(path,pathNode);
-    GetPlayer()->GetMotionMaster()->Mutate(flight);
+    FlightPathMovementGenerator *flight = GetPlayer()->GetMotionMaster()->MoveTaxiFlight(path,pathNode);
 
     SendPath(flight->GetPath(),flight->GetCurrentNode(),flight->GetPathAtMapEnd());
 }
@@ -209,7 +208,7 @@ void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& /*recv_data*/)
     // far teleport case
     if(curDestNode && curDestNode->map_id != GetPlayer()->GetMapId())
     {
-        if(GetPlayer()->GetMotionMaster()->top()->GetMovementGeneratorType()==FLIGHT_MOTION_TYPE)
+        if(GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType()==FLIGHT_MOTION_TYPE)
         {
             // short preparations to continue flight
             FlightPathMovementGenerator* flight = (FlightPathMovementGenerator*)(GetPlayer()->GetMotionMaster()->top());

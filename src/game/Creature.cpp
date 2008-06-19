@@ -1812,7 +1812,7 @@ bool Creature::HasSpellCooldown(uint32 spell_id) const
 
 bool Creature::IsInEvadeMode() const
 {
-    return !i_motionMaster.empty() && i_motionMaster.top()->GetMovementGeneratorType() == HOME_MOTION_TYPE;
+    return !i_motionMaster.empty() && i_motionMaster.GetCurrentMovementGeneratorType() == HOME_MOTION_TYPE;
 }
 
 bool Creature::HasSpell(uint32 spellID) const

@@ -35,7 +35,6 @@
 #include "Creature.h"
 #include "MapManager.h"
 #include "Pet.h"
-#include "WaypointMovementGenerator.h"
 #include "BattleGroundMgr.h"
 #include "BattleGround.h"
 #include "Guild.h"

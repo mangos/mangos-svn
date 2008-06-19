@@ -27,7 +27,6 @@
 #include "Spell.h"
 #include "ObjectAccessor.h"
 #include "MapManager.h"
-#include "TargetedMovementGenerator.h"
 #include "CreatureAI.h"
 #include "Util.h"
 #include "Pet.h"
@@ -81,14 +80,12 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 case COMMAND_STAY:                          //flat=1792  //STAY
                     pet->StopMoving();
                     pet->GetMotionMaster()->Clear();
-                    pet->GetMotionMaster()->Idle();
+                    pet->GetMotionMaster()->MoveIdle();
                     charmInfo->SetCommandState( COMMAND_STAY );
                     break;
                 case COMMAND_FOLLOW:                        //spellid=1792  //FOLLOW
                     pet->AttackStop();
-                    pet->addUnitState(UNIT_STAT_FOLLOW);
-                    pet->GetMotionMaster()->Clear();
-                    pet->GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*_player,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
+                    pet->GetMotionMaster()->MoveFollow(_player,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE);
                     charmInfo->SetCommandState( COMMAND_FOLLOW );
                     break;
                 case COMMAND_ATTACK:                        //spellid=1792  //ATTACK
