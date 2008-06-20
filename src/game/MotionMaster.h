@@ -44,8 +44,6 @@ enum MovementGeneratorType
     FLEEING_MOTION_TYPE   = 9,                              // FleeingMovementGenerator.h
 };
 
-class FlightPathMovementGenerator;
-
 class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
 {
     private:
@@ -77,7 +75,7 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
         void MoveConfused();
         void MoveFleeing(Unit* enemy);
         void MovePoint(uint32 id, float x,float y,float z);
-        FlightPathMovementGenerator* MoveTaxiFlight(uint32 path, uint32 pathnode);
+        void MoveTaxiFlight(uint32 path, uint32 pathnode);
 
         MovementGeneratorType GetCurrentMovementGeneratorType() const;
 

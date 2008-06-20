@@ -869,6 +869,7 @@ class MANGOS_DLL_SPEC PlayerTaxi
             m_TaxiDestinations.pop_front();
             return GetTaxiDestination();
         }
+        bool empty() const { return m_TaxiDestinations.empty(); }
     private:
         TaxiMask m_taximask;
         std::deque<uint32> m_TaxiDestinations;
@@ -1717,7 +1718,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         PlayerMenu* PlayerTalkClass;
         std::vector<ItemSetEffect *> ItemSetEff;
-        void FlightComplete(void);
 
         void SendLoot(uint64 guid, LootType loot_type);
         void SendLootRelease( uint64 guid );
