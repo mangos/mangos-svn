@@ -507,7 +507,7 @@ void Aura::Update(uint32 diff)
             return;
         }
             
-        // Get spell rangy
+        // Get spell range
         float radius;
         if (m_spellProto->EffectRadiusIndex[GetEffIndex()])
             radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellProto->EffectRadiusIndex[GetEffIndex()]));
@@ -5116,9 +5116,9 @@ void Aura::HandleModRating(bool apply, bool Real)
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    for (uint32 rating = 0; rating < MAX_RATING; ++rating)
+    for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
         if (m_modifier.m_miscvalue & (1 << rating))
-            ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_COMBAT_RATING_1 + rating, m_modifier.m_amount, apply);
+            ((Player*)m_target)->ApplyRatingMod(CombatRating(rating), m_modifier.m_amount, apply);
 }
 
 void Aura::HandleAuraModExpertise(bool apply, bool Real)

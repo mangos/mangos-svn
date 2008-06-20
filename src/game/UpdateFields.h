@@ -385,57 +385,6 @@ enum EUnitFields
     PLAYER_FIELD_BYTES2                       = UNIT_END + 0x04C4, // Size: 1, Type: BYTES, Flags: PRIVATE
     PLAYER_FIELD_WATCHED_FACTION_INDEX        = UNIT_END + 0x04C5, // Size: 1, Type: INT, Flags: PRIVATE
     PLAYER_FIELD_COMBAT_RATING_1              = UNIT_END + 0x04C6, // Size: 24, Type: INT, Flags: PRIVATE
-
-    // custom                                               // client names:
-                                                            // RATING_WEAPON_SKILL
-    PLAYER_FIELD_ALL_WEAPONS_SKILL_RATING     = PLAYER_FIELD_COMBAT_RATING_1,
-                                                            // RATING_DEFENSE_SKILL
-    PLAYER_FIELD_DEFENCE_RATING               = PLAYER_FIELD_COMBAT_RATING_1+1,
-                                                            // RATING_DODGE
-    PLAYER_FIELD_DODGE_RATING                 = PLAYER_FIELD_COMBAT_RATING_1+2,
-                                                            // RATING_PARRY
-    PLAYER_FIELD_PARRY_RATING                 = PLAYER_FIELD_COMBAT_RATING_1+3,
-                                                            // RATING_BLOCK
-    PLAYER_FIELD_BLOCK_RATING                 = PLAYER_FIELD_COMBAT_RATING_1+4,
-                                                            // RATING_HIT_MELEE
-    PLAYER_FIELD_MELEE_HIT_RATING             = PLAYER_FIELD_COMBAT_RATING_1+5,
-                                                            // RATING_HIT_RANGED
-    PLAYER_FIELD_RANGED_HIT_RATING            = PLAYER_FIELD_COMBAT_RATING_1+6,
-                                                            // RATING_HIT_SPELL
-    PLAYER_FIELD_SPELL_HIT_RATING             = PLAYER_FIELD_COMBAT_RATING_1+7,
-                                                            // RATING_CRIT_MELEE
-    PLAYER_FIELD_MELEE_CRIT_RATING            = PLAYER_FIELD_COMBAT_RATING_1+8,
-                                                            // RATING_CRIT_RANGED
-    PLAYER_FIELD_RANGED_CRIT_RATING           = PLAYER_FIELD_COMBAT_RATING_1+9,
-                                                            // RATING_CRIT_SPELL
-    PLAYER_FIELD_SPELL_CRIT_RATING            = PLAYER_FIELD_COMBAT_RATING_1+10,
-                                                            // RATING_HIT_TAKEN_MELEE
-    PLAYER_FIELD_HIT_TAKEN_MELEE_RATING       = PLAYER_FIELD_COMBAT_RATING_1+11,
-                                                            // RATING_HIT_TAKEN_RANGED
-    PLAYER_FIELD_HIT_TAKEN_RANGED_RATING      = PLAYER_FIELD_COMBAT_RATING_1+12,
-                                                            // RATING_HIT_TAKEN_SPELL
-    PLAYER_FIELD_HIT_TAKEN_SPELL_RATING       = PLAYER_FIELD_COMBAT_RATING_1+13,
-                                                            // RATING_CRIT_TAKEN_MELEE
-    PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING      = PLAYER_FIELD_COMBAT_RATING_1+14,
-                                                            // RATING_CRIT_TAKEN_RANGED
-    PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING     = PLAYER_FIELD_COMBAT_RATING_1+15,
-                                                            // RATING_CRIT_TAKEN_SPELL
-    PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING      = PLAYER_FIELD_COMBAT_RATING_1+16,
-                                                            // RATING_HASTE_MELEE
-    PLAYER_FIELD_MELEE_HASTE_RATING           = PLAYER_FIELD_COMBAT_RATING_1+17,
-                                                            // RATING_HASTE_RANGED
-    PLAYER_FIELD_RANGED_HASTE_RATING          = PLAYER_FIELD_COMBAT_RATING_1+18,
-                                                            // RATING_HASTE_SPELL
-    PLAYER_FIELD_SPELL_HASTE_RATING           = PLAYER_FIELD_COMBAT_RATING_1+19,
-                                                            // RATING_WEAPON_SKILL_MAINHAND
-    PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING    = PLAYER_FIELD_COMBAT_RATING_1+20,
-                                                            // RATING_WEAPON_SKILL_OFFHAND
-    PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING  = PLAYER_FIELD_COMBAT_RATING_1+21,
-                                                            // RATING_WEAPON_SKILL_RANGED
-    PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING   = PLAYER_FIELD_COMBAT_RATING_1+22,
-                                                            // RATING_EXPERTISE
-    PLAYER_FIELD_EXPERTISE_RATING             = PLAYER_FIELD_COMBAT_RATING_1+23,
-
     PLAYER_FIELD_ARENA_TEAM_INFO_1_1          = UNIT_END + 0x04DE, // Size: 18, Type: INT, Flags: PRIVATE
     PLAYER_FIELD_HONOR_CURRENCY               = UNIT_END + 0x04F0, // Size: 1, Type: INT, Flags: PRIVATE
     PLAYER_FIELD_ARENA_CURRENCY               = UNIT_END + 0x04F1, // Size: 1, Type: INT, Flags: PRIVATE
