@@ -384,7 +384,7 @@ void Spell::FillTargetMap()
             continue;
 
         // targets for TARGET_SCRIPT filled in Spell::canCast call
-        if( m_spellInfo->EffectImplicitTargetA[i] == TARGET_SCRIPT || m_spellInfo->EffectImplicitTargetB[i] == TARGET_SCRIPT )
+        if( m_spellInfo->EffectImplicitTargetA[i] == TARGET_SCRIPT || m_spellInfo->EffectImplicitTargetA[i] != TARGET_SELF && m_spellInfo->EffectImplicitTargetB[i] == TARGET_SCRIPT )
             continue;
 
         std::list<Unit*> tmpUnitMap;
@@ -3210,7 +3210,7 @@ uint8 Spell::CanCast(bool strict)
     {
         for(uint8 j = 0; j < 3; j++)
         {
-            if( m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT || m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT )
+            if( m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT || m_spellInfo->EffectImplicitTargetA[j] != TARGET_SELF && m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT )
             {
                 bool okDoo = false;
 

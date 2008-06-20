@@ -318,12 +318,16 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
             // remove battleground queue status from BGmgr
             sBattleGroundMgr.m_BattleGroundQueues[bgTypeId].RemovePlayer(_player->GetGUID(), false);
 
+            // this is still needed here if battleground "jumping" shouldn't add deserter debuff
+            // if it should, then this should be removed
+            // in that case, Player::TeleportTo will take care of the proper removing of the player from the battleground
             // if player is in battleground already, remove him and port him to new battleground
             if (BattleGround *currentBg = _player->GetBattleGround())
                 currentBg->RemovePlayerAtLeave(_player->GetGUID(), false, true);
 
-            _player->SetBattleGroundId(bg->GetTypeID());
             sBattleGroundMgr.SendToBattleGround(_player, bgTypeId);
+            // set battleground id after calling Player::TeleportTo(), so leaving BG can be handled there instead of SpellEffects
+            _player->SetBattleGroundId(bg->GetTypeID());
             bg->AddPlayer(_player);
             break;
         case 0:                                             // leave queue

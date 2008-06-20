@@ -1518,6 +1518,11 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             return;
         }
 
+        // remove player from battleground on far teleport (when changing maps)
+        // don't teleport to entry point
+        if(InBattleGround())
+            LeaveBattleground(false);
+
         // now we must check if we are going to be homebind after teleport, if it is so,
         // we must re-instantiate again (entering instance to be homebind is not very good idea)
         // this only affects entering instances, not re-logging in (teleport is not used on login)

@@ -270,12 +270,6 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
 
     Player* _player = m_session->GetPlayer();
 
-    if(_player->isInFlight())
-    {
-        SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
-    }
-
     // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
     char* cId = extractKeyFromLink((char*)args,"Hgameobject");
     if(!cId)
@@ -309,7 +303,15 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
         return true;
     }
 
-    _player->SaveRecallPosition();
+    // stop flight if need
+    if(_player->isInFlight())
+    {
+        _player->GetMotionMaster()->MovementExpired();
+        _player->m_taxi.ClearTaxiDestinations();
+    }
+    // save only in non-flight case
+    else
+        _player->SaveRecallPosition();
 
     _player->TeleportTo(mapid, x, y, z, ort);
     return true;
@@ -318,12 +320,6 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
 bool ChatHandler::HandleGoTriggerCommand(const char* args)
 {
     Player* _player = m_session->GetPlayer();
-
-    if(_player->isInFlight())
-    {
-        SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
-    }
 
     if (!*args)
         return false;
@@ -350,7 +346,15 @@ bool ChatHandler::HandleGoTriggerCommand(const char* args)
         return true;
     }
 
-    _player->SaveRecallPosition();
+    // stop flight if need
+    if(_player->isInFlight())
+    {
+        _player->GetMotionMaster()->MovementExpired();
+        _player->m_taxi.ClearTaxiDestinations();
+    }
+    // save only in non-flight case
+    else
+        _player->SaveRecallPosition();
 
     _player->TeleportTo(at->mapid, at->x, at->y, at->z, _player->GetOrientation());
     return true;
@@ -359,12 +363,6 @@ bool ChatHandler::HandleGoTriggerCommand(const char* args)
 bool ChatHandler::HandleGoGraveyardCommand(const char* args)
 {
     Player* _player = m_session->GetPlayer();
-
-    if(_player->isInFlight())
-    {
-        SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
-    }
 
     if (!*args)
         return false;
@@ -391,7 +389,15 @@ bool ChatHandler::HandleGoGraveyardCommand(const char* args)
         return true;
     }
 
-    _player->SaveRecallPosition();
+    // stop flight if need
+    if(_player->isInFlight())
+    {
+        _player->GetMotionMaster()->MovementExpired();
+        _player->m_taxi.ClearTaxiDestinations();
+    }
+    // save only in non-flight case
+    else
+        _player->SaveRecallPosition();
 
     _player->TeleportTo(gy->map_id, gy->x, gy->y, gy->z, _player->GetOrientation());
     return true;
@@ -413,12 +419,6 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
     if(!*args)
         return false;
     Player* _player = m_session->GetPlayer();
-
-    if(_player->isInFlight())
-    {
-        SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
-    }
 
     // "id" or number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
     char* pParam1 = extractKeyFromLink((char*)args,"Hcreature");
@@ -494,7 +494,15 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
         return true;
     }
 
-    _player->SaveRecallPosition();
+    // stop flight if need
+    if(_player->isInFlight())
+    {
+        _player->GetMotionMaster()->MovementExpired();
+        _player->m_taxi.ClearTaxiDestinations();
+    }
+    // save only in non-flight case
+    else
+        _player->SaveRecallPosition();
 
     _player->TeleportTo(mapid, x, y, z, ort);
     return true;

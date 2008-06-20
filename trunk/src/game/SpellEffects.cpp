@@ -721,6 +721,16 @@ void Spell::EffectDummy(uint32 i)
                     }
                     return;
                 }
+                case 15998:                                 // Capture Worg Pup
+                case 29435:                                 // Capture Female Kaliri Hatchling
+                {
+                    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    ((Creature*)unitTarget)->setDeathState(JUST_DIED);
+                    ((Creature*)unitTarget)->RemoveCorpse();
+                    return;
+                }
                 case 16589:                                 // Noggenfogger Elixir
                 {
                     if(m_caster->GetTypeId()!=TYPEID_PLAYER)
@@ -4398,9 +4408,6 @@ void Spell::EffectStuck(uint32 /*i*/)
 
     if(pTarget->isInFlight())
         return;
-
-    if(pTarget->InBattleGround())
-        pTarget->LeaveBattleground(false);
 
     // homebind location is loaded always
     pTarget->TeleportTo(pTarget->m_homebindMapId,pTarget->m_homebindX,pTarget->m_homebindY,pTarget->m_homebindZ,pTarget->GetOrientation());
