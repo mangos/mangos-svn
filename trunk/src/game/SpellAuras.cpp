@@ -2670,8 +2670,6 @@ void Aura::HandleModPossess(bool apply, bool Real)
             m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
             caster->SetCharm(m_target);
 
-            if(caster->getVictim()==m_target)
-                caster->AttackStop();
             m_target->CombatStop();
             m_target->DeleteThreatList();
             if(m_target->GetTypeId() == TYPEID_UNIT)
@@ -2777,8 +2775,6 @@ void Aura::HandleModCharm(bool apply, bool Real)
             m_target->CastStop(m_target==caster ? GetId() : 0);
             caster->SetCharm(m_target);
 
-            if(caster->getVictim()==m_target)
-                caster->AttackStop();
             m_target->CombatStop();
             m_target->DeleteThreatList();
 
@@ -2899,24 +2895,9 @@ void Aura::HandleModConfuse(bool apply, bool Real)
             player->GetSession()->SendPacket(&data);
         }
 
-        // Rogue/Blind ability stops attack
-        // TODO: does all confuses ?
-        if (caster && GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE &&
-            (GetSpellProto()->Mechanic == MECHANIC_CONFUSED || GetSpellProto()->EffectMechanic[GetEffIndex()] == MECHANIC_CONFUSED))
-            caster->AttackStop();
-
         // only at real add aura
         if(Real)
-        {
-            //This fixes blind so it doesn't continue to attack
-            // TODO: may other spells casted confuse aura (but not all) stop attack
-            if(caster && caster->GetTypeId() == TYPEID_PLAYER &&
-                GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE &&
-                (GetSpellProto()->Mechanic == MECHANIC_CONFUSED || GetSpellProto()->EffectMechanic[GetEffIndex()] == MECHANIC_CONFUSED))
-                caster->AttackStop();
-
             m_target->GetMotionMaster()->MoveConfused();
-        }
     }
     else
     {
@@ -3063,13 +3044,6 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 
         // remove fears (after unit state update to prevent attack back/etc)
         m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_FEAR);
-
-        if (caster)
-        {
-            // Stop attack if spell has knockout effect
-            if(GetSpellProto()->Mechanic == MECHANIC_KNOCKOUT || GetSpellProto()->EffectMechanic[GetEffIndex()] == MECHANIC_KNOCKOUT)
-                caster->AttackStop();
-        }
 
         //Save last orientation
         if( m_target->getVictim() )

@@ -2428,6 +2428,10 @@ void Spell::finish(bool ok)
     // call triggered spell only at successful cast (after clear combo points -> for add some if need)
     if(!m_TriggerSpells.empty())
         TriggerSpell();
+
+    // Stop Attack for some spells
+    if( m_spellInfo->Attributes & SPELL_ATTR_STOP_ATTACK_TARGET )
+        m_caster->AttackStop();
 }
 
 void Spell::SendCastResult(uint8 result)
