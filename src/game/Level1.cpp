@@ -303,12 +303,6 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
             return true;
         }
 
-        if(chr->isInFlight())
-        {
-            PSendSysMessage(LANG_CHAR_IN_FLIGHT,chr->GetName());
-            return true;
-        }
-
         Map* pMap = MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(),m_session->GetPlayer());
 
         if(pMap->Instanceable())
@@ -337,7 +331,15 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
         if (m_session->GetPlayer()->IsVisibleGloballyFor(chr))
             ChatHandler(chr).PSendSysMessage(LANG_SUMMONED_BY, m_session->GetPlayer()->GetName());
 
-        chr->SaveRecallPosition();
+        // stop flight if need
+        if(chr->isInFlight())
+        {
+            chr->GetMotionMaster()->MovementExpired();
+            chr->m_taxi.ClearTaxiDestinations();
+        }
+        // save only in non-flight case
+        else
+            chr->SaveRecallPosition();
 
         // before GM
         float x,y,z;
@@ -371,12 +373,6 @@ bool ChatHandler::HandleGonameCommand(const char* args)
 
     Player* _player = m_session->GetPlayer();
 
-    if(_player->isInFlight())
-    {
-        SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
-    }
-
     std::string name = args;
     normalizePlayerName(name);
     //WorldDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
@@ -384,12 +380,6 @@ bool ChatHandler::HandleGonameCommand(const char* args)
     Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
     {
-        if(chr->isInFlight())
-        {
-            PSendSysMessage(LANG_CHAR_IN_FLIGHT, chr->GetName());
-            return true;
-        }
-
         Map* cMap = MapManager::Instance().GetMap(chr->GetMapId(),chr);
         if(cMap->Instanceable())
         {
@@ -436,7 +426,15 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         if (_player->IsVisibleGloballyFor(chr))
             ChatHandler(chr).PSendSysMessage(LANG_APPEARING_TO, _player->GetName());
 
-        _player->SaveRecallPosition();
+        // stop flight if need
+        if(_player->isInFlight())
+        {
+            _player->GetMotionMaster()->MovementExpired();
+            _player->m_taxi.ClearTaxiDestinations();
+        }
+        // save only in non-flight case
+        else
+            _player->SaveRecallPosition();
 
         // to point to see at target with same orientation
         float x,y,z;
@@ -456,13 +454,16 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         bool in_flight;
         if(Player::LoadPositionFromDB(map,x,y,z,o,in_flight,guid))
         {
-            if(in_flight)
+            // stop flight if need
+            if(_player->isInFlight())
             {
-                PSendSysMessage(LANG_CHAR_IN_FLIGHT, name.c_str());
-                return true;
+                _player->GetMotionMaster()->MovementExpired();
+                _player->m_taxi.ClearTaxiDestinations();
             }
+            // save only in non-flight case
+            else
+                _player->SaveRecallPosition();
 
-            _player->SaveRecallPosition();
             _player->TeleportTo(map, x, y, z,_player->GetOrientation());
             return true;
         }
@@ -481,17 +482,8 @@ bool ChatHandler::HandleRecallCommand(const char* args)
     if(!*args)
     {
         chr = getSelectedPlayer();
-
         if(!chr)
-        {
             chr = m_session->GetPlayer();
-
-            if(chr->isInFlight())
-            {
-                SendSysMessage(LANG_TARGET_IN_FLIGHT);
-                return true;
-            }
-        }
     }
     else
     {
@@ -514,10 +506,11 @@ bool ChatHandler::HandleRecallCommand(const char* args)
         return true;
     }
 
+    // stop flight if need
     if(chr->isInFlight())
     {
-        PSendSysMessage(LANG_CHAR_IN_FLIGHT, chr->GetName());
-        return true;
+        chr->GetMotionMaster()->MovementExpired();
+        chr->m_taxi.ClearTaxiDestinations();
     }
 
     chr->TeleportTo(chr->m_recallMap, chr->m_recallX, chr->m_recallY, chr->m_recallZ, chr->m_recallO);
@@ -1515,12 +1508,6 @@ bool ChatHandler::HandleTeleCommand(const char * args)
 
     Player* _player = m_session->GetPlayer();
 
-    if(_player->isInFlight())
-    {
-        SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
-    }
-
     if(_player->InBattleGround())
     {
         SendSysMessage(LANG_YOU_IN_BATTLEGROUND);
@@ -1554,7 +1541,15 @@ bool ChatHandler::HandleTeleCommand(const char * args)
         return true;
     }
 
-    _player->SaveRecallPosition();
+    // stop flight if need
+    if(_player->isInFlight())
+    {
+        _player->GetMotionMaster()->MovementExpired();
+        _player->m_taxi.ClearTaxiDestinations();
+    }
+    // save only in non-flight case
+    else
+        _player->SaveRecallPosition();
 
     _player->TeleportTo(mapid, x, y, z, ort);
     return true;
@@ -1808,18 +1803,20 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
             return true;
         }
 
-        if(chr->isInFlight())
-        {
-            PSendSysMessage(LANG_CHAR_IN_FLIGHT,chr->GetName());
-            return true;
-        }
-
         PSendSysMessage(LANG_TELEPORTING_TO, chr->GetName(),"", location.c_str());
 
         if (m_session->GetPlayer()->IsVisibleGloballyFor(chr))
             ChatHandler(chr).PSendSysMessage(LANG_TELEPORTED_TO_BY, m_session->GetPlayer()->GetName());
 
-        chr->SaveRecallPosition();
+        // stop flight if need
+        if(chr->isInFlight())
+        {
+            chr->GetMotionMaster()->MovementExpired();
+            chr->m_taxi.ClearTaxiDestinations();
+        }
+        // save only in non-flight case
+        else
+            chr->SaveRecallPosition();
 
         chr->TeleportTo(mapid,x,y,z,chr->GetOrientation());
     }
@@ -1895,18 +1892,21 @@ bool ChatHandler::HandleGroupTeleCommand(const char * args)
             continue;
         }
 
-        if(pl->isInFlight())
-        {
-            PSendSysMessage(LANG_CHAR_IN_FLIGHT,pl->GetName());
-            continue;
-        }
-
         PSendSysMessage(LANG_TELEPORTING_TO, pl->GetName(),"", location.c_str());
 
         if (m_session->GetPlayer() != pl && m_session->GetPlayer()->IsVisibleGloballyFor(pl))
             ChatHandler(pl).PSendSysMessage(LANG_TELEPORTED_TO_BY, m_session->GetPlayer()->GetName());
 
-        pl->SaveRecallPosition();
+        // stop flight if need
+        if(pl->isInFlight())
+        {
+            pl->GetMotionMaster()->MovementExpired();
+            pl->m_taxi.ClearTaxiDestinations();
+        }
+        // save only in non-flight case
+        else
+            pl->SaveRecallPosition();
+
         pl->TeleportTo(mapid, x, y, z, ort);
     }
 
@@ -1964,12 +1964,6 @@ bool ChatHandler::HandleGroupgoCommand(const char* args)
             return true;
         }
 
-        if(pl->isInFlight())
-        {
-            PSendSysMessage(LANG_CHAR_IN_FLIGHT,pl->GetName());
-            return true;
-        }
-
         if (to_instance)
         {
             Map* plMap = MapManager::Instance().GetMap(pl->GetMapId(),pl);
@@ -1987,7 +1981,15 @@ bool ChatHandler::HandleGroupgoCommand(const char* args)
         if (m_session->GetPlayer()->IsVisibleGloballyFor(pl))
             ChatHandler(pl).PSendSysMessage(LANG_SUMMONED_BY, m_session->GetPlayer()->GetName());
 
-        pl->SaveRecallPosition();
+        // stop flight if need
+        if(pl->isInFlight())
+        {
+            pl->GetMotionMaster()->MovementExpired();
+            pl->m_taxi.ClearTaxiDestinations();
+        }
+        // save only in non-flight case
+        else
+            pl->SaveRecallPosition();
 
         // before GM
         float x,y,z;
@@ -2005,12 +2007,6 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
         return false;
 
     Player* _player = m_session->GetPlayer();
-
-    if(_player->isInFlight())
-    {
-        SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
-    }
 
     char* px = strtok((char*)args, " ");
     char* py = strtok(NULL, " ");
@@ -2032,9 +2028,19 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
         return true;
     }
 
+    // stop flight if need
+    if(_player->isInFlight())
+    {
+        _player->GetMotionMaster()->MovementExpired();
+        _player->m_taxi.ClearTaxiDestinations();
+    }
+    // save only in non-flight case
+    else
+        _player->SaveRecallPosition();
+
     Map const *map = MapManager::Instance().GetBaseMap(mapid);
     float z = std::max(map->GetHeight(x, y, MAX_HEIGHT), map->GetWaterLevel(x, y));
-    _player->SaveRecallPosition();
+
     _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
 
     return true;
@@ -2047,12 +2053,6 @@ bool ChatHandler::HandleGoXYZCommand(const char* args)
         return false;
 
     Player* _player = m_session->GetPlayer();
-
-    if(_player->isInFlight())
-    {
-        SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
-    }
 
     char* px = strtok((char*)args, " ");
     char* py = strtok(NULL, " ");
@@ -2077,7 +2077,16 @@ bool ChatHandler::HandleGoXYZCommand(const char* args)
         return true;
     }
 
-    _player->SaveRecallPosition();
+    // stop flight if need
+    if(_player->isInFlight())
+    {
+        _player->GetMotionMaster()->MovementExpired();
+        _player->m_taxi.ClearTaxiDestinations();
+    }
+    // save only in non-flight case
+    else
+        _player->SaveRecallPosition();
+
     _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
 
     return true;
@@ -2090,12 +2099,6 @@ bool ChatHandler::HandleGoZoneXYCommand(const char* args)
         return false;
 
     Player* _player = m_session->GetPlayer();
-
-    if(_player->isInFlight())
-    {
-        SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
-    }
 
     char* px = strtok((char*)args, " ");
     char* py = strtok(NULL, " ");
@@ -2137,8 +2140,17 @@ bool ChatHandler::HandleGoZoneXYCommand(const char* args)
         return true;
     }
 
+    // stop flight if need
+    if(_player->isInFlight())
+    {
+        _player->GetMotionMaster()->MovementExpired();
+        _player->m_taxi.ClearTaxiDestinations();
+    }
+    // save only in non-flight case
+    else
+        _player->SaveRecallPosition();
+
     float z = std::max(map->GetHeight(x, y, MAX_HEIGHT), map->GetWaterLevel(x, y));
-    _player->SaveRecallPosition();
     _player->TeleportTo(zoneEntry->mapid, x, y, z, _player->GetOrientation());
 
     return true;
@@ -2149,12 +2161,6 @@ bool ChatHandler::HandleGoGridCommand(const char* args)
 {
     if(!*args)    return false;
     Player* _player = m_session->GetPlayer();
-
-    if(_player->isInFlight())
-    {
-        SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
-    }
 
     char* px = strtok((char*)args, " ");
     char* py = strtok(NULL, " ");
@@ -2180,9 +2186,18 @@ bool ChatHandler::HandleGoGridCommand(const char* args)
         return true;
     }
 
+    // stop flight if need
+    if(_player->isInFlight())
+    {
+        _player->GetMotionMaster()->MovementExpired();
+        _player->m_taxi.ClearTaxiDestinations();
+    }
+    // save only in non-flight case
+    else
+        _player->SaveRecallPosition();
+
     Map const *map = MapManager::Instance().GetBaseMap(mapid);
     float z = std::max(map->GetHeight(x, y, MAX_HEIGHT), map->GetWaterLevel(x, y));
-    _player->SaveRecallPosition();
     _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
 
     return true;
