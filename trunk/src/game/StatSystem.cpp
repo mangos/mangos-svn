@@ -430,12 +430,12 @@ void Player::UpdateBlockPercentage()
 {
     // Base value
     float value = 5.0f;
-    // Modify value from defence skill
+    // Modify value from defense skill
     value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
     // Increase from SPELL_AURA_MOD_BLOCK_PERCENT aura
     value += GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_PERCENT);
     // Increase from rating
-    value += GetRatingBonusValue(PLAYER_FIELD_BLOCK_RATING);
+    value += GetRatingBonusValue(CR_BLOCK);
     value = value < 0.0f ? 0.0f : value;
     SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, value);
 }
@@ -444,30 +444,30 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
 {
     BaseModGroup modGroup;
     uint16 index;
-    uint16 ratingIndex;
+    CombatRating cr;
 
     switch(attType)
     {
         case OFF_ATTACK:
             modGroup = OFFHAND_CRIT_PERCENTAGE;
             index = PLAYER_OFFHAND_CRIT_PERCENTAGE;
-            ratingIndex = PLAYER_FIELD_MELEE_CRIT_RATING;
+            cr = CR_CRIT_MELEE;
             break;
         case RANGED_ATTACK:
             modGroup = RANGED_CRIT_PERCENTAGE;
             index = PLAYER_RANGED_CRIT_PERCENTAGE;
-            ratingIndex = PLAYER_FIELD_RANGED_CRIT_RATING;
+            cr = CR_CRIT_RANGED;
             break;
         case BASE_ATTACK:
         default:
             modGroup = CRIT_PERCENTAGE;
             index = PLAYER_CRIT_PERCENTAGE;
-            ratingIndex = PLAYER_FIELD_MELEE_CRIT_RATING;
+            cr = CR_CRIT_MELEE;
             break;
     }
 
-    float value = GetTotalPercentageModValue(modGroup) + GetRatingBonusValue(ratingIndex);
-    // Modify crit from weapon skill and miximized defence skill of same level victim difference
+    float value = GetTotalPercentageModValue(modGroup) + GetRatingBonusValue(cr);
+    // Modify crit from weapon skill and maximized defense skill of same level victim difference
     value += (int32(GetWeaponSkillValue(attType)) - int32(GetMaxSkillValueForLevel())) * 0.04f;
     value = value < 0.0f ? 0.0f : value;
     SetStatFloatValue(index, value);
@@ -490,12 +490,12 @@ void Player::UpdateParryPercentage()
 {
     // Base parry
     float value  = 5.0f;
-    // Modify value from defence skill
+    // Modify value from defense skill
     value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
     // Parry from SPELL_AURA_MOD_PARRY_PERCENT aura
     value += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
     // Parry from rating
-    value += GetRatingBonusValue(PLAYER_FIELD_PARRY_RATING);
+    value += GetRatingBonusValue(CR_PARRY);
     value = value < 0.0f ? 0.0f : value;
     SetStatFloatValue(PLAYER_PARRY_PERCENTAGE, value);
 }
@@ -504,12 +504,12 @@ void Player::UpdateDodgePercentage()
 {
     // Dodge from agility
     float value = GetDodgeFromAgility();
-    // Modify value from defence skill
+    // Modify value from defense skill
     value += (int32(GetDefenseSkillValue()) - int32(GetMaxSkillValueForLevel())) * 0.04f;
     // Dodge from SPELL_AURA_MOD_DODGE_PERCENT aura
     value += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT);
-    // Dodfe from rating
-    value += GetRatingBonusValue(PLAYER_FIELD_DODGE_RATING);
+    // Dodge from rating
+    value += GetRatingBonusValue(CR_DODGE);
     value = value < 0.0f ? 0.0f : value;
     SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, value);
 }
@@ -531,7 +531,7 @@ void Player::UpdateSpellCritChance(uint32 school)
     // Increase crit by school from SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL
     crit += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, 1<<school);
     // Increase crit from spell crit ratings
-    crit += GetRatingBonusValue(PLAYER_FIELD_SPELL_CRIT_RATING);
+    crit += GetRatingBonusValue(CR_CRIT_SPELL);
 
     // Store crit value
     SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + school, crit);
@@ -548,7 +548,7 @@ void Player::UpdateExpertise(WeaponAttackType attack)
     if(attack==RANGED_ATTACK)
         return;
 
-    int32 expertise = int32(GetRatingBonusValue(PLAYER_FIELD_EXPERTISE_RATING));
+    int32 expertise = int32(GetRatingBonusValue(CR_EXPERTISE));
 
     uint8 slot = GetWeaponSlotByAttack(attack);
 

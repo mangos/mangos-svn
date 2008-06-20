@@ -373,6 +373,36 @@ enum WeaponAttackType
 
 #define MAX_ATTACK  3
 
+enum CombatRating
+{
+    CR_WEAPON_SKILL             = 0,
+    CR_DEFENSE_SKILL            = 1,
+    CR_DODGE                    = 2,
+    CR_PARRY                    = 3,
+    CR_BLOCK                    = 4,
+    CR_HIT_MELEE                = 5,
+    CR_HIT_RANGED               = 6,
+    CR_HIT_SPELL                = 7,
+    CR_CRIT_MELEE               = 8,
+    CR_CRIT_RANGED              = 9,
+    CR_CRIT_SPELL               = 10,
+    CR_HIT_TAKEN_MELEE          = 11,
+    CR_HIT_TAKEN_RANGED         = 12,
+    CR_HIT_TAKEN_SPELL          = 13,
+    CR_CRIT_TAKEN_MELEE         = 14,
+    CR_CRIT_TAKEN_RANGED        = 15,
+    CR_CRIT_TAKEN_SPELL         = 16,
+    CR_HASTE_MELEE              = 17,
+    CR_HASTE_RANGED             = 18,
+    CR_HASTE_SPELL              = 19,
+    CR_WEAPON_SKILL_MAINHAND    = 20,
+    CR_WEAPON_SKILL_OFFHAND     = 21,
+    CR_WEAPON_SKILL_RANGED      = 22,
+    CR_EXPERTISE                = 23
+};
+
+#define MAX_COMBAT_RATING         24
+
 enum DamageEffectType
 {
     DIRECT_DAMAGE           = 0,                            // used for normal weapon damage (not for class abilities or spells)
@@ -415,7 +445,7 @@ enum UnitFlags
     UNIT_FLAG_PACIFIED         = 0x00020000,
     UNIT_FLAG_DISABLE_ROTATE   = 0x00040000,                // stunned, 2.1.1
     UNIT_FLAG_IN_COMBAT        = 0x00080000,
-    UNIT_FLAG_TAXI_FLIGHT      = 0x00100000,                // disbale casting at client side spell not allowed by taxi flight (mounted?), probably used with 0x4 flag
+    UNIT_FLAG_TAXI_FLIGHT      = 0x00100000,                // disable casting at client side spell not allowed by taxi flight (mounted?), probably used with 0x4 flag
     UNIT_FLAG_DISARMED         = 0x00200000,                // disable melee spells casting..., "Required melee weapon" added to melee spells tooltip.
     UNIT_FLAG_CONFUSED         = 0x00400000,
     UNIT_FLAG_FLEEING          = 0x00800000,

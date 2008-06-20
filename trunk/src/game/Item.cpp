@@ -596,7 +596,6 @@ void Item::SetItemRandomProperties(int32 randomPropId)
     }
 }
 
-
 bool Item::UpdateItemSuffixFactor()
 {
     uint32 suffixFactor = GenerateEnchSuffixFactor(GetEntry());

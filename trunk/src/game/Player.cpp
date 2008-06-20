@@ -1303,7 +1303,7 @@ void Player::BuildEnumData( QueryResult * result, WorldPacket * p_data )
 
     for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; slot++)
     {
-        uint32 item_id = GetUInt32Value(PLAYER_VISIBLE_ITEM_1_0 + (slot * 16));
+        uint32 item_id = GetUInt32Value(PLAYER_VISIBLE_ITEM_1_0 + (slot * MAX_VISIBLE_ITEM_OFFSET));
         const ItemPrototype * proto = objmgr.GetItemPrototype(item_id);
 
         if (proto != NULL)
@@ -2104,7 +2104,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     InitStatBuffMods();
 
     //reset rating fields values
-    for(uint16 index = PLAYER_FIELD_COMBAT_RATING_1; index < PLAYER_FIELD_ARENA_TEAM_INFO_1_1; ++index)
+    for(uint16 index = PLAYER_FIELD_COMBAT_RATING_1; index < PLAYER_FIELD_COMBAT_RATING_1 + MAX_COMBAT_RATING; ++index)
         SetUInt32Value(index, 0);
 
     SetUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS,0);
@@ -3129,10 +3129,10 @@ void Player::InitVisibleBits()
     for(uint16 i = 0; i < EQUIPMENT_SLOT_END; i++)
     {
         // item creator
-        updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_CREATOR + (i*16) + 0);
-        updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_CREATOR + (i*16) + 1);
+        updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_CREATOR + (i*MAX_VISIBLE_ITEM_OFFSET) + 0);
+        updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_CREATOR + (i*MAX_VISIBLE_ITEM_OFFSET) + 1);
 
-        uint16 visual_base = PLAYER_VISIBLE_ITEM_1_0 + (i*16);
+        uint16 visual_base = PLAYER_VISIBLE_ITEM_1_0 + (i*MAX_VISIBLE_ITEM_OFFSET);
 
         // item entry
         updateVisualBits.SetBit(visual_base + 0);
@@ -3142,8 +3142,8 @@ void Player::InitVisibleBits()
             updateVisualBits.SetBit(visual_base + 1 + j);
 
         // random properties
-        updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 0 + (i*16));
-        updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 1 + (i*16));
+        updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 0 + (i*MAX_VISIBLE_ITEM_OFFSET));
+        updateVisualBits.SetBit(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 1 + (i*MAX_VISIBLE_ITEM_OFFSET));
     }
 
     updateVisualBits.SetBit(PLAYER_CHOSEN_TITLE);
@@ -4105,45 +4105,42 @@ float Player::GetSpellCritFromIntellect()
     return crit*100.0f;
 }
 
-float Player::GetRatingCoefficient(uint16 index) const
+float Player::GetRatingCoefficient(CombatRating cr) const
 {
     uint32 level = getLevel();
-    uint32 rating_id = index - PLAYER_FIELD_COMBAT_RATING_1;
 
     if (level>GT_MAX_LEVEL) level = GT_MAX_LEVEL;
 
-    GtCombatRatingsEntry const *Rating = sGtCombatRatingsStore.LookupEntry(rating_id*GT_MAX_LEVEL+level-1);
+    GtCombatRatingsEntry const *Rating = sGtCombatRatingsStore.LookupEntry(cr*GT_MAX_LEVEL+level-1);
     if (Rating == NULL)
         return 1.0f;                                        // By default use minimum coefficient (not must be called)
 
     return Rating->ratio;
 }
 
-float Player::GetRatingBonusValue(uint16 index) const
+float Player::GetRatingBonusValue(CombatRating cr) const
 {
-    float value = float(GetUInt32Value(index)) / GetRatingCoefficient(index);
-
-    return value;
+    return float(GetUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + cr)) / GetRatingCoefficient(cr);
 }
 
 uint32 Player::GetMeleeCritDamageReduction(uint32 damage) const
 {
-    float melee  = GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING)*2.0f;
+    float melee  = GetRatingBonusValue(CR_CRIT_TAKEN_MELEE)*2.0f;
     if (melee>25.0f) melee = 25.0f;
     return uint32 (melee * damage /100.0f);
 }
 
 uint32 Player::GetRangedCritDamageReduction(uint32 damage) const
 {
-    float ranged = GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING)*2.0f;
+    float ranged = GetRatingBonusValue(CR_CRIT_TAKEN_RANGED)*2.0f;
     if (ranged>25.0f) ranged=25.0f;
     return uint32 (ranged * damage /100.0f);
 }
 
 uint32 Player::GetSpellCritDamageReduction(uint32 damage) const
 {
-    float spell = GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING)*2.0f;
-    // In wow script recilience limited to 25%
+    float spell = GetRatingBonusValue(CR_CRIT_TAKEN_SPELL)*2.0f;
+    // In wow script resilience limited to 25%
     if (spell>25.0f)
         spell = 25.0f;
     return uint32 (spell * damage / 100.0f);
@@ -4151,7 +4148,7 @@ uint32 Player::GetSpellCritDamageReduction(uint32 damage) const
 
 uint32 Player::GetDotDamageReduction(uint32 damage) const
 {
-    float spellDot = GetRatingBonusValue(PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING);
+    float spellDot = GetRatingBonusValue(CR_CRIT_TAKEN_SPELL);
     // Dot resilience not limited (limit it by 100%)
     if (spellDot > 100.0f)
         spellDot = 100.0f;
@@ -4211,85 +4208,85 @@ float Player::OCTRegenMPPerSpirit()
     return regen;
 }
 
-void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
+void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)
 {
-    ApplyModUInt32Value(index, value, apply);
+    ApplyModUInt32Value(PLAYER_FIELD_COMBAT_RATING_1 + cr, value, apply);
 
-    float RatingCoeffecient = GetRatingCoefficient(index);
+    float RatingCoeffecient = GetRatingCoefficient(cr);
     float RatingChange = 0.0f;
 
     bool affectStats = CanModifyStats();
 
-    switch (index)
+    switch (cr)
     {
-        case PLAYER_FIELD_ALL_WEAPONS_SKILL_RATING:         // Implemented in Unit::RollMeleeOutcomeAgainst
-        case PLAYER_FIELD_DEFENCE_RATING:
+        case CR_WEAPON_SKILL:                               // Implemented in Unit::RollMeleeOutcomeAgainst
+        case CR_DEFENSE_SKILL:
             UpdateDefenseBonusesMod();
             break;
-        case PLAYER_FIELD_DODGE_RATING:
+        case CR_DODGE:
             UpdateDodgePercentage();
             break;
-        case PLAYER_FIELD_PARRY_RATING:
+        case CR_PARRY:
             UpdateParryPercentage();
             break;
-        case PLAYER_FIELD_BLOCK_RATING:
+        case CR_BLOCK:
             UpdateBlockPercentage();
             break;
-        case PLAYER_FIELD_MELEE_HIT_RATING:
+        case CR_HIT_MELEE:
             RatingChange = value / RatingCoeffecient;
             m_modMeleeHitChance += apply ? RatingChange : -RatingChange;
             break;
-        case PLAYER_FIELD_RANGED_HIT_RATING:
+        case CR_HIT_RANGED:
             RatingChange = value / RatingCoeffecient;
             m_modRangedHitChance += apply ? RatingChange : -RatingChange;
             break;
-        case PLAYER_FIELD_SPELL_HIT_RATING:
+        case CR_HIT_SPELL:
             RatingChange = value / RatingCoeffecient;
             m_modSpellHitChance += apply ? RatingChange : -RatingChange;
             break;
-        case PLAYER_FIELD_MELEE_CRIT_RATING:
+        case CR_CRIT_MELEE:
             if(affectStats)
             {
                 UpdateCritPercentage(BASE_ATTACK);
                 UpdateCritPercentage(OFF_ATTACK);
             }
             break;
-        case PLAYER_FIELD_RANGED_CRIT_RATING:
+        case CR_CRIT_RANGED:
             if(affectStats)
                 UpdateCritPercentage(RANGED_ATTACK);
             break;
-        case PLAYER_FIELD_SPELL_CRIT_RATING:
+        case CR_CRIT_SPELL:
             if(affectStats)
                 UpdateAllSpellCritChances();
             break;
-        case PLAYER_FIELD_HIT_TAKEN_MELEE_RATING:           // Implemented in Unit::MeleeMissChanceCalc
-        case PLAYER_FIELD_HIT_TAKEN_RANGED_RATING:
+        case CR_HIT_TAKEN_MELEE:                            // Implemented in Unit::MeleeMissChanceCalc
+        case CR_HIT_TAKEN_RANGED:
             break;
-        case PLAYER_FIELD_HIT_TAKEN_SPELL_RATING:           // Implemented in Unit::MagicSpellHitResult
+        case CR_HIT_TAKEN_SPELL:                            // Implemented in Unit::MagicSpellHitResult
             break;
-        case PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING:          // Implemented in Unit::RollMeleeOutcomeAgainst (only for chance to crit)
-        case PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING:
+        case CR_CRIT_TAKEN_MELEE:                           // Implemented in Unit::RollMeleeOutcomeAgainst (only for chance to crit)
+        case CR_CRIT_TAKEN_RANGED:
             break;
-        case PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING:          // Implemented in Unit::SpellCriticalBonus (only for chance to crit)
+        case CR_CRIT_TAKEN_SPELL:                           // Implemented in Unit::SpellCriticalBonus (only for chance to crit)
             break;
-        case PLAYER_FIELD_MELEE_HASTE_RATING:
+        case CR_HASTE_MELEE:
             RatingChange = value / RatingCoeffecient;
             ApplyAttackTimePercentMod(BASE_ATTACK,RatingChange,apply);
             ApplyAttackTimePercentMod(OFF_ATTACK,RatingChange,apply);
             break;
-        case PLAYER_FIELD_RANGED_HASTE_RATING:
+        case CR_HASTE_RANGED:
             RatingChange = value / RatingCoeffecient;
             ApplyAttackTimePercentMod(RANGED_ATTACK, RatingChange, apply);
             break;
-        case PLAYER_FIELD_SPELL_HASTE_RATING:
+        case CR_HASTE_SPELL:
             RatingChange = value / RatingCoeffecient;
             ApplyCastTimePercentMod(RatingChange,apply);
             break;
-        case PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING:        // Implemented in Unit::RollMeleeOutcomeAgainst
-        case PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING:
-        case PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING:
+        case CR_WEAPON_SKILL_MAINHAND:                      // Implemented in Unit::RollMeleeOutcomeAgainst
+        case CR_WEAPON_SKILL_OFFHAND:
+        case CR_WEAPON_SKILL_RANGED:
             break;
-        case PLAYER_FIELD_EXPERTISE_RATING:
+        case CR_EXPERTISE:
             if(affectStats)
             {
                 UpdateExpertise(BASE_ATTACK);
@@ -6272,94 +6269,94 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 ApplyStatBuffMod(STAT_STAMINA, val, apply);
                 break;
             case ITEM_MOD_DEFENSE_SKILL_RATING:
-                ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, int32(val), apply);
+                ApplyRatingMod(CR_DEFENSE_SKILL, int32(val), apply);
                 break;
             case ITEM_MOD_DODGE_RATING:
-                ApplyRatingMod(PLAYER_FIELD_DODGE_RATING, int32(val), apply);
+                ApplyRatingMod(CR_DODGE, int32(val), apply);
                 break;
             case ITEM_MOD_PARRY_RATING:
-                ApplyRatingMod(PLAYER_FIELD_PARRY_RATING, int32(val), apply);
+                ApplyRatingMod(CR_PARRY, int32(val), apply);
                 break;
             case ITEM_MOD_BLOCK_RATING:
-                ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING, int32(val), apply);
+                ApplyRatingMod(CR_BLOCK, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_MELEE_RATING:
-                ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, int32(val), apply);
+                ApplyRatingMod(CR_HIT_MELEE, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_RANGED_RATING:
-                ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, int32(val), apply);
+                ApplyRatingMod(CR_HIT_RANGED, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_SPELL_RATING:
-                ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, int32(val), apply);
+                ApplyRatingMod(CR_HIT_SPELL, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_MELEE_RATING:
-                ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, int32(val), apply);
+                ApplyRatingMod(CR_CRIT_MELEE, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_RANGED_RATING:
-                ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, int32(val), apply);
+                ApplyRatingMod(CR_CRIT_RANGED, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_SPELL_RATING:
-                ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, int32(val), apply);
+                ApplyRatingMod(CR_CRIT_SPELL, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_TAKEN_MELEE_RATING:
-                ApplyRatingMod(PLAYER_FIELD_HIT_TAKEN_MELEE_RATING, int32(val), apply);
+                ApplyRatingMod(CR_HIT_TAKEN_MELEE, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_TAKEN_RANGED_RATING:
-                ApplyRatingMod(PLAYER_FIELD_HIT_TAKEN_RANGED_RATING, int32(val), apply);
+                ApplyRatingMod(CR_HIT_TAKEN_RANGED, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_TAKEN_SPELL_RATING:
-                ApplyRatingMod(PLAYER_FIELD_HIT_TAKEN_SPELL_RATING, int32(val), apply);
+                ApplyRatingMod(CR_HIT_TAKEN_SPELL, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_TAKEN_MELEE_RATING:
-                ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING, int32(val), apply);
+                ApplyRatingMod(CR_CRIT_TAKEN_MELEE, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_TAKEN_RANGED_RATING:
-                ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING, int32(val), apply);
+                ApplyRatingMod(CR_CRIT_TAKEN_RANGED, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_TAKEN_SPELL_RATING:
-                ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING, int32(val), apply);
+                ApplyRatingMod(CR_CRIT_TAKEN_SPELL, int32(val), apply);
                 break;
             case ITEM_MOD_HASTE_MELEE_RATING:
-                ApplyRatingMod(PLAYER_FIELD_MELEE_HASTE_RATING, int32(val), apply);
+                ApplyRatingMod(CR_HASTE_MELEE, int32(val), apply);
                 break;
             case ITEM_MOD_HASTE_RANGED_RATING:
-                ApplyRatingMod(PLAYER_FIELD_RANGED_HASTE_RATING, int32(val), apply);
+                ApplyRatingMod(CR_HASTE_RANGED, int32(val), apply);
                 break;
             case ITEM_MOD_HASTE_SPELL_RATING:
-                ApplyRatingMod(PLAYER_FIELD_SPELL_HASTE_RATING, int32(val), apply);
+                ApplyRatingMod(CR_HASTE_SPELL, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_RATING:
-                ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, int32(val), apply);
-                ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, int32(val), apply);
-                ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, int32(val), apply);
+                ApplyRatingMod(CR_HIT_MELEE, int32(val), apply);
+                ApplyRatingMod(CR_HIT_RANGED, int32(val), apply);
+                ApplyRatingMod(CR_HIT_SPELL, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_RATING:
-                ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, int32(val), apply);
-                ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, int32(val), apply);
-                ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, int32(val), apply);
+                ApplyRatingMod(CR_CRIT_MELEE, int32(val), apply);
+                ApplyRatingMod(CR_CRIT_RANGED, int32(val), apply);
+                ApplyRatingMod(CR_CRIT_SPELL, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_TAKEN_RATING:
-                ApplyRatingMod(PLAYER_FIELD_HIT_TAKEN_MELEE_RATING, int32(val), apply);
-                ApplyRatingMod(PLAYER_FIELD_HIT_TAKEN_RANGED_RATING, int32(val), apply);
-                ApplyRatingMod(PLAYER_FIELD_HIT_TAKEN_SPELL_RATING, int32(val), apply);
+                ApplyRatingMod(CR_HIT_TAKEN_MELEE, int32(val), apply);
+                ApplyRatingMod(CR_HIT_TAKEN_RANGED, int32(val), apply);
+                ApplyRatingMod(CR_HIT_TAKEN_SPELL, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_TAKEN_RATING:
-                ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING, int32(val), apply);
-                ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING, int32(val), apply);
-                ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING, int32(val), apply);
+                ApplyRatingMod(CR_CRIT_TAKEN_MELEE, int32(val), apply);
+                ApplyRatingMod(CR_CRIT_TAKEN_RANGED, int32(val), apply);
+                ApplyRatingMod(CR_CRIT_TAKEN_SPELL, int32(val), apply);
                 break;
             case ITEM_MOD_RESILIENCE_RATING:
-                ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING, int32(val), apply);
-                ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING, int32(val), apply);
-                ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING, int32(val), apply);
+                ApplyRatingMod(CR_CRIT_TAKEN_MELEE, int32(val), apply);
+                ApplyRatingMod(CR_CRIT_TAKEN_RANGED, int32(val), apply);
+                ApplyRatingMod(CR_CRIT_TAKEN_SPELL, int32(val), apply);
                 break;
             case ITEM_MOD_HASTE_RATING:
-                ApplyRatingMod(PLAYER_FIELD_MELEE_HASTE_RATING, int32(val), apply);
-                ApplyRatingMod(PLAYER_FIELD_RANGED_HASTE_RATING, int32(val), apply);
-                ApplyRatingMod(PLAYER_FIELD_SPELL_HASTE_RATING, int32(val), apply);
+                ApplyRatingMod(CR_HASTE_MELEE, int32(val), apply);
+                ApplyRatingMod(CR_HASTE_RANGED, int32(val), apply);
+                ApplyRatingMod(CR_HASTE_SPELL, int32(val), apply);
                 break;
             case ITEM_MOD_EXPERTISE_RATING:
-                ApplyRatingMod(PLAYER_FIELD_EXPERTISE_RATING, int32(val), apply);
+                ApplyRatingMod(CR_EXPERTISE, int32(val), apply);
                 break;
         }
     }
@@ -9777,30 +9774,30 @@ void Player::SetVisibleItemSlot(uint8 slot, Item *pItem)
 
     if(pItem)
     {
-        SetUInt64Value(PLAYER_VISIBLE_ITEM_1_CREATOR + (slot * 16), pItem->GetUInt64Value(ITEM_FIELD_CREATOR));
+        SetUInt64Value(PLAYER_VISIBLE_ITEM_1_CREATOR + (slot * MAX_VISIBLE_ITEM_OFFSET), pItem->GetUInt64Value(ITEM_FIELD_CREATOR));
 
-        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
+        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * MAX_VISIBLE_ITEM_OFFSET);
         SetUInt32Value(VisibleBase + 0, pItem->GetEntry());
 
         for(int i = 0; i < MAX_INSPECTED_ENCHANTMENT_SLOT; ++i)
             SetUInt32Value(VisibleBase + 1 + i, pItem->GetEnchantmentId(EnchantmentSlot(i)));
 
         // Use SetInt16Value to prevent set high part to FFFF for negative value
-        SetInt16Value( PLAYER_VISIBLE_ITEM_1_PROPERTIES + (slot * 16), 0, pItem->GetItemRandomPropertyId());
-        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 1 + (slot * 16), pItem->GetItemSuffixFactor());
+        SetInt16Value( PLAYER_VISIBLE_ITEM_1_PROPERTIES + (slot * MAX_VISIBLE_ITEM_OFFSET), 0, pItem->GetItemRandomPropertyId());
+        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 1 + (slot * MAX_VISIBLE_ITEM_OFFSET), pItem->GetItemSuffixFactor());
     }
     else
     {
-        SetUInt64Value(PLAYER_VISIBLE_ITEM_1_CREATOR + (slot * 16), 0);
+        SetUInt64Value(PLAYER_VISIBLE_ITEM_1_CREATOR + (slot * MAX_VISIBLE_ITEM_OFFSET), 0);
 
-        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
+        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * MAX_VISIBLE_ITEM_OFFSET);
         SetUInt32Value(VisibleBase + 0, 0);
 
         for(int i = 0; i < MAX_INSPECTED_ENCHANTMENT_SLOT; ++i)
             SetUInt32Value(VisibleBase + 1 + i, 0);
 
-        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 0 + (slot * 16), 0);
-        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 1 + (slot * 16), 0);
+        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 0 + (slot * MAX_VISIBLE_ITEM_OFFSET), 0);
+        SetUInt32Value(PLAYER_VISIBLE_ITEM_1_PROPERTIES + 1 + (slot * MAX_VISIBLE_ITEM_OFFSET), 0);
     }
 }
 
@@ -10938,111 +10935,111 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
                         ApplyStatBuffMod(STAT_STAMINA, enchant_amount, apply);
                         break;
                     case ITEM_MOD_DEFENSE_SKILL_RATING:
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_DEFENSE_SKILL, enchant_amount, apply);
                         sLog.outDebug("+ %u DEFENCE", enchant_amount);
                         break;
                     case  ITEM_MOD_DODGE_RATING:
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DODGE_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_DODGE, enchant_amount, apply);
                         sLog.outDebug("+ %u DODGE", enchant_amount);
                         break;
                     case ITEM_MOD_PARRY_RATING:
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_PARRY_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_PARRY, enchant_amount, apply);
                         sLog.outDebug("+ %u PARRY", enchant_amount);
                         break;
                     case ITEM_MOD_BLOCK_RATING:
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_BLOCK, enchant_amount, apply);
                         sLog.outDebug("+ %u SHIELD_BLOCK", enchant_amount);
                         break;
                     case ITEM_MOD_HIT_MELEE_RATING:
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_HIT_MELEE, enchant_amount, apply);
                         sLog.outDebug("+ %u MELEE_HIT", enchant_amount);
                         break;
                     case ITEM_MOD_HIT_RANGED_RATING:
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_HIT_RANGED, enchant_amount, apply);
                         sLog.outDebug("+ %u RANGED_HIT", enchant_amount);
                         break;
                     case ITEM_MOD_HIT_SPELL_RATING:
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_HIT_SPELL, enchant_amount, apply);
                         sLog.outDebug("+ %u SPELL_HIT", enchant_amount);
                         break;
-                    case ITEM_MOD_CRIT_MELEE_RATING:        // CS = Critical Strike
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, enchant_amount, apply);
+                    case ITEM_MOD_CRIT_MELEE_RATING:
+                        ((Player*)this)->ApplyRatingMod(CR_CRIT_MELEE, enchant_amount, apply);
                         sLog.outDebug("+ %u MELEE_CRIT", enchant_amount);
                         break;
                     case ITEM_MOD_CRIT_RANGED_RATING:
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_CRIT_RANGED, enchant_amount, apply);
                         sLog.outDebug("+ %u RANGED_CRIT", enchant_amount);
                         break;
                     case ITEM_MOD_CRIT_SPELL_RATING:
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_CRIT_SPELL, enchant_amount, apply);
                         sLog.outDebug("+ %u SPELL_CRIT", enchant_amount);
                         break;
 //                    Values from ITEM_STAT_MELEE_HA_RATING to ITEM_MOD_HASTE_RANGED_RATING are never used
 //                    in Enchantments
 //                    case ITEM_MOD_HIT_TAKEN_MELEE_RATING:
-//                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_TAKEN_MELEE_RATING, enchant_amount, apply);
+//                        ((Player*)this)->ApplyRatingMod(CR_HIT_TAKEN_MELEE, enchant_amount, apply);
 //                        break;
 //                    case ITEM_MOD_HIT_TAKEN_RANGED_RATING:
-//                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_TAKEN_RANGED_RATING, enchant_amount, apply);
+//                        ((Player*)this)->ApplyRatingMod(CR_HIT_TAKEN_RANGED, enchant_amount, apply);
 //                        break;
 //                    case ITEM_MOD_HIT_TAKEN_SPELL_RATING:
-//                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_TAKEN_SPELL_RATING, enchant_amount, apply);
+//                        ((Player*)this)->ApplyRatingMod(CR_HIT_TAKEN_SPELL, enchant_amount, apply);
 //                        break;
 //                    case ITEM_MOD_CRIT_TAKEN_MELEE_RATING:
-//                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING, enchant_amount, apply);
+//                        ((Player*)this)->ApplyRatingMod(CR_CRIT_TAKEN_MELEE, enchant_amount, apply);
 //                        break;
 //                    case ITEM_MOD_CRIT_TAKEN_RANGED_RATING:
-//                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING, enchant_amount, apply);
+//                        ((Player*)this)->ApplyRatingMod(CR_CRIT_TAKEN_RANGED, enchant_amount, apply);
 //                        break;
 //                    case ITEM_MOD_CRIT_TAKEN_SPELL_RATING:
-//                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING, enchant_amount, apply);
+//                        ((Player*)this)->ApplyRatingMod(CR_CRIT_TAKEN_SPELL, enchant_amount, apply);
 //                        break;
 //                    case ITEM_MOD_HASTE_MELEE_RATING:
-//                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HASTE_RATING, enchant_amount, apply);
+//                        ((Player*)this)->ApplyRatingMod(CR_HASTE_MELEE, enchant_amount, apply);
 //                        break;
 //                    case ITEM_MOD_HASTE_RANGED_RATING:
-//                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HASTE_RATING, enchant_amount, apply);
+//                        ((Player*)this)->ApplyRatingMod(CR_HASTE_RANGED, enchant_amount, apply);
 //                        break;
                     case ITEM_MOD_HASTE_SPELL_RATING:
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HASTE_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_HASTE_SPELL, enchant_amount, apply);
                         break;
                     case ITEM_MOD_HIT_RATING:
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, enchant_amount, apply);
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_HIT_MELEE, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_HIT_RANGED, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_HIT_SPELL, enchant_amount, apply);
                         sLog.outDebug("+ %u HIT", enchant_amount);
                         break;
                     case ITEM_MOD_CRIT_RATING:
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, enchant_amount, apply);
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, enchant_amount, apply);
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_CRIT_MELEE, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_CRIT_RANGED, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_CRIT_SPELL, enchant_amount, apply);
                         sLog.outDebug("+ %u CRITICAL", enchant_amount);
                         break;
 //                    Values ITEM_MOD_HIT_TAKEN_RATING and ITEM_MOD_CRIT_TAKEN_RATING are never used in Enchantment
 //                    case ITEM_MOD_HIT_TAKEN_RATING:
-//                          ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_TAKEN_MELEE_RATING, enchant_amount, apply);
-//                          ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_TAKEN_RANGED_RATING, enchant_amount, apply);
-//                          ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_TAKEN_SPELL_RATING, enchant_amount, apply);
+//                          ((Player*)this)->ApplyRatingMod(CR_HIT_TAKEN_MELEE, enchant_amount, apply);
+//                          ((Player*)this)->ApplyRatingMod(CR_HIT_TAKEN_RANGED, enchant_amount, apply);
+//                          ((Player*)this)->ApplyRatingMod(CR_HIT_TAKEN_SPELL, enchant_amount, apply);
 //                        break;
 //                    case ITEM_MOD_CRIT_TAKEN_RATING:
-//                          ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING, enchant_amount, apply);
-//                          ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING, enchant_amount, apply);
-//                          ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING, enchant_amount, apply);
+//                          ((Player*)this)->ApplyRatingMod(CR_CRIT_TAKEN_MELEE, enchant_amount, apply);
+//                          ((Player*)this)->ApplyRatingMod(CR_CRIT_TAKEN_RANGED, enchant_amount, apply);
+//                          ((Player*)this)->ApplyRatingMod(CR_CRIT_TAKEN_SPELL, enchant_amount, apply);
 //                        break;
                     case ITEM_MOD_RESILIENCE_RATING:
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_MELEE_RATING, enchant_amount, apply);
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_RANGED_RATING, enchant_amount, apply);
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_TAKEN_SPELL_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_CRIT_TAKEN_MELEE, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_CRIT_TAKEN_RANGED, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_CRIT_TAKEN_SPELL, enchant_amount, apply);
                         sLog.outDebug("+ %u RESILIENCE", enchant_amount);
                         break;
                     case ITEM_MOD_HASTE_RATING:
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HASTE_RATING, enchant_amount, apply);
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HASTE_RATING, enchant_amount, apply);
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HASTE_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_HASTE_MELEE, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_HASTE_RANGED, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_HASTE_SPELL, enchant_amount, apply);
                         sLog.outDebug("+ %u HASTE", enchant_amount);
                         break;
                     case ITEM_MOD_EXPERTISE_RATING:
-                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_EXPERTISE_RATING, enchant_amount, apply);
+                        ((Player*)this)->ApplyRatingMod(CR_EXPERTISE, enchant_amount, apply);
                         sLog.outDebug("+ %u EXPERTISE", enchant_amount);
                         break;
                     default:
@@ -11077,7 +11074,7 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
     // visualize enchantment at player and equipped items
     if(slot < MAX_INSPECTED_ENCHANTMENT_SLOT)
     {
-        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (item->GetSlot() * 16);
+        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (item->GetSlot() * MAX_VISIBLE_ITEM_OFFSET);
         SetUInt32Value(VisibleBase + 1 + slot, apply? item->GetEnchantmentId(slot) : 0);
     }
 

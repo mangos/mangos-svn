@@ -75,36 +75,6 @@ enum SpellNotifyPushType
     PUSH_TARGET_CENTER  = 3
 };
 
-enum Rating
-{
-    RATING_WEAPON_SKILL             = 0,
-    RATING_DEFENSE_SKILL            = 1,
-    RATING_DODGE                    = 2,
-    RATING_PARRY                    = 3,
-    RATING_BLOCK                    = 4,
-    RATING_HIT_MELEE                = 5,
-    RATING_HIT_RANGED               = 6,
-    RATING_HIT_SPELL                = 7,
-    RATING_CRIT_MELEE               = 8,
-    RATING_CRIT_RANGED              = 9,
-    RATING_CRIT_SPELL               = 10,
-    RATING_HIT_TAKEN_MELEE          = 11,
-    RATING_HIT_TAKEN_RANGED         = 12,
-    RATING_HIT_TAKEN_SPELL          = 13,
-    RATING_CRIT_TAKEN_MELEE         = 14,
-    RATING_CRIT_TAKEN_RANGED        = 15,
-    RATING_CRIT_TAKEN_SPELL         = 16,
-    RATING_HASTE_MELEE              = 17,
-    RATING_HASTE_RANGED             = 18,
-    RATING_HASTE_SPELL              = 19,
-    RATING_WEAPON_SKILL_MAINHAND    = 20,
-    RATING_WEAPON_SKILL_OFFHAND     = 21,
-    RATING_WEAPON_SKILL_RANGED      = 22,
-    RATING_EXPERTISE                = 23
-};
-
-#define MAX_RATING                    24
-
 bool IsQuestTameSpell(uint32 spellId);
 
 namespace MaNGOS
