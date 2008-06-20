@@ -489,12 +489,38 @@ void Aura::Update(uint32 diff)
         Unit* caster = GetCaster();
         if(caster && m_timeCla <= 0)
         {
-            SpellEntry const *spellInfo = GetSpellProto();                   
             Powers powertype = caster->getPowerType();
-            int32 manaPerSecond = spellInfo->manaPerSecond + spellInfo->manaPerSecondPerLevel * caster->getLevel();
+            int32 manaPerSecond = m_spellProto->manaPerSecond + m_spellProto->manaPerSecondPerLevel * caster->getLevel();
             m_timeCla = 1000;
             if (manaPerSecond)
                 caster->ModifyPower(powertype,-manaPerSecond);
+        }
+    }
+
+    // Channeled aura required check distance from caster
+    if(IsChanneledSpell(m_spellProto) && m_caster_guid != m_target->GetGUID())
+    {
+        Unit* caster = GetCaster();
+        if(!caster)
+        {
+            m_target->RemoveAura(GetId(),GetEffIndex());
+            return;
+        }
+            
+        // Get spell rangy
+        float radius;
+        if (m_spellProto->EffectRadiusIndex[GetEffIndex()])
+            radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellProto->EffectRadiusIndex[GetEffIndex()]));
+        else
+            radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellProto->rangeIndex));
+
+        if(Player* modOwner = caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(GetId(), SPELLMOD_RADIUS, radius,NULL);
+
+        if(!caster->IsWithinDistInMap(m_target,radius))
+        {
+            m_target->RemoveAura(GetId(),GetEffIndex());
+            return;
         }
     }
 

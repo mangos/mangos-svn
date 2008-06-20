@@ -4072,10 +4072,21 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
     m_Auras.erase(i);
     ++m_removedAuras;                                       // internal count used by unit update
 
+    // Status unsummoned at aura remove
+    Totem* statue = NULL;
+    if(IsChanneledSpell(Aur->GetSpellProto()))
+        if(Unit* caster = Aur->GetCaster())
+            if(caster->GetTypeId()==TYPEID_UNIT && ((Creature*)caster)->isTotem() && ((Totem*)caster)->GetTotemType()==TOTEM_STATUE)
+                statue = ((Totem*)caster);
+
+
     sLog.outDebug("Aura %u now is remove",Aur->GetModifier()->m_auraname);
     Aur->ApplyModifier(false,true);
     Aur->_RemoveAura();
     delete Aur;
+
+    if(statue)
+        statue->UnSummon();
 
     // only way correctly remove all auras from list
     if( m_Auras.empty() )
@@ -6848,8 +6859,8 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     if(!spellProto || !pVictim || damagetype==DIRECT_DAMAGE )
         return pdamage;
 
-    // For totems get damage bonus from owner
-    if( GetTypeId()==TYPEID_UNIT && ((Creature*)this)->isTotem())
+    // For totems get damage bonus from owner (statue isn't totem in fact)
+    if( GetTypeId()==TYPEID_UNIT && ((Creature*)this)->isTotem() && ((Totem*)this)->GetTotemType()!=TOTEM_STATUE)
         if(Unit* owner = GetOwner())
             return owner->SpellDamageBonus(pVictim, spellProto, pdamage, damagetype);
 
@@ -7368,8 +7379,8 @@ uint32 Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 damage, Uni
 
 uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, DamageEffectType damagetype, Unit *pVictim)
 {
-    // For totems get healing bonus from owner
-    if( GetTypeId()==TYPEID_UNIT && ((Creature*)this)->isTotem())
+    // For totems get healing bonus from owner (statue isn't totem in fact)
+    if( GetTypeId()==TYPEID_UNIT && ((Creature*)this)->isTotem() && ((Totem*)this)->GetTotemType()!=TOTEM_STATUE)
         if(Unit* owner = GetOwner())
             return owner->SpellHealingBonus(spellProto, healamount, damagetype, pVictim);
 
