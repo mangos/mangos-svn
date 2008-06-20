@@ -9832,7 +9832,7 @@ void Unit::SetFeared(bool apply, uint64 casterGUID, uint32 spellID)
 
         Unit* caster = ObjectAccessor::GetUnit(*this,casterGUID);
 
-        GetMotionMaster()->MoveFleeing(caster ? caster : this );
+        GetMotionMaster()->MoveFleeing(caster);             // caster==NULL processed in MoveFleeing
     }
     else
     {

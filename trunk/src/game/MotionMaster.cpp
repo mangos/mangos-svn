@@ -129,7 +129,7 @@ MotionMaster::MovementExpired(bool reset)
     if (reset) top()->Reset(*i_owner);
 }
 
-void MotionMaster::MoveIdle(void)
+void MotionMaster::MoveIdle()
 {
     if( empty() || !isStatic( top() ) )
         push( &si_idleMovement );
@@ -178,6 +178,10 @@ MotionMaster::MoveConfused()
 void
 MotionMaster::MoveChase(Unit* target, float dist, float angle)
 {
+    // ignore movement request if target not exist
+    if(!target)
+        return;
+
     i_owner->clearUnitState(UNIT_STAT_FOLLOW);
     if(i_owner->GetTypeId()==TYPEID_PLAYER)
     {
@@ -200,6 +204,12 @@ void
 MotionMaster::MoveFollow(Unit* target, float dist, float angle)
 {
     Clear();
+
+    // ignore movement request if target not exist
+    if(!target)
+        return;
+
+
     i_owner->addUnitState(UNIT_STAT_FOLLOW);
     if(i_owner->GetTypeId()==TYPEID_PLAYER)
     {
@@ -237,6 +247,10 @@ MotionMaster::MovePoint(uint32 id, float x, float y, float z)
 void
 MotionMaster::MoveFleeing(Unit* enemy)
 {
+    // we will flee at start from current unit position itself
+    if(!enemy)
+        enemy = i_owner;
+
     if(i_owner->GetTypeId()==TYPEID_PLAYER)
     {
         DEBUG_LOG("Player (GUID: %u) flee from %s (GUID: %u)", i_owner->GetGUIDLow(),
