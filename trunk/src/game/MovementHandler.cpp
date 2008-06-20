@@ -55,20 +55,15 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
         if(!_player->InBattleGround())
         {
             // short preparations to continue flight
+            GetPlayer()->SetDontMove(false);
             FlightPathMovementGenerator* flight = (FlightPathMovementGenerator*)(GetPlayer()->GetMotionMaster()->top());
             flight->Initialize(*GetPlayer());
-
-            SendPath(flight->GetPath(),flight->GetCurrentNode(),flight->GetPathAtMapEnd());
-
-            GetPlayer()->SetDontMove(false);
             return;
         }
 
         // battleground state prepare, stop flight
         GetPlayer()->GetMotionMaster()->MovementExpired();
-        GetPlayer()->FlightComplete();
         GetPlayer()->m_taxi.ClearTaxiDestinations();
-        GetPlayer()->StopMoving();
     }
 
     // resurrect character at enter into instance where his corpse exist after add to map

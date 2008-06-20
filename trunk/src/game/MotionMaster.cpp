@@ -95,8 +95,11 @@ MotionMaster::Clear(bool reset)
             delete curr;
     }
 
-    assert( !empty() );
-    if (reset) top()->Reset(*i_owner);
+    if (reset)
+    {
+        assert( !empty() );
+        top()->Reset(*i_owner);
+    }
 }
 
 void
@@ -145,7 +148,7 @@ MotionMaster::MoveTargetedHome()
         DEBUG_LOG("Creature (Entry: %u GUID: %u) targeted home", i_owner->GetEntry(), i_owner->GetGUIDLow());
         Mutate(new HomeMovementGenerator<Creature>());
     }
-    if(i_owner->GetTypeId()==TYPEID_UNIT && ((Creature*)i_owner)->GetCharmerOrOwnerGUID())
+    else if(i_owner->GetTypeId()==TYPEID_UNIT && ((Creature*)i_owner)->GetCharmerOrOwnerGUID())
     {
         sLog.outError("Pet or controlled creature (Entry: %u GUID: %u) attempt targeted home", 
             i_owner->GetEntry(), i_owner->GetGUIDLow() );
@@ -251,7 +254,7 @@ MotionMaster::MoveFleeing(Unit* enemy)
     }
 }
 
-FlightPathMovementGenerator*
+void
 MotionMaster::MoveTaxiFlight(uint32 path, uint32 pathnode)
 {
     if(i_owner->GetTypeId()==TYPEID_PLAYER)
@@ -259,14 +262,12 @@ MotionMaster::MoveTaxiFlight(uint32 path, uint32 pathnode)
         DEBUG_LOG("Player (GUID: %u) taxi to (Path %u node %u)", i_owner->GetGUIDLow(), path, pathnode);
         FlightPathMovementGenerator* mgen = new FlightPathMovementGenerator(path,pathnode);
         Mutate(mgen);
-        return mgen;
     }
     else
     {
         sLog.outError("Creature (Entry: %u GUID: %u) attempt taxi to (Path %u node %u)", 
             i_owner->GetEntry(), i_owner->GetGUIDLow(), path, pathnode );
     }
-    return NULL;
 }
 
 void MotionMaster::Mutate(MovementGenerator *m)

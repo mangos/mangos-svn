@@ -124,16 +124,11 @@ void WorldSession::SendDoFlight( uint16 MountId, uint32 path, uint32 pathNode )
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
-    GetPlayer()->Mount( MountId );
-
     while(GetPlayer()->GetMotionMaster()->GetCurrentMovementGeneratorType()==FLIGHT_MOTION_TYPE)
         GetPlayer()->GetMotionMaster()->MovementExpired(false);
 
-    _player->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
-
-    FlightPathMovementGenerator *flight = GetPlayer()->GetMotionMaster()->MoveTaxiFlight(path,pathNode);
-
-    SendPath(flight->GetPath(),flight->GetCurrentNode(),flight->GetPathAtMapEnd());
+    GetPlayer()->Mount( MountId );
+    GetPlayer()->GetMotionMaster()->MoveTaxiFlight(path,pathNode);
 }
 
 bool WorldSession::SendLearnNewTaxiNode( Creature* unit )
@@ -268,26 +263,4 @@ void WorldSession::HandleActivateTaxiOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXI from %d to %d" ,nodes[0],nodes[1]);
 
     GetPlayer()->ActivateTaxiPathTo(nodes);
-}
-
-void WorldSession::SendPath(Path const& path, uint32 start, uint32 end)
-{
-    uint32 traveltime = uint32(path.GetTotalLength(start, end) * 32);
-
-    uint32 pathSize = end-start;
-
-    WorldPacket data( SMSG_MONSTER_MOVE, (_player->GetPackGUID().size()+4+4+4+4+1+4+4+4+pathSize*4*3) );
-    data.append(GetPlayer()->GetPackGUID());
-    data << GetPlayer( )->GetPositionX( )
-        << GetPlayer( )->GetPositionY( )
-        << GetPlayer( )->GetPositionZ( );
-    data << GetPlayer( )->GetOrientation( );
-    data << uint8( 0 );
-    data << uint32( 0x00000300 );
-    data << uint32( traveltime );
-    data << uint32( pathSize );
-    data.append( (char*)path.GetNodes(start), pathSize * 4 * 3 );
-
-    //WPAssert( data.size() == 37 + pathnodes.Size( ) * 4 * 3 );
-    GetPlayer()->SendMessageToSet(&data, true);
 }

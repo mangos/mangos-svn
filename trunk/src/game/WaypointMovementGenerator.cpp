@@ -334,10 +334,35 @@ FlightPathMovementGenerator::Initialize(Player &player)
 {
     player.getHostilRefManager().setOnlineOfflineState(false);
     player.addUnitState(UNIT_STAT_IN_FLIGHT);
+    player.SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
     LoadPath(player);
     Traveller<Player> traveller(player);
     // do not send movement, it was sent already
     i_destinationHolder.SetDestination(traveller, i_path[i_currentNode].x, i_path[i_currentNode].y, i_path[i_currentNode].z, false);
+
+    player.SendMosterMoveByPath(GetPath(),GetCurrentNode(),GetPathAtMapEnd(),MOVEMENTFLAG_WALK_MODE|MOVEMENTFLAG_ONTRANSPORT);
+}
+
+void FlightPathMovementGenerator::Finalize(Player & player)
+{
+
+    float x, y, z;
+    i_destinationHolder.GetLocationNow(x, y, z);
+    player.SetPosition(x, y, z, player.GetOrientation());
+
+    player.clearUnitState(UNIT_STAT_IN_FLIGHT);
+    player.Unmount();
+    player.RemoveFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_TAXI_FLIGHT);
+
+    if(player.m_taxi.empty())
+    {
+        player.getHostilRefManager().setOnlineOfflineState(true);
+        if(player.pvpInfo.inHostileArea)
+            player.CastSpell(&player, 2479, true);
+
+        player.SetUnitMovementFlags(MOVEMENTFLAG_WALK_MODE);
+        player.StopMoving();
+    }
 }
 
 bool
@@ -373,18 +398,7 @@ FlightPathMovementGenerator::Update(Player &player, const uint32 &diff)
     }
 
     // we have arrived at the end of the path
-    EndFlight(player);
     return false;
-}
-
-void
-FlightPathMovementGenerator::EndFlight(Player &player)
-{
-    float x, y, z;
-    i_destinationHolder.GetLocationNow(x, y, z);
-    player.SetPosition(x, y, z, player.GetOrientation());
-
-    player.FlightComplete();
 }
 
 void

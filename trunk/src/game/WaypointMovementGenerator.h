@@ -124,12 +124,10 @@ public PathMovementBase<Player>
     public:
         explicit FlightPathMovementGenerator(uint32 id, uint32 startNode = 0) : i_pathId(id) { i_currentNode = startNode; }
         void Initialize(Player &);
-        void Finalize(Player &) {}
+        void Finalize(Player &);
         void Reset(Player &) {}
         bool Update(Player &, const uint32 &);
         MovementGeneratorType GetMovementGeneratorType() { return FLIGHT_MOTION_TYPE; }
-
-        void EndFlight(Player &);
 
         void LoadPath(Player &);
         void ReloadPath(Player &) { /* don't reload flight path */ }

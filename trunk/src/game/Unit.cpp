@@ -41,6 +41,7 @@
 #include "BattleGround.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
+#include "Path.h"
 
 #include <math.h>
 
@@ -370,6 +371,28 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 ty
     data << NewPosX << NewPosY << NewPosZ;                  // the single waypoint Point B
 
     SendMessageToSet( &data, true );
+}
+
+void Unit::SendMosterMoveByPath(Path const& path, uint32 start, uint32 end, uint32 MovementFlags)
+{
+    uint32 traveltime = uint32(path.GetTotalLength(start, end) * 32);
+
+    uint32 pathSize = end-start;
+
+    WorldPacket data( SMSG_MONSTER_MOVE, (GetPackGUID().size()+4+4+4+4+1+4+4+4+pathSize*4*3) );
+    data.append(GetPackGUID());
+    data << GetPositionX( )
+        << GetPositionY( )
+        << GetPositionZ( );
+    data << GetOrientation( );
+    data << uint8( 0 );
+    data << uint32( MovementFlags );
+    data << uint32( traveltime );
+    data << uint32( pathSize );
+    data.append( (char*)path.GetNodes(start), pathSize * 4 * 3 );
+
+    //WPAssert( data.size() == 37 + pathnodes.Size( ) * 4 * 3 );
+    SendMessageToSet(&data, true);
 }
 
 void Unit::resetAttackTimer(WeaponAttackType type)
@@ -9311,6 +9334,7 @@ void Unit::CleanupsBeforeDelete()
         DeleteThreatList();
         getHostilRefManager().setOnlineOfflineState(false);
         RemoveAllAuras();
+        GetMotionMaster()->Clear(false);                    // remove different non-standard movement generators.
     }
     RemoveFromWorld();
 }

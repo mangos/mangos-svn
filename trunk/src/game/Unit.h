@@ -236,6 +236,7 @@ class DynamicObject;
 class GameObject;
 class Item;
 class Pet;
+class Path;
 
 struct SpellImmune
 {
@@ -863,6 +864,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SendSpellMiss(Unit *target, uint32 spellID, SpellMissInfo missInfo);
 
         void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, uint32 MovementFlags, uint32 Time);
+        void SendMosterMoveByPath(Path const& path, uint32 start, uint32 end, uint32 MovementFlags);
 
         virtual void MoveOutOfRange(Player &) {  };
 
