@@ -15263,7 +15263,7 @@ void Player::HandleStealthedUnitsDetection()
     }
 }
 
-bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_id)
+bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_id, Creature* npc)
 {
     if(nodes.size() < 2)
         return false;
@@ -15370,6 +15370,12 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_i
     }
 
     uint32 money = GetMoney();
+
+    if(npc)
+    {
+        totalcost = (uint32)ceil(totalcost*GetReputationPriceDiscount(npc));
+    }
+
     if(money < totalcost)
     {
         WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
