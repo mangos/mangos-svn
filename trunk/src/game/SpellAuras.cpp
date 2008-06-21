@@ -956,9 +956,8 @@ void Aura::_RemoveAura()
                 m_target->ModifyAuraState(AURA_STATE_SWIFTMEND, false);
         }
 
-        // reset cooldown state for spells infinity/long aura (it's all self applied (?))
-        int32 duration = GetSpellDuration(GetSpellProto());
-        if( caster==m_target && ( duration < 0 || uint32(duration) > GetSpellRecoveryTime(GetSpellProto()) ))
+        // reset cooldown state for spells
+        if( GetSpellProto()->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE )
             SendCoolDownEvent();
     }
     else if(sameaura)                                       // decrease count for spell, only for same aura effect, or this spell auras in remove proccess.
