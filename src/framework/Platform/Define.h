@@ -118,11 +118,10 @@ typedef uint64      OBJECT_HANDLE;
 #define MANGOS_LITTLEENDIAN 0
 #define MANGOS_BIGENDIAN    1
 
-// Until finish bigendian support
-//#if defined(__BIG_ENDIAN) || defined(BIG_ENDIAN)
-//#  define MANGOS_ENDIAN MANGOS_BIGENDIAN
-//#else
+#if defined(__BIG_ENDIAN) || defined(BIG_ENDIAN)
+#  define MANGOS_ENDIAN MANGOS_BIGENDIAN
+#else
 #  define MANGOS_ENDIAN MANGOS_LITTLEENDIAN
-//#endif
+#endif
 
 #endif
