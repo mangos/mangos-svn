@@ -15807,9 +15807,15 @@ void Player::SendCooldownEvent(SpellEntry const *spellInfo)
     if ( !(spellInfo->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE) )
         return;
     
-    // Add spell cooldwn (category recovery time apply on _cast_ )
-    // This kind of spells not have spell mods for cooldown
-    AddSpellCooldown(spellInfo->Id, 0, time(NULL) + spellInfo->RecoveryTime);
+    // Get spell cooldwn
+    int32 cooldown = GetSpellRecoveryTime(spellInfo);
+    // Apply spellmods
+    ApplySpellMod(spellInfo->Id, SPELLMOD_COOLDOWN, cooldown);
+    if (cooldown < 0)
+        cooldown = 0;
+    // Add cooldown
+    AddSpellCooldown(spellInfo->Id, 0, time(NULL) +  cooldown / 1000);
+    // Send activate
     WorldPacket data(SMSG_COOLDOWN_EVENT, (4+8));
     data << spellInfo->Id;
     data << GetGUID();

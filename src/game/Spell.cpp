@@ -2144,12 +2144,14 @@ void Spell::SendSpellCooldown()
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    // Not add cooldown for this kind spells
+    Player* _player = (Player*)m_caster;
+    // Add cooldown for max (disable spell)
     // Cooldown started on SendCooldownEvent call
     if (m_spellInfo->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
+    {
+        _player->AddSpellCooldown(m_spellInfo->Id, 0, time(NULL) - 1);
         return;
-
-    Player* _player = (Player*)m_caster;
+    }
 
     // init cooldown values
     uint32 cat   = 0;
