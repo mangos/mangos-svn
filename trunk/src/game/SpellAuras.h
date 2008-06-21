@@ -270,7 +270,7 @@ class MANGOS_DLL_SPEC Aura
         void _RemoveAura();
 
         void TriggerSpell();
-        void SendCoolDownEvent();
+
         bool IsUpdated() { return m_updated; }
         void SetUpdated(bool val) { m_updated = val; }
         void SetRemoveOnDeath(bool rod) { m_removeOnDeath = rod; }
