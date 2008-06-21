@@ -1508,12 +1508,6 @@ bool ChatHandler::HandleTeleCommand(const char * args)
 
     Player* _player = m_session->GetPlayer();
 
-    if(_player->InBattleGround())
-    {
-        SendSysMessage(LANG_YOU_IN_BATTLEGROUND);
-        return true;
-    }
-
     char* cId = extractKeyFromLink((char*)args,"Htele");    // string or [name] Shift-click form |color|Htele:name|h[name]|h|r
     if(!cId)
         return false;
