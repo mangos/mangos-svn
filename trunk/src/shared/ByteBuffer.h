@@ -53,6 +53,7 @@ class ByteBuffer
             EndianConvert(value);
             append((uint8 *)&value, sizeof(value));
         }
+
         template <typename T> void put(size_t pos,T value)
         {
             EndianConvert(value);
