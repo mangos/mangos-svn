@@ -4226,6 +4226,15 @@ void Unit::AddGameObject(GameObject* gameObj)
 void Unit::RemoveGameObject(GameObject* gameObj, bool del)
 {
     assert(gameObj && gameObj->GetOwnerGUID()==GetGUID());
+
+    // GO created by some spell
+    if ( GetTypeId()==TYPEID_PLAYER && gameObj->GetSpellId() )
+    {
+        SpellEntry const* createBySpell = sSpellStore.LookupEntry(gameObj->GetSpellId());
+        // Need activate spell use for owner
+        if (createBySpell && createBySpell->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
+            ((Player*)this)->SendCooldownEvent(createBySpell);
+    }
     gameObj->SetOwnerGUID(0);
     m_gameObj.remove(gameObj);
     if(del)

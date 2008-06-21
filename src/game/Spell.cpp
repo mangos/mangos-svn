@@ -2144,6 +2144,11 @@ void Spell::SendSpellCooldown()
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    // Not add cooldown for this kind spells
+    // Cooldown started on SendCooldownEvent call
+    if (m_spellInfo->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
+        return;
+
     Player* _player = (Player*)m_caster;
 
     // init cooldown values

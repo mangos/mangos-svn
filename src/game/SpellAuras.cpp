@@ -957,8 +957,11 @@ void Aura::_RemoveAura()
         }
 
         // reset cooldown state for spells
-        if( GetSpellProto()->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE )
-            SendCoolDownEvent();
+        if(caster && caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            if ( GetSpellProto()->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE )
+                ((Player*)caster)->SendCooldownEvent(GetSpellProto());
+        }
     }
     else if(sameaura)                                       // decrease count for spell, only for same aura effect, or this spell auras in remove proccess.
         UpdateSlotCounterAndDuration(false);
@@ -4864,17 +4867,6 @@ void Aura::HandleModPowerCost(bool apply, bool Real)
 /*********************************************************/
 /***                    OTHERS                         ***/
 /*********************************************************/
-
-void Aura::SendCoolDownEvent()
-{
-    Unit* caster = GetCaster();
-    if(caster && caster->GetTypeId()==TYPEID_PLAYER)
-    {
-        WorldPacket data(SMSG_COOLDOWN_EVENT, (4+8));       // last check 2.4.1
-        data << uint32(GetId()) << m_caster_guid;
-        ((Player*)caster)->SendDirectMessage(&data);
-    }
-}
 
 void Aura::HandleShapeshiftBoosts(bool apply)
 {

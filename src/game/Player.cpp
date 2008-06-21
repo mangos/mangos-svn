@@ -15425,6 +15425,11 @@ void Player::ProhibitSpellScholl(SpellSchoolMask idSchoolMask, uint32 unTimeMs )
             ASSERT(spellInfo);
             continue;
         }
+
+        // Not send cooldown for this spells
+        if (spellInfo->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE)
+            continue;
+
         if((idSchoolMask & GetSpellSchoolMask(spellInfo)) && GetSpellCooldownDelay(unSpellId) < unTimeMs )
         {
             data << unSpellId;
@@ -15797,7 +15802,20 @@ void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
     m_spellCooldowns[spellid] = sc;
 }
 
-                                                            //slot to be excluded while counting
+void Player::SendCooldownEvent(SpellEntry const *spellInfo)
+{
+    if ( !(spellInfo->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE) )
+        return;
+    
+    // Add spell cooldwn (category recovery time apply on _cast_ )
+    // This kind of spells not have spell mods for cooldown
+    AddSpellCooldown(spellInfo->Id, 0, time(NULL) + spellInfo->RecoveryTime);
+    WorldPacket data(SMSG_COOLDOWN_EVENT, (4+8));
+    data << spellInfo->Id;
+    data << GetGUID();
+    SendDirectMessage(&data);
+}
+                                                           //slot to be excluded while counting
 bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
 {
     if(!enchantmentcondition)
