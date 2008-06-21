@@ -331,6 +331,7 @@ bool AuthSocket::_HandleLogonChallenge()
     buf.resize(4);
 
     ibuf.Read((char *)&buf[0], 4);
+    EndianConvert(*((uint32*)(buf[0])));
     uint16 remaining = ((sAuthLogonChallenge_C *)&buf[0])->size;
     DEBUG_LOG("[AuthChallenge] got header, body is %#04x bytes", remaining);
 

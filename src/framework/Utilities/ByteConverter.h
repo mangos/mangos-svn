@@ -38,7 +38,7 @@ namespace ByteConverter
     template<> inline void convert<0>(char *val) {}
     template<> void convert<1>(char *val);                  /* link time error all sizes have to be 2 to power n*/
 
-    template<typename T> void apply(T *val)
+    template<typename T> inline void apply(T *val)
     {
         convert<sizeof(T)>((char *)(val));
     }
@@ -51,7 +51,7 @@ template<typename T> inline void EndianConvert(T& val) { }
 #endif
 
 template<typename T> inline void EndianConvert(T*) { }
-template<> inline void EndianConvert(uint8 const&) { }
-template<> inline void EndianConvert( int8 const&) { }
+inline void EndianConvert(uint8&) { }
+inline void EndianConvert( int8&) { }
 
 #endif
