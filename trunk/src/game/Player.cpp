@@ -1519,9 +1519,14 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         }
 
         // remove player from battleground on far teleport (when changing maps)
-        // don't teleport to entry point
-        if(InBattleGround())
-            LeaveBattleground(false);
+        if(BattleGround const* bg = GetBattleGround())
+        {
+            // Note: at battleground join battleground id set before teleport 
+            // and we already will found "current" battleground
+            // just need check that this is targeted map or leave
+            if(bg->GetMapId() != mapid)
+                LeaveBattleground(false);                   // don't teleport to entry point
+        }
 
         // now we must check if we are going to be homebind after teleport, if it is so,
         // we must re-instantiate again (entering instance to be homebind is not very good idea)
