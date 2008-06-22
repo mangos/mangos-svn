@@ -446,6 +446,10 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
             continue;
         }
 
+        if (plr->isDead() && !plr->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+        {
+            plr->ResurrectPlayer(1.0);
+        }
         plr->TeleportTo(newMapid, x, y, z, GetOrientation(), true,false);
 
         //WorldPacket data(SMSG_811, 4);
