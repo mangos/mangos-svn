@@ -130,7 +130,7 @@ FleeingMovementGenerator<T>::_getPoint(T &owner, float &x, float &y, float &z)
                 distance /= 2;
                 break;
             case 10:
-                angle = cur_angle + M_PI/2.0f;
+                angle = cur_angle - M_PI/2.0f;
                 distance /= 2;
                 break;
             case 11:
