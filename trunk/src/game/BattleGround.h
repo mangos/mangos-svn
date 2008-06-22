@@ -58,7 +58,9 @@ enum BattleGroundSpells
     SPELL_SPIRIT_HEAL_CHANNEL       = 22011,
     SPELL_SPIRIT_HEAL               = 22012,
     SPELL_RESURRECTION_VISUAL       = 24171,
-    SPELL_ARENA_PREPARATION         = 32727
+    SPELL_ARENA_PREPARATION         = 32727,
+    SPELL_PREPARATION               = 44521,
+    SPELL_SPIRIT_HEAL_MANA          = 44535
 };
 
 enum BattleGroundTimeIntervals
