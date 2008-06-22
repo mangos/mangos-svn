@@ -181,6 +181,7 @@ void BattleGround::Update(time_t diff)
             if(!plr)
                 continue;
             plr->ResurrectPlayer(1.0f);
+            plr->CastSpell(plr, SPELL_SPIRIT_HEAL_MANA, true);
             ObjectAccessor::Instance().ConvertCorpseForPlayer(*itr);
         }
         m_ResurrectQueue.clear();
@@ -561,6 +562,8 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
 
             plr->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
         }
+        else
+            plr->RemoveAurasDueToSpell(SPELL_PREPARATION);
 
         WorldPacket data;
         if(SendPacket)
@@ -670,15 +673,19 @@ void BattleGround::AddPlayer(Player *plr)
     sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data, plr);
     SendPacketToTeam(plr->GetTeam(), &data, plr, false);
 
-    if(isArena())
+    if(GetStatus() == STATUS_WAIT_JOIN)                     // not started yet
     {
-        if(GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
+        if(isArena())
         {
             // temporary disabled
             //plr->CastSpell(plr, SPELL_ARENA_PREPARATION, true);
         }
-        plr->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+        else
+            plr->CastSpell(plr, SPELL_PREPARATION, true);   // reduces all mana cost of spells.
     }
+
+    if(isArena())
+        plr->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
 
     // Log
     sLog.outDetail("BATTLEGROUND: Player %s joined the battle.", plr->GetName());
