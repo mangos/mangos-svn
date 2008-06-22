@@ -3574,8 +3574,7 @@ void Player::KillPlayer()
     // 6 minutes until repop at graveyard
     m_deathTimer = 360000;
 
-    // dead player body showed at this moment, corpse will be show at Player ghost repop
-    CreateCorpse();
+    // don't create corpse at this moment, player might be falling
 
     // update visibility
     ObjectAccessor::UpdateObjectVisibility(this);
@@ -3826,7 +3825,8 @@ void Player::RepopAtGraveyard()
 {
     AreaTableEntry const *zone = GetAreaEntryByAreaID(GetAreaId());
 
-    if(zone && zone->flags & AREA_FLAG_NEED_FLY)            //Such zones are considered unreachable without flying and the player must be automatically revived
+    // Such zones are considered unreachable as a ghost and the player must be automatically revived
+    if(zone && zone->flags & AREA_FLAG_NEED_FLY || GetTransport())
     {
         ResurrectPlayer(0.5f);
         SpawnCorpseBones();
