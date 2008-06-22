@@ -1116,6 +1116,8 @@ void WorldObject::GetRandomPoint( float x, float y, float z, float distance, flo
     rand_y = y + new_dist * sin(angle);
     rand_z = z;
 
+    MaNGOS::NormalizeMapCoord(rand_x);
+    MaNGOS::NormalizeMapCoord(rand_y);
     UpdateGroundPositionZ(rand_x,rand_y,rand_z);            // update to LOS height if available
 }
 
@@ -1388,6 +1390,9 @@ void WorldObject::GetNearPoint2D(float &x, float &y, float distance2d, float abs
 {
     x = GetPositionX() + (GetObjectSize() + distance2d) * cos(absAngle);
     y = GetPositionY() + (GetObjectSize() + distance2d) * sin(absAngle);
+
+    MaNGOS::NormalizeMapCoord(x);
+    MaNGOS::NormalizeMapCoord(y);
 }
 
 void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, float &z, float distance2d, float absAngle ) const
