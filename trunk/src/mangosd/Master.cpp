@@ -54,6 +54,62 @@ extern int m_ServiceStatus;
 
 INSTANTIATE_SINGLETON_1( Master );
 
+volatile uint32 Master::m_masterLoopCounter = 0;
+
+class FreezeDetectorRunnable : public ZThread::Runnable
+{
+public:
+    FreezeDetectorRunnable() { _delaytime = 0; }
+    uint32 m_loops, m_lastchange;
+    uint32 w_loops, w_lastchange;
+    uint32 _delaytime;
+    void SetDelayTime(uint32 t) { _delaytime = t; }
+    void run(void)
+    {
+        if(!_delaytime)
+            return;
+        sLog.outString("Starting up anti-freeze thread (%u seconds max stuck time)...",_delaytime/1000);
+        m_loops = 0;
+        w_loops = 0;
+        m_lastchange = 0;
+        w_lastchange = 0;
+        while(!World::m_stopEvent)
+        {
+            ZThread::Thread::sleep(1000);
+            uint32 curtime = getMSTime();
+            //DEBUG_LOG("anti-freeze: time=%u, counters=[%u; %u]",curtime,Master::m_masterLoopCounter,World::m_worldLoopCounter);
+
+            // normal work
+            if(m_loops != Master::m_masterLoopCounter)
+            {
+                m_lastchange = curtime;
+                m_loops = Master::m_masterLoopCounter;
+            }
+            // possible freeze 
+            else if(getMSTimeDiff(m_lastchange,curtime) > _delaytime)
+            {
+                sLog.outError("Main/Sockets Thread hangs, kicking out server!");
+                *((uint32 volatile*)NULL) = 0;                       // bang crash
+            }
+
+            // normal work
+            if(w_loops != World::m_worldLoopCounter)
+            {
+                w_lastchange = curtime;
+                w_loops = World::m_worldLoopCounter;
+            }
+            // possible freeze 
+            else if(getMSTimeDiff(w_lastchange,curtime) > _delaytime)
+            {
+                sLog.outError("World Thread hangs, kicking out server!");
+                *((uint32 volatile*)NULL) = 0;                       // bang crash
+            }
+        }
+        sLog.outString("Anti-freeze thread exiting without problems.");
+    }
+};
+
+
 Master::Master()
 {
 }
@@ -208,9 +264,20 @@ void Master::Run()
     uint32 numLoops = (sConfig.GetIntDefault( "MaxPingTime", 30 ) * (MINUTE * 1000000 / socketSelecttime));
     uint32 loopCounter = 0;
 
+    ///- Start up freeze catcher thread
+    uint32 freeze_delay = sConfig.GetIntDefault("MaxCoreStuckTime", 0);
+    if(freeze_delay)
+    {
+        FreezeDetectorRunnable *fdr = new FreezeDetectorRunnable();
+        fdr->SetDelayTime(freeze_delay*1000);
+        ZThread::Thread t(fdr);
+        t.setPriority(ZThread::High);
+    }
+
     ///- Wait for termination signal
     while (!World::m_stopEvent)
     {
+        ++Master::m_masterLoopCounter;
 #ifdef WIN32
         if (m_ServiceStatus == 0) World::m_stopEvent = true;
         while (m_ServiceStatus == 2) Sleep(1000);
@@ -432,6 +499,7 @@ void Master::_UnhookSignals()
     signal(SIGBREAK, 0);
     #endif
 }
+
 
 
 

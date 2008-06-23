@@ -50,6 +50,7 @@ void WorldRunnable::run()
     ///- While we have not World::m_stopEvent, update the world
     while (!World::m_stopEvent)
     {
+        ++World::m_worldLoopCounter;
         realCurrTime = getMSTime();
 
         uint32 diff = getMSTimeDiff(realPrevTime,realCurrTime);
