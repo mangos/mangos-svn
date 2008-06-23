@@ -582,6 +582,8 @@ class SpellMgr
 
         bool IsAffectedBySpell(SpellEntry const *spellInfo, uint32 spellId, uint8 effectId, uint64 familyFlags) const;
 
+        SpellElixirMap const& GetSpellElixirMap() const { return mSpellElixirs; }
+
         uint32 GetSpellElixirMask(uint32 spellid) const
         {
             SpellElixirMap::const_iterator itr = mSpellElixirs.find(spellid);
