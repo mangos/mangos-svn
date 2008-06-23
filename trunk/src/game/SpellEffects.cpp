@@ -2395,6 +2395,48 @@ void Spell::EffectEnergize(uint32 i)
 
     unitTarget->ModifyPower(power,damage);
     m_caster->SendEnergizeSpellLog(unitTarget, m_spellInfo->Id, damage, power);
+
+    // Mad Alchemist's Potion
+    if (m_spellInfo->Id == 45051)
+    {
+        // find elixirs on target
+        uint32 elixir_mask = NULL;
+        Unit::AuraMap& Auras = unitTarget->GetAuras();
+        for(Unit::AuraMap::iterator itr = Auras.begin(); itr != Auras.end(); ++itr)
+        {
+            uint32 spell_id = itr->second->GetId();
+            if(uint32 mask = spellmgr.GetSpellElixirMask(spell_id))
+                elixir_mask |= mask;
+        }
+
+        // get available elixir mask any not active type from battle/guardian (and flask if no any)
+        elixir_mask = (elixir_mask & ELIXIR_FLASK_MASK) ^ ELIXIR_FLASK_MASK;
+
+        // get all available elixirs by mask and spell level
+        std::vector<uint32> elixirs;
+        SpellElixirMap const& m_spellElixirs = spellmgr.GetSpellElixirMap();
+        for(SpellElixirMap::const_iterator itr = m_spellElixirs.begin(); itr != m_spellElixirs.end(); ++itr)
+        {
+            if (itr->second & elixir_mask)
+            {
+                if (itr->second & (ELIXIR_UNSTABLE_MASK | ELIXIR_SHATTRATH_MASK))
+                    continue;
+
+                SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
+                if (spellInfo && (spellInfo->spellLevel < m_spellInfo->spellLevel || spellInfo->spellLevel > unitTarget->getLevel()))
+                    continue;
+
+                elixirs.push_back(itr->first);
+            }
+        }
+
+        if (!elixirs.empty())
+        {
+            // cast random elixir on target
+            uint32 rand_spell = urand(0,elixirs.size()-1);
+            m_caster->CastSpell(unitTarget,elixirs[rand_spell],true,m_CastItem);
+        }
+    }
 }
 
 void Spell::SendLoot(uint64 guid, LootType loottype)
