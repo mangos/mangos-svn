@@ -268,6 +268,14 @@ enum DamageTypeToSchool
     DAMAGE_TAKEN
 };
 
+enum AuraRemoveMode
+{
+    AURA_REMOVE_BY_DEFAULT,
+    AURA_REMOVE_BY_CANCEL,
+    AURA_REMOVE_BY_DISPEL,
+    AURA_REMOVE_BY_DEATH
+};
+
 enum UnitMods
 {
     UNIT_MOD_STAT_STRENGTH,                                 // UNIT_MOD_STAT_STRENGTH..UNIT_MOD_STAT_SPIRIT must be in existed order, it's accessed by index values of Stats enum.
@@ -927,12 +935,15 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         bool AddAura(Aura *aur);
 
-        bool RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster);
-        void RemoveAura(AuraMap::iterator &i, bool onDeath = false);
+        void RemoveAura(AuraMap::iterator &i, AuraRemoveMode mode = AURA_REMOVE_BY_DEFAULT);
         void RemoveAura(uint32 spellId, uint32 effindex, Aura* except = NULL);
         void RemoveSingleAuraFromStack(uint32 spellId, uint32 effindex);
         void RemoveAurasDueToSpell(uint32 spellId, Aura* except = NULL);
         void RemoveAurasDueToItemSpell(Item* castItem,uint32 spellId);
+        void RemoveAurasDueToSpellByDispel(uint32 spellId, Unit *caster, Unit *dispeler);
+        void RemoveAurasDueToSpellBySteal(uint32 spellId, Unit *caster, Unit *stealer);
+        void RemoveAurasDueToSpellByCancel(uint32 spellId);
+
         void RemoveSpellsCausingAura(AuraType auraType);
         void RemoveRankAurasDueToSpell(uint32 spellId);
         bool RemoveNoStackAurasDueToAura(Aura *Aur);

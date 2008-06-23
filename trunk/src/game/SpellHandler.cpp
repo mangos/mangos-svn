@@ -698,7 +698,7 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
     if(!IsPositiveSpell(spellId))
         return;
 
-    _player->RemoveAurasDueToSpell(spellId);
+    _player->RemoveAurasDueToSpellByCancel(spellId);
 
     if (spellId == 2584)                                    // Waiting to resurrect spell cancel, we must remove player from resurrect queue
     {

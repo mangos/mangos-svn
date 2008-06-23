@@ -3842,70 +3842,6 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
     return true;
 }
 
-bool Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster)
-{
-    AuraMap::iterator i;
-    // Create dispel mask by dispel type
-    uint32 dispelMask = GetDispellMask( DispelType(dispel_type) );
-    for (i = m_Auras.begin(); i != m_Auras.end();)
-    {
-        Aura *aur = (*i).second;
-        if (aur && (1<<aur->GetSpellProto()->Dispel) & dispelMask)
-        {
-            SpellEntry const* spellInfo = (*i).second->GetSpellProto();
-            uint32 eff = (*i).second->GetEffIndex();
-
-            if(dispel_type == DISPEL_MAGIC)
-            {
-                bool positive = true;
-
-                if (!(*i).second->IsPositive())
-                    positive = false;
-                else
-                    positive = (spellInfo->AttributesEx & SPELL_ATTR_EX_NEGATIVE)==0;
-
-                // do not remove positive auras if friendly target
-                //               negative auras if non-friendly target
-                if(positive == IsFriendlyTo(pCaster))
-                {
-                    ++i;
-                    continue;
-                }
-            }
-
-            // Unstable Affliction
-            if (spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && (spellInfo->SpellFamilyFlags & 0x010000000000LL))
-            {
-                int32 damage = (*i).second->GetModifier()->m_amount*9;
-                CastCustomSpell(pCaster,31117,&damage,NULL,NULL,true,NULL,(*i).second);
-            }
-
-            // Lifebloom
-            if ( spellInfo->SpellFamilyName == SPELLFAMILY_DRUID && (spellInfo->SpellFamilyFlags & 0x1000000000LL) )
-            {
-                AuraList const& m_dummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
-                for(AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
-                {
-                    if((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID &&
-                        (*i)->GetSpellProto()->SpellFamilyFlags & 0x1000000000LL)
-                    {
-                        int32 heal = (*i)->GetModifier()->m_amount;
-                        CastCustomSpell(this,33778,&heal,NULL,NULL,true,NULL,*i,(*i)->GetCasterGUID());
-                        break;
-                    }
-                }
-            }
-
-            RemoveAurasDueToSpell(spellInfo->Id);
-            return true;
-        }
-        else
-            ++i;
-    }
-
-    return false;
-}
-
 void Unit::RemoveAreaAurasByOthers(uint64 guid)
 {
     int j = 0;
@@ -3945,6 +3881,70 @@ void Unit::RemoveAura(uint32 spellId, uint32 effindex, Aura* except)
             RemoveAura(iter);
             iter = m_Auras.lower_bound(spair);
         }
+        else
+            ++iter;
+    }
+}
+
+void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, Unit *caster, Unit *dispeler)
+{
+    for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); )
+    {
+        Aura *aur = iter->second;
+        if (aur->GetId() == spellId && aur->GetCasterGUID() == caster->GetGUID())
+        {
+            // Custom dispel case
+            // Unstable Affliction
+            if (aur->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (aur->GetSpellProto()->SpellFamilyFlags & 0x010000000000LL))
+            {
+                int32 damage = aur->GetModifier()->m_amount*9;
+                dispeler->CastCustomSpell(dispeler, 31117, &damage, NULL, NULL, true, NULL, aur);
+            }
+            // Remove aura
+            RemoveAura(iter, AURA_REMOVE_BY_DISPEL);
+        }
+        else
+            ++iter;
+    }
+}
+
+void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, Unit *caster, Unit *stealer)
+{
+    for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); )
+    {
+        Aura *aur = iter->second;
+        if (aur->GetId() == spellId && aur->GetCasterGUID() == caster->GetGUID())
+        {
+            int32 basePoints = aur->GetBasePoints();
+            // construct the new aura for the attacker
+            Aura * new_aur = CreateAura(aur->GetSpellProto(), aur->GetEffIndex(), &basePoints, stealer);
+            if(!new_aur)
+                continue;
+
+            // set its duration and maximum duration
+            // max duration 2 minutes (in msecs)
+            int32 dur = aur->GetAuraDuration();
+            const int32 max_dur = 2*MINUTE*1000;
+            new_aur->SetAuraMaxDuration( max_dur > dur ? dur : max_dur );
+            new_aur->SetAuraDuration( max_dur > dur ? dur : max_dur );
+
+            // add the new aura to stealer
+            stealer->AddAura(new_aur);
+
+            // Remove aura as dispel
+            RemoveAura(iter, AURA_REMOVE_BY_DISPEL);
+        }
+        else
+            ++iter;
+    }
+}
+
+void Unit::RemoveAurasDueToSpellByCancel(uint32 spellId)
+{
+    for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); )
+    {
+        if (iter->second->GetId() == spellId)
+            RemoveAura(iter, AURA_REMOVE_BY_CANCEL);
         else
             ++iter;
     }
@@ -3992,7 +3992,7 @@ void Unit::RemoveAurasWithInterruptFlags(uint32 flags)
     }
 }
 
-void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
+void Unit::RemoveAura(AuraMap::iterator &i, AuraRemoveMode mode)
 {
     if (IsSingleTargetSpell((*i).second->GetSpellProto()))
     {
@@ -4062,11 +4062,11 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
     {
         m_modAuras[(*i).second->GetModifier()->m_auraname].remove((*i).second);
     }
-    (*i).second->SetRemoveOnDeath(onDeath);
 
     // remove from list before mods removing (prevent cyclic calls, mods added before including to aura list - use reverse order)
     Aura* Aur = i->second;
-
+    // Set remove mode
+    Aur->SetRemoveMode(mode);
     // some ShapeshiftBoosts at remove trigger removing other auras including parent Shapeshift aura
     // remove aura from list before to prevent deleting it before
     m_Auras.erase(i);
@@ -4079,7 +4079,7 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
             if(caster->GetTypeId()==TYPEID_UNIT && ((Creature*)caster)->isTotem() && ((Totem*)caster)->GetTotemType()==TOTEM_STATUE)
                 statue = ((Totem*)caster);
 
-    sLog.outDebug("Aura %u now is remove",Aur->GetModifier()->m_auraname);
+    sLog.outDebug("Aura %u now is remove mode %d",Aur->GetModifier()->m_auraname, mode);
     Aur->ApplyModifier(false,true);
     Aur->_RemoveAura();
     delete Aur;
@@ -4110,7 +4110,7 @@ void Unit::RemoveAllAurasOnDeath()
     for(AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end();)
     {
         if (!iter->second->IsPassive() && !iter->second->IsDeathPersistent())
-            RemoveAura(iter, true);
+            RemoveAura(iter, AURA_REMOVE_BY_DEATH);
         else
             ++iter;
     }

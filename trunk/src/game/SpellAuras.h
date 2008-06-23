@@ -273,7 +273,17 @@ class MANGOS_DLL_SPEC Aura
 
         bool IsUpdated() { return m_updated; }
         void SetUpdated(bool val) { m_updated = val; }
-        void SetRemoveOnDeath(bool rod) { m_removeOnDeath = rod; }
+        void SetRemoveMode(AuraRemoveMode mode) 
+        {
+            switch (mode)
+            {
+                case AURA_REMOVE_BY_CANCEL: m_cancelled = true; return;
+                case AURA_REMOVE_BY_DISPEL: m_dispelled = true; return;
+                case AURA_REMOVE_BY_DEATH:  m_removeOnDeath = true; return;
+                default:
+                    return;
+            }
+        }
 
         int32 m_procCharges;
 
@@ -317,6 +327,8 @@ class MANGOS_DLL_SPEC Aura
         bool m_isRemovedOnShapeLost:1;
         bool m_updated:1;
         bool m_removeOnDeath:1;
+        bool m_dispelled:1;
+        bool m_cancelled:1;
         bool m_in_use:1;                                    // true while in Aura::ApplyModifier call
 
         int32 m_periodicTimer;
