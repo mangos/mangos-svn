@@ -305,7 +305,7 @@ Aura::Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, U
 m_procCharges(0), m_spellmod(NULL), m_effIndex(eff), m_caster_guid(0), m_target(target),
 m_timeCla(1000), m_castItemGuid(castItem?castItem->GetGUID():0), m_auraSlot(MAX_AURAS),
 m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false), 
-m_isPersistent(false), m_updated(false), m_removeOnDeath(false), m_isRemovedOnShapeLost(true), m_in_use(false),
+m_isPersistent(false), m_updated(false), m_removeOnDeath(false), m_dispelled(false), m_cancelled(false), m_isRemovedOnShapeLost(true), m_in_use(false),
 m_periodicTimer(0), m_PeriodicEventId(0), m_AuraDRGroup(DIMINISHING_NONE)
 {
     assert(target);
@@ -1953,8 +1953,8 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 }
                 else
                 {
-                    // not heal if canceled, dispel case implemented in Unit::RemoveFirstAuraByDispel
-                    if (GetAuraDuration()>0)
+                    // Final heal only on dispelled or duration end
+                    if ( !(GetAuraDuration() <= 0 || m_dispelled) )
                         return;
 
                     // have a look if there is still some other Lifebloom dummy aura
@@ -3771,6 +3771,13 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool Real)
 
     m_isPeriodic = apply;
     m_isTrigger = apply;
+
+    // Curse of the Plaguebringer
+    if (!apply && m_spellProto->Id == 29213 && !m_dispelled)
+    {
+        // Cast Wrath of the Plaguebringer if not dispelled
+        m_target->CastSpell(m_target, 29214, true, 0, this);
+    }
 }
 
 void Aura::HandlePeriodicEnergize(bool apply, bool Real)

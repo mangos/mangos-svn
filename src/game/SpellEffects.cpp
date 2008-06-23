@@ -2888,15 +2888,129 @@ void Spell::EffectDispel(uint32 i)
     if(!unitTarget)
         return;
 
-    for(int n = 0 ; n < damage; ++n)
-    {
-        if(!unitTarget->RemoveFirstAuraByDispel(m_spellInfo->EffectMiscValue[i], m_caster))
-            break;                                          // not found aura for dispel
+    // Fill possible dispell list
+    std::vector <Aura *> dispel_list;
 
-        sLog.outDebug("Spell: Removed aura type %u from %s %u (removed by %s %u)",
-            m_spellInfo->EffectMiscValue[i],
-            unitTarget->GetTypeId()==TYPEID_PLAYER ? "player" : "creature", unitTarget->GetGUIDLow(),
-            m_caster->GetTypeId()==TYPEID_PLAYER ? "player" : "creature", m_caster->GetGUIDLow() );
+    // Create dispel mask by dispel type
+    uint32 dispel_type = m_spellInfo->EffectMiscValue[i];
+    uint32 dispelMask  = GetDispellMask( DispelType(dispel_type) );
+    Unit::AuraMap const& auras = unitTarget->GetAuras();
+    for(Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+    {
+        Aura *aur = (*itr).second;
+        if (aur && (1<<aur->GetSpellProto()->Dispel) & dispelMask)
+        {
+            if(dispel_type == DISPEL_MAGIC)
+            {
+                bool positive = true;
+                if (!aur->IsPositive())
+                    positive = false;
+                else
+                    positive = (aur->GetSpellProto()->AttributesEx & SPELL_ATTR_EX_NEGATIVE)==0;
+
+                // do not remove positive auras if friendly target
+                //               negative auras if non-friendly target
+                if(positive != unitTarget->IsFriendlyTo(m_caster))
+                    dispel_list.push_back(aur);
+            }
+        }
+    }
+    // Ok if exist some buffs for dispel try dispel it
+    if (!dispel_list.empty())
+    {
+        std::list <Aura *> success_list;
+        std::list <Aura *> fail_list;
+        int32 list_size = dispel_list.size();
+        // Dispell N = damage buffs (or while exist buffs for dispel)
+        for (int32 count=0; count < damage && list_size > 0; ++count)
+        {
+            // Random select buff for dispel
+            Aura *aur = dispel_list[urand(0, list_size-1)];
+
+            SpellEntry const* spellInfo = aur->GetSpellProto();
+            // Base dispel chance
+            // TODO: possible chance depend from spell level??
+            int32 dispell_chance = 100;
+            // Apply dispel mod from aura caster
+            if (Unit *caster = aur->GetCaster())
+            {
+                if ( Player* modOwner = caster->GetSpellModOwner() )
+                    modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_RESIST_DISPEL_CHANCE, dispell_chance, this);
+            }
+            // Try dispel
+            if (roll_chance_i(dispell_chance))
+                success_list.push_back(aur);
+            else
+                fail_list.push_back(aur);
+            // Remove buff from list for prevent doubles
+            for (std::vector<Aura *>::iterator j = dispel_list.begin(); j != dispel_list.end(); )
+            {
+                Aura *dispeled = *j;
+                if (dispeled->GetId() == aur->GetId() && dispeled->GetCasterGUID() == aur->GetCasterGUID())
+                {
+                    j = dispel_list.erase(j);
+                    --list_size;
+                }
+                else
+                    ++j;
+            }
+        }
+        // Send success log and really remove auras
+        if (!success_list.empty())
+        {
+            int32 count = success_list.size();
+            WorldPacket data(SMSG_SPELLDISPELLOG, 8+8+4+1+4+count*5);
+            data.append(unitTarget->GetPackGUID());  // Victim GUID
+            data.append(m_caster->GetPackGUID());    // Caster GUID
+            data << uint32(m_spellInfo->Id);         // Dispell spell id
+            data << uint8(0);                        // not used
+            data << uint32(count);                   // count
+            for (std::list<Aura *>::iterator j = success_list.begin(); j != success_list.end(); ++j)
+            {
+                Aura *aur = *j;
+                SpellEntry const* spellInfo = aur->GetSpellProto();
+                data << uint32(spellInfo->Id);       // Spell Id
+                data << uint8(0);                    // 0 - dispeled !=0 cleansed
+                unitTarget->RemoveAurasDueToSpellByDispel(spellInfo->Id, aur->GetCaster(), m_caster);
+            }
+            m_caster->SendMessageToSet(&data, true);
+
+            // On succes dispel
+            // Devour Magic
+            if (m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->Category == 12)
+            {
+                uint32 heal_spell = 0;
+                switch (m_spellInfo->Id)
+                {
+                    case 19505: heal_spell = 19658; break;
+                    case 19731: heal_spell = 19732; break;
+                    case 19734: heal_spell = 19733; break;
+                    case 19736: heal_spell = 19735; break;
+                    case 27276: heal_spell = 27278; break;
+                    case 27277: heal_spell = 27279; break;
+                    default:
+                        sLog.outDebug("Spell for Devour Magic %d not handled in Spell::EffectDispel", m_spellInfo->Id);
+                        break;
+                }
+                if (heal_spell)
+                    m_caster->CastSpell(m_caster, heal_spell, true);
+            }
+        }
+        // Send fail log to client
+        if (!fail_list.empty())
+        {
+            // Failed to dispell
+            WorldPacket data(SMSG_DISPEL_FAILED, 8+8+4+4*fail_list.size());
+            data << uint64(m_caster->GetGUID());     // Caster GUID
+            data << uint64(unitTarget->GetGUID());   // Victim GUID
+            data << uint32(m_spellInfo->Id);         // Dispell spell id 
+            for (std::list<Aura *>::iterator j = fail_list.begin(); j != fail_list.end(); ++j)
+            {
+                Aura *aur = *j;
+                data << uint32(aur->GetId());        // Spell Id
+            }
+            m_caster->SendMessageToSet(&data, true);
+        }
     }
 }
 
@@ -5390,89 +5504,73 @@ void Spell::EffectSkinPlayerCorpse(uint32 /*i*/)
     ((Player*)unitTarget)->RemovedInsignia( (Player*)m_caster );
 }
 
-void Spell::EffectStealBeneficialBuff(uint32 /*i*/)
+void Spell::EffectStealBeneficialBuff(uint32 i)
 {
     sLog.outDebug("Effect: StealBeneficialBuff");
 
-    // get the auras of the target
-    Unit::AuraMap const& auras = unitTarget->GetAuras();
-
-    // count possible for steal auras
-    uint32 count = 0;
-    for(Unit::AuraMap::const_iterator iter = auras.begin(); iter != auras.end(); ++iter)
-    {
-        if( iter->second->IsPositive() &&                   // only steel positive spell
-            !iter->second->IsPassive() &&                   // don't steal passive abilities
-            !iter->second->IsPersistent() &&                // don't steal persistent auras
-            iter->second->GetSpellProto()->Dispel == m_spellInfo->Dispel )
-                                                            // only steal magic effects
-            ++count;
-    }
-
-    // not found any?
-    if(!count)
+    if(!unitTarget)
         return;
 
-    // random buff to steal
-    uint32 remove_prev_positive = urand(0, count-1);
-
-    // id of the spell we'll steal
-    uint32 spellId = 0;
-
-    // select aura by index
-    count = 0;
-    for(Unit::AuraMap::const_iterator iter = auras.begin(); iter != auras.end(); ++iter)
+    std::vector <Aura *> steal_list;
+    // Create dispel mask by dispel type
+    uint32 dispelMask  = GetDispellMask( DispelType(m_spellInfo->EffectMiscValue[i]) );
+    Unit::AuraMap const& auras = unitTarget->GetAuras();
+    for(Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
-        if( iter->second->IsPositive() &&                   // only steel positive spell
-            !iter->second->IsPassive() &&                   // don't steal passive abilities
-            !iter->second->IsPersistent() &&                // don't steal persistent auras
-            iter->second->GetSpellProto()->Dispel == m_spellInfo->Dispel )
-                                                            // only steal magic effects
+        Aura *aur = (*itr).second;
+        if (aur && (1<<aur->GetSpellProto()->Dispel) & dispelMask)
         {
-            if(count==remove_prev_positive)
-            {
-                spellId = iter->first.first;                // store the id of the last stealable spell
-                break;
-            }
-
-            ++count;
+            // Need check for passive? this 
+            if (aur->IsPositive() && !aur->IsPassive())
+                steal_list.push_back(aur);
         }
     }
-
-    // we found a stealable buff
-    if(spellId)
+    // Ok if exist some buffs for dispel try dispel it
+    if (!steal_list.empty())
     {
-        // max duration 2 minutes (in msecs)
-        const int32 max_dur = 2*MINUTE*1000;
-
-        // go through all the effects of the spell
-        for(int i=0; i<3; ++i)
+        std::list <Aura *> success_list;
+        int32 list_size = steal_list.size();
+        // Dispell N = damage buffs (or while exist buffs for dispel)
+        for (int32 count=0; count < damage && list_size > 0; ++count)
         {
-            // get the corresponding aura from the victim
-            Aura * aur = unitTarget->GetAura(spellId, i);
+            // Random select buff for dispel
+            Aura *aur = steal_list[urand(0, list_size-1)];
+            // Not use chance for steal
+            // TODO possible need do it
+            success_list.push_back(aur);
 
-            if(!aur)
-                continue;
-
-            // we have to check against the (remaining) duration on the victim
-            int32 dur        = aur->GetAuraDuration();
-            int32 basePoints = aur->GetBasePoints();
-
-            // construct the new aura for the attacker
-            Aura * new_aur = CreateAura(aur->GetSpellProto(), i, &basePoints, m_caster);
-
-            if(!new_aur)
-                continue;
-
-            // set its duration and maximum duration
-            new_aur->SetAuraMaxDuration( max_dur > dur ? dur : max_dur );
-            new_aur->SetAuraDuration( max_dur > dur ? dur : max_dur );
-
-            // add the new aura
-            m_caster->AddAura(new_aur);
+            // Remove buff from list for prevent doubles
+            for (std::vector<Aura *>::iterator j = steal_list.begin(); j != steal_list.end(); )
+            {
+                Aura *stealed = *j;
+                if (stealed->GetId() == aur->GetId() && stealed->GetCasterGUID() == aur->GetCasterGUID())
+                {
+                    j = steal_list.erase(j);
+                    --list_size;
+                }
+                else
+                    ++j;
+            }
         }
-
-        // remove the auras caused by the stolen spell from the victim
-        unitTarget->RemoveAurasDueToSpell(spellId);
+        // Really try steal and send log
+        if (!success_list.empty())
+        {
+            int32 count = success_list.size();
+            WorldPacket data(SMSG_SPELLSTEALLOG, 8+8+4+1+4+count*5);
+            data.append(unitTarget->GetPackGUID());  // Victim GUID
+            data.append(m_caster->GetPackGUID());    // Caster GUID
+            data << uint32(m_spellInfo->Id);         // Dispell spell id
+            data << uint8(0);                        // not used
+            data << uint32(count);                   // count
+            for (std::list<Aura *>::iterator j = success_list.begin(); j != success_list.end(); ++j)
+            {
+                Aura *aur = *j;
+                SpellEntry const* spellInfo = aur->GetSpellProto();
+                data << uint32(spellInfo->Id);       // Spell Id
+                data << uint8(0);                    // 0 - steals !=0 transfers
+                unitTarget->RemoveAurasDueToSpellBySteal(spellInfo->Id, aur->GetCaster(), m_caster);
+            }
+            m_caster->SendMessageToSet(&data, true);
+        }
     }
 }
