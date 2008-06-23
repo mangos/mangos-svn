@@ -259,6 +259,7 @@ class World
 {
     public:
         static volatile bool m_stopEvent;
+        static volatile uint32 m_worldLoopCounter;
 
         World();
         ~World();

@@ -144,6 +144,11 @@ BindIP = "0.0.0.0"
 #        Update realm uptime period in minutes (for save data in 'uptime' table). Must be > 0 
 #        Default: 10 (minutes)
 #
+#    MaxCoreStuckTime
+#        Periodically check if the process got freezed, if this is the case force crash after the specified
+#        amount of seconds. Must be > 0. Recommended > 10 secs if you use this.
+#        Default: 0 (Disabled)
+#
 ###################################################################################################################
 
 UseProcessors = 0
@@ -166,6 +171,7 @@ vmap.ignoreSpellIds = "7720"
 DetectPosCollision = 1
 TargetPosRecalculateRange = 1.5
 UpdateUptimeInterval = 10
+MaxCoreStuckTime = 0
 
 ###################################################################################################################
 # SERVER LOGGING

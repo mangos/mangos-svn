@@ -57,6 +57,7 @@
 INSTANTIATE_SINGLETON_1( World );
 
 volatile bool World::m_stopEvent = false;
+volatile uint32 World::m_worldLoopCounter = 0;
 
 float World::m_MaxVisibleDistanceForCreature  = DEFAULT_VISIBILITY_DISTANCE;
 float World::m_MaxVisibleDistanceForPlayer    = DEFAULT_VISIBILITY_DISTANCE;

@@ -16975,8 +16975,6 @@ bool Player::IsAtGroupRewardDistance(Unit const* pVictim) const
     return pVictim->GetDistanceSq(corpse) <= sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE);
 }
 
-
-
 uint8 Player::GetWeaponSlotByAttack(WeaponAttackType attType)
 {
     switch (attType)
