@@ -499,9 +499,19 @@ void WorldSession::HandleGMSurveySubmit( WorldPacket & recv_data)
     // TODO: chart this data in some way
 }
 
-void WorldSession::HandleTogglePvP(WorldPacket& /*recvPacket*/)
+void WorldSession::HandleTogglePvP( WorldPacket & recv_data )
 {
-    GetPlayer()->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
+    // this opcode can be used in two ways: Either set explicit new status or toggle old status
+    if(recv_data.size() == 1)
+    {
+        bool newPvPStatus;
+        recv_data >> newPvPStatus;
+        GetPlayer()->ApplyModFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP, newPvPStatus);
+    }
+    else
+    {
+        GetPlayer()->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
+    }
 
     if(GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP))
     {
