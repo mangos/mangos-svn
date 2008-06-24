@@ -2971,7 +2971,7 @@ void Spell::EffectDispel(uint32 i)
                 SpellEntry const* spellInfo = aur->GetSpellProto();
                 data << uint32(spellInfo->Id);       // Spell Id
                 data << uint8(0);                    // 0 - dispeled !=0 cleansed
-                unitTarget->RemoveAurasDueToSpellByDispel(spellInfo->Id, aur->GetCaster(), m_caster);
+                unitTarget->RemoveAurasDueToSpellByDispel(spellInfo->Id, aur->GetCasterGUID(), m_caster);
             }
             m_caster->SendMessageToSet(&data, true);
 
@@ -5568,7 +5568,7 @@ void Spell::EffectStealBeneficialBuff(uint32 i)
                 SpellEntry const* spellInfo = aur->GetSpellProto();
                 data << uint32(spellInfo->Id);       // Spell Id
                 data << uint8(0);                    // 0 - steals !=0 transfers
-                unitTarget->RemoveAurasDueToSpellBySteal(spellInfo->Id, aur->GetCaster(), m_caster);
+                unitTarget->RemoveAurasDueToSpellBySteal(spellInfo->Id, aur->GetCasterGUID(), m_caster);
             }
             m_caster->SendMessageToSet(&data, true);
         }
