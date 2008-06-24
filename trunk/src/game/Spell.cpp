@@ -401,8 +401,8 @@ void Spell::FillTargetMap()
                     SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
                 }
                 // Note: this hack with search required until GO casting not implemented
-                // enviromenment damage spells already have around enemies targeting but this not help in case not existed GO casting support
-                // currently each eanemy selected explicitly and self cast damage
+                // environment damage spells already have around enemies targeting but this not help in case not existed GO casting support
+                // currently each enemy selected explicitly and self cast damage
                 else if(m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_ENEMY_IN_AREA && m_spellInfo->Effect[i]==SPELL_EFFECT_ENVIRONMENTAL_DAMAGE)
                 {
                     if(m_targets.getUnitTarget())
@@ -416,6 +416,7 @@ void Spell::FillTargetMap()
                 break;
             case TARGET_CURRENT_SELECTED_ENEMY:
             case TARGET_ALL_ENEMY_IN_TARGET_AREA_INSTANT:
+            case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
                 SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
                 break;
             default:
@@ -1403,6 +1404,22 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             cell.SetNoCreate();
 
             MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, radius, PUSH_SELF_CENTER,SPELL_TARGETS_FRIENDLY);
+
+            TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
+            TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
+
+            CellLock<GridReadGuard> cell_lock(cell, p);
+            cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+            cell_lock->Visit(cell_lock, grid_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+        }break;
+        case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
+        {
+            CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+            Cell cell(p);
+            cell.data.Part.reserved = ALL_DISTRICT;
+            cell.SetNoCreate();
+
+            MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, radius, PUSH_DEST_CENTER,SPELL_TARGETS_FRIENDLY);
 
             TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
             TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
@@ -3336,9 +3353,6 @@ uint8 Spell::CanCast(bool strict)
         {
             case SPELL_EFFECT_DUMMY:
             {
-                if (!m_targets.getUnitTarget()&&!m_targets.getGOTarget()&&!m_targets.getItemTarget())
-                    return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-
                 // Execute
                 if(m_spellInfo->SpellIconID == 1648)
                 {

@@ -334,6 +334,7 @@ inline bool IsAreaEffectTarget( Targets target )
         case TARGET_AREAEFFECT_CUSTOM_2:
         case TARGET_AREAEFFECT_PARTY_AND_CLASS:
         case TARGET_IN_FRONT_OF_CASTER:
+        case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
             return true;
         default:
             break;
