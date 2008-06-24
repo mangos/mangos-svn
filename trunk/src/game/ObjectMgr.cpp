@@ -3693,39 +3693,38 @@ void ObjectMgr::LoadPageTexts()
     sLog.outString( ">> Loaded %u page texts", sPageTextStore.RecordCount );
     sLog.outString();
 
-    // check data correctness
     for(uint32 i = 1; i < sPageTextStore.MaxEntry; ++i)
     {
+        // check data correctness
         PageText const* page = sPageTextStore.LookupEntry<PageText>(i);
         if(!page)
             continue;
 
         if(page->Next_Page && !sPageTextStore.LookupEntry<PageText>(page->Next_Page))
-            sLog.outErrorDb("Paget text (Id: %u) has not existing next page (Id:%u)", i,page->Next_Page);
-    }
-
-    // detect circular reference
-    for(uint32 i = 1; i < sPageTextStore.MaxEntry; ++i)
-    {
-        std::set<uint32> checkedPages;
-        uint32 pageId = i;
-        while(PageText const* page = sPageTextStore.LookupEntry<PageText>(pageId))
         {
-            if(!page->Next_Page)
+            sLog.outErrorDb("Page text (Id: %u) has not existing next page (Id:%u)", i,page->Next_Page);
+            continue;
+        }
+
+        // detect circular reference
+        std::set<uint32> checkedPages;
+        for(PageText const* pageItr = page; pageItr; pageItr = sPageTextStore.LookupEntry<PageText>(pageItr->Next_Page))
+        {
+            if(!pageItr->Next_Page)
                 break;
-            checkedPages.insert(pageId);
-            if(checkedPages.find(page->Next_Page)!=checkedPages.end())
+            checkedPages.insert(pageItr->Page_ID);
+            if(checkedPages.find(pageItr->Next_Page)!=checkedPages.end())
             {
                 std::ostringstream ss;
                 ss<< "The text page(s) ";
                 for (std::set<uint32>::iterator itr= checkedPages.begin();itr!=checkedPages.end(); itr++)
                     ss << *itr << " ";
                 ss << "create(s) a circular reference, which can cause the server to freeze. Changing Next_Page of page "
-                    << pageId <<" to 0";
+                    << pageItr->Page_ID <<" to 0";
                 sLog.outErrorDb(ss.str().c_str());
-                const_cast<PageText*>(page)->Next_Page = 0;
+                const_cast<PageText*>(pageItr)->Next_Page = 0;
+                break;
             }
-            pageId = page->Next_Page;
         }
     }
 }
