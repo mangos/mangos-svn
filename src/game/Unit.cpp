@@ -3886,12 +3886,12 @@ void Unit::RemoveAura(uint32 spellId, uint32 effindex, Aura* except)
     }
 }
 
-void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, Unit *caster, Unit *dispeler)
+void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID, Unit *dispeler)
 {
     for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); )
     {
         Aura *aur = iter->second;
-        if (aur->GetId() == spellId && aur->GetCasterGUID() == caster->GetGUID())
+        if (aur->GetId() == spellId && aur->GetCasterGUID() == casterGUID)
         {
             // Custom dispel case
             // Unstable Affliction
@@ -3908,12 +3908,12 @@ void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, Unit *caster, Unit *dis
     }
 }
 
-void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, Unit *caster, Unit *stealer)
+void Unit::RemoveAurasDueToSpellBySteal(uint32 spellId, uint64 casterGUID, Unit *stealer)
 {
     for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); )
     {
         Aura *aur = iter->second;
-        if (aur->GetId() == spellId && aur->GetCasterGUID() == caster->GetGUID())
+        if (aur->GetId() == spellId && aur->GetCasterGUID() == casterGUID)
         {
             int32 basePoints = aur->GetBasePoints();
             // construct the new aura for the attacker
