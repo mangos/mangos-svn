@@ -2912,9 +2912,11 @@ void Spell::EffectDispel(uint32 i)
 
                 // do not remove positive auras if friendly target
                 //               negative auras if non-friendly target
-                if(positive != unitTarget->IsFriendlyTo(m_caster))
-                    dispel_list.push_back(aur);
+                if(positive == unitTarget->IsFriendlyTo(m_caster))
+                    continue;
             }
+            // Add aura to dispel list
+            dispel_list.push_back(aur);
         }
     }
     // Ok if exist some buffs for dispel try dispel it
