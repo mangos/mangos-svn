@@ -121,7 +121,7 @@ Master::~Master()
 /// Main function
 void Master::Run()
 {
-    sLog.outString( "MaNGOS daemon %s", _FULLVERSION );
+    sLog.outString( "%s (world-daemon)", _FULLVERSION );
     sLog.outString( "<Ctrl-C> to stop.\n\n" );
 
     sLog.outTitle( "MM   MM         MM   MM  MMMMM   MMMM   MMMMM");
@@ -499,6 +499,7 @@ void Master::_UnhookSignals()
     signal(SIGBREAK, 0);
     #endif
 }
+
 
 
 

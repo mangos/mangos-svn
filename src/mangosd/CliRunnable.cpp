@@ -462,7 +462,7 @@ void CliBan(char*command,pPrintf zprintf)
 void CliVersion(char*,pPrintf zprintf)
 {
                                                             //<--maybe better append to info cmd
-    zprintf( "MaNGOS daemon version is %s\r\n", _FULLVERSION );
+    zprintf( "%s (world-daemon)\r\n", _FULLVERSION );
 }
 
 /// Unban an IP adress or a user account

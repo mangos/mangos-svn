@@ -152,7 +152,7 @@ extern int main(int argc, char **argv)
         while (pause > clock());
     }
 
-    sLog.outString( "MaNGOS realm daemon %s", _FULLVERSION );
+    sLog.outString( "%s (realm-daemon)", _FULLVERSION );
     sLog.outString( "<Ctrl-C> to stop.\n" );
 
     /// realmd PID file creation
