@@ -140,7 +140,7 @@ class WorldSocket : public TcpSocket
         WorldSocket(ISocketHandler&);
         ~WorldSocket();
 
-        void SendPacket(WorldPacket* packet);
+        void SendPacket(WorldPacket const* packet);
         void CloseSocket();
 
         void OnAccept();

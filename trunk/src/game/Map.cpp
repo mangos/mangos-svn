@@ -474,13 +474,10 @@ bool Map::AddInstanced(Player *player)
         return(true);
     }
 
-    for (PlayerList::iterator i = i_Players.begin(); i != i_Players.end(); i++)
+    if(std::find(i_Players.begin(),i_Players.end(),player)!=i_Players.end())
     {
-        if (*i == player)
-        {
-            sLog.outDetail("MAP: Player '%s' already in instance '%u' of map '%s'", player->GetName(), GetInstanceId(), GetMapName());
-            return(true);
-        }
+        sLog.outDetail("MAP: Player '%s' already in instance '%u' of map '%s'", player->GetName(), GetInstanceId(), GetMapName());
+        return true;
     }
 
     // TODO: Not sure about checking player level: already done in HandleAreaTriggerOpcode
@@ -500,6 +497,7 @@ bool Map::AddInstanced(Player *player)
 
         if(i_data)
             i_data->OnPlayerEnter(player);
+
         i_Players.push_back(player);
     }
 
@@ -1475,6 +1473,12 @@ uint32 Map::GetPlayersCountExceptGMs() const
         if(!(*itr)->isGameMaster())
             ++count;
     return count;
+}
+
+void Map::SendToPlayers(WorldPacket const* data) const
+{
+    for(PlayerList::const_iterator itr = i_Players.begin(); itr != i_Players.end(); ++itr)
+        (*itr)->GetSession()->SendPacket(data);
 }
 
 template void Map::Add(Corpse *);

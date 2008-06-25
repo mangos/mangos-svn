@@ -94,7 +94,7 @@ WorldSocket::~WorldSocket()
 }
 
 /// Copy the packet to the to-be-sent queue
-void WorldSocket::SendPacket(WorldPacket* packet)
+void WorldSocket::SendPacket(WorldPacket const* packet)
 {
     WorldPacket *pck = new WorldPacket(*packet);
     ASSERT(pck);
