@@ -4569,7 +4569,7 @@ void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHi
 
     uint32 plevel = getLevel();                             // if defense than pVictim == attacker
     uint32 greylevel = MaNGOS::XP::GetGrayLevel(plevel);
-    uint32 moblevel = pVictim->getLevel();
+    uint32 moblevel = pVictim->getLevelForTarget(this);
     if(moblevel < greylevel)
         return;
 

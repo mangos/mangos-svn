@@ -2290,7 +2290,9 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     DEBUG_LOG ("RollMeleeOutcomeAgainst: rolled %d, miss %d, dodge %d, parry %d, block %d, crit %d",
         roll, miss_chance, dodge_chance, parry_chance, block_chance, crit_chance);
 
-    if (tmp > 0 && roll < (sum += miss_chance ))
+    tmp = miss_chance;
+
+    if (tmp > 0 && roll < (sum += tmp ))
     {
         DEBUG_LOG ("RollMeleeOutcomeAgainst: MISS");
         return MELEE_HIT_MISS;
