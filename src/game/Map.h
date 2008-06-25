@@ -131,14 +131,10 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
 
         virtual void Update(const uint32&);
 
-        std::list<Player*>& GetPlayers() { return i_Players;}
-
         void MessageBroadcast(Player *, WorldPacket *, bool to_self, bool own_team_only = false);
-
         void MessageBroadcast(WorldObject *, WorldPacket *);
 
         void PlayerRelocation(Player *, float x, float y, float z, float angl);
-
         void CreatureRelocation(Creature *creature, float x, float y, float, float);
 
         template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &visitor);
@@ -205,8 +201,12 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         uint32 GetInstanceId() { return i_InstanceId; }
         uint8 GetSpawnMode() { return 0; }
         bool NeedsReset() { return Instanceable() && ( i_resetTime == 0 || i_resetTime <= time(NULL)); }
+        
+        PlayerList const& GetPlayers() const { return i_Players;}
         uint32 GetPlayersCountExceptGMs() const;
         uint32 HavePlayers() const { return !i_Players.empty(); }
+        void SendToPlayers(WorldPacket const* data) const;
+
         void Reset();
         bool CanEnter(Player* player) const;
         const char* GetMapName() const;

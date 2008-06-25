@@ -500,7 +500,7 @@ void WorldSession::SetSocket(WorldSocket *sock)
 }
 
 /// Send a packet to the client
-void WorldSession::SendPacket(WorldPacket* packet)
+void WorldSession::SendPacket(WorldPacket const* packet)
 {
     if (!_socket)
         return;

@@ -208,10 +208,7 @@ class ByteBuffer
             return read<uint8>(pos);
         }
 
-        size_t rpos()
-        {
-            return _rpos;
-        };
+        size_t rpos() const { return _rpos; }
 
         size_t rpos(size_t rpos_)
         {
@@ -219,10 +216,7 @@ class ByteBuffer
             return _rpos;
         };
 
-        size_t wpos()
-        {
-            return _wpos;
-        }
+        size_t wpos() const { return _wpos; }
 
         size_t wpos(size_t wpos_)
         {
