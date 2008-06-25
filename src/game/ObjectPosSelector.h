@@ -86,7 +86,10 @@ struct ObjectPosSelector
         {
             // if next node permit use selected angle, then do it
             if(!CheckAngle(*nextNode, sign, angle))
+            {
+                m_smallStepOk[uptype] = false;
                 return false;
+            }
         }
 
         // possible more points
