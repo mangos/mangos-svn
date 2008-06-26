@@ -793,8 +793,10 @@ enum Targets
     TARGET_PET                         = 5,
     TARGET_CHAIN_DAMAGE                = 6,
     TARGET_AREAEFFECT_CUSTOM           = 8,
+    TARGET_INNKEEPER_COORDINATS        = 9,                 // uses in teleport to innkeeper spells
     TARGET_ALL_ENEMY_IN_AREA           = 15,
     TARGET_ALL_ENEMY_IN_AREA_INSTANT   = 16,
+    TARGET_TABLE_X_Y_Z_COORDINATES     = 17,                // uses in teleport spells and some other
     TARGET_EFFECT_SELECT               = 18,                // highly depends on the spell effect
     TARGET_ALL_PARTY_AROUND_CASTER     = 20,
     TARGET_SINGLE_FRIEND               = 21,
@@ -825,6 +827,7 @@ enum Targets
     TARGET_RANDOM_RAID_MEMBER          = 56,
     TARGET_SINGLE_FRIEND_2             = 57,
     TARGET_AREAEFFECT_PARTY_AND_CLASS  = 61,
+    TERGET_BEHIND_VICTIM               = 65,                // uses in teleport behind spells
     TARGET_ALL_ENEMY_IN_TARGET_AREA_INSTANT = 63,
     TARGET_SINGLE_ENEMY                = 77,
     TARGET_NONCOMBAT_PET               = 90,
