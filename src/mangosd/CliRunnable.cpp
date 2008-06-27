@@ -35,6 +35,7 @@
 #include "CliRunnable.h"
 #include "MapManager.h"
 #include "PlayerDump.h"
+#include "Player.h"
 
 //CliCommand and CliCommandHolder are defined in World.h to avoid cyclic deps
 
@@ -54,6 +55,7 @@ void CliShutdown(char*,pPrintf zprintf);
 void CliBroadcast(char*,pPrintf);
 void CliCreate(char*,pPrintf);
 void CliDelete(char*,pPrintf);
+void CliCharDelete(char *,pPrintf);
 void CliLoadScripts(char*,pPrintf);
 void CliKick(char*,pPrintf);
 void CliTele(char*,pPrintf);
@@ -75,6 +77,7 @@ const CliCommand Commands[]=
     {"broadcast", & CliBroadcast,"Announce in-game message"},
     {"create", & CliCreate,"Create account"},
     {"delete", & CliDelete,"Delete account and characters"},
+    {"chardelete", & CliCharDelete,"Delete character"},
     {"info", & CliInfo,"Display Server infomation"},
     {"uptime", & CliUpTime, "Displays the server uptime"},
     {"motd", & CliMotd,"Change or display motd"},
@@ -201,6 +204,43 @@ void CliDelete(char*command,pPrintf zprintf)
         zprintf("User %s does not exist\r\n",account_name);
     else if(result == 0)
         zprintf("We deleted account: %s\r\n",account_name);
+}
+
+void CliCharDelete(char*command,pPrintf zprintf)
+{
+    char *character_name = strtok(command," ");
+
+    if(!character_name)
+    {
+        zprintf("Syntax is: chardelete $character_name\r\n");
+        return;
+    }
+
+    Player *player = objmgr.GetPlayer(character_name);
+
+    uint64 character_guid;
+    uint32 account_id;
+
+    if(player)
+    {
+        character_guid = player->GetGUID();
+        account_id = player->GetSession()->GetAccountId();
+        player->GetSession()->KickPlayer();
+    }
+    else
+    {
+        character_guid = objmgr.GetPlayerGUIDByName(character_name);
+        if(!character_guid)
+        {
+            zprintf("Player %s not found!\r\n",character_name);
+            return;
+        }
+
+        account_id = objmgr.GetPlayerAccountIdByGUID(character_guid);
+    }
+
+    Player::DeleteFromDB(character_guid, account_id, true); 
+    zprintf("Player %s (Guid: %u AccountId: %u) deleted\r\n",character_name,GUID_LOPART(character_guid),account_id);
 }
 
 /// Broadcast a message to the World
