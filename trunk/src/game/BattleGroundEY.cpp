@@ -571,8 +571,7 @@ void BattleGroundEY::HandleKillPlayer(Player *player, Player *killer)
 
 void BattleGroundEY::EventPlayerDroppedFlag(Player *Source)
 {
-    if(GetStatus() != STATUS_IN_PROGRESS)
-        return;
+    // Drop allowed in any BG state
 
     const char *message = "";
     uint8 type = 0;
