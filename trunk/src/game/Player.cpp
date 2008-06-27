@@ -12303,11 +12303,30 @@ void Player::AreaExploredOrEventHappens( uint32 questId )
         if( log_slot < MAX_QUEST_LOG_SIZE)
         {
             mQuestStatus[questId].m_explored = true;
-            if (mQuestStatus[questId].uState != QUEST_NEW) mQuestStatus[questId].uState = QUEST_CHANGED;
+            if (mQuestStatus[questId].uState != QUEST_NEW)
+                mQuestStatus[questId].uState = QUEST_CHANGED;
         }
         if( CanCompleteQuest( questId ) )
             CompleteQuest( questId );
     }
+}
+
+//not used in mangosd, function for external script library
+void Player::GroupEventHappens( uint32 questId, WorldObject const* pEventObject )
+{
+    if( Group *pGroup = GetGroup() )
+    {
+        for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+        {
+            Player *pGroupGuy = itr->getSource();
+
+            // for any leave or dead (with not released body) group member at appropriate distance
+            if( pGroupGuy && pGroupGuy->IsAtGroupRewardDistance(pEventObject) && !pGroupGuy->GetCorpse() )
+                pGroupGuy->AreaExploredOrEventHappens(questId);
+        }
+    }
+    else
+        AreaExploredOrEventHappens(questId);
 }
 
 void Player::ItemAddedQuestCheck( uint32 entry, uint32 count )
@@ -16962,9 +16981,9 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
     return xp || honored_kill;
 }
 
-bool Player::IsAtGroupRewardDistance(Unit const* pVictim) const
+bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
 {
-    if(pVictim->GetDistanceSq(this) <= sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
+    if(pRewardSource->GetDistanceSq(this) <= sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
         return true;
 
     if(isAlive())
@@ -16974,7 +16993,7 @@ bool Player::IsAtGroupRewardDistance(Unit const* pVictim) const
     if(!corpse)
         return false;
 
-    return pVictim->GetDistanceSq(corpse) <= sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE);
+    return pRewardSource->GetDistanceSq(corpse) <= sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE);
 }
 
 uint8 Player::GetWeaponSlotByAttack(WeaponAttackType attType)

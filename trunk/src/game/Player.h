@@ -1190,6 +1190,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry);
         void AdjustQuestReqItemCount( Quest const* pQuest );
         void AreaExploredOrEventHappens( uint32 questId );
+        void GroupEventHappens( uint32 questId, WorldObject const* pEventObject );
         void ItemAddedQuestCheck( uint32 entry, uint32 count );
         void ItemRemovedQuestCheck( uint32 entry, uint32 count );
         void KilledMonster( uint32 entry, uint64 guid );
@@ -1621,7 +1622,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         static uint32 getFactionForRace(uint8 race);
         void setFactionForRace(uint8 race);
 
-        bool IsAtGroupRewardDistance(Unit const* pVictim) const;
+        bool IsAtGroupRewardDistance(WorldObject const* pRewardSource) const;
         bool RewardPlayerAndGroupAtKill(Unit* pVictim);
 
         FactionsList m_factions;
