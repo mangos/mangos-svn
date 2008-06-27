@@ -284,8 +284,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
 
 void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
 {
-    if(GetStatus() != STATUS_IN_PROGRESS)
-        return;
+    // Drop allowed in any BG state
 
     const char *message = "";
     uint8 type = 0;
