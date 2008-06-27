@@ -247,16 +247,15 @@ MotionMaster::MovePoint(uint32 id, float x, float y, float z)
 void
 MotionMaster::MoveFleeing(Unit* enemy)
 {
-    // we will flee at start from current unit position itself
     if(!enemy)
-        enemy = i_owner;
+        return;
 
     if(i_owner->GetTypeId()==TYPEID_PLAYER)
     {
         DEBUG_LOG("Player (GUID: %u) flee from %s (GUID: %u)", i_owner->GetGUIDLow(),
             enemy->GetTypeId()==TYPEID_PLAYER ? "player" : "creature",
             enemy->GetTypeId()==TYPEID_PLAYER ? enemy->GetGUIDLow() : ((Creature*)enemy)->GetDBTableGUIDLow() );
-        Mutate(new FleeingMovementGenerator<Player>(*enemy));
+        Mutate(new FleeingMovementGenerator<Player>(enemy->GetGUID()));
     }
     else
     {
@@ -264,7 +263,7 @@ MotionMaster::MoveFleeing(Unit* enemy)
             i_owner->GetEntry(), i_owner->GetGUIDLow(),
             enemy->GetTypeId()==TYPEID_PLAYER ? "player" : "creature",
             enemy->GetTypeId()==TYPEID_PLAYER ? enemy->GetGUIDLow() : ((Creature*)enemy)->GetDBTableGUIDLow() );
-        Mutate(new FleeingMovementGenerator<Creature>(*enemy));
+        Mutate(new FleeingMovementGenerator<Creature>(enemy->GetGUID()));
     }
 }
 
