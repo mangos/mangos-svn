@@ -5486,16 +5486,42 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                             return;
                         }
                     }
+
                     if( ((Player*)this)->HasSpellCooldown(32910))
                         return;
 
-                    SpellEntry const* windfurySpellEntry = sSpellStore.LookupEntry(spellId);
-
-                    int32 addvalue = windfurySpellEntry->EffectBasePoints[0]+windfurySpellEntry->EffectBaseDice[0];
-
-                    CastCustomSpell(this, 32910, &addvalue, NULL, NULL, true, castItem, triggeredByAura);
-
                     ((Player*)this)->AddSpellCooldown(32910,0,time(NULL) + 3);
+
+                    SpellEntry const* windfurySpellEntry = sSpellStore.LookupEntry(spellId);
+                    if(!windfurySpellEntry)
+                    {
+                        sLog.outError("Unit::HandleDummyAuraProc: non existed spell id: %u (Windfury)",spellId);
+                        return;
+                    }
+
+                    int32 extra_attack_power = CalculateSpellDamage(windfurySpellEntry,0,windfurySpellEntry->EffectBasePoints[0],pVictim);
+
+                    // Value gained from additional AP
+                    int32 APBonus;
+                    // Spell Casted 25504 for Main-Hand proc, 33750 for Off-Hand
+                    uint32 procSpellId;
+
+                    if ( castItem->GetSlot() == EQUIPMENT_SLOT_OFFHAND )
+                    {
+                        // Off-Hand case
+                        APBonus = int32(extra_attack_power/14.0f * GetAttackTime(OFF_ATTACK)/1000/2);
+                        procSpellId = 33750;
+                    }
+                    else
+                    {
+                        // Main-Hand case
+                        APBonus = int32(extra_attack_power/14.0f * GetAttackTime(BASE_ATTACK)/1000);
+                        procSpellId = 25504;
+                    }
+
+                    // Attack Twice
+                    for ( uint32 i = 0; i<2; ++i )
+                        CastCustomSpell(pVictim,procSpellId,&APBonus,NULL,NULL,true,castItem,triggeredByAura);  
 
                     return;
                 }
