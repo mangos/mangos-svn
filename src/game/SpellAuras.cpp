@@ -3315,11 +3315,11 @@ void Aura::HandleAuraModSilence(bool apply, bool Real)
     if(apply)
     {
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED);
-        // Stop cast only spells vs PreventionType == 1
+        // Stop cast only spells vs PreventionType == SPELL_PREVENTION_TYPE_SILENCE
         for (uint32 i = CURRENT_MELEE_SPELL; i < CURRENT_MAX_SPELL;i++)
         {
             Spell* currentSpell = m_target->m_currentSpells[i];
-            if (currentSpell && currentSpell->m_spellInfo->PreventionType == 1)
+            if (currentSpell && currentSpell->m_spellInfo->PreventionType == SPELL_PREVENTION_TYPE_SILENCE)
             {
                 uint32 state = currentSpell->getState();
                 // Stop spells on prepere or casting state

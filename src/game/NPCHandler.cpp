@@ -382,9 +382,6 @@ void WorldSession::HandleSpiritHealerActivateOpcode( WorldPacket & recv_data )
 
 void WorldSession::SendSpiritResurrect()
 {
-    if (!_player)
-        return;
-
     _player->ResurrectPlayer(0.5f,false, true);
 
     _player->DurabilityLossAll(0.25f);
