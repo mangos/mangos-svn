@@ -2507,17 +2507,25 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
             }
             m_target->setTransForm(GetId());
         }
+
+        // polymorph case
+        if( m_target->GetTypeId() == TYPEID_PLAYER && m_target->IsPolymorphed())
+        {
+            // for players, start regeneration after 1s (in polymorph fast regeneration case)
+            // only if caster is Player (after patch 2.4.2)
+            if(IS_PLAYER_GUID(GetCasterGUID()) )
+                ((Player*)m_target)->setRegenTimer(1000);
+
+            //dismount polymorphed target (after patch 2.4.2)
+            if (m_target->IsMounted())
+                m_target->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+        }
     }
     else
     {
         m_target->SetDisplayId(m_target->GetNativeDisplayId());
         m_target->setTransForm(0);
     }
-
-    // for players, start regeneration after 1s (in polymorph fast regeneration case)
-    if(m_target->GetTypeId() == TYPEID_PLAYER)
-        if (m_target->IsPolymorphed())
-            ((Player*)m_target)->setRegenTimer(1000);
 
     Unit* caster = GetCaster();
 
@@ -3494,6 +3502,10 @@ void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
         data.append(m_target->GetPackGUID());
         data << uint32(0);                                      // unknown
         m_target->SendMessageToSet(&data, true);
+
+        //Players on flying mounts must be immune to polymorph
+        if (m_target->GetTypeId()==TYPEID_PLAYER)
+            m_target->ApplySpellImmune(GetId(),IMMUNITY_MECHANIC,MECHANIC_POLYMORPH,apply);
     }
 
     m_target->UpdateSpeed(MOVE_FLY, true);
