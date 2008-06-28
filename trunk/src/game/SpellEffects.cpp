@@ -1523,6 +1523,48 @@ void Spell::EffectTriggerSpell(uint32 i)
     // special cases
     switch(triggered_spell_id)
     {
+        // Vanish
+        case 18461:
+        {
+            m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
+            m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
+            m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STALKED);
+
+            // if this spell is given to NPC it must handle rest by it's own AI
+            if ( m_caster->GetTypeId() != TYPEID_PLAYER )
+                return;
+
+            // get highest rank of the Stealth spell
+            uint32 spellId = 0;
+            const PlayerSpellMap& sp_list = ((Player*)m_caster)->GetSpellMap();
+            for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+            {
+                // only highest rank is shown in spell book, so simply check if shown in spell book
+                if(itr->second->active != 1 || itr->second->state == PLAYERSPELL_REMOVED)
+                    continue;
+
+                SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
+                if (!spellInfo)
+                    continue;
+                
+                if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_STEALTH)
+                {
+                    spellId = spellInfo->Id;
+                    break;
+                }
+            }
+
+            // no Stealth spell found
+            if (!spellId)
+                return;
+
+            // reset cooldown on it if needed
+            if(((Player*)m_caster)->HasSpellCooldown(spellId))
+                ((Player*)m_caster)->RemoveSpellCooldown(spellId);
+
+            m_caster->CastSpell(m_caster, spellId, true);
+            return;
+        }
         // just skip
         case 23770:                                         // Sayge's Dark Fortune of *
             // not exist, common cooldown can be implemented in scripts if need.
