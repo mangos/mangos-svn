@@ -3542,7 +3542,7 @@ void Aura::HandleModMechanicImmunity(bool apply, bool Real)
     if(GetId()==42292)
         mechanic=IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
 
-    if(apply)
+    if(apply && GetSpellProto()->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)
     {
         Unit::AuraMap& Auras = m_target->GetAuras();
         for(Unit::AuraMap::iterator iter = Auras.begin(), next; iter != Auras.end(); iter = next)
@@ -3639,7 +3639,7 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
 
 void Aura::HandleAuraModStateImmunity(bool apply, bool Real)
 {
-    if(apply && Real)
+    if(apply && Real && GetSpellProto()->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)
     {
         Unit::AuraList const& auraList = m_target->GetAurasByType(AuraType(m_modifier.m_miscvalue));
         for(Unit::AuraList::const_iterator itr = auraList.begin(); itr != auraList.end();)
@@ -3661,7 +3661,7 @@ void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
 {
     m_target->ApplySpellImmune(GetId(),IMMUNITY_SCHOOL,m_modifier.m_miscvalue,apply);
 
-    if(Real && apply)
+    if(Real && apply && GetSpellProto()->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)
     {
         if(IsPositiveSpell(GetId()))                        //Only positive immunity removes auras
         {
@@ -3705,7 +3705,7 @@ void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
 
     m_target->ApplySpellImmune(GetId(),IMMUNITY_DISPEL,m_modifier.m_miscvalue,apply);
 
-    if (apply)
+    if (apply && GetSpellProto()->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)
     {
         // Create dispel mask by dispel type
         uint32 dispelMask = GetDispellMask( DispelType(m_modifier.m_miscvalue) );

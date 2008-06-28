@@ -3927,18 +3927,21 @@ uint8 Spell::CheckCasterAuras() const
 
     //Check if the spell grants school or mechanic immunity.
     //We use bitmasks so the loop is done only once and not on every aura check below.
-    for(int i = 0;i < 3; i ++)
+    if ( m_spellInfo->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY )
     {
-        if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_SCHOOL_IMMUNITY)
-            school_immune |= uint32(m_spellInfo->EffectMiscValue[i]);
-        else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
-            mechanic_immune |= 1 << uint32(m_spellInfo->EffectMiscValue[i]);
-        else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_DISPEL_IMMUNITY)
-            dispel_immune |= GetDispellMask(DispelType(m_spellInfo->EffectMiscValue[i]));
+        for(int i = 0;i < 3; i ++)
+        {
+            if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_SCHOOL_IMMUNITY)
+                school_immune |= uint32(m_spellInfo->EffectMiscValue[i]);
+            else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
+                mechanic_immune |= 1 << uint32(m_spellInfo->EffectMiscValue[i]);
+            else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_DISPEL_IMMUNITY)
+                dispel_immune |= GetDispellMask(DispelType(m_spellInfo->EffectMiscValue[i]));
+        }
+        //immune movement impairement and loss of control
+        if(m_spellInfo->Id==(uint32)42292)
+            mechanic_immune = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
     }
-    //immune movement impairement and loss of control
-    if(m_spellInfo->Id==(uint32)42292)
-        mechanic_immune = IMMUNE_TO_MOVEMENT_IMPAIRMENT_AND_LOSS_CONTROL_MASK;
 
     //Check whether the cast should be prevented by any state you might have.
     uint8 prevented_reason = 0;
