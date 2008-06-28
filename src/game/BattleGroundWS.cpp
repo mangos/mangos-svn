@@ -600,11 +600,13 @@ void BattleGroundWS::ResetBGSubclass()
     m_TeamScores[BG_TEAM_ALLIANCE]      = 0;
     m_TeamScores[BG_TEAM_HORDE]         = 0;
 
+    /* Spirit nodes is static at this BG and then not required deleting at BG reset.
     if(m_BgCreatures[WS_SPIRIT_MAIN_ALLIANCE])
         DelCreature(WS_SPIRIT_MAIN_ALLIANCE);
 
     if(m_BgCreatures[WS_SPIRIT_MAIN_HORDE])
         DelCreature(WS_SPIRIT_MAIN_HORDE);
+    */
 }
 
 void BattleGroundWS::HandleKillPlayer(Player *player, Player *killer)
