@@ -3917,11 +3917,13 @@ uint8 Spell::CheckCasterAuras() const
 {
     // Flag drop spells totally immuned to caster auras
     // FIXME: find more nice check for all totally immuned spells
+    // AttributesEx3 & 0x10000000?
     if(m_spellInfo->Id==23336 || m_spellInfo->Id==23334 || m_spellInfo->Id==34991)
         return 0;
 
     uint8 school_immune = 0;
     uint32 mechanic_immune = 0;
+    uint32 dispel_immune = 0;
 
     //Check if the spell grants school or mechanic immunity.
     //We use bitmasks so the loop is done only once and not on every aura check below.
@@ -3931,6 +3933,8 @@ uint8 Spell::CheckCasterAuras() const
             school_immune |= uint32(m_spellInfo->EffectMiscValue[i]);
         else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
             mechanic_immune |= 1 << uint32(m_spellInfo->EffectMiscValue[i]);
+        else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_DISPEL_IMMUNITY)
+            dispel_immune |= GetDispellMask(DispelType(m_spellInfo->EffectMiscValue[i]));
     }
     //immune movement impairement and loss of control
     if(m_spellInfo->Id==(uint32)42292)
@@ -3938,21 +3942,21 @@ uint8 Spell::CheckCasterAuras() const
 
     //Check whether the cast should be prevented by any state you might have.
     uint8 prevented_reason = 0;
-    if(m_caster->hasUnitState(UNIT_STAT_STUNDED))
+    if(m_caster->hasUnitState(UNIT_STAT_STUNDED) && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_STUNNED))
         prevented_reason = SPELL_FAILED_STUNNED;
-    else if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
+    else if(m_caster->hasUnitState(UNIT_STAT_CONFUSED) && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED))
         prevented_reason = SPELL_FAILED_CONFUSED;
-    else if(m_caster->hasUnitState(UNIT_STAT_FLEEING))
+    else if(m_caster->hasUnitState(UNIT_STAT_FLEEING) && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_FEARED))
         prevented_reason = SPELL_FAILED_FLEEING;
-    else if(m_spellInfo->PreventionType==1 && m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
+    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && m_spellInfo->PreventionType==SPELL_PREVENTION_TYPE_SILENCE)
         prevented_reason = SPELL_FAILED_SILENCED;
-    else if(m_spellInfo->PreventionType==2 && m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED))
+    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && m_spellInfo->PreventionType==SPELL_PREVENTION_TYPE_PACIFY)
         prevented_reason = SPELL_FAILED_PACIFIED;
 
     // Attr must make flag drop spell totally immuned from all effects
     if(prevented_reason)
     {
-        if(school_immune || mechanic_immune)
+        if(school_immune || mechanic_immune || dispel_immune)
         {
             //Checking auras is needed now, because you are prevented by some state but the spell grants immunity.
             Unit::AuraMap const& auras = m_caster->GetAuras();
@@ -3964,24 +3968,32 @@ uint8 Spell::CheckCasterAuras() const
                         continue;
                     if( GetSpellSchoolMask(itr->second->GetSpellProto()) & school_immune )
                         continue;
+                    if( (1<<(itr->second->GetSpellProto()->Dispel)) & dispel_immune)
+                        continue;
 
                     //Make a second check for spell failed so the right SPELL_FAILED message is returned.
                     //That is needed when your casting is prevented by multiple states and you are only immune to some of them.
                     switch(itr->second->GetModifier()->m_auraname)
                     {
                         case SPELL_AURA_MOD_STUN:
-                            return SPELL_FAILED_STUNNED;
-                        case SPELL_AURA_MOD_CONFUSE:
-                            return SPELL_FAILED_CONFUSED;
-                        case SPELL_AURA_MOD_FEAR:
-                            return SPELL_FAILED_FLEEING;
-                        case SPELL_AURA_MOD_SILENCE:
-                            if((GetSpellSchoolMask(m_spellInfo) & SPELL_SCHOOL_MASK_NORMAL)==0)
-                                return SPELL_FAILED_SILENCED;
+                            if (!(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_STUNNED))
+                                return SPELL_FAILED_STUNNED;
                             break;
+                        case SPELL_AURA_MOD_CONFUSE:
+                            if (!(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED))
+                                return SPELL_FAILED_CONFUSED;
+                            break;
+                        case SPELL_AURA_MOD_FEAR:
+                            if (!(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_FEARED))
+                                return SPELL_FAILED_FLEEING;
+                            break;
+                        case SPELL_AURA_MOD_SILENCE:
                         case SPELL_AURA_MOD_PACIFY:
-                            if(GetSpellSchoolMask(m_spellInfo) & SPELL_SCHOOL_MASK_NORMAL)
+                        case SPELL_AURA_MOD_PACIFY_SILENCE:
+                            if( m_spellInfo->PreventionType==SPELL_PREVENTION_TYPE_PACIFY)
                                 return SPELL_FAILED_PACIFIED;
+                            else if ( m_spellInfo->PreventionType==SPELL_PREVENTION_TYPE_SILENCE)
+                                return SPELL_FAILED_SILENCED;
                             break;
                     }
                 }

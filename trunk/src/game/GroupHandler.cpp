@@ -897,7 +897,7 @@ void WorldSession::HandleGroupPassOnLootOpcode( WorldPacket & recv_data )
     recv_data >> unkn;
 
     // ignore if player not loaded
-    if(!GetPlayer())
+    if(!GetPlayer())                                        // needed because STATUS_AUTHED
     {
         if(unkn!=0)
             sLog.outError("CMSG_GROUP_PASS_ON_LOOT value<>0 for not-loaded character!");

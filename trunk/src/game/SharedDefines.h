@@ -353,7 +353,7 @@ enum ItemQualities
 #define SPELL_ATTR_EX5_UNK0                       0x00000001            // 0
 #define SPELL_ATTR_EX5_UNK1                       0x00000002            // 1 not need reagents if UNIT_FLAG_RESTING
 #define SPELL_ATTR_EX5_UNK2                       0x00000004            // 2
-#define SPELL_ATTR_EX5_UNK3                       0x00000008            // 3 usable while stunned
+#define SPELL_ATTR_EX5_USABLE_WHILE_STUNNED       0x00000008            // 3 usable while stunned
 #define SPELL_ATTR_EX5_UNK4                       0x00000010            // 4
 #define SPELL_ATTR_EX5_SINGLE_TARGET_SPELL        0x00000020            // 5 Only one target can be apply at a time
 #define SPELL_ATTR_EX5_UNK6                       0x00000040            // 6
@@ -367,8 +367,8 @@ enum ItemQualities
 #define SPELL_ATTR_EX5_UNK14                      0x00004000            // 14
 #define SPELL_ATTR_EX5_UNK15                      0x00008000            // 15
 #define SPELL_ATTR_EX5_UNK16                      0x00010000            // 16
-#define SPELL_ATTR_EX5_UNK17                      0x00020000            // 17 usable while feared
-#define SPELL_ATTR_EX5_UNK18                      0x00040000            // 18 usable while confused
+#define SPELL_ATTR_EX5_USABLE_WHILE_FEARED        0x00020000            // 17 usable while feared
+#define SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED      0x00040000            // 18 usable while confused
 #define SPELL_ATTR_EX5_UNK19                      0x00080000            // 19
 #define SPELL_ATTR_EX5_UNK20                      0x00100000            // 20
 #define SPELL_ATTR_EX5_UNK21                      0x00200000            // 21
@@ -864,6 +864,13 @@ enum SpellDmgClass
     SPELL_DAMAGE_CLASS_MAGIC    = 1,
     SPELL_DAMAGE_CLASS_MELEE    = 2,
     SPELL_DAMAGE_CLASS_RANGED   = 3
+};
+
+enum SpellPreventionType
+{
+    SPELL_PREVENTION_TYPE_NONE      = 0,
+    SPELL_PREVENTION_TYPE_SILENCE   = 1,
+    SPELL_PREVENTION_TYPE_PACIFY    = 2
 };
 
 enum GameobjectTypes

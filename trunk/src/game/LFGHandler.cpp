@@ -146,7 +146,7 @@ void WorldSession::HandleLfgAutoJoinOpcode( WorldPacket & /*recv_data*/ )
     sLog.outDebug("CMSG_SET_LFG_AUTO_JOIN");
     LookingForGroup_auto_join = true;
 
-    if(!_player)
+    if(!_player)                                            // needed because STATUS_AUTHED
         return;
 
     AttemptJoin(_player);
@@ -163,7 +163,7 @@ void WorldSession::HandleLfmAutoAddMembersOpcode( WorldPacket & /*recv_data*/ )
     sLog.outDebug("CMSG_SET_LFM_AUTOADD");
     LookingForGroup_auto_add = true;
 
-    if(!_player)
+    if(!_player)                                            // needed because STATUS_AUTHED
         return;
 
     AttemptAddMore(_player);

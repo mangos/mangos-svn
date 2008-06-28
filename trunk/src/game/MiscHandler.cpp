@@ -548,9 +548,6 @@ void WorldSession::HandleSetTargetOpcode( WorldPacket & recv_data )
     uint64 guid ;
     recv_data >> guid;
 
-    if( !_player  )
-        return;
-
     _player->SetUInt32Value(UNIT_FIELD_TARGET,guid);
 
     // update reputation list if need
@@ -568,9 +565,6 @@ void WorldSession::HandleSetSelectionOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
-    if( !_player )
-        return;
-
     _player->SetSelection(guid);
 
     // update reputation list if need
@@ -586,16 +580,10 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,1);
 
     sLog.outDebug( "WORLD: Received CMSG_STAND_STATE_CHANGE"  );
-    if( GetPlayer() != 0 )
-    {
-        uint8 animstate;
-        recv_data >> animstate;
+    uint8 animstate;
+    recv_data >> animstate;
 
-        _player->SetStandState(animstate);
-
-        if (_player->IsStandState())
-            _player->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_NOT_SEATED);
-    }
+    _player->SetStandState(animstate);
 }
 
 void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
@@ -1239,7 +1227,7 @@ void WorldSession::HandleSetActionBar(WorldPacket& recv_data)
 
     recv_data >> ActionBar;
 
-    if(!GetPlayer())                                        // ignore until not logged
+    if(!GetPlayer())                                        // ignore until not logged (check needed because STATUS_AUTHED)
     {
         if(ActionBar!=0)
             sLog.outError("WorldSession::HandleSetActionBar in not logged state with value: %u, ignored",uint32(ActionBar));
@@ -1280,8 +1268,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     recv_data >> guid;
     DEBUG_LOG("Inspected guid is " I64FMTD, guid);
 
-    if( _player != 0 )
-        _player->SetSelection(guid);
+    _player->SetSelection(guid);
 
     Player *plr = objmgr.GetPlayer(guid);
     if(!plr)                                                // wrong player
