@@ -99,7 +99,8 @@ ConfusedMovementGenerator<T>::Update(T &unit, const uint32 &diff)
 {
     if(!&unit)
         return true;
-    if(unit.hasUnitState(UNIT_STAT_ROOT) || unit.hasUnitState(UNIT_STAT_STUNDED))
+
+    if(unit.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED | UNIT_STAT_DISTRACTED))
         return true;
 
     if( i_nextMoveTime.Passed() )

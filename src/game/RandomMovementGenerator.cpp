@@ -102,13 +102,16 @@ RandomMovementGenerator<Creature>::Update(Creature &creature, const uint32 &diff
 {
     if(!&creature)
         return true;
-    if(creature.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED))
+
+    if(creature.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED | UNIT_STAT_DISTRACTED))
         return true;
+
     i_nextMoveTime.Update(diff);
     #ifdef USE_INTERPOLATION
     CreatureTraveller traveller(creature);
     i_destinationHolder.UpdateTraveller(traveller, diff, false);
     #endif
+
     if( i_nextMoveTime.Passed() )
     {
         if( creature.IsStopped() )

@@ -41,6 +41,9 @@ class MANGOS_DLL_SPEC PointMovementGenerator
 
         MovementGeneratorType GetMovementGeneratorType() { return POINT_MOTION_TYPE; }
 
+        float GetPointX() const { return x; }
+        float GetPointY() const { return y; }
+        float GetPointZ() const { return z; }
     private:
         TimeTracker i_nextMoveTime;
         float x,y,z;

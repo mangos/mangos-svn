@@ -38,6 +38,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "Weather.h"
+#include "PointMovementGenerator.h"
 #include "TargetedMovementGenerator.h"
 #include "SkillDiscovery.h"
 #include "SkillExtraItems.h"
@@ -4623,7 +4624,23 @@ bool ChatHandler::HandleMovegensCommand(const char* /*args*/)
                 else
                     SendSysMessage(LANG_MOVEGENS_HOME_PLAYER);
                 break;
-            case FLIGHT_MOTION_TYPE:        SendSysMessage(LANG_MOVEGENS_FLIGHT);  break;
+            case FLIGHT_MOTION_TYPE:   SendSysMessage(LANG_MOVEGENS_FLIGHT);  break;
+            case POINT_MOTION_TYPE:
+            {
+                if(unit->GetTypeId()==TYPEID_PLAYER)
+                {
+                    PointMovementGenerator<Player> const* mgen = static_cast<PointMovementGenerator <Player> const*>(*itr);
+                    PSendSysMessage(LANG_MOVEGENS_POINT,mgen->GetPointX(),mgen->GetPointY(),mgen->GetPointZ());
+                }
+                else
+                {
+                    PointMovementGenerator <Creature> const* mgen = static_cast<PointMovementGenerator <Creature> const*>(*itr);
+                    PSendSysMessage(LANG_MOVEGENS_POINT,mgen->GetPointX(),mgen->GetPointY(),mgen->GetPointZ());
+                }
+                break;
+            }
+            case FLEEING_MOTION_TYPE:  SendSysMessage(LANG_MOVEGENS_FEAR);    break;
+            case DISTRACT_MOTION_TYPE: SendSysMessage(LANG_MOVEGENS_DISTRACT);  break;
             default:
                 PSendSysMessage(LANG_MOVEGENS_UNKNOWN,(*itr)->GetMovementGeneratorType());
                 break;

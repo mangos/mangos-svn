@@ -33,4 +33,20 @@ class MANGOS_DLL_SPEC IdleMovementGenerator : public MovementGenerator
 };
 
 extern IdleMovementGenerator si_idleMovement;
+
+class MANGOS_DLL_SPEC DistractMovementGenerator : public MovementGenerator
+{
+    public:
+        explicit DistractMovementGenerator(uint32 timer) : m_timer(timer) {}
+
+        void Initialize(Unit& owner);
+        void Finalize(Unit& owner);
+        void Reset(Unit& owner) { Initialize(owner); }
+        bool Update(Unit& owner, const uint32& time_diff);
+        MovementGeneratorType GetMovementGeneratorType() { return DISTRACT_MOTION_TYPE; }
+
+    private:
+        uint32 m_timer;
+};
+
 #endif

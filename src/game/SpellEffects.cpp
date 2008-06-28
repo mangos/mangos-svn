@@ -3033,29 +3033,30 @@ void Spell::EffectPull(uint32 /*i*/)
 void Spell::EffectDistract(uint32 /*i*/)
 {
     // Check for possible target
-    if (!unitTarget)
+    if (!unitTarget || unitTarget->isInCombat())
         return;
-    #if 0
-    ToDo
-        Dont use Relocate here !!!
-        int32 levelDiff = int32(m_caster->getLevel()) - int32(unitTarget->getLevel());
 
-    // If there is a victim to distract
-    if ((levelDiff > -5) && unitTarget->IsHostileTo(m_caster))
+    // target must be OK to do this
+    if( unitTarget->hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_STUNDED | UNIT_STAT_FLEEING ) )
+        return;
+
+    float angle = unitTarget->GetAngle(m_targets.m_destX, m_targets.m_destY);
+
+    if ( unitTarget->GetTypeId() == TYPEID_PLAYER )
     {
-        // Gets angle of distract epicenter / target
-        float angle = unitTarget->GetAngle(m_targets.m_destX, m_targets.m_destY);
-
-        //Set proper orientation
-        unitTarget->SetOrientation(angle);
-        Creature& pUnit = *((Creature *)unitTarget);
-        // Update animation if target is creature and player removed previous check
-
-        ((Creature *)unitTarget)->StopMoving() ;
-        unitTarget->Relocate(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), unitTarget->GetOrientation());
-        ((Creature *)unitTarget)->StopMoving() ;
+        // For players just turn them
+        WorldPacket data;
+        ((Player*)unitTarget)->BuildTeleportAckMsg(&data, unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), angle);
+        ((Player*)unitTarget)->GetSession()->SendPacket( &data );
+        ((Player*)unitTarget)->SetPosition(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), angle, false);
     }
-    #endif
+    else
+    {
+        // Set creature Distracted, Stop it, And turn it
+        unitTarget->SetOrientation(angle);
+        unitTarget->StopMoving();
+        unitTarget->GetMotionMaster()->MoveDistract(damage*1000);
+    }
 }
 
 void Spell::EffectPickPocket(uint32 /*i*/)
