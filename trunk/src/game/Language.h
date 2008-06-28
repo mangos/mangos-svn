@@ -521,6 +521,10 @@ enum MangosStrings
     LANG_EVENT_ALREADY_ACTIVE           = 587,
     LANG_EVENT_NOT_ACTIVE               = 588,
 
+    LANG_MOVEGENS_POINT                 = 589,
+    LANG_MOVEGENS_FEAR                  = 590,
+    LANG_MOVEGENS_DISTRACT              = 591,
+
     // Battleground
     LANG_BG_A_WINS                      = 600,
     LANG_BG_H_WINS                      = 601,

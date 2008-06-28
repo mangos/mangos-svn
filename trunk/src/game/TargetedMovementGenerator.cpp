@@ -47,7 +47,7 @@ TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
     if( !i_target.isValid() || !&owner )
         return;
 
-    if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED) )
+    if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED | UNIT_STAT_DISTRACTED) )
         return;
 
     // prevent redundant micro-movement for pets, other followers.
@@ -120,8 +120,10 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
 
     if( !&owner || !owner.isAlive())
         return true;
-    if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED | UNIT_STAT_FLEEING) )
+
+    if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED | UNIT_STAT_FLEEING | UNIT_STAT_DISTRACTED) )
         return true;
+
     if( !owner.isInCombat() && !owner.hasUnitState(UNIT_STAT_FOLLOW) )
     {
         //owner.AIM_Initialize();   This case must be the one, when a creature aggroed you. By Initalized a new AI, we prevented to Ai::_stopAttack() to be executed properly.

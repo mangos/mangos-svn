@@ -76,7 +76,7 @@ MotionMaster::~MotionMaster()
 void
 MotionMaster::UpdateMotion(const uint32 &diff)
 {
-    if(i_owner->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED))
+    if( i_owner->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED) )
         return;
     assert( !empty() );
     if (!top()->Update(*i_owner, diff))
@@ -283,11 +283,36 @@ MotionMaster::MoveTaxiFlight(uint32 path, uint32 pathnode)
     }
 }
 
+void
+MotionMaster::MoveDistract(uint32 timer)
+{
+    if(i_owner->GetTypeId()==TYPEID_PLAYER)
+    {
+        DEBUG_LOG("Player (GUID: %u) distracted (timer: %u)", i_owner->GetGUIDLow(), timer);
+    }
+    else
+    {
+        DEBUG_LOG("Creature (Entry: %u GUID: %u) (timer: %u)", 
+            i_owner->GetEntry(), i_owner->GetGUIDLow(), timer);
+    }
+
+    DistractMovementGenerator* mgen = new DistractMovementGenerator(timer);
+    Mutate(mgen);
+}
+
 void MotionMaster::Mutate(MovementGenerator *m)
 {
-    // HomeMovement is not that important, delete it if meanwhile a new comes
-    if (!empty() && top()->GetMovementGeneratorType() == HOME_MOTION_TYPE)
-        MovementExpired(false);
+    if (!empty())
+    {
+        switch(top()->GetMovementGeneratorType())
+        {
+            // HomeMovement is not that important, delete it if meanwhile a new comes
+            case HOME_MOTION_TYPE:
+            // DistractMovement interrupted by any other movement
+            case DISTRACT_MOTION_TYPE:
+                MovementExpired(false);
+        }
+    }
     m->Initialize(*i_owner);
     push(m);
 }

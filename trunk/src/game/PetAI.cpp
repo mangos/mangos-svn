@@ -152,7 +152,6 @@ void PetAI::_stopAttack()
     else
     {
         i_pet.clearUnitState(UNIT_STAT_FOLLOW);
-        i_pet.addUnitState(UNIT_STAT_STOPPED);
         i_pet.GetMotionMaster()->Clear();
         i_pet.GetMotionMaster()->MoveIdle();
     }
