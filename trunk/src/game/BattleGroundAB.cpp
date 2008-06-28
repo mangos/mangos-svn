@@ -30,12 +30,11 @@ BattleGroundAB::BattleGroundAB()
 {
     m_BuffChange = true;
     m_BgObjects.resize(BG_AB_OBJECT_MAX);
-    m_BgCreatures.resize(BG_AB_NODES_COUNT+2);
+    m_BgCreatures.resize(BG_AB_ALL_NODES_COUNT);
 }
 
 BattleGroundAB::~BattleGroundAB()
 {
-
 }
 
 void BattleGroundAB::Update(time_t diff)
@@ -53,9 +52,9 @@ void BattleGroundAB::Update(time_t diff)
             sLog.outDebug("Arathi Basin: entering state STATUS_WAIT_JOIN ...");
 
             // despawn banners, auras and buffs
-            for (int obj = BG_AB_OBJECT_BANNER_NEUTRAL; obj < BG_AB_NODES_COUNT * 8; ++obj)
+            for (int obj = BG_AB_OBJECT_BANNER_NEUTRAL; obj < BG_AB_DYNAMIC_NODES_COUNT * 8; ++obj)
                 SpawnBGObject(obj, RESPAWN_ONE_DAY);
-            for (int i = 0; i < BG_AB_NODES_COUNT * 3; ++i)
+            for (int i = 0; i < BG_AB_DYNAMIC_NODES_COUNT * 3; ++i)
                 SpawnBGObject(BG_AB_OBJECT_SPEEDBUFF_STABLES + i, RESPAWN_ONE_DAY);
 
             // Starting doors
@@ -65,8 +64,8 @@ void BattleGroundAB::Update(time_t diff)
             DoorClose(BG_AB_OBJECT_GATE_H);
 
             // Starting base spirit guides
-            _NodeOccupied(5,ALLIANCE);
-            _NodeOccupied(6,HORDE);
+            _NodeOccupied(BG_AB_SPIRIT_ALIANCE,ALLIANCE);
+            _NodeOccupied(BG_AB_SPIRIT_HORDE,HORDE);
 
             SetStartDelayTime(START_DELAY0);
         }
@@ -91,7 +90,7 @@ void BattleGroundAB::Update(time_t diff)
             // spawn neutral banners
             for (int banner = BG_AB_OBJECT_BANNER_NEUTRAL, i = 0; i < 5; banner += 8, ++i)
                 SpawnBGObject(banner, RESPAWN_IMMEDIATELY);
-            for (int i = 0; i < BG_AB_NODES_COUNT; ++i)
+            for (int i = 0; i < BG_AB_DYNAMIC_NODES_COUNT; ++i)
             {
                 //randomly select buff to spawn
                 uint8 buff = urand(0, 2);
@@ -112,7 +111,7 @@ void BattleGroundAB::Update(time_t diff)
     else if( GetStatus() == STATUS_IN_PROGRESS )
     {
         // 3 sec delay to spawn new banner instead previous despawned one
-        for (int node = 0; node < BG_AB_NODES_COUNT; ++node)
+        for (int node = 0; node < BG_AB_DYNAMIC_NODES_COUNT; ++node)
             if( m_BannerTimers[node].timer )
                 if( m_BannerTimers[node].timer > diff )
                     m_BannerTimers[node].timer -= diff;
@@ -123,7 +122,7 @@ void BattleGroundAB::Update(time_t diff)
                 }
 
         // 1-minute to occupy a node from contested state
-        for (int node = 0; node < BG_AB_NODES_COUNT; ++node)
+        for (int node = 0; node < BG_AB_DYNAMIC_NODES_COUNT; ++node)
             if( m_NodeTimers[node] )
                 if( m_NodeTimers[node] > diff )
                     m_NodeTimers[node] -= diff;
@@ -155,7 +154,7 @@ void BattleGroundAB::Update(time_t diff)
         {
             int points = 0;
             // Go throught all nodes
-            for (int node = 0; node < BG_AB_NODES_COUNT; ++node)
+            for (int node = 0; node < BG_AB_DYNAMIC_NODES_COUNT; ++node)
                 if( m_Nodes[node] == team + 3 )
                     ++points;
             if( !points )
@@ -313,17 +312,17 @@ void BattleGroundAB::FillInitialWorldStates(WorldPacket& data)
     const uint8 plusArray[] = {0, 2, 3, 0, 1};
 
     // Node icons
-    for (uint8 node = 0; node < BG_AB_NODES_COUNT; ++node)
+    for (uint8 node = 0; node < BG_AB_DYNAMIC_NODES_COUNT; ++node)
         data << uint32(BG_AB_OP_NODEICONS[node]) << uint32((m_Nodes[node]==0)?1:0);
 
     // Node occupied states
-    for (uint8 node = 0; node < BG_AB_NODES_COUNT; ++node)
-        for (uint8 i = 1; i < BG_AB_NODES_COUNT; ++i)
+    for (uint8 node = 0; node < BG_AB_DYNAMIC_NODES_COUNT; ++node)
+        for (uint8 i = 1; i < BG_AB_DYNAMIC_NODES_COUNT; ++i)
             data << uint32(BG_AB_OP_NODESTATES[node] + plusArray[i]) << uint32((m_Nodes[node]==i)?1:0);
 
     // How many bases each team owns
     uint8 ally = 0, horde = 0;
-    for (uint8 node = 0; node < BG_AB_NODES_COUNT; ++node)
+    for (uint8 node = 0; node < BG_AB_DYNAMIC_NODES_COUNT; ++node)
         if( m_Nodes[node] == BG_AB_NODE_STATUS_ALLY_OCCUPIED )
             ++ally;
         else if( m_Nodes[node] == BG_AB_NODE_STATUS_HORDE_OCCUPIED )
@@ -356,7 +355,7 @@ void BattleGroundAB::_SendNodeUpdate(uint8 node)
 
     // How many bases each team owns
     uint8 ally = 0, horde = 0;
-    for (uint8 i = 0; i < BG_AB_NODES_COUNT; ++i)
+    for (uint8 i = 0; i < BG_AB_DYNAMIC_NODES_COUNT; ++i)
         if( m_Nodes[i] == BG_AB_NODE_STATUS_ALLY_OCCUPIED )
             ++ally;
         else if( m_Nodes[i] == BG_AB_NODE_STATUS_HORDE_OCCUPIED )
@@ -374,7 +373,7 @@ void BattleGroundAB::_NodeOccupied(uint8 node,Team team)
 
 void BattleGroundAB::_NodeDeOccupied(uint8 node)
 {
-    if( node >= BG_AB_NODES_COUNT )
+    if( node >= BG_AB_DYNAMIC_NODES_COUNT)
         return;
 
     // Those who are waiting to resurrect at this node are taken to the closest own node's graveyard
@@ -409,13 +408,13 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target
 
     uint8 node = BG_AB_NODE_STABLES;
     GameObject* obj=HashMapHolder<GameObject>::Find(m_BgObjects[node*8+7]);
-    while ( (node < BG_AB_NODES_COUNT) && ((!obj) || (!source->IsWithinDistInMap(obj,10))))
+    while ( (node < BG_AB_DYNAMIC_NODES_COUNT) && ((!obj) || (!source->IsWithinDistInMap(obj,10))))
     {
         ++node;
-        obj=HashMapHolder<GameObject>::Find(m_BgObjects[node*8+7]);
+        obj=HashMapHolder<GameObject>::Find(m_BgObjects[node*8+BG_AB_OBJECT_AURA_CONTESTED]);
     }
 
-    if( node == BG_AB_NODES_COUNT )
+    if( node == BG_AB_DYNAMIC_NODES_COUNT)
     {
         // this means our player isn't close to any of banners - maybe cheater ??
         return;
@@ -435,6 +434,7 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target
     // If node is neutral, change to contested
     if( m_Nodes[node] == BG_AB_NODE_TYPE_NEUTRAL )
     {
+        UpdatePlayerScore(source, SCORE_BASES_ASSAULTED, 1);
         m_prevNodes[node] = m_Nodes[node];
         m_Nodes[node] = teamIndex + 1;
         // burn current neutral banner
@@ -452,6 +452,7 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target
         // If last state is NOT occupied, change node to enemy-contested
         if( m_prevNodes[node] < BG_AB_BODE_TYPE_OCCUPIED )
         {
+            UpdatePlayerScore(source, SCORE_BASES_ASSAULTED, 1);
             m_prevNodes[node] = m_Nodes[node];
             m_Nodes[node] = teamIndex + BG_AB_NODE_TYPE_CONTESTED;
             // burn current contested banner
@@ -465,6 +466,7 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target
         // If contested, change back to occupied
         else
         {
+            UpdatePlayerScore(source, SCORE_BASES_DEFENDED, 1);
             m_prevNodes[node] = m_Nodes[node];
             m_Nodes[node] = teamIndex + BG_AB_BODE_TYPE_OCCUPIED;
             // burn current contested banner
@@ -481,6 +483,7 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target
     // If node is occupied, change to enemy-contested
     else
     {
+        UpdatePlayerScore(source, SCORE_BASES_ASSAULTED, 1);
         m_prevNodes[node] = m_Nodes[node];
         m_Nodes[node] = teamIndex + BG_AB_NODE_TYPE_CONTESTED;
         // burn current occupied banner
@@ -493,8 +496,6 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target
         sprintf(buf, GetMangosString(LANG_BG_AB_NODE_ASSAULTED), _GetNodeName(node));
         sound = (teamIndex == 0) ? SOUND_NODE_ASSAULTED_ALLIANCE : SOUND_NODE_ASSAULTED_HORDE;
     }
-    //only bases assaulted is updated
-    UpdatePlayerScore(source, SCORE_BASES_ASSAULTED, 1);
     WorldPacket data;
     ChatHandler::FillMessageData(&data, source->GetSession(), type, LANG_UNIVERSAL, NULL, source->GetGUID(), buf, NULL);
     SendPacketToAll(&data);
@@ -510,7 +511,7 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target
 
 bool BattleGroundAB::SetupBattleGround()
 {
-    for (int i = 0 ; i < BG_AB_NODES_COUNT; ++i)
+    for (int i = 0 ; i < BG_AB_DYNAMIC_NODES_COUNT; ++i)
     {
         if(    !AddObject(BG_AB_OBJECT_BANNER_NEUTRAL + 8*i,BG_AB_OBJECTID_NODE_BANNER_0 + i,BG_AB_NodePositions[i][0],BG_AB_NodePositions[i][1],BG_AB_NodePositions[i][2],BG_AB_NodePositions[i][3], 0, 0, sin(BG_AB_NodePositions[i][3]/2), cos(BG_AB_NodePositions[i][3]/2),RESPAWN_ONE_DAY)
             || !AddObject(BG_AB_OBJECT_BANNER_CONT_A + 8*i,BG_AB_OBJECTID_BANNER_CONT_A,BG_AB_NodePositions[i][0],BG_AB_NodePositions[i][1],BG_AB_NodePositions[i][2],BG_AB_NodePositions[i][3], 0, 0, sin(BG_AB_NodePositions[i][3]/2), cos(BG_AB_NodePositions[i][3]/2),RESPAWN_ONE_DAY)
@@ -534,7 +535,7 @@ bool BattleGroundAB::SetupBattleGround()
         return false;
     }
     //buffs
-    for (int i = 0; i < BG_AB_NODES_COUNT; ++i)
+    for (int i = 0; i < BG_AB_DYNAMIC_NODES_COUNT; ++i)
     {
         if(    !AddObject(BG_AB_OBJECT_SPEEDBUFF_STABLES + 3 * i, Buff_Entries[0], BG_AB_BuffPositions[i][0], BG_AB_BuffPositions[i][1], BG_AB_BuffPositions[i][2], BG_AB_BuffPositions[i][3], 0, 0, sin(BG_AB_BuffPositions[i][3]/2), cos(BG_AB_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
             || !AddObject(BG_AB_OBJECT_SPEEDBUFF_STABLES + 3 * i + 1, Buff_Entries[1], BG_AB_BuffPositions[i][0], BG_AB_BuffPositions[i][1], BG_AB_BuffPositions[i][2], BG_AB_BuffPositions[i][3], 0, 0, sin(BG_AB_BuffPositions[i][3]/2), cos(BG_AB_BuffPositions[i][3]/2), RESPAWN_ONE_DAY)
@@ -557,13 +558,17 @@ void BattleGroundAB::ResetBGSubclass()
     m_ReputationScoreTics[BG_TEAM_ALLIANCE] = 0;
     m_ReputationScoreTics[BG_TEAM_HORDE]    = 0;
     m_IsInformedNearVictory                 = false;
-    for (uint8 i = 0; i < BG_AB_NODES_COUNT; ++i)
+    for (uint8 i = 0; i < BG_AB_DYNAMIC_NODES_COUNT; ++i)
     {
         m_Nodes[i] = 0;
         m_prevNodes[i] = 0;
         m_NodeTimers[i] = 0;
         m_BannerTimers[i].timer = 0;
     }
+
+    for (uint8 i = 0; i < BG_AB_ALL_NODES_COUNT; ++i)
+        if(m_BgCreatures[i])
+            DelCreature(i);
 }
 
 WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team)
@@ -572,7 +577,7 @@ WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(float x, float y, 
 
     // Is there any occupied node for this team?
     std::vector<uint8> nodes;
-    for (uint8 i = 0; i < BG_AB_NODES_COUNT; ++i)
+    for (uint8 i = 0; i < BG_AB_DYNAMIC_NODES_COUNT; ++i)
         if( m_Nodes[i] == teamIndex + 3 )
             nodes.push_back(i);
 
