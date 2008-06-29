@@ -84,6 +84,7 @@ static Unit::AuraTypeSet GenerateAttakerProcEffectAuraTypes()
     auraTypes.insert(SPELL_AURA_MOD_CASTING_SPEED);
     auraTypes.insert(SPELL_AURA_PROC_TRIGGER_DAMAGE);
     auraTypes.insert(SPELL_AURA_MOD_DAMAGE_DONE);
+    auraTypes.insert(SPELL_AURA_MOD_RATING);
     return auraTypes;
 }
 
@@ -5689,6 +5690,15 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     // else (at range hit) called custom case
                     CastSpell(this, 39557, true, castItem, triggeredByAura);
                     return;
+                }
+                // Aura of Wrath (Darkmoon Card: Wrath trinket bonus)
+                case 39442:
+                {
+                    // proc only at non-crit hits
+                    if(procFlags & (PROC_FLAG_CRIT_MELEE|PROC_FLAG_CRIT_RANGED|PROC_FLAG_CRIT_SPELL))
+                        return;
+
+                    break;
                 }
                 // Augment Pain (Timbal's Focusing Crystal trinket bonus)
                 case 45054:
