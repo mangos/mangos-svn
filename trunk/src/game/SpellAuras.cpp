@@ -5764,9 +5764,9 @@ void Aura::PeriodicTick()
             if(!m_target->isAlive() || m_target->getPowerType() != powerType)
                 return;
 
-            // resilience reduce mana draining effect (added in 2.4)
+            // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
             if (powerType == POWER_MANA && m_target->GetTypeId() == TYPEID_PLAYER)
-                pdamage -= ((Player*)m_target)->GetDotDamageReduction(pdamage); 
+                pdamage -= ((Player*)m_target)->GetSpellCritDamageReduction(pdamage); 
 
             uint32 gain = uint32(-m_target->ModifyPower(powerType, -pdamage));
 
