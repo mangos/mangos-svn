@@ -1,9 +1,6 @@
 #include "mpq_libmpq.h"
 #include <deque>
-#include "libmpq/common.h"
 
-//typedef std::vector<mpq_archive*> ArchiveSet;
-typedef std::deque<MPQArchive*> ArchiveSet;
 ArchiveSet gOpenArchives;
 
 MPQArchive::MPQArchive(const char* filename)
@@ -48,7 +45,7 @@ MPQArchive::MPQArchive(const char* filename)
         }
         return;
     }
-    gOpenArchives.push_front(this); //&mpq_a);
+    gOpenArchives.push_front(this);
 }
 
 void MPQArchive::close()

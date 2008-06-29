@@ -3,12 +3,14 @@
 #include <stdio.h>
 #include <deque>
 #include <set>
+#include "direct.h"
 
 #include "dbcfile.h"
 #include "mpq_libmpq.h"
 
 extern unsigned int iRes;
-extern std::deque<MPQArchive*> gOpenArchives;
+extern ArchiveSet gOpenArchives;
+
 bool ConvertADT(char*,char*);
 
 typedef struct{
@@ -27,6 +29,15 @@ uint32 map_count;
 
 static char* const langs[]={"deDE", "enUS", "enGB", "frFR", "esES", "zhCN", "zhTW" };
 #define LANG_COUNT 7
+
+void CreateDir( const std::string& Path )
+{
+    #ifdef WIN32
+     _mkdir( Path.c_str());
+    #else
+    mkdir( Path.c_str(), 0777 );
+    #endif
+}
 
 bool FileExists( const char* FileName )
 {
@@ -87,6 +98,10 @@ void ExtractMapsFromMpq()
 
     unsigned int total=map_count*64*64;
     unsigned int done=0;
+    
+    std::string path = output_path;
+    path += "/maps/";
+    CreateDir(path);
 
     for(unsigned int x=0;x<64;x++)
     {
@@ -148,7 +163,7 @@ void ExtractDBCFiles()
     set<string> dbcfiles;
 
     // get DBC file list
-    for(deque<MPQArchive*>::iterator i = gOpenArchives.begin(); i != gOpenArchives.end();++i)
+    for(ArchiveSet::iterator i = gOpenArchives.begin(); i != gOpenArchives.end();++i)
     {
         vector<string> files = (*i)->GetFileList();
         for (vector<string>::iterator iter = files.begin(); iter != files.end(); ++iter) 
@@ -156,6 +171,10 @@ void ExtractDBCFiles()
                     dbcfiles.insert(*iter);
     }
 
+    std::string path = output_path;
+    path += "/dbc/";
+    CreateDir(path);
+    
     // extract DBCs
     int count = 0;
     for (set<string>::iterator iter = dbcfiles.begin(); iter != dbcfiles.end(); ++iter) 
@@ -184,7 +203,7 @@ void ExtractDBCFiles()
 
 int GetLocale()
 {
-    for (size_t i = 0; i < LANG_COUNT; i++)
+    for (int i = 0; i < LANG_COUNT; i++)
     {
         char tmp1[512];
         sprintf(tmp1, "%s/Data/%s/locale-%s.MPQ", input_path, langs[i], langs[i]);
