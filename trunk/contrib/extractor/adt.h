@@ -22,9 +22,8 @@ double z;
 }vec;
 
 typedef struct{
-	vec v[3];
-
-}triangle;	
+    vec v[3];
+}triangle;
 
 typedef struct{
 float v9[16*8+1][16*8+1];
@@ -40,11 +39,9 @@ float waterlevel[9][9];
 uint8 flag;
 }chunk;
 
-
 class WMO;
 class WMOManager;
 void fixname(std::string &name);
-
 
 typedef struct
 {
