@@ -113,7 +113,7 @@ void CliWritePlayerDump(char*command,pPrintf zprintf)
     char * p2 = strtok(NULL, " ");
     if(!file || !p2)
     {
-        zprintf("Syntax is: writepdump $filename $playerGUID\r\n");
+        zprintf("Syntax is: writepdump $filename $playerNameOrGUID\r\n");
         return;
     }
 
@@ -123,7 +123,7 @@ void CliWritePlayerDump(char*command,pPrintf zprintf)
 
     if(!guid)
     {
-        zprintf("Syntax is: writepdump $filename $playerGUID\r\n");
+        zprintf("Syntax is: writepdump $filename $playerNameOrGUID\r\n");
         return;
     }
 
