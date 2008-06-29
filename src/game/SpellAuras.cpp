@@ -1348,9 +1348,7 @@ void Aura::TriggerSpell()
                     case 31373:
                     {
                         // Summon Elemental after create item
-                        float px, py, pz;
-                        caster->GetClosePoint(px, py, pz);
-                        caster->SummonCreature(17870, px, py, pz, caster->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
+                        caster->SummonCreature(17870, 0, 0, 0, caster->GetOrientation(), TEMPSUMMON_DEAD_DESPAWN, 0);
                         return;
                     }
 //                    // Bloodmyst Tesla
@@ -5364,7 +5362,7 @@ void Aura::PeriodicTick()
                         pdamage = pdamage/2;
                     // 9..12 ticks, 3/2 from normal tick damage
                     else if(m_duration<((m_maxduration-m_modifier.periodictime)/3))
-                        pdamage += pdamage/2;
+                        pdamage += (pdamage+1)/2;           // +1 prevent 0.5 damage possible lost at 1..4 ticks
                     // 5..8 ticks have normal tick damage
                 }
             }
