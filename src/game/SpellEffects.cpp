@@ -5163,6 +5163,11 @@ void Spell::EffectSummonCritter(uint32 i)
     critter->SetHealth(1);
     critter->SetLevel(1);
 
+    // set timer for unsummon
+    int32 duration = GetSpellDuration(m_spellInfo);
+    if(duration > 0)
+        critter->SetDuration(duration);
+
     std::string name = player->GetName();
     name.append(petTypeSuffix[critter->getPetType()]);
     critter->SetName( name );
