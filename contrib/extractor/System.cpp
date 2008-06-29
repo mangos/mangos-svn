@@ -196,7 +196,7 @@ int GetLocale()
     }
 
     printf("Could not detect locale.\n");
-    return 0;
+    return -1;
 }
 
 void LoadMPQFiles(int const locale)
@@ -241,7 +241,7 @@ int main(int argc, char * arg[])
     HandleArgs(argc, arg);
 
     int const locale = GetLocale();
-    if(!locale)
+    if(locale < 0)
         return 1;
 
     LoadMPQFiles(locale);

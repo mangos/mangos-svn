@@ -1,9 +1,10 @@
-<?xml version="1.0" encoding="windows-1251"?>
+<?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="ad"
 	ProjectGUID="{D7552D4F-408F-4F8E-859B-366659150CF4}"
+	RootNamespace="ad"
 	>
 	<Platforms>
 		<Platform
@@ -217,35 +218,11 @@
 				>
 			</File>
 			<File
-				RelativePath=".\libmpq\common.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\dbcfile.cpp"
 				>
 			</File>
 			<File
-				RelativePath=".\libmpq\explode.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\libmpq\extract.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\libmpq\huffman.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\libmpq\mpq.cpp"
-				>
-			</File>
-			<File
 				RelativePath=".\mpq_libmpq.cpp"
-				>
-			</File>
-			<File
-				RelativePath=".\libmpq\parser.cpp"
 				>
 			</File>
 			<File
@@ -272,17 +249,45 @@
 					/>
 				</FileConfiguration>
 			</File>
-			<File
-				RelativePath=".\libmpq\wave.cpp"
+			<Filter
+				Name="libmpq"
 				>
-			</File>
+				<File
+					RelativePath=".\libmpq\common.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\libmpq\explode.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\libmpq\extract.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\libmpq\huffman.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\libmpq\mpq.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\libmpq\parser.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\libmpq\wave.cpp"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl"
 			>
 			<File
-				RelativePath=".\libmpq\common.h"
+				RelativePath=".\adt.h"
 				>
 			</File>
 			<File
@@ -290,25 +295,41 @@
 				>
 			</File>
 			<File
-				RelativePath=".\libmpq\explode.h"
-				>
-			</File>
-			<File
-				RelativePath=".\libmpq\huffman.h"
-				>
-			</File>
-			<File
-				RelativePath=".\libmpq\mpq.h"
-				>
-			</File>
-			<File
 				RelativePath=".\mpq_libmpq.h"
 				>
 			</File>
-			<File
-				RelativePath=".\libmpq\wave.h"
+			<Filter
+				Name="libmpq"
 				>
-			</File>
+				<File
+					RelativePath=".\libmpq\common.h"
+					>
+				</File>
+				<File
+					RelativePath=".\libmpq\explode.h"
+					>
+				</File>
+				<File
+					RelativePath=".\libmpq\huffman.h"
+					>
+				</File>
+				<File
+					RelativePath=".\libmpq\mpq.h"
+					>
+				</File>
+				<File
+					RelativePath=".\libmpq\wave.h"
+					>
+				</File>
+				<File
+					RelativePath=".\libmpq\zconf.h"
+					>
+				</File>
+				<File
+					RelativePath=".\libmpq\zlib.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 	</Files>
 	<Globals>
