@@ -30,7 +30,7 @@ bool LoadADT(char* filename)
     size_t size;
     MPQFile mf(filename);
 
-    if(mf.isEof ())
+    if(mf.isEof())
     {
         //printf("No such file.\n");    
         return false;
@@ -53,9 +53,9 @@ bool LoadADT(char* filename)
         mf.read(&size, 4);
 
         size_t nextpos = mf.getPos () + size;
-        if(fourcc==0x4d43494e)
+        if(fourcc==0x4d43494e)                              // MCIN
         {
-        //    printf("Found chunks info\n");
+            //printf("Found chunks info\n");
             // mapchunk offsets/sizes
             for (int i=0; i<256; i++)
             {
@@ -63,67 +63,66 @@ bool LoadADT(char* filename)
                 mf.read(&mcnk_sizes[i],4);
                 mf.seekRelative(8);
             }
-        //break;
+            //break;
         }
-        else 
-            if(fourcc==0x4d4f4446)
-            {
-            
-            /*    if(size)
-                {    
-                    //printf("\nwmo count %d\n",size/64);
-                    wmo_count =size/64;
-                    for (int i=0; i<wmo_count; i++)
-                    {
-                        int id;
-                        mf.read(&id, 4);
-                        WMO *wmo = (WMO*)wmomanager.items[wmomanager.get(wmos[id])];
-                        WMOInstance inst(wmo, mf);
-                        wmois.push_back(inst);
-                    }
-
-                }*/
-            
-            }else 
-            if(fourcc==0x4d574d4f)//mwmo
-            {
-                /*if (size)
+        else if(fourcc==0x4d4f4446)                         // MODF
+        {      
+            /*  
+            if(size)
+            {    
+                //printf("\nwmo count %d\n",size/64);
+                wmo_count =size/64;
+                for (int i=0; i<wmo_count; i++)
                 {
-                    char *buf = new char[size];
-                    mf.read(buf, size);
-                    char *p=buf;
-                    while (p<buf+size)
-                    {
-                    std::string path(p);
-                        p+=strlen(p)+1;
-                        fixname(path);
-                        
-                        wmomanager.add(path);
-                        wmos.push_back(path);
-                    }
-                    delete[] buf;
-                }*/
-            }
+                    int id;
+                    mf.read(&id, 4);
+                    WMO *wmo = (WMO*)wmomanager.items[wmomanager.get(wmos[id])];
+                    WMOInstance inst(wmo, mf);
+                    wmois.push_back(inst);
+                }
+
+            }*/
+        }
+        else if(fourcc==0x4d574d4f)                         // MWMO
+        {
+            /*
+            if (size)
+            {
+                char *buf = new char[size];
+                mf.read(buf, size);
+                char *p=buf;
+                while (p<buf+size)
+                {
+                std::string path(p);
+                    p+=strlen(p)+1;
+                    fixname(path);
+                    
+                    wmomanager.add(path);
+                    wmos.push_back(path);
+                }
+                delete[] buf;
+            }*/
+        }
         //    else mf.seekRelative(-3);
 
         mf.seek(nextpos);
     }
-        //printf("Loading chunks info\n");
-        // read individual map chunks
-        for (int j=0; j<16; j++) 
-            for (int i=0; i<16; i++) 
-            {
 
-                mf.seek((int)mcnk_offsets[j*16+i]);
-                LoadMapChunk (mf,&(mcells->ch [i][j]));
+    //printf("Loading chunks info\n");
+    // read individual map chunks
+    for (int j=0; j<16; j++) 
+        for (int i=0; i<16; i++) 
+        {
+            mf.seek((int)mcnk_offsets[j*16+i]);
+            LoadMapChunk (mf,&(mcells->ch [i][j]));
+        }
 
-            }
+    /*
+    for(uint32 t=0;t<wmo_count ;t++)
+    {
+        wmois[t].draw ();
+    }*/
 
-        /*    for(uint32 t=0;t<wmo_count ;t++)
-            {
-                wmois[t].draw ();
-
-            }*/
     mf.close ();
     return true;
 }
@@ -167,7 +166,6 @@ struct MapChunkHeader {
 inline
 void LoadMapChunk(MPQFile & mf, chunk*_chunk)
 {
-    
     float h;
     uint32 fourcc;
     uint32 size;
@@ -197,13 +195,13 @@ void LoadMapChunk(MPQFile & mf, chunk*_chunk)
     {
         mf.read(&fourcc,4);
         mf.read(&size, 4);
-    //    if(size!=580)
-    //    printf("\n sz=%d",size);
+        //if(size!=580)
+        //    printf("\n sz=%d",size);
         size_t nextpos = mf.getPos()  + size;
-        if(fourcc==0x4d435654)
-         {
+        if(fourcc==0x4d435654)                              // MCVT
+        {
             for (int j=0; j<17; j++)
-            for (int i=0; i<((j%2)?8:9); i++) 
+                for (int i=0; i<((j%2)?8:9); i++) 
                 {
                     mf.read(&h,4);
                     float z=h+ybase;
@@ -213,84 +211,79 @@ void LoadMapChunk(MPQFile & mf, chunk*_chunk)
                         _chunk->v9[i][j/2] = z;
 
                     if(z>zmax)zmax=z;
-                //    if(z<zmin)zmin=z;
+                    //if(z<zmin)zmin=z;
                 }
         }
-        else
-            if(fourcc==0x4d434e52)
-            {
+        else if(fourcc==0x4d434e52)                         // MCNR
+        {
             nextpos = mf.getPos() + 0x1C0; // size fix
+        }
+        else if(fourcc==0x4d434c51)                         // MCLQ
+        {
+            // liquid / water level
+            //bool haswater;
+            char fcc1[5];
+            mf.read(fcc1,4);
+            flipcc(fcc1);
+            fcc1[4]=0;
+
+            if (!strcmp(fcc1,"MCSE"))
+            {
+                for(int i=0;i<9;i++)
+                    for(int j=0;j<9;j++)
+                        _chunk->waterlevel[i][j]=-999999; // no liquid/water
+            }
+            else
+            {
+                float maxheight;
+                mf.read(&maxheight, 4);
+                
+                for(int j=0;j<9;j++)
+                    for(int i=0;i<9;i++)
+                    {
+                        mf.read(&h, 4);
+                        mf.read(&h, 4);
+                        if(h > maxheight)
+                            _chunk->waterlevel[i][j]=-999999;
+                        else
+                            _chunk->waterlevel[i][j]=h;
+                    }
+
+                if(chunkflags & 4 || chunkflags & 8)
+                    _chunk->flag |=1;
+                if(chunkflags & 16)
+                    _chunk->flag |=2;
 
             }
-        else
-            if(fourcc==0x4d434c51)
-            {
-            // liquid / water level
-            //    bool haswater;
-                char fcc1[5];
-                mf.read(fcc1,4);
-                flipcc(fcc1);
-                fcc1[4]=0;
-
-                if (!strcmp(fcc1,"MCSE"))
-                {
-                    for(int i=0;i<9;i++)
-                        for(int j=0;j<9;j++)
-                            _chunk->waterlevel[i][j]=-999999; // no liquid/water
-                }
-                else
-                {
-                    float maxheight;
-                    mf.read(&maxheight, 4);
-                    
-                    for(int j=0;j<9;j++)
-                        for(int i=0;i<9;i++)
-                        {
-                            mf.read(&h, 4);
-                            mf.read(&h, 4);
-                            if(h > maxheight)
-                                _chunk->waterlevel[i][j]=-999999;
-                            else
-                                _chunk->waterlevel[i][j]=h;
-                        }
-
-                    if(chunkflags & 4 || chunkflags & 8)
-                        _chunk->flag |=1;
-                    if(chunkflags & 16)
-                        _chunk->flag |=2;
-
-                }
-                
-
             break;
-            }else if (fourcc==0x4d434c59)
-            {
+        }
+        else if (fourcc==0x4d434c59)                        // MCLY
+        {
             // texture info
             nTextures = (int)size;
-            }else if (fourcc==0x4d43414c)
-            {
-            
+        }
+        else if (fourcc==0x4d43414c)                        // MCAL
+        {     
             if (nTextures<=0) 
-            continue;
-            }
+                continue;
+        }
 
         mf.seek(nextpos);
     }
-    
-    
+
     printf("");
 }
 
 double solve (vec *v,vec *p)
 {
-double a = v[0].y *(v[1].z - v[2].z) + v[1].y *(v[2].z - v[0].z) + v[2].y *(v[0].z - v[1].z);
-double b = v[0].z *(v[1].x - v[2].x) + v[1].z *(v[2].x - v[0].x) + v[2].z *(v[0].x - v[1].x);
-double c = v[0].x *(v[1].y - v[2].y) + v[1].x *(v[2].y - v[0].y) + v[2].x *(v[0].y - v[1].y);
-double d = v[0].x *(v[1].y*v[2].z - v[2].y*v[1].z) + v[1].x* (v[2].y*v[0].z - v[0].y*v[2].z) + v[2].x* (v[0].y*v[1].z - v[1].y*v[0].z);
-//-d
+    double a = v[0].y *(v[1].z - v[2].z) + v[1].y *(v[2].z - v[0].z) + v[2].y *(v[0].z - v[1].z);
+    double b = v[0].z *(v[1].x - v[2].x) + v[1].z *(v[2].x - v[0].x) + v[2].z *(v[0].x - v[1].x);
+    double c = v[0].x *(v[1].y - v[2].y) + v[1].x *(v[2].y - v[0].y) + v[2].x *(v[0].y - v[1].y);
+    double d = v[0].x *(v[1].y*v[2].z - v[2].y*v[1].z) + v[1].x* (v[2].y*v[0].z - v[0].y*v[2].z) + v[2].x* (v[0].y*v[1].z - v[1].y*v[0].z);
+    //-d
 
-//plane equation ax+by+cz+d=0
-return ((a*p->x+c*p->z-d)/b);
+    //plane equation ax+by+cz+d=0
+    return ((a*p->x+c*p->z-d)/b);
 }
 
 inline
@@ -322,27 +315,28 @@ double GetZ(double x,double z)
     
         if(lx>lz)
         {
-                v[1].x=UNITSIZE;
-                v[1].y =cell->v9[xc+1][zc];
-                v[1].z=0;
-        }else
+            v[1].x=UNITSIZE;
+            v[1].y =cell->v9[xc+1][zc];
+            v[1].z=0;
+        }
+        else
         {
-                v[1].x=0.0;
-                v[1].y =cell->v9[xc][zc+1];
-                v[1].z=UNITSIZE;
+            v[1].x=0.0;
+            v[1].y =cell->v9[xc][zc+1];
+            v[1].z=UNITSIZE;
         }
 
         if(lz>UNITSIZE-lx)
         {
-                v[2].x=UNITSIZE;
-                v[2].y =cell->v9[xc+1][zc+1];
-                v[2].z=UNITSIZE;
-
-        }else
+            v[2].x=UNITSIZE;
+            v[2].y =cell->v9[xc+1][zc+1];
+            v[2].z=UNITSIZE;
+        }
+        else
         {
-                v[2].x=0;
-                v[2].y=cell->v9[xc][zc];
-                v[2].z=0;
+            v[2].x=0;
+            v[2].y=cell->v9[xc][zc];
+            v[2].z=0;
         }
 
         return -solve(v,&p);
@@ -393,7 +387,8 @@ const char MAP_MAGIC[] = "MAP_1.03";
 bool ConvertADT(char * filename,char * filename2)
 {
     //if(!strstr(filename,"oth_32_48"))return false;
-    if(!LoadADT(filename))return false;
+    if(!LoadADT(filename))
+        return false;
 
     FILE *output=fopen(filename2,"wb");
     if(!output)
@@ -418,7 +413,7 @@ bool ConvertADT(char * filename,char * filename2)
             }
             else
             {
-                uint16    flag=0xffff;
+                uint16 flag=0xffff;
                 fwrite(&flag,1,2,output);
             }
         }
@@ -465,5 +460,4 @@ bool ConvertADT(char * filename,char * filename2)
     wmomodel.clear ();
     //polygons.clear ();*/
     return true;
-
 }

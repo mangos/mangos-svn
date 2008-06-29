@@ -9,6 +9,7 @@
 #include <ctype.h>
 #include <vector>
 #include <iostream>
+#include <deque>
 
 using namespace std;
 
@@ -82,6 +83,7 @@ public:
         return filelist;
     }
 };
+typedef std::deque<MPQArchive*> ArchiveSet;
 
 class MPQFile
 {
