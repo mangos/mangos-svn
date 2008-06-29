@@ -2015,13 +2015,15 @@ void Spell::EffectManaDrain(uint32 i)
 
     uint32 curPower = unitTarget->GetPower(drain_power);
 
-    int32 new_damage;
-
+    //add spell damage bonus
+    damage=m_caster->SpellDamageBonus(unitTarget,m_spellInfo,uint32(damage),SPELL_DIRECT_DAMAGE);
+    
     // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
     uint32 power = damage;
     if ( drain_power == POWER_MANA && unitTarget->GetTypeId() == TYPEID_PLAYER )
         power -= ((Player*)unitTarget)->GetSpellCritDamageReduction(power); 
     
+    int32 new_damage;
     if(curPower < power)
         new_damage = curPower;
     else
@@ -2038,7 +2040,11 @@ void Spell::EffectManaDrain(uint32 i)
         if(Player *modOwner = m_caster->GetSpellModOwner())
             modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, manaMultiplier);
 
-        m_caster->ModifyPower(POWER_MANA,uint32(new_damage*manaMultiplier));
+        int32 gain = int32(new_damage*manaMultiplier);
+
+        m_caster->ModifyPower(POWER_MANA,gain);
+        //send log
+        m_caster->SendEnergizeSpellLog(m_caster, m_spellInfo->Id,gain,POWER_MANA,false);
     }
 }
 
