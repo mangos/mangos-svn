@@ -96,13 +96,13 @@ class MPQFile
 
 public:
     MPQFile(const char* filename);    // filenames are not case sensitive
-    ~MPQFile();
+    ~MPQFile() { close(); }
     size_t read(void* dest, size_t bytes);
-    size_t getSize();
-    size_t getPos();
-    char* getBuffer();
-    char* getPointer();
-    bool isEof();
+    size_t getSize() { return size; }
+    size_t getPos() { return pointer; }
+    char* getBuffer() { return buffer; }
+    char* getPointer() { return buffer + pointer; }
+    bool isEof() { return eof; }
     void seek(int offset);
     void seekRelative(int offset);
     void close();

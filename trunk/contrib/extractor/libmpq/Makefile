@@ -11,7 +11,7 @@ clean:
 libmpq.a: $(objects) $(zlib_objects)
 	$(AR) cru $@ $+
 libmpq.so: $(objects) $(zlib_objects)
-	$(CC) -shared -o $@ $+
+	$(CC) -fPIC -o $@ $+
 
 %.o:%.cpp
 	$(CC) -I../ -c $+
