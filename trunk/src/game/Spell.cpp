@@ -4584,7 +4584,7 @@ void Spell::Delayed(int32 delaytime)
     data.append(m_caster->GetPackGUID());
     data << uint32(delaytime);
 
-    ((Player*)m_caster)->GetSession()->SendPacket(&data);
+    m_caster->SendMessageToSet(&data,true);
 }
 
 void Spell::DelayedChannel(int32 delaytime)

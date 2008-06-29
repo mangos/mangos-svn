@@ -850,32 +850,49 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             }
         }
 
-        if (damagetype != NODAMAGE)
+        if (damagetype != NODAMAGE && damagetype && pVictim->GetTypeId() == TYPEID_PLAYER)
         {
-            if(pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL] && pVictim->GetTypeId() == TYPEID_PLAYER && damage)
+            for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
             {
-                if (pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->getState() == SPELL_STATE_CASTING)
+                // skip channeled spell (processed differently below)
+                if (i == CURRENT_CHANNELED_SPELL)
+                    continue;
+
+                if(Spell* spell = pVictim->m_currentSpells[i])
                 {
-                    uint32 channelInterruptFlags = pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->ChannelInterruptFlags;
+                    if(spell->getState() == SPELL_STATE_PREPARING && damagetype != DOT)
+                    {
+                        int32 delay = spell->GetCastTime()/4;
+                        sLog.outDetail("Spell %u delayed (%d) at damage",spell->m_spellInfo->Id,delay);
+                        spell->Delayed(delay);
+                    }
+                }
+            }
+
+            if(Spell* spell = pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL])
+            {
+                if (spell->getState() == SPELL_STATE_CASTING)
+                {
+                    uint32 channelInterruptFlags = spell->m_spellInfo->ChannelInterruptFlags;
                     if( channelInterruptFlags & CHANNEL_FLAG_DELAY )
                     {
                         if(pVictim!=this)                   //don't shorten the duration of channeling if you damage yourself
                         {
-                            int32 delay = int32(0.25f * GetSpellDuration(pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo));
-                            sLog.outDetail("Spell %u delayed (%d) at damage!",pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->Id,delay);
-                            pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->DelayedChannel(delay);
+                            int32 delay = GetSpellDuration(spell->m_spellInfo)/4;
+                            sLog.outDetail("Channeled spell %u delayed (%d) at damage!",spell->m_spellInfo->Id,delay);
+                            spell->DelayedChannel(delay);
                         }
                     }
                     else if( (channelInterruptFlags & (CHANNEL_FLAG_DAMAGE | CHANNEL_FLAG_DAMAGE2)) )
                     {
-                        sLog.outDetail("Spell %u canceled at damage!",pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->Id);
+                        sLog.outDetail("Spell %u canceled at damage!",spell->m_spellInfo->Id);
                         pVictim->InterruptSpell(CURRENT_CHANNELED_SPELL);
                     }
                 }
-                else if (pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->getState() == SPELL_STATE_DELAYED)
+                else if (spell->getState() == SPELL_STATE_DELAYED)
                     // break channeled spell in delayed state on damage
                 {
-                    sLog.outDetail("Spell %u canceled at damage!",pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->Id);
+                    sLog.outDetail("Spell %u canceled at damage!",spell->m_spellInfo->Id);
                     pVictim->InterruptSpell(CURRENT_CHANNELED_SPELL);
                 }
             }
@@ -2032,50 +2049,6 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             {
                 removedAuras = pVictim->m_removedAuras;
                 next = vDamageShields.begin();
-            }
-        }
-    }
-
-    if (pVictim->GetTypeId() == TYPEID_PLAYER && *damage)
-    {
-        for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
-        {
-            // skip channeled spell (processed differently below)
-            if (i == CURRENT_CHANNELED_SPELL)
-                continue;
-
-            if(pVictim->m_currentSpells[i])
-            {
-                int32 delay = int32(0.25f * pVictim->m_currentSpells[i]->GetCastTime());
-                sLog.outDetail("Spell Delayed!%d",delay);
-                pVictim->m_currentSpells[i]->Delayed(delay);
-            }
-        }
-
-        // process channeled spell separately
-        if (pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL])
-        {
-            if (pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->getState() == SPELL_STATE_CASTING)
-            {
-                uint32 channelInterruptFlags = pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo->ChannelInterruptFlags;
-                if( channelInterruptFlags & CHANNEL_FLAG_DELAY )
-                {
-                    int32 delay = int32(0.25f * GetSpellDuration(pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->m_spellInfo));
-                    sLog.outDetail("Spell Delayed!%d",delay);
-                    pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->DelayedChannel(delay);
-                    return;
-                }
-                else if( !(channelInterruptFlags & (CHANNEL_FLAG_DAMAGE | CHANNEL_FLAG_DAMAGE2)) )
-                    return;
-
-                sLog.outDetail("Spell Canceled!");
-                pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->cancel();
-            }
-            else if (pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->getState() == SPELL_STATE_DELAYED)
-            {
-                // break channeled spell in delayed state on damage
-                sLog.outDetail("Spell Canceled!");
-                pVictim->m_currentSpells[CURRENT_CHANNELED_SPELL]->cancel();
             }
         }
     }
