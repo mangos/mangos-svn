@@ -5355,6 +5355,18 @@ void Aura::PeriodicTick()
                 }
 
                 pdamage = pCaster->SpellDamageBonus(m_target,GetSpellProto(),pdamage,DOT);
+
+                // Curse of Agony damage-per-tick calculation
+                if (GetSpellProto()->SpellFamilyName==SPELLFAMILY_WARLOCK && (GetSpellProto()->SpellFamilyFlags & 0x0000000000000400LL) && GetSpellProto()->SpellIconID==544)
+                {
+                    // 1..4 ticks, 1/2 from normal tick damage
+                    if (m_duration>=((m_maxduration-m_modifier.periodictime)*2/3))
+                        pdamage = pdamage/2;
+                    // 9..12 ticks, 3/2 from normal tick damage
+                    else if(m_duration<((m_maxduration-m_modifier.periodictime)/3))
+                        pdamage += pdamage/2;
+                    // 5..8 ticks have normal tick damage
+                }
             }
             else
                 pdamage = uint32(m_target->GetMaxHealth()*amount/100);
