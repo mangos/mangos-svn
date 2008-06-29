@@ -5523,9 +5523,6 @@ void Spell::EffectSummonDemon(uint32 i)
     float py = m_targets.m_destY;
     float pz = m_targets.m_destZ;
 
-    if (px == 0 || py == 0 || pz == 0)
-        m_caster->GetClosePoint(px, py, pz);
-
     Creature* Charmed = m_caster->SummonCreature(m_spellInfo->EffectMiscValue[i], px, py, pz, m_caster->GetOrientation(),TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,3600000);
     if (!Charmed)
         return;
