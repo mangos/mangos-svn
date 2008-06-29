@@ -4718,8 +4718,12 @@ void Spell::EffectSummonTotem(uint32 i)
         modOwner->ApplySpellMod(m_spellInfo->Id,SPELLMOD_DURATION, duration);
     pTotem->SetDuration(duration);
 
-    pTotem->SetMaxHealth(damage);
-    pTotem->SetHealth(damage);
+    if (damage)                                             // if not spell info, DB values used
+    {
+        pTotem->SetMaxHealth(damage);
+        pTotem->SetHealth(damage);
+    }
+
     pTotem->SetUInt32Value(UNIT_CREATED_BY_SPELL,m_spellInfo->Id);
     pTotem->SetFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_PVP_ATTACKABLE);
 
