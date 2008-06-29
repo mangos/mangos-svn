@@ -8735,7 +8735,7 @@ bool Unit::SelectHostilTarget()
     }
 
     // no target but something prevent go to evade mode
-    if( !isInCombat() || HasAuraType(SPELL_AURA_MOD_TAUNT) || !CanFreeMove() )
+    if( !isInCombat() || HasAuraType(SPELL_AURA_MOD_TAUNT) )
         return false;
 
     // last case when creature don't must go to evade mode:
