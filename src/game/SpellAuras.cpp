@@ -3055,6 +3055,10 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         // remove fears (after unit state update to prevent attack back/etc)
         m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_FEAR);
 
+        if(GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && GetSpellProto()->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_SAP)
+            if(m_target->HasStealthAura())
+                m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+
         //Save last orientation
         if( m_target->getVictim() )
             m_target->SetOrientation(m_target->GetAngle(m_target->getVictim()));
