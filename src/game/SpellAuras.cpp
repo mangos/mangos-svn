@@ -3738,12 +3738,6 @@ void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
                 ++itr;
         }
     }
-    if(m_target->IsHostileTo(caster) && (m_target->GetTypeId()!=TYPEID_PLAYER || !((Player*)m_target)->isGameMaster()))
-    {
-
-        if( caster->GetTypeId()==TYPEID_PLAYER && !caster->IsPvP() && m_target->IsPvP())
-            ((Player*)caster)->UpdatePvP(true, true);
-    }
 }
 
 void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
@@ -5218,6 +5212,11 @@ void Aura::CleanupTriggeredSpells()
     if(GetSpellDuration(tProto) != -1)
         return;
 
+    // needed for spell 43680, maybe others
+    // TODO: is there a spell flag, which can solve this in a more sophisticated way?
+    if(m_spellProto->EffectApplyAuraName[GetEffIndex()] == SPELL_AURA_PERIODIC_TRIGGER_SPELL &&
+            GetSpellDuration(m_spellProto) == m_spellProto->EffectAmplitude[GetEffIndex()])
+        return;
     m_target->RemoveAurasDueToSpell(tSpellId);
 }
 

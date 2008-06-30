@@ -594,3 +594,23 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
         sBattleGroundMgr.m_BattleGroundQueues[BATTLEGROUND_AA].AddPlayer(_player, BATTLEGROUND_AA);
     }
 }
+
+void WorldSession::HandleBattleGroundReportAFK( WorldPacket & recv_data )
+{
+    CHECK_PACKET_SIZE(recv_data, 8);
+    
+    uint64 playerGuid;
+    recv_data >> playerGuid;
+    Player *reportedPlayer = objmgr.GetPlayer(playerGuid);
+
+    if(!reportedPlayer)
+    {
+        sLog.outDebug("WorldSession::HandleBattleGroundReportAFK: player not found");
+        return;
+    }
+
+    sLog.outDebug("WorldSession::HandleBattleGroundReportAFK: %s reported %s", _player->GetName(), reportedPlayer->GetName());
+
+    reportedPlayer->ReportedAfkBy(_player);
+}
+

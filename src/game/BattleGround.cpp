@@ -430,6 +430,9 @@ uint32 BattleGround::GetBattlemasterEntry() const
 
 void BattleGround::RewardMark(Player *plr,uint32 count)
 {
+    // 'Inactive' this aura prevents the player from gaining honor points and battleground tokens
+    if(plr->GetDummyAura(43681))
+        return;
     BattleGroundMarks mark;
     bool IsSpell;
     switch(GetTypeID())
@@ -559,11 +562,7 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
         {
             if(!sWorld.IsFFAPvPRealm())
                 plr->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
-
-            plr->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
         }
-        else
-            plr->RemoveAurasDueToSpell(SPELL_PREPARATION);
 
         WorldPacket data;
         if(SendPacket)
@@ -758,8 +757,8 @@ void BattleGround::UpdatePlayerScore(Player *Source, uint32 type, uint32 value)
             break;
         case SCORE_BONUS_HONOR:                             // Honor bonus
             // reward honor instantly
-            Source->RewardHonor(NULL, 1, value);
-            itr->second->BonusHonor += value;
+            if(Source->RewardHonor(NULL, 1, value))
+                itr->second->BonusHonor += value;
             break;
             //used only in EY, but in MSG_PVP_LOG_DATA opcode
         case SCORE_DAMAGE_DONE:                             // Damage Done

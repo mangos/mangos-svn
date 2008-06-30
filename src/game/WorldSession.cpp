@@ -414,6 +414,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_BATTLEFIELD_LIST ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundListOpcode        );
     objmgr.opcodeTable[ CMSG_LEAVE_BATTLEFIELD ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundLeaveOpcode       );
     objmgr.opcodeTable[ CMSG_BATTLEMASTER_JOIN_ARENA ]          = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundArenaJoin         );
+    objmgr.opcodeTable[ CMSG_REPORT_PVP_AFK ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundReportAFK         );
 
     objmgr.opcodeTable[ CMSG_SET_ACTIONBAR_TOGGLES ]            = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleSetActionBar                  );
     objmgr.opcodeTable[ CMSG_SET_WATCHED_FACTION ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetWatchedFactionIndexOpcode  );

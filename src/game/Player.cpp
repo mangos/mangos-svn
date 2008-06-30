@@ -413,6 +413,7 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_unit_movement_flags = 0;
 
     m_miniPet = 0;
+    m_bgAfkReportedTimer = 0;
 }
 
 Player::~Player ()
@@ -904,11 +905,13 @@ void Player::Update( uint32 p_time )
 
     time_t now = time (NULL);
 
-    UpdatePvPFlag(time(NULL));
+    UpdatePvPFlag(now);
 
-    UpdateDuelFlag(time(NULL));
+    UpdateDuelFlag(now);
 
-    CheckDuelDistance(time(NULL));
+    CheckDuelDistance(now);
+
+    UpdateAfkReport(now);
 
     CheckExploreSystem();
 
@@ -1008,7 +1011,10 @@ void Player::Update( uint32 p_time )
             Unit *owner = pVictim->GetOwner();
             Unit *u = owner ? owner : pVictim;
             if(u->IsPvP() && (!duel || duel->opponent != u))
+            {
                 UpdatePvP(true);
+                RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+            }
         }
     }
 
@@ -1590,6 +1596,8 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             SetMapId(mapid);
             Relocate(final_x, final_y, final_z, final_o);
             ApplyModFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTE_RELEASE_TIMER, !MapManager::Instance().GetBaseMap(GetMapId())->Instanceable());
+
+            RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CHANGE_MAP);
 
             // move packet sent by client always after far teleport
             // SetPosition(final_x, final_y, final_z, final_o, true);
@@ -5670,6 +5678,9 @@ void Player::UpdateHonorFields(bool force)
 ///An exact honor value can also be given (overriding the calcs)
 bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
 {
+    // 'Inactive' this aura prevents the player from gaining honor points and battleground tokens
+    if(GetDummyAura(43681))
+        return false;
     uint64 victim_guid = 0;
     uint32 victim_rank = 0;
     uint32 now = time(NULL);
@@ -14639,6 +14650,16 @@ void Player::SendDungeonDifficulty()
 /***              Update timers                        ***/
 /*********************************************************/
 
+///checks the 15 afk reports per 5 minutes limit
+void Player::UpdateAfkReport(time_t currTime)
+{
+    if(m_bgAfkReportedTimer <= currTime)
+    {
+        m_bgAfkReportedCount = 0;
+        m_bgAfkReportedTimer = currTime+5*MINUTE;
+    }
+}
+
 void Player::UpdatePvPFlag(time_t currTime)
 {
     if(!IsPvP())
@@ -16010,6 +16031,7 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
             CastSpell(this, 26013, true);                   // Deserter
 
         bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
+        m_bgAfkReporter.clear();
     }
 }
 
@@ -16020,6 +16042,36 @@ bool Player::CanJoinToBattleground() const
         return false;
 
     return true;
+}
+
+bool Player::CanReportAfkDueToLimit()
+{
+    // a player can complain about 15 people per 5 minutes
+    if(m_bgAfkReportedCount >= 15)
+        return false;
+    ++m_bgAfkReportedCount;
+    return true;
+}
+
+///This player has been blamed to be inactive in a battleground
+void Player::ReportedAfkBy(Player* reporter)
+{
+    BattleGround *bg = GetBattleGround();
+    if(!bg || bg != reporter->GetBattleGround() || GetTeam() != reporter->GetTeam())
+        return;
+
+    // check if player has 'Idle' or 'Inactive' debuff
+    if(m_bgAfkReporter.find(reporter->GetGUIDLow())==m_bgAfkReporter.end() && !HasAura(43680,0) && !HasAura(43681,0) && reporter->CanReportAfkDueToLimit())
+    {
+        m_bgAfkReporter.insert(reporter->GetGUIDLow());
+        // 3 players have to complain to apply debuff
+        if(m_bgAfkReporter.size() >= 3)
+        {
+            // cast 'Idle' spell
+            CastSpell(this, 43680, true);
+            m_bgAfkReporter.clear();
+        }
+    }
 }
 
 bool Player::IsVisibleInGridForPlayer( Player* pl ) const
