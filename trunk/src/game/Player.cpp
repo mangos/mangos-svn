@@ -3673,12 +3673,12 @@ void Player::DurabilityLoss(uint8 equip_pos, double percent)
     if(!m_items[equip_pos])
         return;
 
-    uint32 pDurability =  m_items[equip_pos]->GetUInt32Value(ITEM_FIELD_DURABILITY);
+    uint32 pMaxDurability =  m_items[equip_pos]->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
 
-    if(!pDurability)
+    if(!pMaxDurability)
         return;
 
-    uint32 pDurabilityLoss = (uint32)(pDurability*percent);
+    uint32 pDurabilityLoss = uint32(pMaxDurability*percent);
 
     if(pDurabilityLoss < 1 )
         pDurabilityLoss = 1;
