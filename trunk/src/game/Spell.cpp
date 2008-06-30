@@ -1282,17 +1282,19 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             if(Unit* currentTarget = m_targets.getUnitTarget())
             {
                 TagUnitMap.push_back(currentTarget);
-
-                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                Cell cell(p);
-                cell.data.Part.reserved = ALL_DISTRICT;
-                cell.SetNoCreate();
-                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, radius,PUSH_TARGET_CENTER, SPELL_TARGETS_AOE_DAMAGE);
-                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_notifier(notifier);
-                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer > grid_notifier(notifier);
-                CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, world_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-                cell_lock->Visit(cell_lock, grid_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                if(radius > 0.0f)
+                {
+                    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                    Cell cell(p);
+                    cell.data.Part.reserved = ALL_DISTRICT;
+                    cell.SetNoCreate();
+                    MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, radius,PUSH_TARGET_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+                    TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_notifier(notifier);
+                    TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer > grid_notifier(notifier);
+                    CellLock<GridReadGuard> cell_lock(cell, p);
+                    cell_lock->Visit(cell_lock, world_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                    cell_lock->Visit(cell_lock, grid_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                }
             }
         }break;
         case TARGET_ALL_PARTY_AROUND_CASTER:
