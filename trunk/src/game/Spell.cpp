@@ -600,15 +600,19 @@ void Spell::FillTargetMap()
         if(IsChanneledSpell(m_spellInfo) && !tmpUnitMap.empty())
             m_needAliveTargetMask  |= (1<<i);
 
-        if(m_caster->GetTypeId() == TYPEID_PLAYER && (!m_caster->IsPvP() || ((Player*)m_caster)->pvpInfo.endTimer != 0))
+        if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             Player *me = (Player*)m_caster;
             for (std::list<Unit*>::const_iterator itr = tmpUnitMap.begin(); itr != tmpUnitMap.end(); itr++)
             {
                 Unit *owner = (*itr)->GetOwner();
                 Unit *u = owner ? owner : (*itr);
-                if(u->IsPvP() && (!me->duel || me->duel->opponent != u))
+                if(u!=m_caster && u->IsPvP() && (!me->duel || me->duel->opponent != u))
+                {
                     me->UpdatePvP(true);
+                    me->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
+                    break;
+                }
             }
         }
 

@@ -1441,6 +1441,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdatePvP(bool state, bool ovrride=false);
         void UpdateZone(uint32 newZone);
         void UpdateArea(uint32 newArea);
+        void UpdateAfkReport(time_t currTime);
         void UpdatePvPFlag(time_t currTime);
 
         /** todo: -maybe move UpdateDuelFlag+DuelComplete to independent DuelHandler.. **/
@@ -1805,6 +1806,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void LeaveBattleground(bool teleportToEntryPoint = true);
         bool CanJoinToBattleground() const;
+        bool CanReportAfkDueToLimit();
+        void ReportedAfkBy(Player* reporter);
 
         bool GetBGAccessByLevel(uint32 bgTypeId) const;
 
@@ -1950,6 +1953,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         float m_bgEntryPointY;
         float m_bgEntryPointZ;
         float m_bgEntryPointO;
+
+        std::set<uint32> m_bgAfkReporter;
+        uint8 m_bgAfkReportedCount;
+        time_t m_bgAfkReportedTimer;
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/

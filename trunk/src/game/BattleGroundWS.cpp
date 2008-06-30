@@ -214,6 +214,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
 
     //TODO FIX reputation and honor gains for low level players!
 
+    Source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
     if(Source->GetTeam() == ALLIANCE)
     {
         if (!this->IsHordeFlagPickedup())
@@ -442,6 +443,7 @@ void BattleGroundWS::EventPlayerClickedOnFlag(Player *Source, GameObject* target
     WorldPacket data;
     ChatHandler::FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
     SendPacketToAll(&data);
+    Source->RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_ENTER_PVP_COMBAT);
 }
 
 void BattleGroundWS::RemovePlayer(Player *plr, uint64 guid)

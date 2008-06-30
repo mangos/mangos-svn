@@ -527,6 +527,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleBattleGroundListOpcode( WorldPacket &recv_data );
         void HandleBattleGroundLeaveOpcode( WorldPacket &recv_data );
         void HandleBattleGroundArenaJoin( WorldPacket &recv_data );
+        void HandleBattleGroundReportAFK( WorldPacket &recv_data );
 
         void HandleWardenDataOpcode(WorldPacket& recv_data);
         void HandleWorldTeleportOpcode(WorldPacket& recv_data);
