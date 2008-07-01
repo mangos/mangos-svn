@@ -2018,8 +2018,8 @@ void Player::GiveLevel(uint32 level)
     //update level, max level of skills
     if(getLevel()!= level)
         m_Played_time[1] = 0;                               // Level Played Time reset
-    SetLevel( level);
-    UpdateMaxSkills ();
+    SetLevel(level);
+    UpdateMaxSkills();
 
     // save base values (bonuses already included in stored stats
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
@@ -2624,33 +2624,18 @@ bool Player::addSpell(uint32 spell_id, uint8 active, bool learning, bool loading
                 // lockpicking special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
                 pSkill->id==SKILL_LOCKPICKING && _spell_idx->second->max_value==0 )
             {
-                switch(pSkill->categoryId)
+                switch(GetSkillRangeType(pSkill,_spell_idx->second->racemask!=0))
                 {
-                    case SKILL_CATEGORY_LANGUAGES:
+                    case SKILL_RANGE_LANGUAGE:
                         SetSkill(pSkill->id, 300, 300 );
                         break;
-                    case SKILL_CATEGORY_WEAPON:
-                        if(pSkill->id!=SKILL_FIST_WEAPONS)
-                            SetSkill(pSkill->id, 1, GetMaxSkillValueForLevel() );
-                        else
-                            SetSkill(pSkill->id, 1, 1 );
+                    case SKILL_RANGE_LEVEL:
+                        SetSkill(pSkill->id, 1, GetMaxSkillValueForLevel() );
                         break;
-                    case SKILL_CATEGORY_ARMOR:
-                    case SKILL_CATEGORY_CLASS:
-                        if(pSkill->id != SKILL_POISONS && pSkill->id != SKILL_LOCKPICKING)
-                            SetSkill(pSkill->id, 1, 1 );
-                        else
-                            SetSkill(pSkill->id, 1, GetMaxSkillValueForLevel() );
-                        break;
-                    case SKILL_CATEGORY_SECONDARY:
-                    case SKILL_CATEGORY_PROFESSION:
-                        // not set skills for professions and racial abilities
-                        if(!IsProfessionSkill(pSkill->id) && _spell_idx->second->racemask==0)
-                            SetSkill(pSkill->id, 1, 1 );
-                        break;
-                    case SKILL_CATEGORY_ATTRIBUTES:            //not found in dbc
-                    case SKILL_CATEGORY_NOT_DISPLAYED:         //only GENEREC(DND)
+                    case SKILL_RANGE_MONO:
                         SetSkill(pSkill->id, 1, 1 );
+                        break;
+                    default:
                         break;
                 }
             }
@@ -4642,7 +4627,7 @@ void Player::UpdateMaxSkills()
         if(!pSkill)
             continue;
 
-        if(pSkill->categoryId != SKILL_CATEGORY_WEAPON)
+        if(GetSkillRangeType(pSkill,false) != SKILL_RANGE_LEVEL)
             continue;
 
         uint32 data = GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i));
