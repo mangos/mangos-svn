@@ -211,13 +211,14 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         // if we boarded a transport, add us to it
         if (!GetPlayer()->m_transport)
         {
-            // unmount before boarding
-            _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
-
+            // elevators also cause the client to send MOVEMENTFLAG_ONTRANSPORT - just unmount if the guid can be found in the transport list
             for (MapManager::TransportSet::iterator iter = MapManager::Instance().m_Transports.begin(); iter != MapManager::Instance().m_Transports.end(); ++iter)
             {
                 if ((*iter)->GetGUID() == movementInfo.t_guid)
                 {
+                    // unmount before boarding
+                    _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+
                     GetPlayer()->m_transport = (*iter);
                     (*iter)->AddPassenger(GetPlayer());
                     break;
