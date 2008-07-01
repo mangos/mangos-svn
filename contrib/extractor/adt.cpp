@@ -32,7 +32,7 @@ bool LoadADT(char* filename)
 
     if(mf.isEof())
     {
-        //printf("No such file.\n");    
+        //printf("No such file.\n");
         return false;
     }
     mcells=new mcell;
@@ -44,86 +44,105 @@ bool LoadADT(char* filename)
 
     wmo_count=0;
     bool found=false;
-    //uint32 fs=mf.getSize ()-3;
-    //while (mf.getPos ()<fs)
-    while (!mf.isEof  ())
+    //uint32 fs=mf.getSize()-3;
+    //while (mf.getPos()<fs)
+    while (!mf.isEof())
     {
-        uint32 fourcc;        
+        uint32 fourcc;
         mf.read(&fourcc,4);
         mf.read(&size, 4);
 
-        size_t nextpos = mf.getPos () + size;
-        if(fourcc==0x4d43494e)                              // MCIN
+        size_t nextpos = mf.getPos() + size;
+        switch(fourcc)
         {
-            //printf("Found chunks info\n");
-            // mapchunk offsets/sizes
-            for (int i=0; i<256; i++)
+            case 0x4d43494e:                                // MCIN
             {
-                mf.read(&mcnk_offsets[i],4);
-                mf.read(&mcnk_sizes[i],4);
-                mf.seekRelative(8);
+                //printf("Found chunks info\n");
+                // mapchunk offsets/sizes
+                for (int i=0; i<256; i++)
+                {
+                    mf.read(&mcnk_offsets[i],4);
+                    mf.read(&mcnk_sizes[i],4);
+                    mf.seekRelative(8);
+                }
+                break;
             }
-            //break;
-        }
-        else if(fourcc==0x4d4f4446)                         // MODF
-        {      
-            /*  
-            if(size)
-            {    
-                //printf("\nwmo count %d\n",size/64);
-                wmo_count =size/64;
-                for (int i=0; i<wmo_count; i++)
-                {
-                    int id;
-                    mf.read(&id, 4);
-                    WMO *wmo = (WMO*)wmomanager.items[wmomanager.get(wmos[id])];
-                    WMOInstance inst(wmo, mf);
-                    wmois.push_back(inst);
-                }
-
-            }*/
-        }
-        else if(fourcc==0x4d574d4f)                         // MWMO
-        {
-            /*
-            if (size)
+            case 0x4d4f4446:                                // MODF
             {
-                char *buf = new char[size];
-                mf.read(buf, size);
-                char *p=buf;
-                while (p<buf+size)
+                /*
+                if(size)
                 {
-                std::string path(p);
-                    p+=strlen(p)+1;
-                    fixname(path);
-                    
-                    wmomanager.add(path);
-                    wmos.push_back(path);
-                }
-                delete[] buf;
-            }*/
-        }
-        //    else mf.seekRelative(-3);
+                    //printf("\nwmo count %d\n",size/64);
+                    wmo_count =size/64;
+                    for (int i=0; i<wmo_count; i++)
+                    {
+                        int id;
+                        mf.read(&id, 4);
+                        WMO *wmo = (WMO*)wmomanager.items[wmomanager.get(wmos[id])];
+                        WMOInstance inst(wmo, mf);
+                        wmois.push_back(inst);
+                    }
 
+                }*/
+                break;
+            }
+            case 0x4d574d4f:                                // MWMO
+            {
+                /*
+                if (size)
+                {
+                    char *buf = new char[size];
+                    mf.read(buf, size);
+                    char *p=buf;
+                    while (p<buf+size)
+                    {
+                    std::string path(p);
+                        p+=strlen(p)+1;
+                        fixname(path);
+
+                        wmomanager.add(path);
+                        wmos.push_back(path);
+                    }
+                    delete[] buf;
+                }*/
+                break;
+            }
+            case 0x4d564552:                                // MVER
+            case 0x4d484452:                                // MHDR header
+            case 0x4d434e4b:                                // MCNK
+            case 0x4d544558:                                // MTEX textures (strings)
+            case 0x4d4d4458:                                // MMDX m2 models (strings)
+            case 0x4d4d4944:                                // MMID offsets for strings in MMDX
+            case 0x4d574944:                                // MWID offsets for strings in MWMO
+            case 0x4d444446:                                // MDDF
+            case 0x4d46424f:                                // MFBO new in BC
+                break;
+            default:
+            {
+                // mf.seekRelative(-3);
+                printf("Unhandled map chunk: %u\n",fourcc);
+                break;
+            }
+        }
         mf.seek(nextpos);
     }
 
     //printf("Loading chunks info\n");
     // read individual map chunks
-    for (int j=0; j<16; j++) 
-        for (int i=0; i<16; i++) 
+    for (int j=0; j<16; j++)
+        for (int i=0; i<16; i++)
         {
             mf.seek((int)mcnk_offsets[j*16+i]);
-            LoadMapChunk (mf,&(mcells->ch [i][j]));
+            LoadMapChunk(mf,&(mcells->ch[i][j]));
         }
 
     /*
     for(uint32 t=0;t<wmo_count ;t++)
     {
-        wmois[t].draw ();
+        wmois[t].draw();
     }*/
 
-    mf.close ();
+    mf.close();
     return true;
 }
 
@@ -170,7 +189,7 @@ void LoadMapChunk(MPQFile & mf, chunk*_chunk)
     uint32 fourcc;
     uint32 size;
     MapChunkHeader header;
-    
+
     mf.seekRelative(4);
     mf.read(&size, 4);
 
@@ -191,7 +210,7 @@ void LoadMapChunk(MPQFile & mf, chunk*_chunk)
     float zmax=-999999999.0f;
     //must be there, bl!zz uses some crazy format
     int nTextures;
-    while (mf.getPos ()<lastpos)
+    while (mf.getPos() < lastpos)
     {
         mf.read(&fourcc,4);
         mf.read(&size, 4);
@@ -201,7 +220,7 @@ void LoadMapChunk(MPQFile & mf, chunk*_chunk)
         if(fourcc==0x4d435654)                              // MCVT
         {
             for (int j=0; j<17; j++)
-                for (int i=0; i<((j%2)?8:9); i++) 
+                for (int i=0; i<((j%2)?8:9); i++)
                 {
                     mf.read(&h,4);
                     float z=h+ybase;
@@ -237,7 +256,7 @@ void LoadMapChunk(MPQFile & mf, chunk*_chunk)
             {
                 float maxheight;
                 mf.read(&maxheight, 4);
-                
+
                 for(int j=0;j<9;j++)
                     for(int i=0;i<9;i++)
                     {
@@ -263,15 +282,13 @@ void LoadMapChunk(MPQFile & mf, chunk*_chunk)
             nTextures = (int)size;
         }
         else if (fourcc==0x4d43414c)                        // MCAL
-        {     
-            if (nTextures<=0) 
+        {
+            if (nTextures<=0)
                 continue;
         }
 
         mf.seek(nextpos);
     }
-
-    printf("");
 }
 
 double solve (vec *v,vec *p)
@@ -291,9 +308,9 @@ double GetZ(double x,double z)
 {
     vec v[3];
     vec p;
-    
+
     //bool inWMO=false;
-    
+
     //if(!inWMO)
     {
         //find out quadrant
@@ -306,13 +323,11 @@ double GetZ(double x,double z)
         double lz=z-zc*UNITSIZE;
         p.x=lx;
         p.z=lz;
-    
 
         v[0].x=UNITSIZE/2;
         v[0].y =cell->v8[xc][zc];
         v[0].z=UNITSIZE/2;
 
-    
         if(lx>lz)
         {
             v[1].x=UNITSIZE;
@@ -431,7 +446,7 @@ bool ConvertADT(char * filename,char * filename2)
 
     delete cell;
     TransformData();
-    
+
     for(unsigned int x=0;x<iRes;x++)
     for(unsigned int y=0;y<iRes;y++)
     {
@@ -447,17 +462,17 @@ bool ConvertADT(char * filename,char * filename2)
 /*
     for (std::vector<std::string>::iterator it = wmos.begin(); it != wmos.end(); ++it)
     wmomanager.delbyname(*it);
-        
-    wmos.clear ();
-    wmois.clear ();
-    
+
+    wmos.clear();
+    wmois.clear();
+
     for (std::vector<model>::iterator it = wmomodel.begin(); it != wmomodel.end(); ++it)
     {
         it->tr.clear();
 
     }
     //printf("\n %d \n",in);
-    wmomodel.clear ();
-    //polygons.clear ();*/
+    wmomodel.clear();
+    //polygons.clear();*/
     return true;
 }
