@@ -503,8 +503,8 @@ struct SpellTargetEntry
 
 typedef std::multimap<uint32,SpellTargetEntry> SpellScriptTarget;
 
-// Spell teleports (accessed using SpellMgr functions)
-struct SpellTeleport
+// coordinates for spells (accessed using SpellMgr functions)
+struct SpellTargetPosition
 {
     uint32 target_mapId;
     float  target_X;
@@ -513,7 +513,7 @@ struct SpellTeleport
     float  target_Orientation;
 };
 
-typedef HM_NAMESPACE::hash_map<uint32, SpellTeleport> SpellTeleportMap;
+typedef HM_NAMESPACE::hash_map<uint32, SpellTargetPosition> SpellTargetPositionMap;
 
 // Spell rank chain  (accessed using SpellMgr functions)
 struct SpellChainNode
@@ -618,11 +618,11 @@ class SpellMgr
 
         static bool IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spellProcEvent, SpellEntry const * procSpell, uint32 procFlags );
 
-        // Spell teleports
-        SpellTeleport const* GetSpellTeleport(uint32 spell_id) const
+        // Spell target coordinates
+        SpellTargetPosition const* GetSpellTargetPosition(uint32 spell_id) const
         {
-            SpellTeleportMap::const_iterator itr = mSpellTeleports.find( spell_id );
-            if( itr != mSpellTeleports.end( ) )
+            SpellTargetPositionMap::const_iterator itr = mSpellTargetPositions.find( spell_id );
+            if( itr != mSpellTargetPositions.end( ) )
                 return &itr->second;
             return NULL;
         }
@@ -758,7 +758,7 @@ class SpellMgr
         void LoadSpellAffects();
         void LoadSpellElixirs();
         void LoadSpellProcEvents();
-        void LoadSpellTeleports();
+        void LoadSpellTargetPositions();
         void LoadSpellThreats();
         void LoadSkillLineAbilityMap();
 
@@ -768,7 +768,7 @@ class SpellMgr
         SpellChainMapNext  mSpellChainsNext;
         SpellLearnSkillMap mSpellLearnSkills;
         SpellLearnSpellMap mSpellLearnSpells;
-        SpellTeleportMap   mSpellTeleports;
+        SpellTargetPositionMap mSpellTargetPositions;
         SpellAffectMap     mSpellAffectMap;
         SpellElixirMap     mSpellElixirs;
         SpellProcEventMap  mSpellProcEventMap;

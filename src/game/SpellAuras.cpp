@@ -1365,8 +1365,16 @@ void Aura::TriggerSpell()
 //                    case 33563: break;
 //                    // Murmur's Touch
 //                    case 33711: break;
-//                    // Flame Quills
-//                    case 34229: break;
+                    // Flame Quills
+                    case 34229:
+                    {
+                        // cast 24 spells 34269-34289, 34314-34316
+                        for(uint32 spell_id = 34269; spell_id != 34290; ++spell_id)
+                            caster->CastSpell(m_target,spell_id,true);
+                        for(uint32 spell_id = 34314; spell_id != 34317; ++spell_id)
+                            caster->CastSpell(m_target,spell_id,true);
+                        return;
+                    }
 //                    // Gravity Lapse
 //                    case 34480: break;
 //                    // Tornado

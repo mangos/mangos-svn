@@ -125,7 +125,7 @@ bool ChatHandler::HandleReloadAllSpellCommand(const char*)
     HandleReloadSpellLearnSpellCommand("a");
     HandleReloadSpellProcEventCommand("a");
     HandleReloadSpellScriptTargetCommand("a");
-    HandleReloadSpellTeleportCommand("a");
+    HandleReloadSpellTargetPositionCommand("a");
     HandleReloadSpellThreatsCommand("a");
     return true;
 }
@@ -361,11 +361,11 @@ bool ChatHandler::HandleReloadSpellScriptTargetCommand(const char*)
     return true;
 }
 
-bool ChatHandler::HandleReloadSpellTeleportCommand(const char*)
+bool ChatHandler::HandleReloadSpellTargetPositionCommand(const char*)
 {
-    sLog.outString( "Re-Loading Spell teleport coordinates..." );
-    spellmgr.LoadSpellTeleports();
-    SendGlobalSysMessage("DB table `spell_teleport` (destination coordinates for spell teleports) reloaded.");
+    sLog.outString( "Re-Loading Spell target coordinates..." );
+    spellmgr.LoadSpellTargetPositions();
+    SendGlobalSysMessage("DB table `spell_target_position` (destination coordinates for spell targets) reloaded.");
     return true;
 }
 

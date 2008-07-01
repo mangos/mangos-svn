@@ -417,6 +417,7 @@ void Spell::FillTargetMap()
             case TARGET_CURRENT_SELECTED_ENEMY:
             case TARGET_ALL_ENEMY_IN_TARGET_AREA_INSTANT:
             case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
+            case TARGET_TABLE_X_Y_Z_COORDINATES:
                 SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
                 break;
             default:
@@ -1775,6 +1776,53 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 TagUnitMap.push_back(m_targets.getUnitTarget());
             break;
         }
+        case TARGET_TABLE_X_Y_Z_COORDINATES:
+        {
+            SpellTargetPosition const* st = spellmgr.GetSpellTargetPosition(m_spellInfo->Id);
+            if(st)
+            {
+                if (st->target_mapId == m_caster->GetMapId())
+                    m_targets.setDestination(st->target_X, st->target_Y, st->target_Z);
+
+                if (m_spellInfo->EffectImplicitTargetB[i])
+                {
+                    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                    Cell cell(p);
+                    cell.data.Part.reserved = ALL_DISTRICT;
+                    cell.SetNoCreate();
+
+                    SpellTargets targetB = SPELL_TARGETS_AOE_DAMAGE;
+                    // Select frendly tarets for positive effect
+                    if (IsPositiveEffect(m_spellInfo->Id, i))
+                        targetB = SPELL_TARGETS_FRIENDLY;
+
+                    MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, radius,PUSH_DEST_CENTER, targetB);
+
+                    TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_notifier(notifier);
+                    TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer > grid_notifier(notifier);
+
+                    CellLock<GridReadGuard> cell_lock(cell, p);
+                    cell_lock->Visit(cell_lock, world_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                    cell_lock->Visit(cell_lock, grid_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                }
+            }
+            else
+                sLog.outError( "SPELL: unknown target coordinates for spell ID %u\n", m_spellInfo->Id );
+        }break;
+        case TARGET_BEHIND_VICTIM:
+        {
+            Unit *pTarget = m_caster->getVictim();
+            if(!pTarget && m_caster->GetTypeId() == TYPEID_PLAYER)
+                pTarget = ObjectAccessor::GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
+
+            if(pTarget)
+            {
+                float _target_x, _target_y, _target_z;
+                pTarget->GetClosePoint(_target_x, _target_y, _target_z, CONTACT_DISTANCE + pTarget->GetObjectSize() + m_caster->GetObjectSize(), M_PI);
+                if(pTarget->IsWithinLOS(_target_x,_target_y,_target_z))
+                    m_targets.setDestination(_target_x, _target_y, _target_z);
+            }
+        }break;
         default:
             break;
     }

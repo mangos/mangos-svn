@@ -14876,11 +14876,11 @@ LOCK TABLES `spell_scripts` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `spell_teleport`
+-- Table structure for table `spell_target_position`
 --
 
-DROP TABLE IF EXISTS `spell_teleport`;
-CREATE TABLE `spell_teleport` (
+DROP TABLE IF EXISTS `spell_target_position`;
+CREATE TABLE `spell_target_position` (
   `id` mediumint(8) unsigned NOT NULL default '0' COMMENT 'Identifier',
   `target_map` smallint(5) unsigned NOT NULL default '0',
   `target_position_x` float NOT NULL default '0',
@@ -14891,12 +14891,12 @@ CREATE TABLE `spell_teleport` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Spell System';
 
 --
--- Dumping data for table `spell_teleport`
+-- Dumping data for table `spell_target_position`
 --
 
-LOCK TABLES `spell_teleport` WRITE;
-/*!40000 ALTER TABLE `spell_teleport` DISABLE KEYS */;
-/*!40000 ALTER TABLE `spell_teleport` ENABLE KEYS */;
+LOCK TABLES `spell_target_position` WRITE;
+/*!40000 ALTER TABLE `spell_target_position` DISABLE KEYS */;
+/*!40000 ALTER TABLE `spell_target_position` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

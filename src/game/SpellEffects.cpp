@@ -1716,46 +1716,51 @@ void Spell::EffectTriggerMissileSpell(uint32 effect_idx)
     spell->prepare(&targets, NULL);
 }
 
-void Spell::EffectTeleportUnits(uint32 /*i*/)
+void Spell::EffectTeleportUnits(uint32 i)
 {
     if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if(unitTarget ->isInFlight())
+    if(unitTarget->isInFlight())
         return;
 
-    // special case for homebind
-    if(m_spellInfo->Id == 8690 || m_spellInfo->Id == 556)
+    switch (m_spellInfo->EffectImplicitTargetB[i])
     {
-        //homebind location is loaded always
-        ((Player*)unitTarget)->TeleportTo(((Player*)m_caster)->m_homebindMapId,((Player*)m_caster)->m_homebindX,((Player*)m_caster)->m_homebindY,((Player*)m_caster)->m_homebindZ,unitTarget->GetOrientation());
-        return;
-    }
+        case TARGET_INNKEEPER_COORDINATES:
+        {
+            ((Player*)unitTarget)->TeleportTo(((Player*)unitTarget)->m_homebindMapId,((Player*)unitTarget)->m_homebindX,((Player*)unitTarget)->m_homebindY,((Player*)unitTarget)->m_homebindZ,unitTarget->GetOrientation());
+            break;
+        }
+        case TARGET_TABLE_X_Y_Z_COORDINATES:
+        {
+            SpellTargetPosition const* st = spellmgr.GetSpellTargetPosition(m_spellInfo->Id);
+            if(!st)
+            {
+                sLog.outError( "Spell::EffectTeleportUnits - unknown Teleport coordinates for spell ID %u\n", m_spellInfo->Id );
+                return;
+            }
+            ((Player*)unitTarget)->TeleportTo(st->target_mapId,st->target_X,st->target_Y,st->target_Z,st->target_Orientation);
+            break;
+        }
+        case TARGET_BEHIND_VICTIM:
+        {
+            Unit *pTarget = ObjectAccessor::GetUnit(*m_caster, ((Player*)unitTarget)->GetSelection());
+            if(!pTarget)
+                return;
 
-    if(m_spellInfo->Id == 36563 && m_caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        Unit *pTarget = ObjectAccessor::GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
-        if(!pTarget)
+            float _target_x, _target_y, _target_z;
+            pTarget->GetClosePoint(_target_x, _target_y, _target_z, unitTarget->GetObjectSize(), CONTACT_DISTANCE, M_PI);
+
+            if(!pTarget->IsWithinLOS(_target_x,_target_y,_target_z))
+                return;
+
+            ((Player*)unitTarget)->TeleportTo(unitTarget->GetMapId(),_target_x, _target_y, _target_z , pTarget->GetOrientation());
+            break;
+        }
+        default:
+            sLog.outError( "Spell::EffectTeleportUnits - unknown EffectImplicitTargetB[%u] = %u for spell ID %u\n", i, m_spellInfo->EffectImplicitTargetB[i], m_spellInfo->Id );
             return;
-
-        float _target_x, _target_y, _target_z;
-        pTarget->GetClosePoint(_target_x, _target_y, _target_z, m_caster->GetObjectSize(), CONTACT_DISTANCE, M_PI);
-
-        if(!pTarget->IsWithinLOS(_target_x,_target_y,_target_z))
-            return;
-
-        ((Player*)m_caster)->TeleportTo(m_caster->GetMapId(),_target_x, _target_y, _target_z , pTarget->GetOrientation());
-        return;
     }
-
-    SpellTeleport const* st = spellmgr.GetSpellTeleport(m_spellInfo->Id);
-    if(!st)
-    {
-        sLog.outError( "SPELL: unknown Teleport coordinates for spell ID %u\n", m_spellInfo->Id );
-        return;
-    }
-
-    ((Player*)unitTarget)->TeleportTo(st->target_mapId,st->target_X,st->target_Y,st->target_Z,st->target_Orientation);
 
     // post effects
     switch ( m_spellInfo->Id )
