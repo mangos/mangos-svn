@@ -432,17 +432,6 @@ void Spell::FillTargetMap()
             // FOR EVERY TARGET TYPE THERE IS A DIFFERENT FILL!!
             switch(m_spellInfo->Effect[i])
             {
-                //case SPELL_EFFECT_PERSISTENT_AREA_AURA:
-                case SPELL_EFFECT_RESURRECT:
-                case SPELL_EFFECT_LEARN_SPELL:
-                case SPELL_EFFECT_SKILL_STEP:
-                case SPELL_EFFECT_SELF_RESURRECT:
-                case SPELL_EFFECT_PROFICIENCY:
-                case SPELL_EFFECT_PARRY:
-                case SPELL_EFFECT_CREATE_ITEM:
-                    if(m_targets.getUnitTarget())
-                        tmpUnitMap.push_back(m_targets.getUnitTarget());
-                    break;
                 case SPELL_EFFECT_DUMMY:
                 {
                     switch(m_spellInfo->Id)
@@ -513,6 +502,19 @@ void Spell::FillTargetMap()
                     }
                     break;
                 }
+                case SPELL_EFFECT_RESURRECT:
+                case SPELL_EFFECT_PARRY:
+                case SPELL_EFFECT_CREATE_ITEM:
+                case SPELL_EFFECT_TRIGGER_MISSILE:
+                case SPELL_EFFECT_LEARN_SPELL:
+                case SPELL_EFFECT_SKILL_STEP:
+                case SPELL_EFFECT_PROFICIENCY:
+                case SPELL_EFFECT_SUMMON_POSSESSED:
+                case SPELL_EFFECT_SUMMON_OBJECT_WILD:
+                case SPELL_EFFECT_SELF_RESURRECT:
+                    if(m_targets.getUnitTarget())
+                        tmpUnitMap.push_back(m_targets.getUnitTarget());
+                    break;
                 case SPELL_EFFECT_SUMMON_PLAYER:
                     if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->GetSelection())
                     {
@@ -535,27 +537,27 @@ void Spell::FillTargetMap()
                         }
                     }
                     break;
-                case SPELL_EFFECT_SKILL:
-                case SPELL_EFFECT_SUMMON_CHANGE_ITEM:
-                case SPELL_EFFECT_SUMMON_GUARDIAN:
                 case SPELL_EFFECT_SUMMON:
+                case SPELL_EFFECT_SUMMON_CHANGE_ITEM:
                 case SPELL_EFFECT_SUMMON_WILD:
-                case SPELL_EFFECT_STUCK:
+                case SPELL_EFFECT_SUMMON_GUARDIAN:
+                case SPELL_EFFECT_TRANS_DOOR:
                 case SPELL_EFFECT_ADD_FARSIGHT:
+                case SPELL_EFFECT_STUCK:
                 case SPELL_EFFECT_DESTROY_ALL_TOTEMS:
                 case SPELL_EFFECT_SUMMON_DEMON:
-                case SPELL_EFFECT_TRANS_DOOR:
+                case SPELL_EFFECT_SKILL:
                     tmpUnitMap.push_back(m_caster);
                     break;
                 case SPELL_EFFECT_LEARN_PET_SPELL:
                     if(Pet* pet = m_caster->GetPet())
                         tmpUnitMap.push_back(pet);
                     break;
-                case SPELL_EFFECT_FEED_PET:
-                case SPELL_EFFECT_PROSPECTING:
-                case SPELL_EFFECT_DISENCHANT:
                 case SPELL_EFFECT_ENCHANT_ITEM:
                 case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
+                case SPELL_EFFECT_DISENCHANT:
+                case SPELL_EFFECT_FEED_PET:
+                case SPELL_EFFECT_PROSPECTING:
                     if(m_targets.getItemTarget())
                         AddItemTarget(m_targets.getItemTarget(), i);
                     break;
