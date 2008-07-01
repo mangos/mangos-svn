@@ -171,12 +171,22 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
         return false;
     }
 
-    float px, py, pz;
-    owner->GetClosePoint(px, py, pz,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE);
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_PET);
     uint32 pet_number = fields[0].GetUInt32();
-    if(!Create(guid, owner->GetMapId(), px, py, pz, owner->GetOrientation(), petentry, pet_number))
+    if(!Create(guid, owner->GetMapId(), petentry, pet_number))
     {
+        delete result;
+        return false;
+    }
+
+    float px, py, pz;
+    owner->GetClosePoint(px, py, pz,GetObjectSize(),PET_FOLLOW_DIST,PET_FOLLOW_ANGLE);
+
+    Relocate(px, py, pz, owner->GetOrientation());
+
+    if(!IsPositionValid())
+    {
+        sLog.outError("ERROR: Pet (guidlow %d, entry %d) not loaded. Suggested coordinates isn't valid (X: %d Y: ^%d)", GetGUIDLow(), GetEntry(), GetPositionX(), GetPositionY());
         delete result;
         return false;
     }
@@ -889,7 +899,16 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
 
     sLog.outBasic("Create pet");
     uint32 pet_number = objmgr.GeneratePetNumber();
-    Create(guid, creature->GetMapId(), creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation(), creature->GetEntry(), pet_number);
+    if(!Create(guid, creature->GetMapId(), creature->GetEntry(), pet_number))
+        return false;
+
+    Relocate(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation());
+
+    if(!IsPositionValid())
+    {
+        sLog.outError("ERROR: Pet (guidlow %d, entry %d) not created base at creature. Suggested coordinates isn't valid (X: %d Y: ^%d)", GetGUIDLow(), GetEntry(), GetPositionX(), GetPositionY());
+        return false;
+    }
 
     CreatureInfo const *cinfo = GetCreatureInfo();
     if(!cinfo)
@@ -1596,19 +1615,9 @@ void Pet::ToggleAutocast(uint32 spellid, bool apply)
     }
 }
 
-bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry, uint32 pet_number)
+bool Pet::Create(uint32 guidlow, uint32 mapid, uint32 Entry, uint32 pet_number)
 {
     SetMapId(mapid);
-    Relocate(x,y,z);
-
-    if(!IsPositionValid())
-    {
-        sLog.outError("ERROR: Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %d Y: ^%d)", guidlow, Entry, x, y);
-        return false;
-    }
-
-    SetOrientation(ang);
-    //oX = x;     oY = y;    dX = x;    dY = y;    m_moveTime = 0;    m_startMove = 0;
 
     Object::_Create(guidlow, pet_number, HIGHGUID_PET);
 

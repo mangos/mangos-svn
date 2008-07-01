@@ -465,18 +465,9 @@ bool Creature::AIM_Initialize()
     return true;
 }
 
-bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry, uint32 team, const CreatureData *data)
+bool Creature::Create (uint32 guidlow, uint32 mapid, uint32 Entry, uint32 team, const CreatureData *data)
 {
     SetMapId(mapid);
-    Relocate(x,y,z);
-
-    if(!IsPositionValid())
-    {
-        sLog.outError("ERROR: Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %f Y: %f)",guidlow,Entry,x,y);
-        return false;
-    }
-
-    SetOrientation(ang);
     //oX = x;     oY = y;    dX = x;    dY = y;    m_moveTime = 0;    m_startMove = 0;
     const bool bResult = CreateFromProto(guidlow, Entry, team, data);
 
@@ -1259,8 +1250,16 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
     SetInstanceId(InstanceId);
 
     uint16 team = 0;
-    if(!Create(guid,data->mapid,data->posX,data->posY,data->posZ,data->orientation,data->id,team,data))
+    if(!Create(guid,data->mapid,data->id,team,data))
         return false;
+
+    Relocate(data->posX,data->posY,data->posZ,data->orientation);
+
+    if(!IsPositionValid())
+    {
+        sLog.outError("ERROR: Creature (guidlow %d, entry %d) not loaded. Suggested coordinates isn't valid (X: %f Y: %f)",GetGUIDLow(),GetEntry(),GetPositionX(),GetPositionY());
+        return false;
+    }
 
     m_DBTableGuid = stored_guid;
     LoadCreaturesAddon();

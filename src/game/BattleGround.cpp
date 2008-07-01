@@ -913,11 +913,19 @@ void BattleGround::SpawnBGObject(uint32 type, uint32 respawntime)
 Creature* BattleGround::AddCreature(uint32 entry, uint32 type, uint32 teamval, float x, float y, float z, float o)
 {
     Creature* pCreature = new Creature(NULL);
-    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), GetMapId(), x, y, z, o, entry, teamval))
+    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), GetMapId(), entry, teamval))
     {
         sLog.outError("Can't create creature entry: %u",entry);
         delete pCreature;
         return NULL;
+    }
+
+    pCreature->Relocate(x, y, z, o);
+
+    if(!pCreature->IsPositionValid())
+    {
+        sLog.outError("ERROR: Creature (guidlow %d, entry %d) not added to battleground. Suggested coordinates isn't valid (X: %f Y: %f)",pCreature->GetGUIDLow(),pCreature->GetEntry(),pCreature->GetPositionX(),pCreature->GetPositionY());
+        return false;
     }
 
     pCreature->AIM_Initialize();

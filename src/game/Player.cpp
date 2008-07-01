@@ -523,7 +523,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
             return false;
     }
 
-    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 0.388999998569489f );
+    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, DEFAULT_WORLD_OBJECT_SIZE );
     SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
 
     switch(gender)
