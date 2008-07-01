@@ -219,7 +219,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "spell_proc_event",            SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellProcEventCommand,          "", NULL },
         { "spell_script_target",         SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellScriptTargetCommand,       "", NULL },
         { "spell_scripts",               SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellScriptsCommand,            "", NULL },
-        { "spell_teleport",              SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellTeleportCommand,           "", NULL },
+        { "spell_target_position",       SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellTargetPositionCommand,     "", NULL },
         { "spell_threats",               SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellThreatsCommand,            "", NULL },
         { "",                            SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCommand,                        "", NULL },
         { NULL,                          0,                 NULL,                                                     "", NULL }

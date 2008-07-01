@@ -280,6 +280,8 @@ bool IsPositiveTarget(uint32 targetA, uint32 targetB)
         default:
             break;
     }
+    if (targetB)
+        return IsPositiveTarget(targetB, 0);
     return true;
 }
 
@@ -551,14 +553,14 @@ uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form)
     return 0;
 }
 
-void SpellMgr::LoadSpellTeleports()
+void SpellMgr::LoadSpellTargetPositions()
 {
-    mSpellTeleports.clear();                                // need for reload case
+    mSpellTargetPositions.clear();                                // need for reload case
 
     uint32 count = 0;
 
     //                                                0   1           2                  3                  4                  5
-    QueryResult *result = WorldDatabase.Query("SELECT id, target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM spell_teleport");
+    QueryResult *result = WorldDatabase.Query("SELECT id, target_map, target_position_x, target_position_y, target_position_z, target_orientation FROM spell_target_position");
     if( !result )
     {
 
@@ -567,7 +569,7 @@ void SpellMgr::LoadSpellTeleports()
         bar.step();
 
         sLog.outString();
-        sLog.outString( ">> Loaded %u spell teleport coordinates", count );
+        sLog.outString( ">> Loaded %u spell target coordinates", count );
         return;
     }
 
@@ -583,7 +585,7 @@ void SpellMgr::LoadSpellTeleports()
 
         uint32 Spell_ID = fields[0].GetUInt32();
 
-        SpellTeleport st;
+        SpellTargetPosition st;
 
         st.target_mapId       = fields[1].GetUInt32();
         st.target_X           = fields[2].GetFloat();
@@ -594,14 +596,14 @@ void SpellMgr::LoadSpellTeleports()
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(Spell_ID);
         if(!spellInfo)
         {
-            sLog.outErrorDb("Spell (ID:%u) listed in `spell_teleport` does not exist.",Spell_ID);
+            sLog.outErrorDb("Spell (ID:%u) listed in `spell_target_position` does not exist.",Spell_ID);
             continue;
         }
 
         bool found = false;
         for(int i = 0; i < 3; ++i)
         {
-            if( spellInfo->Effect[i]==SPELL_EFFECT_TELEPORT_UNITS )
+            if( spellInfo->EffectImplicitTargetA[i]==TARGET_TABLE_X_Y_Z_COORDINATES || spellInfo->EffectImplicitTargetB[i]==TARGET_TABLE_X_Y_Z_COORDINATES )
             {
                 found = true;
                 break;
@@ -609,24 +611,24 @@ void SpellMgr::LoadSpellTeleports()
         }
         if(!found)
         {
-            sLog.outErrorDb("Spell (Id: %u) listed in `spell_teleport` does not have effect SPELL_EFFECT_TELEPORT_UNITS (5).",Spell_ID);
+            sLog.outErrorDb("Spell (Id: %u) listed in `spell_target_position` does not have target TARGET_TABLE_X_Y_Z_COORDINATES (17).",Spell_ID);
             continue;
         }
 
         MapEntry const* mapEntry = sMapStore.LookupEntry(st.target_mapId);
         if(!mapEntry)
         {
-            sLog.outErrorDb("Spell (ID:%u) teleport target map (ID: %u) does not exist in `Map.dbc`.",Spell_ID,st.target_mapId);
+            sLog.outErrorDb("Spell (ID:%u) target map (ID: %u) does not exist in `Map.dbc`.",Spell_ID,st.target_mapId);
             continue;
         }
 
         if(st.target_X==0 && st.target_Y==0 && st.target_Z==0)
         {
-            sLog.outErrorDb("Spell (ID:%u) teleport target coordinates not provided.",Spell_ID);
+            sLog.outErrorDb("Spell (ID:%u) target coordinates not provided.",Spell_ID);
             continue;
         }
 
-        mSpellTeleports[Spell_ID] = st;
+        mSpellTargetPositions[Spell_ID] = st;
 
     } while( result->NextRow() );
 
