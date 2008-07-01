@@ -6235,3 +6235,35 @@ bool PlayerCondition::IsValid(ConditionType condition, uint32 value1, uint32 val
     }
     return true;
 }
+
+SkillRangeType GetSkillRangeType(SkillLineEntry const *pSkill, bool racial)
+{
+    switch(pSkill->categoryId)
+    {
+        case SKILL_CATEGORY_LANGUAGES: return SKILL_RANGE_LANGUAGE;
+        case SKILL_CATEGORY_WEAPON:
+            if(pSkill->id!=SKILL_FIST_WEAPONS)
+                return SKILL_RANGE_LEVEL;
+            else
+                return SKILL_RANGE_MONO;
+        case SKILL_CATEGORY_ARMOR:
+        case SKILL_CATEGORY_CLASS:
+            if(pSkill->id != SKILL_POISONS && pSkill->id != SKILL_LOCKPICKING)
+                return SKILL_RANGE_MONO;
+            else
+                return SKILL_RANGE_LEVEL;
+        case SKILL_CATEGORY_SECONDARY:
+        case SKILL_CATEGORY_PROFESSION:
+            // not set skills for professions and racial abilities
+            if(IsProfessionSkill(pSkill->id))
+                return SKILL_RANGE_RANK;
+            else if(racial)
+                return SKILL_RANGE_NONE;
+            else
+                return SKILL_RANGE_MONO;
+        default:
+        case SKILL_CATEGORY_ATTRIBUTES:                     //not found in dbc
+        case SKILL_CATEGORY_NOT_DISPLAYED:                  //only GENEREC(DND)
+            return SKILL_RANGE_NONE;
+    }
+}
