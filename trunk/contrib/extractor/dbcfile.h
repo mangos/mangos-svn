@@ -70,13 +70,13 @@ public:
     class Iterator
     {
     public:
-        Iterator(DBCFile &file, unsigned char *offset): 
+        Iterator(DBCFile &file, unsigned char *offset):
             record(file, offset) {}
         /// Advance (prefix only)
-        Iterator & operator++() { 
+        Iterator & operator++() {
             record.offset += record.file.recordSize;
-            return *this; 
-        }    
+            return *this;
+        }
         /// Return address of current instance
         Record const & operator*() const { return record; }
         const Record* operator->() const {
@@ -104,6 +104,7 @@ public:
     /// Trivial
     size_t getRecordCount() const { return recordCount;}
     size_t getFieldCount() const { return fieldCount; }
+    size_t getMaxId();
 private:
     std::string filename;
     size_t recordSize;

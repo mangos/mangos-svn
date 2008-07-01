@@ -63,14 +63,14 @@ MPQFile::MPQFile(const char* filename):
     for(ArchiveSet::iterator i=gOpenArchives.begin(); i!=gOpenArchives.end();++i)
     {
         mpq_archive &mpq_a = (*i)->mpq_a;
-        
+
         mpq_hash hash = (*i)->GetHashEntry(filename);
         uint32 blockindex = hash.blockindex;
 
         if ((blockindex == 0xFFFFFFFF) || (blockindex == 0)) {
             continue; //file not found
         }
-        
+
         int fileno = blockindex;
 
         //int fileno = libmpq_file_number(&mpq_a, filename);
