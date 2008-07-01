@@ -5920,6 +5920,23 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                         CastSpell(this, 37706, true, castItem, triggeredByAura);
                         return;
                     }
+                    // HoTs on Heals (Fel Reaver's Piston trinket)
+                    case 38299:
+                    {
+                        // at direct heal effect
+                        if(!procSpell || !IsSpellHaveEffect(procSpell,SPELL_EFFECT_HEAL))
+                            return;
+
+                        // single proc at time
+                        AuraList const& scAuras = GetSingleCastAuras();
+                        for(AuraList::const_iterator itr = scAuras.begin(); itr != scAuras.end(); ++itr)
+                            if((*itr)->GetId()==trigger_spell_id)
+                                return;
+
+                        // positive cast at victim instead self
+                        CastSpell(pVictim,trigger_spell_id,true,castItem,triggeredByAura);
+                        return;
+                    }
                 }
                 switch(auraSpellInfo->SpellIconID)
                 {
