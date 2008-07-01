@@ -3844,7 +3844,7 @@ static bool HandleResetStatsOrLevelHelper(Player* player)
     if(!player->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
         player->m_form = 0;
 
-    player->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 0.388999998569489f );
+    player->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, DEFAULT_WORLD_OBJECT_SIZE );
     player->SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
 
     player->setFactionForRace(player->getRace());

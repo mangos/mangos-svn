@@ -1739,7 +1739,7 @@ void Spell::EffectTeleportUnits(uint32 /*i*/)
             return;
 
         float _target_x, _target_y, _target_z;
-        pTarget->GetClosePoint(_target_x, _target_y, _target_z, CONTACT_DISTANCE + pTarget->GetObjectSize() + m_caster->GetObjectSize(), M_PI);
+        pTarget->GetClosePoint(_target_x, _target_y, _target_z, m_caster->GetObjectSize(), CONTACT_DISTANCE, M_PI);
 
         if(!pTarget->IsWithinLOS(_target_x,_target_y,_target_z))
             return;
@@ -2861,16 +2861,23 @@ void Spell::EffectSummon(uint32 i)
         return;
     }
 
-    // before caster
-    float x,y,z;
-    m_caster->GetClosePoint(x,y,z);
-
     uint32 pet_number = objmgr.GeneratePetNumber();
-    if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),
-        m_caster->GetMapId(),x,y,z,-m_caster->GetOrientation(),
-        m_spellInfo->EffectMiscValue[i], pet_number))
+    if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),m_caster->GetMapId(),m_spellInfo->EffectMiscValue[i], pet_number))
     {
         sLog.outErrorDb("Spell::EffectSummon: no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
+        delete spawnCreature;
+        return;
+    }
+
+    // before caster
+    float x,y,z;
+    m_caster->GetClosePoint(x,y,z,spawnCreature->GetObjectSize());
+
+    spawnCreature->Relocate(x,y,z,-m_caster->GetOrientation());
+
+    if(!spawnCreature->IsPositionValid())
+    {
+        sLog.outError("ERROR: Pet (guidlow %d, entry %d) not summoned. Suggested coordinates isn't valid (X: %d Y: ^%d)", spawnCreature->GetGUIDLow(), spawnCreature->GetEntry(), spawnCreature->GetPositionX(), spawnCreature->GetPositionY());
         delete spawnCreature;
         return;
     }
@@ -3191,17 +3198,18 @@ void Spell::EffectSummonWild(uint32 i)
     float center_y = m_targets.m_destY;
     float center_z = m_targets.m_destZ;
 
-    if (center_x == 0 || center_y == 0 || center_z == 0)
-        m_caster->GetClosePoint(center_x, center_y, center_z);
-
     float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
 
     int32 amount = damage > 0 ? damage : 1;
 
     for(int32 count = 0; count < amount; ++count)
     {
-        float px, py, pz;
-        m_caster->GetRandomPoint(center_x,center_y,center_z,radius,px,py,pz);
+        float px = 0.0f;
+        float py = 0.0f;
+        float pz = 0.0f;
+
+        if (center_x != 0 || center_y != 0 || center_z != 0)
+            m_caster->GetRandomPoint(center_x,center_y,center_z,radius,px,py,pz);
 
         int32 duration = GetSpellDuration(m_spellInfo);
 
@@ -3267,29 +3275,38 @@ void Spell::EffectSummonGuardian(uint32 i)
         float center_y = m_targets.m_destY;
         float center_z = m_targets.m_destZ;
 
-        if (center_x == 0 || center_y == 0 || center_z == 0)
-            m_caster->GetClosePoint(center_x, center_y, center_z);
-
         float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
 
         int32 amount = damage > 0 ? damage : 1;
 
         for(int32 count = 0; count < amount; ++count)
         {
-            float px, py, pz;
-            m_caster->GetRandomPoint(center_x,center_y,center_z,radius,px,py,pz);
-
             Pet* spawnCreature = new Pet(m_caster, GUARDIAN_PET);
 
             uint32 pet_number = objmgr.GeneratePetNumber();
-            if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),
-                m_caster->GetMapId(),px,py,pz,m_caster->GetOrientation(),
-                m_spellInfo->EffectMiscValue[i], pet_number))
+            if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),m_caster->GetMapId(),m_spellInfo->EffectMiscValue[i], pet_number))
             {
                 sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
                 delete spawnCreature;
                 return;
             }
+
+            float px, py, pz;
+
+            if (center_x == 0 || center_y == 0 || center_z == 0)
+                m_caster->GetClosePoint(px,py,pz,spawnCreature->GetObjectSize());
+            else
+                m_caster->GetRandomPoint(center_x,center_y,center_z,radius,px,py,pz);
+
+            spawnCreature->Relocate(px,py,pz,m_caster->GetOrientation());
+
+            if(!spawnCreature->IsPositionValid())
+            {
+                sLog.outError("ERROR: Pet (guidlow %d, entry %d) not created base at creature. Suggested coordinates isn't valid (X: %d Y: ^%d)", spawnCreature->GetGUIDLow(), spawnCreature->GetEntry(), spawnCreature->GetPositionX(), spawnCreature->GetPositionY());
+                delete spawnCreature;
+                return;
+            }
+
 
             // set timer for unsummon
             int32 duration = GetSpellDuration(m_spellInfo);
@@ -3333,7 +3350,7 @@ void Spell::EffectTeleUnitsFaceCaster(uint32 i)
     float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
 
     float fx,fy,fz;
-    m_caster->GetClosePoint(fx,fy,fz,unitTarget->GetObjectSize() + dis);
+    m_caster->GetClosePoint(fx,fy,fz,unitTarget->GetObjectSize(),dis);
 
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
         ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, -m_caster->GetOrientation(), false);
@@ -3616,9 +3633,6 @@ void Spell::EffectTameCreature(uint32 /*i*/)
 
 void Spell::EffectSummonPet(uint32 i)
 {
-    float px, py, pz;
-    m_caster->GetClosePoint(px, py, pz);
-
     uint32 petentry = m_spellInfo->EffectMiscValue[i];
 
     Pet *OldSummon = m_caster->GetPet();
@@ -3634,6 +3648,10 @@ void Spell::EffectSummonPet(uint32 i)
 
             MapManager::Instance().GetMap(OldSummon->GetMapId(), OldSummon)->Remove((Creature*)OldSummon,false);
             OldSummon->SetMapId(m_caster->GetMapId());
+
+            float px, py, pz;
+            m_caster->GetClosePoint(px, py, pz, OldSummon->GetObjectSize());
+
             OldSummon->Relocate(px, py, pz, OldSummon->GetOrientation());
             MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Add((Creature*)OldSummon);
 
@@ -3691,79 +3709,92 @@ void Spell::EffectSummonPet(uint32 i)
     }
 
     uint32 pet_number = objmgr.GeneratePetNumber();
-    if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),  m_caster->GetMapId(), px, py, pz+1, m_caster->GetOrientation(), petentry, pet_number))
+    if(!NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),  m_caster->GetMapId(), petentry, pet_number))
     {
-        uint32 petlevel = m_caster->getLevel();
-        NewSummon->setPetType(SUMMON_PET);
-
-        uint32 faction = m_caster->getFaction();
-        if(m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->isTotem())
-        {
-            Unit* owner = ((Totem*)m_caster)->GetOwner();
-            if(owner) faction = owner->getFaction();
-            NewSummon->GetCharmInfo()->SetReactState(REACT_AGGRESSIVE);
-        }
-
-        NewSummon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
-        NewSummon->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
-        NewSummon->SetUInt32Value(UNIT_NPC_FLAGS , 0);
-        NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction);
-        NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
-        NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
-        NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,time(NULL));
-        NewSummon->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
-        NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
-        NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-
-        NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
-                                                            // this enables pet details window (Shift+P)
-
-        // this enables popup window (pet dismiss, cancel), hunter pet additional flags set later
-        NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_PVP_ATTACKABLE);
-
-        NewSummon->InitStatsForLevel( petlevel);
-        NewSummon->InitPetCreateSpells();
-
-        if(NewSummon->getPetType()==SUMMON_PET)
-        {
-            // Remove Demonic Sacrifice auras (new pet)
-            Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-            for(Unit::AuraList::const_iterator itr = auraClassScripts.begin();itr!=auraClassScripts.end();)
-            {
-                if((*itr)->GetModifier()->m_miscvalue==2228)
-                {
-                    m_caster->RemoveAurasDueToSpell((*itr)->GetId());
-                    itr = auraClassScripts.begin();
-                }
-                else
-                    ++itr;
-            }
-
-            // generate new name for summon pet
-            std::string new_name=objmgr.GeneratePetName(petentry);
-            if(!new_name.empty())
-                NewSummon->SetName(new_name);
-        }
-        else if(NewSummon->getPetType()==HUNTER_PET)
-            NewSummon->SetByteValue(UNIT_FIELD_BYTES_2, 2, UNIT_RENAME_NOT_ALLOWED);
-
-        NewSummon->AIM_Initialize();
-        NewSummon->SetHealth(NewSummon->GetMaxHealth());
-        NewSummon->SetPower(POWER_MANA, NewSummon->GetMaxPower(POWER_MANA));
-
-        MapManager::Instance().GetMap(NewSummon->GetMapId(), NewSummon)->Add((Creature*)NewSummon);
-
-        m_caster->SetPet(NewSummon);
-        sLog.outDebug("New Pet has guid %u", NewSummon->GetGUIDLow());
-
-        if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT);
-            ((Player*)m_caster)->PetSpellInitialize();
-        }
-    }
-    else
         delete NewSummon;
+        return;
+    }
+
+    float px, py, pz;
+    m_caster->GetClosePoint(px, py, pz, NewSummon->GetObjectSize());
+
+    NewSummon->Relocate(px, py, pz, m_caster->GetOrientation());
+
+    if(!NewSummon->IsPositionValid())
+    {
+        sLog.outError("ERROR: Pet (guidlow %d, entry %d) not summoned. Suggested coordinates isn't valid (X: %d Y: ^%d)", NewSummon->GetGUIDLow(), NewSummon->GetEntry(), NewSummon->GetPositionX(), NewSummon->GetPositionY());
+        delete NewSummon;
+        return;
+    }
+
+    uint32 petlevel = m_caster->getLevel();
+    NewSummon->setPetType(SUMMON_PET);
+
+    uint32 faction = m_caster->getFaction();
+    if(m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->isTotem())
+    {
+        Unit* owner = ((Totem*)m_caster)->GetOwner();
+        if(owner) faction = owner->getFaction();
+        NewSummon->GetCharmInfo()->SetReactState(REACT_AGGRESSIVE);
+    }
+
+    NewSummon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
+    NewSummon->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
+    NewSummon->SetUInt32Value(UNIT_NPC_FLAGS , 0);
+    NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction);
+    NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
+    NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
+    NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,time(NULL));
+    NewSummon->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
+    NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
+    NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+
+    NewSummon->GetCharmInfo()->SetPetNumber(pet_number, true);
+    // this enables pet details window (Shift+P)
+
+    // this enables popup window (pet dismiss, cancel), hunter pet additional flags set later
+    NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_PVP_ATTACKABLE);
+
+    NewSummon->InitStatsForLevel( petlevel);
+    NewSummon->InitPetCreateSpells();
+
+    if(NewSummon->getPetType()==SUMMON_PET)
+    {
+        // Remove Demonic Sacrifice auras (new pet)
+        Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+        for(Unit::AuraList::const_iterator itr = auraClassScripts.begin();itr!=auraClassScripts.end();)
+        {
+            if((*itr)->GetModifier()->m_miscvalue==2228)
+            {
+                m_caster->RemoveAurasDueToSpell((*itr)->GetId());
+                itr = auraClassScripts.begin();
+            }
+            else
+                ++itr;
+        }
+
+        // generate new name for summon pet
+        std::string new_name=objmgr.GeneratePetName(petentry);
+        if(!new_name.empty())
+            NewSummon->SetName(new_name);
+    }
+    else if(NewSummon->getPetType()==HUNTER_PET)
+        NewSummon->SetByteValue(UNIT_FIELD_BYTES_2, 2, UNIT_RENAME_NOT_ALLOWED);
+
+    NewSummon->AIM_Initialize();
+    NewSummon->SetHealth(NewSummon->GetMaxHealth());
+    NewSummon->SetPower(POWER_MANA, NewSummon->GetMaxPower(POWER_MANA));
+
+    MapManager::Instance().GetMap(NewSummon->GetMapId(), NewSummon)->Add((Creature*)NewSummon);
+
+    m_caster->SetPet(NewSummon);
+    sLog.outDebug("New Pet has guid %u", NewSummon->GetGUIDLow());
+
+    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        NewSummon->SavePetToDB(PET_SAVE_AS_CURRENT);
+        ((Player*)m_caster)->PetSpellInitialize();
+    }
 }
 
 void Spell::EffectLearnPetSpell(uint32 i)
@@ -4069,9 +4100,9 @@ void Spell::EffectInterruptCast(uint32 /*i*/)
 
 void Spell::EffectSummonObjectWild(uint32 i)
 {
-    GameObject* pGameObj = new GameObject(m_caster);
-
     uint32 gameobject_id = m_spellInfo->EffectMiscValue[i];
+
+    GameObject* pGameObj = new GameObject(m_caster);
 
     WorldObject* target = focusObject;
     if( !target )
@@ -4079,7 +4110,7 @@ void Spell::EffectSummonObjectWild(uint32 i)
 
     // before caster
     float x,y,z;
-    m_caster->GetClosePoint(x,y,z);
+    m_caster->GetClosePoint(x,y,z,DEFAULT_WORLD_OBJECT_SIZE);
 
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, target->GetMapId(),
         x, y, z, target->GetOrientation(), 0, 0, 0, 0, 100, 1))
@@ -4646,7 +4677,7 @@ void Spell::EffectSummonPlayer(uint32 /*i*/)
         return;
 
     float x,y,z;
-    m_caster->GetClosePoint(x,y,z);
+    m_caster->GetClosePoint(x,y,z,unitTarget->GetObjectSize());
 
     ((Player*)unitTarget)->SetSummonPoint(m_caster->GetMapId(),x,y,z);
 
@@ -4673,15 +4704,6 @@ void Spell::EffectSummonTotem(uint32 i)
         default: return;
     }
 
-    float angle = slot < 4 ? M_PI/4 - (slot*M_PI/2) : 0;
-
-    float x,y,z;
-    m_caster->GetClosePoint(x,y,z,2,angle);
-
-    // totem must be at same Z in case swimming caster and etc.
-    if( fabs( z - m_caster->GetPositionZ() ) > 5 )
-        z = m_caster->GetPositionZ();
-
     if(slot <4 )
     {
         uint64 guid = m_caster->m_TotemSlot[slot];
@@ -4699,13 +4721,22 @@ void Spell::EffectSummonTotem(uint32 i)
 
     Totem* pTotem = new Totem(m_caster);
 
-    if(!pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
-        m_caster->GetMapId(), x, y, z, m_caster->GetOrientation(),
-        m_spellInfo->EffectMiscValue[i], team ))
+    if(!pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), m_caster->GetMapId(), m_spellInfo->EffectMiscValue[i], team ))
     {
         delete pTotem;
         return;
     }
+
+    float angle = slot < 4 ? M_PI/4 - (slot*M_PI/2) : 0;
+
+    float x,y,z;
+    m_caster->GetClosePoint(x,y,z,pTotem->GetObjectSize(),2.0f,angle);
+
+    // totem must be at same Z in case swimming caster and etc.
+    if( fabs( z - m_caster->GetPositionZ() ) > 5 )
+        z = m_caster->GetPositionZ();
+
+    pTotem->Relocate(x, y, z, m_caster->GetOrientation());
 
     if(slot < 4)
         m_caster->m_TotemSlot[slot] = pTotem->GetGUID();
@@ -4850,6 +4881,8 @@ void Spell::EffectDismissPet(uint32 /*i*/)
 
 void Spell::EffectSummonObject(uint32 i)
 {
+    uint32 go_id = m_spellInfo->EffectMiscValue[i];
+
     uint8 slot = 0;
     switch(m_spellInfo->Effect[i])
     {
@@ -4872,15 +4905,14 @@ void Spell::EffectSummonObject(uint32 i)
     }
 
     GameObject* pGameObj = new GameObject(m_caster);
-    uint32 display_id = m_spellInfo->EffectMiscValue[i];
 
     float rot2 = sin(m_caster->GetOrientation()/2);
     float rot3 = cos(m_caster->GetOrientation()/2);
 
     float x,y,z;
-    m_caster->GetClosePoint(x,y,z);
+    m_caster->GetClosePoint(x,y,z,DEFAULT_WORLD_OBJECT_SIZE);
 
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), x, y, z, m_caster->GetOrientation(), 0, 0, rot2, rot3, 0, 1))
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), go_id,m_caster->GetMapId(), x, y, z, m_caster->GetOrientation(), 0, 0, rot2, rot3, 0, 1))
     {
         delete pGameObj;
         return;
@@ -4973,7 +5005,7 @@ void Spell::EffectMomentMove(uint32 i)
 
         // before caster
         float fx,fy,fz;
-        unitTarget->GetClosePoint(fx,fy,fz,dis);
+        unitTarget->GetClosePoint(fx,fy,fz,unitTarget->GetObjectSize(),dis);
         float ox,oy,oz;
         unitTarget->GetPosition(ox,oy,oz);
 
@@ -5139,15 +5171,24 @@ void Spell::EffectSummonCritter(uint32 i)
     // summon new pet
     Pet* critter = new Pet(m_caster, MINI_PET);
 
-    // before caster
-    float x,y,z;
-    m_caster->GetClosePoint(x,y,z);
-
     uint32 pet_number = objmgr.GeneratePetNumber();
     if(!critter->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),
-        m_caster->GetMapId(),x,y,z,m_caster->GetOrientation(),pet_entry, pet_number))
+        m_caster->GetMapId(),pet_entry, pet_number))
     {
         sLog.outError("Spell::EffectSummonCritter, spellid %u: no such creature entry %u", m_spellInfo->Id, pet_entry);
+        delete critter;
+        return;
+    }
+
+    // before caster
+    float x,y,z;
+    m_caster->GetClosePoint(x,y,z,critter->GetObjectSize());
+
+    critter->Relocate(x,y,z,m_caster->GetOrientation());
+
+    if(!critter->IsPositionValid())
+    {
+        sLog.outError("ERROR: Pet (guidlow %d, entry %d) not summoned. Suggested coordinates isn't valid (X: %d Y: ^%d)", critter->GetGUIDLow(), critter->GetEntry(), critter->GetPositionX(), critter->GetPositionY());
         delete critter;
         return;
     }
@@ -5348,6 +5389,16 @@ void Spell::EffectReduceThreatPercent(uint32 /*i*/)
 
 void Spell::EffectTransmitted(uint32 i)
 {
+    uint32 name_id = m_spellInfo->EffectMiscValue[i];
+
+    GameObjectInfo const* goinfo = objmgr.GetGameObjectInfo(name_id);
+
+    if (!goinfo)
+    {
+        sLog.outErrorDb("Gameobject (Entry: %u) not exist and not created at spell (ID: %u) cast",name_id, m_spellInfo->Id);
+        return;
+    }
+
     float fx,fy,fz;
 
     if(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
@@ -5362,18 +5413,10 @@ void Spell::EffectTransmitted(uint32 i)
         float max_dis = GetSpellMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
         float dis = rand_norm() * (max_dis - min_dis) + min_dis;
 
-        m_caster->GetClosePoint(fx,fy,fz,dis);
+        m_caster->GetClosePoint(fx,fy,fz,DEFAULT_WORLD_OBJECT_SIZE, dis);
     }
 
     uint32 cMap = m_caster->GetMapId();
-    uint32 name_id = m_spellInfo->EffectMiscValue[i];
-    GameObjectInfo const* goinfo = objmgr.GetGameObjectInfo(name_id);
-
-    if (!goinfo)
-    {
-        sLog.outErrorDb("Gameobject (Entry: %u) not exist and not created at spell (ID: %u) cast",name_id, m_spellInfo->Id);
-        return;
-    }
 
     if(goinfo->type==GAMEOBJECT_TYPE_FISHINGNODE)
     {

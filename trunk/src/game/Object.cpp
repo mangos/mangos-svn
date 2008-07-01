@@ -954,15 +954,11 @@ WorldObject::WorldObject( WorldObject *instantiator )
     }
 }
 
-void WorldObject::_Create( uint32 guidlow, HighGuid guidhigh, uint32 mapid, float x, float y, float z, float ang )
+void WorldObject::_Create( uint32 guidlow, HighGuid guidhigh, uint32 mapid )
 {
     Object::_Create(guidlow, 0, guidhigh);
 
     m_mapId = mapid;
-    m_positionX = x;
-    m_positionY = y;
-    m_positionZ = z;
-    m_orientation = ang;
 }
 
 uint32 WorldObject::GetZoneId() const
@@ -1294,11 +1290,20 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     if (GetTypeId()==TYPEID_PLAYER)
         team = ((Player*)this)->GetTeam();
 
-    if (x == 0.0f && y == 0.0f && z == 0.0f)
-        GetClosePoint(x, y, z);
-
-    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), GetMapId(), x, y, z, ang, id, team))
+    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), GetMapId(), id, team))
     {
+        delete pCreature;
+        return NULL;
+    }
+
+    if (x == 0.0f && y == 0.0f && z == 0.0f)
+        GetClosePoint(x, y, z, pCreature->GetObjectSize());
+
+    pCreature->Relocate(x, y, z, ang);
+
+    if(!pCreature->IsPositionValid())
+    {
+        sLog.outError("ERROR: Creature (guidlow %d, entry %d) not summoned. Suggested coordinates isn't valid (X: %f Y: %f)",pCreature->GetGUIDLow(),pCreature->GetEntry(),pCreature->GetPositionX(),pCreature->GetPositionY());
         delete pCreature;
         return NULL;
     }
@@ -1398,11 +1403,9 @@ void WorldObject::GetNearPoint2D(float &x, float &y, float distance2d, float abs
     MaNGOS::NormalizeMapCoord(y);
 }
 
-void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, float &z, float distance2d, float absAngle ) const
+void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, float &z, float searcher_size, float distance2d, float absAngle ) const
 {
-    float size = searcher ? searcher->GetObjectSize() : 0;
-
-    GetNearPoint2D(x,y,distance2d+size,absAngle);
+    GetNearPoint2D(x,y,distance2d+searcher_size,absAngle);
     z = GetPositionZ();
 
     // if detection disabled, return first point
@@ -1418,7 +1421,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     bool first_los_conflict = false;                        // first point LOS problems
 
     // prepare selector for work
-    ObjectPosSelector selector(GetPositionX(),GetPositionY(),GetObjectSize(),distance2d+size);
+    ObjectPosSelector selector(GetPositionX(),GetPositionY(),GetObjectSize(),distance2d+searcher_size);
 
     // adding used positions around object
     {

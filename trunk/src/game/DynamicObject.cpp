@@ -59,7 +59,14 @@ bool DynamicObject::Create( uint32 guidlow, Unit *caster, uint32 spellId, uint32
 {
     SetInstanceId(caster->GetInstanceId());
 
-    WorldObject::_Create(guidlow, HIGHGUID_DYNAMICOBJECT, caster->GetMapId(), x, y, z, 0);
+    WorldObject::_Create(guidlow, HIGHGUID_DYNAMICOBJECT, caster->GetMapId());
+    Relocate(x,y,x,0);
+
+    if(IsPositionValid())
+    {
+        sLog.outError("ERROR: DynamicObject (entry %d) not created. Suggested coordinates isn't valid (X: %f Y: %f)",GetEntry(),GetPositionX(),GetPositionY());
+        return false;
+    }
 
     SetUInt32Value( OBJECT_FIELD_ENTRY, spellId );
     SetFloatValue( OBJECT_FIELD_SCALE_X, 1 );

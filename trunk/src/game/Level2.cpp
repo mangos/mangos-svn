@@ -819,8 +819,17 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     Map *map = chr->GetMap();
 
     Creature* pCreature = new Creature(NULL);
-    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map->GetId(), x, y, z, o, id, (uint32)teamval))
+    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map->GetId(), id, (uint32)teamval))
     {
+        delete pCreature;
+        return false;
+    }
+
+    pCreature->Relocate(x,y,z,o);
+
+    if(!pCreature->IsPositionValid())
+    {
+        sLog.outError("ERROR: Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %f Y: %f)",pCreature->GetGUIDLow(),pCreature->GetEntry(),pCreature->GetPositionX(),pCreature->GetPositionY());
         delete pCreature;
         return false;
     }
@@ -2454,13 +2463,22 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         }
 
         Creature* wpCreature = new Creature(chr);
-        if (!wpCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(),
-            chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), chr->GetOrientation(), VISUAL_WAYPOINT,0))
+        if (!wpCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(),VISUAL_WAYPOINT,0))
         {
             PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
             delete wpCreature;
             return false;
         }
+
+        wpCreature->Relocate(chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), chr->GetOrientation());
+
+        if(!wpCreature->IsPositionValid())
+        {
+            sLog.outError("ERROR: Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %f Y: %f)",wpCreature->GetGUIDLow(),wpCreature->GetEntry(),wpCreature->GetPositionX(),wpCreature->GetPositionY());
+            delete wpCreature;
+            return false;
+        }
+
         WorldDatabase.PExecuteLog("UPDATE creature_movement SET wpguid = '%u' WHERE id = '%u' and point = '%u'", wpCreature->GetGUIDLow(), lowguid, point+1);
 
         wpCreature->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()));
@@ -2562,13 +2580,22 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
                 ObjectAccessor::Instance().AddObjectToRemoveList(wpCreature);
                 // re-create
                 Creature* wpCreature2 = new Creature(chr);
-                if (!wpCreature2->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(),
-                    chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), chr->GetOrientation(), VISUAL_WAYPOINT, 0))
+                if (!wpCreature2->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), VISUAL_WAYPOINT, 0))
                 {
                     PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
                     delete wpCreature2;
                     return false;
                 }
+
+                wpCreature2->Relocate(chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), chr->GetOrientation());
+
+                if(!wpCreature2->IsPositionValid())
+                {
+                    sLog.outError("ERROR: Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %f Y: %f)",wpCreature2->GetGUIDLow(),wpCreature2->GetEntry(),wpCreature2->GetPositionX(),wpCreature2->GetPositionY());
+                    delete wpCreature2;
+                    return false;
+                }
+
                 wpCreature2->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()));
                 // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
                 wpCreature2->LoadFromDB(wpCreature2->GetDBTableGUIDLow(), chr->GetInstanceId());
@@ -2873,13 +2900,24 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             float o = chr->GetOrientation();
 
             Creature* wpCreature = new Creature(chr);
-            if (!wpCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id, 0))
+            if (!wpCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), id, 0))
             {
                 PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, id);
                 delete wpCreature;
                 delete result;
                 return false;
             }
+
+            wpCreature->Relocate(x, y, z, o);
+
+            if(!wpCreature->IsPositionValid())
+            {
+                sLog.outError("ERROR: Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %f Y: %f)",wpCreature->GetGUIDLow(),wpCreature->GetEntry(),wpCreature->GetPositionX(),wpCreature->GetPositionY());
+                delete wpCreature;
+                delete result;
+                return false;
+            }
+
             wpCreature->SetVisibility(VISIBILITY_OFF);
             sLog.outDebug("DEBUG: UPDATE creature_movement SET wpguid = '%u");
             // set "wpguid" column to the visual waypoint
@@ -2919,9 +2957,19 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         Map *map = chr->GetMap();
 
         Creature* pCreature = new Creature(chr);
-        if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id, 0))
+        if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), id, 0))
         {
             PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, id);
+            delete pCreature;
+            delete result;
+            return false;
+        }
+
+        pCreature->Relocate(x, y, z, o);
+
+        if(!pCreature->IsPositionValid())
+        {
+            sLog.outError("ERROR: Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %f Y: %f)",pCreature->GetGUIDLow(),pCreature->GetEntry(),pCreature->GetPositionX(),pCreature->GetPositionY());
             delete pCreature;
             delete result;
             return false;
@@ -2968,9 +3016,19 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         Map *map = chr->GetMap();
 
         Creature* pCreature = new Creature(chr);
-        if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id, 0))
+        if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), id, 0))
         {
             PSendSysMessage(LANG_WAYPOINT_NOTCREATED, id);
+            delete pCreature;
+            delete result;
+            return false;
+        }
+
+        pCreature->Relocate(x, y, z, o);
+
+        if(!pCreature->IsPositionValid())
+        {
+            sLog.outError("ERROR: Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %f Y: %f)",pCreature->GetGUIDLow(),pCreature->GetEntry(),pCreature->GetPositionX(),pCreature->GetPositionY());
             delete pCreature;
             delete result;
             return false;
