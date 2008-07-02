@@ -1157,6 +1157,28 @@ void World::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source,
         ScriptsProcess();
 }
 
+void World::ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* source, Object* target)
+{
+    // NOTE: script record _must_ exist until command executed
+
+    // prepare static data
+    uint64 sourceGUID = source->GetGUID();
+    uint64 targetGUID = target ? target->GetGUID() : (uint64)0;
+    uint64 ownerGUID  = (source->GetTypeId()==TYPEID_ITEM) ? ((Item*)source)->GetOwnerGUID() : (uint64)0;
+
+    ScriptAction sa;
+    sa.sourceGUID = sourceGUID;
+    sa.targetGUID = targetGUID;
+    sa.ownerGUID  = ownerGUID;
+
+    sa.script = &script;
+    m_scriptSchedule.insert(std::pair<time_t, ScriptAction>(m_gameTime + delay, sa));
+
+    ///- If effects should be immediate, launch the script execution
+    if(delay == 0)
+        ScriptsProcess();
+}
+
 /// Process queued scripts
 void World::ScriptsProcess()
 {
@@ -1651,6 +1673,39 @@ void World::ScriptsProcess()
                 break;
             }
 
+            case SCRIPT_COMMAND_ACTIVATE_OBJECT:
+            {
+                if(!source)
+                {
+                    sLog.outError("SCRIPT_COMMAND_ACTIVATE_OBJECT must have source caster.");
+                    break;
+                }
+
+                if(!source->isType(TYPEMASK_UNIT))
+                {
+                    sLog.outError("SCRIPT_COMMAND_ACTIVATE_OBJECT source caster isn't unit (TypeId: %u), skipping.",source->GetTypeId());
+                    break;
+                }
+
+                if(!target)
+                {
+                    sLog.outError("SCRIPT_COMMAND_ACTIVATE_OBJECT call for NULL gameobject.");
+                    break;
+                }
+
+                if(target->GetTypeId()!=TYPEID_GAMEOBJECT)
+                {
+                    sLog.outError("SCRIPT_COMMAND_ACTIVATE_OBJECT call for non-gameobject (TypeId: %u), skipping.",target->GetTypeId());
+                    break;
+                }
+
+                Unit* caster = (Unit*)source;
+
+                GameObject *go = (GameObject*)target;
+
+                go->Use(caster);
+                break;
+            }
             default:
                 sLog.outError("Unknown script command %u called.",step.script->command);
                 break;

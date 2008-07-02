@@ -220,6 +220,7 @@ enum BanReturn
 #define SCRIPT_COMMAND_TEMP_SUMMON_CREATURE 10
 #define SCRIPT_COMMAND_OPEN_DOOR            11
 #define SCRIPT_COMMAND_CLOSE_DOOR           12
+#define SCRIPT_COMMAND_ACTIVATE_OBJECT      13
 
 /// CLI related stuff, define here to prevent cyclic dependancies
 
@@ -375,6 +376,7 @@ class World
         bool RemoveBanAccount(std::string type, std::string nameOrIP);
 
         void ScriptsStart(std::map<uint32, std::multimap<uint32, ScriptInfo> > const& scripts, uint32 id, Object* source, Object* target);
+        void ScriptCommandStart(ScriptInfo const& script, uint32 delay, Object* source, Object* target);
         bool IsScriptScheduled() const { return !m_scriptSchedule.empty(); }
 
         // for max speed access

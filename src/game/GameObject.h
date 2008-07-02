@@ -303,6 +303,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void getFishLoot(Loot *loot);
         uint32 GetGoType() const { return GetUInt32Value(GAMEOBJECT_TYPE_ID); }
 
+        void Use(Unit* user);
+
         LootState getLootState() const { return m_lootState; }
 
         void AddToSkillupList(uint32 PlayerGuidLow) { m_SkillupList.push_back(PlayerGuidLow); }
