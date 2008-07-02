@@ -241,12 +241,13 @@ class Spell
         void EffectDuel(uint32 i);
         void EffectStuck(uint32 i);
         void EffectSummonPlayer(uint32 i);
+        void EffectActivateObject(uint32 i);
         void EffectSummonTotem(uint32 i);
         void EffectEnchantHeldItem(uint32 i);
         void EffectSummonObject(uint32 i);
         void EffectResurrect(uint32 i);
         void EffectParry(uint32 i);
-        void EffectMomentMove(uint32 i);                    //by vendy
+        void EffectMomentMove(uint32 i);
         void EffectTransmitted(uint32 i);
         void EffectDisEnchant(uint32 i);
         void EffectInebriate(uint32 i);

@@ -818,3 +818,415 @@ void GameObject::SwitchDoorOrButton(bool activate)
     else                                                    //if open -> close
         SetUInt32Value(GAMEOBJECT_STATE,1);
 }
+
+void GameObject::Use(Unit* user)
+{
+    // by default spell caster is user
+    Unit* spellCaster = user;
+    uint32 spellId = 0;
+
+    switch(GetGoType())
+    {
+        case GAMEOBJECT_TYPE_DOOR:                          //0
+        case GAMEOBJECT_TYPE_BUTTON:                        //1
+            //doors/buttons never really despawn, only reset to default state/flags
+            UseDoorOrButton();
+
+            // activate script
+            sWorld.ScriptsStart(sGameObjectScripts, GetDBTableGUIDLow(), spellCaster, this);
+            return;
+
+        case GAMEOBJECT_TYPE_QUESTGIVER:                    //2
+        {
+            if(user->GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            Player* player = (Player*)user;
+
+            player->PrepareQuestMenu( GetGUID() );
+            player->SendPreparedQuest( GetGUID() );
+            return;
+        }
+        //Sitting: Wooden bench, chairs enzz
+        case GAMEOBJECT_TYPE_CHAIR:                         //7
+        {
+            GameObjectInfo const* info = GetGOInfo();
+            if(!info)
+                return;
+
+            if(user->GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            Player* player = (Player*)user;
+
+            // a chair may have n slots. we have to calculate their positions and teleport the player to the nearest one
+
+            // check if the db is sane
+            if(info->chair.slots > 0)
+            {
+                float lowestDist = DEFAULT_VISIBILITY_DISTANCE;
+
+                float x_lowest = GetPositionX();
+                float y_lowest = GetPositionY();
+
+                // the object orientation+ 90°
+                // every slot will be on that straight line
+                float orthogonalOrientation = GetOrientation()+M_PI*0.5f;
+                // find nearest slot
+                for(uint32 i=0; i<info->chair.slots; i++)
+                {
+                    // the distance between this slot and the center of the go - imagine a 1D space
+                    float relativeDistance = (info->size*i)-(info->size*(info->chair.slots-1)/2.0f);
+
+                    float x_i = GetPositionX() + relativeDistance * cos(orthogonalOrientation);
+                    float y_i = GetPositionY() + relativeDistance * sin(orthogonalOrientation);
+
+                    // calculate the distance between the player and this slot
+                    float thisDistance = player->GetDistance2d(x_i, y_i);
+
+                    /* debug code. It will spawn a npc on each slot to visualize them.
+                    Creature* helper = player->SummonCreature(14496, x_i, y_i, GetPositionZ(), GetOrientation(), TEMPSUMMON_TIMED_OR_DEAD_DESPAWN, 10000);
+                    std::ostringstream output;
+                    output << i << ": thisDist: " << thisDistance;
+                    helper->MonsterSay(output.str().c_str(), LANG_UNIVERSAL, 0);
+                    */
+
+                    if(thisDistance <= lowestDist)
+                    {
+                        lowestDist = thisDistance;
+                        x_lowest = x_i;
+                        y_lowest = y_i;
+                    }
+                }
+                player->TeleportTo(GetMapId(), x_lowest, y_lowest, GetPositionZ(), GetOrientation(),false,false);
+            }
+            else
+            {
+                // fallback, will always work
+                player->TeleportTo(GetMapId(), GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(),false,false);
+            }
+            player->SetStandState(PLAYER_STATE_SIT_LOW_CHAIR+info->chair.height);
+            return;
+        }
+        //big gun, its a spell/aura
+        case GAMEOBJECT_TYPE_GOOBER:                        //10
+        {
+            GameObjectInfo const* info = GetGOInfo();
+
+            if(user->GetTypeId()==TYPEID_PLAYER)
+            {
+                Player* player = (Player*)user;
+    
+                // show page
+                if(info->goober.pageId)
+                {
+                    WorldPacket data(SMSG_GAMEOBJECT_PAGETEXT, 8);
+                    data << GetGUID();
+                    player->GetSession()->SendPacket(&data);
+                }
+
+                // possible quest objective for active quests
+                player->CastedCreatureOrGO(info->id, GetGUID(), 0);
+            }
+
+            // cast this spell later if provided
+            spellId = info->goober.spellId;
+
+            break;
+        }
+        case GAMEOBJECT_TYPE_CAMERA:                        //13
+        {
+            GameObjectInfo const* info = GetGOInfo();
+            if(!info)
+                return;
+
+            if(user->GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            Player* player = (Player*)user;
+
+            if(info->camera.cinematicId)
+            {
+                WorldPacket data(SMSG_TRIGGER_CINEMATIC, 4);
+                data << info->camera.cinematicId;
+                player->GetSession()->SendPacket(&data);
+            }
+            return;
+        }
+        //fishing bobber
+        case GAMEOBJECT_TYPE_FISHINGNODE:                   //17
+        {
+            if(user->GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            Player* player = (Player*)user;
+
+            if(player->GetGUID() != GetOwnerGUID())
+                return;
+
+            switch(getLootState())
+            {
+                case GO_READY:                              // ready for loot
+                {
+                    // 1) skill must be >= base_zone_skill
+                    // 2) if skill == base_zone_skill => 5% chance
+                    // 3) chance is linear dependence from (base_zone_skill-skill)
+
+                    uint32 subzone = GetAreaId();
+
+                    int32 zone_skill = objmgr.GetFishingBaseSkillLevel( subzone );
+                    if(!zone_skill)
+                        zone_skill = objmgr.GetFishingBaseSkillLevel( GetZoneId() );
+
+                    //provide error, no fishable zone or area should be 0
+                    if(!zone_skill)
+                        sLog.outErrorDb("Fishable areaId %u are not properly defined in `skill_fishing_base_level`.",subzone);
+
+                    int32 skill = player->GetSkillValue(SKILL_FISHING);
+                    int32 chance = skill - zone_skill + 5;
+                    int32 roll = irand(1,100);
+
+                    DEBUG_LOG("Fishing check (skill: %i zone min skill: %i chance %i roll: %i",skill,zone_skill,chance,roll);
+
+                    if(skill >= zone_skill && chance >= roll)
+                    {
+                        // prevent removing GO at spell cancel
+                        player->RemoveGameObject(this,false);
+                        SetOwnerGUID(player->GetGUID());
+
+                        //fish catched
+                        player->UpdateFishingSkill();
+
+                        GameObject* ok = LookupFishingHoleAround(DEFAULT_VISIBILITY_DISTANCE);
+                        if (ok)
+                        {
+                            player->SendLoot(ok->GetGUID(),LOOT_FISHINGHOLE);
+                            SetLootState(GO_JUST_DEACTIVATED);
+                        }
+                        else
+                            player->SendLoot(GetGUID(),LOOT_FISHING);
+                    }
+                    else
+                    {
+                        // fish escaped, can be deleted now
+                        SetLootState(GO_JUST_DEACTIVATED);
+
+                        WorldPacket data(SMSG_FISH_ESCAPED, 0);
+                        player->GetSession()->SendPacket(&data);
+                    }
+                    break;
+                }
+                case GO_JUST_DEACTIVATED:                   // nothing to do, will be deleted at next update
+                    break;
+                default:
+                {
+                    SetLootState(GO_JUST_DEACTIVATED);
+
+                    WorldPacket data(SMSG_FISH_NOT_HOOKED, 0);
+                    player->GetSession()->SendPacket(&data);
+                    break;
+                }
+            }
+
+            if(player->m_currentSpells[CURRENT_CHANNELED_SPELL])
+            {
+                player->m_currentSpells[CURRENT_CHANNELED_SPELL]->SendChannelUpdate(0);
+                player->m_currentSpells[CURRENT_CHANNELED_SPELL]->finish();
+            }
+            return;
+        }
+
+        case GAMEOBJECT_TYPE_SUMMONING_RITUAL:              //18
+        {
+            if(user->GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            Player* player = (Player*)user;
+
+            Unit* caster = GetOwner();
+
+            GameObjectInfo const* info = GetGOInfo();
+
+            if( !caster || caster->GetTypeId()!=TYPEID_PLAYER )
+                return;
+
+            // accept only use by player from same group for caster except caster itself
+            if(((Player*)caster)==player || !((Player*)caster)->IsInSameGroupWith(player))
+                return;
+
+            AddUniqueUse(player);
+
+            // full amount unique participants including original summoner
+            if(GetUniqueUseCount() < info->summoningRitual.reqParticipants)
+                return;
+
+            // in case summoning ritual caster is GO creator
+            spellCaster = caster;
+
+            if(!caster->m_currentSpells[CURRENT_CHANNELED_SPELL])
+                return;
+
+            spellId = info->summoningRitual.spellId;
+
+            // finish spell
+            caster->m_currentSpells[CURRENT_CHANNELED_SPELL]->SendChannelUpdate(0);
+            caster->m_currentSpells[CURRENT_CHANNELED_SPELL]->finish();
+
+            // can be deleted now
+            SetLootState(GO_JUST_DEACTIVATED);
+
+            // go to end function to spell casting
+            break;
+        }
+        case GAMEOBJECT_TYPE_SPELLCASTER:                   //22
+        {
+            SetUInt32Value(GAMEOBJECT_FLAGS,2);
+
+            GameObjectInfo const* info = GetGOInfo();
+            if(!info)
+                return;
+
+            if(info->spellcaster.partyOnly)
+            {
+                Unit* caster = GetOwner();
+                if( !caster || caster->GetTypeId()!=TYPEID_PLAYER )
+                    return;
+
+                if(user->GetTypeId()!=TYPEID_PLAYER || !((Player*)user)->IsInSameRaidWith((Player*)caster))
+                    return;
+            }
+
+            spellId = info->spellcaster.spellId;
+            if (spellId == 0)
+                spellId = info->spellcaster.spellId2;
+
+            AddUse();
+            break;
+        }
+        case GAMEOBJECT_TYPE_MEETINGSTONE:                  //23
+        {
+            GameObjectInfo const* info = GetGOInfo();
+
+            if(user->GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            Player* player = (Player*)user;
+
+            Player* targetPlayer = ObjectAccessor::FindPlayer(player->GetSelection());
+
+            // accept only use by player from same group for caster except caster itself
+            if(!targetPlayer || targetPlayer == player || !targetPlayer->IsInSameGroupWith(player))
+                return;
+
+            //required lvl checks!
+            uint8 level = player->getLevel();
+            if (level < info->meetingstone.minLevel || level > info->meetingstone.maxLevel)
+                return;
+            level = targetPlayer->getLevel();
+            if (level < info->meetingstone.minLevel || level > info->meetingstone.maxLevel)
+                return;
+
+            spellId = 23598;
+
+            break;
+        }
+
+        case GAMEOBJECT_TYPE_FLAGSTAND:                     // 24
+        {
+            if(user->GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            Player* player = (Player*)user;
+
+            if( player->InBattleGround() &&                 // in battleground
+                !player->IsMounted() &&                     // not mounted
+                !player->HasStealthAura() &&                // not stealthed
+                !player->HasInvisibilityAura() &&           // not invisible
+                player->isAlive())                          // live player
+            {
+                BattleGround *bg = player->GetBattleGround();
+                if(!bg)
+                    return;
+                // BG flag click
+                // AB:
+                // 15001
+                // 15002
+                // 15003
+                // 15004
+                // 15005
+                bg->EventPlayerClickedOnFlag(player, this);
+                return;                                     //we don;t need to delete flag ... it is despawned!
+            }
+            break;
+        }
+        case GAMEOBJECT_TYPE_FLAGDROP:                      // 26
+        {
+            if(user->GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            Player* player = (Player*)user;
+
+            if( player->InBattleGround() &&                 // in battleground
+                !player->IsMounted() &&                     // not mounted
+                !player->HasStealthAura() &&                // not stealthed
+                !player->HasInvisibilityAura() &&           // not invisible
+                player->isAlive())                          // live player
+            {
+                BattleGround *bg = player->GetBattleGround();
+                if(!bg)
+                    return;
+                // BG flag dropped
+                // WS:
+                // 179785 - Silverwing Flag
+                // 179786 - Warsong Flag
+                // EotS:
+                // 184142 - Netherstorm Flag
+                GameObjectInfo const* info = GetGOInfo();
+                if(info)
+                {
+                    switch(info->id)
+                    {
+                        case 179785:                        // Silverwing Flag
+                            // check if it's correct bg
+                            if(bg->GetTypeID() == BATTLEGROUND_WS)
+                                bg->EventPlayerClickedOnFlag(player, this);
+                            break;
+                        case 179786:                        // Warsong Flag
+                            if(bg->GetTypeID() == BATTLEGROUND_WS)
+                                bg->EventPlayerClickedOnFlag(player, this);
+                            break;
+                        case 184142:                        // Netherstorm Flag
+                            if(bg->GetTypeID() == BATTLEGROUND_EY)
+                                bg->EventPlayerClickedOnFlag(player, this);
+                            break;
+                    }
+                }
+                //this cause to call return, all flags must be deleted here!!
+                spellId = 0;
+                Delete();
+            }
+            break;
+        }
+        default:
+            sLog.outDebug("Unknown Object Type %u", GetGoType());
+            break;
+    }
+
+    if(!spellId)
+        return;
+
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry( spellId );
+    if(!spellInfo)
+    {
+        sLog.outError("WORLD: unknown spell id %u at use action for gameobject (Entry: %u Type: %u )", spellId,GetEntry(),GetGoType());
+        return;
+    }
+
+    Spell *spell = new Spell(spellCaster, spellInfo, false);
+
+    // spell target is user of GO
+    SpellCastTargets targets;
+    targets.setUnitTarget( user );
+
+    spell->prepare(&targets);
+}
