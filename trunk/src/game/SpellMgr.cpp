@@ -304,8 +304,11 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
     switch(spellproto->Effect[effIndex])
     {
         // always positive effects (check before target checks that provided non-positive result in some case for positive effects)
+        case SPELL_EFFECT_HEAL:
         case SPELL_EFFECT_LEARN_SPELL:
         case SPELL_EFFECT_SKILL_STEP:
+        case SPELL_EFFECT_HEAL_PCT:
+        case SPELL_EFFECT_ENERGIZE_PCT:
             return true;
 
             // non-positive aura use

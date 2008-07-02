@@ -276,6 +276,8 @@ class Spell
         void EffectSummonDemon(uint32 i);
         void EffectStealBeneficialBuff(uint32 i);
         void EffectUnlearnSpecialization(uint32 i);
+        void EffectHealPct(uint32 i);
+        void EffectEnergisePct(uint32 i);
         void EffectTriggerSpellWithValue(uint32 i);
         void EffectTriggerRitualOfSummoning(uint32 i);
 
