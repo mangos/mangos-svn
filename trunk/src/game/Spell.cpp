@@ -1818,7 +1818,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             if(pTarget)
             {
                 float _target_x, _target_y, _target_z;
-                pTarget->GetClosePoint(_target_x, _target_y, _target_z, CONTACT_DISTANCE + pTarget->GetObjectSize() + m_caster->GetObjectSize(), M_PI);
+                pTarget->GetClosePoint(_target_x, _target_y, _target_z, m_caster->GetObjectSize(), CONTACT_DISTANCE, M_PI);
                 if(pTarget->IsWithinLOS(_target_x,_target_y,_target_z))
                     m_targets.setDestination(_target_x, _target_y, _target_z);
             }
