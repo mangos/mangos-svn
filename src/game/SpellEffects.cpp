@@ -196,8 +196,8 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectUnlearnSpecialization,                    //133 SPELL_EFFECT_UNLEARN_SPECIALIZATION   unlearn profession specialization
     &Spell::EffectNULL,                                     //134 SPELL_EFFECT_KILL_CREDIT              misc value is creature entry
     &Spell::EffectNULL,                                     //135 SPELL_EFFECT_CALL_PET
-    &Spell::EffectNULL,                                     //136 SPELL_EFFECT_136
-    &Spell::EffectNULL,                                     //137 SPELL_EFFECT_137
+    &Spell::EffectHealPct,                                  //136 SPELL_EFFECT_136
+    &Spell::EffectEnergisePct,                              //137 SPELL_EFFECT_ENERGIZE_PCT
     &Spell::EffectNULL,                                     //138 SPELL_EFFECT_138
     &Spell::EffectNULL,                                     //139 SPELL_EFFECT_139                      unused
     &Spell::EffectNULL,                                     //140 SPELL_EFFECT_140
@@ -2211,6 +2211,29 @@ void Spell::EffectHeal( uint32 /*i*/ )
     }
 }
 
+void Spell::EffectHealPct( uint32 /*i*/ )
+{
+    if( unitTarget && unitTarget->isAlive() && damage >= 0)
+    {
+        // Try to get original caster
+        Unit *caster = m_originalCasterGUID ? m_originalCaster : m_caster;
+
+        // Skip if m_originalCaster not available
+        if (!caster)
+            return;
+
+        uint32 addhealth = unitTarget->GetMaxHealth() * damage / 100;
+        caster->SendHealSpellLog(unitTarget, m_spellInfo->Id, addhealth, false);
+
+        int32 gain = unitTarget->ModifyHealth( int32(addhealth) );
+        unitTarget->getHostilRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
+
+        if(caster->GetTypeId()==TYPEID_PLAYER)
+            if(BattleGround *bg = ((Player*)caster)->GetBattleGround())
+                bg->UpdatePlayerScore(((Player*)caster), SCORE_HEALING_DONE, gain);
+    }
+}
+
 void Spell::EffectHealMechanical( uint32 /*i*/ )
 {
     // Mechanic creature type should be correctly checked by targetCreatureType field
@@ -2502,6 +2525,27 @@ void Spell::EffectEnergize(uint32 i)
             m_caster->CastSpell(unitTarget,elixirs[rand_spell],true,m_CastItem);
         }
     }
+}
+
+void Spell::EffectEnergisePct(uint32 i)
+{
+    if(!unitTarget)
+        return;
+    if(!unitTarget->isAlive())
+        return;
+
+    if(m_spellInfo->EffectMiscValue[i] < 0 || m_spellInfo->EffectMiscValue[i] >= MAX_POWERS)
+        return;
+
+    Powers power = Powers(m_spellInfo->EffectMiscValue[i]);
+
+    uint32 maxPower = unitTarget->GetMaxPower(power);
+    if(maxPower == 0)
+        return;
+
+    uint32 gain = damage * maxPower / 100;
+    unitTarget->ModifyPower(power, gain);
+    m_caster->SendEnergizeSpellLog(unitTarget, m_spellInfo->Id, damage, power);
 }
 
 void Spell::SendLoot(uint64 guid, LootType loottype)
