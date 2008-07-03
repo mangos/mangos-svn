@@ -281,9 +281,9 @@ pkgdata_DATA = \
 	6171_mangos_spell_affect.sql \
 	6179_mangos_mangos_string.sql \
 	6193_mangos_spell_proc_event.sql \
-	6198_mangos_spell_proc_event.sql \
+	6199_mangos_spell_proc_event.sql \
 	6210_mangos_spell_proc_event.sql \
-        6213_spell_target_position.sql \
+        6213_mangos_spell_target_position.sql \
 	6219_mangos_spell_proc_event.sql \
 	README
 
@@ -546,8 +546,8 @@ EXTRA_DIST = \
 	6171_mangos_spell_affect.sql \
 	6179_mangos_mangos_string.sql \
 	6193_mangos_spell_proc_event.sql \
-	6198_mangos_spell_proc_event.sql \
+	6199_mangos_spell_proc_event.sql \
 	6210_mangos_spell_proc_event.sql \
-        6213_spell_target_position.sql \
+        6213_mangos_spell_target_position.sql \
 	6219_mangos_spell_proc_event.sql \
 	README
