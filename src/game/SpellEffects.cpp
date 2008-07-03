@@ -1755,6 +1755,13 @@ void Spell::EffectTeleportUnits(uint32 i)
             ((Player*)unitTarget)->TeleportTo(unitTarget->GetMapId(),_target_x, _target_y, _target_z , pTarget->GetOrientation());
             break;
         }
+        case TARGET_SCRIPT_COORDINATES:
+        {
+            if(!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
+                return;
+            ((Player*)unitTarget)->TeleportTo(unitTarget->GetMapId(),m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ , unitTarget->GetOrientation());
+            break;
+        }
         default:
             sLog.outError( "Spell::EffectTeleportUnits - unknown EffectImplicitTargetB[%u] = %u for spell ID %u\n", i, m_spellInfo->EffectImplicitTargetB[i], m_spellInfo->Id );
             return;
@@ -4155,9 +4162,15 @@ void Spell::EffectSummonObjectWild(uint32 i)
     if( !target )
         target = m_caster;
 
-    // before caster
     float x,y,z;
-    m_caster->GetClosePoint(x,y,z,DEFAULT_WORLD_OBJECT_SIZE);
+    if(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+    {
+        x = m_targets.m_destX;
+        y = m_targets.m_destY;
+        z = m_targets.m_destZ;
+    }
+    else
+        m_caster->GetClosePoint(x,y,z,DEFAULT_WORLD_OBJECT_SIZE);
 
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, target->GetMapId(),
         x, y, z, target->GetOrientation(), 0, 0, 0, 0, 100, 1))

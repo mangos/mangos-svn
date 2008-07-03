@@ -383,8 +383,10 @@ void Spell::FillTargetMap()
         if(m_spellInfo->Effect[i]==0)
             continue;
 
-        // targets for TARGET_SCRIPT filled in Spell::canCast call
-        if( m_spellInfo->EffectImplicitTargetA[i] == TARGET_SCRIPT || m_spellInfo->EffectImplicitTargetA[i] != TARGET_SELF && m_spellInfo->EffectImplicitTargetB[i] == TARGET_SCRIPT )
+        // targets for TARGET_SCRIPT_COORDINATES (A) and TARGET_SCRIPT  filled in Spell::canCast call
+        if( m_spellInfo->EffectImplicitTargetA[i] == TARGET_SCRIPT_COORDINATES ||
+            m_spellInfo->EffectImplicitTargetA[i] == TARGET_SCRIPT || 
+            m_spellInfo->EffectImplicitTargetB[i] == TARGET_SCRIPT && m_spellInfo->EffectImplicitTargetA[i] != TARGET_SELF )
             continue;
 
         std::list<Unit*> tmpUnitMap;
@@ -421,8 +423,16 @@ void Spell::FillTargetMap()
                 SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
                 break;
             default:
-                SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
-                SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
+                switch(m_spellInfo->EffectImplicitTargetB[i])
+                {
+                    case TARGET_SCRIPT_COORDINATES:         // B case filled in canCast but we need fill unit list base at A case
+                        SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
+                        break;
+                    default:
+                        SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
+                        SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
+                        break;
+                }
                 break;
         }
 
@@ -3294,14 +3304,17 @@ uint8 Spell::CanCast(bool strict)
     {
         for(uint8 j = 0; j < 3; j++)
         {
-            if( m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT || m_spellInfo->EffectImplicitTargetA[j] != TARGET_SELF && m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT )
+            if( m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT ||
+                m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT && m_spellInfo->EffectImplicitTargetA[j] != TARGET_SELF ||
+                m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT_COORDINATES ||
+                m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT_COORDINATES )
             {
                 bool okDoo = false;
 
                 SpellScriptTarget::const_iterator lower = spellmgr.GetBeginSpellScriptTarget(m_spellInfo->Id);
                 SpellScriptTarget::const_iterator upper = spellmgr.GetEndSpellScriptTraget(m_spellInfo->Id);
                 if(lower==upper)
-                    sLog.outErrorDb("Spell (ID: %u) has effect EffectImplicitTargetA/EffectImplicitTargetB = %u (TARGET_SCRIPT), but does not have record in `spell_script_target`",m_spellInfo->Id,TARGET_SCRIPT);
+                    sLog.outErrorDb("Spell (ID: %u) has effect EffectImplicitTargetA/EffectImplicitTargetB = TARGET_SCRIPT or TARGET_SCRIPT_COORDINATES, but does not have record in `spell_script_target`",m_spellInfo->Id);
 
                 SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
                 float range = GetSpellMaxRange(srange);
@@ -3381,9 +3394,29 @@ uint8 Spell::CanCast(bool strict)
                 }
 
                 if(creatureScriptTarget)
-                    AddUnitTarget(creatureScriptTarget, j);
+                {
+                    // store coordinates for TARGET_SCRIPT_COORDINATES
+                    if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT_COORDINATES || 
+                        m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT_COORDINATES )
+                    {
+                        m_targets.setDestination(creatureScriptTarget->GetPositionX(),creatureScriptTarget->GetPositionY(),creatureScriptTarget->GetPositionZ());
+                    }
+                    // store explicit target for TARGET_SCRIPT
+                    else
+                        AddUnitTarget(creatureScriptTarget, j);
+                }
                 else if(goScriptTarget)
-                    AddGOTarget(goScriptTarget, j);
+                {
+                    // store coordinates for TARGET_SCRIPT_COORDINATES
+                    if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT_COORDINATES || 
+                        m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT_COORDINATES )
+                    {
+                        m_targets.setDestination(goScriptTarget->GetPositionX(),goScriptTarget->GetPositionY(),goScriptTarget->GetPositionZ());
+                    }
+                    // store explicit target for TARGET_SCRIPT
+                    else
+                        AddGOTarget(goScriptTarget, j);
+                }
                 else
                     return SPELL_FAILED_BAD_TARGETS;        //Missing DB Entry or targets for this spellEffect.
             }
