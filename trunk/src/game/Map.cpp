@@ -1109,9 +1109,28 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps) const
 
     // find raw .map surface under Z coordinates
     float mapHeight;
-    if(GridMaps[gx][gy])
+    if(GridMap* gmap = GridMaps[gx][gy])
     {
-        float _mapheight = GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
+        int lx_int = (int)lx;
+        int ly_int = (int)ly;
+
+        float zi[4];
+        // Probe 4 nearest points (except border cases)
+        zi[0] = gmap->Z[lx_int][ly_int];
+        zi[1] = lx < MAP_RESOLUTION-1 ? gmap->Z[lx_int+1][ly_int] : zi[0];
+        zi[2] = ly < MAP_RESOLUTION-1 ? gmap->Z[lx_int][ly_int+1] : zi[0];
+        zi[3] = lx < MAP_RESOLUTION-1 && ly < MAP_RESOLUTION-1 ? gmap->Z[lx_int+1][ly_int+1] : zi[0];
+        // Recalculate them like if their x,y positions were in the range 0,1
+        float b[4];
+        b[0] = zi[0];
+        b[1] = zi[1]-zi[0];
+        b[2] = zi[2]-zi[0];
+        b[3] = zi[0]-zi[1]-zi[2]+zi[3];
+        // Normalize the dx and dy to be in range 0..1
+        float fact_x = lx - lx_int;
+        float fact_y = ly - ly_int;
+        // Use the simplified bilinear equation, as described in [url="http://en.wikipedia.org/wiki/Bilinear_interpolation"]http://en.wikipedia.org/wiki/Bilinear_interpolation[/url]
+        float _mapheight = b[0] + (b[1]*fact_x) + (b[2]*fact_y) + (b[3]*fact_x*fact_y);        
 
         // look from a bit higher pos to find the floor, ignore under surface case
         if(z + 2.0f > _mapheight)
