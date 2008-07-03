@@ -855,24 +855,50 @@ void Player::HandleLava()
     }
 }
 
+///The player sobers by 256 every 10 seconds
 void Player::HandleSobering()
 {
     m_drunkTimer = 0;
 
-    uint32 drunk = (m_drunk <= (0xFFFF / 30)) ? 0 : (m_drunk - (0xFFFF / 30));
+    uint32 drunk = (m_drunk <= 256) ? 0 : (m_drunk - 256);
     SetDrunkValue(drunk);
 }
 
-void Player::SetDrunkValue(uint16 newDrunkValue)
+DrunkenState Player::GetDrunkenstateByValue(uint16 value)
 {
-    m_drunk = newDrunkValue;
+    if(value >= 23000)
+        return DRUNKEN_SMASHED;
+    if(value >= 12800)
+        return DRUNKEN_DRUNK;
+    if(value & 0xFFFE)
+        return DRUNKEN_TIPSY;
+    return DRUNKEN_SOBER;
+}
+
+void Player::SetDrunkValue(uint16 newDrunkenValue, uint32 itemId)
+{
+    uint32 oldDrunkenState = Player::GetDrunkenstateByValue(m_drunk);
+
+    m_drunk = newDrunkenValue;
     SetUInt32Value(PLAYER_BYTES_3,(GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0001) | (m_drunk & 0xFFFE));
 
+    uint32 newDrunkenState = Player::GetDrunkenstateByValue(m_drunk);
+
     // special drunk invisibility detection
-    if(m_drunk)
+    if(newDrunkenState >= DRUNKEN_DRUNK)
         m_detectInvisibilityMask |= (1<<6);
     else
         m_detectInvisibilityMask &= ~(1<<6);
+
+    if(newDrunkenState == oldDrunkenState)
+        return;
+
+    WorldPacket data(SMSG_CROSSED_INEBRIATION_THRESHOLD, (8+4+4));
+    data << GetGUID();
+    data << uint32(newDrunkenState);
+    data << uint32(itemId);
+    
+    SendMessageToSet(&data, true);
 }
 
 void Player::Update( uint32 p_time )
@@ -1136,7 +1162,7 @@ void Player::Update( uint32 p_time )
     {
         m_drunkTimer += p_time;
 
-        if (m_drunkTimer > 30000)
+        if (m_drunkTimer > 10000)
             HandleSobering();
     }
 
@@ -1175,6 +1201,8 @@ void Player::setDeathState(DeathState s)
 
     if(s == JUST_DIED && cur)
     {
+        // drunken state is cleared on death
+        SetDrunkValue(0);
         // lost combo points at any target (targeted combo points clear in Unit::setDeathState)
         ClearComboPoints();
 
@@ -12954,9 +12982,6 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     if(GetMoney() > MAX_MONEY_AMOUNT)
         SetMoney(MAX_MONEY_AMOUNT);
 
-    // set value, including drunk invisibility detection
-    SetDrunkValue(GetUInt32Value(PLAYER_BYTES_3) & 0xFFFE);
-
     sLog.outDebug("Load Basic value of player %s is: ", m_name.c_str());
     outDebugValues();
 
@@ -13056,6 +13081,16 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     // since last logout (in seconds)
     uint32 time_diff = (time(NULL) - fields[16].GetUInt32());
+    
+    // set value, including drunk invisibility detection
+    // calculate sobering. after 15 minutes logged out, the player will be sober again
+    float soberFactor;
+    if(time_diff > 15*MINUTE)
+        soberFactor = 0;
+    else
+        soberFactor = 1-time_diff/(15.0f*MINUTE);
+    uint16 newDrunkenValue = soberFactor*(GetUInt32Value(PLAYER_BYTES_3) & 0xFFFE);
+    SetDrunkValue(newDrunkenValue);
 
     m_rest_bonus = fields[15].GetFloat();
     //speed collect rest bonus in offline, in logout, far from tavern, city (section/in hour)
