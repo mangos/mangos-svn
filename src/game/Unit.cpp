@@ -398,10 +398,7 @@ void Unit::SendMosterMoveByPath(Path const& path, uint32 start, uint32 end, uint
 
 void Unit::resetAttackTimer(WeaponAttackType type)
 {
-    if (GetTypeId() == TYPEID_PLAYER)
-        m_attackTimer[type] = uint32(GetAttackTime(type) * m_modAttackSpeedPct[type]);
-    else
-        m_attackTimer[type] = uint32(BASE_ATTACK_TIME * m_modAttackSpeedPct[type]);
+    m_attackTimer[type] = uint32(GetAttackTime(type) * m_modAttackSpeedPct[type]);
 }
 
 bool Unit::canReachWithAttack(Unit *pVictim) const
