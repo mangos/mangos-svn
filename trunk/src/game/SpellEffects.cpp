@@ -4897,12 +4897,12 @@ void Spell::EffectInebriate(uint32 /*i*/)
 
     Player *player = (Player*)unitTarget;
     uint16 currentDrunk = player->GetDrunkValue();
-    uint16 drunkMod = damage * 0xFFFF / 100;
+    uint16 drunkMod = damage * 256;
     if (currentDrunk + drunkMod > 0xFFFF)
         currentDrunk = 0xFFFF;
     else
         currentDrunk += drunkMod;
-    player->SetDrunkValue(currentDrunk);
+    player->SetDrunkValue(currentDrunk, m_CastItem?m_CastItem->GetEntry():0);
 }
 
 void Spell::EffectFeedPet(uint32 i)

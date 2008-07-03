@@ -311,6 +311,14 @@ enum PlayerMovementType
     MOVE_LAND_WALK  = 4
 };
 
+enum DrunkenState
+{
+    DRUNKEN_SOBER   = 0,
+    DRUNKEN_TIPSY   = 1,
+    DRUNKEN_DRUNK   = 2,
+    DRUNKEN_SMASHED = 3
+};
+
 enum PlayerStateType
 {
     /*
@@ -1676,8 +1684,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         //End of PvP System
 
-        void SetDrunkValue(uint16 newDrunkValue);
+        void SetDrunkValue(uint16 newDrunkValue, uint32 itemid=0);
         uint16 GetDrunkValue() const { return m_drunk; }
+        static DrunkenState GetDrunkenstateByValue(uint16 value);
         uint32 GetDeathTimer() const { return m_deathTimer; }
         uint32 GetShieldBlockValue() const;                 // overwrite Unit version (virtual)
         bool CanParry() const { return m_canParry; }
