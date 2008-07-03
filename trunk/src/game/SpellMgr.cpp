@@ -1698,7 +1698,10 @@ void SpellMgr::LoadSpellScriptTarget()
         bool targetfound = false;
         for(int i = 0; i <3; ++i)
         {
-            if(spellProto->EffectImplicitTargetA[i]==TARGET_SCRIPT||spellProto->EffectImplicitTargetB[i]==TARGET_SCRIPT)
+            if( spellProto->EffectImplicitTargetA[i]==TARGET_SCRIPT ||
+                spellProto->EffectImplicitTargetB[i]==TARGET_SCRIPT ||
+                spellProto->EffectImplicitTargetA[i]==TARGET_SCRIPT_COORDINATES ||
+                spellProto->EffectImplicitTargetB[i]==TARGET_SCRIPT_COORDINATES )
             {
                 targetfound = true;
                 break;
@@ -1706,7 +1709,7 @@ void SpellMgr::LoadSpellScriptTarget()
         }
         if(!targetfound)
         {
-            sLog.outErrorDb("Table `spell_script_target`: spellId %u listed for TargetEntry %u does not have any implicit target TARGET_SCRIPT(38).",spellId,targetEntry);
+            sLog.outErrorDb("Table `spell_script_target`: spellId %u listed for TargetEntry %u does not have any implicit target TARGET_SCRIPT(38) or TARGET_SCRIPT_COORDINATES (46).",spellId,targetEntry);
             continue;
         }
 
