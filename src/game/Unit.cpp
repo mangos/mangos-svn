@@ -5156,7 +5156,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 // Maim Interrupt
                 case 44835:
                 {
-                    if(!castItem || pVictim || !pVictim->isAlive())
+                    if(!castItem || !pVictim || !pVictim->isAlive())
                         return;
                     // Deadly Interrupt Effect
                     CastSpell(pVictim, 32747, true, castItem, triggeredByAura);
