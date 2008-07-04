@@ -116,6 +116,7 @@ bool LoadADT(char* filename)
             case 0x4d574944:                                // MWID offsets for strings in MWMO
             case 0x4d444446:                                // MDDF
             case 0x4d46424f:                                // MFBO new in BC
+            case 0x4d48324f:                                // MH2O new in WotLK
                 break;
             default:
             {

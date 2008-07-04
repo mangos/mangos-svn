@@ -39,8 +39,8 @@ enum Extract
 };
 int extract = EXTRACT_MAP | EXTRACT_DBC;
 
-static char* const langs[]={"deDE", "enUS", "enGB", "frFR", "esES", "zhCN", "zhTW" };
-#define LANG_COUNT 7
+static char* const langs[]={"deDE", "enGB", "enUS", "esES", "frFR", "koKR", "zhCN", "zhTW", "enCN", "enTW", "esMX", "ruRU" };
+#define LANG_COUNT 12
 
 #define ADT_RES 64
 
@@ -310,6 +310,11 @@ int main(int argc, char * arg[])
 
     if(extract & EXTRACT_DBC)
         ExtractDBCFiles();
+
+    //Close MPQs
+    for(ArchiveSet::iterator i = gOpenArchives.begin(); i != gOpenArchives.end();++i)
+        (*i)->close();
+    gOpenArchives.clear();
 
     return 0;
 }

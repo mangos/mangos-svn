@@ -188,6 +188,7 @@ class Spell
     public:
 
         void EffectNULL(uint32 );
+        void EffectUnused(uint32 );
         void EffectDistract(uint32 i);
         void EffectPull(uint32 i);
         void EffectSchoolDMG(uint32 i);

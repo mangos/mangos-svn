@@ -5038,12 +5038,6 @@ void ObjectMgr::LoadGameobjectInfo()
                         sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data3=%u but Spell (Entry %u) not exist.",
                             id,goInfo->type,goInfo->spellcaster.spellId,goInfo->spellcaster.spellId);
                 }
-                if(goInfo->spellcaster.spellId2)            // spell2
-                {
-                    if(!sSpellStore.LookupEntry(goInfo->spellcaster.spellId2))
-                        sLog.outErrorDb("Gameobject (Entry: %u Type: %u) have data3=%u but Spell (Entry %u) not exist.",
-                            id,goInfo->type,goInfo->spellcaster.spellId2,goInfo->spellcaster.spellId2);
-                }
                 break;
             }
         }
