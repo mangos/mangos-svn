@@ -264,19 +264,19 @@ void GameObject::Update(uint32 /*p_time*/)
                 float radius = goInfo->trap.radius;
                 if(!radius)
                 {
-                    if(goInfo->trap._data5 != 3)            // cast in other case (at some triggring/linked go/etc explicit call)
+                    if(goInfo->trap.cooldown != 3)            // cast in other case (at some triggring/linked go/etc explicit call)
                         return;
                     else
                     {
                         if(m_respawnTime > 0)
                             break;
 
-                        radius = goInfo->trap._data5;       // battlegrounds gameobjects has data2 == 0 && data5 == 3
+                        radius = goInfo->trap.cooldown;       // battlegrounds gameobjects has data2 == 0 && data5 == 3
                         IsBattleGroundTrap = true;
                     }
                 }
 
-                bool NeedDespawn = (goInfo->trap.isNeedDespawn != 0);
+                bool NeedDespawn = (goInfo->trap.charges != 0);
 
                 CellPair p(MaNGOS::ComputeCellPair(GetPositionX(),GetPositionY()));
                 Cell cell(p);
@@ -1097,8 +1097,6 @@ void GameObject::Use(Unit* user)
             }
 
             spellId = info->spellcaster.spellId;
-            if (spellId == 0)
-                spellId = info->spellcaster.spellId2;
 
             AddUse();
             break;
