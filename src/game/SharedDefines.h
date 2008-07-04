@@ -631,7 +631,7 @@ enum SpellEffects
     SPELL_EFFECT_ENERGIZE_PCT              = 137,
     SPELL_EFFECT_138                       = 138,
     SPELL_EFFECT_139                       = 139,
-    SPELL_EFFECT_140                       = 140,
+    SPELL_EFFECT_FORCE_CAST                = 140,
     SPELL_EFFECT_141                       = 141,
     SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE  = 142,
     SPELL_EFFECT_143                       = 143,

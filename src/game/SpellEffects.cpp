@@ -200,7 +200,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectEnergisePct,                              //137 SPELL_EFFECT_ENERGIZE_PCT
     &Spell::EffectNULL,                                     //138 SPELL_EFFECT_138                      Leap
     &Spell::EffectUnused,                                   //139 SPELL_EFFECT_139                      unused
-    &Spell::EffectNULL,                                     //140 SPELL_EFFECT_140                      force cast
+    &Spell::EffectForceCast,                                //140 SPELL_EFFECT_FORCE_CAST
     &Spell::EffectNULL,                                     //141 SPELL_EFFECT_141                      damage and reduce speed?
     &Spell::EffectTriggerSpellWithValue,                    //142 SPELL_EFFECT_TRIGGER_SPELL_WITH_VALUE
     &Spell::EffectNULL,                                     //143 SPELL_EFFECT_APPLY_AURA_NEW4
@@ -1526,6 +1526,25 @@ void Spell::EffectTriggerRitualOfSummoning(uint32 i)
 
 }
 
+void Spell::EffectForceCast(uint32 i)
+{
+    if( !unitTarget )
+        return;
+
+    uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[i];
+
+    // normal case
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry( triggered_spell_id );
+
+    if(!spellInfo)
+    {
+        sLog.outError("EffectForceCast of spell %u: triggering unknown spell id %i", m_spellInfo->Id,triggered_spell_id);
+        return;
+    }
+
+    unitTarget->CastSpell(unitTarget,spellInfo,true,NULL,NULL,m_originalCasterGUID);
+}
+
 void Spell::EffectTriggerSpell(uint32 i)
 {
     uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[i];
@@ -1556,7 +1575,7 @@ void Spell::EffectTriggerSpell(uint32 i)
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
                 if (!spellInfo)
                     continue;
-                
+
                 if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_STEALTH)
                 {
                     spellId = spellInfo->Id;
