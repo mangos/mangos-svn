@@ -284,10 +284,7 @@ Player::Player (WorldSession *session): Unit( 0 )
     // this must help in case next save after mass player load after server startup
     m_nextSave = urand(m_nextSave/2,m_nextSave*3/2);
 
-    m_resurrectGUID = 0;
-    m_resurrectMap = 0;
-    m_resurrectX = m_resurrectY = m_resurrectZ = 0;
-    m_resurrectHealth = m_resurrectMana = 0;
+    clearResurrectRequestData();
 
     m_SpellModRemoveCount = 0;
 
@@ -3542,6 +3539,7 @@ void Player::ResurrectPlayer(float restore_percent, bool updateToWorld, bool app
     SetMovement(MOVE_UNROOT);
 
     m_deathTimer = 0;
+    clearResurrectRequestData();
 
     // set health/powers (0- will be set in caller)
     if(restore_percent>0.0f)
@@ -17092,4 +17090,27 @@ uint32 Player::GetBaseWeaponSkillValue (WeaponAttackType attType) const
     uint32  skill = item && !item->IsBroken() && IsUseEquipedWeapon(attType==BASE_ATTACK)
         ? item->GetSkill() : SKILL_UNARMED;
     return GetBaseSkillValue(skill);
+}
+
+void Player::ResurectUsingRequestData()
+{
+    ResurrectPlayer(0.0f,false);                            // clearResurrectRequestData called into ResurrectPlayer
+
+    if(GetMaxHealth() > m_resurrectHealth)
+        SetHealth( m_resurrectHealth );
+    else
+        SetHealth( GetMaxHealth() );
+
+    if(GetMaxPower(POWER_MANA) > m_resurrectMana)
+        SetPower(POWER_MANA, m_resurrectMana );
+    else
+        SetPower(POWER_MANA, GetMaxPower(POWER_MANA) );
+
+    SetPower(POWER_RAGE, 0 );
+
+    SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY) );
+
+    SpawnCorpseBones();
+
+    TeleportTo(m_resurrectMap, m_resurrectX, m_resurrectY, m_resurrectZ, GetOrientation());
 }

@@ -237,10 +237,15 @@ void Spell::EffectResurrectNew(uint32 i)
     if(!unitTarget->IsInWorld())
         return;
 
+    Player* pTarget = ((Player*)unitTarget);
+
+    if(pTarget->isRessurectRequested())       // already have one active request
+        return;
+
     uint32 health = damage;
     uint32 mana = m_spellInfo->EffectMiscValue[i];
-    ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
-    SendResurrectRequest((Player*)unitTarget);
+    pTarget->setResurrectRequestData(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+    SendResurrectRequest(pTarget);
 }
 
 void Spell::EffectInstaKill(uint32 /*i*/)
@@ -5051,12 +5056,16 @@ void Spell::EffectResurrect(uint32 i)
         default:
             break;
     }
+
     Player* pTarget = ((Player*)unitTarget);
+
+    if(pTarget->isRessurectRequested())       // already have one active request
+        return;
 
     uint32 health = pTarget->GetMaxHealth() * damage / 100;
     uint32 mana   = pTarget->GetMaxPower(POWER_MANA) * damage / 100;
 
-    ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
+    pTarget->setResurrectRequestData(m_caster->GetGUID(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
     SendResurrectRequest(pTarget);
 }
 
