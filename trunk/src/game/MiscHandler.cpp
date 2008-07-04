@@ -855,36 +855,15 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
     recv_data >> status;
 
     if(status == 0)
+    {
+        GetPlayer()->clearResurrectRequestData();           // reject
+        return;
+    }
+
+    if(!GetPlayer()->isRessurectRequestedBy(guid))
         return;
 
-    if(GetPlayer()->m_resurrectGUID == 0 || GetPlayer()->m_resurrectGUID != guid)
-        return;
-
-    GetPlayer()->ResurrectPlayer(0.0f,false);
-
-    if(GetPlayer()->GetMaxHealth() > GetPlayer()->m_resurrectHealth)
-        GetPlayer()->SetHealth( GetPlayer()->m_resurrectHealth );
-    else
-        GetPlayer()->SetHealth( GetPlayer()->GetMaxHealth() );
-
-    if(GetPlayer()->GetMaxPower(POWER_MANA) > GetPlayer()->m_resurrectMana)
-        GetPlayer()->SetPower(POWER_MANA, GetPlayer()->m_resurrectMana );
-    else
-        GetPlayer()->SetPower(POWER_MANA, GetPlayer()->GetMaxPower(POWER_MANA) );
-
-    GetPlayer()->SetPower(POWER_RAGE, 0 );
-
-    GetPlayer()->SetPower(POWER_ENERGY, GetPlayer()->GetMaxPower(POWER_ENERGY) );
-
-    GetPlayer()->SpawnCorpseBones();
-
-    GetPlayer()->TeleportTo(GetPlayer()->m_resurrectMap, GetPlayer()->m_resurrectX, GetPlayer()->m_resurrectY, GetPlayer()->m_resurrectZ, GetPlayer()->GetOrientation());
-
-    GetPlayer()->m_resurrectGUID = 0;
-    GetPlayer()->m_resurrectMap = 0;
-    GetPlayer()->m_resurrectHealth = GetPlayer()->m_resurrectMana = 0;
-    GetPlayer()->m_resurrectX = GetPlayer()->m_resurrectY = GetPlayer()->m_resurrectZ = 0;
-
+    GetPlayer()->ResurectUsingRequestData();
     GetPlayer()->SaveToDB();
 }
 

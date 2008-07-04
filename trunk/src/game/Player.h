@@ -1421,7 +1421,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadSpellCooldowns(QueryResult *result);
         void _SaveSpellCooldowns();
 
-        void setResurrect(uint64 guid, uint32 mapId, float X, float Y, float Z, uint32 health, uint32 mana)
+        void setResurrectRequestData(uint64 guid, uint32 mapId, float X, float Y, float Z, uint32 health, uint32 mana)
         {
             m_resurrectGUID = guid;
             m_resurrectMap = mapId;
@@ -1431,6 +1431,10 @@ class MANGOS_DLL_SPEC Player : public Unit
             m_resurrectHealth = health;
             m_resurrectMana = mana;
         };
+        void clearResurrectRequestData() { setResurrectRequestData(0,0,0.0f,0.0f,0.0f,0,0); }
+        bool isRessurectRequestedBy(uint64 guid) const { return m_resurrectGUID == guid; }
+        bool isRessurectRequested() const { return m_resurrectGUID != 0; }
+        void ResurectUsingRequestData();
 
         int getCinematic()
         {
