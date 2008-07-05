@@ -681,16 +681,16 @@ namespace MaNGOS
                 if(u->getFaction() != i_funit->getFaction() )
                     return false;
 
-                // skip non hostile to caster enemy creatures
-                if( !u->IsHostileTo(i_enemy) )
-                    return false;
-
                 // only free creature
                 if( u->GetCharmerOrOwnerGUID() )
                     return false;
 
                 // too far
                 if( !i_funit->IsWithinDistInMap(u, i_range) )
+                    return false;
+
+                // skip non hostile to caster enemy creatures
+                if( !u->IsHostileTo(i_enemy) )
                     return false;
 
                 // only if see assisted creature
