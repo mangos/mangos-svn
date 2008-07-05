@@ -48,36 +48,36 @@ struct GameObjectInfo
         //0 GAMEOBJECT_TYPE_DOOR
         struct
         {
-            uint32 startOpen;                               //0
-            uint32 lockId;                                  //1
-            uint32 autoCloseTime;                           //2
-            uint32 noDamageImmune;                          //3
-            uint32 openTextID;                              //4
+            uint32 startOpen;                               //0 used client side to determine GO_ACTIVATED means open/closed
+            uint32 lockId;                                  //1 -> Lock.dbc
+            uint32 autoCloseTime;                           //2 secs till autoclose = autoCloseTime / 0x10000
+            uint32 noDamageImmune;                          //3 break opening whenever you recieve damage?
+            uint32 openTextID;                              //4 can be used to replace castBarCaption?
             uint32 closeTextID;                             //5
         } door;
         //1 GAMEOBJECT_TYPE_BUTTON
         struct
         {
             uint32 startOpen;                               //0
-            uint32 lockId;                                  //1
-            uint32 autoCloseTime;                           //2
+            uint32 lockId;                                  //1 -> Lock.dbc
+            uint32 autoCloseTime;                           //2 secs till autoclose = autoCloseTime / 0x10000
             uint32 linkedTrap;                              //3
             uint32 noDamageImmune;                          //4 isBattlegroundObject
             uint32 large;                                   //5
-            uint32 openTextID;                              //6
+            uint32 openTextID;                              //6 can be used to replace castBarCaption?
             uint32 closeTextID;                             //7
             uint32 losOK;                                   //8
         } button;
         //2 GAMEOBJECT_TYPE_QUESTGIVER
         struct
         {
-            uint32 lockId;                                  //0
+            uint32 lockId;                                  //0 -> Lock.dbc
             uint32 questList;                               //1
             uint32 pageMaterial;                            //2
             uint32 gossipID;                                //3
             uint32 customAnim;                              //4
             uint32 noDamageImmune;                          //5
-            uint32 openTextID;                              //6
+            uint32 openTextID;                              //6 can be used to replace castBarCaption?
             uint32 losOK;                                   //7
             uint32 allowMounted;                            //8
             uint32 large;                                   //9
@@ -85,7 +85,7 @@ struct GameObjectInfo
         //3 GAMEOBJECT_TYPE_CHEST
         struct
         {
-            uint32 lockId;                                  //0
+            uint32 lockId;                                  //0 -> Lock.dbc
             uint32 lootId;                                  //1
             uint32 chestRestockTime;                        //2
             uint32 consumable;                              //3
@@ -99,7 +99,7 @@ struct GameObjectInfo
             uint32 leaveLoot;                               //11
             uint32 notInCombat;                             //12
             uint32 logLoot;                                 //13
-            uint32 openTextID;                              //14
+            uint32 openTextID;                              //14 can be used to replace castBarCaption?
             uint32 groupLootRules;                          //15
         } chest;
         //5 GAMEOBJECT_TYPE_GENERIC
@@ -115,7 +115,7 @@ struct GameObjectInfo
         //6 GAMEOBJECT_TYPE_TRAP
         struct
         {
-            uint32 lockId;                                  //0
+            uint32 lockId;                                  //0 -> Lock.dbc
             uint32 level;                                   //1
             uint32 radius;                                  //2 radius for trap activation
             uint32 spellId;                                 //3
@@ -127,7 +127,7 @@ struct GameObjectInfo
             uint32 stealthed;                               //9
             uint32 large;                                   //10
             uint32 stealthAffected;                         //11
-            uint32 openTextID;                              //12
+            uint32 openTextID;                              //12 can be used to replace castBarCaption?
             uint32 closeTextID;                             //13
         } trap;
         //7 GAMEOBJECT_TYPE_CHAIR
@@ -146,10 +146,18 @@ struct GameObjectInfo
             uint32 serverOnly;                              //3
             uint32 questID;                                 //4
         } spellFocus;
+        //9 GAMEOBJECT_TYPE_TEXT
+        struct
+        {
+            uint32 pageID;                                  //0
+            uint32 language;                                //1
+            uint32 pageMaterial;                            //2
+            uint32 allowMounted;                            //3
+        } text;
         //10 GAMEOBJECT_TYPE_GOOBER
         struct
         {
-            uint32 lockId;                                  //0
+            uint32 lockId;                                  //0 -> Lock.dbc
             uint32 questId;                                 //1
             uint32 eventId;                                 //2
             uint32 autoCloseTime;                           //3
@@ -163,7 +171,7 @@ struct GameObjectInfo
             uint32 noDamageImmune;                          //11
             uint32 linkedTrapId;                            //12
             uint32 large;                                   //13
-            uint32 openTextID;                              //14
+            uint32 openTextID;                              //14 can be used to replace castBarCaption?
             uint32 closeTextID;                             //15
             uint32 losOK;                                   //16 isBattlegroundObject
             uint32 allowMounted;                            //17
@@ -171,26 +179,26 @@ struct GameObjectInfo
         //13 GAMEOBJECT_TYPE_CAMERA
         struct
         {
-            uint32 lockId;                                  //0
+            uint32 lockId;                                  //0 -> Lock.dbc
             uint32 cinematicId;                             //1
             uint32 eventID;                                 //2
-            uint32 openTextID;                              //3
+            uint32 openTextID;                              //3 can be used to replace castBarCaption?
         } camera;
         //15 GAMEOBJECT_TYPE_MO_TRANSPORT
         struct
         {
             uint32 taxiPathId;                              //0
-            uint32 moveSpeed;
-            uint32 accelRate;
-            uint32 startEventID;
-            uint32 stopEventID;
-            uint32 transportPhysics;
-            uint32 mapID;
+            uint32 moveSpeed;                               //1
+            uint32 accelRate;                               //2
+            uint32 startEventID;                            //3
+            uint32 stopEventID;                             //4
+            uint32 transportPhysics;                        //5
+            uint32 mapID;                                   //6
         } moTransport;
         //17 GAMEOBJECT_TYPE_FISHINGNODE
         struct
         {
-            uint32 _data0;
+            uint32 _data0;                                  //0
             uint32 lootId;                                  //1
         } fishnode;
         //18 GAMEOBJECT_TYPE_SUMMONING_RITUAL
@@ -226,7 +234,7 @@ struct GameObjectInfo
             uint32 lootId;                                  //1
             uint32 minSuccessOpens;                         //2
             uint32 maxSuccessOpens;                         //3
-            uint32 lockId;                                  //4 possibly 1628 for all?
+            uint32 lockId;                                  //4 -> Lock.dbc; possibly 1628 for all?
         } fishinghole;
 
         // not use for specific field access (only for output with loop by all filed), also this determinate max union size
@@ -330,7 +338,13 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
             switch(GetGoType())
             {
                 case GAMEOBJECT_TYPE_DOOR: return GetGOInfo()->door.lockId;
+                case GAMEOBJECT_TYPE_BUTTON: return GetGOInfo()->button.lockId;
+                case GAMEOBJECT_TYPE_QUESTGIVER: return GetGOInfo()->questgiver.lockId;
                 case GAMEOBJECT_TYPE_CHEST: return GetGOInfo()->chest.lockId;
+                case GAMEOBJECT_TYPE_TRAP: return GetGOInfo()->trap.lockId;
+                case GAMEOBJECT_TYPE_GOOBER: return GetGOInfo()->goober.lockId;
+                case GAMEOBJECT_TYPE_CAMERA: return GetGOInfo()->camera.lockId;
+                case GAMEOBJECT_TYPE_FISHINGHOLE: return GetGOInfo()->fishinghole.lockId;
                 default: return 0;
             }
         }

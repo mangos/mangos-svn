@@ -673,24 +673,24 @@ namespace MaNGOS
                 if( !u->isAlive() )
                     return false;
 
-                // only free creature
-                if( u->GetCharmerOrOwnerGUID() )
-                    return false;
-
                 // skip fighting creature
                 if( u->isInCombat() )
                     return false;
 
-                // too far
-                if( !i_funit->IsWithinDistInMap(u, i_range) )
+                // only from same creature faction
+                if(u->getFaction() != i_funit->getFaction() )
                     return false;
 
                 // skip non hostile to caster enemy creatures
                 if( !u->IsHostileTo(i_enemy) )
                     return false;
 
-                // only from same creature faction
-                if(u->getFaction() != i_funit->getFaction() )
+                // only free creature
+                if( u->GetCharmerOrOwnerGUID() )
+                    return false;
+
+                // too far
+                if( !i_funit->IsWithinDistInMap(u, i_range) )
                     return false;
 
                 // only if see assisted creature
