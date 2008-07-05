@@ -453,6 +453,17 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
     }
 }
 
+void WorldSession::HandleEmoteOpcode( WorldPacket & recv_data )
+{
+    if(!GetPlayer()->isAlive())
+        return;
+    CHECK_PACKET_SIZE(recv_data,4);
+
+    uint32 emote;
+    recv_data >> emote;
+    GetPlayer()->HandleEmoteCommand(emote);
+}
+
 void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 {
     if(!GetPlayer()->isAlive())
