@@ -2522,7 +2522,7 @@ void Spell::EffectEnergize(uint32 i)
     if (m_spellInfo->Id == 45051)
     {
         // find elixirs on target
-        uint32 elixir_mask = NULL;
+        uint32 elixir_mask = 0;
         Unit::AuraMap& Auras = unitTarget->GetAuras();
         for(Unit::AuraMap::iterator itr = Auras.begin(); itr != Auras.end(); ++itr)
         {
