@@ -544,7 +544,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 
         //Send scripted event call
         if (pCreature && Script)
-            Script->ReceiveEmote(GetPlayer(),pCreature,emote_anim);
+            Script->ReceiveEmote(GetPlayer(),pCreature,text_emote);
     }
 }
 
