@@ -207,7 +207,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //144 SPELL_EFFECT_144                      Spectral Blast
     &Spell::EffectNULL,                                     //145 SPELL_EFFECT_145                      Black Hole Effect
     &Spell::EffectUnused,                                   //146 SPELL_EFFECT_146                      unused
-    &Spell::EffectNULL,                                     //147 SPELL_EFFECT_147                      quest fail
+    &Spell::EffectQuestFail,                                //147 SPELL_EFFECT_QUEST_FAIL               quest fail
     &Spell::EffectUnused,                                   //148 SPELL_EFFECT_148                      unused
     &Spell::EffectNULL,                                     //149 SPELL_EFFECT_149                      swoop
     &Spell::EffectUnused,                                   //150 SPELL_EFFECT_150                      unused
@@ -5807,4 +5807,12 @@ void Spell::EffectKillCredit(uint32 i)
         return;
 
     ((Player*)unitTarget)->KilledMonster(m_spellInfo->EffectMiscValue[i], 0);
+}
+
+void Spell::EffectQuestFail(uint32 i)
+{
+    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    ((Player*)unitTarget)->FailQuest(m_spellInfo->EffectMiscValue[i]);
 }
