@@ -2913,15 +2913,12 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
         {
             case BASE_ATTACK:
                 crit = GetFloatValue( PLAYER_CRIT_PERCENTAGE );
-                crit+= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE);
                 break;
             case OFF_ATTACK:
                 crit = GetFloatValue( PLAYER_OFFHAND_CRIT_PERCENTAGE );
-                crit+= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE);
                 break;
             case RANGED_ATTACK:
                 crit = GetFloatValue( PLAYER_RANGED_CRIT_PERCENTAGE );
-                crit+= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_CHANCE);
                 break;
                 // Just for good manner
             default:
@@ -2932,7 +2929,12 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
     else
         crit = 5.0f;
 
-    // flat
+    // flat aura mods
+    if(attackType == RANGED_ATTACK)
+        crit += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_CHANCE);
+    else
+        crit += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE);
+
     crit += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
 
     // reduce crit chance from Rating for players
