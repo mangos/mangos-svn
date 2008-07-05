@@ -1203,6 +1203,8 @@ void Player::setDeathState(DeathState s)
         // lost combo points at any target (targeted combo points clear in Unit::setDeathState)
         ClearComboPoints();
 
+        clearResurrectRequestData();
+
         // remove form before other mods to prevent incorrect stats calculation
         RemoveAurasDueToSpell(m_ShapeShiftForm);
 
@@ -3539,7 +3541,6 @@ void Player::ResurrectPlayer(float restore_percent, bool updateToWorld, bool app
     SetMovement(MOVE_UNROOT);
 
     m_deathTimer = 0;
-    clearResurrectRequestData();
 
     // set health/powers (0- will be set in caller)
     if(restore_percent>0.0f)
@@ -17094,7 +17095,7 @@ uint32 Player::GetBaseWeaponSkillValue (WeaponAttackType attType) const
 
 void Player::ResurectUsingRequestData()
 {
-    ResurrectPlayer(0.0f,false);                            // clearResurrectRequestData called into ResurrectPlayer
+    ResurrectPlayer(0.0f,false);
 
     if(GetMaxHealth() > m_resurrectHealth)
         SetHealth( m_resurrectHealth );
@@ -17114,3 +17115,4 @@ void Player::ResurectUsingRequestData()
 
     TeleportTo(m_resurrectMap, m_resurrectX, m_resurrectY, m_resurrectZ, GetOrientation());
 }
+
