@@ -124,6 +124,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_SET_TARGET_OBSOLETE ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetTargetOpcode               );
     objmgr.opcodeTable[ CMSG_SET_SELECTION ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetSelectionOpcode            );
     objmgr.opcodeTable[ CMSG_STANDSTATECHANGE ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleStandStateChangeOpcode        );
+    objmgr.opcodeTable[ CMSG_EMOTE ]                            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleEmoteOpcode                   );
     objmgr.opcodeTable[ CMSG_CONTACT_LIST ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleFriendListOpcode              );
     objmgr.opcodeTable[ CMSG_ADD_FRIEND ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAddFriendOpcode               );
     objmgr.opcodeTable[ CMSG_DEL_FRIEND ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDelFriendOpcode               );
