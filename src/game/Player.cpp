@@ -13088,7 +13088,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         soberFactor = 0;
     else
         soberFactor = 1-time_diff/(15.0f*MINUTE);
-    uint16 newDrunkenValue = soberFactor*(GetUInt32Value(PLAYER_BYTES_3) & 0xFFFE);
+    uint16 newDrunkenValue = uint16(soberFactor*(GetUInt32Value(PLAYER_BYTES_3) & 0xFFFE));
     SetDrunkValue(newDrunkenValue);
 
     m_rest_bonus = fields[15].GetFloat();

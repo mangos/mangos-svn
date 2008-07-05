@@ -211,7 +211,7 @@ void LootStore::RemoveLootRefsAndReport(LootIdSet& set, char const* keyname) con
 // RATE_DROP_ITEMS is used for all types of entries
 bool LootStoreItem::Roll() const
 {
-    return roll_chance_i(chance*sWorld.getRate(RATE_DROP_ITEMS));
+    return roll_chance_f(chance*sWorld.getRate(RATE_DROP_ITEMS));
 }
 
 // Checks correctness of values
