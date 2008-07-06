@@ -2983,7 +2983,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
     if (apply)
     {
         m_target->addUnitState(UNIT_STAT_STUNDED);
-        m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
+        m_target->SetUInt64Value(UNIT_FIELD_TARGET, 0);
 
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
         m_target->CastStop(m_target->GetGUID() == GetCasterGUID() ? GetId() : 0);

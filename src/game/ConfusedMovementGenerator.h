@@ -33,7 +33,7 @@ class MANGOS_DLL_SPEC ConfusedMovementGenerator
         explicit ConfusedMovementGenerator() : i_nextMoveTime(0) {}
 
         void Initialize(T &);
-        void Finalize(T &) {}
+        void Finalize(T &);
         void Reset(T &);
         bool Update(T &, const uint32 &);
 
