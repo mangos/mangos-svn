@@ -17116,3 +17116,10 @@ void Player::ResurectUsingRequestData()
     TeleportTo(m_resurrectMap, m_resurrectX, m_resurrectY, m_resurrectZ, GetOrientation());
 }
 
+void Player::SetClientControl(Unit* target, uint8 allowMove)
+{
+    WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, target->GetPackGUID().size()+1);
+    data.append(target->GetPackGUID());
+    data << uint8(allowMove);
+    GetSession()->SendPacket(&data);
+}

@@ -9888,12 +9888,36 @@ void Unit::SetFeared(bool apply, uint64 casterGUID, uint32 spellID)
     }
 
     if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->SetClientControl(this, !apply);
+}
+
+void Unit::SetConfused(bool apply, uint64 casterGUID, uint32 spellID)
+{
+    if( apply )
     {
-        WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, GetPackGUID().size()+1);
-        data.append(GetPackGUID());
-        data << uint8(!apply);
-        ((Player*)this)->GetSession()->SendPacket(&data);
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
+        addUnitState(UNIT_STAT_CONFUSED);
+        CastStop(GetGUID()==casterGUID ? spellID : 0);
+
+        GetMotionMaster()->MoveConfused();
     }
+    else
+    {
+        clearUnitState(UNIT_STAT_CONFUSED);
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
+
+        GetMotionMaster()->MovementExpired(false);
+
+        if (GetTypeId() == TYPEID_UNIT)
+        {
+            // if in combat restore movement generator
+            if(getVictim())
+                GetMotionMaster()->MoveChase(getVictim());
+        }
+    }
+
+    if(GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->SetClientControl(this, !apply);
 }
 
 bool Unit::IsStandState() const

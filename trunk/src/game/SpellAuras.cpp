@@ -2671,83 +2671,70 @@ void Aura::HandleModPossess(bool apply, bool Real)
     if(!Real)
         return;
 
-    if(m_target->GetCreatureType() != CREATURE_TYPE_HUMANOID)
+    if(m_target->getLevel() > m_modifier.m_amount)
         return;
 
     Unit* caster = GetCaster();
     if(!caster)
         return;
 
-    if(int32(m_target->getLevel()) <= m_modifier.m_amount)
+    if( apply )
     {
-        if( apply )
+        m_target->SetCharmerGUID(GetCasterGUID());
+        m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
+        caster->SetCharm(m_target);
+
+        m_target->CombatStop();
+        m_target->DeleteThreatList();
+        if(m_target->GetTypeId() == TYPEID_UNIT)
         {
-            m_target->SetCharmerGUID(GetCasterGUID());
-            m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
-            caster->SetCharm(m_target);
-
-            m_target->CombatStop();
-            m_target->DeleteThreatList();
-            if(m_target->GetTypeId() == TYPEID_UNIT)
-            {
-                m_target->StopMoving();
-                m_target->GetMotionMaster()->Clear();
-                m_target->GetMotionMaster()->MoveIdle();
-                CharmInfo *charmInfo = ((Creature*)m_target)->InitCharmInfo(m_target);
-                charmInfo->InitPossessCreateSpells();
-            }
-
-            if(caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                ((Player*)caster)->PossessSpellInitialize();
-            }
+            m_target->StopMoving();
+            m_target->GetMotionMaster()->Clear();
+            m_target->GetMotionMaster()->MoveIdle();
+            CharmInfo *charmInfo = ((Creature*)m_target)->InitCharmInfo(m_target);
+            charmInfo->InitPossessCreateSpells();
         }
-        else
-        {
-            //remove area auras from charms
-            Unit::AuraMap& tAuras = m_target->GetAuras();
-            for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
-            {
-                if (itr->second && itr->second->IsAreaAura())
-                {
-                    m_target->RemoveAurasDueToSpell(itr->second->GetId());
-                    itr = tAuras.begin();
-                }
-                else
-                    ++itr;
-            }
 
-            m_target->SetCharmerGUID(0);
-
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
-            {
-                ((Player*)m_target)->setFactionForRace(m_target->getRace());
-            }
-            else if(m_target->GetTypeId() == TYPEID_UNIT)
-            {
-                CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
-                m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction_A);
-            }
-
-            caster->SetCharm(0);
-
-            if(caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                WorldPacket data(SMSG_PET_SPELLS, 8);
-                data << uint64(0);
-                ((Player*)caster)->GetSession()->SendPacket(&data);
-            }
-            if(m_target->GetTypeId() == TYPEID_UNIT)
-            {
-                ((Creature*)m_target)->AIM_Initialize();
-
-                if (((Creature*)m_target)->AI())
-                    ((Creature*)m_target)->AI()->AttackStart(caster);
-            }
-        }
         if(caster->GetTypeId() == TYPEID_PLAYER)
-            caster->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
+        {
+            ((Player*)caster)->PossessSpellInitialize();
+        }
     }
+    else
+    {
+        //remove area auras from charms
+        m_target->RemoveAreaAurasByOthers();
+
+        m_target->SetCharmerGUID(0);
+
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
+        {
+            ((Player*)m_target)->setFactionForRace(m_target->getRace());
+        }
+        else if(m_target->GetTypeId() == TYPEID_UNIT)
+        {
+            CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
+            m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction_A);
+        }
+
+        caster->SetCharm(0);
+
+        if(caster->GetTypeId() == TYPEID_PLAYER)
+        {
+            WorldPacket data(SMSG_PET_SPELLS, 8);
+            data << uint64(0);
+            ((Player*)caster)->GetSession()->SendPacket(&data);
+        }
+        if(m_target->GetTypeId() == TYPEID_UNIT)
+        {
+            ((Creature*)m_target)->AIM_Initialize();
+
+            if (((Creature*)m_target)->AI())
+                ((Creature*)m_target)->AI()->AttackStart(caster);
+        }
+    }
+    if(caster->GetTypeId() == TYPEID_PLAYER)
+        caster->SetUInt64Value(PLAYER_FARSIGHT,apply ? m_target->GetGUID() : 0);
 }
 
 void Aura::HandleModPossessPet(bool apply, bool Real)
@@ -2825,17 +2812,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
         else
         {
             //remove area auras from charms
-            Unit::AuraMap& tAuras = m_target->GetAuras();
-            for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
-            {
-                if (itr->second && itr->second->IsAreaAura())
-                {
-                    m_target->RemoveAurasDueToSpell(itr->second->GetId());
-                    itr = tAuras.begin();
-                }
-                else
-                    ++itr;
-            }
+            m_target->RemoveAreaAurasByOthers();
 
             m_target->SetCharmerGUID(0);
 
@@ -2894,55 +2871,10 @@ void Aura::HandleModCharm(bool apply, bool Real)
 
 void Aura::HandleModConfuse(bool apply, bool Real)
 {
-    Unit* caster = GetCaster();
+    if(!Real)
+        return;
 
-    if( apply )
-    {
-        m_target->addUnitState(UNIT_STAT_CONFUSED);
-        m_target->CastStop(m_target==caster ? GetId() : 0);
-        m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
-
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-        {
-            Player *player = (Player*)m_target;
-            WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 10);
-            data.append(player->GetPackGUID());             // target's viewpoint
-            data << uint8(0x00);                            // movement disabled
-            player->GetSession()->SendPacket(&data);
-        }
-
-        // only at real add aura
-        if(Real)
-            m_target->GetMotionMaster()->MoveConfused();
-    }
-    else
-    {
-        m_target->clearUnitState(UNIT_STAT_CONFUSED);
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
-
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-        {
-            Player *player = (Player*)m_target;
-            WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, 10);
-            data.append(player->GetPackGUID());             // target's viewpoint
-            data << uint8(0x01);                            // movement enabled
-            player->GetSession()->SendPacket(&data);
-        }
-
-        // only at real remove aura
-        if(Real)
-        {
-            m_target->GetMotionMaster()->MovementExpired(false);
-
-            if (m_target->GetTypeId() == TYPEID_UNIT)
-            {
-                Creature* c = (Creature*)m_target;
-                // if in combat restore movement generator
-                if(c->getVictim())
-                    c->GetMotionMaster()->MoveChase(c->getVictim());
-            }
-        }
-    }
+    m_target->SetConfused(apply, GetCasterGUID(), GetId());
 }
 
 void Aura::HandleModFear(bool apply, bool Real)
@@ -3048,32 +2980,22 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
     if(!Real)
         return;
 
-    Unit* caster = GetCaster();
-
     if (apply)
     {
         m_target->addUnitState(UNIT_STAT_STUNDED);
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
 
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
-        m_target->CastStop(m_target==caster ? GetId() : 0);
-
-        // remove fears (after unit state update to prevent attack back/etc)
-        m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_FEAR);
+        m_target->CastStop(m_target->GetGUID() == GetCasterGUID() ? GetId() : 0);
 
         if(GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && GetSpellProto()->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_SAP)
-            if(m_target->HasStealthAura())
-                m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-
-        //Save last orientation
-        if( m_target->getVictim() )
-            m_target->SetOrientation(m_target->GetAngle(m_target->getVictim()));
+            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
         // Creature specific
         if(m_target->GetTypeId() != TYPEID_PLAYER)
-        {
-            ((Creature *)m_target)->StopMoving();
-        }else m_target->SetUnitMovementFlags(0);    //Clear movement flags
+            ((Creature*)m_target)->StopMoving();
+        else
+            m_target->SetUnitMovementFlags(0);    //Clear movement flags
 
         WorldPacket data(SMSG_FORCE_MOVE_ROOT, 8);
 
@@ -3091,7 +3013,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
 
         if(m_target->getVictim() && m_target->isAlive())
-            m_target->SetUInt64Value (UNIT_FIELD_TARGET,m_target->getVictim()->GetGUID() );
+            m_target->SetUInt64Value(UNIT_FIELD_TARGET,m_target->getVictim()->GetGUID() );
 
         WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 8+4);
         data.append(m_target->GetPackGUID());
@@ -3101,6 +3023,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         // Wyvern Sting
         if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1721)
         {
+            Unit* caster = GetCaster();
             if( !caster || caster->GetTypeId()!=TYPEID_PLAYER )
                 return;
 

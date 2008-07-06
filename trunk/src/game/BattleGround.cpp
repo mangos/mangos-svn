@@ -520,11 +520,8 @@ void BattleGround::SendRewardMarkByMail(Player *plr,uint32 mark, uint32 count)
 }
 
 void BattleGround::BlockMovement(Player *plr)
-{
-    WorldPacket data(SMSG_CLIENT_CONTROL_UPDATE, plr->GetPackGUID().size()+1);
-    data.append(plr->GetPackGUID());
-    data << uint8(0x00);                                    // movement disabled NOTE: the effect will be automatically removed by client when the player is teleported from the battleground, so no need to send with uint8(1) in RemovePlayerAtLeave()
-    plr->GetSession()->SendPacket(&data);
+{                                  
+    plr->SetClientControl(plr, 0);                          // movement disabled NOTE: the effect will be automatically removed by client when the player is teleported from the battleground, so no need to send with uint8(1) in RemovePlayerAtLeave()
 }
 
 void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPacket)

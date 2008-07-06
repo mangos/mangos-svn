@@ -1176,6 +1176,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SetUnitMovementFlags(uint32 f) { m_unit_movement_flags = f; }
 
         void SetFeared(bool apply, uint64 casterGUID = 0, uint32 spellID = 0);
+        void SetConfused(bool apply, uint64 casterGUID = 0, uint32 spellID = 0);
 
         void AddComboPointHolder(uint32 lowguid) { m_ComboPointHolders.insert(lowguid); }
         void RemoveComboPointHolder(uint32 lowguid) { m_ComboPointHolders.erase(lowguid); }

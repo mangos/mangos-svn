@@ -1857,6 +1857,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool CanFly() const { return HasUnitMovementFlag(MOVEMENTFLAG_CAN_FLY); }
         bool IsFlying() const { return HasUnitMovementFlag(MOVEMENTFLAG_FLYING); }
 
+        void SetClientControl(Unit* target, uint8 allowMove);
+
         // Transports
         Transport * GetTransport() const { return m_transport; }
         void SetTransport(Transport * t) { m_transport = t; }
