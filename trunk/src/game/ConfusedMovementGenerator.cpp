@@ -65,6 +65,7 @@ ConfusedMovementGenerator<T>::Initialize(T &unit)
 
     unit.StopMoving();
     unit.RemoveUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
+    unit.addUnitState(UNIT_STAT_CONFUSED);
 }
 
 template<>
@@ -136,6 +137,14 @@ ConfusedMovementGenerator<T>::Update(T &unit, const uint32 &diff)
     }
     return true;
 }
+
+template<class T>
+void
+ConfusedMovementGenerator<T>::Finalize(T &unit)
+{
+    unit.clearUnitState(UNIT_STAT_CONFUSED);
+}
+
 
 template void ConfusedMovementGenerator<Player>::Initialize(Player &player);
 template void ConfusedMovementGenerator<Creature>::Initialize(Creature &creature);

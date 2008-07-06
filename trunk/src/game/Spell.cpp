@@ -4034,11 +4034,11 @@ uint8 Spell::CheckCasterAuras() const
 
     //Check whether the cast should be prevented by any state you might have.
     uint8 prevented_reason = 0;
-    if(m_caster->hasUnitState(UNIT_STAT_STUNDED) && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_STUNNED))
+    if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE) && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_STUNNED))
         prevented_reason = SPELL_FAILED_STUNNED;
-    else if(m_caster->hasUnitState(UNIT_STAT_CONFUSED) && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED))
+    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED) && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_CONFUSED))
         prevented_reason = SPELL_FAILED_CONFUSED;
-    else if(m_caster->hasUnitState(UNIT_STAT_FLEEING) && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_FEARED))
+    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING) && !(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_USABLE_WHILE_FEARED))
         prevented_reason = SPELL_FAILED_FLEEING;
     else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && m_spellInfo->PreventionType==SPELL_PREVENTION_TYPE_SILENCE)
         prevented_reason = SPELL_FAILED_SILENCED;

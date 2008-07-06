@@ -43,7 +43,6 @@ FleeingMovementGenerator<T>::_setTargetLocation(T &owner)
         return;
 
     owner.addUnitState(UNIT_STAT_FLEEING);
-    owner.SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
     Traveller<T> traveller(owner);
     i_destinationHolder.SetDestination(traveller, x, y, z);
 }
@@ -325,7 +324,6 @@ void
 FleeingMovementGenerator<T>::Finalize(T &owner)
 {
     owner.clearUnitState(UNIT_STAT_FLEEING);
-    owner.RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
 }
 
 template<class T>

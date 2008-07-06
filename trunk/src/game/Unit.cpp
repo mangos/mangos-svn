@@ -9861,6 +9861,8 @@ void Unit::SetFeared(bool apply, uint64 casterGUID, uint32 spellID)
         if(HasAuraType(SPELL_AURA_PREVENTS_FLEEING))
             return;
 
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
+
         GetMotionMaster()->MovementExpired(false);
         CastStop(GetGUID()==casterGUID ? spellID : 0);
 
@@ -9870,7 +9872,6 @@ void Unit::SetFeared(bool apply, uint64 casterGUID, uint32 spellID)
     }
     else
     {
-        clearUnitState(UNIT_STAT_FLEEING);
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
 
         GetMotionMaster()->MovementExpired(false);
@@ -9899,14 +9900,13 @@ void Unit::SetConfused(bool apply, uint64 casterGUID, uint32 spellID)
     if( apply )
     {
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
-        addUnitState(UNIT_STAT_CONFUSED);
+
         CastStop(GetGUID()==casterGUID ? spellID : 0);
 
         GetMotionMaster()->MoveConfused();
     }
     else
     {
-        clearUnitState(UNIT_STAT_CONFUSED);
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
 
         GetMotionMaster()->MovementExpired(false);
