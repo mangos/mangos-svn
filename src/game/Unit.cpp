@@ -847,21 +847,24 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             }
         }
 
-        if (damagetype != NODAMAGE && damagetype && pVictim->GetTypeId() == TYPEID_PLAYER)
+        if (damagetype != NODAMAGE && damage && pVictim->GetTypeId() == TYPEID_PLAYER)
         {
-            for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
+            if( damagetype != DOT )
             {
-                // skip channeled spell (processed differently below)
-                if (i == CURRENT_CHANNELED_SPELL)
-                    continue;
-
-                if(Spell* spell = pVictim->m_currentSpells[i])
+                for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
                 {
-                    if(spell->getState() == SPELL_STATE_PREPARING && damagetype != DOT)
+                    // skip channeled spell (processed differently below)
+                    if (i == CURRENT_CHANNELED_SPELL)
+                        continue;
+
+                    if(Spell* spell = pVictim->m_currentSpells[i])
                     {
-                        int32 delay = spell->GetCastTime()/4;
-                        sLog.outDetail("Spell %u delayed (%d) at damage",spell->m_spellInfo->Id,delay);
-                        spell->Delayed(delay);
+                        if(spell->getState() == SPELL_STATE_PREPARING)
+                        {
+                            int32 delay = spell->GetCastTime()/4;
+                            sLog.outDetail("Spell %u delayed (%d) at damage",spell->m_spellInfo->Id,delay);
+                            spell->Delayed(delay);
+                        }
                     }
                 }
             }
