@@ -1870,7 +1870,7 @@ void ObjectMgr::LoadPlayerInfo()
 
                 if(!GetItemPrototype(item_id))
                 {
-                    sLog.outErrorDb("Wrong item id %u (race %u class %u) in `playercreateinfo_item` table, ignoring.",item_id,current_race,current_class);
+                    sLog.outErrorDb("Item id %u (race %u class %u) in `playercreateinfo_item` table but not listed in `item_template`, ignoring.",item_id,current_race,current_class);
                     continue;
                 }
 
