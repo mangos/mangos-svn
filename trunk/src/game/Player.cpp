@@ -5148,13 +5148,13 @@ void Player::UpdateReputation() const
 {
     sLog.outDetail( "WORLD: Player::UpdateReputation" );
 
-    for(FactionsList::const_iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
+    for(FactionStateList::const_iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
-        SendSetFactionStanding(&(itr->second));
+        SendFactionState(&(itr->second));
     }
 }
 
-void Player::SendSetFactionStanding(const Faction* faction) const
+void Player::SendFactionState(FactionState const* faction) const
 {
     if(faction->Flags & FACTION_FLAG_VISIBLE)               //If faction is visible then update it
     {
@@ -5176,7 +5176,7 @@ void Player::SendInitialReputations()
 
     RepListID a = 0;
 
-    for (FactionsList::const_iterator itr = m_factions.begin(); itr != m_factions.end(); itr++)
+    for (FactionStateList::const_iterator itr = m_factions.begin(); itr != m_factions.end(); itr++)
     {
         // fill in absent fields
         for (; a != itr->first; a++)
@@ -5202,18 +5202,16 @@ void Player::SendInitialReputations()
     GetSession()->SendPacket(&data);
 }
 
-bool Player::IsFactionAtWar(const FactionEntry *factionEntry) const
+FactionState const* Player::GetFactionState( FactionEntry const* factionEntry) const
 {
-    FactionsList::const_iterator itr = m_factions.find(factionEntry->reputationListID);
+    FactionStateList::const_iterator itr = m_factions.find(factionEntry->reputationListID);
     if (itr != m_factions.end())
-    {
-        if(itr->second.Flags & FACTION_FLAG_AT_WAR)
-            return true;
-    }
-    return false;
+        return &itr->second;
+
+    return NULL;
 }
 
-void Player::SetFactionAtWar(Faction* faction, bool atWar)
+void Player::SetFactionAtWar(FactionState* faction, bool atWar)
 {
     // not allow declare war to own faction
     if(atWar && (faction->Flags & FACTION_FLAG_PEACE_FORCED) )
@@ -5231,7 +5229,7 @@ void Player::SetFactionAtWar(Faction* faction, bool atWar)
     faction->Changed = true;
 }
 
-void Player::SetFactionInactive(Faction* faction, bool inactive)
+void Player::SetFactionInactive(FactionState* faction, bool inactive)
 {
     // always invisible or hidden faction can't be inactive
     if(inactive && ((faction->Flags & (FACTION_FLAG_INVISIBLE_FORCED|FACTION_FLAG_HIDDEN)) || !(faction->Flags & FACTION_FLAG_VISIBLE) ) )
@@ -5268,14 +5266,14 @@ void Player::SetFactionVisibleForFactionId(uint32 FactionId)
     if(factionEntry->reputationListID < 0)
         return;
 
-    FactionsList::iterator itr = m_factions.find(factionEntry->reputationListID);
+    FactionStateList::iterator itr = m_factions.find(factionEntry->reputationListID);
     if (itr == m_factions.end())
         return;
 
     SetFactionVisible(&itr->second);
 }
 
-void Player::SetFactionVisible(Faction* faction)
+void Player::SetFactionVisible(FactionState* faction)
 {
     // always invisible or hidden faction can't be make visible
     if(faction->Flags & (FACTION_FLAG_INVISIBLE_FORCED|FACTION_FLAG_HIDDEN))
@@ -5305,7 +5303,7 @@ void Player::SetInitialFactions()
 
         if( factionEntry && (factionEntry->reputationListID >= 0))
         {
-            Faction newFaction;
+            FactionState newFaction;
             newFaction.ID = factionEntry->ID;
             newFaction.ReputationListID = factionEntry->reputationListID;
             newFaction.Standing = 0;
@@ -5372,7 +5370,7 @@ int32 Player::GetReputation(const FactionEntry *factionEntry) const
     if(!factionEntry)
         return 0;
 
-    FactionsList::const_iterator itr = m_factions.find(factionEntry->reputationListID);
+    FactionStateList::const_iterator itr = m_factions.find(factionEntry->reputationListID);
     if (itr != m_factions.end())
         return GetBaseReputation(factionEntry) + itr->second.Standing;
 
@@ -5451,7 +5449,7 @@ bool Player::ModifyFactionReputation(FactionEntry const* factionEntry, int32 sta
 
 bool Player::ModifyOneFactionReputation(FactionEntry const* factionEntry, int32 standing)
 {
-    FactionsList::iterator itr = m_factions.find(factionEntry->reputationListID);
+    FactionStateList::iterator itr = m_factions.find(factionEntry->reputationListID);
     if (itr != m_factions.end())
     {
         int32 BaseRep = GetBaseReputation(factionEntry);
@@ -5493,7 +5491,7 @@ bool Player::ModifyOneFactionReputation(FactionEntry const* factionEntry, int32 
             }
         }
 
-        SendSetFactionStanding(&(itr->second));
+        SendFactionState(&(itr->second));
 
         return true;
     }
@@ -5539,7 +5537,7 @@ bool Player::SetFactionReputation(FactionEntry const* factionEntry, int32 standi
 
 bool Player::SetOneFactionReputation(FactionEntry const* factionEntry, int32 standing)
 {
-    FactionsList::iterator itr = m_factions.find(factionEntry->reputationListID);
+    FactionStateList::iterator itr = m_factions.find(factionEntry->reputationListID);
     if (itr != m_factions.end())
     {
         if (standing > Reputation_Cap)
@@ -5557,7 +5555,7 @@ bool Player::SetOneFactionReputation(FactionEntry const* factionEntry, int32 sta
         if(ReputationToRank(standing) <= REP_HOSTILE)
             SetFactionAtWar(&itr->second,true);
 
-        SendSetFactionStanding(&(itr->second));
+        SendFactionState(&(itr->second));
         return true;
     }
     return false;
@@ -13893,7 +13891,7 @@ void Player::_LoadReputation(QueryResult *result)
             FactionEntry const *factionEntry = sFactionStore.LookupEntry(fields[0].GetUInt32());
             if( factionEntry && (factionEntry->reputationListID >= 0))
             {
-                Faction* faction = &m_factions[factionEntry->reputationListID];
+                FactionState* faction = &m_factions[factionEntry->reputationListID];
 
                 // update standing to current
                 faction->Standing = int32(fields[1].GetUInt32());
@@ -14439,7 +14437,7 @@ void Player::_SaveDailyQuestStatus()
 
 void Player::_SaveReputation()
 {
-    for(FactionsList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
+    for(FactionStateList::iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
         if (itr->second.Changed)
         {

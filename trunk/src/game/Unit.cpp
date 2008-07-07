@@ -6425,8 +6425,14 @@ bool Unit::IsHostileTo(Unit const* unit) const
         FactionEntry const* raw_target_faction = sFactionStore.LookupEntry(target_faction->faction);
         if(raw_target_faction && raw_target_faction->reputationListID >=0 )
         {
-            if(((Player*)tester)->IsFactionAtWar(raw_target_faction))
-                return true;
+            if(FactionState const* factionState = ((Player*)tester)->GetFactionState(raw_target_faction))
+            {
+                if(factionState->Flags & FACTION_FLAG_PEACE_FORCED)
+                    return false;
+
+                if(factionState->Flags & FACTION_FLAG_AT_WAR)
+                    return true;
+            }
         }
     }
     // CvP forced reaction and reputation case
@@ -6536,8 +6542,14 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
         FactionEntry const* raw_target_faction = sFactionStore.LookupEntry(target_faction->faction);
         if(raw_target_faction && raw_target_faction->reputationListID >=0 )
         {
-            if(((Player*)tester)->IsFactionAtWar(raw_target_faction))
-                return false;
+            if(FactionState const* FactionState = ((Player*)tester)->GetFactionState(raw_target_faction))
+            {
+                if(FactionState->Flags & FACTION_FLAG_PEACE_FORCED)
+                    return true;
+
+                if(FactionState->Flags & FACTION_FLAG_AT_WAR)
+                    return false;
+            }
         }
     }
     // CvP forced reaction and reputation case

@@ -689,7 +689,7 @@ void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
     recv_data >> repListID;
     recv_data >> flag;
 
-    FactionsList::iterator itr = GetPlayer()->m_factions.find(repListID);
+    FactionStateList::iterator itr = GetPlayer()->m_factions.find(repListID);
     if (itr == GetPlayer()->m_factions.end())
         return;
 
@@ -790,7 +790,7 @@ void WorldSession::HandleSetWatchedFactionInactiveOpcode(WorldPacket & recv_data
     uint8 inactive;
     recv_data >> replistid >> inactive;
 
-    FactionsList::iterator itr = _player->m_factions.find(replistid);
+    FactionStateList::iterator itr = _player->m_factions.find(replistid);
     if (itr == _player->m_factions.end())
         return;
 
