@@ -229,7 +229,7 @@ enum FactionFlags
 };
 
 typedef uint32 RepListID;
-struct Faction
+struct FactionState
 {
     uint32 ID;
     RepListID ReputationListID;
@@ -238,7 +238,7 @@ struct Faction
     bool Changed;
 };
 
-typedef std::map<RepListID,Faction> FactionsList;
+typedef std::map<RepListID,FactionState> FactionStateList;
 
 typedef std::map<uint32,ReputationRank> ForcedReactions;
 
@@ -1638,7 +1638,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsAtGroupRewardDistance(WorldObject const* pRewardSource) const;
         bool RewardPlayerAndGroupAtKill(Unit* pVictim);
 
-        FactionsList m_factions;
+        FactionStateList m_factions;
         ForcedReactions m_forcedReactions;
         uint32 GetDefaultReputationFlags(const FactionEntry *factionEntry) const;
         int32 GetBaseReputation(const FactionEntry *factionEntry) const;
@@ -1662,12 +1662,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RewardReputation(Quest const *pQuest);
         void SetInitialFactions();
         void UpdateReputation() const;
-        void SendSetFactionStanding(const Faction* faction) const;
+        void SendFactionState(FactionState const* faction) const;
         void SendInitialReputations();
-        bool IsFactionAtWar(const FactionEntry *factionEntry) const;
-        void SetFactionAtWar(Faction* faction, bool atWar);
-        void SetFactionInactive(Faction* faction, bool inactive);
-        void SetFactionVisible(Faction* faction);
+        FactionState const* GetFactionState( FactionEntry const* factionEntry) const;
+        void SetFactionAtWar(FactionState* faction, bool atWar);
+        void SetFactionInactive(FactionState* faction, bool inactive);
+        void SetFactionVisible(FactionState* faction);
         void SetFactionVisibleForFactionTemplateId(uint32 FactionTemplateId);
         void SetFactionVisibleForFactionId(uint32 FactionId);
         void UpdateMaxSkills();

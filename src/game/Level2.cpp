@@ -537,13 +537,13 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
     }
 
     for (uint32 id = 0; id < sFactionStore.GetNumRows(); id++)
-        //for(FactionsList::const_iterator itr = target->m_factions.begin(); itr != target->m_factions.end(); ++itr)
+        //for(FactionStateList::const_iterator itr = target->m_factions.begin(); itr != target->m_factions.end(); ++itr)
     {
         FactionEntry const *factionEntry = sFactionStore.LookupEntry(id);
         //FactionEntry const *factionEntry = sFactionStore.LookupEntry(itr->second.ID);
         if (factionEntry)
         {
-            FactionsList::const_iterator repItr = target->m_factions.find(factionEntry->reputationListID);
+            FactionStateList::const_iterator repItr = target->m_factions.find(factionEntry->reputationListID);
             std::string name = factionEntry->name[sWorld.GetDBClang()];
 
             // converting name to lower case
@@ -1762,7 +1762,7 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
         }
 
         char* FactionName;
-        for(FactionsList::const_iterator itr = target->m_factions.begin(); itr != target->m_factions.end(); ++itr)
+        for(FactionStateList::const_iterator itr = target->m_factions.begin(); itr != target->m_factions.end(); ++itr)
         {
             FactionEntry const *factionEntry = sFactionStore.LookupEntry(itr->second.ID);
             if (factionEntry)
