@@ -204,6 +204,11 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     /* handle special cases */
     if (MovementFlags & MOVEMENTFLAG_ONTRANSPORT)
     {
+        // transports size limited 
+        // (also received at zeppelin leave by some reason with t_* as absolute in continent coordinates, can be safely skipped)
+        if( movementInfo.t_x > 50 || movementInfo.t_y > 50 || movementInfo.t_z > 50 )
+            return;
+
         if( !MaNGOS::IsValidMapCoord(movementInfo.x+movementInfo.t_x, movementInfo.y+movementInfo.t_y,
             movementInfo.z+movementInfo.t_z, movementInfo.o+movementInfo.t_o) )
             return;

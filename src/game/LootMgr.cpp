@@ -228,7 +228,7 @@ bool LootStoreItem::IsValid(LootStore const& store, uint32 entry) const
         ItemPrototype const *proto = objmgr.GetItemPrototype(itemid);
         if(!proto)
         {
-            sLog.outErrorDb("Table '%s' entry %d item %d: wrong item id - skipped", store.GetName(), entry, itemid);
+            sLog.outErrorDb("Table '%s' entry %d item %d: item entry not listed in `item_template` - skipped", store.GetName(), entry, itemid);
             return false;
         }
 

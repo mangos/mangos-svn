@@ -13033,7 +13033,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         sLog.outError("ERROR: Player (guidlow %d) have invalid coordinates (X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.",guid,GetPositionX(),GetPositionY(),GetPositionZ(),GetOrientation());
 
         SetMapId(info->mapId);
-        Relocate(info->positionX,info->positionY,info->positionZ);
+        Relocate(info->positionX,info->positionY,info->positionZ,0.0f);
 
         transGUID = 0;
     }
@@ -13047,14 +13047,16 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
         if( !MaNGOS::IsValidMapCoord(
             GetPositionX()+m_movementInfo.t_x,GetPositionY()+m_movementInfo.t_y,
-            GetPositionZ()+m_movementInfo.t_z,GetOrientation()+m_movementInfo.t_o) )
+            GetPositionZ()+m_movementInfo.t_z,GetOrientation()+m_movementInfo.t_o) ||
+            // transport size limited
+            m_movementInfo.t_x > 50 || m_movementInfo.t_y > 50 || m_movementInfo.t_z > 50 )
         {
             sLog.outError("ERROR: Player (guidlow %d) have invalid transport coordinates (X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.",
                 guid,GetPositionX()+m_movementInfo.t_x,GetPositionY()+m_movementInfo.t_y,
                 GetPositionZ()+m_movementInfo.t_z,GetOrientation()+m_movementInfo.t_o);
 
             SetMapId(info->mapId);
-            Relocate(info->positionX,info->positionY,info->positionZ);
+            Relocate(info->positionX,info->positionY,info->positionZ,0.0f);
 
             m_movementInfo.t_x = 0.0f;
             m_movementInfo.t_y = 0.0f;
@@ -13074,7 +13076,24 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
                 m_transport = *iter;
                 m_transport->AddPassenger(this);
                 SetMapId(m_transport->GetMapId());
+                break;
             }
+        }
+
+        if(!m_transport)
+        {
+            sLog.outError("ERROR: Player (guidlow %d) have invalid transport guid (%u). Teleport to default race/class locations.",
+                guid,transGUID);
+
+            SetMapId(info->mapId);
+            Relocate(info->positionX,info->positionY,info->positionZ,0.0f);
+
+            m_movementInfo.t_x = 0.0f;
+            m_movementInfo.t_y = 0.0f;
+            m_movementInfo.t_z = 0.0f;
+            m_movementInfo.t_o = 0.0f;
+
+            transGUID = 0;
         }
     }
 
@@ -13253,14 +13272,14 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         {
             sLog.outError("Character %u have wrong data in taxi destination list, teleport to homebind.",GetGUIDLow());
             SetMapId(m_homebindMapId);
-            Relocate( m_homebindX, m_homebindY, m_homebindZ);
+            Relocate( m_homebindX, m_homebindY, m_homebindZ,0.0f);
             SaveRecallPosition();                           // save as recall also to prevent recall and fall from sky
         }
         else                                                // have start node, to it
         {
             sLog.outError("Character %u have too short taxi destination list, teleport to original node.",GetGUIDLow());
             SetMapId(nodeEntry->map_id);
-            Relocate(nodeEntry->x, nodeEntry->y, nodeEntry->z);
+            Relocate(nodeEntry->x, nodeEntry->y, nodeEntry->z,0.0f);
             SaveRecallPosition();                           // save as recall also to prevent recall and fall from sky
         }
         m_taxi.ClearTaxiDestinations();
