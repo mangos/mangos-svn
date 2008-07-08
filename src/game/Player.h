@@ -1453,6 +1453,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdatePvP(bool state, bool ovrride=false);
         void UpdateZone(uint32 newZone);
         void UpdateArea(uint32 newArea);
+
+        void UpdateZoneDependentAuras( uint32 zone_id );    // zones
+        void UpdateAreaDependentAuras( uint32 area_id );    // subzones
+
         void UpdateAfkReport(time_t currTime);
         void UpdatePvPFlag(time_t currTime);
 

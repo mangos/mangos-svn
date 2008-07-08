@@ -298,6 +298,8 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
             return true;
         case 28441:                                         // not positive dummy spell
         case 37675:                                         // Chaos Blast
+        case 35480: case 35481: case 35482:                 // Human Illusion (prevent cancel)
+        case 35483: case 39824:                             // Human Illusion (prevent cancel)
             return false;
     }
 

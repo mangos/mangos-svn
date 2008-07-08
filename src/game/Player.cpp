@@ -5949,31 +5949,7 @@ void Player::UpdateArea(uint32 newArea)
             RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
     }
 
-    // remove auras from spells with area limitations
-    for(AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end();)
-    {
-        // use m_zoneUpdateId for speed: UpdateArea called from UpdateZone or instead UpdateZone in both cases m_zoneUpdateId up-to-date
-        if(!IsSpellAllowedInLocation(iter->second->GetSpellProto(),GetMapId(),m_zoneUpdateId,newArea))
-            RemoveAura(iter);
-        else
-            ++iter;
-    }
-
-    // unmount if enter in this subzone
-    if( newArea == 35)
-        RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
-
-    // Dragonmaw Illusion
-    if ( newArea == 3759 || newArea == 3966 || newArea == 3939 )
-    {
-        if( GetDummyAura(40214) )
-        {
-            if( !GetAura(40216,0) )
-                CastSpell(this,40216,true);
-            if( !GetAura(42016,0) )
-                CastSpell(this,42016,true);
-        }
-    }
+    UpdateAreaDependentAuras(newArea);
 }
 
 void Player::UpdateZone(uint32 newZone)
@@ -6069,14 +6045,6 @@ void Player::UpdateZone(uint32 newZone)
         }
     }
 
-    // remove new continent flight forms
-    if( !isGameMaster() &&
-        GetVirtualMapForMapAndZone(GetMapId(),newZone) != 530)
-    {
-        RemoveSpellsCausingAura(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED);
-        RemoveSpellsCausingAura(SPELL_AURA_FLY);
-    }
-
     // remove items with area/map limitations (delete only for alive player to allow back in ghost mode)
     // if player resurrected at teleport this will be applied in resurrect code
     if(isAlive())
@@ -6088,6 +6056,8 @@ void Player::UpdateZone(uint32 newZone)
     // group update
     if(GetGroup())
         SetGroupUpdateFlag(GROUP_UPDATE_FLAG_ZONE);
+
+    UpdateZoneDependentAuras(newZone);
 }
 
 //If players are too far way of duel flag... then player loose the duel
@@ -17139,4 +17109,59 @@ void Player::SetClientControl(Unit* target, uint8 allowMove)
     data.append(target->GetPackGUID());
     data << uint8(allowMove);
     GetSession()->SendPacket(&data);
+}
+
+void Player::UpdateZoneDependentAuras( uint32 newZone )
+{
+    // remove new continent flight forms
+    if( !isGameMaster() &&
+        GetVirtualMapForMapAndZone(GetMapId(),newZone) != 530)
+    {
+        RemoveSpellsCausingAura(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED);
+        RemoveSpellsCausingAura(SPELL_AURA_FLY);
+    }
+
+    // Some spells applied at enter into zone (with subzones)
+    // Human Illusion
+    if ( newZone == 2367 )                                  // Old Hillsbrad Foothills
+    {
+        uint32 spellid = 0;
+        // all horde races
+        if( GetTeam() == HORDE )
+            spellid = getGender() == GENDER_FEMALE ? 35481 : 35480;
+        // and some alliance races
+        else if( getRace() == RACE_NIGHTELF || getRace() == RACE_DRAENEI )
+            spellid = getGender() == GENDER_FEMALE ? 35483 : 35482;
+
+        if(spellid && !GetAura(spellid,0) )
+            CastSpell(this,spellid,true);
+    }
+}
+
+void Player::UpdateAreaDependentAuras( uint32 newArea )
+{
+    // remove auras from spells with area limitations
+    for(AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end();)
+    {
+        // use m_zoneUpdateId for speed: UpdateArea called from UpdateZone or instead UpdateZone in both cases m_zoneUpdateId up-to-date
+        if(!IsSpellAllowedInLocation(iter->second->GetSpellProto(),GetMapId(),m_zoneUpdateId,newArea))
+            RemoveAura(iter);
+        else
+            ++iter;
+    }
+
+    // unmount if enter in this subzone
+    if( newArea == 35)
+        RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+    // Dragonmaw Illusion
+    else if( newArea == 3759 || newArea == 3966 || newArea == 3939 )
+    {
+        if( GetDummyAura(40214) )
+        {
+            if( !GetAura(40216,0) )
+                CastSpell(this,40216,true);
+            if( !GetAura(42016,0) )
+                CastSpell(this,42016,true);
+        }
+    }
 }

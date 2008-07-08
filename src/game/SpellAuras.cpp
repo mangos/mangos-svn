@@ -1787,13 +1787,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             return;
         }
 
-        // Dragonmaw Illusion
-        if ( GetId() == 40214 )
-        {
-            m_isDeathPersist = true;
-            return;
-        }
-
         // Requires No Ammo
         if(GetId()==46699 && m_target->GetTypeId()==TYPEID_PLAYER)
         {
@@ -2426,11 +2419,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
 void Aura::HandleAuraTransform(bool apply, bool Real)
 {
-    // skip if player not added to map at loading or far teleport (to prevent client crash)
-    // it will applied in Player::SendInitialPacketsAfterAddToMap after adding to map
-    if(m_target->GetTypeId()==TYPEID_PLAYER && !((Player*)m_target)->IsInWorld())
-        return;
-
     if (apply)
     {
         // special case (spell specific functionality)
@@ -2532,6 +2520,11 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
         m_target->SetDisplayId(m_target->GetNativeDisplayId());
         m_target->setTransForm(0);
     }
+
+    // skip if player not added to map at loading or far teleport (to prevent client crash)
+    // it will applied in Player::SendInitialPacketsAfterAddToMap after adding to map
+    if(m_target->GetTypeId()==TYPEID_PLAYER && !((Player*)m_target)->IsInWorld())
+        return;
 
     Unit* caster = GetCaster();
 
