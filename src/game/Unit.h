@@ -949,6 +949,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool RemoveNoStackAurasDueToAura(Aura *Aur);
         void RemoveAreaAurasByOthers(uint64 guid = 0);
         void RemoveAurasWithInterruptFlags(uint32 flags);
+        void RemoveAurasWithDispelType( DispelType type );
 
         void RemoveAllAuras();
         void RemoveAllAurasOnDeath();
@@ -1131,6 +1132,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectType damagetype, uint32 CastingTime );
 
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
+        void ApplySpellDispelImmunity(const SpellEntry * spellProto, DispelType type, bool apply);
         virtual bool IsImmunedToSpell(SpellEntry const* spellInfo, bool useCharges = false);
                                                             // redefined in Creature
         bool IsImmunedToPhysicalDamage() const;
@@ -1254,7 +1256,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag, AuraTypeSet const& procAuraTypes, WeaponAttackType attType, SpellEntry const * procSpell, uint32 damage );
         void HandleDummyAuraProc(Unit *pVictim, SpellEntry const *spellProto, uint32 effIndex, uint32 damage, Aura* triggredByAura, SpellEntry const * procSpell, uint32 procFlag);
         void HandleProcTriggerSpell(Unit *pVictim,uint32 damage, Aura* triggredByAura, SpellEntry const *procSpell, uint32 procFlags,WeaponAttackType attType);
-
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
         uint32 m_lastManaUse;                               // msecs

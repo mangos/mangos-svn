@@ -151,7 +151,12 @@ enum SpellSchoolMask
     SPELL_SCHOOL_MASK_NATURE  = (1 << SPELL_SCHOOL_NATURE),
     SPELL_SCHOOL_MASK_FROST   = (1 << SPELL_SCHOOL_FROST ),
     SPELL_SCHOOL_MASK_SHADOW  = (1 << SPELL_SCHOOL_SHADOW),
-    SPELL_SCHOOL_MASK_ARCANE  = (1 << SPELL_SCHOOL_ARCANE)
+    SPELL_SCHOOL_MASK_ARCANE  = (1 << SPELL_SCHOOL_ARCANE),
+
+    // unions
+    SPELL_SCHOOL_MASK_MAGIC   = ( SPELL_SCHOOL_MASK_HOLY   | SPELL_SCHOOL_MASK_FIRE   | 
+                                  SPELL_SCHOOL_MASK_NATURE | SPELL_SCHOOL_MASK_FROST  |
+                                  SPELL_SCHOOL_MASK_SHADOW | SPELL_SCHOOL_MASK_ARCANE )
 };
 
 #define SPELL_SCHOOL_MASK_MAGIC                            \
@@ -732,11 +737,7 @@ enum DispelType
     DISPEL_ZG_TICKET    = 10
 };
 
-#define DISPEL_ALL_MASK   ( \
-    (1<<IMMUNE_DISPEL_MAGIC) | \
-    (1<<IMMUNE_DISPEL_CURSE) | \
-    (1<<IMMUNE_DISPEL_DISEASE) | \
-    (1<<IMMUNE_DISPEL_POISON) )
+#define DISPEL_ALL_MASK ( (1<<DISPEL_MAGIC) | (1<<DISPEL_CURSE) | (1<<DISPEL_DISEASE) | (1<<DISPEL_POISON) )
 
 //To all Immune system,if target has immunes,
 //some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,
@@ -744,47 +745,15 @@ enum DispelType
 //some aura(related to Mechanics or ImmuneToState<aura>) can't apply to it.
 enum SpellImmunity
 {
-    IMMUNITY_EFFECT                = 0,
-    IMMUNITY_STATE                 = 1,
-    IMMUNITY_SCHOOL                = 2,
-    IMMUNITY_DAMAGE                = 3,
-    IMMUNITY_DISPEL                = 4,
-    IMMUNITY_MECHANIC              = 5
+    IMMUNITY_EFFECT                = 0,                     // enum SpellEffects
+    IMMUNITY_STATE                 = 1,                     // enum AuraType
+    IMMUNITY_SCHOOL                = 2,                     // enum SpellSchoolMask
+    IMMUNITY_DAMAGE                = 3,                     // enum SpellSchoolMask
+    IMMUNITY_DISPEL                = 4,                     // enum DispelType
+    IMMUNITY_MECHANIC              = 5                      // enum Mechanics
 };
 
 #define MAX_SPELL_IMMUNITY         6
-
-enum ImmuneToDispel
-{
-    IMMUNE_DISPEL_MAGIC        = 1,
-    IMMUNE_DISPEL_CURSE        = 2,
-    IMMUNE_DISPEL_DISEASE      = 3,
-    IMMUNE_DISPEL_POISON       = 4,
-    IMMUNE_DISPEL_STEALTH      = 5,
-    IMMUNE_DISPEL_INVISIBILITY = 6,
-    IMMUNE_DISPEL_ALL          = 7,
-    IMMUNE_DISPEL_SPE_NPC_ONLY = 8,
-    IMMUNE_DISPEL_CRAZY        = 9,
-    IMMUNE_DISPEL_ZG_TICKET    = 10
-};
-
-enum ImmuneToDamage
-{
-    IMMUNE_DAMAGE_PHYSICAL     = 1,
-    IMMUNE_DAMAGE_MAGIC        = 126
-};
-
-enum ImmuneToSchool
-{
-    IMMUNE_SCHOOL_PHYSICAL     = 1,
-    IMMUNE_SCHOOL_HOLY         = 2,
-    IMMUNE_SCHOOL_FIRE         = 4,
-    IMMUNE_SCHOOL_NATURE       = 8,
-    IMMUNE_SCHOOL_FROST        = 16,
-    IMMUNE_SCHOOL_SHADOW       = 32,
-    IMMUNE_SCHOOL_ARCANE       = 64,
-    IMMUNE_SCHOOL_MAGIC        = 126
-};
 
 enum Targets
 {

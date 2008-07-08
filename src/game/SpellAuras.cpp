@@ -3637,31 +3637,7 @@ void Aura::HandleAuraModDispelImmunity(bool apply, bool Real)
     if(!Real)
         return;
 
-    Unit* caster = GetCaster();
-    if (!caster)
-        return;
-
-    m_target->ApplySpellImmune(GetId(),IMMUNITY_DISPEL,m_modifier.m_miscvalue,apply);
-
-    if (apply && GetSpellProto()->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)
-    {
-        // Create dispel mask by dispel type
-        uint32 dispelMask = GetDispellMask( DispelType(m_modifier.m_miscvalue) );
-        // Dispel all existing auras vs current dispell type
-        Unit::AuraMap& auras = m_target->GetAuras();
-        for(Unit::AuraMap::iterator itr = auras.begin(); itr != auras.end(); )
-        {
-            SpellEntry const* spell = itr->second->GetSpellProto();
-            if( (1<<spell->Dispel) & dispelMask )
-            {
-                // Dispel aura
-                m_target->RemoveAurasDueToSpell(spell->Id);
-                itr = auras.begin();
-            }
-            else
-                ++itr;
-        }
-    }
+    m_target->ApplySpellDispelImmunity(m_spellProto, DispelType(m_modifier.m_miscvalue), apply);
 }
 
 void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
@@ -3947,6 +3923,15 @@ void Aura::HandleAuraModResistance(bool apply, bool Real)
                 m_target->ApplyResistanceBuffModsMod(SpellSchools(x),m_positive,m_modifier.m_amount, apply);
         }
     }
+
+    // Faerie Fire (druid versions)
+    if( m_spellProto->SpellIconID == 109 &&
+        m_spellProto->SpellFamilyName == SPELLFAMILY_DRUID &&
+        m_spellProto->SpellFamilyFlags & 0x0000000000000400LL )
+    {
+        m_target->ApplySpellDispelImmunity(m_spellProto, DISPEL_STEALTH, apply);
+        m_target->ApplySpellDispelImmunity(m_spellProto, DISPEL_INVISIBILITY, apply);
+    }
 }
 
 void Aura::HandleAuraModBaseResistancePCT(bool apply, bool Real)
@@ -3955,7 +3940,7 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply, bool Real)
     if(m_target->GetTypeId() != TYPEID_PLAYER)
     {
         //pets only have base armor
-        if(((Creature*)m_target)->isPet() && (m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL))
+        if(((Creature*)m_target)->isPet() && (m_modifier.m_miscvalue & SPELL_SCHOOL_MASK_NORMAL))
         {
             m_target->HandleStatModifier(UNIT_MOD_ARMOR, BASE_PCT, float(m_modifier.m_amount), apply);
         }
@@ -3994,7 +3979,7 @@ void Aura::HandleModBaseResistance(bool apply, bool Real)
     if(m_target->GetTypeId() != TYPEID_PLAYER)
     {
         //only pets have base stats
-        if(((Creature*)m_target)->isPet() && m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
+        if(((Creature*)m_target)->isPet() && (m_modifier.m_miscvalue & SPELL_SCHOOL_MASK_NORMAL))
             m_target->HandleStatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, float(m_modifier.m_amount), apply);
     }
     else
@@ -4637,15 +4622,15 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
     }
 
     // m_modifier.m_miscvalue is bitmask of spell schools
-    // 1 ( 0-bit ) - normal school damage (IMMUNE_SCHOOL_PHYSICAL)
-    // 126 - full bitmask all magic damages (IMMUNE_SCHOOL_MAGIC) including wands
+    // 1 ( 0-bit ) - normal school damage (SPELL_SCHOOL_MASK_NORMAL)
+    // 126 - full bitmask all magic damages (SPELL_SCHOOL_MASK_MAGIC) including wands
     // 127 - full bitmask any damages
     //
     // mods must be applied base at equipped weapon class and subclass comparison
     // with spell->EquippedItemClass and  EquippedItemSubClassMask and EquippedItemInventoryTypeMask
     // m_modifier.m_miscvalue comparison with item generated damage types
 
-    if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL) != 0)
+    if((m_modifier.m_miscvalue & SPELL_SCHOOL_MASK_NORMAL) != 0)
     {
         // apply generic physical damage bonuses including wand case
         if (GetSpellProto()->EquippedItemClass == -1 || m_target->GetTypeId() != TYPEID_PLAYER)
@@ -4669,7 +4654,7 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
     }
 
     // Skip non magic case for speedup
-    if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_MAGIC) == 0)
+    if((m_modifier.m_miscvalue & SPELL_SCHOOL_MASK_MAGIC) == 0)
         return;
 
     if( GetSpellProto()->EquippedItemClass != -1 || GetSpellProto()->EquippedItemInventoryTypeMask != 0 )
@@ -4725,15 +4710,15 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
     }
 
     // m_modifier.m_miscvalue is bitmask of spell schools
-    // 1 ( 0-bit ) - normal school damage (IMMUNE_SCHOOL_PHYSICAL)
-    // 126 - full bitmask all magic damages (IMMUNE_SCHOOL_MAGIC) including wand
+    // 1 ( 0-bit ) - normal school damage (SPELL_SCHOOL_MASK_NORMAL)
+    // 126 - full bitmask all magic damages (SPELL_SCHOOL_MASK_MAGIC) including wand
     // 127 - full bitmask any damages
     //
     // mods must be applied base at equipped weapon class and subclass comparison
     // with spell->EquippedItemClass and  EquippedItemSubClassMask and EquippedItemInventoryTypeMask
     // m_modifier.m_miscvalue comparison with item generated damage types
 
-    if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL) != 0)
+    if((m_modifier.m_miscvalue & SPELL_SCHOOL_MASK_NORMAL) != 0)
     {
         // apply generic physical damage bonuses including wand case
         if (GetSpellProto()->EquippedItemClass == -1 || m_target->GetTypeId() != TYPEID_PLAYER)
@@ -4749,7 +4734,7 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
     }
 
     // Skip non magic case for speedup
-    if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_MAGIC) == 0)
+    if((m_modifier.m_miscvalue & SPELL_SCHOOL_MASK_MAGIC) == 0)
         return;
 
     if( GetSpellProto()->EquippedItemClass != -1 || GetSpellProto()->EquippedItemInventoryTypeMask != 0 )
