@@ -1002,8 +1002,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint64 m_ObjectSlot[4];
         uint32 m_detectInvisibilityMask;
         uint32 m_invisibilityMask;
-        uint32 m_ShapeShiftForm;
-        uint32 m_form;
+        uint32 m_ShapeShiftFormSpellId;
+        ShapeshiftForm m_form;
         float m_modMeleeHitChance;
         float m_modRangedHitChance;
         float m_modSpellHitChance;

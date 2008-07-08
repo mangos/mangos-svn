@@ -154,7 +154,7 @@ Unit::Unit( WorldObject *instantiator )
     m_extraAttacks = 0;
 
     m_state = 0;
-    m_form = 0;
+    m_form = FORM_NONE;
     m_deathState = ALIVE;
 
     for (uint32 i = 0; i < CURRENT_MAX_SPELL; i++)
@@ -173,7 +173,7 @@ Unit::Unit( WorldObject *instantiator )
     m_detectInvisibilityMask = 0;
     m_invisibilityMask = 0;
     m_transform = 0;
-    m_ShapeShiftForm = 0;
+    m_ShapeShiftFormSpellId = 0;
     m_canModifyStats = false;
 
     for (int i = 0; i < MAX_SPELL_IMMUNITY; i++)
@@ -5865,6 +5865,24 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 CastCustomSpell(this, 34299, &improvedLotPBasePoints0, NULL, NULL, true, castItem, triggeredByAura);
                 if (GetTypeId() == TYPEID_PLAYER)
                     ((Player*)this)->AddSpellCooldown(34299,0,time(NULL) + 6);
+                return;
+            }
+            // Druid Forms Trinket (Druid Tier5 Trinket, triggers different spells per Form)
+            if(auraSpellInfo->Id == 37336)
+            {
+                uint32 spellid = 0;
+                switch(m_form) 
+                {
+                    case FORM_BEAR:
+                    case FORM_DIREBEAR: spellid=37340;break;// Ursine Blessing
+                    case FORM_CAT:      spellid=37341;break;// Feline Blessing
+                    case FORM_TREE:     spellid=37342;break;// Slyvan Blessing
+                    case FORM_MOONKIN:  spellid=37343;break;// Lunar Blessing
+                    case FORM_NONE:     spellid=37344;break;// Cenarion Blessing (for caster form, except FORM_MOONKIN)
+                }
+
+                if(spellid)
+                    CastSpell(this, spellid, true, castItem, triggeredByAura);
                 return;
             }
             break;
