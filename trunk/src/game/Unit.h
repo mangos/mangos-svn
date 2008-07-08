@@ -173,7 +173,7 @@ enum UnitBytes2_Flags
 };
 
 // byte (2 from 0..3) of UNIT_FIELD_BYTES_2
-enum UnitRaname
+enum UnitRename
 {
     UNIT_RENAME_NOT_ALLOWED = 0x02,
     UNIT_RENAME_ALLOWED     = 0x03
