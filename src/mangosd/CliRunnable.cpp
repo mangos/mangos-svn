@@ -390,24 +390,25 @@ void CliInfo(char*,pPrintf zprintf)
 /// Display a list of banned accounts and ip addresses
 void CliBanList(char*,pPrintf zprintf)
 {
+    bool found = false;
     ///- Get the list of banned accounts and display them
-    Field *fields;
     QueryResult *result = loginDatabase.Query("SELECT id,username FROM account WHERE id IN (SELECT id FROM account_banned WHERE active = 1)");
     if(result)
     {
+        found = true;
+
         zprintf("Currently Banned Accounts:\r\n");
         zprintf("===============================================================================\r\n");
         zprintf("|    Account    |   BanDate    |   UnbanDate  |  Banned By    |   Ban Reason  |\r\n");
-        Field *fields2;
         do
         {
             zprintf("-------------------------------------------------------------------------------\r\n");
-            fields = result->Fetch();
+            Field *fields = result->Fetch();
             // No SQL injection. id is uint32.
             QueryResult *banInfo = loginDatabase.PQuery("SELECT bandate,unbandate,bannedby,banreason FROM account_banned WHERE id = %u AND active = 1 ORDER BY unbandate", fields[0].GetUInt32());
             if (banInfo)
             {
-                fields2 = banInfo->Fetch();
+                Field *fields2 = banInfo->Fetch();
                 do
                 {
                     time_t t_ban = fields2[0].GetUInt64();
@@ -435,13 +436,15 @@ void CliBanList(char*,pPrintf zprintf)
     result = loginDatabase.Query( "SELECT ip,bandate,unbandate,bannedby,banreason FROM ip_banned WHERE (bandate=unbandate OR unbandate>UNIX_TIMESTAMP()) ORDER BY unbandate" );
     if(result)
     {
+        found = true;
+
         zprintf("Currently Banned IPs:\r\n");
         zprintf("===============================================================================\r\n");
         zprintf("|      IP       |   BanDate    |   UnbanDate  |  Banned By    |   Ban Reason  |\r\n");
         do
         {
             zprintf("-------------------------------------------------------------------------------\r\n");
-            fields = result->Fetch();
+            Field *fields = result->Fetch();
             time_t t_ban = fields[1].GetUInt64();
             tm* aTm_ban = localtime(&t_ban);
             zprintf("|%-15.15s|", fields[0].GetString());
@@ -459,8 +462,9 @@ void CliBanList(char*,pPrintf zprintf)
         zprintf("===============================================================================\r\n");
         delete result;
     }
-    //there is result already deleted pointer! , do not use it
-    if(!result) zprintf("We do not have banned users\r\n");
+
+    if(!found)
+        zprintf("We do not have banned users\r\n");
 }
 
 /// Ban an IP address or a user account
@@ -469,17 +473,14 @@ void CliBan(char*command,pPrintf zprintf)
     ///- Get the command parameter
     char* type = strtok((char*)command, " ");
     char* nameOrIP = strtok(NULL, " ");
-    char* reason = strtok(NULL," ");
     char* duration = strtok(NULL," ");
+    char* reason = strtok(NULL,"");
 
-    if(!type||!nameOrIP||!reason)                           // ?!? input of single char "0"-"9" wouldn't detect when with: || !atoi(duration)
+    if(!type||!nameOrIP||!duration||!reason)                // ?!? input of single char "0"-"9" wouldn't detect when with: || !atoi(duration)
     {
-        zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter $reason ($duration[s|m|h|d]) \r\n");
+        zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter $duration[s|m|h|d] $reason \r\n");
         return;
     }
-
-    if(!duration)
-        duration="0";
 
     switch (sWorld.BanAccount(type, nameOrIP, duration, reason, "Set by console."))
     {
@@ -493,7 +494,7 @@ void CliBan(char*command,pPrintf zprintf)
             zprintf("%s %s not found\r\n", type, nameOrIP);
             break;
         case BAN_SYNTAX_ERROR:
-            zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter $reason ($duration[s|m|h|d]) \r\n");
+            zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter ($duration[s|m|h|d]) $reason \r\n");
             break;
     }
 }
