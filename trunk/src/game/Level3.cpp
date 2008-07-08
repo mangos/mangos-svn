@@ -4220,12 +4220,10 @@ bool ChatHandler::HandleBanCommand(const char* args)
         return false;
 
     char* duration = strtok(NULL," ");
-    char* reason;
-
     if(!duration || !atoi(duration))
         return false;
-    else
-        reason = strtok(NULL,"");
+
+    char* reason = strtok(NULL,"");
     if(!reason)
         return false;
 

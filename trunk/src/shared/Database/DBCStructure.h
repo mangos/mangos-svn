@@ -270,7 +270,7 @@ struct FactionTemplateEntry
             return false;
         if(friendFaction1 == entry.faction || friendFaction2 == entry.faction || friendFaction3 == entry.faction || friendFaction4 == entry.faction )
             return true;
-        return (friendlyMask & entry.ourMask) != 0;
+        return (ourMask & entry.friendlyMask) != 0;
     }
     bool IsHostileTo(FactionTemplateEntry const& entry) const
     {
@@ -278,7 +278,7 @@ struct FactionTemplateEntry
             return true;
         if(friendFaction1 == entry.faction || friendFaction2 == entry.faction || friendFaction3 == entry.faction || friendFaction4 == entry.faction )
             return false;
-        return (hostileMask & entry.ourMask) != 0;
+        return (ourMask & entry.hostileMask) != 0;
     }
     bool IsHostileToPlayers() const { return hostileMask & FACTION_MASK_PLAYER; }
     bool IsNeutralToAll() const { return hostileMask == 0 && friendlyMask == 0 && enemyFaction1==0 && enemyFaction2==0 && enemyFaction3==0 && enemyFaction4==0; }
