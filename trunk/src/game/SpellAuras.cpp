@@ -4823,9 +4823,6 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             spellId2 = 21178;
             HotWSpellId = 24899;
             break;
-        case FORM_CREATUREBEAR:
-            spellId = 2882;
-            break;
         case FORM_BATTLESTANCE:
             spellId = 21156;
             break;
@@ -4857,6 +4854,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
         case FORM_SHADOW:
         case FORM_STEALTH:
         case FORM_CREATURECAT:
+        case FORM_CREATUREBEAR:
             spellId = 0;
             break;
     }
