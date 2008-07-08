@@ -6467,7 +6467,7 @@ void Player::_ApplyWeaponDependentAuraDamageMod(Item *item, uint8 slot, Aura* au
 {
     // ignore spell mods
     Modifier const* modifier = aura->GetModifier();
-    if((modifier->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL) == 0 && (getClassMask() & CLASSMASK_WAND_USERS)==0)
+    if((modifier->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL) == 0 && (getClassMask() & CLASSMASK_WAND_USERS)==0)
         return;
 
     // generic not weapon specific case processes in aura code

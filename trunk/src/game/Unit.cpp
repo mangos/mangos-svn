@@ -3928,6 +3928,26 @@ void Unit::RemoveAurasDueToSpellByCancel(uint32 spellId)
     }
 }
 
+void Unit::RemoveAurasWithDispelType( DispelType type )
+{
+    // Create dispel mask by dispel type
+    uint32 dispelMask = GetDispellMask(type);
+    // Dispel all existing auras vs current dispell type
+    AuraMap& auras = GetAuras();
+    for(AuraMap::iterator itr = auras.begin(); itr != auras.end(); )
+    {
+        SpellEntry const* spell = itr->second->GetSpellProto();
+        if( (1<<spell->Dispel) & dispelMask )
+        {
+            // Dispel aura
+            RemoveAurasDueToSpell(spell->Id);
+            itr = auras.begin();
+        }
+        else
+            ++itr;
+    }
+}
+
 void Unit::RemoveSingleAuraFromStack(uint32 spellId, uint32 effindex)
 {
     AuraMap::iterator iter = m_Auras.find(spellEffectPair(spellId, effindex));
@@ -7640,13 +7660,13 @@ bool Unit::IsImmunedToPhysicalDamage() const
     //If m_immuneToDamage type contain magic, IMMUNE damage.
     SpellImmuneList const& damageImmList = m_spellImmune[IMMUNITY_DAMAGE];
     for (SpellImmuneList::const_iterator itr = damageImmList.begin(); itr != damageImmList.end(); ++itr)
-        if(itr->type & IMMUNE_DAMAGE_PHYSICAL)
+        if(itr->type & SPELL_SCHOOL_MASK_NORMAL)
             return true;
 
     //If m_immuneToSchool type contain this school type, IMMUNE damage.
     SpellImmuneList const& spellImmList = m_spellImmune[IMMUNITY_SCHOOL];
     for (SpellImmuneList::const_iterator itr = spellImmList.begin(); itr != spellImmList.end(); ++itr)
-        if(itr->type & IMMUNE_SCHOOL_PHYSICAL)
+        if(itr->type & SPELL_SCHOOL_MASK_NORMAL)
             return true;
 
     return false;
@@ -7860,7 +7880,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
     // ..taken
     AuraList const& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
     for(AuraList::const_iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
-        if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
+        if((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL)
             TakenFlatBenefit += (*i)->GetModifier()->m_amount;
 
     if(attType!=RANGED_ATTACK)
@@ -7884,14 +7904,14 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
     // ..taken
     AuraList const& mModDamagePercentTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
     for(AuraList::const_iterator i = mModDamagePercentTaken.begin(); i != mModDamagePercentTaken.end(); ++i)
-        if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
+        if((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL)
             TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
 
     // .. taken pct: dummy auras
     AuraList const& mDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
     for(AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
         if((*i)->GetSpellProto()->SpellIconID == 2109)      // Cheat Death
-            if((*i)->GetModifier()->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
+            if((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL)
                 TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
 
     if(attType != RANGED_ATTACK)
@@ -7952,6 +7972,14 @@ void Unit::ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply)
         }
     }
 
+}
+
+void Unit::ApplySpellDispelImmunity(const SpellEntry * spellProto, DispelType type, bool apply)
+{
+    ApplySpellImmune(spellProto->Id,IMMUNITY_DISPEL, type, apply);
+
+    if (apply && spellProto->AttributesEx & SPELL_ATTR_EX_DISPEL_AURAS_ON_IMMUNITY)
+        RemoveAurasWithDispelType(type);
 }
 
 float Unit::GetWeaponProcChance() const
