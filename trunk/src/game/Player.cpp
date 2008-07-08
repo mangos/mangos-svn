@@ -1206,7 +1206,7 @@ void Player::setDeathState(DeathState s)
         clearResurrectRequestData();
 
         // remove form before other mods to prevent incorrect stats calculation
-        RemoveAurasDueToSpell(m_ShapeShiftForm);
+        RemoveAurasDueToSpell(m_ShapeShiftFormSpellId);
 
         //FIXME: is pet dismissed at dying or releasing spirit? if second, add setDeathState(DEAD) to HandleRepopRequestOpcode and define pet unsummon here with (s == DEAD)
         RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
@@ -15330,7 +15330,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_i
         return false;
     }
 
-    if( m_ShapeShiftForm && m_form != FORM_BATTLESTANCE && m_form != FORM_BERSERKERSTANCE && m_form != FORM_DEFENSIVESTANCE && m_form != FORM_SHADOW )
+    if( m_ShapeShiftFormSpellId && m_form != FORM_BATTLESTANCE && m_form != FORM_BERSERKERSTANCE && m_form != FORM_DEFENSIVESTANCE && m_form != FORM_SHADOW )
     {
         WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
         data << uint32(ERR_TAXIPLAYERSHAPESHIFTED);

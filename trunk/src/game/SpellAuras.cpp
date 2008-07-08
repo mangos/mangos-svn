@@ -2189,7 +2189,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
     uint32 modelid = 0;
     Powers PowerType = POWER_MANA;
-    uint32 form = m_modifier.m_miscvalue;
+    ShapeshiftForm form = ShapeshiftForm(m_modifier.m_miscvalue);
     switch(form)
     {
         case FORM_CAT:
@@ -2272,9 +2272,9 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
     if(apply)
     {
         // remove other shapeshift before applying a new one
-        if(m_target->m_ShapeShiftForm)
+        if(m_target->m_ShapeShiftFormSpellId)
         {
-            m_target->RemoveAurasDueToSpell(m_target->m_ShapeShiftForm,this);
+            m_target->RemoveAurasDueToSpell(m_target->m_ShapeShiftFormSpellId,this);
         }
 
         m_target->SetByteValue(UNIT_FIELD_BYTES_2, 3, form);
@@ -2353,7 +2353,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             }
         }
 
-        m_target->m_ShapeShiftForm = GetId();
+        m_target->m_ShapeShiftFormSpellId = GetId();
         m_target->m_form = form;
 
         switch ( m_target->m_form )
@@ -2385,7 +2385,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         m_target->SetByteValue(UNIT_FIELD_BYTES_2, 3, FORM_NONE);
         if(m_target->getClass() == CLASS_DRUID)
             m_target->setPowerType(POWER_MANA);
-        m_target->m_ShapeShiftForm = 0;
+        m_target->m_ShapeShiftFormSpellId = 0;
         m_target->m_form = FORM_NONE;
 
         switch(form)
