@@ -36,7 +36,7 @@ namespace ByteConverter
     }
 
     template<> inline void convert<0>(char *val) {}
-    template<> void convert<1>(char *val);                  /* link time error all sizes have to be 2 to power n*/
+    template<> inline void convert<1>(char *val) {}         // ignore central byte
 
     template<typename T> inline void apply(T *val)
     {
