@@ -494,7 +494,7 @@ void CliBan(char*command,pPrintf zprintf)
             zprintf("%s %s not found\r\n", type, nameOrIP);
             break;
         case BAN_SYNTAX_ERROR:
-            zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter ($duration[s|m|h|d]) $reason \r\n");
+            zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter $duration[s|m|h|d] $reason \r\n");
             break;
     }
 }
