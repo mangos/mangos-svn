@@ -4144,10 +4144,11 @@ uint8 Spell::CheckRange(bool strict)
 
     if(target && target != m_caster)
     {
-        float dist = m_caster->GetDistanceSq(target);
-        if(dist > max_range * max_range)
+        // distance from target center in checks
+        float dist = m_caster->GetDistance(target)+target->GetObjectSize();
+        if(dist > max_range)
             return SPELL_FAILED_OUT_OF_RANGE;               //0x5A;
-        if(dist < min_range * min_range)
+        if(dist < min_range)
             return SPELL_FAILED_TOO_CLOSE;
         if( !m_IsTriggeredSpell && !IsPositiveSpell(m_spellInfo->Id) && !m_caster->isInFront( target, max_range) )
         {
