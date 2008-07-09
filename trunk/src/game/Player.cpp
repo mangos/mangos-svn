@@ -7114,7 +7114,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
         }
     }
 
-    m_lootGuid = guid;
+    SetLootGUID(guid);
 
     QuestItemList *q_list = 0;
     if (permission != NONE_PERMISSION)
