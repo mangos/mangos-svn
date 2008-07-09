@@ -38,6 +38,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #undef ENABLE_EXCEPTIONS
 #endif // _RUN_DP
 
+// define MACOSX for internal socket library checks
+#if defined(__APPLE__) && defined(__MACH__) && !defined(MACOSX)
+#define MACOSX
+#endif
 
 /* OpenSSL support. */
 //#define HAVE_OPENSSL

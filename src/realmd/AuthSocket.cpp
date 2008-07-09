@@ -331,7 +331,8 @@ bool AuthSocket::_HandleLogonChallenge()
     buf.resize(4);
 
     ibuf.Read((char *)&buf[0], 4);
-    EndianConvert(*((uint32*)(buf[0])));
+
+    EndianConvert(*((uint16*)(buf[0])));
     uint16 remaining = ((sAuthLogonChallenge_C *)&buf[0])->size;
     DEBUG_LOG("[AuthChallenge] got header, body is %#04x bytes", remaining);
 
@@ -342,6 +343,16 @@ bool AuthSocket::_HandleLogonChallenge()
     buf.resize(remaining + buf.size() + 1);
     buf[buf.size() - 1] = 0;
     sAuthLogonChallenge_C *ch = (sAuthLogonChallenge_C*)&buf[0];
+
+    // BigEndian code, nop in little endian case
+    // size already converted
+    EndianConvert(*((uint32*)(&ch->gamename[0])));
+    EndianConvert(ch->build);
+    EndianConvert(*((uint32*)(&ch->platform[0])));
+    EndianConvert(*((uint32*)(&ch->os[0])));
+    EndianConvert(*((uint32*)(&ch->country[0])));
+    EndianConvert(ch->timezone_bias);
+    EndianConvert(ch->ip);
 
     ///- Read the remaining of the packet
     ibuf.Read((char *)&buf[4], remaining);
