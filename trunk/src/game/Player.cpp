@@ -5691,6 +5691,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
     // 'Inactive' this aura prevents the player from gaining honor points and battleground tokens
     if(GetDummyAura(43681))
         return false;
+
     uint64 victim_guid = 0;
     uint32 victim_rank = 0;
     uint32 now = time(NULL);
