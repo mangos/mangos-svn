@@ -251,11 +251,14 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,8);
 
     sLog.outDebug("WORLD: CMSG_LOOT_RELEASE");
-    uint64   lguid;
 
-    recv_data >> lguid;
+    // cheaters can modify lguid to prevent correct apply loot release code and re-loot 
+    // use internal stored guid
+    //uint64   lguid;
+    //recv_data >> lguid;
 
-    DoLootRelease(lguid);
+    if(uint64 lguid = GetPlayer()->GetLootGUID())
+        DoLootRelease(lguid);
 }
 
 void WorldSession::DoLootRelease( uint64 lguid )
@@ -352,7 +355,7 @@ void WorldSession::DoLootRelease( uint64 lguid )
     else if (IS_CORPSE_GUID(lguid))        // ONLY remove insignia at BG
     {
         Corpse *corpse = ObjectAccessor::GetCorpse(*player, lguid);
-        if (!corpse)
+        if (!corpse || !corpse->IsWithinDistInMap(_player,INTERACTION_DISTANCE) )
             return;
 
         loot = &corpse->loot;
