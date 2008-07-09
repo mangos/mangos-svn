@@ -6130,6 +6130,30 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 }
             }
 
+            // Water Shield (3 secs cooldown between charges)
+            if((auraSpellInfo->SpellFamilyFlags & 0x0000002000000000LL) && auraSpellInfo->SpellVisual==7358)
+            {
+                if(GetTypeId() != TYPEID_PLAYER)
+                    return;
+
+                if(!trigger_spell_id)
+                {
+                    sLog.outError("Unit::HandleProcTriggerSpell: Spell %u have 0 in EffectTriggered[%d] in WS",auraSpellInfo->Id,triggeredByAura->GetEffIndex());
+                    return;
+                }
+
+                if (((Player*)this)->HasSpellCooldown(trigger_spell_id))
+                {
+                    ++triggeredByAura->m_procCharges;
+                    return;
+                }
+
+                CastSpell(this, trigger_spell_id, true, castItem, triggeredByAura);
+                // 3 secs cooldown
+                ((Player*)this)->AddSpellCooldown(trigger_spell_id,0,time(NULL) + 3);
+                return;
+            }
+
             // Lightning Shield (overwrite non existing triggered spell call in spell.dbc
             if((auraSpellInfo->SpellFamilyFlags & 0x00000400) && auraSpellInfo->SpellVisual==37)
             {
