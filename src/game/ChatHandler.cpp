@@ -490,18 +490,10 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 
     Unit* unit = ObjectAccessor::GetUnit(*_player, guid);
     Creature *pCreature = dynamic_cast<Creature *>(unit);
-    if( pCreature != NULL )
+    if(unit)
     {
-        nam = pCreature->GetCreatureInfo()->Name;
+        nam = unit->GetName();
         namlen = (nam ? strlen(nam) : 0) + 1;
-    }
-    {
-        Player *pChar = dynamic_cast<Player *>(unit);
-        if( pChar != NULL )
-        {
-            nam = pChar->GetName();
-            namlen = (nam ? strlen(nam) : 0) + 1;
-        }
     }
 
     EmotesTextEntry const *em = sEmotesTextStore.LookupEntry(text_emote);
@@ -516,13 +508,10 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
             case EMOTE_STATE_SLEEP:
             case EMOTE_STATE_SIT:
             case EMOTE_STATE_KNEEL:
+            case EMOTE_ONESHOT_NONE:
                 break;
             default:
-                data.Initialize(SMSG_EMOTE, 12);
-                data << (uint32)emote_anim;
-                data << GetPlayer()->GetGUID();
-                WPAssert(data.size() == 12);
-                GetPlayer()->SendMessageToSet( &data, true );
+                GetPlayer()->HandleEmoteCommand(emote_anim);
                 break;
         }
 
