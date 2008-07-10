@@ -435,6 +435,10 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                     if(spellproto->EffectBasePoints[effIndex]+int32(spellproto->EffectBaseDice[effIndex]) < 0)
                         return false;
                     break;
+                case SPELL_AURA_MOD_SKILL:
+                    if(spellproto->EffectBasePoints[effIndex]+int32(spellproto->EffectBaseDice[effIndex]) < 0)
+                        return false;
+                    break;
                 default:
                     break;
             }
