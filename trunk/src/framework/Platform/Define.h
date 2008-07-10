@@ -22,6 +22,118 @@
 #include "Platform/CompilerDefs.h"
 #include <sys/types.h>
 
+/* Endian detection code from sha2.c:
+-------------------------------------------------------------------------
+Copyright (c) 2001, Dr Brian Gladman <brg@gladman.me.uk>, Worcester, UK.
+All rights reserved.
+
+TERMS
+
+Redistribution and use in source and binary forms, with or without 
+modification, are permitted subject to the following conditions:
+
+1. Redistributions of source code must retain the above copyright 
+notice, this list of conditions and the following disclaimer. 
+
+2. Redistributions in binary form must reproduce the above copyright
+notice, this list of conditions and the following disclaimer in the 
+documentation and/or other materials provided with the distribution. 
+
+3. The copyright holder's name must not be used to endorse or promote 
+any products derived from this software without his specific prior 
+written permission. 
+
+This software is provided 'as is' with no express or implied warranties 
+of correctness or fitness for purpose.
+-------------------------------------------------------------------------
+*/
+
+/*  1. PLATFORM SPECIFIC INCLUDES */
+
+#if defined(__GNU_LIBRARY__)
+#  include <endian.h>
+#  include <byteswap.h>
+#elif defined(__CRYPTLIB__)
+#  if defined( INC_ALL )
+#    include "crypt.h"
+#  elif defined( INC_CHILD )
+#    include "../crypt.h"
+#  else
+#    include "crypt.h"
+#  endif
+#  if defined(DATA_LITTLEENDIAN)
+#    define PLATFORM_BYTE_ORDER SHA_LITTLE_ENDIAN
+#  else
+#    define PLATFORM_BYTE_ORDER SHA_BIG_ENDIAN
+#  endif
+#elif defined(_MSC_VER)
+#  include <stdlib.h>
+#elif !defined(WIN32)
+#  include <stdlib.h>
+#  if !defined (_ENDIAN_H)
+#    include <sys/param.h>
+#  else
+#    include _ENDIAN_H
+#  endif
+#endif
+
+/*  2. BYTE ORDER IN 32-BIT WORDS
+
+To obtain the highest speed on processors with 32-bit words, this code 
+needs to determine the order in which bytes are packed into such words.
+The following block of code is an attempt to capture the most obvious 
+ways in which various environemnts specify their endian definitions. 
+It may well fail, in which case the definitions will need to be set by 
+editing at the points marked **** EDIT HERE IF NECESSARY **** below.
+*/
+
+#define MANGOS_LITTLEENDIAN 0
+#define MANGOS_BIGENDIAN    1
+
+#if !defined(MANGOS_ENDIAN)
+#  if defined(LITTLE_ENDIAN) || defined(BIG_ENDIAN)
+#    if defined(LITTLE_ENDIAN) && defined(BIG_ENDIAN)
+#      if defined(BYTE_ORDER)
+#        if   (BYTE_ORDER == LITTLE_ENDIAN)
+#          define MANGOS_ENDIAN MANGOS_LITTLEENDIAN
+#        elif (BYTE_ORDER == BIG_ENDIAN)
+#          define MANGOS_ENDIAN MANGOS_BIGENDIAN
+#        endif
+#      endif
+#    elif defined(LITTLE_ENDIAN) && !defined(BIG_ENDIAN) 
+#      define MANGOS_ENDIAN MANGOS_LITTLEENDIAN
+#    elif !defined(LITTLE_ENDIAN) && defined(BIG_ENDIAN)
+#      define MANGOS_ENDIAN MANGOS_BIGENDIAN
+#    endif
+#  elif defined(_LITTLE_ENDIAN) || defined(_BIG_ENDIAN)
+#    if defined(_LITTLE_ENDIAN) && defined(_BIG_ENDIAN)
+#      if defined(_BYTE_ORDER)
+#        if   (_BYTE_ORDER == _LITTLE_ENDIAN)
+#          define MANGOS_ENDIAN MANGOS_LITTLEENDIAN
+#        elif (_BYTE_ORDER == _BIG_ENDIAN)
+#          define MANGOS_ENDIAN MANGOS_BIGENDIAN
+#        endif
+#      endif
+#    elif defined(_LITTLE_ENDIAN) && !defined(_BIG_ENDIAN) 
+#      define MANGOS_ENDIAN MANGOS_LITTLE_ENDIAN
+#    elif !defined(_LITTLE_ENDIAN) && defined(_BIG_ENDIAN)
+#      define MANGOS_ENDIAN MANGOS_BIGENDIAN
+#    endif
+#  elif 0     /* **** EDIT HERE IF NECESSARY **** */
+#    define MANGOS_ENDIAN MANGOS_LITTLEENDIAN
+#  elif 0     /* **** EDIT HERE IF NECESSARY **** */
+#    define MANGOS_ENDIAN MANGOS_BIGENDIAN
+#  elif (('1234' >> 24) == '1')
+#    define MANGOS_ENDIAN MANGOS_LITTLEENDIAN
+#  elif (('4321' >> 24) == '1')
+#    define MANGOS_ENDIAN MANGOS_BIGENDIAN
+#  else
+#    define MANGOS_ENDIAN MANGOS_LITTLEENDIAN
+#  endif
+#endif
+
+/* End of Endian detection code from sha2.c: */
+
 #if PLATFORM == PLATFORM_WINDOWS
 #define MANGOS_EXPORT __declspec(dllexport)
 #define MANGOS_LIBRARY_HANDLE HMODULE
@@ -113,15 +225,6 @@ typedef uint64      OBJECT_HANDLE;
 #else
 #  define ATTR_NORETURN
 #  define ATTR_PRINTF(F,V)
-#endif
-
-#define MANGOS_LITTLEENDIAN 0
-#define MANGOS_BIGENDIAN    1
-
-#ifdef _BIG_ENDIAN
-#  define MANGOS_ENDIAN MANGOS_BIGENDIAN
-#else
-#  define MANGOS_ENDIAN MANGOS_LITTLEENDIAN
 #endif
 
 #endif
