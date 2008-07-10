@@ -3929,85 +3929,31 @@ void Spell::EffectWeaponDmg(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    uint32 wp[4] = { SPELL_EFFECT_WEAPON_DAMAGE, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, SPELL_EFFECT_NORMALIZED_WEAPON_DMG, SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL };
-
-    // multiple weap dmg effect workaround
-    // execute only the first weapon damage
+    // multiple weapon dmg effect workaround
+    // execute only the last weapon damage
     // and handle all effects at once
-    uint8 j,k;
-    int32 bonus = 0;
-
-    for (j = 0; j < 3; j++)
+    for (int j = 0; j < 3; j++)
     {
-        for (k = 0; k < 4; k++)
-            if (m_spellInfo->Effect[j] == wp[k])
-                break;
-        if (k != 4)
+        switch(m_spellInfo->Effect[j])
         {
-            if (j < i)
-                return;
-            if (m_spellInfo->Effect[j] != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE)
-                bonus += CalculateDamage(j,unitTarget);
+            case SPELL_EFFECT_WEAPON_DAMAGE:
+            case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+            case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+            case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
+                if (j < i)                                  // we must calculate only at last weapon effect
+                    return;
+            break;
         }
     }
 
-    // Devastate bonus and sunder armor refresh
-    if(m_spellInfo->SpellVisual == 671 && m_spellInfo->SpellIconID == 1508)
-    {
-        int32 sp_bonus = 0;
-        for(int x=0;x<3;++x)
-        {
-            if(m_spellInfo->Effect[x]==SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
-            {
-                sp_bonus=CalculateDamage(x,unitTarget);
-                break;
-            }
-        }
-
-        uint32 sunder_stacks = 0;
-        Unit::AuraList const& list = unitTarget->GetAurasByType(SPELL_AURA_MOD_RESISTANCE);
-        for(Unit::AuraList::const_iterator itr=list.begin();itr!=list.end();++itr)
-        {
-            SpellEntry const *proto = (*itr)->GetSpellProto();
-            if(proto->SpellVisual == 406 && proto->SpellIconID == 565)
-            {
-                int32 duration = GetSpellDuration(proto);
-                (*itr)->SetAuraDuration(duration);
-                (*itr)->UpdateAuraDuration();
-                ++sunder_stacks;
-            }
-        }
-
-        bonus+= sp_bonus*sunder_stacks;
-    }
-    // Note: bonus can be negative
-
-    uint32 hitInfo = 0;
-    uint32 nohitMask = HITINFO_ABSORB | HITINFO_RESIST | HITINFO_MISS;
-    VictimState victimState = VICTIMSTATE_NORMAL;
-    uint32 blocked_dmg = 0;
-    uint32 absorbed_dmg = 0;
-    uint32 resisted_dmg = 0;
-    CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
-    bool criticalhit = false;
-
-    // calculate damage percent modifier
-    float damagePercentMod = 1;
-    for (j = 0; j < 3; j++)
-        if (m_spellInfo->Effect[j] == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE)
-            damagePercentMod *= (float(CalculateDamage(j,unitTarget)) / 100);
-
-    // set base eff_damage, total normal hit damage after DoAttackDamage call will be bonus + weapon
-    // if miss/parry, no eff=0 automatically by func DoAttackDamage
-    // if crit eff = (bonus + weapon) * 2
-    // In a word, bonus + weapon will be calculated together in cases of miss, armor reduce, crit, etc.
+    // some spell specific modifiers
+    bool customBonusDamagePercentMod = false;
+    float bonusDamagePercentMod  = 1.0f;                    // applied to fixed effect damage bonus if set customBonusDamagePercentMod
+    float weaponDamagePercentMod = 1.0f;                    // applied to weapon damage (and to fixed effect damage bonus if customBonusDamagePercentMod not set
+    float totalDamagePercentMod  = 1.0f;                    // applied to final bonus+weapon damage
     bool normalized = false;
-    for (j = 0; j <3;j++)
-        if (m_spellInfo->Effect[j] ==  SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
-            normalized = true;
- 
-    bonus += m_caster->CalculateDamage(m_attackType, normalized);
 
+    int32 spell_bonus = 0;                                  // bonus specific for spell
     switch(m_spellInfo->SpellFamilyName)
     {
         case SPELLFAMILY_WARRIOR:
@@ -4017,14 +3963,39 @@ void Spell::EffectWeaponDmg(uint32 i)
             {
                 Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
                 if (item && item->GetProto()->Class == ITEM_CLASS_WEAPON && !item->IsBroken() && ((Player*)m_caster)->IsUseEquipedWeapon(false))
-                    bonus += m_caster->CalculateDamage (OFF_ATTACK, normalized);
+                    spell_bonus += m_caster->CalculateDamage (OFF_ATTACK, normalized);
+            }
+            // Devastate bonus and sunder armor refresh
+            else if(m_spellInfo->SpellVisual == 671 && m_spellInfo->SpellIconID == 1508)
+            {
+                customBonusDamagePercentMod = true;
+                bonusDamagePercentMod = 0.0f;               // only applied if auras found
+
+                Unit::AuraList const& list = unitTarget->GetAurasByType(SPELL_AURA_MOD_RESISTANCE);
+                for(Unit::AuraList::const_iterator itr=list.begin();itr!=list.end();++itr)
+                {
+                    SpellEntry const *proto = (*itr)->GetSpellProto();
+                    if(proto->SpellVisual == 406 && proto->SpellIconID == 565)
+                    {
+                        int32 duration = GetSpellDuration(proto);
+                        (*itr)->SetAuraDuration(duration);
+                        (*itr)->UpdateAuraDuration();
+                        bonusDamagePercentMod += 1.0f;      // +100%
+                    }
+                }
             }
             break;
         }
         case SPELLFAMILY_ROGUE:
         {
+            // Ambush
+            if(m_spellInfo->SpellFamilyFlags & 0x00000200LL)
+            {
+                customBonusDamagePercentMod = true;
+                bonusDamagePercentMod = 2.5f;               // 250%
+            }
             // Mutilate (for each hand)
-            if(m_spellInfo->SpellFamilyFlags & 0x600000000LL)
+            else if(m_spellInfo->SpellFamilyFlags & 0x600000000LL)
             {
                 Unit::AuraMap const& auras = unitTarget->GetAuras();
                 for(Unit::AuraMap::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
@@ -4032,7 +4003,7 @@ void Spell::EffectWeaponDmg(uint32 i)
                     if(itr->second->GetSpellProto()->Dispel == DISPEL_POISON)
                     {
                         // 150% damage
-                        damagePercentMod *= 1.5f;
+                        totalDamagePercentMod *= 1.5f;
                         break;
                     }
                 }
@@ -4044,8 +4015,8 @@ void Spell::EffectWeaponDmg(uint32 i)
             // Seal of Command - receive benefit from Spell Damage and Healing
             if(m_spellInfo->SpellFamilyFlags & 0x00000002000000LL)
             {
-                bonus += int32(0.20f*m_caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellInfo)));
-                bonus += int32(0.29f*m_caster->SpellBaseDamageBonusForVictim(GetSpellSchoolMask(m_spellInfo), unitTarget));
+                spell_bonus += int32(0.20f*m_caster->SpellBaseDamageBonus(GetSpellSchoolMask(m_spellInfo)));
+                spell_bonus += int32(0.29f*m_caster->SpellBaseDamageBonusForVictim(GetSpellSchoolMask(m_spellInfo), unitTarget));
             }
             break;
         }
@@ -4069,20 +4040,60 @@ void Spell::EffectWeaponDmg(uint32 i)
         }
     }
 
-    // percent mod applied
-    bonus = int32(bonus *damagePercentMod);
+    int32 fixed_bonus = 0;
+    for (int j = 0; j < 3; j++)
+    {
+        switch(m_spellInfo->Effect[j])
+        {
+            case SPELL_EFFECT_WEAPON_DAMAGE:
+            case SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL:
+                fixed_bonus += CalculateDamage(j,unitTarget);
+                break;
+            case SPELL_EFFECT_NORMALIZED_WEAPON_DMG:
+                fixed_bonus += CalculateDamage(j,unitTarget);
+                normalized = true;
+                break;
+            case SPELL_EFFECT_WEAPON_PERCENT_DAMAGE:
+                weaponDamagePercentMod *= float(CalculateDamage(j,unitTarget)) / 100.0f;
+
+                // applied only to prev.effects fixed damage
+                if(customBonusDamagePercentMod)
+                    fixed_bonus = int32(fixed_bonus*bonusDamagePercentMod);
+                else
+                    fixed_bonus = int32(fixed_bonus*weaponDamagePercentMod);
+                break;
+            default:
+                break;                                      // not weapon damage effect, just skip
+        }
+    }
+
+    // non-weapon damage
+    int32 bonus = spell_bonus + fixed_bonus;
+
+    // + weapon damage with applied weapon% dmg to base weapon damage in call
+    bonus += int32(m_caster->CalculateDamage(m_attackType, normalized)*weaponDamagePercentMod);
+
+    // total damage 
+    bonus = int32(bonus*totalDamagePercentMod);
 
     // prevent negative damage
     uint32 eff_damage = uint32(bonus > 0 ? bonus : 0);
+
+    const uint32 nohitMask = HITINFO_ABSORB | HITINFO_RESIST | HITINFO_MISS;
+
+    uint32 hitInfo = 0;
+    VictimState victimState = VICTIMSTATE_NORMAL;
+    uint32 blocked_dmg = 0;
+    uint32 absorbed_dmg = 0;
+    uint32 resisted_dmg = 0;
+    CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
 
     m_caster->DoAttackDamage(unitTarget, &eff_damage, &cleanDamage, &blocked_dmg, m_spellSchoolMask, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, m_attackType, m_spellInfo, m_IsTriggeredSpell);
 
     if ((hitInfo & nohitMask) && m_attackType != RANGED_ATTACK)  // not send ranged miss/etc
         m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, m_spellSchoolMask, eff_damage, absorbed_dmg, resisted_dmg, VICTIMSTATE_NORMAL, blocked_dmg);
 
-    if(hitInfo & HITINFO_CRITICALHIT)
-        criticalhit = true;
-
+    bool criticalhit = (hitInfo & HITINFO_CRITICALHIT);
     m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, eff_damage, m_spellSchoolMask, absorbed_dmg, resisted_dmg, false, blocked_dmg, criticalhit);
 
     if (eff_damage > (absorbed_dmg + resisted_dmg + blocked_dmg))
