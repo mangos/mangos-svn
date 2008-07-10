@@ -621,6 +621,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         if( msg == EQUIP_ERR_OK )
         {
             EquipNewItem( eDest, titem_id, titem_amount, true);
+            AutoUnequipOffhandIfNeed();
             continue;                                       // equipped, to next
         }
 
@@ -9144,7 +9145,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                 if( offItem && (!not_loading ||
                     CanUnequipItem(uint16(INVENTORY_SLOT_BAG_0) << 8 | EQUIPMENT_SLOT_OFFHAND,false) !=  EQUIP_ERR_OK ||
                     CanStoreItem( NULL_BAG, NULL_SLOT, off_dest, offItem, false ) !=  EQUIP_ERR_OK ) )
-                    return EQUIP_ERR_ITEMS_CANT_BE_SWAPPED;
+                    return swap ? EQUIP_ERR_ITEMS_CANT_BE_SWAPPED : EQUIP_ERR_INVENTORY_FULL;
             }
             dest = ((INVENTORY_SLOT_BAG_0 << 8) | eslot);
             return EQUIP_ERR_OK;
@@ -15736,6 +15737,8 @@ bool Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             GetSession()->SendPacket(&data);
 
             SendNewItem(it, count, true, false, false);
+
+            AutoUnequipOffhandIfNeed();
         }
     }
     else
