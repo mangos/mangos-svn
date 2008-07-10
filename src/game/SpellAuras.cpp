@@ -1787,6 +1787,22 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             return;
         }
 
+        // Blood Elf Illusion
+        if(GetId()==46354 && caster)
+        {
+            switch(caster->getGender())
+            {
+                case GENDER_FEMALE:
+                    caster->CastSpell(m_target,46356,true,NULL,this);
+                    break;
+                case GENDER_MALE:
+                    caster->CastSpell(m_target,46355,true,NULL,this);
+                    break;
+                default:
+                    break;
+            }
+        }
+
         // Requires No Ammo
         if(GetId()==46699 && m_target->GetTypeId()==TYPEID_PLAYER)
         {
