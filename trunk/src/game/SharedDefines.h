@@ -793,7 +793,7 @@ enum Targets
     TARGET_SCRIPT_COORDINATES          = 46,
     TARGET_DYNAMIC_OBJECT              = 47,
     TARGET_AREAEFFECT_CUSTOM_2         = 52,
-    TARGET_CURRENT_SELECTED_ENEMY      = 53,                // if used in A and B==16 then enemy and nearest enemies, in B no visible affect different from provided A
+    TARGET_CURRENT_ENEMY_COORDINATES   = 53,                // set unit coordinates as dest, only 16 target B imlemented
     TARGET_RANDOM_RAID_MEMBER          = 56,
     TARGET_SINGLE_FRIEND_2             = 57,
     TARGET_AREAEFFECT_PARTY_AND_CLASS  = 61,

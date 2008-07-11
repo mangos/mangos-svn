@@ -4747,6 +4747,9 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
         {
             // done in Player::_ApplyWeaponDependentAuraMods
         }
+        // For show in client
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
+            m_target->ApplyModSignedFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT,m_modifier.m_amount/100.0f,apply);
     }
 
     // Skip non magic case for speedup
@@ -4763,7 +4766,10 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
     }
 
     // Magic damage percent modifiers implemented in Unit::SpellDamageBonus
-    // Client does not update visual spell damages when percentage aura is applied
+    // Send info to client
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+        for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
+            m_target->ApplyModSignedFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT+i,m_modifier.m_amount/100.0f,apply);
 }
 
 void Aura::HandleModOffhandDamagePercent(bool apply, bool Real)

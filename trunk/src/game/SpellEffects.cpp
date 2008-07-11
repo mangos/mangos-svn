@@ -1745,21 +1745,25 @@ void Spell::EffectTriggerMissileSpell(uint32 effect_idx)
 
 void Spell::EffectTeleportUnits(uint32 i)
 {
-    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    if(unitTarget->isInFlight())
+    if(!unitTarget || unitTarget->isInFlight())
         return;
 
     switch (m_spellInfo->EffectImplicitTargetB[i])
     {
         case TARGET_INNKEEPER_COORDINATES:
         {
+            // Only players can teleport to innkeeper
+            if (unitTarget->GetTypeId() != TYPEID_PLAYER)
+                return;
+
             ((Player*)unitTarget)->TeleportTo(((Player*)unitTarget)->m_homebindMapId,((Player*)unitTarget)->m_homebindX,((Player*)unitTarget)->m_homebindY,((Player*)unitTarget)->m_homebindZ,unitTarget->GetOrientation());
-            break;
+            return;
         }
         case TARGET_TABLE_X_Y_Z_COORDINATES:
         {
+            // TODO: Only players can teleport?
+            if (unitTarget->GetTypeId() != TYPEID_PLAYER)
+                return;
             SpellTargetPosition const* st = spellmgr.GetSpellTargetPosition(m_spellInfo->Id);
             if(!st)
             {
@@ -1771,32 +1775,62 @@ void Spell::EffectTeleportUnits(uint32 i)
         }
         case TARGET_BEHIND_VICTIM:
         {
-            Unit *pTarget = ObjectAccessor::GetUnit(*m_caster, ((Player*)unitTarget)->GetSelection());
-            if(!pTarget)
+            // Get selected target for player (or victim for units)
+            Unit *pTarget = NULL;
+            if(m_caster->GetTypeId() == TYPEID_PLAYER)
+                pTarget = ObjectAccessor::GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
+            else
+                pTarget = m_caster->getVictim();
+            // No target present - return
+            if (!pTarget)
                 return;
-
-            float _target_x, _target_y, _target_z;
-            pTarget->GetClosePoint(_target_x, _target_y, _target_z, unitTarget->GetObjectSize(), CONTACT_DISTANCE, M_PI);
-
-            if(!pTarget->IsWithinLOS(_target_x,_target_y,_target_z))
-                return;
-
-            ((Player*)unitTarget)->TeleportTo(unitTarget->GetMapId(),_target_x, _target_y, _target_z , pTarget->GetOrientation());
-            break;
-        }
-        case TARGET_SCRIPT_COORDINATES:
-        {
-            if(!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
-                return;
-            ((Player*)unitTarget)->TeleportTo(unitTarget->GetMapId(),m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ , unitTarget->GetOrientation());
-            break;
+            // Init dest coordinates
+            uint32 mapid = m_caster->GetMapId();
+            float x = m_targets.m_destX;
+            float y = m_targets.m_destY;
+            float z = m_targets.m_destZ;
+            float orientation = pTarget->GetOrientation();
+            // Teleport
+            if(unitTarget->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)unitTarget)->TeleportTo(mapid, x, y, z, orientation, false);
+            else
+            {
+                MapManager::Instance().GetMap(mapid, m_caster)->CreatureRelocation((Creature*)unitTarget, x, y, z, orientation);
+                WorldPacket data;
+                unitTarget->BuildTeleportAckMsg(&data, x, y, z, orientation);
+                unitTarget->SendMessageToSet(&data, false);
+            }
+            return;
         }
         default:
-            sLog.outError( "Spell::EffectTeleportUnits - unknown EffectImplicitTargetB[%u] = %u for spell ID %u\n", i, m_spellInfo->EffectImplicitTargetB[i], m_spellInfo->Id );
+        {
+            // If not exist data for dest location - return
+            if(!(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION))
+            {
+                sLog.outError( "Spell::EffectTeleportUnits - unknown EffectImplicitTargetB[%u] = %u for spell ID %u\n", i, m_spellInfo->EffectImplicitTargetB[i], m_spellInfo->Id );
+                return;
+            }
+            // Init dest coordinates
+            uint32 mapid = m_caster->GetMapId();
+            float x = m_targets.m_destX;
+            float y = m_targets.m_destY;
+            float z = m_targets.m_destZ;
+            float orientation = unitTarget->GetOrientation();
+            // Teleport
+            if(unitTarget->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)unitTarget)->TeleportTo(mapid, x, y, z, orientation, false);
+            else
+            {
+                MapManager::Instance().GetMap(mapid, m_caster)->CreatureRelocation((Creature*)unitTarget, x, y, z, orientation);
+                WorldPacket data;
+                unitTarget->BuildTeleportAckMsg(&data, x, y, z, orientation);
+                unitTarget->SendMessageToSet(&data, false);
+            }
             return;
+        }
     }
 
-    // post effects
+    // post effects for TARGET_TABLE_X_Y_Z_COORDINATES
     switch ( m_spellInfo->Id )
     {
         // Dimensional Ripper - Everlook
@@ -2952,9 +2986,16 @@ void Spell::EffectSummon(uint32 i)
         return;
     }
 
-    // before caster
+    // Summon in dest location
     float x,y,z;
-    m_caster->GetClosePoint(x,y,z,spawnCreature->GetObjectSize());
+    if(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+    {
+        x = m_targets.m_destX;
+        y = m_targets.m_destY;
+        z = m_targets.m_destZ;
+    }
+    else
+        m_caster->GetClosePoint(x,y,z,spawnCreature->GetObjectSize());
 
     spawnCreature->Relocate(x,y,z,-m_caster->GetOrientation());
 
@@ -3287,12 +3328,24 @@ void Spell::EffectSummonWild(uint32 i)
 
     for(int32 count = 0; count < amount; ++count)
     {
-        float px = 0.0f;
-        float py = 0.0f;
-        float pz = 0.0f;
-
-        if (center_x != 0 || center_y != 0 || center_z != 0)
-            m_caster->GetRandomPoint(center_x,center_y,center_z,radius,px,py,pz);
+        float px, py, pz;
+        // If dest location if present
+        if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+        {
+            // Summon 1 unit in dest location
+            if (count == 0)
+            {
+                px = m_targets.m_destX;
+                py = m_targets.m_destY;
+                pz = m_targets.m_destZ;
+            }
+            // Summon in random point all other units if location present
+            else
+                m_caster->GetRandomPoint(center_x,center_y,center_z,radius,px,py,pz);
+        }
+        // Summon if dest location not present near caster
+        else
+            m_caster->GetClosePoint(px,py,pz,3.0f);
 
         int32 duration = GetSpellDuration(m_spellInfo);
 
@@ -3316,7 +3369,8 @@ void Spell::EffectSummonGuardian(uint32 i)
     }
 
     Pet* old_wild = NULL;
-
+    // Unsummon old Guardian only for players
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
         Cell cell(p);
@@ -3375,11 +3429,23 @@ void Spell::EffectSummonGuardian(uint32 i)
             }
 
             float px, py, pz;
-
-            if (center_x == 0 || center_y == 0 || center_z == 0)
-                m_caster->GetClosePoint(px,py,pz,spawnCreature->GetObjectSize());
+            // If dest location if present
+            if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+            {
+                // Summon 1 unit in dest location
+                if (count == 0)
+                {
+                    px = m_targets.m_destX;
+                    py = m_targets.m_destY;
+                    pz = m_targets.m_destZ;
+                }
+                // Summon in random point all other units if location present
+                else
+                    m_caster->GetRandomPoint(center_x,center_y,center_z,radius,px,py,pz);
+            }
+            // Summon if dest location not present near caster
             else
-                m_caster->GetRandomPoint(center_x,center_y,center_z,radius,px,py,pz);
+                m_caster->GetClosePoint(px,py,pz,spawnCreature->GetObjectSize());
 
             spawnCreature->Relocate(px,py,pz,m_caster->GetOrientation());
 
@@ -5031,7 +5097,16 @@ void Spell::EffectSummonObject(uint32 i)
     float rot3 = cos(m_caster->GetOrientation()/2);
 
     float x,y,z;
-    m_caster->GetClosePoint(x,y,z,DEFAULT_WORLD_OBJECT_SIZE);
+    // If dest location if present
+    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+    {
+        x = m_targets.m_destX;
+        y = m_targets.m_destY;
+        z = m_targets.m_destZ;
+    }
+    // Summon in random point all other units if location present
+    else
+        m_caster->GetClosePoint(x,y,z,DEFAULT_WORLD_OBJECT_SIZE);
 
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), go_id,m_caster->GetMapId(), x, y, z, m_caster->GetOrientation(), 0, 0, rot2, rot3, 0, 1))
     {
@@ -5305,9 +5380,17 @@ void Spell::EffectSummonCritter(uint32 i)
         return;
     }
 
-    // before caster
     float x,y,z;
-    m_caster->GetClosePoint(x,y,z,critter->GetObjectSize());
+    // If dest location if present
+    if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+    {
+         x = m_targets.m_destX;
+         y = m_targets.m_destY;
+         z = m_targets.m_destZ;
+     }
+     // Summon if dest location not present near caster
+     else
+         m_caster->GetClosePoint(x,y,z,critter->GetObjectSize());
 
     critter->Relocate(x,y,z,m_caster->GetOrientation());
 

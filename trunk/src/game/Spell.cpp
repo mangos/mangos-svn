@@ -416,7 +416,6 @@ void Spell::FillTargetMap()
                     SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
                 }
                 break;
-            case TARGET_CURRENT_SELECTED_ENEMY:
             case TARGET_ALL_ENEMY_IN_TARGET_AREA_INSTANT:
             case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
             case TARGET_TABLE_X_Y_Z_COORDINATES:
@@ -516,6 +515,7 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_RESURRECT:
                 case SPELL_EFFECT_PARRY:
                 case SPELL_EFFECT_CREATE_ITEM:
+                case SPELL_EFFECT_TRIGGER_SPELL:
                 case SPELL_EFFECT_TRIGGER_MISSILE:
                 case SPELL_EFFECT_LEARN_SPELL:
                 case SPELL_EFFECT_SKILL_STEP:
@@ -1738,17 +1738,16 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 }
             }
         }break;
-        case TARGET_CURRENT_SELECTED_ENEMY:
+        case TARGET_CURRENT_ENEMY_COORDINATES:
         {
             Unit* currentTarget = m_targets.getUnitTarget();
-
             if(currentTarget)
             {
                 TagUnitMap.push_back(currentTarget);
-
+                m_targets.setDestination(currentTarget->GetPositionX(), currentTarget->GetPositionY(), currentTarget->GetPositionZ());
                 if(m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_ENEMY_IN_AREA_INSTANT)
                 {
-                    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                    CellPair p(MaNGOS::ComputeCellPair(currentTarget->GetPositionX(), currentTarget->GetPositionY()));
                     Cell cell(p);
                     cell.data.Part.reserved = ALL_DISTRICT;
                     cell.SetNoCreate();
@@ -3953,7 +3952,7 @@ int16 Spell::PetCanCast(Unit* target)
         bool need = false;
         for(uint32 i = 0;i<3;i++)
         {
-            if(m_spellInfo->EffectImplicitTargetA[i] == TARGET_CHAIN_DAMAGE || m_spellInfo->EffectImplicitTargetA[i] == TARGET_SINGLE_FRIEND || m_spellInfo->EffectImplicitTargetA[i] == TARGET_DUELVSPLAYER || m_spellInfo->EffectImplicitTargetA[i] == TARGET_SINGLE_PARTY || m_spellInfo->EffectImplicitTargetA[i] == TARGET_CURRENT_SELECTED_ENEMY)
+            if(m_spellInfo->EffectImplicitTargetA[i] == TARGET_CHAIN_DAMAGE || m_spellInfo->EffectImplicitTargetA[i] == TARGET_SINGLE_FRIEND || m_spellInfo->EffectImplicitTargetA[i] == TARGET_DUELVSPLAYER || m_spellInfo->EffectImplicitTargetA[i] == TARGET_SINGLE_PARTY || m_spellInfo->EffectImplicitTargetA[i] == TARGET_CURRENT_ENEMY_COORDINATES)
             {
                 need = true;
                 if(!target)
