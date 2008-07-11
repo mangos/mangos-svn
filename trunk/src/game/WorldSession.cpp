@@ -286,6 +286,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_BUY_ITEM_IN_SLOT ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBuyItemInSlotOpcode           );
     objmgr.opcodeTable[ CMSG_BUY_ITEM ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBuyItemOpcode                 );
     objmgr.opcodeTable[ CMSG_LIST_INVENTORY ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleListInventoryOpcode           );
+    objmgr.opcodeTable[ CMSG_AUTOEQUIP_ITEM_SLOT ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAutoEquipItemSlotOpcode       );
     objmgr.opcodeTable[ CMSG_SWAP_ITEM ]                        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSwapItem                      );
     objmgr.opcodeTable[ CMSG_BUYBACK_ITEM ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBuybackItem                   );
     objmgr.opcodeTable[ CMSG_AUTOSTORE_BAG_ITEM ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAutoStoreBagItemOpcode        );

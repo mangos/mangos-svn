@@ -70,6 +70,23 @@ void WorldSession::HandleSwapInvItemOpcode( WorldPacket & recv_data )
     _player->SwapItem( src, dst );
 }
 
+void WorldSession::HandleAutoEquipItemSlotOpcode( WorldPacket & recv_data )
+{
+    CHECK_PACKET_SIZE(recv_data,8+1);
+    uint64 itemguid;
+    uint8 dstslot;
+    recv_data >> itemguid >> dstslot;
+    
+    Item* item = _player->GetItemByGuid(itemguid);
+    
+    // cheating attempt?
+    if(!item)
+        return;
+
+    uint16 dstpos = dstslot | (INVENTORY_SLOT_BAG_0 << 8);
+    _player->SwapItem(item->GetPos(), dstpos);
+}
+
 void WorldSession::HandleSwapItem( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,1+1+1+1);
