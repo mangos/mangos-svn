@@ -1793,7 +1793,8 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 if (st->target_mapId == m_caster->GetMapId())
                     m_targets.setDestination(st->target_X, st->target_Y, st->target_Z);
 
-                if (m_spellInfo->EffectImplicitTargetB[i])
+                // if B==TARGET_TABLE_X_Y_Z_COORDINATES then A already fill all required targets
+                if (m_spellInfo->EffectImplicitTargetB[i] && m_spellInfo->EffectImplicitTargetB[i]!=TARGET_TABLE_X_Y_Z_COORDINATES)
                 {
                     CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
                     Cell cell(p);
@@ -1801,7 +1802,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                     cell.SetNoCreate();
 
                     SpellTargets targetB = SPELL_TARGETS_AOE_DAMAGE;
-                    // Select frendly tarets for positive effect
+                    // Select friendly targets for positive effect
                     if (IsPositiveEffect(m_spellInfo->Id, i))
                         targetB = SPELL_TARGETS_FRIENDLY;
 

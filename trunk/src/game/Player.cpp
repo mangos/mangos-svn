@@ -415,15 +415,12 @@ Player::Player (WorldSession *session): Unit( 0 )
 
 Player::~Player ()
 {
-    if(m_uint32Values)                                      // only for fully created Object
-    {
-        DuelComplete(DUEL_INTERUPTED);
-        sSocialMgr.RemovePlayerSocial(GetGUIDLow());
-    }
-
     CleanupsBeforeDelete();
 
-    TradeCancel(false);
+    if(m_uint32Values)                                      // only for fully created Object
+    {
+        sSocialMgr.RemovePlayerSocial(GetGUIDLow());
+    }
 
     // Note: buy back item already deleted from DB when player was saved
     for(int i = 0; i < PLAYER_SLOTS_COUNT; ++i)
@@ -453,6 +450,16 @@ Player::~Player ()
     for(size_t x = 0; x < ItemSetEff.size(); x++)
         if(ItemSetEff[x])
             delete ItemSetEff[x];
+}
+
+void Player::CleanupsBeforeDelete()
+{
+    if(m_uint32Values)                                      // only for fully created Object
+    {
+        TradeCancel(false);
+        DuelComplete(DUEL_INTERUPTED);
+    }
+    Unit::CleanupsBeforeDelete();
 }
 
 bool Player::Create( uint32 guidlow, WorldPacket& data )
