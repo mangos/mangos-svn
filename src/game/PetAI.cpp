@@ -232,7 +232,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
     for (uint8 i = 0; i < i_pet.GetPetAutoSpellSize(); i++)
     {
-        uint32 spellID = i_pet.GePetAutoSpellOnPos(i);
+        uint32 spellID = i_pet.GetPetAutoSpellOnPos(i);
         if (!spellID)
             continue;
 

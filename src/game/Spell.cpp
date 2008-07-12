@@ -4103,8 +4103,19 @@ bool Spell::CanAutoCast(Unit* target)
 
     for(uint32 j = 0;j<3;j++)
     {
-        if((m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA || m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AREA_AURA) && target->HasAura(m_spellInfo->Id, j))
-            return false;                                   //don't buff an already buffed unit
+        if(m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA || m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AREA_AURA)
+        {
+            if( m_spellInfo->StackAmount <= 1)
+            {
+                if( target->HasAura(m_spellInfo->Id, j) )
+                    return false;
+            }
+            else
+            {
+                if( target->GetAuras().count(Unit::spellEffectPair(m_spellInfo->Id, j)) >= m_spellInfo->StackAmount)
+                    return false;
+            }
+        }
     }
 
     int16 result = PetCanCast(target);
