@@ -159,6 +159,12 @@ bool DatabaseMysql::Initialize(const char *infoString)
         else
             sLog.outDetail("AUTOCOMMIT NOT SET TO 1");
         /*-------------------------------------*/
+
+        // set connection properties to UTF8 to properly handle locales for different
+        // server configs - core sends data in UTF8, so MySQL must expect UTF8 too
+        PExecute("SET NAMES `utf8`");
+        PExecute("SET CHARACTER SET `utf8`");
+
         return true;
     }
     else
