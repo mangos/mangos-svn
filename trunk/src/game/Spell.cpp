@@ -416,9 +416,8 @@ void Spell::FillTargetMap()
                     SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
                 }
                 break;
-            case TARGET_ALL_ENEMY_IN_TARGET_AREA_INSTANT:
-            case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
             case TARGET_TABLE_X_Y_Z_COORDINATES:
+                // Only if target A, for target B (used in teleports) dest select in effect
                 SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
                 break;
             default:
@@ -1272,7 +1271,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             // targets the ground, not the units in the area
             if (m_spellInfo->Effect[i]!=SPELL_EFFECT_PERSISTENT_AREA_AURA)
             {
-                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                CellPair p(MaNGOS::ComputeCellPair(m_targets.m_destX, m_targets.m_destY));
                 Cell cell(p);
                 cell.data.Part.reserved = ALL_DISTRICT;
                 cell.SetNoCreate();
@@ -1290,24 +1289,12 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 TagUnitMap.remove(m_caster);
             }
         }break;
-        case TARGET_ALL_ENEMY_IN_TARGET_AREA_INSTANT:
+        case TARGET_DUELVSPLAYER_COORDINATES:
         {
             if(Unit* currentTarget = m_targets.getUnitTarget())
             {
+                m_targets.setDestination(currentTarget->GetPositionX(), currentTarget->GetPositionY(), currentTarget->GetPositionZ());
                 TagUnitMap.push_back(currentTarget);
-                if(radius > 0.0f)
-                {
-                    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                    Cell cell(p);
-                    cell.data.Part.reserved = ALL_DISTRICT;
-                    cell.SetNoCreate();
-                    MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, radius,PUSH_TARGET_CENTER, SPELL_TARGETS_AOE_DAMAGE);
-                    TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_notifier(notifier);
-                    TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer > grid_notifier(notifier);
-                    CellLock<GridReadGuard> cell_lock(cell, p);
-                    cell_lock->Visit(cell_lock, world_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-                    cell_lock->Visit(cell_lock, grid_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-                }
             }
         }break;
         case TARGET_ALL_PARTY_AROUND_CASTER:
@@ -1433,7 +1420,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         }break;
         case TARGET_ALL_FRIENDLY_UNITS_IN_AREA:
         {
-            CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+            CellPair p(MaNGOS::ComputeCellPair(m_targets.m_destX, m_targets.m_destY));
             Cell cell(p);
             cell.data.Part.reserved = ALL_DISTRICT;
             cell.SetNoCreate();
@@ -3560,12 +3547,9 @@ uint8 Spell::CanCast(bool strict)
             case SPELL_EFFECT_POWER_BURN:
             case SPELL_EFFECT_MANA_DRAIN:
             {
-                if (!m_targets.getUnitTarget())
-                    return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-
-                if(m_targets.getUnitTarget()->getPowerType()!=POWER_MANA)
+                // Can be area effect
+                if (m_targets.getUnitTarget() && m_targets.getUnitTarget()->getPowerType()!=POWER_MANA)
                     return SPELL_FAILED_BAD_TARGETS;
-
                 break;
             }
             case SPELL_EFFECT_CHARGE:
