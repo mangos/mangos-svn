@@ -185,7 +185,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             for (int i = 0; i < 3; i++)
             {
                 // only paladin auras have this
-                if (spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA)
+                if (spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_PARTY)
                     return SPELL_AURA;
             }
             break;
@@ -315,7 +315,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
 
             // non-positive aura use
         case SPELL_EFFECT_APPLY_AURA:
-        case SPELL_EFFECT_APPLY_AURA_NEW2:
+        case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
         {
             switch(spellproto->EffectApplyAuraName[effIndex])
             {
@@ -999,7 +999,7 @@ bool SpellMgr::canStackSpellRanks(SpellEntry const *spellInfo)
     {
         // Paladin aura Spell
         if(spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN
-            && spellInfo->Effect[i]==SPELL_EFFECT_APPLY_AREA_AURA)
+            && spellInfo->Effect[i]==SPELL_EFFECT_APPLY_AREA_AURA_PARTY)
             return false;
         // Druid form Spell
         if(spellInfo->SpellFamilyName == SPELLFAMILY_DRUID
@@ -1412,7 +1412,7 @@ SpellEntry const* SpellMgr::SelectAuraRankForPlayerLevel(SpellEntry const* spell
     {
         if( IsPositiveEffect(spellInfo->Id, i) && (
             spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA ||
-            spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA
+            spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_PARTY
             ) )
         {
             needRankSelection = true;

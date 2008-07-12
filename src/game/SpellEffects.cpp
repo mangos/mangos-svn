@@ -95,7 +95,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectTriggerMissileSpell,                      // 32 SPELL_EFFECT_TRIGGER_MISSILE
     &Spell::EffectOpenLock,                                 // 33 SPELL_EFFECT_OPEN_LOCK
     &Spell::EffectSummonChangeItem,                         // 34 SPELL_EFFECT_SUMMON_CHANGE_ITEM
-    &Spell::EffectApplyAA,                                  // 35 SPELL_EFFECT_APPLY_AREA_AURA
+    &Spell::EffectApplyAreaAura,                            // 35 SPELL_EFFECT_APPLY_AREA_AURA_PARTY
     &Spell::EffectLearnSpell,                               // 36 SPELL_EFFECT_LEARN_SPELL
     &Spell::EffectUnused,                                   // 37 SPELL_EFFECT_SPELL_DEFENSE            one spell: SPELLDEFENSE (DND)
     &Spell::EffectDispel,                                   // 38 SPELL_EFFECT_DISPEL
@@ -179,7 +179,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSkinPlayerCorpse,                         //116 SPELL_EFFECT_SKIN_PLAYER_CORPSE       one spell: Remove Insignia, bg usage, required special corpse flags...
     &Spell::EffectSpiritHeal,                               //117 SPELL_EFFECT_SPIRIT_HEAL              one spell: Spirit Heal
     &Spell::EffectSkill,                                    //118 SPELL_EFFECT_SKILL                    professions and more
-    &Spell::EffectApplyPetAura,                             //119 SPELL_EFFECT_APPLY_AURA_NEW
+    &Spell::EffectApplyPetAura,                             //119 SPELL_EFFECT_APPLY_AURA_PET
     &Spell::EffectUnused,                                   //120 SPELL_EFFECT_TELEPORT_GRAVEYARD       one spell: Graveyard Teleport Test
     &Spell::EffectWeaponDmg,                                //121 SPELL_EFFECT_NORMALIZED_WEAPON_DMG
     &Spell::EffectUnused,                                   //122 SPELL_EFFECT_122                      unused
@@ -188,8 +188,8 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectReduceThreatPercent,                      //125 SPELL_EFFECT_REDUCE_THREAT_PERCENT
     &Spell::EffectStealBeneficialBuff,                      //126 SPELL_EFFECT_STEAL_BENEFICIAL_BUFF    spell steal effect?
     &Spell::EffectProspecting,                              //127 SPELL_EFFECT_PROSPECTING              Prospecting spell
-    &Spell::EffectApplyAura,                                //128 SPELL_EFFECT_APPLY_AURA_NEW2          probably apply aura again
-    &Spell::EffectNULL,                                     //129 SPELL_EFFECT_APPLY_AURA_NEW3
+    &Spell::EffectApplyAreaAura,                            //128 SPELL_EFFECT_APPLY_AREA_AURA_FRIEND
+    &Spell::EffectApplyAreaAura,                            //129 SPELL_EFFECT_APPLY_AREA_AURA_ENEMY
     &Spell::EffectNULL,                                     //130 SPELL_EFFECT_REDIRECT_THREAT
     &Spell::EffectUnused,                                   //131 SPELL_EFFECT_131                      used in some test spells
     &Spell::EffectNULL,                                     //132 SPELL_EFFECT_PLAY_MUSIC               sound id in misc value
@@ -2944,7 +2944,7 @@ void Spell::EffectProficiency(uint32 /*i*/)
     }
 }
 
-void Spell::EffectApplyAA(uint32 i)
+void Spell::EffectApplyAreaAura(uint32 i)
 {
     if(!unitTarget)
         return;

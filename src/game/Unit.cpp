@@ -4008,58 +4008,7 @@ void Unit::RemoveAura(AuraMap::iterator &i, AuraRemoveMode mode)
             sLog.outError("Couldn't find the caster of the single target aura, may crash later!");
         }
     }
-    // remove aura from party members when the caster turns off the aura
-    if((*i).second->IsAreaAura())
-    {
-        Unit *i_target = (*i).second->GetTarget();
-        if((*i).second->GetCasterGUID() == i_target->GetGUID())
-        {
-            Unit* i_caster = i_target;
 
-            Unit* owner = NULL;
-            Group *pGroup = NULL;
-            Player *pGroupOf = NULL;
-            if (i_caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                pGroupOf = (Player*)i_caster;
-                pGroup = pGroupOf->GetGroup();
-            }
-            else if(((Creature*)i_caster)->isTotem() || ((Creature*)i_caster)->isPet() || i_caster->isCharmed())
-            {
-                owner = i_caster->GetCharmerOrOwner();
-                if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                {
-                    pGroupOf = (Player*)owner;
-                    pGroup = pGroupOf->GetGroup();
-                }
-            }
-
-            //float radius =  GetRadius(sSpellRadiusStore.LookupEntry((*i).second->GetSpellProto()->EffectRadiusIndex[(*i).second->GetEffIndex()]));
-            if(pGroup && pGroupOf)
-            {
-                for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
-                {
-                    Player* Target = itr->getSource();
-                    if(!Target || !pGroup->SameSubGroup(pGroupOf, Target))
-                        continue;
-
-                    if(Target->GetGUID() == i_caster->GetGUID())
-                        continue;
-                    Aura *t_aura = Target->GetAura((*i).second->GetId(), (*i).second->GetEffIndex());
-                    if (t_aura)
-                        if (t_aura->GetCasterGUID() == i_caster->GetGUID())
-                            Target->RemoveAura((*i).second->GetId(), (*i).second->GetEffIndex());
-                }
-            }
-            else if(owner)
-            {
-                Aura *t_aura = owner->GetAura((*i).second->GetId(), (*i).second->GetEffIndex());
-                if (t_aura)
-                    if (t_aura->GetCasterGUID() == i_caster->GetGUID())
-                        owner->RemoveAura((*i).second->GetId(), (*i).second->GetEffIndex());
-            }
-        }
-    }
     if ((*i).second->GetModifier()->m_auraname < TOTAL_AURAS)
     {
         m_modAuras[(*i).second->GetModifier()->m_auraname].remove((*i).second);

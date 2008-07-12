@@ -351,6 +351,7 @@ class MANGOS_DLL_SPEC AreaAura : public Aura
         void Update(uint32 diff);
     private:
         float m_radius;
+        AreaAuraType m_areaAuraType;
 };
 
 class MANGOS_DLL_SPEC PersistentAreaAura : public Aura

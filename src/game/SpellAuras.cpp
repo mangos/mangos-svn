@@ -42,6 +42,9 @@
 #include "BattleGround.h"
 #include "CreatureAI.h"
 #include "Util.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 
 #define NULL_AURA_SLOT 0xFF
 
@@ -409,6 +412,25 @@ Unit *caster, Item* castItem) : Aura(spellproto, eff, currentBasePoints, target,
     m_radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
     if(Player* modOwner = caster_ptr->GetSpellModOwner())
         modOwner->ApplySpellMod(GetId(), SPELLMOD_RADIUS, m_radius);
+
+    switch(spellproto->Effect[eff])
+    {
+        case SPELL_EFFECT_APPLY_AREA_AURA_PARTY:
+            m_areaAuraType = AREA_AURA_PARTY;
+            break;
+        case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
+            m_areaAuraType = AREA_AURA_FRIEND;
+            break;
+        case SPELL_EFFECT_APPLY_AREA_AURA_ENEMY:
+            m_areaAuraType = AREA_AURA_ENEMY;
+            if(target == caster_ptr)
+                m_modifier.m_auraname = SPELL_AURA_NONE;    // Do not do any effect on self
+            break;
+        default:
+            sLog.outError("Wrong spell effect in AreaAura constructor");
+            ASSERT(false);
+            break;
+    }
 }
 
 AreaAura::~AreaAura()
@@ -445,7 +467,9 @@ Unit* SingleEnemyTargetAura::GetTriggerTarget() const
 
 Aura* CreateAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem)
 {
-    if (spellproto->Effect[eff] == SPELL_EFFECT_APPLY_AREA_AURA)
+    if (spellproto->Effect[eff] == SPELL_EFFECT_APPLY_AREA_AURA_PARTY ||
+        spellproto->Effect[eff] == SPELL_EFFECT_APPLY_AREA_AURA_FRIEND ||
+        spellproto->Effect[eff] == SPELL_EFFECT_APPLY_AREA_AURA_ENEMY)
         return new AreaAura(spellproto, eff, currentBasePoints, target, caster, castItem);
 
     uint32 triggeredSpellId = spellproto->EffectTriggerSpell[eff];
@@ -557,92 +581,99 @@ void AreaAura::Update(uint32 diff)
     {
         Unit* caster = m_target;
 
-        Group *pGroup = NULL;
-        if (caster->GetTypeId() == TYPEID_PLAYER)
-            pGroup = ((Player*)caster)->GetGroup();
-        else if(caster->GetCharmerOrOwnerGUID() != 0)
-        {
-            Unit *owner = caster->GetCharmerOrOwner();
-            if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                pGroup = ((Player*)owner)->GetGroup();
-        }
+        Unit* owner = caster->GetCharmerOrOwner();
+        if (!owner)
+            owner = caster;
+        std::list<Unit *> targets;
 
-        if(pGroup)
+        switch(m_areaAuraType)
         {
-            for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+            case AREA_AURA_PARTY:
             {
-                Player* Target = itr->getSource();
-                if(!Target)
-                    continue;
-
-                if (caster->GetTypeId() == TYPEID_PLAYER)
+                Group *pGroup;
+                if (owner->GetTypeId() == TYPEID_PLAYER)
+                    pGroup = ((Player*)owner)->GetGroup();
+                if( pGroup)
                 {
-                    if(Target->GetGUID() == m_caster_guid || !Target->isAlive() || !pGroup->SameSubGroup((Player*)caster, Target))
-                        continue;
-                }
-                else if(caster->GetCharmerOrOwnerGUID() != 0)
-                {
-                    Unit *owner = caster->GetCharmerOrOwner();
-                    if(!Target->isAlive() || (owner->GetTypeId() == TYPEID_PLAYER && !pGroup->SameSubGroup((Player*)owner, Target)))
-                        continue;
-                }
-
-                Aura *t_aura = Target->GetAura(GetId(), m_effIndex);
-
-                if(caster->IsWithinDistInMap(Target, m_radius) )
-                {
-                    // apply aura to players in range that dont have it yet
-                    if (!t_aura)
+                    uint8 subgroup = ((Player*)owner)->GetSubGroup();
+                    for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                     {
-                        // if rank not found
-                        if(SpellEntry const *actualSpellInfo = spellmgr.SelectAuraRankForPlayerLevel(GetSpellProto(),Target->getLevel()))
+                        Player* Target = itr->getSource();
+                        if(Target && Target->isAlive() && Target->GetSubGroup()==subgroup && caster->IsFriendlyTo(Target))
                         {
-                            int32 actualBasePoints = m_currentBasePoints;
-
-                            // recalculate basepoints for lower rank (all AreaAura spell not use custom basepoints?)
-                            if(actualSpellInfo != GetSpellProto())
-                                actualBasePoints = actualSpellInfo->EffectBasePoints[m_effIndex];
-
-                            AreaAura *aur = new AreaAura(actualSpellInfo, m_effIndex, &actualBasePoints, Target, caster);
-                            Target->AddAura(aur);
+                            if(caster->IsWithinDistInMap(Target, m_radius) && !Target->GetAura(GetId(), m_effIndex))
+                                targets.push_back(Target);
+                            Pet *pet = Target->GetPet();
+                            if(pet && pet->isAlive() && caster->IsWithinDistInMap(pet, m_radius) && !pet->GetAura(GetId(), m_effIndex))
+                                targets.push_back(Target);
                         }
                     }
                 }
                 else
                 {
-                    // remove auras of the same caster from out of range players
-                    if (t_aura)
-                        if (t_aura->GetCasterGUID() == m_caster_guid)
-                            Target->RemoveAura(GetId(), m_effIndex);
+                    // add owner
+                    if( owner != caster && caster->IsWithinDistInMap(owner, m_radius) )
+                        targets.push_back(owner);
+                    // add caster's pet
+                    Unit* pet = caster->GetPet();
+                    if( pet && caster->IsWithinDistInMap(pet, m_radius))
+                        targets.push_back(pet);
                 }
+                break;
             }
-        }
-        else if (caster->GetCharmerOrOwnerGUID() != 0)
-        {
-            // add / remove auras from the totem's owner
-            Unit *owner = caster->GetCharmerOrOwner();
-            if (owner)
+            case AREA_AURA_FRIEND:
             {
-                Aura *o_aura = owner->GetAura(GetId(), m_effIndex);
-                if(caster->IsWithinDistInMap(owner, m_radius))
-                {
-                    if (!o_aura)
-                    {
-                        AreaAura *aur = new AreaAura(GetSpellProto(), m_effIndex, &m_currentBasePoints, owner, caster);
-                        owner->AddAura(aur);
-                    }
-                }
-                else
-                {
-                    if (o_aura)
-                        if (o_aura->GetCasterGUID() == m_caster_guid)
-                            owner->RemoveAura(GetId(), m_effIndex);
-                }
+                CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(), caster->GetPositionY()));
+                Cell cell(p);
+                cell.data.Part.reserved = ALL_DISTRICT;
+                cell.SetNoCreate();
+
+                MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(caster, owner, m_radius);
+                MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
+                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
+                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
+                CellLock<GridReadGuard> cell_lock(cell, p);
+                cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(caster->GetMapId(), caster));
+                cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(caster->GetMapId(), caster));
+                break;
+            }
+            case AREA_AURA_ENEMY:
+            {
+                CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(), caster->GetPositionY()));
+                Cell cell(p);
+                cell.data.Part.reserved = ALL_DISTRICT;
+                cell.SetNoCreate();
+
+                MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(caster, owner, m_radius); // No GetCharmer in searcher
+                MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(targets, u_check);
+                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
+                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
+                CellLock<GridReadGuard> cell_lock(cell, p);
+                cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(caster->GetMapId(), caster));
+                cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(caster->GetMapId(), caster));
+                break;
             }
         }
-    }
 
-    if(m_caster_guid != m_target->GetGUID())                // aura at non-caster
+        for(std::list<Unit *>::iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
+        {
+            if((*tIter)->GetAura(GetId(), m_effIndex))
+                continue;
+
+            if(SpellEntry const *actualSpellInfo = spellmgr.SelectAuraRankForPlayerLevel(GetSpellProto(), (*tIter)->getLevel()))
+            {
+                int32 actualBasePoints = m_currentBasePoints;
+                // recalculate basepoints for lower rank (all AreaAura spell not use custom basepoints?)
+                if(actualSpellInfo != GetSpellProto())
+                    actualBasePoints = actualSpellInfo->EffectBasePoints[m_effIndex];
+                AreaAura *aur = new AreaAura(actualSpellInfo, m_effIndex, &actualBasePoints, (*tIter), caster, NULL);
+                (*tIter)->AddAura(aur);
+            }
+        }
+
+        Aura::Update(diff);
+    }
+    else                                                    // aura at non-caster
     {
         Unit * tmp_target = m_target;
         Unit* caster = GetCaster();
@@ -652,11 +683,31 @@ void AreaAura::Update(uint32 diff)
         // DO NOT access its members after update!
         Aura::Update(diff);
 
-        // remove aura if out-of-range from caster (after teleport for example)
-        if(!caster || !caster->IsWithinDistInMap(tmp_target, m_radius) )
+        // remove aura if out-of-range from caster (after teleport for example) or caster no longer has the aura or caster is (no longer) friendly
+        bool needFriendly = (m_areaAuraType == AREA_AURA_ENEMY ? false : true);
+        if(!caster || !caster->IsWithinDistInMap(tmp_target, m_radius) || !caster->GetAura(tmp_spellId, tmp_effIndex) || caster->IsFriendlyTo(tmp_target) != needFriendly)
             tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
+        else if( m_areaAuraType == AREA_AURA_PARTY)         // check if in same sub group
+        {
+            Unit* check = caster->GetCharmerOrOwner();
+            if (!check)
+                check = caster;
+
+            if(check->GetTypeId() == TYPEID_PLAYER)
+            {
+                if(Group *pGroup = ((Player*)check)->GetGroup())
+                {
+                    Unit* checkTarget = tmp_target->GetCharmerOrOwner();
+                    if(!checkTarget)
+                        checkTarget = tmp_target;
+                    if(checkTarget->GetTypeId() != TYPEID_PLAYER || !pGroup->SameSubGroup((Player*)check, (Player*)checkTarget))
+                        tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
+                }
+            }
+            else
+                tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
+        }
     }
-    else Aura::Update(diff);
 }
 
 void PersistentAreaAura::Update(uint32 diff)
@@ -795,7 +846,9 @@ void Aura::_AddAura()
     Unit* caster = GetCaster();
 
     // passive auras (except totem auras) do not get placed in the slots
-    if(!m_isPassive || (caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem()))
+    // SPELL_EFFECT_APPLY_AREA_AURA_ENEMY are not shown on caster
+    if((!m_isPassive || (caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem())) && 
+        (m_spellProto->Effect[GetEffIndex()] != SPELL_EFFECT_APPLY_AREA_AURA_ENEMY || m_target != caster))
     {
         if(!samespell)                                      // new slot need
         {

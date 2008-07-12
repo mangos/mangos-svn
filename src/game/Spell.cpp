@@ -585,7 +585,7 @@ void Spell::FillTargetMap()
                             break;
                     }
                     break;
-                case SPELL_EFFECT_APPLY_AREA_AURA:
+                case SPELL_EFFECT_APPLY_AREA_AURA_PARTY:
                                                             // AreaAura
                     if(m_spellInfo->Attributes == 0x9050000 || m_spellInfo->Attributes == 0x10000)
                         SetTargetMap(i,TARGET_AREAEFFECT_PARTY,tmpUnitMap);
@@ -4104,7 +4104,7 @@ bool Spell::CanAutoCast(Unit* target)
 
     for(uint32 j = 0;j<3;j++)
     {
-        if(m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA || m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AREA_AURA)
+        if(m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA)
         {
             if( m_spellInfo->StackAmount <= 1)
             {
@@ -4116,6 +4116,13 @@ bool Spell::CanAutoCast(Unit* target)
                 if( target->GetAuras().count(Unit::spellEffectPair(m_spellInfo->Id, j)) >= m_spellInfo->StackAmount)
                     return false;
             }
+        }
+        else if (m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AREA_AURA_PARTY   || 
+                 m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AREA_AURA_FRIEND  ||
+                 m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AREA_AURA_ENEMY)
+        {
+                if( target->HasAura(m_spellInfo->Id, j) )
+                    return false;
         }
     }
 
