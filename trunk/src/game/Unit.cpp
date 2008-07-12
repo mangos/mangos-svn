@@ -2928,7 +2928,10 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
         }
     }
     else
+    {
         crit = 5.0f;
+        crit += GetTotalAuraModifier(SPELL_AURA_MOD_CRIT_PERCENT);
+    }
 
     // flat aura mods
     if(attackType == RANGED_ATTACK)
