@@ -2853,7 +2853,11 @@ float Unit::GetUnitDodgeChance() const
         if(((Creature const*)this)->isTotem())
             return 0.0f;
         else
-            return 5.0f;
+        {
+            float dodge = 5.0f;
+            dodge += GetTotalAuraModifier(SPELL_AURA_MOD_DODGE_PERCENT);
+            return dodge > 0.0f ? dodge : 0.0f;
+        }
     }
 }
 
@@ -2884,7 +2888,10 @@ float Unit::GetUnitParryChance() const
     else if(GetTypeId() == TYPEID_UNIT)
     {
         if(GetCreatureType() == CREATURE_TYPE_HUMANOID)
+        {
             chance = 5.0f;
+            chance += GetTotalAuraModifier(SPELL_AURA_MOD_PARRY_PERCENT);
+        }
     }
 
     return chance;
@@ -2908,7 +2915,11 @@ float Unit::GetUnitBlockChance() const
         if(((Creature const*)this)->isTotem())
             return 0.0f;
         else
-            return 5.0f;
+        {
+            float block = 5.0f;
+            block += GetTotalAuraModifier(SPELL_AURA_MOD_BLOCK_PERCENT);
+            return block > 0.0f ? block : 0.0f;
+        }
     }
 }
 
