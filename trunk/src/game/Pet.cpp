@@ -1055,6 +1055,9 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
                 SetCreateHealth(pInfo->health);
                 SetCreateMana(pInfo->mana);
 
+                if(pInfo->armor > 0)
+                    SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(pInfo->armor));
+
                 for(int stat = 0; stat < MAX_STATS; ++stat)
                 {
                     SetCreateStat(Stats(stat),float(pInfo->stats[stat]));

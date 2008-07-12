@@ -2894,7 +2894,7 @@ float Unit::GetUnitParryChance() const
         }
     }
 
-    return chance;
+    return chance > 0.0f ? chance : 0.0f;
 }
 
 float Unit::GetUnitBlockChance() const
