@@ -34,7 +34,7 @@ TalentSpellPos const* GetTalentSpellPos(uint32 spellId);
 AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
 AreaTableEntry const* GetAreaEntryByAreaFlagAndMap(uint32 area_flag,uint32 map_id);
 uint32 GetAreaFlagByMapId(uint32 mapid);
-inline bool IsNoDamageXPArea(uint32 area_id) { return area_id==3712 || area_id==3803; }
+inline bool IsNoDamageXPArea(uint32 area_id) { return area_id==3712 || area_id==3803 || area_id==4092; }
 
 uint32 GetVirtualMapForMapAndZone(uint32 mapid, uint32 zoneId);
 
