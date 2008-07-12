@@ -231,29 +231,10 @@ Unit::~Unit()
         m_currentSpells[i] = NULL;
     }
 
-    // remove references to unit
-    for(std::list<GameObject*>::iterator i = m_gameObj.begin(); i != m_gameObj.end();)
-    {
-        (*i)->SetOwnerGUID(0);
-        (*i)->SetRespawnTime(0);
-        (*i)->Delete();
-        i = m_gameObj.erase(i);
-    }
-
+    RemoveAllGameObjects();
     RemoveAllDynObjects();
 
     if(m_charmInfo) delete m_charmInfo;
-}
-
-void Unit::RemoveAllDynObjects()
-{
-    while(!m_dynObjGUIDs.empty())
-    {
-        DynamicObject* dynObj = ObjectAccessor::GetDynamicObject(*this,*m_dynObjGUIDs.begin());
-        if(dynObj)
-            dynObj->Delete();
-        m_dynObjGUIDs.erase(m_dynObjGUIDs.begin());
-    }
 }
 
 void Unit::Update( uint32 p_time )
@@ -4198,6 +4179,17 @@ void Unit::RemoveDynObject(uint32 spellid)
     }
 }
 
+void Unit::RemoveAllDynObjects()
+{
+    while(!m_dynObjGUIDs.empty())
+    {
+        DynamicObject* dynObj = ObjectAccessor::GetDynamicObject(*this,*m_dynObjGUIDs.begin());
+        if(dynObj)
+            dynObj->Delete();
+        m_dynObjGUIDs.erase(m_dynObjGUIDs.begin());
+    }
+}
+
 DynamicObject * Unit::GetDynObject(uint32 spellId, uint32 effIndex)
 {
     for (DynObjectGUIDs::iterator i = m_dynObjGUIDs.begin(); i != m_dynObjGUIDs.end();)
@@ -4283,6 +4275,18 @@ void Unit::RemoveGameObject(uint32 spellid, bool del)
         }
         else
             ++next;
+    }
+}
+
+void Unit::RemoveAllGameObjects()
+{
+    // remove references to unit
+    for(std::list<GameObject*>::iterator i = m_gameObj.begin(); i != m_gameObj.end();)
+    {
+        (*i)->SetOwnerGUID(0);
+        (*i)->SetRespawnTime(0);
+        (*i)->Delete();
+        i = m_gameObj.erase(i);
     }
 }
 
@@ -9452,6 +9456,8 @@ void Unit::CleanupsBeforeDelete()
         DeleteThreatList();
         getHostilRefManager().setOnlineOfflineState(false);
         RemoveAllAuras();
+        RemoveAllGameObjects();
+        RemoveAllDynObjects();
         GetMotionMaster()->Clear(false);                    // remove different non-standard movement generators.
     }
     RemoveFromWorld();
