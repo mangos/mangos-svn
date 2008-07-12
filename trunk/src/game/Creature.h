@@ -518,7 +518,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         GridReference<Creature> &GetGridRef() { return m_gridRef; }
         bool isRegeneratingHealth() { return m_regenHealth; }
         virtual uint8 GetPetAutoSpellSize() const { return CREATURE_MAX_SPELLS; }
-        virtual uint32 GePetAutoSpellOnPos(uint8 pos) const
+        virtual uint32 GetPetAutoSpellOnPos(uint8 pos) const
         {
             if (pos >= CREATURE_MAX_SPELLS || m_charmInfo->GetCharmSpell(pos)->active != ACT_ENABLED)
                 return 0;
