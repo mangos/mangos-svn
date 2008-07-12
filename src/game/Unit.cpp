@@ -2830,8 +2830,14 @@ float Unit::MeleeMissChanceCalc(const Unit *pVictim, WeaponAttackType attType) c
 uint32 Unit::GetDefenseSkillValue(Unit const* target) const
 {
     if(GetTypeId() == TYPEID_PLAYER)
-        return ((Player*)this)->GetSkillValue (SKILL_DEFENSE)+
-            uint32(((Player*)this)->GetRatingBonusValue(CR_DEFENSE_SKILL));
+    {
+        // in PvP use full skill instead current skill value
+        uint32 value = (target && target->GetTypeId() == TYPEID_PLAYER)
+            ? ((Player*)this)->GetMaxSkillValue(SKILL_DEFENSE)
+            : ((Player*)this)->GetSkillValue(SKILL_DEFENSE);
+        value += uint32(((Player*)this)->GetRatingBonusValue(CR_DEFENSE_SKILL));
+        return value;
+    }
     else
         return GetUnitMeleeSkill(target);
 }
@@ -2971,7 +2977,10 @@ uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType, Unit const* target) 
         // in range
         uint32  skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon(attType==BASE_ATTACK)
             ? item->GetSkill() : SKILL_UNARMED;
-        value = ((Player*)this)->GetSkillValue (skill);
+        // in PvP use full skill instead current skill value
+        value = (target && target->GetTypeId() == TYPEID_PLAYER)
+            ? ((Player*)this)->GetMaxSkillValue(skill)
+            : ((Player*)this)->GetSkillValue(skill);
         // Modify value from ratings
         value += uint32(((Player*)this)->GetRatingBonusValue(CR_WEAPON_SKILL));
         switch (attType)
