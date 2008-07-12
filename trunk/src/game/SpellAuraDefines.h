@@ -291,4 +291,11 @@ enum AuraType
     SPELL_AURA_MOD_ENEMY_DODGE = 251,
     TOTAL_AURAS=252
 };
+
+enum AreaAuraType
+{
+    AREA_AURA_PARTY     = 0,
+    AREA_AURA_FRIEND    = 1,
+    AREA_AURA_ENEMY     = 2
+};
 #endif

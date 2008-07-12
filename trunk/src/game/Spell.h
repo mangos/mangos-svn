@@ -210,7 +210,7 @@ class Spell
         void EffectSummonChangeItem(uint32 i);
         void EffectOpenSecretSafe(uint32 i);
         void EffectProficiency(uint32 i);
-        void EffectApplyAA(uint32 i);
+        void EffectApplyAreaAura(uint32 i);
         void EffectSummon(uint32 i);
         void EffectLearnSpell(uint32 i);
         void EffectDispel(uint32 i);
