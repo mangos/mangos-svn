@@ -2260,6 +2260,19 @@ void Spell::EffectHeal( uint32 /*i*/ )
                 }
             }
         }
+        // Vessel of the Naaru (Vial of the Sunwell trinket)
+        if (m_spellInfo->Id == 45064)
+        {
+            // Amount of heal - depends from stacked Holy Energy
+            damage = 0;
+            Unit::AuraList const& mDummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+            for(Unit::AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
+                if((*i)->GetId() == 45062)
+                    damage+=(*i)->GetModifier()->m_amount;
+            if (damage)
+                m_caster->RemoveAurasDueToSpell(45062);
+        }
+
         uint32 addhealth = caster->SpellHealingBonus(m_spellInfo, uint32(damage),HEAL, unitTarget);
         bool crit = caster->isSpellCrit(unitTarget, m_spellInfo, m_spellSchoolMask, m_attackType);
         if (crit)
