@@ -1123,7 +1123,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendItemDurations();
         void LoadCorpse();
         void LoadPet();
-        void RemoveAreaAurasFromGroup();
 
         uint32 m_stableSlots;
 

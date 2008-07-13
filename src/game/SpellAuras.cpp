@@ -607,7 +607,7 @@ void AreaAura::Update(uint32 diff)
                                 targets.push_back(Target);
                             Pet *pet = Target->GetPet();
                             if(pet && pet->isAlive() && caster->IsWithinDistInMap(pet, m_radius) && !pet->GetAura(GetId(), m_effIndex))
-                                targets.push_back(Target);
+                                targets.push_back(pet);
                         }
                     }
                 }
@@ -695,16 +695,17 @@ void AreaAura::Update(uint32 diff)
             if (!check)
                 check = caster;
 
-            if(check->GetTypeId() == TYPEID_PLAYER)
+            Group *pGroup = NULL;
+            if( check->GetTypeId() == TYPEID_PLAYER )
+                pGroup = ((Player*)check)->GetGroup();
+
+            if( pGroup )
             {
-                if(Group *pGroup = ((Player*)check)->GetGroup())
-                {
-                    Unit* checkTarget = tmp_target->GetCharmerOrOwner();
-                    if(!checkTarget)
-                        checkTarget = tmp_target;
-                    if(checkTarget->GetTypeId() != TYPEID_PLAYER || !pGroup->SameSubGroup((Player*)check, (Player*)checkTarget))
-                        tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
-                }
+                Unit* checkTarget = tmp_target->GetCharmerOrOwner();
+                if(!checkTarget)
+                    checkTarget = tmp_target;
+                if(checkTarget->GetTypeId() != TYPEID_PLAYER || !pGroup->SameSubGroup((Player*)check, (Player*)checkTarget))
+                    tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
             }
             else
                 tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
@@ -2773,9 +2774,6 @@ void Aura::HandleModPossess(bool apply, bool Real)
     }
     else
     {
-        //remove area auras from charms
-        m_target->RemoveAreaAurasByOthers();
-
         m_target->SetCharmerGUID(0);
 
         if(m_target->GetTypeId() == TYPEID_PLAYER)
@@ -2882,9 +2880,6 @@ void Aura::HandleModCharm(bool apply, bool Real)
         }
         else
         {
-            //remove area auras from charms
-            m_target->RemoveAreaAurasByOthers();
-
             m_target->SetCharmerGUID(0);
 
             if(m_target->GetTypeId() == TYPEID_PLAYER)

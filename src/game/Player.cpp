@@ -15177,25 +15177,6 @@ void Player::RemoveSpellMods(Spell const* spell)
     }
 }
 
-void Player::RemoveAreaAurasFromGroup()
-{
-    Group* pGroup = GetGroup();
-    if(!pGroup)
-        return;
-
-    for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
-    {
-        Player* Member = itr->getSource();
-        if(!Member || Member==this || !pGroup->SameSubGroup(this, Member))
-            continue;
-
-        Member->RemoveAreaAurasByOthers(GetGUID());
-        for (uint8 i = 0; i < 4; i++)
-            if (m_TotemSlot[i])
-                Member->RemoveAreaAurasByOthers(m_TotemSlot[i]);
-    }
-}
-
 // send Proficiency
 void Player::SendProficiency(uint8 pr1, uint32 pr2)
 {
