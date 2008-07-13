@@ -2730,7 +2730,7 @@ void Spell::SendLogExecute()
         {
             switch(m_spellInfo->Effect[0])
             {
-                case SPELL_EFFECT_MANA_DRAIN:
+                case SPELL_EFFECT_POWER_DRAIN:
                     if(Unit *unit = m_targets.getUnitTarget())
                         data.append(unit->GetPackGUID());
                     else
@@ -3545,11 +3545,13 @@ uint8 Spell::CanCast(bool strict)
                 break;
             }
             case SPELL_EFFECT_POWER_BURN:
-            case SPELL_EFFECT_MANA_DRAIN:
+            case SPELL_EFFECT_POWER_DRAIN:
             {
-                // Can be area effect
-                if (m_targets.getUnitTarget() && m_targets.getUnitTarget()->getPowerType()!=POWER_MANA)
-                    return SPELL_FAILED_BAD_TARGETS;
+                // Can be area effect, also ignore target power in case non-player cast (spell can have multiply drain/burn effects
+                if (m_caster->GetTypeId()==TYPEID_PLAYER)
+                    if(Unit* target = m_targets.getUnitTarget())
+                        if(target->getPowerType()!=m_spellInfo->EffectMiscValue[i])
+                            return SPELL_FAILED_BAD_TARGETS;
                 break;
             }
             case SPELL_EFFECT_CHARGE:

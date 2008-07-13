@@ -199,7 +199,7 @@ class Spell
         void EffectApplyAura(uint32 i);
         void EffectSendEvent(uint32 i);
         void EffectPowerBurn(uint32 i);
-        void EffectManaDrain(uint32 i);
+        void EffectPowerDrain(uint32 i);
         void EffectHeal(uint32 i);
         void EffectHealthLeech(uint32 i);
         void EffectQuestComplete(uint32 i);

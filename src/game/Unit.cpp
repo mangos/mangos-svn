@@ -10163,7 +10163,7 @@ uint32 Unit::GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectT
         switch ( spellProto->Effect[i] )
         {
             case SPELL_EFFECT_SCHOOL_DAMAGE:
-            case SPELL_EFFECT_MANA_DRAIN:
+            case SPELL_EFFECT_POWER_DRAIN:
             case SPELL_EFFECT_HEALTH_LEECH:
             case SPELL_EFFECT_ENVIRONMENTAL_DAMAGE:
             case SPELL_EFFECT_POWER_BURN:

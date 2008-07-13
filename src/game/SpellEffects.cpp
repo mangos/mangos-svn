@@ -68,7 +68,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectTeleportUnits,                            //  5 SPELL_EFFECT_TELEPORT_UNITS
     &Spell::EffectApplyAura,                                //  6 SPELL_EFFECT_APPLY_AURA
     &Spell::EffectEnvirinmentalDMG,                         //  7 SPELL_EFFECT_ENVIRONMENTAL_DAMAGE
-    &Spell::EffectManaDrain,                                //  8 SPELL_EFFECT_MANA_DRAIN
+    &Spell::EffectPowerDrain,                               //  8 SPELL_EFFECT_POWER_DRAIN
     &Spell::EffectHealthLeech,                              //  9 SPELL_EFFECT_HEALTH_LEECH
     &Spell::EffectHeal,                                     // 10 SPELL_EFFECT_HEAL
     &Spell::EffectUnused,                                   // 11 SPELL_EFFECT_BIND
@@ -2070,7 +2070,7 @@ void Spell::EffectUnlearnSpecialization( uint32 i )
     sLog.outDebug( "Spell: Player %u have unlearned spell %u from NpcGUID: %u", _player->GetGUIDLow(), spellToUnlearn, m_caster->GetGUIDLow() );
 }
 
-void Spell::EffectManaDrain(uint32 i)
+void Spell::EffectPowerDrain(uint32 i)
 {
     if(m_spellInfo->EffectMiscValue[i] < 0 || m_spellInfo->EffectMiscValue[i] >= MAX_POWERS)
         return;
@@ -2183,26 +2183,32 @@ void Spell::EffectSendEvent(uint32 EffectIndex)
 
 void Spell::EffectPowerBurn(uint32 i)
 {
+    if(m_spellInfo->EffectMiscValue[i] < 0 || m_spellInfo->EffectMiscValue[i] >= MAX_POWERS)
+        return;
+
+    Powers powertype = Powers(m_spellInfo->EffectMiscValue[i]);
+
     if(!unitTarget)
         return;
     if(!unitTarget->isAlive())
         return;
-    if(unitTarget->getPowerType()!=POWER_MANA)
+    if(unitTarget->getPowerType()!=powertype)
         return;
     if(damage < 0)
         return;
 
-    int32 curPower = int32(unitTarget->GetPower(POWER_MANA));
+    int32 curPower = int32(unitTarget->GetPower(powertype));
 
     // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
     uint32 power = damage;
-    if(unitTarget->GetTypeId() == TYPEID_PLAYER)
+    if ( powertype == POWER_MANA && unitTarget->GetTypeId() == TYPEID_PLAYER )
         power -= ((Player*)unitTarget)->GetSpellCritDamageReduction(power);
 
     int32 new_damage = (curPower < power) ? curPower : power;
 
-    unitTarget->ModifyPower(POWER_MANA,-new_damage);
+    unitTarget->ModifyPower(powertype,-new_damage);
     float multiplier = m_spellInfo->EffectMultipleValue[i];
+
     if(Player *modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
 
