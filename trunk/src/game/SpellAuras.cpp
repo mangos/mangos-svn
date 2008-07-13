@@ -590,9 +590,11 @@ void AreaAura::Update(uint32 diff)
         {
             case AREA_AURA_PARTY:
             {
-                Group *pGroup;
+                Group *pGroup = NULL;
+
                 if (owner->GetTypeId() == TYPEID_PLAYER)
                     pGroup = ((Player*)owner)->GetGroup();
+
                 if( pGroup)
                 {
                     uint8 subgroup = ((Player*)owner)->GetSubGroup();
