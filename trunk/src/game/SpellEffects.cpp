@@ -4595,14 +4595,21 @@ void Spell::EffectScriptEffect(uint32 i)
             }
             break;
         }
-        // Flame Crash
-        case 41126:
+        case 41126:                                         // Flame Crash
         {
             if(!unitTarget)
                 return;
 
            unitTarget->CastSpell(unitTarget, 41131, true);
            break;
+        }
+        case 44876:                                         // Force Cast - Portal Effect: Sunwell Isle
+        {
+            if(!unitTarget)
+                return;
+
+            unitTarget->CastSpell(unitTarget, 44870, true);
+            break;
         }
 
         // Goblin Weather Machine
