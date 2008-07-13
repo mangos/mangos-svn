@@ -23,6 +23,7 @@
 #include "Policies/SingletonImp.h"
 #include "MovementGenerator.h"
 #include "ScriptCalls.h"
+#include "Pet.h"
 
 INSTANTIATE_SINGLETON_1(CreatureAIRegistry);
 INSTANTIATE_SINGLETON_1(MovementGeneratorRegistry);
@@ -31,15 +32,10 @@ namespace FactorySelector
 {
     CreatureAI* selectAI(Creature *creature)
     {
-        /*if(CreatureAI* scriptedAI = Script->GetAI(creature))
-            return scriptedAI;*/
-        //NOTE: in case there are valid scripts for pets remove check for !creature->isPet()
-        //if there are scripts for charms remove check for !creature->isCharmed()
-        //the commented condition is too db dependant to get into the core, but is an example to create the possibilty to have scripts for untamed pets and scripts for their tamed/owned equivalents
-        //e.g. if there are scripts for warlock pets but not for hunter's the activation of the check will allow warlock pets to be scripted while hunter pets would retain standard pet AI
-        CreatureAI* scriptedAI = Script->GetAI(creature);
-        if(scriptedAI && !((creature->isPet() || creature->isCharmed())/* && creature->GetCreatureInfo()->ScriptName == "generic_creature"*/))
-            return scriptedAI;
+        // Allow scripting AI for normal creatures and not controlled pets (guardians and mini-pets)
+        if((!creature->isPet() || !((Pet*)creature)->isControlled()) && !creature->isCharmed())
+            if(CreatureAI* scriptedAI = Script->GetAI(creature))
+                return scriptedAI;
 
         CreatureAIRegistry &ai_registry(CreatureAIRepository::Instance());
         assert( creature->GetCreatureInfo() != NULL );
