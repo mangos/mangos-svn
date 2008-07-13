@@ -503,7 +503,7 @@ enum SpellEffects
     SPELL_EFFECT_TELEPORT_UNITS            = 5,
     SPELL_EFFECT_APPLY_AURA                = 6,
     SPELL_EFFECT_ENVIRONMENTAL_DAMAGE      = 7,
-    SPELL_EFFECT_MANA_DRAIN                = 8,
+    SPELL_EFFECT_POWER_DRAIN               = 8,
     SPELL_EFFECT_HEALTH_LEECH              = 9,
     SPELL_EFFECT_HEAL                      = 10,
     SPELL_EFFECT_BIND                      = 11,
