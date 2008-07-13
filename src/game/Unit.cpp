@@ -273,7 +273,7 @@ void Unit::Update( uint32 p_time )
         setAttackTimer(BASE_ATTACK, (p_time >= base_att ? 0 : base_att - p_time) );
     }
 
-    // update abilities avaiable only for fraction of time
+    // update abilities available only for fraction of time
     UpdateReactives( p_time );
 
     ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, GetHealth() < GetMaxHealth()*0.20f);

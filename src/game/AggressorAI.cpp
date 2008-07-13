@@ -147,7 +147,6 @@ AggressorAI::AttackStart(Unit *u)
         //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", i_creature.GetName(), u->GetGUIDLow());
         i_victimGuid = u->GetGUID();
 
-        i_creature.resetAttackTimer();
         i_creature.GetMotionMaster()->MoveChase(u);
         if (u->GetTypeId() == TYPEID_PLAYER)
             i_creature.SetLootRecipient((Player*)u);
