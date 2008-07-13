@@ -355,7 +355,6 @@ CREATE TABLE `character_pet` (
   `level` int(11) unsigned NOT NULL default '1',
   `exp` int(11) unsigned NOT NULL default '0',
   `Reactstate` tinyint(1) unsigned NOT NULL default '0',
-  `Commandstate` tinyint(1) unsigned NOT NULL default '1',
   `loyaltypoints` int(11) NOT NULL default '0',
   `loyalty` int(11) unsigned NOT NULL default '0',
   `trainpoint` int(11) NOT NULL default '0',
