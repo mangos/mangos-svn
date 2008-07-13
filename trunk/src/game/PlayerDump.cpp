@@ -360,6 +360,22 @@ bool PlayerDumpWriter::WriteDump(std::string file, uint32 guid)
 
 bool PlayerDumpReader::LoadDump(std::string file, uint32 account, std::string name, uint32 guid)
 {
+    // check character count
+    {
+        QueryResult *result = CharacterDatabase.PQuery("SELECT COUNT(guid) FROM characters WHERE account = '%d'", account);
+        uint8 charcount = 0;
+        if ( result )
+        {
+            Field *fields=result->Fetch();
+            charcount = fields[0].GetUInt8();
+            delete result;
+
+            if (charcount >= 10)
+            {
+                return false;
+            }
+        }
+    }
     FILE *fin = fopen(file.c_str(), "r");
     if(!fin) return false;
 
