@@ -268,8 +268,6 @@ void Group::Disband(bool hideDestroy)
         if(!player)
             continue;
 
-        player->RemoveAreaAurasByOthers();
-        player->RemoveAreaAurasFromGroup();
         player->SetGroup(NULL);
 
         if(!player->GetSession())
@@ -896,8 +894,6 @@ bool Group::_removeMember(const uint64 &guid)
     Player *player = objmgr.GetPlayer(guid);
     if (player)
     {
-        player->RemoveAreaAurasByOthers();
-        player->RemoveAreaAurasFromGroup();
         player->SetGroup(NULL);
     }
 

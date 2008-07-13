@@ -3824,35 +3824,6 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
     return true;
 }
 
-void Unit::RemoveAreaAurasByOthers(uint64 guid)
-{
-    int j = 0;
-    for (AuraMap::iterator i = m_Auras.begin(); i != m_Auras.end();)
-    {
-        if (i->second && i->second->IsAreaAura())
-        {
-            uint64 casterGuid = i->second->GetCasterGUID();
-            uint64 targetGuid = i->second->GetTarget()->GetGUID();
-            // if area aura cast by someone else or by the specified caster
-            if (casterGuid == guid || (guid == 0 && casterGuid != targetGuid))
-            {
-                for (j = 0; j < 4; j++)
-                    if (m_TotemSlot[j] == casterGuid)
-                        break;
-                // and not by one of my totems
-                if (j == 4)
-                    RemoveAura(i);
-                else
-                    ++i;
-            }
-            else
-                ++i;
-        }
-        else
-            ++i;
-    }
-}
-
 void Unit::RemoveAura(uint32 spellId, uint32 effindex, Aura* except)
 {
     spellEffectPair spair = spellEffectPair(spellId, effindex);
