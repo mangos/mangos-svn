@@ -353,6 +353,7 @@ enum UnitState
     UNIT_STAT_ROOT            = 0x0400,
     UNIT_STAT_CONFUSED        = 0x0800,
     UNIT_STAT_DISTRACTED      = 0x1000,
+    UNIT_STAT_ISOLATED        = 0x2000,                     // area auras do not affect other players
     UNIT_STAT_ALL_STATE       = 0xffff                      //(UNIT_STAT_STOPPED | UNIT_STAT_MOVING | UNIT_STAT_IN_COMBAT | UNIT_STAT_IN_FLIGHT)
 };
 
