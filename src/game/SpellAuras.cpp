@@ -2444,29 +2444,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
         m_target->m_ShapeShiftFormSpellId = GetId();
         m_target->m_form = form;
-
-        switch ( m_target->m_form )
-        {
-            case FORM_CAT:
-            case FORM_TREE:
-            case FORM_TRAVEL:
-            case FORM_AQUA:
-            case FORM_BEAR:
-            case FORM_DIREBEAR:
-            case FORM_FLIGHT_EPIC:
-            case FORM_FLIGHT:
-            case FORM_MOONKIN:
-                // remove movement affects
-                m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);           
-                m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
-
-                // and polymorphic affects
-                if(m_target->IsPolymorphed())
-                    m_target->RemoveAurasDueToSpell(m_target->getTransForm());
-                break;
-            default:
-               break;
-        }
     }
     else
     {
@@ -2496,6 +2473,29 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 break;
             }
         }
+    }
+    
+    switch ( form )
+    {
+        case FORM_CAT:
+        case FORM_TREE:
+        case FORM_TRAVEL:
+        case FORM_AQUA:
+        case FORM_BEAR:
+        case FORM_DIREBEAR:
+        case FORM_FLIGHT_EPIC:
+        case FORM_FLIGHT:
+        case FORM_MOONKIN:
+            // remove movement affects
+            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);           
+            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
+
+            // and polymorphic affects
+            if(m_target->IsPolymorphed())
+                m_target->RemoveAurasDueToSpell(m_target->getTransForm());
+            break;
+        default:
+           break;
     }
 
     // adding/removing linked auras
