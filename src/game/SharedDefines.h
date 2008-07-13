@@ -762,7 +762,7 @@ enum Targets
     TARGET_PET                         = 5,
     TARGET_CHAIN_DAMAGE                = 6,
     TARGET_AREAEFFECT_CUSTOM           = 8,
-    TARGET_INNKEEPER_COORDINATES        = 9,                 // uses in teleport to innkeeper spells
+    TARGET_INNKEEPER_COORDINATES       = 9,                 // uses in teleport to innkeeper spells
     TARGET_ALL_ENEMY_IN_AREA           = 15,
     TARGET_ALL_ENEMY_IN_AREA_INSTANT   = 16,
     TARGET_TABLE_X_Y_Z_COORDINATES     = 17,                // uses in teleport spells and some other
