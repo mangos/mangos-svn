@@ -16887,15 +16887,15 @@ void Player::RemoveItemDependentAurasAndCasts( Item * pItem )
     {
         Aura* aura = itr->second;
 
-        // skip persistent and not item class dependent and not self applied auras
+        // skip passive (passive item dependent spells work in another way) and not self applied auras
         SpellEntry const* spellInfo = aura->GetSpellProto();
-        if(aura->IsPermanent() ||  aura->GetCasterGUID()!=GetGUID())
+        if(aura->IsPassive() ||  aura->GetCasterGUID()!=GetGUID())
         {
             ++itr;
             continue;
         }
 
-        // skip if have alternative item
+        // skip if not item dependent or have alternative item
         if(HasItemFitToSpellReqirements(spellInfo,pItem))
         {
             ++itr;
