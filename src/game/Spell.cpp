@@ -3547,10 +3547,10 @@ uint8 Spell::CanCast(bool strict)
             case SPELL_EFFECT_POWER_BURN:
             case SPELL_EFFECT_POWER_DRAIN:
             {
-                // Can be area effect, Check only if set TARGET_FLAG_UNIT (spell can have multiply drain/burn effects)
-                if (m_targets.m_targetMask&TARGET_FLAG_UNIT)
+                // Can be area effect, Check only for players and not check if target - caster (spell can have multiply drain/burn effects)
+                if(m_caster->GetTypeId() == TYPEID_PLAYER)
                     if(Unit* target = m_targets.getUnitTarget())
-                        if(target->getPowerType()!=m_spellInfo->EffectMiscValue[i])
+                        if(target!=m_caster && target->getPowerType()!=m_spellInfo->EffectMiscValue[i])
                             return SPELL_FAILED_BAD_TARGETS;
                 break;
             }
