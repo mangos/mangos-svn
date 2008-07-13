@@ -581,98 +581,100 @@ void AreaAura::Update(uint32 diff)
     {
         Unit* caster = m_target;
 
-        Unit* owner = caster->GetCharmerOrOwner();
-        if (!owner)
-            owner = caster;
-        std::list<Unit *> targets;
-
-        switch(m_areaAuraType)
+        if( !caster->hasUnitState(UNIT_STAT_ISOLATED) )
         {
-            case AREA_AURA_PARTY:
+            Unit* owner = caster->GetCharmerOrOwner();
+            if (!owner)
+                owner = caster;
+            std::list<Unit *> targets;
+
+            switch(m_areaAuraType)
             {
-                Group *pGroup = NULL;
-
-                if (owner->GetTypeId() == TYPEID_PLAYER)
-                    pGroup = ((Player*)owner)->GetGroup();
-
-                if( pGroup)
+                case AREA_AURA_PARTY:
                 {
-                    uint8 subgroup = ((Player*)owner)->GetSubGroup();
-                    for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+                    Group *pGroup = NULL;
+
+                    if (owner->GetTypeId() == TYPEID_PLAYER)
+                        pGroup = ((Player*)owner)->GetGroup();
+
+                    if( pGroup)
                     {
-                        Player* Target = itr->getSource();
-                        if(Target && Target->isAlive() && Target->GetSubGroup()==subgroup && caster->IsFriendlyTo(Target))
+                        uint8 subgroup = ((Player*)owner)->GetSubGroup();
+                        for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                         {
-                            if(caster->IsWithinDistInMap(Target, m_radius) && !Target->GetAura(GetId(), m_effIndex))
-                                targets.push_back(Target);
-                            Pet *pet = Target->GetPet();
-                            if(pet && pet->isAlive() && caster->IsWithinDistInMap(pet, m_radius) && !pet->GetAura(GetId(), m_effIndex))
-                                targets.push_back(pet);
+                            Player* Target = itr->getSource();
+                            if(Target && Target->isAlive() && Target->GetSubGroup()==subgroup && caster->IsFriendlyTo(Target))
+                            {
+                                if(caster->IsWithinDistInMap(Target, m_radius) && !Target->GetAura(GetId(), m_effIndex))
+                                    targets.push_back(Target);
+                                Pet *pet = Target->GetPet();
+                                if(pet && pet->isAlive() && caster->IsWithinDistInMap(pet, m_radius) && !pet->GetAura(GetId(), m_effIndex))
+                                    targets.push_back(pet);
+                            }
                         }
                     }
+                    else
+                    {
+                        // add owner
+                        if( owner != caster && caster->IsWithinDistInMap(owner, m_radius) )
+                            targets.push_back(owner);
+                        // add caster's pet
+                        Unit* pet = caster->GetPet();
+                        if( pet && caster->IsWithinDistInMap(pet, m_radius))
+                            targets.push_back(pet);
+                    }
+                    break;
                 }
-                else
+                case AREA_AURA_FRIEND:
                 {
-                    // add owner
-                    if( owner != caster && caster->IsWithinDistInMap(owner, m_radius) )
-                        targets.push_back(owner);
-                    // add caster's pet
-                    Unit* pet = caster->GetPet();
-                    if( pet && caster->IsWithinDistInMap(pet, m_radius))
-                        targets.push_back(pet);
+                    CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(), caster->GetPositionY()));
+                    Cell cell(p);
+                    cell.data.Part.reserved = ALL_DISTRICT;
+                    cell.SetNoCreate();
+
+                    MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(caster, owner, m_radius);
+                    MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
+                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
+                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
+                    CellLock<GridReadGuard> cell_lock(cell, p);
+                    cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(caster->GetMapId(), caster));
+                    cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(caster->GetMapId(), caster));
+                    break;
                 }
-                break;
-            }
-            case AREA_AURA_FRIEND:
-            {
-                CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(), caster->GetPositionY()));
-                Cell cell(p);
-                cell.data.Part.reserved = ALL_DISTRICT;
-                cell.SetNoCreate();
+                case AREA_AURA_ENEMY:
+                {
+                    CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(), caster->GetPositionY()));
+                    Cell cell(p);
+                    cell.data.Part.reserved = ALL_DISTRICT;
+                    cell.SetNoCreate();
 
-                MaNGOS::AnyFriendlyUnitInObjectRangeCheck u_check(caster, owner, m_radius);
-                MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
-                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
-                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyFriendlyUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
-                CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(caster->GetMapId(), caster));
-                cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(caster->GetMapId(), caster));
-                break;
+                    MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(caster, owner, m_radius); // No GetCharmer in searcher
+                    MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(targets, u_check);
+                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
+                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
+                    CellLock<GridReadGuard> cell_lock(cell, p);
+                    cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(caster->GetMapId(), caster));
+                    cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(caster->GetMapId(), caster));
+                    break;
+                }
             }
-            case AREA_AURA_ENEMY:
-            {
-                CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(), caster->GetPositionY()));
-                Cell cell(p);
-                cell.data.Part.reserved = ALL_DISTRICT;
-                cell.SetNoCreate();
 
-                MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(caster, owner, m_radius); // No GetCharmer in searcher
-                MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(targets, u_check);
-                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
-                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
-                CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(caster->GetMapId(), caster));
-                cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(caster->GetMapId(), caster));
-                break;
+            for(std::list<Unit *>::iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
+            {
+                if((*tIter)->GetAura(GetId(), m_effIndex))
+                    continue;
+
+                if(SpellEntry const *actualSpellInfo = spellmgr.SelectAuraRankForPlayerLevel(GetSpellProto(), (*tIter)->getLevel()))
+                {
+                    int32 actualBasePoints = m_currentBasePoints;
+                    // recalculate basepoints for lower rank (all AreaAura spell not use custom basepoints?)
+                    if(actualSpellInfo != GetSpellProto())
+                        actualBasePoints = actualSpellInfo->EffectBasePoints[m_effIndex];
+                    AreaAura *aur = new AreaAura(actualSpellInfo, m_effIndex, &actualBasePoints, (*tIter), caster, NULL);
+                    (*tIter)->AddAura(aur);
+                }
             }
         }
-
-        for(std::list<Unit *>::iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
-        {
-            if((*tIter)->GetAura(GetId(), m_effIndex))
-                continue;
-
-            if(SpellEntry const *actualSpellInfo = spellmgr.SelectAuraRankForPlayerLevel(GetSpellProto(), (*tIter)->getLevel()))
-            {
-                int32 actualBasePoints = m_currentBasePoints;
-                // recalculate basepoints for lower rank (all AreaAura spell not use custom basepoints?)
-                if(actualSpellInfo != GetSpellProto())
-                    actualBasePoints = actualSpellInfo->EffectBasePoints[m_effIndex];
-                AreaAura *aur = new AreaAura(actualSpellInfo, m_effIndex, &actualBasePoints, (*tIter), caster, NULL);
-                (*tIter)->AddAura(aur);
-            }
-        }
-
         Aura::Update(diff);
     }
     else                                                    // aura at non-caster
@@ -685,10 +687,18 @@ void AreaAura::Update(uint32 diff)
         // DO NOT access its members after update!
         Aura::Update(diff);
 
-        // remove aura if out-of-range from caster (after teleport for example) or caster no longer has the aura or caster is (no longer) friendly
+        // remove aura if out-of-range from caster (after teleport for example)
+        // or caster is isolated or caster no longer has the aura 
+        // or caster is (no longer) friendly
         bool needFriendly = (m_areaAuraType == AREA_AURA_ENEMY ? false : true);
-        if(!caster || !caster->IsWithinDistInMap(tmp_target, m_radius) || !caster->GetAura(tmp_spellId, tmp_effIndex) || caster->IsFriendlyTo(tmp_target) != needFriendly)
+        if( !caster || caster->hasUnitState(UNIT_STAT_ISOLATED) ||
+            !caster->IsWithinDistInMap(tmp_target, m_radius)    ||
+            !caster->GetAura(tmp_spellId, tmp_effIndex)         ||
+            caster->IsFriendlyTo(tmp_target) != needFriendly
+           )
+        {
             tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
+        }
         else if( m_areaAuraType == AREA_AURA_PARTY)         // check if in same sub group
         {
             Unit* check = caster->GetCharmerOrOwner();
@@ -3696,6 +3706,13 @@ void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
                 }
             }
         }
+    }
+    if( Real && GetSpellProto()->Mechanic == MECHANIC_BANISH )
+    {
+        if( apply )
+            m_target->addUnitState(UNIT_STAT_ISOLATED);
+        else
+            m_target->clearUnitState(UNIT_STAT_ISOLATED);
     }
 }
 
