@@ -3066,7 +3066,6 @@ void Spell::EffectSummon(uint32 i)
     {
         m_caster->SetPet(spawnCreature);
         spawnCreature->GetCharmInfo()->SetReactState( REACT_DEFENSIVE );
-        spawnCreature->GetCharmInfo()->SetCommandState( COMMAND_FOLLOW );
         spawnCreature->SavePetToDB(PET_SAVE_AS_CURRENT);
         ((Player*)m_caster)->PetSpellInitialize();
     }
@@ -3902,7 +3901,8 @@ void Spell::EffectSummonPet(uint32 i)
     if(m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->isTotem())
     {
         Unit* owner = ((Totem*)m_caster)->GetOwner();
-        if(owner) faction = owner->getFaction();
+        if(owner)
+            faction = owner->getFaction();
         NewSummon->GetCharmInfo()->SetReactState(REACT_AGGRESSIVE);
     }
 

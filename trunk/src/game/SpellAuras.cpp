@@ -2866,7 +2866,6 @@ void Aura::HandleModCharm(bool apply, bool Real)
                 CharmInfo *charmInfo = ((Creature*)m_target)->InitCharmInfo(m_target);
                 charmInfo->InitCharmCreateSpells();
                 charmInfo->SetReactState( REACT_DEFENSIVE );
-                charmInfo->SetCommandState( COMMAND_FOLLOW );
 
                 if(caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK)
                 {

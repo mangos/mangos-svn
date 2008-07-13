@@ -283,13 +283,14 @@ pkgdata_DATA = \
 	6193_mangos_spell_proc_event.sql \
 	6199_mangos_spell_proc_event.sql \
 	6210_mangos_spell_proc_event.sql \
-        6213_mangos_spell_target_position.sql \
+	6213_mangos_spell_target_position.sql \
 	6219_mangos_spell_proc_event.sql \
 	6246_mangos_spell_proc_event.sql \
 	6251_mangos_spell_proc_event.sql \
 	6255_mangos_spell_proc_event.sql \
 	6265_mangos_pet_name_generation.sql \
 	6270_mangos_spell_proc_event.sql \
+	6291_character_pet.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -553,11 +554,12 @@ EXTRA_DIST = \
 	6193_mangos_spell_proc_event.sql \
 	6199_mangos_spell_proc_event.sql \
 	6210_mangos_spell_proc_event.sql \
-        6213_mangos_spell_target_position.sql \
+	6213_mangos_spell_target_position.sql \
 	6219_mangos_spell_proc_event.sql \
 	6246_mangos_spell_proc_event.sql \
 	6251_mangos_spell_proc_event.sql \
 	6255_mangos_spell_proc_event.sql \
 	6265_mangos_pet_name_generation.sql \
 	6270_mangos_spell_proc_event.sql \
+	6291_character_pet.sql \
 	README
