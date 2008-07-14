@@ -4150,7 +4150,7 @@ uint8 Spell::CheckRange(bool strict)
     if(target && target != m_caster)
     {
         // distance from target center in checks
-        float dist = m_caster->GetDistance(target)+target->GetObjectSize();
+        float dist = m_caster->GetDistance(target->GetPositionX(),target->GetPositionY(),target->GetPositionZ());
         if(dist > max_range)
             return SPELL_FAILED_OUT_OF_RANGE;               //0x5A;
         if(dist < min_range)

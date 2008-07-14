@@ -1408,7 +1408,7 @@ uint8 Player::chatTag()
         return 0;
 }
 
-void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange, bool ignore_transport, bool is_gm_command)
+void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options)
 {
     // preparing unsummon pet if lost (we must get pet before teleportation or will not find it later)
     Pet* pet = GetPet();
@@ -1460,7 +1460,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     */
 
     // if we were on a transport, leave
-    if (ignore_transport && m_transport)
+    if (!(options & TELE_TO_NOT_LEAVE_TRANSPORT) && m_transport)
     {
         m_transport->RemovePassenger(this);
         m_transport = NULL;
@@ -1498,7 +1498,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         SetPosition( x, y, z, orientation, true);
         //BuildHeartBeatMsg(&data);
         //SendMessageToSet(&data, true);
-        if (outofrange)
+        if (!(options & TELE_TO_NOT_UNSUMMON_PET))
         {
             //same map, only remove pet if out of range
             if(pet && !IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
@@ -1512,10 +1512,11 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             }
         }
 
-        if (outofrange)
-        {
+        if(!(options & TELE_TO_NOT_LEAVE_COMBAT))
             CombatStop();
 
+        if (!(options & TELE_TO_NOT_UNSUMMON_PET))
+        {
             // resummon pet
             if(pet && m_oldpetnumber)
             {
@@ -1543,10 +1544,14 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     {
         CombatStop();
 
+        if(!(options & TELE_TO_SPELL))                      // not attempt interrupt teleportation spell at caster teleport
+            if(IsNonMeleeSpellCasted(true))
+                InterruptNonMeleeSpells(true);
+
         // far teleport to another map
         Map* oldmap = MapManager::Instance().GetMap(GetMapId(), this);
 
-        if(outofrange && pet)
+        if (!(options & TELE_TO_NOT_UNSUMMON_PET) && pet)
         {
             //leaving map -> delete pet right away (doing this later will cause problems)
             if(pet->isControlled() && !pet->isTemporarySummoned())
@@ -1581,7 +1586,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         Map* map = MapManager::Instance().GetMap(mapid, this);
         // verify, if it does want to homebind us (but only if we are not in GM state,
         // GMs are allowed to teleport everywhere they want to be)
-        if (!m_InstanceValid && (!isGameMaster() || !is_gm_command))
+        if (!m_InstanceValid && (!isGameMaster() || !(options & TELE_TO_GM_MODE)))
         {
             // yes, we are going to be homebind, avoid this action :)
             SetInstanceId(0);                               // reset instance id

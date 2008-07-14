@@ -450,7 +450,7 @@ void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
         {
             plr->ResurrectPlayer(1.0);
         }
-        plr->TeleportTo(newMapid, x, y, z, GetOrientation(), true,false);
+        plr->TeleportTo(newMapid, x, y, z, GetOrientation(), TELE_TO_NOT_LEAVE_TRANSPORT);
 
         //WorldPacket data(SMSG_811, 4);
         //data << uint32(0);

@@ -792,6 +792,15 @@ enum DuelCompleteType
     DUEL_FLED       = 2
 };
 
+enum TeleportToOptions
+{
+    TELE_TO_GM_MODE,
+    TELE_TO_NOT_LEAVE_TRANSPORT,
+    TELE_TO_NOT_LEAVE_COMBAT,
+    TELE_TO_NOT_UNSUMMON_PET,
+    TELE_TO_SPELL,
+};
+
 /// Type of environmental damages
 enum EnviromentalDamage
 {
@@ -900,7 +909,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddToWorld();
         void RemoveFromWorld();
 
-        void TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange = true, bool ignore_transport = true, bool is_gm_command = false);
+        void TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0);
 
         void SetSummonPoint(uint32 mapid, float x, float y, float z)
         {
