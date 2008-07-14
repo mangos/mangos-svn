@@ -396,8 +396,7 @@ Player::Player (WorldSession *session): Unit( 0 )
     }
 
     // Honor System
-    m_lastHonorDate = 0;
-    m_lastKillDate = 0;
+    m_lastHonorUpdateTime = time(NULL);
 
     // Player summoning
     m_summon_expire = 0;
@@ -5657,39 +5656,36 @@ void Player::UpdateArenaFields(void)
     /* arena calcs go here */
 }
 
-void Player::UpdateHonorFields(bool force)
+void Player::UpdateHonorFields()
 {
     /// called when rewarding honor and at each save
-    uint32 today = uint32(time(NULL) / DAY) * DAY;
-    uint32 yesterday = today - DAY;
+    uint64 now = time(NULL);
+    uint64 today = uint64(time(NULL) / DAY) * DAY;
 
-    if ((m_lastHonorDate < today) || force)
+    if(m_lastHonorUpdateTime < today)
     {
-        // if we have pending honor it either got added today or yesterday
-        // if the last was added yesterday then this is the first update after midnight
+        uint64 yesterday = today - DAY;
+
+        uint16 kills_today = PAIR32_LOPART(GetUInt32Value(PLAYER_FIELD_KILLS));
 
         // update yesterday's contribution
-        SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, GetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION));
-        // this is the first update today, reset today's contribution and pending honor
-        SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
-    }
-
-    uint16 kills_today = PAIR32_LOPART(GetUInt32Value(PLAYER_FIELD_KILLS));
-    if ((kills_today && m_lastKillDate < today) || force)
-    {
-        // if the last was done yesterday then this is the first update after midnight
-        if(m_lastKillDate >= yesterday || force)
+        if(m_lastHonorUpdateTime >= yesterday )
         {
-            // if the last victim was killed yesterday then
-            // kills_today is actually the total kills yesterday
+            SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, GetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION));
+
+            // this is the first update today, reset today's contribution
+            SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
             SetUInt32Value(PLAYER_FIELD_KILLS, MAKE_PAIR32(0,kills_today));
         }
         else
         {
-            // no kills yesterday or today, reset
+            // no honor/kills yesterday or today, reset
+            SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0);
             SetUInt32Value(PLAYER_FIELD_KILLS, 0);
         }
     }
+
+    m_lastHonorUpdateTime = now;
 }
 
 ///Calculate the amount of honor gained based on the victim
@@ -5703,10 +5699,10 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
 
     uint64 victim_guid = 0;
     uint32 victim_rank = 0;
-    uint32 now = time(NULL);
+    time_t now = time(NULL);
 
-    // first save/honor gain after midnight will also update the player's honor fields
-    UpdateHonorFields();
+    // need call before fields update to have chance move yesterday data to appropriate fields before today data change.
+    UpdateHonorFields();                                    
 
     if(honor <= 0)
     {
@@ -5771,8 +5767,6 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
             ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);
             // and those in a lifetime
             ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 1, true);
-
-            m_lastKillDate = now;
         }
         else
         {
@@ -5808,7 +5802,6 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
 
     GetSession()->SendPacket(&data);
 
-    m_lastHonorDate = now;
     // add honor points
     ModifyHonorPoints(int32(honor));
 
@@ -12897,8 +12890,8 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 
 bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 {
-    ////                                                     0     1        2     3     4     5      6           7           8           9    10           11        12         13         14         15          16           17                 18                 19                 20       21       22       23       24         25       26            27        [28]  [29]    30               31              32
-    //QueryResult *result = CharacterDatabase.PQuery("SELECT guid, account, data, name, race, class, position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, gmstate, stable_slots, at_login, zone, online, last_honor_date, last_kill_date, taxi_path FROM characters WHERE guid = '%u'", guid);
+    ////                                                     0     1        2     3     4     5      6           7           8           9    10           11        12         13         14         15          16           17                 18                 19                 20       21       22       23       24         25       26            27        [28]  [29]    30
+    //QueryResult *result = CharacterDatabase.PQuery("SELECT guid, account, data, name, race, class, position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, gmstate, stable_slots, at_login, zone, online, taxi_path FROM characters WHERE guid = '%u'", guid);
     QueryResult *result = holder->GetResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
     if(!result)
@@ -13075,8 +13068,11 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         }
     }
 
+    time_t now = time(NULL);
+    time_t logoutTime = time_t(fields[16].GetUInt64());
+
     // since last logout (in seconds)
-    uint32 time_diff = (time(NULL) - fields[16].GetUInt32());
+    uint64 time_diff = uint64(now - logoutTime);
     
     // set value, including drunk invisibility detection
     // calculate sobering. after 15 minutes logged out, the player will be sober again
@@ -13108,7 +13104,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     m_Played_time[1]= fields[14].GetUInt32();
 
     m_resetTalentsCost = fields[18].GetUInt32();
-    m_resetTalentsTime = fields[19].GetUInt64();
+    m_resetTalentsTime = time_t(fields[19].GetUInt64());
 
     // reserve some flags
     uint32 old_safe_flags = GetUInt32Value(PLAYER_FLAGS) & ( PLAYER_FLAGS_HIDE_CLOAK | PLAYER_FLAGS_HIDE_HELM );
@@ -13130,10 +13126,11 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     m_atLoginFlags = fields[27].GetUInt32();
 
     // Honor system
-    m_lastHonorDate = fields[30].GetUInt32();
-    m_lastKillDate = fields[31].GetUInt32();
+    // Update Honor kills data
+    m_lastHonorUpdateTime = logoutTime;
+    UpdateHonorFields();
 
-    std::string taxi_nodes = fields[32].GetCppString();
+    std::string taxi_nodes = fields[30].GetCppString();
 
     delete result;
 
@@ -14074,7 +14071,7 @@ void Player::SaveToDB()
         "taximask,online,cinematic,"
         "totaltime,leveltime,rest_bonus,logout_time,is_logout_resting,resettalents_cost,resettalents_time,"
         "trans_x, trans_y, trans_z, trans_o, transguid, gmstate, stable_slots,at_login,zone,"
-        "last_honor_date, last_kill_date,taxi_path) VALUES ("
+        "taxi_path) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -14111,7 +14108,7 @@ void Player::SaveToDB()
     ss << ", ";
     ss << finiteAlways(m_rest_bonus);
     ss << ", ";
-    ss << time(NULL);
+    ss << (uint64)time(NULL);
     ss << ", ";
     ss << is_save_resting;
     ss << ", ";
@@ -14145,10 +14142,6 @@ void Player::SaveToDB()
     ss << ", ";
     ss << GetZoneId();
 
-    ss << ", ";
-    ss << m_lastHonorDate;
-    ss << ", ";
-    ss << m_lastKillDate;
     ss << ", '";
     ss << m_taxi.SaveTaxiDestinationsToString();
     ss << "' )";

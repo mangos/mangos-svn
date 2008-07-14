@@ -3472,7 +3472,7 @@ bool ChatHandler::HandleUpdateHonorFieldsCommand(const char* /*args*/)
         return true;
     }
 
-    target->UpdateHonorFields(true);
+    target->UpdateHonorFields();
     return true;
 }
 
