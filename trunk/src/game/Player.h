@@ -1696,7 +1696,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetDrunkValue(uint16 newDrunkValue, uint32 itemid=0);
         uint16 GetDrunkValue() const { return m_drunk; }
         static DrunkenState GetDrunkenstateByValue(uint16 value);
+
         uint32 GetDeathTimer() const { return m_deathTimer; }
+        uint32 GetCorpseReclaimDelay() const;
+        void UpdateCorpseReclaimDelay();
+        void SendCorpseReclaimDelay(bool load = false);
+
         uint32 GetShieldBlockValue() const;                 // overwrite Unit version (virtual)
         bool CanParry() const { return m_canParry; }
         void SetCanParry(bool value) { m_canParry = value; }
@@ -2125,6 +2130,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_areaUpdateId;
 
         uint32 m_deathTimer;
+        time_t m_deathExpireTime;
 
         uint32 m_restTime;
 

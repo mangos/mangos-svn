@@ -39,7 +39,8 @@ Corpse::Corpse( WorldObject *instantiator, CorpseType type ) : WorldObject( inst
     m_valuesCount = CORPSE_END;
 
     m_type = type;
-    m_time = time(NULL) - CORPSE_RECLAIM_DELAY;             // to prevent resurrecting delay at load
+
+    m_time = time(NULL);
 
     lootForBody = false;
 }
@@ -106,7 +107,7 @@ void Corpse::SaveToDB()
         << GetOrientation() << ", "  << GetZoneId() << ", "  << GetMapId() << ", '";
     for(uint16 i = 0; i < m_valuesCount; i++ )
         ss << GetUInt32Value(i) << " ";
-    ss << "', NOW(), " << int(GetType()) << ", " << int(GetInstanceId()) << ")";
+    ss << "'," << uint64(m_time) <<", " << int(GetType()) << ", " << int(GetInstanceId()) << ")";
     CharacterDatabase.Execute( ss.str().c_str() );
     CharacterDatabase.CommitTransaction();
 }
@@ -139,7 +140,8 @@ bool Corpse::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
 {
     bool external = (result != NULL);
     if (!external)
-        result = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,data,bones_flag,instance FROM corpse WHERE guid = '%u'",guid);
+        //                                        0          1          2          3           4   5    6    7          8
+        result = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,data,time,bones_flag,instance FROM corpse WHERE guid = '%u'",guid);
 
     if( ! result )
     {
@@ -161,21 +163,23 @@ bool Corpse::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
 
 bool Corpse::LoadFromDB(uint32 guid, Field *fields)
 {
-    // SELECT position_x,position_y,position_z,orientation,map,data,bones_flag,instance FROM corpse
+    //                                          0          1          2          3           4   5    6    7          8
+    //result = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,data,time,bones_flag,instance FROM corpse WHERE guid = '%u'",guid);
     float positionX = fields[0].GetFloat();
     float positionY = fields[1].GetFloat();
     float positionZ = fields[2].GetFloat();
     float ort       = fields[3].GetFloat();
-    //uint32 zoneid   = fields[6].GetUInt32();
     uint32 mapid    = fields[4].GetUInt32();
-    uint32 bones   = fields[6].GetUInt32();
-    uint32 instanceid   = fields[7].GetUInt32();
 
     if(!LoadValues( fields[5].GetString() ))
     {
         sLog.outError("ERROR: Corpse #%d have broken data in `data` field. Can't be loaded.",guid);
         return false;
     }
+
+    m_time             = time_t(fields[6].GetUInt64());
+    uint32 bones       = fields[7].GetUInt32();
+    uint32 instanceid  = fields[8].GetUInt32();
 
     // overwrite possible wrong/corrupted guid
     SetUInt64Value(OBJECT_FIELD_GUID, MAKE_NEW_GUID(guid, 0, HIGHGUID_CORPSE));

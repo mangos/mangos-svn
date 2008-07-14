@@ -34,7 +34,7 @@ static void CorpsesErase(CorpseType type,uint32 delay)
 {
     ///- Get the list of eligible corpses/bones to be removed
     //No SQL injection (uint32 and enum)
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid,position_x,position_y,map,player FROM corpse WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(time) > '%u' AND bones_flag = '%u'",delay,type );
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid,position_x,position_y,map,player FROM corpse WHERE UNIX_TIMESTAMP()-time > '%u' AND bones_flag = '%u'",delay,type );
 
     if(result)
     {
