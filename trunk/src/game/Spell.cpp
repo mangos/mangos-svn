@@ -3824,6 +3824,12 @@ uint8 Spell::CanCast(bool strict)
                             return SPELL_FAILED_TRY_AGAIN;
                 break;
             }
+            case SPELL_EFFECT_STEAL_BENEFICIAL_BUFF:
+            {
+                if (m_targets.getUnitTarget()==m_caster)
+                    return SPELL_FAILED_BAD_TARGETS;
+                break;
+            }
             default:break;
         }
     }
