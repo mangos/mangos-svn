@@ -3129,8 +3129,8 @@ void Spell::EffectDispel(uint32 i)
     // Ok if exist some buffs for dispel try dispel it
     if (!dispel_list.empty())
     {
-        std::list <Aura *> success_list;
-        std::list <Aura *> fail_list;
+        std::list < std::pair<uint32,uint64> > success_list;// (spell_id,casterGuid)
+        std::list < uint32 > fail_list;                     // spell_id
         int32 list_size = dispel_list.size();
         // Dispell N = damage buffs (or while exist buffs for dispel)
         for (int32 count=0; count < damage && list_size > 0; ++count)
@@ -3150,9 +3150,9 @@ void Spell::EffectDispel(uint32 i)
             }
             // Try dispel
             if (roll_chance_i(miss_chance))
-                fail_list.push_back(aur);
+                fail_list.push_back(aur->GetId());
             else
-                success_list.push_back(aur);
+                success_list.push_back(std::pair<uint32,uint64>(aur->GetId(),aur->GetCasterGUID()));
             // Remove buff from list for prevent doubles
             for (std::vector<Aura *>::iterator j = dispel_list.begin(); j != dispel_list.end(); )
             {
@@ -3171,18 +3171,17 @@ void Spell::EffectDispel(uint32 i)
         {
             int32 count = success_list.size();
             WorldPacket data(SMSG_SPELLDISPELLOG, 8+8+4+1+4+count*5);
-            data.append(unitTarget->GetPackGUID());  // Victim GUID
-            data.append(m_caster->GetPackGUID());    // Caster GUID
-            data << uint32(m_spellInfo->Id);         // Dispell spell id
-            data << uint8(0);                        // not used
-            data << uint32(count);                   // count
-            for (std::list<Aura *>::iterator j = success_list.begin(); j != success_list.end(); ++j)
+            data.append(unitTarget->GetPackGUID());         // Victim GUID
+            data.append(m_caster->GetPackGUID());           // Caster GUID
+            data << uint32(m_spellInfo->Id);                // Dispell spell id
+            data << uint8(0);                               // not used
+            data << uint32(count);                          // count
+            for (std::list<std::pair<uint32,uint64> >::iterator j = success_list.begin(); j != success_list.end(); ++j)
             {
-                Aura *aur = *j;
-                SpellEntry const* spellInfo = aur->GetSpellProto();
-                data << uint32(spellInfo->Id);       // Spell Id
-                data << uint8(0);                    // 0 - dispeled !=0 cleansed
-                unitTarget->RemoveAurasDueToSpellByDispel(spellInfo->Id, aur->GetCasterGUID(), m_caster);
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(j->first);
+                data << uint32(spellInfo->Id);              // Spell Id
+                data << uint8(0);                           // 0 - dispeled !=0 cleansed
+                unitTarget->RemoveAurasDueToSpellByDispel(spellInfo->Id, j->second, m_caster);
             }
             m_caster->SendMessageToSet(&data, true);
 
@@ -3212,14 +3211,11 @@ void Spell::EffectDispel(uint32 i)
         {
             // Failed to dispell
             WorldPacket data(SMSG_DISPEL_FAILED, 8+8+4+4*fail_list.size());
-            data << uint64(m_caster->GetGUID());     // Caster GUID
-            data << uint64(unitTarget->GetGUID());   // Victim GUID
-            data << uint32(m_spellInfo->Id);         // Dispell spell id 
-            for (std::list<Aura *>::iterator j = fail_list.begin(); j != fail_list.end(); ++j)
-            {
-                Aura *aur = *j;
-                data << uint32(aur->GetId());        // Spell Id
-            }
+            data << uint64(m_caster->GetGUID());            // Caster GUID
+            data << uint64(unitTarget->GetGUID());          // Victim GUID
+            data << uint32(m_spellInfo->Id);                // Dispell spell id 
+            for (std::list< uint32 >::iterator j = fail_list.begin(); j != fail_list.end(); ++j)
+                data << uint32(*j);                         // Spell Id
             m_caster->SendMessageToSet(&data, true);
         }
     }
@@ -5854,7 +5850,7 @@ void Spell::EffectStealBeneficialBuff(uint32 i)
 {
     sLog.outDebug("Effect: StealBeneficialBuff");
 
-    if(!unitTarget)
+    if(!unitTarget || unitTarget==m_caster)                 // can't steal from self
         return;
 
     std::vector <Aura *> steal_list;
@@ -5874,7 +5870,7 @@ void Spell::EffectStealBeneficialBuff(uint32 i)
     // Ok if exist some buffs for dispel try dispel it
     if (!steal_list.empty())
     {
-        std::list <Aura *> success_list;
+        std::list < std::pair<uint32,uint64> > success_list;
         int32 list_size = steal_list.size();
         // Dispell N = damage buffs (or while exist buffs for dispel)
         for (int32 count=0; count < damage && list_size > 0; ++count)
@@ -5883,7 +5879,7 @@ void Spell::EffectStealBeneficialBuff(uint32 i)
             Aura *aur = steal_list[urand(0, list_size-1)];
             // Not use chance for steal
             // TODO possible need do it
-            success_list.push_back(aur);
+            success_list.push_back( std::pair<uint32,uint64>(aur->GetId(),aur->GetCasterGUID()));
 
             // Remove buff from list for prevent doubles
             for (std::vector<Aura *>::iterator j = steal_list.begin(); j != steal_list.end(); )
@@ -5908,13 +5904,12 @@ void Spell::EffectStealBeneficialBuff(uint32 i)
             data << uint32(m_spellInfo->Id);         // Dispell spell id
             data << uint8(0);                        // not used
             data << uint32(count);                   // count
-            for (std::list<Aura *>::iterator j = success_list.begin(); j != success_list.end(); ++j)
+            for (std::list<std::pair<uint32,uint64> >::iterator j = success_list.begin(); j != success_list.end(); ++j)
             {
-                Aura *aur = *j;
-                SpellEntry const* spellInfo = aur->GetSpellProto();
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(j->first);
                 data << uint32(spellInfo->Id);       // Spell Id
                 data << uint8(0);                    // 0 - steals !=0 transfers
-                unitTarget->RemoveAurasDueToSpellBySteal(spellInfo->Id, aur->GetCasterGUID(), m_caster);
+                unitTarget->RemoveAurasDueToSpellBySteal(spellInfo->Id, j->second, m_caster);
             }
             m_caster->SendMessageToSet(&data, true);
         }

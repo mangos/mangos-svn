@@ -3850,9 +3850,29 @@ void Unit::RemoveAurasDueToSpellByDispel(uint32 spellId, uint64 casterGUID, Unit
             // Unstable Affliction
             if (aur->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (aur->GetSpellProto()->SpellFamilyFlags & 0x010000000000LL))
             {
+                uint32 eff = aur->GetEffIndex();
                 int32 damage = aur->GetModifier()->m_amount*9;
                 dispeler->CastCustomSpell(dispeler, 31117, &damage, NULL, NULL, true, NULL, aur);
+
+                // aura can be remove by spell cast in case dispeler==this at death or other cases
+                bool found = false;
+                spellEffectPair spellpair (spellId,eff);    // do fast search by spell/eff pair
+                for (AuraMap::iterator iter2 = m_Auras.lower_bound(spellpair); iter2 != m_Auras.upper_bound(spellpair); ++iter2)
+                {
+                    if(iter2->second==aur)
+                    {
+                        found = true;                       // not removed, and then iterator also valid
+                        break;
+                    }
+                }
+
+                if(!found)
+                {
+                    iter = m_Auras.begin();
+                    continue;
+                }
             }
+
             // Remove aura
             RemoveAura(iter, AURA_REMOVE_BY_DISPEL);
         }
