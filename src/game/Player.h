@@ -1683,7 +1683,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                  PVP SYSTEM                       ***/
         /*********************************************************/
         void UpdateArenaFields();
-        void UpdateHonorFields(bool force = false);
+        void UpdateHonorFields();
         bool RewardHonor(Unit *pVictim, uint32 groupsize, float honor = -1);
         uint32 GetHonorPoints() { return GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY); }
         uint32 GetArenaPoints() { return GetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY); }
@@ -2040,8 +2040,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***                  HONOR SYSTEM                     ***/
         /*********************************************************/
-        uint32 m_lastHonorDate;
-        uint32 m_lastKillDate;
+        time_t m_lastHonorUpdateTime;
 
         void outDebugValues() const;
         bool _removeSpell(uint16 spell_id);

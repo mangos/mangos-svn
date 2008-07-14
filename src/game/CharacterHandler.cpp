@@ -57,7 +57,7 @@ bool LoginQueryHolder::Initialize()
 
     // NOTE: all fields in `characters` must be read to prevent lost character data at next save in case wrong DB structure.
     // !!! NOTE: including unused `zone`,`online`
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADFROM,            "SELECT guid,account,data,name,race,class,position_x,position_y,position_z,map,orientation,taximask,cinematic,totaltime,leveltime,rest_bonus,logout_time,is_logout_resting,resettalents_cost,resettalents_time,trans_x,trans_y,trans_z,trans_o, transguid,gmstate,stable_slots,at_login,zone,online,last_honor_date,last_kill_date,taxi_path FROM characters WHERE guid = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADFROM,            "SELECT guid,account,data,name,race,class,position_x,position_y,position_z,map,orientation,taximask,cinematic,totaltime,leveltime,rest_bonus,logout_time,is_logout_resting,resettalents_cost,resettalents_time,trans_x,trans_y,trans_z,trans_o, transguid,gmstate,stable_slots,at_login,zone,online,taxi_path FROM characters WHERE guid = '%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGROUP,           "SELECT leaderGuid FROM group_member WHERE memberGuid='%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES,  "SELECT map,instance,leader FROM character_instance WHERE guid = '%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADAURAS,           "SELECT caster_guid,spell,effect_index,amount,maxduration,remaintime,remaincharges FROM character_aura WHERE guid = '%u'", GUID_LOPART(m_guid));
@@ -642,9 +642,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     // Load pet if any and player is alive and not in taxi flight
     if(pCurrChar->isAlive() && pCurrChar->m_taxi.GetTaxiSource()==0)
         pCurrChar->LoadPet();
-
-    // Update Honor kills data
-    pCurrChar->UpdateHonorFields();
 
     // Set FFA PvP for non GM in non-rest mode
     if(sWorld.IsFFAPvPRealm() && !pCurrChar->isGameMaster() && !pCurrChar->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_RESTING) )
