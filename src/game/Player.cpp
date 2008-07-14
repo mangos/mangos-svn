@@ -111,6 +111,12 @@ enum CharacterFlags
     CHARACTER_FLAG_UNK32                = 0x80000000
 };
 
+// corpse reclaim times
+#define DEATH_EXPIRE_STEP (5*MINUTE)
+#define MAX_DEATH_COUNT 3
+
+static uint32 copseReclaimDelay[MAX_DEATH_COUNT] = { 30, 60, 120 };
+
 //== PlayerTaxi ================================================
 
 PlayerTaxi::PlayerTaxi()
@@ -332,6 +338,7 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_drunk = 0;
     m_restTime = 0;
     m_deathTimer = 0;
+    m_deathExpireTime = 0;
 
     m_swingErrorMsg = 0;
 
@@ -3502,10 +3509,7 @@ void Player::BuildPlayerRepop()
     // BG - remove insignia related
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
 
-    //! corpse reclaim delay 30 * 1000ms
-    WorldPacket data(SMSG_CORPSE_RECLAIM_DELAY, 4);
-    data << (uint32)(CORPSE_RECLAIM_DELAY*1000);
-    GetSession()->SendPacket( &data );
+    SendCorpseReclaimDelay();
 
     // to prevent cheating
     if(corpse)
@@ -3603,6 +3607,8 @@ void Player::KillPlayer()
 
     // 6 minutes until repop at graveyard
     m_deathTimer = 360000;
+
+    UpdateCorpseReclaimDelay();
 
     // don't create corpse at this moment, player might be falling
 
@@ -12890,8 +12896,8 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 
 bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 {
-    ////                                                     0     1        2     3     4     5      6           7           8           9    10           11        12         13         14         15          16           17                 18                 19                 20       21       22       23       24         25       26            27        [28]  [29]    30
-    //QueryResult *result = CharacterDatabase.PQuery("SELECT guid, account, data, name, race, class, position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, gmstate, stable_slots, at_login, zone, online, taxi_path FROM characters WHERE guid = '%u'", guid);
+    ////                                                     0     1        2     3     4     5      6           7           8           9    10           11        12         13         14         15          16           17                 18                 19                 20       21       22       23       24         25       26            27        [28]  [29]    30                 31
+    //QueryResult *result = CharacterDatabase.PQuery("SELECT guid, account, data, name, race, class, position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, gmstate, stable_slots, at_login, zone, online, death_expire_time, taxi_path FROM characters WHERE guid = '%u'", guid);
     QueryResult *result = holder->GetResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
     if(!result)
@@ -13130,7 +13136,11 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     m_lastHonorUpdateTime = logoutTime;
     UpdateHonorFields();
 
-    std::string taxi_nodes = fields[30].GetCppString();
+    m_deathExpireTime = (time_t)fields[30].GetUInt64();
+    if(m_deathExpireTime > now+MAX_DEATH_COUNT*DEATH_EXPIRE_STEP)
+        m_deathExpireTime = now+MAX_DEATH_COUNT*DEATH_EXPIRE_STEP-1;
+
+    std::string taxi_nodes = fields[31].GetCppString();
 
     delete result;
 
@@ -14071,7 +14081,7 @@ void Player::SaveToDB()
         "taximask,online,cinematic,"
         "totaltime,leveltime,rest_bonus,logout_time,is_logout_resting,resettalents_cost,resettalents_time,"
         "trans_x, trans_y, trans_z, trans_o, transguid, gmstate, stable_slots,at_login,zone,"
-        "taxi_path) VALUES ("
+        "death_expire_time, taxi_path) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -14141,6 +14151,9 @@ void Player::SaveToDB()
 
     ss << ", ";
     ss << GetZoneId();
+
+    ss << ", ";
+    ss << (uint64)m_deathExpireTime;
 
     ss << ", '";
     ss << m_taxi.SaveTaxiDestinationsToString();
@@ -17150,4 +17163,61 @@ void Player::UpdateAreaDependentAuras( uint32 newArea )
                 CastSpell(this,42016,true);
         }
     }
+}
+
+uint32 Player::GetCorpseReclaimDelay() const
+{
+    time_t now = time(NULL);
+    // 0..2 full period
+    uint32 count = (now < m_deathExpireTime) ? (m_deathExpireTime - now)/DEATH_EXPIRE_STEP : 0;
+    return copseReclaimDelay[count];
+}
+
+void Player::UpdateCorpseReclaimDelay()
+{
+    time_t now = time(NULL);
+    if(now < m_deathExpireTime)
+    {
+        // full and partly periods 1..3
+        uint32 count = (m_deathExpireTime - now)/DEATH_EXPIRE_STEP +1;
+        if(count < MAX_DEATH_COUNT)
+            m_deathExpireTime = now+(count+1)*DEATH_EXPIRE_STEP;
+        else
+            m_deathExpireTime = now+MAX_DEATH_COUNT*DEATH_EXPIRE_STEP;
+    }
+    else
+        m_deathExpireTime = now+DEATH_EXPIRE_STEP;
+}
+
+void Player::SendCorpseReclaimDelay(bool load)
+{
+    uint32 delay;
+    if(load)
+    {
+        Corpse* corpse = GetCorpse();
+        if(!corpse)
+            return;
+
+        if(corpse->GetGhostTime() > m_deathExpireTime)
+            return;
+
+        uint32 count = (m_deathExpireTime-corpse->GetGhostTime())/DEATH_EXPIRE_STEP;
+        if(count>=MAX_DEATH_COUNT)
+            count = MAX_DEATH_COUNT-1;
+
+        time_t expected_time = corpse->GetGhostTime()+copseReclaimDelay[count];
+
+        time_t now = time(NULL);
+        if(now >= expected_time)
+            return;
+
+        delay = expected_time-now;
+    }
+    else
+        delay = GetCorpseReclaimDelay();
+
+    //! corpse reclaim delay 30 * 1000ms or longer at often deaths
+    WorldPacket data(SMSG_CORPSE_RECLAIM_DELAY, 4);
+    data << uint32(delay*1000);
+    GetSession()->SendPacket( &data );
 }

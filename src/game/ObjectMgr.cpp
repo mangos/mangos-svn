@@ -5169,8 +5169,8 @@ uint32 ObjectMgr::GeneratePetNumber()
 void ObjectMgr::LoadCorpses()
 {
     uint32 count = 0;
-    //                                                     0           1           2           3            4    5     6           7         8       9
-    QueryResult *result = CharacterDatabase.PQuery("SELECT position_x, position_y, position_z, orientation, map, data, bones_flag, instance, player, guid FROM corpse WHERE bones_flag = 0");
+    //                                                     0           1           2           3            4    5     6     7           8         10
+    QueryResult *result = CharacterDatabase.PQuery("SELECT position_x, position_y, position_z, orientation, map, data, time, bones_flag, instance, guid FROM corpse WHERE bones_flag = 0");
 
     if( !result )
     {
