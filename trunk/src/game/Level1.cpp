@@ -440,7 +440,8 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         float x,y,z;
         chr->GetContactPoint(m_session->GetPlayer(),x,y,z);
 
-        _player->TeleportTo(chr->GetMapId(), x, y, z, _player->GetAngle( chr ), true, true, true);
+        _player->TeleportTo(chr->GetMapId(), x, y, z, _player->GetAngle( chr ), TELE_TO_GM_MODE);
+
         return true;
     }
 
