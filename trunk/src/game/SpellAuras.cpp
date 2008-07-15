@@ -605,10 +605,10 @@ void AreaAura::Update(uint32 diff)
                             Player* Target = itr->getSource();
                             if(Target && Target->isAlive() && Target->GetSubGroup()==subgroup && caster->IsFriendlyTo(Target))
                             {
-                                if(caster->IsWithinDistInMap(Target, m_radius) && !Target->GetAura(GetId(), m_effIndex))
+                                if(caster->IsWithinDistInMap(Target, m_radius))
                                     targets.push_back(Target);
                                 Pet *pet = Target->GetPet();
-                                if(pet && pet->isAlive() && caster->IsWithinDistInMap(pet, m_radius) && !pet->GetAura(GetId(), m_effIndex))
+                                if(pet && pet->isAlive() && caster->IsWithinDistInMap(pet, m_radius))
                                     targets.push_back(pet);
                             }
                         }
@@ -661,7 +661,7 @@ void AreaAura::Update(uint32 diff)
 
             for(std::list<Unit *>::iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
             {
-                if((*tIter)->GetAura(GetId(), m_effIndex))
+                if((*tIter)->HasAura(GetId(), m_effIndex))
                     continue;
 
                 if(SpellEntry const *actualSpellInfo = spellmgr.SelectAuraRankForPlayerLevel(GetSpellProto(), (*tIter)->getLevel()))
@@ -693,7 +693,7 @@ void AreaAura::Update(uint32 diff)
         bool needFriendly = (m_areaAuraType == AREA_AURA_ENEMY ? false : true);
         if( !caster || caster->hasUnitState(UNIT_STAT_ISOLATED) ||
             !caster->IsWithinDistInMap(tmp_target, m_radius)    ||
-            !caster->GetAura(tmp_spellId, tmp_effIndex)         ||
+            !caster->HasAura(tmp_spellId, tmp_effIndex)         ||
             caster->IsFriendlyTo(tmp_target) != needFriendly
            )
         {
@@ -701,24 +701,28 @@ void AreaAura::Update(uint32 diff)
         }
         else if( m_areaAuraType == AREA_AURA_PARTY)         // check if in same sub group
         {
-            Unit* check = caster->GetCharmerOrOwner();
-            if (!check)
-                check = caster;
-
-            Group *pGroup = NULL;
-            if( check->GetTypeId() == TYPEID_PLAYER )
-                pGroup = ((Player*)check)->GetGroup();
-
-            if( pGroup )
+            // not check group if target == owner or target == pet
+            if (caster->GetCharmerOrOwnerGUID() != tmp_target->GetGUID() && caster->GetPetGUID() != tmp_target->GetGUID())
             {
-                Unit* checkTarget = tmp_target->GetCharmerOrOwner();
-                if(!checkTarget)
-                    checkTarget = tmp_target;
-                if(checkTarget->GetTypeId() != TYPEID_PLAYER || !pGroup->SameSubGroup((Player*)check, (Player*)checkTarget))
+                Unit* check = caster->GetCharmerOrOwner();
+                if (!check)
+                    check = caster;
+
+                Group *pGroup = NULL;
+                if( check->GetTypeId() == TYPEID_PLAYER )
+                    pGroup = ((Player*)check)->GetGroup();
+
+                if( pGroup )
+                {
+                    Unit* checkTarget = tmp_target->GetCharmerOrOwner();
+                    if(!checkTarget)
+                        checkTarget = tmp_target;
+                    if(checkTarget->GetTypeId() != TYPEID_PLAYER || !pGroup->SameSubGroup((Player*)check, (Player*)checkTarget))
+                        tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
+                }
+                else
                     tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
             }
-            else
-                tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
         }
     }
 }

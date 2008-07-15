@@ -692,15 +692,6 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                 WorldPacket data(SMSG_DURABILITY_DAMAGE_DEATH, 0);
                 ((Player*)pVictim)->GetSession()->SendPacket(&data);
             }
-
-            Pet *pet = pVictim->GetPet();
-            if(pet && pVictim->GetTypeId() != TYPEID_PLAYER)
-            {
-                pet->setDeathState(JUST_DIED);
-                pet->SetHealth(0);
-                pet->addUnitState(UNIT_STAT_DIED);
-                pet->getHostilRefManager().deleteReferences();
-            }
         }
         else                                                // creature died
         {

@@ -1700,7 +1700,7 @@ void Player::RewardRage( uint32 damage, uint32 weaponSpeedHitFactor, bool attack
         addRage = damage/rageconversion*2.5;
 
         // Berserker Rage effect
-        if(GetAura(18499,0))
+        if(HasAura(18499,0))
             addRage *= 1.3;
     }
 
@@ -17140,7 +17140,7 @@ void Player::UpdateZoneDependentAuras( uint32 newZone )
         else if( getRace() == RACE_NIGHTELF || getRace() == RACE_DRAENEI )
             spellid = getGender() == GENDER_FEMALE ? 35483 : 35482;
 
-        if(spellid && !GetAura(spellid,0) )
+        if(spellid && !HasAura(spellid,0) )
             CastSpell(this,spellid,true);
     }
 }
@@ -17165,9 +17165,9 @@ void Player::UpdateAreaDependentAuras( uint32 newArea )
     {
         if( GetDummyAura(40214) )
         {
-            if( !GetAura(40216,0) )
+            if( !HasAura(40216,0) )
                 CastSpell(this,40216,true);
-            if( !GetAura(42016,0) )
+            if( !HasAura(42016,0) )
                 CastSpell(this,42016,true);
         }
     }
