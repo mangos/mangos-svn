@@ -3063,95 +3063,37 @@ void Unit::_UpdateSpells( uint32 time )
 
 void Unit::_UpdateAutoRepeatSpell()
 {
-    if(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->getState() == SPELL_STATE_FINISHED)
+    //check "realtime" interrupts
+    if ( (GetTypeId() == TYPEID_PLAYER && ((Player*)this)->isMoving()) || IsNonMeleeSpellCasted(false,false,true) )
     {
-        //Auto Shot & Shoot
-        if( m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->AttributesEx2 == 0x000020 && GetTypeId() == TYPEID_PLAYER )
-        {
-            // Auto Shot don't require ranged weapon cooldown at first cast, wand shoot does, so the 'FINISHED' state
-            if(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Category == 351)
-            {
-                // Shoot
-                resetAttackTimer( RANGED_ATTACK );
-            }
-            else
-            {
-                // Auto Shoot
-                if (m_AutoRepeatFirstCast)
-                {
-                    // first cast only with recovery time (not less)
-                    if (getAttackTimer( RANGED_ATTACK ) < m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->RecoveryTime)
-                        setAttackTimer( RANGED_ATTACK, m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->RecoveryTime);
-                    m_AutoRepeatFirstCast = false;
-                }
-                else
-                {
-                    // second or further casts
-                    resetAttackTimer( RANGED_ATTACK );
-                }
-            }
-        }
-        else
-        {
-            setAttackTimer( RANGED_ATTACK, m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->RecoveryTime);
-        }
-
-        m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->setState(SPELL_STATE_IDLE);
+        // cancel wand shoot
+        if(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Category == 351)
+            InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+        m_AutoRepeatFirstCast = true;
+        return;
     }
-    else if(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->getState() == SPELL_STATE_IDLE && isAttackReady(RANGED_ATTACK) )
+
+    //apply delay
+    if ( m_AutoRepeatFirstCast && getAttackTimer(RANGED_ATTACK) < 500 )
+        setAttackTimer(RANGED_ATTACK,500);
+    m_AutoRepeatFirstCast = false;
+
+    //castroutine
+    if (isAttackReady(RANGED_ATTACK))
     {
-        // check if we can cast
-        if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CanCast(true) == 0)
-        {
-            // check movement in player case
-            if(GetTypeId() == TYPEID_PLAYER && ((Player*)this)->isMoving())
-            {
-                // cancel wand shooting
-                if(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Category == 351)
-                    InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
-                // ELSE delay auto-repeat ranged weapon until player movement stop
-            }
-            else
-                // recheck range and req. items (ammo and gun, etc)
-            if(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CheckRange(true) == 0 && m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CheckItems() == 0 )
-            {
-                // check, if we are casting melee spell (it blocks autorepeat)
-                if ( ! (m_currentSpells[CURRENT_MELEE_SPELL] &&
-                    (m_currentSpells[CURRENT_MELEE_SPELL]->getState() != SPELL_STATE_FINISHED) &&
-                    (m_currentSpells[CURRENT_MELEE_SPELL]->getState() != SPELL_STATE_DELAYED)) )
-                {
-                    // check, if we are casting something else, if no then run autorepeat spell
-                    if (!IsNonMeleeSpellCasted(false, false, true))
-                    {
-                        // wee need clear target list before recasting 
-                        m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CleanupTargetList();
-                        m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->setState(SPELL_STATE_PREPARING);
-                        m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->ReSetTimer();
-                    }
-                }
-            }
-            else
-            {
-                InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
-            }
-        }
-        else
+        // Check if able to cast
+        if(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CanCast(true))
         {
             InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+            return;
         }
-    }
-    else if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->getState() == SPELL_STATE_PREPARING)
-    {
-        // check, if some other incomplete spell exists (including melee) or ranged attack is not ready
-        if ( m_currentSpells[CURRENT_MELEE_SPELL] ||
-            m_currentSpells[CURRENT_GENERIC_SPELL] ||
-            m_currentSpells[CURRENT_CHANNELED_SPELL] ||
-            !isAttackReady(RANGED_ATTACK) )
-        {
-            // some other spell is here or ranged attack is not ready, break us to idle state
-            m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->finish(false);
-            m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->setState(SPELL_STATE_IDLE);
-        }
+
+        // we want to shoot
+        Spell* spell = new Spell(this, m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo, true, 0);
+        spell->prepare(&(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_targets));
+
+        // all went good, reset attack
+        resetAttackTimer(RANGED_ATTACK);
     }
 }
 
@@ -3181,6 +3123,7 @@ void Unit::SetCurrentCastedSpell( Spell * pSpell )
                 // break autorepeat if not Auto Shot
                 if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->m_spellInfo->Category == 351)
                     InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+                m_AutoRepeatFirstCast = true;
             }
         } break;
 
@@ -3205,11 +3148,8 @@ void Unit::SetCurrentCastedSpell( Spell * pSpell )
                 InterruptSpell(CURRENT_GENERIC_SPELL,false);
                 InterruptSpell(CURRENT_CHANNELED_SPELL,false);
             }
-            else
-            {
-                // special action: set first cast flag for Auto Shoot
-                m_AutoRepeatFirstCast = true;
-            }
+            // special action: set first cast flag
+            m_AutoRepeatFirstCast = true;
         } break;
 
         default:

@@ -334,9 +334,11 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
     m_cast_count = 0;
     m_triggeredByAuraSpell  = NULL;
 
-    m_autoRepeat = false;
-    if( m_spellInfo->AttributesEx2 == 0x000020 )            //Auto Shot & Shoot
+    //Auto Shot & Shoot
+    if( m_spellInfo->AttributesEx2 == 0x000020 && !triggered )
         m_autoRepeat = true;
+    else
+        m_autoRepeat = false;
 
     m_powerCost = 0;                                        // setup to correct value in Spell::prepare, don't must be used before.
     m_casttime = 0;                                         // setup to correct value in Spell::prepare, don't must be used before.
@@ -1891,7 +1893,7 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
     m_powerCost = CalculatePowerCost();
 
     uint8 result = CanCast(true);
-    if(result != 0)
+    if(result != 0 && !IsAutoRepeat())                      //always cast autorepeat dummy for triggering
     {
         if(triggeredByAura)
         {
@@ -1916,10 +1918,6 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
         m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         m_caster->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
     }
-
-    // do first cast of autorepeat spell with recovery time delay (like after any autocast)
-    if(IsAutoRepeat())
-        m_spellState = SPELL_STATE_FINISHED;
 
     if(m_IsTriggeredSpell)
         cast(true);
@@ -2324,23 +2322,10 @@ void Spell::update(uint32 difftime)
     // update pointers based at it's GUIDs
     UpdatePointers();
 
-    if(m_targets.getUnitTargetGUID())
+    if(m_targets.getUnitTargetGUID() && !m_targets.getUnitTarget())
     {
-        if(!m_targets.getUnitTarget() || !m_targets.getUnitTarget()->isAlive())
-        {
-            if(m_autoRepeat)
-            {
-                m_autoRepeat = false;
-                m_spellState = SPELL_STATE_FINISHED;
-                return;
-            }
-
-            if(!m_targets.getUnitTarget())
-            {
-                cancel();
-                return;
-            }
-        }
+        cancel();
+        return;
     }
 
     // check if the player caster has moved before the spell finished
@@ -2351,8 +2336,8 @@ void Spell::update(uint32 difftime)
         // always cancel for channeled spells
         if( m_spellState == SPELL_STATE_CASTING )
             cancel();
-        // don't cancel for melee, autorepeat and instant spells
-        else if(!IsNextMeleeSwingSpell() && !m_autoRepeat && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT))
+        // don't cancel for melee, autorepeat, triggered and instant spells
+        else if(!IsNextMeleeSwingSpell() && !IsAutoRepeat() && !m_IsTriggeredSpell && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_MOVEMENT))
             cancel();
     }
 
@@ -2368,7 +2353,7 @@ void Spell::update(uint32 difftime)
                     m_timer -= difftime;
             }
 
-            if(m_timer == 0 && !IsNextMeleeSwingSpell())
+            if(m_timer == 0 && !IsNextMeleeSwingSpell() && !IsAutoRepeat())
                 cast();
         } break;
         case SPELL_STATE_CASTING:
@@ -2496,8 +2481,8 @@ void Spell::finish(bool ok)
             m_caster->resetAttackTimer(OFF_ATTACK);
     }
 
-    if (IsRangedAttackResetSpell())
-        m_caster->resetAttackTimer(RANGED_ATTACK);
+    /*if (IsRangedAttackResetSpell())
+        m_caster->resetAttackTimer(RANGED_ATTACK);*/
 
     // Clear combo at finish state
     if(m_caster->GetTypeId() == TYPEID_PLAYER && NeedsComboPoints(m_spellInfo))
