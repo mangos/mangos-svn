@@ -176,6 +176,7 @@ INSERT INTO `command` VALUES
 ('cast back',3,'Syntax: .cast back #spellid\r\n  Selected target will cast #spellid to your character.'),
 ('cast self',3,'Syntax: .cast self #spellid\r\nCast #spellid by target at target itself.'),
 ('cast target',3,'Syntax: .cast target #spellid\r\n  Selected target will cast #spellid to his victim.'),
+('combatstop',2,'Syntax: .combatstop\r\nStop combat for selected character. If selected non-player then command applied to self.'),
 ('commands',0,'Syntax: .commands\r\n\r\nDisplay a list of available commands for your account level.'),
 ('cooldown',3,'Syntax: .cooldown [#spell_id]\r\n\r\nRemove all (if spell_id not provided) or #spel_id spell cooldown from selected character or you (if no selection).'),
 ('damage',3,'Syntax: .damage $damage_amount [$school [$spellid]]\r\n\r\nApply $damage to target. If not $school and $spellid provided then this flat clean melee damage without any modifiers. If $school provided then damage modified by armor reduction (if school physical), and target absorbing modifiers and result applied as melee damage to target. If spell provided then damage modified and applied as spell damage. $spellid can be shift-link.'),
