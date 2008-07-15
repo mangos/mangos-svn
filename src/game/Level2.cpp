@@ -3644,3 +3644,16 @@ bool ChatHandler::HandleEventStopCommand(const char* args)
     gameeventmgr.StopEvent(event_id,true);
     return true;
 }
+
+bool ChatHandler::HandleCombatStopCommand(const char* args)
+{
+    
+    Player *player = getSelectedPlayer();
+    
+    if (!player)
+        player = m_session->GetPlayer();
+
+    player->CombatStop();
+    player->getHostilRefManager().deleteReferences();
+    return true;
+}

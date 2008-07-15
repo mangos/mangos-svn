@@ -350,6 +350,7 @@ class ChatHandler
         bool HandleCastSelfCommand(const char *args);
         bool HandleCastTargetCommand(const char *args);
         bool HandleComeToMeCommand(const char *args);
+        bool HandleCombatStopCommand(const char *args);
 
         //! Development Commands
         bool HandleSetValue(const char* args);
