@@ -734,8 +734,10 @@ void Spell::EffectDummy(uint32 i)
                     if(!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
                         return;
 
-                    ((Creature*)unitTarget)->setDeathState(JUST_DIED);
-                    ((Creature*)unitTarget)->RemoveCorpse();
+                    Creature* creatureTarget = (Creature*)unitTarget;
+                    creatureTarget->setDeathState(JUST_DIED);
+                    creatureTarget->RemoveCorpse();
+                    creatureTarget->SetHealth(0);           // just for nice GM-mode view
                     return;
                 }
                 case 16589:                                 // Noggenfogger Elixir
@@ -952,6 +954,21 @@ void Spell::EffectDummy(uint32 i)
                         int32 bp = damage * count;
                         m_caster->CastCustomSpell(m_caster, 28733, &bp, NULL, NULL, true);
                     }
+                    return;
+                }
+                case 44875:                                 // Complete Raptor Capture
+                {
+                    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
+                        return;
+
+                    Creature* creatureTarget = (Creature*)unitTarget;
+
+                    creatureTarget->setDeathState(JUST_DIED);
+                    creatureTarget->RemoveCorpse();
+                    creatureTarget->SetHealth(0);           // just for nice GM-mode view
+
+                    //cast spell Raptor Capture Credit
+                    m_caster->CastSpell(m_caster,42337,true,NULL);
                     return;
                 }
             }
