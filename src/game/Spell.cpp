@@ -269,6 +269,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
     m_selfContainer = NULL;
     m_triggeringContainer = triggeringContainer;
     m_deletable = true;
+    m_delayAtDamageCount = 0;
 
     m_applyMultiplierMask = 0;
 
@@ -4657,7 +4658,7 @@ uint8 Spell::CheckItems()
     return uint8(0);
 }
 
-void Spell::Delayed(int32 delaytime)
+void Spell::Delayed()
 {
     if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -4676,10 +4677,17 @@ void Spell::Delayed(int32 delaytime)
     if (roll_chance_i(resistChance))
         return;
 
-    m_timer += delaytime;
+    int32 delaytime = GetNextDelayAtDamageMsTime();
 
-    if(int32(m_timer) > m_casttime)
-        ReSetTimer();
+    if(int32(m_timer) + delaytime > m_casttime)
+    {
+        delaytime = m_casttime - m_timer;
+        m_timer = m_casttime;
+    }
+    else
+        m_timer += delaytime;
+
+    sLog.outDetail("Spell %u partially interrupted for (%d) ms at damage",m_spellInfo->Id,delaytime);
 
     WorldPacket data(SMSG_SPELL_DELAYED, 8+4);
     data.append(m_caster->GetPackGUID());
@@ -4688,7 +4696,7 @@ void Spell::Delayed(int32 delaytime)
     m_caster->SendMessageToSet(&data,true);
 }
 
-void Spell::DelayedChannel(int32 delaytime)
+void Spell::DelayedChannel()
 {
     if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER || getState() != SPELL_STATE_CASTING)
         return;
@@ -4700,16 +4708,17 @@ void Spell::DelayedChannel(int32 delaytime)
     if (roll_chance_i(resistChance))
         return;
 
-    int32 appliedDelayTime = delaytime;
+    int32 delaytime = GetNextDelayAtDamageMsTime();
 
     if(int32(m_timer) < delaytime)
     {
-        appliedDelayTime = m_timer;
+        delaytime = m_timer;
         m_timer = 0;
-    } else
-    m_timer -= delaytime;
+    }
+    else
+        m_timer -= delaytime;
 
-    sLog.outDebug("Spell %u partially interrupted for %i ms, new duration: %u ms", m_spellInfo->Id, appliedDelayTime, m_timer);
+    sLog.outDebug("Spell %u partially interrupted for %i ms, new duration: %u ms", m_spellInfo->Id, delaytime, m_timer);
 
     for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
     {
@@ -4720,7 +4729,7 @@ void Spell::DelayedChannel(int32 delaytime)
             {
                 for (int j=0;j<3;j++)
                     if( ihit->effectMask & (1<<j) )
-                        unit->DelayAura(m_spellInfo->Id, j, appliedDelayTime);
+                        unit->DelayAura(m_spellInfo->Id, j, delaytime);
             }
 
         }
@@ -4731,7 +4740,7 @@ void Spell::DelayedChannel(int32 delaytime)
         // partially interrupt persistent area auras
         DynamicObject* dynObj = m_caster->GetDynObject(m_spellInfo->Id, j);
         if(dynObj)
-            dynObj->Delay(appliedDelayTime);
+            dynObj->Delay(delaytime);
     }
 
     SendChannelUpdate(m_timer);
