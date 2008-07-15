@@ -70,8 +70,8 @@
 #define SKILL_MAX(x)           PAIR32_HIPART(x)
 #define MAKE_SKILL_VALUE(v, m) MAKE_PAIR32(v,m)
 
-#define SKILL_TEMP_BONUS(x)    PAIR32_LOPART(x)
-#define SKILL_PERM_BONUS(x)    PAIR32_HIPART(x)
+#define SKILL_TEMP_BONUS(x)    int16(PAIR32_LOPART(x))
+#define SKILL_PERM_BONUS(x)    int16(PAIR32_HIPART(x))
 #define MAKE_SKILL_BONUS(t, p) MAKE_PAIR32(t,p)
 
 enum CharacterFlags
@@ -4837,8 +4837,11 @@ uint16 Player::GetMaxSkillValue(uint32 skill) const
     {
         if ((GetUInt32Value(PLAYER_SKILL_INDEX(i)) & 0x0000FFFF) == skill)
         {
+            uint32 bonus = GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i));
+
             int32 result = int32(SKILL_MAX(GetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i))));
-            result += SKILL_PERM_BONUS(GetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i)));
+            result += SKILL_TEMP_BONUS(bonus);
+            result += SKILL_PERM_BONUS(bonus);
             return result < 0 ? 0 : result;
         }
     }
