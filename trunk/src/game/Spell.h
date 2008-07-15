@@ -318,8 +318,8 @@ class Spell
         int32 CalculatePowerCost();
 
         bool HaveTargetsForEffect(uint8 effect) const;
-        void Delayed(int32 delaytime);
-        void DelayedChannel(int32 delaytime);
+        void Delayed();
+        void DelayedChannel();
         inline uint32 getState() const { return m_spellState; }
         void setState(uint32 state) { m_spellState = state; }
 
@@ -414,6 +414,9 @@ class Spell
         int32 m_casttime;                                   // Calculated spell cast time initialized only in Spell::prepare
         bool m_canReflect;                                  // can reflect this spell?
         bool m_autoRepeat;
+
+        uint8 m_delayAtDamageCount;
+        int32 GetNextDelayAtDamageMsTime() { return m_delayAtDamageCount < 5 ? 1000 - (m_delayAtDamageCount++)* 200 : 200; }
 
         // Delayed spells system
         uint64 m_delayStart;                                // time of spell delay start, filled by event handler, zero = just started

@@ -839,14 +839,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                         continue;
 
                     if(Spell* spell = pVictim->m_currentSpells[i])
-                    {
                         if(spell->getState() == SPELL_STATE_PREPARING)
-                        {
-                            int32 delay = spell->GetCastTime()/4;
-                            sLog.outDetail("Spell %u delayed (%d) at damage",spell->m_spellInfo->Id,delay);
-                            spell->Delayed(delay);
-                        }
-                    }
+                            spell->Delayed();
                 }
             }
 
@@ -858,11 +852,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                     if( channelInterruptFlags & CHANNEL_FLAG_DELAY )
                     {
                         if(pVictim!=this)                   //don't shorten the duration of channeling if you damage yourself
-                        {
-                            int32 delay = GetSpellDuration(spell->m_spellInfo)/4;
-                            sLog.outDetail("Channeled spell %u delayed (%d) at damage!",spell->m_spellInfo->Id,delay);
-                            spell->DelayedChannel(delay);
-                        }
+                            spell->DelayedChannel();
                     }
                     else if( (channelInterruptFlags & (CHANNEL_FLAG_DAMAGE | CHANNEL_FLAG_DAMAGE2)) )
                     {
