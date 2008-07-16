@@ -82,6 +82,8 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
         MovementGeneratorType GetCurrentMovementGeneratorType() const;
 
         void propagateSpeedChange();
+
+        bool GetDestination(float &x, float &y, float &z);
     private:
         void Mutate(MovementGenerator *m);                  // use Move* functions instead
 

@@ -294,13 +294,21 @@ bool Unit::haveOffhandWeapon() const
         return false;
 }
 
-void Unit::SendMoveToPacket(float x, float y, float z, uint32 MovementFlags, uint32 transitTime)
+void Unit::SendMonsterMoveWithSpeedToCurrentDestination(Player* player)
 {
-    float dx = x - GetPositionX();
-    float dy = y - GetPositionY();
-    float dz = z - GetPositionZ();
+    float x, y, z;
+    if(GetMotionMaster()->GetDestination(x, y, z))
+        SendMonsterMoveWithSpeed(x, y, z, GetUnitMovementFlags(), 0, player);
+}
+
+void Unit::SendMonsterMoveWithSpeed(float x, float y, float z, uint32 MovementFlags, uint32 transitTime, Player* player)
+{
     if (!transitTime)
     {
+        float dx = x - GetPositionX();
+        float dy = y - GetPositionY();
+        float dz = z - GetPositionZ();
+
         float dist = ((dx*dx) + (dy*dy) + (dz*dz));
         if(dist<0)
             dist = 0;
@@ -314,10 +322,10 @@ void Unit::SendMoveToPacket(float x, float y, float z, uint32 MovementFlags, uin
         transitTime = static_cast<uint32>(dist / speed + 0.5);
     }
     //float orientation = (float)atan2((double)dy, (double)dx);
-    SendMonsterMove(x, y, z, 0, MovementFlags, transitTime);
+    SendMonsterMove(x, y, z, 0, MovementFlags, transitTime, player);
 }
 
-void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, uint32 MovementFlags, uint32 Time)
+void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, uint32 MovementFlags, uint32 Time, Player* player)
 {
     WorldPacket data( SMSG_MONSTER_MOVE, (41 + GetPackGUID().size()) );
     data.append(GetPackGUID());
@@ -352,10 +360,13 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 ty
     data << uint32(1);                                      // 1 single waypoint
     data << NewPosX << NewPosY << NewPosZ;                  // the single waypoint Point B
 
-    SendMessageToSet( &data, true );
+    if(player)
+        player->GetSession()->SendPacket(&data);
+    else
+        SendMessageToSet( &data, true );
 }
 
-void Unit::SendMosterMoveByPath(Path const& path, uint32 start, uint32 end, uint32 MovementFlags)
+void Unit::SendMonsterMoveByPath(Path const& path, uint32 start, uint32 end, uint32 MovementFlags)
 {
     uint32 traveltime = uint32(path.GetTotalLength(start, end) * 32);
 

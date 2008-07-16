@@ -16185,6 +16185,9 @@ void Player::UpdateVisibilityOf(WorldObject* target)
             // send data at target visibility change (adding to client)
             if(target!=this && target->isType(TYPEMASK_UNIT))
                 SendAuraDurationsForTarget((Unit*)target);
+
+            if(target->GetTypeId()==TYPEID_UNIT)
+                ((Unit*)target)->SendMonsterMoveWithSpeedToCurrentDestination(this);
         }
     }
 }
