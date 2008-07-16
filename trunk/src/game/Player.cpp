@@ -1247,7 +1247,7 @@ void Player::setDeathState(DeathState s)
 
         // restore default warrior stance
         if(getClass()== CLASS_WARRIOR)
-            CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true);
+            CastSpell(this,SPELL_ID_PASSIVE_BATTLE_STANCE,true);
     }
 }
 
@@ -3586,11 +3586,11 @@ void Player::ResurrectPlayer(float restore_percent, bool updateToWorld, bool app
     uint32 delta = (spellLvl-10)*MINUTE;
 
     // set resurrection sickness
-    CastSpell(this,SPELL_PASSIVE_RESURRECTION_SICKNESS,true);
+    CastSpell(this,SPELL_ID_PASSIVE_RESURRECTION_SICKNESS,true);
 
     for(int i =0; i < 3; ++i)
     {
-        Aura* Aur = GetAura(SPELL_PASSIVE_RESURRECTION_SICKNESS,i);
+        Aura* Aur = GetAura(SPELL_ID_PASSIVE_RESURRECTION_SICKNESS,i);
         if(Aur)
         {
             Aur->SetAuraDuration(delta*1000);
@@ -13432,7 +13432,7 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
     }
 
     if(m_class == CLASS_WARRIOR)
-        CastSpell(this,SPELL_PASSIVE_BATTLE_STANCE,true);
+        CastSpell(this,SPELL_ID_PASSIVE_BATTLE_STANCE,true);
 }
 
 void Player::LoadCorpse()
