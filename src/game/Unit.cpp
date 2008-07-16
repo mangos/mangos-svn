@@ -5994,6 +5994,44 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             {
                 switch(auraSpellInfo->SpellIconID)
                 {
+                    case 19:
+                    {
+                        switch(auraSpellInfo->Id)
+                        {
+                            case 23551:                     // Lightning Shield - Tier2: 8 pieces proc shield
+                            {
+                                if(!pVictim || !pVictim->isAlive())
+                                    return;
+
+                                CastSpell(pVictim, 23552, true, castItem, triggeredByAura);
+                                return;
+                            }
+                            case 23552:                     // Lightning Shield - trigger shield damage
+                            {
+                                if(!pVictim || !pVictim->isAlive())
+                                    return;
+
+                                if (GetTypeId() == TYPEID_PLAYER)
+                                {
+                                    if(((Player*)this)->HasSpellCooldown(27635))
+                                    {
+                                        // restore charges for proc triggered in cooldown time
+                                        ++triggeredByAura->m_procCharges;
+                                        return;
+                                    }
+
+                                    CastSpell(pVictim, 27635, true, castItem, triggeredByAura);
+
+                                    // 3 secs cooldown
+                                    ((Player*)this)->AddSpellCooldown(27635,0,time(NULL) + 3);
+                                }
+                                else
+                                    CastSpell(pVictim, 27635, true, castItem, triggeredByAura);
+                                return;
+                            }
+                        }
+                        break;
+                    }
                     // Mana Surge (Shaman T1 bonus)
                     case 87:
                     {
@@ -7102,8 +7140,8 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 else if (spellProto->SpellIconID == 37)     // Magma totem attack must be 6.67%(untested)
                     CastingTime = 234;                      // ignore CastingTimePenalty and use as modifier
             }
-            // Lightning Shield 33% per charge
-            else if (spellProto->SpellFamilyFlags & 0x00000000400LL)
+            // Lightning Shield (and proc shield from T2 8 pieces bonus ) 33% per charge
+            else if( (spellProto->SpellFamilyFlags & 0x00000000400LL) || spellProto->Id == 23552)
                 CastingTime = 1155;                         // ignore CastingTimePenalty and use as modifier
             break;
         case SPELLFAMILY_PRIEST:
