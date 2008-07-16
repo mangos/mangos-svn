@@ -3647,11 +3647,27 @@ bool ChatHandler::HandleEventStopCommand(const char* args)
 
 bool ChatHandler::HandleCombatStopCommand(const char* args)
 {
+    Player *player;
     
-    Player *player = getSelectedPlayer();
-    
-    if (!player)
-        player = m_session->GetPlayer();
+    if(*args)
+    {
+        std::string playername = args;
+        normalizePlayerName(playername);
+        player = objmgr.GetPlayer(playername.c_str());
+
+        if(!player)
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            return true;         
+        }
+    }
+    else
+    {
+        player = getSelectedPlayer();
+
+        if (!player)
+            player = m_session->GetPlayer();
+    }
 
     player->CombatStop();
     player->getHostilRefManager().deleteReferences();
