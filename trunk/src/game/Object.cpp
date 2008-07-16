@@ -1334,8 +1334,8 @@ namespace MaNGOS
 
                 float x,y,z;
 
-                if( !c->isAlive() || c->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED | UNIT_STAT_DISTRACTED) || c->GetMotionMaster()->top()->GetMovementGeneratorType() != TARGETED_MOTION_TYPE ||
-                    !((TargetedMovementGenerator<Creature>*)(c->GetMotionMaster()->top()))->GetDestination(x,y,z) )
+                if( !c->isAlive() || c->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED | UNIT_STAT_DISTRACTED) ||
+                    !c->GetMotionMaster()->GetDestination(x,y,z) )
                 {
                     x = c->GetPositionX();
                     y = c->GetPositionY();

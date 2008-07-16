@@ -333,3 +333,11 @@ MovementGeneratorType MotionMaster::GetCurrentMovementGeneratorType() const
 
    return top()->GetMovementGeneratorType();
 }
+
+bool MotionMaster::GetDestination(float &x, float &y, float &z)
+{
+   if(empty())
+       return false;
+
+   return top()->GetDestination(x,y,z);
+}

@@ -53,7 +53,7 @@ class MANGOS_DLL_SPEC TargetedMovementGenerator
 
         Unit* GetTarget() const;
 
-        bool GetDestination(float &x, float &y, float &z)
+        bool GetDestination(float &x, float &y, float &z) const
         {
             if(!i_destinationHolder.HasDestination()) return false;
             i_destinationHolder.GetDestination(x,y,z);
