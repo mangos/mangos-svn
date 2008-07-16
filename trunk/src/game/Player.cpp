@@ -6598,12 +6598,13 @@ void Player::UpdateEquipSpellsAtFormChange()
 {
     for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
     {
-        if(m_items[i])
+        if(m_items[i] && !m_items[i]->IsBroken())
         {
             ApplyItemEquipSpell(m_items[i],false,true);     // remove spells that not fit to form
             ApplyItemEquipSpell(m_items[i],true,true);      // add spells that fit form but not active
         }
     }
+
     for(size_t setindex = 0; setindex < ItemSetEff.size(); ++setindex)
     {
         ItemSetEffect* eff = ItemSetEff[setindex];
