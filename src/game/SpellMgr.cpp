@@ -1031,7 +1031,7 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
         return false;
 
     // Resurrection sickness
-    if((spellInfo_1->Id == SPELL_PASSIVE_RESURRECTION_SICKNESS) != (spellInfo_2->Id==SPELL_PASSIVE_RESURRECTION_SICKNESS))
+    if((spellInfo_1->Id == SPELL_ID_PASSIVE_RESURRECTION_SICKNESS) != (spellInfo_2->Id==SPELL_ID_PASSIVE_RESURRECTION_SICKNESS))
         return false;
 
     // Specific spell family spells

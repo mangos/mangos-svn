@@ -35,10 +35,6 @@
 #include "MotionMaster.h"
 #include <list>
 
-// Passive Spell codes explicit used in code
-#define SPELL_PASSIVE_BATTLE_STANCE            2457
-#define SPELL_PASSIVE_RESURRECTION_SICKNESS   15007
-
 enum SpellInterruptFlags
 {
     SPELL_INTERRUPT_FLAG_MOVEMENT     = 0x01,

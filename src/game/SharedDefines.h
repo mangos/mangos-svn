@@ -140,7 +140,6 @@ enum SpellSchools
 };
 
 #define MAX_SPELL_SCHOOL                  7
-#define SPELL_GENERIC_LEARN             483
 
 enum SpellSchoolMask
 {
@@ -1808,7 +1807,11 @@ enum CorpseDynFlags
     CORPSE_DYNFLAG_LOOTABLE        = 0x0001
 };
 
-#define SPELL_ID_AGGRO                    38192             //Tap Mob and Aggro Summoner
+// Passive Spell codes explicit used in code
+#define SPELL_ID_GENERIC_LEARN                   483
+#define SPELL_ID_PASSIVE_BATTLE_STANCE           2457
+#define SPELL_ID_PASSIVE_RESURRECTION_SICKNESS   15007
+#define SPELL_ID_AGGRO                           38192      // Tap Mob and Aggro Summoner
 
 enum WeatherType
 {
