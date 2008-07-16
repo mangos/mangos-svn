@@ -1342,7 +1342,7 @@ void World::ScriptsProcess()
                     sLog.outError("SCRIPT_COMMAND_MOVE_TO call for non-creature (TypeId: %u), skipping.",source->GetTypeId());
                     break;
                 }
-                ((Unit *)source)->SendMoveToPacket(step.script->x, step.script->y, step.script->z, ((Unit *)source)->GetUnitMovementFlags(), step.script->datalong2 );
+                ((Unit *)source)->SendMonsterMoveWithSpeed(step.script->x, step.script->y, step.script->z, ((Unit *)source)->GetUnitMovementFlags(), step.script->datalong2 );
                 MapManager::Instance().GetMap(((Unit *)source)->GetMapId(), ((Unit *)source))->CreatureRelocation(((Creature *)source), step.script->x, step.script->y, step.script->z, 0);
                 break;
             case SCRIPT_COMMAND_FLAG_SET:
