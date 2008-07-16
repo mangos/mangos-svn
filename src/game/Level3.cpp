@@ -4618,7 +4618,7 @@ bool ChatHandler::HandleMovegensCommand(const char* /*args*/)
                 if(unit->GetTypeId()==TYPEID_UNIT)
                 {
                     float x,y,z;
-                    ((Creature*)unit)->GetRespawnCoord(x,y,z);
+                    (*itr)->GetDestination(x,y,z);
                     PSendSysMessage(LANG_MOVEGENS_HOME_CREATURE,x,y,z);
                 }
                 else
@@ -4627,16 +4627,9 @@ bool ChatHandler::HandleMovegensCommand(const char* /*args*/)
             case FLIGHT_MOTION_TYPE:   SendSysMessage(LANG_MOVEGENS_FLIGHT);  break;
             case POINT_MOTION_TYPE:
             {
-                if(unit->GetTypeId()==TYPEID_PLAYER)
-                {
-                    PointMovementGenerator<Player> const* mgen = static_cast<PointMovementGenerator <Player> const*>(*itr);
-                    PSendSysMessage(LANG_MOVEGENS_POINT,mgen->GetPointX(),mgen->GetPointY(),mgen->GetPointZ());
-                }
-                else
-                {
-                    PointMovementGenerator <Creature> const* mgen = static_cast<PointMovementGenerator <Creature> const*>(*itr);
-                    PSendSysMessage(LANG_MOVEGENS_POINT,mgen->GetPointX(),mgen->GetPointY(),mgen->GetPointZ());
-                }
+                float x,y,z;
+                (*itr)->GetDestination(x,y,z);
+                PSendSysMessage(LANG_MOVEGENS_POINT,x,y,z);
                 break;
             }
             case FLEEING_MOTION_TYPE:  SendSysMessage(LANG_MOVEGENS_FEAR);    break;
