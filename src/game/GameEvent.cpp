@@ -445,9 +445,9 @@ void GameEvent::GameEventSpawn(int16 event_id)
             // We use spawn coords to spawn
             if(!map->Instanceable() && !map->IsRemovalGrid(data->posX,data->posY))
             {
-                Creature* pCreature = new Creature((WorldObject*)NULL);
+                Creature* pCreature = new Creature;
                 //sLog.outDebug("Spawning creature %u",*itr);
-                if (!pCreature->LoadFromDB(*itr, map->GetInstanceId()))
+                if (!pCreature->LoadFromDB(*itr, map))
                 {
                     delete pCreature;
                 }
@@ -478,9 +478,9 @@ void GameEvent::GameEventSpawn(int16 event_id)
             // We use current coords to unspawn, not spawn coords since creature can have changed grid
             if(!map->Instanceable() && !map->IsRemovalGrid(data->posX, data->posY))
             {
-                GameObject* pGameobject = new GameObject((WorldObject*)NULL);
+                GameObject* pGameobject = new GameObject;
                 //sLog.outDebug("Spawning gameobject %u", *itr);
-                if (!pGameobject->LoadFromDB(*itr, map->GetInstanceId()))
+                if (!pGameobject->LoadFromDB(*itr, map))
                 {
                     delete pGameobject;
                 }

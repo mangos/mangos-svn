@@ -36,7 +36,7 @@
 #include "InstanceData.h"
 #include "BattleGround.h"
 
-GameObject::GameObject( WorldObject *instantiator ) : WorldObject( instantiator )
+GameObject::GameObject() : WorldObject()
 {
     m_objectType |= TYPEMASK_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
@@ -85,10 +85,11 @@ void GameObject::RemoveFromWorld()
     Object::RemoveFromWorld();
 }
 
-bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, uint32 go_state)
+bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, uint32 go_state)
 {
     Relocate(x,y,z,ang);
-    SetMapId(mapid);
+    SetMapId(map->GetId());
+    SetInstanceId(map->GetInstanceId());
 
     if(!IsPositionValid())
     {
@@ -99,7 +100,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
     GameObjectInfo const* goinfo = objmgr.GetGameObjectInfo(name_id);
     if (!goinfo)
     {
-        sLog.outErrorDb("Gameobject (GUID: %u Entry: %u) not created: it have not exist entry in `gameobject_template`. Map: %u  (X: %f Y: %f Z: %f) ang: %f rotation0: %f rotation1: %f rotation2: %f rotation3: %f",guidlow, name_id, mapid, x, y, z, ang, rotation0, rotation1, rotation2, rotation3);
+        sLog.outErrorDb("Gameobject (GUID: %u Entry: %u) not created: it have not exist entry in `gameobject_template`. Map: %u  (X: %f Y: %f Z: %f) ang: %f rotation0: %f rotation1: %f rotation2: %f rotation3: %f",guidlow, name_id, map->GetId(), x, y, z, ang, rotation0, rotation1, rotation2, rotation3);
         return false;
     }
 
@@ -146,7 +147,6 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
     //Notify the map's instance data.
     //Only works if you create the object in it, not if it is moves to that map.
     //Normally non-players do not teleport to other maps.
-    Map *map = MapManager::Instance().GetMap(GetMapId(), this);
     if(map && map->GetInstanceData())
     {
         map->GetInstanceData()->OnObjectCreate(this);
@@ -526,7 +526,7 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask)
     WorldDatabase.CommitTransaction();
 }
 
-bool GameObject::LoadFromDB(uint32 guid, uint32 InstanceId)
+bool GameObject::LoadFromDB(uint32 guid, Map *map)
 {
     GameObjectData const* data = objmgr.GetGOData(guid);
 
@@ -552,10 +552,9 @@ bool GameObject::LoadFromDB(uint32 guid, uint32 InstanceId)
     uint32 go_state = data->go_state;
 
     uint32 stored_guid = guid;
-    if (InstanceId != 0) guid = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
-    SetInstanceId(InstanceId);
+    if (map->GetInstanceId() != 0) guid = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
 
-    if (!Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, go_state) )
+    if (!Create(guid,entry, map, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, go_state) )
         return false;
 
     m_DBTableGuid = stored_guid;
@@ -575,7 +574,7 @@ bool GameObject::LoadFromDB(uint32 guid, uint32 InstanceId)
             {
                 m_spawnedByDefault = true;
                 m_respawnDelayTime = data->spawntimesecs;
-                m_respawnTime = objmgr.GetGORespawnTime(stored_guid,InstanceId);
+                m_respawnTime = objmgr.GetGORespawnTime(stored_guid, map->GetInstanceId());
 
                                                             // ready to respawn
                 if(m_respawnTime && m_respawnTime <= time(NULL))

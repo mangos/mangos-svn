@@ -815,9 +815,11 @@ void Spell::EffectDummy(uint32 i)
                     creatureTarget->RemoveCorpse();
                     creatureTarget->SetHealth(0);                   // just for nice GM-mode view
 
-                    GameObject* pGameObj = new GameObject(m_caster);
+                    GameObject* pGameObj = new GameObject;
 
-                    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179644 ,creatureTarget->GetMapId(),
+                    Map *map = creatureTarget->GetMap();
+
+                    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179644, map,
                         creatureTarget->GetPositionX(), creatureTarget->GetPositionY(), creatureTarget->GetPositionZ(),
                         creatureTarget->GetOrientation(), 0, 0, 0, 0, 100, 1) )
                     {
@@ -831,7 +833,7 @@ void Spell::EffectDummy(uint32 i)
                     pGameObj->SetSpellId(m_spellInfo->Id);
 
                     DEBUG_LOG("AddObject at SpellEfects.cpp EffectDummy\n");
-                    MapManager::Instance().GetMap(creatureTarget->GetMapId(), pGameObj)->Add(pGameObj);
+                    map->Add(pGameObj);
 
                     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
                     data << uint64(pGameObj->GetGUID());
@@ -2532,7 +2534,7 @@ void Spell::EffectPersistentAA(uint32 i)
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius);
 
     int32 duration = GetSpellDuration(m_spellInfo);
-    DynamicObject* dynObj = new DynamicObject(m_caster);
+    DynamicObject* dynObj = new DynamicObject;
     if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, i, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, duration, radius))
     {
         delete dynObj;
@@ -3007,7 +3009,7 @@ void Spell::EffectSummon(uint32 i)
     if(!pet_entry)
         return;
     uint32 level = m_caster->getLevel();
-    Pet* spawnCreature = new Pet(m_caster, SUMMON_PET);
+    Pet* spawnCreature = new Pet(SUMMON_PET);
 
     if(spawnCreature->LoadPetFromDB(m_caster,pet_entry))
     {
@@ -3019,8 +3021,9 @@ void Spell::EffectSummon(uint32 i)
         return;
     }
 
+    Map *map = m_caster->GetMap();
     uint32 pet_number = objmgr.GeneratePetNumber();
-    if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),m_caster->GetMapId(),m_spellInfo->EffectMiscValue[i], pet_number))
+    if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),map,m_spellInfo->EffectMiscValue[i], pet_number))
     {
         sLog.outErrorDb("Spell::EffectSummon: no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
         delete spawnCreature;
@@ -3082,7 +3085,7 @@ void Spell::EffectSummon(uint32 i)
     name.append(petTypeSuffix[spawnCreature->getPetType()]);
     spawnCreature->SetName( name );
 
-    MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Add((Creature*)spawnCreature);
+    map->Add((Creature*)spawnCreature);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
     {
@@ -3318,7 +3321,7 @@ void Spell::EffectAddFarsight(uint32 i)
 {
     float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
     int32 duration = GetSpellDuration(m_spellInfo);
-    DynamicObject* dynObj = new DynamicObject(m_caster);
+    DynamicObject* dynObj = new DynamicObject;
     if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, i, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, duration, radius))
     {
         delete dynObj;
@@ -3454,10 +3457,11 @@ void Spell::EffectSummonGuardian(uint32 i)
 
         for(int32 count = 0; count < amount; ++count)
         {
-            Pet* spawnCreature = new Pet(m_caster, GUARDIAN_PET);
+            Pet* spawnCreature = new Pet(GUARDIAN_PET);
 
+            Map *map = m_caster->GetMap();
             uint32 pet_number = objmgr.GeneratePetNumber();
-            if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),m_caster->GetMapId(),m_spellInfo->EffectMiscValue[i], pet_number))
+            if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_PET), map,m_spellInfo->EffectMiscValue[i], pet_number))
             {
                 sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
                 delete spawnCreature;
@@ -3518,7 +3522,7 @@ void Spell::EffectSummonGuardian(uint32 i)
             spawnCreature->SetArmor(level*50);
             spawnCreature->AIM_Initialize();
 
-            MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Add((Creature*)spawnCreature);
+            map->Add((Creature*)spawnCreature);
         }
     }
 }
@@ -3769,7 +3773,7 @@ void Spell::EffectTameCreature(uint32 /*i*/)
         //SendChannelUpdate(0);
         finish();
 
-        Pet* pet = new Pet(m_caster, HUNTER_PET);
+        Pet* pet = new Pet(HUNTER_PET);
 
         if(!pet->CreateBaseAtCreature(creatureTarget))
         {
@@ -3853,7 +3857,7 @@ void Spell::EffectSummonPet(uint32 i)
             return;
     }
 
-    Pet* NewSummon = new Pet(m_caster);
+    Pet* NewSummon = new Pet;
 
     // petentry==0 for hunter "call pet" (current pet summoned if any)
     if(NewSummon->LoadPetFromDB(m_caster,petentry))
@@ -3893,8 +3897,9 @@ void Spell::EffectSummonPet(uint32 i)
         return;
     }
 
+    Map *map = m_caster->GetMap();
     uint32 pet_number = objmgr.GeneratePetNumber();
-    if(!NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),  m_caster->GetMapId(), petentry, pet_number))
+    if(!NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_PET), map, petentry, pet_number))
     {
         delete NewSummon;
         return;
@@ -3971,7 +3976,7 @@ void Spell::EffectSummonPet(uint32 i)
     NewSummon->SetHealth(NewSummon->GetMaxHealth());
     NewSummon->SetPower(POWER_MANA, NewSummon->GetMaxPower(POWER_MANA));
 
-    MapManager::Instance().GetMap(NewSummon->GetMapId(), NewSummon)->Add((Creature*)NewSummon);
+    map->Add((Creature*)NewSummon);
 
     m_caster->SetPet(NewSummon);
     sLog.outDebug("New Pet has guid %u", NewSummon->GetGUIDLow());
@@ -4299,7 +4304,7 @@ void Spell::EffectSummonObjectWild(uint32 i)
 {
     uint32 gameobject_id = m_spellInfo->EffectMiscValue[i];
 
-    GameObject* pGameObj = new GameObject(m_caster);
+    GameObject* pGameObj = new GameObject;
 
     WorldObject* target = focusObject;
     if( !target )
@@ -4315,7 +4320,9 @@ void Spell::EffectSummonObjectWild(uint32 i)
     else
         m_caster->GetClosePoint(x,y,z,DEFAULT_WORLD_OBJECT_SIZE);
 
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, target->GetMapId(),
+    Map *map = target->GetMap();
+
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, map,
         x, y, z, target->GetOrientation(), 0, 0, 0, 0, 100, 1))
     {
         delete pGameObj;
@@ -4328,7 +4335,7 @@ void Spell::EffectSummonObjectWild(uint32 i)
 
     if(pGameObj->GetGoType() != GAMEOBJECT_TYPE_FLAGDROP)   // make dropped flag clickable for other players (not set owner guid (created by) for this)...
         m_caster->AddGameObject(pGameObj);
-    MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
+    map->Add(pGameObj);
 
     if(pGameObj->GetMapId() == 489 && pGameObj->GetGoType() == GAMEOBJECT_TYPE_FLAGDROP)  //WS
     {
@@ -4363,15 +4370,15 @@ void Spell::EffectSummonObjectWild(uint32 i)
 
     if(uint32 linkedEntry = pGameObj->GetLinkedGameObjectEntry())
     {
-        GameObject* linkedGO = new GameObject(m_caster);
-        if(linkedGO->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), linkedEntry, target->GetMapId(),
+        GameObject* linkedGO = new GameObject;
+        if(linkedGO->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), linkedEntry, map,
             x, y, z, target->GetOrientation(), 0, 0, 0, 0, 100, 1))
         {
             linkedGO->SetRespawnTime(duration > 0 ? duration/1000 : 0);
             linkedGO->SetSpellId(m_spellInfo->Id);
 
             m_caster->AddGameObject(linkedGO);
-            MapManager::Instance().GetMap(linkedGO->GetMapId(), linkedGO)->Add(linkedGO);
+            map->Add(linkedGO);
         }
         else
         {
@@ -4800,11 +4807,12 @@ void Spell::EffectDuel(uint32 i)
     }
 
     //CREATE DUEL FLAG OBJECT
-    GameObject* pGameObj = new GameObject(m_caster);
+    GameObject* pGameObj = new GameObject;
 
     uint32 gameobject_id = m_spellInfo->EffectMiscValue[i];
 
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id,m_caster->GetMapId(),
+    Map *map = m_caster->GetMap();
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, map,
         m_caster->GetPositionX()+(unitTarget->GetPositionX()-m_caster->GetPositionX())/2 ,
         m_caster->GetPositionY()+(unitTarget->GetPositionY()-m_caster->GetPositionY())/2 ,
         m_caster->GetPositionZ(),
@@ -4821,7 +4829,7 @@ void Spell::EffectDuel(uint32 i)
     pGameObj->SetSpellId(m_spellInfo->Id);
 
     m_caster->AddGameObject(pGameObj);
-    MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
+    map->Add(pGameObj);
     //END
 
     // Send request
@@ -4950,9 +4958,9 @@ void Spell::EffectSummonTotem(uint32 i)
     if (m_caster->GetTypeId()==TYPEID_PLAYER)
         team = ((Player*)m_caster)->GetTeam();
 
-    Totem* pTotem = new Totem(m_caster);
+    Totem* pTotem = new Totem; 
 
-    if(!pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), m_caster->GetMapId(), m_spellInfo->EffectMiscValue[i], team ))
+    if(!pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), m_caster->GetMap(), m_spellInfo->EffectMiscValue[i], team ))
     {
         delete pTotem;
         return;
@@ -5135,7 +5143,7 @@ void Spell::EffectSummonObject(uint32 i)
         m_caster->m_ObjectSlot[slot] = 0;
     }
 
-    GameObject* pGameObj = new GameObject(m_caster);
+    GameObject* pGameObj = new GameObject;
 
     float rot2 = sin(m_caster->GetOrientation()/2);
     float rot3 = cos(m_caster->GetOrientation()/2);
@@ -5152,7 +5160,8 @@ void Spell::EffectSummonObject(uint32 i)
     else
         m_caster->GetClosePoint(x,y,z,DEFAULT_WORLD_OBJECT_SIZE);
 
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), go_id,m_caster->GetMapId(), x, y, z, m_caster->GetOrientation(), 0, 0, rot2, rot3, 0, 1))
+    Map *map = m_caster->GetMap();
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), go_id, map, x, y, z, m_caster->GetOrientation(), 0, 0, rot2, rot3, 0, 1))
     {
         delete pGameObj;
         return;
@@ -5164,7 +5173,7 @@ void Spell::EffectSummonObject(uint32 i)
     pGameObj->SetSpellId(m_spellInfo->Id);
     m_caster->AddGameObject(pGameObj);
 
-    MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
+    map->Add(pGameObj);
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
     data << pGameObj->GetGUID();
     m_caster->SendMessageToSet(&data,true);
@@ -5413,11 +5422,12 @@ void Spell::EffectSummonCritter(uint32 i)
         player->RemoveMiniPet();
 
     // summon new pet
-    Pet* critter = new Pet(m_caster, MINI_PET);
+    Pet* critter = new Pet(MINI_PET);
 
+    Map *map = m_caster->GetMap();
     uint32 pet_number = objmgr.GeneratePetNumber();
     if(!critter->Create(objmgr.GenerateLowGuid(HIGHGUID_PET),
-        m_caster->GetMapId(),pet_entry, pet_number))
+        map, pet_entry, pet_number))
     {
         sLog.outError("Spell::EffectSummonCritter, spellid %u: no such creature entry %u", m_spellInfo->Id, pet_entry);
         delete critter;
@@ -5466,7 +5476,7 @@ void Spell::EffectSummonCritter(uint32 i)
     critter->SetName( name );
     player->SetMiniPet(critter);
 
-    MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Add((Creature*)critter);
+    map->Add((Creature*)critter);
 }
 
 void Spell::EffectKnockBack(uint32 i)
@@ -5668,12 +5678,11 @@ void Spell::EffectTransmitted(uint32 i)
         m_caster->GetClosePoint(fx,fy,fz,DEFAULT_WORLD_OBJECT_SIZE, dis);
     }
 
-    uint32 cMap = m_caster->GetMapId();
+    Map *cMap = m_caster->GetMap();
 
     if(goinfo->type==GAMEOBJECT_TYPE_FISHINGNODE)
     {
-        Map* map = MapManager::Instance().GetMap(cMap, m_caster);
-        if ( !map->IsInWater(fx,fy,fz-0.5f)) // Hack to prevent fishing bobber from failing to land on fishing hole
+        if ( !cMap->IsInWater(fx,fy,fz-0.5f)) // Hack to prevent fishing bobber from failing to land on fishing hole
         { // but this is not proper, we really need to ignore not materialized objects
             SendCastResult(SPELL_FAILED_NOT_HERE);
             SendChannelUpdate(0);
@@ -5681,7 +5690,7 @@ void Spell::EffectTransmitted(uint32 i)
         }
 
         // replace by water level in this case
-        fz = map->GetWaterLevel(fx,fy);
+        fz = cMap->GetWaterLevel(fx,fy);
     }
     // if gameobject is summoning object, it should be spawned right on caster's position
     else if(goinfo->type==GAMEOBJECT_TYPE_SUMMONING_RITUAL)
@@ -5689,9 +5698,9 @@ void Spell::EffectTransmitted(uint32 i)
         m_caster->GetPosition(fx,fy,fz);
     }
 
-    GameObject* pGameObj = new GameObject(m_caster);
+    GameObject* pGameObj = new GameObject;
 
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id,cMap,
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id, cMap,
         fx, fy, fz, m_caster->GetOrientation(), 0, 0, 0, 0, 100, 1))
     {
         delete pGameObj;
@@ -5744,7 +5753,7 @@ void Spell::EffectTransmitted(uint32 i)
     //m_caster->AddGameObject(pGameObj);
     //m_ObjToDel.push_back(pGameObj);
 
-    MapManager::Instance().GetMap(cMap, pGameObj)->Add(pGameObj);
+    cMap->Add(pGameObj);
 
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM_OBSOLETE, 8);
     data << uint64(pGameObj->GetGUID());
@@ -5752,7 +5761,7 @@ void Spell::EffectTransmitted(uint32 i)
 
     if(uint32 linkedEntry = pGameObj->GetLinkedGameObjectEntry())
     {
-        GameObject* linkedGO = new GameObject(m_caster);
+        GameObject* linkedGO = new GameObject;
         if(linkedGO->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), linkedEntry, cMap,
             fx, fy, fz, m_caster->GetOrientation(), 0, 0, 0, 0, 100, 1))
         {

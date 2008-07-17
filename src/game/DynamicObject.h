@@ -28,7 +28,7 @@ class DynamicObject : public WorldObject
 {
     public:
         typedef std::set<Unit*> AffectedSet;
-        explicit DynamicObject( WorldObject *instantiator );
+        explicit DynamicObject();
 
         void AddToWorld();
         void RemoveFromWorld();

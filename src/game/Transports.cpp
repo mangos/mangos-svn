@@ -49,7 +49,7 @@ void MapManager::LoadTransports()
     {
         bar.step();
 
-        Transport *t = new Transport( NULL );
+        Transport *t = new Transport;
 
         Field *fields = result->Fetch();
 
@@ -132,7 +132,7 @@ void MapManager::LoadTransports()
     }
 }
 
-Transport::Transport( WorldObject *instantiator ) : GameObject( instantiator )
+Transport::Transport() : GameObject()
 {
                                                             // 2.3.2 - 0x5A
     m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_LOWGUID | UPDATEFLAG_HIGHGUID | UPDATEFLAG_HASPOSITION);

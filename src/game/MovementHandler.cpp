@@ -113,7 +113,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
     // resummon pet
     if(GetPlayer()->m_oldpetnumber)
     {
-        Pet* NewPet = new Pet(GetPlayer());
+        Pet* NewPet = new Pet;
         if(!NewPet->LoadPetFromDB(GetPlayer(), 0, GetPlayer()->m_oldpetnumber, true))
             delete NewPet;
 

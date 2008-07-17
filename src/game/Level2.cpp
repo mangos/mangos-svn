@@ -818,8 +818,8 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     float o = chr->GetOrientation();
     Map *map = chr->GetMap();
 
-    Creature* pCreature = new Creature(NULL);
-    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map->GetId(), id, (uint32)teamval))
+    Creature* pCreature = new Creature;
+    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map, id, (uint32)teamval))
     {
         delete pCreature;
         return false;
@@ -839,7 +839,7 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     uint32 db_guid = pCreature->GetDBTableGUIDLow();
 
     // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-    pCreature->LoadFromDB(db_guid, chr->GetInstanceId());
+    pCreature->LoadFromDB(db_guid, map);
 
     map->Add(pCreature);
     objmgr.AddCreatureToGrid(db_guid, objmgr.GetCreatureData(db_guid));
@@ -2462,8 +2462,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             }
         }
 
-        Creature* wpCreature = new Creature(chr);
-        if (!wpCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(),VISUAL_WAYPOINT,0))
+        Creature* wpCreature = new Creature;
+        if (!wpCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map,VISUAL_WAYPOINT,0))
         {
             PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
             delete wpCreature;
@@ -2483,7 +2483,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
 
         wpCreature->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()));
         // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-        wpCreature->LoadFromDB(wpCreature->GetDBTableGUIDLow(), chr->GetInstanceId());
+        wpCreature->LoadFromDB(wpCreature->GetDBTableGUIDLow(), map);
         map->Add(wpCreature);
 
         PSendSysMessage(LANG_WAYPOINT_ADDED_NO, point+1);
@@ -2579,8 +2579,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
                 wpCreature->CleanupsBeforeDelete();
                 ObjectAccessor::Instance().AddObjectToRemoveList(wpCreature);
                 // re-create
-                Creature* wpCreature2 = new Creature(chr);
-                if (!wpCreature2->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), VISUAL_WAYPOINT, 0))
+                Creature* wpCreature2 = new Creature;
+                if (!wpCreature2->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map, VISUAL_WAYPOINT, 0))
                 {
                     PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
                     delete wpCreature2;
@@ -2598,7 +2598,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
 
                 wpCreature2->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()));
                 // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-                wpCreature2->LoadFromDB(wpCreature2->GetDBTableGUIDLow(), chr->GetInstanceId());
+                wpCreature2->LoadFromDB(wpCreature2->GetDBTableGUIDLow(), map);
                 map->Add(wpCreature2);
                 //MapManager::Instance().GetMap(npcCreature->GetMapId())->Add(wpCreature2);
             }
@@ -2899,8 +2899,8 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             Map *map = chr->GetMap();
             float o = chr->GetOrientation();
 
-            Creature* wpCreature = new Creature(chr);
-            if (!wpCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), id, 0))
+            Creature* wpCreature = new Creature;
+            if (!wpCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map, id, 0))
             {
                 PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, id);
                 delete wpCreature;
@@ -2925,7 +2925,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
 
             wpCreature->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()));
             // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
-            wpCreature->LoadFromDB(wpCreature->GetDBTableGUIDLow(), chr->GetInstanceId());
+            wpCreature->LoadFromDB(wpCreature->GetDBTableGUIDLow(),map);
             map->Add(wpCreature);
             //MapManager::Instance().GetMap(wpCreature->GetMapId())->Add(wpCreature);
         }while( result->NextRow() );
@@ -2956,8 +2956,8 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         float o = chr->GetOrientation();
         Map *map = chr->GetMap();
 
-        Creature* pCreature = new Creature(chr);
-        if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), id, 0))
+        Creature* pCreature = new Creature;
+        if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),map, id, 0))
         {
             PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, id);
             delete pCreature;
@@ -2976,7 +2976,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         }
 
         pCreature->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()));
-        pCreature->LoadFromDB(pCreature->GetDBTableGUIDLow(), chr->GetInstanceId());
+        pCreature->LoadFromDB(pCreature->GetDBTableGUIDLow(), map);
         map->Add(pCreature);
         //player->PlayerTalkClass->SendPointOfInterest(x, y, 6, 6, 0, "First Waypoint");
 
@@ -3015,8 +3015,8 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         float o = chr->GetOrientation();
         Map *map = chr->GetMap();
 
-        Creature* pCreature = new Creature(chr);
-        if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), id, 0))
+        Creature* pCreature = new Creature;
+        if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map, id, 0))
         {
             PSendSysMessage(LANG_WAYPOINT_NOTCREATED, id);
             delete pCreature;
@@ -3035,7 +3035,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         }
 
         pCreature->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()));
-        pCreature->LoadFromDB(pCreature->GetDBTableGUIDLow(), chr->GetInstanceId());
+        pCreature->LoadFromDB(pCreature->GetDBTableGUIDLow(), map);
         map->Add(pCreature);
         //player->PlayerTalkClass->SendPointOfInterest(x, y, 6, 6, 0, "Last Waypoint");
         // Cleanup memory
@@ -3369,10 +3369,10 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     float rot2 = sin(o/2);
     float rot3 = cos(o/2);
 
-    GameObject* pGameObj = new GameObject(NULL);
+    GameObject* pGameObj = new GameObject;
     uint32 db_lowGUID = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
 
-    if(!pGameObj->Create(db_lowGUID, goI->id, chr->GetMapId(), x, y, z, o, 0, 0, rot2, rot3, 0, 1))
+    if(!pGameObj->Create(db_lowGUID, goI->id, map, x, y, z, o, 0, 0, rot2, rot3, 0, 1))
     {
         delete pGameObj;
         return false;
@@ -3389,7 +3389,7 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     pGameObj->SaveToDB(map->GetId(), (1 << map->GetSpawnMode()));
 
     // this will generate a new guid if the object is in an instance
-    if(!pGameObj->LoadFromDB(db_lowGUID, map->GetInstanceId()))
+    if(!pGameObj->LoadFromDB(db_lowGUID, map))
     {
         delete pGameObj;
         return false;

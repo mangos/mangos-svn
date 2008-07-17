@@ -57,7 +57,7 @@ class TransportPath
 class Transport : private GameObject
 {
     public:
-        explicit Transport( WorldObject *instantiator );
+        explicit Transport();
 
         // prevent using Transports as normal GO, but allow call some inherited functions
         using GameObject::IsTransport;

@@ -36,7 +36,7 @@ enum CorpseType
 class Corpse : public WorldObject
 {
     public:
-        explicit Corpse( WorldObject *instantiator, CorpseType type = CORPSE_BONES );
+        explicit Corpse( CorpseType type = CORPSE_BONES );
         ~Corpse( );
 
         void AddToWorld();

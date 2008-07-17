@@ -59,7 +59,7 @@ uint32 const LevelStartLoyalty[6] =
     17500,
 };
 
-Pet::Pet(WorldObject *instantiator, PetType type) : Creature( instantiator )
+Pet::Pet(PetType type) : Creature()
 {
     m_isPet = true;
     m_name = "Pet";
@@ -165,9 +165,10 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
         return false;
     }
 
+    Map *map = owner->GetMap();
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_PET);
     uint32 pet_number = fields[0].GetUInt32();
-    if(!Create(guid, owner->GetMapId(), petentry, pet_number))
+    if(!Create(guid, map, petentry, pet_number))
     {
         delete result;
         return false;
@@ -193,7 +194,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     if(cinfo->type == CREATURE_TYPE_CRITTER)
     {
         AIM_Initialize();
-        MapManager::Instance().GetMap(owner->GetMapId(), owner)->Add((Creature*)this);
+        map->Add((Creature*)this);
         delete result;
         return true;
     }
@@ -326,7 +327,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     }
 
     AIM_Initialize();
-    MapManager::Instance().GetMap(owner->GetMapId(), owner)->Add((Creature*)this);
+    map->Add((Creature*)this);
 
     // Spells should be loaded after pet is added to map, because in CanCast is check on it
     _LoadSpells();
@@ -895,7 +896,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
 
     sLog.outBasic("Create pet");
     uint32 pet_number = objmgr.GeneratePetNumber();
-    if(!Create(guid, creature->GetMapId(), creature->GetEntry(), pet_number))
+    if(!Create(guid, creature->GetMap(), creature->GetEntry(), pet_number))
         return false;
 
     Relocate(creature->GetPositionX(), creature->GetPositionY(), creature->GetPositionZ(), creature->GetOrientation());
@@ -1622,9 +1623,10 @@ void Pet::ToggleAutocast(uint32 spellid, bool apply)
     }
 }
 
-bool Pet::Create(uint32 guidlow, uint32 mapid, uint32 Entry, uint32 pet_number)
+bool Pet::Create(uint32 guidlow, Map *map, uint32 Entry, uint32 pet_number)
 {
-    SetMapId(mapid);
+    SetMapId(map->GetId());
+    SetInstanceId(map->GetInstanceId());
 
     Object::_Create(guidlow, pet_number, HIGHGUID_PET);
 
