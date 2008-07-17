@@ -2244,6 +2244,23 @@ void Spell::EffectHeal( uint32 /*i*/ )
         if (!caster)
             return;
 
+        int32 addhealth = damage;
+
+        // Vessel of the Naaru (Vial of the Sunwell trinket)
+        if (m_spellInfo->Id == 45064)
+        {
+            // Amount of heal - depends from stacked Holy Energy
+            int damageAmount = 0;
+            Unit::AuraList const& mDummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+            for(Unit::AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
+                if((*i)->GetId() == 45062)
+                    damageAmount+=(*i)->GetModifier()->m_amount;
+            if (damageAmount)
+                m_caster->RemoveAurasDueToSpell(45062);
+
+            addhealth += damageAmount;
+        }
+        
         // Swiftmend - consumes Regrowth or Rejuvenation
         if (m_spellInfo->TargetAuraState == AURA_STATE_SWIFTMEND)
         {
@@ -2261,36 +2278,24 @@ void Spell::EffectHeal( uint32 /*i*/ )
                             short_itr = i;
                     }
                 }
-
-                switch((*short_itr)->GetSpellProto()->SpellFamilyFlags)
+                int idx = 0;
+                while(idx < 3)
                 {
-                    case 16:                                //Rejuvenation
-                        damage += (*short_itr)->GetModifier()->m_amount * 4;
-                        unitTarget->RemoveAurasDueToSpell((*short_itr)->GetId());
+                    if((*short_itr)->GetSpellProto()->EffectApplyAuraName[idx] == SPELL_AURA_PERIODIC_HEAL)
                         break;
-                    case 64:                                //Regrowth
-                        damage += (*short_itr)->GetModifier()->m_amount * 6;
-                        unitTarget->RemoveAurasDueToSpell((*short_itr)->GetId());
-                        break;
-                    default:
-                        break;
+                    idx++;
                 }
+
+                int32 tickheal = caster->SpellHealingBonus((*short_itr)->GetSpellProto(), (*short_itr)->GetModifier()->m_amount, DOT, unitTarget);
+                int32 tickcount = GetSpellDuration((*short_itr)->GetSpellProto()) / (*short_itr)->GetSpellProto()->EffectAmplitude[idx];
+                unitTarget->RemoveAurasDueToSpell((*short_itr)->GetId());
+                
+                addhealth += tickheal * tickcount;
             }
         }
-        // Vessel of the Naaru (Vial of the Sunwell trinket)
-        if (m_spellInfo->Id == 45064)
-        {
-            // Amount of heal - depends from stacked Holy Energy
-            damage = 0;
-            Unit::AuraList const& mDummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-            for(Unit::AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
-                if((*i)->GetId() == 45062)
-                    damage+=(*i)->GetModifier()->m_amount;
-            if (damage)
-                m_caster->RemoveAurasDueToSpell(45062);
-        }
+        else
+            addhealth = caster->SpellHealingBonus(m_spellInfo, addhealth,HEAL, unitTarget);
 
-        uint32 addhealth = caster->SpellHealingBonus(m_spellInfo, uint32(damage),HEAL, unitTarget);
         bool crit = caster->isSpellCrit(unitTarget, m_spellInfo, m_spellSchoolMask, m_attackType);
         if (crit)
             addhealth = caster->SpellCriticalBonus(m_spellInfo, addhealth, unitTarget);
