@@ -305,11 +305,11 @@ int main(int argc, char * arg[])
 
     LoadMPQFiles(locale);
 
-    if(extract & EXTRACT_MAP)
-        ExtractMapsFromMpq();
-
     if(extract & EXTRACT_DBC)
         ExtractDBCFiles();
+
+    if(extract & EXTRACT_MAP)
+        ExtractMapsFromMpq();
 
     //Close MPQs
     for(ArchiveSet::iterator i = gOpenArchives.begin(); i != gOpenArchives.end();++i)
