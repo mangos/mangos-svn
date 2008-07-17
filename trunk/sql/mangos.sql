@@ -693,6 +693,7 @@ CREATE TABLE `creature_template` (
   `RegenHealth` tinyint(3) unsigned NOT NULL default '1',
   `equipment_id` mediumint(8) unsigned NOT NULL default '0',
   `mechanic_immune_mask` int(10) unsigned NOT NULL default '0',
+  `flags_extra` int(10) unsigned NOT NULL default '0',
   `ScriptName` char(64) NOT NULL default '',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';

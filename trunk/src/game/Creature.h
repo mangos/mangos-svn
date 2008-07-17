@@ -207,6 +207,7 @@ struct CreatureInfo
     bool    RegenHealth;
     uint32  equipmentId;
     uint32  MechanicImmuneMask;
+    uint32  flags_extra;
     char const* ScriptName;
 };
 
