@@ -600,6 +600,9 @@ class MANGOS_DLL_SPEC WorldSession
         // private trade methods
         void moveItems(Item* myItems[], Item* hisItems[]);
 
+        // logging helper
+        void logUnexpectedOpcode(WorldPacket *packet, const char * reason);
+
         Player *_player;
         WorldSocket *_socket;
 

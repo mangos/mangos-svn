@@ -169,7 +169,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_MOVE_CHNG_TRANSPORT ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
     objmgr.opcodeTable[ CMSG_MOVE_SET_FLY ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
     objmgr.opcodeTable[ MSG_MOVE_START_DESCEND]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
-    objmgr.opcodeTable[ MSG_MOVE_WORLDPORT_ACK ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveWorldportAckOpcode        );
+    objmgr.opcodeTable[ MSG_MOVE_WORLDPORT_ACK ]                = OpcodeHandler( STATUS_TRANSFER_PENDING, &WorldSession::HandleMoveWorldportAckOpcode);
     objmgr.opcodeTable[ CMSG_FORCE_RUN_SPEED_CHANGE_ACK ]       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           );
     objmgr.opcodeTable[ CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK ]  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           );
     objmgr.opcodeTable[ CMSG_FORCE_SWIM_SPEED_CHANGE_ACK ]      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           );
@@ -551,6 +551,15 @@ void WorldSession::QueuePacket(WorldPacket& packet)
     _recvQueue.add(pck);
 }
 
+/// Logging helper for unexpected opcodes
+void WorldSession::logUnexpectedOpcode(WorldPacket* packet, const char *reason)
+{
+    sLog.outError( "SESSION: received unexpected opcode %s (0x%.4X) %s",
+        LookupOpcodeName(packet->GetOpcode()),
+        packet->GetOpcode(),
+        reason);
+}
+
 /// Update the WorldSession (triggered by World update)
 bool WorldSession::Update(uint32 /*diff*/)
 {
@@ -578,22 +587,31 @@ bool WorldSession::Update(uint32 /*diff*/)
         }
         else
         {
-            if (iter->second.status == STATUS_LOGGEDIN && _player)
+            switch (iter->second.status)
             {
-                (this->*iter->second.handler)(*packet);
-            }
-            else if (iter->second.status == STATUS_AUTHED)
-            {
-                m_playerRecentlyLogout = false;
-                (this->*iter->second.handler)(*packet);
-            }
-            else
-                // skip STATUS_LOGGEDIN opcode unexpected errors if player logout sometime ago - this can be network lag delayed packets
-            if(!m_playerRecentlyLogout)
-            {
-                sLog.outError( "SESSION: received unexpected opcode %s (0x%.4X)",
-                    LookupOpcodeName(packet->GetOpcode()),
-                    packet->GetOpcode());
+                case STATUS_LOGGEDIN:
+                    if(!_player)
+                    {
+                        // skip STATUS_LOGGEDIN opcode unexpected errors if player logout sometime ago - this can be network lag delayed packets
+                        if(!m_playerRecentlyLogout)
+                            logUnexpectedOpcode(packet, "the player has not logged in yet");
+                    }
+                    else if(_player->IsInWorld())
+                        (this->*iter->second.handler)(*packet);
+                    // lag can cause STATUS_LOGGEDIN opcodes to arrive after the player started a transfer
+                    break;
+                case STATUS_TRANSFER_PENDING:
+                    if(!_player)
+                        logUnexpectedOpcode(packet, "the player has not logged in yet");
+                    else if(_player->IsInWorld())
+                        logUnexpectedOpcode(packet, "the player is still in world");
+                    else
+                        (this->*iter->second.handler)(*packet);
+                    break;
+                case STATUS_AUTHED:
+                    m_playerRecentlyLogout = false;
+                    (this->*iter->second.handler)(*packet);
+                    break;
             }
         }
 
@@ -733,7 +751,10 @@ void WorldSession::LogoutPlayer(bool Save)
 
         ///- Remove the player from the world
         ObjectAccessor::Instance().RemoveObject(_player);
-        MapManager::Instance().GetMap(_player->GetMapId(), _player)->Remove(_player, false);
+        // the player may not be in the world when logging out
+        // e.g if he got disconnected during a transfer to another map
+        // calls to GetMap in this case may cause crashes
+        if(_player->IsInWorld())  MapManager::Instance().GetMap(_player->GetMapId(), _player)->Remove(_player, false);
 
         ///- Send update to group
         if(_player->GetGroup())
