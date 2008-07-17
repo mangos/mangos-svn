@@ -668,7 +668,6 @@ CREATE TABLE `creature_template` (
   `maxrangedmg` float NOT NULL default '0',
   `rangedattackpower` smallint(5) unsigned NOT NULL default '0',
   `type` tinyint(3) unsigned NOT NULL default '0',
-  `civilian` tinyint(3) unsigned NOT NULL default '0',
   `flag1` int(10) unsigned NOT NULL default '0',
   `lootid` mediumint(8) unsigned NOT NULL default '0',
   `pickpocketloot` mediumint(8) unsigned NOT NULL default '0',

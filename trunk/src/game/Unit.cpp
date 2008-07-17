@@ -1115,6 +1115,7 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
                     victimState = VICTIMSTATE_PARRY;
 
                     // Counter-attack ( explained in Unit::DoAttackDamage() )
+                    if(pVictim->GetTypeId()==TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_PARRY_HASTEN) )
                     {
                         // Get attack timers
                         float offtime  = float(pVictim->getAttackTimer(OFF_ATTACK));
@@ -2280,32 +2281,39 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         // Reduce parry chance by attacker expertise rating
         if (GetTypeId() == TYPEID_PLAYER)
             parry_chance-= int32(((Player*)this)->GetExpertiseDodgeOrParryReduction(attType)*100);
-        int32 tmp = int32(parry_chance);
-        if (   (tmp > 0)                                    // check if unit _can_ parry
-            && ((tmp -= skillBonus) > 0)
-            && (roll < (sum += tmp)))
+
+        if(pVictim->GetTypeId()==TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_PARRY) )
         {
-            DEBUG_LOG ("RollMeleeOutcomeAgainst: PARRY <%d, %d)", sum-tmp, sum);
-            return MELEE_HIT_PARRY;
+            int32 tmp = int32(parry_chance);
+            if (   (tmp > 0)                                    // check if unit _can_ parry
+                && ((tmp -= skillBonus) > 0)
+                && (roll < (sum += tmp)))
+            {
+                DEBUG_LOG ("RollMeleeOutcomeAgainst: PARRY <%d, %d)", sum-tmp, sum);
+                return MELEE_HIT_PARRY;
+            }
         }
 
-        tmp = block_chance;
-        if (   (tmp > 0)                                    // check if unit _can_ block
-            && ((tmp -= skillBonus) > 0)
-            && (roll < (sum += tmp)))
+        if(pVictim->GetTypeId()==TYPEID_PLAYER || !(((Creature*)pVictim)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_BLOCK) )
         {
-            // Critical chance
-            tmp = crit_chance + skillBonus2;
-            if ( GetTypeId() == TYPEID_PLAYER && SpellCasted && tmp > 0 )
+            tmp = block_chance;
+            if (   (tmp > 0)                                    // check if unit _can_ block
+                && ((tmp -= skillBonus) > 0)
+                && (roll < (sum += tmp)))
             {
-                if ( roll_chance_i(tmp/100))
+                // Critical chance
+                tmp = crit_chance + skillBonus2;
+                if ( GetTypeId() == TYPEID_PLAYER && SpellCasted && tmp > 0 )
                 {
-                    DEBUG_LOG ("RollMeleeOutcomeAgainst: BLOCKED CRIT");
-                    return MELEE_HIT_BLOCK_CRIT;
+                    if ( roll_chance_i(tmp/100))
+                    {
+                        DEBUG_LOG ("RollMeleeOutcomeAgainst: BLOCKED CRIT");
+                        return MELEE_HIT_BLOCK_CRIT;
+                    }
                 }
+                DEBUG_LOG ("RollMeleeOutcomeAgainst: BLOCK <%d, %d)", sum-tmp, sum);
+                return MELEE_HIT_BLOCK;
             }
-            DEBUG_LOG ("RollMeleeOutcomeAgainst: BLOCK <%d, %d)", sum-tmp, sum);
-            return MELEE_HIT_BLOCK;
         }
     }
 
@@ -2338,22 +2346,25 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         }
     }
 
-    // mobs can score crushing blows if they're 3 or more levels above victim
-    // or when their weapon skill is 15 or more above victim's defense skill
-    tmp = victimDefenseSkill;
-    int32 tmpmax = victimMaxSkillValueForLevel;
-    // having defense above your maximum (from items, talents etc.) has no effect
-    tmp = tmp > tmpmax ? tmpmax : tmp;
-    // tmp = mob's level * 5 - player's current defense skill
-    tmp = attackerMaxSkillValueForLevel - tmp;
-    if (GetTypeId() != TYPEID_PLAYER && !((Creature*)this)->isPet() && (tmp >= 15))
+    if(GetTypeId()!=TYPEID_PLAYER && !(((Creature*)this)->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_NO_CRUSH) && !((Creature*)this)->isPet() )
     {
-        // add 2% chance per lacking skill point, min. is 15%
-        tmp = tmp * 200 - 1500;
-        if (roll < (sum += tmp))
+        // mobs can score crushing blows if they're 3 or more levels above victim
+        // or when their weapon skill is 15 or more above victim's defense skill
+        tmp = victimDefenseSkill;
+        int32 tmpmax = victimMaxSkillValueForLevel;
+        // having defense above your maximum (from items, talents etc.) has no effect
+        tmp = tmp > tmpmax ? tmpmax : tmp;
+        // tmp = mob's level * 5 - player's current defense skill
+        tmp = attackerMaxSkillValueForLevel - tmp;
+        if(tmp >= 15)
         {
-            DEBUG_LOG ("RollMeleeOutcomeAgainst: CRUSHING <%d, %d)", sum-tmp, sum);
-            return MELEE_HIT_CRUSHING;
+            // add 2% chance per lacking skill point, min. is 15%
+            tmp = tmp * 200 - 1500;
+            if (roll < (sum += tmp))
+            {
+                DEBUG_LOG ("RollMeleeOutcomeAgainst: CRUSHING <%d, %d)", sum-tmp, sum);
+                return MELEE_HIT_CRUSHING;
+            }
         }
     }
 

@@ -237,7 +237,8 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
     {
         FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction);
         if (factionEntry)
-            if (!cinfo->civilian && (factionEntry->team == ALLIANCE || factionEntry->team == HORDE))
+            if( !(cinfo->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN) &&
+                (factionEntry->team == ALLIANCE || factionEntry->team == HORDE) )
                 SetPvP(true);
     }
 
