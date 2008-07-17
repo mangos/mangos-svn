@@ -176,7 +176,7 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
         if (player->GetGroup())
         {
             // instantiate map for group leader (possibly got from the database)
-            sLog.outDebug("MAPINSTANCED: Player '%s' is in group, instantiating map for group leader", player->GetName());
+            sLog.outDebug("MAPINSTANCED: Player '%s' (GUID: %u) is in group, instantiating map for group leader", player->GetName(),player->GetGUIDLow());
             instantiator = objmgr.GetPlayer(player->GetGroup()->GetLeaderGUID());
             if (!instantiator)
             {
@@ -187,7 +187,7 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
 
         if (!instantiator && instantiator_online)
         {
-            sLog.outDebug("MAPINSTANCED: Player '%s' is not in group, instantiating map for player", player->GetName());
+            sLog.outDebug("MAPINSTANCED: Player '%s' (GUID: %u) is not in group, instantiating map for player", player->GetName(),player->GetGUIDLow());
             instantiator = player;
         }
 
@@ -195,7 +195,7 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
         if (instantiator_online)
         {
             // player online, normal instantianting
-            sLog.outDebug("MAPINSTANCED: Instantiating map for player '%s' (group leader '%s')", player->GetName(), instantiator->GetName());
+            sLog.outDebug("MAPINSTANCED: Instantiating map for player '%s' (GUID: %u) (group leader '%s')", player->GetName(), player->GetGUIDLow(), instantiator->GetName());
             instantiator_id = instantiator->GetGUIDLow();
             BoundInstancesMap::iterator i = instantiator->m_BoundInstances.find(GetId());
             if (i != instantiator->m_BoundInstances.end())
@@ -215,7 +215,7 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
         else
         {
             // the aforementioned "very special" case of leader being not online
-            sLog.outDebug("MAPINSTANCED: Instantiating map for player '%s' (group leader is not online, querying DB)", player->GetName());
+            sLog.outDebug("MAPINSTANCED: Instantiating map for player '%s' (GUID: %u) (group leader is not online, querying DB)", player->GetName(),player->GetGUIDLow());
             instantiator_id = GUID_LOPART(player->GetGroup()->GetLeaderGUID());
             QueryResult* result = CharacterDatabase.PQuery("SELECT instance FROM character_instance WHERE (guid = '%u') AND (map = '%u') AND (leader = '%u')", instantiator_id, GetId(), instantiator_id);
             if (result)

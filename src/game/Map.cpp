@@ -468,7 +468,7 @@ bool Map::AddInstanced(Player *player)
 {
     if (!Instanceable())
     {
-        sLog.outDetail("MAP: Player '%s' entered the non-instanceable map '%s'", player->GetName(), GetMapName());
+        sLog.outDetail("MAP: Player '%s' (GUID: %u) entered the non-instanceable map '%s'", player->GetName(), player->GetGUIDLow(), GetMapName());
         if (player->GetPet()) player->GetPet()->SetInstanceId(0);
         player->SetInstanceId(0);
         return(true);
@@ -476,7 +476,7 @@ bool Map::AddInstanced(Player *player)
 
     if(std::find(i_Players.begin(),i_Players.end(),player)!=i_Players.end())
     {
-        sLog.outDetail("MAP: Player '%s' already in instance '%u' of map '%s'", player->GetName(), GetInstanceId(), GetMapName());
+        sLog.outDetail("MAP: Player '%s' (GUID: %u) already in instance '%u' of map '%s'", player->GetName(), player->GetGUIDLow(), GetInstanceId(), GetMapName());
         return true;
     }
 
@@ -490,7 +490,7 @@ bool Map::AddInstanced(Player *player)
         // GMs can avoid player limits
         if (i_maxPlayers && (GetPlayersCountExceptGMs() >= i_maxPlayers) && !player->isGameMaster())
         {
-            sLog.outDetail("MAP: Instance '%u' of map '%s' cannot have more than '%u' players. Player '%s' rejected", GetInstanceId(), GetMapName(), i_maxPlayers, player->GetName());
+            sLog.outDetail("MAP: Instance '%u' of map '%s' cannot have more than '%u' players. Player '%s' (GUID: %u) rejected", GetInstanceId(), GetMapName(), i_maxPlayers, player->GetName(),player->GetGUIDLow());
             player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAX_PLAYERS);
             return(false);
         }
@@ -506,7 +506,7 @@ bool Map::AddInstanced(Player *player)
 
     player->SendInitWorldStates();
 
-    sLog.outDetail("MAP: Player '%s' entered the instance '%u' of map '%s'", player->GetName(), GetInstanceId(), GetMapName());
+    sLog.outDetail("MAP: Player '%s' (GUID: %u) entered the instance '%u' of map '%s'", player->GetName(), player->GetGUIDLow(), GetInstanceId(), GetMapName());
 
     // reinitialize reset time
     InitResetTime();
@@ -566,7 +566,7 @@ bool Map::CanEnter(Player* player) const
         {
             // probably there must be special opcode, because client has this string constant in GlobalStrings.lua
             player->GetSession()->SendAreaTriggerMessage("You must be in a raid group to enter %s instance", GetMapName());
-            sLog.outDebug("MAP: Player '%s' must be in a raid group to enter instance of '%s'", player->GetName(), GetMapName());
+            sLog.outDebug("MAP: Player '%s' (GUID: %u) must be in a raid group to enter instance of '%s'", player->GetName(), player->GetGUIDLow(), GetMapName());
             return false;
         }
     }
@@ -590,21 +590,21 @@ bool Map::CanEnter(Player* player) const
             if (!instance_map)
             {
                 player->GetSession()->SendAreaTriggerMessage("You cannot enter %s while in a ghost mode", GetMapName());
-                sLog.outDebug("MAP: Player '%s' doesn't has a corpse in instance '%s' and can't enter", player->GetName(), GetMapName());
+                sLog.outDebug("MAP: Player '%s' (GUID: %u) doesn't has a corpse in instance '%s' and can't enter", player->GetName(), player->GetGUIDLow(), GetMapName());
                 return false;
             }
-            sLog.outDebug("MAP: Player '%s' has corpse in instance '%s' and can enter", player->GetName(), GetMapName());
+            sLog.outDebug("MAP: Player '%s' (GUID: %u) has corpse in instance '%s' and can enter", player->GetName(), player->GetGUIDLow(), GetMapName());
         }
         else
         {
-            sLog.outDebug("Map::CanEnter - player '%s' is dead but doesn't have a corpse!", player->GetName());
+            sLog.outDebug("Map::CanEnter - player '%s' (GUID: %u) is dead but doesn't have a corpse!", player->GetName(),player->GetGUIDLow());
         }
     }
 
     // prevent enter to instance non-GMs in boss encounter time
     if(i_data && i_data->IsEncounterInProgress() && !player->isGameMaster() )
     {
-        sLog.outDebug("MAP: Player '%s' can't enter instance '%s' while an encounter is in progress.", player->GetName(), GetMapName());
+        sLog.outDebug("MAP: Player '%s' (GUID: %u) can't enter instance '%s' while an encounter is in progress.", player->GetName(), player->GetGUIDLow(), GetMapName());
         player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
         return false;
     }
@@ -738,7 +738,7 @@ void Map::Remove(Player *player, bool remove)
 {
     if (Instanceable())
     {
-        sLog.outDetail("MAP: Removing player '%s' from instance '%u' of map '%s' before relocating to other map", player->GetName(), GetInstanceId(), GetMapName());
+        sLog.outDetail("MAP: Removing player '%s' (GUID: %u) from instance '%u' of map '%s' before relocating to other map", player->GetName(), player->GetGUIDLow(), GetInstanceId(), GetMapName());
         RemoveInstanced(player);                            // remove from instance player list, etc.
     }
 

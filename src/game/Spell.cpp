@@ -525,6 +525,7 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_SUMMON_POSSESSED:
                 case SPELL_EFFECT_SUMMON_OBJECT_WILD:
                 case SPELL_EFFECT_SELF_RESURRECT:
+                case SPELL_EFFECT_REPUTATION:
                     if(m_targets.getUnitTarget())
                         tmpUnitMap.push_back(m_targets.getUnitTarget());
                     break;
