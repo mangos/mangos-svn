@@ -1202,7 +1202,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void UpdateAuraForGroup(uint8 slot);
 
     protected:
-        explicit Unit ( WorldObject *instantiator );
+        explicit Unit ();
 
         void _UpdateSpells(uint32 time);
 

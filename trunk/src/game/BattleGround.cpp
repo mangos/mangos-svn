@@ -909,8 +909,11 @@ void BattleGround::SpawnBGObject(uint32 type, uint32 respawntime)
 
 Creature* BattleGround::AddCreature(uint32 entry, uint32 type, uint32 teamval, float x, float y, float z, float o)
 {
-    Creature* pCreature = new Creature(NULL);
-    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), GetMapId(), entry, teamval))
+    Map * map = MapManager::Instance().GetMap(GetMapId(), 0);
+    if(!map) return NULL;
+
+    Creature* pCreature = new Creature;
+    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map, entry, teamval))
     {
         sLog.outError("Can't create creature entry: %u",entry);
         delete pCreature;
@@ -928,7 +931,8 @@ Creature* BattleGround::AddCreature(uint32 entry, uint32 type, uint32 teamval, f
     pCreature->AIM_Initialize();
 
     //pCreature->SetDungeonDifficulty(0);
-    MapManager::Instance().GetMap(pCreature->GetMapId(), pCreature)->Add(pCreature);
+    
+    map->Add(pCreature);
     m_BgCreatures[type] = pCreature->GetGUID();
     return  pCreature;
 }

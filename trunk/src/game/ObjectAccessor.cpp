@@ -521,7 +521,7 @@ ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
     corpse->DeleteFromDB();
 
     // Create bones, don't change Corpse
-    Corpse *bones = new Corpse(corpse);
+    Corpse *bones = new Corpse;
     bones->Create(corpse->GetGUIDLow());
 
     for (int i = 3; i < CORPSE_END; i++)                    // don't overwrite guid and object type
@@ -533,6 +533,7 @@ ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
     // bones->m_type = m_type;                              // don't overwrite type
     bones->Relocate(corpse->GetPositionX(), corpse->GetPositionY(), corpse->GetPositionZ(), corpse->GetOrientation());
     bones->SetMapId(corpse->GetMapId());
+    bones->SetInstanceId(corpse->GetInstanceId());
 
     bones->SetUInt32Value(CORPSE_FIELD_FLAGS, 0x05);
     bones->SetUInt64Value(CORPSE_FIELD_OWNER, 0);

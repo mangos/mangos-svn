@@ -136,8 +136,8 @@ bool IsPassiveStackableSpell( uint32 spellId )
     return true;
 }
 
-Unit::Unit( WorldObject *instantiator )
-: WorldObject( instantiator ), i_motionMaster(this), m_ThreatManager(this), m_HostilRefManager(this)
+Unit::Unit()
+: WorldObject(), i_motionMaster(this), m_ThreatManager(this), m_HostilRefManager(this)
 {
     m_objectType |= TYPEMASK_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -8015,7 +8015,7 @@ void Unit::Unmount()
 
     if(GetTypeId() == TYPEID_PLAYER && ((Player*)this)->GetOldPetNumber() && isAlive())
     {
-        Pet* NewPet = new Pet(this);
+        Pet* NewPet = new Pet;
         if(!NewPet->LoadPetFromDB(this, 0, ((Player*)this)->GetOldPetNumber(), true))
             delete NewPet;
 

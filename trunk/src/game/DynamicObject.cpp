@@ -31,7 +31,7 @@
 #include "CellImpl.h"
 #include "GridNotifiersImpl.h"
 
-DynamicObject::DynamicObject( WorldObject *instantiator ) : WorldObject( instantiator )
+DynamicObject::DynamicObject() : WorldObject()
 {
     m_objectType |= TYPEMASK_DYNAMICOBJECT;
     m_objectTypeId = TYPEID_DYNAMICOBJECT;

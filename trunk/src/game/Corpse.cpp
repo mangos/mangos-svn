@@ -29,7 +29,7 @@
 #include "GossipDef.h"
 #include "World.h"
 
-Corpse::Corpse( WorldObject *instantiator, CorpseType type ) : WorldObject( instantiator )
+Corpse::Corpse(CorpseType type) : WorldObject()
 {
     m_objectType |= TYPEMASK_CORPSE;
     m_objectTypeId = TYPEID_CORPSE;

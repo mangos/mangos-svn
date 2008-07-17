@@ -298,13 +298,13 @@ class Unit;
 class MANGOS_DLL_SPEC GameObject : public WorldObject
 {
     public:
-        explicit GameObject( WorldObject *instantiator );
+        explicit GameObject();
         ~GameObject();
 
         void AddToWorld();
         void RemoveFromWorld();
 
-        bool Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, uint32 go_state);
+        bool Create(uint32 guidlow, uint32 name_id, Map *map, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, uint32 go_state);
         void Update(uint32 p_time);
         static GameObject* GetGameObject(WorldObject& object, uint64 guid);
         GameObjectInfo const* GetGOInfo() const;
@@ -328,7 +328,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         void SaveToDB();
         void SaveToDB(uint32 mapid, uint8 spawnMask);
-        bool LoadFromDB(uint32 guid, uint32 InstanceId);
+        bool LoadFromDB(uint32 guid, Map *map);
         void DeleteFromDB();
         void SetLootState(LootState s) { m_lootState = s; }
         static uint32 GetLootId(GameObjectInfo const* info);

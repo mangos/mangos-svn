@@ -302,13 +302,13 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
     public:
 
-        explicit Creature( WorldObject *instantiator );
+        explicit Creature();
         virtual ~Creature();
 
         void AddToWorld();
         void RemoveFromWorld();
 
-        bool Create (uint32 guidlow, uint32 mapid, uint32 Entry, uint32 team, const CreatureData *data = NULL);
+        bool Create (uint32 guidlow, Map *map, uint32 Entry, uint32 team, const CreatureData *data = NULL);
         bool CreateFromProto(uint32 guidlow,uint32 Entry,uint32 team, const CreatureData *data = NULL);
         bool LoadCreaturesAddon(bool reload = false);
         void SelectLevel(const CreatureInfo *cinfo);
@@ -458,7 +458,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         void setDeathState(DeathState s);                   // overwrite virtual Unit::setDeathState
 
-        bool LoadFromDB(uint32 guid, uint32 InstanceId);
+        bool LoadFromDB(uint32 guid, Map *map);
         void SaveToDB();
                                                             // overwrited in Pet
         virtual void SaveToDB(uint32 mapid, uint8 spawnMask);

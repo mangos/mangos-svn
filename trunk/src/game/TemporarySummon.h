@@ -25,7 +25,7 @@
 class TemporarySummon : public Creature
 {
     public:
-        explicit TemporarySummon( WorldObject *instantiator, uint64 summoner = 0);
+        explicit TemporarySummon(uint64 summoner = 0);
         virtual ~TemporarySummon(){};
         void Update(uint32 time);
         void Summon(TempSummonType type, uint32 lifetime);

@@ -25,7 +25,7 @@
 #include "ObjectMgr.h"
 #include "SpellMgr.h"
 
-Totem::Totem( WorldObject *instantiator ) : Creature( instantiator )
+Totem::Totem() : Creature()
 {
     m_isTotem = true;
     m_duration = 0;
@@ -57,7 +57,7 @@ void Totem::Summon(Unit* owner)
     sLog.outDebug("AddObject at Totem.cpp line 49");
 
     SetInstanceId(owner->GetInstanceId());
-    MapManager::Instance().GetMap(GetMapId(), owner)->Add((Creature*)this);
+    owner->GetMap()->Add((Creature*)this);
 
     // select totem model in dependent from owner team
     CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(GetEntry());

@@ -108,7 +108,7 @@ extern const uint32 LevelStartLoyalty[6];
 class Pet : public Creature
 {
     public:
-        explicit Pet(WorldObject *instantiator, PetType type = MAX_PET_TYPE);
+        explicit Pet(PetType type = MAX_PET_TYPE);
         virtual ~Pet();
 
         void AddToWorld();
@@ -119,7 +119,7 @@ class Pet : public Creature
         bool isControlled() const { return getPetType()==SUMMON_PET || getPetType()==HUNTER_PET; }
         bool isTemporarySummoned() const { return m_duration > 0; }
 
-        bool Create (uint32 guidlow, uint32 mapid, uint32 Entry, uint32 pet_number);
+        bool Create (uint32 guidlow, Map *map, uint32 Entry, uint32 pet_number);
         bool CreateBaseAtCreature( Creature* creature );
         bool LoadPetFromDB( Unit* owner,uint32 petentry = 0,uint32 petnumber = 0, bool current = false );
         void SavePetToDB(PetSaveMode mode);

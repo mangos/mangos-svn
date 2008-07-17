@@ -244,7 +244,7 @@ const int32 Player::ReputationRank_Length[MAX_REPUTATION_RANK] = {36000, 3000, 3
 
 UpdateMask Player::updateVisualBits;
 
-Player::Player (WorldSession *session): Unit( 0 )
+Player::Player (WorldSession *session): Unit()
 {
     m_transport = 0;
 
@@ -1518,7 +1518,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             // resummon pet
             if(pet && m_oldpetnumber)
             {
-                Pet* NewPet = new Pet(this);
+                Pet* NewPet = new Pet;
                 if(!NewPet->LoadPetFromDB(this, 0, m_oldpetnumber, true))
                     delete NewPet;
 
@@ -3626,7 +3626,7 @@ void Player::CreateCorpse()
 
     uint32 _uf, _pb, _pb2, _cfb1, _cfb2;
 
-    Corpse *corpse = new Corpse(this, CORPSE_RESURRECTABLE);
+    Corpse *corpse = new Corpse(CORPSE_RESURRECTABLE);
 
     if(!corpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetMapId(), GetPositionX(),
         GetPositionY(), GetPositionZ(), GetOrientation()))
@@ -13716,7 +13716,7 @@ void Player::_LoadMail()
 
 void Player::LoadPet()
 {
-    Pet *pet = new Pet(this);
+    Pet *pet = new Pet;
     if(!pet->LoadPetFromDB(this,0,0,true))
         delete pet;
 }

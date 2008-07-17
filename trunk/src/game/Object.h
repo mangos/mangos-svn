@@ -416,7 +416,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         Creature* SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime);
 
     protected:
-        explicit WorldObject( WorldObject *instantiator );
+        explicit WorldObject();
         std::string m_name;
 
     private:

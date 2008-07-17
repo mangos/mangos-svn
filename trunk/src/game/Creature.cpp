@@ -42,8 +42,8 @@
 // apply implementation of the singletons
 #include "Policies/SingletonImp.h"
 
-Creature::Creature( WorldObject *instantiator ) :
-Unit( instantiator ), i_AI(NULL),
+Creature::Creature() :
+Unit(), i_AI(NULL),
 lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupLeaderGUID(0),
 m_itemsLoaded(false), m_trainerSpellsLoaded(false), m_trainer_type(0), m_lootMoney(0), m_lootRecipient(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0f),
@@ -467,9 +467,11 @@ bool Creature::AIM_Initialize()
     return true;
 }
 
-bool Creature::Create (uint32 guidlow, uint32 mapid, uint32 Entry, uint32 team, const CreatureData *data)
+bool Creature::Create (uint32 guidlow, Map *map, uint32 Entry, uint32 team, const CreatureData *data)
 {
-    SetMapId(mapid);
+    SetMapId(map->GetId());
+    SetInstanceId(map->GetInstanceId());
+    
     //oX = x;     oY = y;    dX = x;    dY = y;    m_moveTime = 0;    m_startMove = 0;
     const bool bResult = CreateFromProto(guidlow, Entry, team, data);
 
@@ -1236,7 +1238,7 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
     return true;
 }
 
-bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
+bool Creature::LoadFromDB(uint32 guid, Map *map)
 {
     CreatureData const* data = objmgr.GetCreatureData(guid);
 
@@ -1247,12 +1249,10 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
     }
 
     uint32 stored_guid = guid;
-
-    if (InstanceId != 0) guid = objmgr.GenerateLowGuid(HIGHGUID_UNIT);
-    SetInstanceId(InstanceId);
+    if (map->GetInstanceId() != 0) guid = objmgr.GenerateLowGuid(HIGHGUID_UNIT);
 
     uint16 team = 0;
-    if(!Create(guid,data->mapid,data->id,team,data))
+    if(!Create(guid,map,data->id,team,data))
         return false;
 
     Relocate(data->posX,data->posY,data->posZ,data->orientation);

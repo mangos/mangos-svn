@@ -934,7 +934,7 @@ bool Object::PrintIndexError(uint32 index, bool set) const
     return false;
 }
 
-WorldObject::WorldObject( WorldObject *instantiator )
+WorldObject::WorldObject()
 {
     m_positionX         = 0.0f;
     m_positionY         = 0.0f;
@@ -947,11 +947,6 @@ WorldObject::WorldObject( WorldObject *instantiator )
     m_name = "";
 
     mSemaphoreTeleport  = false;
-
-    if (instantiator)
-    {
-        m_InstanceId = instantiator->GetInstanceId();
-    }
 }
 
 void WorldObject::_Create( uint32 guidlow, HighGuid guidhigh, uint32 mapid )
@@ -1283,14 +1278,14 @@ Map const* WorldObject::GetBaseMap() const
 
 Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime)
 {
-    TemporarySummon* pCreature = new TemporarySummon(this, GetGUID());
+    TemporarySummon* pCreature = new TemporarySummon(GetGUID());
 
     pCreature->SetInstanceId(GetInstanceId());
     uint32 team = 0;
     if (GetTypeId()==TYPEID_PLAYER)
         team = ((Player*)this)->GetTeam();
 
-    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), GetMapId(), id, team))
+    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), GetMap(), id, team))
     {
         delete pCreature;
         return NULL;
