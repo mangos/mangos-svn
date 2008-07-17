@@ -425,12 +425,7 @@ bool IsDiminishingReturnsGroupDurationLimited(DiminishingGroup group);
 DiminishingReturnsType GetDiminishingReturnsGroupType(DiminishingGroup group);
 
 // Spell affects related declarations (accessed using SpellMgr functions)
-struct SpellAffection
-{
-    uint64 SpellFamilyMask;
-};
-
-typedef HM_NAMESPACE::hash_map<uint32, SpellAffection> SpellAffectMap;
+typedef std::map<uint32, uint64> SpellAffectMap;
 
 // Spell proc event related declarations (accessed using SpellMgr functions)
 enum ProcFlags
@@ -580,12 +575,12 @@ class SpellMgr
         // Accessors (const or static functions)
     public:
         // Spell affects
-        SpellAffection const* GetSpellAffection(uint16 spellId, uint8 effectId) const
+        uint64 GetSpellAffectMask(uint16 spellId, uint8 effectId) const
         {
             SpellAffectMap::const_iterator itr = mSpellAffectMap.find((spellId<<8) + effectId);
             if( itr != mSpellAffectMap.end( ) )
-                return &itr->second;
-            return NULL;
+                return itr->second;
+            return 0;
         }
 
         bool IsAffectedBySpell(SpellEntry const *spellInfo, uint32 spellId, uint8 effectId, uint64 familyFlags) const;

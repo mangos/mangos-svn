@@ -700,28 +700,26 @@ void SpellMgr::LoadSpellAffects()
             continue;
         }
 
-        SpellAffection sa;
-
-        sa.SpellFamilyMask = fields[2].GetUInt64();
+        uint64 spellAffectMask = fields[2].GetUInt64();
 
         // Spell.dbc have own data for low part of SpellFamilyMask
         if( spellInfo->EffectItemType[effectId])
         {
-            if(spellInfo->EffectItemType[effectId] == sa.SpellFamilyMask)
+            if(spellInfo->EffectItemType[effectId] == spellAffectMask)
             {
                 sLog.outErrorDb("Spell %u listed in `spell_affect` have redundant (same with EffectItemType%d) data for effect index (%u) and not needed, skipped.", entry,effectId+1,effectId);
                 continue;
             }
 
             // 24429 have wrong data in EffectItemType and overwrites by DB, possible bug in client
-            if(spellInfo->Id!=24429 && spellInfo->EffectItemType[effectId] != sa.SpellFamilyMask)
+            if(spellInfo->Id!=24429 && spellInfo->EffectItemType[effectId] != spellAffectMask)
             {
                 sLog.outErrorDb("Spell %u listed in `spell_affect` have different low part from EffectItemType%d for effect index (%u) and not needed, skipped.", entry,effectId+1,effectId);
                 continue;
             }
         }
 
-        mSpellAffectMap.insert(SpellAffectMap::value_type((entry<<8) + effectId,sa));
+        mSpellAffectMap.insert(SpellAffectMap::value_type((entry<<8) + effectId,spellAffectMask));
 
         ++count;
     } while( result->NextRow() );
@@ -747,7 +745,7 @@ void SpellMgr::LoadSpellAffects()
                 spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_TARGET_TRIGGER) )
                 continue;
 
-            if(GetSpellAffection(id,effectId))
+            if(GetSpellAffectMask(id,effectId))
                 continue;
 
             if(spellInfo->EffectItemType[effectId] != 0)
@@ -778,8 +776,7 @@ bool SpellMgr::IsAffectedBySpell(SpellEntry const *spellInfo, uint32 spellId, ui
     if (!familyFlags)
     {
         // Get it from spellAffect table
-        if (SpellAffection const *spellAffect = GetSpellAffection(spellId,effectId))
-            familyFlags = spellAffect->SpellFamilyMask;
+        familyFlags = GetSpellAffectMask(spellId,effectId);
         // false if familyFlags == 0
         if (!familyFlags)
             return false;
