@@ -175,7 +175,8 @@ struct WeatherZoneChances
 enum SessionStatus
 {
     STATUS_AUTHED = 0,                                      ///< Player authenticated
-    STATUS_LOGGEDIN                                         ///< Player in game
+    STATUS_LOGGEDIN,                                        ///< Player in game
+    STATUS_TRANSFER_PENDING                                 ///< Player transferring to another map
 };
 
 struct OpcodeHandler
