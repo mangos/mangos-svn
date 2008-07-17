@@ -7503,12 +7503,24 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
                 CastingTime = 1050;
             break;
         case  SPELLFAMILY_DRUID:
-            // Lifebloom final heal
-            if (spellProto->SpellFamilyFlags & 0x1000000000LL && damagetype != DOT)
-                CastingTime = 1500;
+            // Lifebloom
+            if (spellProto->SpellFamilyFlags & 0x1000000000LL)
+            {
+                CastingTime = damagetype == DOT ? 3500 : 1200;
+                DotFactor = damagetype == DOT ? 0.519f : 1.0f;
+            }
             // Tranquilitiy triggered spell
             else if (spellProto->SpellFamilyFlags & 0x80LL)
-                CastingTime = 500;
+                CastingTime = 667;
+            // Rejuvenation
+            else if (spellProto->SpellFamilyFlags & 0x10LL)
+                DotFactor = 0.845f;
+            // Regrowth
+            else if (spellProto->SpellFamilyFlags & 0x40LL)
+            {
+                DotFactor = damagetype == DOT ? 0.705f : 1.0f;
+                CastingTime = damagetype == DOT ? 3500 : 1010;
+            }
             break;
         case SPELLFAMILY_PALADIN:
             // Seal and Judgement of Light
