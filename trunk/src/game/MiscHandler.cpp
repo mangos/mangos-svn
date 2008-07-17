@@ -880,20 +880,20 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
     if(GetPlayer()->isInFlight())
     {
-        sLog.outDebug("Player '%s' in flight, ignore Area Trigger ID:%u",GetPlayer()->GetName(),Trigger_ID);
+        sLog.outDebug("Player '%s' (GUID: %u) in flight, ignore Area Trigger ID:%u",GetPlayer()->GetName(),GetPlayer()->GetGUIDLow(), Trigger_ID);
         return;
     }
 
     AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
     if(!atEntry)
     {
-        sLog.outDebug("Player '%s' send unknown (by DBC) Area Trigger ID:%u",GetPlayer()->GetName(),Trigger_ID);
+        sLog.outDebug("Player '%s' (GUID: %u) send unknown (by DBC) Area Trigger ID:%u",GetPlayer()->GetName(),GetPlayer()->GetGUIDLow(), Trigger_ID);
         return;
     }
 
     if (GetPlayer()->GetMapId()!=atEntry->mapid)
     {
-        sLog.outDebug("Player '%s' too far (trigger map: %u player map: %u), ignore Area Trigger ID: %u", GetPlayer()->GetName(), atEntry->mapid, GetPlayer()->GetMapId(), Trigger_ID);
+        sLog.outDebug("Player '%s' (GUID: %u) too far (trigger map: %u player map: %u), ignore Area Trigger ID: %u", GetPlayer()->GetName(), atEntry->mapid, GetPlayer()->GetMapId(), GetPlayer()->GetGUIDLow(), Trigger_ID);
         return;
     }
 
@@ -908,8 +908,8 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         float dist = pl->GetDistance(atEntry->x,atEntry->y,atEntry->z);
         if(dist > atEntry->radius + delta)
         {
-            sLog.outDebug("Player '%s' too far (radius: %f distance: %f), ignore Area Trigger ID: %u",
-                pl->GetName(), atEntry->radius, dist, Trigger_ID);
+            sLog.outDebug("Player '%s' (GUID: %u) too far (radius: %f distance: %f), ignore Area Trigger ID: %u",
+                pl->GetName(), pl->GetGUIDLow(), atEntry->radius, dist, Trigger_ID);
             return;
         }
     }
@@ -929,8 +929,8 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             (fabs(rotateDy) > atEntry->box_y/2 + delta) ||
             (fabs(dz) > atEntry->box_z/2 + delta) )
         {
-            sLog.outDebug("Player '%s' too far (1/2 box X: %f 1/2 box Y: %u 1/2 box Z: %u rotate dX: %f rotate dY: %f dZ:%f), ignore Area Trigger ID: %u",
-                pl->GetName(), atEntry->box_x/2, atEntry->box_y/2, atEntry->box_z/2, rotateDx, rotateDy, dz, Trigger_ID);
+            sLog.outDebug("Player '%s' (GUID: %u) too far (1/2 box X: %f 1/2 box Y: %u 1/2 box Z: %u rotate dX: %f rotate dY: %f dZ:%f), ignore Area Trigger ID: %u",
+                pl->GetName(), pl->GetGUIDLow(), atEntry->box_x/2, atEntry->box_y/2, atEntry->box_z/2, rotateDx, rotateDy, dz, Trigger_ID);
             return;
         }
     }
@@ -1365,7 +1365,7 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
 
     if(GetPlayer()->isInFlight())
     {
-        sLog.outDebug("Player '%s' in flight, ignore worldport command.",GetPlayer()->GetName());
+        sLog.outDebug("Player '%s' (GUID: %u) in flight, ignore worldport command.",GetPlayer()->GetName(),GetPlayer()->GetGUIDLow());
         return;
     }
 

@@ -1124,7 +1124,7 @@ void Player::Update( uint32 p_time )
         {
             // m_nextSave reseted in SaveToDB call
             SaveToDB();
-            sLog.outDetail("Player '%u' '%s' Saved", GetGUIDLow(), GetName());
+            sLog.outDetail("Player '%s' (GUID: %u) saved", GetName(), GetGUIDLow());
         }
         else
         {
@@ -15818,7 +15818,7 @@ void Player::UpdateHomebindTime(uint32 time)
         data << m_HomebindTimer;
         data << uint32(1);
         GetSession()->SendPacket(&data);
-        sLog.outDebug("PLAYER: Player '%s' will be teleported to homebind in 60 seconds", GetName());
+        sLog.outDebug("PLAYER: Player '%s' (GUID: %u) will be teleported to homebind in 60 seconds", GetName(),GetGUIDLow());
     }
 }
 
