@@ -6675,6 +6675,15 @@ bool Unit::AttackStop()
     return true;
 }
 
+void Unit::CombatStop()
+{
+    AttackStop(); 
+    RemoveAllAttackers(); 
+    if( GetTypeId()==TYPEID_PLAYER )
+        ((Player*)this)->SendAttackSwingCancelAttack();     // melee and ranged forced attack cancel
+    ClearInCombat();
+}
+
 bool Unit::isAttackingPlayer() const
 {
     if(getVictim())
