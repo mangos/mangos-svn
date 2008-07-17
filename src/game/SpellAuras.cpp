@@ -2993,7 +2993,6 @@ void Aura::HandleFeignDeath(bool apply, bool Real)
         if(m_caster_guid==m_target->GetGUID() && m_target->m_currentSpells[CURRENT_GENERIC_SPELL])
             m_target->m_currentSpells[CURRENT_GENERIC_SPELL]->finish();
         m_target->InterruptNonMeleeSpells(true);
-        ((Player*)m_target)->SendAttackSwingCancelAttack(); // melee and ranged forced attack cancel
         m_target->getHostilRefManager().deleteReferences();
 
         // send cooldown explicitly
