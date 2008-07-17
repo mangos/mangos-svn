@@ -2100,7 +2100,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         float m_auraBaseMod[BASEMOD_END][MOD_END];
 
         SpellModList m_spellMods[MAX_SPELLMOD];
-        int32 m_totalSpellMod[MAX_SPELLMOD][64];            // 64 = size of SpellFamilyFlags
         int32 m_SpellModRemoveCount;
         EnchantDurationList m_enchantDuration;
         ItemDurationList m_itemDuration;

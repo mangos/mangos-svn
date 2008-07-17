@@ -394,8 +394,6 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_HomebindTimer = 0;
     m_InstanceValid = true;
 
-    memset(m_totalSpellMod, 0, sizeof(m_totalSpellMod));
-
     for (int i = 0; i < BASEMOD_END; i++)
     {
         m_auraBaseMod[i][FLAT_MOD] = 0.0f;
@@ -15147,13 +15145,20 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
 
     for(int eff=0;eff<64;++eff)
     {
-        if ( mod->mask & (uint64(1) << eff) )
+        uint64 _mask = uint64(1) << eff;
+        if ( mod->mask & _mask)
         {
-            m_totalSpellMod[mod->op][eff] += apply ? mod->value : -(mod->value);
+            int32 val = 0;
+            for (SpellModList::iterator itr = m_spellMods[mod->op].begin(); itr != m_spellMods[mod->op].end(); ++itr)
+            {
+                if ((*itr)->type == mod->type && (*itr)->mask & _mask)
+                    val += (*itr)->value;
+            }
+            val += apply ? mod->value : -(mod->value);
             WorldPacket data(Opcode, (1+1+4));
             data << uint8(eff);
             data << uint8(mod->op);
-            data << int32(m_totalSpellMod[mod->op][eff]);
+            data << int32(val);
             SendDirectMessage(&data);
         }
     }

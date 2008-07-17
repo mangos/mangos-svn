@@ -1141,10 +1141,10 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         mod->effectId = m_effIndex;
         mod->lastAffected = NULL;
 
-        SpellAffection const *spellAffect = spellmgr.GetSpellAffection(GetId(), m_effIndex);
+        uint64 spellAffectMask = spellmgr.GetSpellAffectMask(GetId(), m_effIndex);
 
-        if (spellAffect && spellAffect->SpellFamilyMask)
-            mod->mask = spellAffect->SpellFamilyMask;
+        if (spellAffectMask)
+            mod->mask = spellAffectMask;
         else
             mod->mask = spellInfo->EffectItemType[m_effIndex];
 
