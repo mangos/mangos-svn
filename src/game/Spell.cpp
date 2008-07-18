@@ -3374,6 +3374,9 @@ uint8 Spell::CanCast(bool strict)
                         m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT_COORDINATES )
                     {
                         m_targets.setDestination(creatureScriptTarget->GetPositionX(),creatureScriptTarget->GetPositionY(),creatureScriptTarget->GetPositionZ());
+
+                        if(m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT_COORDINATES && m_spellInfo->EffectImplicitTargetB[j] == 0 && m_spellInfo->Effect[j]!=SPELL_EFFECT_PERSISTENT_AREA_AURA)
+                            AddUnitTarget(creatureScriptTarget, j);
                     }
                     // store explicit target for TARGET_SCRIPT
                     else
@@ -3386,6 +3389,9 @@ uint8 Spell::CanCast(bool strict)
                         m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT_COORDINATES )
                     {
                         m_targets.setDestination(goScriptTarget->GetPositionX(),goScriptTarget->GetPositionY(),goScriptTarget->GetPositionZ());
+
+                        if(m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT_COORDINATES && m_spellInfo->EffectImplicitTargetB[j] == 0 && m_spellInfo->Effect[j]!=SPELL_EFFECT_PERSISTENT_AREA_AURA)
+                            AddGOTarget(goScriptTarget, j);
                     }
                     // store explicit target for TARGET_SCRIPT
                     else
