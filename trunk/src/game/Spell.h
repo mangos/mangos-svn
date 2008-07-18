@@ -275,7 +275,6 @@ class Spell
         void EffectAddExtraAttacks(uint32 i);
         void EffectSpiritHeal(uint32 i);
         void EffectSkinPlayerCorpse(uint32 i);
-        void EffectApplyPetAura(uint32 i);
         void EffectSummonDemon(uint32 i);
         void EffectStealBeneficialBuff(uint32 i);
         void EffectUnlearnSpecialization(uint32 i);
