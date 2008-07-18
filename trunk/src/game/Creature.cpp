@@ -1498,11 +1498,15 @@ void Creature::setDeathState(DeathState s)
 
 void Creature::Respawn()
 {
-    if(getDeathState()==CORPSE && !m_isDeadByDefault ||getDeathState()==ALIVE && m_isDeadByDefault)
-    {
-        m_deathTimer = 0;
-        Update(0);                                          // despawn corpse
-    }
+    RemoveCorpse();
+
+    // forced recreate creature object at clients
+    UnitVisibility currentVis = GetVisibility();
+    SetVisibility(VISIBILITY_RESPAWN);
+    ObjectAccessor::UpdateObjectVisibility(this);
+    SetVisibility(currentVis);                              // restore visibility state
+    ObjectAccessor::UpdateObjectVisibility(this);
+
     if(getDeathState()==DEAD)
     {
         objmgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),0);

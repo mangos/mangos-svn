@@ -16193,8 +16193,8 @@ void Player::UpdateVisibilityOf(WorldObject* target)
             if(target!=this && target->isType(TYPEMASK_UNIT))
                 SendAuraDurationsForTarget((Unit*)target);
 
-            if(target->GetTypeId()==TYPEID_UNIT)
-                ((Unit*)target)->SendMonsterMoveWithSpeedToCurrentDestination(this);
+            if(target->GetTypeId()==TYPEID_UNIT && ((Creature*)target)->isAlive())
+                ((Creature*)target)->SendMonsterMoveWithSpeedToCurrentDestination(this);
         }
     }
 }

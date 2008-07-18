@@ -135,8 +135,6 @@ void LoadHelper(CellCorpseSet const& cell_corpses, CellPair &cell, CorpseMapType
     if(cell_corpses.empty())
         return;
 
-    Corpse *obj;
-
     for(CellCorpseSet::const_iterator itr = cell_corpses.begin(); itr != cell_corpses.end(); ++itr)
     {
         if(itr->second != map->GetInstanceId())
@@ -144,7 +142,7 @@ void LoadHelper(CellCorpseSet const& cell_corpses, CellPair &cell, CorpseMapType
 
         uint32 player_guid = itr->first;
 
-        obj = ObjectAccessor::Instance().GetCorpseForPlayerGUID(player_guid);
+        Corpse *obj = ObjectAccessor::Instance().GetCorpseForPlayerGUID(player_guid);
         if(!obj)
             continue;
 
