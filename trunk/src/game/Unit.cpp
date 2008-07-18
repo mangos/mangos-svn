@@ -7520,7 +7520,7 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
                 CastingTime = damagetype == DOT ? 3500 : 1200;
                 DotFactor = damagetype == DOT ? 0.519f : 1.0f;
             }
-            // Tranquilitiy triggered spell
+            // Tranquility triggered spell
             else if (spellProto->SpellFamilyFlags & 0x80LL)
                 CastingTime = 667;
             // Rejuvenation
