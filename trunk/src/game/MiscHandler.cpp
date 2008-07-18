@@ -820,12 +820,12 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
         return;
 
     // prevent resurrect before 30-sec delay after body release not finished
-    if(corpse->GetGhostTime() + GetPlayer()->GetCorpseReclaimDelay(corpse->GetType()==CORPSE_RESURRECTABLE_PVP) > time(NULL))
+    if(corpse->GetGhostTime() + GetPlayer()->GetCorpseReclaimDelay() > time(NULL))
         return;
 
-    float dist = corpse->GetDistance2dSq(GetPlayer());
+    float dist = corpse->GetDistance2d(GetPlayer());
     sLog.outDebug("Corpse 2D Distance: \t%f",dist);
-    if (dist > CORPSE_RECLAIM_RADIUS*CORPSE_RECLAIM_RADIUS)
+    if (dist > CORPSE_RECLAIM_RADIUS)
         return;
 
     uint64 guid;
