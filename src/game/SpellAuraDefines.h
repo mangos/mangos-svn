@@ -294,8 +294,10 @@ enum AuraType
 
 enum AreaAuraType
 {
-    AREA_AURA_PARTY     = 0,
-    AREA_AURA_FRIEND    = 1,
-    AREA_AURA_ENEMY     = 2
+    AREA_AURA_PARTY,
+    AREA_AURA_FRIEND,
+    AREA_AURA_ENEMY,
+    AREA_AURA_PET,
+    AREA_AURA_OWNER
 };
 #endif

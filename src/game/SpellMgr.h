@@ -360,6 +360,17 @@ inline bool IsAreaOfEffectSpell(SpellEntry const *spellInfo)
     return false;
 }
 
+inline bool IsAreaAuraEffect(uint32 effect)
+{
+    if( effect == SPELL_EFFECT_APPLY_AREA_AURA_PARTY    ||
+        effect == SPELL_EFFECT_APPLY_AREA_AURA_FRIEND   ||
+        effect == SPELL_EFFECT_APPLY_AREA_AURA_ENEMY    ||
+        effect == SPELL_EFFECT_APPLY_AREA_AURA_PET      ||
+        effect == SPELL_EFFECT_APPLY_AREA_AURA_OWNER)
+        return true;
+    return false;
+}
+
 inline bool IsDispelSpell(SpellEntry const *spellInfo)
 {
     if (spellInfo->Effect[0] == SPELL_EFFECT_DISPEL ||

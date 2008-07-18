@@ -392,6 +392,11 @@ void Spell::FillTargetMap()
             m_spellInfo->EffectImplicitTargetB[i] == TARGET_SCRIPT && m_spellInfo->EffectImplicitTargetA[i] != TARGET_SELF )
             continue;
 
+        // TODO: find a way so this is not needed?
+        // for area auras always add caster as target (needed for totems for example)
+        if(IsAreaAuraEffect(m_spellInfo->Effect[i]))
+            AddUnitTarget(m_caster, i);
+
         std::list<Unit*> tmpUnitMap;
 
         // TargetA/TargetB dependent from each other, we not switch to full support this dependences
@@ -4103,9 +4108,7 @@ bool Spell::CanAutoCast(Unit* target)
                     return false;
             }
         }
-        else if (m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AREA_AURA_PARTY   || 
-                 m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AREA_AURA_FRIEND  ||
-                 m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AREA_AURA_ENEMY)
+        else if ( IsAreaAuraEffect( m_spellInfo->Effect[j] ))
         {
                 if( target->HasAura(m_spellInfo->Id, j) )
                     return false;
