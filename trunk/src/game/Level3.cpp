@@ -2994,9 +2994,9 @@ bool ChatHandler::HandleAuraCommand(const char* args)
             uint8 eff = spellInfo->Effect[i];
             if (eff>=TOTAL_SPELL_EFFECTS)
                 continue;
-            if( eff == SPELL_EFFECT_APPLY_AREA_AURA_PARTY || eff == SPELL_EFFECT_APPLY_AURA ||
-                eff == SPELL_EFFECT_PERSISTENT_AREA_AURA || eff == SPELL_EFFECT_APPLY_AREA_AURA_FRIEND || 
-                eff == SPELL_EFFECT_APPLY_AREA_AURA_ENEMY)
+            if( IsAreaAuraEffect(eff)           || 
+                eff == SPELL_EFFECT_APPLY_AURA  ||
+                eff == SPELL_EFFECT_PERSISTENT_AREA_AURA )
             {
                 Aura *Aur = CreateAura(spellInfo, i, NULL, target);
                 target->AddAura(Aur);

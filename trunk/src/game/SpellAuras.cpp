@@ -417,6 +417,8 @@ Unit *caster, Item* castItem) : Aura(spellproto, eff, currentBasePoints, target,
     {
         case SPELL_EFFECT_APPLY_AREA_AURA_PARTY:
             m_areaAuraType = AREA_AURA_PARTY;
+            if(target->GetTypeId() == TYPEID_UNIT && ((Creature*)target)->isTotem())
+                m_modifier.m_auraname = SPELL_AURA_NONE;
             break;
         case SPELL_EFFECT_APPLY_AREA_AURA_FRIEND:
             m_areaAuraType = AREA_AURA_FRIEND;
@@ -425,6 +427,14 @@ Unit *caster, Item* castItem) : Aura(spellproto, eff, currentBasePoints, target,
             m_areaAuraType = AREA_AURA_ENEMY;
             if(target == caster_ptr)
                 m_modifier.m_auraname = SPELL_AURA_NONE;    // Do not do any effect on self
+            break;
+        case SPELL_EFFECT_APPLY_AREA_AURA_PET:
+            m_areaAuraType = AREA_AURA_PET;
+            break;
+        case SPELL_EFFECT_APPLY_AREA_AURA_OWNER:
+            m_areaAuraType = AREA_AURA_OWNER;
+            if(target == caster_ptr)
+                m_modifier.m_auraname = SPELL_AURA_NONE;
             break;
         default:
             sLog.outError("Wrong spell effect in AreaAura constructor");
@@ -467,9 +477,7 @@ Unit* SingleEnemyTargetAura::GetTriggerTarget() const
 
 Aura* CreateAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem)
 {
-    if (spellproto->Effect[eff] == SPELL_EFFECT_APPLY_AREA_AURA_PARTY ||
-        spellproto->Effect[eff] == SPELL_EFFECT_APPLY_AREA_AURA_FRIEND ||
-        spellproto->Effect[eff] == SPELL_EFFECT_APPLY_AREA_AURA_ENEMY)
+    if (IsAreaAuraEffect(spellproto->Effect[eff]))
         return new AreaAura(spellproto, eff, currentBasePoints, target, caster, castItem);
 
     uint32 triggeredSpellId = spellproto->EffectTriggerSpell[eff];
@@ -657,6 +665,13 @@ void AreaAura::Update(uint32 diff)
                     cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(caster->GetMapId(), caster));
                     break;
                 }
+                case AREA_AURA_OWNER:
+                case AREA_AURA_PET:
+                {
+                    if(owner != caster)
+                        targets.push_back(owner);
+                    break;
+                }
             }
 
             for(std::list<Unit *>::iterator tIter = targets.begin(); tIter != targets.end(); tIter++)
@@ -702,7 +717,7 @@ void AreaAura::Update(uint32 diff)
         else if( m_areaAuraType == AREA_AURA_PARTY)         // check if in same sub group
         {
             // not check group if target == owner or target == pet
-            if (caster->GetCharmerOrOwnerGUID() != tmp_target->GetGUID() && caster->GetPetGUID() != tmp_target->GetGUID())
+            if (caster->GetCharmerOrOwnerGUID() != tmp_target->GetGUID() && caster->GetGUID() != tmp_target->GetCharmerOrOwnerGUID())
             {
                 Unit* check = caster->GetCharmerOrOwner();
                 if (!check)
@@ -723,6 +738,11 @@ void AreaAura::Update(uint32 diff)
                 else
                     tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
             }
+        }
+        else if( m_areaAuraType == AREA_AURA_PET || m_areaAuraType == AREA_AURA_OWNER )
+        {
+            if( caster->GetGUID() != tmp_target->GetCharmerOrOwnerGUID() )
+                tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
         }
     }
 }
@@ -863,9 +883,9 @@ void Aura::_AddAura()
     Unit* caster = GetCaster();
 
     // passive auras (except totem auras) do not get placed in the slots
-    // SPELL_EFFECT_APPLY_AREA_AURA_ENEMY are not shown on caster
+    // area auras with SPELL_AURA_NONE are not shown on target
     if((!m_isPassive || (caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem())) && 
-        (m_spellProto->Effect[GetEffIndex()] != SPELL_EFFECT_APPLY_AREA_AURA_ENEMY || m_target != caster))
+        (m_modifier.m_auraname != SPELL_AURA_NONE || !IsAreaAura()))
     {
         if(!samespell)                                      // new slot need
         {
