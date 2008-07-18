@@ -78,6 +78,5 @@ static void CorpsesErase(CorpseType type,uint32 delay)
 void CorpsesErase()
 {
     CorpsesErase(CORPSE_BONES, 20*MINUTE);
-    CorpsesErase(CORPSE_RESURRECTABLE_PVP,3*DAY);
-    CorpsesErase(CORPSE_RESURRECTABLE_PVE,3*DAY);
+    CorpsesErase(CORPSE_RESURRECTABLE,3*DAY);
 }

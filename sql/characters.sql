@@ -596,7 +596,7 @@ CREATE TABLE `corpse` (
   `corpse_type` tinyint(3) unsigned NOT NULL default '0',
   `instance` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`),
-  KEY `idx_bones_flag` (`bones_flag`),
+  KEY `idx_type` (`corpse_type`),
   KEY `instance` (`instance`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Death System';
 

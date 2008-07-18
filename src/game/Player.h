@@ -1711,8 +1711,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         static DrunkenState GetDrunkenstateByValue(uint16 value);
 
         uint32 GetDeathTimer() const { return m_deathTimer; }
-        void SetDeathPvP(bool pvp) { m_deathPvP = pvp; }
-        uint32 GetCorpseReclaimDelay(bool pvp) const;
+        uint32 GetCorpseReclaimDelay() const;
         void UpdateCorpseReclaimDelay();
         void SendCorpseReclaimDelay(bool load = false);
 
@@ -2144,7 +2143,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_deathTimer;
         time_t m_deathExpireTime;
-        bool   m_deathPvP;                                  // store PvP death status until corpse creating.
 
         uint32 m_restTime;
 
