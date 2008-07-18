@@ -673,7 +673,7 @@ void World::SetInitialWorldSettings()
     loginDatabase.PExecute("UPDATE realmlist SET icon = %u WHERE id = '%d'", server_type, realmID);
 
     ///- Remove the bones after a restart
-    CharacterDatabase.PExecute("DELETE FROM corpse WHERE bones_flag = '1'");
+    CharacterDatabase.PExecute("DELETE FROM corpse WHERE corpse_type = '0'");
 
     ///- Load the DBC files
     sLog.outString("Initialize data stores...");

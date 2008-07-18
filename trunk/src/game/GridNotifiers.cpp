@@ -176,7 +176,7 @@ template void ObjectUpdater::Visit<DynamicObject>(DynamicObjectMapType &);
 bool CannibalizeObjectCheck::operator()(Corpse* u)
 {
     // ignore bones
-    if(u->GetType()!=CORPSE_RESURRECTABLE)
+    if(u->GetType()==CORPSE_BONES)
         return false;
 
     Player* owner = ObjectAccessor::FindPlayer(u->GetOwnerGUID());

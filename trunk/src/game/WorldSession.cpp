@@ -648,8 +648,6 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->CombatStop();
             _player->getHostilRefManager().setOnlineOfflineState(false);
             _player->RemoveAllAurasOnDeath();
-            _player->KillPlayer();
-            _player->BuildPlayerRepop();
 
             // build set of player who attack _player or who have pet attacking of _player
             std::set<Player*> aset;
@@ -666,6 +664,10 @@ void WorldSession::LogoutPlayer(bool Save)
                     aset.insert((Player*)(*itr));
             }
 
+            _player->SetDeathPvP(!aset.empty());
+            _player->KillPlayer();
+            _player->BuildPlayerRepop();
+
             // give honor to all attackers from set like group case
             for(std::set<Player*>::const_iterator itr = aset.begin(); itr != aset.end(); ++itr)
                 (*itr)->RewardHonor(_player,aset.size());
@@ -680,6 +682,7 @@ void WorldSession::LogoutPlayer(bool Save)
         {
             // this will kill character by SPELL_AURA_SPIRIT_OF_REDEMPTION
             _player->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
+            //_player->SetDeathPvP(*); set at SPELL_AURA_SPIRIT_OF_REDEMPTION apply time
             _player->KillPlayer();
             _player->BuildPlayerRepop();
         }

@@ -593,7 +593,7 @@ CREATE TABLE `corpse` (
   `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
   `data` longtext,
   `time` bigint(20) unsigned NOT NULL default '0',
-  `bones_flag` tinyint(3) NOT NULL default '0',
+  `corpse_type` tinyint(3) unsigned NOT NULL default '0',
   `instance` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_bones_flag` (`bones_flag`),

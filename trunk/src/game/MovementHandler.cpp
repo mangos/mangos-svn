@@ -68,7 +68,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
 
     // resurrect character at enter into instance where his corpse exist after add to map
     Corpse *corpse = GetPlayer()->GetCorpse();
-    if (corpse && corpse->GetType() == CORPSE_RESURRECTABLE && corpse->GetMapId() == GetPlayer()->GetMapId())
+    if (corpse && corpse->GetType() != CORPSE_BONES && corpse->GetMapId() == GetPlayer()->GetMapId())
     {
         if( mEntry && (mEntry->map_type == MAP_INSTANCE || mEntry->map_type == MAP_RAID) )
         {

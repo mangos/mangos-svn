@@ -300,6 +300,7 @@ pkgdata_DATA = \
 	6314_mangos_command.sql \
 	6324_mangos_creature_template.sql \
 	6325_mangos_creature_template.sql \
+	6326_characters_corpse.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -580,4 +581,5 @@ EXTRA_DIST = \
 	6314_mangos_command.sql \
 	6324_mangos_creature_template.sql \
 	6325_mangos_creature_template.sql \
+	6326_characters_corpse.sql \
 	README
