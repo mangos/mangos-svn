@@ -8155,6 +8155,10 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
     if(!at_same_transport && (!IsInWorld() || !u->IsInWorld()))
         return false;
 
+    // forbidden to seen (at GM respawn command)
+    if(m_Visibility==VISIBILITY_RESPAWN)
+        return false;
+
     // always seen by owner
     if(GetCharmerOrOwnerGUID()==u->GetGUID())
         return true;

@@ -5170,7 +5170,7 @@ void ObjectMgr::LoadCorpses()
 {
     uint32 count = 0;
     //                                                     0           1           2           3            4    5     6     7            8         10
-    QueryResult *result = CharacterDatabase.PQuery("SELECT position_x, position_y, position_z, orientation, map, data, time, corpse_type, instance, guid FROM corpse WHERE bones_flag = 0");
+    QueryResult *result = CharacterDatabase.PQuery("SELECT position_x, position_y, position_z, orientation, map, data, time, corpse_type, instance, guid FROM corpse WHERE corpse_type <> 0");
 
     if( !result )
     {
@@ -5185,7 +5185,6 @@ void ObjectMgr::LoadCorpses()
 
     barGoLink bar( result->GetRowCount() );
 
-    Corpse *corpse;
     do
     {
         bar.step();
@@ -5194,7 +5193,7 @@ void ObjectMgr::LoadCorpses()
 
         uint32 guid = fields[result->GetFieldCount()-1].GetUInt32();
 
-        corpse = new Corpse;
+        Corpse *corpse = new Corpse;
         if(!corpse->LoadFromDB(guid,fields))
         {
             delete corpse;

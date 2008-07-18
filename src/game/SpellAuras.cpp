@@ -1385,9 +1385,9 @@ void Aura::TriggerSpell()
                                 else
                                     player->SendEquipError( msg, NULL, NULL );
                             }
-                            target->setDeathState(JUST_DIED);
+                            creature->setDeathState(JUST_DIED);
                             creature->RemoveCorpse();
-
+                            creature->SetHealth(0);         // just for nice GM-mode view
                         }
                         return;
                         break;
