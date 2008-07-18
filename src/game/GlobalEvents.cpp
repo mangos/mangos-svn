@@ -34,7 +34,7 @@ static void CorpsesErase(CorpseType type,uint32 delay)
 {
     ///- Get the list of eligible corpses/bones to be removed
     //No SQL injection (uint32 and enum)
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid,position_x,position_y,map,player FROM corpse WHERE UNIX_TIMESTAMP()-time > '%u' AND bones_flag = '%u'",delay,type );
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid,position_x,position_y,map,player FROM corpse WHERE UNIX_TIMESTAMP()-time > '%u' AND corpse_type = '%u'",delay,type );
 
     if(result)
     {
@@ -52,7 +52,7 @@ static void CorpsesErase(CorpseType type,uint32 delay)
             sLog.outDebug("[Global event] Removing %s %u (X:%f Y:%f Map:%u).",(type==CORPSE_BONES?"bones":"corpse"),guidlow,positionX,positionY,mapid);
 
             /// Resurrectable - convert corpses to bones
-            if(type==CORPSE_RESURRECTABLE)
+            if(type!=CORPSE_BONES)
             {
                 if(!ObjectAccessor::Instance().ConvertCorpseForPlayer(player_guid))
                 {
@@ -78,5 +78,6 @@ static void CorpsesErase(CorpseType type,uint32 delay)
 void CorpsesErase()
 {
     CorpsesErase(CORPSE_BONES, 20*MINUTE);
-    CorpsesErase(CORPSE_RESURRECTABLE,3*DAY);
+    CorpsesErase(CORPSE_RESURRECTABLE_PVP,3*DAY);
+    CorpsesErase(CORPSE_RESURRECTABLE_PVE,3*DAY);
 }

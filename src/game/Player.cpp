@@ -339,6 +339,7 @@ Player::Player (WorldSession *session): Unit()
     m_restTime = 0;
     m_deathTimer = 0;
     m_deathExpireTime = 0;
+    m_deathPvP = false;
 
     m_swingErrorMsg = 0;
 
@@ -3611,7 +3612,7 @@ void Player::KillPlayer()
     // 6 minutes until repop at graveyard
     m_deathTimer = 360000;
 
-    UpdateCorpseReclaimDelay();
+    UpdateCorpseReclaimDelay();                             // dependent at use SetDeathPvP() call before kill
 
     // don't create corpse at this moment, player might be falling
 
@@ -3626,7 +3627,8 @@ void Player::CreateCorpse()
 
     uint32 _uf, _pb, _pb2, _cfb1, _cfb2;
 
-    Corpse *corpse = new Corpse(CORPSE_RESURRECTABLE);
+    Corpse *corpse = new Corpse(m_deathPvP ? CORPSE_RESURRECTABLE_PVP : CORPSE_RESURRECTABLE_PVE);
+    m_deathPvP = false;                                     // reset to default not PvP state
 
     if(!corpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetMapId(), GetPositionX(),
         GetPositionY(), GetPositionZ(), GetOrientation()))
@@ -13444,7 +13446,7 @@ void Player::LoadCorpse()
     {
         if(Corpse *corpse = GetCorpse())
         {
-            if( corpse->GetType() == CORPSE_RESURRECTABLE && IsWithinDistInMap(corpse,0.0))
+            if( corpse->GetType() != CORPSE_BONES && IsWithinDistInMap(corpse,0.0))
                 RepopAtGraveyard();
         }
         else
@@ -17182,8 +17184,11 @@ void Player::UpdateAreaDependentAuras( uint32 newArea )
     }
 }
 
-uint32 Player::GetCorpseReclaimDelay() const
+uint32 Player::GetCorpseReclaimDelay(bool pvp) const
 {
+    if(!pvp)
+        return copseReclaimDelay[0];
+
     time_t now = time(NULL);
     // 0..2 full period
     uint32 count = (now < m_deathExpireTime) ? (m_deathExpireTime - now)/DEATH_EXPIRE_STEP : 0;
@@ -17192,6 +17197,9 @@ uint32 Player::GetCorpseReclaimDelay() const
 
 void Player::UpdateCorpseReclaimDelay()
 {
+    if(!m_deathPvP)
+        return;
+
     time_t now = time(NULL);
     if(now < m_deathExpireTime)
     {
@@ -17208,19 +17216,25 @@ void Player::UpdateCorpseReclaimDelay()
 
 void Player::SendCorpseReclaimDelay(bool load)
 {
+    Corpse* corpse = GetCorpse();
+    if(!corpse)
+        return;
+
     uint32 delay;
     if(load)
     {
-        Corpse* corpse = GetCorpse();
-        if(!corpse)
-            return;
-
         if(corpse->GetGhostTime() > m_deathExpireTime)
             return;
 
-        uint32 count = (m_deathExpireTime-corpse->GetGhostTime())/DEATH_EXPIRE_STEP;
-        if(count>=MAX_DEATH_COUNT)
-            count = MAX_DEATH_COUNT-1;
+        uint32 count;
+        if(corpse->GetType()==CORPSE_RESURRECTABLE_PVP)
+        {
+            count = (m_deathExpireTime-corpse->GetGhostTime())/DEATH_EXPIRE_STEP;
+            if(count>=MAX_DEATH_COUNT)
+                count = MAX_DEATH_COUNT-1;
+        }
+        else
+            count=0;
 
         time_t expected_time = corpse->GetGhostTime()+copseReclaimDelay[count];
 
@@ -17231,7 +17245,7 @@ void Player::SendCorpseReclaimDelay(bool load)
         delay = expected_time-now;
     }
     else
-        delay = GetCorpseReclaimDelay();
+        delay = GetCorpseReclaimDelay(corpse->GetType()==CORPSE_RESURRECTABLE_PVP);
 
     //! corpse reclaim delay 30 * 1000ms or longer at often deaths
     WorldPacket data(SMSG_CORPSE_RECLAIM_DELAY, 4);

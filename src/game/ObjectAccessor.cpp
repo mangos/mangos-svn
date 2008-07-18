@@ -434,7 +434,7 @@ ObjectAccessor::GetCorpseForPlayerGUID(uint64 guid)
     Player2CorpsesMapType::iterator iter = i_player2corpse.find(guid);
     if( iter == i_player2corpse.end() ) return NULL;
 
-    assert(iter->second->GetType() == CORPSE_RESURRECTABLE);
+    assert(iter->second->GetType() != CORPSE_BONES);
 
     return iter->second;
 }
@@ -442,7 +442,7 @@ ObjectAccessor::GetCorpseForPlayerGUID(uint64 guid)
 void
 ObjectAccessor::RemoveCorpse(Corpse *corpse)
 {
-    assert(corpse && corpse->GetType() == CORPSE_RESURRECTABLE);
+    assert(corpse && corpse->GetType() != CORPSE_BONES);
 
     Guard guard(i_corpseGuard);
     Player2CorpsesMapType::iterator iter = i_player2corpse.find(corpse->GetOwnerGUID());
@@ -462,7 +462,7 @@ ObjectAccessor::RemoveCorpse(Corpse *corpse)
 void
 ObjectAccessor::AddCorpse(Corpse *corpse)
 {
-    assert(corpse && corpse->GetType() == CORPSE_RESURRECTABLE);
+    assert(corpse && corpse->GetType() != CORPSE_BONES);
 
     Guard guard(i_corpseGuard);
     assert(i_player2corpse.find(corpse->GetOwnerGUID()) == i_player2corpse.end());

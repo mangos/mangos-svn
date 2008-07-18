@@ -286,7 +286,7 @@ template<>
 void Map::AddToGrid(Corpse *obj, NGridType *grid, Cell const& cell)
 {
     // add to world object registry in grid
-    if(obj->GetType()==CORPSE_RESURRECTABLE)
+    if(obj->GetType()!=CORPSE_BONES)
     {
         (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(obj, obj->GetGUID());
     }
@@ -330,7 +330,7 @@ template<>
 void Map::RemoveFromGrid(Corpse *obj, NGridType *grid, Cell const& cell)
 {
     // remove from world object registry in grid
-    if(obj->GetType()==CORPSE_RESURRECTABLE)
+    if(obj->GetType()!=CORPSE_BONES)
     {
         (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject(obj, obj->GetGUID());
     }

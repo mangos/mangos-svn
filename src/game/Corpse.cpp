@@ -102,12 +102,12 @@ void Corpse::SaveToDB()
     DeleteFromDB();
 
     std::ostringstream ss;
-    ss  << "INSERT INTO corpse (guid,player,position_x,position_y,position_z,orientation,zone,map,data,time,bones_flag,instance) VALUES ("
+    ss  << "INSERT INTO corpse (guid,player,position_x,position_y,position_z,orientation,zone,map,data,time,corpse_type,instance) VALUES ("
         << GetGUIDLow() << ", " << GUID_LOPART(GetOwnerGUID()) << ", " << GetPositionX() << ", " << GetPositionY() << ", " << GetPositionZ() << ", "
         << GetOrientation() << ", "  << GetZoneId() << ", "  << GetMapId() << ", '";
     for(uint16 i = 0; i < m_valuesCount; i++ )
         ss << GetUInt32Value(i) << " ";
-    ss << "'," << uint64(m_time) <<", " << int(GetType()) << ", " << int(GetInstanceId()) << ")";
+    ss << "'," << uint64(m_time) <<", " << uint32(GetType()) << ", " << int(GetInstanceId()) << ")";
     CharacterDatabase.Execute( ss.str().c_str() );
     CharacterDatabase.CommitTransaction();
 }
@@ -133,15 +133,15 @@ void Corpse::DeleteFromDB()
         CharacterDatabase.PExecute("DELETE FROM corpse WHERE guid = '%d'", GetGUIDLow());
     else
         // all corpses (not bones)
-        CharacterDatabase.PExecute("DELETE FROM corpse WHERE player = '%d' AND bones_flag = '0'",  GUID_LOPART(GetOwnerGUID()));
+        CharacterDatabase.PExecute("DELETE FROM corpse WHERE player = '%d' AND corpse_type <> '0'",  GUID_LOPART(GetOwnerGUID()));
 }
 
 bool Corpse::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
 {
     bool external = (result != NULL);
     if (!external)
-        //                                        0          1          2          3           4   5    6    7          8
-        result = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,data,time,bones_flag,instance FROM corpse WHERE guid = '%u'",guid);
+        //                                        0          1          2          3           4   5    6    7           8
+        result = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,data,time,corpse_type,instance FROM corpse WHERE guid = '%u'",guid);
 
     if( ! result )
     {
@@ -163,8 +163,8 @@ bool Corpse::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
 
 bool Corpse::LoadFromDB(uint32 guid, Field *fields)
 {
-    //                                          0          1          2          3           4   5    6    7          8
-    //result = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,data,time,bones_flag,instance FROM corpse WHERE guid = '%u'",guid);
+    //                                          0          1          2          3           4   5    6    7           8
+    //result = CharacterDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map,data,time,corpse_type,instance FROM corpse WHERE guid = '%u'",guid);
     float positionX = fields[0].GetFloat();
     float positionY = fields[1].GetFloat();
     float positionZ = fields[2].GetFloat();
@@ -178,7 +178,12 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
     }
 
     m_time             = time_t(fields[6].GetUInt64());
-    uint32 bones       = fields[7].GetUInt32();
+    m_type             = CorpseType(fields[7].GetUInt32());
+    if(m_type >= MAX_CORPSE_TYPE)
+    {
+        sLog.outError("ERROR: Corpse (guidlow %d, owner %d) have wrong corpse type, not load.",GetGUIDLow(),GUID_LOPART(GetOwnerGUID()));
+        return false;
+    }
     uint32 instanceid  = fields[8].GetUInt32();
 
     // overwrite possible wrong/corrupted guid
@@ -195,8 +200,6 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
         return false;
     }
 
-    // set before return to prevent attempting remove Corpse (CORPSE_RESURRECTABLE) from World at Load fail
-    m_type = (bones == 0) ? CORPSE_RESURRECTABLE : CORPSE_BONES;
     m_grid = MaNGOS::ComputeGridPair(GetPositionX(), GetPositionY());
 
     return true;

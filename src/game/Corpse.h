@@ -26,9 +26,11 @@
 
 enum CorpseType
 {
-    CORPSE_RESURRECTABLE = 0,
-    CORPSE_BONES         = 1
+    CORPSE_BONES             = 0,
+    CORPSE_RESURRECTABLE_PVE = 1,
+    CORPSE_RESURRECTABLE_PVP = 2
 };
+#define MAX_CORPSE_TYPE        3
 
 // Value equal client resurrection dialog show radius.
 #define CORPSE_RECLAIM_RADIUS 39
