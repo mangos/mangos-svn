@@ -1587,10 +1587,10 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchoolMask schoolMask, DamageEffe
 
         RemainingDamage -= currentAbsorb;
 
-        pVictim->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, currentAbsorb, GetSpellSchoolMask((*i)->GetSpellProto()), 0, 0, false, 0, false);
+        SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, currentAbsorb, GetSpellSchoolMask((*i)->GetSpellProto()), 0, 0, false, 0, false);
 
         CleanDamage cleanDamage = CleanDamage(currentAbsorb, BASE_ATTACK, MELEE_HIT_NORMAL);
-        pVictim->DealDamage(caster, currentAbsorb, &cleanDamage, DIRECT_DAMAGE, GetSpellSchoolMask((*i)->GetSpellProto()), (*i)->GetSpellProto(), false);
+        DealDamage(caster, currentAbsorb, &cleanDamage, DIRECT_DAMAGE, GetSpellSchoolMask((*i)->GetSpellProto()), (*i)->GetSpellProto(), false);
     }
 
     AuraList const& vSplitDamagePct = pVictim->GetAurasByType(SPELL_AURA_SPLIT_DAMAGE_PCT);
@@ -1611,10 +1611,10 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchoolMask schoolMask, DamageEffe
 
         RemainingDamage -= splitted;
 
-        pVictim->SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, splitted, GetSpellSchoolMask((*i)->GetSpellProto()), 0, 0, false, 0, false);
+        SendSpellNonMeleeDamageLog(caster, (*i)->GetSpellProto()->Id, splitted, GetSpellSchoolMask((*i)->GetSpellProto()), 0, 0, false, 0, false);
 
         CleanDamage cleanDamage = CleanDamage(splitted, BASE_ATTACK, MELEE_HIT_NORMAL);
-        pVictim->DealDamage(caster, splitted, &cleanDamage, DIRECT_DAMAGE, GetSpellSchoolMask((*i)->GetSpellProto()), (*i)->GetSpellProto(), false);
+        DealDamage(caster, splitted, &cleanDamage, DIRECT_DAMAGE, GetSpellSchoolMask((*i)->GetSpellProto()), (*i)->GetSpellProto(), false);
     }
 
     *absorb = damage - RemainingDamage - *resist;
