@@ -2382,6 +2382,30 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             sLog.outError("Auras: Unknown Shapeshift Type: %u", m_modifier.m_miscvalue);
     }
 
+    // remove polymorph before changing display id to keep new display id
+    switch ( form )
+    {
+        case FORM_CAT:
+        case FORM_TREE:
+        case FORM_TRAVEL:
+        case FORM_AQUA:
+        case FORM_BEAR:
+        case FORM_DIREBEAR:
+        case FORM_FLIGHT_EPIC:
+        case FORM_FLIGHT:
+        case FORM_MOONKIN:
+            // remove movement affects
+            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);           
+            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
+
+            // and polymorphic affects
+            if(m_target->IsPolymorphed())
+                m_target->RemoveAurasDueToSpell(m_target->getTransForm());
+            break;
+        default:
+           break;
+    }
+
     if(apply)
     {
         // remove other shapeshift before applying a new one
@@ -2497,29 +2521,6 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 break;
             }
         }
-    }
-    
-    switch ( form )
-    {
-        case FORM_CAT:
-        case FORM_TREE:
-        case FORM_TRAVEL:
-        case FORM_AQUA:
-        case FORM_BEAR:
-        case FORM_DIREBEAR:
-        case FORM_FLIGHT_EPIC:
-        case FORM_FLIGHT:
-        case FORM_MOONKIN:
-            // remove movement affects
-            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);           
-            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
-
-            // and polymorphic affects
-            if(m_target->IsPolymorphed())
-                m_target->RemoveAurasDueToSpell(m_target->getTransForm());
-            break;
-        default:
-           break;
     }
 
     // adding/removing linked auras
