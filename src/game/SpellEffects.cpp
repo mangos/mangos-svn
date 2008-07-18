@@ -2994,7 +2994,7 @@ void Spell::EffectApplyAreaAura(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    AreaAura* Aur = new AreaAura(m_spellInfo, i, &m_currentBasePoints[i], unitTarget, m_caster);
+    AreaAura* Aur = new AreaAura(m_spellInfo, i, &m_currentBasePoints[i], unitTarget, m_caster, m_CastItem);
     unitTarget->AddAura(Aur);
 }
 
@@ -5806,19 +5806,6 @@ void Spell::EffectProspecting(uint32 /*i*/)
 void Spell::EffectSkill(uint32 /*i*/)
 {
     sLog.outDebug("WORLD: SkillEFFECT");
-}
-
-void Spell::EffectApplyPetAura(uint32 i)
-{
-    // spell aura for both pet and owner, think the pet has the aura and applies it to owner
-    EffectApplyAura(i);
-
-    Unit* owner = unitTarget->GetCharmerOrOwner();
-    if(owner)
-    {
-        unitTarget = owner;
-        EffectApplyAura(i);
-    }
 }
 
 void Spell::EffectSummonDemon(uint32 i)
