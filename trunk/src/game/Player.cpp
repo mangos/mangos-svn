@@ -13339,6 +13339,25 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     return true;
 }
 
+bool Player::isAllowedToLoot(Creature* creature)
+{
+    if(Player* recipient = creature->GetLootRecipient())
+    {
+        if (recipient == this)
+            return true;
+        if( Group* otherGroup = recipient->GetGroup())
+        {
+            Group* thisGroup = GetGroup();
+            if(!thisGroup)
+                return false;
+            return thisGroup == otherGroup;
+        }
+        return false;
+    }
+    else
+        return true;
+}
+
 void Player::_LoadActions(QueryResult *result)
 {
     m_actionButtons.clear();
