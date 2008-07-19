@@ -3015,15 +3015,6 @@ void Aura::HandleFeignDeath(bool apply, bool Real)
             m_target->m_currentSpells[CURRENT_GENERIC_SPELL]->finish();
         m_target->InterruptNonMeleeSpells(true);
         m_target->getHostilRefManager().deleteReferences();
-
-        // send cooldown explicitly
-        WorldPacket data(SMSG_SPELL_COOLDOWN, 8+8);
-        data << m_target->GetGUID();
-        data << uint8(0x0);
-        data << uint32(GetId());
-        data << uint32(GetSpellRecoveryTime(GetSpellProto()));
-        ((Player*)m_target)->GetSession()->SendPacket(&data);
-
     }
     else
     {
@@ -5148,7 +5139,7 @@ void Aura::HandleModTargetResistance(bool apply, bool Real)
         m_target->ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_PHYSICAL_RESISTANCE,m_modifier.m_amount, apply);
 
     // show as spell penetration only full spell penetration bonuses (all resistances except armor and holy
-    if (m_target->GetTypeId() == TYPEID_PLAYER && (m_modifier.m_miscvalue & SPELL_SCHOOL_MASK_MAGIC)==SPELL_SCHOOL_MASK_MAGIC)
+    if (m_target->GetTypeId() == TYPEID_PLAYER && (m_modifier.m_miscvalue & SPELL_SCHOOL_MASK_SPELL)==SPELL_SCHOOL_MASK_SPELL)
         m_target->ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE,m_modifier.m_amount, apply);
 }
 
