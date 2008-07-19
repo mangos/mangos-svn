@@ -4398,44 +4398,6 @@ void Spell::EffectScriptEffect(uint32 i)
     // by spell id
     switch(m_spellInfo->Id)
     {
-        // Keep in top, because core use it for npc aggro other npc
-        case SPELL_ID_AGGRO:
-        {
-            if( !m_caster || m_caster->GetTypeId() != TYPEID_UNIT || !m_caster->getVictim() )
-                return;
-
-            float radius = sWorld.getConfig(CONFIG_CREATURE_FAMILY_ASSISTEMCE_RADIUS);
-            if(radius > 0)
-            {
-                std::list<Creature*> assistList;
-
-                {
-                    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                    Cell cell(p);
-                    cell.data.Part.reserved = ALL_DISTRICT;
-                    cell.SetNoCreate();
-
-                    MaNGOS::AnyAssistCreatureInRangeCheck u_check(m_caster, m_caster->getVictim(), radius);
-                    MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck> searcher(assistList, u_check);
-
-                    TypeContainerVisitor<MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck>, GridTypeMapContainer >  grid_creature_searcher(searcher);
-
-                    CellLock<GridReadGuard> cell_lock(cell, p);
-                    cell_lock->Visit(cell_lock, grid_creature_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-                }
-
-                for(std::list<Creature*>::iterator iter = assistList.begin(); iter != assistList.end(); ++iter)
-                {
-                    ((Creature*)m_caster)->SetNoCallAssistence(true);
-                    (*iter)->SetNoCallAssistence(true);
-                    if((*iter)->AI())
-                        (*iter)->AI()->AttackStart(m_caster->getVictim());
-                }
-            }
-
-            return;
-        }
-
         // Bending Shinbone
         case 8856:
         {

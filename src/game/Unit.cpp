@@ -494,7 +494,6 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
     {
-        //pVictim->SetInFront(this);
         // no xp,health if type 8 /critters/
         if ( pVictim->GetCreatureType() == CREATURE_TYPE_CRITTER)
         {
@@ -6645,10 +6644,8 @@ bool Unit::Attack(Unit *victim, bool meleeAttack)
         ((WorldObject*)this)->SendMessageToSet(&data, true);
     }
 
-    if( GetTypeId()==TYPEID_UNIT && !(((Creature*)this)->isPet() || isCharmed()) )
-    {
+    if( GetTypeId()==TYPEID_UNIT )
         ((Creature*)this)->CallAssistence();
-    }
 
     // delay offhand weapon attack to next attack time
     if(haveOffhandWeapon())

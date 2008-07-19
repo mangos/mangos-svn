@@ -38,6 +38,9 @@
 #include "WaypointMovementGenerator.h"
 #include "InstanceData.h"
 #include "BattleGround.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 
 // apply implementation of the singletons
 #include "Policies/SingletonImp.h"
@@ -1661,9 +1664,36 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
 
 void Creature::CallAssistence()
 {
-    if( !m_AlreadyCallAssistence && getVictim() )
+    if( !m_AlreadyCallAssistence && getVictim() && !isPet() && !isCharmed())
     {
-        CastSpell(this,SPELL_ID_AGGRO, true, NULL, NULL, getVictim()->GetGUID());
+        float radius = sWorld.getConfig(CONFIG_CREATURE_FAMILY_ASSISTEMCE_RADIUS);
+        if(radius > 0)
+        {
+            std::list<Creature*> assistList;
+
+            {
+                CellPair p(MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY()));
+                Cell cell(p);
+                cell.data.Part.reserved = ALL_DISTRICT;
+                cell.SetNoCreate();
+
+                MaNGOS::AnyAssistCreatureInRangeCheck u_check(this, getVictim(), radius);
+                MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck> searcher(assistList, u_check);
+
+                TypeContainerVisitor<MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck>, GridTypeMapContainer >  grid_creature_searcher(searcher);
+
+                CellLock<GridReadGuard> cell_lock(cell, p);
+                cell_lock->Visit(cell_lock, grid_creature_searcher, *MapManager::Instance().GetMap(GetMapId(), this));
+            }
+
+            for(std::list<Creature*>::iterator iter = assistList.begin(); iter != assistList.end(); ++iter)
+            {
+                SetNoCallAssistence(true);
+                (*iter)->SetNoCallAssistence(true);
+                if((*iter)->AI())
+                    (*iter)->AI()->AttackStart(getVictim());
+            }
+        }
     }
 }
 
