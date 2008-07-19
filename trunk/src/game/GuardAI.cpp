@@ -136,6 +136,9 @@ void GuardAI::AttackStart(Unit *u)
     //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", i_creature.GetName(), u->GetGUIDLow());
     if(i_creature.Attack(u,true))
     {
+        i_creature.SetInCombat(u);
+        u->SetInCombat(&i_creature);
+        
         i_creature.AddThreat(u, 0.0f);
         i_victimGuid = u->GetGUID();
         i_creature.GetMotionMaster()->MoveChase(u);

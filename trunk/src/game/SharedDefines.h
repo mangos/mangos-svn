@@ -312,7 +312,7 @@ enum ItemQualities
 #define SPELL_ATTR_EX3_UNK14                      0x00004000            // 14 "Honorless Target" only this spells have this flag
 #define SPELL_ATTR_EX3_UNK15                      0x00008000            // 15 Auto Shoot, Shoot, Throw,  - this is autoshot flag
 #define SPELL_ATTR_EX3_UNK16                      0x00010000            // 16
-#define SPELL_ATTR_EX3_UNK17                      0x00020000            // 17 no initial aggro
+#define SPELL_ATTR_EX3_NO_INITIAL_AGGRO           0x00020000            // 17 no initial aggro
 #define SPELL_ATTR_EX3_UNK18                      0x00040000            // 18
 #define SPELL_ATTR_EX3_UNK19                      0x00080000            // 19
 #define SPELL_ATTR_EX3_DEATH_PERSISTENT           0x00100000            // 20 Death persistent spells

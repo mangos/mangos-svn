@@ -258,7 +258,7 @@ void Unit::Update( uint32 p_time )
         // Check UNIT_STAT_MELEE_ATTACKING or UNIT_STAT_CHASE (without UNIT_STAT_FOLLOW in this case) so pets can reach far away
         // targets without stopping half way there and running off.
         // These flags are reset after target dies or another command is given.
-        if( m_HostilRefManager.isEmpty() && !hasUnitState(UNIT_STAT_MELEE_ATTACKING) && !(hasUnitState(UNIT_STAT_CHASE) && !hasUnitState(UNIT_STAT_FOLLOW) ) )
+        if( m_HostilRefManager.isEmpty() )
         {
             // m_CombatTimer set at aura start and it will be freeze until aura removing
             if ( m_CombatTimer <= p_time )
@@ -534,8 +534,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
     //Get in CombatState
     if(pVictim != this && damagetype != DOT)
     {
-        SetInCombat();
-        pVictim->SetInCombat();
+        SetInCombat(pVictim);
+        pVictim->SetInCombat(this);
     }
 
     // Rage from Damage made (only from direct weapon damage)
@@ -628,21 +628,6 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         // stop combat
         pVictim->CombatStop();
         pVictim->getHostilRefManager().deleteReferences();
-
-        // clear combat state for killer dependent units (owner/pets)
-        if(player)
-        {
-            if(player==this)                                // not controlled player
-            {
-                if(Unit* pet = GetPet())
-                    pet->ClearInCombat();
-
-                if(Unit* pet = GetCharm())
-                    pet->ClearInCombat();
-            }
-            else                                            // Pet or timed creature, or player
-                player->ClearInCombat();
-        }
 
         bool damageFromSpiritOfRedemtionTalent = spellProto && spellProto->Id == 27795;
 
@@ -6629,7 +6614,6 @@ bool Unit::Attack(Unit *victim, bool meleeAttack)
 
     if(meleeAttack)
         addUnitState(UNIT_STAT_MELEE_ATTACKING);
-    SetInCombat();
     m_attacking = victim;
     m_attacking->_addAttacker(this);
 
@@ -8033,9 +8017,18 @@ void Unit::Unmount()
     }
 }
 
-void Unit::SetInCombat()
+void Unit::SetInCombat(Unit* enemy)
 {
-    m_CombatTimer = 5000;
+    Unit* owner = enemy->GetOwner();
+    if(!owner)
+        owner = enemy;
+    SetInCombat(owner->IsPvP());
+}
+
+void Unit::SetInCombat(bool PvP)
+{
+    if(PvP)
+        m_CombatTimer = 5000;
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
     if(isCharmed() || (GetTypeId()!=TYPEID_PLAYER && ((Creature*)this)->isPet()))
