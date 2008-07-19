@@ -1968,7 +1968,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (uint64(1) << slot); }
 
         GridReference<Player> &GetGridRef() { return m_gridRef; }
-
+        bool isAllowedToLoot(Creature* creature);
+        
     protected:
 
         /*********************************************************/
