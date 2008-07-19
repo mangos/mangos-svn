@@ -273,7 +273,7 @@ enum ItemQualities
 #define SPELL_ATTR_EX2_UNK8                       0x00000100            // 8 not set in 2.4.2
 #define SPELL_ATTR_EX2_UNK9                       0x00000200            // 9
 #define SPELL_ATTR_EX2_UNK10                      0x00000400            // 10
-#define SPELL_ATTR_EX2_UNK11                      0x00000800            // 11
+#define SPELL_ATTR_EX2_HEALTH_FUNNEL              0x00000800            // 11
 #define SPELL_ATTR_EX2_UNK12                      0x00001000            // 12
 #define SPELL_ATTR_EX2_UNK13                      0x00002000            // 13
 #define SPELL_ATTR_EX2_UNK14                      0x00004000            // 14
@@ -806,6 +806,7 @@ enum Targets
     TARGET_DUELVSPLAYER_COORDINATES    = 63,
     TARGET_BEHIND_VICTIM               = 65,                // uses in teleport behind spells
     TARGET_SINGLE_ENEMY                = 77,
+    TARGET_SELF2                       = 87,
     TARGET_NONCOMBAT_PET               = 90,
 };
 
