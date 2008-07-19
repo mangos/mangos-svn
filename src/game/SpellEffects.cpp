@@ -273,6 +273,9 @@ void Spell::EffectInstaKill(uint32 /*i*/)
         m_caster->CastSpell(m_caster,spellID,true);
     }
 
+    if(m_caster==unitTarget)                                // prevent interrupt message
+        finish();
+
     uint32 health = unitTarget->GetHealth();
     m_caster->DealDamage(unitTarget, health, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
 }
@@ -1730,8 +1733,7 @@ void Spell::EffectTriggerSpell(uint32 i)
 
     if(instant)
     {
-        // in case multi-targets, spell must be casted one time, at last target in list)
-        if (unitTarget && m_UniqueTargetInfo.back().targetGUID==unitTarget->GetGUID())
+        if (unitTarget)
             m_caster->CastSpell(unitTarget,spellInfo,true,m_CastItem,NULL,m_originalCasterGUID);
     }
     else
