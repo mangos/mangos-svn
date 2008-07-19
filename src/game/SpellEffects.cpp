@@ -1971,52 +1971,6 @@ void Spell::EffectApplyAura(uint32 i)
 
     Aura* Aur = CreateAura(m_spellInfo, i, &m_currentBasePoints[i], unitTarget, caster, m_CastItem);
 
-    if (!Aur->IsPositive() && Aur->GetCasterGUID() != Aur->GetTarget()->GetGUID())
-    {
-        bool attack = false;
-        const SpellEntry* spellEntry = Aur->GetSpellProto();
-        switch (Aur->GetModifier()->m_auraname)
-        {
-            case SPELL_AURA_BIND_SIGHT:
-            case SPELL_AURA_MOD_CHARM:
-            case SPELL_AURA_FAR_SIGHT:
-            case SPELL_AURA_MOD_DETECT_RANGE:
-            case SPELL_AURA_AURAS_VISIBLE:
-            case SPELL_AURA_MOD_STALKED:
-            case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:
-            case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
-            case SPELL_AURA_EMPATHY:
-            case SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS:
-            case SPELL_AURA_MOD_INVISIBILITY_DETECTION:
-                break;
-            case SPELL_AURA_MOD_STUN:
-                // I'm not sure, if all STUN-Auras prevent attack, therefore the query
-                if(!(spellEntry->SpellFamilyName == SPELLFAMILY_ROGUE && spellEntry->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_SAP))
-                    attack=true;
-                break;
-            case SPELL_AURA_DUMMY:
-                // Don't attack on Arcane Missiles Dummy Aura, attack at hit
-                if(spellEntry->SpellFamilyName == SPELLFAMILY_MAGE && (spellEntry->SpellFamilyFlags & 0x800LL))
-                    break;
-
-                // If Aura is applied to monster then attack caster
-                attack=true;
-                break;
-            default:
-                // If Aura is applied to monster then attack caster
-                attack=true;
-                break;
-        }
-        if(attack)
-        {
-            if( Aur->GetTarget()->GetTypeId() == TYPEID_UNIT && !Aur->GetTarget()->isInCombat() &&
-                ((Creature*)Aur->GetTarget())->AI() )
-                ((Creature*)Aur->GetTarget())->AI()->AttackStart(caster);
-
-            Aur->GetTarget()->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-        }
-    }
-
     // Now Reduce spell duration using data received at spell hit
     int32 duration = Aur->GetAuraMaxDuration();
     unitTarget->ApplyDiminishingToDuration(m_diminishGroup,duration,m_caster,m_diminishLevel);

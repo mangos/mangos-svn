@@ -3078,9 +3078,6 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
         m_target->CastStop(m_target->GetGUID() == GetCasterGUID() ? GetId() : 0);
 
-        if(GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && GetSpellProto()->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_SAP)
-            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-
         // Creature specific
         if(m_target->GetTypeId() != TYPEID_PLAYER)
             ((Creature*)m_target)->StopMoving();

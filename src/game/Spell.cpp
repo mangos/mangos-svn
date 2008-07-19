@@ -943,6 +943,39 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
         return;
     }
 
+    if( m_caster != unit )
+    {
+        if( !m_caster->IsFriendlyTo(unit) )
+        {
+            // exclude Arcane Missiles Dummy Aura aura for now (attack on hit)
+            // TODO: find way to not need this?
+            if(!(m_spellInfo->SpellFamilyName == SPELLFAMILY_MAGE &&
+                m_spellInfo->SpellFamilyFlags & 0x800LL))
+            {
+                unit->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+
+                if( !(m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_NO_INITIAL_AGGRO) )
+                {
+                    if(!unit->IsStandState() && !unit->hasUnitState(UNIT_STAT_STUNDED))
+                        unit->SetStandState(PLAYER_STATE_NONE);
+                    
+                    unit->SetInCombat(m_caster);
+                    m_caster->SetInCombat(unit);
+
+                    unit->AddThreat(m_caster, 0.0f);
+                }
+            }
+        }
+        else
+        {
+            if( unit->isInCombat() && !(m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_NO_INITIAL_AGGRO) )
+            {
+                m_caster->SetInCombat(unit->GetCombatTimer() > 0);
+                unit->getHostilRefManager().threatAssist(m_caster, 0.0f);
+            }
+        }
+    }
+
     // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
     m_diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo,m_triggeredByAuraSpell);
     m_diminishLevel = unit->GetDiminishing(m_diminishGroup);

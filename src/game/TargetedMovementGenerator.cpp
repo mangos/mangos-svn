@@ -124,12 +124,6 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
     if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED | UNIT_STAT_FLEEING | UNIT_STAT_DISTRACTED) )
         return true;
 
-    if( !owner.isInCombat() && !owner.hasUnitState(UNIT_STAT_FOLLOW) )
-    {
-        //owner.AIM_Initialize();   This case must be the one, when a creature aggroed you. By Initalized a new AI, we prevented to Ai::_stopAttack() to be executed properly.
-        return false;
-    }
-
     // prevent movement while casting spells with cast time or channel time
     if ( owner.IsNonMeleeSpellCasted(false, false,  true))
     {

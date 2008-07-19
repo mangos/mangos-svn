@@ -694,19 +694,12 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
             AttackerSet::iterator itr = m_attackers.find(pAttacker);
             if(itr == m_attackers.end())
                 m_attackers.insert(pAttacker);
-            SetInCombat();
         }
         void _removeAttacker(Unit *pAttacker)               // must be called only from Unit::AttackStop()
         {
             AttackerSet::iterator itr = m_attackers.find(pAttacker);
             if(itr != m_attackers.end())
                 m_attackers.erase(itr);
-
-            if (m_attackers.empty())
-            {
-                if(!m_attacking)
-                    ClearInCombat();
-            }
         }
         Unit * getAttackerForHelper()                       // If someone wants to help, who to give them
         {
@@ -860,8 +853,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool isInFlight()  const { return hasUnitState(UNIT_STAT_IN_FLIGHT); }
 
         bool isInCombat()  const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
-        void SetInCombat();
+        void SetInCombat(bool PvP);
+        void SetInCombat(Unit* enemy);
         void ClearInCombat();
+        uint32 GetCombatTimer() const { return m_CombatTimer; }
 
         bool HasAuraType(AuraType auraType) const;
         bool HasAura(uint32 spellId, uint32 effIndex) const
