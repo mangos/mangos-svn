@@ -61,8 +61,14 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         return;
     }
 
+    if(lang == LANG_ADDON)
+    {
+        // Disabled addon channel?
+        if(!sWorld.getConfig(CONFIG_ADDON_CHANNEL))
+            return;
+    }
     // LANG_ADDON should not be changed nor be affected by flood control
-    if (lang != LANG_ADDON)
+    else
     {
         // send in universal language if player in .gmon mode (ignore spell effects)
         if (_player->isGameMaster())
