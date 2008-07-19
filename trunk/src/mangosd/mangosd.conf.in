@@ -178,7 +178,7 @@ DetectPosCollision = 1
 TargetPosRecalculateRange = 1.5
 UpdateUptimeInterval = 10
 MaxCoreStuckTime = 0
-PermitAddon = 1
+AddonChannel = 1
 
 ###################################################################################################################
 # SERVER LOGGING
