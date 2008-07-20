@@ -743,7 +743,7 @@ void Player::EnvironmentalDamage(uint64 guid, EnviromentalDamage type, uint32 da
     if(type==DAMAGE_FALL && !isAlive())                     // DealDamage not apply item durability loss at self damage
     {
         DEBUG_LOG("We are fall to death, loosing 10 percents durability");
-        DurabilityLossAll(0.10f);
+        DurabilityLossAll(0.10f,false);
         // durability lost message
         WorldPacket data(SMSG_DURABILITY_DAMAGE_DEATH, 0);
         GetSession()->SendPacket(&data);
@@ -3691,18 +3691,32 @@ Corpse* Player::GetCorpse() const
     return ObjectAccessor::Instance().GetCorpseForPlayerGUID(GetGUID());
 }
 
-void Player::DurabilityLossAll(double percent)
+void Player::DurabilityLossAll(double percent, bool inventory)
 {
-    for (uint16 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
-        DurabilityLoss(i,percent);
+    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+        if(Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+            DurabilityLoss(pItem,percent);
+
+    // keys not have durability
+    //for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
+
+    if(inventory)
+    {
+        for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+            if(Bag* pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+                if(ItemPrototype const *pBagProto = pBag->GetProto())
+                    for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                        if(Item* pItem = GetItemByPos( i, j ))
+                            DurabilityLoss(pItem,percent);
+    }
 }
 
-void Player::DurabilityLoss(uint8 equip_pos, double percent)
+void Player::DurabilityLoss(Item* item, double percent)
 {
-    if(!m_items[equip_pos])
+    if(!item )
         return;
 
-    uint32 pMaxDurability =  m_items[equip_pos]->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+    uint32 pMaxDurability =  item ->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
 
     if(!pMaxDurability)
         return;
@@ -3712,15 +3726,33 @@ void Player::DurabilityLoss(uint8 equip_pos, double percent)
     if(pDurabilityLoss < 1 )
         pDurabilityLoss = 1;
 
-    DurabilityPointsLoss(equip_pos,pDurabilityLoss);
+    DurabilityPointsLoss(item,pDurabilityLoss);
 }
 
-void Player::DurabilityPointsLoss(uint8 equip_pos, int32 points)
+void Player::DurabilityPointsLossAll(int32 points, bool inventory)
 {
-    if(!m_items[equip_pos])
-        return;
-    int32 pMaxDurability = m_items[equip_pos]->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
-    int32 pOldDurability = m_items[equip_pos]->GetUInt32Value(ITEM_FIELD_DURABILITY);
+    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+        if(Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+            DurabilityPointsLoss(pItem,points);
+
+    // keys not have durability
+    //for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
+
+    if(inventory)
+    {
+        for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+            if(Bag* pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+                if(ItemPrototype const *pBagProto = pBag->GetProto())
+                    for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                        if(Item* pItem = GetItemByPos( i, j ))
+                            DurabilityPointsLoss(pItem,points);
+    }
+}
+
+void Player::DurabilityPointsLoss(Item* item, int32 points)
+{
+    int32 pMaxDurability = item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+    int32 pOldDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
     int32 pNewDurability = pOldDurability - points;
 
     if (pNewDurability < 0)
@@ -3731,17 +3763,23 @@ void Player::DurabilityPointsLoss(uint8 equip_pos, int32 points)
     if (pOldDurability != pNewDurability)
     {
         // modify item stats _before_ Durability set to 0 to pass _ApplyItemMods internal check
-        if ( pNewDurability == 0 && pOldDurability > 0)
-            _ApplyItemMods(m_items[equip_pos],equip_pos, false);
+        if ( pNewDurability == 0 && pOldDurability > 0 && item->IsEquipped())
+            _ApplyItemMods(item,item->GetSlot(), false);
 
-        m_items[equip_pos]->SetUInt32Value(ITEM_FIELD_DURABILITY, pNewDurability);
+        item->SetUInt32Value(ITEM_FIELD_DURABILITY, pNewDurability);
 
         // modify item stats _after_ restore durability to pass _ApplyItemMods internal check
-        if ( pNewDurability > 0 && pOldDurability == 0)
-            _ApplyItemMods(m_items[equip_pos],equip_pos, true);
+        if ( pNewDurability > 0 && pOldDurability == 0 && item->IsEquipped())
+            _ApplyItemMods(item,item->GetSlot(), true);
 
-        m_items[equip_pos]->SetState(ITEM_CHANGED, this);
+        item->SetState(ITEM_CHANGED, this);
     }
+}
+
+void Player::DurabilityPointLossForEquipSlot(EquipmentSlots slot)
+{
+    if(Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, slot ))
+        DurabilityPointsLoss(pItem,1);
 }
 
 uint32 Player::DurabilityRepairAll(bool cost, float discountMod, bool guildBank)

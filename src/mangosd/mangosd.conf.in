@@ -786,6 +786,22 @@ Visibility.Distance.Grey.Object = 10
 #         Default: 0  - no decrease
 #                  75 - in 2 times each 75 skill points
 #
+#    DurabilityLossChance.Damage
+#         Chance lost one from equiped items durability point at damage apply or receive.
+#         Default: 0.5 (100/0.5 = 200) Each 200 damage apply one from 19 possible equipped items
+#
+#    DurabilityLossChance.Absorb
+#         Chance lost one from armor items durability point at damage absorb.
+#         Default: 0.5 (100/0.5 = 200) Each 200 absorbs apply one from 15 possible armor equipped items
+#
+#    DurabilityLossChance.Parry
+#         Chance lost weapon durability point at parry.
+#         Default: 0.05 (100/0.05 = 2000) Each 2000 parry attacks main weapon lost point
+#
+#    DurabilityLossChance.Block
+#         Chance lost sheild durability point at damage block.
+#         Default: 0.05 (100/0.05 = 2000) Each 2000 partly or full blocked attacks shield lost point
+#
 ###################################################################################################################
 
 Rate.Health = 1
@@ -822,6 +838,11 @@ SkillChance.Green  = 25
 SkillChance.Grey   = 0
 SkillChance.MiningSteps   = 0
 SkillChance.SkinningSteps = 0
+DurabilityLossChance.Damage = 0.5
+DurabilityLossChance.Absorb = 0.5
+DurabilityLossChance.Parry  = 0.05
+DurabilityLossChance.Block  = 0.05
+
 
 ###################################################################################################################
 # CONSOLE AND REMOTE ACCESS

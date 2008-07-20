@@ -1602,17 +1602,20 @@ class MANGOS_DLL_SPEC Player : public Unit
         Corpse *GetCorpse() const;
         void SpawnCorpseBones();
         void CreateCorpse();
-
         void KillPlayer();
         uint32 GetResurrectionSpellId();
         void ResurrectPlayer(float restore_percent, bool updateToWorld = true, bool applySickness = false);
         void BuildPlayerRepop();
-        void DurabilityLossAll(double percent);
-        void DurabilityLoss(uint8 equip_pos, double percent);
-        void DurabilityPointsLoss(uint8 equip_pos, int32 points);
+        void RepopAtGraveyard();
+
+        void DurabilityLossAll(double percent, bool inventory);
+        void DurabilityLoss(Item* item, double percent);
+        void DurabilityPointsLossAll(int32 points, bool inventory);
+        void DurabilityPointsLoss(Item* item, int32 points);
+        void DurabilityPointLossForEquipSlot(EquipmentSlots slot);
         uint32 DurabilityRepairAll(bool cost, float discountMod, bool guildBank);
         uint32 DurabilityRepair(uint16 pos, bool cost, float discountMod, bool guildBank);
-        void RepopAtGraveyard();
+
         void StopMirrorTimers()
         {
             StopMirrorTimer(FATIGUE_TIMER);

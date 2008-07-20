@@ -4192,7 +4192,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             if(pItem->GetMaxStackCount()==1)
             {
                 // decrease durability for non-stackable throw weapon
-                ((Player*)m_caster)->DurabilityPointsLoss(EQUIPMENT_SLOT_RANGED,1);
+                ((Player*)m_caster)->DurabilityPointLossForEquipSlot(EQUIPMENT_SLOT_RANGED);
             }
             else
             {
@@ -5527,15 +5527,16 @@ void Spell::EffectDurabilityDamage(uint32 i)
     // Possibly its mean -1 all player equipped items and -2 all items
     if(slot < 0)
     {
-        for (int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_BAG_END; ++i)
-            ((Player*)unitTarget)->DurabilityPointsLoss(i, damage);
+        ((Player*)unitTarget)->DurabilityPointsLossAll(damage,(slot < -1));
         return;
     }
+
     // invalid slot value
     if(slot >= INVENTORY_SLOT_BAG_END)
         return;
 
-    ((Player*)unitTarget)->DurabilityPointsLoss(slot,damage);
+    if(Item* item = ((Player*)unitTarget)->GetItemByPos(INVENTORY_SLOT_BAG_0,slot))
+        ((Player*)unitTarget)->DurabilityPointsLoss(item,damage);
 }
 
 void Spell::EffectDurabilityDamagePCT(uint32 i)
@@ -5545,9 +5546,13 @@ void Spell::EffectDurabilityDamagePCT(uint32 i)
 
     int32 slot = m_spellInfo->EffectMiscValue[i];
 
-    // FIXME: some spells effects have value -1/-2 (don't know what do for its :/ )
+    // FIXME: some spells effects have value -1/-2
+    // Possibly its mean -1 all player equipped items and -2 all items
     if(slot < 0)
+    {
+        ((Player*)unitTarget)->DurabilityLossAll(double(damage)/100.0f,(slot < -1));
         return;
+    }
 
     // invalid slot value
     if(slot >= INVENTORY_SLOT_BAG_END)
@@ -5556,7 +5561,8 @@ void Spell::EffectDurabilityDamagePCT(uint32 i)
     if(damage <= 0)
         return;
 
-    ((Player*)unitTarget)->DurabilityLoss(slot,double(damage)/100);
+    if(Item* item = ((Player*)unitTarget)->GetItemByPos(INVENTORY_SLOT_BAG_0,slot))
+        ((Player*)unitTarget)->DurabilityLoss(item,double(damage)/100.0f);
 }
 
 void Spell::EffectReduceThreatPercent(uint32 /*i*/)

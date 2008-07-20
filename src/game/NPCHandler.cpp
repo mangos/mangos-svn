@@ -383,7 +383,7 @@ void WorldSession::SendSpiritResurrect()
 {
     _player->ResurrectPlayer(0.5f,false, true);
 
-    _player->DurabilityLossAll(0.25f);
+    _player->DurabilityLossAll(0.25f,true);
 
     // get corpse nearest graveyard
     WorldSafeLocsEntry const *corpseGrave = NULL;
