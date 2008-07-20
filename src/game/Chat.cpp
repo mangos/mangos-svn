@@ -633,6 +633,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text, st
         if(m_session->GetSecurity() < table[i].SecurityLevel)
             continue;
 
+        SetSentErrorMessage(false);
         // table[i].Name == "" is special case: send original command to handler
         if((this->*(table[i].Handler))(strlen(table[i].Name)!=0 ? text : oldtext))
         {
@@ -645,7 +646,8 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text, st
                     GetLogNameForGuid(sel_guid),GUID_LOPART(sel_guid));
             }
         }
-        else
+        // some commands have custom error messages. Don't send the default one in these cases.
+        else if(!sentErrorMessage)
         {
             if(!table[i].Help.empty())
                 SendSysMessage(table[i].Help.c_str());

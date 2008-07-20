@@ -375,8 +375,11 @@ class ChatHandler
         void ShowTicket(uint64 guid, uint32 category, char const* text, char const* time);
         uint32 GetTicketIDByNum(uint32 num);
 
+        void SetSentErrorMessage(bool val){ sentErrorMessage = val;};
+    private:
         // common global flag
         static bool load_command_table;
+        bool sentErrorMessage;
 };
 #endif
 

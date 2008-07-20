@@ -65,13 +65,15 @@ bool ChatHandler::HandleStartCommand(const char* /*args*/)
     if(chr->isInFlight())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if(chr->isInCombat())
     {
         SendSysMessage(LANG_YOU_IN_COMBAT);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     // cast spell Stuck
@@ -100,13 +102,15 @@ bool ChatHandler::HandleDismountCommand(const char* /*args*/)
     if (!m_session->GetPlayer( )->IsMounted())
     {
         SendSysMessage(LANG_CHAR_NON_MOUNTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if(m_session->GetPlayer( )->isInFlight())
     {
         SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     m_session->GetPlayer()->Unmount();
@@ -180,7 +184,8 @@ bool ChatHandler::HandlePasswordCommand(const char* args)
     if (password_new.size() > 16)
     {
         SendSysMessage(LANG_COMMAND_NOTCHANGEPASSWORD);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if(!accmgr.CheckPassword(m_session->GetAccountId(), password_old) || password_new != password_new_c)

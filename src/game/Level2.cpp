@@ -67,7 +67,8 @@ bool ChatHandler::HandleMuteCommand(const char* args)
     if(!guid)
     {
         SendSysMessage(LANG_PLAYER_NOT_FOUND);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Player *chr = objmgr.GetPlayer(guid);
@@ -90,7 +91,8 @@ bool ChatHandler::HandleMuteCommand(const char* args)
     if(security >= m_session->GetSecurity())
     {
         SendSysMessage(LANG_YOURS_SECURITY_IS_LOW);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     time_t mutetime = time(NULL) + notspeaktime*60;
@@ -125,7 +127,8 @@ bool ChatHandler::HandleUnmuteCommand(const char* args)
     if(!guid)
     {
         SendSysMessage(LANG_PLAYER_NOT_FOUND);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Player *chr = objmgr.GetPlayer(guid);
@@ -148,7 +151,8 @@ bool ChatHandler::HandleUnmuteCommand(const char* args)
     if(security >= m_session->GetSecurity())
     {
         SendSysMessage(LANG_YOURS_SECURITY_IS_LOW);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if (chr)
@@ -156,7 +160,8 @@ bool ChatHandler::HandleUnmuteCommand(const char* args)
         if(chr->CanSpeak())
         {
             SendSysMessage(LANG_CHAT_ALREADY_ENABLED);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         chr->GetSession()->m_muteTime = 0;
@@ -294,13 +299,15 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
     else
     {
         SendSysMessage(LANG_COMMAND_GOOBJNOTFOUND);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if(!MapManager::IsValidMapCoord(mapid,x,y,z,ort))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     // stop flight if need
@@ -337,13 +344,15 @@ bool ChatHandler::HandleGoTriggerCommand(const char* args)
     if (!at)
     {
         PSendSysMessage(LANG_COMMAND_GOAREATRNOTFOUND,i_atId);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if(!MapManager::IsValidMapCoord(at->mapid,at->x,at->y,at->z))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,at->x,at->y,at->mapid);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     // stop flight if need
@@ -380,13 +389,15 @@ bool ChatHandler::HandleGoGraveyardCommand(const char* args)
     if (!gy)
     {
         PSendSysMessage(LANG_COMMAND_GRAVEYARDNOEXIST,i_gyId);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if(!MapManager::IsValidMapCoord(gy->map_id,gy->x,gy->y,gy->z))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,gy->x,gy->y,gy->map_id);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     // stop flight if need
@@ -472,7 +483,8 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
     if( result->GetRowCount() > 1 )
     {
@@ -491,7 +503,8 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
     if(!MapManager::IsValidMapCoord(mapid,x,y,z,ort))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     // stop flight if need
@@ -515,7 +528,8 @@ bool ChatHandler::HandleGUIDCommand(const char* /*args*/)
     if (guid == 0)
     {
         SendSysMessage(LANG_NO_SELECTION);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     PSendSysMessage(LANG_OBJECT_GUID, GUID_LOPART(guid), GUID_HIPART(guid));
@@ -533,7 +547,8 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
     if (!target)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     for (uint32 id = 0; id < sFactionStore.GetNumRows(); id++)
@@ -603,7 +618,8 @@ bool ChatHandler::HandleModifyRepCommand(const char * args)
     if(!target)
     {
         SendSysMessage(LANG_PLAYER_NOT_FOUND);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     char* factionTxt = extractKeyFromLink((char*)args,"Hfaction");
@@ -639,7 +655,8 @@ bool ChatHandler::HandleModifyRepCommand(const char * args)
                     if ((delta < 0) || (delta > Player::ReputationRank_Length[r] -1))
                     {
                         PSendSysMessage(LANG_COMMAND_FACTION_DELTA, (Player::ReputationRank_Length[r]-1));
-                        return true;
+                        SetSentErrorMessage(true);
+                        return false;
                     }
                     amount += delta;
                 }
@@ -650,7 +667,8 @@ bool ChatHandler::HandleModifyRepCommand(const char * args)
         if (r >= MAX_REPUTATION_RANK)
         {
             PSendSysMessage(LANG_COMMAND_FACTION_INVPARAM, rankTxt);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
     }
 
@@ -659,13 +677,15 @@ bool ChatHandler::HandleModifyRepCommand(const char * args)
     if (!factionEntry)
     {
         PSendSysMessage(LANG_COMMAND_FACTION_UNKNOWN, factionId);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if (factionEntry->reputationListID < 0)
     {
         PSendSysMessage(LANG_COMMAND_FACTION_NOREP_ERROR, factionEntry->name[sWorld.GetDBClang()], factionId);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     target->SetFactionReputation(factionEntry,amount);
@@ -852,7 +872,8 @@ bool ChatHandler::HandleDeleteCommand(const char* /*args*/)
     if(!unit || unit->isPet() || unit->isTotem())
     {
         SendSysMessage(LANG_SELECT_CREATURE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     unit->CombatStop();
@@ -888,7 +909,8 @@ bool ChatHandler::HandleDelObjectCommand(const char* args)
     if(!obj)
     {
         PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, lowguid);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     uint64 owner_guid = obj->GetOwnerGUID();
@@ -898,7 +920,8 @@ bool ChatHandler::HandleDelObjectCommand(const char* args)
         if(!owner && !IS_PLAYER_GUID(owner_guid))
         {
             PSendSysMessage(LANG_COMMAND_DELOBJREFERCREATURE, GUID_LOPART(owner_guid), obj->GetGUIDLow());
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         owner->RemoveGameObject(obj,false);
@@ -933,7 +956,8 @@ bool ChatHandler::HandleTurnObjectCommand(const char* args)
     if(!obj)
     {
         PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, lowguid);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     char* po = strtok(NULL, " ");
@@ -994,7 +1018,8 @@ bool ChatHandler::HandleMoveCreatureCommand(const char* args)
             if(!data)
             {
                 PSendSysMessage(LANG_COMMAND_CREATGUIDNOTFOUND, lowguid);
-                return true;
+                SetSentErrorMessage(true);
+                return false;
             }
 
             uint32 map_id = data->mapid;
@@ -1002,7 +1027,8 @@ bool ChatHandler::HandleMoveCreatureCommand(const char* args)
             if(m_session->GetPlayer()->GetMapId()!=map_id)
             {
                 PSendSysMessage(LANG_COMMAND_CREATUREATSAMEMAP, lowguid);
-                return true;
+                SetSentErrorMessage(true);
+                return false;
             }
         }
         else
@@ -1064,7 +1090,8 @@ bool ChatHandler::HandleMoveObjectCommand(const char* args)
     if(!obj)
     {
         PSendSysMessage(LANG_COMMAND_OBJNOTFOUND, lowguid);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     char* px = strtok(NULL, " ");
@@ -1097,7 +1124,8 @@ bool ChatHandler::HandleMoveObjectCommand(const char* args)
         if(!MapManager::IsValidMapCoord(obj->GetMapId(),x,y,z))
         {
             PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,obj->GetMapId());
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         Map* map = MapManager::Instance().GetMap(obj->GetMapId(),obj);
@@ -1141,14 +1169,16 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
     if (!vendor || !vendor->isVendor())
     {
         SendSysMessage(LANG_COMMAND_VENDORSELECTION);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     char* pitem  = extractKeyFromLink((char*)args,"Hitem");
     if (!pitem)
     {
         SendSysMessage(LANG_COMMAND_NEEDITEMSEND);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
     uint32 itemId = atol(pitem);
 
@@ -1169,13 +1199,15 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
     if(!pProto)
     {
         PSendSysMessage(LANG_ITEM_NOT_FOUND, itemId);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if(extendedcost && !sItemExtendedCostStore.LookupEntry(extendedcost))
     {
         PSendSysMessage(LANG_BAD_VALUE, extendedcost);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     // load vendor items if not yet
@@ -1184,13 +1216,15 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
     if(vendor->FindItem(itemId))
     {
         PSendSysMessage(LANG_ITEM_ALREADY_IN_LIST,itemId);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if (vendor->GetItemCount() >= MAX_VENDOR_ITEMS)
     {
         SendSysMessage(LANG_COMMAND_ADDVENDORITEMITEMS);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     // add to DB and to current ingame vendor
@@ -1210,14 +1244,16 @@ bool ChatHandler::HandleDelVendorItemCommand(const char* args)
     if (!vendor || !vendor->isVendor())
     {
         SendSysMessage(LANG_COMMAND_VENDORSELECTION);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     char* pitem  = extractKeyFromLink((char*)args,"Hitem");
     if (!pitem)
     {
         SendSysMessage(LANG_COMMAND_NEEDITEMSEND);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
     uint32 itemId = atol(pitem);
 
@@ -1225,7 +1261,8 @@ bool ChatHandler::HandleDelVendorItemCommand(const char* args)
     if(!pProto)
     {
         PSendSysMessage(LANG_ITEM_NOT_FOUND, itemId);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     // load vendor items if not yet
@@ -1234,7 +1271,8 @@ bool ChatHandler::HandleDelVendorItemCommand(const char* args)
     if (!vendor->RemoveItem(itemId))
     {
         PSendSysMessage(LANG_ITEM_NOT_IN_LIST,itemId);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     WorldDatabase.PExecuteLog("DELETE FROM npc_vendor WHERE entry='%u' AND item='%u'",vendor->GetEntry(), itemId);
@@ -1267,7 +1305,8 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
         if(!data)
         {
             PSendSysMessage(LANG_COMMAND_CREATGUIDNOTFOUND, lowguid);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
     }
     else
@@ -1405,7 +1444,8 @@ bool ChatHandler::HandleSetMoveTypeCommand(const char* args)
             if(!data)
             {
                 PSendSysMessage(LANG_COMMAND_CREATGUIDNOTFOUND, lowguid);
-                return true;
+                SetSentErrorMessage(true);
+                return false;
             }
         }
         else
@@ -1471,14 +1511,16 @@ bool ChatHandler::HandleChangeLevelCommand(const char* args)
     if ( lvl < 1 || lvl > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) + 3)
     {
         SendSysMessage(LANG_BAD_VALUE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Creature* pCreature = getSelectedCreature();
     if(!pCreature)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if(pCreature->isPet())
@@ -1509,7 +1551,8 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
     if(!pCreature)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     pCreature->SetUInt32Value(UNIT_NPC_FLAGS, npcFlags);
@@ -1534,7 +1577,8 @@ bool ChatHandler::HandleSetModelCommand(const char* args)
     if(!pCreature)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     pCreature->SetDisplayId(displayId);
@@ -1573,7 +1617,8 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
     if (!sFactionTemplateStore.LookupEntry(factionId))
     {
         PSendSysMessage(LANG_WRONG_FACTION, factionId);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Creature* pCreature = getSelectedCreature();
@@ -1581,7 +1626,8 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
     if(!pCreature)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     pCreature->setFaction(factionId);
@@ -1612,13 +1658,15 @@ bool ChatHandler::HandleKickPlayerCommand(const char *args)
         if(!player)
         {
             SendSysMessage(LANG_NO_CHAR_SELECTED);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         if(player==m_session->GetPlayer())
         {
             SendSysMessage(LANG_COMMAND_KICKSELF);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         player->GetSession()->KickPlayer();
@@ -1631,7 +1679,8 @@ bool ChatHandler::HandleKickPlayerCommand(const char *args)
         if(name==m_session->GetPlayer()->GetName())
         {
             SendSysMessage(LANG_COMMAND_KICKSELF);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         if(sWorld.KickPlayer(name))
@@ -1685,7 +1734,8 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
     if(!target && !targetGUID)
     {
         SendSysMessage(LANG_PLAYER_NOT_FOUND);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     uint32 accId = 0;
@@ -1755,7 +1805,8 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
         {
             // rep option not implemented for offline case
             SendSysMessage(LANG_PINFO_NO_REP);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         char* FactionName;
@@ -1848,7 +1899,8 @@ bool ChatHandler::HandleTicketCommand(const char* args)
         {
             PSendSysMessage(LANG_COMMAND_TICKENOTEXIST, num);
             delete result;
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         Field* fields = result->Fetch();
@@ -1956,7 +2008,8 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
         {
             PSendSysMessage(LANG_COMMAND_TICKENOTEXIST, num);
             delete result;
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         for(int i = 1; i < num; ++i)
@@ -2055,7 +2108,8 @@ bool ChatHandler::HandleSpawnTimeCommand(const char* args)
     if (i_stime < 0)
     {
         SendSysMessage(LANG_BAD_VALUE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Creature *pCreature = getSelectedCreature();
@@ -2120,7 +2174,8 @@ bool ChatHandler::HandleWpAddCommand(const char* args)
         if(!target)
         {
             SendSysMessage(LANG_SELECT_CREATURE);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
         if (target->GetEntry() == VISUAL_WAYPOINT )
         {
@@ -2145,7 +2200,8 @@ bool ChatHandler::HandleWpAddCommand(const char* args)
                 if(!result)
                 {
                     PSendSysMessage(LANG_WAYPOINT_NOTFOUNDDBPROBLEM, target->GetGUIDLow());
-                    return true;
+                    SetSentErrorMessage(true);
+                    return false;
                 }
             }
             do
@@ -2160,14 +2216,16 @@ bool ChatHandler::HandleWpAddCommand(const char* args)
             if(!data)
             {
                 PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, lowguid);
-                return true;
+                SetSentErrorMessage(true);
+                return false;
             }
 
             target = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_NEW_GUID(lowguid,data->id,HIGHGUID_UNIT));
             if(!target)
             {
                 PSendSysMessage(LANG_WAYPOINT_NOTFOUNDDBPROBLEM, lowguid);
-                return true;
+                SetSentErrorMessage(true);
+                return false;
             }
         }
         else
@@ -2192,14 +2250,16 @@ bool ChatHandler::HandleWpAddCommand(const char* args)
         if(!data)
         {
             PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, lowguid);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         target = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_NEW_GUID(lowguid,data->id,HIGHGUID_UNIT));
         if(!target)
         {
             PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, lowguid);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
     }
     // lowguid -> GUID of the NPC
@@ -2303,7 +2363,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         if (target->GetEntry() != VISUAL_WAYPOINT )
         {
             PSendSysMessage(LANG_WAYPOINT_VP_SELECT);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         wpGuid = target->GetGUIDLow();
@@ -2315,7 +2376,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         if(!result)
         {
             PSendSysMessage(LANG_WAYPOINT_NOTFOUNDDBPROBLEM, wpGuid);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
         sLog.outDebug("DEBUG: HandleWpModifyCommand - After getting wpGuid");
 
@@ -2343,7 +2405,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         if(!data)
         {
             PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, lowguid);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         PSendSysMessage("DEBUG: GUID provided: %d", lowguid);
@@ -2365,7 +2428,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         if (!result)
         {
             PSendSysMessage(LANG_WAYPOINT_NOTFOUNDSEARCH, lowguid, point);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         Field *fields = result->Fetch();
@@ -2410,7 +2474,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         if(!data)
         {
             PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, lowguid);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         Creature* npcCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(), MAKE_NEW_GUID(lowguid, data->id, HIGHGUID_UNIT));
@@ -2418,7 +2483,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         if( !npcCreature )
         {
             PSendSysMessage(LANG_WAYPOINT_NPCNOTFOUND);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         sLog.outDebug("DEBUG: HandleWpModifyCommand - add -- npcCreature");
@@ -2493,7 +2559,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         if(!data)
         {
             PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, lowguid);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         Creature* npcCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(), MAKE_NEW_GUID(lowguid, data->id, HIGHGUID_UNIT));
@@ -2555,7 +2622,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             if(!data)
             {
                 PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, lowguid);
-                return true;
+                SetSentErrorMessage(true);
+                return false;
             }
 
             Creature* npcCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(), MAKE_NEW_GUID(lowguid, data->id, HIGHGUID_UNIT));
@@ -2618,7 +2686,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
     if(!data)
     {
         PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, lowguid);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Creature* npcCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(), MAKE_NEW_GUID(lowguid, data->id, HIGHGUID_UNIT));
@@ -2714,7 +2783,8 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         if(!target)
         {
             SendSysMessage(LANG_SELECT_CREATURE);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
     }
     else
@@ -2734,7 +2804,8 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         if(!data)
         {
             PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, lowguid);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         target = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_NEW_GUID(lowguid,data->id,HIGHGUID_UNIT));
@@ -2742,7 +2813,8 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         if(!target)
         {
             PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, lowguid);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
     }
 
@@ -2767,7 +2839,8 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         if( target->GetEntry() != VISUAL_WAYPOINT )
         {
             PSendSysMessage(LANG_WAYPOINT_VP_SELECT);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         //PSendSysMessage("wp on, GUID: %u", lowguid);
@@ -2792,7 +2865,8 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             if(!result)
             {
                 PSendSysMessage(LANG_WAYPOINT_NOTFOUNDDBPROBLEM, lowguid);
-                return true;
+                SetSentErrorMessage(true);
+                return false;
             }
         }
         do
@@ -2840,7 +2914,8 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         if(!result)
         {
             PSendSysMessage(LANG_WAYPOINT_NOTFOUND, lowguid);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
         // Delete all visuals for this NPC
         QueryResult *result2 = WorldDatabase.PQuery( "SELECT wpguid FROM creature_movement WHERE id = '%u' and wpguid <> 0", lowguid);
@@ -2934,7 +3009,8 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         if(!result)
         {
             PSendSysMessage(LANG_WAYPOINT_NOTFOUND, lowguid);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         Field *fields = result->Fetch();
@@ -2994,7 +3070,8 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         if(!result)
         {
             PSendSysMessage(LANG_WAYPOINT_NOTFOUNDLAST, lowguid);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
         Field *fields = result->Fetch();
         float x         = fields[0].GetFloat();
@@ -3040,7 +3117,8 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         if(!result)
         {
             SendSysMessage(LANG_WAYPOINT_VP_NOTFOUND);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
         bool hasError = false;
         do
@@ -3147,7 +3225,8 @@ bool ChatHandler::HandleWpExportCommand(const char *args)
     if (!result)
     {
         PSendSysMessage(LANG_WAYPOINT_NOTHINGTOEXPORT);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     std::ofstream outfile;
@@ -3308,7 +3387,8 @@ bool ChatHandler::HandleRenameCommand(const char* args)
     if(!target && !targetGUID)
     {
         SendSysMessage(LANG_PLAYER_NOT_FOUND);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if(target)
@@ -3347,7 +3427,8 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     if (!goI)
     {
         PSendSysMessage(LANG_GAMEOBJECT_NOT_EXIST,id);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Player *chr = m_session->GetPlayer();
@@ -3404,11 +3485,7 @@ bool ChatHandler::HandleAnimCommand(const char* args)
         return false;
 
     uint32 anim_id = atoi((char*)args);
-
-    WorldPacket data( SMSG_EMOTE, (8+4) );
-    data << anim_id << m_session->GetPlayer( )->GetGUID();
-    WPAssert(data.size() == 12);
-    MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer())->MessageBroadcast(m_session->GetPlayer(), &data, true);
+    m_session->GetPlayer()->HandleEmoteCommand(anim_id);
     return true;
 }
 
@@ -3433,7 +3510,8 @@ bool ChatHandler::HandleAddHonorCommand(const char* args)
     if(!target)
     {
         SendSysMessage(LANG_PLAYER_NOT_FOUND);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     uint32 amount = (uint32)atoi(args);
@@ -3447,7 +3525,8 @@ bool ChatHandler::HandleHonorAddKillCommand(const char* /*args*/)
     if(!target)
     {
         SendSysMessage(LANG_PLAYER_NOT_FOUND);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     m_session->GetPlayer()->RewardHonor(target, 1);
@@ -3460,7 +3539,8 @@ bool ChatHandler::HandleUpdateHonorFieldsCommand(const char* /*args*/)
     if(!target)
     {
         SendSysMessage(LANG_PLAYER_NOT_FOUND);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     target->UpdateHonorFields();
@@ -3545,7 +3625,8 @@ bool ChatHandler::HandleEventInfoCommand(const char* args)
     if(event_id >=events.size())
     {
         SendSysMessage(LANG_EVENT_NOT_EXIST);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     GameEventData const& eventData = events[event_id];
@@ -3587,7 +3668,8 @@ bool ChatHandler::HandleEventStartCommand(const char* args)
     if(event_id < 0 || event_id >=events.size())
     {
         SendSysMessage(LANG_EVENT_NOT_EXIST);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     GameEvent::ActiveEvents const& activeEvents = gameeventmgr.GetActiveEventList();
@@ -3596,7 +3678,8 @@ bool ChatHandler::HandleEventStartCommand(const char* args)
     if(activeEvents.find(event_id) != activeEvents.end())
     {
         PSendSysMessage(LANG_EVENT_ALREADY_ACTIVE,event_id);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     gameeventmgr.StartEvent(event_id,true);
@@ -3620,7 +3703,8 @@ bool ChatHandler::HandleEventStopCommand(const char* args)
     if(event_id < 0 || event_id >=events.size())
     {
         SendSysMessage(LANG_EVENT_NOT_EXIST);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     GameEvent::ActiveEvents const& activeEvents = gameeventmgr.GetActiveEventList();
@@ -3629,7 +3713,8 @@ bool ChatHandler::HandleEventStopCommand(const char* args)
     if(activeEvents.find(event_id) == activeEvents.end())
     {
         PSendSysMessage(LANG_EVENT_NOT_ACTIVE,event_id);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     gameeventmgr.StopEvent(event_id,true);
@@ -3649,7 +3734,8 @@ bool ChatHandler::HandleCombatStopCommand(const char* args)
         if(!player)
         {
             SendSysMessage(LANG_PLAYER_NOT_FOUND);
-            return true;         
+            SetSentErrorMessage(true);
+            return false;         
         }
     }
     else
