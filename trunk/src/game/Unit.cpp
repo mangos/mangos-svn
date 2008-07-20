@@ -684,7 +684,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             if (durabilityLoss && !player && !((Player*)pVictim)->InBattleGround())
             {
                 DEBUG_LOG("We are dead, loosing 10 percents durability");
-                ((Player*)pVictim)->DurabilityLossAll(0.10f);
+                ((Player*)pVictim)->DurabilityLossAll(0.10f,false);
                 // durability lost message
                 WorldPacket data(SMSG_DURABILITY_DAMAGE_DEATH, 0);
                 ((Player*)pVictim)->GetSession()->SendPacket(&data);
@@ -785,11 +785,21 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                 ((Player*)pVictim)->RewardRage(rage_damage, 0, false);
             }
 
-            // random durability for items (HIT)
-            if (urand(0,300) == 10)
+            // random durability for items (HIT TAKEN)
+            if (roll_chance_f(sWorld.getRate(RATE_DURABILITY_LOSS_DAMAGE)))
             {
-                DEBUG_LOG("HIT: We decrease durability with 5 percent");
-                ((Player*)pVictim)->DurabilityLossAll(0.05f);
+                EquipmentSlots slot = EquipmentSlots(urand(0,EQUIPMENT_SLOT_END-1));
+                ((Player*)pVictim)->DurabilityPointLossForEquipSlot(slot);
+            }
+        }
+
+        if(GetTypeId()==TYPEID_PLAYER)
+        {
+            // random durability for items (HIT DONE)
+            if (roll_chance_f(sWorld.getRate(RATE_DURABILITY_LOSS_DAMAGE)))
+            {
+                EquipmentSlots slot = EquipmentSlots(urand(0,EQUIPMENT_SLOT_END-1));
+                ((Player*)this)->DurabilityPointLossForEquipSlot(slot);
             }
         }
 
@@ -1022,6 +1032,13 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
 
                 //Calculate armor mitigation
                 uint32 damageAfterArmor = CalcArmorReducedDamage(pVictim, *damage);
+
+                // random durability for main hand weapon (ABSORB)
+                if(damageAfterArmor < *damage)
+                    if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                        if (roll_chance_f(sWorld.getRate(RATE_DURABILITY_LOSS_ABSORB)))
+                            ((Player*)pVictim)->DurabilityPointLossForEquipSlot(EquipmentSlots(urand(EQUIPMENT_SLOT_START,EQUIPMENT_SLOT_BACK)));
+
                 cleanDamage->damage += *damage - damageAfterArmor;
                 *damage = damageAfterArmor;
             } 
@@ -1091,6 +1108,16 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
 
                         pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
                         pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
+
+                        if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                        {
+                            // Update defense
+                            ((Player*)pVictim)->UpdateDefense();
+
+                            // random durability for main hand weapon (BLOCK)
+                            if (roll_chance_f(sWorld.getRate(RATE_DURABILITY_LOSS_BLOCK)))
+                                ((Player*)pVictim)->DurabilityPointLossForEquipSlot(EQUIPMENT_SLOT_OFFHAND);
+                        }
                     }
                     break;
                 }
@@ -1138,9 +1165,15 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
                         }
                     }
 
-                    // Update victim defense ?
                     if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // Update victim defense ?
                         ((Player*)pVictim)->UpdateDefense();
+
+                        // random durability for main hand weapon (PARRY)
+                        if (roll_chance_f(sWorld.getRate(RATE_DURABILITY_LOSS_PARRY)))
+                            ((Player*)pVictim)->DurabilityPointLossForEquipSlot(EQUIPMENT_SLOT_MAINHAND);
+                    }
 
                     // Set parry flags
                     pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
@@ -1156,6 +1189,7 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
                         pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
                         pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
                     }
+
                     break;
                 }
                 case MELEE_HIT_DODGE:
@@ -1206,6 +1240,15 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
                     pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
                     pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
 
+                    if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                    {
+                        // Update defense
+                        ((Player*)pVictim)->UpdateDefense();
+
+                        // random durability for main hand weapon (BLOCK)
+                        if (roll_chance_f(sWorld.getRate(RATE_DURABILITY_LOSS_BLOCK)))
+                            ((Player*)pVictim)->DurabilityPointLossForEquipSlot(EQUIPMENT_SLOT_OFFHAND);
+                    }
                     break;
 
                 }
@@ -1657,6 +1700,13 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
     if (damageSchoolMask & SPELL_SCHOOL_MASK_NORMAL)
     {
         uint32 damageAfterArmor = CalcArmorReducedDamage(pVictim, *damage);
+
+        // random durability for main hand weapon (ABSORB)
+        if(damageAfterArmor < *damage)
+            if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                if (roll_chance_f(sWorld.getRate(RATE_DURABILITY_LOSS_ABSORB)))
+                    ((Player*)pVictim)->DurabilityPointLossForEquipSlot(EquipmentSlots(urand(EQUIPMENT_SLOT_START,EQUIPMENT_SLOT_BACK)));
+
         cleanDamage->damage += *damage - damageAfterArmor;
         *damage = damageAfterArmor;
     }
@@ -1747,7 +1797,14 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
                 }
 
                 if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                {
+                    // Update defense
                     ((Player*)pVictim)->UpdateDefense();
+
+                    // random durability for main hand weapon (BLOCK)
+                    if (roll_chance_f(sWorld.getRate(RATE_DURABILITY_LOSS_BLOCK)))
+                        ((Player*)pVictim)->DurabilityPointLossForEquipSlot(EQUIPMENT_SLOT_OFFHAND);
+                }
 
                 pVictim->ModifyAuraState(AURA_STATE_DEFENSE,true);
                 pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
@@ -1813,7 +1870,14 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             }
 
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
+            {
+                // Update victim defense ?
                 ((Player*)pVictim)->UpdateDefense();
+
+                // random durability for main hand weapon (PARRY)
+                if (roll_chance_f(sWorld.getRate(RATE_DURABILITY_LOSS_PARRY)))
+                    ((Player*)pVictim)->DurabilityPointLossForEquipSlot(EQUIPMENT_SLOT_MAINHAND);
+            }
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
 
@@ -1881,7 +1945,14 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             }
 
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
+            {
+                // Update defense
                 ((Player*)pVictim)->UpdateDefense();
+
+                // random durability for main hand weapon (BLOCK)
+                if (roll_chance_f(sWorld.getRate(RATE_DURABILITY_LOSS_BLOCK)))
+                    ((Player*)pVictim)->DurabilityPointLossForEquipSlot(EQUIPMENT_SLOT_OFFHAND);
+            }
 
             pVictim->ModifyAuraState(AURA_STATE_DEFENSE,true);
             pVictim->StartReactiveTimer( REACTIVE_DEFENSE );

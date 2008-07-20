@@ -395,6 +395,31 @@ void World::SetInitialWorldSettings()
         rate_values[RATE_TARGET_POS_RECALCULATION_RANGE] = ATTACK_DISTANCE;
     }
 
+    rate_values[RATE_DURABILITY_LOSS_DAMAGE] = sConfig.GetFloatDefault("DurabilityLossChance.Damage",0.5f);
+    if(rate_values[RATE_DURABILITY_LOSS_DAMAGE] < 0)
+    {
+        sLog.outError("DurabilityLossChance.Damage (%f) must be >=0. Using 0.0 instead.",rate_values[RATE_DURABILITY_LOSS_DAMAGE]);
+        rate_values[RATE_DURABILITY_LOSS_DAMAGE] = 0.0f;
+    }
+    rate_values[RATE_DURABILITY_LOSS_ABSORB] = sConfig.GetFloatDefault("DurabilityLossChance.Absorb",0.5f);
+    if(rate_values[RATE_DURABILITY_LOSS_ABSORB] < 0)
+    {
+        sLog.outError("DurabilityLossChance.Absorb (%f) must be >=0. Using 0.0 instead.",rate_values[RATE_DURABILITY_LOSS_ABSORB]);
+        rate_values[RATE_DURABILITY_LOSS_ABSORB] = 0.0f;
+    }
+    rate_values[RATE_DURABILITY_LOSS_PARRY] = sConfig.GetFloatDefault("DurabilityLossChance.Parry",0.05f);
+    if(rate_values[RATE_DURABILITY_LOSS_PARRY] < 0)
+    {
+        sLog.outError("DurabilityLossChance.Parry (%f) must be >=0. Using 0.0 instead.",rate_values[RATE_DURABILITY_LOSS_PARRY]);
+        rate_values[RATE_DURABILITY_LOSS_PARRY] = 0.0f;
+    }
+    rate_values[RATE_DURABILITY_LOSS_BLOCK] = sConfig.GetFloatDefault("DurabilityLossChance.Block",0.05f);
+    if(rate_values[RATE_DURABILITY_LOSS_BLOCK] < 0)
+    {
+        sLog.outError("DurabilityLossChance.Block (%f) must be >=0. Using 0.0 instead.",rate_values[RATE_DURABILITY_LOSS_BLOCK]);
+        rate_values[RATE_DURABILITY_LOSS_BLOCK] = 0.0f;
+    }
+
     ///- Read other configuration items from the config file
 
     m_configs[CONFIG_COMPRESSION] = sConfig.GetIntDefault("Compression", 1);
