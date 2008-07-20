@@ -6254,14 +6254,6 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     sLog.outDetail("applying mods for item %u ",item->GetGUIDLow());
 
-    if(proto->ItemSet)
-    {
-        if (apply)
-            AddItemsSetItem(this,item);
-        else
-            RemoveItemsSetItem(this,proto);
-    }
-
     if(IsWeaponSlot(slot))
         _ApplyWeaponDependentAuraMods(item,slot,apply);
 
@@ -6641,6 +6633,7 @@ void Player::UpdateEquipSpellsAtFormChange()
         }
     }
 
+    // item set bonuses not dependent from item broken state
     for(size_t setindex = 0; setindex < ItemSetEff.size(); ++setindex)
     {
         ItemSetEffect* eff = ItemSetEff[setindex];
@@ -6748,15 +6741,16 @@ void Player::_RemoveAllItemMods()
     {
         if(m_items[i])
         {
-            if(m_items[i]->IsBroken())
-                continue;
-
             ItemPrototype const *proto = m_items[i]->GetProto();
             if(!proto)
                 continue;
 
+            // item set bonuses not dependent from item broken state
             if(proto->ItemSet)
                 RemoveItemsSetItem(this,proto);
+
+            if(m_items[i]->IsBroken())
+                continue;
 
             ApplyItemEquipSpell(m_items[i],false);
             ApplyEnchantment(m_items[i], false);
@@ -6815,15 +6809,16 @@ void Player::_ApplyAllItemMods()
     {
         if(m_items[i])
         {
-            if(m_items[i]->IsBroken())
-                continue;
-
             ItemPrototype const *proto = m_items[i]->GetProto();
             if(!proto)
                 continue;
 
+            // item set bonuses not dependent from item broken state
             if(proto->ItemSet)
                 AddItemsSetItem(this,m_items[i]);
+
+            if(m_items[i]->IsBroken())
+                continue;
 
             ApplyItemEquipSpell(m_items[i],true);
             ApplyEnchantment(m_items[i], true);
@@ -9741,9 +9736,14 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
 
             if(isAlive())
             {
+                ItemPrototype const *pProto = pItem->GetProto();
+
+                // item set bonuses applied only at equip and removed at unequip, and still active for broken items
+                if(pProto && pProto->ItemSet)
+                    AddItemsSetItem(this,pItem);
+
                 _ApplyItemMods(pItem, slot, true);
 
-                ItemPrototype const *pProto = pItem->GetProto();
                 if(pProto && isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer == 0)
                 {
                     m_weaponChangeTimer = DEFAULT_SWITCH_WEAPON;
@@ -9896,6 +9896,12 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
         {
             if ( slot < INVENTORY_SLOT_BAG_END )
             {
+                ItemPrototype const *pProto = pItem->GetProto();
+                // item set bonuses applied only at equip and removed at unequip, and still active for broken items
+
+                if(pProto && pProto->ItemSet)
+                    RemoveItemsSetItem(this,pProto);
+
                 _ApplyItemMods(pItem, slot, false);
 
                 // remove item dependent auras and casts (only weapon and armor slots)
@@ -10012,7 +10018,15 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
 
             // equipment and equipped bags can have applied bonuses
             if ( slot < INVENTORY_SLOT_BAG_END )
+            {
+                ItemPrototype const *pProto = pItem->GetProto();
+
+                // item set bonuses applied only at equip and removed at unequip, and still active for broken items
+                if(pProto && pProto->ItemSet)
+                    RemoveItemsSetItem(this,pProto);
+
                 _ApplyItemMods(pItem, slot, false);
+            }
 
             if ( slot < EQUIPMENT_SLOT_END )
             {
