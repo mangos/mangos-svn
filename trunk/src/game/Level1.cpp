@@ -44,7 +44,8 @@ bool ChatHandler::HandleSayCommand(const char* args)
     if(!pCreature)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     pCreature->Say(args, LANG_UNIVERSAL, 0);
@@ -61,7 +62,8 @@ bool ChatHandler::HandleYellCommand(const char* args)
     if(!pCreature)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     pCreature->Yell(args, LANG_UNIVERSAL, 0);
@@ -80,7 +82,8 @@ bool ChatHandler::HandleTextEmoteCommand(const char* args)
     if(!pCreature)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     pCreature->TextEmote(args, 0);
@@ -153,7 +156,8 @@ bool ChatHandler::HandleGMmodeCommand(const char* args)
     if(!*args)
     {
         SendSysMessage(LANG_USE_BOL);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     std::string argstr = (char*)args;
@@ -181,7 +185,8 @@ bool ChatHandler::HandleGMmodeCommand(const char* args)
     }
 
     SendSysMessage(LANG_USE_BOL);
-    return true;
+    SetSentErrorMessage(true);
+    return false;
 }
 
 //Enable\Dissable Invisible mode
@@ -210,7 +215,8 @@ bool ChatHandler::HandleVisibleCommand(const char* args)
     }
 
     SendSysMessage(LANG_USE_BOL);
-    return true;
+    SetSentErrorMessage(true);
+    return false;
 }
 
 bool ChatHandler::HandleGPSCommand(const char* args)
@@ -224,7 +230,8 @@ bool ChatHandler::HandleGPSCommand(const char* args)
         if(!obj)
         {
             SendSysMessage(LANG_PLAYER_NOT_FOUND);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
     }
     else
@@ -234,7 +241,8 @@ bool ChatHandler::HandleGPSCommand(const char* args)
         if(!obj)
         {
             SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
     }
     CellPair cell_val = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
@@ -300,7 +308,8 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
         if(chr->IsBeingTeleported()==true)
         {
             PSendSysMessage(LANG_IS_TELEPORTED, chr->GetName());
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         Map* pMap = MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(),m_session->GetPlayer());
@@ -312,7 +321,8 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
             {
                 // cannot summon from instance to instance
                 PSendSysMessage(LANG_CANNOT_SUMMON_TO_INST,chr->GetName());
-                return true;
+                SetSentErrorMessage(true);
+                return false;
             }
 
             // we are in instance, and can summon only player in our group with us as lead
@@ -322,7 +332,8 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
                 // the last check is a bit excessive, but let it be, just in case
             {
                 PSendSysMessage(LANG_CANNOT_SUMMON_TO_INST,chr->GetName());
-                return true;
+                SetSentErrorMessage(true);
+                return false;
             }
         }
 
@@ -388,7 +399,8 @@ bool ChatHandler::HandleGonameCommand(const char* args)
             {
                 // cannot go from instance to instance
                 PSendSysMessage(LANG_CANNOT_GO_INST_INST,chr->GetName());
-                return true;
+                SetSentErrorMessage(true);
+                return false;
             }
 
             // we have to go to instance, and can go to player only if:
@@ -400,7 +412,8 @@ bool ChatHandler::HandleGonameCommand(const char* args)
                 if (_player->GetGroup() != chr->GetGroup())
                 {
                     PSendSysMessage(LANG_CANNOT_GO_TO_INST_PARTY,chr->GetName());
-                    return true;
+                    SetSentErrorMessage(true);
+                    return false;
                 }
             }
             else
@@ -409,7 +422,8 @@ bool ChatHandler::HandleGonameCommand(const char* args)
                 if (!_player->isGameMaster())
                 {
                     PSendSysMessage(LANG_CANNOT_GO_TO_INST_GM,chr->GetName());
-                    return true;
+                    SetSentErrorMessage(true);
+                    return false;
                 }
             }
 
@@ -472,7 +486,8 @@ bool ChatHandler::HandleGonameCommand(const char* args)
 
     PSendSysMessage(LANG_NO_PLAYER, args);
 
-    return true;
+    SetSentErrorMessage(true);
+    return false;
 }
 
 // Teleport player to last position
@@ -497,14 +512,16 @@ bool ChatHandler::HandleRecallCommand(const char* args)
         if(!chr)
         {
             PSendSysMessage(LANG_NO_PLAYER, args);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
     }
 
     if(chr->IsBeingTeleported())
     {
         PSendSysMessage(LANG_IS_TELEPORTED, chr->GetName());
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     // stop flight if need
@@ -530,7 +547,8 @@ bool ChatHandler::HandleModifyKnownTitlesCommand(const char* args)
     if (!chr)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     uint64 titles2 = titles;
@@ -570,14 +588,16 @@ bool ChatHandler::HandleModifyHPCommand(const char* args)
     if (hp <= 0 || hpm <= 0 || hpm < hp)
     {
         SendSysMessage(LANG_BAD_VALUE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_HP, chr->GetName(), hp, hpm);
@@ -611,14 +631,16 @@ bool ChatHandler::HandleModifyManaCommand(const char* args)
     if (mana <= 0 || manam <= 0 || manam < mana)
     {
         SendSysMessage(LANG_BAD_VALUE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_MANA, chr->GetName(), mana, manam);
@@ -653,14 +675,16 @@ bool ChatHandler::HandleModifyEnergyCommand(const char* args)
     if (energy <= 0 || energym <= 0 || energym < energy)
     {
         SendSysMessage(LANG_BAD_VALUE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Player *chr = getSelectedPlayer();
     if (!chr)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_ENERGY, chr->GetName(), energy/10, energym/10);
@@ -697,14 +721,16 @@ bool ChatHandler::HandleModifyRageCommand(const char* args)
     if (rage <= 0 || ragem <= 0 || ragem < rage)
     {
         SendSysMessage(LANG_BAD_VALUE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_RAGE, chr->GetName(), rage/10, ragem/10);
@@ -729,7 +755,8 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
     if(!chr)
     {
         SendSysMessage(LANG_SELECT_CREATURE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if(!pfactionid)
@@ -748,7 +775,8 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
     if( !chr )
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     uint32 factionid = atoi(pfactionid);
@@ -779,7 +807,8 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
     if(!sFactionTemplateStore.LookupEntry(factionid))
     {
         PSendSysMessage(LANG_WRONG_FACTION, factionid);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_FACTION, chr->GetGUIDLow(),factionid,flag,npcflag,dyflag);
@@ -829,7 +858,8 @@ bool ChatHandler::HandleModifySpellCommand(const char* args)
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_SPELLFLATID, spellflatid, val, mark, chr->GetName());
@@ -859,7 +889,8 @@ bool ChatHandler::HandleModifyTalentCommand (const char* args)
         if(!player)
         {
             SendSysMessage(LANG_NO_CHAR_SELECTED);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
         player->SetFreeTalentPoints(tp);
         return true;
@@ -873,7 +904,8 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args)
     if (!*args)
     {
         SendSysMessage(LANG_USE_BOL);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     std::string argstr = (char*)args;
@@ -907,7 +939,8 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args)
     }
 
     SendSysMessage(LANG_USE_BOL);
-    return true;
+    SetSentErrorMessage(true);
+    return false;
 }
 
 //Edit Player Aspeed
@@ -921,20 +954,23 @@ bool ChatHandler::HandleModifyASpeedCommand(const char* args)
     if (ASpeed > 10 || ASpeed < 0.1)
     {
         SendSysMessage(LANG_BAD_VALUE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if(chr->isInFlight())
     {
         PSendSysMessage(LANG_CHAR_IN_FLIGHT,chr->GetName());
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_ASPEED, ASpeed, chr->GetName());
@@ -961,20 +997,23 @@ bool ChatHandler::HandleModifySpeedCommand(const char* args)
     if (Speed > 10 || Speed < 0.1)
     {
         SendSysMessage(LANG_BAD_VALUE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if(chr->isInFlight())
     {
         PSendSysMessage(LANG_CHAR_IN_FLIGHT,chr->GetName());
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_SPEED, Speed, chr->GetName());
@@ -998,20 +1037,23 @@ bool ChatHandler::HandleModifySwimCommand(const char* args)
     if (Swim > 10.0f || Swim < 0.01f)
     {
         SendSysMessage(LANG_BAD_VALUE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if(chr->isInFlight())
     {
         PSendSysMessage(LANG_CHAR_IN_FLIGHT,chr->GetName());
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_SWIM_SPEED, Swim, chr->GetName());
@@ -1035,20 +1077,23 @@ bool ChatHandler::HandleModifyBWalkCommand(const char* args)
     if (BSpeed > 10.0f || BSpeed < 0.1f)
     {
         SendSysMessage(LANG_BAD_VALUE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if(chr->isInFlight())
     {
         PSendSysMessage(LANG_CHAR_IN_FLIGHT,chr->GetName());
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_BACK_SPEED, BSpeed, chr->GetName());
@@ -1072,14 +1117,16 @@ bool ChatHandler::HandleModifyFlyCommand(const char* args)
     if (FSpeed > 10.0f || FSpeed < 0.1f)
     {
         SendSysMessage(LANG_BAD_VALUE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_FLY_SPEED, FSpeed, chr->GetName());
@@ -1102,14 +1149,16 @@ bool ChatHandler::HandleModifyScaleCommand(const char* args)
     if (Scale > 3.0f || Scale <= 0.0f)
     {
         SendSysMessage(LANG_BAD_VALUE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     PSendSysMessage(LANG_YOU_CHANGE_SIZE, Scale, chr->GetName());
@@ -1344,14 +1393,16 @@ bool ChatHandler::HandleModifyMountCommand(const char* args)
             break;
         default:
             SendSysMessage(LANG_NO_MOUNT);
-            return true;
+            SetSentErrorMessage(true);
+            return false;
     }
 
     Player *chr = getSelectedPlayer();
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     PSendSysMessage(LANG_YOU_GIVE_MOUNT, chr->GetName());
@@ -1388,7 +1439,8 @@ bool ChatHandler::HandleModifyMoneyCommand(const char* args)
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     int32 addmoney = atoi((char*)args);
@@ -1440,7 +1492,8 @@ bool ChatHandler::HandleModifyBitCommand(const char* args)
     if (chr == NULL)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     char* pField = strtok((char*)args, " ");
@@ -1457,13 +1510,15 @@ bool ChatHandler::HandleModifyBitCommand(const char* args)
     if (field < 1 || field >= PLAYER_END)
     {
         SendSysMessage(LANG_BAD_VALUE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if (bit < 1 || bit > 32)
     {
         SendSysMessage(LANG_BAD_VALUE);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     if ( chr->HasFlag( field, (1<<(bit-1)) ) )
@@ -1490,7 +1545,8 @@ bool ChatHandler::HandleModifyHonorCommand (const char* args)
     if(!target)
     {
         SendSysMessage(LANG_PLAYER_NOT_FOUND);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     int32 amount = (uint32)atoi(args);
@@ -1520,7 +1576,8 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_TELE_NOTFOUND);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
     Field *fields = result->Fetch();
     float x = fields[0].GetFloat();
@@ -1533,7 +1590,8 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     if(!MapManager::IsValidMapCoord(mapid,x,y,x,ort))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     // stop flight if need
@@ -1596,7 +1654,8 @@ bool ChatHandler::HandleLookupTeleCommand(const char * args)
     if(!*args)
     {
         SendSysMessage(LANG_COMMAND_TELE_PARAMETER);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
     char const* str = strtok((char*)args, " ");
     if(!str)
@@ -1608,7 +1667,8 @@ bool ChatHandler::HandleLookupTeleCommand(const char * args)
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_TELE_NOREQUEST);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
     std::string reply;
     for (uint64 i=0; i < result->GetRowCount(); i++)
@@ -1660,7 +1720,8 @@ bool ChatHandler::HandleWhispersCommand(const char* args)
     }
 
     SendSysMessage(LANG_USE_BOL);
-    return true;
+    SetSentErrorMessage(true);
+    return false;
 }
 
 //Play sound
@@ -1771,7 +1832,8 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_TELE_NOTFOUND);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Field *fields = result->Fetch();
@@ -1785,7 +1847,8 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
     if(!MapManager::IsValidMapCoord(mapid,x,y,x,ort))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Player *chr = objmgr.GetPlayer(name.c_str());
@@ -1795,7 +1858,8 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
         if(chr->IsBeingTeleported()==true)
         {
             PSendSysMessage(LANG_IS_TELEPORTED, chr->GetName());
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         PSendSysMessage(LANG_TELEPORTING_TO, chr->GetName(),"", location.c_str());
@@ -1836,7 +1900,8 @@ bool ChatHandler::HandleGroupTeleCommand(const char * args)
     if (!player)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     char* cId = extractKeyFromLink((char*)args,"Htele");    // string or [name] Shift-click form |color|Htele:name|h[name]|h|r
@@ -1850,7 +1915,8 @@ bool ChatHandler::HandleGroupTeleCommand(const char * args)
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_TELE_NOTFOUND);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
     Field *fields = result->Fetch();
     float x = fields[0].GetFloat();
@@ -1863,7 +1929,8 @@ bool ChatHandler::HandleGroupTeleCommand(const char * args)
     if(!MapManager::IsValidMapCoord(mapid,x,y,z,ort))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Group *grp = player->GetGroup();
@@ -1871,7 +1938,8 @@ bool ChatHandler::HandleGroupTeleCommand(const char * args)
     if(!grp)
     {
         PSendSysMessage(LANG_NOT_IN_GROUP,player->GetName());
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     for(GroupReference *itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
@@ -1922,7 +1990,8 @@ bool ChatHandler::HandleGroupgoCommand(const char* args)
     if (!player)
     {
         PSendSysMessage(LANG_NO_PLAYER, args);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Group *grp = player->GetGroup();
@@ -1930,7 +1999,8 @@ bool ChatHandler::HandleGroupgoCommand(const char* args)
     if(!grp)
     {
         PSendSysMessage(LANG_NOT_IN_GROUP,player->GetName());
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Map* gmMap = MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(),m_session->GetPlayer());
@@ -1943,7 +2013,8 @@ bool ChatHandler::HandleGroupgoCommand(const char* args)
         // the last check is a bit excessive, but let it be, just in case
     {
         SendSysMessage(LANG_CANNOT_SUMMON_TO_INST);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     for(GroupReference *itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
@@ -1956,7 +2027,8 @@ bool ChatHandler::HandleGroupgoCommand(const char* args)
         if(pl->IsBeingTeleported()==true)
         {
             PSendSysMessage(LANG_IS_TELEPORTED, pl->GetName());
-            return true;
+            SetSentErrorMessage(true);
+            return false;
         }
 
         if (to_instance)
@@ -1967,7 +2039,8 @@ bool ChatHandler::HandleGroupgoCommand(const char* args)
             {
                 // cannot summon from instance to instance
                 PSendSysMessage(LANG_CANNOT_SUMMON_TO_INST,pl->GetName());
-                return true;
+                SetSentErrorMessage(true);
+                return false;
             }
         }
 
@@ -2020,7 +2093,8 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
     if(!MapManager::IsValidMapCoord(mapid,x,y))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     // stop flight if need
@@ -2069,7 +2143,8 @@ bool ChatHandler::HandleGoXYZCommand(const char* args)
     if(!MapManager::IsValidMapCoord(mapid,x,y,z))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     // stop flight if need
@@ -2113,7 +2188,8 @@ bool ChatHandler::HandleGoZoneXYCommand(const char* args)
     if( x<0 || x>100 || y<0 || y>100 || !areaEntry )
     {
         PSendSysMessage(LANG_INVALID_ZONE_COORD,x,y,areaid);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     // update to parent zone if exist (client map show only zones without parents)
@@ -2124,7 +2200,8 @@ bool ChatHandler::HandleGoZoneXYCommand(const char* args)
     if(map->Instanceable())
     {
         PSendSysMessage(LANG_INVALID_ZONE_MAP,areaEntry->ID,areaEntry->area_name[sWorld.GetDBClang()],map->GetId(),map->GetMapName());
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     Zone2MapCoordinates(x,y,zoneEntry->ID);
@@ -2132,7 +2209,8 @@ bool ChatHandler::HandleGoZoneXYCommand(const char* args)
     if(!MapManager::IsValidMapCoord(zoneEntry->mapid,x,y))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,zoneEntry->mapid);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     // stop flight if need
@@ -2178,7 +2256,8 @@ bool ChatHandler::HandleGoGridCommand(const char* args)
     if(!MapManager::IsValidMapCoord(mapid,x,y))
     {
         PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
-        return true;
+        SetSentErrorMessage(true);
+        return false;
     }
 
     // stop flight if need
