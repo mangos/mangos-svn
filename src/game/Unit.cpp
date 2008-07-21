@@ -6648,6 +6648,10 @@ bool Unit::Attack(Unit *victim, bool meleeAttack)
     if(!victim || victim == this)
         return false;
 
+    // dead units can neither attack nor be attacked
+    if(!isAlive() || !victim->isAlive())
+        return false;
+
     // player cannot attack in mount state
     if(GetTypeId()==TYPEID_PLAYER && IsMounted())
         return false;
@@ -8102,6 +8106,10 @@ void Unit::SetInCombat(Unit* enemy)
 
 void Unit::SetInCombat(bool PvP)
 {
+    // only alive units can be in combat
+    if(!isAlive())
+        return;
+    
     if(PvP)
         m_CombatTimer = 5000;
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
@@ -8708,10 +8716,19 @@ void Unit::setDeathState(DeathState s)
 ########################################*/
 bool Unit::CanHaveThreatList() const
 {
-    if(GetTypeId() == TYPEID_UNIT && !((Creature*)this)->isPet() && !((Creature*)this)->isTotem() )
-        return true;
-    else
+    // only creatures can have threat list
+    if( GetTypeId() != TYPEID_UNIT )
         return false;
+
+    // only alive units can have threat list
+    if( !isAlive() )
+        return false;
+
+    // pets and totems can not have threat list
+    if( ((Creature*)this)->isPet() || ((Creature*)this)->isTotem() )
+        return false;
+
+    return true;
 }
 
 //======================================================================
