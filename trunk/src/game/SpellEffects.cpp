@@ -2274,7 +2274,7 @@ void Spell::EffectHeal( uint32 /*i*/ )
         if (crit)
             procHealer |= PROC_FLAG_CRIT_HEAL;
 
-        m_caster->ProcDamageAndSpell(unitTarget,procHealer,PROC_FLAG_HEALED,addhealth,m_spellInfo,m_IsTriggeredSpell);
+        m_caster->ProcDamageAndSpell(unitTarget,procHealer,PROC_FLAG_HEALED,addhealth,SPELL_SCHOOL_MASK_NONE,m_spellInfo,m_IsTriggeredSpell);
     }
 }
 
@@ -2417,11 +2417,14 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
     uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, newitemid, num_to_add, &no_space );
     if( msg != EQUIP_ERR_OK )
     {
-        if( msg == EQUIP_ERR_INVENTORY_FULL )                   // convert to possibló store amount
+        if( msg == EQUIP_ERR_INVENTORY_FULL )               // convert to possibló store amount
             num_to_add -= no_space;
         else
         {
-            player->SendEquipError( msg, NULL, NULL );
+            // not output error for innkeeper case
+            // TODO: but maybe base at attributes exit more nice check for like cases
+            if(m_spellInfo->Id!=3286)                       
+                player->SendEquipError( msg, NULL, NULL );
             return;
         }
     }

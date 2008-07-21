@@ -81,9 +81,9 @@ static Unit::AuraTypeSet GenerateVictimProcCastAuraTypes()
 static Unit::AuraTypeSet GenerateAttakerProcEffectAuraTypes()
 {
     static Unit::AuraTypeSet auraTypes;
-    auraTypes.insert(SPELL_AURA_MOD_CASTING_SPEED);
-    auraTypes.insert(SPELL_AURA_PROC_TRIGGER_DAMAGE);
     auraTypes.insert(SPELL_AURA_MOD_DAMAGE_DONE);
+    auraTypes.insert(SPELL_AURA_PROC_TRIGGER_DAMAGE);
+    auraTypes.insert(SPELL_AURA_MOD_CASTING_SPEED);
     auraTypes.insert(SPELL_AURA_MOD_RATING);
     return auraTypes;
 }
@@ -92,10 +92,11 @@ static Unit::AuraTypeSet GenerateAttakerProcEffectAuraTypes()
 static Unit::AuraTypeSet GenerateVictimProcEffectAuraTypes()
 {
     static Unit::AuraTypeSet auraTypes;
+    auraTypes.insert(SPELL_AURA_MOD_RESISTANCE);
     auraTypes.insert(SPELL_AURA_PROC_TRIGGER_DAMAGE);
     auraTypes.insert(SPELL_AURA_MOD_PARRY_PERCENT);
     auraTypes.insert(SPELL_AURA_MOD_BLOCK_PERCENT);
-    auraTypes.insert(SPELL_AURA_MOD_RESISTANCE);
+    auraTypes.insert(SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN);
     return auraTypes;
 }
 
@@ -1012,7 +1013,7 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
                     if(GetTypeId()== TYPEID_PLAYER)
                         ((Player*)this)->UpdateWeaponSkill(BASE_ATTACK);
 
-                    CastMeleeProcDamageAndSpell(pVictim,0,BASE_ATTACK,MELEE_HIT_MISS,spellInfo,isTriggeredSpell);
+                    CastMeleeProcDamageAndSpell(pVictim,0,GetSpellSchoolMask(spellInfo),BASE_ATTACK,MELEE_HIT_MISS,spellInfo,isTriggeredSpell);
                     return;
                 }
             }
@@ -1262,7 +1263,7 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
 
             // do all damage=0 cases here
             if(*damage == 0)
-                CastMeleeProcDamageAndSpell(pVictim,0,BASE_ATTACK,outcome,spellInfo,isTriggeredSpell);
+                CastMeleeProcDamageAndSpell(pVictim,0,GetSpellSchoolMask(spellInfo),BASE_ATTACK,outcome,spellInfo,isTriggeredSpell);
 
             break;
         }
@@ -1297,7 +1298,7 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
                 uint32 procAttacker = PROC_FLAG_HIT_SPELL;
                 uint32 procVictim   = (PROC_FLAG_STRUCK_SPELL|PROC_FLAG_TAKE_DAMAGE);
 
-                ProcDamageAndSpell(pVictim, procAttacker, procVictim, 0, spellInfo, isTriggeredSpell);
+                ProcDamageAndSpell(pVictim, procAttacker, procVictim, 0, GetSpellSchoolMask(spellInfo), spellInfo, isTriggeredSpell);
             }
 
             break;
@@ -1346,7 +1347,7 @@ uint32 Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage
             if (resist)
             {
                 HitInfo |= HITINFO_RESIST;
-                ProcDamageAndSpell(pVictim, PROC_FLAG_TARGET_RESISTS, PROC_FLAG_RESIST_SPELL, 0, spellInfo,isTriggeredSpell);
+                ProcDamageAndSpell(pVictim, PROC_FLAG_TARGET_RESISTS, PROC_FLAG_RESIST_SPELL, 0, GetSpellSchoolMask(spellInfo), spellInfo,isTriggeredSpell);
             }
 
             //Send resist
@@ -1374,7 +1375,7 @@ uint32 Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage
             procVictim   |= PROC_FLAG_STRUCK_CRIT_SPELL;
         }
 
-        ProcDamageAndSpell(pVictim, procAttacker, procVictim, damage, spellInfo, isTriggeredSpell);
+        ProcDamageAndSpell(pVictim, procAttacker, procVictim, damage, GetSpellSchoolMask(spellInfo), spellInfo, isTriggeredSpell);
 
         return damage;
     }
@@ -1892,7 +1893,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
                 pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
             }
 
-            CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
+            CastMeleeProcDamageAndSpell(pVictim, 0, damageSchoolMask, attType, outcome, spellCasted, isTriggeredSpell);
             return;
         }
         case MELEE_HIT_DODGE:
@@ -1925,7 +1926,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
                 StartReactiveTimer( REACTIVE_OVERPOWER );
             }
 
-            CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
+            CastMeleeProcDamageAndSpell(pVictim, 0, damageSchoolMask, attType, outcome, spellCasted, isTriggeredSpell);
             return;
         }
         case MELEE_HIT_BLOCK:
@@ -2042,7 +2043,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
         //*hitInfo = 0x00010020;
         //*hitInfo |= HITINFO_SWINGNOHITSOUND;
         //*damageType = 0;
-        CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
+        CastMeleeProcDamageAndSpell(pVictim, 0, damageSchoolMask, attType, outcome, spellCasted, isTriggeredSpell);
         return;
     }
 
@@ -2062,7 +2063,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
         }
     }
 
-    CastMeleeProcDamageAndSpell(pVictim, (*damage - *absorbDamage - *resistDamage - *blocked_amount), attType, outcome, spellCasted, isTriggeredSpell);
+    CastMeleeProcDamageAndSpell(pVictim, (*damage - *absorbDamage - *resistDamage - *blocked_amount), damageSchoolMask, attType, outcome, spellCasted, isTriggeredSpell);
 
     // victim's damage shield
     // yet another hack to fix crashes related to the aura getting removed during iteration
@@ -4300,7 +4301,7 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, 
     SendMessageToSet( &data, true );
 }
 
-void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVictim, uint32 damage, SpellEntry const *procSpell, bool isTriggeredSpell, WeaponAttackType attType)
+void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVictim, uint32 damage, SpellSchoolMask damageSchoolMask, SpellEntry const *procSpell, bool isTriggeredSpell, WeaponAttackType attType)
 {
     sLog.outDebug("ProcDamageAndSpell: attacker flags are 0x%x, victim flags 0x%x", procAttacker, procVictim);
     if(procSpell)
@@ -4335,8 +4336,8 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
     if (procAttacker)
     {
         // procces auras that not generate casts at proc event before auras that generate casts to prevent proc aura added at prev. proc aura execute in set
-        ProcDamageAndSpellFor(false,pVictim,procAttacker,attackerProcEffectAuraTypes,attType, procSpell, damage);
-        ProcDamageAndSpellFor(false,pVictim,procAttacker,attackerProcCastAuraTypes,attType, procSpell, damage);
+        ProcDamageAndSpellFor(false,pVictim,procAttacker,attackerProcEffectAuraTypes,attType, procSpell, damage, damageSchoolMask);
+        ProcDamageAndSpellFor(false,pVictim,procAttacker,attackerProcCastAuraTypes,attType, procSpell, damage, damageSchoolMask);
     }
 
     // Now go on with a victim's events'n'auras
@@ -4344,12 +4345,12 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
     if(pVictim && pVictim->isAlive() && procVictim)
     {
         // procces auras that not generate casts at proc event before auras that generate casts to prevent proc aura added at prev. proc aura execute in set
-        pVictim->ProcDamageAndSpellFor(true,this,procVictim,victimProcEffectAuraTypes,attType,procSpell, damage);
-        pVictim->ProcDamageAndSpellFor(true,this,procVictim,victimProcCastAuraTypes,attType,procSpell, damage);
+        pVictim->ProcDamageAndSpellFor(true,this,procVictim,victimProcEffectAuraTypes,attType,procSpell, damage, damageSchoolMask);
+        pVictim->ProcDamageAndSpellFor(true,this,procVictim,victimProcCastAuraTypes,attType,procSpell, damage, damageSchoolMask);
     }
 }
 
-void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttackType attType, MeleeHitOutcome outcome, SpellEntry const *spellCasted, bool isTriggeredSpell)
+void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, SpellSchoolMask damageSchoolMask, WeaponAttackType attType, MeleeHitOutcome outcome, SpellEntry const *spellCasted, bool isTriggeredSpell)
 {
     if(!pVictim)
         return;
@@ -4432,7 +4433,7 @@ void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttac
         procVictim |= PROC_FLAG_TAKE_DAMAGE;
 
     if(procAttacker != PROC_FLAG_NONE || procVictim != PROC_FLAG_NONE)
-        ProcDamageAndSpell(pVictim, procAttacker, procVictim, damage, spellCasted, isTriggeredSpell, attType);
+        ProcDamageAndSpell(pVictim, procAttacker, procVictim, damage, damageSchoolMask, spellCasted, isTriggeredSpell, attType);
 }
 
 void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint32 effIndex, uint32 damage, Aura* triggeredByAura, SpellEntry const * procSpell, uint32 procFlag)
@@ -5640,7 +5641,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                         return;
 
                     // fall through
-                    break;                                          // normal cast
+                    break;                                  // normal cast
                 }
                 // Health Restore
                 case 33510:
@@ -5653,6 +5654,9 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     CastSpell(this, 39557, true, castItem, triggeredByAura);
                     return;
                 }
+                // Shaleskin
+                case 36576:
+                    return;                                 // nothing to do
                 // Aura of Wrath (Darkmoon Card: Wrath trinket bonus)
                 case 39442:
                 {
@@ -9651,7 +9655,7 @@ struct ProcTriggeredData
 
 typedef std::list< ProcTriggeredData > ProcTriggeredList;
 
-void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag, AuraTypeSet const& procAuraTypes, WeaponAttackType attType, SpellEntry const * procSpell, uint32 damage )
+void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag, AuraTypeSet const& procAuraTypes, WeaponAttackType attType, SpellEntry const * procSpell, uint32 damage, SpellSchoolMask damageSchoolMask )
 {
     for(AuraTypeSet::const_iterator aur = procAuraTypes.begin(); aur != procAuraTypes.end(); ++aur)
     {
@@ -9801,6 +9805,14 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                 {
                     sLog.outDebug("ProcDamageAndSpell: casting spell id %u (triggered by %s haste aura of spell %u)", i->spellInfo->Id,(isVictim?"a victim's":"an attacker's"),i->triggeredByAura->GetId());
                     HandleDummyAuraProc(pTarget, i->spellInfo, i->spellParam, damage, i->triggeredByAura, procSpell, procFlag);
+                    break;
+                }
+                case SPELL_AURA_MOD_DAMAGE_PERCENT_TAKEN:
+                {
+                    // nothing do, just charges counter
+                    // but count only in case appropriate school damage
+                    if(i->triggeredByAura->m_procCharges >=0 && !(i->triggeredByAura->GetModifier()->m_miscvalue & damageSchoolMask))
+                        i->triggeredByAura->m_procCharges += 1;
                     break;
                 }
                 default:
