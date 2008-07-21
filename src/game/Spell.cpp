@@ -809,7 +809,7 @@ void Spell::AddItemTarget(Item* pitem, uint32 effIndex)
     m_UniqueItemInfo.push_back(target);
 }
 
-void Spell::doTriggers(SpellMissInfo missInfo, uint32 damage, uint32 block, uint32 absorb, bool crit)
+void Spell::doTriggers(SpellMissInfo missInfo, uint32 damage, SpellSchoolMask damageSchoolMask, uint32 block, uint32 absorb, bool crit)
 {
     // Do triggers depenends from hit result (triggers on hit do in effects)
     // Set aura states depends from hit result
@@ -823,10 +823,10 @@ void Spell::doTriggers(SpellMissInfo missInfo, uint32 damage, uint32 block, uint
                 if(m_caster->GetTypeId()== TYPEID_PLAYER)
                     ((Player*)m_caster)->UpdateWeaponSkill(BASE_ATTACK);
 
-                m_caster->CastMeleeProcDamageAndSpell(unitTarget, 0, m_attackType, MELEE_HIT_MISS, m_spellInfo, m_IsTriggeredSpell);
+                m_caster->CastMeleeProcDamageAndSpell(unitTarget, 0, damageSchoolMask, m_attackType, MELEE_HIT_MISS, m_spellInfo, m_IsTriggeredSpell);
                 break;
             case SPELL_MISS_RESIST:
-                m_caster->ProcDamageAndSpell(unitTarget, PROC_FLAG_TARGET_RESISTS, PROC_FLAG_RESIST_SPELL, 0, m_spellInfo, m_IsTriggeredSpell);
+                m_caster->ProcDamageAndSpell(unitTarget, PROC_FLAG_TARGET_RESISTS, PROC_FLAG_RESIST_SPELL, 0, damageSchoolMask, m_spellInfo, m_IsTriggeredSpell);
                 break;
             case SPELL_MISS_DODGE:
                 if(unitTarget->GetTypeId() == TYPEID_PLAYER)
@@ -846,7 +846,7 @@ void Spell::doTriggers(SpellMissInfo missInfo, uint32 damage, uint32 block, uint
                     unitTarget->StartReactiveTimer( REACTIVE_DEFENSE );
                 }
 
-                m_caster->CastMeleeProcDamageAndSpell(unitTarget, 0, m_attackType, MELEE_HIT_DODGE, m_spellInfo, m_IsTriggeredSpell);
+                m_caster->CastMeleeProcDamageAndSpell(unitTarget, 0, damageSchoolMask, m_attackType, MELEE_HIT_DODGE, m_spellInfo, m_IsTriggeredSpell);
                 break;
             case SPELL_MISS_PARRY:
                 // Update victim defense ?
@@ -863,13 +863,13 @@ void Spell::doTriggers(SpellMissInfo missInfo, uint32 damage, uint32 block, uint
                     unitTarget->ModifyAuraState(AURA_STATE_DEFENSE, true);
                     unitTarget->StartReactiveTimer( REACTIVE_DEFENSE );
                 }
-                m_caster->CastMeleeProcDamageAndSpell(unitTarget, 0, m_attackType, MELEE_HIT_PARRY, m_spellInfo, m_IsTriggeredSpell);
+                m_caster->CastMeleeProcDamageAndSpell(unitTarget, 0, damageSchoolMask, m_attackType, MELEE_HIT_PARRY, m_spellInfo, m_IsTriggeredSpell);
                 break;
             case SPELL_MISS_BLOCK:
                 unitTarget->ModifyAuraState(AURA_STATE_DEFENSE, true);
                 unitTarget->StartReactiveTimer( REACTIVE_DEFENSE );
 
-                m_caster->CastMeleeProcDamageAndSpell(unitTarget, 0, m_attackType, MELEE_HIT_BLOCK, m_spellInfo, m_IsTriggeredSpell);
+                m_caster->CastMeleeProcDamageAndSpell(unitTarget, 0, damageSchoolMask, m_attackType, MELEE_HIT_BLOCK, m_spellInfo, m_IsTriggeredSpell);
                 break;
                 // Trigger from this events not supported
             case SPELL_MISS_EVADE:
@@ -2088,7 +2088,7 @@ void Spell::cast(bool skipCheck)
     // Pass cast spell event to handler (not send triggered by aura spells)
     if (m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE && m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_RANGED && !m_triggeredByAuraSpell)
     {
-        m_caster->ProcDamageAndSpell(m_targets.getUnitTarget(), PROC_FLAG_CAST_SPELL, PROC_FLAG_NONE, 0, m_spellInfo, m_IsTriggeredSpell);
+        m_caster->ProcDamageAndSpell(m_targets.getUnitTarget(), PROC_FLAG_CAST_SPELL, PROC_FLAG_NONE, 0, SPELL_SCHOOL_MASK_NONE, m_spellInfo, m_IsTriggeredSpell);
 
         // update pointers base at GUIDs to prevent access to non-existed already object
         UpdatePointers();                                   // pointers can be invalidate at triggered spell casting

@@ -799,8 +799,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *damage, CleanDamage *cleanDamage, bool *crit = false, bool isTriggeredSpell = false);
         void DoAttackDamage(Unit *pVictim, uint32 *damage, CleanDamage *cleanDamage, uint32 *blocked_amount, SpellSchoolMask damageSchoolMask, uint32 *hitInfo, VictimState *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted = NULL, bool isTriggeredSpell = false);
 
-        void CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttackType attType, MeleeHitOutcome outcome, SpellEntry const *spellCasted = NULL, bool isTriggeredSpell = false);
-        void ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVictim, uint32 damage = 0, SpellEntry const *procSpell = NULL, bool isTriggeredSpell = false, WeaponAttackType attType = BASE_ATTACK);
+        void CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, SpellSchoolMask damageSchoolMask, WeaponAttackType attType, MeleeHitOutcome outcome, SpellEntry const *spellCasted = NULL, bool isTriggeredSpell = false);
+        void ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVictim, uint32 damage = 0, SpellSchoolMask damageSchoolMask = SPELL_SCHOOL_MASK_NONE, SpellEntry const *procSpell = NULL, bool isTriggeredSpell = false, WeaponAttackType attType = BASE_ATTACK);
         void HandleEmoteCommand(uint32 anim_id);
         void AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType = BASE_ATTACK, bool extra = false );
 
@@ -1247,7 +1247,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SendAttackStop(Unit* victim);                  // only from AttackStop(Unit*)
         void SendAttackStart(Unit* pVictim);                // only from Unit::AttackStart(Unit*)
 
-        void ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag, AuraTypeSet const& procAuraTypes, WeaponAttackType attType, SpellEntry const * procSpell, uint32 damage );
+        void ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag, AuraTypeSet const& procAuraTypes, WeaponAttackType attType, SpellEntry const * procSpell, uint32 damage, SpellSchoolMask damageSchoolMask );
         void HandleDummyAuraProc(Unit *pVictim, SpellEntry const *spellProto, uint32 effIndex, uint32 damage, Aura* triggredByAura, SpellEntry const * procSpell, uint32 procFlag);
         void HandleProcTriggerSpell(Unit *pVictim,uint32 damage, Aura* triggredByAura, SpellEntry const *procSpell, uint32 procFlags,WeaponAttackType attType);
         uint32 m_state;                                     // Even derived shouldn't modify

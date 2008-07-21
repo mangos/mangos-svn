@@ -444,7 +444,7 @@ class Spell
         //******************************************
         // Spell trigger system
         //******************************************
-        void doTriggers(SpellMissInfo missInfo, uint32 damage=0, uint32 block=0, uint32 absorb=0, bool crit=false);
+        void doTriggers(SpellMissInfo missInfo, uint32 damage=0, SpellSchoolMask damageSchoolMask = SPELL_SCHOOL_MASK_NONE, uint32 block=0, uint32 absorb=0, bool crit=false);
 
         //*****************************************
         // Spell target subsystem
