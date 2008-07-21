@@ -19,6 +19,10 @@
 #ifndef AuctionHouse
 #define AuctionHouse
 
+#include "SharedDefines.h"
+
+#define MIN_AUCTION_TIME (12*HOUR)
+
 enum AuctionError
 {
     AUCTION_OK = 0,
