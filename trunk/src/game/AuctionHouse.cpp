@@ -217,6 +217,20 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
         return;
     }
 
+    // client send time in minutes, convert to common used sec time
+    etime *= MINUTE;
+
+    // client understand only 3 auction time
+    switch(etime)
+    {
+        case 1*MIN_AUCTION_TIME:
+        case 2*MIN_AUCTION_TIME:
+        case 4*MIN_AUCTION_TIME:
+            break;
+        default:
+            return;
+    }
+
     // remove fake death
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
@@ -268,6 +282,8 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
 
     pl->ModifyMoney( -int32(deposit) );
 
+    uint32 auction_time = uint32(etime * sWorld.getRate(RATE_AUCTION_TIME));
+
     AuctionEntry *AH = new AuctionEntry;
     AH->Id = objmgr.GenerateAuctionID();
     AH->auctioneer = GUID_LOPART(auctioneer);
@@ -278,12 +294,11 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     AH->bidder = 0;
     AH->bid = 0;
     AH->buyout = buyout;
-    time_t base = time(NULL);
-    AH->time = ((time_t)(etime * 60 * sWorld.getRate(RATE_AUCTION_TIME))) + base;
+    AH->time = time(NULL) + auction_time;
     AH->deposit = deposit;
     AH->location = location;
 
-    sLog.outDetail("selling item %u to auctioneer %u with initial bid %u with buyout %u and with time %u (in minutes) in location: %u", GUID_LOPART(item), GUID_LOPART(auctioneer), bid, buyout, etime, location);
+    sLog.outDetail("selling item %u to auctioneer %u with initial bid %u with buyout %u and with time %u (in sec) in location: %u", GUID_LOPART(item), GUID_LOPART(auctioneer), bid, buyout, auction_time, location);
     mAuctions->AddAuction(AH);
 
     objmgr.AddAItem(it);

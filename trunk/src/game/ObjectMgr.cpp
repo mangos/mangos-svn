@@ -227,12 +227,16 @@ uint32 ObjectMgr::GetAuctionCut(uint32 location, uint32 highBid)
 
 uint32 ObjectMgr::GetAuctionDeposit(uint32 location, uint32 time, Item *pItem)
 {
-    uint32 percentance;
+    float percentance;                                      // in 0..1
     if ( location == 7 && !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_TRADE))
-        percentance = 25;
+        percentance = 0.75f;
     else
-        percentance = 5;
-    return (uint32) ( ((percentance * sWorld.getRate(RATE_AUCTION_DEPOSIT) * pItem->GetProto()->SellPrice * pItem->GetCount() ) / 100 ) * (time / 120 ) );
+        percentance = 0.15f;
+
+
+    percentance *= sWorld.getRate(RATE_AUCTION_DEPOSIT);
+
+    return uint32( percentance * pItem->GetProto()->SellPrice * pItem->GetCount() * (time / MIN_AUCTION_TIME ) );
 }
 
 /// the sum of outbid is (1% from current bid)*5, if bid is very small, it is 1c
