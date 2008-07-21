@@ -719,7 +719,7 @@ void Map::Update(const uint32 &t_diff)
 {
     // Don't unload grids if it's battleground, since we may have manually added GOs,creatures, those doesn't load from DB at grid re-load !
     // This isn't really bother us, since as soon as we have instanced BG-s, the whole map unloads as the BG gets ended
-    if ((i_id == 489) || (i_id == 529))                     // WS, AB
+    if ( IsBattleArena() )
         return;
 
     for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end(); )
