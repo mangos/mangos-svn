@@ -741,7 +741,7 @@ void AreaAura::Update(uint32 diff)
         }
         else if( m_areaAuraType == AREA_AURA_PET || m_areaAuraType == AREA_AURA_OWNER )
         {
-            if( caster->GetGUID() != tmp_target->GetCharmerOrOwnerGUID() )
+            if( tmp_target->GetGUID() != caster->GetCharmerOrOwnerGUID() )
                 tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
         }
     }
