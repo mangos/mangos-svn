@@ -3588,8 +3588,7 @@ void Player::ResurrectPlayer(float restore_percent, bool updateToWorld, bool app
 
     for(int i =0; i < 3; ++i)
     {
-        Aura* Aur = GetAura(SPELL_ID_PASSIVE_RESURRECTION_SICKNESS,i);
-        if(Aur)
+        if(Aura* Aur = GetAura(SPELL_ID_PASSIVE_RESURRECTION_SICKNESS,i))
         {
             Aur->SetAuraDuration(delta*1000);
             Aur->UpdateAuraDuration();
@@ -17051,7 +17050,7 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
 
         if(member_with_max_level)
         {
-            xp = PvP || IsNoDamageXPArea(GetAreaId()) ? 0 : MaNGOS::XP::Gain(member_with_max_level, pVictim);
+            xp = PvP ? 0 : MaNGOS::XP::Gain(member_with_max_level, pVictim);
 
             // skip in check PvP case (for speed, not used)
             bool is_raid = PvP ? false : MapManager::Instance().GetBaseMap(GetMapId())->IsRaid() && pGroup->isRaidGroup();
@@ -17103,7 +17102,7 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
     }
     else                                                    // if (!pGroup)
     {
-        xp = PvP || IsNoDamageXPArea(GetAreaId()) ? 0 : MaNGOS::XP::Gain(this, pVictim);
+        xp = PvP ? 0 : MaNGOS::XP::Gain(this, pVictim);
 
         // honor can be in PvP and !PvP (racial leader) cases
         if(RewardHonor(pVictim,1))
