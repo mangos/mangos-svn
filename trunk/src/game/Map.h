@@ -215,6 +215,9 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         // NOTE: this duplicate of Instanceable(), but Instanceable() can be changed when BG also will be instanceable
         bool IsDungeon() const { return(i_mapEntry && ((i_mapEntry->map_type == MAP_INSTANCE) || (i_mapEntry->map_type == MAP_RAID))); }
         bool IsRaid() const { return(i_mapEntry && (i_mapEntry->map_type == MAP_RAID)); }
+        bool IsBattleArena() const { return(i_mapEntry && ((i_mapEntry->map_type == MAP_BATTLEGROUND) || (i_mapEntry->map_type == MAP_ARENA))); }
+        bool IsBattleGround() const { return(i_mapEntry && (i_mapEntry->map_type == MAP_BATTLEGROUND)); }
+        bool IsArena() const { return(i_mapEntry && (i_mapEntry->map_type == MAP_ARENA)); }
         bool IsMountAllowed() const
         {
             return !IsDungeon() || i_mapEntry && (
