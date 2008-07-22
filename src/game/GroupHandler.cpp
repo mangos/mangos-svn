@@ -27,6 +27,7 @@
 #include "Player.h"
 #include "Group.h"
 #include "ObjectAccessor.h"
+#include "MapManager.h"
 #include "SocialMgr.h"
 
 /* differeces from off:
@@ -86,8 +87,18 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
         SendPartyResult(PARTY_OP_INVITE, membername, PARTY_RESULT_TARGET_UNFRIENDLY);
         return;
     }
-
+    if(GetPlayer()->GetInstanceId() != 0 && player->GetInstanceId() != 0 && GetPlayer()->GetInstanceId() != player->GetInstanceId() && GetPlayer()->GetMapId() == player->GetMapId())
+    {
+        SendPartyResult(PARTY_OP_INVITE, membername, PARTY_RESULT_NOT_IN_YOUR_INSTANCE);
+        return;
+    }
     // just ignore us
+    if(player->GetInstanceId() != 0 && player->GetDifficulty() != GetPlayer()->GetDifficulty())
+    {
+        SendPartyResult(PARTY_OP_INVITE, membername, PARTY_RESULT_TARGET_IGNORE_YOU);
+        return;
+    }
+
     if(player->GetSocial()->HasIgnore(GetPlayer()->GetGUIDLow()))
     {
         SendPartyResult(PARTY_OP_INVITE, membername, PARTY_RESULT_TARGET_IGNORE_YOU);
@@ -183,6 +194,13 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & /*recv_data*/ )
         SendPartyResult(PARTY_OP_INVITE, "", PARTY_RESULT_INVITE_RESTRICTED);
         return;
     }
+
+    // if the leader has solo saves, convert them to group saves
+    if(group->GetMembersCount() == 1) leader->ConvertInstancesToGroup();
+    
+    // reset the acceptee's solo instances, unless he is currently in one of them
+    // including raid/heroic instances that they are not permanently bound to!
+    GetPlayer()->ResetInstances(INSTANCE_RESET_GROUP_JOIN);
 
     // everything's fine, do it
     if(!group->AddMember(GetPlayer()->GetGUID(), GetPlayer()->GetName()))
@@ -865,21 +883,8 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
 
 /*!*/void WorldSession::HandleRequestRaidInfoOpcode( WorldPacket & /*recv_data*/ )
 {
-    //sLog.outDebug("Received opcode CMSG_REQUEST_RAID_INFO");
-
-    WorldPacket data(SMSG_RAID_INSTANCE_INFO, 4);
-    data << (uint32)0;                                      // count (max is 10)
-
-    /*data << (uint32)count;
-    for(int i=0; i<count; i++)
-    {
-        data << (uint32)mapid;
-        data << (uint32)time_left_in_seconds; // time to reset
-        data << (uint32)instanceid;
-        data << (uint32)0;      // unknown
-    }*/
-
-    GetPlayer()->GetSession()->SendPacket(&data);
+    // every time the player checks the character screen
+    _player->SendRaidInfo();
 }
 
 /*void WorldSession::HandleGroupCancelOpcode( WorldPacket & recv_data )

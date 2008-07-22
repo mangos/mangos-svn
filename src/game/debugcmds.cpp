@@ -29,6 +29,8 @@
 #include "ObjectAccessor.h"
 #include "GossipDef.h"
 #include "Language.h"
+#include "MapManager.h"
+#include "InstanceSaveMgr.h"
 
 bool ChatHandler::HandleDebugInArcCommand(const char* /*args*/)
 {
@@ -499,5 +501,63 @@ bool ChatHandler::HandleGetItemState(const char* args)
             SendSysMessage("All OK!");
     }
 
+    return true;
+}
+
+std::string GetTimeString(uint32 time)
+{
+    uint16 days = time / DAY, hours = (time % DAY) / HOUR, minute = (time % HOUR) / MINUTE;
+    std::ostringstream ss;
+    if(days) ss << days << "d ";
+    if(hours) ss << hours << "h ";
+    ss << minute << "m";
+    return ss.str();
+}
+
+bool ChatHandler::HandleInstanceCommand(const char* args)
+{
+    if(!args)
+        return true;
+
+    std::string cmd = args;
+    if(cmd == "stats")
+    {
+        PSendSysMessage("instances loaded: %d", MapManager::Instance().GetNumInstances());
+        PSendSysMessage("players in instances: %d", MapManager::Instance().GetNumPlayersInInstances());
+        PSendSysMessage("instance saves: %d", sInstanceSaveManager.GetNumInstanceSaves());
+        PSendSysMessage("players bound: %d", sInstanceSaveManager.GetNumBoundPlayersTotal());
+        PSendSysMessage("groups bound: %d", sInstanceSaveManager.GetNumBoundGroupsTotal());
+    }
+    else if(cmd == "unbindall")
+    {
+        Player* player = getSelectedPlayer();
+        if (!player) player = m_session->GetPlayer();
+        for(uint8 i = 0; i < TOTAL_DIFFICULTIES; i++)
+        {
+            Player::BoundInstancesMap &binds = player->GetBoundInstances(i);
+            for(Player::BoundInstancesMap::iterator itr = binds.begin(); itr != binds.end();)
+            {
+                if(itr->first != player->GetMapId())
+                    player->UnbindInstance(itr, i);
+                else
+                    ++itr;
+            }
+        }
+    }
+    else if(cmd == "listbinds")
+    {
+        Player* player = getSelectedPlayer();
+        if (!player) player = m_session->GetPlayer();
+        for(uint8 i = 0; i < TOTAL_DIFFICULTIES; i++)
+        {
+            Player::BoundInstancesMap &binds = player->GetBoundInstances(i);
+            for(Player::BoundInstancesMap::iterator itr = binds.begin(); itr != binds.end(); ++itr)
+            {
+                InstanceSave *save = itr->second.save;
+                std::string timeleft = GetTimeString(save->GetResetTime() - time(NULL));
+                PSendSysMessage("map: %d inst: %d perm: %s diff: %s canReset: %s TTR: %s", itr->first, save->GetInstanceId(), itr->second.perm ? "yes" : "no",  save->GetDifficulty() == DIFFICULTY_NORMAL ? "normal" : "heroic", save->CanReset() ? "yes" : "no", timeleft.c_str());
+            }
+        }
+    }
     return true;
 }

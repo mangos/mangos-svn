@@ -909,7 +909,7 @@ void BattleGround::SpawnBGObject(uint32 type, uint32 respawntime)
 
 Creature* BattleGround::AddCreature(uint32 entry, uint32 type, uint32 teamval, float x, float y, float z, float o)
 {
-    Map * map = MapManager::Instance().GetMap(GetMapId(), 0);
+    Map * map = MapManager::Instance().FindMap(GetMapId(), 0);
     if(!map) return NULL;
 
     Creature* pCreature = new Creature;

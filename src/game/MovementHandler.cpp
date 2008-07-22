@@ -28,25 +28,57 @@
 #include "Transports.h"
 #include "BattleGround.h"
 #include "WaypointMovementGenerator.h"
+#include "InstanceSaveMgr.h"
 
 void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug( "WORLD: got MSG_MOVE_WORLDPORT_ACK." );
 
-    MapEntry const* mEntry = sMapStore.LookupEntry(GetPlayer()->GetMapId());
-    if(!mEntry || !MaNGOS::IsValidMapCoord(GetPlayer()->GetPositionX(),GetPlayer()->GetPositionY(),GetPlayer()->GetPositionZ(),GetPlayer()->GetOrientation()))
+    // get the teleport destination
+    WorldLocation &loc = GetPlayer()->GetTeleportDest();
+    // get the destination map entry, not the current one, this will fix homebind and reset greeting
+    // also possible errors in the coordinate validity check
+    MapEntry const* mEntry = sMapStore.LookupEntry(loc.mapid);
+    InstanceTemplate const* mInstance = objmgr.GetInstanceTemplate(loc.mapid);
+    if(!mEntry || !MaNGOS::IsValidMapCoord(loc.x,loc.y,loc.z,loc.o))
     {
         LogoutPlayer(false);
         return;
     }
 
-    // reset instance validity
-    GetPlayer()->m_InstanceValid = true;
+    // reset instance validity, except if going to an instance inside an instance
+    if(GetPlayer()->m_InstanceValid == false && !mInstance)
+        GetPlayer()->m_InstanceValid = true;
 
     GetPlayer()->SetSemaphoreTeleport(false);
 
+    // relocate the player to the teleport destination
+    GetPlayer()->SetMapId(loc.mapid);
+    GetPlayer()->Relocate(loc.x, loc.y, loc.z, loc.o);
+
+    // since the MapId is set before the GetInstance call, the InstanceId must be set to 0
+    // to let GetInstance() determine the proper InstanceId based on the player's binds
+    GetPlayer()->SetInstanceId(0);
+
+    // check this before Map::Add(player), because that will create the instance save!
+    bool reset_notify = (GetPlayer()->GetBoundInstance(GetPlayer()->GetMapId(), GetPlayer()->GetDifficulty()) == NULL);
+
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
-    MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
+    // the CanEnter checks are done in TeleporTo but conditions may change
+    // while the player is in transit, for example the map may get full
+    if(!MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer()))
+    {
+        sLog.outDebug("WORLD: teleport of player %s (%d) to location %d,%f,%f,%f,%f failed", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), loc.mapid, loc.x, loc.y, loc.z, loc.o);
+        // teleport the player home
+        GetPlayer()->SetDontMove(false);
+        if(!GetPlayer()->TeleportTo(GetPlayer()->m_homebindMapId, GetPlayer()->m_homebindX, GetPlayer()->m_homebindY, GetPlayer()->m_homebindZ, GetPlayer()->GetOrientation()))
+        {
+            // if all else fails .. logot
+            sLog.outError("WORLD: failed to teleport player %s (%d) to homebind location %d,%f,%f,%f,%f!", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), GetPlayer()->m_homebindMapId, GetPlayer()->m_homebindX, GetPlayer()->m_homebindY, GetPlayer()->m_homebindZ, GetPlayer()->GetOrientation());
+            LogoutPlayer(false);
+        }
+        return;
+    }
     GetPlayer()->SendInitialPacketsAfterAddToMap();
 
     // flight fast teleport case
@@ -78,6 +110,15 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
         }
     }
 
+    if(mEntry->map_type == MAP_RAID && mInstance)
+    {
+        if(reset_notify)
+        {
+            uint32 timeleft = sInstanceSaveManager.GetResetTimeFor(GetPlayer()->GetMapId()) - time(NULL);
+            GetPlayer()->SendInstanceResetWarning(GetPlayer()->GetMapId(), timeleft); // greeting at the entrance of the resort raid instance
+        }
+    }
+
     // mount allow check
     if(!_player->GetBaseMap()->IsMountAllowed())
         _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
@@ -93,6 +134,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
                 if(!bg->GetBgRaid(_player->GetTeam()))      // first player joined
                 {
                     Group *group = new Group;
+                    group->SetDifficulty(DIFFICULTY_NORMAL);
                     bg->SetBgRaid(_player->GetTeam(), group);
                     group->ConvertToRaid();
                     group->AddMember(_player->GetGUID(), _player->GetName());

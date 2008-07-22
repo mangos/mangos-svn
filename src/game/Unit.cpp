@@ -39,6 +39,7 @@
 #include "Util.h"
 #include "Totem.h"
 #include "BattleGround.h"
+#include "InstanceSaveMgr.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "Path.h"
@@ -694,15 +695,38 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         else                                                // creature died
         {
             DEBUG_LOG("DealDamageNotPlayer");
+            Creature *cVictim = (Creature*)pVictim;
 
-            if(!((Creature*)pVictim)->isPet())
+            if(!cVictim->isPet())
             {
-                pVictim->DeleteThreatList();
-                pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+                cVictim->DeleteThreatList();
+                cVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             }
             // Call creature just died function
-            if (((Creature*)pVictim)->AI())
-                ((Creature*)pVictim)->AI()->JustDied(this);
+            if (cVictim->AI())
+                cVictim->AI()->JustDied(this);
+
+            // Dungeon specific stuff
+            if(cVictim->GetInstanceId())
+            {
+                Map *m = cVictim->GetMap();
+                if(m->IsDungeon())
+                {
+                    if(m->IsRaid() || m->IsHeroic())
+                    {
+                        if(cVictim->isWorldBoss() || (cVictim->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND))
+                            ((InstanceMap *)m)->PermBindAllPlayers();
+                    }
+                    else
+                    {
+                        // the reset time is set but not added to the scheduler
+                        // until the players leave the instance
+                        time_t resettime = cVictim->GetRespawnTimeEx() + 2 * HOUR;
+                        if(InstanceSave *save = sInstanceSaveManager.GetInstanceSave(cVictim->GetInstanceId()))
+                            if(save->GetResetTime() < resettime) save->SetResetTime(resettime);
+                    }
+                }
+            }
         }
 
         // last damage from non duel opponent or opponent controlled creature
@@ -8084,7 +8108,10 @@ void Unit::Unmount()
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
     RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
 
-    if(GetTypeId() == TYPEID_PLAYER && ((Player*)this)->GetOldPetNumber() && isAlive())
+    // only resummon old pet if the player is already added to a map
+    // this prevents adding a pet to a not created map which would otherwise cause a crash
+    // (it could probably happen when logging in after a previous crash)
+    if(GetTypeId() == TYPEID_PLAYER && IsInWorld() && ((Player*)this)->GetOldPetNumber() && isAlive())
     {
         Pet* NewPet = new Pet;
         if(!NewPet->LoadPetFromDB(this, 0, ((Player*)this)->GetOldPetNumber(), true))

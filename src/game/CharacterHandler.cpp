@@ -57,9 +57,9 @@ bool LoginQueryHolder::Initialize()
 
     // NOTE: all fields in `characters` must be read to prevent lost character data at next save in case wrong DB structure.
     // !!! NOTE: including unused `zone`,`online`
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADFROM,            "SELECT guid,account,data,name,race,class,position_x,position_y,position_z,map,orientation,taximask,cinematic,totaltime,leveltime,rest_bonus,logout_time,is_logout_resting,resettalents_cost,resettalents_time,trans_x,trans_y,trans_z,trans_o, transguid,gmstate,stable_slots,at_login,zone,online,death_expire_time,taxi_path FROM characters WHERE guid = '%u'", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGROUP,           "SELECT leaderGuid FROM group_member WHERE memberGuid='%u'", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES,  "SELECT map,instance,leader FROM character_instance WHERE guid = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADFROM,            "SELECT guid, account, data, name, race, class, position_x, position_y, position_z, map, orientation, taximask, cinematic, totaltime, leveltime, rest_bonus, logout_time, is_logout_resting, resettalents_cost, resettalents_time, trans_x, trans_y, trans_z, trans_o, transguid, gmstate, stable_slots, at_login, zone, online, death_expire_time, taxi_path, dungeon_difficulty FROM characters WHERE guid = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGROUP,           "SELECT leaderGuid FROM group_member WHERE memberGuid ='%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES,  "SELECT id, permanent, map, difficulty, resettime FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADAURAS,           "SELECT caster_guid,spell,effect_index,amount,maxduration,remaintime,remaincharges FROM character_aura WHERE guid = '%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSPELLS,          "SELECT spell,slot,active FROM character_spell WHERE guid = '%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADQUESTSTATUS,     "SELECT quest,status,rewarded,explored,timer,mobcount1,mobcount2,mobcount3,mobcount4,itemcount1,itemcount2,itemcount3,itemcount4 FROM character_queststatus WHERE guid = '%u'", GUID_LOPART(m_guid));
@@ -415,7 +415,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
     SetPlayer(pCurrChar);
 
-    pCurrChar->SendDungeonDifficulty();
+    pCurrChar->SendDungeonDifficulty(false);
 
     WorldPacket data( SMSG_LOGIN_VERIFY_WORLD, 20 );
     data << pCurrChar->GetMapId();
@@ -536,7 +536,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         pCurrChar->SetRank(0);
     }
 
-    if (!MapManager::Instance().GetMap(pCurrChar->GetMapId(), pCurrChar)->AddInstanced(pCurrChar))
+    if (!MapManager::Instance().GetMap(pCurrChar->GetMapId(), pCurrChar)->Add(pCurrChar))
     {
         AreaTrigger const* at = objmgr.GetGoBackTrigger(pCurrChar->GetMapId());
         if(at)
@@ -545,7 +545,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
             pCurrChar->TeleportTo(pCurrChar->m_homebindMapId, pCurrChar->m_homebindX, pCurrChar->m_homebindY, pCurrChar->m_homebindZ, pCurrChar->GetOrientation());
     }
 
-    MapManager::Instance().GetMap(pCurrChar->GetMapId(), pCurrChar)->Add(pCurrChar);
     ObjectAccessor::Instance().AddObject(pCurrChar);
     //sLog.outDebug("Player %s added to Map.",pCurrChar->GetName());
 

@@ -293,7 +293,8 @@ CreatureAI* GetAI(Creature *_Creature )
 MANGOS_DLL_EXPORT
 InstanceData* CreateInstanceData(Map *map)
 {
-    std::string name = map->GetScript();
+    if(!map->IsDungeon()) return NULL;
+    std::string name = ((InstanceMap*)map)->GetScript();
     if(!name.empty())
         for(int i=0;i<num_inst_scripts;i++)
             if(m_instance_scripts[i] && m_instance_scripts[i]->name == name)

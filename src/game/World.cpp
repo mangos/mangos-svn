@@ -53,6 +53,7 @@
 #include "WorldSocket.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
+#include "InstanceSaveMgr.h"
 
 INSTANTIATE_SINGLETON_1( World );
 
@@ -375,6 +376,7 @@ void World::SetInitialWorldSettings()
     rate_values[RATE_HONOR] = sConfig.GetFloatDefault("Rate.Honor",1);
     rate_values[RATE_MINING_AMOUNT] = sConfig.GetFloatDefault("Rate.Mining.Amount",1);
     rate_values[RATE_MINING_NEXT]   = sConfig.GetFloatDefault("Rate.Mining.Next",1);
+    rate_values[RATE_INSTANCE_RESET_TIME] = sConfig.GetFloatDefault("Rate.InstanceResetTime",1);
     rate_values[RATE_TALENT] = sConfig.GetFloatDefault("Rate.Talent",1);
     if(rate_values[RATE_TALENT] < 0)
     {
@@ -488,6 +490,8 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_INSTANCE_IGNORE_RAID]  = sConfig.GetBoolDefault("Instance.IgnoreRaid", false);
     m_configs[CONFIG_BATTLEGROUND_CAST_DESERTER] = sConfig.GetBoolDefault("Battleground.CastDeserter", true);
     m_configs[CONFIG_CAST_UNSTUCK] = sConfig.GetBoolDefault("CastUnstuck", true);
+    m_configs[CONFIG_INSTANCE_RESET_TIME_HOUR]  = sConfig.GetIntDefault("Instance.ResetTimeHour", 4);
+    m_configs[CONFIG_INSTANCE_UNLOAD_DELAY] = sConfig.GetIntDefault("Instance.UnloadDelay", 1800000);
 
     m_configs[CONFIG_MAX_PRIMARY_TRADE_SKILL] = sConfig.GetIntDefault("MaxPrimaryTradeSkill", 2);
     m_configs[CONFIG_MIN_PETITION_SIGNS] = sConfig.GetIntDefault("MinPetitionSigns", 9);
@@ -706,6 +710,9 @@ void World::SetInitialWorldSettings()
     LoadDBCStores(m_dataPath);
     DetectDBCLang();
 
+    sLog.outString( "Loading InstanceTemplate" );
+    objmgr.LoadInstanceTemplate();
+
     sLog.outString( "Loading SkillLineAbilityMultiMap Data..." );
     spellmgr.LoadSkillLineAbilityMap();
 
@@ -874,9 +881,6 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading GameObject for quests..." );
     objmgr.LoadGameObjectForQuests();
-
-    sLog.outString( "Loading InstanceTemplate" );
-    objmgr.LoadInstanceTemplate();
 
     sLog.outString( "Loading BattleMasters..." );
     objmgr.LoadBattleMastersEntry();
@@ -1145,6 +1149,9 @@ void World::Update(time_t diff)
     /// </ul>
     ///- Move all creatures with "delayed move" and remove and delete all objects with "delayed remove"
     ObjectAccessor::Instance().DoDelayedMovesAndRemoves();
+
+    // update the instance reset times
+    sInstanceSaveManager.Update();
 
     // And last, but not least handle the issued cli commands
     ProcessCliCommands();

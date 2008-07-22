@@ -37,9 +37,12 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
     public:
 
         Map* GetMap(uint32, const WorldObject* obj);
+        Map* FindMap(uint32 mapid) { return _findMap(mapid); }
+        Map* FindMap(uint32 mapid, uint32 instanceId);
 
         // only const version for outer users
         Map const* GetBaseMap(uint32 id) const { return const_cast<MapManager*>(this)->_GetBaseMap(id); }
+        void DeleteInstance(uint32 mapid, uint32 instanceId, uint8 mode);
 
         inline uint16 GetAreaFlag(uint32 mapid, float x, float y) const
         {
@@ -104,6 +107,10 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         void RemoveBonesFromMap(uint32 mapid, uint64 guid, float x, float y);
         inline uint32 GenerateInstanceId() { return ++i_MaxInstanceId; }
         void InitMaxInstanceId();
+
+        /* statistics */
+        uint32 GetNumInstances();
+        uint32 GetNumPlayersInInstances();
 
     private:
         // debugging code, should be deleted some day
