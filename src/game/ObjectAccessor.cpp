@@ -515,43 +515,44 @@ ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
     RemoveCorpse(corpse);
 
     // remove resurrectble corpse from grid object registry (loaded state checked into call)
-    MapManager::Instance().GetMap(corpse->GetMapId(), corpse)->Remove(corpse,false);
+    // do not load the map if it's not loaded
+    Map *map = MapManager::Instance().GetMap(corpse->GetMapId(), corpse);
+    if(map) map->Remove(corpse,false);
 
     // remove corpse from DB
     corpse->DeleteFromDB();
 
-    // Create bones, don't change Corpse
-    Corpse *bones = new Corpse;
-    bones->Create(corpse->GetGUIDLow());
-
-    for (int i = 3; i < CORPSE_END; i++)                    // don't overwrite guid and object type
-        bones->SetUInt32Value(i, corpse->GetUInt32Value(i));
-
-    bones->SetGrid(corpse->GetGrid());
-    // bones->m_time = m_time;                              // don't overwrite time
-    // bones->m_inWorld = m_inWorld;                        // don't overwrite world state
-    // bones->m_type = m_type;                              // don't overwrite type
-    bones->Relocate(corpse->GetPositionX(), corpse->GetPositionY(), corpse->GetPositionZ(), corpse->GetOrientation());
-    bones->SetMapId(corpse->GetMapId());
-    bones->SetInstanceId(corpse->GetInstanceId());
-
-    bones->SetUInt32Value(CORPSE_FIELD_FLAGS, 0x05);
-    bones->SetUInt64Value(CORPSE_FIELD_OWNER, 0);
-
-    for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
+    Corpse *bones = NULL;
+    // create the bones only if the map and the grid is loaded at the corpse's location
+    if(map && !map->IsRemovalGrid(corpse->GetPositionX(), corpse->GetPositionY()))
     {
-        if(corpse->GetUInt32Value(CORPSE_FIELD_ITEM + i))
-            bones->SetUInt32Value(CORPSE_FIELD_ITEM + i, 0);
-    }
+        // Create bones, don't change Corpse
+        Corpse *bones = new Corpse;
+        bones->Create(corpse->GetGUIDLow());
 
-    // add bones to DB
-    bones->SaveToDB();
+        for (int i = 3; i < CORPSE_END; i++)                    // don't overwrite guid and object type
+            bones->SetUInt32Value(i, corpse->GetUInt32Value(i));
 
-    Map* map = MapManager::Instance().GetMap(bones->GetMapId(), bones);
+        bones->SetGrid(corpse->GetGrid());
+        // bones->m_time = m_time;                              // don't overwrite time
+        // bones->m_inWorld = m_inWorld;                        // don't overwrite world state
+        // bones->m_type = m_type;                              // don't overwrite type
+        bones->Relocate(corpse->GetPositionX(), corpse->GetPositionY(), corpse->GetPositionZ(), corpse->GetOrientation());
+        bones->SetMapId(corpse->GetMapId());
+        bones->SetInstanceId(corpse->GetInstanceId());
 
-    // add bones in grid store if grid loaded where corpse placed
-    if(!map->IsRemovalGrid(bones->GetPositionX(),bones->GetPositionY()))
+        bones->SetUInt32Value(CORPSE_FIELD_FLAGS, 0x05);
+        bones->SetUInt64Value(CORPSE_FIELD_OWNER, 0);
+
+        for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
+        {
+            if(corpse->GetUInt32Value(CORPSE_FIELD_ITEM + i))
+                bones->SetUInt32Value(CORPSE_FIELD_ITEM + i, 0);
+        }
+
+        // add bones in grid store if grid loaded where corpse placed
         map->Add(bones);
+    }
 
     // all references to the corpse should be removed at this point
     delete corpse;
@@ -569,8 +570,11 @@ ObjectAccessor::Update(uint32 diff)
         HashMapHolder<Player>::MapType& playerMap = HashMapHolder<Player>::GetContainer();
         for(HashMapHolder<Player>::MapType::iterator iter = playerMap.begin(); iter != playerMap.end(); ++iter)
         {
-            if(iter->second->IsInWorld()) iter->second->Update(diff);
-            creature_locations.insert( CreatureLocationHolderType::value_type(iter->second->GetMapId(), iter->second) );
+            if(iter->second->IsInWorld())
+            {
+                iter->second->Update(diff);
+                creature_locations.insert( CreatureLocationHolderType::value_type(iter->second->GetMapId(), iter->second) );
+            }
         }
 
         Map *map;

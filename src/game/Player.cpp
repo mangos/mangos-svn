@@ -1406,7 +1406,7 @@ uint8 Player::chatTag()
         return 0;
 }
 
-void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options)
+bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options)
 {
     // preparing unsummon pet if lost (we must get pet before teleportation or will not find it later)
     Pet* pet = GetPet();
@@ -1415,11 +1415,11 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
     // this map not exist in client
     if(!mEntry)
-        return;
+        return false;
 
     // don't let enter battlegrounds without assigned battleground id (for example through areatrigger)...
     if(!InBattleGround() && mEntry->map_type == MAP_BATTLEGROUND && !GetSession()->GetSecurity())
-        return;
+        return false;
 
     bool tbc = GetSession()->IsTBC() && sWorld.getConfig(CONFIG_EXPANSION) > 0;
 
@@ -1433,7 +1433,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
         SendTransferAborted(mapid, TRANSFER_ABORT_INSUF_EXPAN_LVL1);
 
-        return;                                             // normal client can't teleport to this map...
+        return false;                                       // normal client can't teleport to this map...
     }
     else if(tbc)                                            // can teleport to any existing map
     {
@@ -1540,42 +1540,16 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     }
     else
     {
-        CombatStop();
-
-        if(!(options & TELE_TO_SPELL))                      // not attempt interrupt teleportation spell at caster teleport
-            if(IsNonMeleeSpellCasted(true))
-                InterruptNonMeleeSpells(true);
-
         // far teleport to another map
         Map* oldmap = MapManager::Instance().GetMap(GetMapId(), this);
-
-        if (!(options & TELE_TO_NOT_UNSUMMON_PET) && pet)
-        {
-            //leaving map -> delete pet right away (doing this later will cause problems)
-            if(pet->isControlled() && !pet->isTemporarySummoned())
-                m_oldpetnumber = pet->GetCharmInfo()->GetPetNumber();
-            else
-                m_oldpetnumber = 0;
-
-            RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
-        }
+        // check if we can enter before stopping combat / removing pet / totems / interrupting spells
 
         // Check enter rights before map getting to avoid creating instance copy for player
         // this check not dependent from map instance copy and same for all instance copies of selected map
         if (!MapManager::Instance().CanPlayerEnter(mapid, this))
         {
             SetSemaphoreTeleport(false);
-            return;
-        }
-
-        // remove player from battleground on far teleport (when changing maps)
-        if(BattleGround const* bg = GetBattleGround())
-        {
-            // Note: at battleground join battleground id set before teleport 
-            // and we already will found "current" battleground
-            // just need check that this is targeted map or leave
-            if(bg->GetMapId() != mapid)
-                LeaveBattleground(false);                   // don't teleport to entry point
+            return false;
         }
 
         // now we must check if we are going to be homebind after teleport, if it is so,
@@ -1595,6 +1569,45 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
         if (map &&  map->AddInstanced(this))
         {
+            CombatStop();
+
+            // remove player from battleground on far teleport (when changing maps)
+            if(BattleGround const* bg = GetBattleGround())
+            {
+                // Note: at battleground join battleground id set before teleport 
+                // and we already will found "current" battleground
+                // just need check that this is targeted map or leave
+                if(bg->GetMapId() != mapid)
+                    LeaveBattleground(false);                   // don't teleport to entry point
+            }
+
+            // remove pet on map change
+            if (pet)
+            {
+                //leaving map -> delete pet right away (doing this later will cause problems)
+                if(pet->isControlled() && !pet->isTemporarySummoned())
+                    m_oldpetnumber = pet->GetCharmInfo()->GetPetNumber();
+                else
+                    m_oldpetnumber = 0;
+
+                RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
+            }
+
+            // remove charmed creatures
+            Uncharm();
+
+            // unsummon totems on map change
+            UnsummonAllTotems();
+
+            // remove all dyn objects
+            RemoveAllDynObjects();
+
+            // stop spellcasting
+            // not attempt interrupt teleportation spell at caster teleport
+            if(!(options & TELE_TO_SPELL))
+                if(IsNonMeleeSpellCasted(true))
+                    InterruptNonMeleeSpells(true);
+
             // send transfer packets
             WorldPacket data(SMSG_TRANSFER_PENDING, (4+4+4));
             data << uint32(mapid);
@@ -1649,7 +1662,10 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             // code for finish transfer to new map called in WorldSession::HandleMoveWorldportAckOpcode at client packet
         }
+        else
+            return false;
     }
+    return true;
 }
 
 void Player::AddToWorld()
@@ -16440,12 +16456,12 @@ void Player::SendInitialPacketsBeforeAddToMap()
     data << xmitTime;
     data << (float)0.01666667f;                             // game speed
     GetSession()->SendPacket( &data );
-
-    CastSpell(this, 836, true);                             // LOGINEFFECT
 }
 
 void Player::SendInitialPacketsAfterAddToMap()
 {
+    CastSpell(this, 836, true);                             // LOGINEFFECT
+
     // set some aura effects that send packet to player client after add player to map
     // SendMessageToSet not send it to player not it map, only for aura that not changed anything at re-apply
     // same auras state lost at far teleport, send it one more time in this case also

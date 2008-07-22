@@ -92,6 +92,19 @@ class InstanceData;
 
 typedef HM_NAMESPACE::hash_map<Player*, UpdateData> UpdateDataMapType;
 
+struct WorldLocation
+{
+    uint32 mapid;
+    float x;
+    float y;
+    float z;
+    float o;
+    explicit WorldLocation(uint32 mapid = 0, float x = 0, float y = 0, float z = 0, float o = 0)
+        : mapid(mapid), x(x), y(y), z(z), o(o) {}
+    WorldLocation(WorldLocation const &loc)
+        : mapid(loc.mapid), x(loc.x), y(loc.y), z(loc.z), o(loc.o) {}
+};
+
 class MANGOS_DLL_SPEC Object
 {
     public:
