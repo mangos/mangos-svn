@@ -1,6 +1,6 @@
-MaNGOS 0.11   (??? ??? 2008) http://www.mangosproject.org/trac/milestone/0.11
+MaNGOS 0.12   (??? ??? 2008) http://www.mangosproject.org/trac/milestone/0.12
 
- MaNGOS 0.11 - Codename "???" - adds further improvements to the
+ MaNGOS 0.12 - Codename "???" - adds further improvements to the
  server core as well as to the majority of game classes and the game content
  database.
 
@@ -11,6 +11,82 @@ MaNGOS 0.11   (??? ??? 2008) http://www.mangosproject.org/trac/milestone/0.11
  ==== Statistics ====
  * Fixed Bugs: ???
  * Total number of changes: ???
+
+ The complete list of closed tickets can be found here:
+   http://www.mangosproject.org/trac/query?status=closed&milestone=0.12
+
+MaNGOS 0.11   (Jul 22 2008) http://www.mangosproject.org/trac/milestone/0.11
+
+ MaNGOS 0.11 - adds further improvements to the
+ server core as well as to the majority of game classes and the game content
+ database.
+
+ ==== Game Features ====
+
+ * Added: Support for show possible blocked damage, armor penetration, negative stats and other data in client.
+ * Added: Support for show aura charges in client.
+ * Added: Support for spell casting delay at damage dependence from casting partly interrupts amount, apply interrupts in spell direct damage case also.
+ * Added: Support for form requirement check for item/itemset casts at equip. Correctly cast at equip and cast/remove at form switch.
+ * Added: Support for correct speed bonus stacking.
+ * Added: Support for instant honor updating.
+ * Added: Support for cap experience received from high level creatures.
+ * Added: Support mining/herbalism mode for skinning of special creatures.
+ * Added: Support for more battleground types, many improvements in battlegrounds work.
+ * Added: Support for quests work with player title rewards, check for shareable quests base at quest flags.
+ * Added: Support for quest rewarding with mail send after specific delay with possible items sent.
+ * Added: Support for boss +3 target dependent level for attack rolls and chances.
+ * Added: Support for dodge chance calculations depends from agility and level (use dbc based values) instead wrong hardcoded values.
+ * Added: Support for defense/weapon skills maxed in PvP fight.
+ * Added: Support for bilinear interpolation use for height calculation between existed map point data for better ground height selection for point.
+ * Added: Support for corpse reclaim delay dependence from character death count in last period.
+ * Added: Support for creatures movement flags storing in DB and setup from scripts, also store extra flags to mark creatures that can't parry/block/counterattack or not provide xp at kill.
+ * Added: Support for offhand expertize.
+ * Added: Support for generation of pet passive auras by DBC data.
+ * Improved: Re-Implemented group/friend/enemy/pet area auras.
+ * Improved: Finished fill spell_affect DB table allow have related spells correct working. Now only required update table at client switch.
+ * Improved: Allow DoTs/HoTs ticks from dead caster if its not required caster alive state.
+ * Improved: Better spell targeting selection code.
+ * Improved: Removed outdated honor diminishing return support.
+ * Improved: Fixed well known unexpected sit at stun bug.
+ * Improved: More correct show and work with faction reputation.
+ * Improved: Finish update to expected level dependent mana/health stats data for player's classes.
+ * Improved: Better creature corpse despawn time selection. Corpse instant despawn after skinning.
+ * Improved: Better check in front spell target requirement.
+ * Improved: Show parry/dodge/block/crit calculation in client for same level creature enemy.
+ * Improved: Correctly show item random property in all cases, including random property with suffix factor, in inspect and in equipped state at other player.
+ * Improved: Use correct way to check binding items and check enchants apply in trade slot.
+ * Improved: Rewritten mana regen calculation, also implement creature in combat mana regeneration delay.
+ * Improved: Fixed long time existed problem with unexpected auto start melee attack after spell casting.
+ * Improved: Re-implemented diminishing returns system.
+ * Improved: Re-implemented fear movement.
+ * Improved: Rewritten distract/dispel/spell steal effects.
+ * Improved: Updated pet name generation data in DB.
+ * Improved: Better work combat enter/leave system in PvP/PvE cases.
+ * Improved: Many items and item set effects start work.
+ * plus lots of fixes for auras, effects, spells, talents, and more.
+
+ ==== Server Features ====
+
+ * Added: New sql/tools directory for useful SQL queries for check and restore DB integrity.
+ * Added: Own counter for HIGHGUID_PET low guids. Use it for pets. This let have lot more range for pet guids, and then more creature guid for instances spawns/totems.
+ * Added: Replace existed random generators by Mersenne Twister random number generator.
+ * Added: Support for Russian, Spanish Mexico, traditional and simplified Chinese clients to ad.exe.
+ * Added: Support for using the failed_logins field in the account table. Support IP/account temporary ban at max allowed failed logins for account.
+ * Added: Support for --enable-doxygen to enable doc generation at configure use at Unix/Linux.
+ * Added: Anti-freeze system.
+ * Added: AD.EXE now also extracts DBC files. It also now searches for patch files dynamically.
+ * Improved: Updated MySQL client libs to 5.0.56.
+ * Improved: Better checking DB data at server loading.
+ * Improved: Apply reserver names check to pet/charter names also.
+ * Improved: Move hardcoded base fishing skill for zone from code to new DB table.
+ * Improved: Removed `spell_learn_skill` and `PlayerCreateInfo_skill` tables, use DBC data instead.
+ * Improved: Many improvements in Gamemaster chat commands.
+ * Improved: Many improvements in config options.
+ * Improved: Better scripting support (DB base and C++ based scripts).
+
+ ==== Statistics ====
+ * Fixed Bugs: 194
+ * Total number of changes: 708
 
  The complete list of closed tickets can be found here:
    http://www.mangosproject.org/trac/query?status=closed&milestone=0.11
