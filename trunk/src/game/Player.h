@@ -775,8 +775,7 @@ MovementFlags const movementFlagsMask = MovementFlags(
 MovementFlags const movementOrTurningFlagsMask = MovementFlags(
     movementFlagsMask | MOVEMENTFLAG_LEFT | MOVEMENTFLAG_RIGHT
 );
-
-typedef HM_NAMESPACE::hash_map< uint32, std::pair < uint32, uint32 > > BoundInstancesMap;
+class InstanceSave;
 
 enum RestType
 {
@@ -840,6 +839,16 @@ enum PlayerLoginQueryIndex
 // Player summoning auto-decline time (in secs)
 #define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
 #define MAX_MONEY_AMOUNT                       (0x7FFFFFFF-1)
+
+struct InstancePlayerBind
+{
+    InstanceSave *save;
+    bool perm;
+    /* permanent PlayerInstanceBinds are created in Raid/Heroic instances for players
+       that aren't already permanently bound when they are inside when a boss is killed
+       or when they enter an instance that the group leader is permanently bound to. */
+    InstancePlayerBind() : save(NULL), perm(false) {}
+};
 
 class MANGOS_DLL_SPEC PlayerTaxi
 {
@@ -935,7 +944,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendInitialPacketsBeforeAddToMap();
         void SendInitialPacketsAfterAddToMap();
         void SendTransferAborted(uint32 mapid, uint16 reason);
-        void SendRaidInstanceResetWarning(uint32 type, uint32 mapid, uint32 time);
+        void SendInstanceResetWarning(uint32 mapid, uint32 time);
 
         bool CanInteractWithNPCs(bool alive = true) const;
 
@@ -1509,8 +1518,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetArenaTeamIdInvited(uint32 ArenaTeamId) { m_ArenaTeamIdInvited = ArenaTeamId; }
         uint32 GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
 
-        void SetDungeonDifficulty(uint32 difficulty) { m_dungeonDifficulty = difficulty; }
-        uint32 GetDungeonDifficulty() { return m_dungeonDifficulty; }
+        void SetDifficulty(uint32 dungeon_difficulty) { m_dungeonDifficulty = dungeon_difficulty; }
+        uint8 GetDifficulty() { return m_dungeonDifficulty; }
 
         bool UpdateSkill(uint32 skill_id, uint32 step);
         bool UpdateSkillPro(uint16 SkillId, int32 Chance, uint32 step);
@@ -1591,7 +1600,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendAutoRepeatCancel();
         void SendExplorationExperience(uint32 Area, uint32 Experience);
 
-        void SendDungeonDifficulty();
+        void SendDungeonDifficulty(bool IsInGroup);
+        void ResetInstances(uint8 method);
+        void SendResetInstanceSuccess(uint32 MapId);
+        void SendResetInstanceFailed(uint32 reason, uint32 MapId);
+        void SendResetFailedNotify(uint32 mapid);
 
         bool SetPosition(float x, float y, float z, float orientation, bool teleport = false);
         void SendMessageToSet(WorldPacket *data, bool self);// overwrite Object::SendMessageToSet
@@ -1948,11 +1961,22 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                 INSTANCE SYSTEM                   ***/
         /*********************************************************/
 
+        typedef HM_NAMESPACE::hash_map< uint32 /*mapId*/, InstancePlayerBind > BoundInstancesMap;
+
         void UpdateHomebindTime(uint32 time);
 
         uint32 m_HomebindTimer;
         bool m_InstanceValid;
-        BoundInstancesMap m_BoundInstances;
+        // permanent binds and solo binds by difficulty
+        BoundInstancesMap m_boundInstances[TOTAL_DIFFICULTIES];
+        InstancePlayerBind* GetBoundInstance(uint32 mapid, uint8 difficulty);
+        BoundInstancesMap& GetBoundInstances(uint8 difficulty) { return m_boundInstances[difficulty]; }
+        void UnbindInstance(uint32 mapid, uint8 difficulty, bool unload = false);
+        void UnbindInstance(BoundInstancesMap::iterator &itr, uint8 difficulty, bool unload = false);
+        InstancePlayerBind* BindToInstance(InstanceSave *save, bool permanent, bool load = false);
+        void SendRaidInfo();
+        void SendSavedInstances();
+        void ConvertInstancesToGroup(bool load = false);
 
         /*********************************************************/
         /***                   GROUP SYSTEM                    ***/
@@ -1972,6 +1996,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         GridReference<Player> &GetGridRef() { return m_gridRef; }
         bool isAllowedToLoot(Creature* creature);
+
+        WorldLocation& GetTeleportDest() { return m_teleport_dest; }
 
     protected:
 
@@ -2035,7 +2061,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void _SaveActions();
         void _SaveAuras();
-        void _SaveBoundInstances();
         void _SaveInventory();
         void _SaveMail();
         void _SaveQuestStatus();
@@ -2194,6 +2219,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         float  m_summon_x;
         float  m_summon_y;
         float  m_summon_z;
+
+        // Far Teleport
+        WorldLocation m_teleport_dest;
     private:
         // internal common parts for CanStore/StoreItem functions
         uint8 _CanStoreItem_InSpecificSlot( uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemPrototype const *pProto, uint32& count, bool swap, Item *pSrcItem ) const;

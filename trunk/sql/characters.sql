@@ -158,6 +158,7 @@ CREATE TABLE `characters` (
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
   `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
+  `dungeon_difficulty` tinyint(1) unsigned NOT NULL DEFAULT '0',
   `orientation` float NOT NULL default '0',
   `taximask` longtext,
   `online` tinyint(3) unsigned NOT NULL default '0',
@@ -298,12 +299,10 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `character_instance`;
 CREATE TABLE `character_instance` (
   `guid` int(11) unsigned NOT NULL default '0',
-  `map` int(11) unsigned NOT NULL default '0',
-  `instance` bigint(40) NOT NULL default '0',
-  `leader` int(11) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`guid`,`map`),
-  KEY `instance` (`instance`),
-  KEY `leader` (`leader`)
+  `instance` int(11) unsigned NOT NULL default '0',
+  `permanent` tinyint(1) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`guid`,`instance`),
+  KEY `instance` (`instance`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -630,6 +629,7 @@ CREATE TABLE `groups` (
   `icon7` int(11) unsigned NOT NULL,
   `icon8` int(11) unsigned NOT NULL,
   `isRaid` tinyint(1) unsigned NOT NULL,
+  `difficulty` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`leaderGuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Groups';
 
@@ -640,6 +640,26 @@ CREATE TABLE `groups` (
 LOCK TABLES `groups` WRITE;
 /*!40000 ALTER TABLE `groups` DISABLE KEYS */;
 /*!40000 ALTER TABLE `groups` ENABLE KEYS */;
+UNLOCK TABLES;
+
+-- ----------------------------
+-- Table structure for group_instance
+-- ----------------------------
+CREATE TABLE `group_instance` (
+  `leaderGuid` int(11) unsigned NOT NULL default '0',
+  `instance` int(11) unsigned NOT NULL default '0',
+  `permanent` tinyint(1) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`leaderGuid`,`instance`),
+  KEY `instance` (`instance`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `group_instance`
+--
+
+LOCK TABLES `group_instance` WRITE;
+/*!40000 ALTER TABLE `group_instance` DISABLE KEYS */;
+/*!40000 ALTER TABLE `group_instance` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -902,6 +922,24 @@ CREATE TABLE `instance` (
 LOCK TABLES `instance` WRITE;
 /*!40000 ALTER TABLE `instance` DISABLE KEYS */;
 /*!40000 ALTER TABLE `instance` ENABLE KEYS */;
+UNLOCK TABLES;
+
+-- ----------------------------
+-- Table structure for instance_reset
+-- ----------------------------
+CREATE TABLE `instance_reset` (
+  `mapid` int(11) unsigned NOT NULL default '0',
+  `resettime` bigint(40) NOT NULL default '0',
+  PRIMARY KEY  (`mapid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `instance_reset`
+--
+
+LOCK TABLES `instance_reset` WRITE;
+/*!40000 ALTER TABLE `instance_reset` DISABLE KEYS */;
+/*!40000 ALTER TABLE `instance_reset` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

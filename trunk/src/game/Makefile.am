@@ -146,6 +146,8 @@ libmangosgame_a_SOURCES = \
 	Mail.h \
 	Map.cpp \
 	Map.h \
+	InstanceSaveMgr.cpp \
+	InstanceSaveMgr.h \
 	MapInstanced.cpp \
 	MapInstanced.h \
 	MapManager.cpp \

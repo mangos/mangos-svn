@@ -90,6 +90,8 @@ enum GroupUpdateFlags
                                                                 // 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10,11,12,13,14,15,16,17,18,19
 static const uint8 GroupUpdateLength[GROUP_UPDATE_FLAGS_COUNT] = { 0, 2, 2, 2, 1, 2, 2, 2, 2, 4, 8, 8, 1, 2, 2, 2, 1, 2, 2, 8};
 
+class InstanceSave;
+
 class Roll : public LootValidatorRef
 {
     public:
@@ -114,6 +116,15 @@ class Roll : public LootValidatorRef
         uint8 itemSlot;
 };
 
+struct InstanceGroupBind
+{
+    InstanceSave *save;
+    bool perm;
+    /* permanent InstanceGroupBinds exist iff the leader has a permanent
+       PlayerInstanceBind for the same instance. */
+    InstanceGroupBind() : save(NULL), perm(false) {}
+};
+
 /** request member stats checken **/
 /** todo: uninvite people that not accepted invite **/
 class MANGOS_DLL_SPEC Group
@@ -128,6 +139,8 @@ class MANGOS_DLL_SPEC Group
         };
         typedef std::list<MemberSlot> MemberSlotList;
         typedef MemberSlotList::const_iterator member_citerator;
+
+        typedef HM_NAMESPACE::hash_map< uint32 /*mapId*/, InstanceGroupBind> BoundInstancesMap;
     protected:
         typedef MemberSlotList::iterator member_witerator;
         typedef std::set<uint64> InvitesList;
@@ -244,6 +257,11 @@ class MANGOS_DLL_SPEC Group
         }
 
         void SetTargetIcon(uint8 id, uint64 guid);
+        void SetDifficulty(uint8 difficulty);
+        uint8 GetDifficulty() { return m_difficulty; }
+        uint16 InInstance();
+        bool InCombatToInstance(uint32 instanceId);
+        void ResetInstances(uint8 method, Player* SendMsgTo);
 
         // -no description-
         //void SendInit(WorldSession *session);
@@ -283,6 +301,10 @@ class MANGOS_DLL_SPEC Group
         void LinkMember(GroupReference *pRef) { m_memberMgr.insertFirst(pRef); }
         void DelinkMember(GroupReference* /*pRef*/ ) { }
 
+        InstanceGroupBind* BindToInstance(InstanceSave *save, bool permanent, bool load = false);
+        void UnbindInstance(uint32 mapid, uint8 difficulty, bool unload = false);
+        InstanceGroupBind* GetBoundInstance(uint32 mapid, uint8 difficulty);
+
     protected:
         bool _addMember(const uint64 &guid, const char* name, bool isAssistant=false);
         bool _addMember(const uint64 &guid, const char* name, bool isAssistant, uint8 group);
@@ -296,6 +318,8 @@ class MANGOS_DLL_SPEC Group
         bool _setAssistantFlag(const uint64 &guid, const bool &state);
         bool _setMainTank(const uint64 &guid);
         bool _setMainAssistant(const uint64 &guid);
+
+        void _homebindIfInstance(Player *player);
 
         member_citerator _getMemberCSlot(uint64 Guid) const
         {
@@ -325,11 +349,13 @@ class MANGOS_DLL_SPEC Group
         uint64              m_mainTank;
         uint64              m_mainAssistant;
         GroupType           m_groupType;
+        uint8               m_difficulty;
         BattleGround*       m_bgGroup;
         uint64              m_targetIcons[TARGETICONCOUNT];
         LootMethod          m_lootMethod;
         ItemQualities       m_lootThreshold;
         uint64              m_looterGuid;
         Rolls               RollId;
+        BoundInstancesMap   m_boundInstances[TOTAL_DIFFICULTIES];
 };
 #endif

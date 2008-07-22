@@ -147,9 +147,9 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, float x, float
     //Notify the map's instance data.
     //Only works if you create the object in it, not if it is moves to that map.
     //Normally non-players do not teleport to other maps.
-    if(map && map->GetInstanceData())
+    if(map->IsDungeon() && ((InstanceMap*)map)->GetInstanceData())
     {
-        map->GetInstanceData()->OnObjectCreate(this);
+        ((InstanceMap*)map)->GetInstanceData()->OnObjectCreate(this);
     }
 
     return true;

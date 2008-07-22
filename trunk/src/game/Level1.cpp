@@ -30,6 +30,7 @@
 #include "ObjectAccessor.h"
 #include "Language.h"
 #include "CellImpl.h"
+#include "InstanceSaveMgr.h"
 #include "Util.h"
 #ifdef _DEBUG_VMAPS
 #include "VMapFactory.h"
@@ -427,12 +428,22 @@ bool ChatHandler::HandleGonameCommand(const char* args)
                 }
             }
 
-            // bind us to the players instance
-            BoundInstancesMap::iterator i = chr->m_BoundInstances.find(chr->GetMapId());
-                                                            // error, the player has no instance bound!!!
-            if (i == chr->m_BoundInstances.end()) return true;
-            _player->m_BoundInstances[chr->GetMapId()] = std::pair < uint32, uint32 >(i->second.first, i->second.second);
-            _player->SetInstanceId(chr->GetInstanceId());
+            // if the player or the player's group is bound to another instance
+            // the player will not be bound to another one
+            InstancePlayerBind *pBind = _player->GetBoundInstance(chr->GetMapId(), chr->GetDifficulty());
+            if(!pBind)
+            {
+                Group *group = _player->GetGroup();
+                InstanceGroupBind *gBind = group ? group->GetBoundInstance(chr->GetMapId(), chr->GetDifficulty()) : NULL;
+                if(!gBind)
+                {
+                    // if no bind exists, create a solo bind
+                    InstanceSave *save = sInstanceSaveManager.GetInstanceSave(chr->GetInstanceId());
+                    if(save) _player->BindToInstance(save, !save->CanReset());
+                }
+            }
+
+            _player->SetDifficulty(chr->GetDifficulty());
         }
 
         PSendSysMessage(LANG_APPEARING_AT, chr->GetName());

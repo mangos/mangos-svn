@@ -150,6 +150,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "getvalue",       SEC_ADMINISTRATOR,  &ChatHandler::HandleGetValue,                   "", NULL },
         { "Mod32Value",     SEC_ADMINISTRATOR,  &ChatHandler::HandleMod32Value,                 "", NULL },
         { "anim",           SEC_GAMEMASTER,     &ChatHandler::HandleAnimCommand,                "", NULL },
+        { "instance",       SEC_ADMINISTRATOR,  &ChatHandler::HandleInstanceCommand,            "", NULL },
         { NULL,             0,                  NULL,                                           "", NULL }
     };
 

@@ -20,10 +20,13 @@
 #define MANGOS_MAP_INSTANCED_H
 
 #include "Map.h"
+#include "InstanceSaveMgr.h"
 
 class MANGOS_DLL_DECL MapInstanced : public Map
 {
+    friend class MapManager;
     public:
+        typedef HM_NAMESPACE::hash_map< uint32, Map* > InstancedMaps;
 
         MapInstanced(uint32 id, time_t, uint32 aInstanceId);
         ~MapInstanced() {}
@@ -34,8 +37,9 @@ class MANGOS_DLL_DECL MapInstanced : public Map
         virtual void UnloadAll(bool pForce);
 
         Map* GetInstance(const WorldObject* obj);
-        bool IsValidInstance(uint32 InstanceId);
-
+        Map* FindMap(uint32 InstanceId) { return _FindMap(InstanceId); }
+        void DestroyInstance(uint32 InstanceId);
+        void DestroyInstance(InstancedMaps::iterator &itr);
         void AddGridMapReference(const GridPair &p) { ++GridMapReference[p.x_coord][p.y_coord]; }
         void RemoveGridMapReference(const GridPair &p)
         {
@@ -43,11 +47,11 @@ class MANGOS_DLL_DECL MapInstanced : public Map
             if (!GridMapReference[p.x_coord][p.y_coord]) { SetUnloadFlag(GridPair(63-p.x_coord,63-p.y_coord), true); }
         }
 
+        InstancedMaps &GetInstancedMaps() { return m_InstancedMaps; }
+
     private:
 
-        void CreateInstance(uint32 InstanceId, Map* &map);
-
-        typedef HM_NAMESPACE::hash_map< uint32, Map* > InstancedMaps;
+        InstanceMap* CreateInstance(uint32 InstanceId, InstanceSave *save, uint8 difficulty);
 
         InstancedMaps m_InstancedMaps;
 

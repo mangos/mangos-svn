@@ -31,9 +31,11 @@
 #include "ObjectMgr.h"
 #include "World.h"
 #include "ScriptCalls.h"
+#include "Group.h"
 
 #include "MapManager.h"
 #include "MapInstanced.h"
+#include "InstanceSaveMgr.h"
 #include "VMapFactory.h"
 
 #define DEFAULT_GRID_EXPIRY     300
@@ -47,6 +49,15 @@ GridState* si_GridStates[MAX_GRID_STATE];
 Map::~Map()
 {
     UnloadAll(true);
+}
+
+InstanceMap::~InstanceMap()
+{
+    if(i_data)
+    {
+        delete i_data;
+        i_data = NULL;
+    }
 }
 
 bool Map::ExistMap(uint32 mapid,int x,int y)
@@ -204,9 +215,9 @@ void Map::DeleteStateMachine()
     delete si_GridStates[GRID_STATE_REMOVAL];
 }
 
-Map::Map(uint32 id, time_t expiry, uint32 ainstanceId)
-: i_id(id), i_gridExpiry(expiry), i_mapEntry(sMapStore.LookupEntry(id)),
-i_resetTime(0), i_resetDelayTime(0), i_InstanceId(ainstanceId), i_maxPlayers(0), i_data(NULL)
+Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
+  : i_id(id), i_gridExpiry(expiry), i_mapEntry (sMapStore.LookupEntry(id)), 
+ i_InstanceId(InstanceId), i_spawnMode(SpawnMode)
 {
     for(unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
     {
@@ -217,56 +228,12 @@ i_resetTime(0), i_resetDelayTime(0), i_InstanceId(ainstanceId), i_maxPlayers(0),
             setNGrid(NULL, idx, j);
         }
     }
+}
 
-    if (Instanceable())
-    {
-        sLog.outDetail("INSTANCEMAP: Loading instance template");
-
-        InstanceTemplate const* mInstance = objmgr.GetInstanceTemplate(id);
-        if (mInstance)
-        {
-            i_maxPlayers = mInstance->maxPlayers;
-            i_resetDelayTime = mInstance->reset_delay;
-            i_script = mInstance->script;
-            i_data = Script->CreateInstanceData(this);
-            if(i_data)
-            {
-                sLog.outDebug("New instance data, \"%s\" ,initialized!",i_script.c_str());
-                i_data->Initialize();
-            }
-        }
-        else
-        {
-            i_maxPlayers = 0;
-            i_resetDelayTime = 0;
-            sLog.outErrorDb("Instance (Map: %u) not have records in `instance_template` in DB. Using default settings.",id);
-        }
-
-        if(i_InstanceId!=0)
-        {
-            QueryResult* result = CharacterDatabase.PQuery("SELECT resettime, data FROM instance WHERE map = '%u' AND id = '%u'", id, i_InstanceId);
-            if (result)
-            {
-                Field* fields = result->Fetch();
-                i_resetTime = (time_t) fields[0].GetUInt64();
-
-                const char* data = fields[1].GetString();
-                if(data && i_data)
-                {
-                    sLog.outDebug("Loading instance data for %s with id %u", i_script.c_str(), i_InstanceId);
-                    i_data->Load(data);
-                }
-
-                delete result;
-            }
-        }
-
-        if (i_resetTime == 0) InitResetTime();
-    }
-    else
-        i_data = NULL;
-
-    i_Players.clear();
+InstanceMap::InstanceMap(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
+  : Map(id, expiry, InstanceId, SpawnMode), i_data(NULL), m_unloadTimer(0),
+    m_resetAfterUnload(false), m_unloadWhenEmpty(false)
+{
 }
 
 // Template specialization of utility methods
@@ -464,155 +431,226 @@ Map::LoadGrid(const Cell& cell, bool no_unload)
     LoadVMap(63-cell.GridX(),63-cell.GridY());
 }
 
-bool Map::AddInstanced(Player *player)
+/*
+    Do map specific checks to see if the player can enter
+*/
+bool InstanceMap::CanEnter(Player *player)
 {
-    if (!Instanceable())
-    {
-        sLog.outDetail("MAP: Player '%s' (GUID: %u) entered the non-instanceable map '%s'", player->GetName(), player->GetGUIDLow(), GetMapName());
-        if (player->GetPet()) player->GetPet()->SetInstanceId(0);
-        player->SetInstanceId(0);
-        return(true);
-    }
-
     if(std::find(i_Players.begin(),i_Players.end(),player)!=i_Players.end())
     {
-        sLog.outDetail("MAP: Player '%s' (GUID: %u) already in instance '%u' of map '%s'", player->GetName(), player->GetGUIDLow(), GetInstanceId(), GetMapName());
-        return true;
+        sLog.outError("InstanceMap::CanEnter - player %u already in map!", player->GetGUIDLow());
+        assert(false);
+        return false;
     }
 
-    // TODO: Not sure about checking player level: already done in HandleAreaTriggerOpcode
-    // GM's still can teleport player in instance.
-    // Is it needed?
-
+    // cannot enter if the instance is full (player cap), GMs don't count
+    InstanceTemplate const* iTemplate = objmgr.GetInstanceTemplate(GetId());
+    if (!player->isGameMaster() && GetPlayersCountExceptGMs() >= iTemplate->maxPlayers)
     {
-        Guard guard(*this);
-
-        // GMs can avoid player limits
-        if (i_maxPlayers && (GetPlayersCountExceptGMs() >= i_maxPlayers) && !player->isGameMaster())
-        {
-            sLog.outDetail("MAP: Instance '%u' of map '%s' cannot have more than '%u' players. Player '%s' (GUID: %u) rejected", GetInstanceId(), GetMapName(), i_maxPlayers, player->GetName(),player->GetGUIDLow());
-            player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAX_PLAYERS);
-            return(false);
-        }
-
-        if(i_data)
-            i_data->OnPlayerEnter(player);
-
-        i_Players.push_back(player);
+        sLog.outDetail("MAP: Instance '%u' of map '%s' cannot have more than '%u' players. Player '%s' rejected", GetInstanceId(), GetMapName(), iTemplate->maxPlayers, player->GetName());
+        player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAX_PLAYERS);
+        return false;
     }
 
-    if (player->GetPet()) player->GetPet()->SetInstanceId(this->GetInstanceId());
-    player->SetInstanceId(this->GetInstanceId());
-
-    player->SendInitWorldStates();
-
-    sLog.outDetail("MAP: Player '%s' (GUID: %u) entered the instance '%u' of map '%s'", player->GetName(), player->GetGUIDLow(), GetInstanceId(), GetMapName());
-
-    // reinitialize reset time
-    InitResetTime();
-
-    if (IsRaid())
-        player->SendRaidInstanceResetWarning(RAID_INSTANCE_WELCOME, GetId(), i_resetTime-time(NULL));
-
-    return(true);
-}
-
-void Map::RemoveInstanced(Player *player)
-{
-    i_Players.remove(player);
-
-    // reinitialize reset time
-    InitResetTime();
-}
-
-void Map::InitResetTime()
-{
-    // for i_resetDelayTime==0 call single time for i_resetTime==0
-    if (Instanceable() && (i_resetDelayTime != 0 || i_resetTime == 0) )
+    // cannot enter while players in the instance are in combat
+    Group *pGroup = player->GetGroup();
+    if(pGroup && pGroup->InCombatToInstance(GetInstanceId()) && player->isAlive() && player->GetMapId() != GetId())
     {
-        i_resetTime = time(NULL) + i_resetDelayTime;        // only used for Instanceable() case
-
-        if(GetInstanceId())
-        {
-            const char* instance_data = i_data ? i_data->Save() : "";
-            CharacterDatabase.BeginTransaction();
-            CharacterDatabase.PExecute("DELETE FROM instance WHERE id = '%u'", GetInstanceId());
-            CharacterDatabase.PExecute("INSERT INTO instance VALUES ('%u', '%u', '" I64FMTD "','%s')", GetInstanceId(), i_id, (uint64)this->i_resetTime, instance_data);
-            CharacterDatabase.CommitTransaction();
-        }
-    }
-}
-
-void Map::Reset()
-{
-    objmgr.DeleteRespawnTimeForInstance(GetInstanceId());
-
-    UnloadAll(false);
-
-    // reinitialize reset time
-    InitResetTime();
-}
-
-bool Map::CanEnter(Player* player) const
-{
-    if( !Instanceable() )
-        return true;
-
-    // GMs can avoid raid limitations
-    if (IsRaid() && (!player->isGameMaster() && !sWorld.getConfig(CONFIG_INSTANCE_IGNORE_RAID)))
-    {
-        Group* group = player->GetGroup();
-        if (!group || !group->isRaidGroup())
-        {
-            // probably there must be special opcode, because client has this string constant in GlobalStrings.lua
-            player->GetSession()->SendAreaTriggerMessage("You must be in a raid group to enter %s instance", GetMapName());
-            sLog.outDebug("MAP: Player '%s' (GUID: %u) must be in a raid group to enter instance of '%s'", player->GetName(), player->GetGUIDLow(), GetMapName());
-            return false;
-        }
-    }
-
-    if (!player->isAlive())
-    {
-        if(Corpse *corpse = player->GetCorpse())
-        {
-            // let enter in ghost mode in instance that connected to inner instance with corpse
-            uint32 instance_map = corpse->GetMapId();
-            do
-            {
-                if(instance_map==GetId())
-                    break;
-
-                InstanceTemplate const* instance = objmgr.GetInstanceTemplate(instance_map);
-                instance_map = instance ? instance->parent : 0;
-            }
-            while (instance_map);
-
-            if (!instance_map)
-            {
-                player->GetSession()->SendAreaTriggerMessage("You cannot enter %s while in a ghost mode", GetMapName());
-                sLog.outDebug("MAP: Player '%s' (GUID: %u) doesn't has a corpse in instance '%s' and can't enter", player->GetName(), player->GetGUIDLow(), GetMapName());
-                return false;
-            }
-            sLog.outDebug("MAP: Player '%s' (GUID: %u) has corpse in instance '%s' and can enter", player->GetName(), player->GetGUIDLow(), GetMapName());
-        }
-        else
-        {
-            sLog.outDebug("Map::CanEnter - player '%s' (GUID: %u) is dead but doesn't have a corpse!", player->GetName(),player->GetGUIDLow());
-        }
-    }
-
-    // prevent enter to instance non-GMs in boss encounter time
-    if(i_data && i_data->IsEncounterInProgress() && !player->isGameMaster() )
-    {
-        sLog.outDebug("MAP: Player '%s' (GUID: %u) can't enter instance '%s' while an encounter is in progress.", player->GetName(), player->GetGUIDLow(), GetMapName());
         player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
         return false;
     }
 
+    // entering an instance that will be reset soon
+    /*if(uint32(GetResetTime() - time(NULL)) < 60)
+    {
+        player->m_InstanceValid = false;
+        player->m_HomebindTimer = uint32(GetResetTime() - time(NULL));
+        sLog.outError("player->m_InstanceValid = false, uint32(this->GetResetTime() - time(NULL)) < 60");
+        return false;
+    }*/
+    return Map::CanEnter(player);
+}
+
+/*
+    Do map specific checks and add the player to the map if successful.
+*/
+bool InstanceMap::Add(Player *player)
+{
+    // TODO: Not sure about checking player level: already done in HandleAreaTriggerOpcode
+    // GMs still can teleport player in instance.
+    // Is it needed?
+
+    {
+        Guard guard(*this);
+        if(!CanEnter(player))
+            return false;
+
+        // get or create an instance save for the map
+        InstanceSave *mapSave = sInstanceSaveManager.GetInstanceSave(GetInstanceId());
+        if(!mapSave)
+        {
+            sLog.outDebug("InstanceMap::Add: creating instance save for map %d spawnmode %d with instance id %d", GetId(), GetSpawnMode(), GetInstanceId());
+            mapSave = sInstanceSaveManager.AddInstanceSave(GetId(), GetInstanceId(), GetSpawnMode(), 0, true);
+        }
+
+        // check for existing instance binds
+        InstancePlayerBind *playerBind = player->GetBoundInstance(GetId(), GetSpawnMode());
+        if(playerBind && playerBind->perm)
+        {
+            // cannot enter other instances if bound permanently
+            assert(playerBind->save == mapSave);
+        }
+        else
+        {
+            Group *pGroup = player->GetGroup();
+            if(pGroup)
+            {
+                // solo saves should be reset when entering a group
+                assert(!playerBind);
+                InstanceGroupBind *groupBind = pGroup->GetBoundInstance(GetId(), GetSpawnMode());
+                // bind to the group or keep using the group save
+                if(!groupBind)
+                    pGroup->BindToInstance(mapSave, false);
+                else
+                {
+                    // cannot jump to a different instance without resetting it
+                    if(groupBind->save != mapSave)
+                    {
+                        sLog.outError("InstanceMap::Add: player %s(%d) is being put in instance %d,%d,%d but he is in group %d which is bound to instance %d,%d,%d!", player->GetName(), player->GetGUIDLow(), mapSave->GetMapId(), mapSave->GetInstanceId(), mapSave->GetDifficulty(), GUID_LOPART(pGroup->GetLeaderGUID()), groupBind->save->GetMapId(), groupBind->save->GetInstanceId(), groupBind->save->GetDifficulty());
+                        sLog.outError("%d,%d,%d", (int)mapSave, (int)groupBind->save, groupBind->perm);
+                        if(mapSave) sLog.outError("%d, %d", mapSave->GetPlayerCount(), mapSave->GetGroupCount());
+                        if(groupBind->save) sLog.outError("%d, %d", groupBind->save->GetPlayerCount(), groupBind->save->GetGroupCount());
+                        assert(false);
+                    }
+                    // if the group/leader is permanently bound to the instance
+                    // players also become permanently bound when they enter
+                    if(groupBind->perm)
+                    {
+                        WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
+                        data << uint32(0);
+                        player->GetSession()->SendPacket(&data);
+                        player->BindToInstance(mapSave, true);
+                    }
+                }
+            }
+            else
+            {
+                // set up a solo bind or continue using it 
+                if(!playerBind)
+                    player->BindToInstance(mapSave, false);
+                else
+                    // cannot jump to a different instance without resetting it
+                    assert(playerBind->save == mapSave);
+            }
+        }
+
+        if(i_data) i_data->OnPlayerEnter(player);
+        SetResetSchedule(false);
+
+        i_Players.push_back(player);
+        player->SendInitWorldStates();
+        sLog.outDetail("MAP: Player '%s' entered the instance '%u' of map '%s'", player->GetName(), GetInstanceId(), GetMapName());
+        // initialize unload state
+        m_unloadTimer = 0;
+        m_resetAfterUnload = false;
+        m_unloadWhenEmpty = false;
+    }
+
+    // this will acquire the same mutex so it cannot be in the previous block
+    Map::Add(player);
     return true;
 }
 
-void Map::Add(Player *player)
+void InstanceMap::Remove(Player *player, bool remove)
+{
+    sLog.outDetail("MAP: Removing player '%s' from instance '%u' of map '%s' before relocating to other map", player->GetName(), GetInstanceId(), GetMapName());
+    i_Players.remove(player);
+    SetResetSchedule(true);
+    if(!m_unloadTimer && i_Players.empty())
+        m_unloadTimer = m_unloadWhenEmpty ? 1 : sWorld.getConfig(CONFIG_INSTANCE_UNLOAD_DELAY);
+    Map::Remove(player, remove);
+}
+
+void InstanceMap::CreateInstanceData(bool load)
+{
+    if(i_data != NULL)
+        return;
+
+    InstanceTemplate const* mInstance = objmgr.GetInstanceTemplate(GetId());
+    if (mInstance)
+    {
+        i_script = mInstance->script;
+        i_data = Script->CreateInstanceData(this);
+    }
+
+    if(!i_data)
+        return;
+
+    if(load)
+    {
+        // TODO: make a global storage for this
+        QueryResult* result = CharacterDatabase.PQuery("SELECT data FROM instance WHERE map = '%u' AND id = '%u'", GetId(), i_InstanceId);
+        if (result)
+        {
+            Field* fields = result->Fetch();
+            const char* data = fields[0].GetString();
+            if(data)
+            {
+                sLog.outDebug("Loading instance data for `%s` with id %u", i_script.c_str(), i_InstanceId);
+                i_data->Load(data);
+            }
+            delete result;
+        }
+    }
+    else
+    {
+        sLog.outDebug("New instance data, \"%s\" ,initialized!",i_script.c_str());
+        i_data->Initialize();
+    }
+}
+
+/*
+    Returns true if there are no players in the instance
+*/
+bool InstanceMap::Reset(uint8 method)
+{
+    // note: since the map may not be loaded when the instance needs to be reset
+    // the instance must be deleted from the DB by InstanceSaveManager
+
+    if(!i_Players.empty())
+    {
+        if(method == INSTANCE_RESET_ALL)
+        {
+            // notify the players to leave the instance so it can be reset
+            for(PlayerList::iterator itr = i_Players.begin(); itr != i_Players.end(); ++itr)
+                (*itr)->SendResetFailedNotify(GetId());
+        }
+        else
+        {
+            if(method == INSTANCE_RESET_GLOBAL)
+            {
+                // set the homebind timer for players inside (1 minute)
+                for(PlayerList::iterator itr = i_Players.begin(); itr != i_Players.end(); ++itr)
+                    (*itr)->m_InstanceValid = false;
+            }
+
+            // the unload timer is not started
+            // instead the map will unload immediately after the players have left
+            m_unloadWhenEmpty = true;
+            m_resetAfterUnload = true;
+        }
+    }
+    else
+    {
+        // unloaded at next update
+        m_unloadTimer = 1;
+        m_resetAfterUnload = true;
+    }
+
+    return i_Players.empty();
+}
+
+bool Map::Add(Player *player)
 {
     if (player->GetPet()) player->GetPet()->SetInstanceId(this->GetInstanceId());
     player->SetInstanceId(this->GetInstanceId());
@@ -631,9 +669,7 @@ void Map::Add(Player *player)
     UpdateObjectsVisibilityFor(player,cell,p);
 
     AddNotifier(player,cell,p);
-
-    // reinitialize reset time
-    InitResetTime();
+    return true;
 }
 
 template<class T>
@@ -719,7 +755,7 @@ void Map::Update(const uint32 &t_diff)
 {
     // Don't unload grids if it's battleground, since we may have manually added GOs,creatures, those doesn't load from DB at grid re-load !
     // This isn't really bother us, since as soon as we have instanced BG-s, the whole map unloads as the BG gets ended
-    if (IsBattleGround() || IsArena())
+    if (IsBattleGroundOrArena())
         return;
 
     for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end(); )
@@ -730,18 +766,19 @@ void Map::Update(const uint32 &t_diff)
         assert(grid->GetGridState() >= 0 && grid->GetGridState() < MAX_GRID_STATE);
         si_GridStates[grid->GetGridState()]->Update(*this, *grid, *info, grid->getX(), grid->getY(), t_diff);
     }
+}
+
+void InstanceMap::Update(const uint32& t_diff)
+{
+    Map::Update(t_diff);
+
     if(i_data)
         i_data->Update(t_diff);
 }
 
+
 void Map::Remove(Player *player, bool remove)
 {
-    if (Instanceable())
-    {
-        sLog.outDetail("MAP: Removing player '%s' (GUID: %u) from instance '%u' of map '%s' before relocating to other map", player->GetName(), player->GetGUIDLow(), GetInstanceId(), GetMapName());
-        RemoveInstanced(player);                            // remove from instance player list, etc.
-    }
-
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
     {
@@ -775,9 +812,6 @@ void Map::Remove(Player *player, bool remove)
 
     if( remove )
         DeleteFromWorld(player);
-
-    // reinitialize reset time
-    InitResetTime();
 }
 
 bool Map::RemoveBones(uint64 guid, float x, float y)
@@ -1083,13 +1117,6 @@ void Map::UnloadAll(bool pForce)
         NGridType &grid(*i->getSource());
         ++i;
         UnloadGrid(grid.getX(), grid.getY(), pForce);       // deletes the grid and removes it from the GridRefManager
-    }
-
-    //Delete instance data
-    if(i_data)
-    {
-        delete i_data;
-        i_data = NULL;
     }
 }
 
@@ -1485,19 +1512,13 @@ inline void Map::setNGrid(NGridType *grid, uint32 x, uint32 y)
     i_grids[x][y] = grid;
 }
 
-uint32 Map::GetPlayersCountExceptGMs() const
+uint32 InstanceMap::GetPlayersCountExceptGMs() const
 {
     uint32 count = 0;
     for(PlayerList::const_iterator itr = i_Players.begin(); itr != i_Players.end(); ++itr)
         if(!(*itr)->isGameMaster())
             ++count;
     return count;
-}
-
-void Map::SendToPlayers(WorldPacket const* data) const
-{
-    for(PlayerList::const_iterator itr = i_Players.begin(); itr != i_Players.end(); ++itr)
-        (*itr)->GetSession()->SendPacket(data);
 }
 
 template void Map::Add(Corpse *);
@@ -1509,3 +1530,88 @@ template void Map::Remove(Corpse *,bool);
 template void Map::Remove(Creature *,bool);
 template void Map::Remove(GameObject *, bool);
 template void Map::Remove(DynamicObject *, bool);
+
+void InstanceMap::PermBindAllPlayers()
+{
+    InstanceSave *save = sInstanceSaveManager.GetInstanceSave(GetInstanceId());
+    if(!save)
+    {
+        sLog.outError("Cannot bind players, no instance save available for map!\n");
+        return;
+    }
+
+    for(PlayerList::iterator itr = i_Players.begin(); itr != i_Players.end(); ++itr)
+    {
+        if(*itr)
+        {
+            // players inside an instance cannot be bound to other instances
+            // some players may already be permanently bound, in this case nothing happens
+            InstancePlayerBind *bind = (*itr)->GetBoundInstance(save->GetMapId(), save->GetDifficulty());
+            if(!bind || !bind->perm)
+            {
+                (*itr)->BindToInstance(save, true);
+                WorldPacket data(SMSG_INSTANCE_SAVE_CREATED, 4);
+                data << uint32(0);
+                (*itr)->GetSession()->SendPacket(&data);
+            }
+
+            Group *group = (*itr)->GetGroup();
+            if(group && group->GetLeaderGUID() == (*itr)->GetGUID())
+                group->BindToInstance(save, true);
+        }
+    }
+}
+
+time_t InstanceMap::GetResetTime()
+{
+    InstanceSave *save = sInstanceSaveManager.GetInstanceSave(GetInstanceId());
+    return save ? save->GetDifficulty() : DIFFICULTY_NORMAL;
+}
+
+bool InstanceMap::CanUnload(const uint32& diff)
+{
+    if(!m_unloadTimer) return false;
+    if(m_unloadTimer < diff) return true;
+    m_unloadTimer -= diff;
+    return false;
+}
+
+void InstanceMap::UnloadAll(bool pForce)
+{
+    if(!i_Players.empty())
+    {
+        sLog.outError("InstanceMap::UnloadAll: there are still players in the instance at unload, should not happen!");
+        for(PlayerList::iterator itr = i_Players.begin(); itr != i_Players.end(); ++itr)
+            if(*itr) (*itr)->TeleportTo((*itr)->m_homebindMapId, (*itr)->m_homebindX, (*itr)->m_homebindY, (*itr)->m_homebindZ, (*itr)->GetOrientation());
+    }
+
+    if(m_resetAfterUnload == true)
+        objmgr.DeleteRespawnTimeForInstance(GetInstanceId());
+
+    Map::UnloadAll(pForce);
+}
+
+void InstanceMap::SendResetWarnings(uint32 timeLeft)
+{
+    for(PlayerList::iterator itr = i_Players.begin(); itr != i_Players.end(); ++itr)
+        (*itr)->SendInstanceResetWarning(GetId(), timeLeft);
+}
+
+void InstanceMap::SetResetSchedule(bool on)
+{
+    // only for normal instances
+    // the reset time is only scheduled when there are no payers inside
+    // it is assumed that the reset time will rarely (if ever) change while the reset is scheduled
+    if(i_Players.empty() && !IsRaid() && !IsHeroic())
+    {
+        InstanceSave *save = sInstanceSaveManager.GetInstanceSave(GetInstanceId());
+        if(!save) sLog.outError("InstanceMap::SetResetSchedule: cannot turn schedule %s, no save available for instance %d of %d", on ? "on" : "off", GetInstanceId(), GetId());
+        else sInstanceSaveManager.ScheduleReset(on, save->GetResetTime(), InstanceSaveManager::InstResetEvent(0, GetId(), GetInstanceId()));
+    }
+}
+
+void InstanceMap::SendToPlayers(WorldPacket const* data) const
+{
+    for(PlayerList::const_iterator itr = i_Players.begin(); itr != i_Players.end(); ++itr)
+        (*itr)->GetSession()->SendPacket(data);
+}

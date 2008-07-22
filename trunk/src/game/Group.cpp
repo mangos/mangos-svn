@@ -26,6 +26,9 @@
 #include "Group.h"
 #include "ObjectAccessor.h"
 #include "BattleGround.h"
+#include "MapManager.h"
+#include "InstanceSaveMgr.h"
+#include "MapInstanced.h"
 
 Group::Group()
 {
@@ -59,6 +62,11 @@ Group::~Group()
         RollId.erase(itr);
         delete(r);
     }
+
+    // may unload some instance saves
+    for(uint8 i = 0; i < TOTAL_DIFFICULTIES; i++)
+        for(BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
+            itr->second.save->RemoveGroup(this);
 }
 
 bool Group::Create(const uint64 &guid, const char * name)
@@ -74,14 +82,22 @@ bool Group::Create(const uint64 &guid, const char * name)
     if(!AddMember(guid, name))
         return false;
 
+    Player *player = objmgr.GetPlayer(guid);
+    if(player)
+    {
+        m_difficulty = player->GetDifficulty();
+    }
+    else
+        m_difficulty = DIFFICULTY_NORMAL;
+
     // store group in database
     CharacterDatabase.BeginTransaction();
-    CharacterDatabase.PExecute("DELETE FROM groups WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
-    CharacterDatabase.PExecute("DELETE FROM group_member WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
-    CharacterDatabase.PExecute("INSERT INTO groups(leaderGuid,mainTank,mainAssistant,lootMethod,looterGuid,lootThreshold,icon1,icon2,icon3,icon4,icon5,icon6,icon7,icon8,isRaid) "
-        "VALUES('%u','%u','%u','%u','%u','%u','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "',0)",
+    CharacterDatabase.PExecute("DELETE FROM groups WHERE leaderGuid ='%u'", GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("DELETE FROM group_member WHERE leaderGuid ='%u'", GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("INSERT INTO groups(leaderGuid,mainTank,mainAssistant,lootMethod,looterGuid,lootThreshold,icon1,icon2,icon3,icon4,icon5,icon6,icon7,icon8,isRaid,difficulty) "
+        "VALUES('%u','%u','%u','%u','%u','%u','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "',0,'%u')",
         GUID_LOPART(m_leaderGuid), GUID_LOPART(m_mainTank), GUID_LOPART(m_mainAssistant), uint32(m_lootMethod),
-        GUID_LOPART(m_looterGuid), uint32(m_lootThreshold), m_targetIcons[0], m_targetIcons[1], m_targetIcons[2], m_targetIcons[3], m_targetIcons[4], m_targetIcons[5], m_targetIcons[6], m_targetIcons[7]);
+        GUID_LOPART(m_looterGuid), uint32(m_lootThreshold), m_targetIcons[0], m_targetIcons[1], m_targetIcons[2], m_targetIcons[3], m_targetIcons[4], m_targetIcons[5], m_targetIcons[6], m_targetIcons[7], m_difficulty);
 
     for(Group::member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
     {
@@ -99,8 +115,8 @@ bool Group::LoadGroupFromDB(const uint64 &leaderGuid, QueryResult *result, bool 
     if(!result)
     {
         external = false;
-        //                                       0          1              2           3           4              5      6      7      8      9      10     11     12     13
-        result = CharacterDatabase.PQuery("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid FROM groups WHERE leaderGuid ='%u'", GUID_LOPART(leaderGuid));
+        //                                       0          1              2           3           4              5      6      7      8      9      10     11     12     13      14
+        result = CharacterDatabase.PQuery("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid, difficulty FROM groups WHERE leaderGuid ='%u'", GUID_LOPART(leaderGuid));
         if(!result)
             return false;
     }
@@ -115,6 +131,7 @@ bool Group::LoadGroupFromDB(const uint64 &leaderGuid, QueryResult *result, bool 
     }
 
     m_groupType  = (*result)[13].GetBool() ? GROUPTYPE_RAID : GROUPTYPE_NORMAL;
+    m_difficulty = (*result)[14].GetUInt8();
     m_mainTank = (*result)[0].GetUInt64();
     m_mainAssistant = (*result)[1].GetUInt64();
     m_lootMethod = (LootMethod)(*result)[2].GetUInt8();
@@ -197,10 +214,14 @@ bool Group::AddMember(const uint64 &guid, const char* name)
     Player *player = objmgr.GetPlayer(guid);
     if(player)
     {
+        if(!IsLeader(player->GetGUID()) && player->getLevel() >= LEVELREQUIREMENT_HEROIC && player->GetDifficulty() != GetDifficulty() && !isBGGroup())
+        {
+            player->SetDifficulty(m_difficulty);
+            player->SendDungeonDifficulty(true);
+        }
         player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
         UpdatePlayerOutOfRange(player);
     }
-
     return true;
 }
 
@@ -225,6 +246,8 @@ uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
             data.Initialize(SMSG_GROUP_LIST, 24);
             data << uint64(0) << uint64(0) << uint64(0);
             player->GetSession()->SendPacket(&data);
+
+            _homebindIfInstance(player);
         }
 
         if(leaderChanged)
@@ -283,6 +306,8 @@ void Group::Disband(bool hideDestroy)
         data.Initialize(SMSG_GROUP_LIST, 24);
         data << uint64(0) << uint64(0) << uint64(0);
         player->GetSession()->SendPacket(&data);
+
+        _homebindIfInstance(player);
     }
     RollId.clear();
     m_memberSlots.clear();
@@ -299,6 +324,9 @@ void Group::Disband(bool hideDestroy)
     CharacterDatabase.PExecute("DELETE FROM groups WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
     CharacterDatabase.PExecute("DELETE FROM group_member WHERE leaderGuid='%u'", GUID_LOPART(m_leaderGuid));
     CharacterDatabase.CommitTransaction();
+
+    if(!isBGGroup())
+        ResetInstances(INSTANCE_RESET_GROUP_DISBAND, NULL);
 
     m_leaderGuid = 0;
     m_leaderName = "";
@@ -803,7 +831,8 @@ void Group::SendUpdate()
             data << (uint8)m_lootMethod;                    // loot method
             data << (uint64)m_looterGuid;                   // looter guid
             data << (uint8)m_lootThreshold;                 // loot threshold
-            data << (uint8)0;                               // 2.1.0 unk
+            data << (uint8)m_difficulty;                    // Heroic Mod Group
+
         }
         player->GetSession()->SendPacket( &data );
     }
@@ -863,6 +892,8 @@ bool Group::_addMember(const uint64 &guid, const char* name, bool isAssistant, u
     if(!guid)
         return false;
 
+    Player *player = objmgr.GetPlayer(guid);
+
     MemberSlot member;
     member.guid      = guid;
     member.name      = name;
@@ -870,11 +901,14 @@ bool Group::_addMember(const uint64 &guid, const char* name, bool isAssistant, u
     member.assistant = isAssistant;
     m_memberSlots.push_back(member);
 
-    Player *player = objmgr.GetPlayer(guid);
     if(player)
     {
         player->SetGroupInvite(NULL);
         player->SetGroup(this, group);
+        // if the same group invites the player back, cancel the homebind timer
+        InstanceGroupBind *bind = GetBoundInstance(player->GetMapId(), player->GetDifficulty());
+        if(bind && bind->save->GetInstanceId() == player->GetInstanceId())
+            player->m_InstanceValid = true;
     }
 
     if(!isRaidGroup())                                      // reset targetIcons for non-raid-groups
@@ -921,90 +955,39 @@ void Group::_setLeader(const uint64 &guid)
     if(slot==m_memberSlots.end())
         return;
 
-    // instance system leader change process
-    if (m_leaderGuid != slot->guid)
+    // update the group's bound instances when changing leaders
+    // TODO: not sure if this is correct
+    Player *player = objmgr.GetPlayer(guid);
+    if(player)
     {
-        // here we must unbind all instances bound to that leader on group members from the
-        // leader, and rebind them on the players
-        uint64 old_guid = m_leaderGuid;
-        uint64 new_guid = slot->guid;
-        std::set< uint32 > changed_bindings;
-        Player* player;
-        BoundInstancesMap::iterator i_BoundInstances;
-
-        // 1) rebind current associations in memory for group members
-        // 2) get current group associations from database (for unbind)
-        // combined because of query building in the iteration
-        if (GetMembersCount() > 0)
+        // first remove all permanent binds
+        for(uint8 i = 0; i < TOTAL_DIFFICULTIES; i++)
         {
-            std::ostringstream ss;
-            ss << "SELECT DISTINCT(map) FROM character_instance WHERE (guid IN (";
-
-            for(member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); )
+            for(BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end();)
             {
-                ss << GUID_LOPART(citr->guid);
-                player = objmgr.GetPlayer(citr->guid);
-                if(player && (citr->guid != old_guid))
+                if(itr->second.perm)
                 {
-                    for(i_BoundInstances = player->m_BoundInstances.begin(); i_BoundInstances != player->m_BoundInstances.end(); i_BoundInstances++)
-                    {
-                        if (i_BoundInstances->second.second == GUID_LOPART(old_guid))
-                        {
-
-                            i_BoundInstances->second.second = GUID_LOPART(new_guid);
-                            changed_bindings.insert(i_BoundInstances->first);
-                        }
-                    }
+                    // both the previous group leader and new one are online
+                    assert(itr->second.save->RemoveGroup(this));
+                    m_boundInstances[i].erase(itr++);
                 }
-                ++citr;
-                if (citr != m_memberSlots.end()) ss << ", ";
-            }
-            ss << ")) AND (leader = '" << GUID_LOPART(old_guid) << "')";
-            QueryResult* result = CharacterDatabase.Query(ss.str().c_str());
-            if (result)
-            {
-                do
-                {
-                    Field* fields = result->Fetch();
-                    changed_bindings.insert(fields[0].GetUInt32());
-                } while(result->NextRow());
-                delete result;
+                else
+                    ++itr;
             }
         }
 
-        // rebind changed associations in memory for old leader
-        player = objmgr.GetPlayer(old_guid);
-        if(player)
-        {
-            for (std::set< uint32 >::iterator i = changed_bindings.begin(); i != changed_bindings.end(); i++)
-            {
-                i_BoundInstances = player->m_BoundInstances.find(*i);
-                if (i_BoundInstances != player->m_BoundInstances.end()) i_BoundInstances->second.second = GUID_LOPART(new_guid);
-            }
-        }
-
-        // rebind changed associations in database
-        if (!changed_bindings.empty())
-        {
-            std::ostringstream ss;
-            ss << "UPDATE character_instance SET leader = '" << GUID_LOPART(new_guid) << "' WHERE (map IN (";
-            {
-                std::set< uint32 >::iterator i = changed_bindings.begin();
-                while (i != changed_bindings.end())
-                {
-                    ss << "'" << *i << "'";
-                    ++i;
-                    if (i != changed_bindings.end()) ss << ", ";
-                }
-            }
-            ss << ")) AND (leader = '" << GUID_LOPART(old_guid) << "')";
-            CharacterDatabase.Execute(ss.str().c_str());
-        }
+        // add the permanent binds of the player
+        // (assuming the player won't have solo binds when in group)
+        player->ConvertInstancesToGroup(true);
     }
 
+    // TODO: set a time limit to have this function run rarely cause it can be slow
     CharacterDatabase.BeginTransaction();
     CharacterDatabase.PExecute("UPDATE groups SET leaderGuid='%u' WHERE leaderGuid='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
     CharacterDatabase.PExecute("UPDATE group_member SET leaderGuid='%u' WHERE leaderGuid='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("DELETE FROM group_instance WHERE leaderguid='%u' AND permanent = 1", GUID_LOPART(m_leaderGuid));
+    CharacterDatabase.PExecute("INSERT INTO group_instance SELECT guid, instance, permanent FROM character_instance WHERE guid = '%u' AND permanent = 1", GUID_LOPART(slot->guid));
+    CharacterDatabase.PExecute("UPDATE group_instance SET leaderGuid='%u' WHERE leaderGuid = '%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
     CharacterDatabase.CommitTransaction();
 
     m_leaderGuid = slot->guid;
@@ -1200,4 +1183,154 @@ void Roll::targetObjectBuildLink()
 {
     // called from link()
     this->getTarget()->addLootValidatorRef(this);
+}
+
+void Group::SetDifficulty(uint8 difficulty)
+{
+    m_difficulty = difficulty;
+    CharacterDatabase.PExecute("UPDATE groups SET difficulty = %u WHERE leaderGuid ='%u'", m_difficulty, GUID_LOPART(m_leaderGuid));
+
+    for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player *player = itr->getSource();
+        if(!player->GetSession() || player->getLevel() < LEVELREQUIREMENT_HEROIC)
+            continue;
+        player->SetDifficulty(difficulty);
+        player->SendDungeonDifficulty(true);
+    }
+}
+
+bool Group::InCombatToInstance(uint32 instanceId)
+{
+    for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player *pPlayer = itr->getSource();
+        if(pPlayer->getAttackers().size() && pPlayer->GetInstanceId() == instanceId)
+            return true;
+    }
+    return false;
+}
+
+void Group::ResetInstances(uint8 method, Player* SendMsgTo)
+{
+    // method can be INSTANCE_RESET_ALL, INSTANCE_RESET_CHANGE_DIFFICULTY, INSTANCE_RESET_GROUP_DISBAND
+
+    // we assume that when the difficulty changes, all instances that can be reset will be
+    uint8 dif = GetDifficulty();
+     
+    for(BoundInstancesMap::iterator itr = m_boundInstances[dif].begin(); itr != m_boundInstances[dif].end();)
+    {
+        InstanceSave *p = itr->second.save;
+        const MapEntry *entry = sMapStore.LookupEntry(itr->first);
+        if(!entry || !p->CanReset())
+        {
+            ++itr;
+            continue;
+        }
+
+        if(method == INSTANCE_RESET_ALL)
+        {
+            // the "reset all instances" method can only reset normal maps
+            if(dif == DIFFICULTY_HEROIC || entry->map_type == MAP_RAID)
+            {
+                ++itr;
+                continue;
+            }
+        }
+
+        bool isEmpty = true;
+        // if the map is loaded, reset it
+        Map *map = MapManager::Instance().FindMap(p->GetMapId());
+        if(map && map->Instanceable())
+        {
+            Map *iMap = ((MapInstanced*)map)->FindMap(p->GetInstanceId());
+            if(iMap && iMap->IsDungeon())
+                isEmpty = ((InstanceMap*)iMap)->Reset(method);
+        }
+
+        if(SendMsgTo)
+        {
+            if(isEmpty) SendMsgTo->SendResetInstanceSuccess(p->GetMapId());
+            else SendMsgTo->SendResetInstanceFailed(0, p->GetMapId());
+        }
+
+        if(isEmpty || method == INSTANCE_RESET_GROUP_DISBAND || method == INSTANCE_RESET_CHANGE_DIFFICULTY)
+        {
+            p->DeleteFromDB();
+            // i don't know for sure if hash_map iterators 
+            m_boundInstances[dif].erase(itr);
+            itr = m_boundInstances[dif].begin();
+            // this unloads the instance save unless online players are bound to it
+            // (eg. permanent binds or GM solo binds)
+            p->RemoveGroup(this);
+        }
+        else
+            ++itr;
+    }
+}
+
+InstanceGroupBind* Group::GetBoundInstance(uint32 mapid, uint8 difficulty)
+{
+    // some instances only have one difficulty
+    const MapEntry* entry = sMapStore.LookupEntry(mapid);
+    if(!entry || !entry->SupportsHeroicMode()) difficulty = DIFFICULTY_NORMAL;
+
+    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
+    if(itr != m_boundInstances[difficulty].end())
+        return &itr->second;
+    else
+        return NULL;
+}
+
+InstanceGroupBind* Group::BindToInstance(InstanceSave *save, bool permanent, bool load)
+{
+    if(save)
+    {
+        InstanceGroupBind& bind = m_boundInstances[save->GetDifficulty()][save->GetMapId()];
+        if(bind.save)
+        {
+            // when a boss is killed or when copying the players's binds to the group
+            if(permanent != bind.perm || save != bind.save)
+                if(!load) CharacterDatabase.PExecute("UPDATE group_instance SET instance = '%u', permanent = '%u' WHERE leaderGuid = '%u' AND instance = '%u'", save->GetInstanceId(), permanent, GUID_LOPART(GetLeaderGUID()), bind.save->GetInstanceId());
+        }
+        else
+            if(!load) CharacterDatabase.PExecute("INSERT INTO group_instance (leaderGuid, instance, permanent) VALUES ('%u', '%u', '%u')", GUID_LOPART(GetLeaderGUID()), save->GetInstanceId(), permanent);
+
+        if(bind.save != save)
+        {
+            if(bind.save) bind.save->RemoveGroup(this);
+            save->AddGroup(this);
+        }
+
+        bind.save = save;
+        bind.perm = permanent;
+        if(!load) sLog.outDebug("Group::BindToInstance: %d is now bound to map %d, instance %d, difficulty %d", GUID_LOPART(GetLeaderGUID()), save->GetMapId(), save->GetInstanceId(), save->GetDifficulty());
+        return &bind;
+    }
+    else
+        return NULL;
+}
+
+void Group::UnbindInstance(uint32 mapid, uint8 difficulty, bool unload)
+{
+    BoundInstancesMap::iterator itr = m_boundInstances[difficulty].find(mapid);
+    if(itr != m_boundInstances[difficulty].end())
+    {
+        if(!unload) CharacterDatabase.PExecute("DELETE FROM group_instance WHERE leaderGuid = '%u' AND instance = '%u'", GUID_LOPART(GetLeaderGUID()), itr->second.save->GetInstanceId());
+        itr->second.save->RemoveGroup(this);                // save can become invalid
+        m_boundInstances[difficulty].erase(itr);
+    }
+}
+
+void Group::_homebindIfInstance(Player *player)
+{
+    if(player && !player->isGameMaster() && MapManager::Instance().GetBaseMap(player->GetMapId())->IsDungeon())
+    {
+        // leaving the group in an instance, the homebind timer is started
+        // unless the player is permanently saved to the instance
+        InstanceSave *save = sInstanceSaveManager.GetInstanceSave(player->GetInstanceId());
+        InstancePlayerBind *playerBind = save ? player->GetBoundInstance(save->GetMapId(), save->GetDifficulty()) : NULL;
+        if(!playerBind || !playerBind->perm)
+            player->m_InstanceValid = false;
+    }
 }

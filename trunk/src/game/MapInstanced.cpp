@@ -21,8 +21,9 @@
 #include "MapManager.h"
 #include "BattleGround.h"
 #include "VMapFactory.h"
+#include "InstanceSaveMgr.h"
 
-MapInstanced::MapInstanced(uint32 id, time_t expiry, uint32 aInstanceId) : Map(id, expiry, 0)
+MapInstanced::MapInstanced(uint32 id, time_t expiry, uint32 aInstanceId) : Map(id, expiry, 0, 0)
 {
     // initialize instanced maps list
     m_InstancedMaps.clear();
@@ -36,33 +37,17 @@ void MapInstanced::Update(const uint32& t)
     Map::Update(t);
 
     // update the instanced maps
-    HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = m_InstancedMaps.begin();
+    InstancedMaps::iterator i = m_InstancedMaps.begin();
 
     while (i != m_InstancedMaps.end())
     {
-        if (i->second->NeedsReset())
+        if(i->second->CanUnload(t))
         {
-            if (!i->second->HavePlayers())
-            {
-                i->second->Reset();
-                // avoid doing ++ on invalid data
-                InstancedMaps::iterator i_old = i;
-                ++i;
-                // erase map
-                delete i_old->second;
-                m_InstancedMaps.erase(i_old);
-            }
-            else
-            {
-                // shift reset time of the map
-                i->second->InitResetTime();
-                ++i;
-            }
+            DestroyInstance(i);                             // iterator incremented
         }
         else
         {
             // update only here, because it may schedule some bad things before delete
-            // in the other case
             i->second->Update(t);
             ++i;
         }
@@ -71,7 +56,7 @@ void MapInstanced::Update(const uint32& t)
 
 void MapInstanced::MoveAllCreaturesInMoveList()
 {
-    for (HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); i++)
+    for (InstancedMaps::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); i++)
     {
         i->second->MoveAllCreaturesInMoveList();
     }
@@ -81,7 +66,7 @@ bool MapInstanced::RemoveBones(uint64 guid, float x, float y)
 {
     bool remove_result = false;
 
-    for (HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); i++)
+    for (InstancedMaps::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); i++)
     {
         remove_result = remove_result || i->second->RemoveBones(guid, x, y);
     }
@@ -92,11 +77,11 @@ bool MapInstanced::RemoveBones(uint64 guid, float x, float y)
 void MapInstanced::UnloadAll(bool pForce)
 {
     // Unload instanced maps
-    for (HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); i++)
+    for (InstancedMaps::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); i++)
         i->second->UnloadAll(pForce);
 
     // Delete the maps only after everything is unloaded to prevent crashes
-    for (HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); i++)
+    for (InstancedMaps::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); i++)
         delete i->second;
 
     m_InstancedMaps.clear();
@@ -105,245 +90,153 @@ void MapInstanced::UnloadAll(bool pForce)
     Map::UnloadAll(pForce);
 }
 
+/*
+- return the right instance for the object, based on its InstanceId
+- create the instance if it's not created already
+- the player is not actually added to the instance (only in InstanceMap::Add)
+*/
 Map* MapInstanced::GetInstance(const WorldObject* obj)
 {
-    uint32 InstanceId = obj->GetInstanceId();
+    uint32 CurInstanceId = obj->GetInstanceId();
     Map* map = NULL;
 
-    if (InstanceId != 0) map = _FindMap(InstanceId);
-
-                                                            // return map for non-player objects
-    if (map && obj->GetTypeId() != TYPEID_PLAYER) return(map);
-
-    if (obj->GetTypeId() != TYPEID_PLAYER)
+    if (obj->GetMapId() == GetId() && CurInstanceId != 0)
     {
-        sLog.outDebug("MAPINSTANCED: WorldObject '%u' (Entry: %u Type: %u) is requesting instance '%u' of map '%u', instantiating", obj->GetGUIDLow(), obj->GetEntry(), obj->GetTypeId(), InstanceId, GetId());
-
-        if (InstanceId == 0)
+        // the object wants to be put in a certain instance of this map
+        map = _FindMap(CurInstanceId);
+        if (map)
         {
-            sLog.outError("MAPINSTANCED: WorldObject '%u' (Entry: %u Type: %u) requested base map instance of map '%u', this must not happen", obj->GetGUIDLow(), obj->GetEntry(), obj->GetTypeId(), GetId());
-            return(this);
+            // it's already loaded
+            return(map);
         }
-
-        // short instantiate process for world object
-        CreateInstance(InstanceId, map);
-        return(map);
-    }
-
-    // here we do additionally verify, if the player is allowed in instance by leader
-    // and if it has current instance bound correctly
-    Player* player = (Player*)obj;
-
-    // reset instance validation flag
-    player->m_InstanceValid = true;
-
-    BoundInstancesMap::iterator i = player->m_BoundInstances.find(GetId());
-    if (i != player->m_BoundInstances.end())
-    {
-        // well, we have an instance bound, really, verify self or group leader
-        if (!((player->GetGUIDLow() == i->second.second) ||
-            (player->GetGroup() &&
-            (GUID_LOPART(player->GetGroup()->GetLeaderGUID()) == i->second.second))))
+        else
         {
-            // well, we are bound to instance, but are not a leader and are not in the correct group
-            // we must not rebind us or the instantiator (which can surely be the same)
-            // will remain bound if accepted into group or will be unbound, if we go to homebind
-            InstanceId = i->second.first;                   // restore the instance bound
-            player->m_InstanceValid = false;                // player instance is invalid
-            if (InstanceId != 0) map = _FindMap(InstanceId);// restore the map bound
+            // not loaded then try to load it
+            if(obj->GetTypeId() != TYPEID_PLAYER)
+            {
+                // creatures/gameobjects are not allowed to load new instances for themselves
+                sLog.outError("MAPINSTANCED: WorldObject '%u' (Entry: %u Type: %u) is requesting instance '%u' of map '%u', instantiating", obj->GetGUIDLow(), obj->GetEntry(), obj->GetTypeId(), CurInstanceId, GetId());
+                assert(false);
+                return NULL;
+            }
+            else
+            {
+                //If the player has left game, being in instance, and the server has crashed
+                //at the next login of the player we should create new instance with the same ID
+                //and add this player in it.
+
+                Player *player = (Player*)obj;
+                InstanceSave *save = NULL;
+
+                if(!player->IsInWorld())
+                    assert(false);
+
+                const MapEntry *entry = sMapStore.LookupEntry(GetId());
+                switch(entry->map_type)
+                {
+                    case MAP_INSTANCE:
+                    case MAP_RAID:
+                        if(!(save = sInstanceSaveManager.GetInstanceSave(CurInstanceId)))
+                        {
+                            sLog.outError("MapInstanced::GetInstance: player %d has %d instanceId but no instance save can be found!", player->GetGUIDLow(), CurInstanceId, player->GetMapId());
+                            assert(false);
+                        }
+                        else
+                            return CreateInstance(CurInstanceId, save, player->GetDifficulty());
+                    default:
+                        sLog.outError("MapInstanced::GetInstance: unhandled map type %d!", entry->map_type);
+                        assert(false);
+                        return NULL;
+                }
+            }
         }
     }
     else
     {
-        // the player has no map bindings, we can proceed safely creating a new one
-        map = NULL;
-    }
-
-    if (map) return(map);                                   // here we go, the map is found and we are correctly bound
-
-    Player* instantiator = NULL;
-    uint32 instantiator_id = 0;
-    bool instantiator_online = true;
-    bool instantiator_bound = false;
-
-    // we do need to scan for the instantiator, if the instance we scan for is valid, not temporary
-    if (player->m_InstanceValid)
-    {
-        // either we are not bound to the instance, or we have to create new instance, do it
-        InstanceId = 0;
-
-        // determine the instantiator which designates the instance id
-        if (player->GetGroup())
+        // instance not specified, find an existing or create a new one
+        if(obj->GetTypeId() != TYPEID_PLAYER)
         {
-            // instantiate map for group leader (possibly got from the database)
-            sLog.outDebug("MAPINSTANCED: Player '%s' (GUID: %u) is in group, instantiating map for group leader", player->GetName(),player->GetGUIDLow());
-            instantiator = objmgr.GetPlayer(player->GetGroup()->GetLeaderGUID());
-            if (!instantiator)
-            {
-                // the very special case: leader is not online, read instance map from DB
-                instantiator_online = false;
-            }
-        }
-
-        if (!instantiator && instantiator_online)
-        {
-            sLog.outDebug("MAPINSTANCED: Player '%s' (GUID: %u) is not in group, instantiating map for player", player->GetName(),player->GetGUIDLow());
-            instantiator = player;
-        }
-
-        // now, get the real instance id from the instantiator
-        if (instantiator_online)
-        {
-            // player online, normal instantianting
-            sLog.outDebug("MAPINSTANCED: Instantiating map for player '%s' (GUID: %u) (group leader '%s')", player->GetName(), player->GetGUIDLow(), instantiator->GetName());
-            instantiator_id = instantiator->GetGUIDLow();
-            BoundInstancesMap::iterator i = instantiator->m_BoundInstances.find(GetId());
-            if (i != instantiator->m_BoundInstances.end())
-            {
-                // the instantiator has his instance bound
-                InstanceId = i->second.first;
-                // this check is to avoid the case where remote instantiator has his instance
-                // bound to another remote instantiator (e.g. exited from group recently)
-                // if that is the case, the instance for him will be regenerated and rebound
-                if ((instantiator == player) || (i->second.second == instantiator_id))
-                {
-                    // player is instantiator or instantiator has his instance bound to himself
-                    instantiator_bound = true;
-                }
-            }
+            sLog.outError("MAPINSTANCED: WorldObject '%u' (Entry: %u Type: %u) requested base map instance of map '%u', this must not happen", obj->GetGUIDLow(), obj->GetEntry(), obj->GetTypeId(), GetId());
+            assert(false);
+            return NULL;
         }
         else
         {
-            // the aforementioned "very special" case of leader being not online
-            sLog.outDebug("MAPINSTANCED: Instantiating map for player '%s' (GUID: %u) (group leader is not online, querying DB)", player->GetName(),player->GetGUIDLow());
-            instantiator_id = GUID_LOPART(player->GetGroup()->GetLeaderGUID());
-            QueryResult* result = CharacterDatabase.PQuery("SELECT instance FROM character_instance WHERE (guid = '%u') AND (map = '%u') AND (leader = '%u')", instantiator_id, GetId(), instantiator_id);
-            if (result)
+            uint32 NewInstanceId = 0;                       // instanceId of the resulting map
+            Player* player = (Player*)obj;
+
+            // TODO: battlegrounds and arenas
+
+            InstancePlayerBind *pBind = player->GetBoundInstance(GetId(), player->GetDifficulty());
+            InstanceSave *pSave = pBind ? pBind->save : NULL;
+
+            // the player's permanet player bind is taken into consideration first
+            // then the player's group bind and finally the solo bind.
+            if(!pBind || !pBind->perm)
             {
-                // the instantiator has his instance bound
-                InstanceId = result->Fetch()[0].GetUInt32();
-                instantiator_bound = true;
-                delete result;
+                InstanceGroupBind *groupBind = NULL;
+                Group *group = player->GetGroup();
+                // use the player's difficulty setting (it may not be the same as the group's)
+                if(group && (groupBind = group->GetBoundInstance(GetId(), player->GetDifficulty())))
+                    pSave = groupBind->save;
             }
-        }
 
-        // check, if we have to generate new instance
-        if (!instantiator_bound || (InstanceId == 0))
-        {
-            // yes, new instance id has to be generated
-            InstanceId = MapManager::Instance().GenerateInstanceId();
-        }
-        else
-        {
-            // find map of the designated instance and verify it
-            map = _FindMap(InstanceId);
-        }
-    }
-
-    // now create the instance
-    CreateInstance(InstanceId, map);
-
-    // we do need to bind instance, if the instance we use is valid, not temporary
-    if (player->m_InstanceValid)
-    {
-        // bind instance to instantiator (only if needed)
-        if (!instantiator_bound)
-        {
-            CharacterDatabase.BeginTransaction();
-            if (instantiator_online)
+            if(pSave)
             {
-                // player online, normal bind
-                instantiator->m_BoundInstances[GetId()] = std::pair< uint32, uint32 >(InstanceId, instantiator_id);
-                CharacterDatabase.PExecute("DELETE FROM character_instance WHERE (guid = '%u') AND (map = '%u')", instantiator_id, GetId());
-                CharacterDatabase.PExecute("INSERT INTO character_instance VALUES ('%u', '%u', '%u', '%u')", instantiator_id, GetId(), InstanceId, instantiator_id);
+                // solo/perm/group
+                NewInstanceId = pSave->GetInstanceId();
+                map = _FindMap(NewInstanceId);
+                // it is possible that the save exists but the map doesn't
+                if(!map)
+                    map = CreateInstance(NewInstanceId, pSave, pSave->GetDifficulty());
+                return map;
             }
             else
             {
-                // the aforementioned "very special" case of leader being not online
-                CharacterDatabase.PExecute("DELETE FROM character_instance WHERE (guid = '%u') AND (map = '%u')", GUID_LOPART(player->GetGroup()->GetLeaderGUID()), GetId());
-                CharacterDatabase.PExecute("INSERT INTO character_instance VALUES ('%u', '%u', '%u', '%u')", GUID_LOPART(player->GetGroup()->GetLeaderGUID()), GetId(), InstanceId, GUID_LOPART(player->GetGroup()->GetLeaderGUID()));
+                // if no instanceId via group members or instance saves is found
+                // the instance will be created for the first time
+                NewInstanceId = MapManager::Instance().GenerateInstanceId();
+                return CreateInstance(NewInstanceId, NULL, player->GetDifficulty());
             }
-            CharacterDatabase.CommitTransaction();
-        }
-
-        // bind instance to player (avoid duplicate binding)
-        if (instantiator != player)
-        {
-            CharacterDatabase.BeginTransaction();
-            if (instantiator_online)
-            {
-                player->m_BoundInstances[GetId()] = std::pair< uint32, uint32 >(InstanceId, instantiator_id);
-                CharacterDatabase.PExecute("DELETE FROM character_instance WHERE (guid = '%u') AND (map = '%u')", player->GetGUIDLow(), GetId());
-                CharacterDatabase.PExecute("INSERT INTO character_instance VALUES ('%u', '%u', '%u', '%u')", player->GetGUIDLow(), GetId(), InstanceId, instantiator_id);
-            }
-            else
-            {
-                // the aforementioned "very special" case of leader being not online
-                player->m_BoundInstances[GetId()] = std::pair< uint32, uint32 >(InstanceId, GUID_LOPART(player->GetGroup()->GetLeaderGUID()));
-                CharacterDatabase.PExecute("DELETE FROM character_instance WHERE (guid = '%u') AND (map = '%u')", player->GetGUIDLow(), GetId());
-                CharacterDatabase.PExecute("INSERT INTO character_instance VALUES ('%u', '%u', '%u', '%u')", player->GetGUIDLow(), GetId(), InstanceId, GUID_LOPART(player->GetGroup()->GetLeaderGUID()));
-            }
-            CharacterDatabase.CommitTransaction();
         }
     }
-
-    // set instance id for instantiating player
-    if (player->GetPet()) player->GetPet()->SetInstanceId(InstanceId);
-    player->SetInstanceId(InstanceId);
-
-    return(map);
 }
 
-void MapInstanced::CreateInstance(uint32 InstanceId, Map* &map)
+InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save, uint8 difficulty)
 {
-    if (!IsValidInstance(InstanceId))
-    {
-        // instance is invalid, need to verify map presence
-        if (map)
-        {
-            // map for the instance is present, but the instance itself is no more valid, destroy map
-            Guard guard(*this);
+    // load/create a map
+    Guard guard(*this);
 
-            map->Reset();
-            m_InstancedMaps.erase(InstanceId);
-            delete map;
-            map = NULL;
-        }
-    }
+    // some instances only have one difficulty
+    const MapEntry* entry = sMapStore.LookupEntry(GetId());
+    if(!entry || !entry->SupportsHeroicMode()) difficulty = DIFFICULTY_NORMAL;
 
-    // verify, if we have the map created, and create it if needed
-    if (!map)
-    {
-        // map does not exist, create it
-        Guard guard(*this);
+    sLog.outDebug("MapInstanced::CreateInstance: %smap instance %d for %d created with difficulty %s", save?"":"new ", InstanceId, GetId(), difficulty?"heroic":"normal");
+ 
+    InstanceMap *map = new InstanceMap(GetId(), GetGridExpiry(), InstanceId, difficulty);
+    assert(map->IsDungeon());
 
-        map = new Map(GetId(), GetGridExpiry(), InstanceId);
-        m_InstancedMaps[InstanceId] = map;
-    }
+    bool load_data = save != NULL;
+    map->CreateInstanceData(load_data);
+
+    m_InstancedMaps[InstanceId] = map;
+    return map;
 }
 
-bool MapInstanced::IsValidInstance(uint32 InstanceId)
+void MapInstanced::DestroyInstance(uint32 InstanceId)
 {
-    // verify, if the map exists and needs to be reset
-    Map* m = _FindMap(InstanceId);
-
-    if (m && m->NeedsReset())
-    {
-        // check for real reset need (can only reset if no players)
-        if (!m->HavePlayers())
-            return false;                                   // map exists, but needs reset
-        // shift reset time of the map to a bit later
-        m->InitResetTime();
-    }
-
-    // verify, if the map theoretically exists but not loaded
-    QueryResult* result = CharacterDatabase.PQuery("SELECT '1' FROM instance WHERE (id = '%u') AND (map = '%u') AND (resettime > " I64FMTD ")", InstanceId, GetId(), (uint64)time(NULL));
-    if (result)
-    {
-        delete result;
-        return(true);
-    }
-
-    // no map exists at all
-    return(false);
+    InstancedMaps::iterator itr = m_InstancedMaps.find(InstanceId);
+    if(itr != m_InstancedMaps.end())
+        DestroyInstance(itr);
 }
+
+// increments the iterator after erase
+void MapInstanced::DestroyInstance(InstancedMaps::iterator &itr)
+{
+    itr->second->UnloadAll(true);
+    VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(itr->second->GetId());
+    // erase map
+    delete itr->second;
+    m_InstancedMaps.erase(itr++);
+}
+

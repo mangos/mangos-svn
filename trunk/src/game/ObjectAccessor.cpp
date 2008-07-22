@@ -35,6 +35,7 @@
 #include "GridNotifiersImpl.h"
 #include "Opcodes.h"
 #include "ObjectDefines.h"
+#include "MapInstanced.h"
 
 #include <cmath>
 
@@ -516,7 +517,9 @@ ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
 
     // remove resurrectble corpse from grid object registry (loaded state checked into call)
     // do not load the map if it's not loaded
-    Map *map = MapManager::Instance().GetMap(corpse->GetMapId(), corpse);
+    Map *map = MapManager::Instance().FindMap(corpse->GetMapId());
+    if(map && map->Instanceable())
+        map = ((MapInstanced*)map)->FindMap(corpse->GetInstanceId());
     if(map) map->Remove(corpse,false);
 
     // remove corpse from DB

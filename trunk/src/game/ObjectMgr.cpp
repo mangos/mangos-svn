@@ -37,6 +37,7 @@
 #include "GameEvent.h"
 #include "Spell.h"
 #include "Chat.h"
+#include "InstanceSaveMgr.h"
 #include "SpellAuras.h"
 
 INSTANTIATE_SINGLETON_1(ObjectMgr);
@@ -2402,8 +2403,8 @@ void ObjectMgr::LoadGroups()
     Group *group = NULL;
     uint64 leaderGuid = 0;
     uint32 count = 0;
-    //                                                     0         1              2           3           4              5      6      7      8      9      10     11     12     13      14
-    QueryResult *result = CharacterDatabase.PQuery("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid, leaderGuid FROM groups");
+    //                                                     0         1              2           3           4              5      6      7      8      9      10     11     12     13      14          15
+    QueryResult *result = CharacterDatabase.PQuery("SELECT mainTank, mainAssistant, lootMethod, looterGuid, lootThreshold, icon1, icon2, icon3, icon4, icon5, icon6, icon7, icon8, isRaid, difficulty, leaderGuid FROM groups");
 
     if( !result )
     {
@@ -2423,7 +2424,7 @@ void ObjectMgr::LoadGroups()
         bar.step();
         Field *fields = result->Fetch();
         ++count;
-        leaderGuid = MAKE_NEW_GUID(fields[14].GetUInt32(),0,HIGHGUID_PLAYER);
+        leaderGuid = MAKE_NEW_GUID(fields[15].GetUInt32(),0,HIGHGUID_PLAYER);
 
         group = new Group;
         if(!group->LoadGroupFromDB(leaderGuid, result, false))
@@ -2439,6 +2440,51 @@ void ObjectMgr::LoadGroups()
 
     sLog.outString();
     sLog.outString( ">> Loaded %u group definitions", count );
+
+    // -- loading instances --
+    count = 0;
+    group = NULL;
+    leaderGuid = 0;
+    result = CharacterDatabase.PQuery(
+        //      0           1    2         3          4           5
+        "SELECT leaderGuid, map, instance, permanent, difficulty, resettime, "
+        // 6
+        "(SELECT COUNT(*) FROM character_instance WHERE guid = leaderGuid AND instance = group_instance.instance AND permanent = 1 LIMIT 1) "
+        "FROM group_instance LEFT JOIN instance ON instance = id ORDER BY leaderGuid"
+    );
+
+    if(!result)
+    {
+        barGoLink bar( 1 );
+        bar.step();
+    }
+    else
+    {
+        barGoLink bar( result->GetRowCount() );
+        do
+        {
+            bar.step();
+            Field *fields = result->Fetch();
+            count++;
+            leaderGuid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
+            if(!group || group->GetLeaderGUID() != leaderGuid)
+            {
+                group = GetGroupByLeader(leaderGuid);
+                if(!group)
+                {
+                    sLog.outErrorDb("Incorrect entry in group_instance table : no group with leader %d", fields[0].GetUInt32());
+                    continue;
+                }
+            }
+
+            InstanceSave *save = sInstanceSaveManager.AddInstanceSave(fields[1].GetUInt32(), fields[2].GetUInt32(), fields[4].GetUInt8(), (time_t)fields[5].GetUInt64(), (fields[6].GetUInt32() == 0), true);
+            group->BindToInstance(save, fields[3].GetBool(), true);
+        }while( result->NextRow() );
+        delete result;
+    }
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u group-instance binds total", count );
 
     // -- loading members --
     count = 0;
@@ -3790,6 +3836,35 @@ void ObjectMgr::LoadPageTextLocales()
 void ObjectMgr::LoadInstanceTemplate()
 {
     sInstanceTemplate.Load();
+
+    for(uint32 i = 0; i < sInstanceTemplate.MaxEntry; i++)
+    {
+        InstanceTemplate* temp = (InstanceTemplate*)GetInstanceTemplate(i);
+        if(!temp) continue;
+        const MapEntry* entry = sMapStore.LookupEntry(temp->map);
+        if(!entry)
+        {
+            sLog.outErrorDb("ObjectMgr::LoadInstanceTemplate: bad mapid %d for template!", temp->map);
+            continue;
+        }
+        else if(!entry->HasResetTime())
+            continue;
+
+        if(temp->reset_delay == 0)
+        {
+            // use defaults from the DBC
+            if(entry->SupportsHeroicMode())
+            {
+                temp->reset_delay = entry->resetTimeHeroic / DAY;
+            }
+            else if (entry->resetTimeRaid && entry->map_type == MAP_RAID)
+            {
+                temp->reset_delay = entry->resetTimeRaid / DAY;
+            }
+        }
+
+        temp->reset_delay = (uint32)(temp->reset_delay * sWorld.getRate(RATE_INSTANCE_RESET_TIME));
+    }
 
     sLog.outString( ">> Loaded %u Instance Template definitions", sInstanceTemplate.RecordCount );
     sLog.outString();
@@ -5292,15 +5367,39 @@ void ObjectMgr::LoadReputationOnKill()
 
 void ObjectMgr::CleanupInstances()
 {
-    // this routine cleans up old instances from all the tables before server start
+    uint64 now = (uint64)time(NULL);
 
-    uint32 okcount = 0;
-    uint32 delcount = 0;
+    barGoLink bar(2);
+    bar.step();
 
-    QueryResult *result;
+    // load reset times and clean expired instances
+    sInstanceSaveManager.LoadResetTimes();
 
+    // clean character/group - instance binds with invalid group/characters
+    CharacterDatabase.DirectPExecute("DELETE FROM character_instance USING character_instance LEFT JOIN characters ON character_instance.guid = characters.guid WHERE characters.guid IS NULL");
+    CharacterDatabase.DirectPExecute("DELETE FROM group_instance USING group_instance LEFT JOIN characters ON group_instance.leaderGuid = characters.guid LEFT JOIN groups ON group_instance.leaderGuid = groups.leaderGuid WHERE characters.guid IS NULL OR groups.leaderGuid IS NULL");
+
+    // clean instances that do not have any players or groups bound to them
+    CharacterDatabase.DirectPExecute("DELETE FROM instance USING instance LEFT JOIN character_instance ON character_instance.instance = id LEFT JOIN group_instance ON group_instance.instance = id WHERE character_instance.instance IS NULL AND group_instance.instance IS NULL");
+
+    // clean invalid instance references in other tables
+    CharacterDatabase.PExecute("DELETE FROM character_instance USING character_instance LEFT JOIN instance ON character_instance.instance = instance.id WHERE instance.id IS NULL");
+    CharacterDatabase.PExecute("DELETE FROM group_instance USING group_instance LEFT JOIN instance ON group_instance.instance = instance.id WHERE instance.id IS NULL");
+
+    // creature_respawn and gameobject_respawn are in another database
     // first, obtain total instance set
     std::set< uint32 > InstanceSet;
+    QueryResult *result = CharacterDatabase.PQuery("SELECT id FROM instance");
+    if( result )
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            InstanceSet.insert(fields[0].GetUInt32());
+        }
+        while (result->NextRow());
+        delete result;
+    }
 
     // creature_respawn
     result = WorldDatabase.PQuery("SELECT DISTINCT(instance) FROM creature_respawn WHERE instance <> 0");
@@ -5309,7 +5408,8 @@ void ObjectMgr::CleanupInstances()
         do
         {
             Field *fields = result->Fetch();
-            InstanceSet.insert(fields[0].GetUInt32());
+            if(InstanceSet.find(fields[0].GetUInt32()) == InstanceSet.end())
+                WorldDatabase.DirectPExecute("DELETE FROM creature_respawn WHERE instance = '%u'", fields[0].GetUInt32());
         }
         while (result->NextRow());
         delete result;
@@ -5322,87 +5422,30 @@ void ObjectMgr::CleanupInstances()
         do
         {
             Field *fields = result->Fetch();
-            InstanceSet.insert(fields[0].GetUInt32());
+            if(InstanceSet.find(fields[0].GetUInt32()) == InstanceSet.end())
+                WorldDatabase.DirectPExecute("DELETE FROM gameobject_respawn WHERE instance = '%u'", fields[0].GetUInt32());
         }
         while (result->NextRow());
         delete result;
     }
 
-    // character_instance
-    result = CharacterDatabase.PQuery("SELECT DISTINCT(instance) FROM character_instance");
-    if( result )
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-            InstanceSet.insert(fields[0].GetUInt32());
-        }
-        while (result->NextRow());
-        delete result;
-    }
-
-    // instance
-    result = CharacterDatabase.PQuery("SELECT id FROM instance");
-    if( result )
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-            InstanceSet.insert(fields[0].GetUInt32());
-        }
-        while (result->NextRow());
-        delete result;
-    }
-
-    // now remove all valid instances from instance list (it will become list of instances to delete)
-    // instances considered valid:
-    //   1) reset time > current time
-    //   2) bound to at least one character (id is found in character_instance table)
-    result = CharacterDatabase.PQuery("SELECT DISTINCT(instance.id) AS id FROM instance LEFT JOIN character_instance ON (character_instance.instance = instance.id) WHERE (instance.id = character_instance.instance) AND (instance.resettime > " I64FMTD ")", (uint64)time(NULL));
-    if( result )
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-            if (InstanceSet.find(fields[0].GetUInt32()) != InstanceSet.end())
-            {
-                InstanceSet.erase(fields[0].GetUInt32());
-                ++okcount;
-            }
-        }
-        while (result->NextRow());
-        delete result;
-    }
-
-    delcount = InstanceSet.size();
-
-    barGoLink bar( delcount + 1 );
     bar.step();
-
-    // remove all old instances from tables
-    for (std::set< uint32 >::iterator i = InstanceSet.begin(); i != InstanceSet.end(); i++)
-    {
-        WorldDatabase.PExecute("DELETE FROM creature_respawn WHERE instance = '%u'", *i);
-        WorldDatabase.PExecute("DELETE FROM gameobject_respawn WHERE instance = '%u'", *i);
-        CharacterDatabase.PExecute("DELETE FROM corpse WHERE instance = '%u'", *i);
-        CharacterDatabase.PExecute("DELETE FROM instance WHERE id = '%u'", *i);
-
-        bar.step();
-    }
-
     sLog.outString();
-    sLog.outString( ">> Initialized %u instances, deleted %u old instances", okcount, delcount );
+    sLog.outString( ">> Initialized %u instances", (uint32)InstanceSet.size());
 }
 
 void ObjectMgr::PackInstances()
 {
     // this routine renumbers player instance associations in such a way so they start from 1 and go up
+    // TODO: this can be done a LOT more efficiently
 
     // obtain set of all associations
     std::set< uint32 > InstanceSet;
 
-    // the check in query allows us to prevent table destruction in case of a bug we must never encounter
-    QueryResult *result = CharacterDatabase.PQuery("SELECT DISTINCT(instance) FROM character_instance WHERE instance <> 0");
+    // all valid ids are in the instance table
+    // any associations to ids not in this table are assumed to be
+    // cleaned already in CleanupInstances
+    QueryResult *result = CharacterDatabase.PQuery("SELECT id FROM instance");
     if( result )
     {
         do
@@ -5417,7 +5460,8 @@ void ObjectMgr::PackInstances()
     barGoLink bar( InstanceSet.size() + 1);
     bar.step();
 
-    uint32 InstanceNumber = 1;
+    // use only IDs larger than the largest mapid
+    uint32 InstanceNumber = sMapStore.GetNumRows()+1;
 
     // we do assume std::set is sorted properly on integer value
     for (std::set< uint32 >::iterator i = InstanceSet.begin(); i != InstanceSet.end(); i++)
@@ -5430,6 +5474,7 @@ void ObjectMgr::PackInstances()
             CharacterDatabase.PExecute("UPDATE corpse SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
             CharacterDatabase.PExecute("UPDATE character_instance SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
             CharacterDatabase.PExecute("UPDATE instance SET id = '%u' WHERE id = '%u'", InstanceNumber, *i);
+            CharacterDatabase.PExecute("UPDATE group_instance SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
         }
 
         ++InstanceNumber;

@@ -353,6 +353,7 @@ class ChatHandler
         bool HandleCombatStopCommand(const char *args);
 
         //! Development Commands
+        bool HandleInstanceCommand(const char* args);
         bool HandleSetValue(const char* args);
         bool HandleGetValue(const char* args);
         bool HandleSet32Bit(const char* args);

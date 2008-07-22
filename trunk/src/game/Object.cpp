@@ -973,7 +973,8 @@ uint32 WorldObject::GetAreaId() const
 
 InstanceData* WorldObject::GetInstanceData()
 {
-    return MapManager::Instance().GetMap(m_mapId, this)->GetInstanceData();
+    Map *map = MapManager::Instance().GetMap(m_mapId, this);
+    return map->IsDungeon() ? ((InstanceMap*)map)->GetInstanceData() : NULL;
 }
 
                                                             //slow
