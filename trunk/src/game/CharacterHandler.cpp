@@ -538,7 +538,11 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
     if (!MapManager::Instance().GetMap(pCurrChar->GetMapId(), pCurrChar)->AddInstanced(pCurrChar))
     {
-        // TODO : Teleport to zone-in area
+        AreaTrigger const* at = objmgr.GetGoBackTrigger(pCurrChar->GetMapId());
+        if(at)
+            pCurrChar->TeleportTo(at->target_mapId, at->target_X, at->target_Y, at->target_Z, pCurrChar->GetOrientation());
+        else
+            pCurrChar->TeleportTo(pCurrChar->m_homebindMapId, pCurrChar->m_homebindX, pCurrChar->m_homebindY, pCurrChar->m_homebindZ, pCurrChar->GetOrientation());
     }
 
     MapManager::Instance().GetMap(pCurrChar->GetMapId(), pCurrChar)->Add(pCurrChar);
@@ -552,10 +556,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     pCurrChar->SetInGameTime( getMSTime() );
 
     // announce group about member online (must be after add to player list to receive announce to self)
-    if(pCurrChar->GetGroup())
+    if(Group *group = pCurrChar->GetGroup())
     {
         //pCurrChar->groupInfo.group->SendInit(this); // useless
-        pCurrChar->GetGroup()->SendUpdate();
+        group->SendUpdate();
     }
 
     // friend status
