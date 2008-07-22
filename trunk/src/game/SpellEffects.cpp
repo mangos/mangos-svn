@@ -88,7 +88,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectUnused,                                   // 25 SPELL_EFFECT_WEAPON
     &Spell::EffectUnused,                                   // 26 SPELL_EFFECT_DEFENSE                  one spell: Defense
     &Spell::EffectPersistentAA,                             // 27 SPELL_EFFECT_PERSISTENT_AREA_AURA
-    &Spell::EffectSummon,                                   // 28 SPELL_EFFECT_SUMMON
+    &Spell::EffectSummonType,                               // 28 SPELL_EFFECT_SUMMON
     &Spell::EffectMomentMove,                               // 29 SPELL_EFFECT_LEAP
     &Spell::EffectEnergize,                                 // 30 SPELL_EFFECT_ENERGIZE
     &Spell::EffectWeaponDmg,                                // 31 SPELL_EFFECT_WEAPON_PERCENT_DAMAGE
@@ -2065,7 +2065,7 @@ void Spell::EffectPowerDrain(uint32 i)
 
     //add spell damage bonus
     damage=m_caster->SpellDamageBonus(unitTarget,m_spellInfo,uint32(damage),SPELL_DIRECT_DAMAGE);
-    
+
     // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
     uint32 power = damage;
     if ( drain_power == POWER_MANA && unitTarget->GetTypeId() == TYPEID_PLAYER )
@@ -2218,7 +2218,7 @@ void Spell::EffectHeal( uint32 /*i*/ )
 
             addhealth += damageAmount;
         }
-        
+
         // Swiftmend - consumes Regrowth or Rejuvenation
         if (m_spellInfo->TargetAuraState == AURA_STATE_SWIFTMEND)
         {
@@ -2423,7 +2423,7 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
         {
             // not output error for innkeeper case
             // TODO: but maybe base at attributes exit more nice check for like cases
-            if(m_spellInfo->Id!=3286)                       
+            if(m_spellInfo->Id!=3286)
                 player->SendEquipError( msg, NULL, NULL );
             return;
         }
@@ -2957,6 +2957,48 @@ void Spell::EffectApplyAreaAura(uint32 i)
     unitTarget->AddAura(Aur);
 }
 
+void Spell::EffectSummonType(uint32 i)
+{
+    switch(m_spellInfo->EffectMiscValueB[i])
+    {
+        case SUMMON_TYPE_GUARDIAN:
+        case SUMMON_TYPE_POSESSED:
+        case SUMMON_TYPE_POSESSED2:
+            EffectSummonGuardian(i);
+            break;
+        case SUMMON_TYPE_WILD:
+            EffectSummonWild(i);
+            break;
+        case SUMMON_TYPE_DEMON:
+            EffectSummonDemon(i);
+            break;
+        case SUMMON_TYPE_SUMMON:
+            EffectSummon(i);
+            break;
+        case SUMMON_TYPE_CRITTER:
+        case SUMMON_TYPE_CRITTER2:
+            EffectSummonCritter(i);
+            break;
+        case SUMMON_TYPE_TOTEM_SLOT1:
+        case SUMMON_TYPE_TOTEM_SLOT2:
+        case SUMMON_TYPE_TOTEM_SLOT3:
+        case SUMMON_TYPE_TOTEM_SLOT4:
+        case SUMMON_TYPE_TOTEM:
+            EffectSummonTotem(i);
+            break;
+        case SUMMON_TYPE_UNKNOWN1:
+        case SUMMON_TYPE_UNKNOWN2:
+        case SUMMON_TYPE_UNKNOWN3:
+        case SUMMON_TYPE_UNKNOWN4:
+        case SUMMON_TYPE_UNKNOWN5:
+        case SUMMON_TYPE_UNKNOWN6:
+            break;
+        default:
+            sLog.outError("EffectSummonType: Unhandled summon type %u", m_spellInfo->EffectMiscValueB[i]);
+            break;
+    }
+}
+
 void Spell::EffectSummon(uint32 i)
 {
     if(m_caster->GetPetGUID())
@@ -3454,7 +3496,6 @@ void Spell::EffectSummonGuardian(uint32 i)
                 delete spawnCreature;
                 return;
             }
-
 
             // set timer for unsummon
             int32 duration = GetSpellDuration(m_spellInfo);
@@ -4846,25 +4887,23 @@ void Spell::EffectActivateObject(uint32 effect_idx)
     sWorld.ScriptCommandStart(activateCommand, delay_secs, m_caster, gameObjTarget);
 }
 
-
-
 void Spell::EffectSummonTotem(uint32 i)
 {
     uint8 slot = 0;
-    switch(m_spellInfo->Effect[i])
+    switch(m_spellInfo->EffectMiscValueB[i])
     {
-        case SPELL_EFFECT_SUMMON_TOTEM_SLOT1: slot = 0; break;
-        case SPELL_EFFECT_SUMMON_TOTEM_SLOT2: slot = 1; break;
-        case SPELL_EFFECT_SUMMON_TOTEM_SLOT3: slot = 2; break;
-        case SPELL_EFFECT_SUMMON_TOTEM_SLOT4: slot = 3; break;
+        case SUMMON_TYPE_TOTEM_SLOT1: slot = 0; break;
+        case SUMMON_TYPE_TOTEM_SLOT2: slot = 1; break;
+        case SUMMON_TYPE_TOTEM_SLOT3: slot = 2; break;
+        case SUMMON_TYPE_TOTEM_SLOT4: slot = 3; break;
         // Battle standard case
-        case SPELL_EFFECT_SUMMON_TOTEM:       slot = 254; break;
+        case SUMMON_TYPE_TOTEM:       slot = 254; break;
         // jewelery statue case, like totem without slot
-        case SPELL_EFFECT_SUMMON_GUARDIAN:    slot = 255; break;
+        case SUMMON_TYPE_GUARDIAN:    slot = 255; break;
         default: return;
     }
 
-    if(slot <4 )
+    if(slot < 4)
     {
         uint64 guid = m_caster->m_TotemSlot[slot];
         if(guid != 0)

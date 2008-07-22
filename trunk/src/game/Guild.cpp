@@ -808,10 +808,10 @@ void Guild::DisplayGuildEventlog(WorldSession *session)
         // Player 1
         data << uint64((*itr)->PlayerGuid1);
         // Player 2 not for left/join guild events
-        if( (*itr)->EventType != 2 && (*itr)->EventType != 6 )
+        if( (*itr)->EventType != GUILD_EVENT_LOG_JOIN_GUILD && (*itr)->EventType != GUILD_EVENT_LOG_LEAVE_GUILD )
             data << uint64((*itr)->PlayerGuid2);
         // New Rank - only for promote/demote guild events
-        if( (*itr)->EventType == 3 || (*itr)->EventType == 4 )
+        if( (*itr)->EventType == GUILD_EVENT_LOG_PROMOTE_PLAYER || (*itr)->EventType == GUILD_EVENT_LOG_DEMOTE_PLAYER )
             data << uint8((*itr)->NewRank);
         // Event timestamp
         data << uint32(time(NULL)-(*itr)->TimeStamp);
@@ -1704,8 +1704,7 @@ void Guild::AppendDisplayGuildBankSlot( WorldPacket& data, GuildBankTab const *t
         data << uint8(pItem->GetCount());
         data << uint32(0);                                  // +16 // Unknown value
         data << uint8(0);                                   // unknown 2.4.2
-        uint32 Enchant0 = pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT);
-        if (Enchant0)
+        if (uint32 Enchant0 = pItem->GetEnchantmentId(PERM_ENCHANTMENT_SLOT))
         {
             data << uint8(1);                               // number of enchantments (max 3) why max 3?
             data << uint8(PERM_ENCHANTMENT_SLOT);           // enchantment slot (range: 0:2)

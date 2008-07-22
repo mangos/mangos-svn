@@ -557,6 +557,12 @@ void Spell::FillTargetMap()
                     }
                     break;
                 case SPELL_EFFECT_SUMMON:
+                    if(m_spellInfo->EffectMiscValueB[i] == SUMMON_TYPE_POSESSED || m_spellInfo->EffectMiscValueB[i] == SUMMON_TYPE_POSESSED2)
+                        if(m_targets.getUnitTarget())
+                            tmpUnitMap.push_back(m_targets.getUnitTarget());
+                    else
+                        tmpUnitMap.push_back(m_caster);
+                    break;
                 case SPELL_EFFECT_SUMMON_CHANGE_ITEM:
                 case SPELL_EFFECT_SUMMON_WILD:
                 case SPELL_EFFECT_SUMMON_GUARDIAN:
@@ -811,7 +817,7 @@ void Spell::AddItemTarget(Item* pitem, uint32 effIndex)
 
 void Spell::doTriggers(SpellMissInfo missInfo, uint32 damage, SpellSchoolMask damageSchoolMask, uint32 block, uint32 absorb, bool crit)
 {
-    // Do triggers depenends from hit result (triggers on hit do in effects)
+    // Do triggers depends from hit result (triggers on hit do in effects)
     // Set aura states depends from hit result
     if (missInfo!=SPELL_MISS_NONE)
     {
@@ -961,7 +967,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
                     
                     if(!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
                         ((Creature*)unit)->AI()->AttackStart(m_caster);
-                    
+
                     unit->SetInCombat(m_caster);
                     m_caster->SetInCombat(unit);
 
@@ -982,7 +988,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
     // Get Data Needed for Diminishing Returns, some effects may have multiple auras, so this must be done on spell hit, not aura add
     m_diminishGroup = GetDiminishingReturnsGroupForSpell(m_spellInfo,m_triggeredByAuraSpell);
     m_diminishLevel = unit->GetDiminishing(m_diminishGroup);
-    // Increase Diminishing on unit, current informations for actualy casts will use values above
+    // Increase Diminishing on unit, current informations for actually casts will use values above
     if((GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_PLAYER && unit->GetTypeId() == TYPEID_PLAYER) || GetDiminishingReturnsGroupType(m_diminishGroup) == DRTYPE_ALL)
         unit->IncrDiminishing(m_diminishGroup);
 
@@ -1022,7 +1028,7 @@ void Spell::DoAllEffectOnTarget(GOTargetInfo *target)
         if (effectMask & (1<<effectNumber))
             HandleEffects(NULL,NULL,go,effectNumber);
 
-    // cast at creature (or GO) quest objectives update at succesful cast finished (+channel finished)
+    // cast at creature (or GO) quest objectives update at successful cast finished (+channel finished)
     // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
     if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsNextMeleeSwingSpell() && !IsChannelActive() )
         ((Player*)m_caster)->CastedCreatureOrGO(go->GetEntry(),go->GetGUID(),m_spellInfo->Id);
@@ -2211,7 +2217,7 @@ void Spell::_handle_immediate_phase()
             continue;
         }
 
-        // Dont do spell log, if is school damage spell
+        // Don't do spell log, if is school damage spell
         if(m_spellInfo->Effect[j] == SPELL_EFFECT_SCHOOL_DAMAGE || m_spellInfo->Effect[j] == 0)
             m_needSpellLog = false;
 
@@ -2436,7 +2442,7 @@ void Spell::update(uint32 difftime)
                 SendChannelUpdate(0);
 
                 // channeled spell processed independently for quest targeting
-                // cast at creature (or GO) quest objectives update at succesful cast channel finished
+                // cast at creature (or GO) quest objectives update at successful cast channel finished
                 // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
                 if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsNextMeleeSwingSpell() )
                 {
@@ -3792,7 +3798,6 @@ uint8 Spell::CanCast(bool strict)
             }
             case SPELL_EFFECT_SUMMON_PET:
             {
-
                 if(m_caster->GetPetGUID())                  //let warlock do a replacement summon
                 {
 
@@ -3842,7 +3847,7 @@ uint8 Spell::CanCast(bool strict)
                 float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
                 float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
                 float fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
-                // teleport a bit above terrainlevel to avoid falling below it
+                // teleport a bit above terrain level to avoid falling below it
                 float fz = MapManager::Instance().GetBaseMap(m_caster->GetMapId())->GetHeight(fx,fy,m_caster->GetPositionZ(),true);
                 if(fz <= INVALID_HEIGHT)                    // note: this also will prevent use effect in instances without vmaps height enabled
                     return SPELL_FAILED_TRY_AGAIN;

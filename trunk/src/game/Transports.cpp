@@ -160,20 +160,21 @@ bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, 
         return false;
     }
 
+    m_goInfo = goinfo;
+
     SetFloatValue(OBJECT_FIELD_SCALE_X, goinfo->size);
 
     SetUInt32Value(GAMEOBJECT_FACTION, goinfo->faction);
     SetUInt32Value(GAMEOBJECT_FLAGS, goinfo->flags);
-    m_flags = goinfo->flags;
 
     SetUInt32Value(OBJECT_FIELD_ENTRY, goinfo->id);
 
     SetUInt32Value(GAMEOBJECT_DISPLAYID, goinfo->displayId);
 
-    SetUInt32Value(GAMEOBJECT_STATE, 1);
-    SetUInt32Value(GAMEOBJECT_TYPE_ID, goinfo->type);
+    SetGoState(1);
+    SetGoType(goinfo->type);
 
-    SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, animprogress);
+    SetGoAnimProgress(animprogress);
     if(dynflags)
         SetUInt32Value(GAMEOBJECT_DYN_FLAGS, dynflags);
 

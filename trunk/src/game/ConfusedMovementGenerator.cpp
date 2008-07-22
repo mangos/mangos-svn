@@ -145,7 +145,6 @@ ConfusedMovementGenerator<T>::Finalize(T &unit)
     unit.clearUnitState(UNIT_STAT_CONFUSED);
 }
 
-
 template void ConfusedMovementGenerator<Player>::Initialize(Player &player);
 template void ConfusedMovementGenerator<Creature>::Initialize(Creature &creature);
 template void ConfusedMovementGenerator<Player>::Finalize(Player &player);

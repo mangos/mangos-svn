@@ -130,18 +130,18 @@ typedef struct AUTH_LOGON_PROOF_S
     uint8   cmd;
     uint8   error;
     uint8   M2[20];
-    uint16  unk1;
+    uint32  unk1;
     uint32  unk2;
-    uint32  unk3;
+    uint16  unk3;
 } sAuthLogonProof_S;
 
 typedef struct XFER_INIT
 {
-    uint8 cmd;                                              //XFER_INITIATE
-    uint8 size;                                             //strlen("Patch");
-    uint8 name[5];
-    uint64 file_size;
-    uint8 md5[MD5_DIGEST_LENGTH];
+    uint8 cmd;                                              // XFER_INITIATE
+    uint8 fileNameLen;                                      // strlen(fileName);
+    uint8 fileName[1];                                      // fileName[fileNameLen]
+    uint64 file_size;                                       // file size (bytes)
+    uint8 md5[MD5_DIGEST_LENGTH];                           // MD5
 }XFER_INIT;
 
 typedef struct XFER_DATA
@@ -650,9 +650,9 @@ bool AuthSocket::_HandleLogonProof()
         memcpy(proof.M2, sha.GetDigest(), 20);
         proof.cmd = AUTH_LOGON_PROOF;
         proof.error = 0;
-        proof.unk1 = 0;
-        proof.unk2 = 0x80;
-        proof.unk3 = 0;
+        proof.unk1 = 0x00800000;
+        proof.unk2 = 0x00;
+        proof.unk3 = 0x00;
 
         SendBuf((char *)&proof, sizeof(proof));
 

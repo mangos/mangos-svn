@@ -138,7 +138,7 @@ void GuardAI::AttackStart(Unit *u)
     {
         i_creature.SetInCombat(u);
         u->SetInCombat(&i_creature);
-        
+
         i_creature.AddThreat(u, 0.0f);
         i_victimGuid = u->GetGUID();
         i_creature.GetMotionMaster()->MoveChase(u);

@@ -520,7 +520,7 @@ void BattleGround::SendRewardMarkByMail(Player *plr,uint32 mark, uint32 count)
 }
 
 void BattleGround::BlockMovement(Player *plr)
-{                                  
+{
     plr->SetClientControl(plr, 0);                          // movement disabled NOTE: the effect will be automatically removed by client when the player is teleported from the battleground, so no need to send with uint8(1) in RemovePlayerAtLeave()
 }
 
@@ -851,7 +851,7 @@ void BattleGround::DoorClose(uint32 type)
     if(obj)
     {
         //if doors are open, close it
-        if( obj->getLootState() == GO_ACTIVATED && !obj->GetUInt32Value(GAMEOBJECT_STATE) )
+        if( obj->getLootState() == GO_ACTIVATED && !obj->GetGoState() )
         {
             //change state to allow door to be closed
             obj->SetLootState(GO_READY);
@@ -931,7 +931,7 @@ Creature* BattleGround::AddCreature(uint32 entry, uint32 type, uint32 teamval, f
     pCreature->AIM_Initialize();
 
     //pCreature->SetDungeonDifficulty(0);
-    
+
     map->Add(pCreature);
     m_BgCreatures[type] = pCreature->GetGUID();
     return  pCreature;

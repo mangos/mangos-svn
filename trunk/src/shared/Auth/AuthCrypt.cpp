@@ -17,7 +17,7 @@
  */
 
 #include "AuthCrypt.h"
-#include <algorithm>
+#include "Hmac.h"
 
 AuthCrypt::AuthCrypt()
 {
@@ -59,12 +59,23 @@ void AuthCrypt::EncryptSend(uint8 *data, size_t len)
     }
 }
 
-void AuthCrypt::SetKey(uint8 *key, size_t len)
+void AuthCrypt::SetKey(BigNumber *bn)
 {
-    _key.resize(len);
-    std::copy(key, key + len, _key.begin());
+    uint8 *key = new uint8[SHA_DIGEST_LENGTH];
+    GenerateKey(key, bn);
+    _key.resize(SHA_DIGEST_LENGTH);
+    std::copy(key, key + SHA_DIGEST_LENGTH, _key.begin());
+    delete key;
 }
 
 AuthCrypt::~AuthCrypt()
 {
+}
+
+void AuthCrypt::GenerateKey(uint8 *key, BigNumber *bn)
+{
+    HmacHash hash;
+    hash.UpdateBigNumber(bn);
+    hash.Finalize();
+    memcpy(key, hash.GetDigest(), SHA_DIGEST_LENGTH);
 }

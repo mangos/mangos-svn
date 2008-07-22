@@ -1972,7 +1972,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         GridReference<Player> &GetGridRef() { return m_gridRef; }
         bool isAllowedToLoot(Creature* creature);
-        
+
     protected:
 
         /*********************************************************/

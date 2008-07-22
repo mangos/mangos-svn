@@ -201,7 +201,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         uint32 GetInstanceId() { return i_InstanceId; }
         uint8 GetSpawnMode() { return 0; }
         bool NeedsReset() { return Instanceable() && ( i_resetTime == 0 || i_resetTime <= time(NULL)); }
-        
+
         PlayerList const& GetPlayers() const { return i_Players;}
         uint32 GetPlayersCountExceptGMs() const;
         uint32 HavePlayers() const { return !i_Players.empty(); }
@@ -215,7 +215,6 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         // NOTE: this duplicate of Instanceable(), but Instanceable() can be changed when BG also will be instanceable
         bool IsDungeon() const { return(i_mapEntry && ((i_mapEntry->map_type == MAP_INSTANCE) || (i_mapEntry->map_type == MAP_RAID))); }
         bool IsRaid() const { return(i_mapEntry && (i_mapEntry->map_type == MAP_RAID)); }
-        bool IsBattleArena() const { return(i_mapEntry && ((i_mapEntry->map_type == MAP_BATTLEGROUND) || (i_mapEntry->map_type == MAP_ARENA))); }
         bool IsBattleGround() const { return(i_mapEntry && (i_mapEntry->map_type == MAP_BATTLEGROUND)); }
         bool IsArena() const { return(i_mapEntry && (i_mapEntry->map_type == MAP_ARENA)); }
         bool IsMountAllowed() const

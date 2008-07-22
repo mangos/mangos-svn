@@ -20,6 +20,7 @@
     \ingroup u2w
 */
 
+#include "Util.h"
 #include "Common.h"
 #include "Log.h"
 #include "Opcodes.h"
@@ -66,10 +67,10 @@ struct ServerPktHeader
 
 #define SOCKET_CHECK_PACKET_SIZE(P,S) if((P).size() < (S)) return SizeError((P),(S));
 
-/// WorldSocket construction and initialisation.
+/// WorldSocket construction and initialization.
 WorldSocket::WorldSocket(ISocketHandler &sh): TcpSocket(sh), _cmd(0), _remaining(0), _session(NULL)
 {
-    _seed = 0xDEADBABE;
+    _seed = mtRand.randInt();
     m_LastPingMSTime = 0;                                   // first time it will counted as overspeed maybe, but this is not important
     m_OverSpeedPings = 0;
 
@@ -166,7 +167,7 @@ void WorldSocket::OnRead()
             sWorldLog.Log("\n\n");
         }
 
-        ///- If thepacket is PING or AUTH_SESSION, handle immediately
+        ///- If the packet is PING or AUTH_SESSION, handle immediately
         switch (_cmd)
         {
             case CMSG_PING:
@@ -386,21 +387,21 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         packet << uint8( AUTH_FAILED );
         SendPacket( &packet );
 
-        sLog.outDetail( "SOCKET: Sent Auth Response (authentification failed)." );
+        sLog.outDetail( "SOCKET: Sent Auth Response (authentication failed)." );
         return;
     }
 
     ///- Initialize the encryption with the Key
-    _crypt.SetKey(K.AsByteArray(), 40);
+    _crypt.SetKey(&K);
     _crypt.Init();
 
     ///- Send 'Auth is ok'
     packet.Initialize( SMSG_AUTH_RESPONSE, 1+4+1+4+1 );
     packet << uint8( AUTH_OK );
-    packet << (uint32)0;                                    // unknown random value...
-    packet << (uint8)2;
-    packet << (uint32)0;
-    packet << (uint8)(tbc ? 1 : 0);                         // 0 - normal, 1 - TBC, must be set in database manually for each account
+    packet << uint32(0);                                    // unknown random value...
+    packet << uint8(0);                                     // can be 0 and 2
+    packet << uint32(0);                                    // const 0
+    packet << uint8(tbc ? 1 : 0);                           // 0 - normal, 1 - TBC, must be set in database manually for each account
     SendPacket(&packet);
 
     ///- Create a new WorldSession for the player and add it to the World
@@ -419,7 +420,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     loginDatabase.escape_string(address);
     loginDatabase.PExecute("UPDATE account SET last_ip = '%s' WHERE username = '%s'",address.c_str(), safe_account.c_str());
 
-    // do small delay (10ms) at accepting successful authed connection to prevent droping packets by client
+    // do small delay (10ms) at accepting successful authed connection to prevent dropping packets by client
     // don't must harm anyone (let login ~100 accounts in 1 sec ;) )
     #ifdef WIN32
     Sleep(10);

@@ -407,7 +407,6 @@ namespace MaNGOS
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
-
     // CHECKS && DO classes
 
     // WorldObject check classes

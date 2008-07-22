@@ -276,7 +276,6 @@ FleeingMovementGenerator<T>::_setMoveData(T &owner)
     return true;
 }
 
-
 template<class T>
 void
 FleeingMovementGenerator<T>::Initialize(T &owner)

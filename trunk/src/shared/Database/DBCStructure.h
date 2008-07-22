@@ -148,7 +148,7 @@ struct ChrClassesEntry
     //char*       string2[16];                              // 38-53 unused
                                                             // 54 string flag, unused
                                                             // 55, unused
-    uint32 spellfamily;                                     // 56
+    uint32      spellfamily;                                // 56
                                                             // 57, unused
 };
 
@@ -590,7 +590,7 @@ struct SpellEntry
     uint32    manaPerSecondPerLevel;                        // 39
     uint32    rangeIndex;                                   // 40
     float     speed;                                        // 41
-    uint32    modalNextSpell;                               // 42
+    //uint32    modalNextSpell;                             // 42
     uint32    StackAmount;                                  // 43
     uint32    Totem[2];                                     // 44-45
     int32     Reagent[8];                                   // 46-53
@@ -614,41 +614,42 @@ struct SpellEntry
     uint32    EffectChainTarget[3];                         // 104-106
     uint32    EffectItemType[3];                            // 107-109
     int32     EffectMiscValue[3];                           // 110-112
-    uint32    EffectTriggerSpell[3];                        // 113-115
-    float     EffectPointsPerComboPoint[3];                 // 116-118
-    uint32    SpellVisual;                                  // 119
-                                                            // 120 not used
-    uint32    SpellIconID;                                  // 121
-    uint32    activeIconID;                                 // 122
-    uint32    spellPriority;                                // 123
-    char*     SpellName[16];                                // 124-139
-    //uint32    SpellNameFlag;                              // 140
-    char*     Rank[16];                                     // 141-156
-    //uint32    RankFlags;                                  // 157
-    //char*     Description[16];                            // 158-173 not used
-    //uint32    DescriptionFlags;                           // 174     not used
-    //char*     ToolTip[16];                                // 175-190 not used
-    //uint32    ToolTipFlags;                               // 191     not used
-    uint32    ManaCostPercentage;                           // 192
-    uint32    StartRecoveryCategory;                        // 193
-    uint32    StartRecoveryTime;                            // 194
-    uint32    MaxTargetLevel;                               // 195
-    uint32    SpellFamilyName;                              // 196
-    uint64    SpellFamilyFlags;                             // 197+198
-    uint32    MaxAffectedTargets;                           // 199
-    uint32    DmgClass;                                     // 200  defenseType
-    uint32    PreventionType;                               // 201
-    //uint32    StanceBarOrder;                             // 202 not used
-    float     DmgMultiplier[3];                             // 203-205
-    //uint32    MinFactionId;                               // 206 not used, and 0 in 2.4.2
-    //uint32    MinReputation;                              // 207 not used, and 0 in 2.4.2
-    //uint32    RequiredAuraVision;                         // 208 not used
-    uint32    TotemCategory[2];                             // 209-210
-    uint32    AreaId;                                       // 211
-    uint32    SchoolMask;                                   // 212 school mask
+    int32     EffectMiscValueB[3];                          // 113-115
+    uint32    EffectTriggerSpell[3];                        // 116-118
+    float     EffectPointsPerComboPoint[3];                 // 119-121
+    uint32    SpellVisual;                                  // 122
+                                                            // 123 not used
+    uint32    SpellIconID;                                  // 124
+    uint32    activeIconID;                                 // 125
+    //uint32    spellPriority;                              // 126
+    char*     SpellName[16];                                // 127-142
+    //uint32    SpellNameFlag;                              // 143
+    char*     Rank[16];                                     // 144-159
+    //uint32    RankFlags;                                  // 160
+    //char*     Description[16];                            // 161-176 not used
+    //uint32    DescriptionFlags;                           // 177     not used
+    //char*     ToolTip[16];                                // 178-193 not used
+    //uint32    ToolTipFlags;                               // 194     not used
+    uint32    ManaCostPercentage;                           // 195
+    uint32    StartRecoveryCategory;                        // 196
+    uint32    StartRecoveryTime;                            // 197
+    uint32    MaxTargetLevel;                               // 198
+    uint32    SpellFamilyName;                              // 199
+    uint64    SpellFamilyFlags;                             // 200+201
+    uint32    MaxAffectedTargets;                           // 202
+    uint32    DmgClass;                                     // 203 defenseType
+    uint32    PreventionType;                               // 204
+    //uint32    StanceBarOrder;                             // 205 not used
+    float     DmgMultiplier[3];                             // 206-208
+    //uint32    MinFactionId;                               // 209 not used, and 0 in 2.4.2
+    //uint32    MinReputation;                              // 210 not used, and 0 in 2.4.2
+    //uint32    RequiredAuraVision;                         // 211 not used
+    uint32    TotemCategory[2];                             // 212-213
+    uint32    AreaId;                                       // 214
+    uint32    SchoolMask;                                   // 215 school mask
 
     private:
-        // prevent creating custom entries (copy data from original infact)
+        // prevent creating custom entries (copy data from original in fact)
         SpellEntry(SpellEntry const&);                      // DON'T must have implementation
 };
 
@@ -892,6 +893,6 @@ struct TaxiPathNode
 typedef std::vector<TaxiPathNode> TaxiPathNodeList;
 typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
 
-#define TaxiMaskSize 8
+#define TaxiMaskSize 16
 typedef uint32 TaxiMask[TaxiMaskSize];
 #endif

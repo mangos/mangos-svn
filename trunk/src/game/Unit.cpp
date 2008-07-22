@@ -1190,7 +1190,6 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
                         pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
                         pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
                     }
-
                     break;
                 }
                 case MELEE_HIT_DODGE:
@@ -1251,7 +1250,6 @@ void Unit::DealFlatDamage(Unit *pVictim, SpellEntry const *spellInfo, uint32 *da
                             ((Player*)pVictim)->DurabilityPointLossForEquipSlot(EQUIPMENT_SLOT_OFFHAND);
                     }
                     break;
-
                 }
                 case MELEE_HIT_EVADE:                       // already processed early
                 case MELEE_HIT_MISS:                        // already processed early
@@ -8109,7 +8107,7 @@ void Unit::SetInCombat(bool PvP)
     // only alive units can be in combat
     if(!isAlive())
         return;
-    
+
     if(PvP)
         m_CombatTimer = 5000;
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);

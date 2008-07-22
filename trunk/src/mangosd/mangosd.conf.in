@@ -843,7 +843,6 @@ DurabilityLossChance.Absorb = 0.5
 DurabilityLossChance.Parry  = 0.05
 DurabilityLossChance.Block  = 0.05
 
-
 ###################################################################################################################
 # CONSOLE AND REMOTE ACCESS
 #
