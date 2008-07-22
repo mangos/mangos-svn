@@ -621,6 +621,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\shared\Auth\Hmac.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Auth\Hmac.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\shared\Auth\Sha1.cpp"
 				>
 			</File>

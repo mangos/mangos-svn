@@ -167,7 +167,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
         // UPDATETYPE_CREATE_OBJECT2 for some gameobject types...
         if(isType(TYPEMASK_GAMEOBJECT))
         {
-            switch(m_uint32Values[GAMEOBJECT_TYPE_ID])
+            switch(((GameObject*)this)->GetGoType())
             {
                 case GAMEOBJECT_TYPE_TRAP:
                 case GAMEOBJECT_TYPE_DUEL_ARBITER:
@@ -298,7 +298,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
     if (flags & UPDATEFLAG_HASPOSITION)
     {
         // 0x02
-        if(flags & UPDATEFLAG_TRANSPORT && m_uint32Values[GAMEOBJECT_TYPE_ID] == GAMEOBJECT_TYPE_MO_TRANSPORT)
+        if(flags & UPDATEFLAG_TRANSPORT && ((GameObject*)this)->GetGoType() == GAMEOBJECT_TYPE_MO_TRANSPORT)
         {
             *data << (float)0;
             *data << (float)0;
@@ -1319,7 +1319,6 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
 
 namespace MaNGOS
 {
-
     class NearUsedPosDo
     {
         public:
@@ -1392,7 +1391,6 @@ namespace MaNGOS
             float              i_angle;
             ObjectPosSelector& i_selector;
     };
-
 }                                                           // namespace MaNGOS
 
 //===================================================================================================

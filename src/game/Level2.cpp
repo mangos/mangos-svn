@@ -3724,7 +3724,7 @@ bool ChatHandler::HandleEventStopCommand(const char* args)
 bool ChatHandler::HandleCombatStopCommand(const char* args)
 {
     Player *player;
-    
+
     if(*args)
     {
         std::string playername = args;
@@ -3735,7 +3735,7 @@ bool ChatHandler::HandleCombatStopCommand(const char* args)
         {
             SendSysMessage(LANG_PLAYER_NOT_FOUND);
             SetSentErrorMessage(true);
-            return false;         
+            return false;
         }
     }
     else

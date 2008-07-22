@@ -50,7 +50,7 @@ ReactorAI::AttackStart(Unit *p)
         DEBUG_LOG("Tag unit GUID: %u (TypeId: %u) as a victim", p->GetGUIDLow(), p->GetTypeId());
         i_creature.SetInCombat(p);
         p->SetInCombat(&i_creature);
-        
+
         i_creature.AddThreat(p, 0.0f);
         i_victimGuid = p->GetGUID();
         i_creature.GetMotionMaster()->MoveChase(p);

@@ -205,7 +205,7 @@ void Map::DeleteStateMachine()
 }
 
 Map::Map(uint32 id, time_t expiry, uint32 ainstanceId)
-: i_id(id), i_gridExpiry(expiry), i_mapEntry (sMapStore.LookupEntry(id)),
+: i_id(id), i_gridExpiry(expiry), i_mapEntry(sMapStore.LookupEntry(id)),
 i_resetTime(0), i_resetDelayTime(0), i_InstanceId(ainstanceId), i_maxPlayers(0), i_data(NULL)
 {
     for(unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
@@ -719,7 +719,7 @@ void Map::Update(const uint32 &t_diff)
 {
     // Don't unload grids if it's battleground, since we may have manually added GOs,creatures, those doesn't load from DB at grid re-load !
     // This isn't really bother us, since as soon as we have instanced BG-s, the whole map unloads as the BG gets ended
-    if ( IsBattleArena() )
+    if (IsBattleGround() || IsArena())
         return;
 
     for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end(); )

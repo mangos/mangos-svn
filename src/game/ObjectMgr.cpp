@@ -73,7 +73,6 @@ ObjectMgr::ObjectMgr()
 
 ObjectMgr::~ObjectMgr()
 {
-
     for( QuestMap::iterator i = mQuestTemplates.begin( ); i != mQuestTemplates.end( ); ++ i )
     {
         delete i->second;
@@ -232,7 +231,6 @@ uint32 ObjectMgr::GetAuctionDeposit(uint32 location, uint32 time, Item *pItem)
         percentance = 0.75f;
     else
         percentance = 0.15f;
-
 
     percentance *= sWorld.getRate(RATE_AUCTION_DEPOSIT);
 
@@ -4441,7 +4439,6 @@ GraveYardData const* ObjectMgr::FindGraveYardData(uint32 id, uint32 zoneId)
 
 bool ObjectMgr::AddGraveYardLink(uint32 id, uint32 zoneId, uint32 team, bool inDB)
 {
-
     if(FindGraveYardData(id,zoneId))
         return false;
 

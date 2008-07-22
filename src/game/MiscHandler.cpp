@@ -1213,8 +1213,7 @@ void WorldSession::HandleSetActionBar(WorldPacket& recv_data)
         return;
     }
 
-    uint32 temp = ((GetPlayer()->GetUInt32Value( PLAYER_FIELD_BYTES )) & 0xFFF0FFFF) + (ActionBar << 16);
-    GetPlayer()->SetUInt32Value( PLAYER_FIELD_BYTES, temp);
+    GetPlayer()->SetByteValue(PLAYER_FIELD_BYTES, 2, ActionBar);
 }
 
 void WorldSession::HandleWardenDataOpcode(WorldPacket& /*recv_data*/)
@@ -1687,5 +1686,5 @@ void WorldSession::HandleSetTaxiBenchmarkOpcode( WorldPacket & recv_data )
     uint8 mode;
     recv_data >> mode;
 
-    sLog.outDebug("Client use \"/timetest %d\" command", mode);
+    sLog.outDebug("Client used \"/timetest %d\" command", mode);
 }

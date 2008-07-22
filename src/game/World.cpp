@@ -1576,7 +1576,7 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                if( !door->GetUInt32Value(GAMEOBJECT_STATE) )
+                if( !door->GetGoState() )
                     break;                                  //door already  open
 
                 door->UseDoorOrButton(time_to_close);
@@ -1632,7 +1632,7 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                if( door->GetUInt32Value(GAMEOBJECT_STATE) )
+                if( door->GetGoState() )
                     break;                                  //door already closed
 
                 door->UseDoorOrButton(time_to_open);

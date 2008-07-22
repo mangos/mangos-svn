@@ -613,4 +613,3 @@ void WorldSession::HandleBattleGroundReportAFK( WorldPacket & recv_data )
 
     reportedPlayer->ReportedAfkBy(_player);
 }
-

@@ -52,6 +52,7 @@ GameObject::GameObject() : WorldObject()
     m_spellId = 0;
     m_charges = 5;
     m_cooldownTime = 0;
+    m_goInfo = NULL;
 }
 
 GameObject::~GameObject()
@@ -107,6 +108,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, float x, float
     Object::_Create(guidlow, goinfo->id, HIGHGUID_GAMEOBJECT);
 
     m_DBTableGuid = guidlow;
+    m_goInfo = goinfo;
 
     if (goinfo->type >= MAX_GAMEOBJECT_TYPE)
     {
@@ -114,7 +116,6 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, float x, float
         return false;
     }
 
-    //    SetUInt32Value(GAMEOBJECT_TIMESTAMP, (uint32)time(NULL));
     SetFloatValue(GAMEOBJECT_POS_X, x);
     SetFloatValue(GAMEOBJECT_POS_Y, y);
     SetFloatValue(GAMEOBJECT_POS_Z, z);
@@ -129,16 +130,15 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, float x, float
 
     SetUInt32Value(GAMEOBJECT_FACTION, goinfo->faction);
     SetUInt32Value(GAMEOBJECT_FLAGS, goinfo->flags);
-    m_flags = goinfo->flags;
 
-    SetUInt32Value (OBJECT_FIELD_ENTRY, goinfo->id);
+    SetUInt32Value(OBJECT_FIELD_ENTRY, goinfo->id);
 
-    SetUInt32Value (GAMEOBJECT_DISPLAYID, goinfo->displayId);
+    SetUInt32Value(GAMEOBJECT_DISPLAYID, goinfo->displayId);
 
-    SetUInt32Value (GAMEOBJECT_STATE, go_state);
-    SetUInt32Value (GAMEOBJECT_TYPE_ID, goinfo->type);
+    SetGoState(go_state);
+    SetGoType(goinfo->type);
 
-    SetUInt32Value (GAMEOBJECT_ANIMPROGRESS, animprogress);
+    SetGoAnimProgress(animprogress);
 
     // Spell charges for GAMEOBJECT_TYPE_SPELLCASTER (22)
     if (goinfo->type == GAMEOBJECT_TYPE_SPELLCASTER)
@@ -175,7 +175,7 @@ void GameObject::Update(uint32 /*p_time*/)
                     Unit* caster = GetOwner();
                     if(caster && caster->GetTypeId()==TYPEID_PLAYER)
                     {
-                        SetUInt32Value(GAMEOBJECT_STATE, 0);
+                        SetGoState(0);
                         SetUInt32Value(GAMEOBJECT_FLAGS, 32);
 
                         UpdateData udata;
@@ -230,7 +230,7 @@ void GameObject::Update(uint32 /*p_time*/)
                         case GAMEOBJECT_TYPE_DOOR:
                         case GAMEOBJECT_TYPE_BUTTON:
                             //we need to open doors if they are closed (add there another condition if this code breaks some usage, but it need to be here for battlegrounds)
-                            if( !GetUInt32Value(GAMEOBJECT_STATE) )
+                            if( !GetGoState() )
                                 SwitchDoorOrButton(false);
                             //flags in AB are type_button and we need to add them here so no break!
                         default:
@@ -388,11 +388,11 @@ void GameObject::Update(uint32 /*p_time*/)
             }
 
             //burning flags in some battlegrounds, if you find better condition, just add it
-            if (this->GetUInt32Value(GAMEOBJECT_ANIMPROGRESS) > 0)
+            if (GetGoAnimProgress() > 0)
             {
-                this->SendObjectDeSpawnAnim(this->GetGUID());
+                SendObjectDeSpawnAnim(this->GetGUID());
                 //reset flags
-                SetUInt32Value(GAMEOBJECT_FLAGS, m_flags);
+                SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags);
             }
 
             loot.clear();
@@ -440,10 +440,9 @@ void GameObject::Delete()
 {
     SendObjectDeSpawnAnim(GetGUID());
 
-    SetUInt32Value(GAMEOBJECT_STATE, 1);
-    SetUInt32Value(GAMEOBJECT_FLAGS, m_flags);
+    SetGoState(1);
+    SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags);
 
-    //TODO: set timestamp
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }
 
@@ -497,8 +496,8 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask)
     data.rotation2 = GetFloatValue(GAMEOBJECT_ROTATION+2);
     data.rotation3 = GetFloatValue(GAMEOBJECT_ROTATION+3);
     data.spawntimesecs = m_spawnedByDefault ? m_respawnDelayTime : -(int32)m_respawnDelayTime;
-    data.animprogress = GetUInt32Value (GAMEOBJECT_ANIMPROGRESS);
-    data.go_state = GetUInt32Value (GAMEOBJECT_STATE);
+    data.animprogress = GetGoAnimProgress();
+    data.go_state = GetGoState();
     data.spawnMask = spawnMask;
 
     // updated in DB
@@ -517,8 +516,8 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask)
         << GetFloatValue(GAMEOBJECT_ROTATION+2) << ", "
         << GetFloatValue(GAMEOBJECT_ROTATION+3) << ", "
         << m_respawnDelayTime << ", "
-        << GetUInt32Value (GAMEOBJECT_ANIMPROGRESS) << ", "
-        << GetUInt32Value (GAMEOBJECT_STATE) << ")";
+        << GetGoAnimProgress() << ", "
+        << GetGoState() << ")";
 
     WorldDatabase.BeginTransaction();
     WorldDatabase.PExecuteLog("DELETE FROM gameobject WHERE guid = '%u'", m_DBTableGuid);
@@ -610,7 +609,7 @@ GameObject* GameObject::GetGameObject(WorldObject& object, uint64 guid)
 
 GameObjectInfo const *GameObject::GetGOInfo() const
 {
-    return objmgr.GetGameObjectInfo(GetUInt32Value (OBJECT_FIELD_ENTRY));
+    return m_goInfo;
 }
 
 uint32 GameObject::GetLootId(GameObjectInfo const* ginfo)
@@ -820,10 +819,10 @@ void GameObject::SwitchDoorOrButton(bool activate)
     else
         RemoveFlag(GAMEOBJECT_FLAGS, GO_FLAG_IN_USE);
 
-    if(GetUInt32Value(GAMEOBJECT_STATE))                    //if closed -> open
-        SetUInt32Value(GAMEOBJECT_STATE,0);
+    if(GetGoState())                                        //if closed -> open
+        SetGoState(0);
     else                                                    //if open -> close
-        SetUInt32Value(GAMEOBJECT_STATE,1);
+        SetGoState(1);
 }
 
 void GameObject::Use(Unit* user)

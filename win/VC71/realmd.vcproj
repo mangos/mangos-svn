@@ -151,6 +151,9 @@
 	</References>
 	<Files>
 		<File
+			RelativePath="..\..\src\realmd\AuthCodes.h">
+		</File>
+		<File
 			RelativePath="..\..\src\realmd\AuthSocket.cpp">
 		</File>
 		<File

@@ -313,7 +313,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         void SetOwnerGUID(uint64 owner)
         {
-            m_spawnedByDefault = false;                     // all object with owner is de-spawned after delay
+            m_spawnedByDefault = false;                     // all object with owner is despawned after delay
             SetUInt64Value(OBJECT_FIELD_CREATED_BY, owner);
         }
         uint64 GetOwnerGUID() const { return GetUInt64Value(OBJECT_FIELD_CREATED_BY); }
@@ -379,6 +379,13 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         uint32 GetSpellId() const { return m_spellId;}
         void getFishLoot(Loot *loot);
         uint32 GetGoType() const { return GetUInt32Value(GAMEOBJECT_TYPE_ID); }
+        void SetGoType(uint32 type) { SetUInt32Value(GAMEOBJECT_TYPE_ID, type); }
+        uint32 GetGoState() const { return GetUInt32Value(GAMEOBJECT_STATE); }
+        void SetGoState(uint32 state) { SetUInt32Value(GAMEOBJECT_STATE, state); }
+        uint32 GetGoArtKit() const { return GetUInt32Value(GAMEOBJECT_ARTKIT); }
+        void SetGoArtKit(uint32 artkit) { SetUInt32Value(GAMEOBJECT_ARTKIT, artkit); }
+        uint32 GetGoAnimProgress() const { return GetUInt32Value(GAMEOBJECT_ANIMPROGRESS); }
+        void SetGoAnimProgress(uint32 animprogress) { SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, animprogress); }
 
         void Use(Unit* user);
 
@@ -444,17 +451,17 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         uint32      m_spellId;
         time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
         uint32      m_respawnDelayTime;                     // (secs) if 0 then current GO state no dependent from timer
-        uint32      m_flags;
         LootState   m_lootState;
         bool        m_spawnedByDefault;
         time_t      m_cooldownTime;                         // used as internal reaction delay time store (not state change reaction).
-                                                            // For traps this: spell casting cooldown, for doors/buttnons: reset time.
+                                                            // For traps this: spell casting cooldown, for doors/buttons: reset time.
         std::list<uint32> m_SkillupList;
 
         std::set<uint32> m_unique_users;
         uint32 m_usetimes;
 
         uint32 m_DBTableGuid;
+        GameObjectInfo const* m_goInfo;
     private:
         void SwitchDoorOrButton(bool activate);
 

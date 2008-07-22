@@ -2042,10 +2042,10 @@ void Player::GiveLevel(uint32 level)
     objmgr.GetPlayerClassLevelInfo(getClass(),level,&classInfo);
 
     // send levelup info to client
-    WorldPacket data(SMSG_LEVELUP_INFO, (4+4+5*4+5*4));
+    WorldPacket data(SMSG_LEVELUP_INFO, (4+4+MAX_POWERS*4+MAX_STATS*4));
     data << uint32(level);
     data << uint32(int32(classInfo.basehealth) - int32(GetCreateHealth()));
-    // for(int i = 0; i < 5; ++i)                           // Powers loop (0-6)
+    // for(int i = 0; i < MAX_POWERS; ++i)                  // Powers loop (0-6)
     data << uint32(int32(classInfo.basemana)   - int32(GetCreateMana()));
     data << uint32(0);
     data << uint32(0);
@@ -2254,7 +2254,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     // cleanup player flags (will be re-applied if need at aura load), to avoid have ghost flag without ghost aura, for example.
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK | PLAYER_FLAGS_DND | PLAYER_FLAGS_GM | PLAYER_FLAGS_GHOST | PLAYER_FLAGS_FFA_PVP);
 
-    SetByteValue(UNIT_FIELD_BYTES_1, 2, 0x00);              // one form stealth modofied bytes
+    SetByteValue(UNIT_FIELD_BYTES_1, 2, 0x00);              // one form stealth modified bytes
 
     // restore if need some important flags
     SetUInt32Value(PLAYER_FIELD_BYTES2, 0 );                // flags empty by default
@@ -3843,7 +3843,7 @@ uint32 Player::DurabilityRepair(uint16 pos, bool cost, float discountMod, bool g
             costs = uint32(costs * discountMod);
 
             if (costs==0)                                   //fix for ITEM_QUALITY_ARTIFACT
-                costs= 1;
+                costs = 1;
 
             if (guildBank)
             {
@@ -4793,7 +4793,6 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
     }
     else if(currVal)                                        //add
     {
-
         for (i=0; i < PLAYER_MAX_SKILLS; i++)
             if (!GetUInt32Value(PLAYER_SKILL_INDEX(i)))
         {
@@ -4968,7 +4967,7 @@ void Player::addActionButton(const uint8 button, const uint16 action, const uint
 {
     if(button >= MAX_ACTION_BUTTONS)
     {
-        sLog.outError( "Action %u not added into button %u for player %s: button must be < 120", action, button, GetName() );
+        sLog.outError( "Action %u not added into button %u for player %s: button must be < 132", action, button, GetName() );
         return;
     }
 
@@ -4991,7 +4990,8 @@ void Player::addActionButton(const uint8 button, const uint16 action, const uint
     if (m_actionButtons.find(button)==m_actionButtons.end())
     {                                                       // just add new button
         m_actionButtons[button] = ActionButton(action,type,misc);
-    } else
+    }
+    else
     {                                                       // change state of current button
         ActionButtonUpdateState uState = m_actionButtons[button].uState;
         m_actionButtons[button] = ActionButton(action,type,misc);
@@ -5108,7 +5108,7 @@ void Player::CheckExploreSystem()
         return;
     int offset = areaFlag / 32;
 
-    if(offset >= 64)
+    if(offset >= 128)
     {
         sLog.outError("ERROR: Wrong area flag %u in map data for (X: %f Y: %f) point to field PLAYER_EXPLORED_ZONES_1 + %u ( %u must be < 64 ).",areaFlag,GetPositionX(),GetPositionY(),offset,offset);
         return;
@@ -5751,7 +5751,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
     time_t now = time(NULL);
 
     // need call before fields update to have chance move yesterday data to appropriate fields before today data change.
-    UpdateHonorFields();                                    
+    UpdateHonorFields();
 
     if(honor <= 0)
     {
@@ -13137,7 +13137,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     // since last logout (in seconds)
     uint64 time_diff = uint64(now - logoutTime);
-    
+
     // set value, including drunk invisibility detection
     // calculate sobering. after 15 minutes logged out, the player will be sober again
     float soberFactor;
