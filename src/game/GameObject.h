@@ -145,6 +145,7 @@ struct GameObjectInfo
             uint32 linkedTrapId;                            //2
             uint32 serverOnly;                              //3
             uint32 questID;                                 //4
+            uint32 large;                                   //5
         } spellFocus;
         //9 GAMEOBJECT_TYPE_TEXT
         struct
@@ -176,6 +177,25 @@ struct GameObjectInfo
             uint32 losOK;                                   //16 isBattlegroundObject
             uint32 allowMounted;                            //17
         } goober;
+        //11 GAMEOBJECT_TYPE_TRANSPORT
+        struct
+        {
+            uint32 pause;                                   //0
+            uint32 startOpen;                               //1
+            uint32 autoCloseTime;                           //2 secs till autoclose = autoCloseTime / 0x10000
+        } transport;
+        //12 GAMEOBJECT_TYPE_AREADAMAGE
+        struct
+        {
+            uint32 lockId;                                  //0
+            uint32 radius;                                  //1
+            uint32 damageMin;                               //2
+            uint32 damageMax;                               //3
+            uint32 damageSchool;                            //4
+            uint32 autoCloseTime;                           //5 secs till autoclose = autoCloseTime / 0x10000
+            uint32 openTextID;                              //6
+            uint32 closeTextID;                             //7
+        } areadamage;
         //13 GAMEOBJECT_TYPE_CAMERA
         struct
         {
@@ -213,6 +233,17 @@ struct GameObjectInfo
             uint32 castersGrouped;                          //6
             uint32 ritualNoTargetCheck;                     //7
         } summoningRitual;
+        //20 GAMEOBJECT_TYPE_AUCTIONHOUSE
+        struct
+        {
+            uint32 actionHouseID;                           //0
+        } auctionhouse;
+        //21 GAMEOBJECT_TYPE_GUARDPOST
+        struct
+        {
+            uint32 creatureID;                              //0
+            uint32 charges;                                 //1
+        } guardpost;
         //22 GAMEOBJECT_TYPE_SPELLCASTER
         struct
         {
@@ -227,6 +258,18 @@ struct GameObjectInfo
             uint32 maxLevel;                                //1
             uint32 areaID;                                  //2
         } meetingstone;
+        //24 GAMEOBJECT_TYPE_FLAGSTAND
+        struct
+        {
+            uint32 lockId;                                  //0
+            uint32 pickupSpell;                             //1
+            uint32 radius;                                  //2
+            uint32 returnAura;                              //3
+            uint32 returnSpell;                             //4
+            uint32 noDamageImmune;                          //5
+            uint32 openTextID;                              //6
+            uint32 losOK;                                   //7
+        } flagstand;
         //25 GAMEOBJECT_TYPE_FISHINGHOLE                    // not implemented yet
         struct
         {
@@ -236,6 +279,75 @@ struct GameObjectInfo
             uint32 maxSuccessOpens;                         //3
             uint32 lockId;                                  //4 -> Lock.dbc; possibly 1628 for all?
         } fishinghole;
+        //26 GAMEOBJECT_TYPE_FLAGDROP
+        struct
+        {
+            uint32 lockId;                                  //0
+            uint32 eventID;                                 //1
+            uint32 pickupSpell;                             //2
+            uint32 noDamageImmune;                          //3
+            uint32 openTextID;                              //4
+        } flagdrop;
+        //27 GAMEOBJECT_TYPE_MINI_GAME
+        struct
+        {
+            uint32 gameType;                                //0
+        } miniGame;
+        //29 GAMEOBJECT_TYPE_CAPTURE_POINT
+        struct
+        {
+            uint32 radius;                                  //0
+            uint32 spell;                                   //1
+            uint32 worldState1;                             //2
+            uint32 worldstate2;                             //3
+            uint32 winEventID1;                             //4
+            uint32 winEventID2;                             //5
+            uint32 contestedEventID1;                       //6
+            uint32 contestedEventID2;                       //7
+            uint32 progressEventID1;                        //8
+            uint32 progressEventID2;                        //9
+            uint32 neutralEventID1;                         //10
+            uint32 neutralEventID2;                         //11
+            uint32 neutralPercent;                          //12
+            uint32 worldstate3;                             //13
+            uint32 minSuperiority;                          //14
+            uint32 maxSuperiority;                          //15
+            uint32 minTime;                                 //16
+            uint32 maxTime;                                 //17
+            uint32 large;                                   //18
+            uint32 highlight;                               //19
+        } capturePoint;
+        //30 GAMEOBJECT_TYPE_AURA_GENERATOR
+        struct
+        {
+            uint32 startOpen;                               //0
+            uint32 radius;                                  //1
+            uint32 auraID1;                                 //2
+            uint32 conditionID1;                            //3
+            uint32 auraID2;                                 //4
+            uint32 conditionID2;                            //5
+            uint32 serverOnly;                              //6
+        } auraGenerator;
+        //31 GAMEOBJECT_TYPE_DUNGEON_DIFFICULTY
+        struct
+        {
+            uint32 mapID;                                   //0
+            uint32 difficulty;                              //1
+        } dungeonDifficulty;
+        //32 GAMEOBJECT_TYPE_DO_NOT_USE_YET
+        struct
+        {
+            uint32 mapID;                                   //0
+            uint32 difficulty;                              //1
+        } doNotUseYet;
+        //33 GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING
+        struct
+        {
+            uint32 dmgPctState1;                            //0
+            uint32 dmgPctState2;                            //1
+            uint32 state1Name;                              //2
+            uint32 state2Name;                              //3
+        } destructibleBuilding;
 
         // not use for specific field access (only for output with loop by all filed), also this determinate max union size
         struct                                              // GAMEOBJECT_TYPE_SPELLCASTER
@@ -343,8 +455,11 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
                 case GAMEOBJECT_TYPE_CHEST: return GetGOInfo()->chest.lockId;
                 case GAMEOBJECT_TYPE_TRAP: return GetGOInfo()->trap.lockId;
                 case GAMEOBJECT_TYPE_GOOBER: return GetGOInfo()->goober.lockId;
+                case GAMEOBJECT_TYPE_AREADAMAGE: return GetGOInfo()->areadamage.lockId;
                 case GAMEOBJECT_TYPE_CAMERA: return GetGOInfo()->camera.lockId;
+                case GAMEOBJECT_TYPE_FLAGSTAND: return GetGOInfo()->flagstand.lockId;
                 case GAMEOBJECT_TYPE_FISHINGHOLE: return GetGOInfo()->fishinghole.lockId;
+                case GAMEOBJECT_TYPE_FLAGDROP: return GetGOInfo()->flagdrop.lockId;
                 default: return 0;
             }
         }
@@ -431,10 +546,12 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
             uint32 autoCloseTime = 0;
             switch(GetGoType())
             {
-                case GAMEOBJECT_TYPE_DOOR:   autoCloseTime = GetGOInfo()->door.autoCloseTime;
-                case GAMEOBJECT_TYPE_BUTTON: autoCloseTime = GetGOInfo()->button.autoCloseTime;
-                case GAMEOBJECT_TYPE_TRAP:   autoCloseTime = GetGOInfo()->trap.autoCloseTime;
-                case GAMEOBJECT_TYPE_GOOBER: autoCloseTime = GetGOInfo()->goober.autoCloseTime;
+                case GAMEOBJECT_TYPE_DOOR:          autoCloseTime = GetGOInfo()->door.autoCloseTime; break;
+                case GAMEOBJECT_TYPE_BUTTON:        autoCloseTime = GetGOInfo()->button.autoCloseTime; break;
+                case GAMEOBJECT_TYPE_TRAP:          autoCloseTime = GetGOInfo()->trap.autoCloseTime; break;
+                case GAMEOBJECT_TYPE_GOOBER:        autoCloseTime = GetGOInfo()->goober.autoCloseTime; break;
+                case GAMEOBJECT_TYPE_TRANSPORT:     autoCloseTime = GetGOInfo()->transport.autoCloseTime; break;
+                case GAMEOBJECT_TYPE_AREADAMAGE:    autoCloseTime = GetGOInfo()->areadamage.autoCloseTime; break;
             }
             return autoCloseTime / 0x10000;
         }
