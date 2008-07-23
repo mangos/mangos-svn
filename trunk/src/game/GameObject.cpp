@@ -136,7 +136,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, float x, float
     SetUInt32Value(GAMEOBJECT_DISPLAYID, goinfo->displayId);
 
     SetGoState(go_state);
-    SetGoType(goinfo->type);
+    SetGoType(GameobjectTypes(goinfo->type));
 
     SetGoAnimProgress(animprogress);
 

@@ -378,8 +378,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void SetSpellId(uint32 id) { m_spellId = id;}
         uint32 GetSpellId() const { return m_spellId;}
         void getFishLoot(Loot *loot);
-        uint32 GetGoType() const { return GetUInt32Value(GAMEOBJECT_TYPE_ID); }
-        void SetGoType(uint32 type) { SetUInt32Value(GAMEOBJECT_TYPE_ID, type); }
+        GameobjectTypes GetGoType() const { return GameobjectTypes(GetUInt32Value(GAMEOBJECT_TYPE_ID)); }
+        void SetGoType(GameobjectTypes type) { SetUInt32Value(GAMEOBJECT_TYPE_ID, type); }
         uint32 GetGoState() const { return GetUInt32Value(GAMEOBJECT_STATE); }
         void SetGoState(uint32 state) { SetUInt32Value(GAMEOBJECT_STATE, state); }
         uint32 GetGoArtKit() const { return GetUInt32Value(GAMEOBJECT_ARTKIT); }
