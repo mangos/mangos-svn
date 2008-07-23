@@ -301,7 +301,17 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //248 SPELL_AURA_MOD_COMBAT_RESULT_CHANCE         implemented in Unit::RollMeleeOutcomeAgainst
     &Aura::HandleNULL,                                      //249
     &Aura::HandleAuraModIncreaseHealth,                     //250 SPELL_AURA_MOD_INCREASE_HEALTH_2
-    &Aura::HandleNULL                                       //251 SPELL_AURA_MOD_ENEMY_DODGE
+    &Aura::HandleNULL,                                      //251 SPELL_AURA_MOD_ENEMY_DODGE
+    &Aura::HandleUnused,                                    //252 unused
+    &Aura::HandleUnused,                                    //253 unused
+    &Aura::HandleUnused,                                    //254 unused
+    &Aura::HandleUnused,                                    //255 unused
+    &Aura::HandleUnused,                                    //256 unused
+    &Aura::HandleUnused,                                    //257 unused
+    &Aura::HandleUnused,                                    //258 unused
+    &Aura::HandleUnused,                                    //259 unused
+    &Aura::HandleUnused,                                    //260 unused
+    &Aura::HandleNULL                                       //261 SPELL_AURA_261 some phased state (44856 spell)
 };
 
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem) :
