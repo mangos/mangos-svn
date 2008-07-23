@@ -745,10 +745,10 @@ void SpellMgr::LoadSpellAffects()
                 spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_TARGET_TRIGGER) )
                 continue;
 
-            if(GetSpellAffectMask(id,effectId))
+            if(spellInfo->EffectItemType[effectId] != 0)
                 continue;
 
-            if(spellInfo->EffectItemType[effectId] != 0)
+            if(mSpellAffectMap.find((id<<8) + effectId) !=  mSpellAffectMap.end())
                 continue;
 
             sLog.outErrorDb("Spell %u (%s) misses spell_affect for effect %u",id,spellInfo->SpellName[sWorld.GetDBClang()], effectId);
