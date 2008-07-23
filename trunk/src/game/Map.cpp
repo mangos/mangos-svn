@@ -517,9 +517,14 @@ bool InstanceMap::Add(Player *player)
                     if(groupBind->save != mapSave)
                     {
                         sLog.outError("InstanceMap::Add: player %s(%d) is being put in instance %d,%d,%d but he is in group %d which is bound to instance %d,%d,%d!", player->GetName(), player->GetGUIDLow(), mapSave->GetMapId(), mapSave->GetInstanceId(), mapSave->GetDifficulty(), GUID_LOPART(pGroup->GetLeaderGUID()), groupBind->save->GetMapId(), groupBind->save->GetInstanceId(), groupBind->save->GetDifficulty());
-                        sLog.outError("%d,%d,%d", (int)mapSave, (int)groupBind->save, groupBind->perm);
-                        if(mapSave) sLog.outError("%d, %d", mapSave->GetPlayerCount(), mapSave->GetGroupCount());
-                        if(groupBind->save) sLog.outError("%d, %d", groupBind->save->GetPlayerCount(), groupBind->save->GetGroupCount());
+                        if(mapSave)
+                            sLog.outError("MapSave players: %d, group count: %d", mapSave->GetPlayerCount(), mapSave->GetGroupCount());
+                        else
+                            sLog.outError("MapSave NULL");
+                        if(groupBind->save)
+                            sLog.outError("GroupBind save players: %d, group count: %d", groupBind->save->GetPlayerCount(), groupBind->save->GetGroupCount());
+                        else
+                            sLog.outError("GroupBind save NULL");
                         assert(false);
                     }
                     // if the group/leader is permanently bound to the instance
