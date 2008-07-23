@@ -275,7 +275,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleUnused,                                    //222 unused
     &Aura::HandleNULL,                                      //223 Cold Stare
     &Aura::HandleUnused,                                    //224 unused
-    &Aura::HandleNoImmediateEffect,                         //225 SPELL_AURA_DUMMY_3 Prayer of Mending
+    &Aura::HandleNoImmediateEffect,                         //225 SPELL_AURA_PRAYER_OF_MENDING
     &Aura::HandleAuraPeriodicDummy,                         //226 SPELL_AURA_PERIODIC_DUMMY
     &Aura::HandleNULL,                                      //227 periodic trigger spell
     &Aura::HandleNoImmediateEffect,                         //228 stealth detection

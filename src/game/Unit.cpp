@@ -73,7 +73,7 @@ static Unit::AuraTypeSet GenerateVictimProcCastAuraTypes()
 {
     static Unit::AuraTypeSet auraTypes;
     auraTypes.insert(SPELL_AURA_DUMMY);
-    auraTypes.insert(SPELL_AURA_DUMMY_3);
+    auraTypes.insert(SPELL_AURA_PRAYER_OF_MENDING);
     auraTypes.insert(SPELL_AURA_PROC_TRIGGER_SPELL);
     return auraTypes;
 }
@@ -5063,36 +5063,6 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     return;
                 }
             }
-
-            //Prayer of Mending
-            if(dummySpell->SpellFamilyFlags & 0x00002000000000LL)
-            {
-                int32 heal = triggeredByAura->GetModifier()->m_amount;
-
-                // heal
-                CastCustomSpell(this,33110,&heal,NULL,NULL,true,castItem,triggeredByAura,triggeredByAura->GetCasterGUID());
-
-                // jump
-                uint32 spellId;
-                switch (dummySpell->Id)
-                {
-                    case 41635: spellId=33280; break;       // 1 jump
-                    case 33280: spellId=35092; break;       // 2 jump
-                    case 35092: spellId=35093; break;       // 3 jump
-                    case 35093: spellId=35094; break;       // 4 jump
-                    case 35094: return;                     // no jumps
-                    default:
-                        sLog.outError("Unit::HandleDummyAuraProc: non handled spell id: %u (PoM)", dummySpell->Id);
-                        return;
-                }
-
-                CastCustomSpell(this,spellId,&heal,NULL,NULL,true,castItem,triggeredByAura,triggeredByAura->GetCasterGUID());
-
-                // aura expire
-                triggeredByAura->m_procCharges = 0;         // will removed
-                return;
-            }
-
             break;
         }
         case SPELLFAMILY_DRUID:
@@ -9779,7 +9749,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                 {
                     case SPELL_AURA_PROC_TRIGGER_SPELL: i_spell_param = procFlag;    break;
                     case SPELL_AURA_DUMMY:
-                    case SPELL_AURA_DUMMY_3:
+                    case SPELL_AURA_PRAYER_OF_MENDING:
                     case SPELL_AURA_MOD_HASTE:          i_spell_param = i_spell_eff; break;
                     default: i_spell_param = (*i)->GetModifier()->m_amount;          break;
                 }
@@ -9837,10 +9807,63 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                     break;
                 }
                 case SPELL_AURA_DUMMY:
-                case SPELL_AURA_DUMMY_3:
                 {
                     sLog.outDebug("ProcDamageAndSpell: casting spell id %u (triggered by %s dummy aura of spell %u)", i->spellInfo->Id,(isVictim?"a victim's":"an attacker's"),i->triggeredByAura->GetId());
                     HandleDummyAuraProc(pTarget, i->spellInfo, i->spellParam, damage, i->triggeredByAura, procSpell, procFlag);
+                    break;
+                }
+                case SPELL_AURA_PRAYER_OF_MENDING:
+                {
+                    sLog.outDebug("ProcDamageAndSpell(mending): casting spell id %u (triggered by %s dummy aura of spell %u)", i->spellInfo->Id,(isVictim?"a victim's":"an attacker's"),i->triggeredByAura->GetId());
+
+                    int32 heal = i->triggeredByAura->GetModifier()->m_amount;
+
+                    // heal
+                    CastCustomSpell(this,33110,&heal,NULL,NULL,true,NULL,i->triggeredByAura,i->triggeredByAura->GetCasterGUID());
+
+                    // jumps (already -1 after triggering)
+                    int32 jumps = i->triggeredByAura->m_procCharges;
+
+                    // current aura expire
+                    i->triggeredByAura->m_procCharges = 0;  // will removed
+
+                    // next target selection
+                    if(jumps > 0 && GetTypeId()==TYPEID_PLAYER && IS_PLAYER_GUID(i->triggeredByAura->GetCasterGUID()))
+                    {
+                        Aura* aura = i->triggeredByAura;
+
+                        SpellEntry const* spellProto = aura->GetSpellProto();
+                        uint32 effIdx = aura->GetEffIndex();
+
+                        float radius;
+                        if (spellProto->EffectRadiusIndex[effIdx])
+                            radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(spellProto->EffectRadiusIndex[effIdx]));
+                        else
+                            radius = GetSpellMaxRange(sSpellRangeStore.LookupEntry(spellProto->rangeIndex));
+
+                        if(Player* caster = ((Player*)aura->GetCaster()))
+                        {
+                            caster->ApplySpellMod(spellProto->Id, SPELLMOD_RADIUS, radius,NULL);
+
+                            if(Player* target = ((Player*)this)->GetNextRandomRaidMember(radius))
+                            {
+                                // aura will applied from caster, but spell casted from current aura holder
+                                SpellModifier *mod = new SpellModifier;
+                                mod->op = SPELLMOD_CHARGES;
+                                mod->value = jumps-5;               // negative
+                                mod->type = SPELLMOD_FLAT;
+                                mod->spellId = spellProto->Id;
+                                mod->effectId = effIdx;
+                                mod->lastAffected = NULL;
+                                mod->mask = spellProto->SpellFamilyFlags;
+                                mod->charges = 0;
+
+                                caster->AddSpellMod(mod, true);
+                                CastCustomSpell(target,spellProto->Id,&heal,NULL,NULL,true,NULL,aura,caster->GetGUID());
+                                caster->AddSpellMod(mod, false);
+                            }
+                        }
+                    }
                     break;
                 }
                 case SPELL_AURA_MOD_HASTE:

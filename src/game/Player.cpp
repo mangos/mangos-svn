@@ -17553,3 +17553,29 @@ void Player::SendCorpseReclaimDelay(bool load)
     data << uint32(delay*1000);
     GetSession()->SendPacket( &data );
 }
+
+Player* Player::GetNextRandomRaidMember(float radius)
+{
+    Group *pGroup = GetGroup();
+    if(!pGroup)
+        return NULL;
+
+    std::vector<Player*> nearMembers;
+    nearMembers.reserve(pGroup->GetMembersCount());
+
+    for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player* Target = itr->getSource();
+
+        // IsHostileTo check duel and controlled by enemy
+        if( Target && Target != this && IsWithinDistInMap(Target, radius) &&
+            !Target->HasInvisibilityAura() && !IsHostileTo(Target) )
+            nearMembers.push_back(Target);
+    }
+
+    if (nearMembers.empty())
+        return NULL;
+
+    uint32 randTarget = urand(0,nearMembers.size()-1);
+    return nearMembers[randTarget];
+}

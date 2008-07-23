@@ -172,7 +172,7 @@ bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, 
     SetUInt32Value(GAMEOBJECT_DISPLAYID, goinfo->displayId);
 
     SetGoState(1);
-    SetGoType(goinfo->type);
+    SetGoType(GameobjectTypes(goinfo->type));
 
     SetGoAnimProgress(animprogress);
     if(dynflags)
