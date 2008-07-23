@@ -1,3 +1,6 @@
+TRUNCATE `character_instance`;
+TRUNCATE `instance`;
+
 ALTER TABLE `character_instance`
   DROP KEY `leader`,
   DROP PRIMARY KEY,
@@ -9,9 +12,6 @@ ALTER TABLE `character_instance`
 
 ALTER TABLE `instance`
   ADD COLUMN `difficulty` tinyint(1) unsigned NOT NULL default '0' AFTER `resettime`;
-
-TRUNCATE `character_instance`;
-TRUNCATE `instance`;
 
 CREATE TABLE `group_instance` (
   `leaderGuid` int(11) unsigned NOT NULL default '0',
