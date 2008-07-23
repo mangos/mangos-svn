@@ -104,52 +104,11 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
     {
         // the object wants to be put in a certain instance of this map
         map = _FindMap(CurInstanceId);
-        if (map)
-        {
-            // it's already loaded
-            return(map);
-        }
-        else
-        {
-            // not loaded then try to load it
-            if(obj->GetTypeId() != TYPEID_PLAYER)
-            {
-                // creatures/gameobjects are not allowed to load new instances for themselves
-                sLog.outError("MAPINSTANCED: WorldObject '%u' (Entry: %u Type: %u) is requesting instance '%u' of map '%u', instantiating", obj->GetGUIDLow(), obj->GetEntry(), obj->GetTypeId(), CurInstanceId, GetId());
-                assert(false);
-                return NULL;
-            }
-            else
-            {
-                //If the player has left game, being in instance, and the server has crashed
-                //at the next login of the player we should create new instance with the same ID
-                //and add this player in it.
-
-                Player *player = (Player*)obj;
-                InstanceSave *save = NULL;
-
-                if(!player->IsInWorld())
-                    assert(false);
-
-                const MapEntry *entry = sMapStore.LookupEntry(GetId());
-                switch(entry->map_type)
-                {
-                    case MAP_INSTANCE:
-                    case MAP_RAID:
-                        if(!(save = sInstanceSaveManager.GetInstanceSave(CurInstanceId)))
-                        {
-                            sLog.outError("MapInstanced::GetInstance: player %d has %d instanceId but no instance save can be found!", player->GetGUIDLow(), CurInstanceId, player->GetMapId());
-                            assert(false);
-                        }
-                        else
-                            return CreateInstance(CurInstanceId, save, player->GetDifficulty());
-                    default:
-                        sLog.outError("MapInstanced::GetInstance: unhandled map type %d!", entry->map_type);
-                        assert(false);
-                        return NULL;
-                }
-            }
-        }
+        // For players if the instanceId is set, it's assumed they are already in a map,
+        // hence the map must be loaded. For Creatures, GameObjects etc the map must exist
+        // prior to calling GetMap, they are not allowed to create maps for themselves.
+        assert(map);
+        return(map);
     }
     else
     {

@@ -460,14 +460,6 @@ bool InstanceMap::CanEnter(Player *player)
         return false;
     }
 
-    // entering an instance that will be reset soon
-    /*if(uint32(GetResetTime() - time(NULL)) < 60)
-    {
-        player->m_InstanceValid = false;
-        player->m_HomebindTimer = uint32(GetResetTime() - time(NULL));
-        sLog.outError("player->m_InstanceValid = false, uint32(this->GetResetTime() - time(NULL)) < 60");
-        return false;
-    }*/
     return Map::CanEnter(player);
 }
 

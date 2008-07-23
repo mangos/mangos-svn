@@ -396,13 +396,6 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         if(cMap->Instanceable())
         {
             Map* pMap = MapManager::Instance().GetMap(_player->GetMapId(),_player);
-            if( pMap->Instanceable() && cMap->GetInstanceId() != pMap->GetInstanceId() )
-            {
-                // cannot go from instance to instance
-                PSendSysMessage(LANG_CANNOT_GO_INST_INST,chr->GetName());
-                SetSentErrorMessage(true);
-                return false;
-            }
 
             // we have to go to instance, and can go to player only if:
             //   1) we are in his group (either as leader or as member)
