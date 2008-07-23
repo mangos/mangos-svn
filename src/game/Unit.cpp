@@ -9816,10 +9816,9 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                 {
                     sLog.outDebug("ProcDamageAndSpell(mending): casting spell id %u (triggered by %s dummy aura of spell %u)", i->spellInfo->Id,(isVictim?"a victim's":"an attacker's"),i->triggeredByAura->GetId());
 
+                    // aura can be deleted at casts
                     int32 heal = i->triggeredByAura->GetModifier()->m_amount;
-
-                    // heal
-                    CastCustomSpell(this,33110,&heal,NULL,NULL,true,NULL,i->triggeredByAura,i->triggeredByAura->GetCasterGUID());
+                    uint64 caster_guid = i->triggeredByAura->GetCasterGUID();
 
                     // jumps (already -1 after triggering)
                     int32 jumps = i->triggeredByAura->m_procCharges;
@@ -9828,7 +9827,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                     i->triggeredByAura->m_procCharges = 0;  // will removed
 
                     // next target selection
-                    if(jumps > 0 && GetTypeId()==TYPEID_PLAYER && IS_PLAYER_GUID(i->triggeredByAura->GetCasterGUID()))
+                    if(jumps > 0 && GetTypeId()==TYPEID_PLAYER && IS_PLAYER_GUID(caster_guid))
                     {
                         Aura* aura = i->triggeredByAura;
 
@@ -9864,6 +9863,10 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                             }
                         }
                     }
+
+                    // heal
+                    CastCustomSpell(this,33110,&heal,NULL,NULL,true,NULL,NULL,caster_guid);
+
                     break;
                 }
                 case SPELL_AURA_MOD_HASTE:
