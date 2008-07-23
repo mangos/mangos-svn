@@ -909,6 +909,7 @@ CREATE TABLE `instance` (
   `id` int(11) unsigned NOT NULL default '0',
   `map` int(11) unsigned NOT NULL default '0',
   `resettime` bigint(40) NOT NULL default '0',
+  `difficulty` tinyint(1) unsigned NOT NULL default '0',
   `data` longtext,
   PRIMARY KEY  (`id`),
   KEY `map` (`map`),
