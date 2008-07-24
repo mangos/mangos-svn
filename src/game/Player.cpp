@@ -261,7 +261,7 @@ Player::Player (WorldSession *session): Unit()
 
     m_divider = 0;
 
-    m_GMFlags = 0;
+    m_ExtraFlags = 0;
     if(GetSession()->GetSecurity() >= SEC_GAMEMASTER)
         SetAcceptTicket(true);
 
@@ -338,7 +338,7 @@ Player::Player (WorldSession *session): Unit()
     m_restTime = 0;
     m_deathTimer = 0;
     m_deathExpireTime = 0;
-
+ 
     m_swingErrorMsg = 0;
 
     m_DetectInvTimer = 1000;
@@ -1873,7 +1873,7 @@ void Player::SetGameMaster(bool on)
 {
     if(on)
     {
-        m_GMFlags |= GM_ON;
+        m_ExtraFlags |= PLAYER_EXTRA_GM_ON;
         setFaction(35);
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
 
@@ -1884,7 +1884,7 @@ void Player::SetGameMaster(bool on)
     }
     else
     {
-        m_GMFlags &= ~GM_ON;
+        m_ExtraFlags &= ~ PLAYER_EXTRA_GM_ON;
         setFactionForRace(getRace());
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
 
@@ -1905,7 +1905,7 @@ void Player::SetGMVisible(bool on)
 {
     if(on)
     {
-        m_GMFlags &= ~GM_INVISIBLE;                         //remove flag
+        m_ExtraFlags &= ~PLAYER_EXTRA_GM_INVISIBLE;         //remove flag
 
         // Reapply stealth/invisibility if active or show if not any
         if(HasAuraType(SPELL_AURA_MOD_STEALTH))
@@ -1917,7 +1917,7 @@ void Player::SetGMVisible(bool on)
     }
     else
     {
-        m_GMFlags |= GM_INVISIBLE;                          //add flag
+        m_ExtraFlags |= PLAYER_EXTRA_GM_INVISIBLE;          //add flag
 
         SetAcceptWhispers(false);
         SetGameMaster(true);
@@ -3584,19 +3584,26 @@ void Player::ResurrectPlayer(float restore_percent, bool updateToWorld, bool app
     //Characters from level 11-19 will suffer from one minute of sickness
     //for each level they are above 10.
     //Characters level 20 and up suffer from ten minutes of sickness.
+    int32 startLevel = sWorld.getConfig(CONFIG_DEATH_SICKNESS_LEVEL);
 
-    uint32 spellLvl = getLevel() < 20 ? getLevel() : 20;
-    uint32 delta = (spellLvl-10)*MINUTE;
-
-    // set resurrection sickness
-    CastSpell(this,SPELL_ID_PASSIVE_RESURRECTION_SICKNESS,true);
-
-    for(int i =0; i < 3; ++i)
+    if(int32(getLevel()) >= startLevel)
     {
-        if(Aura* Aur = GetAura(SPELL_ID_PASSIVE_RESURRECTION_SICKNESS,i))
+        // set resurrection sickness
+        CastSpell(this,SPELL_ID_PASSIVE_RESURRECTION_SICKNESS,true);
+
+        // not full duration
+        if(int32(getLevel()) < startLevel+9)
         {
-            Aur->SetAuraDuration(delta*1000);
-            Aur->UpdateAuraDuration();
+            int32 delta = (int32(getLevel()) - startLevel + 1)*MINUTE;
+
+            for(int i =0; i < 3; ++i)
+            {
+                if(Aura* Aur = GetAura(SPELL_ID_PASSIVE_RESURRECTION_SICKNESS,i))
+                {
+                    Aur->SetAuraDuration(delta*1000);
+                    Aur->UpdateAuraDuration();
+                }
+            }
         }
     }
 }
@@ -3630,7 +3637,8 @@ void Player::CreateCorpse()
 
     uint32 _uf, _pb, _pb2, _cfb1, _cfb2;
 
-    Corpse *corpse = new Corpse(CORPSE_RESURRECTABLE);
+    Corpse *corpse = new Corpse( (m_ExtraFlags & PLAYER_EXTRA_PVP_DEATH) ? CORPSE_RESURRECTABLE_PVP : CORPSE_RESURRECTABLE_PVE );
+    SetPvPDeath(false);
 
     if(!corpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetMapId(), GetPositionX(),
         GetPositionY(), GetPositionZ(), GetOrientation()))
@@ -17497,8 +17505,14 @@ void Player::UpdateAreaDependentAuras( uint32 newArea )
     }
 }
 
-uint32 Player::GetCorpseReclaimDelay() const
+uint32 Player::GetCorpseReclaimDelay(bool pvp) const
 {
+    if( pvp && !sWorld.getConfig(CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVP) ||
+       !pvp && !sWorld.getConfig(CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVE) )
+    {
+        return copseReclaimDelay[0];
+    }
+
     time_t now = time(NULL);
     // 0..2 full period
     uint32 count = (now < m_deathExpireTime) ? (m_deathExpireTime - now)/DEATH_EXPIRE_STEP : 0;
@@ -17507,6 +17521,12 @@ uint32 Player::GetCorpseReclaimDelay() const
 
 void Player::UpdateCorpseReclaimDelay()
 {
+    bool pvp = m_ExtraFlags & PLAYER_EXTRA_PVP_DEATH;
+
+    if( pvp && !sWorld.getConfig(CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVP) ||
+        !pvp && !sWorld.getConfig(CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVE) )
+        return;
+
     time_t now = time(NULL);
     if(now < m_deathExpireTime)
     {
@@ -17533,9 +17553,18 @@ void Player::SendCorpseReclaimDelay(bool load)
         if(corpse->GetGhostTime() > m_deathExpireTime)
             return;
 
-        uint32 count = (m_deathExpireTime-corpse->GetGhostTime())/DEATH_EXPIRE_STEP;
-        if(count>=MAX_DEATH_COUNT)
-            count = MAX_DEATH_COUNT-1;
+        bool pvp = corpse->GetType()==CORPSE_RESURRECTABLE_PVP;
+
+        uint32 count;
+        if( pvp && sWorld.getConfig(CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVP) ||
+           !pvp && sWorld.getConfig(CONFIG_DEATH_CORPSE_RECLAIM_DELAY_PVE) )
+        {
+            count = (m_deathExpireTime-corpse->GetGhostTime())/DEATH_EXPIRE_STEP;
+            if(count>=MAX_DEATH_COUNT)
+                count = MAX_DEATH_COUNT-1;
+        }
+        else
+            count=0;
 
         time_t expected_time = corpse->GetGhostTime()+copseReclaimDelay[count];
 
@@ -17546,7 +17575,7 @@ void Player::SendCorpseReclaimDelay(bool load)
         delay = expected_time-now;
     }
     else
-        delay = GetCorpseReclaimDelay();
+        delay = GetCorpseReclaimDelay(corpse->GetType()==CORPSE_RESURRECTABLE_PVP);
 
     //! corpse reclaim delay 30 * 1000ms or longer at often deaths
     WorldPacket data(SMSG_CORPSE_RECLAIM_DELAY, 4);

@@ -664,6 +664,7 @@ void WorldSession::LogoutPlayer(bool Save)
                     aset.insert((Player*)(*itr));
             }
 
+            _player->SetPvPDeath(!aset.empty());
             _player->KillPlayer();
             _player->BuildPlayerRepop();
 

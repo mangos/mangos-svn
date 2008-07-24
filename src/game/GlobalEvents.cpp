@@ -30,11 +30,11 @@
 #include "Corpse.h"
 
 /// Handle periodic erase of corpses and bones
-static void CorpsesErase(CorpseType type,uint32 delay)
+static void CorpsesErase(bool bones,uint32 delay)
 {
     ///- Get the list of eligible corpses/bones to be removed
     //No SQL injection (uint32 and enum)
-    QueryResult *result = CharacterDatabase.PQuery("SELECT guid,position_x,position_y,map,player FROM corpse WHERE UNIX_TIMESTAMP()-time > '%u' AND corpse_type = '%u'",delay,type );
+    QueryResult *result = CharacterDatabase.PQuery("SELECT guid,position_x,position_y,map,player FROM corpse WHERE UNIX_TIMESTAMP()-time > '%u' AND corpse_type %s '0'", delay, (bones ? "=" : "<>") );
 
     if(result)
     {
@@ -49,10 +49,10 @@ static void CorpsesErase(CorpseType type,uint32 delay)
 
             uint64 guid = MAKE_NEW_GUID(guidlow, 0, HIGHGUID_CORPSE);
 
-            sLog.outDebug("[Global event] Removing %s %u (X:%f Y:%f Map:%u).",(type==CORPSE_BONES?"bones":"corpse"),guidlow,positionX,positionY,mapid);
+            sLog.outDebug("[Global event] Removing %s %u (X:%f Y:%f Map:%u).",(bones?"bones":"corpse"),guidlow,positionX,positionY,mapid);
 
             /// Resurrectable - convert corpses to bones
-            if(type!=CORPSE_BONES)
+            if(!bones)
             {
                 if(!ObjectAccessor::Instance().ConvertCorpseForPlayer(player_guid))
                 {
@@ -77,6 +77,6 @@ static void CorpsesErase(CorpseType type,uint32 delay)
 /// not thread guarded variant for call from other thread
 void CorpsesErase()
 {
-    CorpsesErase(CORPSE_BONES, 20*MINUTE);
-    CorpsesErase(CORPSE_RESURRECTABLE,3*DAY);
+    CorpsesErase(true, 20*MINUTE);
+    CorpsesErase(false,3*DAY);
 }
