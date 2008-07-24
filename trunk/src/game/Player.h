@@ -386,79 +386,72 @@ enum PlayerFlags
     PLAYER_UNK                  = 0x00040000,               // 2.0.8...
 };
 
-// used for PLAYER__FIELD_KNOWN_TITLES field
-enum PlayerKnownTitles
-{
-    PLAYER_TITLE_DISABLED             = 0x00000000,
-    PLAYER_TITLE_NONE                 = 0x00000001,
-    PLAYER_TITLE_PRIVATE              = 0x00000002,
-    PLAYER_TITLE_CORPORAL             = 0x00000004,
-    PLAYER_TITLE_SERGEANT_A           = 0x00000008,
-    PLAYER_TITLE_MASTER_SERGEANT      = 0x00000010,
-    PLAYER_TITLE_SERGEANT_MAJOR       = 0x00000020,
-    PLAYER_TITLE_KNIGHT               = 0x00000040,
-    PLAYER_TITLE_KNIGHT_LIEUTENANT    = 0x00000080,
-    PLAYER_TITLE_KNIGHT_CAPTAIN       = 0x00000100,
-    PLAYER_TITLE_KNIGHT_CHAMPION      = 0x00000200,
-    PLAYER_TITLE_LIEUTENANT_COMMANDER = 0x00000400,
-    PLAYER_TITLE_COMMANDER            = 0x00000800,
-    PLAYER_TITLE_MARSHAL              = 0x00001000,
-    PLAYER_TITLE_FIELD_MARSHAL        = 0x00002000,
-    PLAYER_TITLE_GRAND_MARSHAL        = 0x00004000,
-    PLAYER_TITLE_SCOUT                = 0x00008000,
-    PLAYER_TITLE_GRUNT                = 0x00010000,
-    PLAYER_TITLE_SERGEANT_H           = 0x00020000,
-    PLAYER_TITLE_SENIOR_SERGEANT      = 0x00040000,
-    PLAYER_TITLE_FIRST_SERGEANT       = 0x00080000,
-    PLAYER_TITLE_STONE_GUARD          = 0x00100000,
-    PLAYER_TITLE_BLOOD_GUARD          = 0x00200000,
-    PLAYER_TITLE_LEGIONNAIRE          = 0x00400000,
-    PLAYER_TITLE_CENTURION            = 0x00800000,
-    PLAYER_TITLE_CHAMPION             = 0x01000000,
-    PLAYER_TITLE_LIEUTENANT_GENERAL   = 0x02000000,
-    PLAYER_TITLE_GENERAL              = 0x04000000,
-    PLAYER_TITLE_WARLORD              = 0x08000000,
-    PLAYER_TITLE_HIGH_WARLORD         = 0x10000000,
-    PLAYER_TITLE_UNUSED1              = 0x20000000,
-    PLAYER_TITLE_UNUSED2              = 0x40000000
-};
-
-// used for PLAYER__FIELD_KNOWN_TITLES+1 field
-enum PlayerKnownTitles2
-{
-    PLAYER_TITLE_UNUSED3              = 0x00000000,
-    PLAYER_TITLE_UNUSED4              = 0x00000001,
-    PLAYER_TITLE_UNUSED5              = 0x00000002,
-    PLAYER_TITLE_UNUSED6              = 0x00000004,
-    PLAYER_TITLE_UNUSED7              = 0x00000008,
-    PLAYER_TITLE_UNUSED8              = 0x00000010,
-    PLAYER_TITLE_UNUSED9              = 0x00000020,
-    PLAYER_TITLE_UNUSED10             = 0x00000040,
-    PLAYER_TITLE_UNUSED11             = 0x00000080,
-    PLAYER_TITLE_UNUSED12             = 0x00000100,
-    PLAYER_TITLE_UNUSED13             = 0x00000200,
-    PLAYER_TITLE_UNUSED14             = 0x00000400,
-    PLAYER_TITLE_UNUSED15             = 0x00000800,
-    PLAYER_TITLE_UNUSED16             = 0x00001000,
-    PLAYER_TITLE_UNUSED17             = 0x00002000,
-    PLAYER_TITLE_UNUSED18             = 0x00004000,
-    PLAYER_TITLE_UNUSED19             = 0x00008000,
-    PLAYER_TITLE_UNUSED20             = 0x00010000,
-    PLAYER_TITLE_UNUSED21             = 0x00020000,
-    PLAYER_TITLE_UNUSED22             = 0x00040000,
-    PLAYER_TITLE_UNUSED23             = 0x00080000,
-    PLAYER_TITLE_UNUSED24             = 0x00100000,
-    PLAYER_TITLE_UNUSED25             = 0x00200000,
-    PLAYER_TITLE_UNUSED26             = 0x00400000,
-    PLAYER_TITLE_UNUSED27             = 0x00800000,
-    PLAYER_TITLE_UNUSED28             = 0x01000000,
-    PLAYER_TITLE_UNUSED29             = 0x02000000,
-    PLAYER_TITLE_UNUSED30             = 0x04000000,
-    PLAYER_TITLE_UNUSED31             = 0x08000000,
-    PLAYER_TITLE_UNUSED32             = 0x10000000,
-    PLAYER_TITLE_UNUSED33             = 0x20000000,
-    PLAYER_TITLE_UNUSED34             = 0x40000000
-};
+// used for PLAYER__FIELD_KNOWN_TITLES field (uint64), can't use enum
+#define PLAYER_TITLE_DISABLED              0x0000000000000000LL
+#define PLAYER_TITLE_NONE                  0x0000000000000001LL
+#define PLAYER_TITLE_PRIVATE               0x0000000000000002LL
+#define PLAYER_TITLE_CORPORAL              0x0000000000000004LL
+#define PLAYER_TITLE_SERGEANT_A            0x0000000000000008LL
+#define PLAYER_TITLE_MASTER_SERGEANT       0x0000000000000010LL
+#define PLAYER_TITLE_SERGEANT_MAJOR        0x0000000000000020LL
+#define PLAYER_TITLE_KNIGHT                0x0000000000000040LL
+#define PLAYER_TITLE_KNIGHT_LIEUTENANT     0x0000000000000080LL
+#define PLAYER_TITLE_KNIGHT_CAPTAIN        0x0000000000000100LL
+#define PLAYER_TITLE_KNIGHT_CHAMPION       0x0000000000000200LL
+#define PLAYER_TITLE_LIEUTENANT_COMMANDER  0x0000000000000400LL
+#define PLAYER_TITLE_COMMANDER             0x0000000000000800LL
+#define PLAYER_TITLE_MARSHAL               0x0000000000001000LL
+#define PLAYER_TITLE_FIELD_MARSHAL         0x0000000000002000LL
+#define PLAYER_TITLE_GRAND_MARSHAL         0x0000000000004000LL
+#define PLAYER_TITLE_SCOUT                 0x0000000000008000LL
+#define PLAYER_TITLE_GRUNT                 0x0000000000010000LL
+#define PLAYER_TITLE_SERGEANT_H            0x0000000000020000LL
+#define PLAYER_TITLE_SENIOR_SERGEANT       0x0000000000040000LL
+#define PLAYER_TITLE_FIRST_SERGEANT        0x0000000000080000LL
+#define PLAYER_TITLE_STONE_GUARD           0x0000000000100000LL
+#define PLAYER_TITLE_BLOOD_GUARD           0x0000000000200000LL
+#define PLAYER_TITLE_LEGIONNAIRE           0x0000000000400000LL
+#define PLAYER_TITLE_CENTURION             0x0000000000800000LL
+#define PLAYER_TITLE_CHAMPION              0x0000000001000000LL
+#define PLAYER_TITLE_LIEUTENANT_GENERAL    0x0000000002000000LL
+#define PLAYER_TITLE_GENERAL               0x0000000004000000LL
+#define PLAYER_TITLE_WARLORD               0x0000000008000000LL
+#define PLAYER_TITLE_HIGH_WARLORD          0x0000000010000000LL
+#define PLAYER_TITLE_UNUSED30              0x0000000020000000LL
+#define PLAYER_TITLE_UNUSED31              0x0000000040000000LL
+#define PLAYER_TITLE_UNUSED32              0x0000000080000000LL
+#define PLAYER_TITLE_UNUSED33              0x0000000100000000LL
+#define PLAYER_TITLE_UNUSED33              0x0000000200000000LL
+#define PLAYER_TITLE_UNUSED34              0x0000000400000000LL
+#define PLAYER_TITLE_UNUSED35              0x0000000800000000LL
+#define PLAYER_TITLE_UNUSED36              0x0000001000000000LL
+#define PLAYER_TITLE_UNUSED37              0x0000002000000000LL
+#define PLAYER_TITLE_UNUSED38              0x0000004000000000LL
+#define PLAYER_TITLE_UNUSED39              0x0000008000000000LL
+#define PLAYER_TITLE_UNUSED40              0x0000010000000000LL
+#define PLAYER_TITLE_UNUSED41              0x0000020000000000LL
+#define PLAYER_TITLE_UNUSED42              0x0000040000000000LL
+#define PLAYER_TITLE_UNUSED43              0x0000080000000000LL
+#define PLAYER_TITLE_UNUSED44              0x0000100000000000LL
+#define PLAYER_TITLE_UNUSED45              0x0000200000000000LL
+#define PLAYER_TITLE_UNUSED46              0x0000400000000000LL
+#define PLAYER_TITLE_UNUSED48              0x0000800000000000LL
+#define PLAYER_TITLE_UNUSED49              0x0001000000000000LL
+#define PLAYER_TITLE_UNUSED50              0x0002000000000000LL
+#define PLAYER_TITLE_UNUSED51              0x0004000000000000LL
+#define PLAYER_TITLE_UNUSED52              0x0008000000000000LL
+#define PLAYER_TITLE_UNUSED53              0x0010000000000000LL
+#define PLAYER_TITLE_UNUSED54              0x0020000000000000LL
+#define PLAYER_TITLE_UNUSED55              0x0040000000000000LL
+#define PLAYER_TITLE_UNUSED56              0x0080000000000000LL
+#define PLAYER_TITLE_UNUSED57              0x0100000000000000LL
+#define PLAYER_TITLE_UNUSED58              0x0200000000000000LL
+#define PLAYER_TITLE_UNUSED59              0x0400000000000000LL
+#define PLAYER_TITLE_UNUSED60              0x0800000000000000LL
+#define PLAYER_TITLE_UNUSED61              0x1000000000000000LL
+#define PLAYER_TITLE_UNUSED62              0x2000000000000000LL
+#define PLAYER_TITLE_UNUSED63              0x4000000000000000LL
+#define PLAYER_TITLE_UNUSED64              0x8000000000000000LL
 
 // used in PLAYER_FIELD_BYTES values
 enum PlayerFieldByteFlags
@@ -512,13 +505,17 @@ enum MirrorTimerType
 };
 
 // 2^n values
-enum GMFlags
+enum PlayerExtraFlags
 {
-    GM_ON              = 1,
-    GM_ACCEPT_TICKETS  = 2,
-    GM_ACCEPT_WHISPERS = 4,
-    GM_TAXICHEAT       = 8,                                 // can be applied to non-gm players
-    GM_INVISIBLE       = 16
+    // gm abilities
+    PLAYER_EXTRA_GM_ON              = 0x0001,
+    PLAYER_EXTRA_GM_ACCEPT_TICKETS  = 0x0002,
+    PLAYER_EXTRA_ACCEPT_WHISPERS    = 0x0004,
+    PLAYER_EXTRA_TAXICHEAT          = 0x0008,
+    PLAYER_EXTRA_GM_INVISIBLE       = 0x0010,
+
+    // other states
+    PLAYER_EXTRA_PVP_DEATH          = 0x0100                // store PvP death status until corpse creating.
 };
 
 // 2^n values
@@ -962,16 +959,17 @@ class MANGOS_DLL_SPEC Player : public Unit
         void InitTaxiNodesForLevel() { m_taxi.InitTaxiNodesForLevel(getRace(),getLevel()); }
         bool ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_id = 0 , Creature* npc = NULL);
                                                             // mount_id can be used in scripting calls
-        bool isAcceptTickets() const { return GetSession()->GetSecurity() >= SEC_GAMEMASTER && (m_GMFlags & GM_ACCEPT_TICKETS); }
-        void SetAcceptTicket(bool on) { if(on) m_GMFlags |= GM_ACCEPT_TICKETS; else m_GMFlags &= ~GM_ACCEPT_TICKETS; }
-        bool isAcceptWhispers() const { return m_GMFlags & GM_ACCEPT_WHISPERS; }
-        void SetAcceptWhispers(bool on) { if(on) m_GMFlags |= GM_ACCEPT_WHISPERS; else m_GMFlags &= ~GM_ACCEPT_WHISPERS; }
-        bool isGameMaster() const { return m_GMFlags & GM_ON; }
+        bool isAcceptTickets() const { return GetSession()->GetSecurity() >= SEC_GAMEMASTER && (m_ExtraFlags & PLAYER_EXTRA_GM_ACCEPT_TICKETS); }
+        void SetAcceptTicket(bool on) { if(on) m_ExtraFlags |= PLAYER_EXTRA_GM_ACCEPT_TICKETS; else m_ExtraFlags &= ~PLAYER_EXTRA_GM_ACCEPT_TICKETS; }
+        bool isAcceptWhispers() const { return m_ExtraFlags & PLAYER_EXTRA_ACCEPT_WHISPERS; }
+        void SetAcceptWhispers(bool on) { if(on) m_ExtraFlags |= PLAYER_EXTRA_ACCEPT_WHISPERS; else m_ExtraFlags &= ~PLAYER_EXTRA_ACCEPT_WHISPERS; }
+        bool isGameMaster() const { return m_ExtraFlags & PLAYER_EXTRA_GM_ON; }
         void SetGameMaster(bool on);
-        bool isTaxiCheater() const { return m_GMFlags & GM_TAXICHEAT; }
-        void SetTaxiCheater(bool on) { if(on) m_GMFlags |= GM_TAXICHEAT; else m_GMFlags &= ~GM_TAXICHEAT; }
-        bool isGMVisible() const { return !(m_GMFlags & GM_INVISIBLE); }
+        bool isTaxiCheater() const { return m_ExtraFlags & PLAYER_EXTRA_TAXICHEAT; }
+        void SetTaxiCheater(bool on) { if(on) m_ExtraFlags |= PLAYER_EXTRA_TAXICHEAT; else m_ExtraFlags &= ~PLAYER_EXTRA_TAXICHEAT; }
+        bool isGMVisible() const { return !(m_ExtraFlags & PLAYER_EXTRA_GM_INVISIBLE); }
         void SetGMVisible(bool on);
+        void SetPvPDeath(bool on) { if(on) m_ExtraFlags |= PLAYER_EXTRA_PVP_DEATH; else m_ExtraFlags &= ~PLAYER_EXTRA_PVP_DEATH; }
 
         void GiveXP(uint32 xp, Unit* victim);
         void GiveLevel(uint32 level);
@@ -1727,7 +1725,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         static DrunkenState GetDrunkenstateByValue(uint16 value);
 
         uint32 GetDeathTimer() const { return m_deathTimer; }
-        uint32 GetCorpseReclaimDelay() const;
+        uint32 GetCorpseReclaimDelay(bool pvp) const;
         void UpdateCorpseReclaimDelay();
         void SendCorpseReclaimDelay(bool load = false);
 
@@ -2110,7 +2108,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         std::vector<Item*> m_itemUpdateQueue;
         bool m_itemUpdateQueueBlocked;
 
-        uint32 m_GMFlags;
+        uint32 m_ExtraFlags;
         uint64 m_curSelection;
 
         uint64 m_comboTarget;

@@ -817,6 +817,18 @@ Visibility.Distance.Grey.Object = 10
 #         Chance lost sheild durability point at damage block.
 #         Default: 0.05 (100/0.05 = 2000) Each 2000 partly or full blocked attacks shield lost point
 #
+#    Death.SicknessLevel
+#         Starting Character start gain sickness at spirit resurrection (1 min)
+#         Default: 11
+#                  -10 - character will have full time (10min) sickness at 1 level
+#                  maxplayerlevel+1 - chaarcter will not have sickess at any level
+#
+#    Death.CorpseReclaimDelay.PvP
+#    Death.CorpseReclaimDelay.PvE
+#         Enabled/disabled increase corpse reclaim delay at oftent PvP/PvE deaths 
+#         Default: 1 (enabled)
+#                  0 (disabled)
+#
 ###################################################################################################################
 
 Rate.Health = 1
@@ -858,6 +870,9 @@ DurabilityLossChance.Damage = 0.5
 DurabilityLossChance.Absorb = 0.5
 DurabilityLossChance.Parry  = 0.05
 DurabilityLossChance.Block  = 0.05
+Death.SicknessLevel = 11
+Death.CorpseReclaimDelay.PvP = 1
+Death.CorpseReclaimDelay.PvE = 1
 
 ###################################################################################################################
 # CONSOLE AND REMOTE ACCESS
