@@ -18,11 +18,12 @@
 
 #include "InstanceData.h"
 #include "Database/DatabaseEnv.h"
+#include "Map.h"
 
 void InstanceData::SaveToDB()
 {
     if(!Save()) return;
     std::string data = Save();
     CharacterDatabase.escape_string(data);
-    CharacterDatabase.PExecute("UPDATE instance SET data = '%s'", data.c_str());
+    CharacterDatabase.PExecute("UPDATE instance SET data = '%s' WHERE id = '%d'", data.c_str(), instance->GetInstanceId());
 }
