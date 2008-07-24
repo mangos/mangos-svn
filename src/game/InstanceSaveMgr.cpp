@@ -39,6 +39,7 @@
 #include "ObjectMgr.h"
 #include "World.h"
 #include "Group.h"
+#include "InstanceData.h"
 
 INSTANTIATE_SINGLETON_1( InstanceSaveManager );
 
@@ -138,8 +139,22 @@ InstanceSave::~InstanceSave()
 */
 void InstanceSave::SaveToDB()
 {
-    // TODO: InstanceData is not being saved
-    CharacterDatabase.PExecute("INSERT INTO instance VALUES ('%u', '%u', '"I64FMTD"', '%u', '')", m_instanceid, GetMapId(), (uint64)GetResetTimeForDB(), GetDifficulty());
+    // save instance data too
+    std::string data;
+
+    Map *map = MapManager::Instance().FindMap(m_instanceid, GetMapId());
+    if(map)
+    {
+        assert(map->IsDungeon());
+        InstanceData *iData = ((InstanceMap *)map)->GetInstanceData();
+        if(iData && iData->Save())
+        {
+            data = iData->Save();
+            CharacterDatabase.escape_string(data);
+        }
+    }
+
+    CharacterDatabase.PExecute("INSERT INTO instance VALUES ('%u', '%u', '"I64FMTD"', '%u', '%s')", m_instanceid, GetMapId(), (uint64)GetResetTimeForDB(), GetDifficulty(), data.c_str());
 }
 
 time_t InstanceSave::GetResetTimeForDB()
