@@ -45,6 +45,8 @@ class MANGOS_DLL_SPEC InstanceData
         //When save is needed, this function generates the data
         virtual const char* Save() { return ""; }
 
+        void SaveToDB();
+
         //Called every map update
         virtual void Update(uint32 /*diff*/) {}
 

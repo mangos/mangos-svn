@@ -3863,7 +3863,8 @@ void ObjectMgr::LoadInstanceTemplate()
             }
         }
 
-        temp->reset_delay = (uint32)(temp->reset_delay * sWorld.getRate(RATE_INSTANCE_RESET_TIME));
+        // the reset_delay must be atleast one day
+        temp->reset_delay = std::max((uint32)1, (uint32)(temp->reset_delay * sWorld.getRate(RATE_INSTANCE_RESET_TIME)));
     }
 
     sLog.outString( ">> Loaded %u Instance Template definitions", sInstanceTemplate.RecordCount );
