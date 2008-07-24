@@ -1520,7 +1520,10 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchoolMask schoolMask, DamageEffe
                 {
                     pVictim->CastSpell(pVictim,31231,true);
                     ((Player*)pVictim)->AddSpellCooldown(31231,0,time(NULL)+60);
-                    RemainingDamage = 0;
+
+                    // with health > 10% lost health until health==10%, in other case no losses
+                    uint32 health10 = pVictim->GetMaxHealth()/10;
+                    RemainingDamage = pVictim->GetHealth() > health10 ? pVictim->GetHealth() - health10 : 0;
                 }
             }
             continue;
@@ -7061,9 +7064,20 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     // .. taken pct: dummy auras
     AuraList const& mDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
     for(AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+    {
         if( (*i)->GetSpellProto()->SpellIconID == 2109 )    // Cheat Death
+        {
             if( ((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) )
-                TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+            {
+                if(pVictim->GetTypeId() != TYPEID_PLAYER)
+                    continue;
+                float mod = -((Player*)pVictim)->GetRatingBonusValue(CR_CRIT_TAKEN_SPELL)*2*4;
+                if (mod < (*i)->GetModifier()->m_amount)
+                    mod = (*i)->GetModifier()->m_amount;
+                TakenTotalMod *= (mod+100.0f)/100.0f;
+            }
+        }
+    }
     
     // Distribute Damage over multiple effects, reduce by AoE
     CastingTime = GetCastingTimeForBonus( spellProto, damagetype, CastingTime );   
@@ -7954,7 +7968,14 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
     for(AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
         if((*i)->GetSpellProto()->SpellIconID == 2109)      // Cheat Death
             if((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL)
-                TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+            {
+                if(pVictim->GetTypeId() != TYPEID_PLAYER)
+                    continue;
+                float mod = ((Player*)pVictim)->GetRatingBonusValue(CR_CRIT_TAKEN_MELEE)*(-8.0f);
+                if (mod < (*i)->GetModifier()->m_amount)
+                    mod = (*i)->GetModifier()->m_amount;
+                TakenTotalMod *= (mod+100.0f)/100.0f;
+            }
 
     if(attType != RANGED_ATTACK)
     {

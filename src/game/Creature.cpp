@@ -1666,6 +1666,8 @@ void Creature::CallAssistence()
 {
     if( !m_AlreadyCallAssistence && getVictim() && !isPet() && !isCharmed())
     {
+        SetNoCallAssistence(true);
+
         float radius = sWorld.getConfig(CONFIG_CREATURE_FAMILY_ASSISTEMCE_RADIUS);
         if(radius > 0)
         {
@@ -1688,7 +1690,6 @@ void Creature::CallAssistence()
 
             for(std::list<Creature*>::iterator iter = assistList.begin(); iter != assistList.end(); ++iter)
             {
-                SetNoCallAssistence(true);
                 (*iter)->SetNoCallAssistence(true);
                 if((*iter)->AI())
                     (*iter)->AI()->AttackStart(getVictim());
