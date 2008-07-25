@@ -4361,13 +4361,15 @@ bool ChatHandler::HandleCompleteQuest(const char* args)
     }
 
     // If the quest requires reputation to complete
-    uint32 repFaction = pQuest->GetRepObjectiveFaction();
-    uint32 repValue = pQuest->GetRepObjectiveValue();
-    uint32 curRep = player->GetReputation(repFaction);
-    if(repFaction != 0 && curRep < repValue)
+    if(uint32 repFaction = pQuest->GetRepObjectiveFaction())
     {
-        FactionEntry const *factionEntry = sFactionStore.LookupEntry(repFaction);
-        player->SetFactionReputation(factionEntry,repValue);
+        uint32 repValue = pQuest->GetRepObjectiveValue();
+        uint32 curRep = player->GetReputation(repFaction);
+        if(curRep < repValue)
+        {
+            FactionEntry const *factionEntry = sFactionStore.LookupEntry(repFaction);
+            player->SetFactionReputation(factionEntry,repValue);
+        }
     }
 
     // If the quest requires money
