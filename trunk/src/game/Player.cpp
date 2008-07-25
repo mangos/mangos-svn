@@ -5000,15 +5000,17 @@ void Player::addActionButton(const uint8 button, const uint16 action, const uint
         }
     }
 
-    if (m_actionButtons.find(button)==m_actionButtons.end())
+    ActionButtonList::iterator buttonItr = m_actionButtons.find(button);
+
+    if (buttonItr==m_actionButtons.end())
     {                                                       // just add new button
         m_actionButtons[button] = ActionButton(action,type,misc);
     }
     else
     {                                                       // change state of current button
-        ActionButtonUpdateState uState = m_actionButtons[button].uState;
-        m_actionButtons[button] = ActionButton(action,type,misc);
-        if (uState != ACTIONBUTTON_NEW) m_actionButtons[button].uState = ACTIONBUTTON_CHANGED;
+        ActionButtonUpdateState uState = buttonItr->second.uState;
+        buttonItr->second = ActionButton(action,type,misc);
+        if (uState != ACTIONBUTTON_NEW) buttonItr->second.uState = ACTIONBUTTON_CHANGED;
     };
 
     sLog.outDetail( "Player '%u' Added Action '%u' to Button '%u'", GetGUIDLow(), action, button );
@@ -5016,7 +5018,15 @@ void Player::addActionButton(const uint8 button, const uint16 action, const uint
 
 void Player::removeActionButton(uint8 button)
 {
-    m_actionButtons[button].uState = ACTIONBUTTON_DELETED;
+    ActionButtonList::iterator buttonItr = m_actionButtons.find(button);
+    if (buttonItr==m_actionButtons.end())
+        return;
+
+    if(buttonItr->second.uState==ACTIONBUTTON_NEW)
+        m_actionButtons.erase(buttonItr);                   // new and not saved
+    else
+        buttonItr->second.uState = ACTIONBUTTON_DELETED;    // saved, will deleted at next save
+
     sLog.outDetail( "Action Button '%u' Removed from Player '%u'", button, GetGUIDLow() );
 }
 
