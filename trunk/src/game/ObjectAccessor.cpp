@@ -332,6 +332,14 @@ void ObjectAccessor::RemoveAllObjectsInRemoveList()
     {
         WorldObject* obj = *i_objectsToRemove.begin();
         i_objectsToRemove.erase(i_objectsToRemove.begin());
+
+        Map *map = MapManager::Instance().FindMap(obj->GetMapId(), obj->GetInstanceId());
+        if(!map)
+        {
+            sLog.outDebug("ObjectAccessor: object (guid %d, type %d) was removed just before the map (%d, %d) was unloaded", obj->GetGUIDLow(), obj->GetTypeId(), obj->GetMapId(), obj->GetInstanceId());
+            continue;
+        }
+
         switch(obj->GetTypeId())
         {
             case TYPEID_CORPSE:
@@ -343,18 +351,18 @@ void ObjectAccessor::RemoveAllObjectsInRemoveList()
                 }
                 else
                 {
-                    MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove(corpse,true);
+                    map->Remove(corpse,true);
                 }
                 break;
             }
             case TYPEID_DYNAMICOBJECT:
-                MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove((DynamicObject*)obj,true);
+                map->Remove((DynamicObject*)obj,true);
                 break;
             case TYPEID_GAMEOBJECT:
-                MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove((GameObject*)obj,true);
+                map->Remove((GameObject*)obj,true);
                 break;
             case TYPEID_UNIT:
-                MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove((Creature*)obj,true);
+                map->Remove((Creature*)obj,true);
                 break;
             default:
                 sLog.outError("Non-grid object (TypeId: %u) in grid object removing list, ignored.",obj->GetTypeId());
