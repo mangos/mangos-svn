@@ -1282,6 +1282,18 @@ Map const* WorldObject::GetBaseMap() const
     return MapManager::Instance().GetBaseMap(GetMapId());
 }
 
+void WorldObject::AddObjectToRemoveList()
+{
+    Map* map = GetMap();
+    if(!map)
+    {
+        sLog.outError("Object (TypeId: %u Entry: %u GUID: %u) at attempt add to move list not have valid map (Id: %u).",GetTypeId(),GetEntry(),GetGUIDLow(),GetMapId());
+        return;
+    }
+
+    map->AddObjectToRemoveList(this);
+}
+
 Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime)
 {
     TemporarySummon* pCreature = new TemporarySummon(GetGUID());

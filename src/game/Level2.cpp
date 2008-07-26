@@ -881,7 +881,7 @@ bool ChatHandler::HandleDeleteCommand(const char* /*args*/)
     unit->DeleteFromDB();
 
     unit->CleanupsBeforeDelete();
-    ObjectAccessor::Instance().AddObjectToRemoveList(unit);
+    unit->AddObjectToRemoveList();
 
     SendSysMessage(LANG_COMMAND_DELCREATMESSAGE);
 
@@ -2572,7 +2572,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             wpCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_NEW_GUID(wpGuid, VISUAL_WAYPOINT, HIGHGUID_UNIT));
             wpCreature->DeleteFromDB();
             wpCreature->CleanupsBeforeDelete();
-            ObjectAccessor::Instance().AddObjectToRemoveList(wpCreature);
+            wpCreature->AddObjectToRemoveList();
         }
 
         // What to do:
@@ -2638,7 +2638,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
                 wpCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_NEW_GUID(wpGuid, VISUAL_WAYPOINT, HIGHGUID_UNIT));
                 wpCreature->DeleteFromDB();
                 wpCreature->CleanupsBeforeDelete();
-                ObjectAccessor::Instance().AddObjectToRemoveList(wpCreature);
+                wpCreature->AddObjectToRemoveList();
                 // re-create
                 Creature* wpCreature2 = new Creature;
                 if (!wpCreature2->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), map, VISUAL_WAYPOINT, 0))
@@ -2938,7 +2938,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
                 {
                     pCreature->DeleteFromDB();
                     pCreature->CleanupsBeforeDelete();
-                    ObjectAccessor::Instance().AddObjectToRemoveList(pCreature);
+                    pCreature->AddObjectToRemoveList();
                 }
 
             }while( result2->NextRow() );
@@ -3139,7 +3139,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             {
                 pCreature->DeleteFromDB();
                 pCreature->CleanupsBeforeDelete();
-                ObjectAccessor::Instance().AddObjectToRemoveList(pCreature);
+                pCreature->AddObjectToRemoveList();
             }
         }while(result->NextRow());
         // set "wpguid" column to "empty" - no visual waypoint spawned

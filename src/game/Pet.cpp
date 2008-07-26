@@ -823,7 +823,7 @@ void Pet::Remove(PetSaveMode mode, bool returnreagent)
     }
 
     CleanupsBeforeDelete();
-    ObjectAccessor::Instance().AddObjectToRemoveList(this);
+    AddObjectToRemoveList();
     m_removed = true;
 }
 

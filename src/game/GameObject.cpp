@@ -443,7 +443,7 @@ void GameObject::Delete()
     SetGoState(1);
     SetUInt32Value(GAMEOBJECT_FLAGS, GetGOInfo()->flags);
 
-    ObjectAccessor::Instance().AddObjectToRemoveList(this);
+    AddObjectToRemoveList();
 }
 
 void GameObject::getFishLoot(Loot *fishloot)

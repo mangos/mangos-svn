@@ -181,10 +181,6 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         void AddUpdateObject(Object *obj);
         void RemoveUpdateObject(Object *obj);
 
-        void AddObjectToRemoveList(WorldObject   *obj);
-
-        void DoDelayedMovesAndRemoves();
-
         void Update(uint32 diff);
 
         Corpse* GetCorpseForPlayerGUID(uint64 guid);
@@ -201,8 +197,6 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         static void UpdateObjectVisibility(WorldObject* obj);
         static void UpdateVisibilityForPlayer(Player* player);
     private:
-        void RemoveAllObjectsInRemoveList();
-
         struct WorldObjectChangeAccumulator
         {
             UpdateDataMapType &i_updateDatas;
@@ -222,10 +216,8 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         static void _buildPacket(Player *, Object *, UpdateDataMapType &);
         void _update(void);
         std::set<Object *> i_objects;
-        std::set<WorldObject *> i_objectsToRemove;
         LockType i_playerGuard;
         LockType i_updateGuard;
-        LockType i_removeGuard;
         LockType i_corpseGuard;
         LockType i_petGuard;
 };

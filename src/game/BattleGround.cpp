@@ -948,7 +948,7 @@ bool BattleGround::DelCreature(uint32 type)
         return false;
     }
     cr->CleanupsBeforeDelete();
-    ObjectAccessor::Instance().AddObjectToRemoveList(cr);
+    cr->AddObjectToRemoveList();
     m_BgCreatures[type] = 0;
     return true;
 }

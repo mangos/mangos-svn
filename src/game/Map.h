@@ -222,6 +222,9 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
                 i_mapEntry->MapID==560 || i_mapEntry->MapID==509 || i_mapEntry->MapID==269 );
         }
 
+        void AddObjectToRemoveList(WorldObject *obj);
+        void DoDelayedMovesAndRemoves();
+
         virtual bool RemoveBones(uint64 guid, float x, float y);
 
         void UpdateObjectVisibility(WorldObject* obj, Cell cell, CellPair cellpair);
@@ -269,6 +272,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         void setGridObjectDataLoaded(bool pLoaded, uint32 x, uint32 y) { getNGrid(x,y)->setGridObjectDataLoaded(pLoaded); }
 
         inline void setNGrid(NGridType* grid, uint32 x, uint32 y);
+
     protected:
         typedef MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>::Lock Guard;
 
@@ -286,6 +290,10 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cells;
 
         time_t i_gridExpiry;
+
+        void RemoveAllObjectsInRemoveList();
+
+        std::set<WorldObject *> i_objectsToRemove;
 
         // Type specific code for add/remove to/from grid
         template<class T>
