@@ -8119,10 +8119,29 @@ void Unit::Unmount()
 
 void Unit::SetInCombat(Unit* enemy)
 {
-    Unit* owner = enemy->GetOwner();
+    Unit* owner = enemy->GetCharmerOrOwner();
     if(!owner)
         owner = enemy;
-    SetInCombat(owner->IsPvP());
+
+    if(owner->IsPvP())
+    {
+        SetInCombat(true);
+        return;
+    }
+
+    //check for duel
+    if(owner->GetTypeId() == TYPEID_PLAYER && ((Player*)owner)->duel)
+    {
+        Unit* myOwner = GetCharmerOrOwner();
+        if(!myOwner)
+            myOwner = this;
+        if(((Player*)owner)->duel->opponent == myOwner)
+        {
+            SetInCombat(true);
+            return;
+        }
+    }
+    SetInCombat(false);
 }
 
 void Unit::SetInCombat(bool PvP)
