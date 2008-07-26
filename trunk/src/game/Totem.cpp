@@ -123,7 +123,7 @@ void Totem::UnSummon()
     }
 
     CleanupsBeforeDelete();
-    ObjectAccessor::Instance().AddObjectToRemoveList(this);
+    AddObjectToRemoveList();
 }
 
 void Totem::SetOwner(uint64 guid)

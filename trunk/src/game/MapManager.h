@@ -93,7 +93,7 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
             return IsValidMAP(mapid) && MaNGOS::IsValidMapCoord(x,y,z,o);
         }
 
-        void MoveAllCreaturesInMoveList();
+        void DoDelayedMovesAndRemoves();
 
         void LoadTransports();
 

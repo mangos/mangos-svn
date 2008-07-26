@@ -514,7 +514,7 @@ void GameEvent::GameEventUnspawn(int16 event_id)
             if( Creature* pCreature = ObjectAccessor::Instance().GetObjectInWorld(MAKE_NEW_GUID(*itr, data->id, HIGHGUID_UNIT), (Creature*)NULL) )
             {
                 pCreature->CleanupsBeforeDelete();
-                ObjectAccessor::Instance().AddObjectToRemoveList(pCreature);
+                pCreature->AddObjectToRemoveList();
             }
         }
     }
@@ -533,7 +533,7 @@ void GameEvent::GameEventUnspawn(int16 event_id)
             objmgr.RemoveGameobjectFromGrid(*itr, data);
 
             if( GameObject* pGameobject = ObjectAccessor::Instance().GetObjectInWorld(MAKE_NEW_GUID(*itr, data->id, HIGHGUID_GAMEOBJECT), (GameObject*)NULL) )
-                ObjectAccessor::Instance().AddObjectToRemoveList(pGameobject);
+                pGameobject->AddObjectToRemoveList();
         }
     }
 }

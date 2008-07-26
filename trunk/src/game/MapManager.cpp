@@ -257,10 +257,10 @@ MapManager::Update(time_t diff)
     i_timer.SetCurrent(0);
 }
 
-void MapManager::MoveAllCreaturesInMoveList()
+void MapManager::DoDelayedMovesAndRemoves()
 {
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
-        iter->second->MoveAllCreaturesInMoveList();
+        iter->second->DoDelayedMovesAndRemoves();
 }
 
 bool MapManager::ExistMapAndVMap(uint32 mapid, float x,float y)

@@ -312,7 +312,7 @@ bool PlayerDumpWriter::DumpTable(std::string& dump, uint32 guid, char const*tabl
             case DTT_PET:
                 StoreGUID(result,0,pets);  break;           // pet guid collection
             case DTT_MAIL:
-                StoreGUID(result,0,mails); break;           // mail id collection
+                StoreGUID(result,0,mails);                  // mail id collection
                 StoreGUID(result,6,texts); break;           // item text id collection
             case DTT_MAIL_ITEM:
                 StoreGUID(result,1,items); break;           // item guid collection
@@ -493,8 +493,8 @@ bool PlayerDumpReader::LoadDump(std::string file, uint32 account, std::string na
                     if (result)
                     {
                         delete result;
-                                                            // rename on login
-                        if(!changenth(line, 29, "1")) ROLLBACK;
+                                                            // rename on login: `at_login` field 30 in raw field list
+                        if(!changenth(line, 30, "1")) ROLLBACK;
                     }
                 }
                 else if(!changenth(line, 4, name.c_str())) ROLLBACK;
@@ -532,8 +532,8 @@ bool PlayerDumpReader::LoadDump(std::string file, uint32 account, std::string na
             {
                 //store a map of old pet id to new inserted pet id for use by type 5 tables
                 snprintf(currpetid, 20, "%s", getnth(line, 1).c_str());
-                if(lastpetid == "") snprintf(lastpetid, 20, "%s", currpetid);
-                if(lastpetid != currpetid)
+                if(strlen(lastpetid)==0) snprintf(lastpetid, 20, "%s", currpetid);
+                if(strcmp(lastpetid,currpetid)!=0)
                 {
                     snprintf(newpetid, 20, "%d", objmgr.GeneratePetNumber());
                     snprintf(lastpetid, 20, "%s", currpetid);

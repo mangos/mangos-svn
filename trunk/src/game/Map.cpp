@@ -970,7 +970,7 @@ void Map::MoveAllCreaturesInMoveList()
                     sLog.outDebug("Creature (GUID: %u Entry: %u ) can't be move to unloaded respawn grid.",c->GetGUIDLow(),c->GetEntry());
                 #endif
                 c->CleanupsBeforeDelete();
-                ObjectAccessor::Instance().AddObjectToRemoveList(c);
+                AddObjectToRemoveList(c);
             }
         }
     }
@@ -1072,13 +1072,13 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y, bool pForce)
 
         // Finish creature moves, remove and delete all creatures with delayed remove before moving to respawn grids
         // Must know real mob position before move
-        ObjectAccessor::Instance().DoDelayedMovesAndRemoves();
+        DoDelayedMovesAndRemoves();
 
         // move creatures to respawn grids if this is diff.grid or to remove list
         unloader.MoveToRespawnN();
 
         // Finish creature moves, remove and delete all creatures with delayed remove before unload
-        ObjectAccessor::Instance().DoDelayedMovesAndRemoves();
+        DoDelayedMovesAndRemoves();
 
         unloader.UnloadN();
         delete getNGrid(x, y);
@@ -1509,13 +1509,57 @@ inline void Map::setNGrid(NGridType *grid, uint32 x, uint32 y)
     i_grids[x][y] = grid;
 }
 
-uint32 InstanceMap::GetPlayersCountExceptGMs() const
+void Map::DoDelayedMovesAndRemoves()
 {
-    uint32 count = 0;
-    for(PlayerList::const_iterator itr = i_Players.begin(); itr != i_Players.end(); ++itr)
-        if(!(*itr)->isGameMaster())
-            ++count;
-    return count;
+    MoveAllCreaturesInMoveList();
+    RemoveAllObjectsInRemoveList();
+}
+
+void Map::AddObjectToRemoveList(WorldObject *obj)
+{
+    assert(obj->GetMapId()==GetId() && obj->GetInstanceId()==obj->GetInstanceId());
+
+    i_objectsToRemove.insert(obj);
+    //sLog.outDebug("Object (GUID: %u TypeId: %u ) added to removing list.",obj->GetGUIDLow(),obj->GetTypeId());
+}
+
+void Map::RemoveAllObjectsInRemoveList()
+{
+    if(i_objectsToRemove.empty())
+        return;
+
+    //sLog.outDebug("Object remover 1 check.");
+    while(!i_objectsToRemove.empty())
+    {
+        WorldObject* obj = *i_objectsToRemove.begin();
+        i_objectsToRemove.erase(i_objectsToRemove.begin());
+
+        switch(obj->GetTypeId())
+        {
+            case TYPEID_CORPSE:
+            {
+                Corpse* corpse = ObjectAccessor::Instance().GetCorpse(*obj, obj->GetGUID());
+                if (!corpse)
+                    sLog.outError("ERROR: Try delete corpse/bones %u that not in map", obj->GetGUIDLow());
+                else
+                    Remove(corpse,true);
+                break;
+            }
+        case TYPEID_DYNAMICOBJECT:
+            Remove((DynamicObject*)obj,true);
+            break;
+        case TYPEID_GAMEOBJECT:
+            Remove((GameObject*)obj,true);
+            break;
+        case TYPEID_UNIT:
+            Remove((Creature*)obj,true);
+            break;
+        default:
+            sLog.outError("Non-grid object (TypeId: %u) in grid object removing list, ignored.",obj->GetTypeId());
+            break;
+        }
+    }
+    //sLog.outDebug("Object remover 2 check.");
 }
 
 template void Map::Add(Corpse *);
@@ -1527,6 +1571,15 @@ template void Map::Remove(Corpse *,bool);
 template void Map::Remove(Creature *,bool);
 template void Map::Remove(GameObject *, bool);
 template void Map::Remove(DynamicObject *, bool);
+
+uint32 InstanceMap::GetPlayersCountExceptGMs() const
+{
+    uint32 count = 0;
+    for(PlayerList::const_iterator itr = i_Players.begin(); itr != i_Players.end(); ++itr)
+        if(!(*itr)->isGameMaster())
+            ++count;
+    return count;
+}
 
 void InstanceMap::PermBindAllPlayers()
 {

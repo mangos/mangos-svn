@@ -123,7 +123,7 @@ void Corpse::DeleteBonesFromWorld()
         return;
     }
 
-    ObjectAccessor::Instance().AddObjectToRemoveList(this);
+    AddObjectToRemoveList();
 }
 
 void Corpse::DeleteFromDB()

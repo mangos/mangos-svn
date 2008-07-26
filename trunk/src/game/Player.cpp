@@ -15102,7 +15102,7 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
     pet->SavePetToDB(mode);
 
     pet->CleanupsBeforeDelete();
-    ObjectAccessor::Instance().AddObjectToRemoveList(pet);
+    pet->AddObjectToRemoveList();
     pet->m_removed = true;
 
     if(pet->isControlled())

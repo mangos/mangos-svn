@@ -418,6 +418,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         uint32 GetInstanceId() const { return m_InstanceId; }
         void SetInstanceId(uint32 val) { m_InstanceId = val; }
 
+        void AddObjectToRemoveList();
+
         // main visibility check function in normal case (ignore grey zone distance check)
         bool isVisibleFor(Player const* u) const { return isVisibleForInState(u,false); }
 
