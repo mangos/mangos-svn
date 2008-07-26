@@ -337,6 +337,7 @@ void ObjectAccessor::RemoveAllObjectsInRemoveList()
         if(!map)
         {
             sLog.outDebug("ObjectAccessor: object (guid %d, type %d) was removed just before the map (%d, %d) was unloaded", obj->GetGUIDLow(), obj->GetTypeId(), obj->GetMapId(), obj->GetInstanceId());
+            delete obj;
             continue;
         }
 
