@@ -2523,13 +2523,15 @@ void ObjectMgr::LoadGroups()
 
     // clean groups
     // TODO: maybe delete from the DB before loading in this case
-    for(GroupSet::iterator itr = mGroupSet.begin(); itr != mGroupSet.end(); ++itr)
+    for(GroupSet::iterator itr = mGroupSet.begin(); itr != mGroupSet.end();)
     {
         if((*itr)->GetMembersCount() < 2)
         {
             delete *itr;
             mGroupSet.erase(itr++);
         }
+        else
+            ++itr;
     }
 
     sLog.outString();
