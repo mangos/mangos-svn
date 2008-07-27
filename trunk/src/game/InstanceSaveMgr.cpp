@@ -49,8 +49,26 @@ InstanceSaveManager::InstanceSaveManager() : lock_instLists(false)
 
 InstanceSaveManager::~InstanceSaveManager()
 {
+    // it is undefined whether this or objectmgr will be unloaded first
+    // so we must be prepared for both cases
+    lock_instLists = true;
     for (InstanceSaveHashMap::iterator itr = m_instanceSaveById.begin(); itr != m_instanceSaveById.end(); ++itr)
-        delete itr->second;
+    {
+        InstanceSave *save = itr->second;
+        for(InstanceSave::PlayerListType::iterator itr = save->m_playerList.begin(), next = itr; itr != save->m_playerList.end(); itr = next)
+        {
+            ++next;
+            (*itr)->UnbindInstance(save->GetMapId(), save->GetDifficulty(), true);
+        }
+        save->m_playerList.clear();
+        for(InstanceSave::GroupListType::iterator itr = save->m_groupList.begin(), next = itr; itr != save->m_groupList.end(); itr = next)
+        {
+            ++next;
+            (*itr)->UnbindInstance(save->GetMapId(), save->GetDifficulty(), true);
+        }
+        save->m_groupList.clear();
+        delete save;
+    }
 }
 
 /*
@@ -131,7 +149,7 @@ InstanceSave::InstanceSave(uint16 MapId, uint32 InstanceId, uint8 difficulty,
 InstanceSave::~InstanceSave()
 {
     // the players and groups must be unbound before deleting the save
-    assert(World::m_stopEvent || (m_playerList.empty() && m_groupList.empty()));
+    assert(m_playerList.empty() && m_groupList.empty());
 }
 
 /*
