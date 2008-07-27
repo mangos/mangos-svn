@@ -536,8 +536,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
     //Get in CombatState
     if(pVictim != this && damagetype != DOT)
     {
-        SetInCombat(pVictim);
-        pVictim->SetInCombat(this);
+        SetInCombatWith(pVictim);
+        pVictim->SetInCombatWith(this);
     }
 
     // Rage from Damage made (only from direct weapon damage)
@@ -6418,7 +6418,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
         return false;
 
     // always non-hostile to GM in GM mode
-    if(unit->GetTypeId()==TYPEID_PLAYER && ((Player*)unit)->isGameMaster())
+    if(unit->GetTypeId()==TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
         return false;
 
     // always hostile to enemy
@@ -6451,29 +6451,32 @@ bool Unit::IsHostileTo(Unit const* unit) const
     // special cases (Duel, etc)
     if(tester->GetTypeId()==TYPEID_PLAYER && target->GetTypeId()==TYPEID_PLAYER)
     {
+        Player const* pTester = (Player const*)tester;
+        Player const* pTarget = (Player const*)target;
+
         // Duel
-        if(((Player const*)tester)->duel && ((Player const*)tester)->duel->opponent == target && ((Player const*)tester)->duel->startTime != 0)
+        if(pTester->duel && pTester->duel->opponent == pTarget && pTester->duel->startTime != 0)
             return true;
 
         // Group
-        if(((Player*)tester)->GetGroup() && ((Player*)tester)->GetGroup()==((Player*)target)->GetGroup())
+        if(pTester->GetGroup() && pTester->GetGroup()==pTarget->GetGroup())
             return false;
 
         // Sanctuary
-        if(target->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY) && tester->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
+        if(pTarget->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY) && pTester->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
             return false;
 
         // PvP FFA state
-        if(((Player*)tester)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP) && ((Player*)target)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP))
+        if(pTester->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP) && pTarget->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP))
             return true;
 
         //= PvP states
         // Green/Blue (can't attack)
-        if(((Player*)tester)->GetTeam()==((Player*)target)->GetTeam())
+        if(pTester->GetTeam()==pTarget->GetTeam())
             return false;
 
         // Red (can attack) if true, Blue/Yellow (can't attack) in another case
-        return ((Player*)tester)->IsPvP() && ((Player*)target)->IsPvP();
+        return pTester->IsPvP() && pTarget->IsPvP();
     }
 
     // faction base cases
@@ -6500,14 +6503,14 @@ bool Unit::IsHostileTo(Unit const* unit) const
     else if(target->GetTypeId()==TYPEID_PLAYER)
     {
         // forced reaction
-        ForcedReactions::const_iterator forceItr = ((Player*)target)->m_forcedReactions.find(tester_faction->faction);
-        if(forceItr!=((Player*)target)->m_forcedReactions.end())
+        ForcedReactions::const_iterator forceItr = ((Player const*)target)->m_forcedReactions.find(tester_faction->faction);
+        if(forceItr!=((Player const*)target)->m_forcedReactions.end())
             return forceItr->second <= REP_HOSTILE;
 
         // apply reputation state
         FactionEntry const* raw_tester_faction = sFactionStore.LookupEntry(tester_faction->faction);
         if(raw_tester_faction && raw_tester_faction->reputationListID >=0 )
-            return ((Player*)target)->GetReputationRank(raw_tester_faction) <= REP_HOSTILE;
+            return ((Player const*)target)->GetReputationRank(raw_tester_faction) <= REP_HOSTILE;
     }
 
     // common faction based case (CvC,PvC,CvP)
@@ -6521,7 +6524,7 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
         return true;
 
     // always friendly to GM in GM mode
-    if(unit->GetTypeId()==TYPEID_PLAYER && ((Player*)unit)->isGameMaster())
+    if(unit->GetTypeId()==TYPEID_PLAYER && ((Player const*)unit)->isGameMaster())
         return true;
 
     // always non-friendly to enemy
@@ -6554,29 +6557,32 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     // special cases (Duel)
     if(tester->GetTypeId()==TYPEID_PLAYER && target->GetTypeId()==TYPEID_PLAYER)
     {
+        Player const* pTester = (Player const*)tester;
+        Player const* pTarget = (Player const*)target;
+
         // Duel
-        if(((Player const*)tester)->duel && ((Player const*)tester)->duel->opponent == target && ((Player const*)tester)->duel->startTime != 0)
+        if(pTester->duel && pTester->duel->opponent == target && pTester->duel->startTime != 0)
             return false;
 
         // Group
-        if(((Player*)tester)->GetGroup() && ((Player*)tester)->GetGroup()==((Player*)target)->GetGroup())
+        if(pTester->GetGroup() && pTester->GetGroup()==pTarget->GetGroup())
             return true;
 
         // Sanctuary
-        if(target->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY) && tester->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
+        if(pTarget->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY) && pTester->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_SANCTUARY))
             return true;
 
         // PvP FFA state
-        if(((Player*)tester)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP) && ((Player*)target)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP))
+        if(pTester->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP) && pTarget->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP))
             return false;
 
         //= PvP states
         // Green/Blue (non-attackable)
-        if(((Player*)tester)->GetTeam()==((Player*)target)->GetTeam())
+        if(pTester->GetTeam()==pTarget->GetTeam())
             return true;
 
         // Blue (friendly/non-attackable) if not PVP, or Yellow/Red in another case (attackable)
-        return !((Player*)target)->IsPvP();
+        return !pTarget->IsPvP();
     }
 
     // faction base cases
@@ -6589,8 +6595,8 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     if(tester->GetTypeId()==TYPEID_PLAYER)
     {
         // forced reaction
-        ForcedReactions::const_iterator forceItr = ((Player*)tester)->m_forcedReactions.find(target_faction->faction);
-        if(forceItr!=((Player*)tester)->m_forcedReactions.end())
+        ForcedReactions::const_iterator forceItr = ((Player const*)tester)->m_forcedReactions.find(target_faction->faction);
+        if(forceItr!=((Player const*)tester)->m_forcedReactions.end())
             return forceItr->second >= REP_FRIENDLY;
 
         // if faction have reputation then friendly state for tester at 100% dependent from at_war state
@@ -6603,14 +6609,14 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     else if(target->GetTypeId()==TYPEID_PLAYER)
     {
         // forced reaction
-        ForcedReactions::const_iterator forceItr = ((Player*)target)->m_forcedReactions.find(tester_faction->faction);
-        if(forceItr!=((Player*)target)->m_forcedReactions.end())
+        ForcedReactions::const_iterator forceItr = ((Player const*)target)->m_forcedReactions.find(tester_faction->faction);
+        if(forceItr!=((Player const*)target)->m_forcedReactions.end())
             return forceItr->second >= REP_FRIENDLY;
 
         // apply reputation state
         if(FactionEntry const* raw_tester_faction = sFactionStore.LookupEntry(tester_faction->faction))
             if(raw_tester_faction->reputationListID >=0 )
-                return ((Player*)target)->GetReputationRank(raw_tester_faction) >= REP_FRIENDLY;
+                return ((Player const*)target)->GetReputationRank(raw_tester_faction) >= REP_FRIENDLY;
     }
 
     // common faction based case (CvC,PvC,CvP)
@@ -8117,34 +8123,34 @@ void Unit::Unmount()
     }
 }
 
-void Unit::SetInCombat(Unit* enemy)
+void Unit::SetInCombatWith(Unit const* enemy)
 {
-    Unit* owner = enemy->GetCharmerOrOwner();
-    if(!owner)
-        owner = enemy;
+    Unit const* eOwner = enemy->GetCharmerOrOwner();
+    if(!eOwner)
+        eOwner = enemy;
 
-    if(owner->IsPvP())
+    if(eOwner->IsPvP())
     {
-        SetInCombat(true);
+        SetInCombatState(true);
         return;
     }
 
     //check for duel
-    if(owner->GetTypeId() == TYPEID_PLAYER && ((Player*)owner)->duel)
+    if(eOwner->GetTypeId() == TYPEID_PLAYER && ((Player*)eOwner)->duel)
     {
-        Unit* myOwner = GetCharmerOrOwner();
+        Unit const* myOwner = GetCharmerOrOwner();
         if(!myOwner)
             myOwner = this;
-        if(((Player*)owner)->duel->opponent == myOwner)
+        if(((Player const*)eOwner)->duel->opponent == myOwner)
         {
-            SetInCombat(true);
+            SetInCombatState(true);
             return;
         }
     }
-    SetInCombat(false);
+    SetInCombatState(false);
 }
 
-void Unit::SetInCombat(bool PvP)
+void Unit::SetInCombatState(bool PvP)
 {
     // only alive units can be in combat
     if(!isAlive())
