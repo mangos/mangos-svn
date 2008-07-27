@@ -968,8 +968,8 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
                     if(!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
                         ((Creature*)unit)->AI()->AttackStart(m_caster);
 
-                    unit->SetInCombat(m_caster);
-                    m_caster->SetInCombat(unit);
+                    unit->SetInCombatWith(m_caster);
+                    m_caster->SetInCombatWith(unit);
 
                     unit->AddThreat(m_caster, 0.0f);
                 }
@@ -979,7 +979,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
         {
             if( unit->isInCombat() && !(m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_NO_INITIAL_AGGRO) )
             {
-                m_caster->SetInCombat(unit->GetCombatTimer() > 0);
+                m_caster->SetInCombatState(unit->GetCombatTimer() > 0);
                 unit->getHostilRefManager().threatAssist(m_caster, 0.0f);
             }
         }
