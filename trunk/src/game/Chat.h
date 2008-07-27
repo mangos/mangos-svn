@@ -374,7 +374,7 @@ class ChatHandler
         WorldSession * m_session;
 
         // Utility methods for commands
-        void ShowTicket(uint64 guid, uint32 category, char const* text, char const* time);
+        void ShowTicket(uint64 guid, char const* text, char const* time);
         uint32 GetTicketIDByNum(uint32 num);
 
         void SetSentErrorMessage(bool val){ sentErrorMessage = val;};
