@@ -369,11 +369,9 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & /*recv_data*/ )
 
 void WorldSession::HandleGMTicketUpdateTextOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,1+1);
+    CHECK_PACKET_SIZE(recv_data,1);
 
-    uint8 unk;
     std::string ticketText;
-    recv_data >> unk;
     recv_data >> ticketText;
 
     CharacterDatabase.escape_string(ticketText);
@@ -395,23 +393,23 @@ void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & /*recv_data*/ )
 
 void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,1+4+4+4+4+1+1);
+    CHECK_PACKET_SIZE(recv_data, 4*4+1+2*4);
 
     uint32 map;
     float x, y, z;
-    uint8 category;
     std::string ticketText = "";
-    std::string unk_text;                                   // "Reserved for future use" text
+    uint32 unk1, unk2;
 
-    recv_data >> category >> map >> x >> y >> z;            // last check 2.0.12
+    recv_data >> map >> x >> y >> z;                        // last check 2.4.3
     recv_data >> ticketText;
 
     // recheck
-    CHECK_PACKET_SIZE(recv_data,1+4+4+4+4+(ticketText.size()+1)+1);
+    CHECK_PACKET_SIZE(recv_data,4*4+(ticketText.size()+1)+2*4);
 
-    recv_data >> unk_text;
+    recv_data >> unk1 >> unk2;
+    // note: the packet might contain more data, but the exact structure of that is unknown
 
-    sLog.outDebug("TicketCreate: category %u, map %u, x %f, y %f, z %f, text %s, unk_text %s", category, map, x, y, z, ticketText.c_str(), unk_text.c_str());
+    sLog.outDebug("TicketCreate: map %u, x %f, y %f, z %f, text %s, unk1 %u, unk2 %u", map, x, y, z, ticketText.c_str(), unk1, unk2);
 
     CharacterDatabase.escape_string(ticketText);
 
@@ -432,7 +430,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
         }
         else
         {
-            CharacterDatabase.PExecute("INSERT INTO character_ticket (guid,ticket_text,ticket_category) VALUES ('%u', '%s', '%u')", _player->GetGUIDLow(), ticketText.c_str(), category);
+            CharacterDatabase.PExecute("INSERT INTO character_ticket (guid,ticket_text) VALUES ('%u', '%s')", _player->GetGUIDLow(), ticketText.c_str());
 
             WorldPacket data( SMSG_QUERY_TIME_RESPONSE, 4+4 );
             data << (uint32)time(NULL);
