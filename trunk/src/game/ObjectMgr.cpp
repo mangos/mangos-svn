@@ -3745,7 +3745,9 @@ void ObjectMgr::LoadItemTexts()
 
 void ObjectMgr::LoadPageTexts()
 {
-    sPageTextStore.Load ();
+    sPageTextStore.Free();                                  // for reload case
+
+    sPageTextStore.Load();
     sLog.outString( ">> Loaded %u page texts", sPageTextStore.RecordCount );
     sLog.outString();
 

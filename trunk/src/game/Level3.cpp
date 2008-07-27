@@ -45,6 +45,7 @@
 #include "SystemConfig.h"
 #include "Config/ConfigEnv.h"
 #include "Util.h"
+#include "ItemEnchantmentMgr.h"
 
 //reload commands
 bool ChatHandler::HandleReloadCommand(const char* arg)
@@ -65,6 +66,7 @@ bool ChatHandler::HandleReloadAllCommand(const char*)
     HandleReloadAllLootCommand("");
     HandleReloadAllQuestCommand("");
     HandleReloadAllSpellCommand("");
+    HandleReloadAllItemCommand("");
 
     HandleReloadCommandCommand("");
     HandleReloadReservedNameCommand("");
@@ -129,6 +131,13 @@ bool ChatHandler::HandleReloadAllSpellCommand(const char*)
     HandleReloadSpellScriptTargetCommand("a");
     HandleReloadSpellTargetPositionCommand("a");
     HandleReloadSpellThreatsCommand("a");
+    return true;
+}
+
+bool ChatHandler::HandleReloadAllItemCommand(const char*)
+{
+    HandleReloadPageTextsCommand("a");
+    HandleReloadItemEnchantementsCommand("a");
     return true;
 }
 
@@ -376,6 +385,22 @@ bool ChatHandler::HandleReloadSpellThreatsCommand(const char*)
     sLog.outString( "Re-Loading Aggro Spells Definitions...");
     spellmgr.LoadSpellThreats();
     SendGlobalSysMessage("DB table `spell_threat` (spell aggro definitions) reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadPageTextsCommand(const char*)
+{
+    sLog.outString( "Re-Loading Page Texts..." );
+    objmgr.LoadPageTexts();
+    SendGlobalSysMessage("DB table `page_texts` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadItemEnchantementsCommand(const char*)
+{
+    sLog.outString( "Re-Loading Item Random Enchantments Table..." );
+    LoadRandomEnchantmentsTable();
+    SendGlobalSysMessage("DB table `item_enchantment_template` reloaded.");
     return true;
 }
 

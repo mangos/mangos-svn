@@ -46,6 +46,8 @@ static EnchantmentStore RandomItemEnch;
 
 void LoadRandomEnchantmentsTable()
 {
+    RandomItemEnch.clear();                                 // for reload case
+
     EnchantmentStore::iterator tab;
     uint32 entry, ench;
     float chance;

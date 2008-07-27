@@ -184,6 +184,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "all_loot",       SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllLootCommand,       "", NULL },
         { "all_scripts",    SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllScriptsCommand,    "", NULL },
         { "all_spell",      SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllSpellCommand,      "", NULL },
+        { "all_item",       SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllItemCommand,       "", NULL },
 
         { "areatrigger_tavern",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAreaTriggerTavernCommand,       "", NULL },
         { "areatrigger_teleport",        SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAreaTriggerTeleportCommand,     "", NULL },
@@ -200,8 +201,10 @@ ChatCommand * ChatHandler::getCommandTable()
         { "gameobject_loot_template",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesGameobjectCommand, "", NULL },
         { "gameobject_questrelation",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadGOQuestRelationsCommand,        "", NULL },
         { "gameobject_scripts",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadGameObjectScriptsCommand,       "", NULL },
+        { "item_enchantment_template",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadItemEnchantementsCommand,       "", NULL },
         { "item_loot_template",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesItemCommand,       "", NULL },
         { "mangos_string",               SEC_ADMINISTRATOR, &ChatHandler::HandleReloadMangosStringCommand,            "", NULL },
+        { "page_text",                   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadPageTextsCommand,               "", NULL },
         { "pickpocketing_loot_template", SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesPickpocketingCommand,"",NULL},
         { "prospecting_loot_template",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesProspectingCommand,"", NULL },
         { "quest_mail_loot_template",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesQuestMailCommand,  "", NULL },
