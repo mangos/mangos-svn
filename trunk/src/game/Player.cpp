@@ -755,14 +755,10 @@ void Player::EnvironmentalDamage(uint64 guid, EnviromentalDamage type, uint32 da
     }
 }
 
-void Player::HandleDrowning(uint32 UnderWaterTime)
+void Player::HandleDrowning()
 {
     if(!m_isunderwater)
         return;
-
-    AuraList const& mModWaterBreathing = GetAurasByType(SPELL_AURA_MOD_WATER_BREATHING);
-    for(AuraList::const_iterator i = mModWaterBreathing.begin(); i != mModWaterBreathing.end(); ++i)
-        UnderWaterTime = uint32(UnderWaterTime * (100.0f + (*i)->GetModifier()->m_amount) / 100.0f);
 
     //if have water breath , then remove bar
     if(waterbreath || isGameMaster() || !isAlive())
@@ -771,6 +767,12 @@ void Player::HandleDrowning(uint32 UnderWaterTime)
         m_isunderwater = 0;
         return;
     }
+
+    uint32 UnderWaterTime = 1*MINUTE*1000;                  // default leangthL 1 min
+
+    AuraList const& mModWaterBreathing = GetAurasByType(SPELL_AURA_MOD_WATER_BREATHING);
+    for(AuraList::const_iterator i = mModWaterBreathing.begin(); i != mModWaterBreathing.end(); ++i)
+        UnderWaterTime = uint32(UnderWaterTime * (100.0f + (*i)->GetModifier()->m_amount) / 100.0f);
 
     if ((m_isunderwater & 0x01) && !(m_isunderwater & 0x80) && isAlive())
     {
@@ -1146,7 +1148,7 @@ void Player::Update( uint32 p_time )
     }
 
     //Handle Water/drowning
-    HandleDrowning(60000);
+    HandleDrowning();
 
     //Handle lava
     HandleLava();
@@ -5069,21 +5071,8 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
     }
 
     // code block for underwater state update
-    {
-        float water_z  = m->GetWaterLevel(x,y);
-        float height_z = m->GetHeight(x,y,z, false);        // use .map base surface height
-        uint8 flag1    = m->GetTerrainType(x,y);
+    UpdateUnderwaterState(m, x, y, z);
 
-        //!Underwater check, not in water if underground or above water level
-        if (height_z <= INVALID_HEIGHT || z < (height_z-2) || z > (water_z - 2) )
-            m_isunderwater &= 0x7A;
-        else if ((z < (water_z - 2)) && (flag1 & 0x01))
-            m_isunderwater |= 0x01;
-
-        //!in lava check, anywhere under lava level
-        if ((height_z <= INVALID_HEIGHT || z < (height_z - 0)) && (flag1 == 0x00) && IsInWater())
-            m_isunderwater |= 0x80;
-    }
 
     CheckExploreSystem();
 
@@ -17617,4 +17606,21 @@ Player* Player::GetNextRandomRaidMember(float radius)
 
     uint32 randTarget = urand(0,nearMembers.size()-1);
     return nearMembers[randTarget];
+}
+
+void Player::UpdateUnderwaterState( Map* m, float x, float y, float z )
+{
+    float water_z  = m->GetWaterLevel(x,y);
+    float height_z = m->GetHeight(x,y,z, false);        // use .map base surface height
+    uint8 flag1    = m->GetTerrainType(x,y);
+
+    //!Underwater check, not in water if underground or above water level
+    if (height_z <= INVALID_HEIGHT || z < (height_z-2) || z > (water_z - 2) )
+        m_isunderwater &= 0x7A;
+    else if ((z < (water_z - 2)) && (flag1 & 0x01))
+        m_isunderwater |= 0x01;
+
+    //!in lava check, anywhere under lava level
+    if ((height_z <= INVALID_HEIGHT || z < (height_z - 0)) && (flag1 == 0x00) && IsInWater())
+        m_isunderwater |= 0x80;
 }

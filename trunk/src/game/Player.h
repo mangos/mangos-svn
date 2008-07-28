@@ -1583,6 +1583,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendResetFailedNotify(uint32 mapid);
 
         bool SetPosition(float x, float y, float z, float orientation, bool teleport = false);
+        void UpdateUnderwaterState( Map * m, float x, float y, float z );
+
         void SendMessageToSet(WorldPacket *data, bool self);// overwrite Object::SendMessageToSet
         void SendMessageToOwnTeamSet(WorldPacket *data, bool self);
 
@@ -1872,6 +1874,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool CanFly() const { return HasUnitMovementFlag(MOVEMENTFLAG_CAN_FLY); }
         bool IsFlying() const { return HasUnitMovementFlag(MOVEMENTFLAG_FLYING); }
 
+        void HandleDrowning();
+
         void SetClientControl(Unit* target, uint8 allowMove);
 
         // Transports
@@ -2052,7 +2056,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***              ENVIRONMENTAL SYSTEM                 ***/
         /*********************************************************/
-        void HandleDrowning (uint32 UnderWaterTime);
         void HandleLava();
         void HandleSobering();
         void StartMirrorTimer(MirrorTimerType Type, uint32 MaxValue);
