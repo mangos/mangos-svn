@@ -318,6 +318,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
         {
             switch(spellproto->EffectApplyAuraName[effIndex])
             {
+                // case SPELL_AURA_PERIODIC_DAMAGE:         can't be used for spell classification as used in positive spells also.
                 case SPELL_AURA_DUMMY:
                 {
                     // dummy aura can be positive or negative dependent from casted spell

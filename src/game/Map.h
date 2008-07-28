@@ -196,6 +196,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         }
 
         virtual void MoveAllCreaturesInMoveList();
+        virtual void RemoveAllObjectsInRemoveList();
 
         bool CreatureRespawnRelocation(Creature *c);        // used only in MoveAllCreaturesInMoveList and ObjectGridUnloader
 
@@ -290,8 +291,6 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cells;
 
         time_t i_gridExpiry;
-
-        void RemoveAllObjectsInRemoveList();
 
         std::set<WorldObject *> i_objectsToRemove;
 

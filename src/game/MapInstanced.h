@@ -31,10 +31,12 @@ class MANGOS_DLL_DECL MapInstanced : public Map
         MapInstanced(uint32 id, time_t, uint32 aInstanceId);
         ~MapInstanced() {}
 
-        virtual void Update(const uint32&);
-        virtual void MoveAllCreaturesInMoveList();
-        virtual bool RemoveBones(uint64 guid, float x, float y);
-        virtual void UnloadAll(bool pForce);
+        // functions overwrite Map versions
+        void Update(const uint32&);
+        void MoveAllCreaturesInMoveList();
+        void RemoveAllObjectsInRemoveList();
+        bool RemoveBones(uint64 guid, float x, float y);
+        void UnloadAll(bool pForce);
 
         Map* GetInstance(const WorldObject* obj);
         Map* FindMap(uint32 InstanceId) { return _FindMap(InstanceId); }
