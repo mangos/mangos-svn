@@ -3669,7 +3669,7 @@ void Player::CreateCorpse()
         flags |= 0x20;                                      // to be able to remove insignia
     corpse->SetUInt32Value( CORPSE_FIELD_FLAGS, flags );
 
-    corpse->SetUInt32Value( CORPSE_FIELD_DISPLAY_ID, GetDisplayId() );
+    corpse->SetUInt32Value( CORPSE_FIELD_DISPLAY_ID, GetNativeDisplayId() );
 
     uint32 iDisplayID;
     uint16 iIventoryType;
