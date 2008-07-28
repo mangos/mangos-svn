@@ -60,6 +60,18 @@ void MapInstanced::MoveAllCreaturesInMoveList()
     {
         i->second->MoveAllCreaturesInMoveList();
     }
+
+    Map::MoveAllCreaturesInMoveList();
+}
+
+void MapInstanced::RemoveAllObjectsInRemoveList()
+{
+    for (InstancedMaps::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); i++)
+    {
+        i->second->RemoveAllObjectsInRemoveList();
+    }
+
+    Map::RemoveAllObjectsInRemoveList();
 }
 
 bool MapInstanced::RemoveBones(uint64 guid, float x, float y)
@@ -71,7 +83,7 @@ bool MapInstanced::RemoveBones(uint64 guid, float x, float y)
         remove_result = remove_result || i->second->RemoveBones(guid, x, y);
     }
 
-    return remove_result;
+    return remove_result || Map::RemoveBones(guid,x,y);
 }
 
 void MapInstanced::UnloadAll(bool pForce)

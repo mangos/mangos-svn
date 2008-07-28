@@ -1517,7 +1517,7 @@ void Map::DoDelayedMovesAndRemoves()
 
 void Map::AddObjectToRemoveList(WorldObject *obj)
 {
-    assert(obj->GetMapId()==GetId() && obj->GetInstanceId()==obj->GetInstanceId());
+    assert(obj->GetMapId()==GetId() && obj->GetInstanceId()==GetInstanceId());
 
     i_objectsToRemove.insert(obj);
     //sLog.outDebug("Object (GUID: %u TypeId: %u ) added to removing list.",obj->GetGUIDLow(),obj->GetTypeId());
