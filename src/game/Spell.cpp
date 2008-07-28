@@ -558,8 +558,10 @@ void Spell::FillTargetMap()
                     break;
                 case SPELL_EFFECT_SUMMON:
                     if(m_spellInfo->EffectMiscValueB[i] == SUMMON_TYPE_POSESSED || m_spellInfo->EffectMiscValueB[i] == SUMMON_TYPE_POSESSED2)
+                    {
                         if(m_targets.getUnitTarget())
                             tmpUnitMap.push_back(m_targets.getUnitTarget());
+                    }
                     else
                         tmpUnitMap.push_back(m_caster);
                     break;
