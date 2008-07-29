@@ -60,7 +60,7 @@ void Totem::Summon(Unit* owner)
     owner->GetMap()->Add((Creature*)this);
 
     // select totem model in dependent from owner team
-    CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(GetEntry());
+    CreatureInfo const *cinfo = GetCreatureInfo();
     if(owner->GetTypeId()==TYPEID_PLAYER && cinfo)
     {
         if(((Player*)owner)->GetTeam()==HORDE)

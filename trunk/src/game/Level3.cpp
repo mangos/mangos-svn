@@ -3265,7 +3265,7 @@ bool ChatHandler::HandleNpcInfoCommand(const char* /*args*/)
     uint32 npcflags = target->GetUInt32Value(UNIT_NPC_FLAGS);
     uint32 displayid = target->GetDisplayId();
     uint32 nativeid = target->GetNativeDisplayId();
-    uint32 Entry = target->GetUInt32Value(OBJECT_FIELD_ENTRY);
+    uint32 Entry = target->GetEntry();
     CreatureInfo const* cInfo = target->GetCreatureInfo();
 
     int32 curRespawnDelay = target->GetRespawnTimeEx()-time(NULL);

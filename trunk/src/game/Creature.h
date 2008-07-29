@@ -156,6 +156,7 @@ enum CreatureFlagsExtra
 struct CreatureInfo
 {
     uint32  Entry;
+    uint32  HeroicEntry;
     uint32  DisplayID_A;
     uint32  DisplayID_A2;
     uint32  DisplayID_H;
@@ -447,7 +448,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         SpellsList const& GetTrainerSpells() const { return m_trainer_spells; }
         uint32 GetTrainerType() const { return m_trainer_type; }
 
-        CreatureInfo const *GetCreatureInfo() const;
+        CreatureInfo const *GetCreatureInfo() const { return m_creatureInfo; }
         CreatureDataAddon const* GetCreatureAddon() const;
 
         void prepareGossipMenu( Player *pPlayer,uint32 gossipid );
@@ -587,5 +588,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 m_originalEntry;
     private:
         GridReference<Creature> m_gridRef;
+        CreatureInfo const* m_creatureInfo;                 // in heroic mode can different from GetCreatureInfo(GetEntry())
 };
 #endif
