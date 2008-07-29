@@ -63,8 +63,8 @@ Group::~Group()
         delete(r);
     }
 
-    // it is undefined whether this or objectmgr will be unloaded first
-    // so we must be prepared for both cases
+    // it is undefined whether objectmgr (which stores the groups) or instancesavemgr
+    // will be unloaded first so we must be prepared for both cases
     // this may unload some instance saves
     for(uint8 i = 0; i < TOTAL_DIFFICULTIES; i++)
         for(BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)

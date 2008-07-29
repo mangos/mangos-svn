@@ -158,6 +158,7 @@ pkgdata_DATA = \
 	6381_mangos_command.sql \
 	6387_characters_character_ticket.sql \
 	6387_mangos_mangos_string.sql \
+	6397_mangos_creature_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -296,4 +297,5 @@ EXTRA_DIST = \
 	6381_mangos_command.sql \
 	6387_characters_character_ticket.sql \
 	6387_mangos_mangos_string.sql \
+	6397_mangos_creature_template.sql \
 	README

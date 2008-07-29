@@ -757,7 +757,7 @@ void WorldSession::LogoutPlayer(bool Save)
         // the player may not be in the world when logging out
         // e.g if he got disconnected during a transfer to another map
         // calls to GetMap in this case may cause crashes
-        if(_player->IsInWorld())  MapManager::Instance().GetMap(_player->GetMapId(), _player)->Remove(_player, false);
+        if(_player->IsInWorld()) MapManager::Instance().GetMap(_player->GetMapId(), _player)->Remove(_player, false);
 
         ///- Send update to group
         if(_player->GetGroup())
