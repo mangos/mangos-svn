@@ -719,7 +719,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                 {
                     if(m->IsRaid() || m->IsHeroic())
                     {
-                        if(cVictim->isWorldBoss() || (cVictim->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND))
+                        if(cVictim->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
                             ((InstanceMap *)m)->PermBindAllPlayers();
                     }
                     else

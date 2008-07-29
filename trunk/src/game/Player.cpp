@@ -1588,6 +1588,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
             }
 
+            // remove mini pet
+            RemoveMiniPet();
+
             // remove charmed creatures
             Uncharm();
 
@@ -14341,13 +14344,26 @@ void Player::SaveToDB()
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
         << m_race << ", "
-        << m_class << ", "
-        << GetMapId() << ", "
+        << m_class << ", ";
+
+    if(!IsBeingTeleported())
+    {
+        ss << GetMapId() << ", "
         << (uint32)GetDifficulty() << ", "
         << finiteAlways(GetPositionX()) << ", "
         << finiteAlways(GetPositionY()) << ", "
         << finiteAlways(GetPositionZ()) << ", "
         << finiteAlways(GetOrientation()) << ", '";
+    }
+    else
+    {
+        ss << GetTeleportDest().mapid << ", "
+        << (uint32)GetDifficulty() << ", "
+        << finiteAlways(GetTeleportDest().x) << ", "
+        << finiteAlways(GetTeleportDest().y) << ", "
+        << finiteAlways(GetTeleportDest().z) << ", "
+        << finiteAlways(GetTeleportDest().o) << ", '";
+    }
 
     uint16 i;
     for( i = 0; i < m_valuesCount; i++ )

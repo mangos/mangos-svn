@@ -341,6 +341,12 @@ class MANGOS_DLL_SPEC WorldObject : public Object
             m_positionZ = z;
         }
 
+        void Relocate(WorldLocation const & loc)
+        {
+            SetMapId(loc.mapid);
+            Relocate(loc.x, loc.y, loc.z, loc.o);
+        }
+
         void SetOrientation(float orientation) { m_orientation = orientation; }
 
         float GetPositionX( ) const { return m_positionX; }
@@ -348,6 +354,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         float GetPositionZ( ) const { return m_positionZ; }
         void GetPosition( float &x, float &y, float &z ) const
             { x = m_positionX; y = m_positionY; z = m_positionZ; }
+        void GetPosition( WorldLocation &loc ) const
+            { loc.mapid = GetMapId(); GetPosition(loc.x, loc.y, loc.z); loc.o = GetOrientation(); }
         float GetOrientation( ) const { return m_orientation; }
         void GetNearPoint2D( float &x, float &y, float distance, float absAngle) const;
         void GetNearPoint( WorldObject const* searcher, float &x, float &y, float &z, float searcher_size, float distance2d,float absAngle) const;
