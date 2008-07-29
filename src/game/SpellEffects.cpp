@@ -3078,11 +3078,7 @@ void Spell::EffectSummon(uint32 i)
     spawnCreature->SetHealth(spawnCreature->GetMaxHealth());
     spawnCreature->SetPower(POWER_MANA, spawnCreature->GetMaxPower(POWER_MANA));
 
-    std::string name;
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        name = ((Player*)m_caster)->GetName();
-    else
-        name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
+    std::string name = m_caster->GetName();
     name.append(petTypeSuffix[spawnCreature->getPetType()]);
     spawnCreature->SetName( name );
 
@@ -3829,7 +3825,7 @@ void Spell::EffectSummonPet(uint32 i)
     // if pet requested type already exist
     if( OldSummon )
     {
-        if(petentry == 0 || OldSummon->GetCreatureInfo()->Entry == petentry)
+        if(petentry == 0 || OldSummon->GetEntry() == petentry)
         {
             // pet in corpse state can't be summoned
             if( OldSummon->isDead() )

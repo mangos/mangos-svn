@@ -497,12 +497,76 @@ void ObjectMgr::LoadCreatureTemplates()
     sLog.outString( ">> Loaded %u creature definitions", sCreatureStorage.RecordCount );
     sLog.outString();
 
+    std::set<uint32> heroicEntries;                         // already loaded heroic value in creatures
+    std::set<uint32> hasHeroicEntries;                      // already loaded creatures with heroic entry values
+
     // check data correctness
     for(uint32 i = 1; i < sCreatureStorage.MaxEntry; ++i)
     {
         CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i);
         if(!cInfo)
             continue;
+
+        if(cInfo->HeroicEntry)
+        {
+            CreatureInfo const* heroicInfo = GetCreatureTemplate(cInfo->HeroicEntry);
+            if(!heroicInfo)
+            {
+                sLog.outErrorDb("Creature (Entry: %u) have `heroic_entry`=%u but creature entry %u not exist.",cInfo->HeroicEntry,cInfo->HeroicEntry);
+                continue;
+            }
+
+            if(heroicEntries.find(i)!=heroicEntries.end())
+            {
+                sLog.outErrorDb("Creature (Entry: %u) listed as heroic but have value in `heroic_entry`.",i);
+                continue;
+            }
+
+            if(heroicEntries.find(cInfo->HeroicEntry)!=heroicEntries.end())
+            {
+                sLog.outErrorDb("Creature (Entry: %u) already listed as heroic for another entry.",cInfo->HeroicEntry);
+                continue;
+            }
+
+            if(hasHeroicEntries.find(cInfo->HeroicEntry)!=hasHeroicEntries.end())
+            {
+                sLog.outErrorDb("Creature (Entry: %u) have `heroic_entry`=%u but creature entry %u have heroic entry also.",i,cInfo->HeroicEntry,cInfo->HeroicEntry);
+                continue;
+            }
+
+            if(cInfo->npcflag != heroicInfo->npcflag)
+            {
+                sLog.outErrorDb("Creature (Entry: %u) listed in `creature_template_substitution` has different `npcflag` in heroic mode.",i);
+                continue;
+            }
+
+            if(cInfo->classNum != heroicInfo->classNum)
+            {
+                sLog.outErrorDb("Creature (Entry: %u) listed in `creature_template_substitution` has different `classNum` in heroic mode.",i);
+                continue;
+            }
+
+            if(cInfo->race != heroicInfo->race)
+            {
+                sLog.outErrorDb("Creature (Entry: %u) listed in `creature_template_substitution` has different `race` in heroic mode.",i);
+                continue;
+            }
+
+            if(cInfo->trainer_type != heroicInfo->trainer_type)
+            {
+                sLog.outErrorDb("Creature (Entry: %u) listed in `creature_template_substitution` has different `trainer_type` in heroic mode.",i);
+                continue;
+            }
+
+            if(cInfo->trainer_spell != heroicInfo->trainer_spell)
+            {
+                sLog.outErrorDb("Creature (Entry: %u) listed in `creature_template_substitution` has different `trainer_spell` in heroic mode.",i);
+                continue;
+            }
+
+            hasHeroicEntries.insert(i);
+            heroicEntries.insert(cInfo->HeroicEntry);
+        }
 
         FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->faction_A);
         if(!factionTemplate)
@@ -773,6 +837,13 @@ void ObjectMgr::LoadCreatures()
         return;
     }
 
+    // build single time for check creature data
+    std::set<uint32> heroicCreatures;
+    for(uint32 i = 0; i < sCreatureStorage.MaxEntry; ++i)
+        if(CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i))
+            if(cInfo->HeroicEntry)
+                heroicCreatures.insert(cInfo->HeroicEntry);
+
     barGoLink bar(result->GetRowCount());
 
     do
@@ -806,6 +877,12 @@ void ObjectMgr::LoadCreatures()
         if(!cInfo)
         {
             sLog.outErrorDb("Table `creature` have creature (GUID: %u) with not existed creature entry %u, skipped.",guid,data.id );
+            continue;
+        }
+
+        if(heroicCreatures.find(data.id)!=heroicCreatures.end())
+        {
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u) that listed as heroic template in `creature_template_substitution`, skipped.",guid,data.id );
             continue;
         }
 

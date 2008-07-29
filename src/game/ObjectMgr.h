@@ -292,7 +292,7 @@ class ObjectMgr
         void AddArenaTeam(ArenaTeam* arenateam) { mArenaTeamSet.insert( arenateam ); }
         void RemoveArenaTeam(ArenaTeam* arenateam) { mArenaTeamSet.erase( arenateam ); }
 
-        CreatureInfo const *GetCreatureTemplate( uint32 id );
+        static CreatureInfo const *GetCreatureTemplate( uint32 id );
         CreatureModelInfo const *GetCreatureModelInfo( uint32 modelid );
         CreatureModelInfo const* GetCreatureModelRandomGender(uint32 display_id);
         uint32 ChooseDisplayId(uint32 team, const CreatureInfo *cinfo, const CreatureData *data);

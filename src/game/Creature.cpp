@@ -53,7 +53,7 @@ m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_resp
 m_gossipOptionLoaded(false),m_NPCTextId(0), m_emoteState(0), m_isPet(false), m_isTotem(false),
 m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0),
 m_AlreadyCallAssistence(false), m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false),
-m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL)
+m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),m_creatureInfo(NULL)
 {
     m_valuesCount = UNIT_END;
 
@@ -164,14 +164,27 @@ void Creature::RemoveCorpse()
  */
 bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
 {
-    CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(Entry);
-    if(!cinfo)
+    CreatureInfo const *normalInfo = objmgr.GetCreatureTemplate(Entry);
+    if(!normalInfo)
     {
         sLog.outErrorDb("Creature::UpdateEntry creature entry %u does not exist.", Entry);
         return false;
     }
 
-    SetUInt32Value(OBJECT_FIELD_ENTRY, Entry);
+    // get heroic mode entry
+    Map *map = MapManager::Instance().FindMap(GetMapId(), GetInstanceId());
+    uint32 actualEntry = map && map->IsHeroic() ? normalInfo->HeroicEntry : Entry;
+
+    CreatureInfo const *cinfo = actualEntry!=Entry ? objmgr.GetCreatureTemplate(actualEntry) : normalInfo;
+    if(!cinfo)
+    {
+        sLog.outErrorDb("Creature::UpdateEntry creature heroic entry %u does not exist.", actualEntry);
+        return false;
+    }
+
+    SetUInt32Value(OBJECT_FIELD_ENTRY, Entry);              // normal entry always
+    m_creatureInfo = cinfo;                                 // map mode related always
+
     m_regenHealth = cinfo->RegenHealth;
     if (cinfo->DisplayID_A == 0 || cinfo->DisplayID_H == 0) // Cancel load if no model defined
     {
@@ -207,7 +220,7 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
         LoadEquipment(data->equipmentId);
     }
 
-    SetName(cinfo->Name);
+    SetName(normalInfo->Name);                              // at normal entry always
     SelectLevel(cinfo);
     if (team == HORDE)
         SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, cinfo->faction_H);
@@ -290,7 +303,7 @@ void Creature::Update(uint32 diff)
                 if(m_originalEntry != GetUInt32Value(OBJECT_FIELD_ENTRY))
                     UpdateEntry(m_originalEntry);
 
-                CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(this->GetEntry());
+                CreatureInfo const *cinfo = GetCreatureInfo();
 
                 SelectLevel(cinfo);
                 SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
@@ -512,7 +525,7 @@ bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
     if(m_trainer_spells.empty())
     {
         sLog.outErrorDb("Creature %u (Entry: %u) have UNIT_NPC_FLAG_TRAINER but have empty trainer spell list.",
-            GetGUIDLow(),GetCreatureInfo()->Entry);
+            GetGUIDLow(),GetEntry());
         return false;
     }
 
@@ -672,7 +685,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                         if(!GetItemCount())
                         {
                             sLog.outErrorDb("Creature %u (Entry: %u) have UNIT_NPC_FLAG_VENDOR but have empty trading item list.",
-                                GetGUIDLow(),GetCreatureInfo()->Entry);
+                                GetGUIDLow(),GetEntry());
                             cantalking=false;
                         }
                         break;
@@ -708,7 +721,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                     case GOSSIP_OPTION_AUCTIONEER:
                         break;                              // no checks
                     default:
-                        sLog.outErrorDb("Creature %u (entry: %u) have unknown gossip option %u",GetGUIDLow(),GetCreatureInfo()->Entry,gso->Action);
+                        sLog.outErrorDb("Creature %u (entry: %u) have unknown gossip option %u",GetGUIDLow(),GetEntry(),gso->Action);
                         break;
                 }
             }
@@ -1452,11 +1465,6 @@ float Creature::GetAttackDistance(Unit const* pl) const
     return (RetDistance*aggroRate);
 }
 
-CreatureInfo const *Creature::GetCreatureInfo() const
-{
-    return objmgr.GetCreatureTemplate(GetEntry());
-}
-
 void Creature::setDeathState(DeathState s)
 {
     if((s == JUST_DIED && !m_isDeadByDefault)||(s == JUST_ALIVED && m_isDeadByDefault))
@@ -1487,7 +1495,7 @@ void Creature::setDeathState(DeathState s)
     {
         SetHealth(GetMaxHealth());
         Unit::setDeathState(ALIVE);
-        CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(this->GetEntry());
+        CreatureInfo const *cinfo = GetCreatureInfo();
         SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
         RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
         AddUnitMovementFlag(MOVEMENTFLAG_WALK_MODE);
@@ -1739,7 +1747,8 @@ CreatureDataAddon const* Creature::GetCreatureAddon() const
     if(CreatureDataAddon const* addon = ObjectMgr::GetCreatureAddon(m_DBTableGuid))
         return addon;
 
-    return ObjectMgr::GetCreatureTemplateAddon(GetEntry());
+    // dependent from heroic mode entry
+    return ObjectMgr::GetCreatureTemplateAddon(GetCreatureInfo()->Entry);
 }
 
 //creature_addon table
