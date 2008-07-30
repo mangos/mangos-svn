@@ -2518,51 +2518,6 @@ void ObjectMgr::LoadGroups()
     sLog.outString();
     sLog.outString( ">> Loaded %u group definitions", count );
 
-    // -- loading instances --
-    count = 0;
-    group = NULL;
-    leaderGuid = 0;
-    result = CharacterDatabase.PQuery(
-        //      0           1    2         3          4           5
-        "SELECT leaderGuid, map, instance, permanent, difficulty, resettime, "
-        // 6
-        "(SELECT COUNT(*) FROM character_instance WHERE guid = leaderGuid AND instance = group_instance.instance AND permanent = 1 LIMIT 1) "
-        "FROM group_instance LEFT JOIN instance ON instance = id ORDER BY leaderGuid"
-    );
-
-    if(!result)
-    {
-        barGoLink bar( 1 );
-        bar.step();
-    }
-    else
-    {
-        barGoLink bar( result->GetRowCount() );
-        do
-        {
-            bar.step();
-            Field *fields = result->Fetch();
-            count++;
-            leaderGuid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
-            if(!group || group->GetLeaderGUID() != leaderGuid)
-            {
-                group = GetGroupByLeader(leaderGuid);
-                if(!group)
-                {
-                    sLog.outErrorDb("Incorrect entry in group_instance table : no group with leader %d", fields[0].GetUInt32());
-                    continue;
-                }
-            }
-
-            InstanceSave *save = sInstanceSaveManager.AddInstanceSave(fields[1].GetUInt32(), fields[2].GetUInt32(), fields[4].GetUInt8(), (time_t)fields[5].GetUInt64(), (fields[6].GetUInt32() == 0), true);
-            group->BindToInstance(save, fields[3].GetBool(), true);
-        }while( result->NextRow() );
-        delete result;
-    }
-
-    sLog.outString();
-    sLog.outString( ">> Loaded %u group-instance binds total", count );
-
     // -- loading members --
     count = 0;
     group = NULL;
@@ -2610,6 +2565,51 @@ void ObjectMgr::LoadGroups()
         else
             ++itr;
     }
+
+    // -- loading instances --
+    count = 0;
+    group = NULL;
+    leaderGuid = 0;
+    result = CharacterDatabase.PQuery(
+        //      0           1    2         3          4           5
+        "SELECT leaderGuid, map, instance, permanent, difficulty, resettime, "
+        // 6
+        "(SELECT COUNT(*) FROM character_instance WHERE guid = leaderGuid AND instance = group_instance.instance AND permanent = 1 LIMIT 1) "
+        "FROM group_instance LEFT JOIN instance ON instance = id ORDER BY leaderGuid"
+    );
+
+    if(!result)
+    {
+        barGoLink bar( 1 );
+        bar.step();
+    }
+    else
+    {
+        barGoLink bar( result->GetRowCount() );
+        do
+        {
+            bar.step();
+            Field *fields = result->Fetch();
+            count++;
+            leaderGuid = MAKE_NEW_GUID(fields[0].GetUInt32(), 0, HIGHGUID_PLAYER);
+            if(!group || group->GetLeaderGUID() != leaderGuid)
+            {
+                group = GetGroupByLeader(leaderGuid);
+                if(!group)
+                {
+                    sLog.outErrorDb("Incorrect entry in group_instance table : no group with leader %d", fields[0].GetUInt32());
+                    continue;
+                }
+            }
+
+            InstanceSave *save = sInstanceSaveManager.AddInstanceSave(fields[1].GetUInt32(), fields[2].GetUInt32(), fields[4].GetUInt8(), (time_t)fields[5].GetUInt64(), (fields[6].GetUInt32() == 0), true);
+            group->BindToInstance(save, fields[3].GetBool(), true);
+        }while( result->NextRow() );
+        delete result;
+    }
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u group-instance binds total", count );
 
     sLog.outString();
     sLog.outString( ">> Loaded %u group members total", count );
