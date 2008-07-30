@@ -1956,7 +1956,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         InstancePlayerBind* BindToInstance(InstanceSave *save, bool permanent, bool load = false);
         void SendRaidInfo();
         void SendSavedInstances();
-        void ConvertInstancesToGroup(bool load = false);
+        static void ConvertInstancesToGroup(Player *player, Group *group = NULL, uint64 player_guid = 0);
 
         /*********************************************************/
         /***                   GROUP SYSTEM                    ***/

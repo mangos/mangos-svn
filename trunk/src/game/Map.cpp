@@ -1581,7 +1581,7 @@ uint32 InstanceMap::GetPlayersCountExceptGMs() const
     return count;
 }
 
-void InstanceMap::PermBindAllPlayers()
+void InstanceMap::PermBindAllPlayers(Player *player)
 {
     InstanceSave *save = sInstanceSaveManager.GetInstanceSave(GetInstanceId());
     if(!save)
@@ -1590,6 +1590,8 @@ void InstanceMap::PermBindAllPlayers()
         return;
     }
 
+    Group *group = player->GetGroup();
+    // group members outside the instance group don't get bound
     for(PlayerList::iterator itr = i_Players.begin(); itr != i_Players.end(); ++itr)
     {
         if(*itr)
@@ -1605,7 +1607,7 @@ void InstanceMap::PermBindAllPlayers()
                 (*itr)->GetSession()->SendPacket(&data);
             }
 
-            Group *group = (*itr)->GetGroup();
+            // if the leader is not in the instance the group will not get a perm bind
             if(group && group->GetLeaderGUID() == (*itr)->GetGUID())
                 group->BindToInstance(save, true);
         }

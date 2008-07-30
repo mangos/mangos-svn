@@ -958,42 +958,51 @@ void Group::_setLeader(const uint64 &guid)
         return;
 
     // update the group's bound instances when changing leaders
-    // TODO: not sure if this is correct
-    Player *player = objmgr.GetPlayer(guid);
+    // TODO: set a time limit to have this function run rarely cause it can be slow
+    CharacterDatabase.BeginTransaction();
+
+    // remove all permanent binds from the group
+    // in the DB also remove solo binds that will be replaced with permbinds
+    // from the new leader
+    CharacterDatabase.PExecute(
+        "DELETE FROM group_instance WHERE leaderguid='%u' AND (permanent = 1 OR "
+        "instance IN (SELECT instance FROM character_instance WHERE guid = '%u')"
+        ")", GUID_LOPART(m_leaderGuid), GUID_LOPART(slot->guid)
+    );
+
+    Player *player = objmgr.GetPlayer(slot->guid);
     if(player)
     {
-        // first remove all permanent binds
         for(uint8 i = 0; i < TOTAL_DIFFICULTIES; i++)
         {
             for(BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end();)
             {
                 if(itr->second.perm)
                 {
-                    // both the previous group leader and new one are online
-                    assert(itr->second.save->RemoveGroup(this));
+                    itr->second.save->RemoveGroup(this);
                     m_boundInstances[i].erase(itr++);
                 }
                 else
                     ++itr;
             }
         }
-
-        // add the permanent binds of the player
-        // (assuming the player won't have solo binds when in group)
-        player->ConvertInstancesToGroup(true);
     }
 
-    // TODO: set a time limit to have this function run rarely cause it can be slow
-    CharacterDatabase.BeginTransaction();
+    // update the group's solo binds to the new leader
+    CharacterDatabase.PExecute("UPDATE group_instance SET leaderGuid='%u' WHERE leaderGuid = '%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
+
+    // copy the permanent binds from the new leader to the group
+    // overwriting the solo binds with permanent ones if necessary
+    // in the DB those have been deleted already
+    Player::ConvertInstancesToGroup(player, this, slot->guid);
+
+    // update the group leader
     CharacterDatabase.PExecute("UPDATE groups SET leaderGuid='%u' WHERE leaderGuid='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
     CharacterDatabase.PExecute("UPDATE group_member SET leaderGuid='%u' WHERE leaderGuid='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
-    CharacterDatabase.PExecute("DELETE FROM group_instance WHERE leaderguid='%u' AND permanent = 1", GUID_LOPART(m_leaderGuid));
-    CharacterDatabase.PExecute("INSERT INTO group_instance SELECT guid, instance, permanent FROM character_instance WHERE guid = '%u' AND permanent = 1", GUID_LOPART(slot->guid));
-    CharacterDatabase.PExecute("UPDATE group_instance SET leaderGuid='%u' WHERE leaderGuid = '%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
-    CharacterDatabase.CommitTransaction();
-
     m_leaderGuid = slot->guid;
     m_leaderName = slot->name;
+
+    CharacterDatabase.CommitTransaction();
 }
 
 void Group::_removeRolls(const uint64 &guid)
@@ -1224,7 +1233,7 @@ void Group::ResetInstances(uint8 method, Player* SendMsgTo)
     {
         InstanceSave *p = itr->second.save;
         const MapEntry *entry = sMapStore.LookupEntry(itr->first);
-        if(!entry || !p->CanReset())
+        if(!entry || (!p->CanReset() && method != INSTANCE_RESET_GROUP_DISBAND))
         {
             ++itr;
             continue;
@@ -1242,13 +1251,9 @@ void Group::ResetInstances(uint8 method, Player* SendMsgTo)
 
         bool isEmpty = true;
         // if the map is loaded, reset it
-        Map *map = MapManager::Instance().FindMap(p->GetMapId());
-        if(map && map->Instanceable())
-        {
-            Map *iMap = ((MapInstanced*)map)->FindMap(p->GetInstanceId());
-            if(iMap && iMap->IsDungeon())
-                isEmpty = ((InstanceMap*)iMap)->Reset(method);
-        }
+        Map *map = MapManager::Instance().FindMap(p->GetMapId(), p->GetInstanceId());
+        if(map && map->IsDungeon())
+            isEmpty = ((InstanceMap*)map)->Reset(method);
 
         if(SendMsgTo)
         {

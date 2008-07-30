@@ -195,8 +195,9 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & /*recv_data*/ )
         return;
     }
 
-    // if the leader has solo saves, convert them to group saves
-    if(group->GetMembersCount() == 1) leader->ConvertInstancesToGroup();
+    // when forming a new group, create group binds
+    if(group->GetMembersCount() == 1)
+        Player::ConvertInstancesToGroup(leader, group, group->GetLeaderGUID());
     
     // reset the acceptee's solo instances, unless he is currently in one of them
     // including raid/heroic instances that they are not permanently bound to!
