@@ -84,12 +84,8 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 
     recvPacket >> Invitedname;
 
-    if(!Invitedname.empty())
-    {
-        normalizePlayerName(Invitedname);
-
+    if(normalizePlayerName(Invitedname))
         player = ObjectAccessor::Instance().FindPlayerByName(Invitedname.c_str());
-    }
 
     if(!player)
     {
@@ -163,11 +159,8 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 
     recvPacket >> plName;
 
-    if(plName.empty())
+    if(!normalizePlayerName(plName))
         return;
-
-    normalizePlayerName(plName);
-    //CharacterDatabase.escape_string(plName);              // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -311,11 +304,8 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 
     recvPacket >> plName;
 
-    if(plName.empty())
+    if(!normalizePlayerName(plName))
         return;
-
-    normalizePlayerName(plName);
-    //CharacterDatabase.escape_string(plName);              // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -396,11 +386,8 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
 
     recvPacket >> plName;
 
-    if(plName.empty())
+    if(!normalizePlayerName(plName))
         return;
-
-    normalizePlayerName(plName);
-    //CharacterDatabase.escape_string(plName);              // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -544,11 +531,8 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
 
     recvPacket >> name;
 
-    if(name.empty())
+    if(!normalizePlayerName(name))
         return;
-
-    normalizePlayerName(name);
-    //CharacterDatabase.escape_string(name);                // prevent SQL injection - normal name don't must changed by this call
 
     newLeader = ObjectAccessor::Instance().FindPlayerByName(name.c_str());
     if(newLeader)
@@ -646,11 +630,8 @@ void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
 
     recvPacket >> name;
 
-    if(name.empty())
+    if(!normalizePlayerName(name))
         return;
-
-    normalizePlayerName(name);
-    //CharacterDatabase.escape_string(name);                // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(name.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -706,11 +687,8 @@ void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
 
     recvPacket >> plName;
 
-    if(plName.empty())
+    if(!normalizePlayerName(plName))
         return;
-
-    normalizePlayerName(plName);
-    //CharacterDatabase.escape_string(plName);              // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());

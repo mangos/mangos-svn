@@ -62,7 +62,13 @@ bool ChatHandler::HandleMuteCommand(const char* args)
 
     uint32 notspeaktime = (uint32) atoi(timetonotspeak);
 
-    normalizePlayerName(cname);
+    if(!normalizePlayerName(cname))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
     uint64 guid = objmgr.GetPlayerGUIDByName(cname.c_str());
     if(!guid)
     {
@@ -122,7 +128,13 @@ bool ChatHandler::HandleUnmuteCommand(const char* args)
 
     std::string cname = charname;
 
-    normalizePlayerName(cname);
+    if(!normalizePlayerName(cname))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
     uint64 guid = objmgr.GetPlayerGUIDByName(cname.c_str());
     if(!guid)
     {
@@ -1674,7 +1686,12 @@ bool ChatHandler::HandleKickPlayerCommand(const char *args)
     else
     {
         std::string name = kickName;
-        normalizePlayerName(name);
+        if(!normalizePlayerName(name))
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
 
         if(name==m_session->GetPlayer()->GetName())
         {
@@ -1712,7 +1729,13 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
         if(name.empty())
             return false;
 
-        normalizePlayerName(name);
+        if(!normalizePlayerName(name))
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
+
         target = objmgr.GetPlayer(name.c_str());
         if (target)
             py = strtok(NULL, " ");
@@ -1915,8 +1938,13 @@ bool ChatHandler::HandleTicketCommand(const char* args)
     }
 
     std::string name = px;
-    normalizePlayerName(name);
-    //WorldDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+
+    if(!normalizePlayerName(name))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
     uint64 guid = objmgr.GetPlayerGUIDByName(name);
 
@@ -2034,7 +2062,13 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
     }
 
     std::string name = px;
-    normalizePlayerName(name);
+
+    if(!normalizePlayerName(name))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
     uint64 guid = objmgr.GetPlayerGUIDByName(name);
 
@@ -3369,8 +3403,14 @@ bool ChatHandler::HandleRenameCommand(const char* args)
     if(px)
     {
         oldname = px;
-        normalizePlayerName(oldname);
-        //WorldDatabase.escape_string(oldname);
+
+        if(!normalizePlayerName(oldname))
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
+
         target = objmgr.GetPlayer(oldname.c_str());
 
         if (!target)
@@ -3726,7 +3766,14 @@ bool ChatHandler::HandleCombatStopCommand(const char* args)
     if(*args)
     {
         std::string playername = args;
-        normalizePlayerName(playername);
+
+        if(!normalizePlayerName(playername))
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
+
         player = objmgr.GetPlayer(playername.c_str());
 
         if(!player)

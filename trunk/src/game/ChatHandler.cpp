@@ -160,7 +160,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if(msg.empty())
                 break;
 
-            if(to.empty())
+            if(!normalizePlayerName(to))
             {
                 WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, (to.size()+1));
                 data<<to;
@@ -168,7 +168,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
             }
 
-            normalizePlayerName(to);
             Player *player = objmgr.GetPlayer(to.c_str());
             uint32 tSecurity = GetSecurity();
             uint32 pSecurity = player ? player->GetSession()->GetSecurity() : 0;

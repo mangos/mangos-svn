@@ -222,12 +222,13 @@ bool ChatHandler::HandleVisibleCommand(const char* args)
 
 bool ChatHandler::HandleGPSCommand(const char* args)
 {
-    WorldObject *obj;
+    WorldObject *obj = NULL;
     if (*args)
     {
         std::string name = args;
-        normalizePlayerName(name);
-        obj = objmgr.GetPlayer(name.c_str());
+        if(normalizePlayerName(name))
+            obj = objmgr.GetPlayer(name.c_str());
+
         if(!obj)
         {
             SendSysMessage(LANG_PLAYER_NOT_FOUND);
@@ -300,8 +301,13 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
         return false;
 
     std::string name = args;
-    normalizePlayerName(name);
-    //WorldDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+
+    if(!normalizePlayerName(name))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
     Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
@@ -372,7 +378,10 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
             guid);
     }
     else
+    {
         PSendSysMessage(LANG_NO_PLAYER, args);
+        SetSentErrorMessage(true);
+    }
 
     return true;
 }
@@ -386,8 +395,13 @@ bool ChatHandler::HandleGonameCommand(const char* args)
     Player* _player = m_session->GetPlayer();
 
     std::string name = args;
-    normalizePlayerName(name);
-    //WorldDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+
+    if(!normalizePlayerName(name))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
     Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
@@ -508,8 +522,13 @@ bool ChatHandler::HandleRecallCommand(const char* args)
     else
     {
         std::string name = args;
-        normalizePlayerName(name);
-        //WorldDatabase.escape_string(name);                      // prevent SQL injection - normal name don't must changed by this call
+
+        if(!normalizePlayerName(name))
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
 
         chr = objmgr.GetPlayer(name.c_str());
 
@@ -1781,7 +1800,12 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
     std::string subject = msgSubject;
     std::string text    = msgText;
 
-    normalizePlayerName(name);
+    if(!normalizePlayerName(name))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
     uint64 receiver_guid = objmgr.GetPlayerGUIDByName(name);
 
@@ -1829,7 +1853,12 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
 
     std::string name = pName;
 
-    normalizePlayerName(name);
+    if(!normalizePlayerName(name))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
     WorldDatabase.escape_string(location);
     QueryResult *result = WorldDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map FROM game_tele WHERE name = '%s'",location.c_str());
@@ -1987,8 +2016,13 @@ bool ChatHandler::HandleGroupgoCommand(const char* args)
         return false;
 
     std::string name = args;
-    normalizePlayerName(name);
-    //WorldDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+
+    if(!normalizePlayerName(name))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
     Player *player = objmgr.GetPlayer(name.c_str());
     if (!player)

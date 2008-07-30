@@ -181,7 +181,7 @@ bool ChatHandler::HandlePasswordCommand(const char* args)
     std::string password_new = new_pass;
     std::string password_new_c = new_pass_c;
 
-    if (password_new.size() > 16)
+    if (utf8length(password_new) > 16)
     {
         SendSysMessage(LANG_COMMAND_NOTCHANGEPASSWORD);
         SetSentErrorMessage(true);

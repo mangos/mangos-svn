@@ -117,7 +117,15 @@ void CliWritePlayerDump(char*command,pPrintf zprintf)
         return;
     }
 
-    uint32 guid = objmgr.GetPlayerGUIDByName(p2);
+    //FIXME: need convert from byte string in host locale to utf8
+    std::string name = p2;
+    if(!normalizePlayerName(name))
+    {
+        zprintf("Syntax is: writepdump $filename $playerNameOrGUID\r\n");
+        return;
+    }
+
+    uint32 guid = objmgr.GetPlayerGUIDByName(name);
     if(!guid)
         guid = atoi(p2);
 
@@ -161,12 +169,24 @@ void CliLoadPlayerDump(char*command,pPrintf zprintf)
         }
     }
 
-    char * name = strtok(NULL, " ");
-    char * guid_str = name ? strtok(NULL, " ") : NULL;
+    char * name_str = strtok(NULL, " ");
+    char * guid_str = name_str ? strtok(NULL, " ") : NULL;
 
     uint32 guid = guid_str ? atoi(guid_str) : 0;
 
-    if(PlayerDumpReader().LoadDump(file, account_id, name ? name : "", guid))
+    std::string name;
+    if(name_str)
+    {
+        //FIXME: need convert from byte string in host locale to utf8
+        name = name_str;
+        if(!normalizePlayerName(name))
+        {
+            zprintf("Syntax is: loadpdump $filename $account ($newname) ($newguid)\r\n");
+            return;
+        }
+    }
+
+    if(PlayerDumpReader().LoadDump(file, account_id, name, guid))
         zprintf("Character loaded successfully!");
     else
         zprintf("Failed to load the character!");
@@ -189,34 +209,45 @@ void CliLoadScripts(char*command,pPrintf zprintf)
 void CliDelete(char*command,pPrintf zprintf)
 {
     ///- Get the account name from the command line
-    char *account_name=strtok(command," ");
-    if(!account_name)
+    char *account_name_str=strtok(command," ");
+    if(!account_name_str)
     {
         // \r\n is used because this function can also be called from RA
         zprintf("Syntax is: delete $account\r\n");
         return;
     }
 
+    //FIXME: need convert from byte string in host locale to utf8
+    std::string account_name = account_name_str;
+
     int result = accmgr.DeleteAccount(accmgr.GetId(account_name));
     if(result == -1)
-        zprintf("User %s NOT deleted (probably sql file format was updated)\r\n",account_name);
+        zprintf("User %s NOT deleted (probably sql file format was updated)\r\n",account_name_str);
     if(result == 1)
-        zprintf("User %s does not exist\r\n",account_name);
+        zprintf("User %s does not exist\r\n",account_name_str);
     else if(result == 0)
-        zprintf("We deleted account: %s\r\n",account_name);
+        zprintf("We deleted account: %s\r\n",account_name_str);
 }
 
 void CliCharDelete(char*command,pPrintf zprintf)
 {
-    char *character_name = strtok(command," ");
+    char *character_name_str = strtok(command," ");
 
-    if(!character_name)
+    if(!character_name_str)
     {
         zprintf("Syntax is: chardelete $character_name\r\n");
         return;
     }
 
-    Player *player = objmgr.GetPlayer(character_name);
+    //FIXME: need convert from byte string in host locale to utf8
+    std::string character_name = character_name_str;
+    if(!normalizePlayerName(character_name))
+    {
+        zprintf("Syntax is: chardelete $character_name\r\n");
+        return;
+    }
+
+    Player *player = objmgr.GetPlayer(character_name.c_str());
 
     uint64 character_guid;
     uint32 account_id;
@@ -247,6 +278,8 @@ void CliCharDelete(char*command,pPrintf zprintf)
 void CliBroadcast(char *text,pPrintf zprintf)
 {
     std::string str = objmgr.GetMangosString(LANG_SYSTEMMESSAGE);
+
+    //FIXME: need convert from byte string in host locale to utf8
     str += text;
     sWorld.SendWorldText(str.c_str(), NULL);
     zprintf("Broadcasting to the world: %s\r\n",str.c_str());
@@ -482,6 +515,7 @@ void CliBan(char*command,pPrintf zprintf)
         return;
     }
 
+    //FIXME: need convert from byte string in host locale to utf8
     switch (sWorld.BanAccount(type, nameOrIP, duration, reason, "Set by console."))
     {
         case BAN_SUCCESS:
@@ -518,6 +552,7 @@ void CliRemoveBan(char *command,pPrintf zprintf)
         return;
     }
 
+    //FIXME: need convert from byte string in host locale to utf8
     if (!sWorld.RemoveBanAccount(type, nameorip))
         zprintf("%s %s not found\r\n", type, nameorip);
     else
@@ -573,6 +608,8 @@ void CliSetGM(char *command,pPrintf zprintf)
     //wow it's ok,let's hope it was integer given
     int lev=atoi(szLevel);                                  //get int anyway (0 if error)
 
+    //FIXME: need convert from byte string in host locale to utf8
+
     ///- Escape the account name to allow quotes in names
     std::string safe_account_name=szAcc;
     loginDatabase.escape_string(safe_account_name);
@@ -622,6 +659,7 @@ void CliSetPassword(char *command,pPrintf zprintf)
         return;
     }
 
+    //FIXME: need convert from host locale byte string to utf8
     std::string pass1 = szPassword1;
     std::string pass2 = szPassword2;
 
@@ -631,7 +669,7 @@ void CliSetPassword(char *command,pPrintf zprintf)
         return;
     }
 
-    if (pass1.size() > 16)
+    if (utf8length(pass1) > 16)
     {
         zprintf("Password can't be longer than 16 characters (client limit), password not changed!\r\n");
         return;
@@ -658,6 +696,7 @@ void CliCreate(char *command,pPrintf zprintf)
         return;
     }
 
+    //FIXME: need convert from byte string in host locale to utf8
     if(strlen(szAcc)>16)
     {
         zprintf("Account name cannot be longer than 16 characters.\r\n");
@@ -731,8 +770,11 @@ void CliKick(char*command,pPrintf zprintf)
         return;
     }
 
+    //FIXME: need convert from byte string in host locale to utf8
     std::string name = kickName;
-    normalizePlayerName(name);
+    
+    if(!normalizePlayerName(name))
+        return;
 
     sWorld.KickPlayer(name);
 }
@@ -749,8 +791,11 @@ void CliTele(char*command,pPrintf zprintf)
         return;
     }
 
+    //FIXME: need convert from byte string in host locale to utf8
     std::string name = charName;
-    normalizePlayerName(name);
+    
+    if(!normalizePlayerName(name))
+        return;
 
     std::string location = locName;
 
@@ -818,6 +863,7 @@ void CliMotd(char*command,pPrintf zprintf)
     }
     else
     {
+        //FIXME: need convert from byte string in host locale to utf8
         sWorld.SetMotd(command);
         zprintf("Message of the day changed to:\r\n%s\r\n", command);
     }
@@ -871,6 +917,8 @@ void CliSetTBC(char *command,pPrintf zprintf)
         return;
     }
 
+    //FIXME: need convert from byte string in host locale to utf8
+
     ///- Escape the account name to allow quotes in names
     std::string safe_account_name=szAcc;
     loginDatabase.escape_string(safe_account_name);
@@ -916,8 +964,16 @@ void CliSend(char *playerN,pPrintf zprintf)
         return;
     }
 
+    //FIXME: need convert from byte string in host locale to utf8
+    std::string name = plr;
+    if(!normalizePlayerName(name))
+    {
+        zprintf("Syntax: send $player $message (Player name is case sensitive)\r\n");
+        return;
+    }
+
     ///- Find the player and check that he is not logging out.
-    Player *rPlayer = objmgr.GetPlayer(plr);
+    Player *rPlayer = objmgr.GetPlayer(name.c_str());
     if(!rPlayer)
     {
         zprintf("Player %s not found!\r\n", plr);

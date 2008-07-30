@@ -199,15 +199,13 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     }
 
     // prevent character creating with invalid name
-    if(name.empty())
+    if(!normalizePlayerName(name))
     {
         data << (uint8)CHAR_NAME_INVALID_CHARACTER;
         SendPacket( &data );
         sLog.outError("Account:[%d] but tried to Create character with empty [name] ",GetAccountId());
         return;
     }
-
-    normalizePlayerName(name);
 
     // check name limitations
     if(!ObjectMgr::IsValidName(name))
@@ -857,15 +855,13 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     }
 
     // prevent character rename to invalid name
-    if(newname.empty())                                     // checked by client
+    if(!normalizePlayerName(newname))
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
         data << (uint8)CHAR_NAME_NO_NAME;
         SendPacket( &data );
         return;
     }
-
-    normalizePlayerName(newname);
 
     if(!ObjectMgr::IsValidName(newname))
     {

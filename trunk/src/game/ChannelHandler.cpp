@@ -116,10 +116,8 @@ void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
 
     recvPacket >> newp;
 
-    if(newp.empty())
+    if(!normalizePlayerName(newp))
         return;
-
-    normalizePlayerName(newp);
 
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname, _player))
@@ -153,10 +151,8 @@ void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)
 
     recvPacket >> otp;
 
-    if(otp.empty())
+    if(!normalizePlayerName(otp))
         return;
-
-    normalizePlayerName(otp);
 
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname, _player))
@@ -177,10 +173,8 @@ void WorldSession::HandleChannelUnmoderator(WorldPacket& recvPacket)
 
     recvPacket >> otp;
 
-    if(otp.empty())
+    if(!normalizePlayerName(otp))
         return;
-
-    normalizePlayerName(otp);
 
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname, _player))
@@ -201,10 +195,8 @@ void WorldSession::HandleChannelMute(WorldPacket& recvPacket)
 
     recvPacket >> otp;
 
-    if(otp.empty())
+    if(!normalizePlayerName(otp))
         return;
-
-    normalizePlayerName(otp);
 
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname, _player))
@@ -225,10 +217,8 @@ void WorldSession::HandleChannelUnmute(WorldPacket& recvPacket)
 
     recvPacket >> otp;
 
-    if(otp.empty())
+    if(!normalizePlayerName(otp))
         return;
-
-    normalizePlayerName(otp);
 
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname, _player))
@@ -249,10 +239,8 @@ void WorldSession::HandleChannelInvite(WorldPacket& recvPacket)
 
     recvPacket >> otp;
 
-    if(otp.empty())
+    if(!normalizePlayerName(otp))
         return;
-
-    normalizePlayerName(otp);
 
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname, _player))
@@ -272,10 +260,8 @@ void WorldSession::HandleChannelKick(WorldPacket& recvPacket)
     CHECK_PACKET_SIZE(recvPacket, (channelname.size()+1)+1);
 
     recvPacket >> otp;
-    if(otp.empty())
+    if(!normalizePlayerName(otp))
         return;
-
-    normalizePlayerName(otp);
 
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname, _player))
@@ -296,10 +282,8 @@ void WorldSession::HandleChannelBan(WorldPacket& recvPacket)
 
     recvPacket >> otp;
 
-    if(otp.empty())
+    if(!normalizePlayerName(otp))
         return;
-
-    normalizePlayerName(otp);
 
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname, _player))
@@ -320,10 +304,8 @@ void WorldSession::HandleChannelUnban(WorldPacket& recvPacket)
 
     recvPacket >> otp;
 
-    if(otp.empty())
+    if(!normalizePlayerName(otp))
         return;
-
-    normalizePlayerName(otp);
 
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname, _player))

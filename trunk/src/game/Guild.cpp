@@ -1940,7 +1940,7 @@ void Guild::SetGuildBankTabText(uint8 TabId, std::string text)
         return;
 
     if(text.size() > 500)                                   // DB and client size limitation
-        text.resize(500);
+        text.resize(500);                                   // FIXME: is this byte size of utf8 characters size limit?
 
     m_TabListMap[TabId]->Text = text;
 

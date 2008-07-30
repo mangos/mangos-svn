@@ -480,10 +480,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     data >> m_name;
 
-    //if(m_name.size() == 0) //not need double check
+    //if(!normalizePlayerName(m_name))                      // already checked
     //    return false;
-
-    normalizePlayerName(m_name);
 
     data >> race >> class_ >> gender >> skin >> face;
     data >> hairStyle >> hairColor >> facialHair >> outfitId;
