@@ -1631,50 +1631,16 @@ bool Pet::Create(uint32 guidlow, Map *map, uint32 Entry, uint32 pet_number)
     Object::_Create(guidlow, pet_number, HIGHGUID_PET);
 
     m_DBTableGuid = guidlow;
+    m_originalEntry = Entry;
 
-    SetUInt32Value(OBJECT_FIELD_ENTRY, Entry);
-    CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(Entry);
-    if(!cinfo)
-    {
-        sLog.outError("Error: creature entry %u does not exist.", Entry);
+    if(!InitEntry(Entry))
         return false;
-    }
 
-    LoadEquipment(cinfo->equipmentId);
-
-    CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(cinfo->DisplayID_A);
-    if(!minfo)
-    {
-        sLog.outErrorDb("Pet (Entry: %u) has model %u not found in table `creature_model_info`, can't load.", Entry, cinfo->DisplayID_A);
-        return false;
-    }
-
-    SetDisplayId(minfo->modelid);
-    SetNativeDisplayId(minfo->modelid);
     SetByteValue(UNIT_FIELD_BYTES_2, 0, SHEATH_STATE_MELEE );
     SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_UNK3 | UNIT_BYTE2_FLAG_AURAS | UNIT_BYTE2_FLAG_UNK5 );
 
     if(getPetType() == MINI_PET)                            // always non-attackable
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE);
-
-    SetName(GetCreatureInfo()->Name);
-
-    SetFloatValue(OBJECT_FIELD_SCALE_X, cinfo->scale );
-
-    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
-    SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );
-
-    SetSpeed(MOVE_WALK,     cinfo->speed );
-    SetSpeed(MOVE_RUN,      cinfo->speed );
-    SetSpeed(MOVE_SWIM,     cinfo->speed);
-
-    if(cinfo->MovementType < MAX_DB_MOTION_TYPE)
-        m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
-    else
-    {
-        m_defaultMovementType = IDLE_MOTION_TYPE;
-        sLog.outErrorDb("Creature template %u have wrong movement generator type value %u, ignore and set to IDLE.",Entry,cinfo->MovementType);
-    }
 
     return true;
 }

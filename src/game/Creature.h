@@ -321,7 +321,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void RemoveFromWorld();
 
         bool Create (uint32 guidlow, Map *map, uint32 Entry, uint32 team, const CreatureData *data = NULL);
-        bool CreateFromProto(uint32 guidlow,uint32 Entry,uint32 team, const CreatureData *data = NULL);
         bool LoadCreaturesAddon(bool reload = false);
         void SelectLevel(const CreatureInfo *cinfo);
         void LoadEquipment(uint32 equip_entry, bool force=false);
@@ -539,6 +538,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         }
 
     protected:
+        bool CreateFromProto(uint32 guidlow,uint32 Entry,uint32 team, const CreatureData *data = NULL);
+        bool InitEntry(uint32 entry, uint32 team=ALLIANCE, const CreatureData* data=NULL);
+
         // vendor items
         typedef std::vector<CreatureItem> CreatureItems;
         CreatureItems m_vendor_items;
