@@ -253,3 +253,9 @@ EXTRA_DIST += \
 EXTRA_DIST += \
 	mersennetwister/MersenneTwister.h
 
+# UTF8-CPP header files
+EXTRA_DIST += \
+	utf8cpp/utf8.h \
+	utf8cpp/utf8/checked.h \
+	utf8cpp/utf8/core.h \
+	utf8cpp/utf8/unchecked.h

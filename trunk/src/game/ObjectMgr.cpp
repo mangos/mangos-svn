@@ -5847,29 +5847,33 @@ void ObjectMgr::LoadReservedPlayersNames()
     sLog.outString( ">> Loaded %u reserved player names", count );
 }
 
-static char const* notAllowedCharsName  = "\t\v\b\f\a\n\r\\\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789\0";
-static char const* notAllowedCharsTitle = "\t\v\b\f\a\n\r\\\"\'\?<>[](){}_=+-|/!@#$%^&*~`.,\0";
+static wchar_t const* notAllowedCharsName  = L"\t\v\b\f\a\n\r\\\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789\0";
+static wchar_t const* notAllowedCharsTitle = L"\t\v\b\f\a\n\r\\\"\'\?<>[](){}_=+-|/!@#$%^&*~`.,\0";
 
-static char const* strictAllowedCharsName  = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-static char const* strictAllowedCharsTitle = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ";
+static wchar_t const* strictAllowedCharsName  = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+static wchar_t const* strictAllowedCharsTitle = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ";
 
 bool ObjectMgr::IsValidName( std::string name )
 {
-    // check used symbols in player name at creating and rename
-    if(name.find_first_of(notAllowedCharsName)!=name.npos)
+    std::wstring wname;
+    if(!Utf8toWStr(name,wname))
         return false;
 
-    if(name.size() < 1)
+    // check used symbols in player name at creating and rename
+    if(wname.find_first_of(notAllowedCharsName)!=wname.npos)
+        return false;
+
+    if(wname.size() < 1)
         return false;
 
     if(sWorld.getConfig(CONFIG_STRICT_PLAYER_NAMES))
     {
-        if(name[0] < 'A' || name[0] > 'Z')                  // use special check for normalized case
+        if(wname[0] < L'A' || wname[0] > L'Z')              // use special check for normalized case
             return false;
 
-        for(size_t i=1; i < name.size(); ++i)
+        for(size_t i=1; i < wname.size(); ++i)
         {
-            if(name[i] < 'a' || name[i] > 'z')
+            if(wname[i] < L'a' || wname[i] > L'z')
                 return false;
         }
     }
@@ -5879,15 +5883,19 @@ bool ObjectMgr::IsValidName( std::string name )
 
 bool ObjectMgr::IsValidCharterName( std::string name )
 {
-    // check used symbols in charter(guild/arena) name at creating and rename
-    if(name.find_first_of(notAllowedCharsTitle)!=name.npos)
+    std::wstring wname;
+    if(!Utf8toWStr(name,wname))
         return false;
 
-    if(name.size() < 1)
+    // check used symbols in charter(guild/arena) name at creating and rename
+    if(wname.find_first_of(notAllowedCharsTitle)!=wname.npos)
+        return false;
+
+    if(wname.size() < 1)
         return false;
 
     if(sWorld.getConfig(CONFIG_STRICT_CHARTER_NAMES))
-        if(name.find_first_not_of(strictAllowedCharsTitle)!=name.npos)
+        if(wname.find_first_not_of(strictAllowedCharsTitle)!=wname.npos)
             return false;
 
     return true;
@@ -5895,15 +5903,19 @@ bool ObjectMgr::IsValidCharterName( std::string name )
 
 bool ObjectMgr::IsValidPetName( std::string name )
 {
-    // check used symbols in pet name at rename
-    if(name.find_first_of(notAllowedCharsName)!=name.npos)
+    std::wstring wname;
+    if(!Utf8toWStr(name,wname))
         return false;
 
-    if(name.size() < 1)
+    // check used symbols in pet name at rename
+    if(wname.find_first_of(notAllowedCharsName)!=wname.npos)
+        return false;
+
+    if(wname.size() < 1)
         return false;
 
     if(sWorld.getConfig(CONFIG_STRICT_PET_NAMES))
-        if(name.find_first_not_of(strictAllowedCharsName)!=name.npos)
+        if(wname.find_first_not_of(strictAllowedCharsName)!=wname.npos)
             return false;
 
     return true;

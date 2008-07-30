@@ -290,26 +290,13 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         }
     }
 
+    // extract other data required for player creating
+    uint8 gender, skin, face, hairStyle, hairColor, facialHair, outfitId;
+    recv_data >> gender >> skin >> face;
+    recv_data >> hairStyle >> hairColor >> facialHair >> outfitId;
+
     Player * pNewChar = new Player(this);
-    recv_data.rpos(0);
-
-    if(pNewChar->Create( objmgr.GenerateLowGuid(HIGHGUID_PLAYER), recv_data ))
-    {
-        if(have_same_race && skipCinematics == 1 || skipCinematics == 2)
-        {
-            pNewChar->setCinematic(1);                      // not show intro
-        }
-
-        // Player create
-        pNewChar->SaveToDB();
-        charcount+=1;
-
-        loginDatabase.PExecute("DELETE FROM realmcharacters WHERE acctid= '%d' AND realmid = '%d'", GetAccountId(), realmID);
-        loginDatabase.PExecute("INSERT INTO realmcharacters (numchars, acctid, realmid) VALUES (%u, %u, %u)",  charcount, GetAccountId(), realmID);
-
-        delete pNewChar;
-    }
-    else
+    if(!pNewChar->Create( objmgr.GenerateLowGuid(HIGHGUID_PLAYER), name, race_, class_, gender, skin, face, hairStyle, hairColor, facialHair, outfitId ))
     {
         // Player not create (race/class problem?)
         delete pNewChar;
@@ -319,6 +306,18 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
         return;
     }
+
+    if(have_same_race && skipCinematics == 1 || skipCinematics == 2)
+        pNewChar->setCinematic(1);                          // not show intro
+
+    // Player created, save it now
+    pNewChar->SaveToDB();
+    charcount+=1;
+
+    loginDatabase.PExecute("DELETE FROM realmcharacters WHERE acctid= '%d' AND realmid = '%d'", GetAccountId(), realmID);
+    loginDatabase.PExecute("INSERT INTO realmcharacters (numchars, acctid, realmid) VALUES (%u, %u, %u)",  charcount, GetAccountId(), realmID);
+
+    delete pNewChar;                                        // created only to call SaveToDB()
 
     data << (uint8)CHAR_CREATE_SUCCESS;
     SendPacket( &data );
