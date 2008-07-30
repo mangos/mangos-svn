@@ -405,11 +405,11 @@ void WorldSession::SendSpiritResurrect()
             _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, _player->GetOrientation());
         // or update at original position
         else
-            MapManager::Instance().GetMap(_player->GetMapId(), _player)->Add(_player);
+            ObjectAccessor::UpdateVisibilityForPlayer(_player);
     }
     // or update at original position
     else
-        MapManager::Instance().GetMap(_player->GetMapId(), _player)->Add(_player);
+        ObjectAccessor::UpdateVisibilityForPlayer(_player);
 
     _player->SaveToDB();
 }

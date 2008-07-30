@@ -332,7 +332,7 @@ class MANGOS_DLL_SPEC InstanceMap : public Map
         bool Reset(uint8 method);
         std::string GetScript() { return i_script; }
         InstanceData* GetInstanceData() { return i_data; }
-        void PermBindAllPlayers();
+        void PermBindAllPlayers(Player *player);
         PlayerList const& GetPlayers() const { return i_Players;}
         void SendToPlayers(WorldPacket const* data) const;
         time_t GetResetTime();

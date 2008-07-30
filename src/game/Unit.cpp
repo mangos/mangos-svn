@@ -711,8 +711,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             if (cVictim->AI())
                 cVictim->AI()->JustDied(this);
 
-            // Dungeon specific stuff
-            if(cVictim->GetInstanceId())
+            // Dungeon specific stuff, only applies to players killing creatures
+            if(GetTypeId() == TYPEID_PLAYER && cVictim->GetInstanceId())
             {
                 Map *m = cVictim->GetMap();
                 if(m->IsDungeon())
@@ -720,7 +720,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                     if(m->IsRaid() || m->IsHeroic())
                     {
                         if(cVictim->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
-                            ((InstanceMap *)m)->PermBindAllPlayers();
+                            ((InstanceMap *)m)->PermBindAllPlayers((Player*)this);
                     }
                     else
                     {

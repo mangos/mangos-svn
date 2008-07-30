@@ -14232,24 +14232,43 @@ void Player::SendSavedInstances()
     }
 }
 
-void Player::ConvertInstancesToGroup(bool load)
+/// convert the player's binds to the group
+void Player::ConvertInstancesToGroup(Player *player, Group *group, uint64 player_guid)
 {
-    // copy the player's bind to the group
-    Group *pGroup = GetGroup();
-    if(!pGroup)
-        return;
+    bool has_binds = false;
+    bool has_solo = false;
 
-    for(uint8 i = 0; i < TOTAL_DIFFICULTIES; i++)
+    if(player) { player_guid = player->GetGUID(); group = player->GetGroup(); }
+    assert(player_guid);
+
+    // copy all binds to the group, when changing leader it's assumed the character
+    // will not have any solo binds
+
+    if(player)
     {
-        for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end();)
+        for(uint8 i = 0; i < TOTAL_DIFFICULTIES; i++)
         {
-            pGroup->BindToInstance(itr->second.save, itr->second.perm, load);
-            if(!itr->second.perm)
-                UnbindInstance(itr, i);                     // increments itr
-            else
-                ++itr;
+            for (BoundInstancesMap::iterator itr = player->m_boundInstances[i].begin(); itr != player->m_boundInstances[i].end();)
+            {
+                has_binds = true;
+                if(group) group->BindToInstance(itr->second.save, itr->second.perm, true);
+                // permanent binds are not removed
+                if(!itr->second.perm)
+                {
+                    
+                    player->UnbindInstance(itr, i, true);   // increments itr
+                    has_solo = true;
+                }
+                else
+                    ++itr;
+            }
         }
     }
+
+    // if the player's not online we don't know what binds it has
+    if(!player || !group || has_binds) CharacterDatabase.PExecute("INSERT INTO group_instance SELECT guid, instance, permanent FROM character_instance WHERE guid = '%u'", GUID_LOPART(player_guid));
+    // the following should not get executed when changing leaders
+    if(!player || has_solo) CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND permanent = 0", GUID_LOPART(player_guid));
 }
 
 bool Player::_LoadHomeBind(QueryResult *result)
