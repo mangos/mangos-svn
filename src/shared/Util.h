@@ -112,14 +112,6 @@ inline void ApplyPercentModFloatVar(float& var, float val, bool apply)
     var *= (apply?(100.0f+val)/100.0f : 100.0f / (100.0f+val));
 }
 
-inline void normalizePlayerName(std::string& name)
-{
-    assert(!name.empty());
-    name[0] = toupper(name[0]);
-    for(size_t i = 1; i < name.size(); ++i)
-        name[i] = tolower(name[i]);
-}
-
 inline void strToUpper(std::string& str)
 {
     std::transform( str.begin(), str.end(), str.begin(), ::toupper );
@@ -128,6 +120,25 @@ inline void strToUpper(std::string& str)
 inline void strToLower(std::string& str)
 {
     std::transform( str.begin(), str.end(), str.begin(), ::tolower );
+}
+
+inline size_t utf8length(std::string utf8str)
+{
+    //TODO: implement correct utf8 string length check
+    //Currently use string size just for cleanup related caller code
+    return utf8str.size();
+}
+
+inline bool normalizePlayerName(std::string& name)
+{
+    if(name.empty())
+        return false;
+
+    name[0] = toupper(name[0]);
+    for(size_t i = 1; i < name.size(); ++i)
+        name[i] = tolower(name[i]);
+
+    return true;
 }
 
 bool IsIPAddress(char const* ipaddress);

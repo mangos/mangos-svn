@@ -1876,7 +1876,10 @@ uint8 World::BanAccount(std::string type, std::string nameOrIP, std::string dura
     loginDatabase.escape_string(reason);
     std::string safe_author=author;
     loginDatabase.escape_string(safe_author);
-    normalizePlayerName(nameOrIP);
+
+    if(!normalizePlayerName(nameOrIP))
+        return BAN_NOTFOUND;                                // Nobody to ban
+
     uint32 duration_secs = TimeStringToSecs(duration);
     QueryResult *resultAccounts = NULL;                     //used for kicking
 
@@ -1931,10 +1934,9 @@ uint8 World::BanAccount(std::string type, std::string nameOrIP, std::string dura
 /// Remove a ban from an account or IP address
 bool World::RemoveBanAccount(std::string type, std::string nameOrIP)
 {
-    loginDatabase.escape_string(nameOrIP);
-
     if(type == "ip")
     {
+        loginDatabase.escape_string(nameOrIP);
         loginDatabase.PExecute("DELETE FROM ip_banned WHERE ip = '%s'",nameOrIP.c_str());
     }
     else
@@ -1943,6 +1945,7 @@ bool World::RemoveBanAccount(std::string type, std::string nameOrIP)
         if(type == "account")
         {
             //NO SQL injection as name is escaped
+            loginDatabase.escape_string(nameOrIP);
             QueryResult *resultAccounts = loginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'",nameOrIP.c_str());
             if(!resultAccounts)
                 return false;
@@ -1953,8 +1956,11 @@ bool World::RemoveBanAccount(std::string type, std::string nameOrIP)
         }
         else if(type == "character")
         {
-            normalizePlayerName(nameOrIP);
+            if(!normalizePlayerName(nameOrIP))
+                return false;
+
             //NO SQL injection as name is escaped
+            loginDatabase.escape_string(nameOrIP);
             QueryResult *resultAccounts = CharacterDatabase.PQuery("SELECT account FROM characters WHERE name = '%s'",nameOrIP.c_str());
             if(!resultAccounts)
                 return false;

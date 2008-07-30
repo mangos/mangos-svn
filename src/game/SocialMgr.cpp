@@ -93,7 +93,7 @@ void PlayerSocial::SetFriendNote(uint32 friend_guid, std::string note)
         return;
 
     if(note.size() > 48)                                    // DB and client size limitation
-        note.resize(48);
+        note.resize(48);                                    // FIXME: is this byte size of utf8 characters size limit?
 
     CharacterDatabase.escape_string(note);
     CharacterDatabase.PExecute("UPDATE character_social SET note = '%s' WHERE guid = '%u' AND friend = '%u'", note.c_str(), GetPlayerGUID(), friend_guid);

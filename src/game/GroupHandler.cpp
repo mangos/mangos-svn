@@ -65,13 +65,12 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
     // attempt add selected player
 
     // cheating
-    if(membername.empty())
+    if(!normalizePlayerName(membername))
     {
         SendPartyResult(PARTY_OP_INVITE, membername, PARTY_RESULT_CANT_FIND_TARGET);
         return;
     }
 
-    normalizePlayerName(membername);
     Player *player = objmgr.GetPlayer(membername.c_str());
 
     // no player
@@ -266,16 +265,15 @@ void WorldSession::HandleGroupUninviteNameOpcode(WorldPacket & recv_data)
     std::string membername;
     recv_data >> membername;
 
-    if(membername.empty())
-        return;
-
     if(_player->InBattleGround())
     {
         SendPartyResult(PARTY_OP_INVITE, membername, PARTY_RESULT_INVITE_RESTRICTED);
         return;
     }
 
-    normalizePlayerName(membername);
+    // player not found
+    if(!normalizePlayerName(membername))
+        return;
 
     uint64 guid = objmgr.GetPlayerGUIDByName(membername);
 

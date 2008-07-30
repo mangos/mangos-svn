@@ -99,12 +99,12 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     if (receiver.empty())
         return;
 
-    normalizePlayerName(receiver);
-    //CharacterDatabase.escape_string(receiver);            // prevent SQL injection
-
     Player* pl = _player;
 
-    uint64 rc = objmgr.GetPlayerGUIDByName(receiver);
+    uint64 rc = 0;
+    if(normalizePlayerName(receiver))
+        rc = objmgr.GetPlayerGUIDByName(receiver);
+
     if (!rc)
     {
         sLog.outDetail("Player %u is sending mail to %s (GUID: not existed!) with subject %s and body %s includes %u items, %u copper and %u COD copper with unk1 = %u, unk2 = %u", pl->GetGUIDLow(), receiver.c_str(), GUID_LOPART(rc), subject.c_str(), body.c_str(), items_count, money, COD, unk1, unk2);

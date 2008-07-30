@@ -5834,9 +5834,8 @@ void ObjectMgr::LoadReservedPlayersNames()
         bar.step();
         fields = result->Fetch();
         std::string name= fields[0].GetCppString();
-        if(!name.empty())
+        if(normalizePlayerName(name))
         {
-            normalizePlayerName(name);
             m_ReservedNames.insert(name);
             ++count;
         }

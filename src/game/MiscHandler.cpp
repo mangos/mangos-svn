@@ -613,10 +613,9 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     recv_data >> friendNote;
 
-    if(friendName.empty())
+    if(!normalizePlayerName(friendName))
         return;
 
-    normalizePlayerName(friendName);
     CharacterDatabase.escape_string(friendName);            // prevent SQL injection - normal name don't must changed by this call
 
     sLog.outDebug( "WORLD: %s asked to add friend : '%s'",
@@ -699,10 +698,9 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 
     recv_data >> IgnoreName;
 
-    if(IgnoreName.empty())
+    if(!normalizePlayerName(IgnoreName))
         return;
 
-    normalizePlayerName(IgnoreName);
     CharacterDatabase.escape_string(IgnoreName);            // prevent SQL injection - normal name don't must changed by this call
 
     sLog.outDebug( "WORLD: %s asked to Ignore: '%s'",

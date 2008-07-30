@@ -397,8 +397,8 @@ bool PlayerDumpReader::LoadDump(std::string file, uint32 account, std::string na
     else guid = objmgr.m_hiCharGuid;
 
     // normalize the name if specified and check if it exists
-    if(!name.empty())
-        normalizePlayerName(name);
+    if(!normalizePlayerName(name))
+        name = "";
 
     if(ObjectMgr::IsValidName(name))
     {

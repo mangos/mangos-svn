@@ -547,7 +547,13 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
     else
     {
         targetName = arg1;
-        normalizePlayerName(targetName);
+        if(!normalizePlayerName(targetName))
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
+
         targetPlayer = ObjectAccessor::Instance().FindPlayerByName(targetName.c_str());
         if(targetPlayer)
         {
@@ -1573,7 +1579,14 @@ bool ChatHandler::HandleLearnAllDefaultCommand(const char* args)
     if (pName)
     {
         std::string name = pName;
-        normalizePlayerName(name);
+
+        if(!normalizePlayerName(name))
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
+
         player = objmgr.GetPlayer(name.c_str());
     }
     else
@@ -2693,7 +2706,12 @@ bool ChatHandler::HandleGuildInviteCommand(const char *args)
         return false;
 
     std::string plName = par1;
-    normalizePlayerName(plName);
+    if(!normalizePlayerName(plName))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
     uint64 plGuid = 0;
     if(Player* targetPlayer = ObjectAccessor::Instance().FindPlayerByName(plName.c_str()))
@@ -2720,7 +2738,12 @@ bool ChatHandler::HandleGuildUninviteCommand(const char *args)
     if(!par1)
         return false;
     std::string plName = par1;
-    normalizePlayerName(plName);
+    if(!normalizePlayerName(plName))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
     uint64 plGuid = 0;
     uint32 glId   = 0;
@@ -2757,7 +2780,12 @@ bool ChatHandler::HandleGuildRankCommand(const char *args)
     if(!par1 || !par2)
         return false;
     std::string plName = par1;
-    normalizePlayerName(plName);
+    if(!normalizePlayerName(plName))
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
     uint64 plGuid = 0;
     uint32 glId   = 0;
@@ -3020,7 +3048,13 @@ bool ChatHandler::HandleReviveCommand(const char* args)
     if (*args)
     {
         std::string name = args;
-        normalizePlayerName(name);
+        if(!normalizePlayerName(name))
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
+
         SelectedPlayer = objmgr.GetPlayer(name.c_str());
     }
     else
@@ -3389,7 +3423,12 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
     if(pname)                                               // player by name
     {
         name = pname;
-        normalizePlayerName(name);
+        if(!normalizePlayerName(name))
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
 
         chr = objmgr.GetPlayer(name.c_str());
         if(!chr)                                            // not in game
@@ -3891,7 +3930,13 @@ bool ChatHandler::HandleResetHonorCommand (const char * args)
     if (pName)
     {
         std::string name = pName;
-        normalizePlayerName(name);
+        if(!normalizePlayerName(name))
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
+
         uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str());
         player = objmgr.GetPlayer(guid);
     }
@@ -3990,7 +4035,13 @@ bool ChatHandler::HandleResetLevelCommand(const char * args)
     if (pName)
     {
         std::string name = pName;
-        normalizePlayerName(name);
+        if(!normalizePlayerName(name))
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
+
         uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str());
         player = objmgr.GetPlayer(guid);
     }
@@ -4028,7 +4079,13 @@ bool ChatHandler::HandleResetStatsCommand(const char * args)
     if (pName)
     {
         std::string name = pName;
-        normalizePlayerName(name);
+        if(!normalizePlayerName(name))
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
+
         uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str());
         player = objmgr.GetPlayer(guid);
     }
@@ -4060,7 +4117,14 @@ bool ChatHandler::HandleResetSpellsCommand(const char * args)
     if (pName)
     {
         std::string name = pName;
-        normalizePlayerName(name);
+
+        if(!normalizePlayerName(name))
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
+
         player = objmgr.GetPlayer(name.c_str());
         if(!player)
             playerGUID = objmgr.GetPlayerGUIDByName(name.c_str());
@@ -4101,7 +4165,13 @@ bool ChatHandler::HandleResetTalentsCommand(const char * args)
     if (pName)
     {
         std::string name = pName;
-        normalizePlayerName(name);
+        if(!normalizePlayerName(name))
+        {
+            SendSysMessage(LANG_PLAYER_NOT_FOUND);
+            SetSentErrorMessage(true);
+            return false;
+        }
+
         player = objmgr.GetPlayer(name.c_str());
         if(!player)
             playerGUID = objmgr.GetPlayerGUIDByName(name.c_str());
@@ -4503,7 +4573,13 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
         }
         else if(type == "character")
         {
-            normalizePlayerName(nameOrIP);
+            if(!normalizePlayerName(nameOrIP))
+            {
+                SendSysMessage(LANG_PLAYER_NOT_FOUND);
+                SetSentErrorMessage(true);
+                return false;
+            }
+
             QueryResult *result = CharacterDatabase.PQuery("SELECT account FROM characters WHERE name = '%s'", nameOrIP.c_str());
             if (!result)
             {
