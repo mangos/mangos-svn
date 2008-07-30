@@ -471,20 +471,11 @@ void Player::CleanupsBeforeDelete()
     Unit::CleanupsBeforeDelete();
 }
 
-bool Player::Create( uint32 guidlow, WorldPacket& data )
+bool Player::Create( uint32 guidlow, std::string name, uint8 race, uint8 class_, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair, uint8 outfitId )
 {
-    int i;
-    uint8 race,class_,gender,skin,face,hairStyle,hairColor,facialHair,outfitId;
-
     Object::_Create(guidlow, 0, HIGHGUID_PLAYER);
 
-    data >> m_name;
-
-    //if(!normalizePlayerName(m_name))                      // already checked
-    //    return false;
-
-    data >> race >> class_ >> gender >> skin >> face;
-    data >> hairStyle >> hairColor >> facialHair >> outfitId;
+    m_name = name;
 
     PlayerInfo const* info = objmgr.GetPlayerInfo(race, class_);
     if(!info)
@@ -493,7 +484,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         return false;
     }
 
-    for (i = 0; i < PLAYER_SLOTS_COUNT; i++)
+    for (int i = 0; i < PLAYER_SLOTS_COUNT; i++)
         m_items[i] = NULL;
 
     //for(int j = BUYBACK_SLOT_START; j < BUYBACK_SLOT_END; j++)
@@ -605,18 +596,18 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     learnDefaultSpells(true);
 
     std::list<uint16>::const_iterator action_itr[4];
-    for(i=0; i<4; i++)
+    for(int i=0; i<4; i++)
         action_itr[i] = info->action[i].begin();
 
     for (; action_itr[0]!=info->action[0].end() && action_itr[1]!=info->action[1].end();)
     {
         uint16 taction[4];
-        for( i=0; i<4 ;i++)
+        for(int i=0; i<4 ;i++)
             taction[i] = (*action_itr[i]);
 
         addActionButton((uint8)taction[0], taction[1], (uint8)taction[2], (uint8)taction[3]);
 
-        for( i=0; i<4 ;i++)
+        for(int i=0; i<4 ;i++)
             ++action_itr[i];
     }
 
