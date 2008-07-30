@@ -712,15 +712,26 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
                 cVictim->AI()->JustDied(this);
 
             // Dungeon specific stuff, only applies to players killing creatures
-            if(GetTypeId() == TYPEID_PLAYER && cVictim->GetInstanceId())
+            if(cVictim->GetInstanceId())
             {
                 Map *m = cVictim->GetMap();
-                if(m->IsDungeon())
+                Player *creditedPlayer = NULL;
+                if(GetCharmerOrOwnerGUID())
+                {
+                    if(IS_PLAYER_GUID(GetCharmerOrOwnerGUID()))
+                        creditedPlayer = (Player*)GetCharmerOrOwner();
+                    // the unit's charmer is credited always, and it's left NULL if it's not a player 
+                    // TODO: do instance binding anyway if the charmer/owner is offline
+                }
+                else if(GetTypeId() == TYPEID_PLAYER)
+                    creditedPlayer = (Player*)this;
+
+                if(m->IsDungeon() && creditedPlayer)
                 {
                     if(m->IsRaid() || m->IsHeroic())
                     {
                         if(cVictim->GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_INSTANCE_BIND)
-                            ((InstanceMap *)m)->PermBindAllPlayers((Player*)this);
+                            ((InstanceMap *)m)->PermBindAllPlayers(creditedPlayer);
                     }
                     else
                     {
