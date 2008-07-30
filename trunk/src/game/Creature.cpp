@@ -162,7 +162,7 @@ void Creature::RemoveCorpse()
 /**
  * change the entry of creature until respawn
  */
-bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
+bool Creature::InitEntry(uint32 Entry, uint32 team, const CreatureData *data )
 {
     CreatureInfo const *normalInfo = objmgr.GetCreatureTemplate(Entry);
     if(!normalInfo)
@@ -172,26 +172,32 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
     }
 
     // get heroic mode entry
-    Map *map = MapManager::Instance().FindMap(GetMapId(), GetInstanceId());
-    uint32 actualEntry = map && map->IsHeroic() ? normalInfo->HeroicEntry : Entry;
-
-    CreatureInfo const *cinfo = actualEntry!=Entry ? objmgr.GetCreatureTemplate(actualEntry) : normalInfo;
-    if(!cinfo)
+    uint32 actualEntry = Entry;
+    CreatureInfo const *cinfo = normalInfo;
+    if(normalInfo->HeroicEntry)
     {
-        sLog.outErrorDb("Creature::UpdateEntry creature heroic entry %u does not exist.", actualEntry);
-        return false;
+        Map *map = MapManager::Instance().FindMap(GetMapId(), GetInstanceId());
+        if(map && map->IsHeroic())
+        {
+            cinfo = objmgr.GetCreatureTemplate(normalInfo->HeroicEntry);
+            if(!cinfo)
+            {
+                sLog.outErrorDb("Creature::UpdateEntry creature heroic entry %u does not exist.", actualEntry);
+                return false;
+            }
+        }
     }
 
     SetUInt32Value(OBJECT_FIELD_ENTRY, Entry);              // normal entry always
     m_creatureInfo = cinfo;                                 // map mode related always
 
-    m_regenHealth = cinfo->RegenHealth;
     if (cinfo->DisplayID_A == 0 || cinfo->DisplayID_H == 0) // Cancel load if no model defined
     {
         sLog.outErrorDb("Creature (Entry: %u) has no model defined for Horde or Alliance in table `creature_template`, can't load. ",Entry);
         return false;
     }
-    uint32 display_id = objmgr.ChooseDisplayId(team, cinfo, data);
+
+    uint32 display_id = objmgr.ChooseDisplayId(team, GetCreatureInfo(), data);
     CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(display_id);
     if (!minfo)
     {
@@ -204,12 +210,7 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
     SetDisplayId(display_id);
     SetNativeDisplayId(display_id);
     SetByteValue(UNIT_FIELD_BYTES_0, 2, minfo->gender);
-    // creatures always have melee weapon ready if any
-    SetByteValue(UNIT_FIELD_BYTES_2, 0, SHEATH_STATE_MELEE );
-    SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_AURAS );
 
-    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
-    SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );
     // Load creature equipment
     if(!data || data->equipmentId == 0)
     {                                                       // use default from the template
@@ -221,47 +222,9 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
     }
 
     SetName(normalInfo->Name);                              // at normal entry always
-    SelectLevel(cinfo);
-    if (team == HORDE)
-        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, cinfo->faction_H);
-    else
-        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, cinfo->faction_A);
 
-    SetUInt32Value(UNIT_NPC_FLAGS,cinfo->npcflag);
-
-    SetAttackTime(BASE_ATTACK,  cinfo->baseattacktime);
-    SetAttackTime(OFF_ATTACK,   cinfo->baseattacktime);
-    SetAttackTime(RANGED_ATTACK,cinfo->rangeattacktime);
-
-    SetUInt32Value(UNIT_FIELD_FLAGS,cinfo->Flags);
-    SetUInt32Value(UNIT_DYNAMIC_FLAGS,cinfo->dynamicflags);
-
-    SetModifierValue(UNIT_MOD_ARMOR,             BASE_VALUE, float(cinfo->armor));
-    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY,   BASE_VALUE, float(cinfo->resistance1));
-    SetModifierValue(UNIT_MOD_RESISTANCE_FIRE,   BASE_VALUE, float(cinfo->resistance2));
-    SetModifierValue(UNIT_MOD_RESISTANCE_NATURE, BASE_VALUE, float(cinfo->resistance3));
-    SetModifierValue(UNIT_MOD_RESISTANCE_FROST,  BASE_VALUE, float(cinfo->resistance4));
-    SetModifierValue(UNIT_MOD_RESISTANCE_SHADOW, BASE_VALUE, float(cinfo->resistance5));
-    SetModifierValue(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(cinfo->resistance6));
-
-    SetCanModifyStats(true);
-    UpdateAllStats();
-    SetFloatValue(OBJECT_FIELD_SCALE_X, cinfo->scale);
-
-    FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cinfo->faction_A);
-    if (factionTemplate)                                    // check and error show at loading templates
-    {
-        FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction);
-        if (factionEntry)
-            if( !(cinfo->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN) &&
-                (factionEntry->team == ALLIANCE || factionEntry->team == HORDE) )
-                SetPvP(true);
-    }
-
-    m_spells[0] = cinfo->spell1;
-    m_spells[1] = cinfo->spell2;
-    m_spells[2] = cinfo->spell3;
-    m_spells[3] = cinfo->spell4;
+    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
+    SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );
 
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
 
@@ -269,8 +232,66 @@ bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
     SetSpeed(MOVE_RUN,      cinfo->speed );
     SetSpeed(MOVE_SWIM,     cinfo->speed );
 
+    SetFloatValue(OBJECT_FIELD_SCALE_X, cinfo->scale);
+
     // checked at loading
     m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
+
+    return true;
+}
+
+bool Creature::UpdateEntry(uint32 Entry, uint32 team, const CreatureData *data )
+{
+    if(!InitEntry(Entry,team,data))
+        return false;
+
+    m_regenHealth = GetCreatureInfo()->RegenHealth;
+
+    // creatures always have melee weapon ready if any
+    SetByteValue(UNIT_FIELD_BYTES_2, 0, SHEATH_STATE_MELEE );
+    SetByteValue(UNIT_FIELD_BYTES_2, 1, UNIT_BYTE2_FLAG_AURAS );
+
+    SelectLevel(GetCreatureInfo());
+    if (team == HORDE)
+        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, GetCreatureInfo()->faction_H);
+    else
+        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, GetCreatureInfo()->faction_A);
+
+    SetUInt32Value(UNIT_NPC_FLAGS,GetCreatureInfo()->npcflag);
+
+    SetAttackTime(BASE_ATTACK,  GetCreatureInfo()->baseattacktime);
+    SetAttackTime(OFF_ATTACK,   GetCreatureInfo()->baseattacktime);
+    SetAttackTime(RANGED_ATTACK,GetCreatureInfo()->rangeattacktime);
+
+    SetUInt32Value(UNIT_FIELD_FLAGS,GetCreatureInfo()->Flags);
+    SetUInt32Value(UNIT_DYNAMIC_FLAGS,GetCreatureInfo()->dynamicflags);
+
+    SetModifierValue(UNIT_MOD_ARMOR,             BASE_VALUE, float(GetCreatureInfo()->armor));
+    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY,   BASE_VALUE, float(GetCreatureInfo()->resistance1));
+    SetModifierValue(UNIT_MOD_RESISTANCE_FIRE,   BASE_VALUE, float(GetCreatureInfo()->resistance2));
+    SetModifierValue(UNIT_MOD_RESISTANCE_NATURE, BASE_VALUE, float(GetCreatureInfo()->resistance3));
+    SetModifierValue(UNIT_MOD_RESISTANCE_FROST,  BASE_VALUE, float(GetCreatureInfo()->resistance4));
+    SetModifierValue(UNIT_MOD_RESISTANCE_SHADOW, BASE_VALUE, float(GetCreatureInfo()->resistance5));
+    SetModifierValue(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(GetCreatureInfo()->resistance6));
+
+    SetCanModifyStats(true);
+    UpdateAllStats();
+
+    FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(GetCreatureInfo()->faction_A);
+    if (factionTemplate)                                    // check and error show at loading templates
+    {
+        FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction);
+        if (factionEntry)
+            if( !(GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN) &&
+                (factionEntry->team == ALLIANCE || factionEntry->team == HORDE) )
+                SetPvP(true);
+    }
+
+    m_spells[0] = GetCreatureInfo()->spell1;
+    m_spells[1] = GetCreatureInfo()->spell2;
+    m_spells[2] = GetCreatureInfo()->spell3;
+    m_spells[3] = GetCreatureInfo()->spell4;
+
     return true;
 }
 
