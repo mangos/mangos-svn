@@ -402,9 +402,8 @@ bool PlayerDumpReader::LoadDump(std::string file, uint32 account, std::string na
 
     if(ObjectMgr::IsValidName(name))
     {
-        std::string name1 = name;                           // not escape original name
-        CharacterDatabase.escape_string(name1);
-        result = CharacterDatabase.PQuery("SELECT * FROM characters WHERE name = '%s'", name1.c_str());
+        CharacterDatabase.escape_string(name);              // for safe, we use name only for sql quearies anyway
+        result = CharacterDatabase.PQuery("SELECT * FROM characters WHERE name = '%s'", name.c_str());
         if (result)
         {
             name = "";                                      // use the one from the dump
@@ -412,6 +411,8 @@ bool PlayerDumpReader::LoadDump(std::string file, uint32 account, std::string na
         }
     }
     else name = "";
+
+    // name encoded or empty
 
     snprintf(newguid, 20, "%d", guid);
     snprintf(chraccount, 20, "%d", account);
@@ -489,10 +490,9 @@ bool PlayerDumpReader::LoadDump(std::string file, uint32 account, std::string na
                 {
                     // check if the original name already exists
                     name = getnth(line, 4);
+                    CharacterDatabase.escape_string(name);
 
-                    std::string sql_name = name;
-                    CharacterDatabase.escape_string(sql_name);
-                    result = CharacterDatabase.PQuery("SELECT * FROM characters WHERE name = '%s'", sql_name.c_str());
+                    result = CharacterDatabase.PQuery("SELECT * FROM characters WHERE name = '%s'", name.c_str());
                     if (result)
                     {
                         delete result;
