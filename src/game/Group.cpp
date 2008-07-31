@@ -1263,7 +1263,9 @@ void Group::ResetInstances(uint8 method, Player* SendMsgTo)
 
         if(isEmpty || method == INSTANCE_RESET_GROUP_DISBAND || method == INSTANCE_RESET_CHANGE_DIFFICULTY)
         {
-            p->DeleteFromDB();
+            // do not reset the instance, just unbind if others are permanently bound to it
+            if(p->CanReset()) p->DeleteFromDB();
+            else CharacterDatabase.PExecute("DELETE FROM group_instance WHERE instance = '%u'", p->GetInstanceId());
             // i don't know for sure if hash_map iterators 
             m_boundInstances[dif].erase(itr);
             itr = m_boundInstances[dif].begin();
