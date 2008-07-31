@@ -46,7 +46,7 @@ void RealmList::Initialize(uint32 updateInterval)
     UpdateRealms(true);
 }
 
-void RealmList::UpdateRealm( uint32 ID, const char *name, const char *address, uint32 port, uint8 icon, uint8 color, uint8 timezone, AccountTypes allowedSecurityLevel, float popu)
+void RealmList::UpdateRealm( uint32 ID, std::string name, std::string address, uint32 port, uint8 icon, uint8 color, uint8 timezone, AccountTypes allowedSecurityLevel, float popu)
 {
     ///- Create new if not exist or update existed
     Realm& realm = m_realms[name];
@@ -60,9 +60,8 @@ void RealmList::UpdateRealm( uint32 ID, const char *name, const char *address, u
     realm.populationLevel        = popu;
 
     ///- Append port to IP address.
-    std::string addr = address ? address : "";
     std::ostringstream ss;
-    ss << addr << ":" << port;
+    ss << address << ":" << port;
     realm.address   = ss.str();
 }
 
@@ -96,7 +95,7 @@ void RealmList::UpdateRealms(bool init)
 
             uint8 allowedSecurityLevel = fields[7].GetUInt8();
 
-            UpdateRealm(fields[0].GetUInt32(), fields[1].GetString(),fields[2].GetString(),fields[3].GetUInt32(),fields[4].GetUInt8(), fields[5].GetUInt8(), fields[6].GetUInt8(), (allowedSecurityLevel <= SEC_ADMINISTRATOR ? AccountTypes(allowedSecurityLevel) : SEC_ADMINISTRATOR), fields[8].GetFloat() );
+            UpdateRealm(fields[0].GetUInt32(), fields[1].GetCppString(),fields[2].GetCppString(),fields[3].GetUInt32(),fields[4].GetUInt8(), fields[5].GetUInt8(), fields[6].GetUInt8(), (allowedSecurityLevel <= SEC_ADMINISTRATOR ? AccountTypes(allowedSecurityLevel) : SEC_ADMINISTRATOR), fields[8].GetFloat() );
             if(init)
                 sLog.outString("Added realm \"%s\".", fields[1].GetString());
         } while( result->NextRow() );
