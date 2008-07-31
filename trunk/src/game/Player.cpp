@@ -14341,6 +14341,9 @@ void Player::SaveToDB()
 
     CharacterDatabase.PExecute("DELETE FROM characters WHERE guid = '%u'",GetGUIDLow());
 
+    std::string sql_name = m_name;
+    CharacterDatabase.escape_string(sql_name);
+
     std::ostringstream ss;
     ss << "INSERT INTO characters (guid,account,name,race,class,"
         "map, dungeon_difficulty, position_x, position_y, position_z, orientation, data, "
@@ -14350,7 +14353,7 @@ void Player::SaveToDB()
         "death_expire_time, taxi_path) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
-        << m_name << "', "
+        << sql_name << "', "
         << m_race << ", "
         << m_class << ", ";
 

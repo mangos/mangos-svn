@@ -489,7 +489,10 @@ bool PlayerDumpReader::LoadDump(std::string file, uint32 account, std::string na
                 {
                     // check if the original name already exists
                     name = getnth(line, 4);
-                    result = CharacterDatabase.PQuery("SELECT * FROM characters WHERE name = '%s'", name.c_str());
+
+                    std::string sql_name = name;
+                    CharacterDatabase.escape_string(sql_name);
+                    result = CharacterDatabase.PQuery("SELECT * FROM characters WHERE name = '%s'", sql_name.c_str());
                     if (result)
                     {
                         delete result;
