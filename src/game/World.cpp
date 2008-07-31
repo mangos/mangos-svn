@@ -1918,7 +1918,8 @@ uint8 World::BanAccount(std::string type, std::string nameOrIP, std::string dura
 
         if(type != "ip")
             //No SQL injection as strings are escaped
-            loginDatabase.PExecute("INSERT INTO account_banned VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, '%s', '%s', '1')",account,duration_secs,safe_author.c_str(),reason.c_str());
+            loginDatabase.PExecute("INSERT INTO account_banned VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, '%s', '%s', '1')",
+                account,duration_secs,safe_author.c_str(),reason.c_str());
 
         WorldSession* sess = FindSession(account);
         if( sess )

@@ -387,7 +387,10 @@ bool AuthSocket::_HandleLogonChallenge()
         ///- Verify that this IP is not in the ip_banned table
         // No SQL injection possible (paste the IP address as passed by the socket)
         dbRealmServer.Execute("DELETE FROM ip_banned WHERE unbandate<=UNIX_TIMESTAMP() AND unbandate<>bandate");
-        QueryResult *result = dbRealmServer.PQuery(  "SELECT * FROM ip_banned WHERE ip = '%s'",GetRemoteAddress().c_str());
+
+        std::string address = GetRemoteAddress();
+        dbRealmServer.escape_string(address);
+        QueryResult *result = dbRealmServer.PQuery(  "SELECT * FROM ip_banned WHERE ip = '%s'",address.c_str());
         if(result)
         {
             pkt << (uint8)REALM_AUTH_ACCOUNT_BANNED;

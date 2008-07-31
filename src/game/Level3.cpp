@@ -4551,7 +4551,6 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
     if (!IsIPAddress(cnameOrIP) && type=="ip")
         return false;
 
-    loginDatabase.escape_string(nameOrIP);
     Field *fields;
     if(type != "ip")
     {
@@ -4560,6 +4559,7 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
         std::string accountname;
         if(type == "account")
         {
+            loginDatabase.escape_string(nameOrIP);
             QueryResult *result = loginDatabase.PQuery("SELECT id, username FROM account WHERE username = '%s' ",nameOrIP.c_str());
             if (!result)
             {
@@ -4580,6 +4580,7 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
                 return false;
             }
 
+            loginDatabase.escape_string(nameOrIP);
             QueryResult *result = CharacterDatabase.PQuery("SELECT account FROM characters WHERE name = '%s'", nameOrIP.c_str());
             if (!result)
             {
@@ -4628,6 +4629,7 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
     }
     else
     {
+        loginDatabase.escape_string(nameOrIP);
         QueryResult *result = loginDatabase.PQuery("SELECT ip, FROM_UNIXTIME(bandate), FROM_UNIXTIME(unbandate), unbandate-UNIX_TIMESTAMP(), banreason,bannedby,unbandate-bandate FROM ip_banned WHERE ip = '%s'",nameOrIP.c_str());
         if(!result)
         {
