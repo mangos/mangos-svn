@@ -403,7 +403,7 @@ void InstanceSaveManager::_ResetSave(InstanceSaveHashMap::iterator &itr)
         player->UnbindInstance(itr->second->GetMapId(), itr->second->GetDifficulty(), true);
     }
     InstanceSave::GroupListType &gList = itr->second->m_groupList;
-    while(!pList.empty())
+    while(!gList.empty())
     {
         Group *group = *(gList.begin());
         group->UnbindInstance(itr->second->GetMapId(), itr->second->GetDifficulty(), true);
