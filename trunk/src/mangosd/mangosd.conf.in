@@ -1,7 +1,7 @@
 #####################################
 # MaNGOS Configuration file         #
 #####################################
-ConfVersion=2008022901
+ConfVersion=2008080101
 
 ###################################################################################################################
 # CONNECTIONS AND DIRECTORIES
@@ -304,6 +304,39 @@ LogColors = ""
 #        also custom type: 16 FFA_PVP (free for all pvp mode like arena PvP in all zones except rest 
 #        activated places and sanctuaries)
 #
+#    RealmZone
+#        Server realm zone (set allowed alphabet in character names/etc). See also Strict*Names options.
+#
+#	 1 Development    - any language
+#	 2 United States  - any language
+#	 3 Oceanic        - extended-Latin
+#	 4 Latin America  - extended-Latin 
+#	 5 Tournament     - basic-Latin at create, any at login
+#	 6 Korea          - East-Asian
+#	 7 Tournament     - basic-Latin at create, any at login
+#	 8 English        - extended-Latin
+#	 9 German         - extended-Latin
+#	 10 French        - extended-Latin
+#	 11 Spanish       - extended-Latin
+#	 12 Russian       - Cyrillic
+#	 13 Tournament    - basic-Latin at create, any at login
+#	 14 Taiwan        - East-Asian
+#	 15 Tournament    - basic-Latin at create, any at login
+#	 16 China         - East-Asian
+#	 17 CN1           - basic-Latin at create, any at login
+#	 18 CN2           - basic-Latin at create, any at login
+#	 19 CN3           - basic-Latin at create, any at login
+#	 20 CN4           - basic-Latin at create, any at login
+#	 21 CN5           - basic-Latin at create, any at login
+#	 22 CN6           - basic-Latin at create, any at login
+#	 23 CN7           - basic-Latin at create, any at login
+#	 24 CN8           - basic-Latin at create, any at login
+#	 25 Tournament    - basic-Latin at create, any at login
+#	 26 Test Server   - any language
+#	 27 Tournament    - basic-Latin at create, any at login
+#	 28 QA Server     - any language
+#	 29 CN9           - basic-Latin at create, any at login
+#
 #    Expansion
 #        Allow server use expansion content
 #        Default: 1 - check expansion maps existence, and if client support expansion and account have 
@@ -318,19 +351,31 @@ LogColors = ""
 #        255 = Auto Detect (Default)
 #
 #    StrictPlayerNames
-#        Limit player name to only latin characters, not allow create characters with non latin names, and set rename request and disconnect at login attempt with non-latin name
-#        Default: 0 (false)
-#                 1 (true)
+#        Limit player name to language specific symbols set, not allow create characters, and set rename request and disconnect at not allowed symbols name
+#        Default: 0 disable (but limited server timezone dependent client check)
+#                 1 basic latin characters  (strict)
+#                 2 realm zone specific (strict). See RealmZone setting. 
+#                   Note: In any case if you want correctly see character name at client this client must have apporopriate fonts 
+#                   (included in client by default, with active official localization or custom localization fonts in clientdir/Fonts).
+#                 3 basic latin characters + server timezone specific
 #
 #    StrictCharterNames
-#        Limit guild/arena team charter names to only latin characters/numbers and spaces, not allow create charters with non latin names
-#        Default: 0 (false)
-#                 1 (true)
+#        Limit guild/arena team charter names to language specific symbols set, not allow create charters with allowed symbols in name
+#        Default: 0 disable
+#                 1 basic latin characters  (strict)
+#                 2 realm zone specific (strict). See RealmZone setting. 
+#                   Note: In any case if you want correctly see character name at client this client must have apporopriate fonts 
+#                   (included in client by default, with active official localization or custom localization fonts in clientdir/Fonts).
+#                 3 basic latin characters + server timezone specific
 #
 #    StrictPetNames
-#        Limit pet names to only latin characters
-#        Default: 0 (false)
-#                 1 (true)
+#        Limit pet names to language specific symbols set
+#        Default: 0 disable
+#                 1 basic latin characters  (strict)
+#                 2 realm zone specific (strict). See RealmZone setting. 
+#                   Note: In any case if you want correctly see character name at client this client must have apporopriate fonts 
+#                   (included in client by default, with active official localization or custom localization fonts in clientdir/Fonts).
+#                 3 basic latin characters + server timezone specific
 #
 #    SkipCinematics
 #        Disable in-game script movie at first character's login(allows to prevent buggy intro in case of custom start location coordinates)
@@ -438,6 +483,7 @@ LogColors = ""
 ###################################################################################################################
 
 GameType = 1
+RealmZone = 0
 Expansion = 1
 DBC.Locale = 255
 StrictPlayerNames = 0

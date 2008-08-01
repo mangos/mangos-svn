@@ -669,12 +669,12 @@ class ObjectMgr
         }
 
         // name with valid structure and symbols
-        static bool IsValidName( std::string name );
+        static bool IsValidName( std::string name, bool create = false );
         static bool IsValidCharterName( std::string name );
         static bool IsValidPetName( std::string name );
 
         int GetIndexForLocale(LocaleConstant loc);
-        LocaleConstant GetLocalForIndex(int);
+        LocaleConstant GetLocaleForIndex(int i);
         // guild bank tabs
         const uint32 GetGuildBankTabPrice(uint8 Index) { return Index < GUILD_BANK_MAX_TABS ? mGuildBankTabPrice[Index] : 0; }
 
