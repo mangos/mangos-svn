@@ -208,7 +208,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     }
 
     // check name limitations
-    if(!ObjectMgr::IsValidName(name))
+    if(!ObjectMgr::IsValidName(name,true))
     {
         data << (uint8)CHAR_NAME_INVALID_CHARACTER;
         SendPacket( &data );
@@ -862,7 +862,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if(!ObjectMgr::IsValidName(newname))
+    if(!ObjectMgr::IsValidName(newname,true))
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
         data << (uint8)CHAR_NAME_INVALID_CHARACTER;

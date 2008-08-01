@@ -445,6 +445,7 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_SIGHT_MONSTER] = sConfig.GetIntDefault("MonsterSight", 400);
     m_configs[CONFIG_SIGHT_GUARDER] = sConfig.GetIntDefault("GuarderSight", 500);
     m_configs[CONFIG_GAME_TYPE] = sConfig.GetIntDefault("GameType", 0);
+    m_configs[CONFIG_REALM_ZONE] = sConfig.GetIntDefault("RealmZone", 0);
     m_configs[CONFIG_ALLOW_TWO_SIDE_ACCOUNTS] = sConfig.GetBoolDefault("AllowTwoSide.Accounts", false);
     m_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT]    = sConfig.GetBoolDefault("AllowTwoSide.Interaction.Chat",false);
     m_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL] = sConfig.GetBoolDefault("AllowTwoSide.Interaction.Channel",false);
@@ -455,9 +456,9 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_ALLOW_TWO_SIDE_WHO_LIST] = sConfig.GetBoolDefault("AllowTwoSide.WhoList", false);
     m_configs[CONFIG_ALLOW_TWO_SIDE_ADD_FRIEND] = sConfig.GetBoolDefault("AllowTwoSide.AddFriend", false);
 
-    m_configs[CONFIG_STRICT_PLAYER_NAMES] = sConfig.GetBoolDefault("StrictPlayerNames", false);
-    m_configs[CONFIG_STRICT_CHARTER_NAMES] = sConfig.GetBoolDefault("StrictCharterNames", false);
-    m_configs[CONFIG_STRICT_PET_NAMES] = sConfig.GetBoolDefault("StrictPetNames", false);
+    m_configs[CONFIG_STRICT_PLAYER_NAMES]  = sConfig.GetIntDefault("StrictPlayerNames",  0);
+    m_configs[CONFIG_STRICT_CHARTER_NAMES] = sConfig.GetIntDefault("StrictCharterNames", 0);
+    m_configs[CONFIG_STRICT_PET_NAMES]     = sConfig.GetIntDefault("StrictPetNames",     0);
 
     m_configs[CONFIG_SKIP_CINEMATICS] = sConfig.GetIntDefault("SkipCinematics", 0);
     if(m_configs[CONFIG_SKIP_CINEMATICS] < 0 || m_configs[CONFIG_SKIP_CINEMATICS] > 2)
@@ -703,8 +704,9 @@ void World::SetInitialWorldSettings()
     //No SQL injection as values are treated as integers
 
     // not send custom type REALM_FFA_PVP to realm list
-    uint32 server_type = IsFFAPvPRealm() ? REALM_PVP : m_configs[CONFIG_GAME_TYPE];
-    loginDatabase.PExecute("UPDATE realmlist SET icon = %u WHERE id = '%d'", server_type, realmID);
+    uint32 server_type = IsFFAPvPRealm() ? REALM_TYPE_PVP : getConfig(CONFIG_GAME_TYPE);
+    uint32 realm_zone = getConfig(CONFIG_REALM_ZONE);
+    loginDatabase.PExecute("UPDATE realmlist SET icon = %u, timezone = %u WHERE id = '%d'", server_type, realm_zone, realmID);
 
     ///- Remove the bones after a restart
     CharacterDatabase.PExecute("DELETE FROM corpse WHERE corpse_type = '0'");

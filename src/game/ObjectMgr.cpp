@@ -5848,38 +5848,91 @@ void ObjectMgr::LoadReservedPlayersNames()
     sLog.outString( ">> Loaded %u reserved player names", count );
 }
 
-static wchar_t const* notAllowedCharsName  = L"\t\v\b\f\a\n\r\\\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789\0";
-static wchar_t const* notAllowedCharsTitle = L"\t\v\b\f\a\n\r\\\"\'\?<>[](){}_=+-|/!@#$%^&*~`.,\0";
+enum LanguageType
+{
+    LT_BASIC_LATIN    = 0x0000,
+    LT_EXTENDEN_LATIN = 0x0001,
+    LT_CYRILLIC       = 0x0002,
+    LT_EAST_ASIA      = 0x0004,
+    LT_ANY            = 0xFFFF
+};
 
-static wchar_t const* strictAllowedCharsName  = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
-static wchar_t const* strictAllowedCharsTitle = L"ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 ";
+static LanguageType GetRealmLanguageType(bool create)
+{
+    switch(sWorld.getConfig(CONFIG_REALM_ZONE))
+    {
+        case REALM_ZONE_UNKNOWN:                            // any language
+        case REALM_ZONE_DEVELOPMENT:
+        case REALM_ZONE_TEST_SERVER:
+        case REALM_ZONE_QA_SERVER:
+            return LT_ANY;
+        case REALM_ZONE_UNITED_STATES:                      // extended-Latin
+        case REALM_ZONE_OCEANIC:
+        case REALM_ZONE_LATIN_AMERICA:
+        case REALM_ZONE_ENGLISH:
+        case REALM_ZONE_GERMAN:
+        case REALM_ZONE_FRENCH:
+        case REALM_ZONE_SPANISH:
+            return LT_EXTENDEN_LATIN;
+        case REALM_ZONE_KOREA:                              // East-Asian
+        case REALM_ZONE_TAIWAN:
+        case REALM_ZONE_CHINA:
+            return LT_EAST_ASIA;
+        case REALM_ZONE_RUSSIAN:                            // Cyrillic
+            return LT_CYRILLIC;
+        default:
+            return create ? LT_BASIC_LATIN : LT_ANY;        // basic-Latin at create, any at login
+    }
+}
 
-bool ObjectMgr::IsValidName( std::string name )
+bool isValidString(std::wstring wstr, uint32 strictMask, bool numericOrSpace, bool create = false)
+{
+    if(strictMask==0)                                       // any language, ignore realm
+    {
+        if(isExtendedLatinString(wstr,numericOrSpace))
+            return true;
+        if(isCyrillicString(wstr,numericOrSpace))
+            return true;
+        if(isEastAsianString(wstr,numericOrSpace))
+            return true;
+        return false;
+    }
+
+    if(strictMask & 0x2)                                    // realm zone specific
+    {
+        LanguageType lt = GetRealmLanguageType(create);
+        if(lt & LT_EXTENDEN_LATIN)
+            if(isExtendedLatinString(wstr,numericOrSpace))
+                return true;
+        if(lt & LT_CYRILLIC)
+            if(isCyrillicString(wstr,numericOrSpace))
+                return true;
+        if(lt & LT_EAST_ASIA)
+            if(isEastAsianString(wstr,numericOrSpace))
+                return true;
+    }
+
+    if(strictMask & 0x1)                                    // basic latin
+    {
+        if(isBasicLatinString(wstr,numericOrSpace))
+            return true;
+    }
+
+    return false;
+}
+
+bool ObjectMgr::IsValidName( std::string name, bool create )
 {
     std::wstring wname;
     if(!Utf8toWStr(name,wname))
         return false;
 
-    // check used symbols in player name at creating and rename
-    if(wname.find_first_of(notAllowedCharsName)!=wname.npos)
-        return false;
-
     if(wname.size() < 1)
         return false;
 
-    if(sWorld.getConfig(CONFIG_STRICT_PLAYER_NAMES))
-    {
-        if(wname[0] < L'A' || wname[0] > L'Z')              // use special check for normalized case
-            return false;
+    uint32 strictMask = sWorld.getConfig(CONFIG_STRICT_PLAYER_NAMES);
 
-        for(size_t i=1; i < wname.size(); ++i)
-        {
-            if(wname[i] < L'a' || wname[i] > L'z')
-                return false;
-        }
-    }
-
-    return true;
+    return isValidString(wname,strictMask,false,create);
 }
 
 bool ObjectMgr::IsValidCharterName( std::string name )
@@ -5888,18 +5941,12 @@ bool ObjectMgr::IsValidCharterName( std::string name )
     if(!Utf8toWStr(name,wname))
         return false;
 
-    // check used symbols in charter(guild/arena) name at creating and rename
-    if(wname.find_first_of(notAllowedCharsTitle)!=wname.npos)
-        return false;
-
     if(wname.size() < 1)
         return false;
 
-    if(sWorld.getConfig(CONFIG_STRICT_CHARTER_NAMES))
-        if(wname.find_first_not_of(strictAllowedCharsTitle)!=wname.npos)
-            return false;
+    uint32 strictMask = sWorld.getConfig(CONFIG_STRICT_CHARTER_NAMES);
 
-    return true;
+    return isValidString(wname,strictMask,true);
 }
 
 bool ObjectMgr::IsValidPetName( std::string name )
@@ -5908,18 +5955,12 @@ bool ObjectMgr::IsValidPetName( std::string name )
     if(!Utf8toWStr(name,wname))
         return false;
 
-    // check used symbols in pet name at rename
-    if(wname.find_first_of(notAllowedCharsName)!=wname.npos)
-        return false;
-
     if(wname.size() < 1)
         return false;
 
-    if(sWorld.getConfig(CONFIG_STRICT_PET_NAMES))
-        if(wname.find_first_not_of(strictAllowedCharsName)!=wname.npos)
-            return false;
+    uint32 strictMask = sWorld.getConfig(CONFIG_STRICT_PET_NAMES);
 
-    return true;
+    return isValidString(wname,strictMask,false);
 }
 
 int ObjectMgr::GetIndexForLocale( LocaleConstant loc )
@@ -5934,7 +5975,7 @@ int ObjectMgr::GetIndexForLocale( LocaleConstant loc )
     return -1;
 }
 
-LocaleConstant ObjectMgr::GetLocalForIndex(int i)
+LocaleConstant ObjectMgr::GetLocaleForIndex(int i)
 {
     if (i<0 || i>=m_LocalToIndex.size())
         return LOCALE_ENG;
