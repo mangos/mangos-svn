@@ -1553,6 +1553,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         Map *map = MapManager::Instance().FindMap(mapid);
         if (!map ||  map->CanEnter(this))
         {
+            SetSelection(0);
+
             CombatStop();
 
             // remove player from battleground on far teleport (when changing maps)

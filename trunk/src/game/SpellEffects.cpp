@@ -2220,36 +2220,39 @@ void Spell::EffectHeal( uint32 /*i*/ )
         }
 
         // Swiftmend - consumes Regrowth or Rejuvenation
-        if (m_spellInfo->TargetAuraState == AURA_STATE_SWIFTMEND)
+        if (m_spellInfo->TargetAuraState == AURA_STATE_SWIFTMEND && unitTarget->HasAuraState(AURA_STATE_SWIFTMEND))
         {
             Unit::AuraList const& RejorRegr = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
-            if(!RejorRegr.empty())
+            // find most short by duration
+            Aura *targetAura = NULL;
+            for(Unit::AuraList::const_iterator i = RejorRegr.begin(); i != RejorRegr.end(); ++i)
             {
-                // find most short by duration
-                Unit::AuraList::const_iterator short_itr = RejorRegr.begin();
-                for(Unit::AuraList::const_iterator i = RejorRegr.begin(); i != RejorRegr.end(); ++i)
+                if((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID
+                    && ((*i)->GetSpellProto()->SpellFamilyFlags == 0x40 || (*i)->GetSpellProto()->SpellFamilyFlags == 0x10) )
                 {
-                    if((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID
-                        && ((*i)->GetSpellProto()->SpellFamilyFlags == 0x40 || (*i)->GetSpellProto()->SpellFamilyFlags == 0x10) )
-                    {
-                        if((*i)->GetAuraDuration() < (*short_itr)->GetAuraDuration())
-                            short_itr = i;
-                    }
+                    if(!targetAura || (*i)->GetAuraDuration() < targetAura->GetAuraDuration())
+                        targetAura = *i;
                 }
-                int idx = 0;
-                while(idx < 3)
-                {
-                    if((*short_itr)->GetSpellProto()->EffectApplyAuraName[idx] == SPELL_AURA_PERIODIC_HEAL)
-                        break;
-                    idx++;
-                }
-
-                int32 tickheal = caster->SpellHealingBonus((*short_itr)->GetSpellProto(), (*short_itr)->GetModifier()->m_amount, DOT, unitTarget);
-                int32 tickcount = GetSpellDuration((*short_itr)->GetSpellProto()) / (*short_itr)->GetSpellProto()->EffectAmplitude[idx];
-                unitTarget->RemoveAurasDueToSpell((*short_itr)->GetId());
-                
-                addhealth += tickheal * tickcount;
             }
+
+            if(!targetAura)
+            {
+                sLog.outError("Target(GUID:" I64FMTD ") has aurastate AURA_STATE_SWIFTMEND but no matching aura.", unitTarget->GetGUID());
+                return;
+            }
+            int idx = 0;
+            while(idx < 3)
+            {
+                if(targetAura->GetSpellProto()->EffectApplyAuraName[idx] == SPELL_AURA_PERIODIC_HEAL)
+                    break;
+                idx++;
+            }
+
+            int32 tickheal = caster->SpellHealingBonus(targetAura->GetSpellProto(), targetAura->GetModifier()->m_amount, DOT, unitTarget);
+            int32 tickcount = GetSpellDuration(targetAura->GetSpellProto()) / targetAura->GetSpellProto()->EffectAmplitude[idx];
+            unitTarget->RemoveAurasDueToSpell(targetAura->GetId());
+            
+            addhealth += tickheal * tickcount;
         }
         else
             addhealth = caster->SpellHealingBonus(m_spellInfo, addhealth,HEAL, unitTarget);
