@@ -14246,7 +14246,6 @@ void Player::ConvertInstancesToGroup(Player *player, Group *group, uint64 player
                 // permanent binds are not removed
                 if(!itr->second.perm)
                 {
-                    
                     player->UnbindInstance(itr, i, true);   // increments itr
                     has_solo = true;
                 }
@@ -14989,13 +14988,9 @@ void Player::ResetInstances(uint8 method)
         }
 
         // if the map is loaded, reset it
-        Map *map = MapManager::Instance().FindMap(p->GetMapId());
-        if(map && map->Instanceable())
-        {
-            Map *iMap = ((MapInstanced*)map)->FindMap(p->GetInstanceId());
-            if(iMap && iMap->IsDungeon())
-                ((InstanceMap*)iMap)->Reset(method);
-        }
+        Map *map = MapManager::Instance().FindMap(p->GetMapId(), p->GetInstanceId());
+        if(map && map->IsDungeon())
+            ((InstanceMap*)map)->Reset(method);
 
         // since this is a solo instance there should not be any players inside
         if(method == INSTANCE_RESET_ALL || method == INSTANCE_RESET_CHANGE_DIFFICULTY)
