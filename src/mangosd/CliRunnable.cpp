@@ -187,9 +187,9 @@ void CliLoadPlayerDump(char*command,pPrintf zprintf)
     }
 
     if(PlayerDumpReader().LoadDump(file, account_id, name, guid))
-        zprintf("Character loaded successfully!");
+        zprintf("Character loaded successfully!\r\n");
     else
-        zprintf("Failed to load the character!");
+        zprintf("Failed to load the character!\r\n");
 }
 
 /// Reload the scripts and notify the players
