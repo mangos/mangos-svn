@@ -301,8 +301,10 @@ inline bool normalizePlayerName(std::string& name)
 
 inline std::wstring GetMainPartOfName(std::wstring wname)
 {
-    // supported only Cyrillic case A      IE      I       SHORT I O       U       YERU    SOFT SIGN E     YU      YA      IO
-    static wchar_t dropChars[] = { 0x0430, 0x0435, 0x0438, 0x0439, 0x043E, 0x0443, 0x044B, 0x044C, 0x044D, 0x044E, 0x044F, 0x0451 };
+    // supported only Cyrillic case and in some cases over aggressive
+    //                             A       IE      I       SHORT I O       U       YERU    SOFT SIGN E     YU      YA      IO      M
+    static wchar_t dropChars[] = { 0x0430, 0x0435, 0x0438, 0x0439, 0x043E, 0x0443, 0x044B, 0x044C, 0x044D, 0x044E, 0x044F, 0x0451, 0x043C, 0x0000 };
+
     size_t pos = wname.find_last_not_of(dropChars);
     return pos!=wname.npos ? wname.substr(0,pos+1) : wname;
 }

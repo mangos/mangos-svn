@@ -1982,6 +1982,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
         static QueryResult* LoadDeclinedNameFromDB(uint32 guid);
+        void LoadDeclinedNameFromDB();
 
     protected:
 
