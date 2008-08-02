@@ -811,6 +811,7 @@ void WorldSession::HandleToggleCloakOpcode( WorldPacket & /*recv_data*/ )
 
 void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,8+1);
 
     uint64 guid;
     std::string newname;
@@ -899,6 +900,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
 
     CharacterDatabase.escape_string(newname);
     CharacterDatabase.PExecute("UPDATE characters set name = '%s', at_login = at_login & ~ '%u' WHERE guid ='%u'", newname.c_str(), uint32(AT_LOGIN_RENAME),GUID_LOPART(guid));
+    CharacterDatabase.PExecute("DELETE FROM character_declinedname WHERE guid ='%u'", GUID_LOPART(guid));
 
     std::string IP_str = _socket ? _socket->GetRemoteAddress().c_str() : "-";
     sLog.outChar("Account: %d (IP: %s) Character:[%s] (guid:%u) Changed name to: %s",GetAccountId(),IP_str.c_str(),oldname.c_str(),GUID_LOPART(guid),newname.c_str());
@@ -908,4 +910,92 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     data << guid;
     data << newname;
     SendPacket(&data);
+}
+
+void WorldSession::HandleDeclinedPlayerNameOpcode(WorldPacket& recv_data)
+{
+    uint64 guid;
+
+    CHECK_PACKET_SIZE(recv_data, 8+6);
+    recv_data >> guid;
+
+    // not accept declined names for unsupported languages
+    std::string name;
+    if(!objmgr.GetPlayerNameByGUID(guid,name))
+    {
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
+        data << (uint32)1;
+        data << guid;
+        SendPacket(&data);    
+        return;
+    }
+
+    std::wstring wname;
+    if(!Utf8toWStr(name,wname))
+    {
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
+        data << (uint32)1;
+        data << guid;
+        SendPacket(&data);    
+        return;
+    }
+
+    if(!isCyrillicString(wname,false))
+    {
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
+        data << (uint32)1;
+        data << guid;
+        SendPacket(&data);    
+        return;
+    }
+
+    std::string name2;
+    DeclinedName declinedname;
+
+    recv_data >> name2;
+
+    if(name2!=name)                                         // character have different name
+    {
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
+        data << (uint32)1;
+        data << guid;
+        SendPacket(&data);    
+        return;
+    }
+
+    for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+    {
+        recv_data >> declinedname.name[i];
+        if(!normalizePlayerName(declinedname.name[i]))
+        {
+            WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
+            data << (uint32)1;
+            data << guid;
+            SendPacket(&data);    
+            return;
+        }
+    }
+
+    if(!ObjectMgr::CheckDeclinedNames(GetMainPartOfName(wname),declinedname))
+    {
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
+        data << (uint32)1;
+        data << guid;
+        SendPacket(&data);    
+        return;
+    }
+
+    for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+        CharacterDatabase.escape_string(declinedname.name[i]);
+
+    CharacterDatabase.BeginTransaction();
+    CharacterDatabase.PExecute("DELETE FROM character_declinedname WHERE guid = '%u'", GUID_LOPART(guid));
+    CharacterDatabase.PExecute("INSERT INTO character_declinedname (guid, genitive, dative, accusative, instrumental, prepositional) VALUES ('%u','%s','%s','%s','%s','%s')", 
+        GUID_LOPART(guid), declinedname.name[0].c_str(),declinedname.name[1].c_str(),declinedname.name[2].c_str(),declinedname.name[3].c_str(),declinedname.name[4].c_str());
+    CharacterDatabase.CommitTransaction();
+
+    WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
+    data << (uint32)0;                                      // OK
+    data << guid;
+    SendPacket(&data);    
 }

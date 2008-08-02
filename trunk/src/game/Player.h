@@ -1980,6 +1980,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         WorldLocation& GetTeleportDest() { return m_teleport_dest; }
 
+        DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
+        static QueryResult* LoadDeclinedNameFromDB(uint32 guid);
+
     protected:
 
         /*********************************************************/
@@ -2202,6 +2205,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         // Far Teleport
         WorldLocation m_teleport_dest;
+
+        DeclinedName *m_declinedname;
     private:
         // internal common parts for CanStore/StoreItem functions
         uint8 _CanStoreItem_InSpecificSlot( uint8 bag, uint8 slot, ItemPosCountVec& dest, ItemPrototype const *pProto, uint32& count, bool swap, Item *pSrcItem ) const;

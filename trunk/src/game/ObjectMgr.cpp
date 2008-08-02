@@ -6250,6 +6250,20 @@ uint16 ObjectMgr::GetConditionId( ConditionType condition, uint32 value1, uint32
     return mConditions.size() - 1;
 }
 
+bool ObjectMgr::CheckDeclinedNames( std::wstring mainpart, DeclinedName const& names )
+{
+    for(int i =0; i < MAX_DECLINED_NAME_CASES; ++i)
+    {
+        std::wstring wname;
+        if(!Utf8toWStr(names.name[i],wname))
+            return false;
+
+        if(mainpart!=GetMainPartOfName(wname))
+            return false;
+    }
+    return true;
+}
+
 // Checks if player meets the condition
 bool PlayerCondition::Meets(Player const * player) const
 {

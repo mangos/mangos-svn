@@ -400,7 +400,7 @@ bool PlayerDumpReader::LoadDump(std::string file, uint32 account, std::string na
     if(!normalizePlayerName(name))
         name = "";
 
-    if(ObjectMgr::IsValidName(name))
+    if(ObjectMgr::IsValidName(name,true))
     {
         CharacterDatabase.escape_string(name);              // for safe, we use name only for sql quearies anyway
         result = CharacterDatabase.PQuery("SELECT * FROM characters WHERE name = '%s'", name.c_str());
