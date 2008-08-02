@@ -12895,7 +12895,19 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
     if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) )
         m_deathState = DEAD;
     
-    QueryResult* result2 = LoadDeclinedNameFromDB(guid);
+    LoadDeclinedNameFromDB();
+
+    return true;
+}
+
+QueryResult* Player::LoadDeclinedNameFromDB(uint32 guid)
+{
+    return CharacterDatabase.PQuery("SELECT genitive, dative, accusative, instrumental, prepositional FROM character_declinedname WHERE guid = '%u'",guid);
+}
+
+void Player::LoadDeclinedNameFromDB()
+{
+    QueryResult* result2 = LoadDeclinedNameFromDB(GetGUIDLow());
     if(result2)
     {
         if(m_declinedname)
@@ -12908,13 +12920,6 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
 
         delete result2;
     }
-
-    return true;
-}
-
-QueryResult* Player::LoadDeclinedNameFromDB(uint32 guid)
-{
-    return CharacterDatabase.PQuery("SELECT genitive, dative, accusative, instrumental, prepositional FROM character_declinedname WHERE guid = '%u'",guid);
 }
 
 bool Player::LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, bool& in_flight, uint64 guid)
@@ -13427,6 +13432,8 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         Unmount();
         RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
     }
+
+    LoadDeclinedNameFromDB();
 
     return true;
 }
