@@ -134,6 +134,8 @@ inline wchar_t wcharToUpper(wchar_t wchar)
     }
     if(wchar >= 0x0430 && wchar <= 0x044F)                  // CYRILLIC SMALL LETTER A - CYRILLIC SMALL LETTER YA
         return wchar_t(uint16(wchar)-0x0020);
+    if(wchar == 0x0451)                                     // CYRILLIC SMALL LETTER IO
+        return wchar_t(0x0401);
 
     return wchar;
 }
@@ -153,6 +155,8 @@ inline wchar_t wcharToLower(wchar_t wchar)
     }
     if(wchar == 0x1E9E)                                     // LATIN CAPITAL LETTER SHARP S
         return wchar_t(0x00DF);
+    if(wchar == 0x0401)                                     // CYRILLIC CAPITAL LETTER IO
+        return wchar_t(0x0451);
     if(wchar >= 0x0410 && wchar <= 0x042F)                  // CYRILLIC CAPITAL LETTER A - CYRILLIC CAPITAL LETTER YA
         return wchar_t(uint16(wchar)+0x0020);
 
@@ -192,6 +196,8 @@ inline bool isExtendedLatinCharacter(wchar_t wchar)
 inline bool isCyrillicCharacter(wchar_t wchar)
 {
     if(wchar >= 0x0410 && wchar <= 0x044F)                  // CYRILLIC CAPITAL LETTER A - CYRILLIC SMALL LETTER YA
+        return true;
+    if(wchar == 0x0401 || wchar == 0x0451)                  // CYRILLIC CAPITAL LETTER IO, CYRILLIC SMALL LETTER IO
         return true;
     return false;
 }
@@ -291,6 +297,14 @@ inline bool normalizePlayerName(std::string& name)
         return false;
 
     return true;
+}
+
+inline std::wstring GetMainPartOfName(std::wstring wname)
+{
+    // supported only Cyrillic case A      IE      I       SHORT I O       U       YERU    SOFT SIGN E     YU      YA      IO
+    static wchar_t dropChars[] = { 0x0430, 0x0435, 0x0438, 0x0439, 0x043E, 0x0443, 0x044B, 0x044C, 0x044D, 0x044E, 0x044F, 0x0451 };
+    size_t pos = wname.find_last_not_of(dropChars);
+    return pos!=wname.npos ? wname.substr(0,pos+1) : wname;
 }
 
 bool IsIPAddress(char const* ipaddress);

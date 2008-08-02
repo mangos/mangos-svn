@@ -44,12 +44,15 @@ void WorldSession::SendNameQueryOpcode(Player *p)
     data << uint32(p->getRace());
     data << uint32(p->getGender());
     data << uint32(p->getClass());
-    data << uint8(0);                                       // unk 2.4.0
-    /*for(5)
+    if(DeclinedName const* names = p->GetDeclinedNames())
     {
-        // string
-    }*/
-
+        data << uint8(1);                                   // is declined
+        for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            data << names->name[i];
+    }
+    else
+        data << uint8(0);                                   // is not declined
+    
     SendPacket(&data);
 }
 
@@ -72,11 +75,19 @@ void WorldSession::SendNameQueryOpcodeFromDB(uint64 guid)
     data << (uint32)(field & 0xFF);
     data << (uint32)((field >> 16) & 0xFF);
     data << (uint32)((field >> 8) & 0xFF);
-    data << (uint8)0;
-    /*for(5)
+
+    DeclinedName* names = NULL;
+    QueryResult *result = Player::LoadDeclinedNameFromDB(GUID_LOPART(guid));
+    if(result)
     {
-        // string
-    }*/
+        data << (uint8)1;                                   // is declined
+        Field *fields = result->Fetch();
+        for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            data << fields[i].GetCppString();
+        delete result;
+    }
+    else
+        data << (uint8)0;                                   // is declined
 
     SendPacket( &data );
 }

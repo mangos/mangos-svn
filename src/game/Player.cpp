@@ -103,7 +103,7 @@ enum CharacterFlags
     CHARACTER_FLAG_UNK23                = 0x00400000,
     CHARACTER_FLAG_UNK24                = 0x00800000,
     CHARACTER_FLAG_LOCKED_BY_BILLING    = 0x01000000,
-    CHARACTER_FLAG_UNK26                = 0x02000000,
+    CHARACTER_FLAG_DECLINED             = 0x02000000,
     CHARACTER_FLAG_UNK27                = 0x04000000,
     CHARACTER_FLAG_UNK28                = 0x08000000,
     CHARACTER_FLAG_UNK29                = 0x10000000,
@@ -415,6 +415,8 @@ Player::Player (WorldSession *session): Unit()
 
     m_miniPet = 0;
     m_bgAfkReportedTimer = 0;
+
+    m_declinedname = NULL;
 }
 
 Player::~Player ()
@@ -459,6 +461,8 @@ Player::~Player ()
     for(uint8 i = 0; i < TOTAL_DIFFICULTIES; i++)
         for(BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); ++itr)
             itr->second.save->RemovePlayer(this);
+
+    delete m_declinedname;
 }
 
 void Player::CleanupsBeforeDelete()
@@ -1286,7 +1290,9 @@ void Player::BuildEnumData( QueryResult * result, WorldPacket * p_data )
         char_flags |= CHARACTER_FLAG_GHOST;
     if(HasAtLoginFlag(AT_LOGIN_RENAME))
         char_flags |= CHARACTER_FLAG_RENAME;
-
+    if(m_declinedname)
+        char_flags |= CHARACTER_FLAG_DECLINED;
+       
     *p_data << (uint32)char_flags;                          // character flags
 
     *p_data << (uint8)1;                                    // unknown
@@ -3433,6 +3439,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     }
 
     CharacterDatabase.PExecute("DELETE FROM characters WHERE guid = '%u'",guid);
+    CharacterDatabase.PExecute("DELETE FROM character_declinedname WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_action WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_aura WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_gifts WHERE guid = '%u'",guid);
@@ -3451,6 +3458,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     CharacterDatabase.PExecute("DELETE FROM mail WHERE receiver = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM mail_items WHERE receiver = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_pet WHERE owner = '%u'",guid);
+    CharacterDatabase.PExecute("DELETE FROM character_pet_declinedname WHERE owner = '%u'",guid);
     CharacterDatabase.CommitTransaction();
 
     //loginDatabase.PExecute("UPDATE realmcharacters SET numchars = numchars - 1 WHERE acctid = %d AND realmid = %d", accountId, realmID);
@@ -12886,8 +12894,27 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
 
     if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) )
         m_deathState = DEAD;
+    
+    QueryResult* result2 = LoadDeclinedNameFromDB(guid);
+    if(result2)
+    {
+        if(m_declinedname)
+            delete m_declinedname;
+
+        m_declinedname = new DeclinedName;
+        Field *fields = result2->Fetch();
+        for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            m_declinedname->name[i] = fields[i].GetCppString();
+
+        delete result2;
+    }
 
     return true;
+}
+
+QueryResult* Player::LoadDeclinedNameFromDB(uint32 guid)
+{
+    return CharacterDatabase.PQuery("SELECT genitive, dative, accusative, instrumental, prepositional FROM character_declinedname WHERE guid = '%u'",guid);
 }
 
 bool Player::LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, bool& in_flight, uint64 guid)

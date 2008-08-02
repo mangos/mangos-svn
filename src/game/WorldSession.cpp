@@ -81,6 +81,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_CHAR_DELETE ]                      = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleCharDeleteOpcode              );
     objmgr.opcodeTable[ CMSG_PLAYER_LOGIN ]                     = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandlePlayerLoginOpcode             );
     objmgr.opcodeTable[ CMSG_CHAR_RENAME ]                      = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleChangePlayerNameOpcode        );
+    objmgr.opcodeTable[ CMSG_SET_PLAYER_DECLINED_NAMES ]        = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleDeclinedPlayerNameOpcode      );
 
     objmgr.opcodeTable[ CMSG_SET_ACTION_BUTTON ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetActionButtonOpcode         );
     objmgr.opcodeTable[ CMSG_REPOP_REQUEST ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleRepopRequestOpcode            );

@@ -673,6 +673,8 @@ class ObjectMgr
         static bool IsValidCharterName( std::string name );
         static bool IsValidPetName( std::string name );
 
+        static bool CheckDeclinedNames(std::wstring mainpart, DeclinedName const& names);
+
         int GetIndexForLocale(LocaleConstant loc);
         LocaleConstant GetLocaleForIndex(int i);
         // guild bank tabs

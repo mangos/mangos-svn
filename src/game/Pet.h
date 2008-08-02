@@ -208,6 +208,8 @@ class Pet : public Creature
         void SetAuraUpdateMask(uint8 slot) { m_auraUpdateMask |= (uint64(1) << slot); }
         void ResetAuraUpdateMask() { m_auraUpdateMask = 0; }
 
+        DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
+
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
     protected:
         uint32  m_regenTimer;
@@ -218,6 +220,9 @@ class Pet : public Creature
         int32   m_loyaltyPoints;
         int32   m_bonusdamage;
         uint64  m_auraUpdateMask;
+
+        DeclinedName *m_declinedname;
+
     private:
         void SaveToDB(uint32, uint8)                        // overwrited of Creature::SaveToDB     - don't must be called
         {

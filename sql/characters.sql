@@ -246,6 +246,30 @@ LOCK TABLES `character_aura` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `character_declinedname`
+--
+
+DROP TABLE IF EXISTS `character_declinedname`;
+CREATE TABLE `character_declinedname` (
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `genitive` varchar(12) NOT NULL default '',
+  `dative` varchar(12) NOT NULL default '',
+  `accusative` varchar(12) NOT NULL default '',
+  `instrumental` varchar(12) NOT NULL default '',
+  `prepositional` varchar(12) NOT NULL default '',
+  PRIMARY KEY  (`guid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+
+--
+-- Dumping data for table `character_declinedname`
+--
+
+LOCK TABLES `character_declinedname` WRITE;
+/*!40000 ALTER TABLE `character_declinedname` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_declinedname` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `character_gifts`
 --
 
@@ -378,6 +402,32 @@ CREATE TABLE `character_pet` (
 LOCK TABLES `character_pet` WRITE;
 /*!40000 ALTER TABLE `character_pet` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_pet` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `character_pet_declinedname`
+--
+
+DROP TABLE IF EXISTS `character_pet_declinedname`;
+CREATE TABLE `character_pet_declinedname` (
+  `id` int(11) unsigned NOT NULL default '0',
+  `owner` int(11) unsigned NOT NULL default '0',
+  `genitive` varchar(12) NOT NULL default '',
+  `dative` varchar(12) NOT NULL default '',
+  `accusative` varchar(12) NOT NULL default '',
+  `instrumental` varchar(12) NOT NULL default '',
+  `prepositional` varchar(12) NOT NULL default '',
+  PRIMARY KEY  (`id`),
+  KEY owner_key (`owner`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+
+--
+-- Dumping data for table `character_pet_declinedname`
+--
+
+LOCK TABLES `character_pet_declinedname` WRITE;
+/*!40000 ALTER TABLE `character_pet_declinedname` DISABLE KEYS */;
+/*!40000 ALTER TABLE `character_pet_declinedname` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
