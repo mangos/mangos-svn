@@ -156,7 +156,7 @@ template<class T>
 inline void LoadDBC(barGoLink& bar, StoreProblemList& errlist, DBCStorage<T>& storage, std::string filename)
 {
     // compatibility format and C++ structure sizes
-    assert(DBCFile::GetFormatRecordSize(storage.fmt) == sizeof(T) || LoadDBC_assert_print(DBCFile::GetFormatRecordSize(storage.fmt),sizeof(T),filename));
+    assert(DBCFile::GetFormatRecordSize(storage.GetFormat()) == sizeof(T) || LoadDBC_assert_print(DBCFile::GetFormatRecordSize(storage.GetFormat()),sizeof(T),filename));
 
     if(storage.Load(filename.c_str()))
         bar.step();
@@ -167,7 +167,7 @@ inline void LoadDBC(barGoLink& bar, StoreProblemList& errlist, DBCStorage<T>& st
         if(f)
         {
             char buf[100];
-            snprintf(buf,100," (exist, but have %d fields instead %d) Wrong client version DBC file?",storage.fieldCount,strlen(storage.fmt));
+            snprintf(buf,100," (exist, but have %d fields instead %d) Wrong client version DBC file?",storage.GetFieldCount(),strlen(storage.GetFormat()));
             errlist.push_back(filename + buf);
             fclose(f);
         }
@@ -189,7 +189,7 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sAreaStore,                dataPath+"dbc/AreaTable.dbc");
 
     // must be after sAreaStore loading
-    for(uint32 i = 0; i < sAreaStore.nCount; ++i)           // areaflag numbered from 0
+    for(uint32 i = 0; i < sAreaStore.GetNumRows(); ++i)           // areaflag numbered from 0
     {
         if(AreaTableEntry const* area = sAreaStore.LookupEntry(i))
         {
@@ -216,7 +216,7 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sDurabilityQualityStore,   dataPath+"dbc/DurabilityQuality.dbc");
     LoadDBC(bar,bad_dbc_files,sEmotesTextStore,          dataPath+"dbc/EmotesText.dbc");
     LoadDBC(bar,bad_dbc_files,sFactionStore,             dataPath+"dbc/Faction.dbc");
-    for (uint32 i=0;i<sFactionStore.nCount; ++i)
+    for (uint32 i=0;i<sFactionStore.GetNumRows(); ++i)
     {
         FactionEntry const * faction = sFactionStore.LookupEntry(i);
         if (faction && faction->team)
@@ -255,7 +255,7 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sSkillLineStore,           dataPath+"dbc/SkillLine.dbc");
     LoadDBC(bar,bad_dbc_files,sSkillLineAbilityStore,    dataPath+"dbc/SkillLineAbility.dbc");
     LoadDBC(bar,bad_dbc_files,sSpellStore,               dataPath+"dbc/Spell.dbc");
-    for(uint32 i = 1; i < sSpellStore.nCount; ++i)
+    for(uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
     {
         SpellEntry const * spell = sSpellStore.LookupEntry(i);
         if(spell && spell->Category)
@@ -279,7 +279,7 @@ void LoadDBCStores(std::string dataPath)
 
         if(spellInfo && (spellInfo->Attributes & 0x1D0) == 0x1D0)
         {      
-            for (unsigned int i = 1; i < sCreatureFamilyStore.nCount; ++i)
+            for (unsigned int i = 1; i < sCreatureFamilyStore.GetNumRows(); ++i)
             {
                 CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(i);
                 if(!cFamily)
@@ -322,7 +322,7 @@ void LoadDBCStores(std::string dataPath)
         // store in with (row,col,talent)->size key for correct sorting by (row,col)
         typedef std::map<uint32,uint32> TalentBitSize;
         TalentBitSize sTalentBitSize;
-        for(uint32 i = 1; i < sTalentStore.nCount; ++i)
+        for(uint32 i = 1; i < sTalentStore.GetNumRows(); ++i)
         {
             TalentEntry const *talentInfo = sTalentStore.LookupEntry(i);
             if (!talentInfo) continue;
@@ -347,7 +347,7 @@ void LoadDBCStores(std::string dataPath)
         }
 
         // now have all max ranks (and then bit amount used for store talent ranks in inspect)
-        for(uint32 talentTabId = 1; talentTabId < sTalentTabStore.nCount; ++talentTabId)
+        for(uint32 talentTabId = 1; talentTabId < sTalentTabStore.GetNumRows(); ++talentTabId)
         {
             TalentTabEntry const *talentTabInfo = sTalentTabStore.LookupEntry( talentTabId );
             if(!talentTabInfo)
@@ -380,7 +380,7 @@ void LoadDBCStores(std::string dataPath)
 
     // Initialize global taxinodes mask
     memset(sTaxiNodesMask,0,sizeof(sTaxiNodesMask));
-    for(uint32 i = 1; i < sTaxiNodesStore.nCount; ++i)
+    for(uint32 i = 1; i < sTaxiNodesStore.GetNumRows(); ++i)
     {
         if(sTaxiNodesStore.LookupEntry(i))
         {
@@ -392,10 +392,10 @@ void LoadDBCStores(std::string dataPath)
 
     //## TaxiPath.dbc ## Loaded only for initialization different structures
     LoadDBC(bar,bad_dbc_files,sTaxiPathStore,            dataPath+"dbc/TaxiPath.dbc");
-    for(uint32 i = 1; i < sTaxiPathStore.nCount; ++i)
+    for(uint32 i = 1; i < sTaxiPathStore.GetNumRows(); ++i)
         if(TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(i))
             sTaxiPathSetBySource[entry->from][entry->to] = TaxiPathBySourceAndDestination(entry->ID,entry->price);
-    uint32 pathCount = sTaxiPathStore.nCount;
+    uint32 pathCount = sTaxiPathStore.GetNumRows();
     sTaxiPathStore.Clear();
 
     //## TaxiPathNode.dbc ## Loaded only for initialization different structures
@@ -403,7 +403,7 @@ void LoadDBCStores(std::string dataPath)
     // Calculate path nodes count
     std::vector<uint32> pathLength;
     pathLength.resize(pathCount);                           // 0 and some other indexes not used
-    for(uint32 i = 1; i < sTaxiPathNodeStore.nCount; ++i)
+    for(uint32 i = 1; i < sTaxiPathNodeStore.GetNumRows(); ++i)
         if(TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
             ++pathLength[entry->path];
     // Set path length
@@ -411,7 +411,7 @@ void LoadDBCStores(std::string dataPath)
     for(uint32 i = 1; i < sTaxiPathNodesByPath.size(); ++i)
         sTaxiPathNodesByPath[i].resize(pathLength[i]);
     // fill data
-    for(uint32 i = 1; i < sTaxiPathNodeStore.nCount; ++i)
+    for(uint32 i = 1; i < sTaxiPathNodeStore.GetNumRows(); ++i)
         if(TaxiPathNodeEntry const* entry = sTaxiPathNodeStore.LookupEntry(i))
             sTaxiPathNodesByPath[entry->path][entry->index] = TaxiPathNode(entry->mapid,entry->x,entry->y,entry->z,entry->actionFlag,entry->delay);
     sTaxiPathNodeStore.Clear();
@@ -548,7 +548,7 @@ ContentLevels GetContentLevelsForMapAndZone(uint32 mapid, uint32 zoneId)
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
 {
     // not sorted, numbering index from 0
-    for(uint32 i = 0; i < sChatChannelsStore.nCount; ++i)
+    for(uint32 i = 0; i < sChatChannelsStore.GetNumRows(); ++i)
     {
         ChatChannelsEntry const* ch = sChatChannelsStore.LookupEntry(i);
         if(ch && ch->ChannelID == channel_id)

@@ -59,24 +59,18 @@ template<class T>
 class DBCStorage
 {
     public:
-        DBCStorage(const char *f){indexTable = NULL;fmt=f;fieldCount = 0; nCount =0; data = NULL; }
+        explicit DBCStorage(const char *f) : nCount(0), fieldCount(0), fmt(f), indexTable(NULL), data(NULL) { }
         ~DBCStorage() { Clear(); }
 
-        inline
-            T const* LookupEntry(uint32 id) const
-        {
-            return (id>=nCount)?NULL:indexTable[id];
-        }
-        inline
-            unsigned int GetNumRows() const
-        {
-            return nCount;
-        }
+        T const* LookupEntry(uint32 id) const { return (id>=nCount)?NULL:indexTable[id]; }
+        uint32  GetNumRows() const { return nCount; }
+        char const* GetFormat() const { return fmt; }
+        uint32 GetFieldCount() const { return fieldCount; }
 
         bool Load(char const* fn)
         {
 
-            dbc = new DBCFile;
+            DBCFile * dbc = new DBCFile;
             // Check if load was sucessful, only then continue
             bool res = dbc->Load(fn, fmt);
             if (res)
@@ -95,19 +89,22 @@ class DBCStorage
 
         void Clear()
         {
-            if (!indexTable) return;
-            delete[] ((char*)indexTable); indexTable = NULL;
+            if (!indexTable)
+                return;
+
+            delete[] ((char*)indexTable);
+            indexTable = NULL;
             delete[] data;
+            data = NULL;
+            nCount = 0;
         }
 
-        T** indexTable;
-        char * data;
+    private:
         uint32 nCount;
         uint32 fieldCount;
-        const char * fmt;
-
-    private:
-        DBCFile * dbc;
+        char const* fmt;
+        T** indexTable;
+        char* data;
 };
 
 extern DBCStorage <AreaTableEntry>               sAreaStore;// recommend access using functions
