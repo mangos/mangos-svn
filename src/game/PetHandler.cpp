@@ -412,7 +412,7 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
 
         std::wstring wname;
         Utf8toWStr(name,wname);
-        if(!ObjectMgr::CheckDeclinedNames(GetMainPartOfName(wname),declinedname))
+        if(!ObjectMgr::CheckDeclinedNames(GetMainPartOfName(wname,0),declinedname))
         {
             SendNotification("Invalid name");
             return;

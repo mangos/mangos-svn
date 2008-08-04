@@ -3709,15 +3709,22 @@ Corpse* Player::GetCorpse() const
 
 void Player::DurabilityLossAll(double percent, bool inventory)
 {
-    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
         if(Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
             DurabilityLoss(pItem,percent);
 
-    // keys not have durability
-    //for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
-
     if(inventory)
     {
+        // bags not have durability
+        // for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+
+        for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+            if(Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+                DurabilityLoss(pItem,percent);
+
+        // keys not have durability
+        //for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
+
         for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
             if(Bag* pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
                 if(ItemPrototype const *pBagProto = pBag->GetProto())
@@ -3747,15 +3754,22 @@ void Player::DurabilityLoss(Item* item, double percent)
 
 void Player::DurabilityPointsLossAll(int32 points, bool inventory)
 {
-    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
         if(Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
             DurabilityPointsLoss(pItem,points);
 
-    // keys not have durability
-    //for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
-
     if(inventory)
     {
+        // bags not have durability
+        // for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+
+        for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+            if(Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
+                DurabilityPointsLoss(pItem,points);
+
+        // keys not have durability
+        //for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
+
         for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
             if(Bag* pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i ))
                 if(ItemPrototype const *pBagProto = pBag->GetProto())
@@ -12895,7 +12909,7 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
     if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) )
         m_deathState = DEAD;
     
-    LoadDeclinedNameFromDB();
+    _LoadDeclinedNames(LoadDeclinedNameFromDB(GetGUIDLow()));
 
     return true;
 }
@@ -12905,21 +12919,20 @@ QueryResult* Player::LoadDeclinedNameFromDB(uint32 guid)
     return CharacterDatabase.PQuery("SELECT genitive, dative, accusative, instrumental, prepositional FROM character_declinedname WHERE guid = '%u'",guid);
 }
 
-void Player::LoadDeclinedNameFromDB()
+void Player::_LoadDeclinedNames(QueryResult* result)
 {
-    QueryResult* result2 = LoadDeclinedNameFromDB(GetGUIDLow());
-    if(result2)
-    {
-        if(m_declinedname)
-            delete m_declinedname;
+    if(!result)
+        return;
 
-        m_declinedname = new DeclinedName;
-        Field *fields = result2->Fetch();
-        for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-            m_declinedname->name[i] = fields[i].GetCppString();
+    if(m_declinedname)
+        delete m_declinedname;
 
-        delete result2;
-    }
+    m_declinedname = new DeclinedName;
+    Field *fields = result->Fetch();
+    for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+        m_declinedname->name[i] = fields[i].GetCppString();
+
+    delete result;
 }
 
 bool Player::LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, bool& in_flight, uint64 guid)
@@ -13433,7 +13446,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
     }
 
-    LoadDeclinedNameFromDB();
+    _LoadDeclinedNames(holder->GetResult(PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES));
 
     return true;
 }

@@ -6258,7 +6258,7 @@ bool ObjectMgr::CheckDeclinedNames( std::wstring mainpart, DeclinedName const& n
         if(!Utf8toWStr(names.name[i],wname))
             return false;
 
-        if(mainpart!=GetMainPartOfName(wname))
+        if(mainpart!=GetMainPartOfName(wname,i+1))
             return false;
     }
     return true;

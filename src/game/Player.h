@@ -806,10 +806,11 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADSOCIALLIST           = 13,
     PLAYER_LOGIN_QUERY_LOADHOMEBIND             = 14,
     PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS       = 15,
-    PLAYER_LOGIN_QUERY_LOADGUILD                = 16,
+    PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES        = 16,
+    PLAYER_LOGIN_QUERY_LOADGUILD                = 17,
 };
 
-#define MAX_PLAYER_LOGIN_QUERY                    17
+#define MAX_PLAYER_LOGIN_QUERY                    18
 
 // Player summoning auto-decline time (in secs)
 #define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
@@ -1982,7 +1983,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
         static QueryResult* LoadDeclinedNameFromDB(uint32 guid);
-        void LoadDeclinedNameFromDB();
 
     protected:
 
@@ -2039,6 +2039,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadTutorials(QueryResult *result);
         void _LoadFriendList(QueryResult *result);
         bool _LoadHomeBind(QueryResult *result);
+        void _LoadDeclinedNames(QueryResult *result);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
