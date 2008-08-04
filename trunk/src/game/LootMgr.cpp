@@ -1010,7 +1010,7 @@ void LoadLootTemplates_Fishing()
     LootTemplates_Fishing.LoadAndCollectLootIds(set);
 
     // remove real entries
-    for(uint32 i = 1; i < sAreaStore.nCount; ++i )
+    for(uint32 i = 1; i < sAreaStore.GetNumRows(); ++i )
         if(AreaTableEntry const* areaEntry = sAreaStore.LookupEntry(i))
             set.erase(areaEntry->ID);
 

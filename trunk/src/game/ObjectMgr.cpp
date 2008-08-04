@@ -3760,7 +3760,7 @@ void ObjectMgr::LoadEventScripts()
         }
     }
     // Load all possible script entries from spells
-    for(uint32 i = 1; i < sSpellStore.nCount; ++i)
+    for(uint32 i = 1; i < sSpellStore.GetNumRows(); ++i)
     {
         SpellEntry const * spell = sSpellStore.LookupEntry(i);
         if (spell)
@@ -4307,7 +4307,7 @@ uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
     float dist;
     uint32 id = 0;
 
-    for(uint32 i = 1; i < sTaxiNodesStore.nCount; ++i)
+    for(uint32 i = 1; i < sTaxiNodesStore.GetNumRows(); ++i)
     {
         TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(i);
         if(node && node->map_id == mapid)
