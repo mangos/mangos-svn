@@ -223,3 +223,46 @@ bool WStrToUtf8(std::wstring wstr, std::string& utf8str)
 
     return true;
 }
+
+typedef wchar_t const* const* wstrlist;
+
+std::wstring GetMainPartOfName(std::wstring wname, uint32 declension)
+{
+    // supported only Cyrillic cases
+    if(wname.size() < 1 || !isCyrillicCharacter(wname[0]) || declension > 5)
+        return wname;
+
+    static wchar_t const aEnd[]    = { wchar_t(1), wchar_t(0x0430),wchar_t(0x0000)};
+    static wchar_t const oEnd[]    = { wchar_t(1), wchar_t(0x043E),wchar_t(0x0000)};
+    static wchar_t const yaEnd[]   = { wchar_t(1), wchar_t(0x044F),wchar_t(0x0000)};
+    static wchar_t const ieEnd[]   = { wchar_t(1), wchar_t(0x0435),wchar_t(0x0000)};
+    static wchar_t const iEnd[]    = { wchar_t(1), wchar_t(0x0438),wchar_t(0x0000)};
+    static wchar_t const yeruEnd[] = { wchar_t(1), wchar_t(0x044B),wchar_t(0x0000)};
+    static wchar_t const uEnd[]    = { wchar_t(1), wchar_t(0x0443),wchar_t(0x0000)};
+    static wchar_t const yuEnd[]   = { wchar_t(1), wchar_t(0x044E),wchar_t(0x0000)};
+    static wchar_t const ojEnd[]   = { wchar_t(2), wchar_t(0x043E),wchar_t(0x0439),wchar_t(0x0000)};
+    static wchar_t const iejEnd[]  = { wchar_t(2), wchar_t(0x0435),wchar_t(0x0439),wchar_t(0x0000)};
+    static wchar_t const iojEnd[]  = { wchar_t(2), wchar_t(0x0451),wchar_t(0x0439),wchar_t(0x0000)};
+    static wchar_t const omEnd[]   = { wchar_t(2), wchar_t(0x043E),wchar_t(0x043C),wchar_t(0x0000)};
+    static wchar_t const iomEnd[]  = { wchar_t(2), wchar_t(0x0451),wchar_t(0x043C),wchar_t(0x0000)};
+    static wchar_t const softEnd[] = { wchar_t(1), wchar_t(0x044C),wchar_t(0x0000)};
+
+    static wchar_t const* const dropEnds[6][7] = {
+        { &aEnd[1], &oEnd[1],  &yaEnd[1],  &ieEnd[1], &softEnd[1], NULL,      NULL },
+        { &aEnd[1], &yaEnd[1], &yeruEnd[1],&iEnd[1],  NULL,        NULL,      NULL },
+        { &ieEnd[1],&uEnd[1],  &yuEnd[1],  &iEnd[1],  NULL,        NULL,      NULL },
+        { &uEnd[1], &yuEnd[1], &oEnd[1],   &ieEnd[1], &softEnd[1], NULL,      NULL },
+        { &ojEnd[1],&iojEnd[1],&iejEnd[1], &omEnd[1], &iomEnd[1],  &yuEnd[1], NULL },
+        { &ieEnd[1],&iEnd[1],  NULL,       NULL,      NULL,        NULL,      NULL }
+    };
+
+    for(wchar_t const * const* itr = &dropEnds[declension][0]; *itr; ++itr)
+    {
+        size_t len = size_t((*itr)[-1]);                    // get length from string size field
+
+        if(wname.substr(wname.size()-len,len)==*itr)
+            return wname.substr(0,wname.size()-len);
+    }
+
+    return wname;
+}

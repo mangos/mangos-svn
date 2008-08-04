@@ -73,9 +73,9 @@ bool LoginQueryHolder::Initialize()
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSOCIALLIST,      "SELECT friend,flags,note FROM character_social WHERE guid = '%u' LIMIT 255", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADHOMEBIND,        "SELECT map,zone,position_x,position_y,position_z FROM character_homebind WHERE guid = '%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS,  "SELECT spell,item,time FROM character_spell_cooldown WHERE guid = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES,   "SELECT genitive, dative, accusative, instrumental, prepositional FROM character_declinedname WHERE guid = '%u'",GUID_LOPART(m_guid));
 
     // in other case still be dummy query
-
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGUILD,           "SELECT guildid,rank FROM guild_member WHERE guid = '%u'", GUID_LOPART(m_guid));
 
     return res;
@@ -940,7 +940,7 @@ void WorldSession::HandleDeclinedPlayerNameOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if(!isCyrillicString(wname,false))
+    if(!isCyrillicCharacter(wname[0]))                      // name already stored as only single alphabet using
     {
         WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
         data << (uint32)1;
@@ -976,7 +976,7 @@ void WorldSession::HandleDeclinedPlayerNameOpcode(WorldPacket& recv_data)
         }
     }
 
-    if(!ObjectMgr::CheckDeclinedNames(GetMainPartOfName(wname),declinedname))
+    if(!ObjectMgr::CheckDeclinedNames(GetMainPartOfName(wname,0),declinedname))
     {
         WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
         data << (uint32)1;
