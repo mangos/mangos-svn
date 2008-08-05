@@ -159,12 +159,6 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & /*recv_data*/ )
 
 void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 {
-    // in Player::Create:
-    //uint8 race,class_,gender,skin,face,hairStyle,hairColor,facialHair,outfitId;
-    //data >> name
-    //data >> race >> class_ >> gender >> skin >> face;
-    //data >> hairStyle >> hairColor >> facialHair >> outfitId;
-
     CHECK_PACKET_SIZE(recv_data,1+1+1+1+1+1+1+1+1+1);
 
     std::string name;

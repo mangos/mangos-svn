@@ -246,10 +246,12 @@ bool WStrToUtf8(std::wstring wstr, std::string& utf8str)
 {
     try
     {
-        utf8str.resize(wstr.size()*2);                              // allocate for most long case
+        std::string utf8str2;
+        utf8str2.resize(wstr.size()*4);                     // allocate for most long case
 
-        char* oend = utf8::utf16to8(wstr.c_str(),wstr.c_str()+wstr.size(),&utf8str[0]);
-        utf8str.resize(oend-(&utf8str[0]));                             // remove unused tail
+        char* oend = utf8::utf16to8(wstr.c_str(),wstr.c_str()+wstr.size(),&utf8str2[0]);
+        utf8str2.resize(oend-(&utf8str2[0]));                // remove unused tail
+        utf8str = utf8str2;
     }
     catch(std::exception)
     {

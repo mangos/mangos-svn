@@ -125,9 +125,16 @@ class ByteBuffer
             append((uint8)0);
             return *this;
         }
-        ByteBuffer &operator<<(const char *str)
+        ByteBuffer &operator<<(const signed char *str)
         {
-            append((uint8 const *)str, str ? strlen(str) : 0);
+            append((uint8 const *)str, str ? strlen((char const*)str) : 0);
+            append((uint8)0);
+            return *this;
+        }
+
+        ByteBuffer &operator<<(const unsigned char *str)
+        {
+            append((uint8 const *)str, str ? strlen((char const*)str) : 0);
             append((uint8)0);
             return *this;
         }
