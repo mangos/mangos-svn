@@ -3689,7 +3689,11 @@ void Player::CreateCorpse()
         }
     }
 
-    corpse->SaveToDB();
+    // we don't SaveToDB for players in battlegrounds so don't do it for corpses either
+    const MapEntry *entry = sMapStore.LookupEntry(corpse->GetMapId());
+    assert(entry);
+    if(entry->map_type != MAP_BATTLEGROUND) 
+        corpse->SaveToDB();
 
     // register for player, but not show
     ObjectAccessor::Instance().AddCorpse(corpse);
