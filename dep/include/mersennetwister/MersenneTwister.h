@@ -85,7 +85,9 @@ protected:
 public:
 	MTRand( const uint32& oneSeed );  // initialize with a simple uint32
 	MTRand( uint32 *const bigSeed, uint32 const seedLength = N );  // or an array
-	MTRand();  // auto-initialize with /dev/urandom or time() and clock()
+	MTRand();                         // auto-initialize with /dev/urandom or time() and clock()
+    MTRand(const MTRand&);            // prevent copy constructor
+    MTRand& operator=(const MTRand&); // no-op operator=
 	
 	// Do NOT use for CRYPTOGRAPHY without securely hashing several returned
 	// values together, otherwise the generator state can be learned after
@@ -133,6 +135,11 @@ protected:
 	static uint32 hash( time_t t, clock_t c );
 };
 
+inline MTRand::MTRand(const MTRand&)
+    { seed(); }
+
+inline MTRand& MTRand::operator=(const MTRand&) 
+    { return *this; }
 
 inline MTRand::MTRand( const uint32& oneSeed )
 	{ seed(oneSeed); }
