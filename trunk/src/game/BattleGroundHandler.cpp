@@ -305,7 +305,10 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
 
             // if the player is dead, resurrect him before teleport
             if(!_player->isAlive())
+            {
                 _player->ResurrectPlayer(1.0f,false);
+                _player->SpawnCorpseBones();
+            }
 
             // leave current group
             _player->RemoveFromGroup();
