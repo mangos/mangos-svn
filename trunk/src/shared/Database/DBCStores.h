@@ -97,7 +97,7 @@ class DBCStorage
             if(!dbc.Load(fn, fmt))
                 return false;
 
-            m_stringPoolList(dbc.AutoProduceStrings(fmt,(char*)indexTable));
+            m_stringPoolList.push_back(dbc.AutoProduceStrings(fmt,(char*)m_dataTable));
 
             return true;
         }
