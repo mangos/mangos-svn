@@ -976,6 +976,12 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastSpell(m_caster,42337,true,NULL);
                     return;
                 }
+                case 45030:                                 // Impale Emissary
+                {
+                    // Emissary of Hate Credit
+                    m_caster->CastSpell(m_caster,45088,true);
+                    return;
+                }
             }
 
             //All IconID Check in there
