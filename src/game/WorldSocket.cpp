@@ -70,7 +70,7 @@ struct ServerPktHeader
 /// WorldSocket construction and initialization.
 WorldSocket::WorldSocket(ISocketHandler &sh): TcpSocket(sh), _cmd(0), _remaining(0), _session(NULL)
 {
-    _seed = mtRand.randInt();
+    _seed = static_cast<uint32>(rand32());
     m_LastPingMSTime = 0;                                   // first time it will counted as overspeed maybe, but this is not important
     m_OverSpeedPings = 0;
 

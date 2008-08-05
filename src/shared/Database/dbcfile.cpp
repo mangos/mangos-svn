@@ -120,7 +120,7 @@ uint32 DBCFile::GetFormatRecordSize(const char * format,int32* index_pos)
     return recordsize;
 }
 
-void * DBCFile::AutoProduceData(const char * format, uint32 * records, char *&_data)
+char* DBCFile::AutoProduceData(const char* format, uint32& records, char**& indexTable)
 {
     /*
     format STRING, NA, FLOAT,NA,INT <=>
@@ -134,10 +134,6 @@ void * DBCFile::AutoProduceData(const char * format, uint32 * records, char *&_d
     */
 
     typedef char * ptr;
-    //char * _data;
-    ptr* table;
-    uint32 offset=0;
-
     if(strlen(format)!=fieldCount)
         return NULL;
 
@@ -156,50 +152,95 @@ void * DBCFile::AutoProduceData(const char * format, uint32 * records, char *&_d
         }
 
         ++maxi;
-        *records=maxi;
-        table=new ptr[maxi];
-        memset(table,0,maxi*sizeof(ptr));
-    }else
+        records=maxi;
+        indexTable=new ptr[maxi];
+        memset(indexTable,0,maxi*sizeof(ptr));
+    }
+    else
     {
-        *records = recordCount;
-        table = new ptr [recordCount];
+        records = recordCount;
+        indexTable = new ptr[recordCount];
     }
 
-    _data= new char[recordCount*recordsize + stringSize];
-    char *stringData = _data+recordCount*recordsize;
-    memcpy(stringData,stringTable,stringSize);
+    char* dataTable= new char[recordCount*recordsize];
+
+    uint32 offset=0;
 
     for(uint32 y =0;y<recordCount;y++)
     {
-        //offset=0;
         if(i>=0)
         {
-            table[getRecord(y).getUInt (i)]=&_data[offset];
-        }else table[y]=&_data[offset];
+            indexTable[getRecord(y).getUInt(i)]=&dataTable[offset];
+        }
+        else
+            indexTable[y]=&dataTable[offset];
 
         for(uint32 x=0;x<fieldCount;x++)
+        {
             switch(format[x])
             {
                 case FT_FLOAT:
-                    *((float*)(&_data[offset]))=getRecord(y).getFloat (x);
+                    *((float*)(&dataTable[offset]))=getRecord(y).getFloat(x);
                     offset+=4;
                     break;
                 case FT_IND:
                 case FT_INT:
-                    *((uint32*)(&_data[offset]))=getRecord(y).getUInt (x);
+                    *((uint32*)(&dataTable[offset]))=getRecord(y).getUInt(x);
                     offset+=4;
                     break;
                 case FT_BYTE:
-                    *((uint8*)(&_data[offset]))=getRecord(y).getUInt8 (x);
+                    *((uint8*)(&dataTable[offset]))=getRecord(y).getUInt8(x);
                     offset+=1;
                     break;
                 case FT_STRING:
-                    const char * st = getRecord(y).getString(x);
-                    *((char**)(&_data[offset]))=stringData+(st-(const char*)stringTable);
+                    *((char**)(&dataTable[offset]))=NULL;
                     offset+=sizeof(char*);
                     break;
             }
+        }
     }
 
-    return table;
+    return dataTable;
+}
+
+char* DBCFile::AutoProduceStrings(const char* format, char* dataTable)
+{
+    if(strlen(format)!=fieldCount)
+        return NULL;
+
+    //get struct size and index pos
+    int32 i;
+    uint32 recordsize=GetFormatRecordSize(format,&i);
+
+    char* stringPool= new char[stringSize];
+    memcpy(stringPool,stringTable,stringSize);
+
+    uint32 offset=0;
+
+    for(uint32 y =0;y<recordCount;y++)
+    {
+        for(uint32 x=0;x<fieldCount;x++)
+            switch(format[x])
+        {
+            case FT_FLOAT:
+            case FT_IND:
+            case FT_INT:
+                offset+=4;
+                break;
+            case FT_BYTE:
+                offset+=1;
+                break;
+            case FT_STRING:
+                // fill only not filled entries
+                if(*((char**)(&dataTable[offset]))==NULL)
+                {
+                    const char * st = getRecord(y).getString(x);
+                    *((char**)(&dataTable[offset]))=stringPool+(st-(const char*)stringTable);
+                }
+                offset+=sizeof(char*);
+                break;
+        }
+    }
+
+    return stringPool;
 }

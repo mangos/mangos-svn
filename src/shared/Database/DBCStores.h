@@ -24,6 +24,8 @@
 #include "dbcfile.h"
 #include "DBCStructure.h"
 
+#include <list>
+
 typedef std::list<uint32> SimpleFactionsList;
 
 SimpleFactionsList const* GetFactionTeamList(uint32 faction);
@@ -58,8 +60,9 @@ uint32 const* /*[3]*/ GetTalentTabPages(uint32 cls);
 template<class T>
 class DBCStorage
 {
+    typedef std::list<char*> StringPoolList;
     public:
-        explicit DBCStorage(const char *f) : nCount(0), fieldCount(0), fmt(f), indexTable(NULL), data(NULL) { }
+        explicit DBCStorage(const char *f) : nCount(0), fieldCount(0), fmt(f), indexTable(NULL), m_dataTable(NULL) { }
         ~DBCStorage() { Clear(); }
 
         T const* LookupEntry(uint32 id) const { return (id>=nCount)?NULL:indexTable[id]; }
@@ -70,21 +73,33 @@ class DBCStorage
         bool Load(char const* fn)
         {
 
-            DBCFile * dbc = new DBCFile;
+            DBCFile dbc;
             // Check if load was sucessful, only then continue
-            bool res = dbc->Load(fn, fmt);
-            if (res)
-            {
-                fieldCount = dbc->GetCols();
-                indexTable=(T **) dbc->AutoProduceData(fmt,&nCount,data);
-            }
-            delete dbc;
+            if(!dbc.Load(fn, fmt))
+                return false;
 
-            // error in dbc file at loading
+            fieldCount = dbc.GetCols();
+            m_dataTable = (T*)dbc.AutoProduceData(fmt,nCount,(char**&)indexTable);
+            m_stringPoolList.push_back(dbc.AutoProduceStrings(fmt,(char*)m_dataTable));
+
+            // error in dbc file at loading if NULL
+            return indexTable!=NULL;
+        }
+
+        bool LoadStringsFrom(char const* fn)
+        {
+            // DBC must be already loaded using Load
             if(!indexTable)
-                res = false;
+                return false;
 
-            return res;
+            DBCFile dbc;
+            // Check if load was successful, only then continue
+            if(!dbc.Load(fn, fmt))
+                return false;
+
+            m_stringPoolList(dbc->AutoProduceStrings(fmt,(char*)indexTable));
+
+            return true;
         }
 
         void Clear()
@@ -94,8 +109,14 @@ class DBCStorage
 
             delete[] ((char*)indexTable);
             indexTable = NULL;
-            delete[] data;
-            data = NULL;
+            delete[] ((char*)m_dataTable);
+            m_dataTable = NULL;
+
+            while(!m_stringPoolList.empty())
+            {
+                delete[] m_stringPoolList.front();
+                m_stringPoolList.pop_front();
+            }
             nCount = 0;
         }
 
@@ -104,7 +125,8 @@ class DBCStorage
         uint32 fieldCount;
         char const* fmt;
         T** indexTable;
-        char* data;
+        T* m_dataTable;
+        StringPoolList m_stringPoolList;
 };
 
 extern DBCStorage <AreaTableEntry>               sAreaStore;// recommend access using functions
