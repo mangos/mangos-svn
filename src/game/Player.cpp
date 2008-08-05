@@ -3483,6 +3483,10 @@ void Player::SetMovement(PlayerMovementType pType)
     GetSession()->SendPacket( &data );
 }
 
+/* Preconditions:
+  - a resurrectable corpse must not be loaded for the player (only bones)
+  - the player must be in world
+*/
 void Player::BuildPlayerRepop()
 {
     if(getRace() == RACE_NIGHTELF)
@@ -3493,23 +3497,18 @@ void Player::BuildPlayerRepop()
     // there must be SMSG.STOP_MIRROR_TIMER
     // there we must send 888 opcode
 
-    // place corpse instead player body
-    if(!GetCorpse())
-        CreateCorpse();
+    // the player cannot have a corpse already, only bones which are not returned by GetCorpse
+    assert(!GetCorpse());
 
+    // create a corpse and place it at the player's location
+    CreateCorpse();
     Corpse *corpse = GetCorpse();
-    if (!corpse)
+    if(!corpse)
     {
         sLog.outError("Error creating corpse for Player %s [%u]", GetName(), GetGUIDLow());
         return;
     }
-
-    // now show corpse for all
-    if(corpse)
-    {
-        corpse->SetInstanceId(this->GetInstanceId());
-        MapManager::Instance().GetMap(corpse->GetMapId(), this)->Add(corpse);
-    }
+    GetMap()->Add(corpse);
 
     // convert player body to ghost
     SetHealth( 1 );
