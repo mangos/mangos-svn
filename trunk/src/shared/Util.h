@@ -23,9 +23,6 @@
 
 #include <string>
 #include <vector>
-#include "mersennetwister/MersenneTwister.h"
-
-static MTRand mtRand;
 
 typedef std::vector<std::string> Tokens;
 
@@ -37,45 +34,25 @@ std::string secsToTimeString(uint32 timeInSecs, bool shortText = false, bool hou
 uint32 TimeStringToSecs(std::string timestring);
 std::string TimeToTimestampStr(time_t t);
 
-/* Return a random number in the range min..max; (max-min) must be smaller than 32768.
- * Note: Not reentrant - if two threads call this simultaneously, they will likely
- * get the same random number. */
-inline int32 irand(int32 min, int32 max)
-{
-    //assert((max - min) < 32768);
-    return int32(mtRand.randInt(max-min))+min;
-}
+/* Return a random number in the range min..max; (max-min) must be smaller than 32768. */
+MANGOS_DLL_DECL int32 irand(int32 min, int32 max);
 
 /* Return a random number in the range min..max (inclusive). For reliable results, the difference
 * between max and min should be less than RAND32_MAX. */
-inline uint32 urand(uint32 min, uint32 max)
-{
-    return mtRand.randInt(max-min)+ min;
-}
+MANGOS_DLL_DECL uint32 urand(uint32 min, uint32 max);
 
-/* Return a random number in the range 0 .. RAND32_MAX.
- * Note: Not reentrant - if two threads call this simultaneously, they will likely
- * get the same random number. */
-inline int32 rand32()
-{
-    return mtRand.randInt();
-}
+/* Return a random number in the range 0 .. RAND32_MAX. */
+MANGOS_DLL_DECL int32 rand32();
 
 /* Return a random double from 0.0 to 1.0 (exclusive). Floats support only 7 valid decimal digits.
  * A double supports up to 15 valid decimal digits and is used internally (RAND32_MAX has 10 digits).
  * With an FPU, there is usually no difference in performance between float and double. */
-inline double rand_norm(void)
-{
-    return mtRand.randExc();
-}
+MANGOS_DLL_DECL double rand_norm(void);
 
 /* Return a random double from 0.0 to 99.9999999999999. Floats support only 7 valid decimal digits.
  * A double supports up to 15 valid decimal digits and is used internaly (RAND32_MAX has 10 digits).
  * With an FPU, there is usually no difference in performance between float and double. */
-inline double rand_chance(void)
-{
-    return mtRand.randExc(100.0);
-}
+MANGOS_DLL_DECL double rand_chance(void);
 
 /* Return true if a random roll fits in the specified chance (range 0-100). */
 inline bool roll_chance_f(float chance)

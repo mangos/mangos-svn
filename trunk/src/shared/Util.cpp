@@ -20,6 +20,42 @@
 
 #include "sockets/socket_include.h"
 #include "utf8cpp/utf8.h"
+#include "mersennetwister/MersenneTwister.h"
+#include "zthread/ThreadLocal.h"
+
+typedef ZThread::ThreadLocal<MTRand> MTRandTSS;
+
+/* NOTE: Not sure if static initialization is ok for TSS objects ,
+ * as I see zthread uses custom implementation of the TSS 
+ * ,and in the consturctor there is no code ,so I suppose its ok
+ * If its not ok ,change it to use singleton.
+ */
+static MTRandTSS mtRand;
+
+int32 irand (int32 min, int32 max)
+{
+  return int32 (mtRand.get ().randInt (max - min)) + min;
+}
+
+uint32 urand (uint32 min, uint32 max)
+{
+  return mtRand.get ().randInt (max - min) + min;
+}
+
+int32 rand32 ()
+{
+  return mtRand.get ().randInt ();
+}
+
+double rand_norm(void)
+{
+  return mtRand.get ().randExc ();
+}
+
+double rand_chance (void)
+{
+  return mtRand.get ().randExc (100.0);
+}
 
 Tokens StrSplit(const std::string &src, const std::string &sep)
 {
