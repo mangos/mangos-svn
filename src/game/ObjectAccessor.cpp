@@ -469,7 +469,7 @@ ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
     if(map && !map->IsRemovalGrid(corpse->GetPositionX(), corpse->GetPositionY()))
     {
         // Create bones, don't change Corpse
-        Corpse *bones = new Corpse;
+        bones = new Corpse;
         bones->Create(corpse->GetGUIDLow());
 
         for (int i = 3; i < CORPSE_END; i++)                    // don't overwrite guid and object type

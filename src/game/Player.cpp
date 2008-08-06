@@ -3523,8 +3523,7 @@ void Player::BuildPlayerRepop()
     SendCorpseReclaimDelay();
 
     // to prevent cheating
-    if(corpse)
-        corpse->ResetGhostTime();
+    corpse->ResetGhostTime();
 
     StopMirrorTimers();                                     //disable timers(bars)
 
@@ -6933,14 +6932,13 @@ void Player::RemovedInsignia(Player* looterPlr)
     if(m_deathTimer > 0)
     {
         m_deathTimer = 0;
-        RepopAtGraveyard();
         BuildPlayerRepop();
+        RepopAtGraveyard();
     }
 
     Corpse *corpse = GetCorpse();
     if (!corpse)
         return;
-    corpse->loot.gold = getLevel();
 
     // We have to convert player corpse to bones, not to be able to resurrect there
     // SpawnCorpseBones isn't handy, 'cos it saves player while he in BG
