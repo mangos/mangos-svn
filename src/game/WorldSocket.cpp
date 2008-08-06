@@ -334,7 +334,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     locale = fields[10].GetUInt8();
     if (locale>=MAX_LOCALE)
-        locale=LOCALE_ENG;
+        locale=LOCALE_enUS;
 
     delete result;
 

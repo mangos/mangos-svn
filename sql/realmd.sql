@@ -105,30 +105,6 @@ LOCK TABLES `ip_banned` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `localization`
---
-
-DROP TABLE IF EXISTS `localization`;
-CREATE TABLE `localization` (
-  `locale` tinyint(3) unsigned NOT NULL default '0',
-  `string` char(2) NOT NULL default '',
-  PRIMARY KEY  (`locale`)
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `localization`
---
-
-LOCK TABLES `localization` WRITE;
-/*!40000 ALTER TABLE `localization` DISABLE KEYS */;
-INSERT INTO `localization` VALUES
-(0,'en'),
-(2,'fr'),
-(3,'de');
-/*!40000 ALTER TABLE `localization` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `realmcharacters`
 --
 

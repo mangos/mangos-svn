@@ -759,6 +759,10 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath="..\..\src\shared\Common.cpp"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\shared\Common.h"
 			>
 		</File>

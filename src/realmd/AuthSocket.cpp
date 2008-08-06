@@ -480,17 +480,12 @@ bool AuthSocket::_HandleLogonChallenge()
                         uint8 secLevel = (*result)[4].GetUInt8();
                         _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
 
-                        QueryResult *localeresult = dbRealmServer.PQuery("SELECT locale FROM localization WHERE string = '%c%c'",ch->country[3],ch->country[2]);
-                        if( localeresult )
-                        {
-                            _localization=(*localeresult)[0].GetUInt8();
-                            delete localeresult;
+                        std::string localeName;
+                        localeName.resize(4);
+                        for(int i = 0; i <4; ++i)
+                            localeName[i] = ch->country[4-i-1];
 
-                            if (_localization>=MAX_LOCALE)
-                                _localization=LOCALE_ENG;
-                        }
-                        else
-                            _localization=LOCALE_ENG;
+                        _localization = GetLocaleByName(localeName);
 
                         sLog.outBasic("[AuthChallenge] account %s is using '%c%c' locale (%u)", _login.c_str (), ch->country[3],ch->country[2], _localization);
                     }

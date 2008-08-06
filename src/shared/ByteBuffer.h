@@ -60,11 +60,6 @@ class ByteBuffer
             put(pos,(uint8 *)&value,sizeof(value));
         }
 
-        ByteBuffer &operator<<(bool value)
-        {
-            append<char>((char)value);
-            return *this;
-        }
         ByteBuffer &operator<<(uint8 value)
         {
             append<uint8>(value);
@@ -125,16 +120,9 @@ class ByteBuffer
             append((uint8)0);
             return *this;
         }
-        ByteBuffer &operator<<(const signed char *str)
+        ByteBuffer &operator<<(const char *str)
         {
-            append((uint8 const *)str, str ? strlen((char const*)str) : 0);
-            append((uint8)0);
-            return *this;
-        }
-
-        ByteBuffer &operator<<(const unsigned char *str)
-        {
-            append((uint8 const *)str, str ? strlen((char const*)str) : 0);
+            append((uint8 const *)str, str ? strlen(str) : 0);
             append((uint8)0);
             return *this;
         }
@@ -144,6 +132,7 @@ class ByteBuffer
             value = read<char>() > 0 ? true : false;
             return *this;
         }
+
         ByteBuffer &operator>>(uint8 &value)
         {
             value = read<uint8>();

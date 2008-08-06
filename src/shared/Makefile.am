@@ -33,6 +33,7 @@ libmangosshared_a_SOURCES = \
 	Base.cpp \
 	Base.h \
 	ByteBuffer.h \
+	Common.cpp \
 	Common.h \
 	Errors.h \
 	Log.cpp \
