@@ -600,7 +600,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_ADD_FRIEND" );
 
-    std::string friendName  = objmgr.GetMangosString(LANG_FRIEND_IGNORE_UNKNOWN,GetSessionLocaleIndex());
+    std::string friendName  = GetMangosString(LANG_FRIEND_IGNORE_UNKNOWN);
     std::string friendNote;
     FriendsResult friendResult = FRIEND_NOT_FOUND;
     Player *pFriend     = NULL;
@@ -692,7 +692,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_ADD_IGNORE" );
 
-    std::string IgnoreName = objmgr.GetMangosString(LANG_FRIEND_IGNORE_UNKNOWN,GetSessionLocaleIndex());
+    std::string IgnoreName = GetMangosString(LANG_FRIEND_IGNORE_UNKNOWN);
     FriendsResult ignoreResult = FRIEND_IGNORE_NOT_FOUND;
     uint64 IgnoreGuid = 0;
 
@@ -1011,13 +1011,13 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         {
             // TODO: all this is probably wrong
             if(missingItem)
-                SendAreaTriggerMessage(objmgr.GetMangosString(LANG_LEVEL_MINREQUIRED_AND_ITEM,GetSessionLocaleIndex()), at->requiredLevel, objmgr.GetItemPrototype(missingItem)->Name1);
+                SendAreaTriggerMessage(GetMangosString(LANG_LEVEL_MINREQUIRED_AND_ITEM), at->requiredLevel, objmgr.GetItemPrototype(missingItem)->Name1);
             else if(missingKey)
                 GetPlayer()->SendTransferAborted(at->target_mapId, TRANSFER_ABORT_DIFFICULTY2);
             else if(missingQuest)
                 SendAreaTriggerMessage(at->requiredFailedText.c_str());
             else if(missingLevel)
-                SendAreaTriggerMessage(objmgr.GetMangosString(LANG_LEVEL_MINREQUIRED,GetSessionLocaleIndex()), missingLevel);
+                SendAreaTriggerMessage(GetMangosString(LANG_LEVEL_MINREQUIRED), missingLevel);
             return;
         }
     }

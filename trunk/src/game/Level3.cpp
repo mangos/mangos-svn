@@ -2292,7 +2292,7 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
             if (name.find(namepart) != std::string::npos)
             {
                 // send item set in "id - [namedlink]" format
-                PSendSysMessage(LANG_ITEMSET_LIST,id,id,set->name[sWorld.GetDBClang()]);
+                PSendSysMessage(LANG_ITEMSET_LIST,id,id,name.c_str());
                 ++counter;
             }
         }
@@ -2336,7 +2336,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
             if (name.find(namepart) != std::string::npos)
             {
                 // send skill in "id - [namedlink]" format
-                PSendSysMessage(LANG_SKILL_LIST,id,id,skillInfo->name[sWorld.GetDBClang()],(target->HasSkill(id) ? GetMangosString(LANG_KNOWN) : ""));
+                PSendSysMessage(LANG_SKILL_LIST,id,id,name.c_str(),(target->HasSkill(id) ? m_session->GetMangosString(LANG_KNOWN) : ""));
 
                 ++counter;
             }
@@ -2394,7 +2394,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
 
                 // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
                 std::ostringstream ss;
-                ss << id << " - |cffffffff|Hspell:" << id << "|h[" << spellInfo->SpellName[sWorld.GetDBClang()];
+                ss << id << " - |cffffffff|Hspell:" << id << "|h[" << name;
 
                 // include rank in link name
                 if(rank)

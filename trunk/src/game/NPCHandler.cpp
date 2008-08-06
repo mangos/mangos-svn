@@ -110,7 +110,7 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
 
 void WorldSession::SendTrainerList( uint64 guid )
 {
-    std::string str = objmgr.GetMangosString(LANG_NPC_TAINER_HELLO,GetSessionLocaleIndex());
+    std::string str = GetMangosString(LANG_NPC_TAINER_HELLO);
     SendTrainerList( guid, str );
 }
 

@@ -1658,7 +1658,7 @@ bool ChatHandler::HandleLookupAreaCommand(const char* args)
             {
                 // send area in "id - [name]" format
                 std::ostringstream ss;
-                ss << areaEntry->ID << " - |cffffffff|Harea:" << areaEntry->ID << "|h[" << areaEntry->area_name[sWorld.GetDBClang()] << "]|h|r";
+                ss << areaEntry->ID << " - |cffffffff|Harea:" << areaEntry->ID << "|h[" << name << "]|h|r";
 
                 SendSysMessage(ss.str().c_str());
 

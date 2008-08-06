@@ -278,7 +278,7 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
             if(bidder_security > SEC_PLAYER )               // not do redundant DB requests
             {
                 if(!GetPlayerNameByGUID(bidder_guid,bidder_name))
-                    bidder_name = GetMangosString(LANG_UNKNOWN);
+                    bidder_name = GetMangosStringForDBCLocale(LANG_UNKNOWN);
             }
         }
 
@@ -286,7 +286,7 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
         {
             std::string owner_name;
             if(!GetPlayerNameByGUID(auction->owner,owner_name))
-                owner_name = GetMangosString(LANG_UNKNOWN);
+                owner_name = GetMangosStringForDBCLocale(LANG_UNKNOWN);
 
             uint32 owner_accid = GetPlayerAccountIdByGUID(auction->owner);
 
@@ -5970,8 +5970,8 @@ int ObjectMgr::GetIndexForLocale( LocaleConstant loc )
     if(loc==LOCALE_enUS)
         return -1;
 
-    for(size_t i=0;i < m_LocalToIndex.size(); ++i)
-        if(m_LocalToIndex[i]==loc)
+    for(size_t i=0;i < m_LocalForIndex.size(); ++i)
+        if(m_LocalForIndex[i]==loc)
             return i;
 
     return -1;
@@ -5979,10 +5979,10 @@ int ObjectMgr::GetIndexForLocale( LocaleConstant loc )
 
 LocaleConstant ObjectMgr::GetLocaleForIndex(int i)
 {
-    if (i<0 || i>=m_LocalToIndex.size())
+    if (i<0 || i>=m_LocalForIndex.size())
         return LOCALE_enUS;
 
-    return m_LocalToIndex[i];
+    return m_LocalForIndex[i];
 }
 
 int ObjectMgr::GetOrNewIndexForLocale( LocaleConstant loc )
@@ -5990,12 +5990,12 @@ int ObjectMgr::GetOrNewIndexForLocale( LocaleConstant loc )
     if(loc==LOCALE_enUS)
         return -1;
 
-    for(size_t i=0;i < m_LocalToIndex.size(); ++i)
-        if(m_LocalToIndex[i]==loc)
+    for(size_t i=0;i < m_LocalForIndex.size(); ++i)
+        if(m_LocalForIndex[i]==loc)
             return i;
 
-    m_LocalToIndex.push_back(loc);
-    return m_LocalToIndex.size()-1;
+    m_LocalForIndex.push_back(loc);
+    return m_LocalForIndex.size()-1;
 }
 
 void ObjectMgr::LoadBattleMastersEntry()
@@ -6171,10 +6171,8 @@ void ObjectMgr::LoadMangosStringLocales()
     sLog.outString( ">> Loaded %u MaNGOS locale strings", mMangosStringLocaleMap.size() );
 }
 
-const char *ObjectMgr::GetMangosString(uint32 entry, int locale_idx)
+const char *ObjectMgr::GetMangosString(uint32 entry, int locale_idx) const
 {
-    if (locale_idx == -2)
-        locale_idx = DBCLocaleIndex;
     if (locale_idx >= 0)
     {
         if(MangosStringLocale const *msl = GetMangosStringLocale(entry))

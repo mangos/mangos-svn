@@ -229,7 +229,6 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     uint32 unk2;
     uint32 BuiltNumberClient;
     uint32 id, security;
-    uint8  locale;
     bool tbc = false;
     std::string account;
     Sha1Hash sha1;
@@ -332,7 +331,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     K.SetHexStr(fields[2].GetString());
     time_t mutetime = time_t(fields[9].GetUInt64());
 
-    locale = fields[10].GetUInt8();
+    LocaleConstant locale = LocaleConstant(fields[10].GetUInt8());
     if (locale>=MAX_LOCALE)
         locale=LOCALE_enUS;
 
@@ -405,7 +404,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     SendPacket(&packet);
 
     ///- Create a new WorldSession for the player and add it to the World
-    _session = new WorldSession(id, this,security,tbc,mutetime,LocaleConstant(locale));
+    _session = new WorldSession(id, this,security,tbc,mutetime,locale);
     sWorld.AddSession(_session);
 
     if(sLog.IsOutDebug())                                   // optimize disabled debug output

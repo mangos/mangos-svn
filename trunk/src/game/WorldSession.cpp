@@ -835,3 +835,8 @@ void WorldSession::SendNotification(const char *format,...)
         SendPacket(&data);
     }
 }
+
+const char * WorldSession::GetMangosString( uint32 entry )
+{
+    return objmgr.GetMangosString(entry,GetSessionLocaleIndex());
+}

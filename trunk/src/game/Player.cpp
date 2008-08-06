@@ -13732,7 +13732,7 @@ void Player::_LoadInventory(QueryResult *result, uint32 timediff)
                 mi.AddItem(item->GetGUIDLow(), item->GetEntry(), item);
             }
 
-            std::string subject = objmgr.GetMangosString(LANG_NOT_EQUIPPED_ITEM, GetSession()->GetSessionLocaleIndex());
+            std::string subject = GetSession()->GetMangosString(LANG_NOT_EQUIPPED_ITEM);
 
             WorldSession::SendMailTo(this, MAIL_NORMAL, MAIL_STATIONERY_GM, GetGUIDLow(), GetGUIDLow(), subject, 0, &mi, 0, 0, NOT_READ);
         }
