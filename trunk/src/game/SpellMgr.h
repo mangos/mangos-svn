@@ -741,7 +741,7 @@ class SpellMgr
             return mSpellScriptTarget.lower_bound(spell_id);
         }
 
-        SpellScriptTarget::const_iterator GetEndSpellScriptTraget(uint32 spell_id) const
+        SpellScriptTarget::const_iterator GetEndSpellScriptTarget(uint32 spell_id) const
         {
             return mSpellScriptTarget.upper_bound(spell_id);
         }

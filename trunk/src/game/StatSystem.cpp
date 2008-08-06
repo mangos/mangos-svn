@@ -557,8 +557,8 @@ void Player::UpdateExpertise(WeaponAttackType attack)
 
     Item *weapon = GetItemByPos( INVENTORY_SLOT_BAG_0, slot );
 
-    AuraList const& expAuars = GetAurasByType(SPELL_AURA_MOD_EXPERTISE);
-    for(AuraList::const_iterator itr = expAuars.begin(); itr != expAuars.end(); ++itr)
+    AuraList const& expAuras = GetAurasByType(SPELL_AURA_MOD_EXPERTISE);
+    for(AuraList::const_iterator itr = expAuras.begin(); itr != expAuras.end(); ++itr)
     {
         // item neutral spell
         if((*itr)->GetSpellProto()->EquippedItemClass == -1)
