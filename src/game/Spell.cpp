@@ -591,7 +591,7 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_APPLY_AURA:
                     switch(m_spellInfo->EffectApplyAuraName[i])
                     {
-                        case SPELL_AURA_ADD_FLAT_MODIFIER:  // some spell mods auras have 0 target modes instead expected TRAGET_SELF(1) (and present for other ranks for same spell for example)
+                        case SPELL_AURA_ADD_FLAT_MODIFIER:  // some spell mods auras have 0 target modes instead expected TARGET_SELF(1) (and present for other ranks for same spell for example)
                         case SPELL_AURA_ADD_PCT_MODIFIER:
                             tmpUnitMap.push_back(m_caster);
                             break;
@@ -3310,7 +3310,7 @@ uint8 Spell::CanCast(bool strict)
                 bool okDoo = false;
 
                 SpellScriptTarget::const_iterator lower = spellmgr.GetBeginSpellScriptTarget(m_spellInfo->Id);
-                SpellScriptTarget::const_iterator upper = spellmgr.GetEndSpellScriptTraget(m_spellInfo->Id);
+                SpellScriptTarget::const_iterator upper = spellmgr.GetEndSpellScriptTarget(m_spellInfo->Id);
                 if(lower==upper)
                     sLog.outErrorDb("Spell (ID: %u) has effect EffectImplicitTargetA/EffectImplicitTargetB = TARGET_SCRIPT or TARGET_SCRIPT_COORDINATES, but does not have record in `spell_script_target`",m_spellInfo->Id);
 
@@ -4892,8 +4892,8 @@ Unit* Spell::SelectMagnetTarget()
 
     if(target && target->HasAuraType(SPELL_AURA_SPELL_MAGNET) && !(m_spellInfo->Attributes & 0x10))
     {
-        Unit::AuraList const& magnetAuars = target->GetAurasByType(SPELL_AURA_SPELL_MAGNET);
-        for(Unit::AuraList::const_iterator itr = magnetAuars.begin(); itr != magnetAuars.end(); ++itr)
+        Unit::AuraList const& magnetAuras = target->GetAurasByType(SPELL_AURA_SPELL_MAGNET);
+        for(Unit::AuraList::const_iterator itr = magnetAuras.begin(); itr != magnetAuras.end(); ++itr)
         {
             if(Unit* magnet = (*itr)->GetCaster())
             {

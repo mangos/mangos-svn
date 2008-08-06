@@ -59,7 +59,7 @@ template <class TO, class FROM> class Reference : public LinkedListElement
         // Tell our refTo object, that the link is cut
         inline void unlink() { targetObjectDestroyLink(); delink(); iRefTo = NULL; iRefFrom = NULL; }
 
-        // Link is invalid due to destruction of referenced traget object. Call comes from the refTo object
+        // Link is invalid due to destruction of referenced target object. Call comes from the refTo object
         // Tell our refFrom object, that the link is cut
         inline void invalidate()                            // the iRefFrom MUST remain!!
         {
