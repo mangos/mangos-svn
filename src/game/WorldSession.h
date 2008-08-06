@@ -186,7 +186,8 @@ class MANGOS_DLL_SPEC WorldSession
         time_t m_muteTime;
 
         // Locales
-        int GetSessionDbLocaleIndex() { return m_sessionLocaleIndex; }
+        LocaleConstant GetSessionDbcLocale() { return m_sessionDbcLocale; }
+        int GetSessionDbLocaleIndex() { return m_sessionDbLocaleIndex; }
         const char *GetMangosString(uint32 entry);
 
         uint32 GetLatency() const { return m_latency; }
@@ -616,7 +617,8 @@ class MANGOS_DLL_SPEC WorldSession
         bool m_playerLoading;                               // code processed in LoginPlayer
         bool m_playerLogout;                                // code processed in LogoutPlayer
         bool m_playerRecentlyLogout;
-        int m_sessionLocaleIndex;
+        LocaleConstant m_sessionDbcLocale;
+        int m_sessionDbLocaleIndex;
         uint32 m_latency;
 
         void FillOpcodeHandlerHashTable();

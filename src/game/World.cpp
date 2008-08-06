@@ -98,6 +98,9 @@ World::World()
     m_maxQueuedSessionCount = 0;
     m_resultQueue = NULL;
     m_NextDailyQuestReset = 0;
+
+    m_defaultDbcLocale = LOCALE_enUS;
+    m_availableDbcLocaleMask = 0;
 }
 
 /// World destructor
@@ -737,7 +740,7 @@ void World::SetInitialWorldSettings()
     objmgr.LoadQuestLocales();
     objmgr.LoadNpcTextLocales();
     objmgr.LoadPageTextLocales();
-    objmgr.SetDBCLocaleIndex(GetDBClang());                 // Get once for all the locale index of dbc language
+    objmgr.SetDBCLocaleIndex(GetDefaultDbcLocale());        // Get once for all the locale index of DBC language (console/broadcasts)
 
     sLog.outString( "Loading Page Texts..." );
     objmgr.LoadPageTexts();
@@ -967,34 +970,47 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "WORLD: World initialized" );
 }
-
 void World::DetectDBCLang()
 {
-    m_langid = sConfig.GetIntDefault("DBC.Locale", 255);
+    uint32 m_lang_confid = sConfig.GetIntDefault("DBC.Locale", 255);
+
+    if(m_lang_confid != 255 && m_lang_confid >= MAX_LOCALE)
+    {
+        sLog.outError("Incorrect DBC.Locale! Must be >= 0 and < %d (set to 0)",MAX_LOCALE);
+        m_lang_confid = LOCALE_enUS;
+    }
 
     ChrRacesEntry const* race = sChrRacesStore.LookupEntry(1);
 
-    if (m_langid < 16)
+    std::string availableLocalsStr;
+
+    int default_locale = MAX_LOCALE;
+    for (int i = MAX_LOCALE-1; i >= 0; --i)
     {
-        if ( strlen(race->name[m_langid]) > 0)
+        if ( strlen(race->name[i]) > 0)                     // check by race names
         {
-            sLog.outString("Using DBC Locale From Config (%d).\n", m_langid);
-            return;
-        }
-        else
-            sLog.outString("DBC Locale Does Not Match Config Locale (%d)!!!", m_langid);
-    }
-    for (int i = 0; i < 16; i++)
-    {
-        if ( strlen(race->name[i]) > 0)
-        {
-            m_langid = i;
-            sLog.outString("Using Autodetected DBC Locale (%d).\n", m_langid);
-            return;
+            default_locale = i;
+            m_availableDbcLocaleMask |= (1 << i);
+            availableLocalsStr += localeNames[i];
+            availableLocalsStr += " ";
         }
     }
-    sLog.outError("Unable to determine your DBC Locale!!");
-    exit(1);
+
+    if( default_locale != m_lang_confid && m_lang_confid < MAX_LOCALE && 
+        (m_availableDbcLocaleMask & (1 << m_lang_confid)) )
+    {
+        default_locale = m_lang_confid;
+    }
+
+    if(default_locale >= MAX_LOCALE)
+    {
+        sLog.outError("Unable to determine your DBC Locale! (corrupt DBC?)");
+        exit(1);
+    }
+
+    m_defaultDbcLocale = LocaleConstant(default_locale);
+
+    sLog.outString("Using %s DBC Locale as default. All available DBC locales: %s",localeNames[m_defaultDbcLocale],availableLocalsStr.empty() ? "<none>" : availableLocalsStr.c_str());
 }
 
 /// Update the World !

@@ -193,7 +193,7 @@ char* DBCFile::AutoProduceData(const char* format, uint32& records, char**& inde
                     offset+=1;
                     break;
                 case FT_STRING:
-                    *((char**)(&dataTable[offset]))=NULL;
+                    *((char**)(&dataTable[offset]))=NULL;   // will be replaces non-empty or "" strings in AutoProduceStrings
                     offset+=sizeof(char*);
                     break;
             }
@@ -232,10 +232,11 @@ char* DBCFile::AutoProduceStrings(const char* format, char* dataTable)
                 break;
             case FT_STRING:
                 // fill only not filled entries
-                if(*((char**)(&dataTable[offset]))==NULL)
+                char** slot = (char**)(&dataTable[offset]);
+                if(!*slot || !**slot)
                 {
                     const char * st = getRecord(y).getString(x);
-                    *((char**)(&dataTable[offset]))=stringPool+(st-(const char*)stringTable);
+                    *slot=stringPool+(st-(const char*)stringTable);
                 }
                 offset+=sizeof(char*);
                 break;

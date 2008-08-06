@@ -5313,7 +5313,7 @@ std::string ObjectMgr::GeneratePetName(uint32 entry)
     if(list0.empty() || list1.empty())
     {
         CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(entry);
-        char* petname = GetPetName(cinfo->family, sWorld.GetDBClang());
+        char* petname = GetPetName(cinfo->family, sWorld.GetDefaultDbcLocale());
         if(!petname)
             petname = cinfo->Name;
         return std::string(petname);

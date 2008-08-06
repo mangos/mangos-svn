@@ -552,8 +552,6 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
 {
     if(!*args)
         return false;
-    std::string namepart = args;
-    uint32 counter = 0;                                     // Counter for figure out that we found smth.
 
     Player *target = getSelectedPlayer();
     if (!target)
@@ -563,6 +561,17 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
         return false;
     }
 
+    std::string namepart = args;
+    std::wstring wnamepart;
+
+    if(!Utf8toWStr(namepart,wnamepart))
+        return false;
+
+    // converting string that we try to find to lower case
+    wstrToLower( wnamepart );
+
+    uint32 counter = 0;                                     // Counter for figure out that we found smth.
+
     for (uint32 id = 0; id < sFactionStore.GetNumRows(); id++)
         //for(FactionStateList::const_iterator itr = target->m_factions.begin(); itr != target->m_factions.end(); ++itr)
     {
@@ -571,20 +580,43 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
         if (factionEntry)
         {
             FactionStateList::const_iterator repItr = target->m_factions.find(factionEntry->reputationListID);
-            std::string name = factionEntry->name[sWorld.GetDBClang()];
+
+            int loc = m_session->GetSessionDbcLocale();
+            std::string name = factionEntry->name[loc];
+            std::wstring wname;
 
             // converting name to lower case
-            strToLower( name );
+            if(!Utf8toWStr(name,wname))
+                continue;
 
-            // converting string that we try to find to lower case
-            strToLower( namepart );
+            wstrToLower( wname );
 
-            if (name.find(namepart) != std::string::npos)
+            if (wname.find(wnamepart) == std::wstring::npos)
+            {
+                loc = 0;
+                for(; loc < MAX_LOCALE; ++loc)
+                {
+                    if(loc==m_session->GetSessionDbcLocale())
+                        continue;
+
+                    name = factionEntry->name[loc];
+                    if(!Utf8toWStr(name,wname))
+                        continue;
+
+                    // converting name to lower case
+                    wstrToLower( wname );
+
+                    if (wname.find(wnamepart) != std::wstring::npos)
+                        break;
+                }
+            }
+
+            if(loc < MAX_LOCALE)
             {
                 // send faction in "id - [faction] rank reputation [visible] [at war] [own team] [unknown] [invisible] [inactive]" format
                 // or              "id - [faction] [no reputation]" format
                 std::ostringstream ss;
-                ss << id << " - |cffffffff|Hfaction:" << id << "|h[" << name << "]|h|r";
+                ss << id << " - |cffffffff|Hfaction:" << id << "|h[" << name << " " << localeNames[loc] << "]|h|r";
 
                 if (repItr != target->m_factions.end())
                 {
@@ -695,13 +727,13 @@ bool ChatHandler::HandleModifyRepCommand(const char * args)
 
     if (factionEntry->reputationListID < 0)
     {
-        PSendSysMessage(LANG_COMMAND_FACTION_NOREP_ERROR, factionEntry->name[sWorld.GetDBClang()], factionId);
+        PSendSysMessage(LANG_COMMAND_FACTION_NOREP_ERROR, factionEntry->name[m_session->GetSessionDbcLocale()], factionId);
         SetSentErrorMessage(true);
         return false;
     }
 
     target->SetFactionReputation(factionEntry,amount);
-    PSendSysMessage(LANG_COMMAND_MODIFY_REP, factionEntry->name[sWorld.GetDBClang()], factionId, target->GetName(), target->GetReputation(factionId));
+    PSendSysMessage(LANG_COMMAND_MODIFY_REP, factionEntry->name[m_session->GetSessionDbcLocale()], factionId, target->GetName(), target->GetReputation(factionId));
     return true;
 }
 
@@ -1837,7 +1869,7 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
         {
             FactionEntry const *factionEntry = sFactionStore.LookupEntry(itr->second.ID);
             if (factionEntry)
-                FactionName = factionEntry->name[sWorld.GetDBClang()];
+                FactionName = factionEntry->name[m_session->GetSessionDbcLocale()];
             else
                 FactionName = "#Not found#";
             ReputationRank rank = target->GetReputationRank(factionEntry);

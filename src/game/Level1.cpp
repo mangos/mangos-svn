@@ -275,18 +275,18 @@ bool ChatHandler::HandleGPSCommand(const char* args)
     uint32 have_vmap = Map::ExistVMap(obj->GetMapId(),gx,gy) ? 1 : 0;
 
     PSendSysMessage(LANG_MAP_POSITION,
-        obj->GetMapId(), (mapEntry ? mapEntry->name[sWorld.GetDBClang()] : "<unknown>" ),
-        zone_id, (zoneEntry ? zoneEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ),
-        area_id, (areaEntry ? areaEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ),
+        obj->GetMapId(), (mapEntry ? mapEntry->name[m_session->GetSessionDbcLocale()] : "<unknown>" ),
+        zone_id, (zoneEntry ? zoneEntry->area_name[m_session->GetSessionDbcLocale()] : "<unknown>" ),
+        area_id, (areaEntry ? areaEntry->area_name[m_session->GetSessionDbcLocale()] : "<unknown>" ),
         obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),
         cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(), obj->GetInstanceId(),
         zone_x, zone_y, ground_z, floor_z, have_map, have_vmap );
 
     sLog.outDebug("Player %s GPS call %s %u ", GetMangosString(LANG_MAP_POSITION), m_session->GetPlayer()->GetName(),
         (obj->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), obj->GetGUIDLow(),
-        obj->GetMapId(), (mapEntry ? mapEntry->name[sWorld.GetDBClang()] : "<unknown>" ),
-        zone_id, (zoneEntry ? zoneEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ),
-        area_id, (areaEntry ? areaEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ),
+        obj->GetMapId(), (mapEntry ? mapEntry->name[sWorld.GetDefaultDbcLocale()] : "<unknown>" ),
+        zone_id, (zoneEntry ? zoneEntry->area_name[sWorld.GetDefaultDbcLocale()] : "<unknown>" ),
+        area_id, (areaEntry ? areaEntry->area_name[sWorld.GetDefaultDbcLocale()] : "<unknown>" ),
         obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),
         cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(), obj->GetInstanceId(),
         zone_x, zone_y, ground_z, floor_z, have_map, have_vmap );
@@ -1637,10 +1637,15 @@ bool ChatHandler::HandleLookupAreaCommand(const char* args)
         return false;
 
     std::string namepart = args;
+    std::wstring wnamepart;
+
+    if(!Utf8toWStr(namepart,wnamepart))
+        return false;
+
     uint32 counter = 0;                                     // Counter for figure out that we found smth.
 
     // converting string that we try to find to lower case
-    strToLower( namepart );
+    wstrToLower( wnamepart );
 
     // Search in AreaTable.dbc
     for (uint32 areaflag = 0; areaflag < sAreaStore.GetNumRows(); ++areaflag)
@@ -1648,17 +1653,41 @@ bool ChatHandler::HandleLookupAreaCommand(const char* args)
         AreaTableEntry const *areaEntry = sAreaStore.LookupEntry(areaflag);
         if(areaEntry)
         {
-            // name - is first name field from dbc (English localized)
-            std::string name = areaEntry->area_name[sWorld.GetDBClang()];
+            int loc = m_session->GetSessionDbcLocale();
+            std::string name = areaEntry->area_name[loc];
+            std::wstring wname;
 
             // converting SpellName to lower case
-            strToLower( name );
+            if(!Utf8toWStr(name,wname))
+                continue;
 
-            if (name.find(namepart) != std::string::npos)
+            wstrToLower( wname );
+
+            if(wname.find(wnamepart) == std::wstring::npos)
+            {
+                loc = 0;
+                for(; loc < MAX_LOCALE; ++loc)
+                {
+                    if(loc==m_session->GetSessionDbcLocale())
+                        continue;
+
+                    name = areaEntry->area_name[loc];
+                    if(!Utf8toWStr(name,wname))
+                        continue;
+
+                    // converting SpellName to lower case
+                    wstrToLower( wname );
+
+                    if (wname.find(wnamepart) != std::string::npos)
+                        break;
+                }
+            }
+
+            if(loc < MAX_LOCALE)
             {
                 // send area in "id - [name]" format
                 std::ostringstream ss;
-                ss << areaEntry->ID << " - |cffffffff|Harea:" << areaEntry->ID << "|h[" << name << "]|h|r";
+                ss << areaEntry->ID << " - |cffffffff|Harea:" << areaEntry->ID << "|h[" << name << " " << localeNames[loc]<< "]|h|r";
 
                 SendSysMessage(ss.str().c_str());
 
@@ -2237,7 +2266,7 @@ bool ChatHandler::HandleGoZoneXYCommand(const char* args)
 
     if(map->Instanceable())
     {
-        PSendSysMessage(LANG_INVALID_ZONE_MAP,areaEntry->ID,areaEntry->area_name[sWorld.GetDBClang()],map->GetId(),map->GetMapName());
+        PSendSysMessage(LANG_INVALID_ZONE_MAP,areaEntry->ID,areaEntry->area_name[m_session->GetSessionDbcLocale()],map->GetId(),map->GetMapName());
         SetSentErrorMessage(true);
         return false;
     }
