@@ -896,6 +896,11 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options = 0);
 
+        bool TeleportTo(WorldLocation const &loc, uint32 options = 0)
+        {
+            return TeleportTo(loc.mapid, loc.x, loc.y, loc.z, options);
+        }
+
         void SetSummonPoint(uint32 mapid, float x, float y, float z)
         {
             m_summon_expire = time(NULL) + MAX_PLAYER_SUMMON_DELAY;
