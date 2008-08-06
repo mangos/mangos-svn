@@ -346,9 +346,8 @@ LogColors = ""
 #
 #    DBC.Locale
 #        DBC Language Settings
-#        0 = English; 1 = Korean; 2 = French; 3 = German; 4 = Chinese; 5 = Taiwanese; 6 = Spanish; 7 = Russian
-#        8 = Unknown; 9 = Unknown; 10 = Unknown; 11 = Unknown; 12 = Unknown; 13 = Unknown; 14 = Unknown; 15 = Unknown
-#        255 = Auto Detect (Default)
+#        0 = English; 1 = Korean; 2 = French; 3 = German; 4 = Chinese; 5 = Taiwanese; 6 = Spanish; 7 = Spanish Mexico
+#        8 = Russian; 255 = Auto Detect (Default)
 #
 #    StrictPlayerNames
 #        Limit player name to language specific symbols set, not allow create characters, and set rename request and disconnect at not allowed symbols name

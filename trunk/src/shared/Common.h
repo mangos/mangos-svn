@@ -143,15 +143,22 @@ enum AccountTypes
 
 enum LocaleConstant
 {
-    LOCALE_ENG = 0, // en_us
-    LOCALE_KO  = 1, // ko_kr
-    LOCALE_FR  = 2, // fr_fr
-    LOCALE_DE  = 3, // de_de
-    LOCALE_ZH  = 5, // zh_tw
-    LOCALE_ES  = 6, // es_es
-    LOCALE_RU  = 7,
-    MAX_LOCALE = 8
+    LOCALE_enUS = 0,
+    LOCALE_koKR = 1,
+    LOCALE_frFR = 2,
+    LOCALE_deDE = 3,
+    LOCALE_zhCN = 4,
+    LOCALE_zhTW = 5,
+    LOCALE_esES = 6,
+    LOCALE_esMX = 7,
+    LOCALE_ruRU = 8
 };
+
+#define MAX_LOCALE 9
+
+extern char const* localeNames[MAX_LOCALE];
+
+LocaleConstant GetLocaleByName(std::string name);
 
 // we always use stdlibc++ std::max/std::min, undefine some not C++ standard defines (Win API and some pother platforms)
 #ifdef max

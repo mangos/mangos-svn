@@ -161,6 +161,8 @@ pkgdata_DATA = \
 	6397_mangos_creature_template.sql \
 	6398_mangos_creature_template.sql \
 	6412_characters_declinedname.sql \
+	6426_mangos_locales.sql \
+	6426_realmd_localization.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -302,4 +304,6 @@ EXTRA_DIST = \
 	6397_mangos_creature_template.sql \
 	6398_mangos_creature_template.sql \
 	6412_characters_declinedname.sql \
+	6426_mangos_locales.sql \
+	6426_realmd_localization.sql \
 	README

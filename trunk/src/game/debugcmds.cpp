@@ -140,7 +140,7 @@ bool ChatHandler::HandleSendOpcodeCommand(const char* args)
     uint32 val1;
     uint64 val2;
     float val3;
-    char *val4[101];
+    char val4[101];
 
     uint32 opcode = 0;
     fscanf(file, "%u", &opcode);
