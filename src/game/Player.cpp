@@ -3952,22 +3952,29 @@ void Player::RepopAtGraveyard()
     else
         ClosestGrave = objmgr.GetClosestGraveYard( GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam() );
 
+    // stop countdown until repop
+    m_deathTimer = 0;
+
+    WorldLocation repop_loc;
     if(ClosestGrave)
     {
-        // stop countdown until repop
-        m_deathTimer = 0;
+        repop_loc = WorldLocation(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, GetOrientation());
+        TeleportTo(repop_loc);
+    }
+    else
+    {
+        // if no grave found, stay at the current location
+        GetPosition(repop_loc);
+    }
 
-        TeleportTo(ClosestGrave->map_id, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, GetOrientation());
-
-        if(isDead())                                        // not send if alive, because it used in TeleportTo()
-        {
-            WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);  // show spirit healer position on minimap
-            data << ClosestGrave->map_id;
-            data << ClosestGrave->x;
-            data << ClosestGrave->y;
-            data << ClosestGrave->z;
-            GetSession()->SendPacket(&data);
-        }
+    if(isDead())                                        // not send if alive, because it used in TeleportTo()
+    {
+        WorldPacket data(SMSG_DEATH_RELEASE_LOC, 4*4);  // show spirit healer position on minimap
+        data << repop_loc.mapid;
+        data << repop_loc.x;
+        data << repop_loc.y;
+        data << repop_loc.z;
+        GetSession()->SendPacket(&data);
     }
 }
 
