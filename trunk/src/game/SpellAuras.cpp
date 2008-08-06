@@ -232,7 +232,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //179 SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE implemented in Unit::SpellCriticalBonus
     &Aura::HandleNoImmediateEffect,                         //180 SPELL_AURA_MOD_FLAT_SPELL_DAMAGE_VERSUS   implemented in Unit::SpellDamageBonus
     &Aura::HandleUnused,                                    //181 SPELL_AURA_MOD_FLAT_SPELL_CRIT_DAMAGE_VERSUS unused
-    &Aura::HandleAuraModResistenceOfIntellectPercent,       //182 SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT
+    &Aura::HandleAuraModResistenceOfStatPercent,            //182 SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT
     &Aura::HandleNULL,                                      //183 SPELL_AURA_MOD_CRITICAL_THREAT
     &Aura::HandleNoImmediateEffect,                         //184 SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE  implemented in Unit::RollMeleeOutcomeAgainst
     &Aura::HandleNoImmediateEffect,                         //185 SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE implemented in Unit::RollMeleeOutcomeAgainst
@@ -1561,7 +1561,7 @@ void Aura::TriggerSpell()
 //                    case 38751: break;
 //                    // Murmur's Touch
 //                    case 38794: break;
-//                    // Activate Nether-wraith Beacon
+//                    // Activate Nether-wraith Beacon (31742 Nether-wraith Beacon item)
 //                    case 39105: break;
 //                    // Drain World Tree Visual
 //                    case 39140: break;
@@ -1627,6 +1627,8 @@ void Aura::TriggerSpell()
 //                    case 46981: break;
 //                    // Dragonblight Ram
 //                    case 47015: break;
+//                    // Party G.R.E.N.A.D.E.
+//                    case 51510: break;
                     default:
                         break;
                 }
@@ -1951,6 +1953,14 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
             if(finalSpelId)
                 caster->CastSpell(m_target,finalSpelId,true,NULL,this);
+            return;
+        }
+        // Dark Fiend
+        if(GetId()==45934)
+        {
+            // Kill target if dispeled
+            if (m_dispelled)
+                m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
             return;
         }
 
@@ -4245,7 +4255,7 @@ void Aura::HandleModTotalPercentStat(bool apply, bool Real)
     }
 }
 
-void Aura::HandleAuraModResistenceOfIntellectPercent(bool apply, bool Real)
+void Aura::HandleAuraModResistenceOfStatPercent(bool apply, bool Real)
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -4254,7 +4264,7 @@ void Aura::HandleAuraModResistenceOfIntellectPercent(bool apply, bool Real)
     {
         // support required adding replace UpdateArmor by loop by UpdateResistence at intelect update
         // and include in UpdateResistence same code as in UpdateArmor for aura mod apply.
-        sLog.outError("Aura SPELL_AURA_MOD_RESISTANCE_OF_INTELLECT_PERCENT(182) need adding support for non-armor resistences!");
+        sLog.outError("Aura SPELL_AURA_MOD_RESISTANCE_OF_STAT_PERCENT(182) need adding support for non-armor resistences!");
         return;
     }
 
@@ -6074,8 +6084,6 @@ void Aura::PeriodicDummyTick()
 //        case 46465: break;
 //        // Chill, Internal Shifter
 //        case 46549: break;
-//        // Raise Dead
-//        case 46585: break;
 //        // Summon Ice Spear Knockback Delayer
 //        case 46878: break;
 //        // Burninate Effect
@@ -6086,54 +6094,16 @@ void Aura::PeriodicDummyTick()
 //        case 47369: break;
 //        // Direbrew's Disarm (precast)
 //        case 47407: break;
-//        // Chains of Ice
-//        case 47805: break;
-//        // Crystal Spike
-//        case 47941: break;
-//        // Healer Aura
-//        case 48200: break;
-//        // Summon Gauntlet Mobs Periodic
-//        case 48630: break;
-//        // Bladed Armor
-//        case 48978: break;
-//        // Ride Rocket Propelled Warhead
-//        case 49177: break;
-//        // Summon Gargoyle
-//        case 49206: break;
-//        // Proximity Mine Area Aura
-//        case 49313: break;
-//        // Bladed Armor
-//        case 49390: break;
-//        // Bladed Armor
-//        case 49391: break;
-//        // Bladed Armor
-//        case 49392: break;
-//        // Bladed Armor
-//        case 49393: break;
+//        // Mole Machine Port Schedule
+//        case 47489: break;
 //        // Mole Machine Portal Schedule
 //        case 49466: break;
 //        // Drink Coffee
 //        case 49472: break;
-//        // Corpse Explode
-//        case 49555: break;
-//        // Temporal Rift
-//        case 49592: break;
-//        // Raise Gargoyle
-//        case 49641: break;
-//        // Missile Impact
-//        case 49761: break;
-//        // Cutting Laser
-//        case 49957: break;
-//        // Slow Fall
-//        case 50085: break;
 //        // Listening to Music
 //        case 50493: break;
-//        // Raise Dead
-//        case 50525: break;
 //        // Love Rocket Barrage
 //        case 50530: break;
-//        // Parachute
-//        case 50550: break;
         default:
             break;
     }

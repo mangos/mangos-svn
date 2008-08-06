@@ -201,7 +201,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraModPacifyAndSilence(bool Apply, bool Real);
         void HandleAuraModIncreaseMaxHealth(bool apply, bool Real);
         void HandleAuraModExpertise(bool apply, bool Real);
-        void HandleAuraModResistenceOfIntellectPercent(bool apply, bool Real);
+        void HandleAuraModResistenceOfStatPercent(bool apply, bool Real);
         void HandleAuraPowerBurn(bool apply, bool Real);
         void HandleSchoolAbsorb(bool apply, bool Real);
         void HandlePreventFleeing(bool apply, bool Real);
@@ -211,6 +211,8 @@ class MANGOS_DLL_SPEC Aura
 
         void SetModifier(AuraType t, int32 a, uint32 pt, int32 miscValue);
         Modifier* GetModifier() {return &m_modifier;}
+        int32 GetMiscValue() {return m_spellProto->EffectMiscValue[m_effIndex];}
+        int32 GetMiscBValue() {return m_spellProto->EffectMiscValueB[m_effIndex];}
 
         SpellEntry const* GetSpellProto() const { return m_spellProto; }
         uint32 GetId() const{ return m_spellProto->Id; }
