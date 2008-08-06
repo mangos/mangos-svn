@@ -18,7 +18,7 @@
 
 #include "Common.h"
 
-static char const* localeNames[MAX_LOCALE] = {
+char const* localeNames[MAX_LOCALE] = {
   "enUS",
   "koKR",
   "frFR",
