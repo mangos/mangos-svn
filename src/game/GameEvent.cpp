@@ -405,7 +405,8 @@ void GameEvent::ApplyNewEvent(uint16 event_id)
             break;
         case 1:                                             // announce events
             char str[1024];
-            sprintf(str, objmgr.GetMangosString(LANG_EVENTMESSAGE), mGameEvent[event_id].description.c_str());
+            //FIXME: global messages also must be localized for each target client
+            sprintf(str, objmgr.GetMangosStringForDBCLocale(LANG_EVENTMESSAGE), mGameEvent[event_id].description.c_str());
             sWorld.SendWorldText(str, NULL);
             break;
     }

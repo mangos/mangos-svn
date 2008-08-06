@@ -111,7 +111,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
         // TODO: find correct opcode
         if(_player->getLevel() < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
         {
-            SendNotification(objmgr.GetMangosString(LANG_ARENA_ONE_TOOLOW, GetSessionLocaleIndex()), 70);
+            SendNotification(GetMangosString(LANG_ARENA_ONE_TOOLOW), 70);
             return;
         }
 

@@ -584,7 +584,7 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
                 // send faction in "id - [faction] rank reputation [visible] [at war] [own team] [unknown] [invisible] [inactive]" format
                 // or              "id - [faction] [no reputation]" format
                 std::ostringstream ss;
-                ss << id << " - |cffffffff|Hfaction:" << id << "|h[" << factionEntry->name[sWorld.GetDBClang()] << "]|h|r";
+                ss << id << " - |cffffffff|Hfaction:" << id << "|h[" << name << "]|h|r";
 
                 if (repItr != target->m_factions.end())
                 {

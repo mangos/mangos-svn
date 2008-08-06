@@ -187,6 +187,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         // Locales
         int GetSessionLocaleIndex() { return m_sessionLocaleIndex; }
+        const char *GetMangosString(uint32 entry);
 
         uint32 GetLatency() const { return m_latency; }
         void SetLatency(uint32 latency) { m_latency = latency; }

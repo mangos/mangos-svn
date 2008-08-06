@@ -518,8 +518,7 @@ ChatCommand * ChatHandler::getCommandTable()
 
 const char *ChatHandler::GetMangosString(uint32 entry)
 {
-    int loc = m_session->GetSessionLocaleIndex();
-    return objmgr.GetMangosString(entry,loc);
+    return m_session->GetMangosString(entry);
 }
 
 bool ChatHandler::hasStringAbbr(const char* s1, const char* s2)

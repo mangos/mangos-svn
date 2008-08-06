@@ -510,7 +510,7 @@ void BattleGround::SendRewardMarkByMail(Player *plr,uint32 mark, uint32 count)
                     subject = il->Name[loc_idx];
 
         // text
-        std::string textFormat = objmgr.GetMangosString(LANG_BG_MARK_BY_MAIL, plr->GetSession()->GetSessionLocaleIndex());
+        std::string textFormat = plr->GetSession()->GetMangosString(LANG_BG_MARK_BY_MAIL);
         char textBuf[300];
         snprintf(textBuf,300,textFormat.c_str(),GetName(),GetName());
         uint32 itemTextId = objmgr.CreateItemText( textBuf );
@@ -1023,10 +1023,11 @@ void BattleGround::EndNow()
     SetEndTime(TIME_TO_AUTOREMOVE);
 }
 
-// Battlegound messages are localized using the dbc lang, they are not client language dependant
+// Battleground messages are localized using the dbc lang, they are not client language dependent
 const char *BattleGround::GetMangosString(uint32 entry)
 {
-    return objmgr.GetMangosString(entry);
+    // FIXME: now we have different DBC locales and need localized message for each target client
+    return objmgr.GetMangosStringForDBCLocale(entry);
 }
 
 /*

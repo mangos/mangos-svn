@@ -643,7 +643,8 @@ class ObjectMgr
             if(itr==mMangosStringLocaleMap.end()) return NULL;
             return &itr->second;
         }
-        const char *GetMangosString(uint32 entry, int locale_idx = -2);
+        const char *GetMangosString(uint32 entry, int locale_idx) const;
+        const char *GetMangosStringForDBCLocale(uint32 entry) const { return GetMangosString(entry,DBCLocaleIndex); }
         void SetDBCLocaleIndex(uint32 lang) { DBCLocaleIndex = GetIndexForLocale(LocaleConstant(lang)); }
 
         void AddCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid, uint32 instance);
@@ -744,8 +745,8 @@ class ObjectMgr
 
         GraveYardMap        mGraveYardMap;
 
-        typedef             std::vector<LocaleConstant> LocalToIndex;
-        LocalToIndex        m_LocalToIndex;
+        typedef             std::vector<LocaleConstant> LocalForIndex;
+        LocalForIndex        m_LocalForIndex;
         int GetOrNewIndexForLocale(LocaleConstant loc);
 
         int DBCLocaleIndex;

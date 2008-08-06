@@ -108,7 +108,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         if (!_player->CanSpeak())
         {
             std::string timeStr = secsToTimeString(m_muteTime - time(NULL));
-            SendNotification(objmgr.GetMangosString(LANG_WAIT_BEFORE_SPEAKING, GetSessionLocaleIndex()),timeStr.c_str());
+            SendNotification(GetMangosString(LANG_WAIT_BEFORE_SPEAKING),timeStr.c_str());
             return;
         }
 
@@ -424,7 +424,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 if(!_player->isAFK())
                 {
                     if(msg.empty())
-                        msg  = objmgr.GetMangosString(LANG_PLAYER_AFK_DEFAULT,GetSessionLocaleIndex());
+                        msg  = GetMangosString(LANG_PLAYER_AFK_DEFAULT);
                     _player->afkMsg = msg;
                 }
                 _player->ToggleAFK();
@@ -443,7 +443,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 if(!_player->isDND())
                 {
                     if(msg.empty())
-                        msg  = objmgr.GetMangosString(LANG_PLAYER_DND_DEFAULT,GetSessionLocaleIndex());
+                        msg  = GetMangosString(LANG_PLAYER_DND_DEFAULT);
                     _player->dndMsg = msg;
                 }
                 _player->ToggleDND();
@@ -477,7 +477,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
     if (!GetPlayer()->CanSpeak())
     {
         std::string timeStr = secsToTimeString(m_muteTime - time(NULL));
-        SendNotification(objmgr.GetMangosString(LANG_WAIT_BEFORE_SPEAKING, GetSessionLocaleIndex()),timeStr.c_str());
+        SendNotification(GetMangosString(LANG_WAIT_BEFORE_SPEAKING),timeStr.c_str());
         return;
     }
 
