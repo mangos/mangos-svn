@@ -11342,7 +11342,7 @@ void Player::SendPreparedQuest( uint64 guid )
                 {
                     title = gossiptext->Options[0].Text_0;
 
-                    int loc_idx = GetSession()->GetSessionLocaleIndex();
+                    int loc_idx = GetSession()->GetSessionDbLocaleIndex();
                     if (loc_idx >= 0)
                     {
                         NpcTextLocale const *nl = objmgr.GetNpcTextLocale(textid);
@@ -11357,7 +11357,7 @@ void Player::SendPreparedQuest( uint64 guid )
                 {
                     title = gossiptext->Options[0].Text_1;
 
-                    int loc_idx = GetSession()->GetSessionLocaleIndex();
+                    int loc_idx = GetSession()->GetSessionDbLocaleIndex();
                     if (loc_idx >= 0)
                     {
                         NpcTextLocale const *nl = objmgr.GetNpcTextLocale(textid);

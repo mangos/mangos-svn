@@ -704,7 +704,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                                         name = proto->Name1;
 
                                         // local name
-                                        int loc_idx = GetSessionLocaleIndex();
+                                        int loc_idx = GetSessionDbLocaleIndex();
                                         if ( loc_idx >= 0 )
                                         {
                                             ItemLocale const *il = objmgr.GetItemLocale(proto->ItemId);

@@ -164,7 +164,7 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
         data << uint32( pQuest ? pQuest->GetQuestLevel() : 0 );
         std::string Title = pQuest->GetTitle();
 
-        int loc_idx = pSession->GetSessionLocaleIndex();
+        int loc_idx = pSession->GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
         {
             QuestLocale const *ql = objmgr.GetQuestLocale(questID);
@@ -236,7 +236,7 @@ void PlayerMenu::SendTalking( uint32 textID )
             Text_0[i]=pGossip->Options[i].Text_0;
             Text_1[i]=pGossip->Options[i].Text_1;
         }
-        int loc_idx = pSession->GetSessionLocaleIndex();
+        int loc_idx = pSession->GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
         {
             NpcTextLocale const *nl = objmgr.GetNpcTextLocale(textID);
@@ -395,7 +395,7 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
     std::string Objectives = pQuest->GetObjectives();
     std::string EndText    = pQuest->GetEndText();
 
-    int loc_idx = pSession->GetSessionLocaleIndex();
+    int loc_idx = pSession->GetSessionDbLocaleIndex();
     if (loc_idx >= 0)
     {
         QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
@@ -481,7 +481,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
     for (int i=0;i<QUEST_OBJECTIVES_COUNT;i++)
         ObjectiveText[i]=pQuest->ObjectiveText[i];
 
-    int loc_idx = pSession->GetSessionLocaleIndex();
+    int loc_idx = pSession->GetSessionDbLocaleIndex();
     if (loc_idx >= 0)
     {
         QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
@@ -593,7 +593,7 @@ void PlayerMenu::SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID,
     std::string Title = pQuest->GetTitle();
     std::string OfferRewardText = pQuest->GetOfferRewardText();
 
-    int loc_idx = pSession->GetSessionLocaleIndex();
+    int loc_idx = pSession->GetSessionDbLocaleIndex();
     if (loc_idx >= 0)
     {
         QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
@@ -686,7 +686,7 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest const *pQuest, uint64 npcGUID
     Title = pQuest->GetTitle();
     RequestItemsText = pQuest->GetRequestItemsText();
 
-    int loc_idx = pSession->GetSessionLocaleIndex();
+    int loc_idx = pSession->GetSessionDbLocaleIndex();
     if (loc_idx >= 0)
     {
         QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());

@@ -269,7 +269,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         std::string Name        = pProto->Name1;
         std::string Description = pProto->Description;
 
-        int loc_idx = GetSessionLocaleIndex();
+        int loc_idx = GetSessionDbLocaleIndex();
         if ( loc_idx >= 0 )
         {
             ItemLocale const *il = objmgr.GetItemLocale(pProto->ItemId);
@@ -934,7 +934,7 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket & recv_data)
         std::string Name;
         Name = pProto->Name1;
 
-        int loc_idx = GetSessionLocaleIndex();
+        int loc_idx = GetSessionDbLocaleIndex();
         if (loc_idx >= 0)
         {
             ItemLocale const *il = objmgr.GetItemLocale(pProto->ItemId);

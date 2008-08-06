@@ -186,7 +186,7 @@ class MANGOS_DLL_SPEC WorldSession
         time_t m_muteTime;
 
         // Locales
-        int GetSessionLocaleIndex() { return m_sessionLocaleIndex; }
+        int GetSessionDbLocaleIndex() { return m_sessionLocaleIndex; }
         const char *GetMangosString(uint32 entry);
 
         uint32 GetLatency() const { return m_latency; }
