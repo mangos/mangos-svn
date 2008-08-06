@@ -838,5 +838,5 @@ void WorldSession::SendNotification(const char *format,...)
 
 const char * WorldSession::GetMangosString( uint32 entry )
 {
-    return objmgr.GetMangosString(entry,GetSessionLocaleIndex());
+    return objmgr.GetMangosString(entry,GetSessionDbLocaleIndex());
 }

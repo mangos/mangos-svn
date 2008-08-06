@@ -2227,7 +2227,7 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
         if(!pProto)
             continue;
 
-        int loc_idx = m_session->GetSessionLocaleIndex();
+        int loc_idx = m_session->GetSessionDbLocaleIndex();
         if ( loc_idx >= 0 )
         {
             ItemLocale const *il = objmgr.GetItemLocale(pProto->ItemId);
@@ -2448,7 +2448,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
     {
         Quest * qinfo = iter->second;
 
-        int loc_idx = m_session->GetSessionLocaleIndex();
+        int loc_idx = m_session->GetSessionDbLocaleIndex();
         if ( loc_idx >= 0 )
         {
             QuestLocale const *il = objmgr.GetQuestLocale(qinfo->GetQuestId());
@@ -2532,7 +2532,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
         if(!cInfo)
             continue;
 
-        int loc_idx = m_session->GetSessionLocaleIndex();
+        int loc_idx = m_session->GetSessionDbLocaleIndex();
         if ( loc_idx >= 0 )
         {
             CreatureLocale const *cl = objmgr.GetCreatureLocale(id);
@@ -2590,7 +2590,7 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
         if(!gInfo)
             continue;
 
-        int loc_idx = m_session->GetSessionLocaleIndex();
+        int loc_idx = m_session->GetSessionDbLocaleIndex();
         if ( loc_idx >= 0 )
         {
             GameObjectLocale const *gl = objmgr.GetGameObjectLocale(id);

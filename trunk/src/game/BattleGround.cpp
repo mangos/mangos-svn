@@ -503,7 +503,7 @@ void BattleGround::SendRewardMarkByMail(Player *plr,uint32 mark, uint32 count)
 
         // subject: item name
         std::string subject = markProto->Name1;
-        int loc_idx = plr->GetSession()->GetSessionLocaleIndex();
+        int loc_idx = plr->GetSession()->GetSessionDbLocaleIndex();
         if ( loc_idx >= 0 )
             if(ItemLocale const *il = objmgr.GetItemLocale(markProto->ItemId))
                 if (il->Name.size() > loc_idx && !il->Name[loc_idx].empty())
