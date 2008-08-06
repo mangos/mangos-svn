@@ -953,7 +953,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     SetUInt32Value(UNIT_NPC_FLAGS , 0);
 
     CreatureFamilyEntry const* cFamily = sCreatureFamilyStore.LookupEntry(creature->GetCreatureInfo()->family);
-    if( char* familyname = cFamily->Name[sWorld.GetDBClang()] )
+    if( char* familyname = cFamily->Name[sWorld.GetDefaultDbcLocale()] )
         SetName(familyname);
     else
         SetName(creature->GetName());

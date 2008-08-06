@@ -4008,7 +4008,7 @@ void Player::UpdateLocalChannels(uint32 newZone )
     if(!cMgr)
         return;
 
-    std::string current_zone_name = current_zone->area_name[sWorld.GetDBClang()];
+    std::string current_zone_name = current_zone->area_name[GetSession()->GetSessionDbcLocale()];
 
     for(JoinedChannelsList::iterator i = m_channels.begin(), next; i != m_channels.end(); i = next)
     {
@@ -4027,7 +4027,7 @@ void Player::UpdateLocalChannels(uint32 newZone )
 
         //  new channel
         char new_channel_name_buf[100];
-        snprintf(new_channel_name_buf,100,ch->pattern[sWorld.GetDBClang()],current_zone_name.c_str());
+        snprintf(new_channel_name_buf,100,ch->pattern[m_session->GetSessionDbcLocale()],current_zone_name.c_str());
         Channel* new_channel = cMgr->GetJoinChannel(new_channel_name_buf,ch->ChannelID);
 
         if((*i)!=new_channel)

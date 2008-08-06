@@ -2272,11 +2272,17 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
 {
     if(!*args)
         return false;
+
     std::string namepart = args;
-    uint32 counter = 0;                                     // Counter for figure out that we found smth.
+    std::wstring wnamepart;
+
+    if(!Utf8toWStr(namepart,wnamepart))
+        return false;
 
     // converting string that we try to find to lower case
-    strToLower( namepart );
+    wstrToLower( wnamepart );
+
+    uint32 counter = 0;                                     // Counter for figure out that we found smth.
 
     // Search in ItemSet.dbc
     for (uint32 id = 0; id < sItemSetStore.GetNumRows(); id++)
@@ -2284,15 +2290,40 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
         ItemSetEntry const *set = sItemSetStore.LookupEntry(id);
         if(set)
         {
-            std::string name = set->name[sWorld.GetDBClang()];
+            int loc = m_session->GetSessionDbcLocale();
+            std::string name = set->name[m_session->GetSessionDbcLocale()];
+            std::wstring wname;
 
             // converting name to lower case
-            strToLower( name );
+            if(!Utf8toWStr(name,wname))
+                continue;
 
-            if (name.find(namepart) != std::string::npos)
+            wstrToLower( wname );
+
+            if (wname.find(wnamepart) == std::wstring::npos)
             {
-                // send item set in "id - [namedlink]" format
-                PSendSysMessage(LANG_ITEMSET_LIST,id,id,name.c_str());
+                loc = 0;
+                for(; loc < MAX_LOCALE; ++loc)
+                {
+                    if(loc==m_session->GetSessionDbcLocale())
+                        continue;
+
+                    name = set->name[m_session->GetSessionDbcLocale()];
+                    if(!Utf8toWStr(name,wname))
+                        continue;
+
+                    // converting name to lower case
+                    wstrToLower( wname );
+
+                    if (wname.find(wnamepart) != std::wstring::npos)
+                        break;
+                }
+            }
+
+            if(loc < MAX_LOCALE)
+            {
+                // send item set in "id - [namedlink locale]" format
+                PSendSysMessage(LANG_ITEMSET_LIST,id,id,name.c_str(),localeNames[loc]);
                 ++counter;
             }
         }
@@ -2316,10 +2347,15 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
         return false;
 
     std::string namepart = args;
-    uint32 counter = 0;                                     // Counter for figure out that we found smth.
+    std::wstring wnamepart;
+
+    if(!Utf8toWStr(namepart,wnamepart))
+        return false;
 
     // converting string that we try to find to lower case
-    strToLower( namepart );
+    wstrToLower( wnamepart );
+
+    uint32 counter = 0;                                     // Counter for figure out that we found smth.
 
     // Search in SkillLine.dbc
     for (uint32 id = 0; id < sSkillLineStore.GetNumRows(); id++)
@@ -2327,16 +2363,40 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
         SkillLineEntry const *skillInfo = sSkillLineStore.LookupEntry(id);
         if(skillInfo)
         {
-            // name - is first name field from dbc (English localized)
-            std::string name = skillInfo->name[sWorld.GetDBClang()];
+            int loc = m_session->GetSessionDbcLocale();
+            std::string name = skillInfo->name[loc];
+            std::wstring wname;
 
-            // converting SkillName to lower case
-            strToLower( name );
+            // converting name to lower case
+            if(!Utf8toWStr(name,wname))
+                continue;
 
-            if (name.find(namepart) != std::string::npos)
+            wstrToLower( wname );
+
+            if (wname.find(wnamepart) == std::wstring::npos)
             {
-                // send skill in "id - [namedlink]" format
-                PSendSysMessage(LANG_SKILL_LIST,id,id,name.c_str(),(target->HasSkill(id) ? m_session->GetMangosString(LANG_KNOWN) : ""));
+                loc = 0;
+                for(; loc < MAX_LOCALE; ++loc)
+                {
+                    if(loc==m_session->GetSessionDbcLocale())
+                        continue;
+
+                    name = skillInfo->name[loc];
+                    if(!Utf8toWStr(name,wname))
+                        continue;
+
+                    // converting name to lower case
+                    wstrToLower( wname );
+
+                    if (wname.find(wnamepart) != std::wstring::npos)
+                        break;
+                }
+            }
+
+            if(loc < MAX_LOCALE)
+            {
+                // send skill in "id - [namedlink locale]" format
+                PSendSysMessage(LANG_SKILL_LIST,id,id,name.c_str(),localeNames[loc],(target->HasSkill(id) ? m_session->GetMangosString(LANG_KNOWN) : ""));
 
                 ++counter;
             }
@@ -2359,7 +2419,16 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
 
     if(!*args)
         return false;
+
     std::string namepart = args;
+    std::wstring wnamepart;
+
+    if(!Utf8toWStr(namepart,wnamepart))
+        return false;
+
+    // converting string that we try to find to lower case
+    wstrToLower( wnamepart );
+
     uint32 counter = 0;                                     // Counter for figure out that we found smth.
 
     // converting string that we try to find to lower case
@@ -2371,13 +2440,37 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
         SpellEntry const *spellInfo = sSpellStore.LookupEntry(id);
         if(spellInfo)
         {
-            // name - is first name field from dbc (English localized)
-            std::string name = spellInfo->SpellName[sWorld.GetDBClang()];
+            int loc = m_session->GetSessionDbcLocale();
+            std::string name = spellInfo->SpellName[loc];
+            std::wstring wname;
 
-            // converting SpellName to lower case
-            strToLower( name );
+            // converting name to lower case
+            if(!Utf8toWStr(name,wname))
+                continue;
 
-            if (name.find(namepart) != std::string::npos)
+            wstrToLower( wname );
+
+            if (wname.find(wnamepart) == std::wstring::npos)
+            {
+                loc = 0;
+                for(; loc < MAX_LOCALE; ++loc)
+                {
+                    if(loc==m_session->GetSessionDbcLocale())
+                        continue;
+
+                    name = spellInfo->SpellName[loc];
+                    if(!Utf8toWStr(name,wname))
+                        continue;
+
+                    // converting name to lower case
+                    wstrToLower( wname );
+
+                    if (wname.find(wnamepart) != std::wstring::npos)
+                        break;
+                }
+            }
+
+            if(loc < MAX_LOCALE)
             {
                 bool known = target->HasSpell(id);
                 bool learn = (spellInfo->Effect[0] == SPELL_EFFECT_LEARN_SPELL);
@@ -2400,7 +2493,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
                 if(rank)
                     ss << GetMangosString(LANG_SPELL_RANK) << rank;
 
-                ss << "]|h|r";
+                ss << " " << localeNames[loc] << "]|h|r";
 
                 if(talent)
                     ss << GetMangosString(LANG_TALENT);
@@ -3904,7 +3997,8 @@ bool ChatHandler::HandleListAurasCommand (const char * /*args*/)
         bool talent = GetTalentSpellCost(itr->second->GetId()) > 0;
         PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, itr->second->GetId(), itr->second->GetEffIndex(),
             itr->second->GetModifier()->m_auraname, itr->second->GetAuraDuration(), itr->second->GetAuraMaxDuration(),
-            itr->second->GetSpellProto()->SpellName[sWorld.GetDBClang()],(itr->second->IsPassive() ? passiveStr : ""),(talent ? talentStr : ""),
+            itr->second->GetSpellProto()->SpellName[m_session->GetSessionDbcLocale()],
+            (itr->second->IsPassive() ? passiveStr : ""),(talent ? talentStr : ""),
             IS_PLAYER_GUID(itr->second->GetCasterGUID()) ? "player" : "creature",GUID_LOPART(itr->second->GetCasterGUID()));
     }
     for (int i = 0; i < TOTAL_AURAS; i++)
@@ -3916,7 +4010,7 @@ bool ChatHandler::HandleListAurasCommand (const char * /*args*/)
         {
             bool talent = GetTalentSpellCost((*itr)->GetId()) > 0;
             PSendSysMessage(LANG_COMMAND_TARGET_AURASIMPLE, (*itr)->GetId(), (*itr)->GetEffIndex(),
-                (*itr)->GetSpellProto()->SpellName[sWorld.GetDBClang()],((*itr)->IsPassive() ? passiveStr : ""),(talent ? talentStr : ""),
+                (*itr)->GetSpellProto()->SpellName[m_session->GetSessionDbcLocale()],((*itr)->IsPassive() ? passiveStr : ""),(talent ? talentStr : ""),
                 IS_PLAYER_GUID((*itr)->GetCasterGUID()) ? "player" : "creature",GUID_LOPART((*itr)->GetCasterGUID()));
         }
     }
