@@ -234,9 +234,6 @@ enum SpellFamilyNames
 #define SPELLFAMILYFLAG_ROGUE_KIDNEYSHOT        0x000200000LL
 #define SPELLFAMILYFLAG_ROGUE__FINISHING_MOVE   0x9003E0000LL
 
-//Some SpellIDs
-#define SPELLID_MAGE_HYPOTHERMIA            41425
-
 // Spell clasification
 enum SpellSpecific
 {
@@ -384,7 +381,6 @@ inline bool isSpellBreakStealth(SpellEntry const* spellInfo)
     return !(spellInfo->AttributesEx & SPELL_ATTR_EX_NOT_BREAK_STEALTH);
 }
 
-bool IsMechanicInvulnerabilityImmunityToSpell(SpellEntry const* spellInfo);
 uint8 GetErrorAtShapeshiftedCast (SpellEntry const *spellInfo, uint32 form);
 
 inline bool IsChanneledSpell(SpellEntry const* spellInfo)

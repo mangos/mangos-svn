@@ -3155,6 +3155,12 @@ uint8 Spell::CanCast(bool strict)
             return SPELL_FAILED_ONLY_STEALTHED;
     }
 
+    // caster state requirements
+    if(m_spellInfo->CasterAuraState && !m_caster->HasAuraState(AuraState(m_spellInfo->CasterAuraState)))
+        return SPELL_FAILED_CASTER_AURASTATE;
+    if(m_spellInfo->CasterAuraStateNot && m_caster->HasAuraState(AuraState(m_spellInfo->CasterAuraStateNot)))
+        return SPELL_FAILED_CASTER_AURASTATE;
+
     // cancel autorepeat spells if cast start when moving
     // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)
     if( m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->isMoving() )
@@ -3169,6 +3175,12 @@ uint8 Spell::CanCast(bool strict)
 
     if(target)
     {
+        // target state requirements
+        if(m_spellInfo->TargetAuraState && !target->HasAuraState(AuraState(m_spellInfo->TargetAuraState)))
+            return SPELL_FAILED_TARGET_AURASTATE;
+        if(m_spellInfo->TargetAuraStateNot && target->HasAuraState(AuraState(m_spellInfo->TargetAuraStateNot)))
+            return SPELL_FAILED_TARGET_AURASTATE;
+
         if(target != m_caster)
         {
             // Not allow casting on flying player
@@ -3243,13 +3255,6 @@ uint8 Spell::CanCast(bool strict)
             if(target->IsImmunedToSpell(m_spellInfo,false))
                 return SPELL_FAILED_TARGET_AURASTATE;
         }
-
-        /* Causes problems with berserking
-        if (m_spellInfo->CasterAuraState && !(m_caster->HasFlag(UNIT_FIELD_AURASTATE, (1<<(m_spellInfo->CasterAuraState-1)))))
-            return SPELL_FAILED_CASTER_AURASTATE;
-
-        if (m_spellInfo->TargetAuraState && !(target->HasFlag(UNIT_FIELD_AURASTATE, (1<<(m_spellInfo->TargetAuraState-1)))))
-            return SPELL_FAILED_TARGET_AURASTATE;*/
 
         //Must be behind the target.
         if( m_spellInfo->AttributesEx2 == 0x100000 && (m_spellInfo->AttributesEx & 0x200) == 0x200 && target->HasInArc(M_PI, m_caster) )

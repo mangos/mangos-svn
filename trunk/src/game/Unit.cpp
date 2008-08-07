@@ -6852,6 +6852,7 @@ void Unit::ModifyAuraState(AuraState flag, bool apply)
                 if (spellProto->CasterAuraState == flag)
                 {
                     // exceptions (applied at state but not removed at state change)
+                    // Rampage 
                     if(spellProto->SpellIconID==2006 && spellProto->SpellFamilyName==SPELLFAMILY_WARRIOR && spellProto->SpellFamilyFlags==0x100000)
                     {
                         ++itr;
@@ -7801,11 +7802,6 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, bool useCharges)
             return true;
     }
 
-    // Handle dummy aura of Hypothermia to make immune to Ice Block
-    if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->SpellFamilyFlags & 0x8000000000LL &&
-        HasAura(SPELLID_MAGE_HYPOTHERMIA,0))
-        return true;
-
     // not have spells with charges currently
     SpellImmuneList const& dispelList = m_spellImmune[IMMUNITY_DISPEL];
     for(SpellImmuneList::const_iterator itr = dispelList.begin(); itr != dispelList.end(); ++itr)
@@ -7827,8 +7823,7 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, bool useCharges)
     SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
     for(SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
     {
-        // Spell taht must be affected by MECHANIC_INVULNERABILITY not have this mechanic, check its by another data
-        if(itr->type == spellInfo->Mechanic || itr->type == MECHANIC_INVULNERABILITY && IsMechanicInvulnerabilityImmunityToSpell(spellInfo))
+        if(itr->type == spellInfo->Mechanic)
         {
             if(useCharges)
             {

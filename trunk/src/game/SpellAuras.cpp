@@ -2045,6 +2045,16 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
             break;
         }
+        case SPELLFAMILY_MAGE:
+        {
+            // Hypothermia
+            if( GetId()==41425 )
+            {
+                m_target->ModifyAuraState(AURA_STATE_HYPOTHERMIA,apply);
+                return;
+            }
+            break;
+        }
         case SPELLFAMILY_DRUID:
         {
             // Mangle (Cat) combo && damage
@@ -3640,6 +3650,15 @@ void Aura::HandleModMechanicImmunity(bool apply, bool Real)
     m_target->ApplySpellImmune(GetId(),IMMUNITY_MECHANIC,m_modifier.m_miscvalue,apply);
 
     // special cases
+    switch(m_modifier.m_miscvalue)
+    {
+        case MECHANIC_INVULNERABILITY:
+            m_target->ModifyAuraState(AURA_STATE_FORBEARANCE,apply);
+            break;
+        case MECHANIC_SHIELD:
+            m_target->ModifyAuraState(AURA_STATE_WEAKENED_SOUL,apply);
+            break;
+    }
 
     // Bestial Wrath
     if ( GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1680)
@@ -4068,8 +4087,7 @@ void Aura::HandleAuraModResistance(bool apply, bool Real)
         m_spellProto->SpellFamilyName == SPELLFAMILY_DRUID &&
         m_spellProto->SpellFamilyFlags & 0x0000000000000400LL )
     {
-        m_target->ApplySpellDispelImmunity(m_spellProto, DISPEL_STEALTH, apply);
-        m_target->ApplySpellDispelImmunity(m_spellProto, DISPEL_INVISIBILITY, apply);
+        m_target->ModifyAuraState(AURA_STATE_FAERIE_FIRE,apply);
     }
 }
 
