@@ -6722,10 +6722,9 @@ bool Unit::Attack(Unit *victim, bool meleeAttack)
         data << GetGUID();
         data << uint32(AI_REACTION_AGGRO);                  // Aggro sound
         ((WorldObject*)this)->SendMessageToSet(&data, true);
-    }
 
-    if( GetTypeId()==TYPEID_UNIT )
         ((Creature*)this)->CallAssistence();
+    }
 
     // delay offhand weapon attack to next attack time
     if(haveOffhandWeapon())
