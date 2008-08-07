@@ -1000,6 +1000,9 @@ void Spell::EffectDummy(uint32 i)
                     int32 hasteModBasePoints0 = melee_mod;          // (EffectBasePoints[0]+1)-1+(5-melee_mod) = (melee_mod-1+1)-1+5-melee_mod = 5-1
                     int32 hasteModBasePoints1 = (5-melee_mod);
                     int32 hasteModBasePoints2 = 5;
+
+                    // FIXME: custom spell required this aura state by some unknown reason, we not need remove it anyway
+                    m_caster->ModifyAuraState(AURA_STATE_BERSERKING,true);
                     m_caster->CastCustomSpell(m_caster,26635,&hasteModBasePoints0,&hasteModBasePoints1,&hasteModBasePoints2,true,NULL);
                     return;
                 }
@@ -2010,16 +2013,14 @@ void Spell::EffectApplyAura(uint32 i)
     if(unitTarget->GetTypeId()==TYPEID_PLAYER)              // Negative buff should only be applied on players
     {
         uint32 spellId = 0;
-                                                            // Power Word: Shield
-        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && m_spellInfo->SpellFamilyFlags & 1)
+        if(m_spellInfo->CasterAuraStateNot==AURA_STATE_WEAKENED_SOUL || m_spellInfo->TargetAuraStateNot==AURA_STATE_WEAKENED_SOUL)
             spellId = 6788;                                 // Weakened Soul
-        else if(IsMechanicInvulnerabilityImmunityToSpell(m_spellInfo))
+        else if(m_spellInfo->CasterAuraStateNot==AURA_STATE_FORBEARANCE || m_spellInfo->TargetAuraStateNot==AURA_STATE_FORBEARANCE)
             spellId = 25771;                                // Forbearance
+        else if(m_spellInfo->CasterAuraStateNot==AURA_STATE_HYPOTHERMIA)
+            spellId = 41425;                                // Hypothermia
         else if (m_spellInfo->Mechanic == MECHANIC_BANDAGE) // Bandages
             spellId = 11196;                                // Recently Bandaged
-                                                            // Ice Block
-        else if (m_spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && m_spellInfo->SpellFamilyFlags & 0x8000000000LL)
-            spellId = SPELLID_MAGE_HYPOTHERMIA;             // Hypothermia
         else if( (m_spellInfo->AttributesEx & 0x20) && (m_spellInfo->AttributesEx2 & 0x20000) )
             spellId = 23230;                                // Blood Fury - Healing Reduction
 

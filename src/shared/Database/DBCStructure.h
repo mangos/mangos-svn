@@ -568,8 +568,8 @@ struct SpellEntry
     //uint32    FacingCasterFlags;                          // 17 not used
     uint32    CasterAuraState;                              // 18
     uint32    TargetAuraState;                              // 19
-    //uint32    CasterAuraStateNot                          // 20 not used
-    //uint32    TargetAuraStateNot                          // 21 not used
+    uint32    CasterAuraStateNot;                           // 20
+    uint32    TargetAuraStateNot;                           // 21
     uint32    CastingTimeIndex;                             // 22
     uint32    RecoveryTime;                                 // 23
     uint32    CategoryRecoveryTime;                         // 24
