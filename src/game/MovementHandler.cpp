@@ -364,7 +364,8 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     {
         if(GetPlayer()->isAlive())
             GetPlayer()->EnvironmentalDamage(GetPlayer()->GetGUID(),DAMAGE_FALL_TO_VOID, GetPlayer()->GetMaxHealth());
-        GetPlayer()->BuildPlayerRepop();
+        else if(!GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+            GetPlayer()->BuildPlayerRepop();
         GetPlayer()->RepopAtGraveyard();
     }
 }
