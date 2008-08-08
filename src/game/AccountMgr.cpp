@@ -39,13 +39,11 @@ AccountMgr::~AccountMgr()
 
 int AccountMgr::CreateAccount(std::string username, std::string password)
 {
-    if(username.length() > 16)
+    if(utf8length(username) > 16)
         return 1;                                           // username's too long
 
-    strToUpper( username );
-
     loginDatabase.escape_string(username);
-    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM account WHERE username='%s'", username.c_str());
+    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM account WHERE UPPER(username)=UPPER('%s')", username.c_str());
     if(result)
     {
         delete result;
@@ -54,7 +52,7 @@ int AccountMgr::CreateAccount(std::string username, std::string password)
 
     loginDatabase.escape_string(password);
 
-    if(!loginDatabase.PExecute("INSERT INTO account(username,sha_pass_hash,joindate) VALUES('%s',SHA1(CONCAT(UPPER('%s'),':',UPPER('%s'))),NOW())", username.c_str(), username.c_str(), password.c_str()))
+    if(!loginDatabase.PExecute("INSERT INTO account(username,sha_pass_hash,joindate) VALUES(UPPER('%s'),SHA1(CONCAT(UPPER('%s'),':',UPPER('%s'))),NOW())", username.c_str(), username.c_str(), password.c_str()))
         return -1;                                          // unexpected error
     loginDatabase.Execute("INSERT INTO realmcharacters (realmid, acctid, numchars) SELECT realmlist.id, account.id, 0 FROM account, realmlist WHERE account.id NOT IN (SELECT acctid FROM realmcharacters)");
 
@@ -135,10 +133,8 @@ int AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
 
 uint32 AccountMgr::GetId(std::string username)
 {
-    strToUpper( username );
     loginDatabase.escape_string(username);
-
-    QueryResult *result = loginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", username.c_str());
+    QueryResult *result = loginDatabase.PQuery("SELECT id FROM account WHERE UPPER(username) = UPPER('%s')", username.c_str());
     if(!result)
         return 0;
     else

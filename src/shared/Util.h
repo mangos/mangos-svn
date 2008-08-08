@@ -93,6 +93,7 @@ bool Utf8toWStr(std::string utf8str, std::wstring& wstr);
 bool WStrToUtf8(std::wstring wstr, std::string& utf8str);
 
 size_t utf8length(std::string& utf8str);                    // set string to "" if invalid utf8 sequence
+void utf8truncate(std::string& utf8str,size_t len);
 
 inline wchar_t wcharToUpper(wchar_t wchar)
 {
@@ -235,11 +236,6 @@ inline bool isEastAsianString(std::wstring wstr, bool numericOrSpace)
         if(!isEastAsianCharacter(wstr[i]) && (!numericOrSpace || !isNumericOrSpace(wstr[i])))
             return false;
     return true;
-}
-
-inline void strToUpper(std::string& str)
-{
-    std::transform( str.begin(), str.end(), str.begin(), ::toupper );
 }
 
 inline void wstrToUpper(std::wstring& str)

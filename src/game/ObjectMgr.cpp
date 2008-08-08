@@ -1252,7 +1252,7 @@ bool ObjectMgr::GetAccountNameByAccount(uint32 acc_id, std::string &name) const
 uint32 ObjectMgr::GetAccountByAccountName(std::string name) const
 {
     loginDatabase.escape_string(name);
-    QueryResult *result = loginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", name.c_str());
+    QueryResult *result = loginDatabase.PQuery("SELECT id FROM account WHERE UPPER(username) = UPPER('%s')", name.c_str());
     if(result)
     {
         uint32 id = (*result)[0].GetUInt32();

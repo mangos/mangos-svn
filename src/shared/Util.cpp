@@ -224,6 +224,27 @@ size_t utf8length(std::string& utf8str)
     }
 }
 
+void utf8truncate(std::string& utf8str,size_t len)
+{
+    try
+    {
+        size_t wlen = utf8::distance(utf8str.c_str(),utf8str.c_str()+utf8str.size());
+        if(wlen <= len)
+            return;
+
+        std::wstring wstr;
+        wstr.resize(wlen);
+        utf8::utf8to16(utf8str.c_str(),utf8str.c_str()+utf8str.size(),&wstr[0]);
+        wstr.resize(len);
+        char* oend = utf8::utf16to8(wstr.c_str(),wstr.c_str()+wstr.size(),&utf8str[0]);
+        utf8str.resize(oend-(&utf8str[0]));                 // remove unused tail
+    }
+    catch(std::exception)
+    {
+        utf8str = "";
+    }
+}
+
 bool Utf8toWStr(std::string utf8str, std::wstring& wstr)
 {
     try

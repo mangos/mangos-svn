@@ -144,12 +144,10 @@ void RASocket::OnRead()
                     ///- Get the gmlevel and password from the account table
                     std::string login = szLogin;
 
-                    std::transform( login.begin(), login.end(), login.begin(), ::toupper );
-
                     // No SQL injection (escaped login)
                     loginDatabase.escape_string(login);
 
-                    QueryResult* result = loginDatabase.PQuery("SELECT gmlevel FROM account WHERE username = '%s'",login.c_str());
+                    QueryResult* result = loginDatabase.PQuery("SELECT gmlevel FROM account WHERE UPPER(username) = UPPER('%s')",login.c_str());
 
                     ///- If the user is not found, deny access
                     if(!result)
@@ -186,12 +184,10 @@ void RASocket::OnRead()
                     std::string login = szLogin;
                     std::string pw = &buff[5];
 
-                    std::transform( login.begin(), login.end(), login.begin(), ::toupper );
                     loginDatabase.escape_string(login);
-
                     loginDatabase.escape_string(pw);
 
-                    QueryResult *check = loginDatabase.PQuery("SELECT 1 FROM account WHERE username = '%s' AND sha_pass_hash=SHA1(CONCAT(UPPER(username),':',UPPER('%s')))", login.c_str(), pw.c_str());
+                    QueryResult *check = loginDatabase.PQuery("SELECT 1 FROM account WHERE UPPER(username) = UPPER('%s') AND sha_pass_hash=SHA1(CONCAT(UPPER(username),':',UPPER('%s')))", login.c_str(), pw.c_str());
                     if(check)
                     {
                         delete check;
