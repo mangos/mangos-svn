@@ -164,6 +164,7 @@ pkgdata_DATA = \
 	6426_mangos_locales.sql \
 	6426_realmd_localization.sql \
 	6431_mangos_mangos_string.sql \
+	6439_mangos_command.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -308,4 +309,5 @@ EXTRA_DIST = \
 	6426_mangos_locales.sql \
 	6426_realmd_localization.sql \
 	6431_mangos_mangos_string.sql \
+	6439_mangos_command.sql \
 	README

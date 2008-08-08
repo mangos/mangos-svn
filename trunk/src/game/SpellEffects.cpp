@@ -2426,14 +2426,13 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
     uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, newitemid, num_to_add, &no_space );
     if( msg != EQUIP_ERR_OK )
     {
-        if( msg == EQUIP_ERR_INVENTORY_FULL )               // convert to possibló store amount
+        // convert to possibló store amount
+        if( msg == EQUIP_ERR_INVENTORY_FULL || msg == EQUIP_ERR_CANT_CARRY_MORE_OF_THIS )
             num_to_add -= no_space;
         else
         {
-            // not output error for innkeeper case
-            // TODO: but maybe base at attributes exit more nice check for like cases
-            if(m_spellInfo->Id!=3286)
-                player->SendEquipError( msg, NULL, NULL );
+            // if not created by another reason from full inventory or unique items amount limitation
+            player->SendEquipError( msg, NULL, NULL );
             return;
         }
     }
