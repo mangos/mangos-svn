@@ -1912,7 +1912,7 @@ uint8 World::BanAccount(std::string type, std::string nameOrIP, std::string dura
     else if(type=="account")
     {
         //No SQL injection as string is escaped
-        resultAccounts = loginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'",nameOrIP.c_str());
+        resultAccounts = loginDatabase.PQuery("SELECT id FROM account WHERE UPPER(username) = UPPER('%s')",nameOrIP.c_str());
     }
     else if(type=="character")
     {
@@ -1965,7 +1965,7 @@ bool World::RemoveBanAccount(std::string type, std::string nameOrIP)
         {
             //NO SQL injection as name is escaped
             loginDatabase.escape_string(nameOrIP);
-            QueryResult *resultAccounts = loginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'",nameOrIP.c_str());
+            QueryResult *resultAccounts = loginDatabase.PQuery("SELECT id FROM account WHERE UPPER(username) = UPPER('%s')",nameOrIP.c_str());
             if(!resultAccounts)
                 return false;
             Field* fieldsAccount = resultAccounts->Fetch();
