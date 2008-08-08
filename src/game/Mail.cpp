@@ -540,9 +540,8 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     WorldPacket data(SMSG_MAIL_LIST_RESULT, (200));         // guess size
     data << uint8(0);                                       // mail's count
     time_t cur_time = time(NULL);
-    std::deque<Mail*>::iterator itr;
 
-    for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd(); ++itr)
+    for(PlayerMails::iterator itr = pl->GetmailBegin(); itr != pl->GetmailEnd(); ++itr)
     {
         // skip deleted or not delivered (deliver delay not expired) mails
         if ((*itr)->state == MAIL_STATE_DELETED || (*itr)->HasItems() && cur_time < (*itr)->deliver_time)
@@ -812,6 +811,7 @@ void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 station
     else if(mi)
         mi->deleteIncludedItems();
 
+    CharacterDatabase.BeginTransaction();
     CharacterDatabase.escape_string(subject);
     CharacterDatabase.PExecute("INSERT INTO mail (id,messageType,stationery,mailTemplateId,sender,receiver,subject,itemTextId,has_items,expire_time,deliver_time,money,cod,checked) "
         "VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%s', '%u', '%u', '" I64FMTD "','" I64FMTD "', '%u', '%u', '%d')",
@@ -825,4 +825,5 @@ void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 station
             CharacterDatabase.PExecute("INSERT INTO mail_items (mail_id,item_guid,item_template,receiver) VALUES ('%u', '%u', '%u','%u')", mailId, mailItem.item_guidlow, mailItem.item_template,receiver_guidlow);
         }
     }
+    CharacterDatabase.CommitTransaction();
 }

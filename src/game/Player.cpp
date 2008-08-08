@@ -11831,14 +11831,28 @@ void Player::RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver
         MailItemsInfo mi;                                   // item list preparing
 
         for(size_t i = 0; mi.size() < MAX_MAIL_ITEMS && i < questMailLoot.items.size(); ++i)
+        {
             if(LootItem* lootitem = questMailLoot.LootItemInSlot(i,this))
+            {
                 if(Item* item = Item::CreateItem(lootitem->itemid,lootitem->count,this))
+                {
+                    item->SaveToDB();                       // save for prevent lost at next mail load, if send fail then item will deleted
                     mi.AddItem(item->GetGUIDLow(), item->GetEntry(), item);
+                }
+            }
+        }
 
         for(size_t i = 0; mi.size() < MAX_MAIL_ITEMS && i < questMailLoot.quest_items.size(); ++i)
+        {
             if(LootItem* lootitem = questMailLoot.LootItemInSlot(i+questMailLoot.items.size(),this))
+            {
                 if(Item* item = Item::CreateItem(lootitem->itemid,lootitem->count,this))
+                {
+                    item->SaveToDB();                       // save for prevent lost at next mail load, if send fail then item will deleted
                     mi.AddItem(item->GetGUIDLow(), item->GetEntry(), item);
+                }
+            }
+        }
 
         WorldSession::SendMailTo(this, mailType, MAIL_STATIONERY_NORMAL, senderGuidOrEntry, GetGUIDLow(), "", 0, &mi, 0, 0, NOT_READ,pQuest->GetRewMailDelaySecs(),pQuest->GetRewMailTemplateId());
     }

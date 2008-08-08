@@ -5099,7 +5099,17 @@ bool ChatHandler::HandleCastCommand(const char* args)
         return false;
     }
 
-    m_session->GetPlayer()->CastSpell(target,spell,false);
+    char* trig_str = strtok(NULL, " ");
+    if(trig_str)
+    {
+        int l = strlen(trig_str);
+        if(strncmp(trig_str,"triggered",l) != 0 )
+            return false;
+    }
+
+    bool triggered = (trig_str != NULL);
+
+    m_session->GetPlayer()->CastSpell(target,spell,triggered);
 
     return true;
 }
@@ -5123,6 +5133,16 @@ bool ChatHandler::HandleCastBackCommand(const char* args)
     uint32 spell = (uint32)atol((char*)cId);
     if(!spell || !sSpellStore.LookupEntry(spell))
         return false;
+
+    char* trig_str = strtok(NULL, " ");
+    if(trig_str)
+    {
+        int l = strlen(trig_str);
+        if(strncmp(trig_str,"triggered",l) != 0 )
+            return false;
+    }
+
+    bool triggered = (trig_str != NULL);
 
     // update orientation at server
     caster->SetOrientation(caster->GetAngle(m_session->GetPlayer()));
@@ -5163,6 +5183,16 @@ bool ChatHandler::HandleCastTargetCommand(const char* args)
     uint32 spell = (uint32)atol((char*)cId);
     if(!spell || !sSpellStore.LookupEntry(spell))
         return false;
+
+    char* trig_str = strtok(NULL, " ");
+    if(trig_str)
+    {
+        int l = strlen(trig_str);
+        if(strncmp(trig_str,"triggered",l) != 0 )
+            return false;
+    }
+
+    bool triggered = (trig_str != NULL);
 
     // update orientation at server
     caster->SetOrientation(caster->GetAngle(m_session->GetPlayer()));
