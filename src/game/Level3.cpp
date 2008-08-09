@@ -2215,10 +2215,13 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
         return false;
 
     std::string namepart = args;
-    uint32 counter = 0;
+    std::wstring wnamepart;
 
     // converting string that we try to find to lower case
-    strToLower( namepart );
+    if(!Utf8toWStr(namepart,wnamepart))
+        return false;
+
+    uint32 counter = 0;
 
     // Search in `item_template`
     for (uint32 id = 0; id < sItemStorage.MaxEntry; id++)
@@ -2235,14 +2238,16 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
             {
                 if (il->Name.size() > loc_idx && !il->Name[loc_idx].empty())
                 {
-                    std::string Name = il->Name[loc_idx];
+                    std::string name = il->Name[loc_idx];
 
                     // converting Name to lower case
-                    strToLower( Name );
+                    std::wstring wname;
+                    if(!Utf8toWStr(name,wname))
+                        continue;
 
-                    if (Name.find(namepart) != std::string::npos)
+                    if (wname.find(wnamepart) != std::wstring::npos)
                     {
-                        PSendSysMessage(LANG_ITEM_LIST, id, id, il->Name[loc_idx].c_str());
+                        PSendSysMessage(LANG_ITEM_LIST, id, id, name.c_str());
                         ++counter;
                         continue;
                     }
@@ -2250,14 +2255,16 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
             }
         }
 
-        std::string Name = pProto->Name1;
+        std::string name = pProto->Name1;
 
         // converting Name to lower case
-        strToLower( Name );
+        std::wstring wname;
+        if(!Utf8toWStr(name,wname))
+            return false;
 
-        if (Name.find(namepart) != std::string::npos)
+        if (wname.find(wnamepart) != std::wstring::npos)
         {
-            PSendSysMessage(LANG_ITEM_LIST, id, id, pProto->Name1);
+            PSendSysMessage(LANG_ITEM_LIST, id, id, name.c_str());
             ++counter;
         }
     }
@@ -2431,9 +2438,6 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
 
     uint32 counter = 0;                                     // Counter for figure out that we found smth.
 
-    // converting string that we try to find to lower case
-    strToLower( namepart );
-
     // Search in Spell.dbc
     for (uint32 id = 0; id < sSpellStore.GetNumRows(); id++)
     {
@@ -2531,10 +2535,13 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
         return false;
 
     std::string namepart = args;
-    uint32 counter = 0 ;
+    std::wstring wnamepart;
 
     // converting string that we try to find to lower case
-    strToLower( namepart );
+    if(!Utf8toWStr(namepart,wnamepart))
+        return false;
+
+    uint32 counter = 0 ;
 
     ObjectMgr::QuestMap const& qTemplates = objmgr.GetQuestTemplates();
     for (ObjectMgr::QuestMap::const_iterator iter = qTemplates.begin(); iter != qTemplates.end(); ++iter)
@@ -2549,12 +2556,16 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
             {
                 if (il->Title.size() > loc_idx && !il->Title[loc_idx].empty())
                 {
-                    std::string Title = il->Title[loc_idx];
+                    std::string title = il->Title[loc_idx];
 
                     // converting string that we try to find to lower case
-                    strToLower( Title );
+                    std::wstring wtitle;
 
-                    if (Title.find(namepart) != std::string::npos)
+                    // converting string that we try to find to lower case
+                    if(!Utf8toWStr(title,wtitle))
+                        continue;
+
+                    if (wtitle.find(wnamepart) != std::wstring::npos)
                     {
                         QuestStatus status = target->GetQuestStatus(qinfo->GetQuestId());
 
@@ -2569,7 +2580,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
                         else if(status == QUEST_STATUS_INCOMPLETE)
                             statusStr = GetMangosString(LANG_COMMAND_QUEST_ACTIVE);
 
-                        PSendSysMessage(LANG_QUEST_LIST,qinfo->GetQuestId(),qinfo->GetQuestId(),il->Title[loc_idx].c_str(),(status == QUEST_STATUS_COMPLETE ? GetMangosString(LANG_COMPLETE) : (status == QUEST_STATUS_INCOMPLETE ? GetMangosString(LANG_ACTIVE) : "") ));
+                        PSendSysMessage(LANG_QUEST_LIST,qinfo->GetQuestId(),qinfo->GetQuestId(),title.c_str(),(status == QUEST_STATUS_COMPLETE ? GetMangosString(LANG_COMPLETE) : (status == QUEST_STATUS_INCOMPLETE ? GetMangosString(LANG_ACTIVE) : "") ));
                         ++counter;
                         continue;
                     }
@@ -2577,12 +2588,14 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
             }
         }
 
-        std::string Title = qinfo->GetTitle();
+        std::string title = qinfo->GetTitle();
 
         // converting string that we try to find to lower case
-        strToLower( Title );
+        std::wstring wtitle;
+        if(!Utf8toWStr(title,wtitle))
+            return false;
 
-        if (Title.find(namepart) != std::string::npos)
+        if (wtitle.find(wnamepart) != std::wstring::npos)
         {
             QuestStatus status = target->GetQuestStatus(qinfo->GetQuestId());
 
@@ -2597,7 +2610,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
             else if(status == QUEST_STATUS_INCOMPLETE)
                 statusStr = GetMangosString(LANG_COMMAND_QUEST_ACTIVE);
 
-            PSendSysMessage(LANG_QUEST_LIST,qinfo->GetQuestId(),qinfo->GetQuestId(), qinfo->GetTitle().c_str(),(status == QUEST_STATUS_COMPLETE ? GetMangosString(LANG_COMPLETE) : (status == QUEST_STATUS_INCOMPLETE ? GetMangosString(LANG_ACTIVE) : "") ));
+            PSendSysMessage(LANG_QUEST_LIST,qinfo->GetQuestId(),qinfo->GetQuestId(), title.c_str(),(status == QUEST_STATUS_COMPLETE ? GetMangosString(LANG_COMPLETE) : (status == QUEST_STATUS_INCOMPLETE ? GetMangosString(LANG_ACTIVE) : "") ));
             ++counter;
         }
     }
@@ -2614,10 +2627,13 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
         return false;
 
     std::string namepart = args;
-    uint32 counter = 0;
+    std::wstring wnamepart;
 
     // converting string that we try to find to lower case
-    strToLower( namepart );
+    if(!Utf8toWStr(namepart,wnamepart))
+        return false;
+
+    uint32 counter = 0;
 
     for (uint32 id = 0; id< sCreatureStorage.MaxEntry; id++ )
     {
@@ -2633,14 +2649,16 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
             {
                 if (cl->Name.size() > loc_idx && !cl->Name[loc_idx].empty())
                 {
-                    std::string Name = cl->Name[loc_idx];
+                    std::string name = cl->Name[loc_idx];
 
                     // converting Name to lower case
-                    strToLower( Name );
+                    std::wstring wname;
+                    if(!Utf8toWStr(name,wname))
+                        continue;
 
-                    if (Name.find(namepart) != std::string::npos)
+                    if (wname.find(wnamepart) != std::wstring::npos)
                     {
-                        PSendSysMessage(LANG_CREATURE_ENTRY_LIST, id, id, cl->Name[loc_idx].c_str());
+                        PSendSysMessage(LANG_CREATURE_ENTRY_LIST, id, id, name.c_str());
                         ++counter;
                         continue;
                     }
@@ -2648,14 +2666,16 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
             }
         }
 
-        std::string Name = cInfo->Name;
+        std::string name = cInfo->Name;
 
         // converting Name to lower case
-        strToLower( Name );
+        std::wstring wname;
+        if(!Utf8toWStr(name,wname))
+            return false;
 
-        if (Name.find(namepart) != std::string::npos)
+        if (wname.find(wnamepart) != std::wstring::npos)
         {
-            PSendSysMessage(LANG_CREATURE_ENTRY_LIST,id,id,cInfo->Name);
+            PSendSysMessage(LANG_CREATURE_ENTRY_LIST,id,id,name.c_str());
             ++counter;
         }
     }
@@ -2672,10 +2692,13 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
         return false;
 
     std::string namepart = args;
-    uint32 counter = 0;
+    std::wstring wnamepart;
 
     // converting string that we try to find to lower case
-    strToLower( namepart );
+    if(!Utf8toWStr(namepart,wnamepart))
+        return false;
+
+    uint32 counter = 0;
 
     for (uint32 id = 0; id< sGOStorage.MaxEntry; id++ )
     {
@@ -2691,13 +2714,16 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
             {
                 if (gl->Name.size() > loc_idx && !gl->Name[loc_idx].empty())
                 {
-                    std::string Name = gl->Name[loc_idx];
-                    // converting Name to lower case
-                    strToLower( Name );
+                    std::string name = gl->Name[loc_idx];
 
-                    if (Name.find(namepart) != std::string::npos)
+                    // converting Name to lower case
+                    std::wstring wname;
+                    if(!Utf8toWStr(name,wname))
+                        continue;
+
+                    if (wname.find(wnamepart) != std::wstring::npos)
                     {
-                        PSendSysMessage(LANG_GO_ENTRY_LIST, id, id, gl->Name[loc_idx].c_str());
+                        PSendSysMessage(LANG_GO_ENTRY_LIST, id, id, name.c_str());
                         ++counter;
                         continue;
                     }
@@ -2705,14 +2731,16 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
             }
         }
 
-        std::string Name = gInfo->name;
+        std::string name = gInfo->name;
 
         // converting Name to lower case
-        strToLower( Name );
+        std::wstring wname;
+        if(!Utf8toWStr(name,wname))
+            return false;
 
-        if (Name.find(namepart) != std::string::npos)
+        if(wname.find(wnamepart) != std::wstring::npos)
         {
-            PSendSysMessage(LANG_GO_ENTRY_LIST, id, id, gInfo->name);
+            PSendSysMessage(LANG_GO_ENTRY_LIST, id, id, name.c_str());
             ++counter;
         }
     }

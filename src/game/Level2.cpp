@@ -677,20 +677,27 @@ bool ChatHandler::HandleModifyRepCommand(const char * args)
     if (!factionTxt || !rankTxt)
         return false;
 
-    std::string rankStr = rankTxt;
-    strToLower( rankStr );
-
     amount = atoi(rankTxt);
     if ((amount == 0) && (rankTxt[0] != '-') && !isdigit(rankTxt[0]))
     {
+        std::string rankStr = rankTxt;
+        std::wstring wrankStr;
+        if(!Utf8toWStr(rankStr,wrankStr))
+            return false;
+        wstrToLower( wrankStr );
+
         int r = 0;
         amount = -42000;
         for (; r < MAX_REPUTATION_RANK; ++r)
         {
             std::string rank = GetMangosString(ReputationRankStrIndex[r]);
-            strToLower( rank );
+            std::wstring wrank;
+            if(!Utf8toWStr(rank,wrank))
+                continue;
+            
+            wstrToLower(wrank);
 
-            if (rankStr == rank)
+            if(wrank.substr(0,wrankStr.size())==wrankStr)
             {
                 char *deltaTxt = strtok(NULL, " ");
                 if (deltaTxt)
@@ -3623,10 +3630,13 @@ bool ChatHandler::HandleLookupEventCommand(const char* args)
         return false;
 
     std::string namepart = args;
-    uint32 counter = 0;
+    std::wstring wnamepart;
 
     // converting string that we try to find to lower case
-    strToLower( namepart );
+    if(!Utf8toWStr(namepart,wnamepart))
+        return false;
+
+    uint32 counter = 0;
 
     GameEvent::GameEventDataMap const& events = gameeventmgr.GetEventMap();
     GameEvent::ActiveEvents const& activeEvents = gameeventmgr.GetActiveEventList();
@@ -3638,12 +3648,14 @@ bool ChatHandler::HandleLookupEventCommand(const char* args)
         std::string descr = eventData.description;
 
         // converting to lower case
-        strToLower( descr );
+        std::wstring wdescr;
+        if(!Utf8toWStr(descr,wdescr))
+            continue;
 
-        if (descr.find(namepart) != std::string::npos)
+        if (wdescr.find(wnamepart) != std::wstring::npos)
         {
             char const* active = activeEvents.find(id) != activeEvents.end() ? GetMangosString(LANG_ACTIVE) : "";
-            PSendSysMessage(LANG_EVENT_ENTRY_LIST,id,id,eventData.description.c_str(),active );
+            PSendSysMessage(LANG_EVENT_ENTRY_LIST,id,id,descr.c_str(),active );
             ++counter;
         }
     }

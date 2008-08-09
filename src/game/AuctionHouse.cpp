@@ -678,7 +678,10 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
     totalcount = 0;
     data << (uint32) 0;
 
-    strToLower( searchedname );
+    // converting string that we try to find to lower case
+    std::wstring wsearchedname;
+    if(!Utf8toWStr(searchedname,wsearchedname))
+        return;
 
     for (AuctionHouseObject::AuctionEntryMap::iterator itr = mAuctions->GetAuctionsBegin();itr != mAuctions->GetAuctionsEnd();++itr)
     {
@@ -715,8 +718,12 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                                             }
                                         }
 
-                                        strToLower( name );
-                                        if( searchedname.empty() || name.find( searchedname ) != std::string::npos )
+                                        // converting to lower case
+                                        std::wstring wname;
+                                        if(!Utf8toWStr(name,wname))
+                                            continue;
+
+                                        if( wsearchedname.empty() || wname.find( wsearchedname ) != std::wstring::npos )
                                         {
                                             if ((count < 50) && (totalcount >= listfrom))
                                             {
