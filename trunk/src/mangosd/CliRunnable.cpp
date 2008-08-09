@@ -117,8 +117,10 @@ void CliWritePlayerDump(char*command,pPrintf zprintf)
         return;
     }
 
-    //FIXME: need convert from byte string in host locale to utf8
-    std::string name = p2;
+    std::string name;
+    if(!consoleToUtf8(p2,name))                             // convert from console encoding to utf8
+        return;
+
     if(!normalizePlayerName(name))
     {
         zprintf("Syntax is: writepdump $filename $playerNameOrGUID\r\n");
@@ -177,8 +179,9 @@ void CliLoadPlayerDump(char*command,pPrintf zprintf)
     std::string name;
     if(name_str)
     {
-        //FIXME: need convert from byte string in host locale to utf8
-        name = name_str;
+        if(!consoleToUtf8(name_str,name))                   // convert from console encoding to utf8
+            return;
+
         if(!normalizePlayerName(name))
         {
             zprintf("Syntax is: loadpdump $filename $account ($newname) ($newguid)\r\n");
@@ -217,8 +220,9 @@ void CliDelete(char*command,pPrintf zprintf)
         return;
     }
 
-    //FIXME: need convert from byte string in host locale to utf8
-    std::string account_name = account_name_str;
+    std::string account_name;
+    if(!consoleToUtf8(account_name_str,account_name))       // convert from console encoding to utf8
+        return;
 
     int result = accmgr.DeleteAccount(accmgr.GetId(account_name));
     if(result == -1)
@@ -239,8 +243,10 @@ void CliCharDelete(char*command,pPrintf zprintf)
         return;
     }
 
-    //FIXME: need convert from byte string in host locale to utf8
-    std::string character_name = character_name_str;
+    std::string character_name;
+    if(!consoleToUtf8(character_name_str,character_name))   // convert from console encoding to utf8
+        return;
+
     if(!normalizePlayerName(character_name))
     {
         zprintf("Syntax is: chardelete $character_name\r\n");
@@ -279,8 +285,11 @@ void CliBroadcast(char *text,pPrintf zprintf)
 {
     std::string str = objmgr.GetMangosStringForDBCLocale(LANG_SYSTEMMESSAGE);
 
-    //FIXME: need convert from byte string in host locale to utf8
-    str += text;
+    std::string textUtf8;
+    if(!consoleToUtf8(text,textUtf8))                       // convert from console encoding to utf8
+        return;
+
+    str += textUtf8;
     sWorld.SendWorldText(str.c_str(), NULL);
     zprintf("Broadcasting to the world: %s\r\n",str.c_str());
 }
@@ -504,28 +513,43 @@ void CliBanList(char*,pPrintf zprintf)
 void CliBan(char*command,pPrintf zprintf)
 {
     ///- Get the command parameter
-    char* type = strtok((char*)command, " ");
-    char* nameOrIP = strtok(NULL, " ");
-    char* duration = strtok(NULL," ");
-    char* reason = strtok(NULL,"");
+    char* type_str = strtok((char*)command, " ");
+    char* nameOrIP_str = strtok(NULL, " ");
+    char* duration_str = strtok(NULL," ");
+    char* reason_str = strtok(NULL,"");
 
-    if(!type||!nameOrIP||!duration||!reason)                // ?!? input of single char "0"-"9" wouldn't detect when with: || !atoi(duration)
+    if(!type_str||!nameOrIP_str||!duration_str||!reason_str)// ?!? input of single char "0"-"9" wouldn't detect when with: || !atoi(duration)
     {
         zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter $duration[s|m|h|d] $reason \r\n");
         return;
     }
 
-    //FIXME: need convert from byte string in host locale to utf8
+    std::string type;
+    if(!consoleToUtf8(type_str,type))                       // convert from console encoding to utf8
+        return;
+
+    std::string nameOrIP;
+    if(!consoleToUtf8(nameOrIP_str,nameOrIP))               // convert from console encoding to utf8
+        return;
+
+    std::string duration;
+    if(!consoleToUtf8(duration_str,duration))               // convert from console encoding to utf8
+        return;
+
+    std::string reason;
+    if(!consoleToUtf8(reason_str,reason))                   // convert from console encoding to utf8
+        return;
+
     switch (sWorld.BanAccount(type, nameOrIP, duration, reason, "Set by console."))
     {
         case BAN_SUCCESS:
-            if(atoi(duration)>0)
-                zprintf("%s is banned for %s. Reason: %s.\r\n",nameOrIP,secsToTimeString(TimeStringToSecs(duration),true,false).c_str(),reason);
+            if(atoi(duration_str)>0)
+                zprintf("%s is banned for %s. Reason: %s.\r\n",nameOrIP_str,secsToTimeString(TimeStringToSecs(duration_str),true,false).c_str(),reason_str);
             else
-                zprintf("%s is banned permanently. Reason: %s.\r\n",nameOrIP,reason);
+                zprintf("%s is banned permanently. Reason: %s.\r\n",nameOrIP_str,reason_str);
             break;
         case BAN_NOTFOUND:
-            zprintf("%s %s not found\r\n", type, nameOrIP);
+            zprintf("%s %s not found\r\n", type_str, nameOrIP_str);
             break;
         case BAN_SYNTAX_ERROR:
             zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter $duration[s|m|h|d] $reason \r\n");
@@ -544,19 +568,26 @@ void CliVersion(char*,pPrintf zprintf)
 void CliRemoveBan(char *command,pPrintf zprintf)
 {
     ///- Get the command parameter
-    char *type = strtok(command," ");
-    char *nameorip = strtok(NULL," ");
-    if(!nameorip||!type)
+    char *type_str = strtok(command," ");
+    char *nameorip_str = strtok(NULL," ");
+    if(!nameorip_str||!type_str)
     {
         zprintf("Syntax is: unban account|ip|character $nameorip\r\n");
         return;
     }
 
-    //FIXME: need convert from byte string in host locale to utf8
+    std::string type;
+    if(!consoleToUtf8(type_str,type))                       // convert from console encoding to utf8
+        return;
+
+    std::string nameorip;
+    if(!consoleToUtf8(nameorip_str,nameorip))               // convert from console encoding to utf8
+        return;
+
     if (!sWorld.RemoveBanAccount(type, nameorip))
-        zprintf("%s %s not found\r\n", type, nameorip);
+        zprintf("%s %s not found\r\n", type_str, nameorip_str);
     else
-        zprintf("We removed ban from %s: %s\r\n",type,nameorip);
+        zprintf("We removed ban from %s: %s\r\n",type_str,nameorip_str);
 }
 
 /// Display the list of GMs
@@ -608,10 +639,11 @@ void CliSetGM(char *command,pPrintf zprintf)
     //wow it's ok,let's hope it was integer given
     int lev=atoi(szLevel);                                  //get int anyway (0 if error)
 
-    //FIXME: need convert from byte string in host locale to utf8
+    std::string safe_account_name;
+    if(!consoleToUtf8(szAcc,safe_account_name))             // convert from console encoding to utf8
+        return;
 
     ///- Escape the account name to allow quotes in names
-    std::string safe_account_name=szAcc;
     loginDatabase.escape_string(safe_account_name);
 
     ///- Try to find the account, then update the GM level
@@ -659,9 +691,13 @@ void CliSetPassword(char *command,pPrintf zprintf)
         return;
     }
 
-    //FIXME: need convert from host locale byte string to utf8
-    std::string pass1 = szPassword1;
-    std::string pass2 = szPassword2;
+    std::string pass1;
+    if(!consoleToUtf8(szPassword1,pass1))                   // convert from console encoding to utf8
+        return;
+
+    std::string pass2;
+    if(!consoleToUtf8(szPassword2,pass2))                   // convert from console encoding to utf8
+        return;
 
     if (pass1 != pass2)
     {
@@ -690,21 +726,22 @@ void CliCreate(char *command,pPrintf zprintf)
 
     ///- %Parse the command line arguments
     char *szAcc = strtok(command, " ");
-    if(!szAcc)
-    {
-        zprintf("Syntax is: create $username $password\r\n");
-        return;
-    }
-
     char *szPassword = strtok(NULL, " ");
-
-    if(!szPassword)
+    if(!szAcc || !szPassword)
     {
         zprintf("Syntax is: create $username $password\r\n");
         return;
     }
 
-    int result = accmgr.CreateAccount(szAcc, szPassword);
+    std::string account_name;
+    if(!consoleToUtf8(szAcc,account_name))                   // convert from console encoding to utf8
+        return;
+
+    std::string password;
+    if(!consoleToUtf8(szPassword,password))                 // convert from console encoding to utf8
+        return;
+
+    int result = accmgr.CreateAccount(account_name, password);
     if(result == -1)
         zprintf("User %s with password %s NOT created (probably sql file format was updated)\r\n",szAcc,szPassword);
     else if(result == 1)
@@ -763,8 +800,9 @@ void CliKick(char*command,pPrintf zprintf)
         return;
     }
 
-    //FIXME: need convert from byte string in host locale to utf8
-    std::string name = kickName;
+    std::string name;
+    if(!consoleToUtf8(kickName,name))                       // convert from console encoding to utf8
+        return;
     
     if(!normalizePlayerName(name))
         return;
@@ -784,13 +822,16 @@ void CliTele(char*command,pPrintf zprintf)
         return;
     }
 
-    //FIXME: need convert from byte string in host locale to utf8
     std::string name = charName;
+    if(!consoleToUtf8(charName,name))                       // convert from console encoding to utf8
+        return;
     
     if(!normalizePlayerName(name))
         return;
 
-    std::string location = locName;
+    std::string location;
+    if(!consoleToUtf8(locName,location))                    // convert from console encoding to utf8
+        return;
 
     WorldDatabase.escape_string(location);
     QueryResult *result = WorldDatabase.PQuery("SELECT position_x,position_y,position_z,orientation,map FROM game_tele WHERE name = '%s'",location.c_str());
@@ -856,8 +897,11 @@ void CliMotd(char*command,pPrintf zprintf)
     }
     else
     {
-        //FIXME: need convert from byte string in host locale to utf8
-        sWorld.SetMotd(command);
+        std::string commandUtf8;
+        if(!consoleToUtf8(command,commandUtf8))             // convert from console encoding to utf8
+            return;
+
+        sWorld.SetMotd(commandUtf8);
         zprintf("Message of the day changed to:\r\n%s\r\n", command);
     }
 }
@@ -910,10 +954,11 @@ void CliSetTBC(char *command,pPrintf zprintf)
         return;
     }
 
-    //FIXME: need convert from byte string in host locale to utf8
-
     ///- Escape the account name to allow quotes in names
-    std::string safe_account_name=szAcc;
+    std::string safe_account_name;
+    if(!consoleToUtf8(szAcc,safe_account_name))             // convert from console encoding to utf8
+        return;
+
     loginDatabase.escape_string(safe_account_name);
 
     // No SQL injection (account name is escaped)
@@ -948,17 +993,23 @@ void CliSave(char*,pPrintf zprintf)
 void CliSend(char *playerN,pPrintf zprintf)
 {
     ///- Get the command line arguments
-    char* plr = strtok((char*)playerN, " ");
-    char* msg = strtok(NULL, "");
+    char* name_str = strtok((char*)playerN, " ");
+    char* msg_str = strtok(NULL, "");
 
-    if(!plr || !msg)
+    if(!name_str || !msg_str)
     {
         zprintf("Syntax: send $player $message (Player name is case sensitive)\r\n");
         return;
     }
 
-    //FIXME: need convert from byte string in host locale to utf8
-    std::string name = plr;
+    std::string name;
+    if(!consoleToUtf8(name_str,name))                       // convert from console encoding to utf8
+        return;
+
+    std::string msg;
+    if(!consoleToUtf8(msg_str,msg))             // convert from console encoding to utf8
+        return;
+
     if(!normalizePlayerName(name))
     {
         zprintf("Syntax: send $player $message (Player name is case sensitive)\r\n");
@@ -969,23 +1020,23 @@ void CliSend(char *playerN,pPrintf zprintf)
     Player *rPlayer = objmgr.GetPlayer(name.c_str());
     if(!rPlayer)
     {
-        zprintf("Player %s not found!\r\n", plr);
+        zprintf("Player %s not found!\r\n", name_str);
         return;
     }
 
     if (rPlayer->GetSession()->isLogingOut())
     {
-        zprintf("Cannot send message while player %s is logging out!\r\n",plr);
+        zprintf("Cannot send message while player %s is logging out!\r\n",name_str);
         return;
     }
 
     ///- Send the message
     //Use SendAreaTriggerMessage for fastest delivery.
-    rPlayer->GetSession()->SendAreaTriggerMessage("%s", msg);
+    rPlayer->GetSession()->SendAreaTriggerMessage("%s", msg.c_str());
     rPlayer->GetSession()->SendAreaTriggerMessage("|cffff0000[Message from administrator]:|r");
 
     //Confirmation message
-    zprintf("Message '%s' sent to %s\r\n",msg , plr);
+    zprintf("Message '%s' sent to %s\r\n",msg_str , name_str);
 }
 
 void CliPLimit(char *args,pPrintf zprintf)
