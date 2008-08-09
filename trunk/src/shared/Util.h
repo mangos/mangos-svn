@@ -243,11 +243,6 @@ inline void wstrToUpper(std::wstring& str)
     std::transform( str.begin(), str.end(), str.begin(), wcharToUpper );
 }
 
-inline void strToLower(std::string& str)
-{
-    std::transform( str.begin(), str.end(), str.begin(), ::tolower );
-}
-
 inline void wstrToLower(std::wstring& str)
 {
     std::transform( str.begin(), str.end(), str.begin(), wcharToLower );
