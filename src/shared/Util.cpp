@@ -325,3 +325,35 @@ std::wstring GetMainPartOfName(std::wstring wname, uint32 declension)
 
     return wname;
 }
+
+bool utf8ToConsole(std::string utf8str, std::string& conStr)
+{
+#if PLATFORM == PLATFORM_WINDOWS
+    std::wstring wstr;
+    if(!Utf8toWStr(utf8str,wstr))
+        return false;
+
+    conStr.resize(wstr.size());
+    CharToOemBuffW(&wstr[0],&conStr[0],wstr.size());
+#else
+    // not implemented yet
+    conStr = utf8str;
+#endif
+
+    return true;
+}
+
+bool consoleToUtf8(std::string conStr,std::string& utf8str)
+{
+#if PLATFORM == PLATFORM_WINDOWS
+    std::wstring wstr;
+    wstr.resize(conStr.size());
+    OemToCharBuffW(&conStr[0],&wstr[0],conStr.size());
+
+    return WStrToUtf8(wstr,utf8str);
+#else
+    // not implemented yet
+    utf8str = conStr;
+    return true;
+#endif
+}
