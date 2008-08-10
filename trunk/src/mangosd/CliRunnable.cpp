@@ -106,6 +106,17 @@ const CliCommand Commands[]=
 /// \todo Need some pragma pack? Else explain why in a comment.
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
 
+#if PLATFORM == PLATFORM_WINDOWS
+int utf8printf(const char* str,...)
+{
+    UTF8PRINTF(stdout,str,1);
+    return 0;
+}
+#define UTF8ZPRINTF utf8printf
+#else
+#define UTF8ZPRINTF printf
+#endif
+
 /// Create a character dump file
 void CliWritePlayerDump(char*command,pPrintf zprintf)
 {
@@ -226,11 +237,11 @@ void CliDelete(char*command,pPrintf zprintf)
 
     int result = accmgr.DeleteAccount(accmgr.GetId(account_name));
     if(result == -1)
-        zprintf("User %s NOT deleted (probably sql file format was updated)\r\n",account_name_str);
+        zprintf("User %s NOT deleted (probably sql file format was updated)\r\n",account_name.c_str());
     if(result == 1)
-        zprintf("User %s does not exist\r\n",account_name_str);
+        zprintf("User %s does not exist\r\n",account_name.c_str());
     else if(result == 0)
-        zprintf("We deleted account: %s\r\n",account_name_str);
+        zprintf("We deleted account: %s\r\n",account_name.c_str());
 }
 
 void CliCharDelete(char*command,pPrintf zprintf)
@@ -269,7 +280,7 @@ void CliCharDelete(char*command,pPrintf zprintf)
         character_guid = objmgr.GetPlayerGUIDByName(character_name);
         if(!character_guid)
         {
-            zprintf("Player %s not found!\r\n",character_name);
+            zprintf("Player %s not found!\r\n",character_name.c_str());
             return;
         }
 
@@ -277,7 +288,7 @@ void CliCharDelete(char*command,pPrintf zprintf)
     }
 
     Player::DeleteFromDB(character_guid, account_id, true); 
-    zprintf("Player %s (Guid: %u AccountId: %u) deleted\r\n",character_name,GUID_LOPART(character_guid),account_id);
+    zprintf("Player %s (Guid: %u AccountId: %u) deleted\r\n",character_name.c_str(),GUID_LOPART(character_guid),account_id);
 }
 
 /// Broadcast a message to the World
@@ -544,12 +555,12 @@ void CliBan(char*command,pPrintf zprintf)
     {
         case BAN_SUCCESS:
             if(atoi(duration_str)>0)
-                zprintf("%s is banned for %s. Reason: %s.\r\n",nameOrIP_str,secsToTimeString(TimeStringToSecs(duration_str),true,false).c_str(),reason_str);
+                zprintf("%s is banned for %s. Reason: %s.\r\n",nameOrIP.c_str(),secsToTimeString(TimeStringToSecs(duration_str),true,false).c_str(),reason.c_str());
             else
-                zprintf("%s is banned permanently. Reason: %s.\r\n",nameOrIP_str,reason_str);
+                zprintf("%s is banned permanently. Reason: %s.\r\n",nameOrIP.c_str(),reason.c_str());
             break;
         case BAN_NOTFOUND:
-            zprintf("%s %s not found\r\n", type_str, nameOrIP_str);
+            zprintf("%s %s not found\r\n", type.c_str(), nameOrIP.c_str());
             break;
         case BAN_SYNTAX_ERROR:
             zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter $duration[s|m|h|d] $reason \r\n");
@@ -585,9 +596,9 @@ void CliRemoveBan(char *command,pPrintf zprintf)
         return;
 
     if (!sWorld.RemoveBanAccount(type, nameorip))
-        zprintf("%s %s not found\r\n", type_str, nameorip_str);
+        zprintf("%s %s not found\r\n", type.c_str(), nameorip.c_str());
     else
-        zprintf("We removed ban from %s: %s\r\n",type_str,nameorip_str);
+        zprintf("We removed ban from %s: %s\r\n",type_str,nameorip.c_str());
 }
 
 /// Display the list of GMs
@@ -662,11 +673,11 @@ void CliSetGM(char *command,pPrintf zprintf)
 
         // No SQL injection (account name is escaped)
         loginDatabase.PExecute("UPDATE account SET gmlevel = '%d' WHERE UPPER(username) = UPPER('%s')",lev,safe_account_name.c_str());
-        zprintf("We added %s gmlevel %d\r\n",szAcc,lev);
+        zprintf("We added %s gmlevel %d\r\n",safe_account_name.c_str(),lev);
     }
     else
     {
-        zprintf("No account %s found\r\n",szAcc);
+        zprintf("No account %s found\r\n",safe_account_name.c_str());
     }
 }
 
@@ -684,12 +695,9 @@ void CliSetPassword(char *command,pPrintf zprintf)
         return;
     }
 
-    uint32 acc_id = accmgr.GetId(szAcc);
-    if (!acc_id)
-    {
-        zprintf("Account '%s' does not exist!\r\n", szAcc);
+    std::string account_name;
+    if(!consoleToUtf8(szAcc,account_name))                  // convert from console encoding to utf8
         return;
-    }
 
     std::string pass1;
     if(!consoleToUtf8(szPassword1,pass1))                   // convert from console encoding to utf8
@@ -698,6 +706,13 @@ void CliSetPassword(char *command,pPrintf zprintf)
     std::string pass2;
     if(!consoleToUtf8(szPassword2,pass2))                   // convert from console encoding to utf8
         return;
+
+    uint32 acc_id = accmgr.GetId(szAcc);
+    if (!acc_id)
+    {
+        zprintf("Account '%s' does not exist!\r\n", account_name.c_str());
+        return;
+    }
 
     if (pass1 != pass2)
     {
@@ -712,7 +727,7 @@ void CliSetPassword(char *command,pPrintf zprintf)
     }
 
     if(accmgr.ChangePassword(acc_id, pass1) == 0)
-        zprintf("The password was changed for account '%s' (ID: %u).\r\n",szAcc,acc_id);
+        zprintf("The password was changed for account '%s' (ID: %u).\r\n",account_name.c_str(),acc_id);
     else
         zprintf("Password not changed!\r\n");
 }
@@ -743,13 +758,13 @@ void CliCreate(char *command,pPrintf zprintf)
 
     int result = accmgr.CreateAccount(account_name, password);
     if(result == -1)
-        zprintf("User %s with password %s NOT created (probably sql file format was updated)\r\n",szAcc,szPassword);
+        zprintf("User %s with password %s NOT created (probably sql file format was updated)\r\n",account_name.c_str(),password.c_str());
     else if(result == 1)
-        zprintf("Username %s is too long\r\n", szAcc);
+        zprintf("Username %s is too long\r\n", account_name.c_str());
     else if(result == 2)
-        zprintf("User %s already exists\r\n",szAcc);
+        zprintf("User %s already exists\r\n",account_name.c_str());
     else if(result == 0)
-        zprintf("User %s with password %s created successfully\r\n",szAcc,szPassword);
+        zprintf("User %s with password %s created successfully\r\n",account_name.c_str(),password.c_str());
 }
 
 /// Command parser and dispatcher
@@ -775,7 +790,7 @@ void ParseCommand( pPrintf zprintf, char* input)
             for ( x=0;x<CliTotalCmds;x++)
                 if(!strcmp(Commands[x].cmd,supposedCommand))
             {
-                sWorld.QueueCliCommand(new CliCommandHolder(&Commands[x], arguments, zprintf));
+                sWorld.QueueCliCommand(new CliCommandHolder(&Commands[x], arguments, &UTF8ZPRINTF));
                 bSuccess=true;
                 break;
             }
@@ -902,7 +917,7 @@ void CliMotd(char*command,pPrintf zprintf)
             return;
 
         sWorld.SetMotd(commandUtf8);
-        zprintf("Message of the day changed to:\r\n%s\r\n", command);
+        zprintf("Message of the day changed to:\r\n%s\r\n", commandUtf8.c_str());
     }
 }
 
@@ -968,13 +983,13 @@ void CliSetTBC(char *command,pPrintf zprintf)
     {
         // No SQL injection (account name is escaped)
         loginDatabase.PExecute("UPDATE account SET tbc = '%d' WHERE UPPER(username) = UPPER('%s')",lev,safe_account_name.c_str());
-        zprintf("We added %s to expansion allowed %d\r\n",szAcc,lev);
+        zprintf("We added %s to expansion allowed %d\r\n",safe_account_name.c_str(),lev);
 
         delete result;
     }
     else
     {
-        zprintf("No account %s found\r\n",szAcc);
+        zprintf("No account %s found\r\n",safe_account_name.c_str());
     }
 }
 
@@ -1020,13 +1035,13 @@ void CliSend(char *playerN,pPrintf zprintf)
     Player *rPlayer = objmgr.GetPlayer(name.c_str());
     if(!rPlayer)
     {
-        zprintf("Player %s not found!\r\n", name_str);
+        zprintf("Player %s not found!\r\n", name.c_str());
         return;
     }
 
     if (rPlayer->GetSession()->isLogingOut())
     {
-        zprintf("Cannot send message while player %s is logging out!\r\n",name_str);
+        zprintf("Cannot send message while player %s is logging out!\r\n",name.c_str());
         return;
     }
 
@@ -1036,7 +1051,7 @@ void CliSend(char *playerN,pPrintf zprintf)
     rPlayer->GetSession()->SendAreaTriggerMessage("|cffff0000[Message from administrator]:|r");
 
     //Confirmation message
-    zprintf("Message '%s' sent to %s\r\n",msg_str , name_str);
+    zprintf("Message '%s' sent to %s\r\n",msg.c_str(), name.c_str());
 }
 
 void CliPLimit(char *args,pPrintf zprintf)
@@ -1077,11 +1092,11 @@ void CliPLimit(char *args,pPrintf zprintf)
     char const* secName = "";
     switch(allowedAccountType)
     {
-    case SEC_PLAYER:        secName = "Player";        break;
-    case SEC_MODERATOR:     secName = "Moderator";     break;
-    case SEC_GAMEMASTER:    secName = "Gamemaster";    break;
-    case SEC_ADMINISTRATOR: secName = "Administrator"; break;
-    default:                secName = "<unknown>";     break;
+        case SEC_PLAYER:        secName = "Player";        break;
+        case SEC_MODERATOR:     secName = "Moderator";     break;
+        case SEC_GAMEMASTER:    secName = "Gamemaster";    break;
+        case SEC_ADMINISTRATOR: secName = "Administrator"; break;
+        default:                secName = "<unknown>";     break;
     }
 
     zprintf("Player limits: amount %u, min. security level %s.\r\n",pLimit,secName);
@@ -1147,7 +1162,7 @@ void CliRunnable::run()
                 break;
             }
             //// \todo Shoudn't we use here also the sLog singleton?
-            ParseCommand(&printf,command);
+            ParseCommand(&UTF8ZPRINTF,command);
         }
         else if (feof(stdin))
         {
