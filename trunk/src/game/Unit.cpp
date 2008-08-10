@@ -7974,7 +7974,9 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
     // .. taken pct: dummy auras
     AuraList const& mDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
     for(AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+    {
         if((*i)->GetSpellProto()->SpellIconID == 2109)      // Cheat Death
+        {
             if((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL)
             {
                 if(pVictim->GetTypeId() != TYPEID_PLAYER)
@@ -7984,6 +7986,31 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
                     mod = (*i)->GetModifier()->m_amount;
                 TakenTotalMod *= (mod+100.0f)/100.0f;
             }
+        }
+    }
+
+    // .. taken pct: class scripts
+    AuraList const& mclassScritAuras = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+    for(AuraList::const_iterator i = mclassScritAuras.begin(); i != mclassScritAuras.end(); ++i)
+    {
+        switch((*i)->GetMiscValue())
+        {
+            case 6427: case 6428:                           // Dirty Deeds
+                if(pVictim->HasAuraState(AURA_STATE_HEALTHLESS_35_PERCENT))
+                {
+                    Aura* eff0 = GetAura((*i)->GetId(),0);
+                    if(!eff0 || (*i)->GetEffIndex()!=1)
+                    {
+                        sLog.outError("Spell structure of DD (%u) changed.",(*i)->GetId());
+                        continue;
+                    }
+
+                    // effect 0 have expected value but in negative state
+                    TakenTotalMod *= (-eff0->GetModifier()->m_amount+100.0f)/100.0f;
+                }
+                break;
+        }
+    }
 
     if(attType != RANGED_ATTACK)
     {
