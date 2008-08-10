@@ -292,7 +292,7 @@ bool consoleToUtf8(std::string conStr,std::string& utf8str);
     va_list ap;                                         \
     va_start(ap, FRM);                                  \
     vfprintf(OUT, FRM, ap );                            \
-    va_end(ap)                                          \
+    va_end(ap);                                         \
 }
 #endif
 
