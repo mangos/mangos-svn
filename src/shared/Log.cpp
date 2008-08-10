@@ -20,6 +20,7 @@
 #include "Log.h"
 #include "Policies/SingletonImp.h"
 #include "Config/ConfigEnv.h"
+#include "Util.h"
 
 #include <stdarg.h>
 
@@ -305,7 +306,11 @@ void Log::outTitle( const char * str)
     if(m_colored)
         SetColor(true,WHITE);
 
-    printf( str );
+    std::string strUtf8;
+    if(!utf8ToConsole(str,strUtf8))
+        return;
+
+    printf( strUtf8.c_str() );
 
     if(m_colored)
         ResetColor(true);
@@ -346,10 +351,7 @@ void Log::outString( const char * str, ... )
     if(m_includeTime)
         outTime();
 
-    va_list ap;
-    va_start(ap, str);
-    vprintf( str, ap );
-    va_end(ap);
+    UTF8PRINTF(stdout,str,);
 
     if(m_colored)
         ResetColor(true);
@@ -358,10 +360,13 @@ void Log::outString( const char * str, ... )
     if(logfile)
     {
         outTimestamp(logfile);
+
+        va_list ap;
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         fprintf(logfile, "\n" );
         va_end(ap);
+
         fflush(logfile);
     }
     fflush(stdout);
@@ -378,10 +383,7 @@ void Log::outError( const char * err, ... )
     if(m_includeTime)
         outTime();
 
-    va_list ap;
-    va_start(ap, err);
-    vfprintf( stderr, err, ap );
-    va_end(ap);
+    UTF8PRINTF(stderr,err,);
 
     if(m_colored)
         ResetColor(false);
@@ -391,10 +393,13 @@ void Log::outError( const char * err, ... )
     {
         outTimestamp(logfile);
         fprintf(logfile, "ERROR:" );
+
+        va_list ap;
         va_start(ap, err);
         vfprintf(logfile, err, ap);
-        fprintf(logfile, "\n" );
         va_end(ap);
+
+        fprintf(logfile, "\n" );
         fflush(logfile);
     }
     fflush(stderr);
@@ -411,10 +416,7 @@ void Log::outErrorDb( const char * err, ... )
     if(m_includeTime)
         outTime();
 
-    va_list ap;
-    va_start(ap, err);
-    vfprintf( stderr, err, ap );
-    va_end(ap);
+    UTF8PRINTF(stderr,err,);
 
     if(m_colored)
         ResetColor(false);
@@ -425,20 +427,26 @@ void Log::outErrorDb( const char * err, ... )
     {
         outTimestamp(logfile);
         fprintf(logfile, "ERROR:" );
+
+        va_list ap;
         va_start(ap, err);
         vfprintf(logfile, err, ap);
-        fprintf(logfile, "\n" );
         va_end(ap);
+
+        fprintf(logfile, "\n" );
         fflush(logfile);
     }
 
     if(dberLogfile)
     {
         outTimestamp(dberLogfile);
+
+        va_list ap;
         va_start(ap, err);
         vfprintf(dberLogfile, err, ap);
-        fprintf(dberLogfile, "\n" );
         va_end(ap);
+
+        fprintf(dberLogfile, "\n" );
         fflush(dberLogfile);
     }
     fflush(stderr);
@@ -458,9 +466,7 @@ void Log::outBasic( const char * str, ... )
         if(m_includeTime)
             outTime();
 
-        va_start(ap, str);
-        vprintf( str, ap );
-        va_end(ap);
+        UTF8PRINTF(stdout,str,);
 
         if(m_colored)
             ResetColor(true);
@@ -494,9 +500,7 @@ void Log::outDetail( const char * str, ... )
         if(m_includeTime)
             outTime();
 
-        va_start(ap, str);
-        vprintf( str, ap );
-        va_end(ap);
+        UTF8PRINTF(stdout,str,);
 
         if(m_colored)
             ResetColor(true);
@@ -520,21 +524,19 @@ void Log::outDebugInLine( const char * str, ... )
 {
     if( !str )
         return;
-    va_list ap;
     if( m_logLevel > 2 )
     {
         if(m_colored)
             SetColor(true,m_colors[LogDebug]);
 
-        va_start(ap, str);
-        vprintf( str, ap );
-        va_end(ap);
+        UTF8PRINTF(stdout,str,);
 
         if(m_colored)
             ResetColor(true);
     }
     if(logfile && m_logFileLevel > 2)
     {
+        va_list ap;
         va_start(ap, str);
         vfprintf(logfile, str, ap);
         va_end(ap);
@@ -545,7 +547,6 @@ void Log::outDebug( const char * str, ... )
 {
     if( !str )
         return;
-    va_list ap;
     if( m_logLevel > 2 )
     {
         if(m_colored)
@@ -554,9 +555,7 @@ void Log::outDebug( const char * str, ... )
         if(m_includeTime)
             outTime();
 
-        va_start(ap, str);
-        vprintf( str, ap );
-        va_end(ap);
+        UTF8PRINTF(stdout,str,);
 
         if(m_colored)
             ResetColor(true);
@@ -566,10 +565,13 @@ void Log::outDebug( const char * str, ... )
     if(logfile && m_logFileLevel > 2)
     {
         outTimestamp(logfile);
+
+        va_list ap;
         va_start(ap, str);
         vfprintf(logfile, str, ap);
-        fprintf(logfile, "\n" );
         va_end(ap);
+
+        fprintf(logfile, "\n" );
         fflush(logfile);
     }
     fflush(stdout);
@@ -588,9 +590,7 @@ void Log::outCommand( const char * str, ... )
         if(m_includeTime)
             outTime();
 
-        va_start(ap, str);
-        vprintf( str, ap );
-        va_end(ap);
+        UTF8PRINTF(stdout,str,);
 
         if(m_colored)
             ResetColor(true);
@@ -655,20 +655,20 @@ void Log::outMenu( const char * str, ... )
     if(m_includeTime)
         outTime();
 
-    va_list ap;
-    va_start(ap, str);
-    vprintf( str, ap );
-    va_end(ap);
+    UTF8PRINTF(stdout,str,);
 
     ResetColor(true);
 
     if(logfile)
     {
         outTimestamp(logfile);
+
+        va_list ap;
         va_start(ap, str);
         vfprintf(logfile, str, ap);
-        fprintf(logfile, "\n" );
         va_end(ap);
+
+        fprintf(logfile, "\n" );
         fflush(logfile);
     }
     fflush(stdout);
