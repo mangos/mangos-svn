@@ -3175,14 +3175,17 @@ uint8 Spell::CanCast(bool strict)
 
     if(target)
     {
-        // target state requirements
-        if(m_spellInfo->TargetAuraState && !target->HasAuraState(AuraState(m_spellInfo->TargetAuraState)))
-            return SPELL_FAILED_TARGET_AURASTATE;
+        // target state requirements (not allowed state), apply to self also
         if(m_spellInfo->TargetAuraStateNot && target->HasAuraState(AuraState(m_spellInfo->TargetAuraStateNot)))
             return SPELL_FAILED_TARGET_AURASTATE;
 
+
         if(target != m_caster)
         {
+            // target state requirements (apply to non-self only), to allow cast affects to self like Dirty Deeds
+            if(m_spellInfo->TargetAuraState && !target->HasAuraState(AuraState(m_spellInfo->TargetAuraState)))
+                return SPELL_FAILED_TARGET_AURASTATE;
+
             // Not allow casting on flying player
             if (target->isInFlight())
                 return SPELL_FAILED_BAD_TARGETS;
