@@ -583,6 +583,9 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
 
             int loc = m_session->GetSessionDbcLocale();
             std::string name = factionEntry->name[loc];
+            if(name.empty())
+                continue;
+
             std::wstring wname;
 
             // converting name to lower case
@@ -600,6 +603,9 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
                         continue;
 
                     name = factionEntry->name[loc];
+                    if(name.empty())
+                        continue;
+
                     if(!Utf8toWStr(name,wname))
                         continue;
 
@@ -691,6 +697,9 @@ bool ChatHandler::HandleModifyRepCommand(const char * args)
         for (; r < MAX_REPUTATION_RANK; ++r)
         {
             std::string rank = GetMangosString(ReputationRankStrIndex[r]);
+            if(rank.empty())
+                continue;
+
             std::wstring wrank;
             if(!Utf8toWStr(rank,wrank))
                 continue;
@@ -3648,6 +3657,8 @@ bool ChatHandler::HandleLookupEventCommand(const char* args)
         GameEventData const& eventData = events[id];
 
         std::string descr = eventData.description;
+        if(descr.empty())
+            continue;
 
         // converting to lower case
         std::wstring wdescr;

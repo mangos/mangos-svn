@@ -720,6 +720,9 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                                             }
                                         }
 
+                                        if(name.empty())
+                                            continue;
+
                                         // converting to lower case
                                         std::wstring wname;
                                         if(!Utf8toWStr(name,wname))
