@@ -2272,15 +2272,19 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
         // Increase from SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL aura
         crit_chance += GetTotalAuraModifierByMiscMask(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL, spellInfo->SchoolMask);
 
-        AuraList const& mCanNotBeDodge = GetAurasByType(SPELL_AURA_IGNORE_COMBAT_RESULT);
-        for(AuraList::const_iterator i = mCanNotBeDodge.begin(); i != mCanNotBeDodge.end(); ++i)
+        if( dodge_chance != 0.0f )                          // if dodge chance is already 0, ignore talents fpr speed
         {
-            if((*i)->GetModifier()->m_miscvalue == VICTIMSTATE_DODGE)       // can't be dodged rogue finishing move
+            AuraList const& mCanNotBeDodge = GetAurasByType(SPELL_AURA_IGNORE_COMBAT_RESULT);
+            for(AuraList::const_iterator i = mCanNotBeDodge.begin(); i != mCanNotBeDodge.end(); ++i)
             {
-                if(spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE && (spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE__FINISHING_MOVE))
+                // can't be dodged rogue finishing move
+                if((*i)->GetModifier()->m_miscvalue == VICTIMSTATE_DODGE)
                 {
-                    dodge_chance = 0.0f;
-                    break;
+                    if(spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE && (spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE__FINISHING_MOVE))
+                    {
+                        dodge_chance = 0.0f;
+                        break;
+                    }
                 }
             }
         }
@@ -2354,23 +2358,33 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
 
     // Dodge chance
 
-    // Reduce dodge chance by attacker expertise rating
-    if (GetTypeId() == TYPEID_PLAYER)
-        dodge_chance -= int32(((Player*)this)->GetExpertiseDodgeOrParryReduction(attType)*100);
-
-    // Modify dodge chance by attacker SPELL_AURA_MOD_COMBAT_RESULT_CHANCE
-    dodge_chance+= GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_COMBAT_RESULT_CHANCE, VICTIMSTATE_DODGE);
-
-    tmp = dodge_chance;
-    if (   (tmp > 0)                                        // check if unit _can_ dodge
-        && ((tmp -= skillBonus) > 0)
-        && roll < (sum += tmp))
+    // only players can't dodge if attacker is behind
+    if (pVictim->GetTypeId() == TYPEID_PLAYER && !pVictim->HasInArc(M_PI,this))
     {
-        DEBUG_LOG ("RollMeleeOutcomeAgainst: DODGE <%d, %d)", sum-tmp, sum);
-        return MELEE_HIT_DODGE;
+        DEBUG_LOG ("RollMeleeOutcomeAgainst: attack came from behind and victim was a player.");
+    }
+    else
+    {
+        // Reduce dodge chance by attacker expertise rating
+        if (GetTypeId() == TYPEID_PLAYER)
+            dodge_chance -= int32(((Player*)this)->GetExpertiseDodgeOrParryReduction(attType)*100);
+
+        // Modify dodge chance by attacker SPELL_AURA_MOD_COMBAT_RESULT_CHANCE
+        dodge_chance+= GetTotalAuraModifierByMiscValue(SPELL_AURA_MOD_COMBAT_RESULT_CHANCE, VICTIMSTATE_DODGE);
+
+        tmp = dodge_chance;
+        if (   (tmp > 0)                                        // check if unit _can_ dodge
+            && ((tmp -= skillBonus) > 0)
+            && roll < (sum += tmp))
+        {
+            DEBUG_LOG ("RollMeleeOutcomeAgainst: DODGE <%d, %d)", sum-tmp, sum);
+            return MELEE_HIT_DODGE;
+        }
     }
 
-    // check if attack comes from behind
+    // parry & block chances
+
+    // check if attack comes from behind, nobody can parry or block if attacker is behind
     if (!pVictim->HasInArc(M_PI,this))
     {
         DEBUG_LOG ("RollMeleeOutcomeAgainst: attack came from behind.");
