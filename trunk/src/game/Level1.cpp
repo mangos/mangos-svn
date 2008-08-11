@@ -1655,6 +1655,9 @@ bool ChatHandler::HandleLookupAreaCommand(const char* args)
         {
             int loc = m_session->GetSessionDbcLocale();
             std::string name = areaEntry->area_name[loc];
+            if(name.empty())
+                continue;
+
             std::wstring wname;
 
             // converting SpellName to lower case
@@ -1672,6 +1675,9 @@ bool ChatHandler::HandleLookupAreaCommand(const char* args)
                         continue;
 
                     name = areaEntry->area_name[loc];
+                    if(name.empty())
+                        continue;
+
                     if(!Utf8toWStr(name,wname))
                         continue;
 
