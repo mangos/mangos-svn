@@ -307,8 +307,8 @@ LogColors = ""
 #    RealmZone
 #        Server realm zone (set allowed alphabet in character names/etc). See also Strict*Names options.
 #
-#	 1 Development    - any language
-#	 2 United States  - any language
+#	 1 Development    - any language (Default)
+#	 2 United States  - extended-Latin
 #	 3 Oceanic        - extended-Latin
 #	 4 Latin America  - extended-Latin 
 #	 5 Tournament     - basic-Latin at create, any at login
@@ -482,7 +482,7 @@ LogColors = ""
 ###################################################################################################################
 
 GameType = 1
-RealmZone = 0
+RealmZone = 1
 Expansion = 1
 DBC.Locale = 255
 StrictPlayerNames = 0
