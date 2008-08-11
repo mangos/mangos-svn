@@ -208,14 +208,14 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         virtual bool CanEnter(Player* player) { return true; }
         const char* GetMapName() const;
 
-        bool Instanceable() const { return(i_mapEntry && ((i_mapEntry->map_type == MAP_INSTANCE) || (i_mapEntry->map_type == MAP_RAID))); }
+        bool Instanceable() const { return i_mapEntry && i_mapEntry->Instanceable(); }
         // NOTE: this duplicate of Instanceable(), but Instanceable() can be changed when BG also will be instanceable
-        bool IsDungeon() const { return(i_mapEntry && ((i_mapEntry->map_type == MAP_INSTANCE) || (i_mapEntry->map_type == MAP_RAID))); }
-        bool IsRaid() const { return(i_mapEntry && (i_mapEntry->map_type == MAP_RAID)); }
+        bool IsDungeon() const { return i_mapEntry && i_mapEntry->IsDungeon(); }
+        bool IsRaid() const { return i_mapEntry && i_mapEntry->IsRaid(); }
         bool IsHeroic() const { return i_spawnMode == DIFFICULTY_HEROIC; }
-        bool IsBattleGround() const { return(i_mapEntry && (i_mapEntry->map_type == MAP_BATTLEGROUND)); }
-        bool IsBattleArena() const { return(i_mapEntry && (i_mapEntry->map_type == MAP_ARENA)); }
-        bool IsBattleGroundOrArena() const { return(i_mapEntry && ((i_mapEntry->map_type == MAP_BATTLEGROUND) || (i_mapEntry->map_type == MAP_ARENA))); }
+        bool IsBattleGround() const { return i_mapEntry && i_mapEntry->IsBattleGround(); }
+        bool IsBattleArena() const { return i_mapEntry && i_mapEntry->IsBattleArena(); }
+        bool IsBattleGroundOrArena() const { return i_mapEntry && i_mapEntry->IsBattleGroundOrArena(); }
         bool IsMountAllowed() const
         {
             return !IsDungeon() || i_mapEntry && (
