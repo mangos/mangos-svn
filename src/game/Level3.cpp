@@ -2221,6 +2221,8 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
     if(!Utf8toWStr(namepart,wnamepart))
         return false;
 
+    wstrToLower(wnamepart);
+
     uint32 counter = 0;
 
     // Search in `item_template`
@@ -2245,6 +2247,8 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
                     if(!Utf8toWStr(name,wname))
                         continue;
 
+                    wstrToLower(wname);
+
                     if (wname.find(wnamepart) != std::wstring::npos)
                     {
                         PSendSysMessage(LANG_ITEM_LIST, id, id, name.c_str());
@@ -2261,6 +2265,8 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
         std::wstring wname;
         if(!Utf8toWStr(name,wname))
             return false;
+
+        wstrToLower(wname);
 
         if (wname.find(wnamepart) != std::wstring::npos)
         {
@@ -2541,6 +2547,8 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
     if(!Utf8toWStr(namepart,wnamepart))
         return false;
 
+    wstrToLower(wnamepart);
+
     uint32 counter = 0 ;
 
     ObjectMgr::QuestMap const& qTemplates = objmgr.GetQuestTemplates();
@@ -2564,6 +2572,8 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
                     // converting string that we try to find to lower case
                     if(!Utf8toWStr(title,wtitle))
                         continue;
+
+                    wstrToLower(wtitle);
 
                     if (wtitle.find(wnamepart) != std::wstring::npos)
                     {
@@ -2594,6 +2604,8 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
         std::wstring wtitle;
         if(!Utf8toWStr(title,wtitle))
             return false;
+
+        wstrToLower(wtitle);
 
         if (wtitle.find(wnamepart) != std::wstring::npos)
         {
@@ -2633,6 +2645,8 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
     if(!Utf8toWStr(namepart,wnamepart))
         return false;
 
+    wstrToLower(wnamepart);
+
     uint32 counter = 0;
 
     for (uint32 id = 0; id< sCreatureStorage.MaxEntry; id++ )
@@ -2656,6 +2670,8 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
                     if(!Utf8toWStr(name,wname))
                         continue;
 
+                    wstrToLower(wname);
+
                     if (wname.find(wnamepart) != std::wstring::npos)
                     {
                         PSendSysMessage(LANG_CREATURE_ENTRY_LIST, id, id, name.c_str());
@@ -2672,6 +2688,8 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
         std::wstring wname;
         if(!Utf8toWStr(name,wname))
             return false;
+
+        wstrToLower(wname);
 
         if (wname.find(wnamepart) != std::wstring::npos)
         {
@@ -2698,6 +2716,8 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
     if(!Utf8toWStr(namepart,wnamepart))
         return false;
 
+    wstrToLower(wnamepart);
+
     uint32 counter = 0;
 
     for (uint32 id = 0; id< sGOStorage.MaxEntry; id++ )
@@ -2721,6 +2741,8 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
                     if(!Utf8toWStr(name,wname))
                         continue;
 
+                    wstrToLower(wname);
+
                     if (wname.find(wnamepart) != std::wstring::npos)
                     {
                         PSendSysMessage(LANG_GO_ENTRY_LIST, id, id, name.c_str());
@@ -2737,6 +2759,8 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
         std::wstring wname;
         if(!Utf8toWStr(name,wname))
             return false;
+
+        wstrToLower(wname);
 
         if(wname.find(wnamepart) != std::wstring::npos)
         {

@@ -3636,6 +3636,8 @@ bool ChatHandler::HandleLookupEventCommand(const char* args)
     if(!Utf8toWStr(namepart,wnamepart))
         return false;
 
+    wstrToLower(wnamepart);
+
     uint32 counter = 0;
 
     GameEvent::GameEventDataMap const& events = gameeventmgr.GetEventMap();
@@ -3651,6 +3653,8 @@ bool ChatHandler::HandleLookupEventCommand(const char* args)
         std::wstring wdescr;
         if(!Utf8toWStr(descr,wdescr))
             continue;
+
+        wstrToLower(wdescr);
 
         if (wdescr.find(wnamepart) != std::wstring::npos)
         {
