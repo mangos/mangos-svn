@@ -683,6 +683,8 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
     if(!Utf8toWStr(searchedname,wsearchedname))
         return;
 
+    wstrToLower(wsearchedname);
+
     for (AuctionHouseObject::AuctionEntryMap::iterator itr = mAuctions->GetAuctionsBegin();itr != mAuctions->GetAuctionsEnd();++itr)
     {
         AuctionEntry *Aentry = itr->second;
@@ -722,6 +724,8 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                                         std::wstring wname;
                                         if(!Utf8toWStr(name,wname))
                                             continue;
+
+                                        wstrToLower(wname);
 
                                         if( wsearchedname.empty() || wname.find( wsearchedname ) != std::wstring::npos )
                                         {
