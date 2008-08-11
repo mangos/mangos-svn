@@ -275,7 +275,8 @@ bool MapManager::ExistMapAndVMap(uint32 mapid, float x,float y)
 
 bool MapManager::IsValidMAP(uint32 mapid)
 {
-    return sMapStore.LookupEntry(mapid);
+    MapEntry const* mEntry = sMapStore.LookupEntry(mapid);
+    return mEntry && (!mEntry->Instanceable() || objmgr.GetInstanceTemplate(mapid));
 }
 
 void MapManager::LoadGrid(int mapid, float x, float y, const WorldObject* obj, bool no_unload)

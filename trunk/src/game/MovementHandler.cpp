@@ -36,15 +36,17 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
 
     // get the teleport destination
     WorldLocation &loc = GetPlayer()->GetTeleportDest();
-    // get the destination map entry, not the current one, this will fix homebind and reset greeting
-    // also possible errors in the coordinate validity check
-    MapEntry const* mEntry = sMapStore.LookupEntry(loc.mapid);
-    InstanceTemplate const* mInstance = objmgr.GetInstanceTemplate(loc.mapid);
-    if(!mEntry || !MaNGOS::IsValidMapCoord(loc.x,loc.y,loc.z,loc.o))
+
+    // possible errors in the coordinate validity check
+    if(!MapManager::IsValidMapCoord(loc.mapid,loc.x,loc.y,loc.z,loc.o))
     {
         LogoutPlayer(false);
         return;
     }
+
+    // get the destination map entry, not the current one, this will fix homebind and reset greeting
+    MapEntry const* mEntry = sMapStore.LookupEntry(loc.mapid);
+    InstanceTemplate const* mInstance = objmgr.GetInstanceTemplate(loc.mapid);
 
     // reset instance validity, except if going to an instance inside an instance
     if(GetPlayer()->m_InstanceValid == false && !mInstance)
@@ -102,7 +104,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
     Corpse *corpse = GetPlayer()->GetCorpse();
     if (corpse && corpse->GetType() != CORPSE_BONES && corpse->GetMapId() == GetPlayer()->GetMapId())
     {
-        if( mEntry && (mEntry->map_type == MAP_INSTANCE || mEntry->map_type == MAP_RAID) )
+        if( mEntry->IsDungeon() )
         {
             GetPlayer()->ResurrectPlayer(0.5f,false);
             GetPlayer()->SpawnCorpseBones();
@@ -110,7 +112,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
         }
     }
 
-    if(mEntry->map_type == MAP_RAID && mInstance)
+    if(mEntry->IsRaid() && mInstance)
     {
         if(reset_notify)
         {

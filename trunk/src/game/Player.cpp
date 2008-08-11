@@ -1410,17 +1410,19 @@ uint8 Player::chatTag()
 
 bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientation, uint32 options)
 {
+    if(!MapManager::IsValidMapCoord(mapid, x, y, z, orientation))
+    {
+        sLog.outError("TeleportTo: invalid map %d or absent instance template.", mapid);
+        return false;
+    }
+
     // preparing unsummon pet if lost (we must get pet before teleportation or will not find it later)
     Pet* pet = GetPet();
 
     MapEntry const* mEntry = sMapStore.LookupEntry(mapid);
 
-    // this map not exist in client
-    if(!mEntry)
-        return false;
-
     // don't let enter battlegrounds without assigned battleground id (for example through areatrigger)...
-    if(!InBattleGround() && mEntry->map_type == MAP_BATTLEGROUND && !GetSession()->GetSecurity())
+    if(!InBattleGround() && mEntry->IsBattleGround() && !GetSession()->GetSecurity())
         return false;
 
     bool tbc = GetSession()->IsTBC() && sWorld.getConfig(CONFIG_EXPANSION) > 0;
@@ -13133,14 +13135,6 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     _LoadBoundInstances(holder->GetResult(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES));
 
-    // load the player's map here if it's not already loaded
-    Map *map = GetMap();
-    // since the player may not be bound to the map yet, make sure subsequent
-    // getmap calls won't create new maps
-    SetInstanceId(map->GetInstanceId());
-    
-    SaveRecallPosition();
-
     if(!IsPositionValid())
     {
         sLog.outError("ERROR: Player (guidlow %d) have invalid coordinates (X: %f Y: %f Z: %f O: %f). Teleport to default race/class locations.",guid,GetPositionX(),GetPositionY(),GetPositionZ(),GetOrientation());
@@ -13149,7 +13143,20 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         Relocate(info->positionX,info->positionY,info->positionZ,0.0f);
 
         transGUID = 0;
+
+        m_movementInfo.t_x = 0.0f;
+        m_movementInfo.t_y = 0.0f;
+        m_movementInfo.t_z = 0.0f;
+        m_movementInfo.t_o = 0.0f;
     }
+
+    // load the player's map here if it's not already loaded
+    Map *map = GetMap();
+    // since the player may not be bound to the map yet, make sure subsequent
+    // getmap calls won't create new maps
+    SetInstanceId(map->GetInstanceId());
+    
+    SaveRecallPosition();
 
     if (transGUID != 0)
     {
