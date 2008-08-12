@@ -3500,7 +3500,11 @@ void Player::BuildPlayerRepop()
     // there we must send 888 opcode
 
     // the player cannot have a corpse already, only bones which are not returned by GetCorpse
-    assert(!GetCorpse());
+    if(GetCorpse())
+    {
+        sLog.outError("BuildPlayerRepop: player %s(%d) already has a corpse", GetName(), GetGUIDLow());
+        assert(false);
+    }
 
     // create a corpse and place it at the player's location
     CreateCorpse();
@@ -14431,7 +14435,16 @@ void Player::SaveToDB()
         << m_race << ", "
         << m_class << ", ";
 
-    if(!IsBeingTeleported())
+    bool save_to_dest = false;
+    if(IsBeingTeleported())
+    {
+        // don't save to battlegrounds or arenas
+        const MapEntry *entry = sMapStore.LookupEntry(GetTeleportDest().mapid);
+        if(entry && entry->map_type != MAP_BATTLEGROUND && entry->map_type != MAP_ARENA)
+            save_to_dest = true;
+    }
+
+    if(!save_to_dest)
     {
         ss << GetMapId() << ", "
         << (uint32)GetDifficulty() << ", "

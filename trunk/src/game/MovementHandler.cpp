@@ -364,10 +364,19 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     if(movementInfo.z < -500.0f)
     {
+        // NOTE: this is actually called many times while falling
+        // even after the player has been teleported away
+        // TODO: discard movement packets after the player is rooted
         if(GetPlayer()->isAlive())
+        {
             GetPlayer()->EnvironmentalDamage(GetPlayer()->GetGUID(),DAMAGE_FALL_TO_VOID, GetPlayer()->GetMaxHealth());
-        else if(!GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+            // change the death state to CORPSE to prevent the death timer from
+            // starting in the next player update
+            GetPlayer()->KillPlayer();
             GetPlayer()->BuildPlayerRepop();
+        }
+
+        // cancel the death timer here if started
         GetPlayer()->RepopAtGraveyard();
     }
 }

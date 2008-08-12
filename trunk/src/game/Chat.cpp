@@ -150,7 +150,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "getvalue",       SEC_ADMINISTRATOR,  &ChatHandler::HandleGetValue,                   "", NULL },
         { "Mod32Value",     SEC_ADMINISTRATOR,  &ChatHandler::HandleMod32Value,                 "", NULL },
         { "anim",           SEC_GAMEMASTER,     &ChatHandler::HandleAnimCommand,                "", NULL },
-        { "instance",       SEC_ADMINISTRATOR,  &ChatHandler::HandleInstanceCommand,            "", NULL },
         { NULL,             0,                  NULL,                                           "", NULL }
     };
 
@@ -383,6 +382,15 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  NULL,                                           "", NULL }
     };
 
+    static ChatCommand instanceCommandTable[] =
+    {
+        { "listbinds",      SEC_MODERATOR,      &ChatHandler::HandleInstanceListBindsCommand,   "", NULL },
+        { "unbind",         SEC_MODERATOR,      &ChatHandler::HandleInstanceUnbindCommand,      "", NULL },
+        { "stats",          SEC_MODERATOR,      &ChatHandler::HandleInstanceStatsCommand,       "", NULL },
+        { "savedata",       SEC_MODERATOR,      &ChatHandler::HandleInstanceSaveDataCommand,    "", NULL },
+        { NULL,             0,                  NULL,                                           "", NULL }
+    };
+
     static ChatCommand commandTable[] =
     {
         { "gm",             SEC_MODERATOR,      NULL,                                           "", gmCommandTable },
@@ -404,6 +412,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "guild",          SEC_ADMINISTRATOR,  NULL,                                           "", guildCommandTable },
         { "cast",           SEC_ADMINISTRATOR,  NULL,                                           "", castCommandTable },
         { "reset",          SEC_ADMINISTRATOR,  NULL,                                           "", resetCommandTable },
+        { "instance",       SEC_ADMINISTRATOR,  NULL,                                           "", instanceCommandTable },
 
         { "aura",           SEC_ADMINISTRATOR,  &ChatHandler::HandleAuraCommand,                "", NULL },
         { "unaura",         SEC_ADMINISTRATOR,  &ChatHandler::HandleUnAuraCommand,              "", NULL },
