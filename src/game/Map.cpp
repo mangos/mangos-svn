@@ -438,7 +438,7 @@ bool InstanceMap::CanEnter(Player *player)
 {
     if(std::find(i_Players.begin(),i_Players.end(),player)!=i_Players.end())
     {
-        sLog.outError("InstanceMap::CanEnter - player %u already in map!", player->GetGUIDLow());
+        sLog.outError("InstanceMap::CanEnter - player %s(%u) already in map %d,%d,%d!", player->GetName(), player->GetGUIDLow(), GetId(), GetInstanceId(), GetSpawnMode());
         assert(false);
         return false;
     }
@@ -481,7 +481,7 @@ bool InstanceMap::Add(Player *player)
         InstanceSave *mapSave = sInstanceSaveManager.GetInstanceSave(GetInstanceId());
         if(!mapSave)
         {
-            sLog.outDebug("InstanceMap::Add: creating instance save for map %d spawnmode %d with instance id %d", GetId(), GetSpawnMode(), GetInstanceId());
+            sLog.outDetail("InstanceMap::Add: creating instance save for map %d spawnmode %d with instance id %d", GetId(), GetSpawnMode(), GetInstanceId());
             mapSave = sInstanceSaveManager.AddInstanceSave(GetId(), GetInstanceId(), GetSpawnMode(), 0, true);
         }
 
@@ -490,7 +490,11 @@ bool InstanceMap::Add(Player *player)
         if(playerBind && playerBind->perm)
         {
             // cannot enter other instances if bound permanently
-            assert(playerBind->save == mapSave);
+            if(playerBind->save != mapSave)
+            {
+                sLog.outError("InstanceMap::Add: player %s(%d) is permanently bound to instance %d,%d,%d,%d,%d,%d but he is being put in instance %d,%d,%d,%d,%d,%d", player->GetName(), player->GetGUIDLow(), playerBind->save->GetMapId(), playerBind->save->GetInstanceId(), playerBind->save->GetDifficulty(), playerBind->save->GetPlayerCount(), playerBind->save->GetGroupCount(), playerBind->save->CanReset(), mapSave->GetMapId(), mapSave->GetInstanceId(), mapSave->GetDifficulty(), mapSave->GetPlayerCount(), mapSave->GetGroupCount(), mapSave->CanReset());
+                assert(false);
+            }
         }
         else
         {
