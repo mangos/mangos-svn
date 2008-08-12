@@ -630,7 +630,7 @@ void CliListGM(char*,pPrintf zprintf)
     }
     else
     {
-        zprintf("NO gamemasters\r\n");
+        zprintf("No gamemasters\r\n");
     }
 }
 
@@ -673,7 +673,7 @@ void CliSetGM(char *command,pPrintf zprintf)
 
         // No SQL injection (account name is escaped)
         loginDatabase.PExecute("UPDATE account SET gmlevel = '%d' WHERE UPPER(username) = UPPER('%s')",lev,safe_account_name.c_str());
-        zprintf("We added %s gmlevel %d\r\n",safe_account_name.c_str(),lev);
+        zprintf("We set %s gmlevel %d\r\n",safe_account_name.c_str(),lev);
     }
     else
     {
@@ -983,7 +983,7 @@ void CliSetTBC(char *command,pPrintf zprintf)
     {
         // No SQL injection (account name is escaped)
         loginDatabase.PExecute("UPDATE account SET tbc = '%d' WHERE UPPER(username) = UPPER('%s')",lev,safe_account_name.c_str());
-        zprintf("We added %s to expansion allowed %d\r\n",safe_account_name.c_str(),lev);
+        zprintf("We set %s to expansion allowed %d\r\n",safe_account_name.c_str(),lev);
 
         delete result;
     }
@@ -1130,7 +1130,7 @@ void CliRunnable::run()
     ///- Display the list of available CLI functions then beep
     sLog.outString();
     /// \todo Shoudn't we use here also the sLog singleton?
-    CliHelp(NULL,&printf);
+    CliHelp(NULL,&UTF8ZPRINTF);
 
     if(sConfig.GetBoolDefault("BeepAtStart", true))
     {

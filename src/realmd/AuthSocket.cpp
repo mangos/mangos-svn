@@ -28,7 +28,6 @@
 #include "RealmList.h"
 #include "AuthSocket.h"
 #include "AuthCodes.h"
-#include <cwctype>                                          // needs for towupper
 #include <openssl/md5.h>
 #include "Auth/Sha1.h"
 
