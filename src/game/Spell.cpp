@@ -4183,7 +4183,8 @@ uint8 Spell::CheckRange(bool strict)
             return SPELL_FAILED_OUT_OF_RANGE;               //0x5A;
         if(dist < min_range)
             return SPELL_FAILED_TOO_CLOSE;
-        if( !m_IsTriggeredSpell && !IsPositiveSpell(m_spellInfo->Id) && !m_caster->isInFront( target, max_range) )
+        if( !m_IsTriggeredSpell && m_caster->GetTypeId() == TYPEID_PLAYER &&
+            !IsPositiveSpell(m_spellInfo->Id) && !m_caster->HasInArc( M_PI, target ) )
         {
             // Spell-Family Related Checks
             switch (m_spellInfo->SpellFamilyName)
