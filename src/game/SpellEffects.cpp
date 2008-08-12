@@ -783,27 +783,8 @@ void Spell::EffectDummy(uint32 i)
                     return;
                 }
                 case 20577:                                 // Cannibalize
-                {
-                    if (!unitTarget)
-                        return;
-
-                    // casting
-                    m_caster->CastSpell(m_caster,20578,false,NULL);
-                    return;
-                }
-
-                // Different item engineering summons
-                case 23074:                                 // Arc. Dragonling
-                    if (!m_CastItem) return;
-                    m_caster->CastSpell(m_caster,19804,true,m_CastItem);
-                    return;
-                case 23075:                                 // Mithril Mechanical Dragonling
-                    if (!m_CastItem) return;
-                    m_caster->CastSpell(m_caster,12749,true,m_CastItem);
-                    return;
-                case 23076:                                 // Mechanical Dragonling
-                    if (!m_CastItem) return;
-                    m_caster->CastSpell(m_caster,4073,true,m_CastItem);
+                    if (unitTarget)
+                        m_caster->CastSpell(m_caster,20578,false,NULL);
                     return;
                 case 23019:                                 // Crystal Prison Dummy DND
                 {
@@ -844,6 +825,18 @@ void Spell::EffectDummy(uint32 i)
 
                     return;
                 }
+                case 23074:                                 // Arc. Dragonling
+                    if (!m_CastItem) return;
+                    m_caster->CastSpell(m_caster,19804,true,m_CastItem);
+                    return;
+                case 23075:                                 // Mithril Mechanical Dragonling
+                    if (!m_CastItem) return;
+                    m_caster->CastSpell(m_caster,12749,true,m_CastItem);
+                    return;
+                case 23076:                                 // Mechanical Dragonling
+                    if (!m_CastItem) return;
+                    m_caster->CastSpell(m_caster,4073,true,m_CastItem);
+                    return;
                 case 23133:                                 // Gnomish Battle Chicken
                     if (!m_CastItem) return;
                     m_caster->CastSpell(m_caster,13166,true,m_CastItem);
@@ -860,13 +853,11 @@ void Spell::EffectDummy(uint32 i)
                     return;
                 }
                 case 23453:                                 // Ultrasafe Transporter: Gadgetzan
-                {
                     if ( roll_chance_i(50) )                // success
                         m_caster->CastSpell(m_caster,23441,true);
                     else                                    // failure
                         m_caster->CastSpell(m_caster,23446,true);
                     return;
-                }
                 case 23725:                                 // Gift of Life (warrior bwl trinket)
                     m_caster->CastSpell(m_caster,23782,true);
                     m_caster->CastSpell(m_caster,23783,true);
@@ -897,6 +888,21 @@ void Spell::EffectDummy(uint32 i)
                 }
                 //case 26074:                               // Holiday Cheer
                 //    return; -- implemented at client side
+                case 28730:                                 // Arcane Torrent (Mana)
+                {
+                    int32 count = 0;
+                    Unit::AuraList const& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                    for(Unit::AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
+                        if ((*i)->GetId() == 28734)
+                            ++count;
+                    if (count)
+                    {
+                        m_caster->RemoveAurasDueToSpell(28734);
+                        int32 bp = damage * count;
+                        m_caster->CastCustomSpell(m_caster, 28733, &bp, NULL, NULL, true);
+                    }
+                    return;
+                }
                 case 29200:                                 // Purify Helboar Meat
                 {
                     if( !itemTarget || m_caster->GetTypeId() != TYPEID_PLAYER )
@@ -907,12 +913,9 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastSpell(m_caster,spell_id,true,NULL);
                     return;
                 }
-                case 30507:                                 // Poultryizer
-                    if (!m_CastItem) return;
-                    if(roll_chance_i(80))                   // success
-                        m_caster->CastSpell(unitTarget, 30501, true, m_CastItem);
-                    else                                    // backfire 20%
-                        m_caster->CastSpell(unitTarget, 30504, true, m_CastItem);
+                case 29858:                                 // Soulshatter
+                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->IsHostileTo(m_caster))
+                        m_caster->CastSpell(unitTarget,32835,true);
                     return;
                 case 30458:                                 // Nigh Invulnerability
                     if (!m_CastItem) return;
@@ -920,6 +923,13 @@ void Spell::EffectDummy(uint32 i)
                         m_caster->CastSpell(m_caster, 30456, true, m_CastItem);
                     else                                    // backfire in 14% casts
                         m_caster->CastSpell(m_caster, 30457, true, m_CastItem);
+                    return;
+                case 30507:                                 // Poultryizer
+                    if (!m_CastItem) return;
+                    if(roll_chance_i(80))                   // success
+                        m_caster->CastSpell(unitTarget, 30501, true, m_CastItem);
+                    else                                    // backfire 20%
+                        m_caster->CastSpell(unitTarget, 30504, true, m_CastItem);
                     return;
                 case 33060:                                         // Make a Wish
                 {
@@ -940,27 +950,10 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastSpell(m_caster,spell_id,true,NULL);
                     return;
                 }
-                case 29858:                                 // Soulshatter
-                {
-                    if (unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && unitTarget->IsHostileTo(m_caster))
-                        m_caster->CastSpell(unitTarget,32835,true);
+                case 37674:                                 // Chaos Blast
+                    if(unitTarget)
+                        m_caster->CastSpell(unitTarget,37675,true);
                     return;
-                }
-                case 28730:                                 // Arcane Torrent (Mana)
-                {
-                    int32 count = 0;
-                    Unit::AuraList const& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-                    for(Unit::AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
-                        if ((*i)->GetId() == 28734)
-                            ++count;
-                    if (count)
-                    {
-                        m_caster->RemoveAurasDueToSpell(28734);
-                        int32 bp = damage * count;
-                        m_caster->CastCustomSpell(m_caster, 28733, &bp, NULL, NULL, true);
-                    }
-                    return;
-                }
                 case 44875:                                 // Complete Raptor Capture
                 {
                     if(!unitTarget || unitTarget->GetTypeId() != TYPEID_UNIT)
