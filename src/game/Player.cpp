@@ -358,7 +358,7 @@ Player::Player (WorldSession *session): Unit()
     m_canDualWield = false;
     m_ammoDPS = 0.0f;
 
-    m_oldpetnumber = 0;
+    m_temporaryUnsummonedPetNumber = 0;
     //cache for UNIT_CREATED_BY_SPELL to allow
     //returning reagests for temporarily removed pets
     //when dying/logging out
@@ -1506,9 +1506,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             if(pet && !IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
             {
                 if(pet->isControlled() && !pet->isTemporarySummoned() )
-                    m_oldpetnumber = pet->GetCharmInfo()->GetPetNumber();
+                    m_temporaryUnsummonedPetNumber = pet->GetCharmInfo()->GetPetNumber();
                 else
-                    m_oldpetnumber = 0;
+                    m_temporaryUnsummonedPetNumber = 0;
 
                 RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
             }
@@ -1520,13 +1520,13 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         if (!(options & TELE_TO_NOT_UNSUMMON_PET))
         {
             // resummon pet
-            if(pet && m_oldpetnumber)
+            if(pet && m_temporaryUnsummonedPetNumber)
             {
                 Pet* NewPet = new Pet;
-                if(!NewPet->LoadPetFromDB(this, 0, m_oldpetnumber, true))
+                if(!NewPet->LoadPetFromDB(this, 0, m_temporaryUnsummonedPetNumber, true))
                     delete NewPet;
 
-                m_oldpetnumber = 0;
+                m_temporaryUnsummonedPetNumber = 0;
             }
         }
 
@@ -1580,9 +1580,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             {
                 //leaving map -> delete pet right away (doing this later will cause problems)
                 if(pet->isControlled() && !pet->isTemporarySummoned())
-                    m_oldpetnumber = pet->GetCharmInfo()->GetPetNumber();
+                    m_temporaryUnsummonedPetNumber = pet->GetCharmInfo()->GetPetNumber();
                 else
-                    m_oldpetnumber = 0;
+                    m_temporaryUnsummonedPetNumber = 0;
 
                 RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
             }
@@ -15149,7 +15149,7 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
     if(!pet)
         pet = GetPet();
 
-    if(returnreagent && (pet || m_oldpetnumber))
+    if(returnreagent && (pet || m_temporaryUnsummonedPetNumber))
     {
         //returning of reagents only for players, so best done here
         uint32 spellId = pet ? pet->GetUInt32Value(UNIT_CREATED_BY_SPELL) : m_oldpetspell;
@@ -15172,7 +15172,7 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
                 }
             }
         }
-        m_oldpetnumber = 0;
+        m_temporaryUnsummonedPetNumber = 0;
     }
 
     if(!pet || pet->GetOwnerGUID()!=GetGUID())

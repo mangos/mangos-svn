@@ -155,13 +155,13 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
         GetPlayer()->CastSpell(GetPlayer(), 2479, true);
 
     // resummon pet
-    if(GetPlayer()->m_oldpetnumber)
+    if(GetPlayer()->m_temporaryUnsummonedPetNumber)
     {
         Pet* NewPet = new Pet;
-        if(!NewPet->LoadPetFromDB(GetPlayer(), 0, GetPlayer()->m_oldpetnumber, true))
+        if(!NewPet->LoadPetFromDB(GetPlayer(), 0, GetPlayer()->m_temporaryUnsummonedPetNumber, true))
             delete NewPet;
 
-        GetPlayer()->m_oldpetnumber = 0;
+        GetPlayer()->m_temporaryUnsummonedPetNumber = 0;
     }
 
     GetPlayer()->SetDontMove(false);

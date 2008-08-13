@@ -1938,8 +1938,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         LookingForGroup m_lookingForGroup;
 
         // Temporarily removed pet cache
-        uint32 GetOldPetNumber() const { return m_oldpetnumber; }
-        void SetOldPetNumber(uint32 petnumber) { m_oldpetnumber = petnumber; }
+        uint32 GetTemporaryUnsummonedPetNumber() const { return m_temporaryUnsummonedPetNumber; }
+        void SetTemporaryUnsummonedPetNumber(uint32 petnumber) { m_temporaryUnsummonedPetNumber = petnumber; }
         uint32 GetOldPetSpell() const { return m_oldpetspell; }
         void SetOldPetSpell(uint32 petspell) { m_oldpetspell = petspell; }
 
@@ -2198,7 +2198,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint64 m_auraUpdateMask;
 
         // Temporarily removed pet cache
-        uint32 m_oldpetnumber;
+        uint32 m_temporaryUnsummonedPetNumber;
         uint32 m_oldpetspell;
 
         uint64 m_miniPet;
