@@ -6891,25 +6891,20 @@ Unit *Unit::GetOwner() const
 
 Unit *Unit::GetCharmer() const
 {
-    uint64 charmerid = GetCharmerGUID();
-    if(!charmerid)
-        return NULL;
-    return ObjectAccessor::GetUnit(*this, charmerid);
+    if(uint64 charmerid = GetCharmerGUID())
+        return ObjectAccessor::GetUnit(*this, charmerid);
+    return NULL;
 }
 
 Pet* Unit::GetPet() const
 {
-    uint64 pet_guid = GetPetGUID();
-    if(pet_guid)
+    if(uint64 pet_guid = GetPetGUID())
     {
-        Pet* pet = ObjectAccessor::GetPet(pet_guid);
-        if(!pet)
-        {
-            sLog.outError("Unit::GetPet: Pet %u not exist.",GUID_LOPART(pet_guid));
-            const_cast<Unit*>(this)->SetPet(0);
-            return NULL;
-        }
-        return pet;
+        if(Pet* pet = ObjectAccessor::GetPet(pet_guid))
+            return pet;
+
+        sLog.outError("Unit::GetPet: Pet %u not exist.",GUID_LOPART(pet_guid));
+        const_cast<Unit*>(this)->SetPet(0);
     }
 
     return NULL;
@@ -6917,32 +6912,26 @@ Pet* Unit::GetPet() const
 
 Unit* Unit::GetCharm() const
 {
-    uint64 charm_guid = GetCharmGUID();
-    if(charm_guid)
+    if(uint64 charm_guid = GetCharmGUID())
     {
-        Unit* pet = ObjectAccessor::GetUnit(*this, charm_guid);
-        if(!pet)
-        {
-            sLog.outError("Unit::GetCharm: Charmed creature %u not exist.",GUID_LOPART(charm_guid));
-            const_cast<Unit*>(this)->SetCharm(0);
-        }
-        return pet;
+        if(Unit* pet = ObjectAccessor::GetUnit(*this, charm_guid))
+            return pet;
+
+        sLog.outError("Unit::GetCharm: Charmed creature %u not exist.",GUID_LOPART(charm_guid));
+        const_cast<Unit*>(this)->SetCharm(0);
     }
-    else
-        return NULL;
+
+    return NULL;
 }
 
 void Unit::SetPet(Pet* pet)
 {
     SetUInt64Value(UNIT_FIELD_SUMMON,pet ? pet->GetGUID() : 0);
 
+    // FIXME: hack, speed must be set only at follow
     if(pet)
-    {
         for(int i = 0; i < MAX_MOVE_TYPE; ++i)
-        {
             pet->SetSpeed(UnitMoveType(i),m_speed_rate[i],true);
-        }
-    }
 }
 
 void Unit::SetCharm(Unit* charmed)
@@ -8132,14 +8121,14 @@ void Unit::Mount(uint32 mount)
         {
             if(pet->isControlled())
             {
-                ((Player*)this)->SetOldPetNumber(pet->GetCharmInfo()->GetPetNumber());
+                ((Player*)this)->SetTemporaryUnsummonedPetNumber(pet->GetCharmInfo()->GetPetNumber());
                 ((Player*)this)->SetOldPetSpell(pet->GetUInt32Value(UNIT_CREATED_BY_SPELL));
             }
 
             ((Player*)this)->RemovePet(NULL,PET_SAVE_NOT_IN_SLOT);
         }
         else
-            ((Player*)this)->SetOldPetNumber(0);
+            ((Player*)this)->SetTemporaryUnsummonedPetNumber(0);
     }
 }
 
@@ -8156,13 +8145,13 @@ void Unit::Unmount()
     // only resummon old pet if the player is already added to a map
     // this prevents adding a pet to a not created map which would otherwise cause a crash
     // (it could probably happen when logging in after a previous crash)
-    if(GetTypeId() == TYPEID_PLAYER && IsInWorld() && ((Player*)this)->GetOldPetNumber() && isAlive())
+    if(GetTypeId() == TYPEID_PLAYER && IsInWorld() && ((Player*)this)->GetTemporaryUnsummonedPetNumber() && isAlive())
     {
         Pet* NewPet = new Pet;
-        if(!NewPet->LoadPetFromDB(this, 0, ((Player*)this)->GetOldPetNumber(), true))
+        if(!NewPet->LoadPetFromDB(this, 0, ((Player*)this)->GetTemporaryUnsummonedPetNumber(), true))
             delete NewPet;
 
-        ((Player*)this)->SetOldPetNumber(0);
+        ((Player*)this)->SetTemporaryUnsummonedPetNumber(0);
     }
 }
 
