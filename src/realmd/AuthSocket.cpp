@@ -486,7 +486,7 @@ bool AuthSocket::_HandleLogonChallenge()
 
                         _localization = GetLocaleByName(localeName);
 
-                        sLog.outBasic("[AuthChallenge] account %s is using '%c%c' locale (%u)", _login.c_str (), ch->country[3],ch->country[2], _localization);
+                        sLog.outBasic("[AuthChallenge] account %s is using '%c%c%c%c' locale (%u)", _login.c_str (), ch->country[3],ch->country[2],ch->country[1],ch->country[0], _localization);
                     }
                 }
                 delete result;
