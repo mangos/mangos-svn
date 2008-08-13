@@ -127,7 +127,7 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
         // instance not specified, find an existing or create a new one
         if(obj->GetTypeId() != TYPEID_PLAYER)
         {
-            sLog.outError("MAPINSTANCED: WorldObject '%u' (Entry: %u Type: %u) requested base map instance of map '%u', this must not happen", obj->GetGUIDLow(), obj->GetEntry(), obj->GetTypeId(), GetId());
+            sLog.outError("MAPINSTANCED: WorldObject '%u' (Entry: %u TypeID: %u) requested base map instance of map '%u', this must not happen", obj->GetGUIDLow(), obj->GetEntry(), obj->GetTypeId(), GetId());
             assert(false);
             return NULL;
         }
