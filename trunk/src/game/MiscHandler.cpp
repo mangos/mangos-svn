@@ -48,6 +48,17 @@ void WorldSession::HandleRepopRequestOpcode( WorldPacket & /*recv_data*/ )
     if(GetPlayer()->isAlive()||GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;
 
+    // the world update order is sessions, players, creatures
+    // the netcode runs in parallel with all of these
+    // creatures can kill players
+    // so if the server is lagging enough the player can
+    // release spirit after he's killed but before he is updated
+    if(GetPlayer()->getDeathState() == JUST_DIED)
+    {
+        sLog.outDebug("HandleRepopRequestOpcode: got request after player %s(%d) was killed and before he was updated", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
+        GetPlayer()->KillPlayer();
+    }
+
     //this is spirit release confirm?
     GetPlayer()->RemovePet(NULL,PET_SAVE_NOT_IN_SLOT, true);
     GetPlayer()->BuildPlayerRepop();

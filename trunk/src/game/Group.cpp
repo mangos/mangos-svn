@@ -76,7 +76,7 @@ bool Group::Create(const uint64 &guid, const char * name)
     m_leaderGuid = guid;
     m_leaderName = name;
 
-    m_groupType  = GROUPTYPE_NORMAL;
+    m_groupType  = isBGGroup() ? GROUPTYPE_RAID : GROUPTYPE_NORMAL;
     m_lootMethod = GROUP_LOOT;
     m_lootThreshold = ITEM_QUALITY_UNCOMMON;
     m_looterGuid = guid;
@@ -97,9 +97,9 @@ bool Group::Create(const uint64 &guid, const char * name)
     CharacterDatabase.PExecute("DELETE FROM groups WHERE leaderGuid ='%u'", GUID_LOPART(m_leaderGuid));
     CharacterDatabase.PExecute("DELETE FROM group_member WHERE leaderGuid ='%u'", GUID_LOPART(m_leaderGuid));
     CharacterDatabase.PExecute("INSERT INTO groups(leaderGuid,mainTank,mainAssistant,lootMethod,looterGuid,lootThreshold,icon1,icon2,icon3,icon4,icon5,icon6,icon7,icon8,isRaid,difficulty) "
-        "VALUES('%u','%u','%u','%u','%u','%u','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "',0,'%u')",
+        "VALUES('%u','%u','%u','%u','%u','%u','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','%u','%u')",
         GUID_LOPART(m_leaderGuid), GUID_LOPART(m_mainTank), GUID_LOPART(m_mainAssistant), uint32(m_lootMethod),
-        GUID_LOPART(m_looterGuid), uint32(m_lootThreshold), m_targetIcons[0], m_targetIcons[1], m_targetIcons[2], m_targetIcons[3], m_targetIcons[4], m_targetIcons[5], m_targetIcons[6], m_targetIcons[7], m_difficulty);
+        GUID_LOPART(m_looterGuid), uint32(m_lootThreshold), m_targetIcons[0], m_targetIcons[1], m_targetIcons[2], m_targetIcons[3], m_targetIcons[4], m_targetIcons[5], m_targetIcons[6], m_targetIcons[7], isRaidGroup(), m_difficulty);
 
     for(Group::member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
     {
@@ -964,37 +964,40 @@ void Group::_setLeader(const uint64 &guid)
     // remove all permanent binds from the group
     // in the DB also remove solo binds that will be replaced with permbinds
     // from the new leader
-    CharacterDatabase.PExecute(
-        "DELETE FROM group_instance WHERE leaderguid='%u' AND (permanent = 1 OR "
-        "instance IN (SELECT instance FROM character_instance WHERE guid = '%u')"
-        ")", GUID_LOPART(m_leaderGuid), GUID_LOPART(slot->guid)
-    );
-
-    Player *player = objmgr.GetPlayer(slot->guid);
-    if(player)
+    if(!isBGGroup())
     {
-        for(uint8 i = 0; i < TOTAL_DIFFICULTIES; i++)
+        CharacterDatabase.PExecute(
+            "DELETE FROM group_instance WHERE leaderguid='%u' AND (permanent = 1 OR "
+            "instance IN (SELECT instance FROM character_instance WHERE guid = '%u')"
+            ")", GUID_LOPART(m_leaderGuid), GUID_LOPART(slot->guid)
+        );
+
+        Player *player = objmgr.GetPlayer(slot->guid);
+        if(player)
         {
-            for(BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end();)
+            for(uint8 i = 0; i < TOTAL_DIFFICULTIES; i++)
             {
-                if(itr->second.perm)
+                for(BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end();)
                 {
-                    itr->second.save->RemoveGroup(this);
-                    m_boundInstances[i].erase(itr++);
+                    if(itr->second.perm)
+                    {
+                        itr->second.save->RemoveGroup(this);
+                        m_boundInstances[i].erase(itr++);
+                    }
+                    else
+                        ++itr;
                 }
-                else
-                    ++itr;
             }
         }
+
+        // update the group's solo binds to the new leader
+        CharacterDatabase.PExecute("UPDATE group_instance SET leaderGuid='%u' WHERE leaderGuid = '%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
+
+        // copy the permanent binds from the new leader to the group
+        // overwriting the solo binds with permanent ones if necessary
+        // in the DB those have been deleted already
+        Player::ConvertInstancesToGroup(player, this, slot->guid);
     }
-
-    // update the group's solo binds to the new leader
-    CharacterDatabase.PExecute("UPDATE group_instance SET leaderGuid='%u' WHERE leaderGuid = '%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
-
-    // copy the permanent binds from the new leader to the group
-    // overwriting the solo binds with permanent ones if necessary
-    // in the DB those have been deleted already
-    Player::ConvertInstancesToGroup(player, this, slot->guid);
 
     // update the group leader
     CharacterDatabase.PExecute("UPDATE groups SET leaderGuid='%u' WHERE leaderGuid='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));

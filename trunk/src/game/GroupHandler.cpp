@@ -195,7 +195,7 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & /*recv_data*/ )
     }
 
     // when forming a new group, create group binds
-    if(group->GetMembersCount() == 1)
+    if(!group->isBGGroup() && group->GetMembersCount() == 1)
         Player::ConvertInstancesToGroup(leader, group, group->GetLeaderGUID());
     
     // reset the acceptee's solo instances, unless he is currently in one of them
