@@ -39,6 +39,7 @@ class Unit;
 class WorldPacket;
 class InstanceData;
 class Group;
+class InstanceSave;
 
 namespace ZThread
 {
@@ -118,8 +119,8 @@ enum LevelRequirementVsMode
 typedef HM_NAMESPACE::hash_map<Creature*, CreatureMover> CreatureMoveList;
 
 #define MAX_HEIGHT            100000.0f                     // can be use for find ground height at surface
-#define INVALID_HEIGHT       -100000.0f                     // for check, must be equal to VMAP_INVALID_HEIGHT, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE
-class InstanceSave;
+#define INVALID_HEIGHT       -100000.0f                     // for check, must be equal to VMAP_INVALID_HEIGHT, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE 
+#define MIN_UNLOAD_DELAY      3*60*1000                     // give enough time for players to log out if they've been disconnected
 
 class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>
 {
@@ -128,7 +129,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         virtual ~Map();
 
         // currently unused for normal maps
-        virtual bool CanUnload(const uint32& diff) { return false; }
+        virtual bool CanUnload(const uint32& diff);
 
         virtual bool Add(Player *);
         virtual void Remove(Player *, bool);
@@ -281,6 +282,7 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         uint8 i_spawnMode;
         uint32 i_id;
         uint32 i_InstanceId;
+        uint32 m_unloadTimer;
 
     private:
         typedef GridReadGuard ReadGuard;
@@ -336,7 +338,6 @@ class MANGOS_DLL_SPEC InstanceMap : public Map
         PlayerList const& GetPlayers() const { return i_Players;}
         void SendToPlayers(WorldPacket const* data) const;
         time_t GetResetTime();
-        bool CanUnload(const uint32& diff);
         void UnloadAll(bool pForce);
         bool CanEnter(Player* player);
         uint32 GetPlayersCountExceptGMs() const;
@@ -344,7 +345,6 @@ class MANGOS_DLL_SPEC InstanceMap : public Map
         void SendResetWarnings(uint32 timeLeft);
         void SetResetSchedule(bool on);
     private:
-        uint32 m_unloadTimer;
         bool m_resetAfterUnload;
         bool m_unloadWhenEmpty;
         InstanceData* i_data;
@@ -352,6 +352,24 @@ class MANGOS_DLL_SPEC InstanceMap : public Map
         // only online players that are inside the instance currently
         // TODO ? - use the grid instead to access the players
         PlayerList i_Players;
+};
+
+class MANGOS_DLL_SPEC BattleGroundMap : public Map
+{
+    public:
+        typedef std::list<Player *> PlayerList;                 // online players only
+
+        BattleGroundMap(uint32 id, time_t, uint32 InstanceId);
+        ~BattleGroundMap();
+
+        bool Add(Player *);
+        void Remove(Player *, bool);
+        bool CanEnter(Player* player);
+        void SetUnload();
+        void UnloadAll(bool pForce);
+    private:
+        PlayerList i_Players;
+        bool m_unload;
 };
 
 /*inline
