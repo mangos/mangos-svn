@@ -136,11 +136,8 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
                 if(!bg->GetBgRaid(_player->GetTeam()))      // first player joined
                 {
                     Group *group = new Group;
-                    group->SetDifficulty(DIFFICULTY_NORMAL);
                     bg->SetBgRaid(_player->GetTeam(), group);
-                    group->ConvertToRaid();
-                    group->AddMember(_player->GetGUID(), _player->GetName());
-                    group->ChangeLeader(_player->GetGUID());
+                    group->Create(_player->GetGUIDLow(), _player->GetName());
                 }
                 else                                        // raid already exist
                 {
