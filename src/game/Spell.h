@@ -69,10 +69,11 @@ enum SpellCastFlags
 
 enum SpellNotifyPushType
 {
-    PUSH_IN_FRONT       = 0,
-    PUSH_SELF_CENTER    = 1,
-    PUSH_DEST_CENTER    = 2,
-    PUSH_TARGET_CENTER  = 3
+    PUSH_IN_FRONT,
+    PUSH_IN_BACK,
+    PUSH_SELF_CENTER,
+    PUSH_DEST_CENTER,
+    PUSH_TARGET_CENTER
 };
 
 bool IsQuestTameSpell(uint32 spellId);
@@ -642,7 +643,11 @@ namespace MaNGOS
                 switch(i_push_type)
                 {
                     case PUSH_IN_FRONT:
-                        if(i_spell.GetCaster()->isInFront((Unit*)(itr->getSource()), i_radius ))
+                        if(i_spell.GetCaster()->isInFront((Unit*)(itr->getSource()), i_radius, 2*M_PI/3 ))
+                            i_data->push_back(itr->getSource());
+                        break;
+                    case PUSH_IN_BACK:
+                        if(i_spell.GetCaster()->isInBack((Unit*)(itr->getSource()), i_radius, 2*M_PI/3 ))
                             i_data->push_back(itr->getSource());
                         break;
                     case PUSH_SELF_CENTER:
