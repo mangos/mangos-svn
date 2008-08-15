@@ -795,7 +795,7 @@ void Guild::DisplayGuildEventlog(WorldSession *session)
 {
     // Load guild eventlog, if not already done
     if (!m_eventlogloaded)
-        LoadGuildEventlogFromDB();
+        LoadGuildEventLogFromDB();
 
     // Sending result
     WorldPacket data(MSG_GUILD_EVENT_LOG_QUERY, 0);
@@ -821,13 +821,13 @@ void Guild::DisplayGuildEventlog(WorldSession *session)
 }
 
 // Load guild eventlog from DB
-void Guild::LoadGuildEventlogFromDB()
+void Guild::LoadGuildEventLogFromDB()
 {
     // Return if already loaded
     if (m_eventlogloaded)
         return;
 
-    QueryResult *result = CharacterDatabase.PQuery("SELECT LogGuid, EventType, PlayerGuid1, PlayerGuid2, NewRank, TimeStamp FROM guild_eventlog WHERE guildid='%u' ORDER BY TimeStamp DESC", Id);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT LogGuid, EventType, PlayerGuid1, PlayerGuid2, NewRank, TimeStamp FROM guild_eventlog WHERE guildid=%u ORDER BY LogGuid DESC LIMIT %u", Id, GUILD_EVENTLOG_MAX_ENTRIES);
     if(!result)
         return;
     do
@@ -849,15 +849,9 @@ void Guild::LoadGuildEventlogFromDB()
 
     // Check lists size in case to many event entries in db
     // This cases can happen only if a crash occured somewhere and table has too many log entries
-    if (m_GuildEventlog.size() > GUILD_EVENTLOG_MAX_ENTRIES)
+    if (!m_GuildEventlog.empty())
     {
-        do
-        {
-            GuildEventlogEntry *EventLogEntry = *(m_GuildEventlog.begin());
-            m_GuildEventlog.pop_front();
-            CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE guildid='%u' AND LogGuid='%u'", Id, EventLogEntry->LogGuid);
-            delete EventLogEntry;
-        } while( m_GuildEventlog.size() > GUILD_EVENTLOG_MAX_ENTRIES );
+        CharacterDatabase.PExecute("DELETE FROM guild_eventlog WHERE guildid=%u AND LogGuid < %u", Id, m_GuildEventlog.front()->LogGuid);
     }
     m_eventlogloaded = true;
 }
@@ -883,22 +877,14 @@ void Guild::UnloadGuildEventlog()
 // This will renum guids used at load to prevent always going up until infinit
 void Guild::RenumGuildEventlog()
 {
-    GuildEventlogMaxGuid = 1;
-
-    QueryResult *result = CharacterDatabase.PQuery("SELECT LogGuid FROM guild_eventlog WHERE guildid = '%u' ORDER BY LogGuid", Id);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT Min(LogGuid), Max(LogGuid) FROM guild_eventlog WHERE guildid = %u", Id);
     if(!result)
         return;
 
-    CharacterDatabase.BeginTransaction();
-    do
-    {
-        Field *fields = result->Fetch();
-        uint32 OldGuid = fields[0].GetUInt32();
-        CharacterDatabase.PExecute("UPDATE guild_eventlog SET LogGuid='%u' WHERE guildid='%u' AND LogGuid='%u'", GuildEventlogMaxGuid, Id, OldGuid);
-        ++GuildEventlogMaxGuid;
-    }while( result->NextRow() );
+    Field *fields = result->Fetch();
+    CharacterDatabase.PExecute("UPDATE guild_eventlog SET LogGuid=LogGuid-%u+1 WHERE guildid=%u ORDER BY LogGuid %s",fields[0].GetUInt32(), Id, fields[0].GetUInt32()?"ASC":"DESC");
+    GuildEventlogMaxGuid = fields[1].GetUInt32()+1;
     delete result;
-    CharacterDatabase.CommitTransaction();
 }
 
 // Add entry to guild eventlog
@@ -1491,6 +1477,7 @@ void Guild::LoadBankRightsFromDB(uint32 GuildId)
 
 void Guild::LoadGuildBankEventLogFromDB()
 {
+    // We can't add a limit as in Guild::LoadGuildEventLogFromDB since we fetch both money and bank log and know nothing about the composition
     //                                                     0        1         2      3           4            5               6          7
     QueryResult *result = CharacterDatabase.PQuery("SELECT LogGuid, LogEntry, TabId, PlayerGuid, ItemOrMoney, ItemStackCount, DestTabId, TimeStamp FROM guild_bank_eventlog WHERE guildid='%u' ORDER BY TimeStamp DESC", Id);
     if(!result)
@@ -1509,9 +1496,20 @@ void Guild::LoadGuildBankEventLogFromDB()
         NewEvent->ItemStackCount = fields[5].GetUInt8();
         NewEvent->DestTabId = fields[6].GetUInt8();
         NewEvent->TimeStamp = fields[7].GetUInt64();
-        if (NewEvent->LogEntry == GUILD_BANK_LOG_DEPOSIT_MONEY ||
-            NewEvent->LogEntry == GUILD_BANK_LOG_WITHDRAW_MONEY ||
-            NewEvent->LogEntry == GUILD_BANK_LOG_REPAIR_MONEY)
+
+        if (TabId >= GUILD_BANK_MAX_TABS)
+        {
+            sLog.outError( "Guild::LoadGuildBankEventLogFromDB: Invalid tabid '%u' for guild bank log entry (guild: '%s', LogGuid: %u), skipped.", TabId, GetName().c_str(), NewEvent->LogGuid);
+            delete NewEvent;
+            continue;
+        }
+        if (NewEvent->isMoneyEvent() && m_GuildBankEventLog_Money.size() >= GUILD_BANK_MAX_LOGS
+                || m_GuildBankEventLog_Item[TabId].size() >= GUILD_BANK_MAX_LOGS)
+        {
+            delete NewEvent;
+            continue;
+        }
+        if (NewEvent->isMoneyEvent())
             m_GuildBankEventLog_Money.push_front(NewEvent);
         else
             m_GuildBankEventLog_Item[TabId].push_front(NewEvent);
@@ -1521,29 +1519,17 @@ void Guild::LoadGuildBankEventLogFromDB()
 
     // Check lists size in case to many event entries in db for a tab or for money
     // This cases can happen only if a crash occured somewhere and table has too many log entries
-    if (m_GuildBankEventLog_Money.size() > GUILD_BANK_MAX_LOGS)
+    if (!m_GuildBankEventLog_Money.empty())
     {
-        do
-        {
-            GuildBankEvent *EventLogEntry = *(m_GuildBankEventLog_Money.begin());
-            m_GuildBankEventLog_Money.pop_front();
-            CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid='%u' AND LogGuid='%u'",
-                Id, uint32(EventLogEntry->LogEntry), EventLogEntry->LogGuid);
-            delete EventLogEntry;
-        }while( m_GuildBankEventLog_Money.size() > GUILD_BANK_MAX_LOGS );
+        CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid=%u AND LogGuid < %u",
+            Id, m_GuildBankEventLog_Money.front()->LogGuid);
     }
     for (int i = 0; i < GUILD_BANK_MAX_TABS; ++i)
     {
-        if (m_GuildBankEventLog_Item[i].size() > GUILD_BANK_MAX_LOGS)
+        if (!m_GuildBankEventLog_Item[i].empty())
         {
-            do
-            {
-                GuildBankEvent *EventLogEntry = *(m_GuildBankEventLog_Item[i].begin());
-                m_GuildBankEventLog_Item[i].pop_front();
-                CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid='%u' AND LogGuid='%u'",
-                    Id, uint32(EventLogEntry->LogEntry), EventLogEntry->LogGuid);
-                delete EventLogEntry;
-            }while( m_GuildBankEventLog_Item[i].size() > GUILD_BANK_MAX_LOGS );
+            CharacterDatabase.PExecute("DELETE FROM guild_bank_eventlog WHERE guildid=%u AND LogGuid < %u",
+                Id, m_GuildBankEventLog_Item[i].front()->LogGuid);
         }
     }
 }
@@ -1629,9 +1615,7 @@ void Guild::LogBankEvent(uint8 LogEntry, uint8 TabId, uint32 PlayerGuidLow, uint
     NewEvent->DestTabId = DestTabId;
     NewEvent->TimeStamp = uint32(time(NULL));
 
-    if (LogEntry == GUILD_BANK_LOG_DEPOSIT_MONEY ||
-        LogEntry == GUILD_BANK_LOG_WITHDRAW_MONEY ||
-        LogEntry == GUILD_BANK_LOG_REPAIR_MONEY)
+    if (NewEvent->isMoneyEvent())
     {
         if (m_GuildBankEventLog_Money.size() > GUILD_BANK_MAX_LOGS)
         {
@@ -1660,22 +1644,14 @@ void Guild::LogBankEvent(uint8 LogEntry, uint8 TabId, uint32 PlayerGuidLow, uint
 // This will renum guids used at load to prevent always going up until infinit
 void Guild::RenumBankLogs()
 {
-    LogMaxGuid = 1;
-
-    QueryResult *result = CharacterDatabase.PQuery("SELECT LogGuid FROM guild_bank_eventlog WHERE guildid = '%u' ORDER BY LogGuid", Id);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT Min(LogGuid), Max(LogGuid) FROM guild_bank_eventlog WHERE guildid = %u", Id);
     if(!result)
         return;
 
-    CharacterDatabase.BeginTransaction();
-    do
-    {
-        Field *fields = result->Fetch();
-        uint32 OldGuid = fields[0].GetUInt32();
-        CharacterDatabase.PExecute("UPDATE guild_bank_eventlog SET LogGuid='%u' WHERE guildid='%u' AND LogGuid='%u'", LogMaxGuid, Id, OldGuid);
-        ++LogMaxGuid;
-    }while( result->NextRow() );
+    Field *fields = result->Fetch();
+    CharacterDatabase.PExecute("UPDATE guild_bank_eventlog SET LogGuid=LogGuid-%u+1 WHERE guildid=%u ORDER BY LogGuid %s",fields[0].GetUInt32(), Id, fields[0].GetUInt32()?"ASC":"DESC");
+    LogMaxGuid = fields[1].GetUInt32()+1;
     delete result;
-    CharacterDatabase.CommitTransaction();
 }
 
 bool Guild::AddGBankItemToDB(uint32 GuildId, uint32 BankTab , uint32 BankTabSlot , uint32 GUIDLow, uint32 Entry )

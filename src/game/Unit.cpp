@@ -7085,25 +7085,38 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                     TakenTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f; break;
         }
     }
-
     // .. taken pct: dummy auras
     AuraList const& mDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
     for(AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
     {
-        if( (*i)->GetSpellProto()->SpellIconID == 2109 )    // Cheat Death
+        switch((*i)->GetSpellProto()->SpellIconID)
         {
-            if( ((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) )
-            {
-                if(pVictim->GetTypeId() != TYPEID_PLAYER)
-                    continue;
-                float mod = -((Player*)pVictim)->GetRatingBonusValue(CR_CRIT_TAKEN_SPELL)*2*4;
-                if (mod < (*i)->GetModifier()->m_amount)
-                    mod = (*i)->GetModifier()->m_amount;
-                TakenTotalMod *= (mod+100.0f)/100.0f;
-            }
+            //Cheat Death
+            case 2109:
+                if( ((*i)->GetModifier()->m_miscvalue & GetSpellSchoolMask(spellProto)) )
+                {
+                    if(pVictim->GetTypeId() != TYPEID_PLAYER)
+                        continue;
+                    float mod = -((Player*)pVictim)->GetRatingBonusValue(CR_CRIT_TAKEN_SPELL)*2*4;
+                    if (mod < (*i)->GetModifier()->m_amount)
+                        mod = (*i)->GetModifier()->m_amount;
+                    TakenTotalMod *= (mod+100.0f)/100.0f;
+                }
+                break;
+            //Mangle
+            case 2312:
+                for(int j=0;j<3;j++)
+                {
+                    if(GetEffectMechanic(spellProto, j)==MECHANIC_BLEED)
+                    {
+                        TakenTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f; 
+                        break;
+                    }
+                }
+                break;
         }
     }
-    
+
     // Distribute Damage over multiple effects, reduce by AoE
     CastingTime = GetCastingTimeForBonus( spellProto, damagetype, CastingTime );   
 
@@ -7983,17 +7996,28 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
     AuraList const& mDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
     for(AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
     {
-        if((*i)->GetSpellProto()->SpellIconID == 2109)      // Cheat Death
+        switch((*i)->GetSpellProto()->SpellIconID)
         {
-            if((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL)
-            {
-                if(pVictim->GetTypeId() != TYPEID_PLAYER)
-                    continue;
-                float mod = ((Player*)pVictim)->GetRatingBonusValue(CR_CRIT_TAKEN_MELEE)*(-8.0f);
-                if (mod < (*i)->GetModifier()->m_amount)
-                    mod = (*i)->GetModifier()->m_amount;
-                TakenTotalMod *= (mod+100.0f)/100.0f;
-            }
+            //Cheat Death
+            case 2109:
+                if((*i)->GetModifier()->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL)
+                {
+                    if(pVictim->GetTypeId() != TYPEID_PLAYER)
+                        continue;
+                    float mod = ((Player*)pVictim)->GetRatingBonusValue(CR_CRIT_TAKEN_MELEE)*(-8.0f);
+                    if (mod < (*i)->GetModifier()->m_amount)
+                        mod = (*i)->GetModifier()->m_amount;
+                    TakenTotalMod *= (mod+100.0f)/100.0f;
+                }
+                break;
+            //Mangle
+            case 2312:
+                if(spellProto==NULL)
+                    break;
+                // Should increase Shred (initial Damage of Lacerate and Rake handled in Spell::EffectSchoolDMG)
+                if(spellProto->SpellFamilyName==SPELLFAMILY_DRUID && (spellProto->SpellFamilyFlags==0x00008000LL))
+                    TakenTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f;
+                break;
         }
     }
 
