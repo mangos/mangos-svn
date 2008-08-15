@@ -441,6 +441,18 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                         }
                     }
                 }
+                //Mangle Bonus for the initial damage of Lacerate and Rake
+                if((m_spellInfo->SpellFamilyFlags==0x0000000000001000LL && m_spellInfo->SpellIconID==494) ||
+                    (m_spellInfo->SpellFamilyFlags==0x0000010000000000LL && m_spellInfo->SpellIconID==2246))
+                {
+                    Unit::AuraList const& mDummyAuras = unitTarget->GetAurasByType(SPELL_AURA_DUMMY);
+                    for(Unit::AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
+                        if((*i)->GetSpellProto()->SpellFamilyFlags & 0x0000044000000000LL && (*i)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_DRUID)
+                        {
+                            damage = int32(damage*(100.0f+(*i)->GetModifier()->m_amount)/100.0f);
+                            break;
+                        }
+                }
                 break;
             }
             case SPELLFAMILY_ROGUE:
@@ -4235,6 +4247,13 @@ void Spell::EffectWeaponDmg(uint32 i)
         if(m_caster->GetTypeId()==TYPEID_PLAYER)
             ((Player*)m_caster)->AddComboPoints(unitTarget, 1);
     }
+    // Mangle (Cat): CP 
+    if(m_spellInfo->SpellFamilyName==SPELLFAMILY_DRUID && (m_spellInfo->SpellFamilyFlags==0x0000040000000000LL))
+    {
+        if(m_caster->GetTypeId()==TYPEID_PLAYER)
+            ((Player*)m_caster)->AddComboPoints(unitTarget,1);
+    }
+
 
     // take ammo
     if(m_attackType == RANGED_ATTACK && m_caster->GetTypeId() == TYPEID_PLAYER)

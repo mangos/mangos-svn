@@ -2057,32 +2057,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         }
         case SPELLFAMILY_DRUID:
         {
-            // Mangle (Cat) combo && damage
-            if( m_spellProto->SpellFamilyFlags == 0x40000000000LL && caster && caster->GetTypeId()==TYPEID_PLAYER )
-            {
-                if(apply)
-                {
-                    // 1 combo
-                    ((Player*)caster)->AddComboPoints(m_target,1);
-
-                    // damage%
-                    SpellModifier *mod = new SpellModifier;
-                    mod->op = SPELLMOD_DAMAGE;
-                    mod->value = m_modifier.m_amount;
-                    mod->type = SPELLMOD_PCT;
-                    mod->spellId = GetId();
-                    mod->effectId = m_effIndex;
-                    mod->lastAffected = NULL;
-                    mod->mask = 0x00008000 | 0x00001000;
-                    mod->charges = 0;
-
-                    m_spellmod = mod;
-                }
-
-                ((Player*)caster)->AddSpellMod(m_spellmod, apply);
-                return;
-            }
-
             // Lifebloom
             if ( GetSpellProto()->SpellFamilyFlags & 0x1000000000LL )
             {
@@ -2659,7 +2633,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
         }
 
         // polymorph case
-        if( m_target->GetTypeId() == TYPEID_PLAYER && m_target->IsPolymorphed())
+        if( Real && m_target->GetTypeId() == TYPEID_PLAYER && m_target->IsPolymorphed())
         {
             // for players, start regeneration after 1s (in polymorph fast regeneration case)
             // only if caster is Player (after patch 2.4.2)
@@ -2673,8 +2647,27 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
     }
     else
     {
-        m_target->SetDisplayId(m_target->GetNativeDisplayId());
-        m_target->setTransForm(0);
+        Unit::AuraList const& otherTransforms = m_target->GetAurasByType(SPELL_AURA_TRANSFORM);
+        if(otherTransforms.empty())
+        {
+            m_target->SetDisplayId(m_target->GetNativeDisplayId());
+            m_target->setTransForm(0);
+        }
+        else
+        {
+            // look for other transform auras
+            Aura* handledAura = *otherTransforms.begin();
+            for(Unit::AuraList::const_iterator i = otherTransforms.begin();i != otherTransforms.end(); ++i)
+            {
+                // negative auras are prefered
+                if(!IsPositiveSpell((*i)->GetSpellProto()->Id))
+                {
+                    handledAura = *i;
+                    break;
+                }
+            }
+            handledAura->ApplyModifier(true);
+        }
     }
 
     // skip if player not added to map at loading or far teleport (to prevent client crash)

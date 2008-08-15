@@ -196,6 +196,13 @@ struct GuildBankEvent
     uint8  ItemStackCount;
     uint8  DestTabId;
     uint64 TimeStamp;
+
+    const bool isMoneyEvent()
+    {
+        return LogEntry == GUILD_BANK_LOG_DEPOSIT_MONEY ||
+            LogEntry == GUILD_BANK_LOG_WITHDRAW_MONEY ||
+            LogEntry == GUILD_BANK_LOG_REPAIR_MONEY;
+    }
 };
 
 struct GuildBankTab
@@ -321,7 +328,7 @@ class Guild
 
         void UpdateLogoutTime(uint64 guid);
         // Guild eventlog
-        void   LoadGuildEventlogFromDB();
+        void   LoadGuildEventLogFromDB();
         void   UnloadGuildEventlog();
         void   DisplayGuildEventlog(WorldSession *session);
         void   LogGuildEvent(uint8 EventType, uint32 PlayerGuid1, uint32 PlayerGuid2, uint8 NewRank);
@@ -402,9 +409,11 @@ class Guild
 
         typedef std::vector<GuildBankTab*> TabListMap;
         TabListMap m_TabListMap;
+
+        /** These are actually ordered lists. The first element is the oldest entry.*/
         typedef std::list<GuildEventlogEntry*> GuildEventlog;
-        GuildEventlog m_GuildEventlog;
         typedef std::list<GuildBankEvent*> GuildBankEventLog;
+        GuildEventlog m_GuildEventlog;
         GuildBankEventLog m_GuildBankEventLog_Money;
         GuildBankEventLog m_GuildBankEventLog_Item[GUILD_BANK_MAX_TABS];
 
