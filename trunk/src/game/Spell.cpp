@@ -1529,7 +1529,8 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             cell.data.Part.reserved = ALL_DISTRICT;
             cell.SetNoCreate();
 
-            MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, radius, PUSH_IN_FRONT,SPELL_TARGETS_AOE_DAMAGE);
+            bool inFront = m_spellInfo->SpellVisual != 3879;
+            MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, radius, inFront ? PUSH_IN_FRONT : PUSH_IN_BACK,SPELL_TARGETS_AOE_DAMAGE);
 
             TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
             TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
