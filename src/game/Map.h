@@ -369,7 +369,6 @@ class MANGOS_DLL_SPEC BattleGroundMap : public Map
         void UnloadAll(bool pForce);
     private:
         PlayerList i_Players;
-        bool m_unload;
 };
 
 /*inline

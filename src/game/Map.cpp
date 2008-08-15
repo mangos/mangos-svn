@@ -1682,7 +1682,7 @@ void InstanceMap::SendToPlayers(WorldPacket const* data) const
 /* ******* Battleground Instance Maps ******* */
 
 BattleGroundMap::BattleGroundMap(uint32 id, time_t expiry, uint32 InstanceId)
-  : Map(id, expiry, InstanceId, DIFFICULTY_NORMAL), m_unload(false)
+  : Map(id, expiry, InstanceId, DIFFICULTY_NORMAL)
 {
 }
 
