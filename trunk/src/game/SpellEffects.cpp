@@ -1101,8 +1101,13 @@ void Spell::EffectDummy(uint32 i)
                             mana = ((*itr)->GetModifier()->m_amount + 100)* mana / 100;
                     }
 
-                    m_caster->ModifyPower(POWER_MANA,mana);
-                    m_caster->SendEnergizeSpellLog(m_caster, m_spellInfo->Id, mana, POWER_MANA,false);
+                    m_caster->CastCustomSpell(m_caster,31818,&mana,NULL,NULL,true,NULL);
+                    
+                    // Mana Feed
+                    int32 manaFeedVal = m_caster->CalculateSpellDamage(m_spellInfo,1, m_spellInfo->EffectBasePoints[1],m_caster);
+                    manaFeedVal *= mana / 100.0f;
+                    if(manaFeedVal > 0)
+                        m_caster->CastCustomSpell(m_caster,32553,&manaFeedVal,NULL,NULL,true,NULL);
                 }
                 else
                     SendCastResult(SPELL_FAILED_FIZZLE);
