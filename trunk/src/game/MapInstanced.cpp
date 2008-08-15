@@ -22,6 +22,7 @@
 #include "BattleGround.h"
 #include "VMapFactory.h"
 #include "InstanceSaveMgr.h"
+#include "World.h"
 
 MapInstanced::MapInstanced(uint32 id, time_t expiry, uint32 aInstanceId) : Map(id, expiry, 0, 0)
 {
@@ -207,6 +208,20 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save,
     return map;
 }
 
+BattleGroundMap* MapInstanced::CreateBattleGround(uint32 InstanceId)
+{
+    // load/create a map
+    Guard guard(*this);
+
+    sLog.outDebug("MapInstanced::CreateBattleGround: map bg %d for %d created.", InstanceId, GetId());
+ 
+    BattleGroundMap *map = new BattleGroundMap(GetId(), GetGridExpiry(), InstanceId);
+    assert(map->IsBattleGroundOrArena());
+
+    m_InstancedMaps[InstanceId] = map;
+    return map;
+}
+
 void MapInstanced::DestroyInstance(uint32 InstanceId)
 {
     InstancedMaps::iterator itr = m_InstancedMaps.find(InstanceId);
@@ -218,7 +233,14 @@ void MapInstanced::DestroyInstance(uint32 InstanceId)
 void MapInstanced::DestroyInstance(InstancedMaps::iterator &itr)
 {
     itr->second->UnloadAll(true);
-    VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(itr->second->GetId());
+    // should only unload VMaps if this is the last instance and grid unloading is enabled
+    if(m_InstancedMaps.size() <= 1 && sWorld.getConfig(CONFIG_GRID_UNLOAD))
+    {
+        VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(itr->second->GetId());
+        // in that case, unload grids of the base map, too
+        // so in the next map creation, (EnsureGridCreated actually) VMaps will be reloaded
+        Map::UnloadAll(true);
+    }
     // erase map
     delete itr->second;
     m_InstancedMaps.erase(itr++);
