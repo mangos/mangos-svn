@@ -4807,7 +4807,7 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
         else                                                //remove
         {
             // clear skill fields
-            SetUInt64Value(PLAYER_SKILL_INDEX(i),0);
+            SetUInt32Value(PLAYER_SKILL_INDEX(i),0);
             SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i),0);
             SetUInt32Value(PLAYER_SKILL_BONUS_INDEX(i),0);
 
