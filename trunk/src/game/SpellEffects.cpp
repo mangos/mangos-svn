@@ -4590,6 +4590,49 @@ void Spell::EffectScriptEffect(uint32 i)
             unitTarget->HandleEmoteCommand(EMOTE_STATE_DANCE);
             break;
         }
+        
+        // Dreaming Glory
+        case 28698:
+        {
+            if(!unitTarget)
+                return;
+            unitTarget->CastSpell(unitTarget, 28694, true);
+            break;
+        }
+
+        // Netherbloom
+        case 28702:
+        {
+            if(!unitTarget)
+                return;
+            // 25% chance of casting a random buff
+            if(roll_chance_i(75))
+                return;
+
+            // triggered spells are 28703 to 28707
+            // Note: some sources say, that there was the possibility of
+            //       receiving a debuff. However, this seems to be removed by a patch.
+            const uint32 spellid = 28703;
+
+            // don't overwrite an existing aura
+            for(uint8 i=0; i<5; i++)
+                if(unitTarget->HasAura(spellid+i, 0))
+                    return;
+            unitTarget->CastSpell(unitTarget, spellid+urand(0, 4), true);
+            break;
+        }
+        
+        // Nightmare Vine
+        case 28720:
+        {
+            if(!unitTarget)
+                return;
+            // 25% chance of casting Nightmare Pollen
+            if(roll_chance_i(75))
+                return;
+            unitTarget->CastSpell(unitTarget, 28721, true);
+            break;
+        }
 
         // Mirren's Drinking Hat
         case 29830:
