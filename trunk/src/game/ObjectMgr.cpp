@@ -337,6 +337,39 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
     }
 }
 
+void ObjectMgr::SendAuctionSalePendingMail( AuctionEntry * auction )
+{
+    uint64 owner_guid = MAKE_NEW_GUID(auction->owner, 0, HIGHGUID_PLAYER);
+    Player *owner = objmgr.GetPlayer(owner_guid);
+
+    // owner exist (online or offline)
+    if(owner || GetPlayerAccountIdByGUID(owner_guid))
+    {
+        std::ostringstream msgAuctionSalePendingSubject;
+        msgAuctionSalePendingSubject << auction->item_template << ":0:" << AUCTION_SALE_PENDING;
+
+        std::ostringstream msgAuctionSalePendingBody;
+        uint32 auctionCut = GetAuctionCut(auction->location, auction->bid);
+        
+        time_t curr;
+        tm local;
+        time(&curr);
+        local=*(localtime(&curr));
+
+        msgAuctionSalePendingBody.width(16);
+        msgAuctionSalePendingBody << std::right << std::hex << auction->bidder;
+        msgAuctionSalePendingBody << std::dec << ":" << auction->bid << ":" << auction->buyout;
+        msgAuctionSalePendingBody << ":" << auction->deposit << ":" << auctionCut << ":0:";
+        msgAuctionSalePendingBody << ((local.tm_hour + 1) * 60 + local.tm_min);
+
+        sLog.outDebug("AuctionSalePending body string : %s", msgAuctionSalePendingBody.str().c_str());
+
+        uint32 itemTextId = this->CreateItemText( msgAuctionSalePendingBody.str() );
+
+        WorldSession::SendMailTo(owner, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->owner, msgAuctionSalePendingSubject.str(), itemTextId, NULL, 0, 0, AUCTION_CHECKED);
+    }
+}
+
 //call this method to send mail to auction owner, when auction is successful, it does not clear ram
 void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
 {
@@ -358,12 +391,13 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
         msgAuctionSuccessfulSubject << auction->item_template << ":0:" << AUCTION_SUCCESSFUL;
 
         std::ostringstream auctionSuccessfulBody;
-        uint32 auctionCut = this->GetAuctionCut(auction->location, auction->bid);
+        uint32 auctionCut = GetAuctionCut(auction->location, auction->bid);
 
         auctionSuccessfulBody.width(16);
         auctionSuccessfulBody << std::right << std::hex << auction->bidder;
-        auctionSuccessfulBody << std::dec << ":" << auction->bid << ":0:";
-        auctionSuccessfulBody << auction->deposit << ":" << auctionCut;
+        auctionSuccessfulBody << std::dec << ":" << auction->bid << ":" << auction->buyout;
+        auctionSuccessfulBody << ":" << auction->deposit << ":" << auctionCut;
+
         sLog.outDebug("AuctionSuccessful body string : %s", auctionSuccessfulBody.str().c_str());
 
         uint32 itemTextId = this->CreateItemText( auctionSuccessfulBody.str() );
@@ -376,7 +410,7 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
             owner->GetSession()->SendAuctionOwnerNotification( auction );
         }
 
-        WorldSession::SendMailTo(owner, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->owner, msgAuctionSuccessfulSubject.str(), itemTextId, NULL, profit, 0, AUCTION_CHECKED);
+        WorldSession::SendMailTo(owner, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->owner, msgAuctionSuccessfulSubject.str(), itemTextId, NULL, profit, 0, AUCTION_CHECKED, HOUR);
     }
 }
 
@@ -1895,7 +1929,7 @@ void ObjectMgr::LoadPlayerInfo()
                 continue;
             }
 
-            if(!sChrClassesStore.LookupEntry(current_race))
+            if(!sChrClassesStore.LookupEntry(current_class))
             {
                 sLog.outErrorDb("Wrong class %u in `playercreateinfo` table, ignoring.",current_class);
                 continue;

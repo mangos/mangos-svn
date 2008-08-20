@@ -424,6 +424,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
         auction->bidder = pl->GetGUIDLow();
         auction->bid = auction->buyout;
 
+        objmgr.SendAuctionSalePendingMail( auction );
         objmgr.SendAuctionSuccessfulMail( auction );
         objmgr.SendAuctionWonMail( auction );
 

@@ -16,8 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef AuctionHouse
-#define AuctionHouse
+#ifndef _AUCTION_HOUSE_H
+#define _AUCTION_HOUSE_H
 
 #include "SharedDefines.h"
 
