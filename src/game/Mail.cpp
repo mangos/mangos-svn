@@ -16,6 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "Mail.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Opcodes.h"
@@ -545,7 +546,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     for(PlayerMails::iterator itr = pl->GetmailBegin(); itr != pl->GetmailEnd(); ++itr)
     {
         // skip deleted or not delivered (deliver delay not expired) mails
-        if ((*itr)->state == MAIL_STATE_DELETED || (*itr)->HasItems() && cur_time < (*itr)->deliver_time)
+        if ((*itr)->state == MAIL_STATE_DELETED || cur_time < (*itr)->deliver_time)
             continue;
 
         uint8 item_count = (*itr)->items.size();            // max count is MAX_MAIL_ITEMS (12)
@@ -758,9 +759,16 @@ void WorldSession::SendMailTo(Player* receiver, uint8 messageType, uint8 station
 {
     uint32 mailId = objmgr.GenerateMailID();
 
-    //time if COD 3 days, if no COD 30 days
     time_t deliver_time = time(NULL) + deliver_delay;
-    time_t expire_time = deliver_time + DAY * ((COD > 0)? 3 : 30);
+
+    //expire time if COD 3 days, if no COD 30 days, if auction sale pending 1 hour
+    uint32 expire_delay;
+    if(messageType == MAIL_AUCTION && !mi && !money)        // auction mail without any items and money
+        expire_delay = HOUR;
+    else
+        expire_delay = (COD > 0) ? 3*DAY : 30*DAY;
+
+    time_t expire_time = deliver_time + expire_delay;
 
     if(mailTemplateId && !sMailTemplateStore.LookupEntry(mailTemplateId))
     {

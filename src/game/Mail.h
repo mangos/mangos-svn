@@ -18,7 +18,10 @@
 #ifndef MANGOS_MAIL_H
 #define MANGOS_MAIL_H
 
+#include "Common.h"
 #include <map>
+
+class Item;
 
 #define MAIL_BODY_ITEM_TEMPLATE 8383                        // - plain letter, A Dusty Unsent Letter: 889
 #define MAX_MAIL_ITEMS 12
@@ -79,7 +82,8 @@ enum MailAuctionAnswers
     AUCTION_SUCCESSFUL          = 2,
     AUCTION_EXPIRED             = 3,
     AUCTION_CANCELLED_TO_BIDDER = 4,
-    AUCTION_CANCELED            = 5
+    AUCTION_CANCELED            = 5,
+    AUCTION_SALE_PENDING        = 6
 };
 
 // gathered from Stationery.dbc
