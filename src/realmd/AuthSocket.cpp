@@ -30,6 +30,7 @@
 #include "AuthCodes.h"
 #include <openssl/md5.h>
 #include "Auth/Sha1.h"
+//#include "Util.h" -- for commented utf8ToUpperOnlyLatin
 
 extern RealmList m_realmList;
 
@@ -313,7 +314,7 @@ void AuthSocket::_SetVSFields(std::string rI)
     const char *v_hex, *s_hex;
     v_hex = v.AsHexStr();
     s_hex = s.AsHexStr();
-    dbRealmServer.PExecute("UPDATE account SET v = '%s', s = '%s' WHERE UPPER(username) = UPPER('%s')",v_hex,s_hex, _safelogin.c_str() );
+    dbRealmServer.PExecute("UPDATE account SET v = '%s', s = '%s' WHERE username = '%s'",v_hex,s_hex, _safelogin.c_str() );
     OPENSSL_free((void*)v_hex);
     OPENSSL_free((void*)s_hex);
 }
@@ -362,6 +363,9 @@ bool AuthSocket::_HandleLogonChallenge()
 
     _login = (const char*)ch->I;
 
+    ///- Normalize account name
+    //utf8ToUpperOnlyLatin(_login); -- client already send account in expected form
+
     //Escape the user login to avoid further SQL injection
     //Memory will be freed on AuthSocket object destruction
     _safelogin=_login;
@@ -401,7 +405,7 @@ bool AuthSocket::_HandleLogonChallenge()
             ///- Get the account details from the account table
             // No SQL injection (escaped user name)
 
-            result = dbRealmServer.PQuery("SELECT sha_pass_hash,id,locked,last_ip,gmlevel FROM account WHERE UPPER(username) = UPPER('%s')",_safelogin.c_str ());
+            result = dbRealmServer.PQuery("SELECT sha_pass_hash,id,locked,last_ip,gmlevel FROM account WHERE username = '%s'",_safelogin.c_str ());
             if( result )
             {
                 ///- If the IP is 'locked', check that the player comes indeed from the correct IP address
@@ -635,7 +639,7 @@ bool AuthSocket::_HandleLogonProof()
         ///- Update the sessionkey, last_ip, last login time and reset number of failed logins in the account table for this account
         // No SQL injection (escaped user name) and IP address as received by socket
         const char* K_hex = K.AsHexStr();
-        dbRealmServer.PExecute("UPDATE account SET sessionkey = '%s', last_ip = '%s', last_login = NOW(), locale = '%u', failed_logins = 0 WHERE UPPER(username) = UPPER('%s')", K_hex, GetRemoteAddress().c_str(),  _localization, _safelogin.c_str() );
+        dbRealmServer.PExecute("UPDATE account SET sessionkey = '%s', last_ip = '%s', last_login = NOW(), locale = '%u', failed_logins = 0 WHERE username = '%s'", K_hex, GetRemoteAddress().c_str(),  _localization, _safelogin.c_str() );
         OPENSSL_free((void*)K_hex);
 
         ///- Finish SRP6 and send the final result to the client
@@ -666,9 +670,9 @@ bool AuthSocket::_HandleLogonProof()
         if(MaxWrongPassCount > 0)
         {
             //Increment number of failed logins by one and if it reaches the limit temporarily ban that account or IP
-            dbRealmServer.PExecute("UPDATE account SET failed_logins = failed_logins + 1 WHERE UPPER(username) = UPPER('%s')",_safelogin.c_str());
+            dbRealmServer.PExecute("UPDATE account SET failed_logins = failed_logins + 1 WHERE username = '%s'",_safelogin.c_str());
 
-            if(QueryResult *loginfail = dbRealmServer.PQuery("SELECT id, last_ip, failed_logins FROM account WHERE UPPER(username) = UPPER('%s')", _safelogin.c_str()))
+            if(QueryResult *loginfail = dbRealmServer.PQuery("SELECT id, last_ip, failed_logins FROM account WHERE username = '%s'", _safelogin.c_str()))
             {
                 Field* fields = loginfail->Fetch();
                 uint32 failed_logins = fields[2].GetUInt32();
@@ -711,7 +715,7 @@ bool AuthSocket::_HandleRealmList()
     ///- Get the user id (else close the connection)
     // No SQL injection (escaped user name)
 
-    QueryResult *result = dbRealmServer.PQuery("SELECT id,sha_pass_hash FROM account WHERE UPPER(username) = UPPER('%s')",_safelogin.c_str());
+    QueryResult *result = dbRealmServer.PQuery("SELECT id,sha_pass_hash FROM account WHERE username = '%s'",_safelogin.c_str());
     if(!result)
     {
         sLog.outError("[ERROR] user %s tried to login and we cannot find him in the database.",_login.c_str());
