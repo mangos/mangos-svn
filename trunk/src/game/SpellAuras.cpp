@@ -4284,7 +4284,7 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool Real)
         if(!m_target->isAlive())
             return;
 
-        if((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED))
+        if((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && !m_target->IsSitState())
             m_target->SetStandState(PLAYER_STATE_SIT);
 
         if(m_periodicTimer <= 0)
@@ -4304,7 +4304,7 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool Real)
 
 void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
 {
-    if((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply)
+    if((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply  && !m_target->IsSitState())
         m_target->SetStandState(PLAYER_STATE_SIT);
     if(apply)
     {
@@ -4332,7 +4332,7 @@ void Aura::HandleModRegen(bool apply, bool Real)            // eating
         if(!m_target->isAlive())
             return;
 
-        if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED))
+        if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)  && !m_target->IsSitState())
             m_target->SetStandState(PLAYER_STATE_SIT);
 
         if(m_periodicTimer <= 0)
@@ -4354,7 +4354,7 @@ void Aura::HandleModRegen(bool apply, bool Real)            // eating
 
 void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
 {
-    if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply)
+    if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply && !m_target->IsSitState())
         m_target->SetStandState(PLAYER_STATE_SIT);
 
     if(apply && m_periodicTimer <= 0)
