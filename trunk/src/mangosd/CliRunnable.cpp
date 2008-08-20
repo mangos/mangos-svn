@@ -659,7 +659,7 @@ void CliSetGM(char *command,pPrintf zprintf)
 
     ///- Try to find the account, then update the GM level
     // No SQL injection (account name is escaped)
-    QueryResult *result = loginDatabase.PQuery("SELECT id FROM account WHERE UPPER(username) = UPPER('%s')",safe_account_name.c_str());
+    QueryResult *result = loginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'",safe_account_name.c_str());
 
     if (result)
     {
@@ -672,7 +672,7 @@ void CliSetGM(char *command,pPrintf zprintf)
             session->SetSecurity(lev);
 
         // No SQL injection (account name is escaped)
-        loginDatabase.PExecute("UPDATE account SET gmlevel = '%d' WHERE UPPER(username) = UPPER('%s')",lev,safe_account_name.c_str());
+        loginDatabase.PExecute("UPDATE account SET gmlevel = '%d' WHERE username = '%s'",lev,safe_account_name.c_str());
         zprintf("We set %s gmlevel %d\r\n",safe_account_name.c_str(),lev);
     }
     else
@@ -977,12 +977,12 @@ void CliSetTBC(char *command,pPrintf zprintf)
     loginDatabase.escape_string(safe_account_name);
 
     // No SQL injection (account name is escaped)
-    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM account WHERE UPPER(username) = UPPER('%s')",safe_account_name.c_str());
+    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM account WHERE username = '%s'",safe_account_name.c_str());
 
     if (result)
     {
         // No SQL injection (account name is escaped)
-        loginDatabase.PExecute("UPDATE account SET tbc = '%d' WHERE UPPER(username) = UPPER('%s')",lev,safe_account_name.c_str());
+        loginDatabase.PExecute("UPDATE account SET tbc = '%d' WHERE username = '%s'",lev,safe_account_name.c_str());
         zprintf("We set %s to expansion allowed %d\r\n",safe_account_name.c_str(),lev);
 
         delete result;

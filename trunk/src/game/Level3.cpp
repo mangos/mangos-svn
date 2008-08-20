@@ -4734,7 +4734,7 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
         if(type == "account")
         {
             loginDatabase.escape_string(nameOrIP);
-            QueryResult *result = loginDatabase.PQuery("SELECT id, username FROM account WHERE UPPER(username) = UPPER('%s') ",nameOrIP.c_str());
+            QueryResult *result = loginDatabase.PQuery("SELECT id, username FROM account WHERE username = '%s'",nameOrIP.c_str());
             if (!result)
             {
                 PSendSysMessage(LANG_BANINFO_NOACCOUNT);

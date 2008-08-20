@@ -42,17 +42,20 @@ int AccountMgr::CreateAccount(std::string username, std::string password)
     if(utf8length(username) > 16)
         return 1;                                           // username's too long
 
+    utf8ToUpperOnlyLatin(username);
+    utf8ToUpperOnlyLatin(password);
+
     loginDatabase.escape_string(username);
-    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM account WHERE UPPER(username)=UPPER('%s')", username.c_str());
+    loginDatabase.escape_string(password);
+
+    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM account WHERE username = '%s'", username.c_str());
     if(result)
     {
         delete result;
         return 2;                                           // username does already exist
     }
 
-    loginDatabase.escape_string(password);
-
-    if(!loginDatabase.PExecute("INSERT INTO account(username,sha_pass_hash,joindate) VALUES(UPPER('%s'),SHA1(CONCAT(UPPER('%s'),':',UPPER('%s'))),NOW())", username.c_str(), username.c_str(), password.c_str()))
+    if(!loginDatabase.PExecute("INSERT INTO account(username,sha_pass_hash,joindate) VALUES('%s',SHA1(CONCAT('%s',':','%s')),NOW())", username.c_str(), username.c_str(), password.c_str()))
         return -1;                                          // unexpected error
     loginDatabase.Execute("INSERT INTO realmcharacters (realmid, acctid, numchars) SELECT realmlist.id, account.id, 0 FROM account, realmlist WHERE account.id NOT IN (SELECT acctid FROM realmcharacters)");
 
@@ -109,9 +112,12 @@ int AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, std::string 
         return 1;                                           // account doesn't exist
     delete result;
 
+    utf8ToUpperOnlyLatin(new_uname);
+    utf8ToUpperOnlyLatin(new_passwd);
+
     loginDatabase.escape_string(new_uname);
     loginDatabase.escape_string(new_passwd);
-    if(!loginDatabase.PExecute("UPDATE account SET username='%s',sha_pass_hash=SHA1(CONCAT(UPPER('%s'),':',UPPER('%s'))) WHERE id='%d'", new_uname.c_str(), new_uname.c_str(), new_passwd.c_str(), accid))
+    if(!loginDatabase.PExecute("UPDATE account SET username='%s',sha_pass_hash=SHA1(CONCAT('%s',':','%s')) WHERE id='%d'", new_uname.c_str(), new_uname.c_str(), new_passwd.c_str(), accid))
         return -1;                                          // unexpected error
 
     return 0;
@@ -124,8 +130,10 @@ int AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
         return 1;                                           // account doesn't exist
     delete result;
 
+    utf8ToUpperOnlyLatin(new_passwd);
+
     loginDatabase.escape_string(new_passwd);
-    if(!loginDatabase.PExecute("UPDATE account SET sha_pass_hash=SHA1(CONCAT(UPPER(username),':',UPPER('%s'))) WHERE id='%d'", new_passwd.c_str(), accid))
+    if(!loginDatabase.PExecute("UPDATE account SET sha_pass_hash=SHA1(CONCAT(username,':','%s')) WHERE id='%d'", new_passwd.c_str(), accid))
         return -1;                                          // unexpected error
 
     return 0;
@@ -134,7 +142,7 @@ int AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
 uint32 AccountMgr::GetId(std::string username)
 {
     loginDatabase.escape_string(username);
-    QueryResult *result = loginDatabase.PQuery("SELECT id FROM account WHERE UPPER(username) = UPPER('%s')", username.c_str());
+    QueryResult *result = loginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'", username.c_str());
     if(!result)
         return 0;
     else
@@ -147,9 +155,10 @@ uint32 AccountMgr::GetId(std::string username)
 
 bool AccountMgr::CheckPassword(uint32 accid, std::string passwd)
 {
+    utf8ToUpperOnlyLatin(passwd);
     loginDatabase.escape_string(passwd);
 
-    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM account WHERE id='%d' AND sha_pass_hash=SHA1(CONCAT(UPPER(username),':',UPPER('%s')))", accid, passwd.c_str());
+    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM account WHERE id='%d' AND sha_pass_hash=SHA1(CONCAT(username,':','%s'))", accid, passwd.c_str());
     if (result)
     {
         delete result;
