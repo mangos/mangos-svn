@@ -790,7 +790,7 @@ void ParseCommand( pPrintf zprintf, char* input)
             for ( x=0;x<CliTotalCmds;x++)
                 if(!strcmp(Commands[x].cmd,supposedCommand))
             {
-                sWorld.QueueCliCommand(new CliCommandHolder(&Commands[x], arguments, &UTF8ZPRINTF));
+                sWorld.QueueCliCommand(new CliCommandHolder(&Commands[x], arguments, zprintf));
                 bSuccess=true;
                 break;
             }

@@ -781,8 +781,8 @@ bool AuthSocket::_HandleRealmList()
 bool AuthSocket::_HandleXferResume()
 {
     DEBUG_LOG("Entering _HandleXferResume");
-    ///- Check packet length
-    if (ibuf.GetLength()<9)
+    ///- Check packet length and patch existence
+    if (ibuf.GetLength()<9 || !pPatch)
     {
         sLog.outError("Error while resuming patch transfer (wrong packet)");
         return false;
@@ -816,6 +816,14 @@ bool AuthSocket::_HandleXferCancel()
 bool AuthSocket::_HandleXferAccept()
 {
     DEBUG_LOG("Entering _HandleXferAccept");
+
+    ///- Check packet length and patch existence
+    if (!pPatch)
+    {
+        sLog.outError("Error while accepting patch transfer (wrong packet)");
+        return false;
+    }
+
     ///- Launch a PatcherRunnable thread, starting at the begining of the patch file
     ibuf.Remove(1);                                         //clear input buffer
     fseek(pPatch,0,0);
