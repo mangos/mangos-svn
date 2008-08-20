@@ -638,6 +638,13 @@ void WorldSession::LogoutPlayer(bool Save)
 
     if (_player)
     {
+        // finish teleports at logout
+        while(_player->IsBeingTeleported())
+        {
+            WorldPacket *dummy = NULL;
+            HandleMoveWorldportAckOpcode(*dummy);
+        }
+
         ///- If the player just died before logging out, make him appear as a ghost
         //FIXME: logout must be delayed in case lost connection with client in time of combat
         if (_player->GetDeathTimer())
