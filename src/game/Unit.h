@@ -793,6 +793,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         }
 
         uint8 getStandState() const { return GetByteValue(UNIT_FIELD_BYTES_1, 0); }
+        bool IsSitState() const;
         bool IsStandState() const;
         void SetStandState(uint8 state);
 

@@ -10207,13 +10207,18 @@ void Unit::SetConfused(bool apply, uint64 casterGUID, uint32 spellID)
         ((Player*)this)->SetClientControl(this, !apply);
 }
 
+bool Unit::IsSitState() const
+{
+    uint8 s = getStandState();
+    return s == PLAYER_STATE_SIT_CHAIR || s == PLAYER_STATE_SIT_LOW_CHAIR ||
+        s == PLAYER_STATE_SIT_MEDIUM_CHAIR || s == PLAYER_STATE_SIT_HIGH_CHAIR ||
+        s == PLAYER_STATE_SIT;
+}
+
 bool Unit::IsStandState() const
 {
     uint8 s = getStandState();
-    return s != PLAYER_STATE_SIT_CHAIR && s != PLAYER_STATE_SIT_LOW_CHAIR &&
-        s != PLAYER_STATE_SIT_MEDIUM_CHAIR && s != PLAYER_STATE_SIT_HIGH_CHAIR &&
-        s != PLAYER_STATE_SIT && s != PLAYER_STATE_SLEEP &&
-        s != PLAYER_STATE_KNEEL;
+    return !IsSitState() && s != PLAYER_STATE_SLEEP && s != PLAYER_STATE_KNEEL;
 }
 
 void Unit::SetStandState(uint8 state)
