@@ -14340,6 +14340,7 @@ void Player::ConvertInstancesToGroup(Player *player, Group *group, uint64 player
 
 bool Player::_LoadHomeBind(QueryResult *result)
 {
+    bool ok = false;
     //QueryResult *result = CharacterDatabase.PQuery("SELECT map,zone,position_x,position_y,position_z FROM character_homebind WHERE guid = '%u'", GUID_LOPART(playerGuid));
     if (result)
     {
@@ -14350,30 +14351,34 @@ bool Player::_LoadHomeBind(QueryResult *result)
         m_homebindY = fields[3].GetFloat();
         m_homebindZ = fields[4].GetFloat();
         delete result;
-    }
-    else
-    {
-        uint32 plrace = getRace();
-        uint32 plclass = getClass();
-        QueryResult *result1 = WorldDatabase.PQuery("SELECT map,zone,position_x,position_y,position_z FROM playercreateinfo WHERE race = '%u' AND class = '%u'", plrace, plclass);
 
-        if(!result1)
+        // accept saved data only for valid position (and non instanceable)
+        if( MapManager::IsValidMapCoord(m_homebindMapId,m_homebindX,m_homebindY,m_homebindZ) &&
+            !sMapStore.LookupEntry(m_homebindMapId)->Instanceable() )
         {
-            sLog.outErrorDb("Table playercreateinfo not have data for race %u class %u , character can't be loaded.",plrace, plclass);
-            return false;
+            ok = true;
         }
-
-        Field *fields = result1->Fetch();
-        m_homebindMapId = fields[0].GetUInt32();
-        m_homebindZoneId = fields[1].GetUInt16();
-        m_homebindX = fields[2].GetFloat();
-        m_homebindY = fields[3].GetFloat();
-        m_homebindZ = fields[4].GetFloat();
-        CharacterDatabase.PExecute("INSERT INTO character_homebind (guid,map,zone,position_x,position_y,position_z) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GetGUIDLow(), m_homebindMapId, (uint32)m_homebindZoneId, m_homebindX, m_homebindY, m_homebindZ);
-        delete result1;
+        else
+            CharacterDatabase.PExecute("DELETE FROM character_homebind WHERE guid = '%u'", GetGUIDLow());
     }
+
+    if(!ok)
+    {
+        PlayerInfo const *info = objmgr.GetPlayerInfo(getRace(), getClass());
+        if(!info) return false;
+
+        m_homebindMapId = info->mapId;
+        m_homebindZoneId = info->zoneId;
+        m_homebindX = info->positionX;
+        m_homebindY = info->positionY;
+        m_homebindZ = info->positionZ;
+
+        CharacterDatabase.PExecute("INSERT INTO character_homebind (guid,map,zone,position_x,position_y,position_z) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GetGUIDLow(), m_homebindMapId, (uint32)m_homebindZoneId, m_homebindX, m_homebindY, m_homebindZ);
+    }
+
     DEBUG_LOG("Setting player home position: mapid is: %u, zoneid is %u, X is %f, Y is %f, Z is %f\n",
         m_homebindMapId, m_homebindZoneId, m_homebindX, m_homebindY, m_homebindZ);
+
     return true;
 }
 

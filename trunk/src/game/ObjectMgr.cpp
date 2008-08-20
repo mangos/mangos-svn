@@ -1869,33 +1869,61 @@ void ObjectMgr::LoadPlayerInfo()
             Field* fields = result->Fetch();
 
             uint32 current_race = fields[0].GetUInt32();
+            uint32 current_class = fields[1].GetUInt32();
+            uint32 mapId     = fields[2].GetUInt32();
+            uint32 zoneId    = fields[3].GetUInt32();
+            float  positionX = fields[4].GetFloat();
+            float  positionY = fields[5].GetFloat();
+            float  positionZ = fields[6].GetFloat();
+
             if(current_race >= MAX_RACES)
             {
                 sLog.outErrorDb("Wrong race %u in `playercreateinfo` table, ignoring.",current_race);
                 continue;
             }
 
-            uint32 current_class = fields[1].GetUInt32();
+            ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(current_race);
+            if(!rEntry)
+            {
+                sLog.outErrorDb("Wrong race %u in `playercreateinfo` table, ignoring.",current_race);
+                continue;
+            }
+
             if(current_class >= MAX_CLASSES)
             {
                 sLog.outErrorDb("Wrong class %u in `playercreateinfo` table, ignoring.",current_class);
                 continue;
             }
 
+            if(!sChrClassesStore.LookupEntry(current_race))
+            {
+                sLog.outErrorDb("Wrong class %u in `playercreateinfo` table, ignoring.",current_class);
+                continue;
+            }
+
+            // accept DB data only for valid position (and non instanceable)
+            if( !MapManager::IsValidMapCoord(mapId,positionX,positionY,positionZ) )
+            {
+                sLog.outErrorDb("Wrong home position for class %u race %u pair in `playercreateinfo` table, ignoring.",current_class,current_race);
+                continue;
+            }
+
+            if( sMapStore.LookupEntry(mapId)->Instanceable() )
+            {
+                sLog.outErrorDb("Home position in instanceable map for class %u race %u pair in `playercreateinfo` table, ignoring.",current_class,current_race);
+                continue;
+            }
+
             PlayerInfo* pInfo = &playerInfo[current_race][current_class];
 
-            pInfo->mapId     = fields[2].GetUInt32();
-            pInfo->zoneId    = fields[3].GetUInt32();
-            pInfo->positionX = fields[4].GetFloat();
-            pInfo->positionY = fields[5].GetFloat();
-            pInfo->positionZ = fields[6].GetFloat();
+            pInfo->mapId     = mapId;
+            pInfo->zoneId    = zoneId;
+            pInfo->positionX = positionX;
+            pInfo->positionY = positionY;
+            pInfo->positionZ = positionZ;
 
-            ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(fields[0].GetUInt32());
-            if(rEntry)
-            {
-                pInfo->displayId_m = rEntry->model_m;
-                pInfo->displayId_f = rEntry->model_f;
-            }
+            pInfo->displayId_m = rEntry->model_m;
+            pInfo->displayId_f = rEntry->model_f;
 
             bar.step();
             ++count;
