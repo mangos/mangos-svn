@@ -75,9 +75,9 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
         GetPlayer()->SetDontMove(false);
         if(!GetPlayer()->TeleportTo(GetPlayer()->m_homebindMapId, GetPlayer()->m_homebindX, GetPlayer()->m_homebindY, GetPlayer()->m_homebindZ, GetPlayer()->GetOrientation()))
         {
-            // if all else fails .. logot
+            // the player must always be able to teleport home
             sLog.outError("WORLD: failed to teleport player %s (%d) to homebind location %d,%f,%f,%f,%f!", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow(), GetPlayer()->m_homebindMapId, GetPlayer()->m_homebindX, GetPlayer()->m_homebindY, GetPlayer()->m_homebindZ, GetPlayer()->GetOrientation());
-            LogoutPlayer(false);
+            assert(false);
         }
         return;
     }

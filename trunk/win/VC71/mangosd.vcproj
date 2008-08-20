@@ -131,7 +131,7 @@
 				TypeLibraryName=".\mangosd__$(PlatformName)_$(ConfigurationName)\mangosd.tlb"/>
 			<Tool
 				Name="VCPostBuildEventTool"
-				CommandLine="copy ..\..\dep\lib\debug\*.dll ..\..\bin\debug"/>
+				CommandLine="copy ..\..\dep\lib\$(PlatformName)_$(ConfigurationName)\*.dll ..\..\bin\$(PlatformName)_$(ConfigurationName)"/>
 			<Tool
 				Name="VCPreBuildEventTool"/>
 			<Tool
