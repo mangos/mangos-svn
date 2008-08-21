@@ -14152,6 +14152,8 @@ void Player::_LoadBoundInstances(QueryResult *result)
     for(uint8 i = 0; i < TOTAL_DIFFICULTIES; i++)
         m_boundInstances[i].clear();
 
+    Group *group = GetGroup();
+
     //QueryResult *result = CharacterDatabase.PQuery("SELECT id, permanent, map, difficulty, resettime FROM character_instance LEFT JOIN instance ON instance = id WHERE guid = '%u'", GUID_LOPART(m_guid));
     if(result)
     {
@@ -14159,11 +14161,23 @@ void Player::_LoadBoundInstances(QueryResult *result)
         {
             Field *fields = result->Fetch();
             bool perm = fields[1].GetBool();
-            // since non permanent binds are always solo bind, they can always be reset
+            uint32 mapId = fields[2].GetUInt32();
+            uint32 instanceId = fields[0].GetUInt32();
+            uint8 difficulty = fields[3].GetUInt8();
+            time_t resetTime = (time_t)fields[4].GetUInt64();
             // the resettime for normal instances is only saved when the InstanceSave is unloaded
             // so the value read from the DB may be wrong here but only if the InstanceSave is loaded
             // and in that case it is not used
-            InstanceSave *save = sInstanceSaveManager.AddInstanceSave(fields[2].GetUInt32(), fields[0].GetUInt32(), fields[3].GetUInt8(), (time_t)fields[4].GetUInt64(), !perm, true);
+
+            if(!perm && group)
+            {
+                sLog.outError("_LoadBoundInstances: player %s(%d) is in group %d but has a non-permanent character bind to map %d,%d,%d", GetName(), GetGUIDLow(), GUID_LOPART(group->GetLeaderGUID()), mapId, instanceId, difficulty);
+                CharacterDatabase.PExecute("DELETE FROM character_instance WHERE guid = '%d' AND instance = '%d'", GetGUIDLow(), instanceId);
+                continue;
+            }
+
+            // since non permanent binds are always solo bind, they can always be reset
+            InstanceSave *save = sInstanceSaveManager.AddInstanceSave(mapId, instanceId, difficulty, resetTime, !perm, true);
             if(save) BindToInstance(save, perm, true);
         } while(result->NextRow());
         delete result;

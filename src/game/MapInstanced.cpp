@@ -117,10 +117,14 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
     {
         // the object wants to be put in a certain instance of this map
         map = _FindMap(CurInstanceId);
-        // For players if the instanceId is set, it's assumed they are already in a map,
-        // hence the map must be loaded. For Creatures, GameObjects etc the map must exist
-        // prior to calling GetMap, they are not allowed to create maps for themselves.
-        assert(map);
+        if(!map)
+        {
+            // For players if the instanceId is set, it's assumed they are already in a map,
+            // hence the map must be loaded. For Creatures, GameObjects etc the map must exist
+            // prior to calling GetMap, they are not allowed to create maps for themselves.
+            sLog.outError("GetInstance: object %s(%d), typeId %d should be in map %d,%d but that's not loaded yet.", obj->GetName(), obj->GetGUIDLow(), obj->GetTypeId(), obj->GetMapId(), obj->GetInstanceId());
+            assert(false);
+        }
         return(map);
     }
     else
@@ -128,7 +132,7 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
         // instance not specified, find an existing or create a new one
         if(obj->GetTypeId() != TYPEID_PLAYER)
         {
-            sLog.outError("MAPINSTANCED: WorldObject '%u' (Entry: %u TypeID: %u) requested base map instance of map '%u', this must not happen", obj->GetGUIDLow(), obj->GetEntry(), obj->GetTypeId(), GetId());
+            sLog.outError("MAPINSTANCED: WorldObject '%u' (Entry: %u TypeID: %u) is in map %d,%d and requested base map instance of map %d, this must not happen", obj->GetGUIDLow(), obj->GetEntry(), obj->GetTypeId(), obj->GetMapId(), obj->GetInstanceId(), GetId());
             assert(false);
             return NULL;
         }
