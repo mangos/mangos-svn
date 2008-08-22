@@ -425,7 +425,8 @@ enum UnitVisibility
     VISIBILITY_ON                 = 1,
     VISIBILITY_GROUP_STEALTH      = 2,                      // detect chance, seen and can see group members
     VISIBILITY_GROUP_INVISIBILITY = 3,                      // invisibility, can see and can be seen only another invisible unit or invisible detection unit
-    VISIBILITY_RESPAWN            = 4                       // special totally not detectable visibility for force delete object at respawn command 
+    VISIBILITY_GROUP_NO_DETECT    = 4,                      // state just at stealth apply for update Grid state. Don't remove, otherwise stealth spells will break
+    VISIBILITY_RESPAWN            = 5                       // special totally not detectable visibility for force delete object at respawn command 
 };
 
 // Value masks for UNIT_FIELD_FLAGS

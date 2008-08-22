@@ -8448,7 +8448,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
 
     // unit got in stealth in this moment and must ignore old detected state
     // invisibility not have chance for detection
-    if (m_Visibility == VISIBILITY_ON || m_Visibility == VISIBILITY_GROUP_INVISIBILITY)
+    if (m_Visibility == VISIBILITY_ON || m_Visibility == VISIBILITY_GROUP_NO_DETECT || m_Visibility == VISIBILITY_GROUP_INVISIBILITY)
         return false;
 
     // NOW ONLY STEALTH CASE
