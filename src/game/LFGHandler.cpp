@@ -59,6 +59,9 @@ static void AttemptJoin(Player* _player)
             }
 
             objmgr.AddGroup(group);
+
+            // create group binds
+            Player::ConvertInstancesToGroup(_player);
         }
 
         // stop at success join
@@ -66,6 +69,10 @@ static void AttemptJoin(Player* _player)
         {
             if( sWorld.getConfig(CONFIG_RESTRICTED_LFG_CHANNEL) && _player->GetSession()->GetSecurity() == SEC_PLAYER )
                 _player->LeaveLFGChannel();
+
+            // reset the member's instances, unless he is currently in one of them
+            // including raid/heroic instances that it's not permanently bound to!
+            plr->ResetInstances(INSTANCE_RESET_GROUP_JOIN);
 
             break;
         }
@@ -115,6 +122,9 @@ static void AttemptAddMore(Player* _player)
             }
 
             objmgr.AddGroup(group);
+
+            // create group binds
+            Player::ConvertInstancesToGroup(_player);
         }
 
         // stop at join fail (full)
@@ -125,6 +135,10 @@ static void AttemptAddMore(Player* _player)
 
             break;
         }
+
+        // reset the member's instances, unless he is currently in one of them
+        // including raid/heroic instances that it's not permanently bound to!
+        plr->ResetInstances(INSTANCE_RESET_GROUP_JOIN);
 
         // joined
         if( sWorld.getConfig(CONFIG_RESTRICTED_LFG_CHANNEL) && plr->GetSession()->GetSecurity() == SEC_PLAYER )
