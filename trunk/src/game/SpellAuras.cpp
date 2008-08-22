@@ -3193,6 +3193,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
             // apply only if not in GM invisibility
             if(m_target->GetVisibility()!=VISIBILITY_OFF)
             {
+                m_target->SetVisibility(VISIBILITY_GROUP_NO_DETECT);
                 m_target->SetVisibility(VISIBILITY_GROUP_STEALTH);
             }
 
@@ -3261,6 +3262,7 @@ void Aura::HandleInvisibility(bool apply, bool Real)
         if(m_target->GetVisibility()!=VISIBILITY_OFF)
         {
             // Aura not added yet but visibility code expect temporary add aura
+            m_target->SetVisibility(VISIBILITY_GROUP_NO_DETECT);
             m_target->SetVisibility(VISIBILITY_GROUP_INVISIBILITY);
         }
     }
