@@ -2607,11 +2607,16 @@ void ObjectMgr::LoadGroups()
                 if(!group)
                 {
                     sLog.outErrorDb("Incorrect entry in group_member table : no group with leader %d for member %d!", fields[3].GetUInt32(), fields[0].GetUInt32());
+                    CharacterDatabase.PExecute("DELETE FROM group_member WHERE memberGuid = '%d'", fields[0].GetUInt32());
                     continue;
                 }
             }
 
-            group->LoadMemberFromDB(fields[0].GetUInt32(), fields[2].GetUInt8(), fields[1].GetBool());
+            if(!group->LoadMemberFromDB(fields[0].GetUInt32(), fields[2].GetUInt8(), fields[1].GetBool()))
+            {
+                sLog.outErrorDb("Incorrect entry in group_member table : member %d cannot be added to player %d's group!", fields[0].GetUInt32(), fields[3].GetUInt32());
+                CharacterDatabase.PExecute("DELETE FROM group_member WHERE memberGuid = '%d'", fields[0].GetUInt32());
+            }
         }while( result->NextRow() );
         delete result;
     }
@@ -2622,6 +2627,7 @@ void ObjectMgr::LoadGroups()
     {
         if((*itr)->GetMembersCount() < 2)
         {
+            (*itr)->Disband();
             delete *itr;
             mGroupSet.erase(itr++);
         }
