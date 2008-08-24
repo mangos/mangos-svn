@@ -4046,6 +4046,34 @@ void Unit::RemoveAurasWithInterruptFlags(uint32 flags)
     }
 }
 
+void Unit::RemoveNotOwnSingleTargetAuras()
+{
+    // single target auras from other casters
+    for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); )
+    {
+        if (iter->second->GetCasterGUID()!=GetGUID() && IsSingleTargetSpell(iter->second->GetSpellProto()))
+            RemoveAura(iter);
+        else
+            ++iter;
+    }
+
+    // single target auras at other targets
+    AuraList& scAuras = GetSingleCastAuras();
+    for (AuraList::iterator iter = scAuras.begin(); iter != scAuras.end(); )
+    {
+        Aura* aura = *iter;
+        if (aura->GetTarget()!=this)
+        {
+            scAuras.erase(iter);                            // explicitly remove, instead waiting remove in RemoveAura
+            aura->GetTarget()->RemoveAura(aura->GetId(),aura->GetEffIndex());
+            iter = scAuras.begin();
+        }
+        else
+            ++iter;
+    }
+
+}
+
 void Unit::RemoveAura(AuraMap::iterator &i, AuraRemoveMode mode)
 {
     if (IsSingleTargetSpell((*i).second->GetSpellProto()))
