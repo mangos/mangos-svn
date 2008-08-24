@@ -1599,6 +1599,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             // remove all dyn objects
             RemoveAllDynObjects();
 
+            // remove single target auras
+            RemoveNotOwnSingleTargetAuras();
+
             // stop spellcasting
             // not attempt interrupt teleportation spell at caster teleport
             if(!(options & TELE_TO_SPELL))
