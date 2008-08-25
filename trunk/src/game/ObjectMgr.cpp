@@ -351,16 +351,13 @@ void ObjectMgr::SendAuctionSalePendingMail( AuctionEntry * auction )
         std::ostringstream msgAuctionSalePendingBody;
         uint32 auctionCut = GetAuctionCut(auction->location, auction->bid);
         
-        time_t curr;
-        tm local;
-        time(&curr);
-        local=*(localtime(&curr));
+        time_t distrTime = time(NULL) + HOUR;
 
         msgAuctionSalePendingBody.width(16);
         msgAuctionSalePendingBody << std::right << std::hex << auction->bidder;
         msgAuctionSalePendingBody << std::dec << ":" << auction->bid << ":" << auction->buyout;
         msgAuctionSalePendingBody << ":" << auction->deposit << ":" << auctionCut << ":0:";
-        msgAuctionSalePendingBody << ((local.tm_hour + 1) * 60 + local.tm_min);
+        msgAuctionSalePendingBody << secsToTimeBitFields(distrTime);
 
         sLog.outDebug("AuctionSalePending body string : %s", msgAuctionSalePendingBody.str().c_str());
 
