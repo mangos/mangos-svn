@@ -3631,7 +3631,7 @@ void Player::KillPlayer()
     SetFlag(UNIT_DYNAMIC_FLAGS, 0x00);
 
     // 6 minutes until repop at graveyard
-    m_deathTimer = 360000;
+    m_deathTimer = 6*MINUTE*1000;
 
     UpdateCorpseReclaimDelay();                             // dependent at use SetDeathPvP() call before kill
 
@@ -16806,12 +16806,7 @@ void Player::SendInitialPacketsBeforeAddToMap()
     // SMSG_SET_AURA_SINGLE
 
     data.Initialize(SMSG_LOGIN_SETTIMESPEED, 8);
-    time_t gameTime = sWorld.GetGameTime();
-    struct tm *lt = localtime(&gameTime);
-    uint32 xmitTime = (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 |
-        (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 |
-        lt->tm_hour << 6 | lt->tm_min;
-    data << xmitTime;
+    data << uint32(secsToTimeBitFields(sWorld.GetGameTime()));
     data << (float)0.01666667f;                             // game speed
     GetSession()->SendPacket( &data );
 }

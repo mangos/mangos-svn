@@ -1029,7 +1029,7 @@ void World::Update(time_t diff)
     if(m_gameTime > m_NextDailyQuestReset)
     {
         ResetDailyQuests();
-        m_NextDailyQuestReset += 24*HOUR;
+        m_NextDailyQuestReset += DAY;
     }
 
     /// <ul><li> Handle auctions when the timer has passed
@@ -2200,7 +2200,7 @@ void World::InitDailyQuestResetTime()
     time_t curDayResetTime = mktime(&localTm);
 
     // last reset time before current moment
-    time_t resetTime = (curTime < curDayResetTime) ? curDayResetTime - 24*HOUR : curDayResetTime;
+    time_t resetTime = (curTime < curDayResetTime) ? curDayResetTime - DAY : curDayResetTime;
 
     // need reset (if we have quest time before last reset time (not processed by some reason)
     if(mostRecentQuestTime && mostRecentQuestTime <= resetTime)
@@ -2208,7 +2208,7 @@ void World::InitDailyQuestResetTime()
     else
     {
         // plan next reset time
-        m_NextDailyQuestReset = (curTime >= curDayResetTime) ? curDayResetTime + 24*HOUR : curDayResetTime;
+        m_NextDailyQuestReset = (curTime >= curDayResetTime) ? curDayResetTime + DAY : curDayResetTime;
     }
 }
 
