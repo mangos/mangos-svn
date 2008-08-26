@@ -17432,8 +17432,8 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
             xp = PvP ? 0 : MaNGOS::XP::Gain(member_with_max_level, pVictim);
 
             // skip in check PvP case (for speed, not used)
-            bool is_raid = PvP ? false : MapManager::Instance().GetBaseMap(GetMapId())->IsRaid() && pGroup->isRaidGroup();
-            bool is_dungeon = PvP ? false : MapManager::Instance().GetBaseMap(GetMapId())->IsDungeon();
+            bool is_raid = PvP ? false : sMapStore.LookupEntry(GetMapId())->IsRaid() && pGroup->isRaidGroup();
+            bool is_dungeon = PvP ? false : sMapStore.LookupEntry(GetMapId())->IsDungeon();
             float group_rate = MaNGOS::XP::xp_in_group_rate(count,is_raid);
 
             for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())

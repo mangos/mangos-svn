@@ -235,13 +235,22 @@ void CliDelete(char*command,pPrintf zprintf)
     if(!consoleToUtf8(account_name_str,account_name))       // convert from console encoding to utf8
         return;
 
-    int result = accmgr.DeleteAccount(accmgr.GetId(account_name));
-    if(result == -1)
-        zprintf("User %s NOT deleted (probably sql file format was updated)\r\n",account_name.c_str());
-    if(result == 1)
-        zprintf("User %s does not exist\r\n",account_name.c_str());
-    else if(result == 0)
-        zprintf("We deleted account: %s\r\n",account_name.c_str());
+    AccountOpResult result = accmgr.DeleteAccount(accmgr.GetId(account_name));
+    switch(result)
+    {
+        case AOR_OK:
+            zprintf("We deleted account: %s\r\n",account_name.c_str());
+            break;
+        case AOR_NAME_NOT_EXIST:
+            zprintf("User %s does not exist\r\n",account_name.c_str());
+            break;
+        case AOR_DB_INTERNAL_ERROR:
+            zprintf("User %s NOT deleted (probably sql file format was updated)\r\n",account_name.c_str());
+            break;
+        default:
+            zprintf("User %s NOT deleted (unknown error)\r\n",account_name.c_str());
+            break;
+    }
 }
 
 void CliCharDelete(char*command,pPrintf zprintf)
@@ -720,16 +729,26 @@ void CliSetPassword(char *command,pPrintf zprintf)
         return;
     }
 
-    if (utf8length(pass1) > 16)
-    {
-        zprintf("Password can't be longer than 16 characters (client limit), password not changed!\r\n");
-        return;
-    }
+    AccountOpResult result = accmgr.ChangePassword(acc_id, pass1);
 
-    if(accmgr.ChangePassword(acc_id, pass1) == 0)
-        zprintf("The password was changed for account '%s' (ID: %u).\r\n",account_name.c_str(),acc_id);
-    else
-        zprintf("Password not changed!\r\n");
+    switch(result)
+    {
+        case AOR_OK:
+            zprintf("The password was changed for account '%s' (ID: %u).\r\n",account_name.c_str(),acc_id);
+            break;
+        case AOR_PASS_TOO_LONG:
+            zprintf("Password can't be longer than 16 characters (client limit), password not changed!\r\n");
+            break;
+        case AOR_NAME_NOT_EXIST:
+            zprintf("Account '%s' does not exist!\r\n", account_name.c_str());
+            break;
+        case AOR_DB_INTERNAL_ERROR:
+            zprintf("Password not changed! (probably sql file format was updated)\r\n");
+            break;
+        default:
+            zprintf("Password not changed! (unknown error\r\n");
+            break;
+    }
 }
 
 /// Create an account
@@ -756,15 +775,25 @@ void CliCreate(char *command,pPrintf zprintf)
     if(!consoleToUtf8(szPassword,password))                 // convert from console encoding to utf8
         return;
 
-    int result = accmgr.CreateAccount(account_name, password);
-    if(result == -1)
-        zprintf("User %s with password %s NOT created (probably sql file format was updated)\r\n",account_name.c_str(),password.c_str());
-    else if(result == 1)
-        zprintf("Username %s is too long\r\n", account_name.c_str());
-    else if(result == 2)
-        zprintf("User %s already exists\r\n",account_name.c_str());
-    else if(result == 0)
-        zprintf("User %s with password %s created successfully\r\n",account_name.c_str(),password.c_str());
+    AccountOpResult result = accmgr.CreateAccount(account_name, password);
+    switch(result)
+    {
+        case AOR_OK:
+            zprintf("User %s with password %s created successfully\r\n",account_name.c_str(),password.c_str());
+            break;
+        case AOR_NAME_TOO_LONG:
+            zprintf("Username %s is too long\r\n", account_name.c_str());
+            break;
+        case AOR_NAME_ALREDY_EXIST:
+            zprintf("User %s already exists\r\n",account_name.c_str());
+            break;
+        case AOR_DB_INTERNAL_ERROR:
+            zprintf("User %s with password %s NOT created (probably sql file format was updated)\r\n",account_name.c_str(),password.c_str());
+            break;
+        default:
+            zprintf("User %s with password %s NOT created (unknown error)\r\n",account_name.c_str(),password.c_str());
+            break;
+    }
 }
 
 /// Command parser and dispatcher

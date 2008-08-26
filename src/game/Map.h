@@ -217,12 +217,6 @@ class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::Obj
         bool IsBattleGround() const { return i_mapEntry && i_mapEntry->IsBattleGround(); }
         bool IsBattleArena() const { return i_mapEntry && i_mapEntry->IsBattleArena(); }
         bool IsBattleGroundOrArena() const { return i_mapEntry && i_mapEntry->IsBattleGroundOrArena(); }
-        bool IsMountAllowed() const
-        {
-            return !IsDungeon() || i_mapEntry && (
-                i_mapEntry->MapID==568 || i_mapEntry->MapID==309 || i_mapEntry->MapID==209 || i_mapEntry->MapID==534 ||
-                i_mapEntry->MapID==560 || i_mapEntry->MapID==509 || i_mapEntry->MapID==269 );
-        }
 
         void AddObjectToRemoveList(WorldObject *obj);
         void DoDelayedMovesAndRemoves();

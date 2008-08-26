@@ -23,16 +23,26 @@
 #include "Policies/Singleton.h"
 #include <string>
 
+enum AccountOpResult
+{
+    AOR_OK,
+    AOR_NAME_TOO_LONG,
+    AOR_PASS_TOO_LONG,
+    AOR_NAME_ALREDY_EXIST,
+    AOR_NAME_NOT_EXIST,
+    AOR_DB_INTERNAL_ERROR
+};
+
 class AccountMgr
 {
     public:
         AccountMgr();
         ~AccountMgr();
 
-        int CreateAccount(std::string username, std::string password);
-        int DeleteAccount(uint32 accid);
-        int ChangeUsername(uint32 accid, std::string new_uname, std::string new_passwd);
-        int ChangePassword(uint32 accid, std::string new_passwd);
+        AccountOpResult CreateAccount(std::string username, std::string password);
+        AccountOpResult DeleteAccount(uint32 accid);
+        AccountOpResult ChangeUsername(uint32 accid, std::string new_uname, std::string new_passwd);
+        AccountOpResult ChangePassword(uint32 accid, std::string new_passwd);
         bool CheckPassword(uint32 accid, std::string passwd);
 
         uint32 GetId(std::string username);

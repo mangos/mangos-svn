@@ -1752,8 +1752,7 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
     if(!pVictim->isInAccessablePlaceFor(this))
         return true;
 
-    // we not need get instance map, base map provide all info
-    if(MapManager::Instance().GetBaseMap(GetMapId())->Instanceable())
+    if(sMapStore.LookupEntry(GetMapId())->Instanceable())
         return false;
 
     float rx,ry,rz;

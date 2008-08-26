@@ -122,7 +122,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
     }
 
     // mount allow check
-    if(!_player->GetBaseMap()->IsMountAllowed())
+    if(!mEntry->IsMountAllowed())
         _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
 
     // battleground state preper
