@@ -3664,6 +3664,25 @@ void Aura::HandleModMechanicImmunity(bool apply, bool Real)
             }
         }
     }
+    
+    // The Beast Within and Bestial Wrath - immunity
+    if(GetId() == 19574 || GetId() == 34471)
+    {
+        if(apply)
+        {
+            m_target->CastSpell(m_target,24395,true);
+            m_target->CastSpell(m_target,24396,true);
+            m_target->CastSpell(m_target,24397,true);
+            m_target->CastSpell(m_target,26592,true);
+        }
+        else
+        {
+            m_target->RemoveAurasDueToSpell(24395);
+            m_target->RemoveAurasDueToSpell(24396);
+            m_target->RemoveAurasDueToSpell(24397);
+            m_target->RemoveAurasDueToSpell(26592);
+        }
+    }
 }
 
 void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
