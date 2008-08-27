@@ -17222,8 +17222,14 @@ void Player::UpdateForQuestsGO()
     GetSession()->SendPacket(&packet);
 }
 
-void Player::SummonIfPossible()
+void Player::SummonIfPossible(bool agree)
 {
+    if(!agree)
+    {
+        m_summon_expire = 0;
+        return;
+    }
+
     // expire and auto declined
     if(m_summon_expire < time(NULL))
         return;

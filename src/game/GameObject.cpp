@@ -1057,7 +1057,7 @@ void GameObject::Use(Unit* user)
                 return;
 
             // accept only use by player from same group for caster except caster itself
-            if(((Player*)caster)==player || !((Player*)caster)->IsInSameGroupWith(player))
+            if(((Player*)caster)==player || !((Player*)caster)->IsInSameRaidWith(player))
                 return;
 
             AddUniqueUse(player);
