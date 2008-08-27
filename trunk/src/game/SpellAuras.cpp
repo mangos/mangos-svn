@@ -2227,19 +2227,12 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
         if (m_target->GetTypeId()==TYPEID_PLAYER)
             team = ((Player*)m_target)->GetTeam();
 
-        uint32 displayId = (team==HORDE) ? ci->DisplayID_H : ci->DisplayID_A;
+        uint32 display_id = objmgr.ChooseDisplayId(team,ci);
+        CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(display_id);
+        if (minfo)
+            display_id = minfo->modelid;
 
-        CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(displayId);
-        if(!minfo)
-        {
-            sLog.outErrorDb("Mount (Entry: %u) has model %u not found in table `creature_model_info`, can't load. ",
-                m_modifier.m_miscvalue, displayId);
-            return;
-        }
-        else
-            displayId = minfo->modelid;                     // can change for other gender
-
-        m_target->Mount(displayId);
+        m_target->Mount(display_id);
     }
     else
     {
@@ -2629,6 +2622,10 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
             {
                                                             // Will use the default model here
                 m_target->SetDisplayId(ci->DisplayID_A);
+
+                // Dragonmaw Illusion (set mount model also)
+                if(GetId()==42016 && m_target->GetMountID() && !m_target->GetAurasByType(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED).empty())
+                    m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID,16314);
             }
             m_target->setTransForm(GetId());
         }
@@ -2669,14 +2666,29 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
             }
             handledAura->ApplyModifier(true);
         }
+
+        // Dragonmaw Illusion (restore mount model)
+        if(GetId()==42016 && m_target->GetMountID()==16314)
+        {
+            if(!m_target->GetAurasByType(SPELL_AURA_MOUNTED).empty())
+            {
+                uint32 cr_id = m_target->GetAurasByType(SPELL_AURA_MOUNTED).front()->GetModifier()->m_miscvalue;
+                if(CreatureInfo const* ci = objmgr.GetCreatureTemplate(cr_id))
+                {
+                    uint32 team = 0;
+                    if (m_target->GetTypeId()==TYPEID_PLAYER)
+                        team = ((Player*)m_target)->GetTeam();
+
+                    uint32 display_id = objmgr.ChooseDisplayId(team,ci);
+                    CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(display_id);
+                    if (minfo)
+                        display_id = minfo->modelid;
+
+                    m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID,display_id);
+                }
+            }
+        }
     }
-
-    // skip if player not added to map at loading or far teleport (to prevent client crash)
-    // it will applied in Player::SendInitialPacketsAfterAddToMap after adding to map
-    if(m_target->GetTypeId()==TYPEID_PLAYER && !((Player*)m_target)->IsInWorld())
-        return;
-
-    Unit* caster = GetCaster();
 }
 
 void Aura::HandleForceReaction(bool apply, bool Real)
@@ -3557,6 +3569,10 @@ void Aura::HandleAuraModIncreaseFlightSpeed(bool apply, bool Real)
         //Players on flying mounts must be immune to polymorph
         if (m_target->GetTypeId()==TYPEID_PLAYER)
             m_target->ApplySpellImmune(GetId(),IMMUNITY_MECHANIC,MECHANIC_POLYMORPH,apply);
+
+        // Dragonmaw Illusion (overwrite mount model, mounted aura already applied)
+        if( apply && m_target->HasAura(42016,0) && m_target->GetMountID())
+            m_target->SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID,16314);
     }
 
     m_target->UpdateSpeed(MOVE_FLY, true);
