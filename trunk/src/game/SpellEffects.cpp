@@ -3427,10 +3427,16 @@ void Spell::EffectSummonGuardian(uint32 i)
         return;
     }
 
-    Pet* old_wild = NULL;
-    // Unsummon old Guardian only for players
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+    // set timer for unsummon
+    int32 duration = GetSpellDuration(m_spellInfo);
+
+    // Search old Guardian only for players (if casted spell have duration >= cooldown
+    // FIXME: some guardians have control spell applied and controlled by player and anyway player can't summon in this time
+    //        so this code hack in fact
+    if( m_caster->GetTypeId() == TYPEID_PLAYER && (!duration || duration >= GetSpellRecoveryTime(m_spellInfo)) )
     {
+        Pet* old_wild = NULL;
+
         CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
         Cell cell(p);
         cell.data.Part.reserved = ALL_DISTRICT;
@@ -3441,108 +3447,97 @@ void Spell::EffectSummonGuardian(uint32 i)
         TypeContainerVisitor<MaNGOS::UnitSearcher<PetWithIdCheck>, WorldTypeMapContainer > object_checker(checker);
         CellLock<GridReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+
+        if (old_wild)                                           // find old critter, unsummon
+            return;
     }
 
-    if (old_wild)                                           // find old critter, unsummon
-    {
-        old_wild->Remove(PET_SAVE_AS_DELETED);
-        return;
-    }
-    else                                                    // in another case summon new
-    {
-        uint32 level = m_caster->getLevel();
+    // in another case summon new
+    uint32 level = m_caster->getLevel();
 
-        // level of pet summoned using engineering item based at engineering skill level
-        if(m_caster->GetTypeId()==TYPEID_PLAYER && m_CastItem)
+    // level of pet summoned using engineering item based at engineering skill level
+    if(m_caster->GetTypeId()==TYPEID_PLAYER && m_CastItem)
+    {
+        ItemPrototype const *proto = m_CastItem->GetProto();
+        if(proto && proto->RequiredSkill == SKILL_ENGINERING)
         {
-            ItemPrototype const *proto = m_CastItem->GetProto();
-            if(proto && proto->RequiredSkill == SKILL_ENGINERING)
+            uint16 skill202 = ((Player*)m_caster)->GetSkillValue(SKILL_ENGINERING);
+            if(skill202)
             {
-                uint16 skill202 = ((Player*)m_caster)->GetSkillValue(SKILL_ENGINERING);
-                if(skill202)
-                {
-                    level = skill202/5;
-                }
+                level = skill202/5;
             }
         }
+    }
 
-        // select center of summon position
-        float center_x = m_targets.m_destX;
-        float center_y = m_targets.m_destY;
-        float center_z = m_targets.m_destZ;
+    // select center of summon position
+    float center_x = m_targets.m_destX;
+    float center_y = m_targets.m_destY;
+    float center_z = m_targets.m_destZ;
 
-        float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+    float radius = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
 
-        int32 amount = damage > 0 ? damage : 1;
+    int32 amount = damage > 0 ? damage : 1;
 
-        for(int32 count = 0; count < amount; ++count)
+    for(int32 count = 0; count < amount; ++count)
+    {
+        Pet* spawnCreature = new Pet(GUARDIAN_PET);
+
+        Map *map = m_caster->GetMap();
+        uint32 pet_number = objmgr.GeneratePetNumber();
+        if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_PET), map,m_spellInfo->EffectMiscValue[i], pet_number))
         {
-            Pet* spawnCreature = new Pet(GUARDIAN_PET);
+            sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
+            delete spawnCreature;
+            return;
+        }
 
-            Map *map = m_caster->GetMap();
-            uint32 pet_number = objmgr.GeneratePetNumber();
-            if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_PET), map,m_spellInfo->EffectMiscValue[i], pet_number))
+        float px, py, pz;
+        // If dest location if present
+        if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+        {
+            // Summon 1 unit in dest location
+            if (count == 0)
             {
-                sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
-                delete spawnCreature;
-                return;
+                px = m_targets.m_destX;
+                py = m_targets.m_destY;
+                pz = m_targets.m_destZ;
             }
-
-            float px, py, pz;
-            // If dest location if present
-            if (m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
-            {
-                // Summon 1 unit in dest location
-                if (count == 0)
-                {
-                    px = m_targets.m_destX;
-                    py = m_targets.m_destY;
-                    pz = m_targets.m_destZ;
-                }
-                // Summon in random point all other units if location present
-                else
-                    m_caster->GetRandomPoint(center_x,center_y,center_z,radius,px,py,pz);
-            }
-            // Summon if dest location not present near caster
+            // Summon in random point all other units if location present
             else
-                m_caster->GetClosePoint(px,py,pz,spawnCreature->GetObjectSize());
-
-            spawnCreature->Relocate(px,py,pz,m_caster->GetOrientation());
-
-            if(!spawnCreature->IsPositionValid())
-            {
-                sLog.outError("ERROR: Pet (guidlow %d, entry %d) not created base at creature. Suggested coordinates isn't valid (X: %d Y: ^%d)", spawnCreature->GetGUIDLow(), spawnCreature->GetEntry(), spawnCreature->GetPositionX(), spawnCreature->GetPositionY());
-                delete spawnCreature;
-                return;
-            }
-
-            // set timer for unsummon
-            int32 duration = GetSpellDuration(m_spellInfo);
-            if(duration > 0)
-                spawnCreature->SetDuration(duration);
-
-            spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
-            spawnCreature->setPowerType(POWER_MANA);
-            spawnCreature->SetMaxPower(POWER_MANA,28 + 10 * level);
-            spawnCreature->SetPower(   POWER_MANA,28 + 10 * level);
-            spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
-            spawnCreature->SetMaxHealth( 28 + 30*level);
-            spawnCreature->SetHealth(    28 + 30*level);
-            spawnCreature->SetLevel(level);
-            spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
-            spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
-            spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
-            spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
-            spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
-            spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
-            spawnCreature->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
-            spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
-
-            spawnCreature->SetArmor(level*50);
-            spawnCreature->AIM_Initialize();
-
-            map->Add((Creature*)spawnCreature);
+                m_caster->GetRandomPoint(center_x,center_y,center_z,radius,px,py,pz);
         }
+        // Summon if dest location not present near caster
+        else
+            m_caster->GetClosePoint(px,py,pz,spawnCreature->GetObjectSize());
+
+        spawnCreature->Relocate(px,py,pz,m_caster->GetOrientation());
+
+        if(!spawnCreature->IsPositionValid())
+        {
+            sLog.outError("ERROR: Pet (guidlow %d, entry %d) not created base at creature. Suggested coordinates isn't valid (X: %d Y: ^%d)", spawnCreature->GetGUIDLow(), spawnCreature->GetEntry(), spawnCreature->GetPositionX(), spawnCreature->GetPositionY());
+            delete spawnCreature;
+            return;
+        }
+
+        if(duration > 0)
+            spawnCreature->SetDuration(duration);
+
+        spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
+        spawnCreature->setPowerType(POWER_MANA);
+        spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
+        spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
+        spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
+        spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
+        spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
+        spawnCreature->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
+        spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
+
+        spawnCreature->InitStatsForLevel(level);
+        spawnCreature->GetCharmInfo()->SetPetNumber(pet_number, false);
+
+        spawnCreature->AIM_Initialize();
+
+        map->Add((Creature*)spawnCreature);
     }
 }
 

@@ -1133,6 +1133,20 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
             }
             break;
         }
+        case GUARDIAN_PET:
+            SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
+            SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
+
+            SetCreateMana(   28 + 10*petlevel );
+            SetCreateHealth( 28 + 30*petlevel );
+
+            // FIXME: this is wrong formula, possible each guardian pet have own damage formula
+            //these formula may not be correct; however, it is designed to be close to what it should be
+            //this makes dps 0.5 of pets level
+            SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)) );
+            //damage range is then petlevel / 2
+            SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel + (petlevel / 4)) );
+            break;
         default:
             sLog.outError("Pet have incorrect type (%u) for levelup.",getPetType());            break;
     }

@@ -619,7 +619,7 @@ struct CharmSpellEntry
 struct CharmInfo
 {
     public:
-        CharmInfo(Unit* unit);
+        explicit CharmInfo(Unit* unit);
         uint32 GetPetNumber() const { return m_petnumber; }
         void SetPetNumber(uint32 petnumber, bool statwindow);
 
