@@ -870,7 +870,7 @@ Visibility.Distance.Grey.Object = 10
 #
 #    Death.CorpseReclaimDelay.PvP
 #    Death.CorpseReclaimDelay.PvE
-#         Enabled/disabled increase corpse reclaim delay at oftent PvP/PvE deaths 
+#         Enabled/disabled increase corpse reclaim delay at often PvP/PvE deaths 
 #         Default: 1 (enabled)
 #                  0 (disabled)
 #
