@@ -532,7 +532,7 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
     uint32 outbiddedCount;                                  //count of outbidded auctions
 
     recv_data >> guid;
-    recv_data >> listfrom;
+    recv_data >> listfrom;                                  // not used in fact (this list not have page control in client)
     recv_data >> outbiddedCount;
     if (recv_data.size() != (16 + outbiddedCount * 4 ))
     {
@@ -552,9 +552,7 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
-
-    AuctionHouseObject * mAuctions;
-    mAuctions = objmgr.GetAuctionsMap( location );
+    AuctionHouseObject* mAuctions = objmgr.GetAuctionsMap( location );
 
     WorldPacket data( SMSG_AUCTION_BIDDER_LIST_RESULT, (4+4+4) );
     Player *pl = GetPlayer();
@@ -578,12 +576,12 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
         AuctionEntry *Aentry = itr->second;
         if( Aentry && Aentry->bidder == pl->GetGUIDLow() )
         {
-            if ((count < 50) && (totalcount >= listfrom) && SendAuctionInfo(data, itr->second))
+            if (SendAuctionInfo(data, itr->second))
                 ++count;
             ++totalcount;
         }
     }
-    data.put( 0, count );                                   // add count to placeholder
+    data.put<uint32>( 0, count );                           // add count to placeholder
     data << totalcount;
     data << (uint32)300;                                    //unk 2.3.0
     SendPacket(&data);
@@ -598,7 +596,7 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
     uint64 guid;
 
     recv_data >> guid;
-    recv_data >> listfrom;                                  // page of auctions
+    recv_data >> listfrom;                                  // not used in fact (this list not have page control in client)
 
     Creature *pCreature = ObjectAccessor::GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_AUCTIONEER);
     if (!pCreature)
@@ -613,11 +611,11 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
 
     uint32 location = AuctioneerFactionToLocation(pCreature->getFaction());
 
-    AuctionHouseObject * mAuctions;
-    mAuctions = objmgr.GetAuctionsMap( location );
+    AuctionHouseObject* mAuctions = objmgr.GetAuctionsMap( location );
 
     WorldPacket data( SMSG_AUCTION_OWNER_LIST_RESULT, (4+4+4) );
-    data << (uint32) 0;
+    data << (uint32) 0;                                     // amount place holder
+
     uint32 count = 0;
     uint32 totalcount = 0;
     for (AuctionHouseObject::AuctionEntryMap::iterator itr = mAuctions->GetAuctionsBegin();itr != mAuctions->GetAuctionsEnd();++itr)
@@ -625,7 +623,7 @@ void WorldSession::HandleAuctionListOwnerItems( WorldPacket & recv_data )
         AuctionEntry *Aentry = itr->second;
         if( Aentry && Aentry->owner == _player->GetGUIDLow() )
         {
-            if ((count < 50) && (totalcount >= listfrom) && SendAuctionInfo(data, itr->second))
+            if(SendAuctionInfo(data, itr->second))
                 ++count;
             ++totalcount;
         }
@@ -647,7 +645,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
     uint64 guid;
 
     recv_data >> guid;
-    recv_data >> listfrom;
+    recv_data >> listfrom;                                  // start, used for page control listing by 50 elements
     recv_data >> searchedname;
 
     // recheck with known string size
