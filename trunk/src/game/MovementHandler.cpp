@@ -565,10 +565,17 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& /*recv_data*/)
     sLog.outDebug("CMSG_MOVE_WATER_WALK_ACK");
 }
 
-void WorldSession::HandleSummonResponseOpcode(WorldPacket& /*recv_data*/)
+void WorldSession::HandleSummonResponseOpcode(WorldPacket& recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data,8+1);
+
     if(!_player->isAlive() || _player->isInCombat() )
         return;
 
-    _player->SummonIfPossible();
+    uint64 summoner_guid;
+    bool agree;
+    recv_data >> summoner_guid;
+    recv_data >> agree;
+
+    _player->SummonIfPossible(agree);
 }

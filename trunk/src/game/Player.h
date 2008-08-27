@@ -909,7 +909,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             m_summon_y = y;
             m_summon_z = z;
         }
-        void SummonIfPossible();
+        void SummonIfPossible(bool agree);
 
         bool Create( uint32 guidlow, std::string name, uint8 race, uint8 class_, uint8 gender, uint8 skin, uint8 face, uint8 hairStyle, uint8 hairColor, uint8 facialHair, uint8 outfitId );
 
