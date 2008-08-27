@@ -434,11 +434,12 @@ void CliInfo(char*,pPrintf zprintf)
         }
         else
             sprintf(szLine, "|<Error>        | %20s |<Error>          |<Er>|<Err>|\r\n",name.c_str());
-    sInfo+=szLine;
+
+        sInfo += szLine;
 
     }while(resultDB->NextRow());
 
-    sInfo += "\0";
+    delete resultDB;
 
     ///- Display the list of account/characters online
     zprintf("=====================================================================\r\n");
@@ -446,7 +447,6 @@ void CliInfo(char*,pPrintf zprintf)
     zprintf("=====================================================================\r\n");
     zprintf("%s",sInfo.c_str());
     zprintf("=====================================================================\r\n");
-    delete resultDB;
 }
 
 /// Display a list of banned accounts and ip addresses
