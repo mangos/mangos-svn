@@ -13504,7 +13504,8 @@ bool Player::isAllowedToLoot(Creature* creature)
         return false;
     }
     else
-        return true;
+        // prevent other players from looting if the recipient got disconnected
+        return !creature->hasLootRecipient();
 }
 
 void Player::_LoadActions(QueryResult *result)

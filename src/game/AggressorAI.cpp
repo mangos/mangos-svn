@@ -106,7 +106,7 @@ void AggressorAI::EnterEvadeMode()
     i_creature.DeleteThreatList();
     i_victimGuid = 0;
     i_creature.CombatStop();
-
+    i_creature.SetLootRecipient(NULL);
 }
 
 void
@@ -151,7 +151,5 @@ AggressorAI::AttackStart(Unit *u)
         i_victimGuid = u->GetGUID();
 
         i_creature.GetMotionMaster()->MoveChase(u);
-        if (u->GetTypeId() == TYPEID_PLAYER)
-            i_creature.SetLootRecipient((Player*)u);
     }
 }

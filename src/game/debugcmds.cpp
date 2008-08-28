@@ -259,6 +259,16 @@ bool ChatHandler::HandleSendQuestPartyMsgCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleGetLootRecipient(const char* args)
+{
+    Creature* target = getSelectedCreature();
+    if(!target)
+        return false;
+
+    PSendSysMessage("loot recipient: %s", target->hasLootRecipient()?(target->GetLootRecipient()?target->GetLootRecipient()->GetName():"offline"):"no loot recipient");
+    return true;
+}
+
 bool ChatHandler::HandleSendQuestInvalidMsgCommand(const char* args)
 {
     uint32 msg = atol((char*)args);

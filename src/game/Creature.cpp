@@ -1046,13 +1046,36 @@ Player *Creature::GetLootRecipient() const
     else return ObjectAccessor::FindPlayer(m_lootRecipient);
 }
 
-void Creature::SetLootRecipient(Player *player)
+bool Creature::hasLootRecipient() const
+{
+    return m_lootRecipient!=0;
+}
+void Creature::SetLootRecipient(Unit *unit)
 {
     // set the player whose group should receive the right
     // to loot the creature after it dies
     // should be set to NULL after the loot disappears
-    if (!player) m_lootRecipient = 0;
-    else m_lootRecipient = player->GetGUID();
+
+    if (!unit)
+    {
+        m_lootRecipient = 0;
+        RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_OTHER_TAGGER);
+        return;
+    }
+
+    Player* player = NULL;
+    if(Unit* owner = unit->GetCharmerOrOwner())             // controlled player/pet
+    {
+        if(owner->GetTypeId() == TYPEID_PLAYER)
+            player = (Player*)owner;
+    }
+    else if(unit->GetTypeId() == TYPEID_PLAYER)             // uncontrolled player
+        player = (Player*)unit;
+    else                                                    // normal creature, no player involved
+        return;
+
+    m_lootRecipient = player->GetGUID();
+    SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_OTHER_TAGGER);
 }
 
 void Creature::SaveToDB()
@@ -1515,6 +1538,7 @@ void Creature::setDeathState(DeathState s)
     if(s == JUST_ALIVED)
     {
         SetHealth(GetMaxHealth());
+        SetLootRecipient(NULL);
         Unit::setDeathState(ALIVE);
         CreatureInfo const *cinfo = GetCreatureInfo();
         SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);

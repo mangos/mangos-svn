@@ -54,8 +54,6 @@ ReactorAI::AttackStart(Unit *p)
         i_creature.AddThreat(p, 0.0f);
         i_victimGuid = p->GetGUID();
         i_creature.GetMotionMaster()->MoveChase(p);
-        if (p->GetTypeId() == TYPEID_PLAYER)
-            i_creature.SetLootRecipient((Player*)p);
     }
 }
 
@@ -121,6 +119,7 @@ ReactorAI::EnterEvadeMode()
     i_creature.DeleteThreatList();
     i_victimGuid = 0;
     i_creature.CombatStop();
+    i_creature.SetLootRecipient(NULL);
 
     // Remove TargetedMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
     if( i_creature.GetMotionMaster()->GetCurrentMovementGeneratorType() == TARGETED_MOTION_TYPE )
