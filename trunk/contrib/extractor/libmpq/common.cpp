@@ -600,15 +600,14 @@ int libmpq_file_read_block(mpq_archive *mpq_a, mpq_file *mpq_f, unsigned int blo
 		readpos = mpq_f->blockpos[blocknum];
 		toread  = mpq_f->blockpos[blocknum + nblocks] - readpos;
 	}
+
 	readpos += mpq_f->mpq_b->filepos;
 
 	/* Get work buffer for store read data */
-	if (mpq_f->mpq_b->flags & LIBMPQ_FILE_COMPRESSED) {
-		if ((tempbuf = (unsigned char *)malloc(toread)) == NULL) {
-			/* Hmmm... We should add a better error handling here :) */
-			return 0;
-		}
-	}
+    if ((tempbuf = (unsigned char *)malloc(toread)) == NULL) {
+        /* Hmmm... We should add a better error handling here :) */
+        return 0;
+    }
 
 	/* Set file pointer, if necessary. */
 	if (mpq_a->filepos != readpos) {
@@ -681,10 +680,9 @@ int libmpq_file_read_block(mpq_archive *mpq_a, mpq_file *mpq_f, unsigned int blo
 	}
 
 	/* Delete input buffer, if necessary. */
-	if (mpq_f->mpq_b->flags & LIBMPQ_FILE_COMPRESSED) {
-		free(tempbuf);
-	}
-	return bytesread;
+    free(tempbuf);
+
+    return bytesread;
 }
 
 int libmpq_file_read_file(mpq_archive *mpq_a, mpq_file *mpq_f, unsigned int filepos, char *buffer, unsigned int toread) {
