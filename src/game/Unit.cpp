@@ -542,6 +542,12 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
     {
         SetInCombatWith(pVictim);
         pVictim->SetInCombatWith(this);
+
+        uint64 guid = pVictim->GetCharmerOrOwnerGUID();
+        if(!guid)
+            guid = pVictim->GetGUID();
+        if(IS_PLAYER_GUID(guid))
+            addUnitState(UNIT_STAT_ATTACK_PLAYER);
     }
 
     // Rage from Damage made (only from direct weapon damage)
@@ -6820,14 +6826,8 @@ void Unit::CombatStop()
 
 bool Unit::isAttackingPlayer() const
 {
-    if(getVictim())
-    {
-        if(getVictim()->GetTypeId() == TYPEID_PLAYER)
-            return true;
-
-        if(IS_PLAYER_GUID(getVictim()->GetOwnerGUID()))
-            return true;
-    }
+    if(hasUnitState(UNIT_STAT_ATTACK_PLAYER))
+        return true;
 
     Pet* pet = GetPet();
     if(pet && pet->isAttackingPlayer())
@@ -8258,6 +8258,8 @@ void Unit::ClearInCombat()
 
     if(isCharmed() || (GetTypeId()!=TYPEID_PLAYER && ((Creature*)this)->isPet()))
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
+
+    clearUnitState(UNIT_STAT_ATTACK_PLAYER);
 }
 
 bool Unit::isTargetableForAttack() const
