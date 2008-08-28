@@ -231,9 +231,9 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         charcount = fields[0].GetUInt8();
         delete result;
 
-        if (charcount >= 10)
+        if (charcount >= sWorld.getConfig(CONFIG_CHARACTERS_PER_REALM))
         {
-            data << (uint8)CHAR_CREATE_ACCOUNT_LIMIT;
+            data << (uint8)CHAR_CREATE_SERVER_LIMIT;
             SendPacket( &data );
             return;
         }
