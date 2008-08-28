@@ -523,6 +523,8 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleChangePlayerNameOpcode(WorldPacket& recv_data);
         void HandleDeclinedPlayerNameOpcode(WorldPacket& recv_data);
 
+        void HandleTotemDestroy(WorldPacket& recv_data);
+
         //BattleGround
         void HandleBattleGroundHelloOpcode(WorldPacket &recv_data);
         void HandleBattleGroundJoinOpcode(WorldPacket &recv_data);
