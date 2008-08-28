@@ -3303,10 +3303,16 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     if(getLevel() < ( trainer_spell->reqlevel ? trainer_spell->reqlevel : trainer_spell->spell->spellLevel))
         return TRAINER_SPELL_RED;
 
-    // check prev.rank requirement
-    uint32 prev_id =  spellmgr.GetPrevSpellInChain(trainer_spell->spell->Id);
-    if(prev_id && !HasSpell(prev_id))
-        return TRAINER_SPELL_RED;
+    if(SpellChainNode const* spell_chain = spellmgr.GetSpellChainNode(trainer_spell->spell->Id))
+    {
+        // check prev.rank requirement
+        if(spell_chain->prev && !HasSpell(spell_chain->prev))
+            return TRAINER_SPELL_RED;
+
+        // check additional spell requirement
+        if(spell_chain->req && !HasSpell(spell_chain->req))
+            return TRAINER_SPELL_RED;
+    }
 
     // check skill requirement
     if(trainer_spell->reqskill && GetBaseSkillValue(trainer_spell->reqskill) < trainer_spell->reqskillvalue)

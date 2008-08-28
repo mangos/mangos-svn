@@ -1451,7 +1451,7 @@ void SpellMgr::LoadSpellChains()
     mSpellChains.clear();                                   // need for reload case
     mSpellChainsNext.clear();                               // need for reload case
 
-    QueryResult *result = WorldDatabase.PQuery("SELECT spell_id, prev_spell, first_spell, rank FROM spell_chain");
+    QueryResult *result = WorldDatabase.PQuery("SELECT spell_id, prev_spell, first_spell, rank, req_spell FROM spell_chain");
     if(result == NULL)
     {
         barGoLink bar( 1 );
@@ -1477,6 +1477,7 @@ void SpellMgr::LoadSpellChains()
         node.prev  = fields[1].GetUInt32();
         node.first = fields[2].GetUInt32();
         node.rank  = fields[3].GetUInt8();
+        node.req   = fields[4].GetUInt32();
 
         if(!sSpellStore.LookupEntry(spell_id))
         {
@@ -1486,13 +1487,15 @@ void SpellMgr::LoadSpellChains()
 
         if(node.prev!=0 && !sSpellStore.LookupEntry(node.prev))
         {
-            sLog.outErrorDb("Spell %u listed in `spell_chain` has not existing previous rank spell: %u",spell_id,node.prev);
+            sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has not existed previous rank spell.",
+                spell_id,node.prev,node.first,node.rank,node.req);
             continue;
         }
 
         if(!sSpellStore.LookupEntry(node.first))
         {
-            sLog.outErrorDb("Spell %u listed in `spell_chain` has not existing first rank spell: %u",spell_id,node.first);
+            sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has not existing first rank spell.",
+                spell_id,node.prev,node.first,node.rank,node.req);
             continue;
         }
 
@@ -1501,12 +1504,60 @@ void SpellMgr::LoadSpellChains()
             (spell_id == node.first) != (node.prev == 0) ||
             (node.rank <= 1) != (node.prev == 0) )
         {
-            sLog.outErrorDb("Spell %u listed in `spell_chain` has not compatible chain data (prev: %u, first: %u, rank: %d)",spell_id,node.prev,node.first,node.rank);
+            sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has not compatible chain data.",
+                spell_id,node.prev,node.first,node.rank,node.req);
             continue;
         }
 
+        if(node.req!=0 && !sSpellStore.LookupEntry(node.req))
+        {
+            sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has not existing required spell.",
+                spell_id,node.prev,node.first,node.rank,node.req);
+            continue;
+        }
+
+        // talents not required data in spell chain for work, but must be checked if present for intergrity
+        if(TalentSpellPos const* pos = GetTalentSpellPos(spell_id))
+        {
+            if(node.rank!=pos->rank+1)
+            {
+                sLog.outErrorDb("Talent %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has wrong rank.",
+                    spell_id,node.prev,node.first,node.rank,node.req);
+                continue;
+            }
+
+            if(TalentEntry const* talentEntry = sTalentStore.LookupEntry(pos->talent_id))
+            {
+                if(node.first!=talentEntry->RankID[0])
+                {
+                    sLog.outErrorDb("Talent %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has wrong first rank spell.",
+                        spell_id,node.prev,node.first,node.rank,node.req);
+                    continue;
+                }
+
+                if(node.rank > 1 && node.prev != talentEntry->RankID[node.rank-1-1])
+                {
+                    sLog.outErrorDb("Talent %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has wrong prev rank spell.",
+                        spell_id,node.prev,node.first,node.rank,node.req);
+                    continue;
+                }
+
+                if(node.req!=talentEntry->DependsOnSpell)
+                {
+                    sLog.outErrorDb("Talent %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has wrong required spell.",
+                        spell_id,node.prev,node.first,node.rank,node.req);
+                    continue;
+                }
+            }
+        }
+
         mSpellChains[spell_id] = node;
-        mSpellChainsNext.insert(SpellChainMapNext::value_type(node.prev,spell_id));
+
+        if(node.prev)
+            mSpellChainsNext.insert(SpellChainMapNext::value_type(node.prev,spell_id));
+
+        if(node.req)
+            mSpellChainsNext.insert(SpellChainMapNext::value_type(node.req,spell_id));
 
         ++count;
     } while( result->NextRow() );
@@ -1519,18 +1570,42 @@ void SpellMgr::LoadSpellChains()
             SpellChainMap::iterator i_prev = mSpellChains.find(i->second.prev);
             if(i_prev == mSpellChains.end())
             {
-                sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d) listed in `spell_chain` has not found previous rank spell in table.",
-                    i->first,i->second.prev,i->second.first,i->second.rank);
+                sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has not found previous rank spell in table.",
+                    i->first,i->second.prev,i->second.first,i->second.rank,i->second.req);
             }
             else if( i_prev->second.first != i->second.first )
             {
-                sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d) listed in `spell_chain` has different first spell in chain compared to previous rank spell (prev: %u, first: %u, rank: %d).",
-                    i->first,i->second.prev,i->second.first,i->second.rank,i_prev->second.prev,i_prev->second.first,i_prev->second.rank);
+                sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has different first spell in chain compared to previous rank spell (prev: %u, first: %u, rank: %d, req: %u).",
+                    i->first,i->second.prev,i->second.first,i->second.rank,i->second.req,
+                    i_prev->second.prev,i_prev->second.first,i_prev->second.rank,i_prev->second.req);
             }
             else if( i_prev->second.rank+1 != i->second.rank )
             {
-                sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d) listed in `spell_chain` has different rank compared to previous rank spell (prev: %u, first: %u, rank: %d).",
-                    i->first,i->second.prev,i->second.first,i->second.rank,i_prev->second.prev,i_prev->second.first,i_prev->second.rank);
+                sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has different rank compared to previous rank spell (prev: %u, first: %u, rank: %d, req: %u).",
+                    i->first,i->second.prev,i->second.first,i->second.rank,i->second.req,
+                    i_prev->second.prev,i_prev->second.first,i_prev->second.rank,i_prev->second.req);
+            }
+        }
+
+        if(i->second.req)
+        {
+            SpellChainMap::iterator i_req = mSpellChains.find(i->second.req);
+            if(i_req == mSpellChains.end())
+            {
+                sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has not found required rank spell in table.",
+                    i->first,i->second.prev,i->second.first,i->second.rank,i->second.req);
+            }
+            else if( i_req->second.first == i->second.first )
+            {
+                sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has required rank spell from same spell chain (prev: %u, first: %u, rank: %d, req: %u).",
+                    i->first,i->second.prev,i->second.first,i->second.rank,i->second.req,
+                    i_req->second.prev,i_req->second.first,i_req->second.rank,i_req->second.req);
+            }
+            else if( i_req->second.req )
+            {
+                sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d, req: %u) listed in `spell_chain` has required rank spell with required spell (prev: %u, first: %u, rank: %d, req: %u).",
+                    i->first,i->second.prev,i->second.first,i->second.rank,i->second.req,
+                    i_req->second.prev,i_req->second.first,i_req->second.rank,i_req->second.req);
             }
         }
     }

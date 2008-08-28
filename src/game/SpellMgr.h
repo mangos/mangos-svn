@@ -529,6 +529,7 @@ struct SpellChainNode
 {
     uint32 prev;
     uint32 first;
+    uint32 req;
     uint8  rank;
 };
 
@@ -637,22 +638,29 @@ class SpellMgr
         }
 
         // Spell ranks chains
-        uint32 GetFirstSpellInChain(uint32 spell_id) const
+        SpellChainNode const* GetSpellChainNode(uint32 spell_id) const
         {
             SpellChainMap::const_iterator itr = mSpellChains.find(spell_id);
             if(itr == mSpellChains.end())
-                return spell_id;
+                return NULL;
 
-            return itr->second.first;
+            return &itr->second;
+        }
+
+        uint32 GetFirstSpellInChain(uint32 spell_id) const
+        {
+            if(SpellChainNode const* node = GetSpellChainNode(spell_id))
+                return node->first;
+
+            return spell_id;
         }
 
         uint32 GetPrevSpellInChain(uint32 spell_id) const
         {
-            SpellChainMap::const_iterator itr = mSpellChains.find(spell_id);
-            if(itr == mSpellChains.end())
-                return 0;
+            if(SpellChainNode const* node = GetSpellChainNode(spell_id))
+                return node->prev;
 
-            return itr->second.prev;
+            return 0;
         }
 
         SpellChainMapNext const& GetSpellChainNext() const { return mSpellChainsNext; }
@@ -661,11 +669,10 @@ class SpellMgr
         // Use IsHighRankOfSpell instead
         uint8 GetSpellRank(uint32 spell_id) const
         {
-            SpellChainMap::const_iterator itr = mSpellChains.find(spell_id);
-            if(itr == mSpellChains.end())
-                return 0;
+            if(SpellChainNode const* node = GetSpellChainNode(spell_id))
+                return node->rank;
 
-            return itr->second.rank;
+            return 0;
         }
 
         uint8 IsHighRankOfSpell(uint32 spell1,uint32 spell2) const
