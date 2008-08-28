@@ -973,6 +973,12 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
                     unit->SetInCombatWith(m_caster);
                     m_caster->SetInCombatWith(unit);
 
+                    uint64 guid = unit->GetCharmerOrOwnerGUID();
+                    if(!guid)
+                        guid = unit->GetGUID();
+                    if(IS_PLAYER_GUID(guid))
+                        m_caster->addUnitState(UNIT_STAT_ATTACK_PLAYER);
+
                     unit->AddThreat(m_caster, 0.0f);
                 }
             }
