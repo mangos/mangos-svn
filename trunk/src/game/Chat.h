@@ -370,6 +370,7 @@ class ChatHandler
         bool HandleCompleteQuest(const char * args);
         bool HandleSaveAllCommand(const char* args);
         bool HandleGetItemState(const char * args);
+        bool HandleGetLootRecipient(const char * args);
 
         Player*   getSelectedPlayer();
         Creature* getSelectedCreature();

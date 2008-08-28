@@ -589,6 +589,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         }
     }
 
+    if (pVictim->GetTypeId() == TYPEID_UNIT && !((Creature*)pVictim)->isPet() && !((Creature*)pVictim)->hasLootRecipient())
+        ((Creature*)pVictim)->SetLootRecipient(this);
     if (health <= damage)
     {
         // battleground things
@@ -622,7 +624,9 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         }
         else if(GetTypeId() == TYPEID_PLAYER)               // not controlled player
             player = (Player*)this;
-
+        
+        if(pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->GetLootRecipient())
+            player = ((Creature*)pVictim)->GetLootRecipient();
         // Reward player, his pets, and group/raid members
         // call kill spell proc event (before real die and combat stop to triggering auras removed at death/combat stop)
         if(player && player!=pVictim)
@@ -1698,6 +1702,8 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
     else
         outcome = RollPhysicalOutcomeAgainst (pVictim, attType, spellCasted);
 
+    if(outcome == MELEE_HIT_MISS ||outcome == MELEE_HIT_DODGE ||outcome == MELEE_HIT_BLOCK ||outcome == MELEE_HIT_PARRY)
+        pVictim->AddThreat(this, 0.0f);
     switch(outcome)
     {
         case MELEE_HIT_EVADE:
