@@ -1764,7 +1764,17 @@ void Aura::TriggerSpell()
                     // Totemic Mastery (Skyshatter Regalia (Shaman Tier 6) - bonus)
                     case 38443:
                     {
-                        if( caster->m_TotemSlot[0] && caster->m_TotemSlot[1] && caster->m_TotemSlot[2] && caster->m_TotemSlot[3] )
+                        bool all = true;
+                        for(int i = 0; i < MAX_TOTEM; ++i)
+                        {
+                            if(!caster->m_TotemSlot[i])
+                            {
+                                all = false;
+                                break;
+                            }
+                        }
+
+                        if(all)
                             caster->CastSpell(caster,38437,true);
                         else
                             caster->RemoveAurasDueToSpell(38437);

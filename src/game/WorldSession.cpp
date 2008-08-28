@@ -408,6 +408,8 @@ void WorldSession::FillOpcodeHandlerHashTable()
 
     objmgr.opcodeTable[ CMSG_CANCEL_CHANNELLING  ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCancelChanneling              );
 
+    objmgr.opcodeTable[ CMSG_TOTEM_DESTROYED ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTotemDestroy                  );
+
     //BattleGround
     objmgr.opcodeTable[ CMSG_BATTLEFIELD_STATUS ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldStatusOpcode       );
     objmgr.opcodeTable[ CMSG_BATTLEMASTER_HELLO ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundHelloOpcode       );

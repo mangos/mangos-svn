@@ -161,8 +161,12 @@ Unit::Unit()
 
     for (uint32 i = 0; i < CURRENT_MAX_SPELL; i++)
         m_currentSpells[i] = NULL;
+
     m_addDmgOnce = 0;
-    m_TotemSlot[0] = m_TotemSlot[1] = m_TotemSlot[2] = m_TotemSlot[3]  = 0;
+
+    for(int i = 0; i < MAX_TOTEM; ++i)
+        m_TotemSlot[i]  = 0;
+
     m_ObjectSlot[0] = m_ObjectSlot[1] = m_ObjectSlot[2] = m_ObjectSlot[3] = 0;
     //m_Aura = NULL;
     //m_AurasCheck = 2000;
@@ -6827,7 +6831,7 @@ bool Unit::isAttackingPlayer() const
     if(charmed && charmed->isAttackingPlayer())
         return true;
 
-    for (int8 i = 0; i < 4; i++)
+    for (int8 i = 0; i < MAX_TOTEM; i++)
     {
         if(m_TotemSlot[i])
         {
@@ -6962,7 +6966,7 @@ void Unit::SetCharm(Unit* charmed)
 
 void Unit::UnsummonAllTotems()
 {
-    for (int8 i = 0; i < 4; ++i)
+    for (int8 i = 0; i < MAX_TOTEM; ++i)
     {
         if(!m_TotemSlot[i])
             continue;

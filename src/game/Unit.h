@@ -662,6 +662,7 @@ enum ReactiveType
 };
 
 #define MAX_REACTIVE 6
+#define MAX_TOTEM 4
 
 // delay time next attack to prevent client attack animation problems
 #define ATTACK_DISPLAY_DELAY 200
@@ -1002,7 +1003,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         Spell* m_currentSpells[CURRENT_MAX_SPELL];
 
         uint32 m_addDmgOnce;
-        uint64 m_TotemSlot[4];
+        uint64 m_TotemSlot[MAX_TOTEM];
         uint64 m_ObjectSlot[4];
         uint32 m_detectInvisibilityMask;
         uint32 m_invisibilityMask;

@@ -30,6 +30,7 @@
 #include "BattleGround.h"
 #include "MapManager.h"
 #include "ScriptCalls.h"
+#include "Totem.h"
 
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
@@ -410,6 +411,25 @@ void WorldSession::HandleCancelChanneling( WorldPacket & /*recv_data */)
         uint32 spellid;
         recv_data >> spellid;
     */
+}
+
+void WorldSession::HandleTotemDestroy( WorldPacket& recvPacket)
+{
+    CHECK_PACKET_SIZE(recvPacket, 1);
+
+    uint8 slotId;
+
+    recvPacket >> slotId;
+
+    if (slotId >= MAX_TOTEM)
+        return;
+
+    if(!_player->m_TotemSlot[slotId])
+        return;
+
+    Creature* totem = ObjectAccessor::GetCreature(*_player,_player->m_TotemSlot[slotId]);
+    if(totem && totem->isTotem())
+        ((Totem*)totem)->UnSummon();
 }
 
 void WorldSession::HandleSelfResOpcode( WorldPacket & /*recv_data*/ )

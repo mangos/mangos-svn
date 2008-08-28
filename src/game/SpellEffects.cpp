@@ -4977,7 +4977,7 @@ void Spell::EffectSummonTotem(uint32 i)
         default: return;
     }
 
-    if(slot < 4)
+    if(slot < MAX_TOTEM)
     {
         uint64 guid = m_caster->m_TotemSlot[slot];
         if(guid != 0)
@@ -5000,7 +5000,7 @@ void Spell::EffectSummonTotem(uint32 i)
         return;
     }
 
-    float angle = slot < 4 ? M_PI/4 - (slot*M_PI/2) : 0;
+    float angle = slot < MAX_TOTEM ? M_PI/MAX_TOTEM - (slot*2*M_PI/MAX_TOTEM) : 0;
 
     float x,y,z;
     m_caster->GetClosePoint(x,y,z,pTotem->GetObjectSize(),2.0f,angle);
@@ -5011,7 +5011,7 @@ void Spell::EffectSummonTotem(uint32 i)
 
     pTotem->Relocate(x, y, z, m_caster->GetOrientation());
 
-    if(slot < 4)
+    if(slot < MAX_TOTEM)
         m_caster->m_TotemSlot[slot] = pTotem->GetGUID();
 
     pTotem->SetOwner(m_caster->GetGUID());
@@ -5035,6 +5035,16 @@ void Spell::EffectSummonTotem(uint32 i)
     pTotem->ApplySpellImmune(m_spellInfo->Id,IMMUNITY_STATE,SPELL_AURA_TRANSFORM,true);
 
     pTotem->Summon(m_caster);
+
+    if(slot < MAX_TOTEM && m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        WorldPacket data(SMSG_TOTEM_CREATED, 1+8+4+4);
+        data << uint8(slot);
+        data << uint64(pTotem->GetGUID());
+        data << uint32(duration);
+        data << uint32(m_spellInfo->Id);
+        ((Player*)m_caster)->SendDirectMessage(&data);
+    }
 }
 
 void Spell::EffectEnchantHeldItem(uint32 i)
@@ -5612,7 +5622,7 @@ void Spell::EffectSummonDeadPet(uint32 /*i*/)
 void Spell::EffectDestroyAllTotems(uint32 /*i*/)
 {
     float mana = 0;
-    for(int slot = 0;  slot < 4; ++slot)
+    for(int slot = 0;  slot < MAX_TOTEM; ++slot)
     {
         if(!m_caster->m_TotemSlot[slot])
             continue;

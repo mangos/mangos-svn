@@ -93,7 +93,7 @@ void Totem::UnSummon()
     if (owner)
     {
         // clear owenr's totem slot
-        for(int i = 0; i <4; ++i)
+        for(int i = 0; i < MAX_TOTEM; ++i)
         {
             if(owner->m_TotemSlot[i]==GetGUID())
             {
