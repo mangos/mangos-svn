@@ -789,7 +789,8 @@ struct TalentEntry
     uint32    DependsOn;                                    // 13 index in Talent.dbc (TalentEntry)
                                                             // 14-15 not used
     uint32    DependsOnRank;                                // 16
-                                                            // 17-20 not used
+                                                            // 17-19 not used
+    uint32    DependsOnSpell;                               // 20 req.spell
 };
 
 struct TalentTabEntry
