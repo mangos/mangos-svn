@@ -1046,10 +1046,6 @@ Player *Creature::GetLootRecipient() const
     else return ObjectAccessor::FindPlayer(m_lootRecipient);
 }
 
-bool Creature::hasLootRecipient() const
-{
-    return m_lootRecipient!=0;
-}
 void Creature::SetLootRecipient(Unit *unit)
 {
     // set the player whose group should receive the right
@@ -1071,7 +1067,8 @@ void Creature::SetLootRecipient(Unit *unit)
     }
     else if(unit->GetTypeId() == TYPEID_PLAYER)             // uncontrolled player
         player = (Player*)unit;
-    else                                                    // normal creature, no player involved
+
+    if(!player)                                             // normal creature, no player involved
         return;
 
     m_lootRecipient = player->GetGUID();
