@@ -1883,6 +1883,84 @@ void SpellMgr::LoadSpellScriptTarget()
     sLog.outString(">> Loaded %u Spell Script Targets", count);
 }
 
+void SpellMgr::LoadSpellPetAuras()
+{
+    mSpellPetAuraMap.clear();                                  // need for reload case
+
+    uint32 count = 0;
+
+    //                                                0      1    2
+    QueryResult *result = WorldDatabase.Query("SELECT spell, pet, aura FROM spell_pet_auras");
+    if( !result )
+    {
+
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outString( ">> Loaded %u spell pet auras", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        Field *fields = result->Fetch();
+
+        bar.step();
+
+        uint16 spell = fields[0].GetUInt16();
+        uint16 pet = fields[1].GetUInt16();
+        uint16 aura = fields[2].GetUInt16();
+
+        SpellPetAuraMap::iterator itr = mSpellPetAuraMap.find(spell);
+        if(itr != mSpellPetAuraMap.end())
+        {
+            itr->second.AddAura(pet, aura);
+        }
+        else
+        {
+            SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell);
+            if (!spellInfo)
+            {
+                sLog.outErrorDb("Spell %u listed in `spell_pet_auras` does not exist", spell);
+                continue;
+            }
+            int i = 0;
+            for(; i < 3; ++i)
+                if((spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA &&
+                    spellInfo->EffectApplyAuraName[i] == SPELL_AURA_DUMMY) ||
+                    spellInfo->Effect[i] == SPELL_EFFECT_DUMMY)
+                    break;
+
+            if(i == 3)
+            {
+                sLog.outError("Spell %u listed in `spell_pet_auras` does not have dummy aura or dummy effect", spell); 
+                continue;
+            }
+
+            SpellEntry const* spellInfo2 = sSpellStore.LookupEntry(aura);
+            if (!spellInfo2)
+            {
+                sLog.outErrorDb("Aura %u listed in `spell_pet_auras` does not exist", aura);
+                continue;
+            }
+            
+            PetAura pa(pet, aura, spellInfo->EffectImplicitTargetA[i] == TARGET_PET, spellInfo->EffectBasePoints[i] + spellInfo->EffectBaseDice[i]);
+            mSpellPetAuraMap[spell] = pa;
+        }
+        
+        ++count;
+    } while( result->NextRow() );
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u spell pet auras", count );
+}
+
 /// Some checks for spells, to prevent adding depricated/broken spells for trainers, spell book, etc
 bool SpellMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
 {

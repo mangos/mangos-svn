@@ -10579,3 +10579,17 @@ bool Unit::IsUnderLastManaUseEffect() const
 {
     return  getMSTimeDiff(m_lastManaUse,getMSTime()) < 5000;
 }
+
+void Unit::AddPetAura(PetAura const* petSpell)
+{
+    m_petAuras.push_back(petSpell);
+    if(Pet* pet = GetPet())
+        pet->CastPetAura(petSpell);
+}
+
+void Unit::RemovePetAura(PetAura const* petSpell)
+{
+    m_petAuras.remove(petSpell);
+    if(Pet* pet = GetPet())
+        pet->RemoveAurasDueToSpell(petSpell->GetAura(pet->GetEntry()));
+}

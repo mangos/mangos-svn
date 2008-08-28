@@ -1248,32 +1248,6 @@ void Spell::EffectDummy(uint32 i)
                 pet->CastSpell(pet->getVictim(), spell_id, true);
                 return;
             }
-            //Focused Fire (flags have more spells but only this have dummy effect)
-            if (m_spellInfo->SpellIconID == 2221)
-            {
-                if(!unitTarget)
-                    return;
-
-                uint32 spell_id;
-
-                switch(m_spellInfo->Id)
-                {
-                    case 35029: spell_id = 35060; break;    //Rank 1
-                    case 35030: spell_id = 35061; break;    //Rank 2
-                    default:
-                        sLog.outError("Spell::EffectDummy: Spell %u not handled in FF",m_spellInfo->Id);
-                        return;
-                }
-
-                /* FIX ME: must be applied as pet passive spell for _each_ pet after this talent learning
-                Pet* pet = unitTarget->GetPet();
-                if(!pet)
-                    return;
-
-                m_caster->CastSpell(pet, spell_id, true, 0);
-                */
-                return;
-            }
 
             switch(m_spellInfo->Id)
             {
@@ -1524,6 +1498,13 @@ void Spell::EffectDummy(uint32 i)
             }
 
             break;
+    }
+
+    // pet auras
+    if(PetAura const* petSpell = spellmgr.GetPetAura(m_spellInfo->Id))
+    {
+        m_caster->AddPetAura(petSpell);
+        return;
     }
 }
 

@@ -234,6 +234,7 @@ class GameObject;
 class Item;
 class Pet;
 class Path;
+class PetAura;
 
 struct SpellImmune
 {
@@ -1208,6 +1209,11 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         // group updates
         void UpdateAuraForGroup(uint8 slot);
+
+        // pet auras
+        std::list<PetAura const*> m_petAuras;
+        void AddPetAura(PetAura const* petSpell);
+        void RemovePetAura(PetAura const* petSpell);
 
     protected:
         explicit Unit ();

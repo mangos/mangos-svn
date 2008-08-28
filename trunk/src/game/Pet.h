@@ -176,6 +176,8 @@ class Pet : public Creature
         void AddTeachSpell(uint32 learned_id, uint32 source_id) { m_teachspells[learned_id] = source_id; }
 
         void LearnPetPassives();
+        void CastPetAuras(bool current);
+        void CastPetAura(PetAura const* aura);
 
         void _LoadSpellCooldowns();
         void _SaveSpellCooldowns();

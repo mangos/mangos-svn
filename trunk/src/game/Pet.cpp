@@ -316,6 +316,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     else
     {
         LearnPetPassives();
+        CastPetAuras(current);
     }
 
     if(getPetType() == SUMMON_PET && !current)              //all (?) summon pets come with full health when called, but not when they are current
@@ -514,7 +515,10 @@ void Pet::setDeathState(DeathState s)                       // overwrite virtual
         }
     }
     else if(getDeathState()==ALIVE)
+    {
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
+        CastPetAuras(true);
+    }
 }
 
 void Pet::Update(uint32 diff)
@@ -1380,11 +1384,13 @@ void Pet::_SaveAuras()
     AuraMap const& auras = GetAuras();
     for(AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
-        // skip all auras from spell that apply at cast SPELL_AURA_MOD_SHAPESHIFT or SPELL_AURA_MOD_STEALTH auras.
+        // skip all auras from spell that apply at cast SPELL_AURA_MOD_SHAPESHIFT or pet area auras.
         SpellEntry const *spellInfo = itr->second->GetSpellProto();
         uint8 i;
         for (i = 0; i < 3; i++)
-            if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STEALTH)
+            if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STEALTH ||
+                spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_OWNER ||
+                spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA_PET )
                 break;
 
         if (i == 3 && !itr->second->IsPassive())
@@ -1584,6 +1590,8 @@ void Pet::InitPetCreateSpells()
 
     LearnPetPassives();
 
+    CastPetAuras(false);
+
     SetTP(-usedtrainpoints);
 }
 
@@ -1703,4 +1711,42 @@ void Pet::LearnPetPassives()
         for(PetFamilySpellsSet::const_iterator petSet = petStore->second.begin(); petSet != petStore->second.end(); ++petSet)
             addSpell(*petSet);
     }
+}
+
+void Pet::CastPetAuras(bool current)
+{
+    Unit* owner = GetOwner();
+    if(!owner)
+        return;
+
+    if(getPetType() != HUNTER_PET && (getPetType() != SUMMON_PET || owner->getClass() != CLASS_WARLOCK))
+        return;
+
+    for(std::list<PetAura const*>::iterator itr = owner->m_petAuras.begin(); itr != owner->m_petAuras.end(); )
+    {
+        if(!current && (*itr)->IsRemovedOnChangePet())
+        {
+            PetAura const* toRemove = *itr;
+            ++itr;
+            owner->RemovePetAura(toRemove);
+            continue;
+        }
+        CastPetAura(*itr);
+        ++itr;
+    }
+}
+
+void Pet::CastPetAura(PetAura const* aura)
+{
+    uint16 auraId = aura->GetAura(GetEntry());
+    if(!auraId)
+        return;
+
+    if(auraId == 35696)                                       // Demonic Knowledge
+    {
+        int32 basePoints = aura->GetDamage() * (GetStat(STAT_STAMINA) + GetStat(STAT_INTELLECT)) / 100;
+        CastCustomSpell(this,auraId,&basePoints, NULL, NULL, true );
+    }
+    else
+        CastSpell(this, auraId, true);
 }

@@ -848,6 +848,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading SpellAffect definitions..." );
     spellmgr.LoadSpellAffects();
 
+    sLog.outString( "Loading spell pet auras..." );
+    spellmgr.LoadSpellPetAuras();
+
     sLog.outString( "Loading player Create Info & Level Stats..." );
     objmgr.LoadPlayerInfo();
 

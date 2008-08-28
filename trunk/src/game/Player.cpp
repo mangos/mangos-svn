@@ -2758,6 +2758,10 @@ void Player::removeSpell(uint32 spell_id)
 
     RemoveAurasDueToSpell(spell_id);
 
+    // remove pet auras
+    if(PetAura const* petSpell = spellmgr.GetPetAura(spell_id))
+        RemovePetAura(petSpell);
+
     // free talent points
     uint32 talentCosts = GetTalentSpellCost(spell_id);
     if(talentCosts > 0)
