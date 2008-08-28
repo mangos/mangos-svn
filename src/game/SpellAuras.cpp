@@ -896,7 +896,7 @@ void Aura::_AddAura()
     // passive auras (except totem auras) do not get placed in the slots
     // area auras with SPELL_AURA_NONE are not shown on target
     if((!m_isPassive || (caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem())) && 
-        (m_modifier.m_auraname != SPELL_AURA_NONE || !IsAreaAura()))
+        (m_spellProto->Effect[GetEffIndex()] != SPELL_EFFECT_APPLY_AREA_AURA_ENEMY || m_target != caster))
     {
         if(!samespell)                                      // new slot need
         {
@@ -2183,6 +2183,16 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
             break;
         }
+    }
+
+    // pet auras
+    if(PetAura const* petSpell = spellmgr.GetPetAura(GetId()))
+    {
+        if(apply)
+            m_target->AddPetAura(petSpell);
+        else
+            m_target->RemovePetAura(petSpell);
+        return;
     }
 }
 

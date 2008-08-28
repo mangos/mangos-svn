@@ -133,6 +133,7 @@ bool ChatHandler::HandleReloadAllSpellCommand(const char*)
     HandleReloadSpellScriptTargetCommand("a");
     HandleReloadSpellTargetPositionCommand("a");
     HandleReloadSpellThreatsCommand("a");
+    HandleReloadSpellPetAurasCommand("a");
     return true;
 }
 
@@ -387,6 +388,14 @@ bool ChatHandler::HandleReloadSpellThreatsCommand(const char*)
     sLog.outString( "Re-Loading Aggro Spells Definitions...");
     spellmgr.LoadSpellThreats();
     SendGlobalSysMessage("DB table `spell_threat` (spell aggro definitions) reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadSpellPetAurasCommand(const char*)
+{
+    sLog.outString( "Re-Loading Spell pet auras...");
+    spellmgr.LoadSpellPetAuras();
+    SendGlobalSysMessage("DB table `spell_pet_auras` reloaded.");
     return true;
 }
 
