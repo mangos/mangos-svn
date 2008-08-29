@@ -55,7 +55,7 @@ enum SpellChannelInterruptFlags
 
 enum SpellAuraInterruptFlags
 {
-    AURA_INTERRUPT_FLAG_UNK0                = 0x00000001,   // 0
+    AURA_INTERRUPT_FLAG_UNK0                = 0x00000001,   // 0    removed when getting hit by a negative spell?
     AURA_INTERRUPT_FLAG_DAMAGE              = 0x00000002,   // 1    removed by any damage
     AURA_INTERRUPT_FLAG_UNK2                = 0x00000004,   // 2
     AURA_INTERRUPT_FLAG_MOVE                = 0x00000008,   // 3    removed by any movement
@@ -70,7 +70,7 @@ enum SpellAuraInterruptFlags
     AURA_INTERRUPT_FLAG_UNK12               = 0x00001000,   // 12   removed by attack? 
     AURA_INTERRUPT_FLAG_UNK13               = 0x00002000,   // 13
     AURA_INTERRUPT_FLAG_UNK14               = 0x00004000,   // 14
-    AURA_INTERRUPT_FLAG_UNK15               = 0x00008000,   // 15
+    AURA_INTERRUPT_FLAG_UNK15               = 0x00008000,   // 15   removed by casting a spell?
     AURA_INTERRUPT_FLAG_UNK16               = 0x00010000,   // 16
     AURA_INTERRUPT_FLAG_MOUNTING            = 0x00020000,   // 17   removed by mounting
     AURA_INTERRUPT_FLAG_NOT_SEATED          = 0x00040000,   // 18   removed by standing up
