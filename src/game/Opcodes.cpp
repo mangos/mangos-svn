@@ -503,8 +503,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x1D9*/ { "SMSG_START_MIRROR_TIMER",          STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x1DA*/ { "SMSG_PAUSE_MIRROR_TIMER",          STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x1DB*/ { "SMSG_STOP_MIRROR_TIMER",           STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
-    /*0x1DC*/ { "CMSG_PING",                        STATUS_NEVER,    &WorldSession::Handle_NULL                     },
-                                                            // processed in WorldSocket::OnRead
+    /*0x1DC*/ { "CMSG_PING",                        STATUS_NEVER,    &WorldSession::Handle_EarlyProccess            },
     /*0x1DD*/ { "SMSG_PONG",                        STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x1DE*/ { "SMSG_CLEAR_COOLDOWN",              STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x1DF*/ { "SMSG_GAMEOBJECT_PAGETEXT",         STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
@@ -521,8 +520,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x1EA*/ { "SMSG_ITEM_TIME_UPDATE",            STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x1EB*/ { "SMSG_ITEM_ENCHANT_TIME_UPDATE",    STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x1EC*/ { "SMSG_AUTH_CHALLENGE",              STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
-    /*0x1ED*/ { "CMSG_AUTH_SESSION",                STATUS_NEVER,    &WorldSession::Handle_NULL                     },
-                                                            // processed in WorldSocket::OnRead
+    /*0x1ED*/ { "CMSG_AUTH_SESSION",                STATUS_NEVER,    &WorldSession::Handle_EarlyProccess            },
     /*0x1EE*/ { "SMSG_AUTH_RESPONSE",               STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x1EF*/ { "MSG_GM_SHOWLABEL",                 STATUS_NEVER,    &WorldSession::Handle_NULL                     },
     /*0x1F0*/ { "CMSG_PET_CAST_SPELL",              STATUS_LOGGEDIN, &WorldSession::HandleAddDynamicTargetObsoleteOpcode},
@@ -1059,7 +1057,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x403*/ { "SMSG_SPELL_CHANCE_RESIST_PUSHBACK",STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x404*/ { "CMSG_IGNORE_DIMINISHING_RETURNS_CHEAT",STATUS_NEVER,&WorldSession::Handle_NULL                     },
     /*0x405*/ { "SMSG_IGNORE_DIMINISHING_RETURNS_CHEAT",STATUS_NEVER,&WorldSession::Handle_ServerSide               },
-    /*0x406*/ { "CMSG_KEEP_ALIVE",                  STATUS_NEVER,    &WorldSession::Handle_NULL                     },
+    /*0x406*/ { "CMSG_KEEP_ALIVE",                  STATUS_NEVER,    &WorldSession::Handle_EarlyProccess            },
     /*0x407*/ { "SMSG_RAID_READY_CHECK_ERROR",      STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x408*/ { "CMSG_OPT_OUT_OF_LOOT",             STATUS_AUTHED,   &WorldSession::HandleGroupPassOnLootOpcode     },
     /*0x409*/ { "MSG_QUERY_GUILD_BANK_TEXT",        STATUS_LOGGEDIN, &WorldSession::HandleGuildBankTabText          },
