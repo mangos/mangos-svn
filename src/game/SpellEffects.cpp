@@ -907,6 +907,12 @@ void Spell::EffectDummy(uint32 i)
                 }
                 //case 26074:                               // Holiday Cheer
                 //    return; -- implemented at client side
+                case 28006:                                 // Arcane Cloaking
+                {
+                    if( unitTarget->GetTypeId() == TYPEID_PLAYER )
+                        m_caster->CastSpell(unitTarget,29294,true);
+                    return;
+                }
                 case 28730:                                 // Arcane Torrent (Mana)
                 {
                     int32 count = 0;
