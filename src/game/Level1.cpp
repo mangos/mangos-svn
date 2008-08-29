@@ -567,7 +567,9 @@ bool ChatHandler::HandleModifyKnownTitlesCommand(const char* args)
     if(!*args)
         return false;
 
-    uint64 titles = atoi((char*)args);
+    uint64 titles = 0;
+
+    sscanf((char*)args, I64FMTD, &titles);
 
     Player *chr = getSelectedPlayer();
     if (!chr)

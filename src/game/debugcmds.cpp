@@ -168,7 +168,7 @@ bool ChatHandler::HandleSendOpcodeCommand(const char* args)
                 data << uint32(val1);
                 break;
             case 3:                                         // uint64
-                fscanf(file, "%llu", &val2);
+                fscanf(file, I64FMTD, &val2);
                 data << uint64(val2);
                 break;
             case 4:                                         // float
