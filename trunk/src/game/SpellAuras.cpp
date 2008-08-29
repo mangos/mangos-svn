@@ -3905,6 +3905,31 @@ void Aura::HandlePeriodicHeal(bool apply, bool Real)
         // provided m_target as original caster to prevent apply aura caster selection for this negative buff
         m_target->CastSpell(m_target,11196,true,NULL,this,m_target->GetGUID());
     }
+
+    switch (m_spellProto->SpellFamilyName)
+    {
+        case SPELLFAMILY_DRUID:
+        {
+            // Rejuvenation
+            if(m_spellProto->SpellFamilyFlags & 0x0000000000000010LL)
+            {
+                Unit::AuraList const& classScripts = GetCaster()->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                for(Unit::AuraList::const_iterator k = classScripts.begin(); k != classScripts.end(); ++k)
+                {
+                    int32 tickcount = GetSpellDuration(m_spellProto) / m_spellProto->EffectAmplitude[m_effIndex];
+                    switch((*k)->GetModifier()->m_miscvalue)
+                    {
+                        case 4953:                          // Increased Rejuvenation Healing - Harold's Rejuvenating Broach Aura
+                        case 4415:                          // Increased Rejuvenation Healing - Idol of Rejuvenation Aura
+                        {
+                            m_modifier.m_amount += (*k)->GetModifier()->m_amount / tickcount;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
 }
 
 void Aura::HandlePeriodicDamage(bool apply, bool Real)
@@ -3981,6 +4006,18 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 if (apply && !loading && caster && caster->GetTypeId() == TYPEID_PLAYER)
                 {
                     uint8 cp = ((Player*)caster)->GetComboPoints();
+
+                    // Idol of Feral Shadows. Cant be handled as SpellMod in SpellAura:Dummy due its dependency from CPs    
+                    Unit::AuraList const& dummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
+                    for(Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
+                    {
+                        if((*itr)->GetId()==34241)
+                        {
+                            m_modifier.m_amount += cp * (*itr)->GetModifier()->m_amount;
+                            break;
+                        }
+                    }
+
                     if (cp > 4) cp = 4;
                     m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100);
                 }
