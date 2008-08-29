@@ -1091,16 +1091,35 @@ enum Opcodes
 };
 
 // Don't forget to change this value and add opcode name to Opcodes.cpp when you add new opcode!
-#define NUM_MSG_TYPES 1060
+#define NUM_MSG_TYPES 0x424
 
-extern const char* g_worldOpcodeNames[];
+/// Player state
+enum SessionStatus
+{
+    STATUS_AUTHED = 0,                                      ///< Player authenticated
+    STATUS_LOGGEDIN,                                        ///< Player in game
+    STATUS_TRANSFER_PENDING,                                ///< Player transferring to another map
+    STATUS_NEVER                                            ///< Opcode not accepted from client (deprecated or server side only)
+};
+
+class WorldSession;
+class WorldPacket;
+
+struct OpcodeHandler
+{
+    char const* name;
+    SessionStatus status;
+    void (WorldSession::*handler)(WorldPacket& recvPacket);
+};
+
+extern OpcodeHandler opcodeTable[NUM_MSG_TYPES];
 
 /// Lookup opcode name for human understandable logging
 inline const char* LookupOpcodeName(uint16 id)
 {
     if (id >= NUM_MSG_TYPES)
         return "Received unknown opcode, it's more than max!";
-    return g_worldOpcodeNames[id];
+    return opcodeTable[id].name;
 }
 #endif
 /// @}

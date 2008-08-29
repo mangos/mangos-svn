@@ -193,7 +193,13 @@ class MANGOS_DLL_SPEC WorldSession
         uint32 GetLatency() const { return m_latency; }
         void SetLatency(uint32 latency) { m_latency = latency; }
         uint32 getDialogStatus(Player *pPlayer, Object* questgiver, uint32 defstatus);
-    protected:
+
+    public:                                                 // opcodes handlers
+
+        void Handle_NULL(WorldPacket& recvPacket);          // not used
+        void Handle_ServerSide(WorldPacket& recvPacket);    // sever side only, can't be accepted from client
+        void Handle_Depricated(WorldPacket& recvPacket);    // never used anymore by client
+
         void HandleCharEnumOpcode(WorldPacket& recvPacket);
         void HandleCharDeleteOpcode(WorldPacket& recvPacket);
         void HandleCharCreateOpcode(WorldPacket& recvPacket);
@@ -622,8 +628,6 @@ class MANGOS_DLL_SPEC WorldSession
         LocaleConstant m_sessionDbcLocale;
         int m_sessionDbLocaleIndex;
         uint32 m_latency;
-
-        void FillOpcodeHandlerHashTable();
 
         ZThread::LockedQueue<WorldPacket*,ZThread::FastMutex> _recvQueue;
 };
