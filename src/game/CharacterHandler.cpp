@@ -223,6 +223,21 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
+    QueryResult *resultacct = loginDatabase.PQuery("SELECT SUM(numchars) FROM realmcharacters WHERE acctid = '%d'", GetAccountId());
+    if ( resultacct )
+    {
+        Field *fields=resultacct->Fetch();
+        uint32 acctcharcount = fields[0].GetUInt32();
+        delete resultacct;
+
+        if (acctcharcount >= sWorld.getConfig(CONFIG_CHARACTERS_PER_ACCOUNT))
+        {
+            data << (uint8)CHAR_CREATE_ACCOUNT_LIMIT;
+            SendPacket( &data );
+            return;
+        }
+    }
+
     QueryResult *result = CharacterDatabase.PQuery("SELECT COUNT(guid) FROM characters WHERE account = '%d'", GetAccountId());
     uint8 charcount = 0;
     if ( result )

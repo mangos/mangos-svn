@@ -376,6 +376,12 @@ LogColors = ""
 #                   (included in client by default, with active official localization or custom localization fonts in clientdir/Fonts).
 #                 3 basic latin characters + server timezone specific
 #
+#    CharactersPerAccount
+#        Limit numbers of characters per account (at all realms).
+#        Note: this setting limit character creating at _current_ realm base at characters amount at all realms
+#        Default: 50 
+#                The number must be >= CharactersPerRealm
+#
 #    CharactersPerRealm
 #        Limit numbers of characters for account at realm
 #        Default: 10 (client limitation)
@@ -493,6 +499,7 @@ DBC.Locale = 255
 StrictPlayerNames = 0
 StrictCharterNames = 0
 StrictPetNames = 0
+CharactersPerAccount = 50
 CharactersPerRealm = 10
 SkipCinematics = 0
 MaxPlayerLevel = 70
