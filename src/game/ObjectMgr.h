@@ -171,25 +171,6 @@ struct WeatherZoneChances
     WeatherSeasonChances data[WEATHER_SEASONS];
 };
 
-/// Player state
-enum SessionStatus
-{
-    STATUS_AUTHED = 0,                                      ///< Player authenticated
-    STATUS_LOGGEDIN,                                        ///< Player in game
-    STATUS_TRANSFER_PENDING                                 ///< Player transferring to another map
-};
-
-struct OpcodeHandler
-{
-    OpcodeHandler() : status(STATUS_AUTHED), handler(NULL) {};
-    OpcodeHandler( SessionStatus _status, void (WorldSession::*_handler)(WorldPacket& recvPacket) ) : status(_status), handler(_handler) {};
-
-    SessionStatus status;
-    void (WorldSession::*handler)(WorldPacket& recvPacket);
-};
-
-typedef HM_NAMESPACE::hash_map< uint16 , OpcodeHandler > OpcodeTableMap;
-
 struct GraveYardData
 {
     uint32 safeLocId;
@@ -565,8 +546,6 @@ class ObjectMgr
             else
                 return NULL;
         }
-
-        OpcodeTableMap opcodeTable;
 
         CellObjectGuids const& GetCellObjectGuids(uint16 mapid, uint8 spawnMode, uint32 cell_id)
         {
