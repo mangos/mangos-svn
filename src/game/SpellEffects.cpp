@@ -419,25 +419,32 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                 // Starfire
                 else if ( m_spellInfo->SpellFamilyFlags & 0x0004LL )
                 {
-                    // Nordrassil Regalia - bonus
                     Unit::AuraList const& m_OverrideClassScript = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
                     for(Unit::AuraList::const_iterator i = m_OverrideClassScript.begin(); i != m_OverrideClassScript.end(); ++i)
                     {
                         // Starfire Bonus (caster)
-                        if ( (*i)->GetModifier()->m_miscvalue == 5481 )
+                        switch((*i)->GetModifier()->m_miscvalue)
                         {
-                            Unit::AuraList const& m_periodicDamageAuras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                            for(Unit::AuraList::const_iterator itr = m_periodicDamageAuras.begin(); itr != m_periodicDamageAuras.end(); ++itr)
+                            case 5481:                      // Nordrassil Regalia - bonus
                             {
-                                // Moonfire or Insect Swarm (target debuff from any casters)
-                                if ( (*itr)->GetSpellProto()->SpellFamilyFlags & 0x00200002LL )
+                                Unit::AuraList const& m_periodicDamageAuras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                                for(Unit::AuraList::const_iterator itr = m_periodicDamageAuras.begin(); itr != m_periodicDamageAuras.end(); ++itr)
                                 {
-                                    int32 mod = (*i)->GetModifier()->m_amount;
-                                    damage += damage*mod/100;
-                                    break;
+                                    // Moonfire or Insect Swarm (target debuff from any casters)
+                                    if ( (*itr)->GetSpellProto()->SpellFamilyFlags & 0x00200002LL )
+                                    {
+                                        int32 mod = (*i)->GetModifier()->m_amount;
+                                        damage += damage*mod/100;
+                                        break;
+                                    }
                                 }
+                                break;
                             }
-                            break;
+                            case 5148:                      //Improved Starfire - Ivory Idol of the Moongoddes Aura 
+                            {
+                                damage += (*i)->GetModifier()->m_amount;
+                                break;
+                            }
                         }
                     }
                 }
