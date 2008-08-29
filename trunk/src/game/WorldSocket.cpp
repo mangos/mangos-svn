@@ -166,9 +166,11 @@ void WorldSocket::OnRead()
             sWorldLog.Log("\n\n");
         }
 
-        ///- If the packet is PING or AUTH_SESSION, handle immediately
+        ///- If the packet is PING, KEEP_ALIVE or AUTH_SESSION, handle immediately
         switch (_cmd)
         {
+            case CMSG_KEEP_ALIVE:
+                break;                                      // just ignore, network connectivity timeout preventing
             case CMSG_PING:
             {
                 _HandlePing(packet);

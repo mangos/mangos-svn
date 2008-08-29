@@ -443,6 +443,13 @@ void WorldSession::Handle_NULL( WorldPacket& recvPacket )
         recvPacket.GetOpcode());
 }
 
+void WorldSession::Handle_EarlyProccess( WorldPacket& recvPacket )
+{
+    sLog.outError( "SESSION: received opcode %s (0x%.4X) that must be proccessed in WorldSocket::OnRead",
+        LookupOpcodeName(recvPacket.GetOpcode()),
+        recvPacket.GetOpcode());
+}
+
 void WorldSession::Handle_ServerSide( WorldPacket& recvPacket )
 {
     sLog.outError( "SESSION: received sever-side opcode %s (0x%.4X)",
