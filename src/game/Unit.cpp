@@ -3666,7 +3666,7 @@ bool Unit::AddAura(Aura *Aur)
             if(aurSpellInfo->StackAmount)
             {
                 if(m_Auras.count(spair) >= aurSpellInfo->StackAmount)
-                    RemoveAura(i);
+                    RemoveAura(i,AURA_REMOVE_BY_STACK);
             }
             // if StackAmount==0 not allow auras from same caster
             else
@@ -3676,7 +3676,7 @@ bool Unit::AddAura(Aura *Aur)
                     if(i2->second->GetCasterGUID()==Aur->GetCasterGUID())
                     {
                         // can be only single (this check done at _each_ aura add
-                        RemoveAura(i2);
+                        RemoveAura(i2,AURA_REMOVE_BY_STACK);
                         break;
                     }
 
@@ -3696,7 +3696,7 @@ bool Unit::AddAura(Aura *Aur)
                             break;
                         default:                            // not allow
                             // can be only single (this check done at _each_ aura add
-                            RemoveAura(i2);
+                            RemoveAura(i2,AURA_REMOVE_BY_STACK);
                             stop = true;
                             break;
                     }

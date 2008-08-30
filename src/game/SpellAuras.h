@@ -276,17 +276,7 @@ class MANGOS_DLL_SPEC Aura
 
         bool IsUpdated() { return m_updated; }
         void SetUpdated(bool val) { m_updated = val; }
-        void SetRemoveMode(AuraRemoveMode mode) 
-        {
-            switch (mode)
-            {
-                case AURA_REMOVE_BY_CANCEL: m_cancelled = true; return;
-                case AURA_REMOVE_BY_DISPEL: m_dispelled = true; return;
-                case AURA_REMOVE_BY_DEATH:  m_removeOnDeath = true; return;
-                default:
-                    return;
-            }
-        }
+        void SetRemoveMode(AuraRemoveMode mode) { m_removeMode = mode; }
 
         int32 m_procCharges;
 
@@ -317,6 +307,8 @@ class MANGOS_DLL_SPEC Aura
         uint64 m_castItemGuid;                              // it is NOT safe to keep a pointer to the item because it may get deleted
         time_t m_applyTime;
 
+        AuraRemoveMode m_removeMode;
+
         uint8 m_auraSlot;
 
         bool m_positive:1;
@@ -329,9 +321,6 @@ class MANGOS_DLL_SPEC Aura
         bool m_isDeathPersist:1;
         bool m_isRemovedOnShapeLost:1;
         bool m_updated:1;
-        bool m_removeOnDeath:1;
-        bool m_dispelled:1;
-        bool m_cancelled:1;
         bool m_in_use:1;                                    // true while in Aura::ApplyModifier call
 
         int32 m_periodicTimer;

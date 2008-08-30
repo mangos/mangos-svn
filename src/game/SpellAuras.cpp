@@ -318,7 +318,7 @@ Aura::Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, U
 m_procCharges(0), m_spellmod(NULL), m_effIndex(eff), m_caster_guid(0), m_target(target),
 m_timeCla(1000), m_castItemGuid(castItem?castItem->GetGUID():0), m_auraSlot(MAX_AURAS),
 m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false), 
-m_isPersistent(false), m_updated(false), m_removeOnDeath(false), m_dispelled(false), m_cancelled(false), m_isRemovedOnShapeLost(true), m_in_use(false),
+m_isPersistent(false), m_updated(false), m_removeMode(AURA_REMOVE_BY_DEFAULT), m_isRemovedOnShapeLost(true), m_in_use(false),
 m_periodicTimer(0), m_PeriodicEventId(0), m_AuraDRGroup(DIMINISHING_NONE)
 {
     assert(target);
@@ -969,7 +969,9 @@ void Aura::_AddAura()
 void Aura::_RemoveAura()
 {
     // Remove all triggered by aura spells vs unlimited duration
-    CleanupTriggeredSpells();
+    // except same aura replace case
+    if(m_removeMode!=AURA_REMOVE_BY_STACK)
+        CleanupTriggeredSpells();
 
     Unit* caster = GetCaster();
 
@@ -1978,7 +1980,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         if(GetId()==45934)
         {
             // Kill target if dispeled
-            if (m_dispelled)
+            if (m_removeMode==AURA_REMOVE_BY_DISPEL)
                 m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_MASK_NORMAL, NULL, false);
             return;
         }
@@ -2089,7 +2091,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 else
                 {
                     // Final heal only on dispelled or duration end
-                    if ( !(GetAuraDuration() <= 0 || m_dispelled) )
+                    if ( !(GetAuraDuration() <= 0 || m_removeMode==AURA_REMOVE_BY_DISPEL) )
                         return;
 
                     // have a look if there is still some other Lifebloom dummy aura
@@ -2767,7 +2769,7 @@ void Aura::HandleChannelDeathItem(bool apply, bool Real)
     {
         Unit* caster = GetCaster();
         Unit* victim = GetTarget();
-        if(!caster || caster->GetTypeId() != TYPEID_PLAYER || !victim || !m_removeOnDeath)
+        if(!caster || caster->GetTypeId() != TYPEID_PLAYER || !victim || m_removeMode!=AURA_REMOVE_BY_DEATH)
             return;
 
         SpellEntry const *spellInfo = GetSpellProto();
@@ -3885,7 +3887,7 @@ void Aura::HandlePeriodicTriggerSpell(bool apply, bool Real)
     m_isTrigger = apply;
 
     // Curse of the Plaguebringer
-    if (!apply && m_spellProto->Id == 29213 && !m_dispelled)
+    if (!apply && m_spellProto->Id == 29213 && m_removeMode!=AURA_REMOVE_BY_DISPEL)
     {
         // Cast Wrath of the Plaguebringer if not dispelled
         m_target->CastSpell(m_target, 29214, true, 0, this);
