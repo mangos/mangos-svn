@@ -222,7 +222,7 @@ enum FactionFlags
     FACTION_FLAG_VISIBLE            = 0x01,                 // makes visible in client (set or can be set at interaction with target of this faction)
     FACTION_FLAG_AT_WAR             = 0x02,                 // enable AtWar-button in client. player controlled (except opposition team always war state), Flag only set on initial creation
     FACTION_FLAG_HIDDEN             = 0x04,                 // hidden faction from reputation pane in client (player can gain reputation, but this update not sent to client)
-    FACTION_FLAG_INVISIBLE_FORCED   = 0x08,                 // always overwrite FACTION_FLAG_VISIBLE and hide faction in rep.list, used for hide oposite team factions
+    FACTION_FLAG_INVISIBLE_FORCED   = 0x08,                 // always overwrite FACTION_FLAG_VISIBLE and hide faction in rep.list, used for hide opposite team factions
     FACTION_FLAG_PEACE_FORCED       = 0x10,                 // always overwrite FACTION_FLAG_AT_WAR, used for prevent war with own team factions
     FACTION_FLAG_INACTIVE           = 0x20,                 // player controlled, state stored in characters.data ( CMSG_SET_FACTION_INACTIVE )
     FACTION_FLAG_RIVAL              = 0x40                  // flag for the two competing outland factions
@@ -787,7 +787,7 @@ enum EnviromentalDamage
     DAMAGE_FALL_TO_VOID = 6                                 // custom case for fall without durability loss
 };
 
-// used at player loading query list prepering, and later result selection
+// used at player loading query list preparing, and later result selection
 enum PlayerLoginQueryIndex
 {
     PLAYER_LOGIN_QUERY_LOADFROM                 = 0,
@@ -1144,7 +1144,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddQuest( Quest const *pQuest, Object *questGiver );
         void CompleteQuest( uint32 quest_id );
         void IncompleteQuest( uint32 quest_id );
-        void RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver );
+        void RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver, bool announce = true );
         void FailQuest( uint32 quest_id );
         void FailTimedQuest( uint32 quest_id );
         bool SatisfyQuestSkillOrClass( Quest const* qInfo, bool msg );
