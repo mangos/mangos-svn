@@ -123,7 +123,7 @@ enum __QuestFlags
     QUEST_FLAGS_TBC            = 128,                       // Not used currently: Available if TBC expension enabled only
     QUEST_FLAGS_UNK2           = 256,                       // Not used currently: _DELIVER_MORE Quest needs more than normal _q-item_ drops from mobs
     QUEST_FLAGS_HIDDEN_REWARDS = 512,                       // Items and money rewarded only sent in SMSG_QUESTGIVER_OFFER_REWARD (not in SMSG_QUESTGIVER_QUEST_DETAILS or in client quest log(SMSG_QUEST_QUERY_RESPONSE))
-    QUEST_FLAGS_UNK4           = 1024,                      // Not used currently: Unknown tbc flag
+    QUEST_FLAGS_AUTO_REWARDED  = 1024,                      // These quests are automatically rewarded on quest complete and they will never appear in quest log client side.
     QUEST_FLAGS_TBC_RACES      = 2048,                      // Not used currently: Bloodelf/draenei starting zone quests
     QUEST_FLAGS_DAILY          = 4096,                      // Used to know quest is Daily one
 

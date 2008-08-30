@@ -11725,7 +11725,13 @@ void Player::CompleteQuest( uint32 quest_id )
         if( log_slot < MAX_QUEST_LOG_SIZE)
             SetQuestSlotState(log_slot,QUEST_STATE_COMPLETE);
 
-        SendQuestComplete( quest_id );
+        if(Quest const* qInfo = objmgr.GetQuestTemplate(quest_id))
+        {
+            if( qInfo->HasFlag(QUEST_FLAGS_AUTO_REWARDED) )
+                RewardQuest(qInfo,0,this,false);
+            else
+                SendQuestComplete( quest_id );
+        }
     }
 }
 
@@ -11741,7 +11747,7 @@ void Player::IncompleteQuest( uint32 quest_id )
     }
 }
 
-void Player::RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver )
+void Player::RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver, bool announce )
 {
     uint32 quest_id = pQuest->GetQuestId();
 
@@ -11885,7 +11891,10 @@ void Player::RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver
         SetQuestStatus(quest_id, QUEST_STATUS_NONE);
 
     mQuestStatus[quest_id].m_rewarded = true;
-    SendQuestReward( pQuest, XP, questGiver );
+
+    if(announce)
+        SendQuestReward( pQuest, XP, questGiver );
+
     if (mQuestStatus[quest_id].uState != QUEST_NEW) mQuestStatus[quest_id].uState = QUEST_CHANGED;
 }
 
