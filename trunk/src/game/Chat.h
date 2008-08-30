@@ -263,6 +263,7 @@ class ChatHandler
         bool HandleLearnAllCommand(const char* args);
         bool HandleLearnAllGMCommand(const char* args);
         bool HandleLearnAllCraftsCommand(const char* args);
+        bool HandleLearnAllRecipesCommand(const char* args);
         bool HandleLearnAllDefaultCommand(const char* args);
         bool HandleLearnAllLangCommand(const char* args);
         bool HandleLearnAllMyClassCommand(const char* args);

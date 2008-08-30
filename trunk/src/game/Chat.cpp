@@ -173,6 +173,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "all_myclass",    SEC_ADMINISTRATOR,  &ChatHandler::HandleLearnAllMyClassCommand,     "", NULL },
         { "all_myspells",   SEC_ADMINISTRATOR,  &ChatHandler::HandleLearnAllMySpellsCommand,    "", NULL },
         { "all_mytalents",  SEC_ADMINISTRATOR,  &ChatHandler::HandleLearnAllMyTalentsCommand,   "", NULL },
+        { "all_recipes",    SEC_GAMEMASTER,     &ChatHandler::HandleLearnAllRecipesCommand,     "", NULL },
         { "",               SEC_ADMINISTRATOR,  &ChatHandler::HandleLearnCommand,               "", NULL },
         { NULL,             0,                  NULL,                                           "", NULL }
     };

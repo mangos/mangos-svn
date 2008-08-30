@@ -32,6 +32,7 @@
 #include "Language.h"
 #include "World.h"
 #include "GameEvent.h"
+#include "SpellMgr.h"
 #include "Util.h"
 #include <cctype>
 #include <iostream>
@@ -3853,4 +3854,131 @@ bool ChatHandler::HandleCombatStopCommand(const char* args)
     player->CombatStop();
     player->getHostilRefManager().deleteReferences();
     return true;
+}
+
+bool ChatHandler::HandleLearnAllCraftsCommand(const char* /*args*/)
+{
+    uint32 classmask = m_session->GetPlayer()->getClassMask();
+
+    for (uint32 i = 0; i < sSkillLineStore.GetNumRows(); ++i)
+    {
+        SkillLineEntry const *skillInfo = sSkillLineStore.LookupEntry(i);
+        if( !skillInfo )
+            continue;
+
+        if( skillInfo->categoryId == SKILL_CATEGORY_PROFESSION || skillInfo->categoryId == SKILL_CATEGORY_SECONDARY )
+        {
+            for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+            {
+                SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
+                if( !skillLine )
+                    continue;
+
+                // skip racial skills
+                if( skillLine->racemask != 0 )
+                    continue;
+
+                // skip wrong class skills
+                if( skillLine->classmask && (skillLine->classmask & classmask) == 0)
+                    continue;
+
+                if( skillLine->skillId != i || skillLine->forward_spellid )
+                    continue;
+
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
+                if(!spellInfo || !SpellMgr::IsSpellValid(spellInfo,m_session->GetPlayer(),false))
+                    continue;
+
+                m_session->GetPlayer()->learnSpell(skillLine->spellId);
+            }
+        }
+    }
+
+    SendSysMessage(LANG_COMMAND_LEARN_ALL_CRAFT);
+    return true;
+}
+
+bool ChatHandler::HandleLearnAllRecipesCommand(const char* args)
+{
+    //  Learns all recipes of specified profession and sets skill to max
+    //  Example: .learn all_recipes enchanting
+
+    Player* target = getSelectedPlayer();
+    if( !target )
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        return false;
+    }
+
+    if(!*args)
+        return false;
+
+    std::wstring wnamepart;
+
+    if(!Utf8toWStr(args,wnamepart))
+        return false;
+
+    uint32 counter = 0;                                     // Counter for figure out that we found smth.
+
+    // converting string that we try to find to lower case
+    wstrToLower( wnamepart );
+
+    uint32 classmask = m_session->GetPlayer()->getClassMask();
+
+    for (uint32 i = 0; i < sSkillLineStore.GetNumRows(); ++i)
+    {
+        SkillLineEntry const *skillInfo = sSkillLineStore.LookupEntry(i);
+        if( !skillInfo )
+            continue;
+
+        if( skillInfo->categoryId != SKILL_CATEGORY_PROFESSION &&
+            skillInfo->categoryId != SKILL_CATEGORY_SECONDARY )
+            continue;
+
+        int loc = m_session->GetSessionDbcLocale();
+        std::string name = skillInfo->name[loc];
+
+        std::wstring wname;
+
+        // converting SpellName to lower case
+        if(!Utf8toWStr(name,wname))
+            continue;
+
+        wstrToLower( wname );
+
+        if(wname.find(wnamepart) != std::wstring::npos)
+        {
+            for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+            {
+                SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
+                if( !skillLine )
+                    continue;
+
+                if( skillLine->skillId != i || skillLine->forward_spellid )
+                    continue;
+
+                // skip racial skills
+                if( skillLine->racemask != 0 )
+                    continue;
+
+                // skip wrong class skills
+                if( skillLine->classmask && (skillLine->classmask & classmask) == 0)
+                    continue;
+
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
+                if(!spellInfo || !SpellMgr::IsSpellValid(spellInfo,m_session->GetPlayer(),false))
+                    continue;
+
+                if( !target->HasSpell(spellInfo->Id) )
+                    m_session->GetPlayer()->learnSpell(skillLine->spellId);
+            }
+
+            uint16 maxLevel = target->GetPureMaxSkillValue(skillInfo->id);
+            target->SetSkill(skillInfo->id, maxLevel, maxLevel);
+            PSendSysMessage(LANG_COMMAND_LEARN_ALL_RECIPES, name.c_str());
+            return true;
+        }
+    }
+
+    return false;
 }

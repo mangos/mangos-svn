@@ -525,6 +525,8 @@ enum MangosStrings
     LANG_MOVEGENS_FEAR                  = 590,
     LANG_MOVEGENS_DISTRACT              = 591,
 
+    LANG_COMMAND_LEARN_ALL_RECIPES      = 592,
+
     // Battleground
     LANG_BG_A_WINS                      = 600,
     LANG_BG_H_WINS                      = 601,
