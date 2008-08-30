@@ -3916,24 +3916,33 @@ void Aura::HandlePeriodicHeal(bool apply, bool Real)
         m_target->CastSpell(m_target,11196,true,NULL,this,m_target->GetGUID());
     }
 
-    switch (m_spellProto->SpellFamilyName)
+    // For prevent double apply bonuses
+    bool loading = (m_target->GetTypeId() == TYPEID_PLAYER && ((Player*)m_target)->GetSession()->PlayerLoading());
+
+    if(!loading && apply)
     {
-        case SPELLFAMILY_DRUID:
+        switch (m_spellProto->SpellFamilyName)
         {
-            // Rejuvenation
-            if(m_spellProto->SpellFamilyFlags & 0x0000000000000010LL)
+            case SPELLFAMILY_DRUID:
             {
-                Unit::AuraList const& classScripts = GetCaster()->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                for(Unit::AuraList::const_iterator k = classScripts.begin(); k != classScripts.end(); ++k)
+                // Rejuvenation
+                if(m_spellProto->SpellFamilyFlags & 0x0000000000000010LL)
                 {
-                    int32 tickcount = GetSpellDuration(m_spellProto) / m_spellProto->EffectAmplitude[m_effIndex];
-                    switch((*k)->GetModifier()->m_miscvalue)
+                    if(Unit* caster = GetCaster())
                     {
-                        case 4953:                          // Increased Rejuvenation Healing - Harold's Rejuvenating Broach Aura
-                        case 4415:                          // Increased Rejuvenation Healing - Idol of Rejuvenation Aura
+                        Unit::AuraList const& classScripts = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                        for(Unit::AuraList::const_iterator k = classScripts.begin(); k != classScripts.end(); ++k)
                         {
-                            m_modifier.m_amount += (*k)->GetModifier()->m_amount / tickcount;
-                            break;
+                            int32 tickcount = GetSpellDuration(m_spellProto) / m_spellProto->EffectAmplitude[m_effIndex];
+                            switch((*k)->GetModifier()->m_miscvalue)
+                            {
+                                case 4953:                          // Increased Rejuvenation Healing - Harold's Rejuvenating Broach Aura
+                                case 4415:                          // Increased Rejuvenation Healing - Idol of Rejuvenation Aura
+                                {
+                                    m_modifier.m_amount += (*k)->GetModifier()->m_amount / tickcount;
+                                    break;
+                                }
+                            }
                         }
                     }
                 }
