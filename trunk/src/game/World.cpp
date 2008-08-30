@@ -1779,6 +1779,27 @@ void World::ScriptsProcess()
                 go->Use(caster);
                 break;
             }
+
+            case SCRIPT_COMMAND_REMOVE_AURA:
+            {
+                Object* cmdTarget = step.script->datalong2 ? source : target;
+
+                if(!cmdTarget)
+                {
+                    sLog.outError("SCRIPT_COMMAND_REMOVE_AURA call for NULL %s.",step.script->datalong2 ? "source" : "target");
+                    break;
+                }
+
+                if(!cmdTarget->isType(TYPEMASK_UNIT))
+                {
+                    sLog.outError("SCRIPT_COMMAND_REMOVE_AURA %s isn't unit (TypeId: %u), skipping.",step.script->datalong2 ? "source" : "target",cmdTarget->GetTypeId());
+                    break;
+                }
+
+                ((Unit*)cmdTarget)->RemoveAurasDueToSpell(step.script->datalong);
+                break;
+            }
+
             default:
                 sLog.outError("Unknown script command %u called.",step.script->command);
                 break;

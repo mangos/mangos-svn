@@ -1552,10 +1552,18 @@ void Aura::TriggerSpell()
 //                    case 37815: break;
 //                    // Corrupt Medivh
 //                    case 37853: break;
-//                    // Eye of Grillok
-//                    case 38495: break;
-//                    // Absorb Eye of Grillok
-//                    case 38554: break;
+                    // Eye of Grillok
+                    case 38495:
+                    {
+                        m_target->CastSpell(m_target, 38530, true);
+                        return;
+                    }
+                    // Absorb Eye of Grillok (Zezzak's Shard)
+                    case 38554:
+                    {
+                        m_target->CastSpell(m_target, 38495, true);
+                        return;
+                    }
 //                    // Magic Sucker Device timer
 //                    case 38672: break;
 //                    // Tomb Guarding Charging
