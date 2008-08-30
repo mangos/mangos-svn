@@ -272,7 +272,7 @@ class Spell
         void EffectSkill(uint32 i);
         void EffectTaunt(uint32 i);
         void EffectDurabilityDamagePCT(uint32 i);
-        void EffectReduceThreatPercent(uint32 i);
+        void EffectModifyThreatPercent(uint32 i);
         void EffectResurrectNew(uint32 i);
         void EffectAddExtraAttacks(uint32 i);
         void EffectSpiritHeal(uint32 i);
