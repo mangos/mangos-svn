@@ -1216,7 +1216,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void UpdateAuraForGroup(uint8 slot);
 
         // pet auras
-        std::list<PetAura const*> m_petAuras;
+        typedef std::list<PetAura const*> PetAuraList;
+        PetAuraList m_petAuras;
         void AddPetAura(PetAura const* petSpell);
         void RemovePetAura(PetAura const* petSpell);
 

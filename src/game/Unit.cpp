@@ -10621,6 +10621,7 @@ bool Unit::IsUnderLastManaUseEffect() const
 
 void Unit::AddPetAura(PetAura const* petSpell)
 {
+    m_petAuras.remove(petSpell);                            // make sure that same pet spell is not added more than once
     m_petAuras.push_back(petSpell);
     if(Pet* pet = GetPet())
         pet->CastPetAura(petSpell);

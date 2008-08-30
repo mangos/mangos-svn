@@ -1722,7 +1722,7 @@ void Pet::CastPetAuras(bool current)
     if(getPetType() != HUNTER_PET && (getPetType() != SUMMON_PET || owner->getClass() != CLASS_WARLOCK))
         return;
 
-    for(std::list<PetAura const*>::iterator itr = owner->m_petAuras.begin(); itr != owner->m_petAuras.end(); )
+    for(PetAuraList::iterator itr = owner->m_petAuras.begin(); itr != owner->m_petAuras.end(); )
     {
         if(!current && (*itr)->IsRemovedOnChangePet())
         {
