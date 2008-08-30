@@ -269,6 +269,7 @@ enum BanReturn
 #define SCRIPT_COMMAND_OPEN_DOOR            11
 #define SCRIPT_COMMAND_CLOSE_DOOR           12
 #define SCRIPT_COMMAND_ACTIVATE_OBJECT      13
+#define SCRIPT_COMMAND_REMOVE_AURA          14
 
 /// CLI related stuff, define here to prevent cyclic dependancies
 
