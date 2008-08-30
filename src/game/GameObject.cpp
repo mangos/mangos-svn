@@ -166,37 +166,52 @@ void GameObject::Update(uint32 /*p_time*/)
     switch (m_lootState)
     {
         case GO_NOT_READY:
-            if (GetGoType()==GAMEOBJECT_TYPE_FISHINGNODE)
+        {
+            switch(GetGoType())
             {
-                // fishing code (bobber ready)
-                if( time(NULL) > m_respawnTime - FISHING_BOBBER_READY_TIME )
+                case GAMEOBJECT_TYPE_TRAP:
                 {
-                    // splash bobber (bobber ready now)
-                    Unit* caster = GetOwner();
-                    if(caster && caster->GetTypeId()==TYPEID_PLAYER)
-                    {
-                        SetGoState(0);
-                        SetUInt32Value(GAMEOBJECT_FLAGS, 32);
-
-                        UpdateData udata;
-                        WorldPacket packet;
-                        BuildValuesUpdateBlockForPlayer(&udata,((Player*)caster));
-                        udata.BuildPacket(&packet);
-                        ((Player*)caster)->GetSession()->SendPacket(&packet);
-
-                        WorldPacket data(SMSG_GAMEOBJECT_CUSTOM_ANIM,8+4);
-                        data << GetGUID();
-                        data << (uint32)(0);
-                        ((Player*)caster)->SendMessageToSet(&data,true);
-                    }
-
-                    m_lootState = GO_READY;                 // can be succesfully open with some chance
+                    // Arming Time for GAMEOBJECT_TYPE_TRAP (6)
+                    Unit* owner = GetOwner();
+                    if (owner && ((Player*)owner)->isInCombat())
+                        m_cooldownTime = time(NULL) + GetGOInfo()->trap.startDelay;
+                    m_lootState = GO_READY;
+                    break;
                 }
-                return;
-            }
+                case GAMEOBJECT_TYPE_FISHINGNODE:
+                {
+                    // fishing code (bobber ready)
+                    if( time(NULL) > m_respawnTime - FISHING_BOBBER_READY_TIME )
+                    {
+                        // splash bobber (bobber ready now)
+                        Unit* caster = GetOwner();
+                        if(caster && caster->GetTypeId()==TYPEID_PLAYER)
+                        {
+                            SetGoState(0);
+                            SetUInt32Value(GAMEOBJECT_FLAGS, 32);
 
-            m_lootState = GO_READY;                         // for other GOis same switched without delay to GO_READY
-            // NO BREAK
+                            UpdateData udata;
+                            WorldPacket packet;
+                            BuildValuesUpdateBlockForPlayer(&udata,((Player*)caster));
+                            udata.BuildPacket(&packet);
+                            ((Player*)caster)->GetSession()->SendPacket(&packet);
+
+                            WorldPacket data(SMSG_GAMEOBJECT_CUSTOM_ANIM,8+4);
+                            data << GetGUID();
+                            data << (uint32)(0);
+                            ((Player*)caster)->SendMessageToSet(&data,true);
+                        }
+
+                        m_lootState = GO_READY;                 // can be succesfully open with some chance
+                    }
+                    return;
+                }
+                default:
+                    m_lootState = GO_READY;                         // for other GOis same switched without delay to GO_READY
+                    break;
+            }
+            // NO BREAK for switch (m_lootState)
+        }
         case GO_READY:
         {
             if (m_respawnTime > 0)                          // timer on
