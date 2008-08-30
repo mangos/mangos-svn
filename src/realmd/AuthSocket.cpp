@@ -622,11 +622,13 @@ bool AuthSocket::_HandleLogonProof()
     sha.Initialize();
     sha.UpdateData(_login);
     sha.Finalize();
-    BigNumber t4;
-    t4.SetBinary(sha.GetDigest(), 20);
+    uint8 t4[SHA_DIGEST_LENGTH];
+    memcpy(t4, sha.GetDigest(), SHA_DIGEST_LENGTH);
 
     sha.Initialize();
-    sha.UpdateBigNumbers(&t3, &t4, &s, &A, &B, &K, NULL);
+    sha.UpdateBigNumbers(&t3, NULL);
+    sha.UpdateData(t4, SHA_DIGEST_LENGTH);
+    sha.UpdateBigNumbers(&s, &A, &B, &K, NULL);
     sha.Finalize();
     BigNumber M;
     M.SetBinary(sha.GetDigest(), 20);
