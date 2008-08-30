@@ -279,6 +279,7 @@ ChatCommand * ChatHandler::getCommandTable()
     static ChatCommand castCommandTable[] =
     {
         { "back",           SEC_ADMINISTRATOR,  &ChatHandler::HandleCastBackCommand,            "", NULL },
+        { "dist",           SEC_ADMINISTRATOR,  &ChatHandler::HandleCastDistCommand,            "", NULL },
         { "self",           SEC_ADMINISTRATOR,  &ChatHandler::HandleCastSelfCommand,            "", NULL },
         { "target",         SEC_ADMINISTRATOR,  &ChatHandler::HandleCastTargetCommand,          "", NULL },
         { "",               SEC_ADMINISTRATOR,  &ChatHandler::HandleCastCommand,                "", NULL },
