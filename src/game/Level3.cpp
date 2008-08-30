@@ -5204,6 +5204,56 @@ bool ChatHandler::HandleCastBackCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleCastDistCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+
+    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hspell");
+    if(!cId)
+        return false;
+
+    uint32 spell = (uint32)atol((char*)cId);
+    if(!spell)
+        return false;
+
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell);
+    if(!spellInfo)
+        return false;
+
+    if(!SpellMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
+    {
+        PSendSysMessage(LANG_COMMAND_SPELL_BROKEN,spell);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    char *distStr = strtok(NULL, " ");
+
+    float dist = 0;
+
+    if(distStr)
+        sscanf(distStr, "%f", &dist);
+
+    char* trig_str = strtok(NULL, " ");
+    if(trig_str)
+    {
+        int l = strlen(trig_str);
+        if(strncmp(trig_str,"triggered",l) != 0 )
+            return false;
+    }
+
+    bool triggered = (trig_str != NULL);
+
+    float x,y,z;
+    m_session->GetPlayer()->GetClosePoint(x,y,z,dist);
+
+    m_session->GetPlayer()->CastSpell(x,y,z,spell,triggered);
+    return true;
+}
+
 bool ChatHandler::HandleCastTargetCommand(const char* args)
 {
     Creature* caster = getSelectedCreature();
