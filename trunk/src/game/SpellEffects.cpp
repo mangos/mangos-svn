@@ -930,7 +930,7 @@ void Spell::EffectDummy(uint32 i)
                 }
                 case 29200:                                 // Purify Helboar Meat
                 {
-                    if( !itemTarget || m_caster->GetTypeId() != TYPEID_PLAYER )
+                    if( m_caster->GetTypeId() != TYPEID_PLAYER )
                         return;
 
                     uint32 spell_id = roll_chance_i(50) ? 29277 : 29278;
