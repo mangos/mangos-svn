@@ -2770,6 +2770,20 @@ void ObjectMgr::LoadQuests()
             }
         }
 
+        if(qinfo->QuestFlags & QUEST_FLAGS_AUTO_REWARDED)
+        {
+            // at auto-reward can be rewarded only RewChoiceItemId[0]
+            for(int j = 1; j < QUEST_REWARD_CHOICES_COUNT; ++j )
+            {
+                if(uint32 id = qinfo->RewChoiceItemId[j])
+                {
+                    sLog.outErrorDb("Quest %u has `RewChoiceItemId%d` = %u but item from `RewChoiceItemId%d` can't be rewarded with quest flag QUEST_FLAGS_AUTO_REWARDED.",
+                        qinfo->GetQuestId(),j+1,id,j+1);
+                    // no changes, quest ignore this data
+                }
+            }
+        }
+
         // client quest log visual (area case)
         if( qinfo->ZoneOrSort > 0 )
         {

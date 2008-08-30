@@ -1617,48 +1617,6 @@ bool ChatHandler::HandleLearnAllDefaultCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleLearnAllCraftsCommand(const char* /*args*/)
-{
-    uint32 classmask = m_session->GetPlayer()->getClassMask();
-
-    for (uint32 i = 0; i < sSkillLineStore.GetNumRows(); ++i)
-    {
-        SkillLineEntry const *skillInfo = sSkillLineStore.LookupEntry(i);
-        if( !skillInfo )
-            continue;
-
-        if( skillInfo->categoryId == SKILL_CATEGORY_PROFESSION || skillInfo->categoryId == SKILL_CATEGORY_SECONDARY )
-        {
-            for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
-            {
-                SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
-                if( !skillLine )
-                    continue;
-
-                // skip racial skills
-                if( skillLine->racemask != 0 )
-                    continue;
-
-                // skip wrong class skills
-                if( skillLine->classmask && (skillLine->classmask & classmask) == 0)
-                    continue;
-
-                if( skillLine->skillId != i || skillLine->forward_spellid )
-                    continue;
-
-                SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
-                if(!spellInfo || !SpellMgr::IsSpellValid(spellInfo,m_session->GetPlayer(),false))
-                    continue;
-
-                m_session->GetPlayer()->learnSpell(skillLine->spellId);
-            }
-        }
-    }
-
-    SendSysMessage(LANG_COMMAND_LEARN_ALL_CRAFT);
-    return true;
-}
-
 bool ChatHandler::HandleLearnCommand(const char* args)
 {
     Player* targetPlayer = getSelectedPlayer();
