@@ -855,6 +855,9 @@ void Spell::EffectDummy(uint32 i)
                     else                                    // failure
                         m_caster->CastSpell(m_caster,23446,true);
                     return;
+                case 23645:                                 // Hourglass Sand
+                    m_caster->RemoveAurasDueToSpell(23170);
+                    return;
                 case 23725:                                 // Gift of Life (warrior bwl trinket)
                     m_caster->CastSpell(m_caster,23782,true);
                     m_caster->CastSpell(m_caster,23783,true);
