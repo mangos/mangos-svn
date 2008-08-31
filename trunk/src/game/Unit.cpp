@@ -65,6 +65,7 @@ static Unit::AuraTypeSet GenerateAttakerProcCastAuraTypes()
     auraTypes.insert(SPELL_AURA_DUMMY);
     auraTypes.insert(SPELL_AURA_PROC_TRIGGER_SPELL);
     auraTypes.insert(SPELL_AURA_MOD_HASTE);
+    auraTypes.insert(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
     return auraTypes;
 }
 
@@ -6463,6 +6464,80 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         CastSpell(pVictim,trigger_spell_id,true,castItem,triggeredByAura);
 }
 
+void Unit::HandleOverrideClassScriptAuraProc(Unit *pVictim, int32 scriptId, uint32 damage, Aura *triggeredByAura, SpellEntry const *procSpell)
+{
+    Item* castItem = triggeredByAura->GetCastItemGUID() && GetTypeId()==TYPEID_PLAYER
+        ? ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGUID()) : NULL;
+
+    switch(scriptId)
+    {
+        case 836:                                           // Improved Blizzard (Rank 1)
+        {
+            if(!pVictim || !pVictim->isAlive() || !procSpell || procSpell->SpellVisual!=9487 )
+                return;
+            pVictim->CastSpell(pVictim, 12484, true, castItem, triggeredByAura);
+            break;
+        }
+        case 988:                                           // Improved Blizzard (Rank 2)
+        {
+            if(!pVictim || !pVictim->isAlive() || !procSpell || procSpell->SpellVisual!=9487 )
+                return;
+            pVictim->CastSpell(pVictim, 12485, true, castItem, triggeredByAura);
+            break;
+        }
+        case 989:                                           // Improved Blizzard (Rank 3)
+        {
+            if(!pVictim || !pVictim->isAlive() || !procSpell || procSpell->SpellVisual!=9487 )
+                return;
+            pVictim->CastSpell(pVictim, 12486, true, castItem, triggeredByAura);
+            break;
+        }
+        case 4086:                                          // Improved Mend Pet (Rank 1)
+        case 4087:                                          // Improved Mend Pet (Rank 2)
+        {
+            if(!pVictim || !pVictim->isAlive())
+                return;
+
+            int32 chance = triggeredByAura->GetSpellProto()->EffectBasePoints[triggeredByAura->GetEffIndex()];
+            if(chance)
+                CastSpell(pVictim, 24406, true, castItem, triggeredByAura);
+            break;
+        }
+        case 4533:                                          // Dreamwalker Raiment 2 pieces bonus
+        {
+            if(!pVictim || !pVictim->isAlive())
+                return;
+
+            // Chance 50%
+            if (roll_chance_i(50))
+            {
+                uint32 spellId = 0;
+                switch (pVictim->getPowerType())
+                {
+                    case POWER_MANA:   spellId = 28722; break;
+                    case POWER_RAGE:   spellId = 28723; break;
+                    case POWER_ENERGY: spellId = 28724; break;
+                    default:
+                        return;
+                }
+                if (spellId)
+                    CastSpell(pVictim, spellId, true, castItem, triggeredByAura);
+            }
+            break;
+        }
+        case 4537:                                          // Dreamwalker Raiment 6 pieces bonus
+        {
+            if(!pVictim || !pVictim->isAlive())
+                return;
+
+            CastSpell(pVictim, 28750, true, castItem, triggeredByAura);
+            break;
+        }
+        default:
+            break;
+    }
+}
+
 void Unit::setPowerType(Powers new_powertype)
 {
     SetByteValue(UNIT_FIELD_BYTES_0, 3, new_powertype);
@@ -9940,11 +10015,20 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                 int32 i_spell_param;
                 switch(*aur)
                 {
-                    case SPELL_AURA_PROC_TRIGGER_SPELL: i_spell_param = procFlag;    break;
+                    case SPELL_AURA_PROC_TRIGGER_SPELL:
+                        i_spell_param = procFlag;
+                        break;
                     case SPELL_AURA_DUMMY:
                     case SPELL_AURA_PRAYER_OF_MENDING:
-                    case SPELL_AURA_MOD_HASTE:          i_spell_param = i_spell_eff; break;
-                    default: i_spell_param = (*i)->GetModifier()->m_amount;          break;
+                    case SPELL_AURA_MOD_HASTE:
+                        i_spell_param = i_spell_eff;
+                        break;
+                    case SPELL_AURA_OVERRIDE_CLASS_SCRIPTS:
+                        i_spell_param = (*i)->GetModifier()->m_miscvalue;
+                        break;
+                    default:
+                        i_spell_param = (*i)->GetModifier()->m_amount;
+                        break;
                 }
 
                 procTriggered.push_back( ProcTriggeredData(spellProto,i_spell_param,*i) );
@@ -10074,6 +10158,12 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                     // but count only in case appropriate school damage
                     if(i->triggeredByAura->m_procCharges >=0 && !(i->triggeredByAura->GetModifier()->m_miscvalue & damageSchoolMask))
                         i->triggeredByAura->m_procCharges += 1;
+                    break;
+                }
+                case SPELL_AURA_OVERRIDE_CLASS_SCRIPTS:
+                {
+                    sLog.outDebug("ProcDamageAndSpell: casting spell id %u (triggered by %s aura of spell %u)", i->spellInfo->Id,(isVictim?"a victim's":"an attacker's"),i->triggeredByAura->GetId());
+                    HandleOverrideClassScriptAuraProc(pTarget, i->spellParam, damage, i->triggeredByAura, procSpell);
                     break;
                 }
                 default:

@@ -5792,35 +5792,6 @@ void Aura::PeriodicTick()
                 }
             }
 
-            // Rejuvenation tick
-            if (spellProto->SpellFamilyName == SPELLFAMILY_DRUID && spellProto->SpellFamilyFlags & 0x0000000000000010LL)
-            {
-                // Check Dreamwalker Raiment set bonus on caster
-                Unit::AuraList const& mOverrideClassScript = pCaster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                for(Unit::AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
-                {
-                    if ((*i)->GetModifier()->m_miscvalue == 4533)
-                    {
-                        // Chance 50%
-                        if (roll_chance_i(50))
-                        {
-                            uint32 spellId = 0;
-                            switch (m_target->getPowerType())
-                            {
-                                case POWER_MANA:   spellId = 28722; break;
-                                case POWER_RAGE:   spellId = 28723; break;
-                                case POWER_ENERGY: spellId = 28724; break;
-                                default:
-                                    break;
-                            }
-                            if (spellId)
-                                pCaster->CastSpell(m_target, spellId, true, 0, this);
-                        }
-                        break;
-                    }
-                }
-            }
-
             // ignore item heals
             if(procSpell && !haveCastItem)
                 pCaster->ProcDamageAndSpell(target,PROC_FLAG_HEAL, PROC_FLAG_HEALED, pdamage, SPELL_SCHOOL_MASK_NONE, spellProto);
