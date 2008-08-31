@@ -5765,6 +5765,22 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
 
                     break;
                 }
+                // Aviana's Purpose (Skyguard Silver Cross)
+                case 41260:
+                {
+                    if(GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if(!castItem)
+                        return;
+
+                    if( ((Player*)this)->HasSpellCooldown(auraSpellInfo->Id))
+                        return;
+
+                    CastSpell(this, trigger_spell_id, true, castItem, triggeredByAura);
+                    ((Player *)this)->AddSpellCooldown(auraSpellInfo->Id, 0, time(NULL) + 10);
+                    return;
+                }
                 // Augment Pain (Timbal's Focusing Crystal trinket bonus)
                 case 45054:
                 {
