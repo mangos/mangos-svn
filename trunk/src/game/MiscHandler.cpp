@@ -266,8 +266,8 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & /*recv_data*/ )
         return;
     }
 
-    //instant logout in taverns/cities
-    if(GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
+    //instant logout in taverns/cities or on taxi
+    if(GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) || GetPlayer()->isInFlight())
     {
         LogoutPlayer(true);
         return;
