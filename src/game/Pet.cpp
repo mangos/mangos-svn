@@ -1722,17 +1722,15 @@ void Pet::CastPetAuras(bool current)
     if(getPetType() != HUNTER_PET && (getPetType() != SUMMON_PET || owner->getClass() != CLASS_WARLOCK))
         return;
 
-    for(PetAuraList::iterator itr = owner->m_petAuras.begin(); itr != owner->m_petAuras.end(); )
+    for(PetAuraSet::iterator itr = owner->m_petAuras.begin(); itr != owner->m_petAuras.end(); )
     {
-        if(!current && (*itr)->IsRemovedOnChangePet())
-        {
-            PetAura const* toRemove = *itr;
-            ++itr;
-            owner->RemovePetAura(toRemove);
-            continue;
-        }
-        CastPetAura(*itr);
+        PetAura const* pa = *itr;
         ++itr;
+
+        if(!current && pa->IsRemovedOnChangePet())
+            owner->RemovePetAura(pa);
+        else
+            CastPetAura(pa);
     }
 }
 

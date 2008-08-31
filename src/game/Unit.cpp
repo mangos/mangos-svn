@@ -10621,15 +10621,14 @@ bool Unit::IsUnderLastManaUseEffect() const
 
 void Unit::AddPetAura(PetAura const* petSpell)
 {
-    m_petAuras.remove(petSpell);                            // make sure that same pet spell is not added more than once
-    m_petAuras.push_back(petSpell);
+    m_petAuras.insert(petSpell);
     if(Pet* pet = GetPet())
         pet->CastPetAura(petSpell);
 }
 
 void Unit::RemovePetAura(PetAura const* petSpell)
 {
-    m_petAuras.remove(petSpell);
+    m_petAuras.erase(petSpell);
     if(Pet* pet = GetPet())
         pet->RemoveAurasDueToSpell(petSpell->GetAura(pet->GetEntry()));
 }
