@@ -3436,8 +3436,15 @@ uint8 Spell::CanCast(bool strict)
                     else
                         AddGOTarget(goScriptTarget, j);
                 }
+                //Missing DB Entry or targets for this spellEffect.
                 else
-                    return SPELL_FAILED_BAD_TARGETS;        //Missing DB Entry or targets for this spellEffect.
+                {
+                    // not report target not existence for triggered spells
+                    if(m_triggeredByAuraSpell || m_IsTriggeredSpell)
+                        return SPELL_FAILED_DONT_REPORT;
+                    else
+                        return SPELL_FAILED_BAD_TARGETS;
+                }
             }
         }
     }

@@ -285,7 +285,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //232 SPELL_AURA_MECHANIC_DURATION_MOD           implement in Unit::CalculateSpellDuration
     &Aura::HandleNULL,                                      //233 set model id to the one of the creature with id m_modifier.m_miscvalue
     &Aura::HandleNoImmediateEffect,                         //234 SPELL_AURA_MECHANIC_DURATION_MOD_NOT_STACK implement in Unit::CalculateSpellDuration
-    &Aura::HandleNoImmediateEffect,                         //235 SPELL_AURA_MOD_DISPEL_RESIST               implement in Unit::MagicSpellHitResult
+    &Aura::HandleAuraModDispelResist,                       //235 SPELL_AURA_MOD_DISPEL_RESIST               implement in Unit::MagicSpellHitResult
     &Aura::HandleUnused,                                    //236 unused
     &Aura::HandleModSpellDamagePercentFromAttackPower,      //237 SPELL_AURA_MOD_SPELL_DAMAGE_OF_ATTACK_POWER  implemented in Unit::SpellBaseDamageBonus
     &Aura::HandleModSpellHealingPercentFromAttackPower,     //238 SPELL_AURA_MOD_SPELL_HEALING_OF_ATTACK_POWER implemented in Unit::SpellBaseHealingBonus
@@ -1563,7 +1563,16 @@ void Aura::TriggerSpell()
                     // Absorb Eye of Grillok (Zezzak's Shard)
                     case 38554:
                     {
-                        m_target->CastSpell(m_target, 38495, true);
+                        if(m_target->GetTypeId() != TYPEID_UNIT)
+                            return;
+
+                        caster->CastSpell(caster, 38495, true);
+
+                        Creature* creatureTarget = (Creature*)m_target;
+
+                        creatureTarget->setDeathState(JUST_DIED);
+                        creatureTarget->RemoveCorpse();
+                        creatureTarget->SetHealth(0);       // just for nice GM-mode view
                         return;
                     }
 //                    // Magic Sucker Device timer
@@ -4305,6 +4314,15 @@ void Aura::HandleModSpellHealingPercentFromStat(bool apply, bool Real)
 
     // Recalculate bonus
     ((Player*)m_target)->UpdateSpellDamageAndHealingBonus();
+}
+
+void Aura::HandleAuraModDispelResist(bool apply, bool Real)
+{
+    if(!Real || !apply)
+        return;
+
+    if(GetId()==33206)
+        m_target->CastSpell(m_target,44416,true,NULL,this,GetCasterGUID());
 }
 
 void Aura::HandleModSpellDamagePercentFromAttackPower(bool apply, bool Real)
