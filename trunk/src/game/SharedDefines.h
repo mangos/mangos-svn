@@ -803,6 +803,7 @@ enum Targets
     TARGET_CHAIN_HEAL                  = 45,
     TARGET_SCRIPT_COORDINATES          = 46,
     TARGET_DYNAMIC_OBJECT              = 47,
+    TARGET_SUMMON                      = 48,
     TARGET_AREAEFFECT_CUSTOM_2         = 52,
     TARGET_CURRENT_ENEMY_COORDINATES   = 53,                // set unit coordinates as dest, only 16 target B imlemented
     TARGET_RANDOM_RAID_MEMBER          = 56,
