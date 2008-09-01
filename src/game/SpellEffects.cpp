@@ -3129,7 +3129,7 @@ void Spell::EffectDispel(uint32 i)
         Aura *aur = (*itr).second;
         if (aur && (1<<aur->GetSpellProto()->Dispel) & dispelMask)
         {
-            if(dispel_type == DISPEL_MAGIC)
+            if(aur->GetSpellProto()->Dispel == DISPEL_MAGIC)
             {
                 bool positive = true;
                 if (!aur->IsPositive())
