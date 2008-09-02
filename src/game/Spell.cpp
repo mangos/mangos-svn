@@ -2312,39 +2312,25 @@ void Spell::SendSpellCooldown()
 
     time_t curTime = time(NULL);
 
-    time_t recTime    = curTime+rec/1000;                   // in secs
-    time_t catrecTime = curTime+catrec/1000;                // in secs
+    time_t catrecTime = catrec ? curTime+catrec/1000 : 0;   // in secs
+    time_t recTime    = rec ? curTime+rec/1000 : catrecTime;// in secs
 
     // self spell cooldown
     if (rec > 0)
-    {
-        if(m_CastItem)
-            _player->AddSpellCooldown(m_spellInfo->Id, m_CastItem->GetEntry(), recTime);
-        else
-            _player->AddSpellCooldown(m_spellInfo->Id, 0, recTime);
-    }
-    else
-    {
-        if(m_CastItem)
-            _player->AddSpellCooldown(m_spellInfo->Id, m_CastItem->GetEntry(), catrecTime);
-        else
-            _player->AddSpellCooldown(m_spellInfo->Id, 0, catrecTime);
-    }
+        _player->AddSpellCooldown(m_spellInfo->Id, m_CastItem ? m_CastItem->GetEntry() : 0, recTime);
 
-    if (catrec)
+    // category spells
+    if (catrec > 0)
     {
         SpellCategoryStore::const_iterator i_scstore = sSpellCategoryStore.find(cat);
         if(i_scstore != sSpellCategoryStore.end())
         {
             for(SpellCategorySet::const_iterator i_scset = i_scstore->second.begin(); i_scset != i_scstore->second.end(); ++i_scset)
             {
-                if(*i_scset == m_spellInfo->Id)             // skip casted spell
+                if(*i_scset == m_spellInfo->Id)                     // skip main spell
                     continue;
 
-                if(m_CastItem)
-                    _player->AddSpellCooldown(*i_scset, m_CastItem->GetEntry(), catrecTime);
-                else
-                    _player->AddSpellCooldown(*i_scset, 0, catrecTime);
+                _player->AddSpellCooldown(m_spellInfo->Id, m_CastItem ? m_CastItem->GetEntry() : 0, catrecTime);
             }
         }
     }
