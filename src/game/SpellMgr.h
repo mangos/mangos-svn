@@ -481,6 +481,7 @@ struct SpellProcEventEntry
     uint64      spellFamilyMask;                            // if nonzero - for matching proc condition based on candidate spell's SpellFamilyFlags (like auras 107 and 108 do)
     uint32      procFlags;                                  // bitmask for matching proc event
     float       ppmRate;                                    // for melee (ranged?) damage spells - proc rate per minute. if zero, falls back to flat chance from Spell.dbc
+    uint32      cooldown;                                   // hidden cooldown used for some spell proc events, applied to _triggered_spell_
 };
 
 typedef HM_NAMESPACE::hash_map<uint32, SpellProcEventEntry> SpellProcEventMap;

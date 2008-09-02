@@ -1272,9 +1272,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SendAttackStart(Unit* pVictim);                // only from Unit::AttackStart(Unit*)
 
         void ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag, AuraTypeSet const& procAuraTypes, WeaponAttackType attType, SpellEntry const * procSpell, uint32 damage, SpellSchoolMask damageSchoolMask );
-        void HandleDummyAuraProc(Unit *pVictim, SpellEntry const *spellProto, uint32 effIndex, uint32 damage, Aura* triggredByAura, SpellEntry const * procSpell, uint32 procFlag);
-        void HandleProcTriggerSpell(Unit *pVictim,uint32 damage, Aura* triggredByAura, SpellEntry const *procSpell, uint32 procFlags,WeaponAttackType attType);
-        void HandleOverrideClassScriptAuraProc(Unit *pVictim, int32 scriptId, uint32 damage, Aura* triggredByAura, SpellEntry const *procSpell);
+        bool HandleDummyAuraProc(Unit *pVictim, SpellEntry const *spellProto, uint32 effIndex, uint32 damage, Aura* triggredByAura, SpellEntry const * procSpell, uint32 procFlag,uint32 cooldown);
+        bool HandleProcTriggerSpell(Unit *pVictim,uint32 damage, Aura* triggredByAura, SpellEntry const *procSpell, uint32 procFlags,WeaponAttackType attType,uint32 cooldown);
+        bool HandleOverrideClassScriptAuraProc(Unit *pVictim, int32 scriptId, uint32 damage, Aura* triggredByAura, SpellEntry const *procSpell,uint32 cooldown);
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
         uint32 m_lastManaUse;                               // msecs
