@@ -177,7 +177,7 @@ ObjectGridLoader::Visit(CreatureMapType &m)
 
     CellObjectGuids const& cell_guids = objmgr.GetCellObjectGuids(i_map->GetId(), i_map->GetSpawnMode(), cell_id);
 
-    LoadHelper(cell_guids.creatures, cell_pair, m, i_gameObjects, i_map);
+    LoadHelper(cell_guids.creatures, cell_pair, m, i_creatures, i_map);
 }
 
 void
