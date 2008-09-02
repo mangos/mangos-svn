@@ -800,8 +800,8 @@ void SpellMgr::LoadSpellProcEvents()
 
     uint32 count = 0;
 
-    //                                                0      1           2         3        4                5                6          7
-    QueryResult *result = WorldDatabase.Query("SELECT entry, SchoolMask, Category, SkillID, SpellFamilyName, SpellFamilyMask, procFlags, ppmRate FROM spell_proc_event");
+    //                                                0      1           2         3        4                5                6          7        8
+    QueryResult *result = WorldDatabase.Query("SELECT entry, SchoolMask, Category, SkillID, SpellFamilyName, SpellFamilyMask, procFlags, ppmRate, cooldown FROM spell_proc_event");
     if( !result )
     {
 
@@ -839,6 +839,7 @@ void SpellMgr::LoadSpellProcEvents()
         spe.spellFamilyMask = fields[5].GetUInt64();
         spe.procFlags       = fields[6].GetUInt32();
         spe.ppmRate         = fields[7].GetFloat();
+        spe.cooldown        = fields[8].GetUInt32();
 
         mSpellProcEventMap[entry] = spe;
 
