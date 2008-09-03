@@ -951,6 +951,19 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastSpell(m_caster,spell_id,true,NULL);
                     return;
                 }
+                case 35745:
+                {
+                    uint32 spell_id;
+                    switch(m_caster->GetAreaId())
+                    {
+                        case 3900: spell_id = 35743; break;
+                        case 3742: spell_id = 35744; break;
+                        default: return;
+                    }
+
+                    m_caster->CastSpell(m_caster,spell_id,true);
+                    return;
+                }
                 case 37674:                                 // Chaos Blast
                     if(unitTarget)
                         m_caster->CastSpell(unitTarget,37675,true);
@@ -5649,7 +5662,7 @@ void Spell::EffectDurabilityDamagePCT(uint32 i)
         ((Player*)unitTarget)->DurabilityLoss(item,double(damage)/100.0f);
 }
 
-void Spell::EffectModifyThreatPercent(uint32 /*i*/)
+void Spell::EffectModifyThreatPercent(uint32 /*effIndex*/)
 {
     if(!unitTarget)
         return;
@@ -5657,9 +5670,9 @@ void Spell::EffectModifyThreatPercent(uint32 /*i*/)
     unitTarget->getThreatManager().modifyThreatPercent(m_caster, damage);
 }
 
-void Spell::EffectTransmitted(uint32 i)
+void Spell::EffectTransmitted(uint32 effIndex)
 {
-    uint32 name_id = m_spellInfo->EffectMiscValue[i];
+    uint32 name_id = m_spellInfo->EffectMiscValue[effIndex];
 
     GameObjectInfo const* goinfo = objmgr.GetGameObjectInfo(name_id);
 
@@ -5676,6 +5689,12 @@ void Spell::EffectTransmitted(uint32 i)
         fx = m_targets.m_destX;
         fy = m_targets.m_destY;
         fz = m_targets.m_destZ;
+    }
+    //FIXME: this can be better check for most objects but still hack
+    else if(m_spellInfo->EffectRadiusIndex[effIndex] && m_spellInfo->speed==0)
+    {
+        float dis = GetSpellRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[effIndex]));
+        m_caster->GetClosePoint(fx,fy,fz,DEFAULT_WORLD_OBJECT_SIZE, dis);
     }
     else
     {
