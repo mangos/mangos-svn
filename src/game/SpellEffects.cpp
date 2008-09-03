@@ -38,7 +38,6 @@
 #include "UpdateData.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
-#include "CellImpl.h"
 #include "SharedDefines.h"
 #include "Pet.h"
 #include "GameObject.h"
@@ -46,11 +45,7 @@
 #include "Creature.h"
 #include "Totem.h"
 #include "CreatureAI.h"
-#include "GridNotifiers.h"
-#include "GridNotifiersImpl.h"
 #include "BattleGround.h"
-#include "BattleGroundAV.h"
-#include "BattleGroundAB.h"
 #include "BattleGroundEY.h"
 #include "BattleGroundWS.h"
 #include "VMapFactory.h"
@@ -3405,27 +3400,12 @@ void Spell::EffectSummonGuardian(uint32 i)
     // set timer for unsummon
     int32 duration = GetSpellDuration(m_spellInfo);
 
-    // Search old Guardian only for players (if casted spell have duration >= cooldown
+    // Search old Guardian only for players (if casted spell not have duration or cooldown)
     // FIXME: some guardians have control spell applied and controlled by player and anyway player can't summon in this time
     //        so this code hack in fact
-    if( m_caster->GetTypeId() == TYPEID_PLAYER && (!duration || duration >= GetSpellRecoveryTime(m_spellInfo)) )
-    {
-        Pet* old_wild = NULL;
-
-        CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-        Cell cell(p);
-        cell.data.Part.reserved = ALL_DISTRICT;
-        cell.SetNoCreate();
-
-        PetWithIdCheck u_check(m_caster, pet_entry);
-        MaNGOS::UnitSearcher<PetWithIdCheck> checker((Unit*&)old_wild, u_check);
-        TypeContainerVisitor<MaNGOS::UnitSearcher<PetWithIdCheck>, WorldTypeMapContainer > object_checker(checker);
-        CellLock<GridReadGuard> cell_lock(cell, p);
-        cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-
-        if (old_wild)                                           // find old critter, unsummon
-            return;
-    }
+    if( m_caster->GetTypeId() == TYPEID_PLAYER && (duration <= 0 || GetSpellRecoveryTime(m_spellInfo)==0) )
+        if(((Player*)m_caster)->HasGuardianWithEntry(pet_entry))
+            return;                                         // find old guardian, ignore summon
 
     // in another case summon new
     uint32 level = m_caster->getLevel();
@@ -3511,6 +3491,9 @@ void Spell::EffectSummonGuardian(uint32 i)
         spawnCreature->GetCharmInfo()->SetPetNumber(pet_number, false);
 
         spawnCreature->AIM_Initialize();
+
+        if(m_caster->GetTypeId()==TYPEID_PLAYER)
+            ((Player*)m_caster)->AddGuardian(spawnCreature);
 
         map->Add((Creature*)spawnCreature);
     }

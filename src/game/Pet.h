@@ -235,29 +235,4 @@ class Pet : public Creature
             assert(false);
         }
 };
-
-class PetWithIdCheck
-{
-    public:
-        PetWithIdCheck(Unit const* owner, uint32 entry) : i_owner(owner), i_entry(entry) {}
-        bool operator()(Unit const* u) const
-        {
-            if(u->GetTypeId()!=TYPEID_UNIT)
-                return false;
-
-            if(!((Creature const*)u)->isPet())
-                return false;
-
-            if(u->GetEntry()!=i_entry)
-                return false;
-
-            if(u->GetOwnerGUID()!=i_owner->GetGUID())
-                return false;
-
-            return true;
-        }
-    private:
-        Unit const* i_owner;
-        uint32 i_entry;
-};
 #endif

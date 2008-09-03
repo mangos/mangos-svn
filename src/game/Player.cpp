@@ -1223,7 +1223,9 @@ void Player::setDeathState(DeathState s)
         //FIXME: is pet dismissed at dying or releasing spirit? if second, add setDeathState(DEAD) to HandleRepopRequestOpcode and define pet unsummon here with (s == DEAD)
         RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
 
+        // remove uncontrolled pets
         RemoveMiniPet();
+        RemoveGuardians();
 
         // save value before aura remove in Unit::setDeathState
         ressSpellId = GetUInt32Value(PLAYER_SELF_RES_SPELL);
@@ -1587,8 +1589,9 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
             }
 
-            // remove mini pet
+            // remove uncontrolled pets
             RemoveMiniPet();
+            RemoveGuardians();
 
             // remove charmed creatures
             Uncharm();
@@ -15221,8 +15224,19 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
         return;
 
     // only if current pet in slot
-    if(GetPetGUID()==pet->GetGUID())
-        SetPet(0);
+    switch(pet->getPetType())
+    {
+        case MINI_PET:
+            m_miniPet = 0;
+            break;
+        case GUARDIAN_PET:
+            m_guardianPets.erase(pet->GetGUID());
+            break;
+        default:
+            if(GetPetGUID()==pet->GetGUID())
+                SetPet(0);
+            break;
+    }
 
     pet->CombatStop();
 
@@ -15257,6 +15271,7 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
     }
 }
 
+
 void Player::RemoveMiniPet()
 {
     if(Pet* pet = GetMiniPet())
@@ -15271,6 +15286,29 @@ Pet* Player::GetMiniPet()
     if(!m_miniPet)
         return NULL;
     return ObjectAccessor::GetPet(m_miniPet);
+}
+
+void Player::RemoveGuardians()
+{
+    while(!m_guardianPets.empty())
+    {
+        uint64 guid = *m_guardianPets.begin();
+        if(Pet* pet = ObjectAccessor::GetPet(guid))
+            pet->Remove(PET_SAVE_AS_DELETED);
+
+        m_guardianPets.erase(guid);
+    }
+}
+
+bool Player::HasGuardianWithEntry(uint32 entry)
+{
+    // pet guid middle part is entry (and creature also)
+    // and in guardian list must be guardians with same entry _always_
+    for(GuardianPetList::const_iterator itr = m_guardianPets.begin(); itr != m_guardianPets.end(); ++itr)
+        if(GUID_ENPART(*itr)==entry)
+            return true;
+
+    return false;
 }
 
 void Player::Uncharm()
