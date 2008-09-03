@@ -1352,14 +1352,23 @@ void Player::BuildEnumData( QueryResult * result, WorldPacket * p_data )
 
     for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; slot++)
     {
-        uint32 item_id = GetUInt32Value(PLAYER_VISIBLE_ITEM_1_0 + (slot * MAX_VISIBLE_ITEM_OFFSET));
+        uint32 visualbase = PLAYER_VISIBLE_ITEM_1_0 + (slot * MAX_VISIBLE_ITEM_OFFSET);
+        uint32 item_id = GetUInt32Value(visualbase);
         const ItemPrototype * proto = objmgr.GetItemPrototype(item_id);
+        SpellItemEnchantmentEntry const *enchant = NULL;
+
+        for(uint8 enchantSlot = PERM_ENCHANTMENT_SLOT; enchantSlot<=TEMP_ENCHANTMENT_SLOT; enchantSlot++)
+        {
+            uint32 enchantId = GetUInt32Value(visualbase+1+enchantSlot);
+            if(enchant = sSpellItemEnchantmentStore.LookupEntry(enchantId))
+                break;
+        }
 
         if (proto != NULL)
         {
             *p_data << (uint32)proto->DisplayInfoID;
             *p_data << (uint8)proto->InventoryType;
-            *p_data << (uint32)0;                           // enchant?
+            *p_data << (uint32)(enchant?enchant->aura_id:0);
         }
         else
         {
