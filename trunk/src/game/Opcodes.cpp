@@ -992,7 +992,7 @@ OpcodeHandler opcodeTable[NUM_MSG_TYPES] =
     /*0x3C2*/ { "CMSG_CHEAT_PLAYER_LOOKUP",         STATUS_NEVER,    &WorldSession::Handle_NULL                     },
     /*0x3C3*/ { "SMSG_CHEAT_PLAYER_LOOKUP",         STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x3C4*/ { "SMSG_KICK_REASON",                 STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
-    /*0x3C5*/ { "MSG_RAID_READY_CHECK_FINISHED",    STATUS_NEVER,    &WorldSession::Handle_NULL                     },
+    /*0x3C5*/ { "MSG_RAID_READY_CHECK_FINISHED",    STATUS_LOGGEDIN, &WorldSession::HandleRaidReadyCheckFinishOpcode},
     /*0x3C6*/ { "CMSG_COMPLAIN",                    STATUS_LOGGEDIN, &WorldSession::HandleReportSpamOpcode          },
     /*0x3C7*/ { "SMSG_COMPLAIN_RESULT",             STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
     /*0x3C8*/ { "SMSG_FEATURE_SYSTEM_STATUS",       STATUS_NEVER,    &WorldSession::Handle_ServerSide               },
