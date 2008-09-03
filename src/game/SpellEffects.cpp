@@ -4611,7 +4611,7 @@ void Spell::EffectScriptEffect(uint32 effIndex)
                 case 6:                 item = 23586; break;// Aerie Peak Pale Ale
             }
             if (item)
-                DoCreateItem(i,item);
+                DoCreateItem(effIndex,item);
             break;
         }
         // Improved Sprint
