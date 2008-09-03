@@ -7714,9 +7714,6 @@ void Player::SendPetSkillWipeConfirm()
 void Player::SetVirtualItemSlot( uint8 i, Item* item)
 {
     assert(i < 3);
-    SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO + 2*i,    item ? item->GetGUIDLow()              : 0);
-    SetUInt32Value(UNIT_VIRTUAL_ITEM_INFO + 2*i +1, item ? item->GetProto()->Sheath        : 0);
-    SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+i,item ? item->GetProto()->DisplayInfoID : 0);
     if(i < 2 && item)
     {
         if(!item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
