@@ -236,6 +236,8 @@ bool Creature::InitEntry(uint32 Entry, uint32 team, const CreatureData *data )
 
     // checked at loading
     m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
+    if(!m_respawnradius && m_defaultMovementType==RANDOM_MOTION_TYPE)
+        m_defaultMovementType = IDLE_MOTION_TYPE;
 
     return true;
 }
@@ -1130,12 +1132,15 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask)
     data.posZ = GetPositionZ();
     data.orientation = GetOrientation();
     data.spawntimesecs = m_respawnDelay;
-    data.spawndist = m_respawnradius;
+    // prevent add data integrity problems 
+    data.spawndist = GetDefaultMovementType()==IDLE_MOTION_TYPE ? 0 : m_respawnradius;
     data.currentwaypoint = 0;
     data.curhealth = GetHealth();
     data.curmana = GetPower(POWER_MANA);
     data.is_dead = m_isDeadByDefault;
-    data.movementType = GetDefaultMovementType();
+    // prevent add data integrity problems 
+    data.movementType = !m_respawnradius && GetDefaultMovementType()==RANDOM_MOTION_TYPE
+        ? IDLE_MOTION_TYPE : GetDefaultMovementType();
     data.spawnMask = spawnMask;
 
     // updated in DB
