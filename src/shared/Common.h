@@ -123,8 +123,6 @@ inline float finiteAlways(float f) { return finite(f) ? f : 0.0f; }
 
 #define STRINGIZE(a) #a
 
-#define for if(true) for
-
 enum TimeConstants
 {
     MINUTE = 60,

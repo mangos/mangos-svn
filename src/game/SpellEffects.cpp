@@ -4391,7 +4391,7 @@ void Spell::EffectSummonObjectWild(uint32 i)
     }
 }
 
-void Spell::EffectScriptEffect(uint32 i)
+void Spell::EffectScriptEffect(uint32 effIndex)
 {
     // TODO: we must implement hunter pet summon at login there (spell 6962)
 
@@ -4460,7 +4460,7 @@ void Spell::EffectScriptEffect(uint32 i)
                 default:
                     return;
             }
-            DoCreateItem( i, itemtype );
+            DoCreateItem( effIndex, itemtype );
             return;
         }
         // Brittle Armor - need remove one 24575 Brittle Armor aura 

@@ -602,32 +602,40 @@ void WorldSession::HandleRaidReadyCheckOpcode( WorldPacket & recv_data )
     if(recv_data.empty())                                   // request
     {
         /** error handling **/
-        if(!group->IsLeader(GetPlayer()->GetGUID()))
+        if(!group->IsLeader(GetPlayer()->GetGUID()) && !group->IsAssistant(GetPlayer()->GetGUID()))
             return;
         /********************/
 
         // everything's fine, do it
-        WorldPacket data(MSG_RAID_READY_CHECK, 0);
-        group->BroadcastPacket(&data, -1, GetPlayer()->GetGUID());
+        WorldPacket data(MSG_RAID_READY_CHECK, 8);
+        data << GetPlayer()->GetGUID();
+        group->BroadcastPacket(&data, -1);
+
+        group->OfflineReadyCheck();
     }
     else                                                    // answer
     {
         uint8 state;
         recv_data >> state;
 
-        /** error handling **/
-        /********************/
-
         // everything's fine, do it
-        Player *leader = objmgr.GetPlayer(group->GetLeaderGUID());
-        if(leader && leader->GetSession())
-        {
-            WorldPacket data(MSG_RAID_READY_CHECK, 9);
-            data << GetPlayer()->GetGUID();
-            data << state;
-            leader->GetSession()->SendPacket(&data);
-        }
+        WorldPacket data(MSG_RAID_READY_CHECK_CONFIRM, 9);
+        data << GetPlayer()->GetGUID();
+        data << state;
+        group->BroadcastReadyCheck(&data);
     }
+}
+
+void WorldSession::HandleRaidReadyCheckFinishOpcode( WorldPacket & recv_data )
+{
+    //Group* group = GetPlayer()->GetGroup();
+    //if(!group)
+    //    return;
+
+    //if(!group->IsLeader(GetPlayer()->GetGUID()) && !group->IsAssistant(GetPlayer()->GetGUID()))
+    //    return;
+
+    // Is any reaction need?
 }
 
 void WorldSession::BuildPartyMemberStatsChangedPacket(Player *player, WorldPacket *data)

@@ -868,6 +868,32 @@ void Group::BroadcastPacket(WorldPacket *packet, int group, uint64 ignore)
     }
 }
 
+void Group::BroadcastReadyCheck(WorldPacket *packet)
+{
+    for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player *pl = itr->getSource();
+        if(pl && pl->GetSession())
+            if(IsLeader(pl->GetGUID()) || IsAssistant(pl->GetGUID()))
+                pl->GetSession()->SendPacket(packet);
+    }
+}
+
+void Group::OfflineReadyCheck()
+{
+    for(member_citerator citr = m_memberSlots.begin(); citr != m_memberSlots.end(); ++citr)
+    {
+        Player *pl = objmgr.GetPlayer(citr->guid);
+        if (!pl || !pl->GetSession())
+        {
+            WorldPacket data(MSG_RAID_READY_CHECK_CONFIRM, 9);
+            data << citr->guid;
+            data << (uint8)0;
+            BroadcastReadyCheck(&data);
+        }
+    }
+}
+
 bool Group::_addMember(const uint64 &guid, const char* name, bool isAssistant)
 {
     // get first not-full group

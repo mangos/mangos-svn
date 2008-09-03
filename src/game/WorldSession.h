@@ -328,6 +328,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data );
         void HandleRaidIconTargetOpcode( WorldPacket & recv_data );
         void HandleRaidReadyCheckOpcode( WorldPacket & recv_data );
+        void HandleRaidReadyCheckFinishOpcode( WorldPacket & recv_data );
         void HandleRaidConvertOpcode( WorldPacket & recv_data );
         void HandleGroupChangeSubGroupOpcode( WorldPacket & recv_data );
         void HandleGroupAssistantOpcode( WorldPacket & recv_data );
@@ -614,7 +615,6 @@ class MANGOS_DLL_SPEC WorldSession
 
         // logging helper
         void logUnexpectedOpcode(WorldPacket *packet, const char * reason);
-
         Player *_player;
         WorldSocket *_socket;
 
