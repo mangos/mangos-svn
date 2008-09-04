@@ -2867,6 +2867,10 @@ void Aura::HandleModPossess(bool apply, bool Real)
     if(m_target->getLevel() > m_modifier.m_amount)
         return;
 
+    // not possess yourself
+    if(GetCasterGUID() == m_target->GetGUID())
+        return;
+
     Unit* caster = GetCaster();
     if(!caster)
         return;
@@ -2953,6 +2957,10 @@ void Aura::HandleModPossessPet(bool apply, bool Real)
 void Aura::HandleModCharm(bool apply, bool Real)
 {
     if(!Real)
+        return;
+
+    // not charm yourself
+    if(GetCasterGUID() == m_target->GetGUID())
         return;
 
     Unit* caster = GetCaster();
