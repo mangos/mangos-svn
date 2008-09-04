@@ -5783,6 +5783,12 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 // Shaleskin
                 case 36576:
                     return true;                            // nothing to do
+                // Forgotten Knowledge (Blade of Wizardry)
+                case 38319:
+                    // only for harmful enemy targeted spell
+                    if(!pVictim || pVictim==this || !procSpell || IsPositiveSpell(procSpell->Id))
+                        return false;
+                    break;                              // fall through to normal cast
                 // Aura of Wrath (Darkmoon Card: Wrath trinket bonus)
                 case 39442:
                 {
