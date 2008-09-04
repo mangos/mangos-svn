@@ -705,6 +705,20 @@ void outstring_log(const char * str, ...)
     MaNGOS::Singleton<Log>::Instance().outString(buf);
 }
 
+void detail_log(const char * str, ...)
+{
+    if( !str )
+        return;
+
+    char buf[256];
+    va_list ap;
+    va_start(ap, str);
+    vsnprintf(buf,256, str, ap);
+    va_end(ap);
+
+    MaNGOS::Singleton<Log>::Instance().outDetail(buf);
+}
+
 void debug_log(const char * str, ...)
 {
     if( !str )
@@ -731,4 +745,18 @@ void error_log(const char * str, ...)
     va_end(ap);
 
     MaNGOS::Singleton<Log>::Instance().outError(buf);
+}
+
+void error_db_log(const char * str, ...)
+{
+    if( !str )
+        return;
+
+    char buf[256];
+    va_list ap;
+    va_start(ap, str);
+    vsnprintf(buf,256, str, ap);
+    va_end(ap);
+
+    MaNGOS::Singleton<Log>::Instance().outErrorDb(buf);
 }
