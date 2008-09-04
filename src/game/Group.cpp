@@ -757,7 +757,7 @@ void Group::SetTargetIcon(uint8 id, uint64 guid)
     BroadcastPacket(&data);
 }
 
-void Group::GetDataForXPAtKill(Unit const* victim, uint32& count,uint32& sum_level, Player* & memeber_with_max_level)
+void Group::GetDataForXPAtKill(Unit const* victim, uint32& count,uint32& sum_level, Player* & member_with_max_level)
 {
     for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
@@ -770,8 +770,8 @@ void Group::GetDataForXPAtKill(Unit const* victim, uint32& count,uint32& sum_lev
 
         ++count;
         sum_level += member->getLevel();
-        if(!memeber_with_max_level || memeber_with_max_level->getLevel() < member->getLevel())
-            memeber_with_max_level = member;
+        if(!member_with_max_level || member_with_max_level->getLevel() < member->getLevel())
+            member_with_max_level = member;
     }
 }
 
