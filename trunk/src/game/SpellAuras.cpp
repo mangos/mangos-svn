@@ -2187,10 +2187,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                     mod->lastAffected = NULL;
                     switch (m_effIndex)
                     {
-                    case 0: mod->mask = 0x00200000000LL;        // Windfury Totem
-                        break;
-                    case 1: mod->mask = 0x00400000000LL;        // Flametongue Totem
-                        break;
+                        case 0:
+                            mod->mask = 0x00200000000LL;    // Windfury Totem
+                            break;
+                        case 1:
+                            mod->mask = 0x00400000000LL;    // Flametongue Totem
+                            break;
                     }
                     mod->charges = 0;
 

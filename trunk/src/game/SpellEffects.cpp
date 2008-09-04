@@ -1086,12 +1086,12 @@ void Spell::EffectDummy(uint32 i)
                 if(Player* modOwner = m_caster->GetSpellModOwner())
                     modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, cost,this);
 
-                uint32 dmg = m_caster->SpellDamageBonus(m_caster, m_spellInfo,uint32(cost > 0 ? cost : 0), SPELL_DIRECT_DAMAGE);
+                int32 dmg = m_caster->SpellDamageBonus(m_caster, m_spellInfo,uint32(cost > 0 ? cost : 0), SPELL_DIRECT_DAMAGE);
 
                 if(int32(m_caster->GetHealth()) > dmg)
                 {
-                    m_caster->SendSpellNonMeleeDamageLog(m_caster, m_spellInfo->Id, dmg, GetSpellSchoolMask(m_spellInfo), 0, 0, false, 0, false);
-                    m_caster->DealDamage(m_caster,dmg,NULL,DIRECT_DAMAGE,GetSpellSchoolMask(m_spellInfo),m_spellInfo,false);
+                    // Shouldn't Appear in Combat Log
+                    m_caster->ModifyHealth(-dmg);
 
                     int32 mana = dmg;
 
