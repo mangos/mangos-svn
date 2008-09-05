@@ -90,7 +90,7 @@ World::World()
 {
     m_playerLimit = 0;
     m_allowMovement = true;
-    m_ShutdownIdleMode = false;
+    m_ShutdownMask = 0;
     m_ShutdownTimer = 0;
     m_gameTime=time(NULL);
     m_startTime=m_gameTime;
@@ -2049,7 +2049,7 @@ void World::_UpdateGameTime()
         ///- ... and it is overdue, stop the world (set m_stopEvent)
         if( m_ShutdownTimer <= elapsed )
         {
-            if(!m_ShutdownIdleMode || GetActiveAndQueuedSessionCount()==0)
+            if(!(m_ShutdownMask & SHUTDOWN_MASK_IDLE) || GetActiveAndQueuedSessionCount()==0)
                 m_stopEvent = true;
             else
                 m_ShutdownTimer = 1;                        // minimum timer value to wait idle state
@@ -2065,14 +2065,14 @@ void World::_UpdateGameTime()
 }
 
 /// Shutdown the server
-void World::ShutdownServ(uint32 time, bool idle)
+void World::ShutdownServ(uint32 time, uint32 options)
 {
-    m_ShutdownIdleMode = idle;
+    m_ShutdownMask = options;
 
     ///- If the shutdown time is 0, set m_stopEvent (except if shutdown is 'idle' with remaining sessions)
     if(time==0)
     {
-        if(!idle || GetActiveAndQueuedSessionCount()==0)
+        if(!(options & SHUTDOWN_MASK_IDLE) || GetActiveAndQueuedSessionCount()==0)
             m_stopEvent = true;
         else
             m_ShutdownTimer = 1;                            //So that the session count is re-evaluated at next world tick
@@ -2089,7 +2089,7 @@ void World::ShutdownServ(uint32 time, bool idle)
 void World::ShutdownMsg(bool show, Player* player)
 {
     // not show messages for idle shutdown mode
-    if(m_ShutdownIdleMode)
+    if(m_ShutdownMask & SHUTDOWN_MASK_IDLE)
         return;
 
     ///- Display a message every 12 hours, hours, 5 minutes, minute, 5 seconds and finally seconds
@@ -2107,8 +2107,11 @@ void World::ShutdownMsg(bool show, Player* player)
         (m_ShutdownTimer>12*HOUR   && (m_ShutdownTimer % (12*HOUR) )==0))
     {
         std::string str = secsToTimeString(m_ShutdownTimer);
-        SendServerMessage(SERVER_MSG_SHUTDOWN_TIME,str.c_str(),player);
-        DEBUG_LOG("Server is shuttingdown in %s",str.c_str());
+
+        uint32 msgid = (m_ShutdownMask & SHUTDOWN_MASK_RESTART) ? SERVER_MSG_RESTART_TIME : SERVER_MSG_SHUTDOWN_TIME;
+
+        SendServerMessage(msgid,str.c_str(),player);
+        DEBUG_LOG("Server is %s in %s",(m_ShutdownMask & SHUTDOWN_MASK_RESTART ? "restart" : "shuttingdown"),str.c_str());
     }
 }
 
@@ -2118,11 +2121,13 @@ void World::ShutdownCancel()
     if(!m_ShutdownTimer)
         return;
 
-    m_ShutdownIdleMode = false;
-    m_ShutdownTimer = 0;
-    SendServerMessage(SERVER_MSG_SHUTDOWN_CANCELLED);
+    uint32 msgid = (m_ShutdownMask & SHUTDOWN_MASK_RESTART) ? SERVER_MSG_RESTART_CANCELLED : SERVER_MSG_SHUTDOWN_CANCELLED;
 
-    DEBUG_LOG("Server shuttingdown cancelled.");
+    m_ShutdownMask = 0;
+    m_ShutdownTimer = 0;
+    SendServerMessage(msgid);
+
+    DEBUG_LOG("Server %s cancelled.",(m_ShutdownMask & SHUTDOWN_MASK_RESTART ? "restart" : "shuttingdown"));
 }
 
 /// Send a server message to the user(s)

@@ -4402,6 +4402,50 @@ bool ChatHandler::HandleShutDownCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleRestartCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    if(std::string(args)=="cancel")
+    {
+        sWorld.ShutdownCancel();
+    }
+    else
+    {
+        int32 time = atoi(args);
+
+        ///- Prevent interpret wrong arg value as 0 secs shutdown time
+        if(time == 0 && (args[0]!='0' || args[1]!='\0') || time < 0)
+            return false;
+
+        sWorld.ShutdownServ(time, SHUTDOWN_MASK_RESTART);
+    }
+    return true;
+}
+
+bool ChatHandler::HandleIdleRestartCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    if(std::string(args)=="cancel")
+    {
+        sWorld.ShutdownCancel();
+    }
+    else
+    {
+        int32 time = atoi(args);
+
+        ///- Prevent interpret wrong arg value as 0 secs shutdown time
+        if(time == 0 && (args[0]!='0' || args[1]!='\0') || time < 0)
+            return false;
+
+        sWorld.ShutdownServ(time,SHUTDOWN_MASK_RESTART+SHUTDOWN_MASK_IDLE);
+    }
+    return true;
+}
+
 bool ChatHandler::HandleIdleShutDownCommand(const char* args)
 {
     if(!*args)
@@ -4419,7 +4463,7 @@ bool ChatHandler::HandleIdleShutDownCommand(const char* args)
         if(time == 0 && (args[0]!='0' || args[1]!='\0') || time < 0)
             return false;
 
-        sWorld.ShutdownServ(time,true);
+        sWorld.ShutdownServ(time,SHUTDOWN_MASK_IDLE);
     }
     return true;
 }

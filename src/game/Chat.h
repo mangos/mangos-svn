@@ -249,8 +249,10 @@ class ChatHandler
         bool HandleUnBanCommand(const char* args);
         bool HandleBanInfoCommand(const char* args);
         bool HandleBanListCommand(const char* args);
+        bool HandleIdleRestartCommand(const char* args);
         bool HandleIdleShutDownCommand(const char* args);
         bool HandleShutDownCommand(const char* args);
+        bool HandleRestartCommand(const char* args);
         bool HandleSecurityCommand(const char* args);
         bool HandleGoXYCommand(const char* args);
         bool HandleGoXYZCommand(const char* args);

@@ -50,6 +50,8 @@ void CliSetGM(char*,pPrintf);
 void CliListGM(char*,pPrintf);
 void CliVersion(char*,pPrintf);
 void CliExit(char*,pPrintf);
+void CliIdleRestart(char*,pPrintf zprintf);
+void CliRestart(char*,pPrintf zprintf);
 void CliIdleShutdown(char*,pPrintf zprintf);
 void CliShutdown(char*,pPrintf zprintf);
 void CliBroadcast(char*,pPrintf);
@@ -93,6 +95,8 @@ const CliCommand Commands[]=
     {"setloglevel", & CliSetLogLevel,"Set Log Level"},
     {"corpses", & CliCorpses,"Manually call corpses erase global even code"},
     {"version", & CliVersion,"Display server version"},
+    {"idlerestart", & CliIdleRestart,"Restart server with some delay when there are no active connections remaining"},
+    {"restart", & CliRestart,"Restart server with some delay"},
     {"idleshutdown", & CliIdleShutdown,"Shutdown server with some delay when there are no active connections remaining"},
     {"shutdown", & CliShutdown,"Shutdown server with some delay"},
     {"exit", & CliExit,"Shutdown server NOW"},
@@ -328,6 +332,67 @@ void CliExit(char*,pPrintf zprintf)
     World::m_stopEvent = true;
 }
 
+/// Restart the server (with some delay) as soon as no active connections remain on the server
+void CliIdleRestart(char* command,pPrintf zprintf)
+{
+    char *args = strtok(command," ");
+
+    if(!args)
+    {
+        zprintf("Syntax is: idlerestart $seconds|cancel\r\n");
+        return;
+    }
+
+    if(std::string(args)=="cancel")
+    {
+        sWorld.ShutdownCancel();
+    }
+    else
+    {
+
+        uint32 time = atoi(args);
+
+        ///- Prevent interpret wrong arg value as 0 secs shutdown time
+        if(time==0 && (args[0]!='0' || args[1]!='\0') || time < 0)
+        {
+            zprintf("Syntax is: idlerestart $seconds|cancel\r\n");
+            return;
+        }
+
+        sWorld.ShutdownServ(time,SHUTDOWN_MASK_RESTART|SHUTDOWN_MASK_IDLE);
+    }
+}
+
+/// Restart the server with some delay
+void CliRestart(char* command,pPrintf zprintf)
+{
+    char *args = strtok(command," ");
+
+    if(!args)
+    {
+        zprintf("Syntax is: restart $seconds|cancel\r\n");
+        return;
+    }
+
+    if(std::string(args)=="cancel")
+    {
+        sWorld.ShutdownCancel();
+    }
+    else
+    {
+        int32 time = atoi(args);
+
+        ///- Prevent interpret wrong arg value as 0 secs shutdown time
+        if(time==0 && (args[0]!='0' || args[1]!='\0') || time < 0)
+        {
+            zprintf("Syntax is: restart $seconds|cancel\r\n");
+            return;
+        }
+
+        sWorld.ShutdownServ(time,SHUTDOWN_MASK_RESTART);
+    }
+}
+
 /// Shutdown the server (with some delay) as soon as no active connections remain on the server
 void CliIdleShutdown(char* command,pPrintf zprintf)
 {
@@ -355,7 +420,7 @@ void CliIdleShutdown(char* command,pPrintf zprintf)
             return;
         }
 
-        sWorld.ShutdownServ(time,true);
+        sWorld.ShutdownServ(time,SHUTDOWN_MASK_IDLE);
     }
 }
 
