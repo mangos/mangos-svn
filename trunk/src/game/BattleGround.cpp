@@ -558,6 +558,8 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
 
     if(plr)
     {
+        plr->ClearAfkReports();
+
         if(isArena())
         {
             if(!sWorld.IsFFAPvPRealm())
