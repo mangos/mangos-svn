@@ -306,9 +306,9 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                     damage+= rand()%2 ? damage : 0;
                 }
 
-                // Meteor like spells (divided damage to targets)
                 switch(m_spellInfo->Id)                     // better way to check unknown 
                 {
+                    // Meteor like spells (divided damage to targets)
                     case 24340: case 26558: case 28884: case 41276: 
                                                             // Meteor
                     case 26789:                             // Shard of the Fallen Star
@@ -326,8 +326,15 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                         damage /= count;                    // divide to all targets
                         break;
                     }
+                    // percent from health with min
+                    case 25599:                             // Thundercrash
+                    {
+                        damage = unitTarget->GetHealth() / 2;
+                        if(damage < 1000)
+                            damage = 1000;
+                        break;
+                    }
                 }
-
                 break;
             }
 
