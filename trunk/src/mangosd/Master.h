@@ -32,7 +32,7 @@ class Master
     public:
         Master();
         ~Master();
-        void Run();
+        int Run();
         static volatile uint32 m_masterLoopCounter;
 
     private:

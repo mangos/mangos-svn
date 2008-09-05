@@ -141,8 +141,12 @@ extern int main(int argc, char **argv)
 
     ///- and run the 'Master'
     /// \todo Why do we need this 'Master'? Can't all of this be in the Main as for Realmd?
-    sMaster.Run();
-    return 0;
+    return sMaster.Run();
+
+    // at sMaster return function exist with codes
+    // 0 - normal shutdown
+    // 1 - shutdown at error
+    // 2 - restart command used, this code can be used by restarter for restart mangosd
 }
 
 /// @}

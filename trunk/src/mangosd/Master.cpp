@@ -118,7 +118,7 @@ Master::~Master()
 }
 
 /// Main function
-void Master::Run()
+int Master::Run()
 {
     sLog.outString( "%s (world-daemon)", _FULLVERSION );
     sLog.outString( "<Ctrl-C> to stop.\n\n" );
@@ -143,7 +143,7 @@ void Master::Run()
         if( !pid )
         {
             sLog.outError( "Cannot create PID file %s.\n", pidfile.c_str() );
-            return;
+            return 1;
         }
 
         sLog.outString( "Daemon PID: %u\n", pid );
@@ -151,7 +151,7 @@ void Master::Run()
 
     ///- Start the databases
     if (!_StartDB())
-        return;
+        return 1;
 
     ///- Initialize the World
     sWorld.SetInitialWorldSettings();
@@ -166,7 +166,7 @@ void Master::Run()
     {
         clearOnlineAccounts();
         sLog.outError("MaNGOS cannot bind to %s:%d",bind_ip.c_str(), wsport);
-        return;
+        return 1;
     }
 
     h.Add(&worldListenSocket);
@@ -365,7 +365,7 @@ void Master::Run()
     // fixes a memory leak related to detaching threads from the module
     UnloadScriptingModule();
 
-    return;
+    return sWorld.GetShutdownMask() & SHUTDOWN_MASK_RESTART ? 2 : 0;
 }
 
 /// Initialize connection to the databases

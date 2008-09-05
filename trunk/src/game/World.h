@@ -43,6 +43,12 @@ class SqlResultQueue;
 class QueryResult;
 class WorldSocket;
 
+enum ShutdownMask
+{
+    SHUTDOWN_MASK_RESTART = 1,
+    SHUTDOWN_MASK_IDLE    = 2,
+};
+
 /// Timers for different object refresh rates
 enum WorldTimers
 {
@@ -384,8 +390,9 @@ class World
         void SendServerMessage(uint32 type, const char *text = "", Player* player = NULL);
 
         /// Are we in the middle of a shutdown?
+        uint32 GetShutdownMask() const { return m_ShutdownMask; }
         bool IsShutdowning() const { return m_ShutdownTimer > 0; }
-        void ShutdownServ(uint32 time, bool idle = false);
+        void ShutdownServ(uint32 time, uint32 options = 0);
         void ShutdownCancel();
         void ShutdownMsg(bool show = false, Player* player = NULL);
 
@@ -480,8 +487,8 @@ class World
         std::string m_motd;
         std::string m_dataPath;
 
-        uint32 m_ShutdownIdleMode;
         uint32 m_ShutdownTimer;
+        uint32 m_ShutdownMask;
 
         // for max speed access
         static float m_MaxVisibleDistanceForCreature;

@@ -90,6 +90,16 @@ LanguageDesc const* GetLanguageDescBySkill(uint32 skill_id)
 
 ChatCommand * ChatHandler::getCommandTable()
 {
+    static ChatCommand serverCommandTable[] =
+    {
+        { "idlerestart",    SEC_ADMINISTRATOR,  &ChatHandler::HandleIdleRestartCommand,         "", NULL },
+        { "idleshutdown",   SEC_ADMINISTRATOR,  &ChatHandler::HandleIdleShutDownCommand,        "", NULL },
+        { "info",           SEC_PLAYER,         &ChatHandler::HandleInfoCommand,                "", NULL },
+        { "restart",        SEC_ADMINISTRATOR,  &ChatHandler::HandleRestartCommand,             "", NULL },
+        { "shutdown",       SEC_ADMINISTRATOR,  &ChatHandler::HandleShutDownCommand,            "", NULL },
+        { NULL,             0,                  NULL,                                           "", NULL }
+    };
+    
     static ChatCommand modifyCommandTable[] =
     {
         { "hp",             SEC_MODERATOR,      &ChatHandler::HandleModifyHPCommand,            "", NULL },
@@ -417,6 +427,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "cast",           SEC_ADMINISTRATOR,  NULL,                                           "", castCommandTable },
         { "reset",          SEC_ADMINISTRATOR,  NULL,                                           "", resetCommandTable },
         { "instance",       SEC_ADMINISTRATOR,  NULL,                                           "", instanceCommandTable },
+        { "server",         SEC_ADMINISTRATOR,  NULL,                                           "", serverCommandTable },
 
         { "aura",           SEC_ADMINISTRATOR,  &ChatHandler::HandleAuraCommand,                "", NULL },
         { "unaura",         SEC_ADMINISTRATOR,  &ChatHandler::HandleUnAuraCommand,              "", NULL },
@@ -434,7 +445,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "gps",            SEC_MODERATOR,      &ChatHandler::HandleGPSCommand,                 "", NULL },
         { "guid",           SEC_GAMEMASTER,     &ChatHandler::HandleGUIDCommand,                "", NULL },
         { "help",           SEC_PLAYER,         &ChatHandler::HandleHelpCommand,                "", NULL },
-        { "info",           SEC_PLAYER,         &ChatHandler::HandleInfoCommand,                "", NULL },
         { "itemmove",       SEC_GAMEMASTER,     &ChatHandler::HandleItemMoveCommand,            "", NULL },
         { "cooldown",       SEC_ADMINISTRATOR,  &ChatHandler::HandleCooldownCommand,            "", NULL },
         { "unlearn",        SEC_ADMINISTRATOR,  &ChatHandler::HandleUnLearnCommand,             "", NULL },
@@ -469,8 +479,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "maxskill",       SEC_ADMINISTRATOR,  &ChatHandler::HandleMaxSkillCommand,            "", NULL },
         { "setskill",       SEC_ADMINISTRATOR,  &ChatHandler::HandleSetSkillCommand,            "", NULL },
         { "whispers",       SEC_MODERATOR,      &ChatHandler::HandleWhispersCommand,            "", NULL },
-        { "idleshutdown",   SEC_ADMINISTRATOR,  &ChatHandler::HandleIdleShutDownCommand,        "", NULL },
-        { "shutdown",       SEC_ADMINISTRATOR,  &ChatHandler::HandleShutDownCommand,            "", NULL },
         { "pinfo",          SEC_GAMEMASTER,     &ChatHandler::HandlePInfoCommand,               "", NULL },
         { "password",       SEC_PLAYER,         &ChatHandler::HandlePasswordCommand,            "", NULL },
         { "lockaccount",    SEC_PLAYER,         &ChatHandler::HandleLockAccountCommand,         "", NULL },
