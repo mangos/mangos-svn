@@ -529,14 +529,23 @@ void Aura::Update(uint32 diff)
             m_duration = 0;
         m_timeCla -= diff;
 
-        Unit* caster = GetCaster();
-        if(caster && m_timeCla <= 0)
+        // GetEffIndex()==0 prevent double/triple apply manaPerSecond/manaPerSecondPerLevel to same spell with many auras
+        // all spells with manaPerSecond/manaPerSecondPerLevel have aura in effect 0
+        if(GetEffIndex()==0 && m_timeCla <= 0)
         {
-            Powers powertype = caster->getPowerType();
-            int32 manaPerSecond = m_spellProto->manaPerSecond + m_spellProto->manaPerSecondPerLevel * caster->getLevel();
-            m_timeCla = 1000;
-            if (manaPerSecond)
-                caster->ModifyPower(powertype,-manaPerSecond);
+            if(Unit* caster = GetCaster())
+            {
+                Powers powertype = Powers(m_spellProto->powerType);
+                int32 manaPerSecond = m_spellProto->manaPerSecond + m_spellProto->manaPerSecondPerLevel * caster->getLevel();
+                m_timeCla = 1000;
+                if (manaPerSecond)
+                {
+                    if(powertype==POWER_HEALTH)
+                        caster->ModifyHealth(-manaPerSecond);
+                    else
+                        caster->ModifyPower(powertype,-manaPerSecond);
+                }
+            }
         }
     }
 
