@@ -2419,7 +2419,7 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
     uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, newitemid, num_to_add, &no_space );
     if( msg != EQUIP_ERR_OK )
     {
-        // convert to possibló store amount
+        // convert to possible store amount
         if( msg == EQUIP_ERR_INVENTORY_FULL || msg == EQUIP_ERR_CANT_CARRY_MORE_OF_THIS )
             num_to_add -= no_space;
         else
@@ -5749,7 +5749,16 @@ void Spell::EffectTransmitted(uint32 effIndex)
 
             // end time of range when possible catch fish (FISHING_BOBBER_READY_TIME..GetDuration(m_spellInfo))
             // start time == fish-FISHING_BOBBER_READY_TIME (0..GetDuration(m_spellInfo)-FISHING_BOBBER_READY_TIME)
-            duration = urand(FISHING_BOBBER_READY_TIME*1000,duration);
+            int32 lastSec;
+            switch(urand(0, 3))
+            {
+                case 0: lastSec =  3; break;
+                case 1: lastSec =  7; break;
+                case 2: lastSec = 13; break;
+                case 3: lastSec = 17; break;
+            }
+
+            duration = duration - lastSec*1000 + FISHING_BOBBER_READY_TIME*1000;
             break;
         }
         case GAMEOBJECT_TYPE_SUMMONING_RITUAL:

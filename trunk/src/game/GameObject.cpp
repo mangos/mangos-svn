@@ -890,7 +890,7 @@ void GameObject::Use(Unit* user)
                 float x_lowest = GetPositionX();
                 float y_lowest = GetPositionY();
 
-                // the object orientation+ 90°
+                // the object orientation + 1/2 pi
                 // every slot will be on that straight line
                 float orthogonalOrientation = GetOrientation()+M_PI*0.5f;
                 // find nearest slot
