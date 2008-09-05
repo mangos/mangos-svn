@@ -16554,11 +16554,13 @@ void Player::LeaveBattleground(bool teleportToEntryPoint)
 {
     if(BattleGround *bg = GetBattleGround())
     {
-        if(bg->isBattleGround() && (bg->GetStatus() == STATUS_IN_PROGRESS) && sWorld.getConfig(CONFIG_BATTLEGROUND_CAST_DESERTER))
-            CastSpell(this, 26013, true);                   // Deserter
+        bool need_debuf = bg->isBattleGround() && (bg->GetStatus() == STATUS_IN_PROGRESS) && sWorld.getConfig(CONFIG_BATTLEGROUND_CAST_DESERTER);
 
         bg->RemovePlayerAtLeave(GetGUID(), teleportToEntryPoint, true);
-        m_bgAfkReporter.clear();
+
+        // call after remove to be sure that player resurrected for correct cast
+        if(need_debuf)
+            CastSpell(this, 26013, true);                   // Deserter
     }
 }
 
