@@ -5570,12 +5570,13 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                         procSpellId = 25504;
                     }
 
-                    // Attack Twice
-                    for ( uint32 i = 0; i<2; ++i )
-                        CastCustomSpell(pVictim,procSpellId,&APBonus,NULL,NULL,true,castItem,triggeredByAura);  
-
+                    // apply cooldown before cast to prevent proccing itself
                     if( cooldown )
                         ((Player*)this)->AddSpellCooldown(dummySpell->Id,0,time(NULL) + cooldown);
+
+                    // Attack Twice
+                    for ( uint32 i = 0; i<2; ++i )
+                        CastCustomSpell(pVictim,procSpellId,&APBonus,NULL,NULL,true,castItem,triggeredByAura);
 
                     return true;
                 }
