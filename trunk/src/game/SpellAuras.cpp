@@ -4572,6 +4572,7 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
     switch(GetId())
     {
         case 12976:                                         // Warrior Last Stand triggered spell
+        case 28726:                                         // Nightmare Seed ( Nightmare Seed )
         case 34511:                                         // Valor (Bulwark of Kings, Bulwark of the Ancient Kings)
         case 44055:                                         // Tremendous Fortitude (Battlemaster's Alacrity)
         {
