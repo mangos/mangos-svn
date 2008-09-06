@@ -711,34 +711,28 @@ bool ChatHandler::HandleUnLearnCommand(const char* args)
     if (!*args)
         return false;
 
-    uint32 minS;
-    uint32 maxS;
 
     // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
-    char* startS = extractKeyFromLink((char*)args,"Hspell");
+    uint32 min_id = extractSpellIdFromLink((char*)args);
+    if(!min_id)
+        return false;
+
     // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
     char* tail = strtok(NULL,"");
-    char* endS = tail ? extractKeyFromLink(tail,"Hspell") : NULL;
 
-    if (!endS)
+    uint32 max_id = extractSpellIdFromLink(tail);
+
+    if (!max_id)
     {
         // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
-        minS = (uint32)atol(startS);
-        maxS =  minS+1;
+        max_id =  min_id+1;
     }
     else
     {
-        minS = (uint32)atol(startS);
-        maxS = (uint32)atol(endS);
-        if (maxS >= minS)
-        {
-            maxS=maxS+1;
-        }
-        else
-        {
-            std::swap(minS,maxS);
-            maxS=minS+1;
-        }
+        if (max_id < min_id)
+            std::swap(min_id,max_id);
+
+        max_id=max_id+1;
     }
 
     Player* target = getSelectedPlayer();
@@ -749,7 +743,7 @@ bool ChatHandler::HandleUnLearnCommand(const char* args)
         return false;
     }
 
-    for(uint32 spell=minS;spell<maxS;spell++)
+    for(uint32 spell=min_id;spell<max_id;spell++)
     {
         if (target->HasSpell(spell))
             target->removeSpell(spell);
@@ -777,12 +771,10 @@ bool ChatHandler::HandleCooldownCommand(const char* args)
     }
     else
     {
-        // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
-        char* cId = extractKeyFromLink((char*)args,"Hspell");
-        if(!cId)
+        // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
+        uint32 spell_id = extractSpellIdFromLink((char*)args);
+        if(!spell_id)
             return false;
-
-        uint32 spell_id = atol(cId);
 
         if(!sSpellStore.LookupEntry(spell_id))
         {
@@ -1628,12 +1620,8 @@ bool ChatHandler::HandleLearnCommand(const char* args)
         return false;
     }
 
-    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
-    char* cId = extractKeyFromLink((char*)args,"Hspell");
-    if(!cId)
-        return false;
-
-    uint32 spell = (uint32)atol((char*)cId);
+    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
+    uint32 spell = extractSpellIdFromLink((char*)args);
     if(!spell || !sSpellStore.LookupEntry(spell))
         return false;
 
@@ -3148,11 +3136,9 @@ bool ChatHandler::HandleDamageCommand(const char * args)
 
     // non-melee damage
 
-    char* spellStr2 = extractKeyFromLink(spellStr,"Hspell");
-    uint32 spellid = spellStr2 ? atoi(spellStr2) : 0;
-
-    SpellEntry const* spelInfo = sSpellStore.LookupEntry(spellid);
-    if(!spelInfo)
+    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
+    uint32 spellid = extractSpellIdFromLink((char*)args);
+    if(!spellid || !sSpellStore.LookupEntry(spellid))
         return false;
 
     m_session->GetPlayer()->SpellNonMeleeDamageLog(target, spellid, damage, false);
@@ -5170,12 +5156,8 @@ bool ChatHandler::HandleCastCommand(const char* args)
         return false;
     }
 
-    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
-    char* cId = extractKeyFromLink((char*)args,"Hspell");
-    if(!cId)
-        return false;
-
-    uint32 spell = (uint32)atol((char*)cId);
+    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
+    uint32 spell = extractSpellIdFromLink((char*)args);
     if(!spell)
         return false;
 
@@ -5217,11 +5199,8 @@ bool ChatHandler::HandleCastBackCommand(const char* args)
     }
 
     // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
-    char* cId = extractKeyFromLink((char*)args,"Hspell");
-    if(!cId)
-        return false;
-
-    uint32 spell = (uint32)atol((char*)cId);
+    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
+    uint32 spell = extractSpellIdFromLink((char*)args);
     if(!spell || !sSpellStore.LookupEntry(spell))
         return false;
 
@@ -5254,12 +5233,8 @@ bool ChatHandler::HandleCastDistCommand(const char* args)
         return false;
 
 
-    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
-    char* cId = extractKeyFromLink((char*)args,"Hspell");
-    if(!cId)
-        return false;
-
-    uint32 spell = (uint32)atol((char*)cId);
+    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
+    uint32 spell = extractSpellIdFromLink((char*)args);
     if(!spell)
         return false;
 
@@ -5316,12 +5291,8 @@ bool ChatHandler::HandleCastTargetCommand(const char* args)
         return false;
     }
 
-    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
-    char* cId = extractKeyFromLink((char*)args,"Hspell");
-    if(!cId)
-        return false;
-
-    uint32 spell = (uint32)atol((char*)cId);
+    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
+    uint32 spell = extractSpellIdFromLink((char*)args);
     if(!spell || !sSpellStore.LookupEntry(spell))
         return false;
 
@@ -5393,12 +5364,8 @@ bool ChatHandler::HandleCastSelfCommand(const char* args)
         return false;
     }
 
-    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
-    char* cId = extractKeyFromLink((char*)args,"Hspell");
-    if(!cId)
-        return false;
-
-    uint32 spell = (uint32)atol((char*)cId);
+    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
+    uint32 spell = extractSpellIdFromLink((char*)args);
     if(!spell)
         return false;
 
