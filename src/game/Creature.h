@@ -449,6 +449,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         CreatureInfo const *GetCreatureInfo() const { return m_creatureInfo; }
         CreatureDataAddon const* GetCreatureAddon() const;
+        char const* GetScriptName() const;
 
         void prepareGossipMenu( Player *pPlayer,uint32 gossipid );
         void sendPreparedGossip( Player* player);
@@ -592,6 +593,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 m_originalEntry;
     private:
         GridReference<Creature> m_gridRef;
-        CreatureInfo const* m_creatureInfo;                 // in heroic mode can different from GetCreatureInfo(GetEntry())
+        CreatureInfo const* m_creatureInfo;                 // in heroic mode can different from ObjMgr::GetCreatureTemplate(GetEntry())
 };
 #endif

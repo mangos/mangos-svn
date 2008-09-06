@@ -1988,3 +1988,8 @@ uint32 Creature::getLevelForTarget( Unit const* target ) const
         return 255;
     return level;
 }
+
+char const* Creature::GetScriptName() const
+{
+    return ObjectMgr::GetCreatureTemplate(GetEntry())->ScriptName;
+}
