@@ -330,8 +330,8 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                     case 25599:                             // Thundercrash
                     {
                         damage = unitTarget->GetHealth() / 2;
-                        if(damage < 1000)
-                            damage = 1000;
+                        if(damage < 200)
+                            damage = 200;
                         break;
                     }
                 }
