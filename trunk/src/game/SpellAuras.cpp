@@ -4569,27 +4569,30 @@ void Aura::HandleModManaRegen(bool apply, bool Real)
 void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 {
     // Special case with temporary increase max/current health
-    if( GetId() == 12976 ||                                 //Warrior Last Stand triggered spell
-        GetId() == 44055 )                                  //Item spell
+    switch(GetId())
     {
-        if(Real)
+        case 12976:                                         // Warrior Last Stand triggered spell
+        case 34511:                                         // Valor (Bulwark of Kings, Bulwark of the Ancient Kings)
+        case 44055:                                         // Tremendous Fortitude (Battlemaster's Alacrity)
         {
-            if(apply)
+            if(Real)
             {
-                m_target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
-                m_target->ModifyHealth(m_modifier.m_amount);
-            }
-            else
-            {
-                if (int32(m_target->GetHealth()) > m_modifier.m_amount)
-                    m_target->ModifyHealth(-m_modifier.m_amount);
+                if(apply)
+                {
+                    m_target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
+                    m_target->ModifyHealth(m_modifier.m_amount);
+                }
                 else
-                    m_target->SetHealth(1);
-                m_target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
+                {
+                    if (int32(m_target->GetHealth()) > m_modifier.m_amount)
+                        m_target->ModifyHealth(-m_modifier.m_amount);
+                    else
+                        m_target->SetHealth(1);
+                    m_target->HandleStatModifier(UNIT_MOD_HEALTH, TOTAL_VALUE, float(m_modifier.m_amount), apply);
+                }
             }
+            return;
         }
-
-        return;
     }
 
     // generic case
