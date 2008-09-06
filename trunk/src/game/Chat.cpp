@@ -902,7 +902,7 @@ Creature* ChatHandler::getSelectedCreature()
     return ObjectAccessor::GetCreatureOrPet(*m_session->GetPlayer(),m_session->GetPlayer()->GetSelection());
 }
 
-char*     ChatHandler::extractKeyFromLink(char* text, char const* linkType)
+char* ChatHandler::extractKeyFromLink(char* text, char const* linkType, char** something1)
 {
     // skip empty
     if(!text)
@@ -938,10 +938,69 @@ char*     ChatHandler::extractKeyFromLink(char* text, char const* linkType)
         return NULL;
     }
 
-    char* cKey = strtok(NULL, ":|");                        // extract key
-    strtok(NULL, "]");                                      // skip name with possible spalces
+    char* cKeys = strtok(NULL, "|");                        // extract keys and values
+    char* cKeysTail = strtok(NULL, "");
+
+    char* cKey = strtok(cKeys, ":|");                       // extract key
+    if(something1)
+        *something1 = strtok(NULL, ":|");                   // extract something
+
+    strtok(cKeysTail, "]");                                 // restart scan tail and skip name with possible spaces
     strtok(NULL, " ");                                      // skip link tail (to allow continue strtok(NULL,s) use after retturn from function
     return cKey;
+}
+
+char* ChatHandler::extractKeyFromLink(char* text, char const* const* linkTypes, int* found_idx, char** something1)
+{
+    // skip empty
+    if(!text)
+        return NULL;
+
+    // skip speces
+    while(*text==' '||*text=='\t'||*text=='\b')
+        ++text;
+
+    if(!*text)
+        return NULL;
+
+    // return non link case
+    if(text[0]!='|')
+        return strtok(text, " ");
+
+    // [name] Shift-click form |color|linkType:key|h[name]|h|r
+    // or
+    // [name] Shift-click form |color|linkType:key:something1:...:somethingN|h[name]|h|r
+
+    char* check = strtok(text, "|");                        // skip color
+    if(!check)
+        return NULL;                                        // end of data
+
+    char* cLinkType = strtok(NULL, ":");                    // linktype
+    if(!cLinkType)
+        return NULL;                                        // end of data
+
+    for(int i = 0; linkTypes[i]; ++i)
+    {
+        if(strcmp(cLinkType,linkTypes[i]) == 0)
+        {
+            char* cKeys = strtok(NULL, "|");                // extract keys and values
+            char* cKeysTail = strtok(NULL, "");
+
+            char* cKey = strtok(cKeys, ":|");               // extract key
+            if(something1)
+                *something1 = strtok(NULL, ":|");           // extract something
+
+            strtok(cKeysTail, "]");                         // restart scan tail and skip name with possible spaces
+            strtok(NULL, " ");                              // skip link tail (to allow continue strtok(NULL,s) use after return from function
+            if(found_idx)
+                *found_idx = i;
+            return cKey;
+        }
+    }
+
+    strtok(NULL, " ");                                      // skip link tail (to allow continue strtok(NULL,s) use after return from function
+    SendSysMessage(LANG_WRONG_LINK_TYPE);
+    return NULL;
 }
 
 char const *fmtstring( char const *format, ... )
@@ -999,3 +1058,41 @@ GameObject* ChatHandler::GetObjectGlobalyWithGuidOrNearWithDbGuid(uint32 lowguid
 
     return obj;
 }
+
+static char const* const spellTalentKeys[] = {
+    "Hspell",
+    "Htalent",
+    0
+};
+
+uint32 ChatHandler::extractSpellIdFromLink(char* text)
+{
+    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
+    // number or [name] Shift-click form |color|Htalent:telen_id,rank|h[name]|h|r
+    int type = 0;
+    char* rankS = NULL;
+    char* idS = extractKeyFromLink(text,spellTalentKeys,&type,&rankS);
+    if(!idS)
+        return 0;
+
+    uint32 id = (uint32)atol(idS);
+
+    // spell
+    if(type==0)
+        return id;
+
+    // talent
+    TalentEntry const* talentEntry = sTalentStore.LookupEntry(id);
+    if(!talentEntry)
+        return 0;
+
+    int32 rank = rankS ? (uint32)atol(rankS) : 0;
+    if(rank >= 5)
+        return 0;
+
+    if(rank < 0)
+        rank = 0;
+
+    return talentEntry->RankID[rank];
+}
+
