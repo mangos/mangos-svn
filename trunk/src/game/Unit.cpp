@@ -1928,7 +1928,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
                 float basetime = float(pVictim->getAttackTimer(BASE_ATTACK));
 
                 // after parry nearest next attack time will reduced at %40 from full attack time.
-                // The delay cannot be reduced to less than 20% of your weapon’s base swing delay.
+                // The delay cannot be reduced to less than 20% of your weaponï¿½s base swing delay.
                 if (pVictim->haveOffhandWeapon() && offtime < basetime)
                 {
                     float percent20 = pVictim->GetAttackTime(OFF_ATTACK)*0.20;
@@ -4982,14 +4982,14 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 case 11129:
                 {
                     //last charge and crit
-                    if (triggeredByAura->m_procCharges <= 1 && (procFlag & PROC_FLAG_CRIT_SPELL) )
+                    if( triggeredByAura->m_procCharges <= 1 && (procFlag & PROC_FLAG_CRIT_SPELL) )
                     {
                         RemoveAurasDueToSpell(28682);       //-> remove Combustion auras
-                        return true;
+                        return true;                        // charge counting (will removed)
                     }
 
                     CastSpell(this, 28682, true, castItem, triggeredByAura);
-                    return false;                           // no charge changes, no hidden cooldowns
+                    return(procFlag & PROC_FLAG_CRIT_SPELL);// charge update only at crit hits, no hidden cooldowns
                 }
             }
             break;
