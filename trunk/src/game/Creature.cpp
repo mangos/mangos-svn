@@ -1788,8 +1788,8 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
     float rx,ry,rz;
     GetRespawnCoord(rx, ry, rz);
 
-    float length = pVictim->GetDistanceSq(rx,ry,rz);
-    return ( length > 10000.0f);                            // real value unknown
+    float length = pVictim->GetDistance(rx,ry,rz);
+    return ( length > 100.0f);                            // real value unknown
 }
 
 CreatureDataAddon const* Creature::GetCreatureAddon() const

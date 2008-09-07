@@ -131,7 +131,7 @@ AggressorAI::UpdateAI(const uint32 /*diff*/)
 bool
 AggressorAI::IsVisible(Unit *pl) const
 {
-    return i_creature.GetDistanceSq(pl) < sWorld.getConfig(CONFIG_SIGHT_MONSTER)
+    return i_creature.GetDistance(pl) < sWorld.getConfig(CONFIG_SIGHT_MONSTER)
         && pl->isVisibleForOrDetect(&i_creature,true);
 }
 

@@ -531,7 +531,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if( pOther->GetDistance2dSq( _player ) > 100.0f )
+    if( pOther->GetDistance2d( _player ) > 10.0f )
     {
         SendTradeStatus(TRADE_STATUS_TARGET_TO_FAR);
         return;
