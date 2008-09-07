@@ -573,38 +573,38 @@ void BattleGroundEY::EventPlayerDroppedFlag(Player *Source)
 {
     // Drop allowed in any BG state
 
+    if(!IsFlagPickedup())
+        return;
+
+    if(GetFlagPickerGUID() != Source->GetGUID())
+        return;
+
     const char *message = "";
     uint8 type = 0;
 
-    if(IsFlagPickedup())
+    SetFlagPicker(0);
+    Source->RemoveAurasDueToSpell(BG_EY_NETHERSTORM_FLAG_SPELL);
+    m_FlagState = BG_EY_FLAG_STATE_ON_GROUND;
+    m_FlagsTimer = BG_EY_FLAG_RESPAWN_TIME;
+    Source->CastSpell(Source, BG_EY_PLAYER_CANNOT_PICK_FLAG, true);
+    Source->CastSpell(Source, BG_EY_PLAYER_DROPPED_FLAG_SPELL, true);
+    if(Source->GetTeam() == ALLIANCE)
     {
-        if(GetFlagPickerGUID() == Source->GetGUID())
-        {
-            SetFlagPicker(0);
-            Source->RemoveAurasDueToSpell(BG_EY_NETHERSTORM_FLAG_SPELL);
-            m_FlagState = BG_EY_FLAG_STATE_ON_GROUND;
-            m_FlagsTimer = BG_EY_FLAG_RESPAWN_TIME;
-            Source->CastSpell(Source, BG_EY_PLAYER_CANNOT_PICK_FLAG, true);
-            Source->CastSpell(Source, BG_EY_PLAYER_DROPPED_FLAG_SPELL, true);
-            if(Source->GetTeam() == ALLIANCE)
-            {
-                message = GetMangosString(LANG_BG_EY_DROPPED_FLAG);
-                type = CHAT_MSG_BG_SYSTEM_ALLIANCE;
-            }
-            else
-            {
-                message = GetMangosString(LANG_BG_EY_DROPPED_FLAG);
-                type = CHAT_MSG_BG_SYSTEM_HORDE;
-            }
-            //this does not work correctly :( (it should remove flag carrier name)
-            UpdateWorldState(NETHERSTORM_FLAG_STATE_HORDE, BG_EY_FLAG_STATE_WAIT_RESPAWN);
-            UpdateWorldState(NETHERSTORM_FLAG_STATE_ALLIANCE, BG_EY_FLAG_STATE_WAIT_RESPAWN);
-
-            WorldPacket data;
-            ChatHandler::FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
-            SendPacketToAll(&data);
-        }
+        message = GetMangosString(LANG_BG_EY_DROPPED_FLAG);
+        type = CHAT_MSG_BG_SYSTEM_ALLIANCE;
     }
+    else
+    {
+        message = GetMangosString(LANG_BG_EY_DROPPED_FLAG);
+        type = CHAT_MSG_BG_SYSTEM_HORDE;
+    }
+    //this does not work correctly :( (it should remove flag carrier name)
+    UpdateWorldState(NETHERSTORM_FLAG_STATE_HORDE, BG_EY_FLAG_STATE_WAIT_RESPAWN);
+    UpdateWorldState(NETHERSTORM_FLAG_STATE_ALLIANCE, BG_EY_FLAG_STATE_WAIT_RESPAWN);
+
+    WorldPacket data;
+    ChatHandler::FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
+    SendPacketToAll(&data);
 }
 
 void BattleGroundEY::EventPlayerClickedOnFlag(Player *Source, GameObject* target_obj)

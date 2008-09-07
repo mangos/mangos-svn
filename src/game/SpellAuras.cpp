@@ -1903,20 +1903,42 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     // AT APPLY
     if(apply)
     {
-        // Tame beast
-        if( GetId()==1515 && caster && m_target->CanHaveThreatList())
+        switch(GetId())
         {
-            // FIX_ME: this is 2.0.12 threat effect replaced in 2.1.x by dummy aura, must be checked for correctness
-            m_target->AddThreat(caster, 10.0f);
-            return;
-        }
-
-        // net-o-matic
-        if (GetId() == 13139 && caster)
-        {
-            // root to self part of (root_target->charge->root_self sequence
-            caster->CastSpell(caster,13138,true,NULL,this);
-            return;
+            case 1515:                                      // Tame beast
+                // FIX_ME: this is 2.0.12 threat effect replaced in 2.1.x by dummy aura, must be checked for correctness
+                if( caster && m_target->CanHaveThreatList())
+                    m_target->AddThreat(caster, 10.0f);
+                return;
+            case 13139:                                     // net-o-matic
+                // root to self part of (root_target->charge->root_self sequence
+                if(caster)
+                    caster->CastSpell(caster,13138,true,NULL,this);
+                return;
+            case 39850:                                     // Rocket Blast
+                if(roll_chance_i(20))                       // backfire stun
+                    m_target->CastSpell(m_target, 51581, true, NULL, this);
+                return;
+            case 46354:                                     // Blood Elf Illusion
+                if(caster)
+                {
+                    switch(caster->getGender())
+                    {
+                        case GENDER_FEMALE:
+                            caster->CastSpell(m_target,46356,true,NULL,this);
+                            break;
+                        case GENDER_MALE:
+                            caster->CastSpell(m_target,46355,true,NULL,this);
+                            break;
+                        default:
+                            break;
+                    }
+                }
+                return;
+            case 46699:                                     // Requires No Ammo
+                if(m_target->GetTypeId()==TYPEID_PLAYER)
+                    ((Player*)m_target)->RemoveAmmo();      // not use ammo and not allow use
+                return;
         }
 
         // Earth Shield
@@ -1925,29 +1947,6 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             // prevent double apply bonuses
             if(m_target->GetTypeId()!=TYPEID_PLAYER || !((Player*)m_target)->GetSession()->PlayerLoading())
                 m_modifier.m_amount = caster->SpellHealingBonus(GetSpellProto(), m_modifier.m_amount, SPELL_DIRECT_DAMAGE, m_target);
-            return;
-        }
-
-        // Blood Elf Illusion
-        if(GetId()==46354 && caster)
-        {
-            switch(caster->getGender())
-            {
-                case GENDER_FEMALE:
-                    caster->CastSpell(m_target,46356,true,NULL,this);
-                    break;
-                case GENDER_MALE:
-                    caster->CastSpell(m_target,46355,true,NULL,this);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        // Requires No Ammo
-        if(GetId()==46699 && m_target->GetTypeId()==TYPEID_PLAYER)
-        {
-            ((Player*)m_target)->RemoveAmmo();              // not use ammo and not allow use
             return;
         }
     }
