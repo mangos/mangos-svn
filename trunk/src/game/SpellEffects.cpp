@@ -996,6 +996,17 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastSpell(m_caster,45088,true);
                     return;
                 }
+                case 51582:                                 //Rocket Boots Engaged (Rocket Boots Xtreme and Rocket Boots Xtreme Lite)
+                {
+                    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    if(BattleGround* bg = ((Player*)m_caster)->GetBattleGround())
+                        bg->EventPlayerDroppedFlag((Player*)m_caster);
+
+                    m_caster->CastSpell(m_caster, 30452, true, NULL);
+                    return;
+                }
             }
 
             //All IconID Check in there

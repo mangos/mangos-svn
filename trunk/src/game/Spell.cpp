@@ -3461,6 +3461,11 @@ uint8 Spell::CanCast(bool strict)
                     if(!m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetHealth() > m_targets.getUnitTarget()->GetMaxHealth()*0.2)
                         return SPELL_FAILED_BAD_TARGETS;
                 }
+                else if (m_spellInfo->Id == 51582)
+                {
+                    if(m_caster->IsInWater())
+                        return SPELL_FAILED_ONLY_ABOVEWATER;
+                }
                 break;
             }
             case SPELL_EFFECT_SCHOOL_DAMAGE:
