@@ -17584,7 +17584,7 @@ bool Player::RewardPlayerAndGroupAtKill(Unit* pVictim)
 
 bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
 {
-    if(pRewardSource->GetDistanceSq(this) <= sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
+    if(pRewardSource->GetDistance(this) <= sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
         return true;
 
     if(isAlive())
@@ -17594,7 +17594,7 @@ bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
     if(!corpse)
         return false;
 
-    return pRewardSource->GetDistanceSq(corpse) <= sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE);
+    return pRewardSource->GetDistance(corpse) <= sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE);
 }
 
 uint8 Player::GetWeaponSlotByAttack(WeaponAttackType attType)

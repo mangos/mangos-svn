@@ -1198,7 +1198,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             //Now to get us a random target that's in the initial range of the spell
             uint32 t = 0;
             std::list<Unit *>::iterator itr = tempUnitMap.begin();
-            while(itr!= tempUnitMap.end() && (*itr)->GetDistanceSq(m_caster) < radius * radius)
+            while(itr!= tempUnitMap.end() && (*itr)->GetDistance(m_caster) < radius)
                 ++t, ++itr;
 
             if(!t)
@@ -1219,7 +1219,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 
             while(t && next != tempUnitMap.end() )
             {
-                if(prev->GetDistanceSq(*next) > CHAIN_SPELL_JUMP_RADIUS * CHAIN_SPELL_JUMP_RADIUS)
+                if(prev->GetDistance(*next) > CHAIN_SPELL_JUMP_RADIUS)
                     break;
 
                 if(!prev->IsWithinLOSInMap(*next))
@@ -1304,7 +1304,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 
                     while(t && next != tempUnitMap.end() )
                     {
-                        if(prev->GetDistanceSq(*next) > CHAIN_SPELL_JUMP_RADIUS * CHAIN_SPELL_JUMP_RADIUS)
+                        if(prev->GetDistance(*next) > CHAIN_SPELL_JUMP_RADIUS)
                             break;
 
                         if(!prev->IsWithinLOSInMap(*next))
@@ -1736,7 +1736,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 
                 while(t && next != tempUnitMap.end() )
                 {
-                    if(prev->GetDistanceSq(*next) > CHAIN_SPELL_JUMP_RADIUS * CHAIN_SPELL_JUMP_RADIUS)
+                    if(prev->GetDistance(*next) > CHAIN_SPELL_JUMP_RADIUS)
                         break;
 
                     if(!prev->IsWithinLOSInMap(*next))
@@ -4269,10 +4269,10 @@ uint8 Spell::CheckRange(bool strict)
 
     if(m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_destX != 0 && m_targets.m_destY != 0 && m_targets.m_destZ != 0)
     {
-        float dist = m_caster->GetDistanceSq(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ);
-        if(dist > max_range * max_range)
+        float dist = m_caster->GetDistance(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ);
+        if(dist > max_range)
             return SPELL_FAILED_OUT_OF_RANGE;
-        if(dist < min_range * min_range)
+        if(dist < min_range)
             return SPELL_FAILED_TOO_CLOSE;
     }
 

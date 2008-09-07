@@ -121,7 +121,7 @@ void GuardAI::UpdateAI(const uint32 /*diff*/)
 
 bool GuardAI::IsVisible(Unit *pl) const
 {
-    return i_creature.GetDistanceSq(pl) < sWorld.getConfig(CONFIG_SIGHT_GUARDER)
+    return i_creature.GetDistance(pl) < sWorld.getConfig(CONFIG_SIGHT_GUARDER)
         && pl->isVisibleForOrDetect(&i_creature,true);
 }
 

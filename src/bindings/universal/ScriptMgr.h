@@ -84,7 +84,7 @@ extern Script *m_scripts[MAX_SCRIPTS];
 extern InstanceDataScript *m_instance_scripts[MAX_INSTANCE_SCRIPTS];
 extern int num_inst_scripts;
 
-#define VISIBLE_RANGE (26.46f)
+#define VISIBLE_RANGE (50.0f)
 
 struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
 {
@@ -112,7 +112,7 @@ struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
     // Is unit visible for MoveInLineOfSight
     bool IsVisible(Unit* who) const
     {
-        return !who->HasStealthAura() && m_creature->GetDistanceSq(who) <= VISIBLE_RANGE;
+        return !who->HasStealthAura() && m_creature->GetDistance(who) <= VISIBLE_RANGE;
     }
 
     // Called at World update tick
