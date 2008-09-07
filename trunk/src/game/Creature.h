@@ -465,8 +465,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void setEmoteState(uint8 emote) { m_emoteState = emote; };
         void Say(const char* text, const uint32 language, const uint64 TargetGuid) { MonsterSay(text,language,TargetGuid); }
         void Yell(const char* text, const uint32 language, const uint64 TargetGuid) { MonsterYell(text,language,TargetGuid); }
-        void TextEmote(const char* text, const uint64 TargetGuid) { MonsterTextEmote(text,TargetGuid); }
-        void Whisper(const uint64 receiver, const char* text) { MonsterWhisper(receiver,text); }
+        void TextEmote(const char* text, const uint64 TargetGuid, bool IsBossEmote = false) { MonsterTextEmote(text,TargetGuid,IsBossEmote); }
+        void Whisper(const uint64 receiver, const char* text, bool IsBossWhisper = false) { MonsterWhisper(receiver,text,IsBossWhisper); }
 
         void setDeathState(DeathState s);                   // overwrite virtual Unit::setDeathState
 

@@ -1177,13 +1177,13 @@ void WorldObject::MonsterYell(const char* text, const uint32 language, const uin
     SendMessageToSet(&data, true);
 }
 
-void WorldObject::MonsterTextEmote(const char* text, const uint64 TargetGuid)
+void WorldObject::MonsterTextEmote(const char* text, const uint64 TargetGuid, bool IsBossEmote)
 {
     std::string rightText = "%s ";
     rightText.append(text);
 
     WorldPacket data(SMSG_MESSAGECHAT, 200);
-    data << (uint8)CHAT_MSG_MONSTER_EMOTE;
+    data << (uint8)(IsBossEmote ? CHAT_MSG_RAID_BOSS_EMOTE : CHAT_MSG_MONSTER_EMOTE);
     data << (uint32)LANG_UNIVERSAL;
     data << (uint64)GetGUID();                              // 2.1.0
     data << (uint32)0;                                      // 2.1.0
@@ -1202,10 +1202,10 @@ void WorldObject::MonsterTextEmote(const char* text, const uint64 TargetGuid)
     SendMessageToSet(&data, true);                          // SendMessageToOwnTeamSet()?
 }
 
-void WorldObject::MonsterWhisper(const uint64 receiver, const char* text)
+void WorldObject::MonsterWhisper(const uint64 receiver, const char* text, bool IsBossWhisper)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
-    data << (uint8)CHAT_MSG_MONSTER_WHISPER;
+    data << (uint8)(IsBossWhisper ? CHAT_MSG_RAID_BOSS_WHISPER : CHAT_MSG_MONSTER_WHISPER);
     data << (uint32)LANG_UNIVERSAL;
     data << (uint64)GetGUID();
     data << (uint32)0;                                      //unk1
