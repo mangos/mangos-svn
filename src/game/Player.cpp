@@ -2749,10 +2749,10 @@ void Player::removeSpell(uint32 spell_id)
 
     // unlearn non talent higher ranks (recursive)
     SpellChainMapNext const& nextMap = spellmgr.GetSpellChainNext();
-    for(SpellChainMapNext::const_iterator itr = nextMap.lower_bound(spell_id); itr != nextMap.upper_bound(spell_id); ++itr)
+    for(SpellChainMapNext::const_iterator itr2 = nextMap.lower_bound(spell_id); itr2 != nextMap.upper_bound(spell_id); ++itr2)
     {
-        if(HasSpell(itr->second) && !GetTalentSpellPos(itr->second))
-            removeSpell(itr->second);
+        if(HasSpell(itr2->second) && !GetTalentSpellPos(itr2->second))
+            removeSpell(itr2->second);
     }
 
     // removing
@@ -2861,8 +2861,8 @@ void Player::removeSpell(uint32 spell_id)
     SpellLearnSpellMap::const_iterator spell_begin = spellmgr.GetBeginSpellLearnSpell(spell_id);
     SpellLearnSpellMap::const_iterator spell_end   = spellmgr.GetEndSpellLearnSpell(spell_id);
 
-    for(SpellLearnSpellMap::const_iterator itr = spell_begin; itr != spell_end; ++itr)
-        removeSpell(itr->second.spell);
+    for(SpellLearnSpellMap::const_iterator itr2 = spell_begin; itr2 != spell_end; ++itr2)
+        removeSpell(itr2->second.spell);
 }
 
 void Player::RemoveAllSpellCooldown()

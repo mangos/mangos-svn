@@ -451,12 +451,13 @@ void Pet::SavePetToDB(PetSaveMode mode)
             ss << "', '";
 
             //save spells the pet can teach to it's Master
-            uint8 i;
-            TeachSpellMap::iterator itr;
-            for(itr = m_teachspells.begin(), i = 0; i < 4 && itr != m_teachspells.end(); ++i, ++itr)
-                ss << itr->first << " " << itr->second << " ";
-            for(; i < 4; ++i)
-                ss << uint32(0) << " " << uint32(0) << " ";
+            {
+                int i = 0;
+                for(TeachSpellMap::iterator itr = m_teachspells.begin(); i < 4 && itr != m_teachspells.end(); ++i, ++itr)
+                    ss << itr->first << " " << itr->second << " ";
+                for(; i < 4; ++i)
+                    ss << uint32(0) << " " << uint32(0) << " ";
+            }
 
             ss  << "', "
                 << time(NULL) << ", "
