@@ -329,7 +329,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "yell",           SEC_MODERATOR,      &ChatHandler::HandleYellCommand,                "", NULL },
         { "textemote",      SEC_MODERATOR,      &ChatHandler::HandleTextEmoteCommand,           "", NULL },
         { "add",            SEC_GAMEMASTER,     &ChatHandler::HandleAddSpwCommand,              "", NULL },
-        { "delete",         SEC_GAMEMASTER,     &ChatHandler::HandleDeleteCommand,              "", NULL },
+        { "delete",         SEC_GAMEMASTER,     &ChatHandler::HandleDelCreatureCommand,         "", NULL },
         { "spawndist",      SEC_GAMEMASTER,     &ChatHandler::HandleSpawnDistCommand,           "", NULL },
         { "spawntime",      SEC_GAMEMASTER,     &ChatHandler::HandleSpawnTimeCommand,           "", NULL },
         { "factionid",      SEC_GAMEMASTER,     &ChatHandler::HandleFactionIdCommand,           "", NULL },

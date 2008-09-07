@@ -927,9 +927,27 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleDeleteCommand(const char* /*args*/)
+bool ChatHandler::HandleDelCreatureCommand(const char* args)
 {
-    Creature *unit = getSelectedCreature();
+    Creature* unit = NULL;
+
+    if(*args)
+    {
+        // number or [name] Shift-click form |color|Hcreature:creature_guid|h[name]|h|r
+        char* cId = extractKeyFromLink((char*)args,"Hcreature");
+        if(!cId)
+            return false;
+
+        uint32 lowguid = atoi(cId);
+        if(!lowguid)
+            return false;
+
+        if (CreatureData const* cr_data = objmgr.GetCreatureData(lowguid))
+            unit = ObjectAccessor::GetCreature(*m_session->GetPlayer(), MAKE_NEW_GUID(lowguid, cr_data->id, HIGHGUID_UNIT));
+    }
+    else
+        unit = getSelectedCreature();
+
     if(!unit || unit->isPet() || unit->isTotem())
     {
         SendSysMessage(LANG_SELECT_CREATURE);
@@ -937,10 +955,9 @@ bool ChatHandler::HandleDeleteCommand(const char* /*args*/)
         return false;
     }
 
+    // Delete the creature
     unit->CombatStop();
-
     unit->DeleteFromDB();
-
     unit->CleanupsBeforeDelete();
     unit->AddObjectToRemoveList();
 
