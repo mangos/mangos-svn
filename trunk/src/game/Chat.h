@@ -215,7 +215,7 @@ class ChatHandler
         bool HandleNameCommand(const char* args);
         bool HandleSubNameCommand(const char* args);
         bool HandleItemMoveCommand(const char* args);
-        bool HandleDeleteCommand(const char* args);
+        bool HandleDelCreatureCommand(const char* args);
         bool HandleDeMorphCommand(const char* args);
         bool HandleAddVendorItemCommand(const char* args);
         bool HandleDelVendorItemCommand(const char* args);
