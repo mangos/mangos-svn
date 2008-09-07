@@ -3728,6 +3728,12 @@ bool ChatHandler::HandleEventInfoCommand(const char* args)
     }
 
     GameEventData const& eventData = events[event_id];
+    if(!eventData.isValid())
+    {
+        SendSysMessage(LANG_EVENT_NOT_EXIST);
+        SetSentErrorMessage(true);
+        return false;
+    }
 
     GameEvent::ActiveEvents const& activeEvents = gameeventmgr.GetActiveEventList();
     bool active = activeEvents.find(event_id) != activeEvents.end();
@@ -3763,7 +3769,15 @@ bool ChatHandler::HandleEventStartCommand(const char* args)
 
     GameEvent::GameEventDataMap const& events = gameeventmgr.GetEventMap();
 
-    if(event_id < 0 || event_id >=events.size())
+    if(event_id < 1 || event_id >=events.size())
+    {
+        SendSysMessage(LANG_EVENT_NOT_EXIST);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    GameEventData const& eventData = events[event_id];
+    if(!eventData.isValid())
     {
         SendSysMessage(LANG_EVENT_NOT_EXIST);
         SetSentErrorMessage(true);
@@ -3771,8 +3785,6 @@ bool ChatHandler::HandleEventStartCommand(const char* args)
     }
 
     GameEvent::ActiveEvents const& activeEvents = gameeventmgr.GetActiveEventList();
-    GameEventData const& eventData = events[event_id];
-
     if(activeEvents.find(event_id) != activeEvents.end())
     {
         PSendSysMessage(LANG_EVENT_ALREADY_ACTIVE,event_id);
@@ -3798,7 +3810,15 @@ bool ChatHandler::HandleEventStopCommand(const char* args)
 
     GameEvent::GameEventDataMap const& events = gameeventmgr.GetEventMap();
 
-    if(event_id < 0 || event_id >=events.size())
+    if(event_id < 1 || event_id >=events.size())
+    {
+        SendSysMessage(LANG_EVENT_NOT_EXIST);
+        SetSentErrorMessage(true);
+        return false;
+    }
+
+    GameEventData const& eventData = events[event_id];
+    if(!eventData.isValid())
     {
         SendSysMessage(LANG_EVENT_NOT_EXIST);
         SetSentErrorMessage(true);
@@ -3806,7 +3826,6 @@ bool ChatHandler::HandleEventStopCommand(const char* args)
     }
 
     GameEvent::ActiveEvents const& activeEvents = gameeventmgr.GetActiveEventList();
-    GameEventData const& eventData = events[event_id];
 
     if(activeEvents.find(event_id) == activeEvents.end())
     {
