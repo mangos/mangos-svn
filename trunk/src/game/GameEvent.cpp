@@ -127,6 +127,11 @@ void GameEvent::LoadFromDB()
         bar.step();
 
         uint16 event_id = fields[0].GetUInt16();
+        if(event_id==0)
+        {
+            sLog.outErrorDb("`game_event` game event id (%i) is reserved and can't be used.",event_id);
+            continue;
+        }
 
         GameEventData& pGameEvent = mGameEvent[event_id];
         uint64 starttime        = fields[1].GetUInt64();
@@ -135,6 +140,13 @@ void GameEvent::LoadFromDB()
         pGameEvent.end          = time_t(endtime);
         pGameEvent.occurence    = fields[3].GetUInt32();
         pGameEvent.length       = fields[4].GetUInt32();
+
+        if(pGameEvent.length==0)                            // length>0 is validity check
+        {
+            sLog.outErrorDb("`game_event` game event id (%i) have length 0 and can't be used.",event_id);
+            continue;
+        }
+
         pGameEvent.description  = fields[5].GetCppString();
 
     } while( result->NextRow() );

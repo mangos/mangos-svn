@@ -27,11 +27,14 @@
 
 struct GameEventData
 {
+    GameEventData() : start(1),end(0),occurence(0),length(0) {}
     time_t start;
     time_t end;
     uint32 occurence;
     uint32 length;
     std::string description;
+
+    bool isValid() const { return length > 0; }
 };
 
 struct ModelEquip
