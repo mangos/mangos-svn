@@ -3697,12 +3697,18 @@ void Player::CreateCorpse()
     corpse->SetUInt32Value( CORPSE_FIELD_BYTES_1, _cfb1 );
     corpse->SetUInt32Value( CORPSE_FIELD_BYTES_2, _cfb2 );
 
-    uint32 flags = 0x04;
+    uint32 flags = CORPSE_FLAG_UNK2;
+    if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
+        flags |= CORPSE_FLAG_HIDE_HELM;
+    if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
+        flags |= CORPSE_FLAG_HIDE_CLOAK;
     if(InBattleGround())
-        flags |= 0x20;                                      // to be able to remove insignia
+        flags |= CORPSE_FLAG_LOOTABLE;                      // to be able to remove insignia
     corpse->SetUInt32Value( CORPSE_FIELD_FLAGS, flags );
 
     corpse->SetUInt32Value( CORPSE_FIELD_DISPLAY_ID, GetNativeDisplayId() );
+
+    corpse->SetUInt32Value( CORPSE_FIELD_GUILD, GetGuildId() );
 
     uint32 iDisplayID;
     uint16 iIventoryType;

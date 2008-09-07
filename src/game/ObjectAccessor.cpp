@@ -483,7 +483,7 @@ ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
         bones->SetMapId(corpse->GetMapId());
         bones->SetInstanceId(corpse->GetInstanceId());
 
-        bones->SetUInt32Value(CORPSE_FIELD_FLAGS, 0x05);
+        bones->SetUInt32Value(CORPSE_FIELD_FLAGS, CORPSE_FLAG_UNK2 | CORPSE_FLAG_BONES);
         bones->SetUInt64Value(CORPSE_FIELD_OWNER, 0);
 
         for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
