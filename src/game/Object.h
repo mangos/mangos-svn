@@ -416,8 +416,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         void MonsterSay(const char* text, const uint32 language, const uint64 TargetGuid);
         void MonsterYell(const char* text, const uint32 language, const uint64 TargetGuid);
-        void MonsterTextEmote(const char* text, const uint64 TargetGuid);
-        void MonsterWhisper(const uint64 receiver, const char* text);
+        void MonsterTextEmote(const char* text, const uint64 TargetGuid, bool IsBossEmote = false);
+        void MonsterWhisper(const uint64 receiver, const char* text, bool IsBossWhisper = false);
 
         void SendObjectDeSpawnAnim(uint64 guid);
 
