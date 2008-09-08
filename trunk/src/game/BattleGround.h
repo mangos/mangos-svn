@@ -34,9 +34,17 @@ enum BattleGroundSounds
     SOUND_BG_START                  = 3439
 };
 
+enum BattleGroundQuests
+{
+    SPELL_WS_QUEST_REWARD           = 43483,
+    SPELL_AB_QUEST_REWARD           = 43484,
+    SPELL_AV_QUEST_REWARD           = 43475,
+    SPELL_AV_QUEST_KILLED_BOSS      = 23658,
+    SPELL_EY_QUEST_REWARD           = 43477
+};
+
 enum BattleGroundMarks
 {
-    //TODO add EY mark spell
     SPELL_WS_MARK_LOSER             = 24950,
     SPELL_WS_MARK_WINNER            = 24951,
     SPELL_AB_MARK_LOSER             = 24952,
@@ -60,7 +68,9 @@ enum BattleGroundSpells
     SPELL_RESURRECTION_VISUAL       = 24171,
     SPELL_ARENA_PREPARATION         = 32727,
     SPELL_PREPARATION               = 44521,
-    SPELL_SPIRIT_HEAL_MANA          = 44535
+    SPELL_SPIRIT_HEAL_MANA          = 44535,
+    SPELL_RECENTLY_DROPPED_FLAG     = 42792,
+    SPELL_AURA_PLAYER_INACTIVE      = 43681
 };
 
 enum BattleGroundTimeIntervals
@@ -327,6 +337,7 @@ class BattleGround
         void RewardReputationToTeam(uint32 faction_id, uint32 Reputation, uint32 TeamID);
         void RewardMark(Player *plr,uint32 count);
         void SendRewardMarkByMail(Player *plr,uint32 mark, uint32 count);
+        void RewardQuest(Player *plr);
         void UpdateWorldState(uint32 Field, uint32 Value);
         void UpdateWorldStateForPlayer(uint32 Field, uint32 Value, Player *Source);
         void EndBattleGround(uint32 winner);

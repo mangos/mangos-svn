@@ -391,6 +391,7 @@ void BattleGround::EndBattleGround(uint32 winner)
                 Source = plr;
             RewardMark(plr,ITEM_WINNER_COUNT);
             UpdatePlayerScore(plr, SCORE_BONUS_HONOR, 20);
+            RewardQuest(plr);
         }
         else
         {
@@ -431,8 +432,9 @@ uint32 BattleGround::GetBattlemasterEntry() const
 void BattleGround::RewardMark(Player *plr,uint32 count)
 {
     // 'Inactive' this aura prevents the player from gaining honor points and battleground tokens
-    if(plr->GetDummyAura(43681))
+    if(plr->GetDummyAura(SPELL_AURA_PLAYER_INACTIVE))
         return;
+
     BattleGroundMarks mark;
     bool IsSpell;
     switch(GetTypeID())
@@ -520,6 +522,34 @@ void BattleGround::SendRewardMarkByMail(Player *plr,uint32 mark, uint32 count)
 
         WorldSession::SendMailTo(plr, MAIL_CREATURE, MAIL_STATIONERY_NORMAL, bmEntry, plr->GetGUIDLow(), subject, itemTextId , &mi, 0, 0, NOT_READ);
     }
+}
+
+void BattleGround::RewardQuest(Player *plr)
+{
+    // 'Inactive' this aura prevents the player from gaining honor points and battleground tokens
+    if(plr->GetDummyAura(SPELL_AURA_PLAYER_INACTIVE))
+        return;
+
+    uint32 quest;
+    switch(GetTypeID())
+    {
+        case BATTLEGROUND_AV:
+            quest = SPELL_AV_QUEST_REWARD;
+            break;
+        case BATTLEGROUND_WS:
+            quest = SPELL_WS_QUEST_REWARD;
+            break;
+        case BATTLEGROUND_AB:
+            quest = SPELL_AB_QUEST_REWARD;
+            break;
+        case BATTLEGROUND_EY:
+            quest = SPELL_EY_QUEST_REWARD;
+            break;
+        default:
+            return;
+    }
+
+    plr->CastSpell(plr, quest, true);
 }
 
 void BattleGround::BlockMovement(Player *plr)

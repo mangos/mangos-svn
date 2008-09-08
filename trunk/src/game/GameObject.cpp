@@ -1189,6 +1189,7 @@ void GameObject::Use(Unit* user)
                 !player->IsMounted() &&                     // not mounted
                 !player->HasStealthAura() &&                // not stealthed
                 !player->HasInvisibilityAura() &&           // not invisible
+                !player->HasAura(SPELL_RECENTLY_DROPPED_FLAG, 0) &&  // can't pickup
                 player->isAlive())                          // live player
             {
                 BattleGround *bg = player->GetBattleGround();

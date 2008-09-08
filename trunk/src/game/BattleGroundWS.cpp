@@ -324,6 +324,7 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
 
     if (set)
     {
+        Source->CastSpell(Source, SPELL_RECENTLY_DROPPED_FLAG, true);
         UpdateFlagState(Source->GetTeam(), 1);
 
         WorldPacket data;
