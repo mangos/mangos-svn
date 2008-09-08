@@ -8420,8 +8420,12 @@ uint8 Player::_CanStoreItem_InSpecificSlot( uint8 bag, uint8 slot, ItemPosCountV
     if(need_space > count)
         need_space = count;
 
-    dest.push_back(ItemPosCount((bag << 8) | slot,need_space));
-    count -= need_space;
+    ItemPosCount newPosition = ItemPosCount((bag << 8) | slot, need_space);
+    if(!newPosition.isContainedIn(dest))
+    {
+        dest.push_back(newPosition);
+        count -= need_space;
+    }
     return EQUIP_ERR_OK;
 }
 
@@ -8470,11 +8474,15 @@ uint8 Player::_CanStoreItem_InBag( uint8 bag, ItemPosCountVec &dest, ItemPrototy
                 if(need_space > count)
                     need_space = count;
 
-                dest.push_back(ItemPosCount((bag << 8) | j,need_space));
-                count -= need_space;
+                ItemPosCount newPosition = ItemPosCount((bag << 8) | j, need_space);
+                if(!newPosition.isContainedIn(dest))
+                {
+                    dest.push_back(newPosition);
+                    count -= need_space;
 
-                if(count==0)
-                    return EQUIP_ERR_OK;
+                    if(count==0)
+                        return EQUIP_ERR_OK;
+                }
             }
         }
         else
@@ -8483,11 +8491,15 @@ uint8 Player::_CanStoreItem_InBag( uint8 bag, ItemPosCountVec &dest, ItemPrototy
             if(need_space > count)
                 need_space = count;
 
-            dest.push_back(ItemPosCount((bag << 8) | j,need_space));
-            count -= need_space;
+            ItemPosCount newPosition = ItemPosCount((bag << 8) | j, need_space);
+            if(!newPosition.isContainedIn(dest))
+            {
+                dest.push_back(newPosition);
+                count -= need_space;
 
-            if(count==0)
-                return EQUIP_ERR_OK;
+                if(count==0)
+                    return EQUIP_ERR_OK;
+            }
         }
     }
     return EQUIP_ERR_OK;
@@ -8518,12 +8530,15 @@ uint8 Player::_CanStoreItem_InInventorySlots( uint8 slot_begin, uint8 slot_end, 
                 uint32 need_space = pProto->Stackable - pItem2->GetCount();
                 if(need_space > count)
                     need_space = count;
+                ItemPosCount newPosition = ItemPosCount((INVENTORY_SLOT_BAG_0 << 8) | j, need_space);
+                if(!newPosition.isContainedIn(dest))
+                {
+                    dest.push_back(newPosition);
+                    count -= need_space;
 
-                dest.push_back(ItemPosCount((INVENTORY_SLOT_BAG_0 << 8) | j, need_space));
-                count -= need_space;
-
-                if(count==0)
-                    return EQUIP_ERR_OK;
+                    if(count==0)
+                        return EQUIP_ERR_OK;
+                }
             }
         }
         else
@@ -8532,11 +8547,15 @@ uint8 Player::_CanStoreItem_InInventorySlots( uint8 slot_begin, uint8 slot_end, 
             if(need_space > count)
                 need_space = count;
 
-            dest.push_back(ItemPosCount((INVENTORY_SLOT_BAG_0 << 8) | j,need_space));
-            count -= need_space;
+            ItemPosCount newPosition = ItemPosCount((INVENTORY_SLOT_BAG_0 << 8) | j, need_space);
+            if(!newPosition.isContainedIn(dest))
+            {
+                dest.push_back(newPosition);
+                count -= need_space;
 
-            if(count==0)
-                return EQUIP_ERR_OK;
+                if(count==0)
+                    return EQUIP_ERR_OK;
+            }
         }
     }
     return EQUIP_ERR_OK;
@@ -17829,3 +17848,16 @@ void Player::UpdateUnderwaterState( Map* m, float x, float y, float z )
     if ((height_z <= INVALID_HEIGHT || z < (height_z - 0)) && (flag1 == 0x00) && IsInWater())
         m_isunderwater |= 0x80;
 }
+
+bool ItemPosCount::isContainedIn(ItemPosCountVec &vec)
+{
+    for(ItemPosCountVec::const_iterator itr = vec.begin(); itr != vec.end();++itr)
+    {
+        if(itr->pos == this->pos/* && itr->count == this.count*/)
+        {
+            return true;
+        }
+    }
+    return false;
+}
+

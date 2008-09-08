@@ -667,7 +667,7 @@ enum KeyRingSlots
 struct ItemPosCount
 {
     ItemPosCount(uint16 _pos, uint8 _count) : pos(_pos), count(_count) {}
-
+    bool isContainedIn(std::vector<ItemPosCount>&);
     uint16 pos;
     uint8 count;
 };
