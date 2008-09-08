@@ -586,7 +586,7 @@ void BattleGroundEY::EventPlayerDroppedFlag(Player *Source)
     Source->RemoveAurasDueToSpell(BG_EY_NETHERSTORM_FLAG_SPELL);
     m_FlagState = BG_EY_FLAG_STATE_ON_GROUND;
     m_FlagsTimer = BG_EY_FLAG_RESPAWN_TIME;
-    Source->CastSpell(Source, BG_EY_PLAYER_CANNOT_PICK_FLAG, true);
+    Source->CastSpell(Source, SPELL_RECENTLY_DROPPED_FLAG, true);
     Source->CastSpell(Source, BG_EY_PLAYER_DROPPED_FLAG_SPELL, true);
     if(Source->GetTeam() == ALLIANCE)
     {
