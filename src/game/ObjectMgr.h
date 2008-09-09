@@ -39,6 +39,8 @@
 #include "ObjectDefines.h"
 #include "Policies/Singleton.h"
 #include "Database/SQLStorage.h"
+#include "zthread/FastMutex.h"
+#include "zthread/Guard.h"
 
 #include <string>
 #include <map>
@@ -632,7 +634,7 @@ class ObjectMgr
 
         time_t GetCreatureRespawnTime(uint32 loguid, uint32 instance) { return mCreatureRespawnTimes[MAKE_PAIR64(loguid,instance)]; }
         void SaveCreatureRespawnTime(uint32 loguid, uint32 instance, time_t t);
-        time_t GetGORespawnTime(uint32 loguid, uint32 instance) { return mGORespawnTimes[MAKE_PAIR64(loguid,instance)]; }
+        time_t GetGORespawnTime(uint32 loguid, uint32 instance);
         void SaveGORespawnTime(uint32 loguid, uint32 instance, time_t t);
         void DeleteRespawnTimeForInstance(uint32 instance);
 
@@ -767,6 +769,9 @@ class ObjectMgr
         MangosStringLocaleMap mMangosStringLocaleMap;
         RespawnTimes mCreatureRespawnTimes;
         RespawnTimes mGORespawnTimes;
+        typedef ZThread::FastMutex LockType;
+        typedef ZThread::Guard< LockType > GuardType;
+        LockType mGORespawnTimesLock;        
 
         typedef std::vector<uint32> GuildBankTabPriceMap;
         GuildBankTabPriceMap mGuildBankTabPrice;
