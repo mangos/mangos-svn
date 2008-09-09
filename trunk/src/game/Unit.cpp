@@ -5953,7 +5953,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 // Pyroclasm (instead non-existed triggered spell)
                 triggered_spell_id = 18093;
                 target = pVictim;
-                return true;
+                break;
             }
             // Drain Soul
             if(auraSpellInfo->SpellFamilyFlags & 0x0000000000004000)
@@ -6063,7 +6063,7 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     }
 
                     target = this;
-                    return true;
+                    break;
                 }
             }
             break;
