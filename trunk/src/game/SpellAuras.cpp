@@ -1312,8 +1312,22 @@ void Aura::TriggerSpell()
                     }
 //                    // Mark of Frost
 //                    case 23184: break;
-//                    // Restoration
-//                    case 23493: break;
+                    // Restoration
+                    case 23493:
+                    {
+                        int32 heal = caster->GetMaxHealth() * 0.1;
+                        caster->ModifyHealth( heal );
+                        caster->SendHealSpellLog(caster, 23493, heal);
+
+                        int32 mana = caster->GetMaxPower(POWER_MANA);
+                        if (mana)
+                        {
+                            mana *= 0.1;
+                            caster->ModifyPower( POWER_MANA, mana );
+                            caster->SendEnergizeSpellLog(caster, 23493, mana, POWER_MANA);
+                        }
+                        break;
+                    }
 //                    // Stoneclaw Totem Passive TEST
 //                    case 23792: break;
 //                    // Axe Flurry
