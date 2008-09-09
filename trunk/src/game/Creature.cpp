@@ -1887,7 +1887,7 @@ void Creature::AddCreatureSpellCooldown(uint32 spellid)
     if(spellInfo->Category)
         _AddCreatureCategoryCooldown(spellInfo->Category, time(NULL));
 
-    m_GlobalCooldown = 1500;
+    m_GlobalCooldown = spellInfo->StartRecoveryTime;
 }
 
 bool Creature::HasCategoryCooldown(uint32 spell_id) const
