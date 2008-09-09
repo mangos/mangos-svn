@@ -161,7 +161,7 @@ uint32 BigNumber::AsDword()
 
 uint8 *BigNumber::AsByteArray(int minSize)
 {
-    int length = (size >= GetNumBytes()) ? size : GetNumBytes();
+    int length = (minSize >= GetNumBytes()) ? minSize : GetNumBytes();
 
     if (_array)
     {
