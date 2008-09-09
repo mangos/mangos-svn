@@ -4248,7 +4248,9 @@ void Spell::EffectWeaponDmg(uint32 i)
     if(m_attackType == RANGED_ATTACK && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
-        if(!pItem  || pItem->IsBroken())
+
+        // wands don't have ammo
+        if(!pItem  || pItem->IsBroken() || pItem->GetProto()->SubClass==ITEM_SUBCLASS_WEAPON_WAND)
             return;
 
         if( pItem->GetProto()->InventoryType == INVTYPE_THROWN )
@@ -4267,7 +4269,6 @@ void Spell::EffectWeaponDmg(uint32 i)
         }
         else if(uint32 ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID))
             ((Player*)m_caster)->DestroyItemCount(ammo, 1, true);
-        // wand not have ammo
     }
 }
 
