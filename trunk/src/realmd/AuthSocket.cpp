@@ -461,9 +461,6 @@ bool AuthSocket::_HandleLogonChallenge()
                         BigNumber gmod=g.ModExp(b, N);
                         B = ((v * 3) + gmod) % N;
 
-                        if (B.GetNumBytes() < 32)
-                            sLog.outDetail("Interesting, calculation of B in realmd is < 32.");
-
                         ASSERT(gmod.GetNumBytes() <= 32);
 
                         BigNumber unk3;
@@ -471,7 +468,9 @@ bool AuthSocket::_HandleLogonChallenge()
 
                         ///- Fill the response packet with the result
                         pkt << (uint8)REALM_AUTH_SUCCESS;
-                        pkt.append(B.AsByteArray(), B.GetNumBytes());   // 32 bytes
+
+                        // B may be calculated < 32B so we force minnimal length to 32B
+                        pkt.append(B.AsByteArray(32), 32);   // 32 bytes
                         pkt << (uint8)1;
                         pkt.append(g.AsByteArray(), 1);
                         pkt << (uint8)32;
