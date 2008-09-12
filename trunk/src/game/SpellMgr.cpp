@@ -297,8 +297,6 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
             return true;
         case 28441:                                         // not positive dummy spell
         case 37675:                                         // Chaos Blast
-        case 35480: case 35481: case 35482:                 // Human Illusion (prevent cancel)
-        case 35483: case 39824:                             // Human Illusion (prevent cancel)
             return false;
     }
 
@@ -325,6 +323,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                     {
                         case 13139:                         // net-o-matic special effect
                         case 23445:                         // evil twin
+                        case 39824:                         // Human Illusion (prevent cancel)
                             return false;
                         default:
                             break;
@@ -393,6 +392,8 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                     {
                         case 36897:                         // Transporter Malfunction (race mutation to horde)
                         case 36899:                         // Transporter Malfunction (race mutation to alliance)
+                        case 35480: case 35481:             // Human Illusion (prevent cancel)
+                        case 35482: case 35483:             // Human Illusion (prevent cancel)
                             return false;
                     }
                     break;
@@ -441,6 +442,10 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                     break;
                 case SPELL_AURA_MOD_SKILL:
                     if(spellproto->EffectBasePoints[effIndex]+int32(spellproto->EffectBaseDice[effIndex]) < 0)
+                        return false;
+                    break;
+                case SPELL_AURA_FORCE_REACTION:
+                    if(spellproto->Id==42792)               // Recently Dropped Flag (prevent cancel)
                         return false;
                     break;
                 default:
