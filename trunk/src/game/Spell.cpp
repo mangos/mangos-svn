@@ -2327,7 +2327,7 @@ void Spell::SendSpellCooldown()
         {
             for(SpellCategorySet::const_iterator i_scset = i_scstore->second.begin(); i_scset != i_scstore->second.end(); ++i_scset)
             {
-                if(*i_scset == m_spellInfo->Id)                     // skip main spell
+                if(*i_scset == m_spellInfo->Id && rec > 0)  // skip main spell if already handled above
                     continue;
 
                 _player->AddSpellCooldown(m_spellInfo->Id, m_CastItem ? m_CastItem->GetEntry() : 0, catrecTime);
