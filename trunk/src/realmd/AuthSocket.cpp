@@ -673,10 +673,10 @@ bool AuthSocket::_HandleLogonProof()
             //Increment number of failed logins by one and if it reaches the limit temporarily ban that account or IP
             dbRealmServer.PExecute("UPDATE account SET failed_logins = failed_logins + 1 WHERE username = '%s'",_safelogin.c_str());
 
-            if(QueryResult *loginfail = dbRealmServer.PQuery("SELECT id, last_ip, failed_logins FROM account WHERE username = '%s'", _safelogin.c_str()))
+            if(QueryResult *loginfail = dbRealmServer.PQuery("SELECT id, failed_logins FROM account WHERE username = '%s'", _safelogin.c_str()))
             {
                 Field* fields = loginfail->Fetch();
-                uint32 failed_logins = fields[2].GetUInt32();
+                uint32 failed_logins = fields[1].GetUInt32();
 
                 if( failed_logins >= MaxWrongPassCount )
                 {
@@ -686,15 +686,19 @@ bool AuthSocket::_HandleLogonProof()
                     if(WrongPassBanType)
                     {
                         uint32 acc_id = fields[0].GetUInt32();
-                        dbRealmServer.PExecute("INSERT INTO account_banned VALUES ('%u',UNIX_TIMESTAMP(),UNIX_TIMESTAMP()+'%u','MaNGOS realmd','Failed login autoban',1)", acc_id, WrongPassBanTime);
-                        sLog.outBasic("[AuthChallenge] account %s got banned for '%u' seconds because it failed to authenticale '%u' times",_login.c_str(), WrongPassBanTime, failed_logins);
+                        dbRealmServer.PExecute("INSERT INTO account_banned VALUES ('%u',UNIX_TIMESTAMP(),UNIX_TIMESTAMP()+'%u','MaNGOS realmd','Failed login autoban',1)",
+                            acc_id, WrongPassBanTime);
+                        sLog.outBasic("[AuthChallenge] account %s got banned for '%u' seconds because it failed to authenticate '%u' times",
+                            _login.c_str(), WrongPassBanTime, failed_logins);
                     }
                     else
                     {
-                        std::string last_ip = fields[1].GetCppString();
-                        dbRealmServer.escape_string(last_ip);
-                        dbRealmServer.PExecute("INSERT INTO ip_banned VALUES ('%s',UNIX_TIMESTAMP(),UNIX_TIMESTAMP()+'%u','MaNGOS realmd','Failed login autoban')",last_ip.c_str(), WrongPassBanTime);
-                        sLog.outBasic("[AuthChallenge] IP %s got banned for '%u' seconds because it failed to authenticale '%u' times", (*loginfail)[1].GetString(), WrongPassBanTime, failed_logins);
+                        std::string current_ip = GetRemoteAddress();
+                        dbRealmServer.escape_string(current_ip);
+                        dbRealmServer.PExecute("INSERT INTO ip_banned VALUES ('%s',UNIX_TIMESTAMP(),UNIX_TIMESTAMP()+'%u','MaNGOS realmd','Failed login autoban')",
+                            current_ip.c_str(), WrongPassBanTime);
+                        sLog.outBasic("[AuthChallenge] IP %s got banned for '%u' seconds because account %s failed to authenticate '%u' times",
+                            current_ip.c_str(), WrongPassBanTime, _login.c_str(), failed_logins);
                     }
                 }
                 delete loginfail;
