@@ -1928,7 +1928,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
                 float basetime = float(pVictim->getAttackTimer(BASE_ATTACK));
 
                 // after parry nearest next attack time will reduced at %40 from full attack time.
-                // The delay cannot be reduced to less than 20% of your weapon�s base swing delay.
+                // The delay cannot be reduced to less than 20% of your weapon's base swing delay.
                 if (pVictim->haveOffhandWeapon() && offtime < basetime)
                 {
                     float percent20 = pVictim->GetAttackTime(OFF_ATTACK)*0.20;
@@ -3451,9 +3451,9 @@ bool Unit::isInBack(Unit const* target, float distance, float arc) const
 bool Unit::isInAccessablePlaceFor(Creature const* c) const
 {
     if(IsInWater())
-        return c->isCanSwimOrFly();
+        return c->canSwim();
     else
-        return c->isCanWalkOrFly();
+        return c->canWalk();
 }
 
 bool Unit::IsInWater() const
@@ -10303,7 +10303,13 @@ void Unit::StopMoving()
     clearUnitState(UNIT_STAT_MOVING);
 
     // send explicit stop packet
-    SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(),0, GetUnitMovementFlags(), 0);
+    // rely on vmaps here because for exemple stormwind is in air
+    float z = MapManager::Instance().GetBaseMap(GetMapId())->GetHeight(GetPositionX(), GetPositionY(), GetPositionZ(), true);
+    //if (fabs(GetPositionZ() - z) < 2.0f)
+    //    Relocate(GetPositionX(), GetPositionY(), z);
+    Relocate(GetPositionX(), GetPositionY(),GetPositionZ());
+
+    SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(), 0, true, 0);
 
     // update position and orientation;
     WorldPacket data;

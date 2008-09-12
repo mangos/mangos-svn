@@ -287,9 +287,10 @@ struct CreatureModelInfo
 
 enum InhabitTypeValues
 {
-    INHAVIT_GROUND = 1,
-    INHAVIT_WATER  = 2,
-    INHAVIT_ANYWHERE = INHAVIT_GROUND | INHAVIT_WATER
+    INHABIT_GROUND = 1,
+    INHABIT_WATER  = 2,
+    INHABIT_AIR    = 4,
+    INHABIT_ANYWHERE = INHABIT_GROUND | INHABIT_WATER | INHABIT_AIR
 };
 
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform
@@ -337,9 +338,10 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool isTotem() const { return m_isTotem; }
         bool isRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
         bool isCivilian() const { return GetCreatureInfo()->flags_extra & CREATURE_FLAG_EXTRA_CIVILIAN; }
+        bool canWalk() const { return GetCreatureInfo()->InhabitType & INHABIT_GROUND; }
+        bool canSwim() const { return GetCreatureInfo()->InhabitType & INHABIT_WATER; }
+        bool canFly()  const { return GetCreatureInfo()->InhabitType & INHABIT_AIR; }
         ///// TODO RENAME THIS!!!!!
-        bool isCanSwimOrFly() const { return GetCreatureInfo()->InhabitType & INHAVIT_WATER; }
-        bool isCanWalkOrFly() const { return GetCreatureInfo()->InhabitType & INHAVIT_GROUND; }
         bool isCanTrainingOf(Player* player, bool msg) const;
         bool isCanIneractWithBattleMaster(Player* player, bool msg) const;
         bool isCanTrainingAndResetTalentsOf(Player* pPlayer) const;

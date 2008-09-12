@@ -72,8 +72,8 @@ template<>
 void
 ConfusedMovementGenerator<Creature>::_InitSpecific(Creature &creature, bool &is_water_ok, bool &is_land_ok)
 {
-    is_water_ok = creature.isCanSwimOrFly();
-    is_land_ok  = creature.isCanWalkOrFly();
+    is_water_ok = creature.canSwim();
+    is_land_ok  = creature.canWalk();
 }
 
 template<>

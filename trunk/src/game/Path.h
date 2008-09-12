@@ -43,31 +43,34 @@ class Path
         float GetTotalLength() const { return GetTotalLength(0,Size()); }
         float GetTotalLength(uint32 start, uint32 end) const
         {
-            float len = 0, xd, yd;
+            float len = 0, xd, yd, zd;
             for(unsigned int idx=start+1; idx < end; ++idx)
             {
                 xd = i_nodes[ idx ].x - i_nodes[ idx-1 ].x;
                 yd = i_nodes[ idx ].y - i_nodes[ idx-1 ].y;
-                len += (float)sqrt( xd * xd + yd*yd );
+                zd = i_nodes[ idx ].z - i_nodes[ idx-1 ].z;
+                len += sqrtf( xd*xd + yd*yd + zd*zd );
             }
             return len;
         }
 
         float GetPassedLength(uint32 curnode, float x, float y, float z)
         {
-            float len = 0, xd, yd;
+            float len = 0, xd, yd, zd;
             for(unsigned int idx=1; idx < curnode; ++idx)
             {
                 xd = i_nodes[ idx ].x - i_nodes[ idx-1 ].x;
                 yd = i_nodes[ idx ].y - i_nodes[ idx-1 ].y;
-                len += (float)sqrt( xd * xd + yd*yd );
+                zd = i_nodes[ idx ].z - i_nodes[ idx-1 ].z;
+                len += sqrtf( xd*xd + yd*yd + zd*zd );
             }
 
             if(curnode > 0)
             {
                 xd = x - i_nodes[curnode-1].x;
                 yd = y - i_nodes[curnode-1].y;
-                len += (float)sqrt( xd * xd + yd*yd );
+                zd = z - i_nodes[curnode-1].z;
+                len += sqrtf( xd*xd + yd*yd + zd*zd );
             }
 
             return len;

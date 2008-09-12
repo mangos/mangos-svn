@@ -36,7 +36,7 @@
 #include <set>
 
 #define FLIGHT_TRAVEL_UPDATE  100
-
+#define STOP_TIME_FOR_PLAYER  3 * 60 * 1000                         // 3 Minutes
 struct WaypointBehavior
 {
     uint32 emote;
@@ -82,7 +82,7 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
 : public MovementGeneratorMedium< Creature, WaypointMovementGenerator<Creature> >,
 public PathMovementBase<Creature>
 {
-    TimeTracker i_nextMoveTime;
+    TimeTrackerSmall i_nextMoveTime;
     std::vector<uint32> i_delays;
     std::vector<WaypointBehavior *> i_wpBehaviour;
     public:
@@ -106,11 +106,16 @@ public PathMovementBase<Creature>
         void LoadPath(Creature &c);
         void ReloadPath(Creature &c) { ClearWaypoints(); LoadPath(c); }
 
+        // Player stoping creature
+        bool IsStopedByPlayer() { return b_StopedByPlayer; }
+        void SetStopedByPlayer(bool val) { b_StopedByPlayer = val; }
+
         // statics
         static void Initialize(void);
     private:
         void ClearWaypoints();
         static std::set<uint32> si_waypointHolders;
+        bool b_StopedByPlayer;
 };
 
 /** FlightPathMovementGenerator generates movement of the player for the paths

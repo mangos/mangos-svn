@@ -65,9 +65,6 @@ template<typename TRAVELLER>
 uint32
 DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, float dest_x, float dest_y, float dest_z, bool sendMove)
 {
-    if (i_destSet && i_destX == dest_x && i_destY == dest_y && i_destZ == dest_z)
-        return 0;
-
     i_destSet = true;
     i_destX = dest_x;
     i_destY = dest_y;
@@ -89,21 +86,48 @@ DestinationHolder<TRAVELLER>::StartTravel(TRAVELLER &traveller, bool sendMove)
     float dx = i_destX - i_fromX;
     float dy = i_destY - i_fromY;
     float dz = i_destZ - i_fromZ;
-    double dist = ::sqrt((dx*dx) + (dy*dy) + (dz*dz));
-    double speed = traveller.Speed();
-    if(speed<=0)
-        speed = 2.5f;
+
+    float dist;
+    //Should be for Creature Flying and Swimming.
+    if(traveller.GetTraveller().hasUnitState(UNIT_STAT_IN_FLIGHT))
+        dist = sqrt((dx*dx) + (dy*dy) + (dz*dz)); 
+    else                                                    //Walking on the ground
+        dist = sqrt((dx*dx) + (dy*dy)); 
+    float speed = traveller.Speed();
+
     speed *=  0.001f;                                       // speed is in seconds so convert from second to millisecond
-    i_totalTravelTime = static_cast<uint32>( dist/speed + 0.5 );
+    i_totalTravelTime = static_cast<uint32>(dist/speed);
     i_timeElapsed = 0;
-    if(sendMove) traveller.MoveTo(i_destX, i_destY, i_destZ, i_totalTravelTime);
+    if(sendMove) 
+        traveller.MoveTo(i_destX, i_destY, i_destZ, i_totalTravelTime);
     return i_totalTravelTime;
 }
 
 template<typename TRAVELLER>
 bool
-DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, uint32 diff, bool force_update)
+DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, uint32 diff, bool force_update, bool micro_movement)
 {
+    if(!micro_movement)
+    {
+        i_tracker.Update(diff);
+        i_timeElapsed += diff;
+        if( i_tracker.Passed() || force_update )
+        {
+            ResetUpdate();
+            if(!i_destSet) return true;
+            float x,y,z;
+            GetLocationNowNoMicroMovement(x, y, z);
+            if( x == -431602080 )
+                return false;
+            if( traveller.GetTraveller().GetPositionX() != x || traveller.GetTraveller().GetPositionY() != y )
+            {
+                float ori = traveller.GetTraveller().GetAngle(x, y);
+                traveller.Relocation(x, y, z, ori);
+            }
+            return true;
+        }
+        return false;
+    }
     i_tracker.Update(diff);
     i_timeElapsed += diff;
     if( i_tracker.Passed() || force_update )
@@ -111,14 +135,30 @@ DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, uint32 diff,
         ResetUpdate();
         if(!i_destSet) return true;
         float x,y,z;
-        GetLocationNow(x, y, z);
+        
+        if(!traveller.GetTraveller().hasUnitState(UNIT_STAT_MOVING | UNIT_STAT_IN_FLIGHT))
+            return true;
+
+        if(traveller.GetTraveller().hasUnitState(UNIT_STAT_IN_FLIGHT))
+            GetLocationNow(traveller.GetTraveller().GetMapId() ,x, y, z, true);                  // Should repositione Object with right Coord, so I can bypass some Grid Relocation
+        else
+            GetLocationNow(traveller.GetTraveller().GetMapId(), x, y, z, false);
+
         if( x == -431602080 )
             return false;
+        
         if( traveller.GetTraveller().GetPositionX() != x || traveller.GetTraveller().GetPositionY() != y )
         {
             float ori = traveller.GetTraveller().GetAngle(x, y);
             traveller.Relocation(x, y, z, ori);
         }
+        // Change movement computation to micro movement based on last tick coords, this makes system work
+        // even on multiple floors zones without hugh vmaps usage ;)
+        i_totalTravelTime -= i_timeElapsed;     // Consider only the remaining part
+        i_timeElapsed = 0;
+        i_fromX = x;                            // and change origine
+        i_fromY = y;                            // then I take into account only micro movement
+        i_fromZ = z;
         return true;
     }
     return false;
@@ -126,7 +166,7 @@ DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, uint32 diff,
 
 template<typename TRAVELLER>
 void
-DestinationHolder<TRAVELLER>::GetLocationNow(float &x, float &y, float &z) const
+DestinationHolder<TRAVELLER>::GetLocationNow(uint32 mapid, float &x, float &y, float &z, bool is3D) const
 {
     if( HasArrived() )
     {
@@ -134,12 +174,28 @@ DestinationHolder<TRAVELLER>::GetLocationNow(float &x, float &y, float &z) const
         y = i_destY;
         z = i_destZ;
     }
-    else
+    else if(HasDestination())
     {
         double percent_passed = (double)i_timeElapsed / (double)i_totalTravelTime;
-        x = i_fromX + ((i_destX - i_fromX) * percent_passed);
-        y = i_fromY + ((i_destY - i_fromY) * percent_passed);
-        z = i_fromZ + ((i_destZ - i_fromZ) * percent_passed);
+        const float distanceX = ((i_destX - i_fromX) * percent_passed);
+        const float distanceY = ((i_destY - i_fromY) * percent_passed);
+        const float distanceZ = ((i_destZ - i_fromZ) * percent_passed);
+        x = i_fromX + distanceX;
+        y = i_fromY + distanceY;
+        float z2 = i_fromZ + distanceZ;
+        // All that is not finished but previous code neither... Traveller need be able to swim.
+        if(is3D)
+            z = z2;
+        else
+        {
+            //That part is good for mob Walking on the floor. But the floor is not allways what we thought.
+            z = MapManager::Instance().GetBaseMap(mapid)->GetHeight(x,y,i_fromZ,false); // Disable cave check
+            const float groundDist = sqrt(distanceX*distanceX + distanceY*distanceY);
+            const float zDist = fabs(i_fromZ - z) + 0.000001f;
+            const float slope = groundDist / zDist;
+            if(slope < 1.0f)  // This prevents the ground returned by GetHeight to be used when in cave
+                z = z2; // a climb or jump of more than 45 is denied
+        }
     }
 }
 
@@ -158,4 +214,24 @@ DestinationHolder<TRAVELLER>::GetDestinationDiff(float x, float y, float z) cons
 {
     return sqrt(((x-i_destX)*(x-i_destX)) + ((y-i_destY)*(y-i_destY)) + ((z-i_destZ)*(z-i_destZ)));
 }
+
+template<typename TRAVELLER>
+void
+DestinationHolder<TRAVELLER>::GetLocationNowNoMicroMovement(float &x, float &y, float &z) const
+{
+    if( HasArrived() )
+    {
+        x = i_destX;
+        y = i_destY;
+        z = i_destZ;
+    }
+    else
+    {
+        double percent_passed = (double)i_timeElapsed / (double)i_totalTravelTime;
+        x = i_fromX + ((i_destX - i_fromX) * percent_passed);
+        y = i_fromY + ((i_destY - i_fromY) * percent_passed);
+        z = i_fromZ + ((i_destZ - i_fromZ) * percent_passed);
+    }
+}
+
 #endif

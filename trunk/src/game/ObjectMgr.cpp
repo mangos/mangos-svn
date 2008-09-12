@@ -629,10 +629,10 @@ void ObjectMgr::LoadCreatureTemplates()
         if((cInfo->npcflag & UNIT_NPC_FLAG_TRAINER) && cInfo->trainer_type >= MAX_TRAINER_TYPE)
             sLog.outErrorDb("Creature (Entry: %u) has wrong trainer type %u",cInfo->Entry,cInfo->trainer_type);
 
-        if(cInfo->InhabitType <= 0 || cInfo->InhabitType > INHAVIT_ANYWHERE)
+        if(cInfo->InhabitType <= 0 || cInfo->InhabitType > INHABIT_ANYWHERE)
         {
             sLog.outErrorDb("Creature (Entry: %u) has wrong value (%u) in `InhabitType`, creature will not correctly walk/swim/fly",cInfo->Entry,cInfo->InhabitType);
-            const_cast<CreatureInfo*>(cInfo)->InhabitType = INHAVIT_ANYWHERE;
+            const_cast<CreatureInfo*>(cInfo)->InhabitType = INHABIT_ANYWHERE;
         }
 
         if(cInfo->PetSpellDataId)
