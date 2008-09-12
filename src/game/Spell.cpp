@@ -4333,6 +4333,9 @@ int32 Spell::CalculatePowerCost()
     // Apply cost mod by spell
     if(Player* modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, powerCost, this);
+    
+    if(m_spellInfo->Attributes & SPELL_ATTR_LEVEL_DAMAGE_CALCULATION)
+        powerCost *= 0.0017f*m_caster->GetMaxPower(Powers(m_spellInfo->powerType));
 
     // PCT mod from user auras by school
     powerCost = int32(powerCost * (1.0f+m_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+school)));
