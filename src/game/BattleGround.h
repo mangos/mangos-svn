@@ -62,15 +62,15 @@ enum BattleGroundMarksCount
 
 enum BattleGroundSpells
 {
-    SPELL_WAITING_FOR_RESURRECT     = 2584,
-    SPELL_SPIRIT_HEAL_CHANNEL       = 22011,
-    SPELL_SPIRIT_HEAL               = 22012,
-    SPELL_RESURRECTION_VISUAL       = 24171,
-    SPELL_ARENA_PREPARATION         = 32727,
-    SPELL_PREPARATION               = 44521,
-    SPELL_SPIRIT_HEAL_MANA          = 44535,
-    SPELL_RECENTLY_DROPPED_FLAG     = 42792,
-    SPELL_AURA_PLAYER_INACTIVE      = 43681
+    SPELL_WAITING_FOR_RESURRECT     = 2584,                 // Waiting to Resurrect
+    SPELL_SPIRIT_HEAL_CHANNEL       = 22011,                // Spirit Heal Channel
+    SPELL_SPIRIT_HEAL               = 22012,                // Spirit Heal
+    SPELL_RESURRECTION_VISUAL       = 24171,                // Resurrection Impact Visual
+    SPELL_ARENA_PREPARATION         = 32727,                // Arena Preparation
+    SPELL_PREPARATION               = 44521,                // Preparation
+    SPELL_SPIRIT_HEAL_MANA          = 44535,                // Spirit Heal
+    SPELL_RECENTLY_DROPPED_FLAG     = 42792,                // Recently Dropped Flag
+    SPELL_AURA_PLAYER_INACTIVE      = 43681                 // Inactive
 };
 
 enum BattleGroundTimeIntervals
