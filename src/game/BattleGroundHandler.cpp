@@ -45,6 +45,9 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
     if(!unit->isBattleMaster())                             // it's not battlemaster
         return;
 
+    // Stop the npc if moving
+    unit->StopMoving();
+
     uint32 bgTypeId = objmgr.GetBattleMasterBG(unit->GetEntry());
 
     if(!_player->GetBGAccessByLevel(bgTypeId))

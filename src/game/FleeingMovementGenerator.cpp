@@ -306,8 +306,8 @@ FleeingMovementGenerator<Creature>::_Init(Creature &owner)
     if(!&owner)
         return;
     owner.SetUInt64Value(UNIT_FIELD_TARGET, 0);
-    is_water_ok = owner.isCanSwimOrFly();
-    is_land_ok  = owner.isCanWalkOrFly();
+    is_water_ok = owner.canSwim();
+    is_land_ok  = owner.canWalk();
 }
 
 template<>

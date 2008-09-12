@@ -189,17 +189,33 @@ WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint32 &di
 
     CreatureTraveller traveller(creature);
 
-    /*
-    if( npcIsStopped[creature.GetGUID()] )
-    {
-        i_nextMoveTime.Update(40000);
-        i_destinationHolder.UpdateTraveller(traveller, ((diff)-40000), false);
-        npcIsStopped[creature.GetGUID()] = false;
-        return true;
-    }
-    */
     i_nextMoveTime.Update(diff);
-    i_destinationHolder.UpdateTraveller(traveller, diff, false);
+    i_destinationHolder.UpdateTraveller(traveller, diff, false, true);
+
+    // creature has been stoped in middle of the waypoint segment
+    if (!i_destinationHolder.HasArrived() && creature.IsStopped())
+    {
+        if( i_nextMoveTime.Passed()) // Timer has elapsed, meaning this part controlled it
+        {
+            SetStopedByPlayer(false);
+            // Now we re-set destination to same node and start travel
+            assert( i_currentNode < i_path.Size() );
+            creature.addUnitState(UNIT_STAT_ROAMING);
+            const Path::PathNode &node(i_path(i_currentNode));
+            i_destinationHolder.SetDestination(traveller, node.x, node.y, node.z);
+            i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
+        }
+        else // if( !i_nextMoveTime.Passed())
+        { // unexpected end of timer && creature stopped && not at end of segment
+            if (!IsStopedByPlayer())
+            {                                                   // Put 30 seconds delay
+                i_destinationHolder.IncreaseTravelTime(STOP_TIME_FOR_PLAYER);
+                i_nextMoveTime.Reset(STOP_TIME_FOR_PLAYER);
+                SetStopedByPlayer(true);                        // Mark we did it
+            }
+        }
+        return true;    // Abort here this update
+    }
 
     if( creature.IsStopped() )
     {
@@ -260,9 +276,9 @@ WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint32 &di
         }                                                   // wpBehaviour found
     }                                                       // i_creature.IsStopped()
 
-    if( i_nextMoveTime.Passed() )
+    if( i_nextMoveTime.Passed() ) // This is at the end of waypoint segment or has been stopped by player
     {
-        if( creature.IsStopped() )
+        if( creature.IsStopped() ) // If stopped then begin a new move segment
         {
             assert( i_currentNode < i_path.Size() );
             creature.addUnitState(UNIT_STAT_ROAMING);
@@ -286,9 +302,10 @@ WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint32 &di
                 creature.SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
             }
         }
-        else
+        else // If not stopped then stop it and set the reset of TimeTracker to waittime
         {
             creature.StopMoving();
+            SetStopedByPlayer(false);
             i_nextMoveTime.Reset(i_delays[i_currentNode]);
             ++i_currentNode;
             if( i_currentNode >= i_path.Size() )
@@ -347,7 +364,7 @@ void FlightPathMovementGenerator::Finalize(Player & player)
 {
 
     float x, y, z;
-    i_destinationHolder.GetLocationNow(x, y, z);
+    i_destinationHolder.GetLocationNow(player.GetMapId(), x, y, z);
     player.SetPosition(x, y, z, player.GetOrientation());
 
     player.clearUnitState(UNIT_STAT_IN_FLIGHT);

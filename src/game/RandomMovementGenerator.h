@@ -23,7 +23,6 @@
 #include "DestinationHolder.h"
 #include "Traveller.h"
 
-#define MAX_RAND_WAYPOINTS 8
 
 template<class T>
 class MANGOS_DLL_SPEC RandomMovementGenerator
@@ -32,15 +31,19 @@ class MANGOS_DLL_SPEC RandomMovementGenerator
     public:
         RandomMovementGenerator(const Unit &) : i_nextMoveTime(0) {}
 
+        void _setRandomLocation(T &);
         void Initialize(T &);
         void Finalize(T &) {}
         void Reset(T &);
         bool Update(T &, const uint32 &);
-
+        void UpdateMapPosition(uint32 mapid, float &x ,float &y, float &z)
+        {
+            i_destinationHolder.GetLocationNow(mapid, x,y,z);
+        }
         MovementGeneratorType GetMovementGeneratorType() { return RANDOM_MOTION_TYPE; }
     private:
-        TimeTracker i_nextMoveTime;
-        float i_waypoints[MAX_RAND_WAYPOINTS+1][3];
+        TimeTrackerSmall i_nextMoveTime;
+
         DestinationHolder< Traveller<T> > i_destinationHolder;
         uint32 i_nextMove;
 };

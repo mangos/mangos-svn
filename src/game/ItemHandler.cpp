@@ -678,6 +678,8 @@ void WorldSession::SendListInventory( uint64 vendorguid )
     if(GetPlayer()->hasUnitState(UNIT_STAT_DIED))
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
+    // Stop the npc if moving
+    pCreature->StopMoving();
     // load vendor items if not yet
     pCreature->LoadGoods();
 
