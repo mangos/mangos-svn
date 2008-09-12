@@ -84,8 +84,10 @@ bool Group::Create(const uint64 &guid, const char * name)
     m_difficulty = DIFFICULTY_NORMAL;
     if(!isBGGroup())
     {
-        if(Player *player = objmgr.GetPlayer(guid))
-            m_difficulty = player->GetDifficulty();
+        Player *leader = objmgr.GetPlayer(guid);
+        if(leader) m_difficulty = leader->GetDifficulty();
+
+        Player::ConvertInstancesToGroup(leader, this, guid);
 
         // store group in database
         CharacterDatabase.BeginTransaction();
@@ -189,6 +191,16 @@ bool Group::AddInvite(Player *player)
     return true;
 }
 
+bool Group::AddLeaderInvite(Player *player)
+{
+    if(!AddInvite(player))
+        return false;
+
+    m_leaderGuid = player->GetGUID();
+    m_leaderName = player->GetName();
+    return true;
+}
+
 uint32 Group::RemoveInvite(Player *player)
 {
     for(InvitesList::iterator itr=m_invitees.begin(); itr!=m_invitees.end(); ++itr)
@@ -204,6 +216,17 @@ uint32 Group::RemoveInvite(Player *player)
     return GetMembersCount();
 }
 
+void Group::RemoveAllInvites()
+{
+    for(InvitesList::iterator itr=m_invitees.begin(); itr!=m_invitees.end(); ++itr)
+    {
+        Player *invitee = objmgr.GetPlayer(*itr);
+        if(invitee)
+            invitee->SetGroupInvite(NULL);
+    }
+    m_invitees.clear();
+}
+
 bool Group::AddMember(const uint64 &guid, const char* name)
 {
     if(!_addMember(guid, name))
@@ -213,14 +236,22 @@ bool Group::AddMember(const uint64 &guid, const char* name)
     Player *player = objmgr.GetPlayer(guid);
     if(player)
     {
-        if(!IsLeader(player->GetGUID()) && player->getLevel() >= LEVELREQUIREMENT_HEROIC && player->GetDifficulty() != GetDifficulty() && !isBGGroup())
+        if(!IsLeader(player->GetGUID()) && !isBGGroup())
         {
-            player->SetDifficulty(m_difficulty);
-            player->SendDungeonDifficulty(true);
+            // reset the new member's instances, unless he is currently in one of them
+            // including raid/heroic instances that they are not permanently bound to!
+            player->ResetInstances(INSTANCE_RESET_GROUP_JOIN);
+
+            if(player->getLevel() >= LEVELREQUIREMENT_HEROIC && player->GetDifficulty() != GetDifficulty() )
+            {
+                player->SetDifficulty(m_difficulty);
+                player->SendDungeonDifficulty(true);
+            }
         }
         player->SetGroupUpdateFlag(GROUP_UPDATE_FULL);
         UpdatePlayerOutOfRange(player);
     }
+
     return true;
 }
 
@@ -311,13 +342,7 @@ void Group::Disband(bool hideDestroy)
     RollId.clear();
     m_memberSlots.clear();
 
-    for(InvitesList::iterator itr=m_invitees.begin(); itr!=m_invitees.end(); ++itr)
-    {
-        Player *invitee = objmgr.GetPlayer(*itr);
-        if(invitee)
-            invitee->SetGroupInvite(NULL);
-    }
-    m_invitees.clear();
+    RemoveAllInvites();
 
     if(!isBGGroup())
     {

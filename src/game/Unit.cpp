@@ -4128,6 +4128,7 @@ void Unit::RemoveAura(AuraMap::iterator &i, AuraRemoveMode mode)
         else
         {
             sLog.outError("Couldn't find the caster of the single target aura, may crash later!");
+            assert(false);
         }
     }
 
@@ -10558,11 +10559,11 @@ Unit* Unit::SelectNearbyTarget() const
 
     // select random
     uint32 rIdx = urand(0,targets.size()-1);
-    std::list<Unit *>::const_iterator tIter = targets.begin();
+    std::list<Unit *>::const_iterator tcIter = targets.begin();
     for(uint32 i = 0; i < rIdx; ++i)
-        ++tIter;
+        ++tcIter;
 
-    return *tIter;
+    return *tcIter;
 }
 
 void Unit::ApplyAttackTimePercentMod( WeaponAttackType att,float val, bool apply )

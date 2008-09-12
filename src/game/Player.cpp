@@ -1972,8 +1972,14 @@ void Player::UninviteFromGroup()
 
         if(group->GetMembersCount() <= 1)                   // group has just 1 member => disband
         {
-            group->Disband(true);
-            objmgr.RemoveGroup(group);
+            if(group->IsCreated())
+            {
+                group->Disband(true);
+                objmgr.RemoveGroup(group);
+            }
+            else
+                group->RemoveAllInvites();
+
             delete group;
         }
     }
