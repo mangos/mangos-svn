@@ -130,23 +130,20 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
         }
     }
 
-    // ok, but group not exist, creating new
+    // ok, but group not exist, start a new group
+    // but don't create and save the group to the DB until
+    // at least one person joins
     if(!group)
     {
         group = new Group;
-        if(!group->Create(GetPlayer()->GetGUID(), GetPlayer()->GetName()))
+        // new group: if can't add then delete
+        if(!group->AddLeaderInvite(GetPlayer()))
         {
             delete group;
             return;
         }
-
-        objmgr.AddGroup(group);
-
-        // new group: if can't add then delete
         if(!group->AddInvite(player))
         {
-            group->Disband(true);
-            objmgr.RemoveGroup(group);
             delete group;
             return;
         }
@@ -173,6 +170,12 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & /*recv_data*/ )
     Group *group = GetPlayer()->GetGroupInvite();
     if (!group) return;
 
+    if(group->GetLeaderGUID() == GetPlayer()->GetGUID())
+    {
+        sLog.outError("HandleGroupAcceptOpcode: player %s(%d) tried to accept an invite to his own group", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
+        return;
+    }
+
     // remove in from ivites in any case
     group->RemoveInvite(GetPlayer());
 
@@ -194,14 +197,13 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & /*recv_data*/ )
         return;
     }
 
-    // when forming a new group, create group binds
-    if(!group->isBGGroup() && group->GetMembersCount() == 1)
-        Player::ConvertInstancesToGroup(leader, group, group->GetLeaderGUID());
+    // forming a new group, create it
+    if(!group->IsCreated())
+    {
+        if(leader) group->RemoveInvite(leader);
+        group->Create(group->GetLeaderGUID(), group->GetLeaderName());
+    }
     
-    // reset the acceptee's solo instances, unless he is currently in one of them
-    // including raid/heroic instances that they are not permanently bound to!
-    GetPlayer()->ResetInstances(INSTANCE_RESET_GROUP_JOIN);
-
     // everything's fine, do it
     if(!group->AddMember(GetPlayer()->GetGUID(), GetPlayer()->GetName()))
         return;
@@ -224,10 +226,13 @@ void WorldSession::HandleGroupDeclineOpcode( WorldPacket & /*recv_data*/ )
     /********************/
 
     // everything's fine, do it
-    if(group->GetMembersCount() <= 1)                       // group has just 1 member => disband
+    if(!group->IsCreated())
     {
-        group->Disband(true);
-        objmgr.RemoveGroup(group);
+        // note: this means that if you invite more than one person
+        // and one of them declines before the first one accepts
+        // all invites will be cleared
+        // fixme: is that ok ?
+        group->RemoveAllInvites();
         delete group;
     }
 
@@ -308,6 +313,12 @@ void WorldSession::HandleGroupUninvite(uint64 guid, std::string name)
     if(!group->IsMember(guid) && (player && player->GetGroupInvite() != group))
     {
         SendPartyResult(PARTY_OP_LEAVE, name, PARTY_RESULT_NOT_IN_YOUR_PARTY);
+        return;
+    }
+
+    if(guid == GetPlayer()->GetGUID())
+    {
+        sLog.outError("WorldSession::HandleGroupUninvite: leader %s(%d) tried to uninvite himself from the group.", GetPlayer()->GetName(), GetPlayer()->GetGUIDLow());
         return;
     }
     /********************/
