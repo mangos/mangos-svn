@@ -2316,7 +2316,7 @@ void Spell::SendSpellCooldown()
     time_t recTime    = rec ? curTime+rec/1000 : catrecTime;// in secs
 
     // self spell cooldown
-    if (rec > 0)
+    if(recTime > 0)
         _player->AddSpellCooldown(m_spellInfo->Id, m_CastItem ? m_CastItem->GetEntry() : 0, recTime);
 
     // category spells
@@ -2327,7 +2327,7 @@ void Spell::SendSpellCooldown()
         {
             for(SpellCategorySet::const_iterator i_scset = i_scstore->second.begin(); i_scset != i_scstore->second.end(); ++i_scset)
             {
-                if(*i_scset == m_spellInfo->Id && rec > 0)  // skip main spell if already handled above
+                if(*i_scset == m_spellInfo->Id)             // skip main spell, already handled above
                     continue;
 
                 _player->AddSpellCooldown(m_spellInfo->Id, m_CastItem ? m_CastItem->GetEntry() : 0, catrecTime);
