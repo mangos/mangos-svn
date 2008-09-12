@@ -202,6 +202,7 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & /*recv_data*/ )
     {
         if(leader) group->RemoveInvite(leader);
         group->Create(group->GetLeaderGUID(), group->GetLeaderName());
+        objmgr.AddGroup(group);
     }
     
     // everything's fine, do it
