@@ -130,9 +130,6 @@ void GuardAI::AttackStart(Unit *u)
     if( !u )
         return;
 
-    if (u->GetTypeId() == TYPEID_PLAYER)
-        i_creature.SendZoneUnderAttackMessage((Player*)u);
-
     //    DEBUG_LOG("Creature %s tagged a victim to kill [guid=%u]", i_creature.GetName(), u->GetGUIDLow());
     if(i_creature.Attack(u,true))
     {
@@ -144,3 +141,10 @@ void GuardAI::AttackStart(Unit *u)
         i_creature.GetMotionMaster()->MoveChase(u);
     }
 }
+
+void GuardAI::JustDied(Unit *killer)
+{
+    if (killer->GetTypeId() == TYPEID_PLAYER)
+        i_creature.SendZoneUnderAttackMessage((Player*)killer);
+}
+
