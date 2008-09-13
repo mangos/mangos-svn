@@ -1504,13 +1504,6 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                // attack only creatures/players/pets
-                if(summoner->isType(TYPEMASK_UNIT))
-                {
-                    Unit* unitSummoner = (Unit *)summoner;
-                    if (pCreature->AI())
-                        pCreature->AI()->AttackStart(unitSummoner);
-                }
                 break;
             }
 
