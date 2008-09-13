@@ -31,6 +31,7 @@ class MANGOS_DLL_SPEC Config
         ~Config();
 
         bool SetSource(const char *file, bool ignorecase = true);
+        bool Reload();
 
         bool GetString(const char* name, std::string *value);
         bool GetString(const char* name, char const **value);
@@ -45,7 +46,10 @@ class MANGOS_DLL_SPEC Config
         bool GetFloat(const char* name, float *value);
         float GetFloatDefault(const char* name, const float def);
 
+        std::string GetFilename() const { return mFilename; }
     private:
+        std::string mFilename;
+        bool mIgnoreCase;
         DOTCONFDocument *mConf;
 };
 

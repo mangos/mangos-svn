@@ -21,34 +21,42 @@
 
 INSTANTIATE_SINGLETON_1(Config);
 
-Config::Config() : mConf(0)
+Config::Config() : mIgnoreCase(true), mConf(NULL)
 {
 }
 
 
 Config::~Config()
 {
-    if (mConf)
-        delete mConf;
+    delete mConf;
 }
 
 
 bool Config::SetSource(const char *file, bool ignorecase)
 {
-    mConf = new DOTCONFDocument(ignorecase ?
+    mIgnoreCase = ignorecase;
+    mFilename = file;
+
+    return Reload();
+}
+
+bool Config::Reload()
+{
+    delete mConf;
+
+    mConf = new DOTCONFDocument(mIgnoreCase ?
         DOTCONFDocument::CASEINSENSETIVE :
     DOTCONFDocument::CASESENSETIVE);
 
-    if (mConf->setContent(file) == -1)
+    if (mConf->setContent(mFilename.c_str()) == -1)
     {
         delete mConf;
-        mConf = 0;
+        mConf = NULL;
         return false;
     }
 
     return true;
 }
-
 
 bool Config::GetString(const char* name, std::string *value)
 {

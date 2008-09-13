@@ -98,19 +98,24 @@ BindIP = "0.0.0.0"
 #                 0 (do not unload grids)
 #
 #    SocketSelectTime
-#        Default socket select time (in milliseconds)
+#        Socket select time (in milliseconds)
+#        Default: 10000
 #
 #    GridCleanUpDelay
-#        Default grid clean up delay (in milliseconds)
+#        Grid clean up delay (in milliseconds)
+#        Default: 300000 (5 min)
 #
 #    MapUpdateInterval
-#        Default map update interval (in milliseconds)
+#        Map update interval (in milliseconds)
+#        Default: 100
 #
 #    ChangeWeatherInterval
-#        Default weather update interval (in milliseconds)
+#        Weather update interval (in milliseconds)
+#        Default: 600000 (10 min)
 #
 #    PlayerSaveInterval
-#        Default PlayerSaveInterval (in milliseconds)
+#        Player save interval (in milliseconds)
+#        Default: 900000 (15 min)
 #
 #    vmap.enableLOS
 #    vmap.enableHeight

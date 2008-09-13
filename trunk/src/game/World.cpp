@@ -289,11 +289,17 @@ Weather* World::AddWeather(uint32 zone_id)
     return w;
 }
 
-/// Initialize the World
-void World::SetInitialWorldSettings()
+/// Initialize config values
+void World::LoadConfigSettings(bool reload)
 {
-    ///- Initialize the random number generator
-    srand((unsigned int)time(NULL));
+    if(reload)
+    {
+        if(!sConfig.Reload())
+        {
+            sLog.outError("World settings reload fail: can't read settings from %s.",sConfig.GetFilename().c_str());
+            return;
+        }
+    }
 
     ///- Read the version of the configuration file and warn the user in case of emptiness or mismatch
     uint32 confVersion = sConfig.GetIntDefault("ConfVersion", 0);
@@ -436,18 +442,70 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_ADDON_CHANNEL] = sConfig.GetBoolDefault("AddonChannel", true);
     m_configs[CONFIG_GRID_UNLOAD] = sConfig.GetBoolDefault("GridUnload", true);
     m_configs[CONFIG_INTERVAL_SAVE] = sConfig.GetIntDefault("PlayerSaveInterval", 900000);
+
     m_configs[CONFIG_INTERVAL_GRIDCLEAN] = sConfig.GetIntDefault("GridCleanUpDelay", 300000);
+    if(m_configs[CONFIG_INTERVAL_GRIDCLEAN] < MIN_GRID_DELAY)
+    {
+        sLog.outError("GridCleanUpDelay (%i) must be greater %u. Use this minimal value.",m_configs[CONFIG_INTERVAL_GRIDCLEAN],MIN_GRID_DELAY);
+        m_configs[CONFIG_INTERVAL_GRIDCLEAN] = MIN_GRID_DELAY;
+    }
+    if(reload)
+        MapManager::Instance().SetGridCleanUpDelay(m_configs[CONFIG_INTERVAL_GRIDCLEAN]);
+
     m_configs[CONFIG_INTERVAL_MAPUPDATE] = sConfig.GetIntDefault("MapUpdateInterval", 100);
+    if(m_configs[CONFIG_INTERVAL_MAPUPDATE] < MIN_MAP_UPDATE_DELAY)
+    {
+        sLog.outError("MapUpdateInterval (%i) must be greater %u. Use this minimal value.",m_configs[CONFIG_INTERVAL_MAPUPDATE],MIN_MAP_UPDATE_DELAY);
+        m_configs[CONFIG_INTERVAL_MAPUPDATE] = MIN_MAP_UPDATE_DELAY;
+    }
+    if(reload)
+        MapManager::Instance().SetMapUpdateInterval(m_configs[CONFIG_INTERVAL_MAPUPDATE]);
+
     m_configs[CONFIG_INTERVAL_CHANGEWEATHER] = sConfig.GetIntDefault("ChangeWeatherInterval", 600000);
-    m_configs[CONFIG_PORT_WORLD] = sConfig.GetIntDefault("WorldServerPort", DEFAULT_WORLDSERVER_PORT);
-    m_configs[CONFIG_SOCKET_SELECTTIME] = sConfig.GetIntDefault("SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME);
+
+    if(reload)
+    {
+        uint32 val = sConfig.GetIntDefault("WorldServerPort", DEFAULT_WORLDSERVER_PORT);
+        if(val!=m_configs[CONFIG_PORT_WORLD])
+            sLog.outError("WorldServerPort option can't be changed at mangosd.conf reload, using current value (%u).",m_configs[CONFIG_PORT_WORLD]);
+    }
+    else
+        m_configs[CONFIG_PORT_WORLD] = sConfig.GetIntDefault("WorldServerPort", DEFAULT_WORLDSERVER_PORT);
+
+    if(reload)
+    {
+        uint32 val = sConfig.GetIntDefault("SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME);
+        if(val!=m_configs[CONFIG_SOCKET_SELECTTIME])
+            sLog.outError("SocketSelectTime option can't be changed at mangosd.conf reload, using current value (%u).",m_configs[DEFAULT_SOCKET_SELECT_TIME]);
+    }
+    else
+        m_configs[CONFIG_SOCKET_SELECTTIME] = sConfig.GetIntDefault("SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME);
+
+
     m_configs[CONFIG_TCP_NO_DELAY] = sConfig.GetBoolDefault("TcpNoDelay", false);
     m_configs[CONFIG_GROUP_XP_DISTANCE] = sConfig.GetIntDefault("MaxGroupXPDistance", 74);
     /// \todo Add MonsterSight and GuarderSight (with meaning) in mangosd.conf or put them as define
     m_configs[CONFIG_SIGHT_MONSTER] = sConfig.GetIntDefault("MonsterSight", 50);
     m_configs[CONFIG_SIGHT_GUARDER] = sConfig.GetIntDefault("GuarderSight", 50);
-    m_configs[CONFIG_GAME_TYPE] = sConfig.GetIntDefault("GameType", 0);
-    m_configs[CONFIG_REALM_ZONE] = sConfig.GetIntDefault("RealmZone", REALM_ZONE_DEVELOPMENT);
+
+    if(reload)
+    {
+        uint32 val = sConfig.GetIntDefault("GameType", 0);
+        if(val!=m_configs[CONFIG_GAME_TYPE])
+            sLog.outError("GameType option can't be changed at mangosd.conf reload, using current value (%u).",m_configs[CONFIG_GAME_TYPE]);
+    }
+    else
+        m_configs[CONFIG_GAME_TYPE] = sConfig.GetIntDefault("GameType", 0);
+
+    if(reload)
+    {
+        uint32 val = sConfig.GetIntDefault("RealmZone", REALM_ZONE_DEVELOPMENT);
+        if(val!=m_configs[CONFIG_REALM_ZONE])
+            sLog.outError("RealmZone option can't be changed at mangosd.conf reload, using current value (%u).",m_configs[CONFIG_REALM_ZONE]);
+    }
+    else
+        m_configs[CONFIG_REALM_ZONE] = sConfig.GetIntDefault("RealmZone", REALM_ZONE_DEVELOPMENT);
+
     m_configs[CONFIG_ALLOW_TWO_SIDE_ACCOUNTS] = sConfig.GetBoolDefault("AllowTwoSide.Accounts", false);
     m_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT]    = sConfig.GetBoolDefault("AllowTwoSide.Interaction.Chat",false);
     m_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL] = sConfig.GetBoolDefault("AllowTwoSide.Interaction.Channel",false);
@@ -484,12 +542,21 @@ void World::SetInitialWorldSettings()
         m_configs[CONFIG_SKIP_CINEMATICS] = 0;
     }
 
-    m_configs[CONFIG_MAX_PLAYER_LEVEL] = sConfig.GetIntDefault("MaxPlayerLevel", 60);
+
+    if(reload)
+    {
+        uint32 val = sConfig.GetIntDefault("MaxPlayerLevel", 60);
+        if(val!=m_configs[CONFIG_MAX_PLAYER_LEVEL])
+            sLog.outError("MaxPlayerLevel option can't be changed at mangosd.conf reload, using current value (%u).",m_configs[CONFIG_MAX_PLAYER_LEVEL]);
+    }
+    else
+        m_configs[CONFIG_MAX_PLAYER_LEVEL] = sConfig.GetIntDefault("MaxPlayerLevel", 60);
     if(m_configs[CONFIG_MAX_PLAYER_LEVEL] > 255)
     {
         sLog.outError("MaxPlayerLevel (%i) must be in range 1..255. Set to 255.",m_configs[CONFIG_MAX_PLAYER_LEVEL]);
         m_configs[CONFIG_MAX_PLAYER_LEVEL] = 255;
     }
+
     m_configs[CONFIG_START_PLAYER_LEVEL] = sConfig.GetIntDefault("StartPlayerLevel", 1);
     if(m_configs[CONFIG_START_PLAYER_LEVEL] < 1)
     {
@@ -534,6 +601,11 @@ void World::SetInitialWorldSettings()
     {
         sLog.outError("UpdateUptimeInterval (%i) must be > 0, set to default 10.",m_configs[CONFIG_UPTIME_UPDATE]);
         m_configs[CONFIG_UPTIME_UPDATE] = 10;
+    }
+    if(reload)
+    {
+        m_timers[WUPDATE_UPTIME].SetInterval(m_configs[CONFIG_UPTIME_UPDATE]*MINUTE*1000);
+        m_timers[WUPDATE_UPTIME].Reset();
     }
 
     m_configs[CONFIG_SKILL_CHANCE_ORANGE] = sConfig.GetIntDefault("SkillChance.Orange",100);
@@ -583,7 +655,15 @@ void World::SetInitialWorldSettings()
 
     m_configs[CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY] = sConfig.GetBoolDefault("SaveRespawnTimeImmediately",true);
     m_configs[CONFIG_WEATHER] = sConfig.GetBoolDefault("ActivateWeather",true);
-    m_configs[CONFIG_EXPANSION] = sConfig.GetIntDefault("Expansion",1);
+
+    if(reload)
+    {
+        uint32 val = sConfig.GetIntDefault("Expansion",1);
+        if(val!=m_configs[CONFIG_EXPANSION])
+            sLog.outError("Expansion option can't be changed at mangosd.conf reload, using current value (%u).",m_configs[CONFIG_EXPANSION]);
+    }
+    else
+        m_configs[CONFIG_EXPANSION] = sConfig.GetIntDefault("Expansion",1);
 
     m_configs[CONFIG_CHATFLOOD_MESSAGE_COUNT] = sConfig.GetIntDefault("ChatFlood.MessageCount",10);
     m_configs[CONFIG_CHATFLOOD_MESSAGE_DELAY] = sConfig.GetIntDefault("ChatFlood.MessageDelay",1);
@@ -675,11 +755,20 @@ void World::SetInitialWorldSettings()
     }
 
     ///- Read the "Data" directory from the config file
-    m_dataPath = sConfig.GetStringDefault("DataDir","./");
-    if((m_dataPath.at(m_dataPath.length()-1)!='/') && (m_dataPath.at(m_dataPath.length()-1)!='\\'))
-        m_dataPath.append("/");
+    std::string dataPath = sConfig.GetStringDefault("DataDir","./");
+    if( dataPath.at(dataPath.length()-1)!='/' && dataPath.at(dataPath.length()-1)!='\\' )
+        dataPath.append("/");
 
-    sLog.outString("Using DataDir %s",m_dataPath.c_str());
+    if(reload)
+    {
+        if(dataPath!=m_dataPath)
+            sLog.outError("DataDir option can't be changed at mangosd.conf reload, using current value (%s).",m_dataPath);
+    }
+    else
+    {
+        m_dataPath = dataPath;
+        sLog.outString("Using DataDir %s",m_dataPath.c_str());
+    }
 
     bool enableLOS = sConfig.GetBoolDefault("vmap.enableLOS", false);
     bool enableHeight = sConfig.GetBoolDefault("vmap.enableHeight", false);
@@ -692,6 +781,16 @@ void World::SetInitialWorldSettings()
     sLog.outString( "WORLD: VMap support included. LineOfSight:%i, getHeight:%i",enableLOS, enableHeight);
     sLog.outString( "WORLD: VMap data directory is: %svmaps",m_dataPath.c_str());
     sLog.outString( "WORLD: VMap config keys are: vmap.enableLOS, vmap.enableHeight, vmap.ignoreMapIds, vmap.ignoreSpellIds");
+}
+
+/// Initialize the World
+void World::SetInitialWorldSettings()
+{
+    ///- Initialize the random number generator
+    srand((unsigned int)time(NULL));
+
+    ///- Initialize config settings
+    LoadConfigSettings();
 
     ///- Init highest guids before any table loading to prevent using not initialized guids in some code.
     objmgr.SetHighestGuids();

@@ -154,6 +154,8 @@ class ChatHandler
         bool HandleReloadAllScriptsCommand(const char* args);
         bool HandleReloadAllSpellCommand(const char* args);
 
+        bool HandleReloadConfigCommand(const char* args);
+
         bool HandleReloadAreaTriggerTavernCommand(const char* args);
         bool HandleReloadAreaTriggerTeleportCommand(const char* args);
         bool HandleReloadEventScriptsCommand(const char* args);
