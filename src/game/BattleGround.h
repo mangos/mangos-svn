@@ -40,7 +40,9 @@ enum BattleGroundQuests
     SPELL_AB_QUEST_REWARD           = 43484,
     SPELL_AV_QUEST_REWARD           = 43475,
     SPELL_AV_QUEST_KILLED_BOSS      = 23658,
-    SPELL_EY_QUEST_REWARD           = 43477
+    SPELL_EY_QUEST_REWARD           = 43477,
+    SPELL_AB_QUEST_REWARD_4_BASES   = 24061,
+    SPELL_AB_QUEST_REWARD_5_BASES   = 24064
 };
 
 enum BattleGroundMarks
