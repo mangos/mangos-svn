@@ -7139,17 +7139,8 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         if(Unit* owner = GetOwner())
             return owner->SpellDamageBonus(pVictim, spellProto, pdamage, damagetype);
 
-    bool Channeled = IsChanneledSpell(spellProto);
-
     // Damage Done
-    uint32 CastingTime;
-    if ( !Channeled )
-        CastingTime = GetSpellCastTime(spellProto);
-    else
-        CastingTime = GetSpellDuration(spellProto);
-
-    if (CastingTime > 7000) CastingTime = 7000;             // Plus Damage efficient maximum 200% ( 7.0 seconds )
-    if (CastingTime < 1500) CastingTime = 1500;
+    uint32 CastingTime = !IsChanneledSpell(spellProto) ? GetSpellCastTime(spellProto) : GetSpellDuration(spellProto);
 
     // Taken/Done fixed damage bonus auras
     int32 DoneAdvertisedBenefit  = SpellBaseDamageBonus(GetSpellSchoolMask(spellProto));
@@ -7159,20 +7150,17 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     float DotFactor = 1.0f;
     if(damagetype == DOT)
     {
-        if ( !Channeled )
-            CastingTime = 3500;
-
         int32 DotDuration = GetSpellDuration(spellProto);
         // 200% limit
         if(DotDuration > 0)
         {
             if(DotDuration > 30000) DotDuration = 30000;
-            if(!Channeled) DotFactor = DotDuration / 15000.0f;
+            if(!IsChanneledSpell(spellProto)) DotFactor = DotDuration / 15000.0f;
             int x = 0;
             for(int j = 0; j < 3; j++)
             {
-                if(spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA &&
-                    (spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_DAMAGE ||
+                if( spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA && (
+                    spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_DAMAGE ||
                     spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH) )
                 {
                     x = j;
@@ -7686,11 +7674,9 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     if(spellProto->Id == 15290 || spellProto->Id == 39373 || spellProto->Id == 33778 || spellProto->Id == 379 || spellProto->Id == 38395)
         return healamount;
 
-    bool Channeled = IsChanneledSpell(spellProto);
+
     int32 AdvertisedBenefit = SpellBaseHealingBonus(GetSpellSchoolMask(spellProto));
     uint32 CastingTime = GetSpellCastTime(spellProto);
-    if (CastingTime > 7000) CastingTime = 7000;
-    if (CastingTime < 1500) CastingTime = 1500;
 
     // Healing Taken
     AdvertisedBenefit += SpellBaseHealingBonusForVictim(GetSpellSchoolMask(spellProto), pVictim);
@@ -7703,114 +7689,118 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
         {
             if((*i)->GetSpellProto()->SpellVisual == 9180)
             {
-                                                            // Flash of Light
+                // Flash of Light
                 if ((spellProto->SpellFamilyFlags & 0x0000000040000000LL) && (*i)->GetEffIndex() == 1)
                     AdvertisedBenefit += (*i)->GetModifier()->m_amount;
-                                                            // Holy Light
+                // Holy Light
                 else if ((spellProto->SpellFamilyFlags & 0x0000000080000000LL) && (*i)->GetEffIndex() == 0)
                     AdvertisedBenefit += (*i)->GetModifier()->m_amount;
             }
         }
     }
 
-    // Healing over Time spells
-    float DotFactor = 1.0f;
-    if(damagetype == DOT)
+    float ActualBenefit;
+
+    if (AdvertisedBenefit != 0)
     {
-        if(!Channeled) CastingTime = 3500;
-        int32 DotDuration = GetSpellDuration(spellProto);
-        if(DotDuration > 0)
+        // Healing over Time spells
+        float DotFactor = 1.0f;
+        if(damagetype == DOT)
         {
-            // 200% limit
-            if(DotDuration > 30000) DotDuration = 30000;
-            if(!Channeled) DotFactor = DotDuration / 15000.0f;
-            int x = 0;
-            for(int j = 0; j < 3; j++)
+            int32 DotDuration = GetSpellDuration(spellProto);
+            if(DotDuration > 0)
             {
-                if(spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA &&
-                    (spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_HEAL ||
-                    spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH) )
+                // 200% limit
+                if(DotDuration > 30000) DotDuration = 30000;
+                if(!IsChanneledSpell(spellProto)) DotFactor = DotDuration / 15000.0f;
+                int x = 0;
+                for(int j = 0; j < 3; j++)
                 {
-                    x = j;
-                    break;
+                    if( spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA && (
+                        spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_HEAL ||
+                        spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH) )
+                    {
+                        x = j;
+                        break;
+                    }
                 }
+                int DotTicks = 6;
+                if(spellProto->EffectAmplitude[x] != 0)
+                    DotTicks = DotDuration / spellProto->EffectAmplitude[x];
+                if(DotTicks)
+                    AdvertisedBenefit /= DotTicks;
             }
-            int DotTicks = 6;
-            if(spellProto->EffectAmplitude[x] != 0)
-                DotTicks = DotDuration / spellProto->EffectAmplitude[x];
-            if(DotTicks)
-                AdvertisedBenefit /= DotTicks;
         }
-    }
 
-    // distribute healing to all effects, reduce AoE damage
-    CastingTime = GetCastingTimeForBonus( spellProto, damagetype, CastingTime );   
+        // distribute healing to all effects, reduce AoE damage
+        CastingTime = GetCastingTimeForBonus( spellProto, damagetype, CastingTime );   
 
-    // 0% bonus for damage and healing spells for leech spells from healing bonus
-    for(int j = 0; j < 3; ++j)
-    {
-        if( spellProto->Effect[j] == SPELL_EFFECT_HEALTH_LEECH ||
-            spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA && spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH )
+        // 0% bonus for damage and healing spells for leech spells from healing bonus
+        for(int j = 0; j < 3; ++j)
         {
-            CastingTime = 0;
-            break;
-        }
-    }
-
-    // Exception
-    switch (spellProto->SpellFamilyName)
-    {
-        case  SPELLFAMILY_SHAMAN:
-                                                            // Healing stream from totem (add 6% per tick from hill bonus owner)
-            if (spellProto->SpellFamilyFlags & 0x000000002000LL)
-                CastingTime = 210;                          //
-            // Earth Shield 30% per charge
-            else if (spellProto->SpellFamilyFlags & 0x40000000000LL)
-                CastingTime = 1050;
-            break;
-        case  SPELLFAMILY_DRUID:
-            // Lifebloom
-            if (spellProto->SpellFamilyFlags & 0x1000000000LL)
+            if( spellProto->Effect[j] == SPELL_EFFECT_HEALTH_LEECH ||
+                spellProto->Effect[j] == SPELL_EFFECT_APPLY_AURA && spellProto->EffectApplyAuraName[j] == SPELL_AURA_PERIODIC_LEECH )
             {
-                CastingTime = damagetype == DOT ? 3500 : 1200;
-                DotFactor = damagetype == DOT ? 0.519f : 1.0f;
-            }
-            // Tranquility triggered spell
-            else if (spellProto->SpellFamilyFlags & 0x80LL)
-                CastingTime = 667;
-            // Rejuvenation
-            else if (spellProto->SpellFamilyFlags & 0x10LL)
-                DotFactor = 0.845f;
-            // Regrowth
-            else if (spellProto->SpellFamilyFlags & 0x40LL)
-            {
-                DotFactor = damagetype == DOT ? 0.705f : 1.0f;
-                CastingTime = damagetype == DOT ? 3500 : 1010;
-            }
-            break;
-        case SPELLFAMILY_PALADIN:
-            // Seal and Judgement of Light
-            if ( spellProto->SpellFamilyFlags & 0x100040000LL )
                 CastingTime = 0;
-            break;
-        case SPELLFAMILY_WARRIOR:
-        case SPELLFAMILY_HUNTER:
-        case SPELLFAMILY_ROGUE:
-            CastingTime = 0;
-            break;
+                break;
+            }
+        }
+
+        // Exception
+        switch (spellProto->SpellFamilyName)
+        {
+            case  SPELLFAMILY_SHAMAN:
+                // Healing stream from totem (add 6% per tick from hill bonus owner)
+                if (spellProto->SpellFamilyFlags & 0x000000002000LL)
+                    CastingTime = 210;
+                // Earth Shield 30% per charge
+                else if (spellProto->SpellFamilyFlags & 0x40000000000LL)
+                    CastingTime = 1050;
+                break;
+            case  SPELLFAMILY_DRUID:
+                // Lifebloom
+                if (spellProto->SpellFamilyFlags & 0x1000000000LL)
+                {
+                    CastingTime = damagetype == DOT ? 3500 : 1200;
+                    DotFactor = damagetype == DOT ? 0.519f : 1.0f;
+                }
+                // Tranquility triggered spell
+                else if (spellProto->SpellFamilyFlags & 0x80LL)
+                    CastingTime = 667;
+                // Rejuvenation
+                else if (spellProto->SpellFamilyFlags & 0x10LL)
+                    DotFactor = 0.845f;
+                // Regrowth
+                else if (spellProto->SpellFamilyFlags & 0x40LL)
+                {
+                    DotFactor = damagetype == DOT ? 0.705f : 1.0f;
+                    CastingTime = damagetype == DOT ? 3500 : 1010;
+                }
+                break;
+            case SPELLFAMILY_PALADIN:
+                // Seal and Judgement of Light
+                if ( spellProto->SpellFamilyFlags & 0x100040000LL )
+                    CastingTime = 0;
+                break;
+            case SPELLFAMILY_WARRIOR:
+            case SPELLFAMILY_HUNTER:
+            case SPELLFAMILY_ROGUE:
+                CastingTime = 0;
+                break;
+        }
+
+        float LvlPenalty = CalculateLevelPenalty(spellProto);
+
+        // Spellmod SpellDamage
+        float SpellModSpellDamage = 100.0f;
+
+        if(Player* modOwner = GetSpellModOwner())
+            modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_SPELL_BONUS_DAMAGE,SpellModSpellDamage);
+
+        SpellModSpellDamage /= 100.0f;
+
+        ActualBenefit = (float)AdvertisedBenefit * ((float)CastingTime / 3500.0f) * DotFactor * SpellModSpellDamage * LvlPenalty;
     }
-
-    float LvlPenalty = CalculateLevelPenalty(spellProto);
-
-    // Spellmod SpellDamage
-    float SpellModSpellDamage = 100.0f;
-
-    if(Player* modOwner = GetSpellModOwner())
-        modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_SPELL_BONUS_DAMAGE,SpellModSpellDamage);
-
-    SpellModSpellDamage /= 100.0f;
-
-    float ActualBenefit = (float)AdvertisedBenefit * ((float)CastingTime / 3500.0f) * DotFactor * SpellModSpellDamage * LvlPenalty;
 
     // use float as more appropriate for negative values and percent applying
     float heal = healamount + ActualBenefit;
@@ -10590,6 +10580,12 @@ void Unit::ApplyCastTimePercentMod(float val, bool apply )
 
 uint32 Unit::GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectType damagetype, uint32 CastingTime )
 {
+    if (CastingTime > 7000) CastingTime = 7000;
+    if (CastingTime < 1500) CastingTime = 1500;
+
+    if(damagetype == DOT && !IsChanneledSpell(spellProto))
+        CastingTime = 3500;
+
     int32 overTime    = 0;
     uint8 effects     = 0;
     bool DirectDamage = false;
