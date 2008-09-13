@@ -382,6 +382,7 @@ class World
         }
 
         void SetInitialWorldSettings();
+        void LoadConfigSettings(bool reload = false);
 
         void SendWorldText(const char *text, WorldSession *self = 0);
         void SendGlobalMessage(WorldPacket *packet, WorldSession *self = 0, uint32 team = 0);

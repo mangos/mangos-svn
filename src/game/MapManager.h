@@ -65,11 +65,11 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
 
         inline void SetMapUpdateInterval(uint32 t)
         {
-            if( t > 50 )
-            {
-                i_timer.SetInterval(t);
-                i_timer.Reset();
-            }
+            if( t > MIN_MAP_UPDATE_DELAY )
+                t = MIN_MAP_UPDATE_DELAY;
+
+            i_timer.SetInterval(t);
+            i_timer.Reset();
         }
 
         void LoadGrid(int mapid, float x, float y, const WorldObject* obj, bool no_unload = false);

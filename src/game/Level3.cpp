@@ -144,6 +144,14 @@ bool ChatHandler::HandleReloadAllItemCommand(const char*)
     return true;
 }
 
+bool ChatHandler::HandleReloadConfigCommand(const char* arg)
+{
+    sLog.outString( "Re-Loading config settings..." );
+    sWorld.LoadConfigSettings(true);
+    SendGlobalSysMessage("World config settings reloaded.");
+    return false;
+}
+
 bool ChatHandler::HandleReloadAreaTriggerTavernCommand(const char*)
 {
     sLog.outString( "Re-Loading Tavern Area Triggers..." );
