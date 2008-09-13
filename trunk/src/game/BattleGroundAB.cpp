@@ -136,7 +136,7 @@ void BattleGroundAB::Update(time_t diff)
                     // burn current contested banner
                     _DelBanner(node, BG_AB_NODE_TYPE_CONTESTED, teamIndex);
                     // create new occupied banner
-                    _CreateBanner(node, BG_AB_BODE_TYPE_OCCUPIED, teamIndex, true);
+                    _CreateBanner(node, BG_AB_NODE_TYPE_OCCUPIED, teamIndex, true);
                     _SendNodeUpdate(node);
                     _NodeOccupied(node,(teamIndex == 0) ? ALLIANCE:HORDE);
                     // Message to chatlog
@@ -271,7 +271,7 @@ void BattleGroundAB::_CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool
     // handle aura with banner
     if( !type )
         return;
-    obj = node * 8 + ((type == BG_AB_BODE_TYPE_OCCUPIED) ? (5 + teamIndex) : 7);
+    obj = node * 8 + ((type == BG_AB_NODE_TYPE_OCCUPIED) ? (5 + teamIndex) : 7);
     SpawnBGObject(obj, RESPAWN_IMMEDIATELY);
 }
 
@@ -283,7 +283,7 @@ void BattleGroundAB::_DelBanner(uint8 node, uint8 type, uint8 teamIndex)
     // handle aura with banner
     if( !type )
         return;
-    obj = node * 8 + ((type == BG_AB_BODE_TYPE_OCCUPIED) ? (5 + teamIndex) : 7);
+    obj = node * 8 + ((type == BG_AB_NODE_TYPE_OCCUPIED) ? (5 + teamIndex) : 7);
     SpawnBGObject(obj, RESPAWN_ONE_DAY);
 }
 
@@ -369,6 +369,17 @@ void BattleGroundAB::_NodeOccupied(uint8 node,Team team)
 {
    if( !AddSpiritGuide(node, BG_AB_SpiritGuidePos[node][0], BG_AB_SpiritGuidePos[node][1], BG_AB_SpiritGuidePos[node][2], BG_AB_SpiritGuidePos[node][3], team) )
         sLog.outError("Failed to spawn spirit guide! point: %u, team: %u,", node, team);
+
+    uint8 capturedNodes = 0;
+    for (uint8 i = 0; i < BG_AB_DYNAMIC_NODES_COUNT; ++i)
+    {
+        if( m_Nodes[node] == (team==ALLIANCE?0:1) + BG_AB_NODE_TYPE_OCCUPIED && !m_NodeTimers[i])
+            ++capturedNodes;
+    }
+    if(capturedNodes >= 5)
+        CastSpellOnTeam(SPELL_AB_QUEST_REWARD_5_BASES, team);
+    if(capturedNodes >= 4)
+        CastSpellOnTeam(SPELL_AB_QUEST_REWARD_4_BASES, team);
 }
 
 void BattleGroundAB::_NodeDeOccupied(uint8 node)
@@ -451,7 +462,7 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target
     else if( (m_Nodes[node] == BG_AB_NODE_STATUS_ALLY_CONTESTED) || (m_Nodes[node] == BG_AB_NODE_STATUS_HORDE_CONTESTED) )
     {
         // If last state is NOT occupied, change node to enemy-contested
-        if( m_prevNodes[node] < BG_AB_BODE_TYPE_OCCUPIED )
+        if( m_prevNodes[node] < BG_AB_NODE_TYPE_OCCUPIED )
         {
             UpdatePlayerScore(source, SCORE_BASES_ASSAULTED, 1);
             m_prevNodes[node] = m_Nodes[node];
@@ -469,11 +480,11 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target
         {
             UpdatePlayerScore(source, SCORE_BASES_DEFENDED, 1);
             m_prevNodes[node] = m_Nodes[node];
-            m_Nodes[node] = teamIndex + BG_AB_BODE_TYPE_OCCUPIED;
+            m_Nodes[node] = teamIndex + BG_AB_NODE_TYPE_OCCUPIED;
             // burn current contested banner
             _DelBanner(node, BG_AB_NODE_TYPE_CONTESTED, !teamIndex);
             // create new occupied banner
-            _CreateBanner(node, BG_AB_BODE_TYPE_OCCUPIED, teamIndex, true);
+            _CreateBanner(node, BG_AB_NODE_TYPE_OCCUPIED, teamIndex, true);
             _SendNodeUpdate(node);
             m_NodeTimers[node] = 0;
             _NodeOccupied(node,(teamIndex == 0) ? ALLIANCE:HORDE);
@@ -488,7 +499,7 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target
         m_prevNodes[node] = m_Nodes[node];
         m_Nodes[node] = teamIndex + BG_AB_NODE_TYPE_CONTESTED;
         // burn current occupied banner
-        _DelBanner(node, BG_AB_BODE_TYPE_OCCUPIED, !teamIndex);
+        _DelBanner(node, BG_AB_NODE_TYPE_OCCUPIED, !teamIndex);
         // create new contested banner
         _CreateBanner(node, BG_AB_NODE_TYPE_CONTESTED, teamIndex, true);
         _SendNodeUpdate(node);
@@ -501,7 +512,7 @@ void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target
     ChatHandler::FillMessageData(&data, source->GetSession(), type, LANG_UNIVERSAL, NULL, source->GetGUID(), buf, NULL);
     SendPacketToAll(&data);
     // If node is occupied again, send "X has taken the Y" msg.
-    if( m_Nodes[node] >= BG_AB_BODE_TYPE_OCCUPIED )
+    if( m_Nodes[node] >= BG_AB_NODE_TYPE_OCCUPIED )
     {
         sprintf(buf, GetMangosString(LANG_BG_AB_NODE_TAKEN), (teamIndex == 0) ? GetMangosString(LANG_BG_AB_ALLY) : GetMangosString(LANG_BG_AB_HORDE), _GetNodeName(node));
         ChatHandler::FillMessageData(&data, NULL, type, LANG_UNIVERSAL, NULL, 0, buf, NULL);

@@ -5341,8 +5341,8 @@ void Spell::EffectQuestComplete(uint32 i)
     Player *_player = (Player*)m_caster;
 
     uint32 quest_id = m_spellInfo->EffectMiscValue[i];
-
-    _player->AreaExploredOrEventHappens(quest_id);
+    if(_player->GetQuestStatus(quest_id) != QUEST_STATUS_COMPLETE)
+        _player->AreaExploredOrEventHappens(quest_id);
 }
 
 void Spell::EffectSelfResurrect(uint32 i)

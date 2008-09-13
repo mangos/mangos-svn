@@ -146,5 +146,10 @@ void GuardAI::JustDied(Unit *killer)
 {
     if (killer->GetTypeId() == TYPEID_PLAYER)
         i_creature.SendZoneUnderAttackMessage((Player*)killer);
+    else if (Unit *owner = killer->GetOwner())
+    {
+        if (owner->GetTypeId() == TYPEID_PLAYER)
+            i_creature.SendZoneUnderAttackMessage((Player*)owner);
+    }
 }
 
