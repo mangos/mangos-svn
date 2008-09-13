@@ -2364,6 +2364,8 @@ void Spell::EffectHealthLeech(uint32 i)
 
     if(m_caster->isAlive())
     {
+        new_damage = m_caster->SpellHealingBonus(m_spellInfo, new_damage, HEAL, m_caster);
+
         m_caster->ModifyHealth(new_damage);
 
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
