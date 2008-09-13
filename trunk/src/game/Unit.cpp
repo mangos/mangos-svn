@@ -4128,7 +4128,7 @@ void Unit::RemoveAura(AuraMap::iterator &i, AuraRemoveMode mode)
         else
         {
             sLog.outError("Couldn't find the caster of the single target aura, may crash later!");
-            assert(false);
+            // assert(false);
         }
     }
 
