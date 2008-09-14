@@ -544,10 +544,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         SetInCombatWith(pVictim);
         pVictim->SetInCombatWith(this);
 
-        uint64 guid = pVictim->GetCharmerOrOwnerGUID();
-        if(!guid)
-            guid = pVictim->GetGUID();
-        if(IS_PLAYER_GUID(guid))
+        if(pVictim->isCharmedOwnedByPlayerOrPlayer())
             addUnitState(UNIT_STAT_ATTACK_PLAYER);
     }
 
@@ -622,15 +619,7 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         DEBUG_LOG("DealDamage: victim just died");
 
         // find player: owner of controlled `this` or `this` itself maybe
-        Player *player = NULL;
-        if(GetCharmerOrOwnerGUID())                         // Pet or timed creature, or player
-        {
-            if(Unit* owner = GetCharmerOrOwner())
-                if(owner->GetTypeId() == TYPEID_PLAYER)
-                    player = (Player*)owner;
-        }
-        else if(GetTypeId() == TYPEID_PLAYER)               // not controlled player
-            player = (Player*)this;
+        Player *player = GetCharmerOrOwnerPlayerOrPlayerItself();
         
         if(pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->GetLootRecipient())
             player = ((Creature*)pVictim)->GetLootRecipient();
@@ -730,16 +719,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             if(cVictim->GetInstanceId())
             {
                 Map *m = cVictim->GetMap();
-                Player *creditedPlayer = NULL;
-                if(GetCharmerOrOwnerGUID())
-                {
-                    if(IS_PLAYER_GUID(GetCharmerOrOwnerGUID()))
-                        creditedPlayer = (Player*)GetCharmerOrOwner();
-                    // the unit's charmer is credited always, and it's left NULL if it's not a player 
-                    // TODO: do instance binding anyway if the charmer/owner is offline
-                }
-                else if(GetTypeId() == TYPEID_PLAYER)
-                    creditedPlayer = (Player*)this;
+                Player *creditedPlayer = GetCharmerOrOwnerPlayerOrPlayerItself();
+                // TODO: do instance binding anyway if the charmer/owner is offline
 
                 if(m->IsDungeon() && creditedPlayer)
                 {
@@ -7048,6 +7029,15 @@ Unit *Unit::GetCharmer() const
     return NULL;
 }
 
+Player* Unit::GetCharmerOrOwnerPlayerOrPlayerItself()
+{
+    uint64 guid = GetCharmerOrOwnerGUID();
+    if(IS_PLAYER_GUID(guid))
+        return ObjectAccessor::GetPlayer(*this, guid);
+
+    return GetTypeId()==TYPEID_PLAYER ? (Player*)this : NULL;
+}
+
 Pet* Unit::GetPet() const
 {
     if(uint64 pet_guid = GetPetGUID())
@@ -8321,12 +8311,9 @@ void Unit::Unmount()
     }
 }
 
-void Unit::SetInCombatWith(Unit const* enemy)
+void Unit::SetInCombatWith(Unit* enemy)
 {
-    Unit const* eOwner = enemy->GetCharmerOrOwner();
-    if(!eOwner)
-        eOwner = enemy;
-
+    Unit* eOwner = enemy->GetCharmerOrOwnerOrSelf();
     if(eOwner->IsPvP())
     {
         SetInCombatState(true);
@@ -8336,9 +8323,7 @@ void Unit::SetInCombatWith(Unit const* enemy)
     //check for duel
     if(eOwner->GetTypeId() == TYPEID_PLAYER && ((Player*)eOwner)->duel)
     {
-        Unit const* myOwner = GetCharmerOrOwner();
-        if(!myOwner)
-            myOwner = this;
+        Unit const* myOwner = GetCharmerOrOwnerOrSelf();
         if(((Player const*)eOwner)->duel->opponent == myOwner)
         {
             SetInCombatState(true);

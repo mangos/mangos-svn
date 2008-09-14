@@ -746,20 +746,13 @@ void AreaAura::Update(uint32 diff)
             // not check group if target == owner or target == pet
             if (caster->GetCharmerOrOwnerGUID() != tmp_target->GetGUID() && caster->GetGUID() != tmp_target->GetCharmerOrOwnerGUID())
             {
-                Unit* check = caster->GetCharmerOrOwner();
-                if (!check)
-                    check = caster;
+                Player* check = caster->GetCharmerOrOwnerPlayerOrPlayerItself();
 
-                Group *pGroup = NULL;
-                if( check->GetTypeId() == TYPEID_PLAYER )
-                    pGroup = ((Player*)check)->GetGroup();
-
+                Group *pGroup = check ? check->GetGroup() : NULL;
                 if( pGroup )
                 {
-                    Unit* checkTarget = tmp_target->GetCharmerOrOwner();
-                    if(!checkTarget)
-                        checkTarget = tmp_target;
-                    if(checkTarget->GetTypeId() != TYPEID_PLAYER || !pGroup->SameSubGroup((Player*)check, (Player*)checkTarget))
+                    Player* checkTarget = tmp_target->GetCharmerOrOwnerPlayerOrPlayerItself();
+                    if(!checkTarget || !pGroup->SameSubGroup(check, checkTarget))
                         tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
                 }
                 else

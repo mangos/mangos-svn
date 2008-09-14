@@ -973,10 +973,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
                     unit->SetInCombatWith(m_caster);
                     m_caster->SetInCombatWith(unit);
 
-                    uint64 guid = unit->GetCharmerOrOwnerGUID();
-                    if(!guid)
-                        guid = unit->GetGUID();
-                    if(IS_PLAYER_GUID(guid))
+                    if(unit->isCharmedOwnedByPlayerOrPlayer())
                         m_caster->addUnitState(UNIT_STAT_ATTACK_PLAYER);
 
                     unit->AddThreat(m_caster, 0.0f);
@@ -1362,17 +1359,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         case TARGET_ALL_PARTY_AROUND_CASTER_2:
         case TARGET_ALL_PARTY:
         {
-            Unit* owner = m_caster->GetCharmerOrOwner();
-            Player *pTarget = NULL;
-
-            if(owner)
-            {
-                if(owner->GetTypeId() == TYPEID_PLAYER)
-                    pTarget = (Player*)owner;
-            }
-            else if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                pTarget = (Player*)m_caster;
-
+            Player *pTarget = m_caster->GetCharmerOrOwnerPlayerOrPlayerItself();
             Group *pGroup = pTarget ? pTarget->GetGroup() : NULL;
 
             if(pGroup)
@@ -1395,13 +1382,15 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                     }
                 }
             }
-            else if (owner)
-            {
-                if(m_caster->IsWithinDistInMap(owner, radius))
-                    TagUnitMap.push_back(owner);
-            }
             else
-                TagUnitMap.push_back(m_caster);
+            {
+                Unit* ownerOrSelf = pTarget ? pTarget : m_caster->GetCharmerOrOwnerOrSelf();
+                if(m_caster->IsWithinDistInMap(pTarget, radius))
+                    TagUnitMap.push_back(pTarget);
+                if(Pet* pet = pTarget->GetPet())
+                    if( m_caster->IsWithinDistInMap(pet, radius) )
+                        TagUnitMap.push_back(pet);
+            }
         }break;
         case TARGET_RANDOM_RAID_MEMBER:
         {
@@ -1573,8 +1562,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         }
         case TARGET_MASTER:
         {
-            Unit* owner = m_caster->GetCharmerOrOwner();
-            if(owner)
+            if(Unit* owner = m_caster->GetCharmerOrOwner())
                 TagUnitMap.push_back(owner);
             break;
         }
