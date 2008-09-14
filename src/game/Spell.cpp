@@ -945,7 +945,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
         return;
 
     // Recheck immune (only for delayed spells)
-    if (m_spellInfo->speed && (unit->IsImmunedToSpellDamage(m_spellInfo,true) || unit->IsImmunedToSpell(m_spellInfo,true)))
+    if (m_spellInfo->speed && (unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo),true) || unit->IsImmunedToSpell(m_spellInfo,true)))
     {
         m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
         return;
@@ -1385,9 +1385,9 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             else
             {
                 Unit* ownerOrSelf = pTarget ? pTarget : m_caster->GetCharmerOrOwnerOrSelf();
-                if(m_caster->IsWithinDistInMap(pTarget, radius))
-                    TagUnitMap.push_back(pTarget);
-                if(Pet* pet = pTarget->GetPet())
+                if(ownerOrSelf==m_caster || m_caster->IsWithinDistInMap(ownerOrSelf, radius))
+                    TagUnitMap.push_back(ownerOrSelf);
+                if(Pet* pet = ownerOrSelf->GetPet())
                     if( m_caster->IsWithinDistInMap(pet, radius) )
                         TagUnitMap.push_back(pet);
             }
