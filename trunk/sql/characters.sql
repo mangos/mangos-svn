@@ -542,6 +542,7 @@ CREATE TABLE `character_spell` (
   `spell` int(11) unsigned NOT NULL default '0' COMMENT 'Spell Identifier',
   `slot` int(11) unsigned NOT NULL default '0',
   `active` tinyint(3) unsigned NOT NULL default '1',
+  `disabled` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`,`spell`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 

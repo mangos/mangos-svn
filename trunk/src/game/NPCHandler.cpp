@@ -253,12 +253,6 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
     _player->ModifyMoney( -int32(nSpellCost) );
 
-    if(trainer_spell->spell->powerType == POWER_FOCUS)
-    {
-        _player->addSpell(spellId,4);                       // active = 4 for spell book of hunter's pet
-        return;
-    }
-
     // learn explicitly to prevent lost money at lags, learning spell will be only show spell animation
     _player->learnSpell(trainer_spell->spell->Id);
 
