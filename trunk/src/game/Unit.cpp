@@ -7689,7 +7689,7 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
         }
     }
 
-    float ActualBenefit;
+    float ActualBenefit = 0.0f;
 
     if (AdvertisedBenefit != 0)
     {
