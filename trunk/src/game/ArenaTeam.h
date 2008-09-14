@@ -137,7 +137,7 @@ class ArenaTeam
         bool AddMember(uint64 PlayerGuid);
         void DelMember(uint64 guid);
 
-        void SetEmblem(uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle, uint32 borderColor, uint32 backgroundColor);
+        void SetEmblem(uint32 backgroundColor, uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle, uint32 borderColor);
 
         uint32 GetMembersSize() const { return members.size(); }
         MemberList::iterator membersbegin(){ return members.begin(); }
@@ -163,11 +163,11 @@ class ArenaTeam
         std::string Name;
         uint64 CaptainGuid;
 
-        uint32 EmblemStyle;
-        uint32 EmblemColor;
-        uint32 BorderStyle;
-        uint32 BorderColor;
-        uint32 BackgroundColor;
+        uint32 BackgroundColor; // ARGB format
+        uint32 EmblemStyle;     // icon id
+        uint32 EmblemColor;     // ARGB format
+        uint32 BorderStyle;     // border image id
+        uint32 BorderColor;     // ARGB format
 
         MemberList members;
         ArenaTeamStats stats;

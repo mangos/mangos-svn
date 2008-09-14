@@ -26,11 +26,11 @@ ArenaTeam::ArenaTeam()
     Type            = 0;
     Name            = "";
     CaptainGuid     = 0;
+    BackgroundColor = 0;                                    // background
     EmblemStyle     = 0;                                    // icon
     EmblemColor     = 0;                                    // icon color
     BorderStyle     = 0;                                    // border
     BorderColor     = 0;                                    // border color
-    BackgroundColor = 0;                                    // background
     stats.games     = 0;
     stats.played    = 0;
     stats.rank      = 0;
@@ -71,9 +71,9 @@ bool ArenaTeam::create(uint64 captainGuid, uint32 type, std::string ArenaTeamNam
     CharacterDatabase.BeginTransaction();
     // CharacterDatabase.PExecute("DELETE FROM arena_team WHERE arenateamid='%u'", Id); - MAX(arenateam)+1 not exist
     CharacterDatabase.PExecute("DELETE FROM arena_team_member WHERE arenateamid='%u'", Id);
-    CharacterDatabase.PExecute("INSERT INTO arena_team (arenateamid,name,captainguid,type,EmblemStyle,EmblemColor,BorderStyle,BorderColor,BackgroundColor) "
+    CharacterDatabase.PExecute("INSERT INTO arena_team (arenateamid,name,captainguid,type,BackgroundColor,EmblemStyle,EmblemColor,BorderStyle,BorderColor) "
         "VALUES('%u','%s','%u','%u','%u','%u','%u','%u','%u')",
-        Id, ArenaTeamName.c_str(), GUID_LOPART(CaptainGuid), Type, EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor);
+        Id, ArenaTeamName.c_str(), GUID_LOPART(CaptainGuid), Type, BackgroundColor,EmblemStyle,EmblemColor,BorderStyle,BorderColor);
     CharacterDatabase.PExecute("INSERT INTO arena_team_stats (arenateamid, rating, games, wins, played, wins2, rank) VALUES "
         "('%u', '%u', '%u', '%u', '%u', '%u', '%u')", Id,stats.rating,stats.games,stats.wins,stats.played,stats.wins2,stats.rank);
 
@@ -160,8 +160,8 @@ bool ArenaTeam::LoadArenaTeamFromDB(uint32 ArenaTeamId)
     LoadStatsFromDB(ArenaTeamId);
     LoadMembersFromDB(ArenaTeamId);
 
-    //                                                      0          1    2           3    4           5           6           7           8
-    QueryResult *result = CharacterDatabase.PQuery("SELECT arenateamid,name,captainguid,type,EmblemStyle,EmblemColor,BorderStyle,BorderColor,BackgroundColor FROM arena_team WHERE arenateamid = '%u'", ArenaTeamId);
+    //                                                      0          1    2           3    4               5           6           7           8
+    QueryResult *result = CharacterDatabase.PQuery("SELECT arenateamid,name,captainguid,type,BackgroundColor,EmblemStyle,EmblemColor,BorderStyle,BorderColor FROM arena_team WHERE arenateamid = '%u'", ArenaTeamId);
 
     if(!result)
         return false;
@@ -172,11 +172,11 @@ bool ArenaTeam::LoadArenaTeamFromDB(uint32 ArenaTeamId)
     Name = fields[1].GetCppString();
     CaptainGuid  = MAKE_NEW_GUID(fields[2].GetUInt32(), 0, HIGHGUID_PLAYER);
     Type = fields[3].GetUInt32();
-    EmblemStyle = fields[4].GetUInt32();
-    EmblemColor = fields[5].GetUInt32();
-    BorderStyle = fields[6].GetUInt32();
-    BorderColor = fields[7].GetUInt32();
-    BackgroundColor = fields[8].GetUInt32();
+    BackgroundColor = fields[4].GetUInt32();
+    EmblemStyle = fields[5].GetUInt32();
+    EmblemColor = fields[6].GetUInt32();
+    BorderStyle = fields[7].GetUInt32();
+    BorderColor = fields[8].GetUInt32();
 
     delete result;
 
@@ -369,11 +369,11 @@ void ArenaTeam::Query(WorldSession *session)
     data << uint32(GetId());                                // team id
     data << GetName();                                      // team name
     data << uint32(GetType());                              // arena team type (2=2x2, 3=3x3 or 5=5x5)
-    data << uint32(EmblemStyle);                            // emblem style?
-    data << uint32(EmblemColor);                            // emblem color?
-    data << uint32(BorderStyle);                            // border style?
-    data << uint32(BorderColor);                            // border color?
-    data << uint32(BackgroundColor);                        // background color?
+    data << uint32(BackgroundColor);                        // background color
+    data << uint32(EmblemStyle);                            // emblem style
+    data << uint32(EmblemColor);                            // emblem color
+    data << uint32(BorderStyle);                            // border style
+    data << uint32(BorderColor);                            // border color
     session->SendPacket(&data);
     sLog.outDebug("WORLD: Sent SMSG_ARENA_TEAM_QUERY_RESPONSE");
 }
@@ -405,15 +405,15 @@ void ArenaTeam::InspectStats(WorldSession *session, uint64 guid)
     session->SendPacket(&data);
 }
 
-void ArenaTeam::SetEmblem(uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle, uint32 borderColor, uint32 backgroundColor)
+void ArenaTeam::SetEmblem(uint32 backgroundColor, uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle, uint32 borderColor)
 {
+    BackgroundColor = backgroundColor;
     EmblemStyle = emblemStyle;
     EmblemColor = emblemColor;
     BorderStyle = borderStyle;
     BorderColor = borderColor;
-    BackgroundColor = backgroundColor;
 
-    CharacterDatabase.PExecute("UPDATE arena_team SET EmblemStyle='%u', EmblemColor='%u', BorderStyle='%u', BorderColor='%u', BackgroundColor='%u' WHERE arenateamid='%u'", EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor, Id);
+    CharacterDatabase.PExecute("UPDATE arena_team SET BackgroundColor='%u', EmblemStyle='%u', EmblemColor='%u', BorderStyle='%u', BorderColor='%u' WHERE arenateamid='%u'", BackgroundColor, EmblemStyle, EmblemColor, BorderStyle, BorderColor, Id);
 }
 
 void ArenaTeam::SetStats(uint32 stat_type, uint32 value)

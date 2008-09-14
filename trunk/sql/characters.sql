@@ -25,11 +25,11 @@ CREATE TABLE `arena_team` (
   `name` char(255) NOT NULL,
   `captainguid` int(10) unsigned NOT NULL default '0',
   `type` tinyint(3) unsigned NOT NULL default '0',
+  `BackgroundColor` int(10) unsigned NOT NULL default '0',
   `EmblemStyle` int(10) unsigned NOT NULL default '0',
   `EmblemColor` int(10) unsigned NOT NULL default '0',
   `BorderStyle` int(10) unsigned NOT NULL default '0',
   `BorderColor` int(10) unsigned NOT NULL default '0',
-  `BackgroundColor` int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (`arenateamid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
