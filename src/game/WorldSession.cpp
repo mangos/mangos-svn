@@ -317,12 +317,8 @@ void WorldSession::LogoutPlayer(bool Save)
             guild->BroadcastPacket(&data);
         }
 
-        ///- Release charmed creatures and unsummon totems
-        _player->Uncharm();
-        _player->UnsummonAllTotems();
+        ///- Remove pet
         _player->RemovePet(NULL,PET_SAVE_AS_CURRENT, true);
-        _player->RemoveMiniPet();
-        _player->RemoveGuardians();
 
         ///- empty buyback items and save the player in the database
         // some save parts only correctly work in case player present in map/player_lists (pets, etc)
@@ -351,11 +347,12 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->RemoveFromGroup();
 
         ///- Remove the player from the world
-        ObjectAccessor::Instance().RemoveObject(_player);
         // the player may not be in the world when logging out
         // e.g if he got disconnected during a transfer to another map
         // calls to GetMap in this case may cause crashes
         if(_player->IsInWorld()) MapManager::Instance().GetMap(_player->GetMapId(), _player)->Remove(_player, false);
+        // RemoveFromWorld does cleanup that requires the player to be in the accessor
+        ObjectAccessor::Instance().RemoveObject(_player);
 
         ///- Send update to group
         if(_player->GetGroup())

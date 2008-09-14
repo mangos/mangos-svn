@@ -1557,7 +1557,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     else
     {
         // far teleport to another map
-        Map* oldmap = MapManager::Instance().GetMap(GetMapId(), this);
+        Map* oldmap = IsInWorld() ? MapManager::Instance().GetMap(GetMapId(), this) : NULL;
         // check if we can enter before stopping combat / removing pet / totems / interrupting spells
 
         // Check enter rights before map getting to avoid creating instance copy for player
@@ -1599,21 +1599,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
             }
 
-            // remove uncontrolled pets
-            RemoveMiniPet();
-            RemoveGuardians();
-
-            // remove charmed creatures
-            Uncharm();
-
-            // unsummon totems on map change
-            UnsummonAllTotems();
-
             // remove all dyn objects
             RemoveAllDynObjects();
-
-            // remove single target auras
-            RemoveNotOwnSingleTargetAuras();
 
             // stop spellcasting
             // not attempt interrupt teleportation spell at caster teleport
@@ -1643,7 +1630,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             SendSavedInstances();
 
             // remove from old map now
-            if (oldmap) oldmap->Remove(this, false);
+            if(oldmap) oldmap->Remove(this, false);
 
             // new final coordinates
             float final_x = x;
@@ -1680,7 +1667,7 @@ void Player::AddToWorld()
     ///- Do not add/remove the player from the object storage
     ///- It will crash when updating the ObjectAccessor
     ///- The player should only be added when logging in
-    Object::AddToWorld();
+    Unit::AddToWorld();
 
     for(int i = PLAYER_SLOT_START; i < PLAYER_SLOT_END; i++)
     {
@@ -1691,6 +1678,16 @@ void Player::AddToWorld()
 
 void Player::RemoveFromWorld()
 {
+    // cleanup
+    if(IsInWorld())
+    {
+        ///- Release charmed creatures, unsummon totems and remove pets/guardians
+        Uncharm();
+        UnsummonAllTotems();
+        RemoveMiniPet();
+        RemoveGuardians();
+    }
+
     for(int i = PLAYER_SLOT_START; i < PLAYER_SLOT_END; i++)
     {
         if(m_items[i])
@@ -1700,7 +1697,7 @@ void Player::RemoveFromWorld()
     ///- Do not add/remove the player from the object storage
     ///- It will crash when updating the ObjectAccessor
     ///- The player should only be removed when logging out
-    Object::RemoveFromWorld();
+    Unit::RemoveFromWorld();
 }
 
 void Player::RewardRage( uint32 damage, uint32 weaponSpeedHitFactor, bool attacker )
@@ -13964,9 +13961,14 @@ void Player::_LoadMail()
 
 void Player::LoadPet()
 {
-    Pet *pet = new Pet;
-    if(!pet->LoadPetFromDB(this,0,0,true))
-        delete pet;
+    //fixme: the pet should still be loaded if the player is not in world
+    // just not added to the map
+    if(IsInWorld())
+    {
+        Pet *pet = new Pet;
+        if(!pet->LoadPetFromDB(this,0,0,true))
+            delete pet;
+    }
 }
 
 void Player::_LoadQuestStatus(QueryResult *result)
