@@ -222,23 +222,21 @@ bool WorldSession::Update(uint32 /*diff*/)
 /// %Log the player out
 void WorldSession::LogoutPlayer(bool Save)
 {
+    // finish pending transfers before starting the logout
+    while(_player && _player->IsBeingTeleported())
+        HandleMoveWorldportAckOpcode(*(WorldPacket *)NULL);
+
     m_playerLogout = true;
 
     if (_player)
     {
-        // finish teleports at logout
-        while(_player->IsBeingTeleported())
-        {
-            WorldPacket *dummy = NULL;
-            HandleMoveWorldportAckOpcode(*dummy);
-        }
-
         ///- If the player just died before logging out, make him appear as a ghost
         //FIXME: logout must be delayed in case lost connection with client in time of combat
         if (_player->GetDeathTimer())
         {
             _player->getHostilRefManager().deleteReferences();
             _player->BuildPlayerRepop();
+            _player->RepopAtGraveyard();
         }
         else if (!_player->getAttackers().empty())
         {
@@ -264,6 +262,7 @@ void WorldSession::LogoutPlayer(bool Save)
             _player->SetPvPDeath(!aset.empty());
             _player->KillPlayer();
             _player->BuildPlayerRepop();
+            _player->RepopAtGraveyard();
 
             // give honor to all attackers from set like group case
             for(std::set<Player*>::const_iterator itr = aset.begin(); itr != aset.end(); ++itr)
@@ -282,6 +281,7 @@ void WorldSession::LogoutPlayer(bool Save)
             //_player->SetDeathPvP(*); set at SPELL_AURA_SPIRIT_OF_REDEMPTION apply time
             _player->KillPlayer();
             _player->BuildPlayerRepop();
+            _player->RepopAtGraveyard();
         }
 
         ///- Remove player from battleground (teleport to entrance)

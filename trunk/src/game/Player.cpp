@@ -1506,10 +1506,17 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         uint32 old_zone = GetZoneId();
 
         // near teleport
-        WorldPacket data;
-        BuildTeleportAckMsg(&data, x, y, z, orientation);
-        GetSession()->SendPacket(&data);
-        SetPosition( x, y, z, orientation, true);
+        if(!GetSession()->PlayerLogout())
+        {
+            WorldPacket data;
+            BuildTeleportAckMsg(&data, x, y, z, orientation);
+            GetSession()->SendPacket(&data);
+            SetPosition( x, y, z, orientation, true);
+        }
+        else
+            // this will be used instead of the current location in SaveToDB
+            m_teleport_dest = WorldLocation(mapid, x, y, z, orientation);
+
         //BuildHeartBeatMsg(&data);
         //SendMessageToSet(&data, true);
         if (!(options & TELE_TO_NOT_UNSUMMON_PET))
@@ -1544,7 +1551,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
         SetSemaphoreTeleport(false);
 
-        UpdateZone(GetZoneId());
+        if(!GetSession()->PlayerLogout())
+            UpdateZone(GetZoneId());
 
         // new zone
         if(old_zone != GetZoneId())
@@ -1608,29 +1616,32 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 if(IsNonMeleeSpellCasted(true))
                     InterruptNonMeleeSpells(true);
 
-            // send transfer packets
-            WorldPacket data(SMSG_TRANSFER_PENDING, (4+4+4));
-            data << uint32(mapid);
-            if (m_transport)
+            if(!GetSession()->PlayerLogout())
             {
-                data << m_transport->GetEntry() << GetMapId();
-            }
-            GetSession()->SendPacket(&data);
+                // send transfer packets
+                WorldPacket data(SMSG_TRANSFER_PENDING, (4+4+4));
+                data << uint32(mapid);
+                if (m_transport)
+                {
+                    data << m_transport->GetEntry() << GetMapId();
+                }
+                GetSession()->SendPacket(&data);
 
-            data.Initialize(SMSG_NEW_WORLD, (20));
-            if (m_transport)
-            {
-                data << (uint32)mapid << m_movementInfo.t_x << m_movementInfo.t_y << m_movementInfo.t_z << m_movementInfo.t_o;
-            }
-            else
-            {
-                data << (uint32)mapid << (float)x << (float)y << (float)z << (float)orientation;
-            }
-            GetSession()->SendPacket( &data );
-            SendSavedInstances();
+                data.Initialize(SMSG_NEW_WORLD, (20));
+                if (m_transport)
+                {
+                    data << (uint32)mapid << m_movementInfo.t_x << m_movementInfo.t_y << m_movementInfo.t_z << m_movementInfo.t_o;
+                }
+                else
+                {
+                    data << (uint32)mapid << (float)x << (float)y << (float)z << (float)orientation;
+                }
+                GetSession()->SendPacket( &data );
+                SendSavedInstances();
 
-            // remove from old map now
-            if(oldmap) oldmap->Remove(this, false);
+                // remove from old map now
+                if(oldmap) oldmap->Remove(this, false);
+            }
 
             // new final coordinates
             float final_x = x;
@@ -1647,6 +1658,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             }
 
             m_teleport_dest = WorldLocation(mapid, final_x, final_y, final_z, final_o);
+            // if the player is saved before worldportack (at logout for example)
+            // this will be used instead of the current location in SaveToDB
 
             RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CHANGE_MAP);
 
@@ -13687,9 +13700,6 @@ void Player::LoadCorpse()
     {
         if(Corpse *corpse = GetCorpse())
         {
-            if( corpse->GetType() != CORPSE_BONES && IsWithinDistInMap(corpse,0.0))
-                RepopAtGraveyard();
-
             ApplyModFlag(PLAYER_FIELD_BYTES, PLAYER_FIELD_BYTE_RELEASE_TIMER, corpse && !sMapStore.LookupEntry(corpse->GetMapId())->Instanceable() );
         }
         else
@@ -17717,6 +17727,7 @@ void Player::UpdateZoneDependentAuras( uint32 newZone )
 
     // Some spells applied at enter into zone (with subzones)
     // Human Illusion
+    // NOTE: these are removed by RemoveAurasWithInterruptFlags(AURA_INTERRUPT_FLAG_CHANGE_MAP);
     if ( newZone == 2367 )                                  // Old Hillsbrad Foothills
     {
         uint32 spellid = 0;
