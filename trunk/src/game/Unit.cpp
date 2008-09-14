@@ -2211,7 +2211,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool ex
 
     SpellSchoolMask meleeSchoolMask = GetMeleeDamageSchoolMask();
 
-    if( (meleeSchoolMask & SPELL_SCHOOL_MASK_NORMAL) && pVictim->IsImmunedToPhysicalDamage() )
+    if(pVictim->IsImmunedToDamage(meleeSchoolMask,true))    // use charges
     {
         SendAttackStateUpdate (HITINFO_MISS, pVictim, 1, meleeSchoolMask, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
 
@@ -2813,7 +2813,7 @@ SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool 
         return SPELL_MISS_NONE;
 
     // Check for immune (use charges)
-    if (pVictim->IsImmunedToSpellDamage(spell,true))
+    if (pVictim->IsImmunedToDamage(GetSpellSchoolMask(spell),true))
         return SPELL_MISS_IMMUNE;
 
     // Try victim reflect spell
@@ -7873,40 +7873,19 @@ int32 Unit::SpellBaseHealingBonusForVictim(int32 SchoolMask, Unit *pVictim)
     return AdvertisedBenefit;
 }
 
-bool Unit::IsImmunedToPhysicalDamage() const
-{
-    //If m_immuneToDamage type contain magic, IMMUNE damage.
-    SpellImmuneList const& damageImmList = m_spellImmune[IMMUNITY_DAMAGE];
-    for (SpellImmuneList::const_iterator itr = damageImmList.begin(); itr != damageImmList.end(); ++itr)
-        if(itr->type & SPELL_SCHOOL_MASK_NORMAL)
-            return true;
-
-    //If m_immuneToSchool type contain this school type, IMMUNE damage.
-    SpellImmuneList const& spellImmList = m_spellImmune[IMMUNITY_SCHOOL];
-    for (SpellImmuneList::const_iterator itr = spellImmList.begin(); itr != spellImmList.end(); ++itr)
-        if(itr->type & SPELL_SCHOOL_MASK_NORMAL)
-            return true;
-
-    return false;
-}
-
-bool Unit::IsImmunedToSpellDamage(SpellEntry const* spellInfo, bool useCharges)
+bool Unit::IsImmunedToDamage(SpellSchoolMask shoolMask, bool useCharges)
 {
     // no charges dependent checks
-
-    //If m_immuneToSchool type contain this school type, IMMUNE damage.
     SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
     for (SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
-        if(itr->type & GetSpellSchoolMask(spellInfo))
+        if(itr->type & shoolMask)
             return true;
 
     // charges dependent checks
-
-    //If m_immuneToDamage type contain magic, IMMUNE damage.
     SpellImmuneList const& damageList = m_spellImmune[IMMUNITY_DAMAGE];
     for (SpellImmuneList::const_iterator itr = damageList.begin(); itr != damageList.end(); ++itr)
     {
-        if(itr->type & GetSpellSchoolMask(spellInfo))
+        if(itr->type & shoolMask)
         {
             if(useCharges)
             {
@@ -7939,7 +7918,7 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo, bool useCharges)
 
     // no charges first
 
-    // don't get feared if stunned
+    //FIX ME this hack: don't get feared if stunned
     if (spellInfo->Mechanic == MECHANIC_FEAR )
     {
         if ( hasUnitState(UNIT_STAT_STUNDED) )
