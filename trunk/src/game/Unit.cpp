@@ -4109,7 +4109,7 @@ void Unit::RemoveAura(AuraMap::iterator &i, AuraRemoveMode mode)
         else
         {
             sLog.outError("Couldn't find the caster of the single target aura, may crash later!");
-            // assert(false);
+            assert(false);
         }
     }
 
@@ -9689,6 +9689,22 @@ uint32 Unit::GetCreatePowers( Powers power ) const
     }
 
     return 0;
+}
+
+void Unit::AddToWorld()
+{
+    Object::AddToWorld();
+}
+
+void Unit::RemoveFromWorld()
+{
+    // cleanup
+    if(IsInWorld())
+    {  
+        RemoveNotOwnSingleTargetAuras();
+    }
+
+    Object::RemoveFromWorld();
 }
 
 void Unit::CleanupsBeforeDelete()

@@ -81,14 +81,14 @@ void Creature::AddToWorld()
 {
     ///- Register the creature for guid lookup
     if(!IsInWorld()) ObjectAccessor::Instance().AddObject(this);
-    Object::AddToWorld();
+    Unit::AddToWorld();
 }
 
 void Creature::RemoveFromWorld()
 {
     ///- Remove the creature from the accessor
     if(IsInWorld()) ObjectAccessor::Instance().RemoveObject(this);
-    Object::RemoveFromWorld();
+    Unit::RemoveFromWorld();
 }
 
 void Creature::LoadTrainerSpells()

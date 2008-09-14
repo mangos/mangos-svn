@@ -418,18 +418,16 @@ Map::LoadGrid(const Cell& cell, bool no_unload)
 
 bool Map::Add(Player *player)
 {
-    if (player->GetPet()) player->GetPet()->SetInstanceId(this->GetInstanceId());
     player->SetInstanceId(this->GetInstanceId());
-
-    player->AddToWorld();
-
-    SendInitSelf(player);
-    SendInitTransports(player);
 
     // update player state for other player and visa-versa
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
     Cell cell(p);
     EnsureGridLoadedForPlayer(cell, player, true);
+    player->AddToWorld();
+
+    SendInitSelf(player);
+    SendInitTransports(player);
 
     UpdatePlayerVisibility(player,cell,p);
     UpdateObjectsVisibilityFor(player,cell,p);
@@ -569,8 +567,8 @@ void Map::Remove(Player *player, bool remove)
     NGridType *grid = getNGrid(cell.GridX(), cell.GridY());
     assert(grid != NULL);
 
-    RemoveFromGrid(player,grid,cell);
     player->RemoveFromWorld();
+    RemoveFromGrid(player,grid,cell);
 
     SendRemoveTransports(player);
 
@@ -612,8 +610,8 @@ Map::Remove(T *obj, bool remove)
     NGridType *grid = getNGrid(cell.GridX(), cell.GridY());
     assert( grid != NULL );
 
-    RemoveFromGrid(obj,grid,cell);
     obj->RemoveFromWorld();
+    RemoveFromGrid(obj,grid,cell);
 
     UpdateObjectVisibility(obj,cell,p);
 
@@ -1355,6 +1353,9 @@ InstanceMap::InstanceMap(uint32 id, time_t expiry, uint32 InstanceId, uint8 Spaw
   : Map(id, expiry, InstanceId, SpawnMode), i_data(NULL),
     m_resetAfterUnload(false), m_unloadWhenEmpty(false)
 {
+    // the timer is started by default, and stopped when the first player joins
+    // this make sure it gets unloaded if for some reason no player joins
+    m_unloadTimer = std::max(sWorld.getConfig(CONFIG_INSTANCE_UNLOAD_DELAY), (uint32)MIN_UNLOAD_DELAY);
 }
 
 InstanceMap::~InstanceMap()
