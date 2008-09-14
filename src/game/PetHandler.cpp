@@ -193,8 +193,9 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 pet->SetInFront(unit_target);
                 if( unit_target->GetTypeId() == TYPEID_PLAYER )
                     pet->SendUpdateToPlayer( (Player*)unit_target );
-                if(pet->GetCharmerOrOwner() && pet->GetCharmerOrOwner()->GetTypeId() == TYPEID_PLAYER)
-                    pet->SendUpdateToPlayer((Player*)pet->GetCharmerOrOwner());
+                if(Unit* powner = pet->GetCharmerOrOwner())
+                    if(powner->GetTypeId() == TYPEID_PLAYER)
+                        pet->SendUpdateToPlayer((Player*)powner);
                 result = -1;
             }
 

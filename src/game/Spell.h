@@ -620,10 +620,7 @@ namespace MaNGOS
                         if(!itr->getSource()->isTargetableForAttack())
                             continue;
 
-                        Unit* check = i_originalCaster;
-                        Unit* owner = i_originalCaster->GetCharmerOrOwner();
-                        if(owner)
-                            check = owner;
+                        Unit* check = i_originalCaster->GetCharmerOrOwnerOrSelf();
 
                         if( check->GetTypeId()==TYPEID_PLAYER )
                         {

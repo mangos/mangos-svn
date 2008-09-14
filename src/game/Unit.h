@@ -867,7 +867,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         bool isInCombat()  const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
         void SetInCombatState(bool PvP);
-        void SetInCombatWith(Unit const* enemy);
+        void SetInCombatWith(Unit* enemy);
         void ClearInCombat();
         uint32 GetCombatTimer() const { return m_CombatTimer; }
 
@@ -926,8 +926,16 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint64 GetPetGUID() const { return  GetUInt64Value(UNIT_FIELD_SUMMON); }
         uint64 GetCharmerGUID() const { return GetUInt64Value(UNIT_FIELD_CHARMEDBY); }
         uint64 GetCharmGUID() const { return  GetUInt64Value(UNIT_FIELD_CHARM); }
-        uint64 GetCharmerOrOwnerGUID() const { return GetCharmerGUID() ? GetCharmerGUID() : GetOwnerGUID(); }
         void SetCharmerGUID(uint64 owner) { SetUInt64Value(UNIT_FIELD_CHARMEDBY, owner); }
+
+        uint64 GetCharmerOrOwnerGUID() const { return GetCharmerGUID() ? GetCharmerGUID() : GetOwnerGUID(); }
+        uint64 GetCharmerOrOwnerOrOwnGUID() const
+        {
+            if(uint64 guid = GetCharmerOrOwnerGUID())
+                return GetCharmerOrOwnerGUID();
+            return GetGUID();
+        }
+        bool isCharmedOwnedByPlayerOrPlayer() const { return IS_PLAYER_GUID(GetCharmerOrOwnerOrOwnGUID()); }
 
         Player* GetSpellModOwner();
 
@@ -936,6 +944,14 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         Unit* GetCharmer() const;
         Unit* GetCharm() const;
         Unit* GetCharmerOrOwner() const { return GetCharmerGUID() ? GetCharmer() : GetOwner(); }
+        Unit* GetCharmerOrOwnerOrSelf()
+        {
+            if(Unit* u = GetCharmerOrOwner())
+                return u;
+
+            return this;
+        }
+        Player* GetCharmerOrOwnerPlayerOrPlayerItself();
 
         void SetPet(Pet* pet);
         void SetCharm(Unit* pet);

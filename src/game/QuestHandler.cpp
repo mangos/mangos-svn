@@ -317,12 +317,14 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
     if(!pObject||!pObject->hasInvolvedQuest(quest))
         return;
 
-    Quest const *pQuest = objmgr.GetQuestTemplate(quest);
-    if( pQuest )
-    {
-        if ( _player->CanCompleteQuest( quest ) )
-            _player->PlayerTalkClass->SendQuestGiverOfferReward( pQuest, guid, true );
-    }
+    if ( _player->CanCompleteQuest( quest ) )
+        _player->CompleteQuest( quest );
+
+    if( _player->GetQuestStatus( quest ) != QUEST_STATUS_COMPLETE )
+        return;
+
+    if(Quest const *pQuest = objmgr.GetQuestTemplate(quest))
+        _player->PlayerTalkClass->SendQuestGiverOfferReward( pQuest, guid, true );
 }
 
 void WorldSession::HandleQuestgiverCancel(WorldPacket& /*recv_data*/ )

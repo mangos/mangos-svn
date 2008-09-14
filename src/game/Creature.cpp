@@ -1065,15 +1065,7 @@ void Creature::SetLootRecipient(Unit *unit)
         return;
     }
 
-    Player* player = NULL;
-    if(Unit* owner = unit->GetCharmerOrOwner())             // controlled player/pet
-    {
-        if(owner->GetTypeId() == TYPEID_PLAYER)
-            player = (Player*)owner;
-    }
-    else if(unit->GetTypeId() == TYPEID_PLAYER)             // uncontrolled player
-        player = (Player*)unit;
-
+    Player* player = unit->GetCharmerOrOwnerPlayerOrPlayerItself();
     if(!player)                                             // normal creature, no player involved
         return;
 
