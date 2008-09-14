@@ -309,8 +309,8 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                 switch(m_spellInfo->Id)                     // better way to check unknown 
                 {
                     // Meteor like spells (divided damage to targets)
-                    case 24340: case 26558: case 28884: case 41276: 
-                                                            // Meteor
+                    case 24340: case 26558: case 28884:     // Meteor
+                    case 36837: case 38903: case 41276:     // Meteor
                     case 26789:                             // Shard of the Fallen Star
                     case 31436:                             // Malevolent Cleave
                     case 35181:                             // Dive Bomb
