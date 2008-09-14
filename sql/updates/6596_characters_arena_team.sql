@@ -1,0 +1,10 @@
+ALTER TABLE arena_team CHANGE EmblemStyle _BackgroundColor INTEGER;
+ALTER TABLE arena_team CHANGE EmblemColor _EmblemStyle INTEGER;
+ALTER TABLE arena_team CHANGE BorderStyle _EmblemColor INTEGER;
+ALTER TABLE arena_team CHANGE BorderColor _BorderStyle INTEGER;
+ALTER TABLE arena_team CHANGE BackgroundColor _BorderColor INTEGER;
+ALTER TABLE arena_team CHANGE _BackgroundColor BackgroundColor INTEGER;
+ALTER TABLE arena_team CHANGE _EmblemStyle EmblemStyle INTEGER;
+ALTER TABLE arena_team CHANGE _EmblemColor EmblemColor INTEGER;
+ALTER TABLE arena_team CHANGE _BorderStyle BorderStyle INTEGER;
+ALTER TABLE arena_team CHANGE _BorderColor BorderColor INTEGER;

@@ -821,9 +821,9 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
 
         CHECK_PACKET_SIZE(recv_data, 8+5*4);
         uint32 icon, iconcolor, border, bordercolor, backgroud;
-        recv_data >> icon >> iconcolor >> border >> bordercolor >> backgroud;
+        recv_data >> backgroud >> icon >> iconcolor >> border >> bordercolor;
 
-        at->SetEmblem(icon, iconcolor, border, bordercolor, backgroud);
+        at->SetEmblem(backgroud, icon, iconcolor, border, bordercolor);
 
         // register team and add captain
         objmgr.AddArenaTeam(at);

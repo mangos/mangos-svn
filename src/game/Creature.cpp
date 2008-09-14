@@ -1888,6 +1888,10 @@ bool Creature::HasCategoryCooldown(uint32 spell_id) const
     if(!spellInfo)
         return false;
 
+    // check global cooldown if spell affected by it
+    if (spellInfo->StartRecoveryCategory > 0 && m_GlobalCooldown > 0)
+        return true;
+
     CreatureSpellCooldowns::const_iterator itr = m_CreatureCategoryCooldowns.find(spellInfo->Category);
     return(itr != m_CreatureCategoryCooldowns.end() && time_t(itr->second + (spellInfo->CategoryRecoveryTime / 1000)) > time(NULL));
 }
@@ -1895,7 +1899,7 @@ bool Creature::HasCategoryCooldown(uint32 spell_id) const
 bool Creature::HasSpellCooldown(uint32 spell_id) const
 {
     CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.find(spell_id);
-    return (itr != m_CreatureSpellCooldowns.end() && itr->second > time(NULL)) || m_GlobalCooldown > 0 || HasCategoryCooldown(spell_id);
+    return (itr != m_CreatureSpellCooldowns.end() && itr->second > time(NULL)) || HasCategoryCooldown(spell_id);
 }
 
 bool Creature::IsInEvadeMode() const
