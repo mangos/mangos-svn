@@ -691,27 +691,49 @@ void BattleGround::AddPlayer(Player *plr)
 
     uint64 guid = plr->GetGUID();
 
+    uint32 team = plr->GetBGTeam();
+    if(!team)
+        team = plr->GetTeam();
+
     BattleGroundPlayer bp;
     bp.LastOnlineTime = 0;
-    bp.Team = plr->GetTeam();
+    bp.Team = team;
 
     // Add to list/maps
     m_Players[guid] = bp;
 
-    UpdatePlayersCountByTeam(plr->GetTeam(), false);        // +1 player
+    UpdatePlayersCountByTeam(team, false);                  // +1 player
 
     WorldPacket data;
     sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data, plr);
-    SendPacketToTeam(plr->GetTeam(), &data, plr, false);
+    SendPacketToTeam(team, &data, plr, false);
 
-    if(GetStatus() == STATUS_WAIT_JOIN)                     // not started yet
+    if(isArena())
     {
-        if(isArena())
-        {
-            // temporary disabled
-            //plr->CastSpell(plr, SPELL_ARENA_PREPARATION, true);
-        }
+        plr->RemoveArenaSpellCooldowns();
+        //plr->RemoveArenaAuras();
+        plr->RemoveAllEnchantments(TEMP_ENCHANTMENT_SLOT);
+        if(team == ALLIANCE && plr->GetTeam() == ALLIANCE)
+            plr->CastSpell(plr,SPELL_ALLIANCE_GOLD_FLAG,true);
+        else if(team == HORDE && plr->GetTeam() == ALLIANCE)
+            plr->CastSpell(plr,SPELL_ALLIANCE_GREEN_FLAG,true);
+        else if(team == ALLIANCE && plr->GetTeam() == HORDE)
+            plr->CastSpell(plr,SPELL_HORDE_GOLD_FLAG,true);
         else
+            plr->CastSpell(plr,SPELL_HORDE_GREEN_FLAG,true);
+        plr->DestroyConjuredItems(true);
+
+        if(GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
+        {
+            plr->CastSpell(plr, SPELL_ARENA_PREPARATION, true);
+
+            plr->SetHealth(plr->GetMaxHealth());
+            plr->SetPower(POWER_MANA, plr->GetMaxPower(POWER_MANA));
+        }
+    }
+    else
+    {
+        if(GetStatus() == STATUS_WAIT_JOIN)                 // not started yet
             plr->CastSpell(plr, SPELL_PREPARATION, true);   // reduces all mana cost of spells.
     }
 

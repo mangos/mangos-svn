@@ -1089,6 +1089,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void DestroyItem( uint8 bag, uint8 slot, bool update );
         void DestroyItemCount( uint32 item, uint32 count, bool update, bool unequip_check = false);
         void DestroyItemCount( Item* item, uint32& count, bool update );
+        void DestroyConjuredItems( bool update );
         void DestroyZoneLimitedItem( bool update, uint32 new_zone );
         void SplitItem( uint16 src, uint16 dst, uint32 count );
         void SwapItem( uint16 src, uint16 dst );
@@ -1122,6 +1123,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateItemDuration(uint32 time, bool realtimeonly=false);
         void AddEnchantmentDurations(Item *item);
         void RemoveEnchantmentDurations(Item *item);
+        void RemoveAllEnchantments(EnchantmentSlot slot);
         void AddEnchantmentDuration(Item *item,EnchantmentSlot slot,uint32 duration);
         void ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool apply_dur = true, bool ignore_condition = false);
         void ApplyEnchantment(Item *item,bool apply);
@@ -1430,6 +1432,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendCooldownEvent(SpellEntry const *spellInfo);
         void ProhibitSpellScholl(SpellSchoolMask idSchoolMask, uint32 unTimeMs );
         void RemoveSpellCooldown(uint32 spell_id) { m_spellCooldowns.erase(spell_id); }
+        void RemoveArenaSpellCooldowns();
         void RemoveAllSpellCooldown();
         void _LoadSpellCooldowns(QueryResult *result);
         void _SaveSpellCooldowns();
@@ -1778,6 +1781,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool InBattleGround() const { return m_bgBattleGroundID != 0; }
         uint32 GetBattleGroundId() const    { return m_bgBattleGroundID; }
         BattleGround* GetBattleGround() const;
+        bool InArena() const;
 
         uint32 GetBattleGroundQueueIdFromLevel() const;
 
@@ -1847,6 +1851,9 @@ class MANGOS_DLL_SPEC Player : public Unit
             m_bgEntryPointZ = PosZ;
             m_bgEntryPointO = PosO;
         }
+
+        void SetBGTeam(uint32 team) {m_bgTeam = team;}
+        uint32 GetBGTeam() const {return m_bgTeam;}
 
         void LeaveBattleground(bool teleportToEntryPoint = true);
         bool CanJoinToBattleground() const;
@@ -2024,6 +2031,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         std::set<uint32> m_bgAfkReporter;
         uint8 m_bgAfkReportedCount;
         time_t m_bgAfkReportedTimer;
+
+        uint32 m_bgTeam;    // what side the player will be added to
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/
