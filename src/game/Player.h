@@ -1852,8 +1852,8 @@ class MANGOS_DLL_SPEC Player : public Unit
             m_bgEntryPointO = PosO;
         }
 
-        void SetBGTeam(uint32 team) {m_bgTeam = team;}
-        uint32 GetBGTeam() const {return m_bgTeam;}
+        void SetBGTeam(uint32 team) { m_bgTeam = team; }
+        uint32 GetBGTeam() const { return m_bgTeam ? m_bgTeam : GetTeam(); }
 
         void LeaveBattleground(bool teleportToEntryPoint = true);
         bool CanJoinToBattleground() const;
@@ -2032,7 +2032,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 m_bgAfkReportedCount;
         time_t m_bgAfkReportedTimer;
 
-        uint32 m_bgTeam;    // what side the player will be added to
+        uint32 m_bgTeam;                                    // what side the player will be added to
 
         /*********************************************************/
         /***                    QUEST SYSTEM                   ***/

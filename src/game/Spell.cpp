@@ -3263,21 +3263,17 @@ uint8 Spell::CanCast(bool strict)
     }
     // Spell casted only on battleground
     if((m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_BATTLEGROUND) &&  m_caster->GetTypeId()==TYPEID_PLAYER)
-    {
-        if (((Player*)m_caster)->InBattleGround() == false)
+        if(!((Player*)m_caster)->InBattleGround())
             return SPELL_FAILED_ONLY_BATTLEGROUNDS;
-    }
 
     // do not allow spells to be cast in arenas
     // - with greater than 15 min CD without SPELL_ATTR_EX4_USABLE_IN_ARENA flag
     // - with SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA flag
-    if( m_caster->GetTypeId() == TYPEID_PLAYER &&
-        m_spellInfo->RecoveryTime > 15 * 60000 ||
-        m_spellInfo->CategoryRecoveryTime > 15 * 60000 &&
-        !(m_spellInfo->AttributesEx4 & SPELL_ATTR_EX4_USABLE_IN_ARENA) ||
-        (m_spellInfo->AttributesEx4 & SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA) &&
-        ((Player*)m_caster)->InArena() )
-            return SPELL_FAILED_NOT_IN_ARENA;
+    if( (m_spellInfo->AttributesEx4 & SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA) ||
+        GetSpellRecoveryTime(m_spellInfo) > 15 * MINUTE * 1000 && !(m_spellInfo->AttributesEx4 & SPELL_ATTR_EX4_USABLE_IN_ARENA) )
+        if(MapEntry const* mapEntry = sMapStore.LookupEntry(m_caster->GetMapId()))
+            if(mapEntry->IsBattleArena())
+                return SPELL_FAILED_NOT_IN_ARENA;
 
     // zone check
     if(!IsSpellAllowedInLocation(m_spellInfo,m_caster->GetMapId(),m_caster->GetZoneId(),m_caster->GetAreaId()))

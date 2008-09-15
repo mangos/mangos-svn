@@ -690,10 +690,7 @@ void BattleGround::AddPlayer(Player *plr)
     // score struct must be created in inherited class
 
     uint64 guid = plr->GetGUID();
-
     uint32 team = plr->GetBGTeam();
-    if(!team)
-        team = plr->GetTeam();
 
     BattleGroundPlayer bp;
     bp.LastOnlineTime = 0;
