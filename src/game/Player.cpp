@@ -349,6 +349,7 @@ Player::Player (WorldSession *session): Unit()
         m_bgBattleGroundQueueID[j].bgType  = 0;
         m_bgBattleGroundQueueID[j].invited = false;
     }
+    m_bgTeam = 0;
 
     m_logintime = time(NULL);
     m_Last_tick = m_logintime;
@@ -2925,6 +2926,32 @@ void Player::removeSpell(uint32 spell_id, bool disabled)
 
     for(SpellLearnSpellMap::const_iterator itr2 = spell_begin; itr2 != spell_end; ++itr2)
         removeSpell(itr2->second.spell, disabled);
+}
+
+void Player::RemoveArenaSpellCooldowns()
+{
+    // remove cooldowns on spells that has < 15 min CD
+    SpellCooldowns::iterator itr, next;
+    // iterate spell cooldowns
+    for(itr = m_spellCooldowns.begin();itr != m_spellCooldowns.end(); itr = next)
+    {
+        next = itr;
+        ++next;
+        SpellEntry const * entry = sSpellStore.LookupEntry(itr->first);
+        // check if spellentry is present and if the cooldown is less than 15 mins
+        if( entry && 
+            entry->RecoveryTime <= 15 * MINUTE * 1000 &&
+            entry->CategoryRecoveryTime <= 15 * MINUTE * 1000 )
+        {
+            // notify player
+            WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8));
+            data << uint32(itr->first);
+            data << GetGUID();
+            GetSession()->SendPacket(&data);
+            // remove cooldown
+            m_spellCooldowns.erase(itr);
+        }
+    }
 }
 
 void Player::RemoveAllSpellCooldown()
@@ -9243,9 +9270,19 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
             if(res != EQUIP_ERR_OK)
                 return res;
 
-            if( isInCombat()&& pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE &&
+            // do not allow equipping gear except weapons, offhands, projectiles, relics in
+            // - combat
+            // - in-progress arenas
+            if( pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE &&
                 pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD && pProto->InventoryType != INVTYPE_RELIC)
-                return EQUIP_ERR_NOT_IN_COMBAT;
+            {
+                if( isInCombat() )
+                    return EQUIP_ERR_NOT_IN_COMBAT;
+
+                if(BattleGround* bg = GetBattleGround())
+                    if( bg->isArena() && bg->GetStatus() == STATUS_IN_PROGRESS )
+                        return EQUIP_ERR_NOT_DURING_ARENA_MATCH;
+            }
 
             if(isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer != 0)
                 return EQUIP_ERR_CANT_DO_RIGHT_NOW;         // maybe exist better err
@@ -9370,9 +9407,19 @@ uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
     if( !pProto )
         return EQUIP_ERR_ITEM_NOT_FOUND;
 
-    if( isInCombat()&& pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE &&
+    // do not allow unequipping gear except weapons, offhands, projectiles, relics in
+    // - combat
+    // - in-progress arenas
+    if( pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE &&
         pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD && pProto->InventoryType != INVTYPE_RELIC )
-        return EQUIP_ERR_NOT_IN_COMBAT;
+    {
+        if( isInCombat() )
+            return EQUIP_ERR_NOT_IN_COMBAT;
+
+        if(BattleGround* bg = GetBattleGround())
+            if( bg->isArena() && bg->GetStatus() == STATUS_IN_PROGRESS )
+                return EQUIP_ERR_NOT_DURING_ARENA_MATCH;
+    }
 
     if(!swap && pItem->IsBag() && !((Bag*)pItem)->IsEmpty())
         return EQUIP_ERR_CAN_ONLY_DO_WITH_EMPTY_BAGS;
@@ -10382,6 +10429,54 @@ void Player::DestroyZoneLimitedItem( bool update, uint32 new_zone )
     }
 }
 
+void Player::DestroyConjuredItems( bool update )
+{
+    // used when entering arena
+    // distroys all conjured items
+    sLog.outDebug( "STORAGE: DestroyConjuredItems" );
+
+    // in inventory
+    for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem->GetProto() &&
+            (pItem->GetProto()->Class == ITEM_CLASS_CONSUMABLE) && 
+            (pItem->GetProto()->Flags & ITEM_FLAGS_CONJURED) )
+            DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
+    }
+
+    // in inventory bags
+    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        Bag* pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pBag )
+        {
+            ItemPrototype const *pBagProto = pBag->GetProto();
+            if( pBagProto )
+            {
+                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                {
+                    Item* pItem = pBag->GetItemByPos(j);
+                    if( pItem && pItem->GetProto() &&
+                        (pItem->GetProto()->Class == ITEM_CLASS_CONSUMABLE) && 
+                        (pItem->GetProto()->Flags & ITEM_FLAGS_CONJURED) )
+                        DestroyItem( i, j, update);
+                }
+            }
+        }
+    }
+
+    // in equipment and bag list
+    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem->GetProto() &&
+            (pItem->GetProto()->Class == ITEM_CLASS_CONSUMABLE) && 
+            (pItem->GetProto()->Flags & ITEM_FLAGS_CONJURED) )
+            DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
+    }
+}
+
 void Player::DestroyItemCount( Item* pItem, uint32 &count, bool update )
 {
     if(!pItem)
@@ -10973,6 +11068,59 @@ void Player::RemoveEnchantmentDurations(Item *item)
         }
         else
             ++itr;
+    }
+}
+
+ 
+void Player::RemoveAllEnchantments(EnchantmentSlot slot)
+{
+    // remove enchantments from equipped items first to clean up the m_enchantDuration list
+    for(EnchantDurationList::iterator itr = m_enchantDuration.begin(),next;itr != m_enchantDuration.end();itr=next)
+    {
+        next = itr;
+        if(itr->slot==slot)
+        {
+            if(itr->item && itr->item->GetEnchantmentId(slot))
+            {
+                // remove from stats
+                ApplyEnchantment(itr->item,slot,false,false);
+                // remove visual
+                itr->item->ClearEnchantment(slot);
+            }
+            // remove from update list
+            next = m_enchantDuration.erase(itr);
+        }
+        else
+            ++next;
+    }
+
+    // remove enchants from inventory items
+    // NOTE: no need to remove these from stats, since these aren't equipped
+    // in inventory
+    for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem->GetEnchantmentId(slot) )
+            pItem->ClearEnchantment(slot);
+    }
+
+    // in inventory bags
+    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        Bag* pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pBag )
+        {
+            ItemPrototype const *pBagProto = pBag->GetProto();
+            if( pBagProto )
+            {
+                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                {
+                    Item* pItem = pBag->GetItemByPos(j);
+                    if( pItem && pItem->GetEnchantmentId(slot) )
+                        pItem->ClearEnchantment(slot);
+                }
+            }
+        }
     }
 }
 
@@ -17294,6 +17442,15 @@ BattleGround* Player::GetBattleGround() const
         return NULL;
 
     return sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
+}
+
+bool Player::InArena() const
+{
+    BattleGround *bg = GetBattleGround();
+    if(!bg || !bg->isArena())
+        return false;
+
+    return true;
 }
 
 bool Player::GetBGAccessByLevel(uint32 bgTypeId) const

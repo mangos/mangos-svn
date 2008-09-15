@@ -3268,6 +3268,17 @@ uint8 Spell::CanCast(bool strict)
             return SPELL_FAILED_ONLY_BATTLEGROUNDS;
     }
 
+    // do not allow spells to be cast in arenas
+    // - with greater than 15 min CD without SPELL_ATTR_EX4_USABLE_IN_ARENA flag
+    // - with SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA flag
+    if( m_caster->GetTypeId() == TYPEID_PLAYER &&
+        m_spellInfo->RecoveryTime > 15 * 60000 ||
+        m_spellInfo->CategoryRecoveryTime > 15 * 60000 &&
+        !(m_spellInfo->AttributesEx4 & SPELL_ATTR_EX4_USABLE_IN_ARENA) ||
+        (m_spellInfo->AttributesEx4 & SPELL_ATTR_EX4_NOT_USABLE_IN_ARENA) &&
+        ((Player*)m_caster)->InArena() )
+            return SPELL_FAILED_NOT_IN_ARENA;
+
     // zone check
     if(!IsSpellAllowedInLocation(m_spellInfo,m_caster->GetMapId(),m_caster->GetZoneId(),m_caster->GetAreaId()))
         return SPELL_FAILED_REQUIRES_AREA;
