@@ -4542,43 +4542,17 @@ void Player::ApplyRatingMod(CombatRating cr, int32 value, bool apply)
 
 void Player::SetRegularAttackTime()
 {
-    ItemPrototype const *proto = 0;
-    uint32 InvType = 0;
-
-    //check for mainhand weapon
-    Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-    if(tmpitem && !tmpitem->IsBroken())
+    for(int i = 0; i < MAX_ATTACK; ++i)
     {
-        proto = tmpitem->GetProto();
-        InvType = proto->InventoryType;
-        if((InvType == INVTYPE_WEAPON || InvType == INVTYPE_2HWEAPON || InvType == INVTYPE_WEAPONMAINHAND )&& proto->Delay)
-            SetAttackTime(BASE_ATTACK, proto->Delay);
-        else
-            SetAttackTime(BASE_ATTACK, BASE_ATTACK_TIME);
-    }
-
-    //check for offhand weapon
-    tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-    if(tmpitem && !tmpitem->IsBroken())
-    {
-        proto = tmpitem->GetProto();
-        InvType = proto->InventoryType;
-        if((InvType == INVTYPE_WEAPON || InvType == INVTYPE_WEAPONOFFHAND) && proto->Delay)
-            SetAttackTime(OFF_ATTACK, proto->Delay);
-        else
-            SetAttackTime(OFF_ATTACK, BASE_ATTACK_TIME);
-    }
-
-    //check for ranged weapons
-    tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-    if(tmpitem && !tmpitem->IsBroken())
-    {
-        proto = tmpitem->GetProto();
-        InvType = proto->InventoryType;
-        if((InvType == INVTYPE_THROWN || InvType == INVTYPE_RANGED) && proto->Delay )
-            SetAttackTime(RANGED_ATTACK, proto->Delay);
-        else
-            SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
+        Item *tmpitem = GetWeaponForAttack(WeaponAttackType(i));
+        if(tmpitem && !tmpitem->IsBroken())
+        {
+            ItemPrototype const *proto = tmpitem->GetProto();
+            if(proto->Delay)
+                SetAttackTime(WeaponAttackType(i), proto->Delay);
+            else
+                SetAttackTime(WeaponAttackType(i), BASE_ATTACK_TIME);
+        }
     }
 }
 
@@ -4761,27 +4735,19 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
     {
         case BASE_ATTACK:
         {
-            Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+            Item *tmpitem = GetWeaponForAttack(attType,true);
 
-            if (!tmpitem || tmpitem->IsBroken() || !IsUseEquipedWeapon(true))
+            if (!tmpitem)
                 UpdateSkill(SKILL_UNARMED,weapon_skill_gain);
             else if(tmpitem->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE)
                 UpdateSkill(tmpitem->GetSkill(),weapon_skill_gain);
             break;
         }
         case OFF_ATTACK:
-        {
-            Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-
-            if (tmpitem && tmpitem->GetProto()->Class == ITEM_CLASS_WEAPON && !tmpitem->IsBroken() && IsUseEquipedWeapon(false))
-                UpdateSkill(tmpitem->GetSkill(),weapon_skill_gain);
-            break;
-        }
         case RANGED_ATTACK:
         {
-            Item* tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-
-            if (tmpitem && tmpitem->GetProto()->Class == ITEM_CLASS_WEAPON && !tmpitem->IsBroken() && IsUseEquipedWeapon(false))
+            Item *tmpitem = GetWeaponForAttack(attType,true);
+            if (tmpitem)
                 UpdateSkill(tmpitem->GetSkill(),weapon_skill_gain);
             break;
         }
@@ -6414,8 +6380,9 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     sLog.outDetail("applying mods for item %u ",item->GetGUIDLow());
 
-    if(IsWeaponSlot(slot))
-        _ApplyWeaponDependentAuraMods(item,slot,apply);
+    uint32 attacktype = Player::GetAttackBySlot(slot);
+    if(attacktype < MAX_ATTACK)
+        _ApplyWeaponDependentAuraMods(item,WeaponAttackType(attacktype),apply);
 
     _ApplyItemBonuses(proto,slot,apply);
 
@@ -6632,33 +6599,33 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
         UpdateDamagePhysical(attType);
 }
 
-void Player::_ApplyWeaponDependentAuraMods(Item *item,uint8 slot,bool apply)
+void Player::_ApplyWeaponDependentAuraMods(Item *item,WeaponAttackType attackType,bool apply)
 {
     AuraList const& auraCritList = GetAurasByType(SPELL_AURA_MOD_CRIT_PERCENT);
     for(AuraList::const_iterator itr = auraCritList.begin(); itr!=auraCritList.end();++itr)
-        _ApplyWeaponDependentAuraCritMod(item,slot,*itr,apply);
+        _ApplyWeaponDependentAuraCritMod(item,attackType,*itr,apply);
 
     AuraList const& auraDamageFlatList = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for(AuraList::const_iterator itr = auraDamageFlatList.begin(); itr!=auraDamageFlatList.end();++itr)
-        _ApplyWeaponDependentAuraDamageMod(item,slot,*itr,apply);
+        _ApplyWeaponDependentAuraDamageMod(item,attackType,*itr,apply);
 
     AuraList const& auraDamagePCTList = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
     for(AuraList::const_iterator itr = auraDamagePCTList.begin(); itr!=auraDamagePCTList.end();++itr)
-        _ApplyWeaponDependentAuraDamageMod(item,slot,*itr,apply);
+        _ApplyWeaponDependentAuraDamageMod(item,attackType,*itr,apply);
 }
 
-void Player::_ApplyWeaponDependentAuraCritMod(Item *item, uint8 slot, Aura* aura, bool apply)
+void Player::_ApplyWeaponDependentAuraCritMod(Item *item, WeaponAttackType attackType, Aura* aura, bool apply)
 {
     // generic not weapon specific case processes in aura code
     if(aura->GetSpellProto()->EquippedItemClass == -1)
         return;
 
     BaseModGroup mod = BASEMOD_END;
-    switch(slot)
+    switch(attackType)
     {
-        case EQUIPMENT_SLOT_MAINHAND: mod = CRIT_PERCENTAGE;        break;
-        case EQUIPMENT_SLOT_OFFHAND:  mod = OFFHAND_CRIT_PERCENTAGE;break;
-        case EQUIPMENT_SLOT_RANGED:   mod = RANGED_CRIT_PERCENTAGE; break;
+        case BASE_ATTACK:   mod = CRIT_PERCENTAGE;        break;
+        case OFF_ATTACK:    mod = OFFHAND_CRIT_PERCENTAGE;break;
+        case RANGED_ATTACK: mod = RANGED_CRIT_PERCENTAGE; break;
         default: return;
     }
 
@@ -6668,11 +6635,11 @@ void Player::_ApplyWeaponDependentAuraCritMod(Item *item, uint8 slot, Aura* aura
     }
 }
 
-void Player::_ApplyWeaponDependentAuraDamageMod(Item *item, uint8 slot, Aura* aura, bool apply)
+void Player::_ApplyWeaponDependentAuraDamageMod(Item *item, WeaponAttackType attackType, Aura* aura, bool apply)
 {
-    // ignore spell mods
+    // ignore spell mods for not wands
     Modifier const* modifier = aura->GetModifier();
-    if((modifier->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL) == 0 && (getClassMask() & CLASSMASK_WAND_USERS)==0)
+    if((modifier->m_miscvalue & SPELL_SCHOOL_MASK_NORMAL)==0 && (getClassMask() & CLASSMASK_WAND_USERS)==0)
         return;
 
     // generic not weapon specific case processes in aura code
@@ -6680,11 +6647,11 @@ void Player::_ApplyWeaponDependentAuraDamageMod(Item *item, uint8 slot, Aura* au
         return;
 
     UnitMods unitMod = UNIT_MOD_END;
-    switch(slot)
+    switch(attackType)
     {
-        case EQUIPMENT_SLOT_MAINHAND: unitMod = UNIT_MOD_DAMAGE_MAINHAND; break;
-        case EQUIPMENT_SLOT_OFFHAND:  unitMod = UNIT_MOD_DAMAGE_OFFHAND;  break;
-        case EQUIPMENT_SLOT_RANGED:   unitMod = UNIT_MOD_DAMAGE_RANGED;   break;
+        case BASE_ATTACK:   unitMod = UNIT_MOD_DAMAGE_MAINHAND; break;
+        case OFF_ATTACK:    unitMod = UNIT_MOD_DAMAGE_OFFHAND;  break;
+        case RANGED_ATTACK: unitMod = UNIT_MOD_DAMAGE_RANGED;   break;
         default: return;
     }
 
@@ -6927,8 +6894,9 @@ void Player::_RemoveAllItemMods()
             if(!proto)
                 continue;
 
-            if(IsWeaponSlot(i))
-                _ApplyWeaponDependentAuraMods(m_items[i],i,false);
+            uint32 attacktype = Player::GetAttackBySlot(i);
+            if(attacktype < MAX_ATTACK)
+                _ApplyWeaponDependentAuraMods(m_items[i],WeaponAttackType(attacktype),false);
 
             _ApplyItemBonuses(proto,i, false);
 
@@ -6955,8 +6923,9 @@ void Player::_ApplyAllItemMods()
             if(!proto)
                 continue;
 
-            if(IsWeaponSlot(i))
-                _ApplyWeaponDependentAuraMods(m_items[i],i,true);
+            uint32 attacktype = Player::GetAttackBySlot(i);
+            if(attacktype < MAX_ATTACK)
+                _ApplyWeaponDependentAuraMods(m_items[i],WeaponAttackType(attacktype),true);
 
             _ApplyItemBonuses(proto,i, true);
 
@@ -7018,7 +6987,7 @@ bool Player::CheckAmmoCompatibility(const ItemPrototype *ammo_proto) const
         return false;
 
     // check ranged weapon
-    Item *weapon = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
+    Item *weapon = GetWeaponForAttack( RANGED_ATTACK );
     if(!weapon  || weapon->IsBroken() )
         return false;
 
@@ -7829,7 +7798,6 @@ void Player::SetVirtualItemSlot( uint8 i, Item* item)
 
 void Player::SetSheath( uint32 sheathed )
 {
-    Item* item;
     switch (sheathed)
     {
         case SHEATH_STATE_UNARMED:                          // no prepared weapon
@@ -7839,17 +7807,14 @@ void Player::SetSheath( uint32 sheathed )
             break;
         case SHEATH_STATE_MELEE:                            // prepared melee weapon
         {
-            item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-            SetVirtualItemSlot(0,item && !item->IsBroken() && IsUseEquipedWeapon(true) ? item : NULL);
-            item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-            SetVirtualItemSlot(1,item && !item->IsBroken() && IsUseEquipedWeapon(false) ? item : NULL);
+            SetVirtualItemSlot(0,GetWeaponForAttack(BASE_ATTACK,true));
+            SetVirtualItemSlot(1,GetWeaponForAttack(OFF_ATTACK,true));
             SetVirtualItemSlot(2,NULL);
         };  break;
         case SHEATH_STATE_RANGED:                           // prepared ranged weapon
             SetVirtualItemSlot(0,NULL);
             SetVirtualItemSlot(1,NULL);
-            item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-            SetVirtualItemSlot(2,item && !item->IsBroken() && IsUseEquipedWeapon(false) ? item : NULL);
+            SetVirtualItemSlot(2,GetWeaponForAttack(RANGED_ATTACK,true));
             break;
         default:
             SetVirtualItemSlot(0,NULL);
@@ -8230,6 +8195,56 @@ Item* Player::GetItemByPos( uint8 bag, uint8 slot ) const
             return pBag->GetItemByPos(slot);
     }
     return NULL;
+}
+
+Item* Player::GetWeaponForAttack(WeaponAttackType attackType, bool useable) const
+{
+    uint16 slot;
+    switch (attackType)
+    {
+        case BASE_ATTACK:   slot = EQUIPMENT_SLOT_MAINHAND; break;
+        case OFF_ATTACK:    slot = EQUIPMENT_SLOT_OFFHAND;  break;
+        case RANGED_ATTACK: slot = EQUIPMENT_SLOT_RANGED;   break;
+        default: return NULL;
+    }
+
+    Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+    if (!item || item->GetProto()->Class != ITEM_CLASS_WEAPON)
+        return NULL;
+
+    if(!useable)
+        return item;
+
+    if( item->IsBroken() || !IsUseEquipedWeapon(attackType==BASE_ATTACK) )
+        return NULL;
+
+    return item;
+}
+
+Item* Player::GetShield(bool useable) const
+{
+    Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+    if (!item || item->GetProto()->Class != ITEM_CLASS_ARMOR)
+        return NULL;
+
+    if(!useable)
+        return item;
+
+    if( item->IsBroken())
+        return NULL;
+
+    return item;
+}
+
+uint32 Player::GetAttackBySlot( uint8 slot )
+{
+    switch(slot)
+    {
+        case EQUIPMENT_SLOT_MAINHAND: return BASE_ATTACK;
+        case EQUIPMENT_SLOT_OFFHAND:  return OFF_ATTACK;
+        case EQUIPMENT_SLOT_RANGED:   return RANGED_ATTACK;
+        default:                      return MAX_ATTACK;
+    }
 }
 
 bool Player::HasBankBagSlot( uint8 slot ) const
@@ -17866,29 +17881,16 @@ bool Player::IsAtGroupRewardDistance(WorldObject const* pRewardSource) const
     return pRewardSource->GetDistance(corpse) <= sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE);
 }
 
-uint8 Player::GetWeaponSlotByAttack(WeaponAttackType attType)
-{
-    switch (attType)
-    {
-        case OFF_ATTACK:    return EQUIPMENT_SLOT_OFFHAND;
-        case RANGED_ATTACK: return EQUIPMENT_SLOT_RANGED;
-        case BASE_ATTACK:
-        default:            return EQUIPMENT_SLOT_MAINHAND;
-    }
-}
-
 uint32 Player::GetBaseWeaponSkillValue (WeaponAttackType attType) const
 {
-    uint16 slot = GetWeaponSlotByAttack(attType);
-    Item* item = GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+    Item* item = GetWeaponForAttack(attType,true);
 
-    if(slot != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() ||
-        item->GetProto()->Class != ITEM_CLASS_WEAPON || !IsUseEquipedWeapon(false) ))
+    // unarmmed only with base attack
+    if(attType != BASE_ATTACK && !item)
         return 0;
 
-    // in range
-    uint32  skill = item && !item->IsBroken() && IsUseEquipedWeapon(attType==BASE_ATTACK)
-        ? item->GetSkill() : SKILL_UNARMED;
+    // weapon skill or (unarmed for base attack)
+    uint32  skill = item ? item->GetSkill() : SKILL_UNARMED;
     return GetBaseSkillValue(skill);
 }
 

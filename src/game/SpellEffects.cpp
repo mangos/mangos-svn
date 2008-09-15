@@ -1188,7 +1188,7 @@ void Spell::EffectDummy(uint32 i)
 
                     Player *pCaster = ((Player*)m_caster);
 
-                    Item *item = pCaster->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+                    Item *item = pCaster->GetWeaponForAttack(OFF_ATTACK);
                     if(!item)
                         return;
 
@@ -1469,40 +1469,25 @@ void Spell::EffectDummy(uint32 i)
                 if(m_caster->GetTypeId() != TYPEID_PLAYER)
                     return;
 
-                if(Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+                for(int i = BASE_ATTACK; i <= OFF_ATTACK; ++i)
                 {
-                    if(item->IsFitToSpellRequirements(m_spellInfo))
+                    if(Item* item = ((Player*)m_caster)->GetWeaponForAttack(WeaponAttackType(i)))
                     {
-                        Spell *spell = new Spell(m_caster, spellInfo, true);
+                        if(item->IsFitToSpellRequirements(m_spellInfo))
+                        {
+                            Spell *spell = new Spell(m_caster, spellInfo, true);
 
-                        // enchanting spell selected by calculated damage-per-sec in enchanting effect
-                        // at calculation applied affect from Elemental Weapons talent
-                        // real enchantment damage-1
-                        spell->m_currentBasePoints[1] = damage-1;
+                            // enchanting spell selected by calculated damage-per-sec in enchanting effect
+                            // at calculation applied affect from Elemental Weapons talent
+                            // real enchantment damage-1
+                            spell->m_currentBasePoints[1] = damage-1;
 
-                        SpellCastTargets targets;
-                        targets.setItemTarget( item );
-                        spell->prepare(&targets);
+                            SpellCastTargets targets;
+                            targets.setItemTarget( item );
+                            spell->prepare(&targets);
+                        }
                     }
                 }
-
-                if(Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
-                {
-                    if(item->IsFitToSpellRequirements(m_spellInfo))
-                    {
-                        Spell *spell = new Spell(m_caster, spellInfo, true);
-
-                        // enchanting spell selected by calculated damage-per-sec in enchanting effect
-                        // at calculation applied affect from Elemental Weapons talent
-                        // real enchantment damage-1
-                        spell->m_currentBasePoints[1] = damage-1;
-
-                        SpellCastTargets targets;
-                        targets.setItemTarget( item );
-                        spell->prepare(&targets);
-                    }
-                }
-
                 return;
             }
 
@@ -1714,7 +1699,7 @@ void Spell::EffectTriggerSpell(uint32 i)
         // main hand weapon required
         if(spellInfo->AttributesEx3 & SPELL_ATTR_EX3_MAIN_HAND)
         {
-            Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+            Item* item = ((Player*)m_caster)->GetWeaponForAttack(BASE_ATTACK);
 
             // skip spell if no weapon in slot or broken
             if(!item || item->IsBroken() )
@@ -1728,7 +1713,7 @@ void Spell::EffectTriggerSpell(uint32 i)
         // offhand hand weapon required
         if(spellInfo->AttributesEx3 & SPELL_ATTR_EX3_REQ_OFFHAND)
         {
-            Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+            Item* item = ((Player*)m_caster)->GetWeaponForAttack(OFF_ATTACK);
 
             // skip spell if no weapon in slot or broken
             if(!item || item->IsBroken() )
@@ -4074,8 +4059,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             // Whirlwind, single only spell with 2 weapon white damage apply if have
             if(m_caster->GetTypeId()==TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags & 0x00000400000000LL))
             {
-                Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-                if (item && item->GetProto()->Class == ITEM_CLASS_WEAPON && !item->IsBroken() && ((Player*)m_caster)->IsUseEquipedWeapon(false))
+                if(Item* item = ((Player*)m_caster)->GetWeaponForAttack(OFF_ATTACK,true))
                     spell_bonus += m_caster->CalculateDamage (OFF_ATTACK, normalized);
             }
             // Devastate bonus and sunder armor refresh
@@ -4249,7 +4233,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     // take ammo
     if(m_attackType == RANGED_ATTACK && m_caster->GetTypeId() == TYPEID_PLAYER)
     {
-        Item *pItem = ((Player*)m_caster)->GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
+        Item *pItem = ((Player*)m_caster)->GetWeaponForAttack( RANGED_ATTACK );
 
         // wands don't have ammo
         if(!pItem  || pItem->IsBroken() || pItem->GetProto()->SubClass==ITEM_SUBCLASS_WEAPON_WAND)

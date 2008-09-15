@@ -1247,7 +1247,7 @@ void Aura::TriggerSpell()
                     {
                         if (caster->GetTypeId()!=TYPEID_PLAYER)
                             return;
-                        Item* item = ((Player*)caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+                        Item* item = ((Player*)caster)->GetWeaponForAttack(BASE_ATTACK);
                         if (!item)
                             return;
                         uint32 enchant_id = 0;
@@ -4705,14 +4705,9 @@ void Aura::HandleAuraModCritPercent(bool apply, bool Real)
     // apply item specific bonuses for already equipped weapon
     if(Real)
     {
-        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
-            ((Player*)m_target)->_ApplyWeaponDependentAuraCritMod(pItem,EQUIPMENT_SLOT_MAINHAND,this,apply);
-
-        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
-            ((Player*)m_target)->_ApplyWeaponDependentAuraCritMod(pItem,EQUIPMENT_SLOT_OFFHAND,this,apply);
-
-        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
-            ((Player*)m_target)->_ApplyWeaponDependentAuraCritMod(pItem,EQUIPMENT_SLOT_RANGED,this,apply);
+        for(int i = 0; i < MAX_ATTACK; ++i)
+            if(Item* pItem = ((Player*)m_target)->GetWeaponForAttack(WeaponAttackType(i)))
+                ((Player*)m_target)->_ApplyWeaponDependentAuraCritMod(pItem,WeaponAttackType(i),this,apply);
     }
 
     // mods must be applied base at equipped weapon class and subclass comparison
@@ -4916,14 +4911,9 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
     // apply item specific bonuses for already equipped weapon
     if(Real && m_target->GetTypeId()==TYPEID_PLAYER)
     {
-        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
-            ((Player*)m_target)->_ApplyWeaponDependentAuraDamageMod(pItem,EQUIPMENT_SLOT_MAINHAND,this,apply);
-
-        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
-            ((Player*)m_target)->_ApplyWeaponDependentAuraDamageMod(pItem,EQUIPMENT_SLOT_OFFHAND,this,apply);
-
-        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
-            ((Player*)m_target)->_ApplyWeaponDependentAuraDamageMod(pItem,EQUIPMENT_SLOT_RANGED,this,apply);
+        for(int i = 0; i < MAX_ATTACK; ++i)
+            if(Item* pItem = ((Player*)m_target)->GetWeaponForAttack(WeaponAttackType(i)))
+                ((Player*)m_target)->_ApplyWeaponDependentAuraDamageMod(pItem,WeaponAttackType(i),this,apply);
     }
 
     // m_modifier.m_miscvalue is bitmask of spell schools
@@ -5004,14 +4994,9 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
     // apply item specific bonuses for already equipped weapon
     if(Real && m_target->GetTypeId()==TYPEID_PLAYER)
     {
-        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
-            ((Player*)m_target)->_ApplyWeaponDependentAuraDamageMod(pItem,EQUIPMENT_SLOT_MAINHAND,this,apply);
-
-        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
-            ((Player*)m_target)->_ApplyWeaponDependentAuraDamageMod(pItem,EQUIPMENT_SLOT_OFFHAND,this,apply);
-
-        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
-            ((Player*)m_target)->_ApplyWeaponDependentAuraDamageMod(pItem,EQUIPMENT_SLOT_RANGED,this,apply);
+        for(int i = 0; i < MAX_ATTACK; ++i)
+            if(Item* pItem = ((Player*)m_target)->GetWeaponForAttack(WeaponAttackType(i)))
+                ((Player*)m_target)->_ApplyWeaponDependentAuraDamageMod(pItem,WeaponAttackType(i),this,apply);
     }
 
     // m_modifier.m_miscvalue is bitmask of spell schools

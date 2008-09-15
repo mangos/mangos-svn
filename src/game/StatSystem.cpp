@@ -553,9 +553,7 @@ void Player::UpdateExpertise(WeaponAttackType attack)
 
     int32 expertise = int32(GetRatingBonusValue(CR_EXPERTISE));
 
-    uint8 slot = GetWeaponSlotByAttack(attack);
-
-    Item *weapon = GetItemByPos( INVENTORY_SLOT_BAG_0, slot );
+    Item *weapon = GetWeaponForAttack(attack);
 
     AuraList const& expAuras = GetAurasByType(SPELL_AURA_MOD_EXPERTISE);
     for(AuraList::const_iterator itr = expAuras.begin(); itr != expAuras.end(); ++itr)
