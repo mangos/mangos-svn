@@ -9274,7 +9274,8 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
             // - combat
             // - in-progress arenas
             if( pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE &&
-                pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD && pProto->InventoryType != INVTYPE_RELIC)
+                (pProto->Class != ITEM_CLASS_ARMOR || pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD) &&
+                pProto->InventoryType != INVTYPE_RELIC )
             {
                 if( isInCombat() )
                     return EQUIP_ERR_NOT_IN_COMBAT;
@@ -9411,7 +9412,8 @@ uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
     // - combat
     // - in-progress arenas
     if( pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE &&
-        pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD && pProto->InventoryType != INVTYPE_RELIC )
+        (pProto->Class != ITEM_CLASS_ARMOR || pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD) &&
+        pProto->InventoryType != INVTYPE_RELIC )
     {
         if( isInCombat() )
             return EQUIP_ERR_NOT_IN_COMBAT;
