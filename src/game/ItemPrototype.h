@@ -528,6 +528,26 @@ struct ItemPrototype
     uint32 MinMoneyLoot;
     uint32 MaxMoneyLoot;
     int32 Duration;                                         // negative = realtime, positive = ingame time
+
+    // helpers
+    bool CanChangeEquipStateInCombat() const
+    {
+        switch(InventoryType)
+        {
+            case INVTYPE_RELIC:
+            case INVTYPE_SHIELD:
+                return true;
+        }
+
+        switch(Class)
+        {
+            case ITEM_CLASS_WEAPON:
+            case ITEM_CLASS_PROJECTILE:
+                return true;
+        }
+
+        return false;
+    }
 };
 
 struct ItemLocale
