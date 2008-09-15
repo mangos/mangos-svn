@@ -9273,9 +9273,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
             // do not allow equipping gear except weapons, offhands, projectiles, relics in
             // - combat
             // - in-progress arenas
-            if( pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE &&
-                (pProto->Class != ITEM_CLASS_ARMOR || pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD) &&
-                pProto->InventoryType != INVTYPE_RELIC )
+            if( !pProto->CanChangeEquipStateInCombat() )
             {
                 if( isInCombat() )
                     return EQUIP_ERR_NOT_IN_COMBAT;
@@ -9411,9 +9409,7 @@ uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
     // do not allow unequipping gear except weapons, offhands, projectiles, relics in
     // - combat
     // - in-progress arenas
-    if( pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE &&
-        (pProto->Class != ITEM_CLASS_ARMOR || pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD) &&
-        pProto->InventoryType != INVTYPE_RELIC )
+    if( !pProto->CanChangeEquipStateInCombat() )
     {
         if( isInCombat() )
             return EQUIP_ERR_NOT_IN_COMBAT;
