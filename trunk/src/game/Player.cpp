@@ -13866,6 +13866,10 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
             else
                 remaincharges = -1;
 
+            //do not load single target auras (unless they were cast by the player)
+            if (caster_guid != GetGUID() && IsSingleTargetSpell(spellproto))
+                continue;
+
             Aura* aura = CreateAura(spellproto, effindex, NULL, this, NULL);
             if(!damage)
                 damage = aura->GetModifier()->m_amount;
@@ -14914,6 +14918,10 @@ void Player::_SaveAuras()
 
         //skip all auras from spells that are passive or need a shapeshift
         if (itr->second->IsPassive() || itr->second->IsRemovedOnShapeLost())
+            continue;
+
+        //do not save single target auras (unless they were cast by the player)
+        if (itr->second->GetCasterGUID() != GetGUID() && IsSingleTargetSpell(spellInfo))
             continue;
 
         uint8 i;
