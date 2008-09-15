@@ -292,11 +292,7 @@ void Unit::Update( uint32 p_time )
 bool Unit::haveOffhandWeapon() const
 {
     if(GetTypeId() == TYPEID_PLAYER)
-    {
-        Item *tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-
-        return tmpitem && !tmpitem->IsBroken() && (tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON || tmpitem->GetProto()->InventoryType == INVTYPE_WEAPONOFFHAND);
-    }
+        return ((Player*)this)->GetWeaponForAttack(OFF_ATTACK,true);
     else
         return false;
 }
@@ -3005,15 +3001,11 @@ float Unit::GetUnitParryChance() const
         Player const* player = (Player const*)this;
         if(player->CanParry() )
         {
-            Item *tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-            if(!tmpitem || tmpitem->IsBroken() || !player->IsUseEquipedWeapon(true))
-                tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+            Item *tmpitem = ((Player*)this)->GetWeaponForAttack(BASE_ATTACK,true);
+            if(!tmpitem)
+                tmpitem = ((Player*)this)->GetWeaponForAttack(OFF_ATTACK,true);
 
-            if(tmpitem && !tmpitem->IsBroken() && player->IsUseEquipedWeapon(tmpitem->GetSlot()==EQUIPMENT_SLOT_MAINHAND) && (
-                tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON ||
-                tmpitem->GetProto()->InventoryType == INVTYPE_WEAPONOFFHAND ||
-                tmpitem->GetProto()->InventoryType == INVTYPE_WEAPONMAINHAND ||
-                tmpitem->GetProto()->InventoryType == INVTYPE_2HWEAPON))
+            if(tmpitem)
                 chance = GetFloatValue(PLAYER_PARRY_PERCENTAGE);
         }
     }
@@ -3111,18 +3103,18 @@ uint32 Unit::GetWeaponSkillValue (WeaponAttackType attType, Unit const* target) 
     uint32 value = 0;
     if(GetTypeId() == TYPEID_PLAYER)
     {
-        uint16 slot = Player::GetWeaponSlotByAttack(attType);
-        Item* item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
+        Item* item = ((Player*)this)->GetWeaponForAttack(attType,true);
 
-        if(slot != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() ||
-            item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon(false) ))
+        // feral or unarmed skill only for base attack
+        if(attType != BASE_ATTACK && !item )
             return 0;
 
         if(((Player*)this)->IsInFeralForm())
             return GetMaxSkillValueForLevel();              // always maximized SKILL_FERAL_COMBAT in fact
-        // in range
-        uint32  skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon(attType==BASE_ATTACK)
-            ? item->GetSkill() : SKILL_UNARMED;
+
+        // weaon skill or (unarmed for base attack)
+        uint32  skill = item ? item->GetSkill() : SKILL_UNARMED;
+
         // in PvP use full skill instead current skill value
         value = (target && target->GetTypeId() == TYPEID_PLAYER)
             ? ((Player*)this)->GetMaxSkillValue(skill)
@@ -5555,7 +5547,7 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     if(!castItem || !castItem->IsEquipped())
                         return false;
 
-                    // custom cooldown proccessing case
+                    // custom cooldown processing case
                     if( cooldown && ((Player*)this)->HasSpellCooldown(dummySpell->Id))
                         return false;
 
@@ -5584,31 +5576,28 @@ bool Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
 
                     int32 extra_attack_power = CalculateSpellDamage(windfurySpellEntry,0,windfurySpellEntry->EffectBasePoints[0],pVictim);
 
-                    // Value gained from additional AP
-                    int32 APBonus;
-                    // Spell Casted 25504 for Main-Hand proc, 33750 for Off-Hand
-                    uint32 procSpellId;
-
+                    // Off-Hand case
                     if ( castItem->GetSlot() == EQUIPMENT_SLOT_OFFHAND )
                     {
-                        // Off-Hand case
-                        APBonus = int32(extra_attack_power/14.0f * GetAttackTime(OFF_ATTACK)/1000/2);
-                        procSpellId = 33750;
+                        // Value gained from additional AP
+                        basepoints0 = int32(extra_attack_power/14.0f * GetAttackTime(OFF_ATTACK)/1000/2);
+                        triggered_spell_id = 33750;
                     }
+                    // Main-Hand case
                     else
                     {
-                        // Main-Hand case
-                        APBonus = int32(extra_attack_power/14.0f * GetAttackTime(BASE_ATTACK)/1000);
-                        procSpellId = 25504;
+                        // Value gained from additional AP
+                        basepoints0 = int32(extra_attack_power/14.0f * GetAttackTime(BASE_ATTACK)/1000);
+                        triggered_spell_id = 25504;
                     }
 
-                    // apply cooldown before cast to prevent proccing itself
+                    // apply cooldown before cast to prevent processing itself
                     if( cooldown )
                         ((Player*)this)->AddSpellCooldown(dummySpell->Id,0,time(NULL) + cooldown);
 
                     // Attack Twice
                     for ( uint32 i = 0; i<2; ++i )
-                        CastCustomSpell(pVictim,procSpellId,&APBonus,NULL,NULL,true,castItem,triggeredByAura);
+                        CastCustomSpell(pVictim,triggered_spell_id,&basepoints0,NULL,NULL,true,castItem,triggeredByAura);
 
                     return true;
                 }
@@ -9944,20 +9933,16 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
             {
                 if(spellProto->EquippedItemClass == ITEM_CLASS_WEAPON)
                 {
-                    uint8 slot = Player::GetWeaponSlotByAttack(attType);
-                    Item *item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+                    Item *item = ((Player*)this)->GetWeaponForAttack(attType,true);
 
-                    if (!((Player*)this)->IsUseEquipedWeapon(attType==BASE_ATTACK))
-                        continue;
-
-                    if(!item || item->IsBroken() || item->GetProto()->Class != ITEM_CLASS_WEAPON || !((1<<item->GetProto()->SubClass) & spellProto->EquippedItemSubClassMask))
+                    if(!item || !((1<<item->GetProto()->SubClass) & spellProto->EquippedItemSubClassMask))
                         continue;
                 }
                 else if(spellProto->EquippedItemClass == ITEM_CLASS_ARMOR)
                 {
                     // Check if player is wearing shield
-                    Item *item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-                    if(!item || item->IsBroken() || item->GetProto()->Class != ITEM_CLASS_ARMOR || !((1<<item->GetProto()->SubClass) & spellProto->EquippedItemSubClassMask))
+                    Item *item = ((Player*)this)->GetShield(true);
+                    if(!item || !((1<<item->GetProto()->SubClass) & spellProto->EquippedItemSubClassMask))
                         continue;
                 }
             }
@@ -10675,8 +10660,8 @@ float Unit::GetAPMultiplier(WeaponAttackType attType, bool normalized)
     if (!normalized || GetTypeId() != TYPEID_PLAYER)
         return float(GetAttackTime(attType))/1000.0f;
 
-    Item *Weapon = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0,Player::GetWeaponSlotByAttack(attType));
-    if (!Weapon || Weapon->GetProto()->Class != ITEM_CLASS_WEAPON)
+    Item *Weapon = ((Player*)this)->GetWeaponForAttack(attType);
+    if (!Weapon)
         return 2.4;                                         // fist attack
 
     switch (Weapon->GetProto()->InventoryType)
