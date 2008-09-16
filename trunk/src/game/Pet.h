@@ -68,11 +68,18 @@ enum PetSpellState
     PETSPELL_REMOVED   = 3
 };
 
+enum PetSpellType
+{
+    PETSPELL_NORMAL = 0,
+    PETSPELL_FAMILY = 1,
+};
+
 struct PetSpell
 {
     uint16 slotId;
     uint16 active;
-    PetSpellState state;
+    PetSpellState state : 16;
+    PetSpellType type   : 16;
 };
 
 enum ActionFeedback
@@ -186,7 +193,7 @@ class Pet : public Creature
         void _LoadSpells();
         void _SaveSpells();
 
-        bool addSpell(uint16 spell_id,uint16 active = ACT_DECIDE, PetSpellState state = PETSPELL_NEW, uint16 slot_id=0xffff);
+        bool addSpell(uint16 spell_id,uint16 active = ACT_DECIDE, PetSpellState state = PETSPELL_NEW, uint16 slot_id=0xffff, PetSpellType type = PETSPELL_NORMAL);
         bool learnSpell(uint16 spell_id);
         void removeSpell(uint16 spell_id);
         bool _removeSpell(uint16 spell_id);
