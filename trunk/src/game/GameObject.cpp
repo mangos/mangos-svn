@@ -35,6 +35,7 @@
 #include "CellImpl.h"
 #include "InstanceData.h"
 #include "BattleGround.h"
+#include "Util.h"
 
 GameObject::GameObject() : WorldObject()
 {

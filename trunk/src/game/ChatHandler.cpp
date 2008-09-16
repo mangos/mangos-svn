@@ -34,6 +34,7 @@
 #include "Player.h"
 #include "SpellAuras.h"
 #include "Language.h"
+#include "Util.h"
 
 void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 {
