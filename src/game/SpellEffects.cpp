@@ -4177,6 +4177,22 @@ void Spell::EffectWeaponDmg(uint32 i)
     // non-weapon damage
     int32 bonus = spell_bonus + fixed_bonus;
 
+    // apply to non-weapon bonus weapon total pct effect, weapon total flat effect included in weapon damage
+    if(bonus)
+    {
+        UnitMods unitMod;
+        switch(m_attackType)
+        {
+            default:
+            case BASE_ATTACK:   unitMod = UNIT_MOD_DAMAGE_MAINHAND; break;
+            case OFF_ATTACK:    unitMod = UNIT_MOD_DAMAGE_OFFHAND;  break;
+            case RANGED_ATTACK: unitMod = UNIT_MOD_DAMAGE_RANGED;   break;
+        }
+
+        float weapon_total_pct  = m_caster->GetModifierValue(unitMod, TOTAL_PCT);
+        bonus = int32(bonus*weapon_total_pct);
+    }
+
     // + weapon damage with applied weapon% dmg to base weapon damage in call
     bonus += int32(m_caster->CalculateDamage(m_attackType, normalized)*weaponDamagePercentMod);
 
