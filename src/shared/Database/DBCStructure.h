@@ -559,6 +559,17 @@ struct SkillLineAbilityEntry
     uint32    reqtrainpoints;                               // 14
 };
 
+struct SoundEntriesEntry
+{
+    uint32    Id;                                           // 0, sound id
+    //uint32    Type;                                       // 1, sound type (10 generally for creature, etc)
+    //char*     InternalName;                               // 2, internal name, for use in lookup command for example
+    //char*     FileName[10];                               // 3-12, file names
+    //uint32    Unk13[10];                                  // 13-22, linked with file names?
+    //char*     Path;                                       // 23
+                                                            // 24-28, unknown
+};
+
 struct SpellEntry
 {
     uint32    Id;                                           // 0 normally counted from 0 field (but some tools start counting from 1, check this before tool use for data view!)
