@@ -436,6 +436,12 @@
 				RelativePath="..\..\src\game\VoiceChatHandler.cpp">
 			</File>
 			<File
+				RelativePath="..\..\src\game\WaypointManager.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\WaypointManager.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Weather.cpp">
 			</File>
 			<File

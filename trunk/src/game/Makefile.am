@@ -243,6 +243,8 @@ libmangosgame_a_SOURCES = \
 	UpdateFields.h \
 	UpdateMask.h \
 	VoiceChatHandler.cpp \
+	WaypointManager.cpp \
+	WaypointManager.h \
 	WaypointMovementGenerator.cpp \
 	WaypointMovementGenerator.h \
 	Weather.cpp \
