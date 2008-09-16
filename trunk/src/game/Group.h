@@ -310,6 +310,7 @@ class MANGOS_DLL_SPEC Group
         InstanceGroupBind* BindToInstance(InstanceSave *save, bool permanent, bool load = false);
         void UnbindInstance(uint32 mapid, uint8 difficulty, bool unload = false);
         InstanceGroupBind* GetBoundInstance(uint32 mapid, uint8 difficulty);
+        BoundInstancesMap& GetBoundInstances(uint8 difficulty) { return m_boundInstances[difficulty]; }
 
     protected:
         bool _addMember(const uint64 &guid, const char* name, bool isAssistant=false);
