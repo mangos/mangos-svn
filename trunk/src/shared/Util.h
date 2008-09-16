@@ -96,7 +96,16 @@ inline void ApplyPercentModFloatVar(float& var, float val, bool apply)
 }
 
 bool Utf8toWStr(std::string utf8str, std::wstring& wstr);
+// in wsize==max size of buffer, out wsize==real string size
+bool Utf8toWStr(char const* utf8str, size_t csize, wchar_t* wstr, size_t& wsize);
+inline bool Utf8toWStr(std::string utf8str, wchar_t* wstr, size_t& wsize)
+{ 
+    return Utf8toWStr(utf8str.c_str(), utf8str.size(), wstr, wsize);
+}
+
 bool WStrToUtf8(std::wstring wstr, std::string& utf8str);
+// size==real string size
+bool WStrToUtf8(wchar_t* wstr, size_t size, std::string& utf8str);
 
 size_t utf8length(std::string& utf8str);                    // set string to "" if invalid utf8 sequence
 void utf8truncate(std::string& utf8str,size_t len);
@@ -254,46 +263,10 @@ inline void wstrToUpper(std::wstring& str)
     std::transform( str.begin(), str.end(), str.begin(), wcharToUpper );
 }
 
-inline void wstrToUpperOnlyLatin(std::wstring& str)
-{
-    std::transform( str.begin(), str.end(), str.begin(), wcharToUpperOnlyLatin );
-}
-
 inline void wstrToLower(std::wstring& str)
 {
     std::transform( str.begin(), str.end(), str.begin(), wcharToLower );
 }
-
-inline bool normalizePlayerName(std::string& name)
-{
-    if(name.empty())
-        return false;
-
-    std::wstring wstr;
-    if(!Utf8toWStr(name,wstr))
-        return false;
-
-    wstr[0] = wcharToUpper(wstr[0]);
-    for(size_t i = 1; i < wstr.size(); ++i)
-        wstr[i] = wcharToLower(wstr[i]);
-
-    if(!WStrToUtf8(wstr,name))
-        return false;
-
-    return true;
-}
-
-inline bool utf8ToUpperOnlyLatin(std::string& utf8str)
-{
-    std::wstring wstr;
-    if(!Utf8toWStr(utf8str,wstr))
-        return false;
-
-    wstrToUpperOnlyLatin(wstr);
-
-    return WStrToUtf8(wstr,utf8str);
-}
-
 
 std::wstring GetMainPartOfName(std::wstring wname, uint32 declension);
 
@@ -306,12 +279,14 @@ bool consoleToUtf8(std::string conStr,std::string& utf8str);
     static char temp_buf[1000];                         \
     va_list ap;                                         \
     va_start(ap, FRM);                                  \
-    vsnprintf(temp_buf,1000,FRM,ap);                    \
+    size_t temp_len = vsnprintf(temp_buf,1000,FRM,ap);  \
     va_end(ap);                                         \
-    std::wstring wstr;                                  \
-    if(!Utf8toWStr(temp_buf,wstr))                      \
+                                                        \
+    static wchar_t wtemp_buf[1000];                     \
+    size_t wtemp_len = 1000-1;                          \
+    if(!Utf8toWStr(temp_buf,temp_len,wtemp_buf,wtemp_len)) \
         return RESERR;                                  \
-    CharToOemBuffW(wstr.c_str(),&temp_buf[0],wstr.size()+1);\
+    CharToOemBuffW(&wtemp_buf[0],&temp_buf[0],wtemp_len+1);\
     fprintf(OUT,temp_buf);                              \
 }
 #else

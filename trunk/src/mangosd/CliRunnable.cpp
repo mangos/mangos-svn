@@ -471,15 +471,14 @@ void CliInfo(char*,pPrintf zprintf)
     if (!resultDB)
         return;
 
-    int linesize = 1+15+2+20+3+15+2+4+1+5+3;                // see format string
-    std::string sInfo;
-    sInfo.reserve(resultDB->GetRowCount()*linesize+1);
-    sInfo = "";
-    char szLine[512];
+    ///- Display the list of account/characters online
+    zprintf("=====================================================================\r\n");
+    zprintf("|    Account    |       Character      |       IP        | GM | TBC |\r\n");
+    zprintf("=====================================================================\r\n");
+
     ///- Circle through accounts
     do
     {
-        szLine[0] = '\0';
         Field *fieldsDB = resultDB->Fetch();
         std::string name = fieldsDB[0].GetCppString();
         uint32 account = fieldsDB[1].GetUInt32();
@@ -492,25 +491,18 @@ void CliInfo(char*,pPrintf zprintf)
         if(resultLogin)
         {
             Field *fieldsLogin = resultLogin->Fetch();
-            sprintf(szLine,"|%15s| %20s | %15s |%4d|%5d|\r\n",
+            zprintf("|%15s| %20s | %15s |%4d|%5d|\r\n",
                 fieldsLogin[0].GetString(),name.c_str(),fieldsLogin[1].GetString(),fieldsLogin[2].GetUInt32(),fieldsLogin[3].GetUInt32());
 
             delete resultLogin;
         }
         else
-            sprintf(szLine, "|<Error>        | %20s |<Error>          |<Er>|<Err>|\r\n",name.c_str());
-
-        sInfo += szLine;
+            zprintf("|<Error>        | %20s |<Error>          |<Er>|<Err>|\r\n",name.c_str());
 
     }while(resultDB->NextRow());
 
     delete resultDB;
 
-    ///- Display the list of account/characters online
-    zprintf("=====================================================================\r\n");
-    zprintf("|    Account    |       Character      |       IP        | GM | TBC |\r\n");
-    zprintf("=====================================================================\r\n");
-    zprintf("%s",sInfo.c_str());
     zprintf("=====================================================================\r\n");
 }
 

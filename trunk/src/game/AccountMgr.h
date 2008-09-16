@@ -33,6 +33,8 @@ enum AccountOpResult
     AOR_DB_INTERNAL_ERROR
 };
 
+#define MAX_ACCOUNT_STR 16
+
 class AccountMgr
 {
     public:
@@ -46,6 +48,8 @@ class AccountMgr
         bool CheckPassword(uint32 accid, std::string passwd);
 
         uint32 GetId(std::string username);
+
+        static bool normilizeString(std::string& utf8str);
 };
 
 #define accmgr MaNGOS::Singleton<AccountMgr>::Instance()

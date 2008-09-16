@@ -226,6 +226,10 @@ enum SkillRangeType
 
 SkillRangeType GetSkillRangeType(SkillLineEntry const *pSkill, bool racial);
 
+#define MAX_PLAYER_NAME 12
+
+bool normalizePlayerName(std::string& name);
+
 class PlayerDumpReader;
 
 class ObjectMgr
