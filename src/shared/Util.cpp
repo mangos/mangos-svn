@@ -245,6 +245,32 @@ void utf8truncate(std::string& utf8str,size_t len)
     }
 }
 
+bool Utf8toWStr(char const* utf8str, size_t csize, wchar_t* wstr, size_t& wsize)
+{
+    try
+    {
+        size_t len = utf8::distance(utf8str,utf8str+csize);
+        if(len > wsize)
+        {
+            wsize = 0;
+            wstr = L"";
+            return false;
+        }
+
+        wsize = len;
+        utf8::utf8to16(utf8str,utf8str+csize,wstr);
+        wstr[len] = L'\0';
+    }
+    catch(std::exception)
+    {
+        wsize = 0;
+        wstr = L"";
+        return false;
+    }
+
+    return true;
+}
+
 bool Utf8toWStr(std::string utf8str, std::wstring& wstr)
 {
     try
@@ -257,6 +283,26 @@ bool Utf8toWStr(std::string utf8str, std::wstring& wstr)
     catch(std::exception)
     {
         wstr = L"";
+        return false;
+    }
+
+    return true;
+}
+
+bool WStrToUtf8(wchar_t* wstr, size_t size, std::string& utf8str)
+{
+    try
+    {
+        std::string utf8str2;
+        utf8str2.resize(size*4);                            // allocate for most long case
+
+        char* oend = utf8::utf16to8(wstr,wstr+size,&utf8str2[0]);
+        utf8str2.resize(oend-(&utf8str2[0]));               // remove unused tail
+        utf8str = utf8str2;
+    }
+    catch(std::exception)
+    {
+        utf8str = "";
         return false;
     }
 

@@ -24,7 +24,6 @@
 #include "Opcodes.h"
 #include "Mthread.h"
 #include "SpellAuraDefines.h"
-#include "Util.h"
 #include "UpdateFields.h"
 #include "SharedDefines.h"
 #include "ThreatManager.h"

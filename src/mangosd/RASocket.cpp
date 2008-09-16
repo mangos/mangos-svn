@@ -27,6 +27,7 @@
 #include "World.h"
 #include "Config/ConfigEnv.h"
 #include "Util.h"
+#include "AccountMgr.h"
 
 /// \todo Make this thread safe if in the future 2 admins should be able to log at the same time.
 SOCKET r;
@@ -185,8 +186,8 @@ void RASocket::OnRead()
                     std::string login = szLogin;
                     std::string pw = &buff[5];
 
-                    utf8ToUpperOnlyLatin(login);
-                    utf8ToUpperOnlyLatin(pw);
+                    AccountMgr::normilizeString(login);
+                    AccountMgr::normilizeString(pw);
                     loginDatabase.escape_string(login);
                     loginDatabase.escape_string(pw);
 

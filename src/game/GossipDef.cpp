@@ -22,7 +22,6 @@
 #include "Opcodes.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
-#include "Util.h"
 
 GossipMenu::GossipMenu()
 {

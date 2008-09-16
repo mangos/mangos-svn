@@ -39,11 +39,11 @@ AccountMgr::~AccountMgr()
 
 AccountOpResult AccountMgr::CreateAccount(std::string username, std::string password)
 {
-    if(utf8length(username) > 16)
+    if(utf8length(username) > MAX_ACCOUNT_STR)
         return AOR_NAME_TOO_LONG;                           // username's too long
 
-    utf8ToUpperOnlyLatin(username);
-    utf8ToUpperOnlyLatin(password);
+    normilizeString(username);
+    normilizeString(password);
 
     loginDatabase.escape_string(username);
     loginDatabase.escape_string(password);
@@ -112,14 +112,14 @@ AccountOpResult AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, 
         return AOR_NAME_NOT_EXIST;                          // account doesn't exist
     delete result;
 
-    if(utf8length(new_uname) > 16)
+    if(utf8length(new_uname) > MAX_ACCOUNT_STR)
         return AOR_NAME_TOO_LONG;
 
-    if(utf8length(new_passwd) > 16)
+    if(utf8length(new_passwd) > MAX_ACCOUNT_STR)
         return AOR_PASS_TOO_LONG;
 
-    utf8ToUpperOnlyLatin(new_uname);
-    utf8ToUpperOnlyLatin(new_passwd);
+    normilizeString(new_uname);
+    normilizeString(new_passwd);
 
     loginDatabase.escape_string(new_uname);
     loginDatabase.escape_string(new_passwd);
@@ -136,10 +136,10 @@ AccountOpResult AccountMgr::ChangePassword(uint32 accid, std::string new_passwd)
         return AOR_NAME_NOT_EXIST;                          // account doesn't exist
     delete result;
 
-    if (utf8length(new_passwd) > 16)
+    if (utf8length(new_passwd) > MAX_ACCOUNT_STR)
         return AOR_PASS_TOO_LONG;
 
-    utf8ToUpperOnlyLatin(new_passwd);
+    normilizeString(new_passwd);
 
     loginDatabase.escape_string(new_passwd);
     if(!loginDatabase.PExecute("UPDATE account SET sha_pass_hash=SHA1(CONCAT(username,':','%s')) WHERE id='%d'", new_passwd.c_str(), accid))
@@ -164,7 +164,7 @@ uint32 AccountMgr::GetId(std::string username)
 
 bool AccountMgr::CheckPassword(uint32 accid, std::string passwd)
 {
-    utf8ToUpperOnlyLatin(passwd);
+    normilizeString(passwd);
     loginDatabase.escape_string(passwd);
 
     QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM account WHERE id='%d' AND sha_pass_hash=SHA1(CONCAT(username,':','%s'))", accid, passwd.c_str());
@@ -175,4 +175,17 @@ bool AccountMgr::CheckPassword(uint32 accid, std::string passwd)
     }
 
     return false;
+}
+
+bool AccountMgr::normilizeString(std::string& utf8str)
+{
+    wchar_t wstr_buf[MAX_ACCOUNT_STR+1];
+
+    size_t wstr_len = MAX_ACCOUNT_STR;
+    if(!Utf8toWStr(utf8str,wstr_buf,wstr_len))
+        return false;
+
+    std::transform( &wstr_buf[0], wstr_buf+wstr_len, &wstr_buf[0], wcharToUpperOnlyLatin );
+
+    return WStrToUtf8(wstr_buf,wstr_len,utf8str);
 }

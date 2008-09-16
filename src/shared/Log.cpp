@@ -306,11 +306,8 @@ void Log::outTitle( const char * str)
     if(m_colored)
         SetColor(true,WHITE);
 
-    std::string strUtf8;
-    if(!utf8ToConsole(str,strUtf8))
-        return;
-
-    printf( strUtf8.c_str() );
+    // not expected utf8 and then send as-is
+    printf( str );
 
     if(m_colored)
         ResetColor(true);

@@ -39,6 +39,7 @@
 #include "Chat.h"
 #include "InstanceSaveMgr.h"
 #include "SpellAuras.h"
+#include "Util.h"
 
 INSTANTIATE_SINGLETON_1(ObjectMgr);
 
@@ -47,6 +48,27 @@ ScriptMapMap sQuestStartScripts;
 ScriptMapMap sSpellScripts;
 ScriptMapMap sGameObjectScripts;
 ScriptMapMap sEventScripts;
+
+bool normalizePlayerName(std::string& name)
+{
+    if(name.empty())
+        return false;
+
+    wchar_t wstr_buf[MAX_PLAYER_NAME+1];
+    size_t wstr_len = MAX_PLAYER_NAME;
+
+    if(!Utf8toWStr(name,&wstr_buf[0],wstr_len))
+        return false;
+
+    wstr_buf[0] = wcharToUpper(wstr_buf[0]);
+    for(size_t i = 1; i < wstr_len; ++i)
+        wstr_buf[i] = wcharToLower(wstr_buf[i]);
+
+    if(!WStrToUtf8(wstr_buf,wstr_len,name))
+        return false;
+
+    return true;
+}
 
 ObjectMgr::ObjectMgr()
 {
@@ -370,10 +392,6 @@ void ObjectMgr::SendAuctionSalePendingMail( AuctionEntry * auction )
 //call this method to send mail to auction owner, when auction is successful, it does not clear ram
 void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
 {
-    Item *pItem = objmgr.GetAItem(auction->item_guidlow);
-    if(!pItem)
-        return;
-
     uint64 owner_guid = MAKE_NEW_GUID(auction->owner, 0, HIGHGUID_PLAYER);
     Player *owner = objmgr.GetPlayer(owner_guid);
 
@@ -6015,7 +6033,7 @@ bool ObjectMgr::IsValidName( std::string name, bool create )
     if(!Utf8toWStr(name,wname))
         return false;
 
-    if(wname.size() < 1)
+    if(wname.size() < 1 || wname.size() > MAX_PLAYER_NAME)
         return false;
 
     uint32 strictMask = sWorld.getConfig(CONFIG_STRICT_PLAYER_NAMES);
