@@ -513,7 +513,7 @@ void Transport::Update(uint32 /*p_time*/)
         m_nextNodeTime = m_curr->first;
 
         if (m_curr == m_WayPoints.begin() && (sLog.getLogFilter() & LOG_FILTER_TRANSPORT_MOVES)==0)
-            sLog.outDetail(" >>>>>>>>>>>> BEGIN <<<<<<<<<<<<<< %s", this->m_name.c_str());
+            sLog.outDetail(" ************ BEGIN ************** %s", this->m_name.c_str());
 
         //        MapManager::Instance().GetMap(m_curr->second.mapid)->Add(&this); // -> // ->Add(t);
         //MapManager::Instance().GetMap(m_curr->second.mapid)->Remove((GameObject *)this, false); // -> // ->Add(t);
