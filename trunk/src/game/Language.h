@@ -158,6 +158,7 @@ enum MangosStrings
     LANG_COMMAND_TELE_LOCATION          = 168,
 
     LANG_MAIL_SENT                      = 169,
+    LANG_SOUND_NOT_EXIST                = 170,
     // Room for more level 1
 
     // level 2 chat

@@ -1790,26 +1790,29 @@ bool ChatHandler::HandleWhispersCommand(const char* args)
 //Play sound
 bool ChatHandler::HandlePlaySoundCommand(const char* args)
 {
-    // USAGE: .playsound #soundid
-    // #soundid - ID decimal number from SoundEntries.dbc (1 column)
+    // USAGE: .debug playsound #soundid
+    // #soundid - ID decimal number from SoundEntries.dbc (1st column)
     // this file have about 5000 sounds.
-    // In this realisation only caller can hear this sound.
+    // In this realization only caller can hear this sound.
     if( *args )
     {
-        int dwSoundId = atoi((char*)args);
-        if( dwSoundId >= 0 )
-        {
-            WorldPacket data(SMSG_PLAY_OBJECT_SOUND,4+8);
-            data << uint32(dwSoundId) << m_session->GetPlayer()->GetGUID();
-            m_session->SendPacket(&data);
+        uint32 dwSoundId = atoi((char*)args);
 
-            sLog.outDebug("Player %s use command .playsound with #soundid=%u", m_session->GetPlayer()->GetName(), dwSoundId);
-            PSendSysMessage(LANG_YOU_HEAR_SOUND, dwSoundId);
-            return true;
+        if( !sSoundEntriesStore.LookupEntry(dwSoundId) )
+        {
+            PSendSysMessage(LANG_SOUND_NOT_EXIST, dwSoundId);
+            SetSentErrorMessage(true);
+            return false;
         }
+
+        WorldPacket data(SMSG_PLAY_OBJECT_SOUND,4+8);
+        data << uint32(dwSoundId) << m_session->GetPlayer()->GetGUID();
+        m_session->SendPacket(&data);
+
+        PSendSysMessage(LANG_YOU_HEAR_SOUND, dwSoundId);
+        return true;
     }
 
-    SendSysMessage(LANG_BAD_VALUE);
     return false;
 }
 
