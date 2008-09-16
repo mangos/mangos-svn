@@ -35,6 +35,7 @@
 #include "Database/DatabaseImpl.h"
 #include "PlayerDump.h"
 #include "SocialMgr.h"
+#include "Util.h"
 
 class LoginQueryHolder : public SqlQueryHolder
 {

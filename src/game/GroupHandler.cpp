@@ -29,6 +29,7 @@
 #include "ObjectAccessor.h"
 #include "MapManager.h"
 #include "SocialMgr.h"
+#include "Util.h"
 
 /* differeces from off:
     -you can uninvite yourself - is is useful

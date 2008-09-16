@@ -20,7 +20,6 @@
     \ingroup u2w
 */
 
-#include "Util.h"
 #include "Common.h"
 #include "Log.h"
 #include "Opcodes.h"
@@ -35,6 +34,7 @@
 #include "WorldLog.h"
 #include "AddonHandler.h"
 #include "sockets/Utility.h"
+#include "Util.h"
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined( __GNUC__ )

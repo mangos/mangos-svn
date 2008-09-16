@@ -169,7 +169,7 @@ extern int main(int argc, char **argv)
         sLog.outString( "Daemon PID: %u\n", pid );
     }
 
-    ///- Initialise the database connection
+    ///- Initialize the database connection
     std::string dbstring;
     if(!StartDB(dbstring))
         return 1;

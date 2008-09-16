@@ -54,6 +54,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "InstanceSaveMgr.h"
+#include "Util.h"
 
 INSTANTIATE_SINGLETON_1( World );
 

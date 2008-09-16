@@ -29,6 +29,7 @@
 #include "Language.h"
 #include "AccountMgr.h"
 #include "SystemConfig.h"
+#include "Util.h"
 
 bool ChatHandler::HandleHelpCommand(const char* args)
 {

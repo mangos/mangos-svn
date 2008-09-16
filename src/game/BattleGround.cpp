@@ -25,6 +25,7 @@
 #include "Chat.h"
 #include "SpellAuras.h"
 #include "World.h"
+#include "Util.h"
 
 BattleGround::BattleGround()
 {

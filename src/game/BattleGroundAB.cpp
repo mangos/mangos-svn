@@ -25,6 +25,7 @@
 #include "ObjectMgr.h"
 #include "MapManager.h"
 #include "Language.h"
+#include "Util.h"
 
 BattleGroundAB::BattleGroundAB()
 {

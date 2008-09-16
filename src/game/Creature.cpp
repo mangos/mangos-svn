@@ -38,6 +38,7 @@
 #include "WaypointMovementGenerator.h"
 #include "InstanceData.h"
 #include "BattleGround.h"
+#include "Util.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"

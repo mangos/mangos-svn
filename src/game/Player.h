@@ -31,7 +31,7 @@
 #include "Bag.h"
 #include "WorldSession.h"
 #include "Pet.h"
-#include "Util.h"
+#include "Util.h"                                           // for Tokens typedef
 
 #include<string>
 #include<vector>
