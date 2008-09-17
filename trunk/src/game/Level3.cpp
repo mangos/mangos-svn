@@ -2207,14 +2207,7 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
                 {
                     std::string name = il->Name[loc_idx];
 
-                    // converting Name to lower case
-                    std::wstring wname;
-                    if(!Utf8toWStr(name,wname))
-                        continue;
-
-                    wstrToLower(wname);
-
-                    if (wname.find(wnamepart) != std::wstring::npos)
+                    if (Utf8FitTo(name, wnamepart))
                     {
                         PSendSysMessage(LANG_ITEM_LIST, id, id, name.c_str());
                         ++counter;
@@ -2228,14 +2221,7 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
         if(name.empty())
             continue;
 
-        // converting Name to lower case
-        std::wstring wname;
-        if(!Utf8toWStr(name,wname))
-            continue;
-
-        wstrToLower(wname);
-
-        if (wname.find(wnamepart) != std::wstring::npos)
+        if (Utf8FitTo(name, wnamepart))
         {
             PSendSysMessage(LANG_ITEM_LIST, id, id, name.c_str());
             ++counter;
@@ -2275,15 +2261,7 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
             if(name.empty())
                 continue;
 
-            std::wstring wname;
-
-            // converting name to lower case
-            if(!Utf8toWStr(name,wname))
-                continue;
-
-            wstrToLower( wname );
-
-            if (wname.find(wnamepart) == std::wstring::npos)
+            if (!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
                 for(; loc < MAX_LOCALE; ++loc)
@@ -2295,13 +2273,7 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
                     if(name.empty())
                         continue;
 
-                    if(!Utf8toWStr(name,wname))
-                        continue;
-
-                    // converting name to lower case
-                    wstrToLower( wname );
-
-                    if (wname.find(wnamepart) != std::wstring::npos)
+                    if (Utf8FitTo(name, wnamepart))
                         break;
                 }
             }
@@ -2354,15 +2326,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
             if(name.empty())
                 continue;
 
-            std::wstring wname;
-
-            // converting name to lower case
-            if(!Utf8toWStr(name,wname))
-                continue;
-
-            wstrToLower( wname );
-
-            if (wname.find(wnamepart) == std::wstring::npos)
+            if (!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
                 for(; loc < MAX_LOCALE; ++loc)
@@ -2374,13 +2338,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
                     if(name.empty())
                         continue;
 
-                    if(!Utf8toWStr(name,wname))
-                        continue;
-
-                    // converting name to lower case
-                    wstrToLower( wname );
-
-                    if (wname.find(wnamepart) != std::wstring::npos)
+                    if (Utf8FitTo(name, wnamepart))
                         break;
                 }
             }
@@ -2434,15 +2392,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
             if(name.empty())
                 continue;
 
-            std::wstring wname;
-
-            // converting name to lower case
-            if(!Utf8toWStr(name,wname))
-                continue;
-
-            wstrToLower( wname );
-
-            if (wname.find(wnamepart) == std::wstring::npos)
+            if (!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
                 for(; loc < MAX_LOCALE; ++loc)
@@ -2454,13 +2404,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
                     if(name.empty())
                         continue;
 
-                    if(!Utf8toWStr(name,wname))
-                        continue;
-
-                    // converting name to lower case
-                    wstrToLower( wname );
-
-                    if (wname.find(wnamepart) != std::wstring::npos)
+                    if (Utf8FitTo(name, wnamepart))
                         break;
                 }
             }
@@ -2551,16 +2495,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
                 {
                     std::string title = il->Title[loc_idx];
 
-                    // converting string that we try to find to lower case
-                    std::wstring wtitle;
-
-                    // converting string that we try to find to lower case
-                    if(!Utf8toWStr(title,wtitle))
-                        continue;
-
-                    wstrToLower(wtitle);
-
-                    if (wtitle.find(wnamepart) != std::wstring::npos)
+                    if (Utf8FitTo(title, wnamepart))
                     {
                         QuestStatus status = target->GetQuestStatus(qinfo->GetQuestId());
 
@@ -2587,14 +2522,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
         if(title.empty())
             continue;
 
-        // converting string that we try to find to lower case
-        std::wstring wtitle;
-        if(!Utf8toWStr(title,wtitle))
-            continue;
-
-        wstrToLower(wtitle);
-
-        if (wtitle.find(wnamepart) != std::wstring::npos)
+        if (Utf8FitTo(title, wnamepart))
         {
             QuestStatus status = target->GetQuestStatus(qinfo->GetQuestId());
 
@@ -2652,14 +2580,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
                 {
                     std::string name = cl->Name[loc_idx];
 
-                    // converting Name to lower case
-                    std::wstring wname;
-                    if(!Utf8toWStr(name,wname))
-                        continue;
-
-                    wstrToLower(wname);
-
-                    if (wname.find(wnamepart) != std::wstring::npos)
+                    if (Utf8FitTo(name, wnamepart))
                     {
                         PSendSysMessage(LANG_CREATURE_ENTRY_LIST, id, id, name.c_str());
                         ++counter;
@@ -2673,14 +2594,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
         if(name.empty())
             continue;
 
-        // converting Name to lower case
-        std::wstring wname;
-        if(!Utf8toWStr(name,wname))
-            continue;
-
-        wstrToLower(wname);
-
-        if (wname.find(wnamepart) != std::wstring::npos)
+        if (Utf8FitTo(name, wnamepart))
         {
             PSendSysMessage(LANG_CREATURE_ENTRY_LIST,id,id,name.c_str());
             ++counter;
@@ -2725,14 +2639,7 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
                 {
                     std::string name = gl->Name[loc_idx];
 
-                    // converting Name to lower case
-                    std::wstring wname;
-                    if(!Utf8toWStr(name,wname))
-                        continue;
-
-                    wstrToLower(wname);
-
-                    if (wname.find(wnamepart) != std::wstring::npos)
+                    if (Utf8FitTo(name, wnamepart))
                     {
                         PSendSysMessage(LANG_GO_ENTRY_LIST, id, id, name.c_str());
                         ++counter;
@@ -2746,14 +2653,7 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
         if(name.empty())
             continue;
 
-        // converting Name to lower case
-        std::wstring wname;
-        if(!Utf8toWStr(name,wname))
-            continue;
-
-        wstrToLower(wname);
-
-        if(wname.find(wnamepart) != std::wstring::npos)
+        if(Utf8FitTo(name, wnamepart))
         {
             PSendSysMessage(LANG_GO_ENTRY_LIST, id, id, name.c_str());
             ++counter;

@@ -722,14 +722,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                                         if(name.empty())
                                             continue;
 
-                                        // converting to lower case
-                                        std::wstring wname;
-                                        if(!Utf8toWStr(name,wname))
-                                            continue;
-
-                                        wstrToLower(wname);
-
-                                        if( wsearchedname.empty() || wname.find( wsearchedname ) != std::wstring::npos )
+                                        if( wsearchedname.empty() || Utf8FitTo(name, wsearchedname) )
                                         {
                                             if ((count < 50) && (totalcount >= listfrom))
                                             {

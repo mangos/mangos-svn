@@ -77,7 +77,6 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     uint32 level_min, level_max, racemask, classmask, zones_count, str_count;
     uint32 zoneids[10];                                     // 10 is client limit
     std::string player_name, guild_name;
-    std::string str[4];                                     // 4 is client limit
 
     recv_data >> level_min;                                 // maximal player level, default 0
     recv_data >> level_max;                                 // minimal player level, default 100
@@ -118,6 +117,8 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,4+4+(player_name.size()+1)+(guild_name.size()+1)+4+4+4+(4*zones_count)+4+(1*str_count));
 
     sLog.outDebug("Minlvl %u, maxlvl %u, name %s, guild %s, racemask %u, classmask %u, zones %u, strings %u", level_min, level_max, player_name.c_str(), guild_name.c_str(), racemask, classmask, zones_count, str_count);
+    
+    std::wstring str[4];                                    // 4 is client limit
     for(uint32 i = 0; i < str_count; i++)
     {
         // recheck (have one more byte)
@@ -125,9 +126,21 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 
         std::string temp;
         recv_data >> temp;                                  // user entered string, it used as universal search pattern(guild+player name)?
-        str[i] = temp;
+        
+        if(!Utf8toWStr(temp,str[i]))
+            continue;
+        
+        wstrToLower(str[i]);
+        
         sLog.outDebug("String %u: %s", i, str[i].c_str());
     }
+
+    std::wstring wplayer_name;
+    std::wstring wguild_name;
+    if(!(Utf8toWStr(player_name, wplayer_name) && Utf8toWStr(guild_name, wguild_name)))
+        return;
+    wstrToLower(wplayer_name);
+    wstrToLower(wguild_name);
 
     // client send in case not set max level value 100 but mangos support 255 max level,
     // update it to show GMs with characters after 100 level
@@ -193,20 +206,36 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         if (!z_show)
             continue;
 
-        const char *pname = itr->second->GetName();
-        if (!pname || !(player_name.empty() || strstr(pname, player_name.c_str())))
+        std::string pname = itr->second->GetName();
+        std::wstring wpname;
+        if(!Utf8toWStr(pname,wpname))
+            continue;
+        wstrToLower(wpname);
+
+        if (!(wplayer_name.empty() || wpname.find(wplayer_name) != std::wstring::npos))
             continue;
 
         std::string gname = objmgr.GetGuildNameById(itr->second->GetGuildId());
-        if (!(guild_name.empty() || strstr(gname.c_str(), guild_name.c_str())))
+        std::wstring wgname;
+        if(!Utf8toWStr(gname,wgname))
             continue;
+        wstrToLower(wgname);
+
+        if (!(wguild_name.empty() || wgname.find(wguild_name) != std::wstring::npos))
+            continue;
+
+        std::string aname;
+        if(AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(itr->second->GetZoneId()))
+            aname = areaEntry->area_name[GetSessionDbcLocale()];
 
         bool s_show = true;
         for(uint32 i = 0; i < str_count; i++)
         {
             if (!str[i].empty())
             {
-                if (strstr(gname.c_str(), str[i].c_str()) || strstr(pname, str[i].c_str()))
+                if (wgname.find(str[i]) != std::wstring::npos ||
+                    wpname.find(str[i]) != std::wstring::npos ||
+                    Utf8FitTo(aname, str[i]) )
                 {
                     s_show = true;
                     break;

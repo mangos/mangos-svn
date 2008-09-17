@@ -588,15 +588,7 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
             if(name.empty())
                 continue;
 
-            std::wstring wname;
-
-            // converting name to lower case
-            if(!Utf8toWStr(name,wname))
-                continue;
-
-            wstrToLower( wname );
-
-            if (wname.find(wnamepart) == std::wstring::npos)
+            if (!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
                 for(; loc < MAX_LOCALE; ++loc)
@@ -608,13 +600,7 @@ bool ChatHandler::HandleLookupFactionCommand(const char* args)
                     if(name.empty())
                         continue;
 
-                    if(!Utf8toWStr(name,wname))
-                        continue;
-
-                    // converting name to lower case
-                    wstrToLower( wname );
-
-                    if (wname.find(wnamepart) != std::wstring::npos)
+                    if (Utf8FitTo(name, wnamepart))
                         break;
                 }
             }
@@ -3629,14 +3615,7 @@ bool ChatHandler::HandleLookupEventCommand(const char* args)
         if(descr.empty())
             continue;
 
-        // converting to lower case
-        std::wstring wdescr;
-        if(!Utf8toWStr(descr,wdescr))
-            continue;
-
-        wstrToLower(wdescr);
-
-        if (wdescr.find(wnamepart) != std::wstring::npos)
+        if (Utf8FitTo(descr, wnamepart))
         {
             char const* active = activeEvents.find(id) != activeEvents.end() ? GetMangosString(LANG_ACTIVE) : "";
             PSendSysMessage(LANG_EVENT_ENTRY_LIST,id,id,descr.c_str(),active );
@@ -3925,15 +3904,7 @@ bool ChatHandler::HandleLearnAllRecipesCommand(const char* args)
         int loc = m_session->GetSessionDbcLocale();
         std::string name = skillInfo->name[loc];
 
-        std::wstring wname;
-
-        // converting SpellName to lower case
-        if(!Utf8toWStr(name,wname))
-            continue;
-
-        wstrToLower( wname );
-
-        if(wname.find(wnamepart) != std::wstring::npos)
+        if(Utf8FitTo(name, wnamepart))
         {
             for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
             {

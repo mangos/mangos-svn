@@ -272,6 +272,7 @@ std::wstring GetMainPartOfName(std::wstring wname, uint32 declension);
 
 bool utf8ToConsole(std::string utf8str, std::string& conStr);
 bool consoleToUtf8(std::string conStr,std::string& utf8str);
+bool Utf8FitTo(std::string str, std::wstring search);
 
 #if PLATFORM == PLATFORM_WINDOWS
 #define UTF8PRINTF(OUT,FRM,RESERR)                      \
