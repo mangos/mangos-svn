@@ -452,7 +452,6 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                     {
                         // count consumed deadly poison doses at target
                         uint32 doses = 0;
-                        uint32 extraDamage = 0;
 
                         // remove consumed poison doses
                         Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
@@ -1696,8 +1695,6 @@ void Spell::EffectTriggerSpell(uint32 i)
     // some triggered spells require specific equipment
     if(spellInfo->EquippedItemClass >=0 && m_caster->GetTypeId()==TYPEID_PLAYER)
     {
-        Player* p_caster = (Player*)m_caster;
-
         // main hand weapon required
         if(spellInfo->AttributesEx3 & SPELL_ATTR_EX3_MAIN_HAND)
         {
@@ -2874,6 +2871,18 @@ void Spell::EffectSummonChangeItem(uint32 i)
     Item *pNewItem = Item::CreateItem( newitemid, 1, player);
     if( !pNewItem )
         return;
+
+    for(uint8 i= PERM_ENCHANTMENT_SLOT; i<=TEMP_ENCHANTMENT_SLOT; ++i)
+    {
+        if(m_CastItem->GetEnchantmentId(EnchantmentSlot(i)))
+            pNewItem->SetEnchantment(EnchantmentSlot(i), m_CastItem->GetEnchantmentId(EnchantmentSlot(i)), m_CastItem->GetEnchantmentDuration(EnchantmentSlot(i)), m_CastItem->GetEnchantmentCharges(EnchantmentSlot(i)));
+    }
+
+    if(m_CastItem->GetUInt32Value(ITEM_FIELD_DURABILITY) < m_CastItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY))
+    {
+        double loosePercent = 1 - m_CastItem->GetUInt32Value(ITEM_FIELD_DURABILITY) / double(m_CastItem->GetUInt32Value(ITEM_FIELD_MAXDURABILITY));
+        player->DurabilityLoss(pNewItem, loosePercent);
+    }
 
     if( player->IsInventoryPos( pos ) )
     {
@@ -4061,7 +4070,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             // Whirlwind, single only spell with 2 weapon white damage apply if have
             if(m_caster->GetTypeId()==TYPEID_PLAYER && (m_spellInfo->SpellFamilyFlags & 0x00000400000000LL))
             {
-                if(Item* item = ((Player*)m_caster)->GetWeaponForAttack(OFF_ATTACK,true))
+                if(((Player*)m_caster)->GetWeaponForAttack(OFF_ATTACK,true))
                     spell_bonus += m_caster->CalculateDamage (OFF_ATTACK, normalized);
             }
             // Devastate bonus and sunder armor refresh
@@ -4384,7 +4393,6 @@ void Spell::EffectSummonObjectWild(uint32 i)
     {
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
-            Player *pl = (Player*)m_caster;
             BattleGround* bg = ((Player *)m_caster)->GetBattleGround();
             if(bg && bg->GetTypeID()==BATTLEGROUND_EY && bg->GetStatus() == STATUS_IN_PROGRESS)
             {
