@@ -906,7 +906,7 @@ void Spell::DoAllEffectOnTarget(TargetInfo *target)
         return;
 
     Unit* unit = m_caster->GetGUID()==target->targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster,target->targetGUID);
-    if (unit==NULL)
+    if (!unit)
         return;
 
     SpellMissInfo missInfo = target->missCondition;
@@ -945,7 +945,9 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
         return;
 
     // Recheck immune (only for delayed spells)
-    if (m_spellInfo->speed && (unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo),true) || unit->IsImmunedToSpell(m_spellInfo,true)))
+    if( m_spellInfo->speed && (
+        unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo),true) || 
+        unit->IsImmunedToSpell(m_spellInfo,true) ))
     {
         m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
         return;
@@ -955,6 +957,13 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
     {
         if( !m_caster->IsFriendlyTo(unit) )
         {
+            // for delayed spells ignore not visible explicit target
+            if(m_spellInfo->speed > 0.0f && unit==m_targets.getUnitTarget() && !unit->isVisibleForOrDetect(m_caster,false))
+            {
+                m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
+                return;
+            }
+
             // exclude Arcane Missiles Dummy Aura aura for now (attack on hit)
             // TODO: find way to not need this?
             if(!(m_spellInfo->SpellFamilyName == SPELLFAMILY_MAGE &&
