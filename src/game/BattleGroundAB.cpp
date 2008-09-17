@@ -111,9 +111,13 @@ void BattleGroundAB::Update(time_t diff)
     }
     else if( GetStatus() == STATUS_IN_PROGRESS )
     {
-        // 3 sec delay to spawn new banner instead previous despawned one
+        int team_points[2] = { 0, 0 };
+
         for (int node = 0; node < BG_AB_DYNAMIC_NODES_COUNT; ++node)
+        {
+            // 3 sec delay to spawn new banner instead previous despawned one
             if( m_BannerTimers[node].timer )
+            {
                 if( m_BannerTimers[node].timer > diff )
                     m_BannerTimers[node].timer -= diff;
                 else
@@ -121,10 +125,11 @@ void BattleGroundAB::Update(time_t diff)
                     m_BannerTimers[node].timer = 0;
                     _CreateBanner(node, m_BannerTimers[node].type, m_BannerTimers[node].teamIndex, false);
                 }
+            }
 
-        // 1-minute to occupy a node from contested state
-        for (int node = 0; node < BG_AB_DYNAMIC_NODES_COUNT; ++node)
+            // 1-minute to occupy a node from contested state
             if( m_NodeTimers[node] )
+            {
                 if( m_NodeTimers[node] > diff )
                     m_NodeTimers[node] -= diff;
                 else
@@ -149,15 +154,17 @@ void BattleGroundAB::Update(time_t diff)
                     SendPacketToAll(&data);
                     PlaySoundToAll((teamIndex == 0) ? SOUND_NODE_CAPTURED_ALLIANCE : SOUND_NODE_CAPTURED_HORDE);
                 }
+            }
+
+            for (int team = 0; team < 2; ++team)
+                if( m_Nodes[node] == team + BG_AB_NODE_TYPE_OCCUPIED )
+                    ++team_points[team];
+        }
 
         // Accumulate points
         for (int team = 0; team < 2; ++team)
         {
-            int points = 0;
-            // Go throught all nodes
-            for (int node = 0; node < BG_AB_DYNAMIC_NODES_COUNT; ++node)
-                if( m_Nodes[node] == team + 3 )
-                    ++points;
+            int points = team_points[team];
             if( !points )
                 continue;
             m_lastTick[team] += diff;
@@ -374,7 +381,7 @@ void BattleGroundAB::_NodeOccupied(uint8 node,Team team)
     uint8 capturedNodes = 0;
     for (uint8 i = 0; i < BG_AB_DYNAMIC_NODES_COUNT; ++i)
     {
-        if( m_Nodes[node] == (team==ALLIANCE?0:1) + BG_AB_NODE_TYPE_OCCUPIED && !m_NodeTimers[i])
+        if( m_Nodes[node] == GetTeamIndexByTeamId(team) + BG_AB_NODE_TYPE_OCCUPIED && !m_NodeTimers[i])
             ++capturedNodes;
     }
     if(capturedNodes >= 5)
