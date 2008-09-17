@@ -262,6 +262,7 @@ class Spell
         void EffectSkinning(uint32 i);
         void EffectCharge(uint32 i);
         void EffectProspecting(uint32 i);
+        void EffectSendTaxi(uint32 i);
         void EffectSummonCritter(uint32 i);
         void EffectKnockBack(uint32 i);
         void EffectPlayerPull(uint32 i);

@@ -178,7 +178,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectUnused,                                   //120 SPELL_EFFECT_TELEPORT_GRAVEYARD       one spell: Graveyard Teleport Test
     &Spell::EffectWeaponDmg,                                //121 SPELL_EFFECT_NORMALIZED_WEAPON_DMG
     &Spell::EffectUnused,                                   //122 SPELL_EFFECT_122                      unused
-    &Spell::EffectNULL,                                     //123 SPELL_EFFECT_SEND_TAXI                taxi/flight related (misc value is taxi path id)
+    &Spell::EffectSendTaxi,                                 //123 SPELL_EFFECT_SEND_TAXI                taxi/flight related (misc value is taxi path id)
     &Spell::EffectPlayerPull,                               //124 SPELL_EFFECT_PLAYER_PULL              opposite of knockback effect (pulls player twoard caster)
     &Spell::EffectModifyThreatPercent,                      //125 SPELL_EFFECT_MODIFY_THREAT_PERCENT
     &Spell::EffectStealBeneficialBuff,                      //126 SPELL_EFFECT_STEAL_BENEFICIAL_BUFF    spell steal effect?
@@ -5545,6 +5545,41 @@ void Spell::EffectKnockBack(uint32 i)
     data << float(damage/-10);                              // Z Movement speed (vertical)
 
     ((Player*)unitTarget)->GetSession()->SendPacket(&data);
+}
+
+void Spell::EffectSendTaxi(uint32 i)
+{
+    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(m_spellInfo->EffectMiscValue[i]);
+    if(!entry)
+        return;
+
+    std::vector<uint32> nodes;
+
+    nodes.resize(2);
+    nodes[0] = entry->from;
+    nodes[1] = entry->to;
+
+    uint32 mountid = 0;
+    switch(m_spellInfo->Id)
+    {
+        case 31606:       //Stormcrow Amulet
+            mountid = 17447;
+            break;
+        case 45071:      //Quest - Sunwell Daily - Dead Scar Bombing Run
+        case 45113:      //Quest - Sunwell Daily - Ship Bombing Run
+        case 45353:      //Quest - Sunwell Daily - Ship Bombing Run Return
+            mountid = 22840;
+            break;
+        case 34905:      //Stealth Flight
+            mountid = 6851;
+            break;
+    }
+
+    ((Player*)unitTarget)->ActivateTaxiPathTo(nodes,mountid);
+
 }
 
 void Spell::EffectPlayerPull(uint32 i)

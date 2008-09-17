@@ -816,6 +816,14 @@ struct TalentTabEntry
     //char*   internalname;                                 // 22
 };
 
+struct TaxiPathEntry
+{
+    uint32    ID;
+    uint32    from;
+    uint32    to;
+    uint32    price;
+};
+
 struct TaxiNodesEntry
 {
     uint32    ID;                                           // 0
