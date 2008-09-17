@@ -6866,6 +6866,7 @@ bool Unit::Attack(Unit *victim, bool meleeAttack)
         ((WorldObject*)this)->SendMessageToSet(&data, true);
 
         ((Creature*)this)->CallAssistence();
+        ((Creature*)this)->SetCombatStartPosition(GetPositionX(), GetPositionY(), GetPositionZ());
     }
 
     // delay offhand weapon attack to next attack time
