@@ -362,7 +362,7 @@ enum ItemQualities
 #define SPELL_ATTR_EX4_UNK31                      0x80000000            // 31
 
 #define SPELL_ATTR_EX5_UNK0                       0x00000001            // 0
-#define SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP      0x00000002            // 1 not need reagents if UNIT_FLAG_RESTING
+#define SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP      0x00000002            // 1 not need reagents if UNIT_FLAG_PREPARATION
 #define SPELL_ATTR_EX5_UNK2                       0x00000004            // 2
 #define SPELL_ATTR_EX5_USABLE_WHILE_STUNNED       0x00000008            // 3 usable while stunned
 #define SPELL_ATTR_EX5_UNK4                       0x00000010            // 4
