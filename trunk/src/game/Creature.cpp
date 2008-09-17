@@ -1778,11 +1778,12 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
     if(sMapStore.LookupEntry(GetMapId())->Instanceable())
         return false;
 
-    float rx,ry,rz;
-    GetRespawnCoord(rx, ry, rz);
+    float length = pVictim->GetDistance(CombatStartX,CombatStartY,CombatStartZ);
+    float AttackDist = GetAttackDistance(pVictim);
+    uint32 ThreatRadius = sWorld.getConfig(CONFIG_THREAT_RADIUS);
 
-    float length = pVictim->GetDistance(rx,ry,rz);
-    return ( length > 100.0f);                            // real value unknown
+    //Use AttackDistance in distance check if threat radius is lower. This prevents creature bounce in and ouf of combat every update tick.
+    return ( length > (ThreatRadius > AttackDist ? ThreatRadius : AttackDist));
 }
 
 CreatureDataAddon const* Creature::GetCreatureAddon() const

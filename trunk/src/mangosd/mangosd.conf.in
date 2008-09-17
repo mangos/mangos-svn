@@ -580,6 +580,11 @@ TalentsInspecting = 1
 ###################################################################################################################
 # CREATURE SETTINGS
 #
+#    ThreatRadius
+#        Radius for creature to evade after being pulled away from combat start point
+#        If ThreatRadius is less than creature aggro radius then aggro radius will be used
+#        Default: 100 yards
+#
 #    Rate.Creature.Aggro
 #        Aggro radius percent or off.
 #        Default: 1   - 100%
@@ -633,6 +638,7 @@ TalentsInspecting = 1
 #
 ###################################################################################################################
 
+ThreatRadius = 100
 Rate.Creature.Aggro = 1
 CreatureFamilyAssistenceRadius = 10
 WorldBossLevelDiff = 3
