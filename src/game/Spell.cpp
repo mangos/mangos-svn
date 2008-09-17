@@ -3006,6 +3006,10 @@ void Spell::TakeReagents()
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    if (m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP &&
+        m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PREPARATION))
+        return;
+
     Player* p_caster = (Player*)m_caster;
 
     for(uint32 x=0;x<8;x++)
@@ -4461,33 +4465,37 @@ uint8 Spell::CheckItems()
         focusObject = ok;                                   // game object found in range
     }
 
-    for(uint32 i=0;i<8;i++)
+    if (!(m_spellInfo->AttributesEx5 & SPELL_ATTR_EX5_NO_REAGENT_WHILE_PREP &&
+        m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PREPARATION)))
     {
-        if(m_spellInfo->Reagent[i] <= 0)
-            continue;
-
-        itemid    = m_spellInfo->Reagent[i];
-        itemcount = m_spellInfo->ReagentCount[i];
-
-        // if CastItem is also spell reagent
-        if( m_CastItem && m_CastItem->GetEntry() == itemid )
+        for(uint32 i=0;i<8;i++)
         {
-            ItemPrototype const *proto = m_CastItem->GetProto();
-            if(!proto)
-                return SPELL_FAILED_ITEM_NOT_READY;
-            for(int s=0;s<5;s++)
+            if(m_spellInfo->Reagent[i] <= 0)
+                continue;
+
+            itemid    = m_spellInfo->Reagent[i];
+            itemcount = m_spellInfo->ReagentCount[i];
+
+            // if CastItem is also spell reagent
+            if( m_CastItem && m_CastItem->GetEntry() == itemid )
             {
-                // CastItem will be used up and does not count as reagent
-                int32 charges = m_CastItem->GetSpellCharges(s);
-                if (proto->Spells[s].SpellCharges < 0 && abs(charges) < 2)
+                ItemPrototype const *proto = m_CastItem->GetProto();
+                if(!proto)
+                    return SPELL_FAILED_ITEM_NOT_READY;
+                for(int s=0;s<5;s++)
                 {
-                    ++itemcount;
-                    break;
+                    // CastItem will be used up and does not count as reagent
+                    int32 charges = m_CastItem->GetSpellCharges(s);
+                    if (proto->Spells[s].SpellCharges < 0 && abs(charges) < 2)
+                    {
+                        ++itemcount;
+                        break;
+                    }
                 }
             }
+            if( !p_caster->HasItemCount(itemid,itemcount) )
+                return (uint8)SPELL_FAILED_ITEM_NOT_READY;      //0x54
         }
-        if( !p_caster->HasItemCount(itemid,itemcount) )
-            return (uint8)SPELL_FAILED_ITEM_NOT_READY;      //0x54
     }
 
     uint32 totems = 2;
