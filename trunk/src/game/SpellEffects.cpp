@@ -1300,8 +1300,10 @@ void Spell::EffectDummy(uint32 i)
                     if (m_caster->GetTypeId()!=TYPEID_PLAYER)
                         return;
 
-                    // break Auto Shot
+                    // break Auto Shot and autohit
                     m_caster->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+                    m_caster->AttackStop();
+                    ((Player*)m_caster)->SendAttackSwingCancelAttack();
                     return;
                 }
             }
