@@ -405,3 +405,19 @@ bool consoleToUtf8(std::string conStr,std::string& utf8str)
     return true;
 #endif
 }
+
+bool Utf8FitTo(std::string str, std::wstring search)
+{
+    std::wstring temp;
+
+    if(!Utf8toWStr(str,temp))
+        return false;
+
+    // converting to lower case
+    wstrToLower( temp );
+
+    if(temp.find(search) == std::wstring::npos)
+        return false;
+
+    return true;
+}

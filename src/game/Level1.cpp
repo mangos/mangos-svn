@@ -1663,15 +1663,7 @@ bool ChatHandler::HandleLookupAreaCommand(const char* args)
             if(name.empty())
                 continue;
 
-            std::wstring wname;
-
-            // converting SpellName to lower case
-            if(!Utf8toWStr(name,wname))
-                continue;
-
-            wstrToLower( wname );
-
-            if(wname.find(wnamepart) == std::wstring::npos)
+            if(!Utf8FitTo(name, wnamepart))
             {
                 loc = 0;
                 for(; loc < MAX_LOCALE; ++loc)
@@ -1683,13 +1675,7 @@ bool ChatHandler::HandleLookupAreaCommand(const char* args)
                     if(name.empty())
                         continue;
 
-                    if(!Utf8toWStr(name,wname))
-                        continue;
-
-                    // converting SpellName to lower case
-                    wstrToLower( wname );
-
-                    if (wname.find(wnamepart) != std::string::npos)
+                    if (Utf8FitTo(name, wnamepart))
                         break;
                 }
             }
