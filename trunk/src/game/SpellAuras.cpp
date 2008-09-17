@@ -1308,14 +1308,14 @@ void Aura::TriggerSpell()
                     // Restoration
                     case 23493:
                     {
-                        int32 heal = caster->GetMaxHealth() * 0.1;
+                        int32 heal = caster->GetMaxHealth() / 10;
                         caster->ModifyHealth( heal );
                         caster->SendHealSpellLog(caster, 23493, heal);
 
                         int32 mana = caster->GetMaxPower(POWER_MANA);
                         if (mana)
                         {
-                            mana *= 0.1;
+                            mana /= 10;
                             caster->ModifyPower( POWER_MANA, mana );
                             caster->SendEnergizeSpellLog(caster, 23493, mana, POWER_MANA);
                         }
@@ -5733,7 +5733,7 @@ void Aura::PeriodicTick()
             if(Player *modOwner = pCaster->GetSpellModOwner())
                 modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
 
-            int32 gain = pCaster->SpellHealingBonus(spellProto, new_damage * multiplier, DOT, pCaster);
+            int32 gain = pCaster->SpellHealingBonus(spellProto, uint32(new_damage * multiplier), DOT, pCaster);
 
             gain = pCaster->ModifyHealth(gain);
             pCaster->getHostilRefManager().threatAssist(pCaster, float(gain) * 0.5f, spellProto);
