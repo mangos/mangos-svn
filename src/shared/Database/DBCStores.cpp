@@ -115,14 +115,7 @@ TaxiMask sTaxiNodesMask;
 
 // DBC used only for initialization sTaxiPathSetBySource at startup.
 TaxiPathSetBySource sTaxiPathSetBySource;
-struct TaxiPathEntry
-{
-    uint32    ID;
-    uint32    from;
-    uint32    to;
-    uint32    price;
-};
-static DBCStorage <TaxiPathEntry> sTaxiPathStore(TaxiPathEntryfmt);
+DBCStorage <TaxiPathEntry> sTaxiPathStore(TaxiPathEntryfmt);
 
 // DBC used only for initialization sTaxiPathSetBySource at startup.
 TaxiPathNodesByPath sTaxiPathNodesByPath;
@@ -408,13 +401,11 @@ void LoadDBCStores(std::string dataPath)
         }
     }
 
-    //## TaxiPath.dbc ## Loaded only for initialization different structures
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sTaxiPathStore,            dbcPath,"TaxiPath.dbc");
     for(uint32 i = 1; i < sTaxiPathStore.GetNumRows(); ++i)
         if(TaxiPathEntry const* entry = sTaxiPathStore.LookupEntry(i))
             sTaxiPathSetBySource[entry->from][entry->to] = TaxiPathBySourceAndDestination(entry->ID,entry->price);
     uint32 pathCount = sTaxiPathStore.GetNumRows();
-    sTaxiPathStore.Clear();
 
     //## TaxiPathNode.dbc ## Loaded only for initialization different structures
     LoadDBC(availableDbcLocales,bar,bad_dbc_files,sTaxiPathNodeStore,        dbcPath,"TaxiPathNode.dbc");

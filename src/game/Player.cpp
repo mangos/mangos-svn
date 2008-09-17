@@ -16147,8 +16147,12 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_i
         return false;
     }
 
-    // not let cheating with start flight in time of logout process || if casting not finished || while in combat
-    if(GetSession()->isLogingOut() || IsNonMeleeSpellCasted(false) || isInCombat())
+    // not let cheating with start flight in time of logout process || if casting not finished || while in combat || if not use Spell's with EffectSendTaxi 
+    if(GetSession()->isLogingOut() || 
+        (!m_currentSpells[CURRENT_GENERIC_SPELL] ||
+        m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Effect[0] != SPELL_EFFECT_SEND_TAXI)&& 
+        IsNonMeleeSpellCasted(false) ||
+        isInCombat())
     {
         WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
         data << uint32(ERR_TAXIPLAYERBUSY);

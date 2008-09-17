@@ -625,7 +625,7 @@ enum SpellEffects
     SPELL_EFFECT_TELEPORT_GRAVEYARD        = 120,
     SPELL_EFFECT_NORMALIZED_WEAPON_DMG     = 121,
     SPELL_EFFECT_122                       = 122,
-    SPELL_EFFECT_123                       = 123,
+    SPELL_EFFECT_SEND_TAXI                 = 123,
     SPELL_EFFECT_PLAYER_PULL               = 124,
     SPELL_EFFECT_MODIFY_THREAT_PERCENT     = 125,
     SPELL_EFFECT_STEAL_BENEFICIAL_BUFF     = 126,
