@@ -364,6 +364,10 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                 case SPELL_AURA_MOD_STUN:                   //have positive and negative spells, we can't sort its correctly at this moment.
                     if(effIndex==0 && spellproto->Effect[1]==0 && spellproto->Effect[2]==0)
                         return false;                       // but all single stun aura spells is negative
+
+                    // Petrification
+                    if(spellproto->Id == 17624)
+                        return false;
                     break;
                 case SPELL_AURA_MOD_ROOT:
                 case SPELL_AURA_MOD_SILENCE:
