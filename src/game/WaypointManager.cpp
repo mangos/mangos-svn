@@ -71,7 +71,7 @@ void WaypointManager::Load()
         do
         {
             Field *fields = result->Fetch();
-            uint32 point        = fields[15].GetUInt32()-1;
+            uint32 point        = fields[15].GetUInt32();
             uint32 id           = fields[14].GetUInt32();
 
             WaypointPath &path  = m_pathMap[id];
