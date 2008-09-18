@@ -34,11 +34,7 @@
 
 extern RealmList m_realmList;
 
-#ifdef DO_POSTGRESQL
-extern DatabasePostgre dbRealmServer;
-#else
-extern DatabaseMysql dbRealmServer;
-#endif
+extern DatabaseType dbRealmServer;
 
 #define ChunkSize 2048
 
