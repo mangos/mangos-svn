@@ -27,6 +27,7 @@
 
 #include "MovementGenerator.h"
 #include "DestinationHolder.h"
+#include "WaypointManager.h"
 #include "Path.h"
 #include "Traveller.h"
 
@@ -37,18 +38,8 @@
 
 #define FLIGHT_TRAVEL_UPDATE  100
 #define STOP_TIME_FOR_PLAYER  3 * 60 * 1000                         // 3 Minutes
-struct WaypointBehavior
-{
-    uint32 emote;
-    uint32 spell;
-    std::string text[5];
-    float orientation;
-    uint32 model1;
-    uint32 model2;
-    bool HasDone;
-};
 
-template<class T>
+template<class T, class P = Path>
 class MANGOS_DLL_SPEC PathMovementBase
 {
     public:
@@ -66,7 +57,7 @@ class MANGOS_DLL_SPEC PathMovementBase
     protected:
         uint32 i_currentNode;
         DestinationHolder< Traveller<T> > i_destinationHolder;
-        Path i_path;
+        P i_path;
 };
 
 /** WaypointMovementGenerator loads a series of way points
@@ -80,11 +71,10 @@ class MANGOS_DLL_SPEC WaypointMovementGenerator;
 template<>
 class MANGOS_DLL_SPEC WaypointMovementGenerator<Creature>
 : public MovementGeneratorMedium< Creature, WaypointMovementGenerator<Creature> >,
-public PathMovementBase<Creature>
+public PathMovementBase<Creature, WaypointPath*>
 {
     TimeTrackerSmall i_nextMoveTime;
-    std::vector<uint32> i_delays;
-    std::vector<WaypointBehavior *> i_wpBehaviour;
+    std::vector<bool> i_hasDone;
     public:
         WaypointMovementGenerator(Creature &) : i_nextMoveTime(0) {}
         ~WaypointMovementGenerator() { ClearWaypoints(); }
@@ -114,7 +104,6 @@ public PathMovementBase<Creature>
         static void Initialize(void);
     private:
         void ClearWaypoints();
-        static std::set<uint32> si_waypointHolders;
         bool b_StopedByPlayer;
 };
 
