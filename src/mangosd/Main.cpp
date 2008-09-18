@@ -41,15 +41,9 @@ char serviceDescription[] = "Massive Network Game Object Server";
 int m_ServiceStatus = -1;
 #endif
 
-#ifdef DO_POSTGRESQL
-DatabasePostgre WorldDatabase;                              ///< Accessor to the world database
-DatabasePostgre CharacterDatabase;                          ///< Accessor to the character database
-DatabasePostgre loginDatabase;                              ///< Accessor to the realm/login database
-#else
-DatabaseMysql WorldDatabase;                                ///< Accessor to the world database
-DatabaseMysql CharacterDatabase;                            ///< Accessor to the character database
-DatabaseMysql loginDatabase;                                ///< Accessor to the realm/login database
-#endif
+DatabaseType WorldDatabase;                                 ///< Accessor to the world database
+DatabaseType CharacterDatabase;                             ///< Accessor to the character database
+DatabaseType loginDatabase;                                 ///< Accessor to the realm/login database
 
 uint32 realmID;                                             ///< Id of the realm
 

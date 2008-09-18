@@ -31,9 +31,7 @@
 #include "Database/QueryResultPostgre.h"
 #include "Database/Database.h"
 #include "Database/DatabasePostgre.h"
-extern DatabasePostgre WorldDatabase;
-extern DatabasePostgre CharacterDatabase;
-extern DatabasePostgre loginDatabase;
+typedef DatabasePostgre DatabaseType;
 #define _LIKE_          "ILIKE"
 #define _TABLE_SIM_     "\""
 #else
@@ -42,10 +40,13 @@ extern DatabasePostgre loginDatabase;
 #include "Database/Database.h"
 #include "Database/DatabaseMysql.h"
 #include "Database/DatabaseSqlite.h"
-extern DatabaseMysql WorldDatabase;
-extern DatabaseMysql CharacterDatabase;
-extern DatabaseMysql loginDatabase;
+typedef DatabaseMysql DatabaseType;
 #define _LIKE_          "LIKE"
 #define _TABLE_SIM_     "`"
 #endif
+
+extern DatabaseType WorldDatabase;
+extern DatabaseType CharacterDatabase;
+extern DatabaseType loginDatabase;
+
 #endif

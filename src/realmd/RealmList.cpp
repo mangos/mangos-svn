@@ -27,11 +27,7 @@
 
 INSTANTIATE_SINGLETON_1( RealmList );
 
-#ifdef DO_POSTGRESQL
-extern DatabasePostgre dbRealmServer;
-#else
-extern DatabaseMysql dbRealmServer;
-#endif
+extern DatabaseType dbRealmServer;
 
 RealmList::RealmList( ) : m_UpdateInterval(0), m_NextUpdateTime(time(NULL))
 {
