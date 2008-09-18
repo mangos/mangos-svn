@@ -54,6 +54,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "InstanceSaveMgr.h"
+#include "WaypointManager.h"
 #include "Util.h"
 
 INSTANTIATE_SINGLETON_1( World );
@@ -1012,6 +1013,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading BattleMasters..." );
     objmgr.LoadBattleMastersEntry();
+
+    sLog.outString( "Loading Waypoints..." );
+    WaypointMgr.Load();
 
     ///- Handle outdated emails (delete/return)
     sLog.outString( "Returning old mails..." );

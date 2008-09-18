@@ -37,6 +37,7 @@ alter table creature_movement add `wpguid` int(11) default '0';
 #include "Creature.h"
 #include "DestinationHolderImp.h"
 #include "CreatureAI.h"
+#include "WaypointManager.h"
 
 #include <cassert>
 
@@ -44,129 +45,36 @@ alter table creature_movement add `wpguid` int(11) default '0';
 void
 WaypointMovementGenerator<Creature>::LoadPath(Creature &c)
 {
-    QueryResult *result = NULL;
-    sLog.outDebug("DEBUG: WaypointMovementGenerator::_load: GUID - %d", c.GetGUIDLow());
-    // Identify by GUID
-    result = WorldDatabase.PQuery("SELECT position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, text1, text2, text3, text4, text5 FROM creature_movement WHERE id = '%u' ORDER BY point", c.GetDBTableGUIDLow());
-    /*
-    if( result ) {
-    sLog.outDebug("DEBUG: Number of hits: %d", result->GetRowCount());
-    } else {
-    sLog.outDebug("DEBUG: Nothing found");
-    }
-    */
+    sLog.outDetail("LoadPath: loading waypoint path for creature %d,%d", c.GetGUIDLow(), c.GetDBTableGUIDLow());
 
-    if( result )
+    i_path = WaypointMgr.GetPath(c.GetDBTableGUIDLow());
+    if(!i_path)
     {
-        unsigned int count = 0;
-        const unsigned int sz = result->GetRowCount();
-        i_path.Resize( sz );
-        i_delays.resize( sz );
-        i_wpBehaviour.resize( sz );
-
-        do
-        {
-            //sLog.outDebug("DEBUG: _load");
-            Field *fields = result->Fetch();
-            i_path[count].x         = fields[0].GetFloat();
-            i_path[count].y         = fields[1].GetFloat();
-            i_path[count].z         = fields[2].GetFloat();
-            float orientation       = fields[3].GetFloat();
-            uint32 model1           = fields[4].GetUInt32();
-            uint32 model2           = fields[5].GetUInt32();
-            i_delays[count]         = fields[6].GetUInt16();
-            uint32 emote            = fields[7].GetUInt32();
-            uint32 spell            = fields[8].GetUInt32();
-            std::string text1       = fields[9].GetCppString();
-            std::string text2       = fields[10].GetCppString();
-            std::string text3       = fields[11].GetCppString();
-            std::string text4       = fields[12].GetCppString();
-            std::string text5       = fields[13].GetCppString();
-
-            if( (emote != 0) || (spell != 0)
-                || !text1.empty() || !text2.empty() || !text3.empty() || !text4.empty() || !text5.empty()
-                || (model1 != 0)  || (model2 != 0) || (orientation != 100))
-            {
-                WaypointBehavior *tmpWPB = new WaypointBehavior;
-
-                // sLog.outDebug("DEBUG: _load  ---  Adding WaypointBehavior");
-
-                tmpWPB->text[0] = text1;
-                tmpWPB->text[1] = text2;
-                tmpWPB->text[2] = text3;
-                tmpWPB->text[3] = text4;
-                tmpWPB->text[4] = text5;
-                tmpWPB->orientation = orientation;
-                tmpWPB->emote = emote;
-                tmpWPB->spell = spell;
-                tmpWPB->model1 = model1;
-                tmpWPB->model2 = model2;
-                tmpWPB->HasDone = false;
-                i_wpBehaviour[count] = tmpWPB;
-            }
-            else
-            {
-                i_wpBehaviour[count] = NULL;
-            }
-
-            if(!MaNGOS::IsValidMapCoord(i_path[count].x,i_path[count].y,i_path[count].z,orientation))
-            {
-                sLog.outErrorDb("ERROR: Creature (guidlow %d,entry %d) have invalid coordinates in his waypoint %d (X: %d, Y: %d).",
-                    c.GetGUIDLow(),c.GetEntry(),count,i_path[count].x,i_path[count].y
-                    );
-
-                // prevent invalid coordinates using
-                MaNGOS::NormalizeMapCoord(i_path[count].x);
-                MaNGOS::NormalizeMapCoord(i_path[count].y);
-                i_path[count].z = MapManager::Instance ().GetBaseMap(c.GetMapId())->GetHeight(i_path[count].x,i_path[count].y, i_path[count].z);
-            }
-            // to prevent a misbehaviour inside "update"
-            // update is alway called with the next wp - but the wpSys needs the current
-            // so when the routine is called the first time, wpSys gets the last waypoint
-            // and this prevents the system from performing text/emote, etc
-            if( count == (sz-1) )
-            {
-                if( i_wpBehaviour[count] != NULL )
-                {
-                    i_wpBehaviour[count]->HasDone = true;
-                }
-            }
-            //if( i_delays[count] < 30 /* millisecond */ )
-            //    i_delays[count] = (rand() % 5000);
-            ++count;
-
-        } while( result->NextRow() );
-
-        delete result;
-
-        assert( sz == count );
+        sLog.outErrorDb("WaypointMovementGenerator::LoadPath: creature %s(%d) doesn't have waypoint path", c.GetName(), c.GetDBTableGUIDLow());
+        return;
     }
+
+    uint32 node_count = i_path->size();
+    i_hasDone.resize(node_count);
+    for(uint32 i = 0; i < node_count-1; i++)
+        i_hasDone[i] = false;
+
+    // to prevent a misbehaviour inside "update"
+    // update is always called with the next wp - but the wpSys needs the current
+    // so when the routine is called the first time, wpSys gets the last waypoint
+    // and this prevents the system from performing text/emote, etc
+    i_hasDone[node_count - 1] = true;
 }
 
 void
 WaypointMovementGenerator<Creature>::ClearWaypoints()
 {
-    for (std::vector<WaypointBehavior*>::iterator itr = i_wpBehaviour.begin(); itr != i_wpBehaviour.end(); ++itr)
-        delete (*itr);
-    i_wpBehaviour.clear();
+    i_path = NULL;
 }
 
 void
 WaypointMovementGenerator<Creature>::Initialize()
 {
-    QueryResult *result = WorldDatabase.Query("SELECT distinct(id) as uniqueid FROM creature_movement");
-
-    if( result )
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-            si_waypointHolders.insert( fields[0].GetUInt32() );
-        }
-        while( result->NextRow() );
-
-        delete result;
-    }
 }
 
 bool
@@ -177,15 +85,18 @@ WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint32 &di
 
     // Waypoint movement can be switched on/off
     // This is quite handy for escort quests and other stuff
-
     if(creature.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED | UNIT_STAT_DISTRACTED))
         return true;
 
-    // prevent crash at empty waypoint path.
-    if(i_path.Empty())
-    {
+    // prevent a crash at empty waypoint path.
+    if(!i_path || i_path->empty())
         return true;
-    }
+
+    // i_path was modified by chat commands for example
+    if(i_path->size() != i_hasDone.size())
+        i_hasDone.resize(i_path->size());
+    if(i_currentNode >= i_path->size())
+        i_currentNode = 0;
 
     CreatureTraveller traveller(creature);
 
@@ -199,9 +110,8 @@ WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint32 &di
         {
             SetStopedByPlayer(false);
             // Now we re-set destination to same node and start travel
-            assert( i_currentNode < i_path.Size() );
             creature.addUnitState(UNIT_STAT_ROAMING);
-            const Path::PathNode &node(i_path(i_currentNode));
+            const WaypointNode &node = i_path->at(i_currentNode);
             i_destinationHolder.SetDestination(traveller, node.x, node.y, node.z);
             i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
         }
@@ -217,88 +127,66 @@ WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint32 &di
         return true;    // Abort here this update
     }
 
-    if( creature.IsStopped() )
+    if( creature.IsStopped())
     {
-        uint32 wpB = i_currentNode > 0 ? i_currentNode-1 : i_wpBehaviour.size()-1;
+        uint32 idx = i_currentNode > 0 ? i_currentNode-1 : i_path->size()-1;
 
-        if( i_wpBehaviour[wpB] != NULL )
+        if (!i_hasDone[idx])
         {
-            struct WaypointBehavior *tmpBehavior = i_wpBehaviour[wpB];
+            if (i_path->at(idx).orientation !=100)
+                creature.SetOrientation(i_path->at(idx).orientation);
 
-            if (!tmpBehavior->HasDone)
+            if(WaypointBehavior *behavior = i_path->at(idx).behavior)
             {
-                if(tmpBehavior->emote != 0)
+                if(behavior->emote != 0)
+                    creature.SetUInt32Value(UNIT_NPC_EMOTESTATE,behavior->emote);
+                if(behavior->spell != 0)
+                    creature.CastSpell(&creature,behavior->spell, false);
+                if(behavior->model1 != 0)
+                    creature.SetDisplayId(behavior->model1);
+                if(!behavior->text[0].empty())
                 {
-                    creature.SetUInt32Value(UNIT_NPC_EMOTESTATE,tmpBehavior->emote);
-                }
-                //sLog.outDebug("DEBUG: tmpBehavior->text[0] TEST");
-                if(!tmpBehavior->text[0].empty())
-                {
-                    //sLog.outDebug("DEBUG: tmpBehavior->text[0] != \"\"");
                     // Only one text is set
-                    if( tmpBehavior->text[1].empty() )
-                    {
-                        //sLog.outDebug("DEBUG: tmpBehavior->text[1] == NULL");
-                        creature.Say(tmpBehavior->text[0].c_str(), 0, 0);
-                    }
-                    else
+                    if( !behavior->text[1].empty() )
                     {
                         // Select one from max 5 texts (0 and 1 laready checked)
                         int i = 2;
                         for( ; i < 5; ++i )
-                            if( tmpBehavior->text[i].empty() )
+                            if( behavior->text[i].empty() )
                                 break;
 
-                        //sLog.outDebug("DEBUG: tmpBehavior->text[i] == \"\": %d", i);
-                        //sLog.outDebug("DEBUG: rand() % (i): %d", rand() % (i));
+                        creature.Say(behavior->text[rand() % i].c_str(), 0, 0);
 
-                        creature.Say(tmpBehavior->text[rand() % i].c_str(), 0, 0);
                     }
+                    else
+                        creature.Say(behavior->text[0].c_str(), 0, 0);
                 }
-                if(tmpBehavior->spell != 0)
-                {
-                    //sLog.outDebug("DEBUG: wpSys - spell");
-                    creature.CastSpell(&creature,tmpBehavior->spell, false);
-                }
-                if (tmpBehavior->orientation !=100)
-                {
-                    //sLog.outDebug("DEBUG: wpSys - orientation");
-                    creature.SetOrientation(tmpBehavior->orientation);
-                }
-                if(tmpBehavior->model1 != 0)
-                {
-                    //sLog.outDebug("DEBUG: wpSys - model1");
-                    creature.SetDisplayId(tmpBehavior->model1);
-                }
-                tmpBehavior->HasDone = true;
+
+                i_hasDone[idx] = true;
                 MovementInform(creature);
-            }                                               // HasDone == false
-        }                                                   // wpBehaviour found
+            }                                               // wpBehaviour found
+        }                                                   // HasDone == false
     }                                                       // i_creature.IsStopped()
 
     if( i_nextMoveTime.Passed() ) // This is at the end of waypoint segment or has been stopped by player
     {
         if( creature.IsStopped() ) // If stopped then begin a new move segment
         {
-            assert( i_currentNode < i_path.Size() );
             creature.addUnitState(UNIT_STAT_ROAMING);
-            const Path::PathNode &node(i_path(i_currentNode));
+            const WaypointNode &node = i_path->at(i_currentNode);
             i_destinationHolder.SetDestination(traveller, node.x, node.y, node.z);
             i_nextMoveTime.Reset(i_destinationHolder.GetTotalTravelTime());
-            uint32 wpB = i_currentNode > 0 ? i_currentNode-1 : i_wpBehaviour.size()-1;
+            uint32 idx = i_currentNode > 0 ? i_currentNode-1 : i_path->size()-1;
 
-            if( i_wpBehaviour[wpB] != NULL )
+            if (i_path->at(idx).orientation !=100)
+                creature.SetOrientation(i_path->at(idx).orientation);
+
+            if(WaypointBehavior *behavior = i_path->at(idx).behavior )
             {
-                struct WaypointBehavior *tmpBehavior = i_wpBehaviour[wpB];
-                tmpBehavior->HasDone = false;
-                if(tmpBehavior->model2 != 0)
-                {
-                    creature.SetDisplayId(tmpBehavior->model2);
-                }
-                if (tmpBehavior->orientation !=100)
-                {
-                    creature.SetOrientation(tmpBehavior->orientation);
-                }
+                i_hasDone[idx] = false;
+                if(behavior->model2 != 0)
+                    creature.SetDisplayId(behavior->model2);
+
                 creature.SetUInt32Value(UNIT_NPC_EMOTESTATE, 0);
             }
         }
@@ -306,9 +194,9 @@ WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint32 &di
         {
             creature.StopMoving();
             SetStopedByPlayer(false);
-            i_nextMoveTime.Reset(i_delays[i_currentNode]);
+            i_nextMoveTime.Reset(i_path->at(i_currentNode).delay);
             ++i_currentNode;
-            if( i_currentNode >= i_path.Size() )
+            if( i_currentNode >= i_path->size() )
                 i_currentNode = 0;
         }
     }
@@ -320,8 +208,6 @@ void WaypointMovementGenerator<Creature>::MovementInform(Creature &unit)
     if(unit.AI())
         unit.AI()->MovementInform(WAYPOINT_MOTION_TYPE, i_currentNode);
 }
-
-std::set<uint32> WaypointMovementGenerator<Creature>::si_waypointHolders;
 
 //----------------------------------------------------//
 void
