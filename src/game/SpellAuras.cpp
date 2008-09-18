@@ -5733,12 +5733,12 @@ void Aura::PeriodicTick()
             if(Player *modOwner = pCaster->GetSpellModOwner())
                 modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
 
-            int32 gain = pCaster->SpellHealingBonus(spellProto, uint32(new_damage * multiplier), DOT, pCaster);
+            uint32 heal = pCaster->SpellHealingBonus(spellProto, uint32(new_damage * multiplier), DOT, pCaster);
 
-            gain = pCaster->ModifyHealth(gain);
-            pCaster->getHostilRefManager().threatAssist(pCaster, float(gain) * 0.5f, spellProto);
+            int32 gain = pCaster->ModifyHealth(heal);
+            pCaster->getHostilRefManager().threatAssist(pCaster, gain * 0.5f, spellProto);
 
-            pCaster->SendHealSpellLog(pCaster, spellProto->Id, uint32(new_damage * multiplier));
+            pCaster->SendHealSpellLog(pCaster, spellProto->Id, heal);
             break;
         }
         case SPELL_AURA_PERIODIC_HEAL:
