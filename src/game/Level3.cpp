@@ -5347,7 +5347,7 @@ bool ChatHandler::HandleInstanceUnbindCommand(const char* args)
         return false;
 
     std::string cmd = args;
-    if(args == "all")
+    if(cmd == "all")
     {
         Player* player = getSelectedPlayer();
         if (!player) player = m_session->GetPlayer();
