@@ -179,7 +179,7 @@ void WaypointManager::_addNode(uint32 id, uint32 point, float x, float y, float 
     WorldDatabase.PExecuteLog("INSERT INTO creature_movement (id,point,position_x,position_y,position_z,orientation,wpguid,waittime) VALUES ('%u','%u','%f', '%f', '%f', '%f', '%d', '%d')", id, point, x, y, z, o, wpGuid, delay);
     WaypointPathMap::iterator itr = m_pathMap.find(id);
     if(itr == m_pathMap.end())
-        itr = m_pathMap.insert(m_pathMap.begin(), WaypointPathMap::value_type(id, WaypointPath()));
+        itr = m_pathMap.insert(WaypointPathMap::value_type(id, WaypointPath())).first;
     itr->second.insert(itr->second.begin() + (point - 1), WaypointNode(x, y, z, o, delay, NULL));
 }
 
