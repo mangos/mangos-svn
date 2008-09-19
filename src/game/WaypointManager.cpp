@@ -75,6 +75,8 @@ void WaypointManager::Load()
             uint32 id           = fields[14].GetUInt32();
 
             WaypointPath &path  = m_pathMap[id];
+            // the cleanup queries make sure the following is true
+            assert(point >= 1 && point <= path.size());
             WaypointNode &node  = path[point-1];
 
             node.x              = fields[0].GetFloat();
