@@ -65,6 +65,11 @@ enum AreaFlags
     AREA_FLAG_LOWLEVEL         = 0x00100000                 // used for some starting areas with area_level <=15
 };
 
+enum FactionTemplateFlags
+{
+    FACTION_TEMPLATE_FLAG_CONTESTED_GUARD   =   0x00001000, // faction will attack players that were involved in PvP combats
+};
+
 struct AreaTableEntry
 {
     uint32    ID;                                           // 0
@@ -249,7 +254,7 @@ struct FactionTemplateEntry
 {
     uint32      ID;                                         // 0
     uint32      faction;                                    // 1
-                                                            // 2 not used
+    uint32      factionFlags;                               // 2 specific flags for that faction
     uint32      ourMask;                                    // 3 if mask set (see FactionMasks) then faction included in masked team
     uint32      friendlyMask;                               // 4 if mask set (see FactionMasks) then faction friendly to masked team
     uint32      hostileMask;                                // 5 if mask set (see FactionMasks) then faction hostile to masked team
@@ -282,6 +287,7 @@ struct FactionTemplateEntry
     }
     bool IsHostileToPlayers() const { return hostileMask & FACTION_MASK_PLAYER; }
     bool IsNeutralToAll() const { return hostileMask == 0 && friendlyMask == 0 && enemyFaction1==0 && enemyFaction2==0 && enemyFaction3==0 && enemyFaction4==0; }
+    bool IsContestedGuardFaction() const { return factionFlags & FACTION_TEMPLATE_FLAG_CONTESTED_GUARD;}
 };
 
 struct GemPropertiesEntry

@@ -540,8 +540,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
         SetInCombatWith(pVictim);
         pVictim->SetInCombatWith(this);
 
-        if(pVictim->isCharmedOwnedByPlayerOrPlayer())
-            addUnitState(UNIT_STAT_ATTACK_PLAYER);
+        if(Player* attackedPlayer = pVictim->GetCharmerOrOwnerPlayerOrPlayerItself())
+            SetContestedPvP(attackedPlayer);
     }
 
     // Rage from Damage made (only from direct weapon damage)
@@ -6638,6 +6638,9 @@ bool Unit::IsHostileTo(Unit const* unit) const
     if(!tester_faction || !target_faction)
         return false;
 
+    if(target->isAttackingPlayer() && tester->IsContestedGuard())
+        return true;
+
     // PvC forced reaction and reputation case
     if(tester->GetTypeId()==TYPEID_PLAYER)
     {
@@ -6742,6 +6745,9 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     FactionTemplateEntry const*tester_faction = tester->getFactionTemplateEntry();
     FactionTemplateEntry const*target_faction = target->getFactionTemplateEntry();
     if(!tester_faction || !target_faction)
+        return false;
+
+    if(target->isAttackingPlayer() && tester->IsContestedGuard())
         return false;
 
     // PvC forced reaction and reputation case
@@ -8324,7 +8330,9 @@ void Unit::ClearInCombat()
     if(isCharmed() || (GetTypeId()!=TYPEID_PLAYER && ((Creature*)this)->isPet()))
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 
-    clearUnitState(UNIT_STAT_ATTACK_PLAYER);
+    // Player's state will be cleared in Player::UpdateContestedPvP
+    if(GetTypeId()!=TYPEID_PLAYER)
+        clearUnitState(UNIT_STAT_ATTACK_PLAYER);
 }
 
 bool Unit::isTargetableForAttack() const
@@ -10696,6 +10704,29 @@ Aura* Unit::GetDummyAura( uint32 spell_id ) const
 bool Unit::IsUnderLastManaUseEffect() const
 {
     return  getMSTimeDiff(m_lastManaUse,getMSTime()) < 5000;
+}
+
+void Unit::SetContestedPvP(Player *attackedPlayer)
+{
+    Player* player = GetCharmerOrOwnerPlayerOrPlayerItself();
+    
+    if(!player || attackedPlayer && (attackedPlayer == player || player->duel && player->duel->opponent == attackedPlayer))
+        return;
+
+    player->SetContestedPvPTimer(30000);
+    if(!player->hasUnitState(UNIT_STAT_ATTACK_PLAYER))
+    {
+        player->addUnitState(UNIT_STAT_ATTACK_PLAYER);
+        player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP);
+        // call MoveInLineOfSight for nearby contested guards
+        SetVisibility(GetVisibility());
+    }
+    if(!hasUnitState(UNIT_STAT_ATTACK_PLAYER))
+    {
+        addUnitState(UNIT_STAT_ATTACK_PLAYER);
+        // call MoveInLineOfSight for nearby contested guards
+        SetVisibility(GetVisibility());
+    }
 }
 
 void Unit::AddPetAura(PetAura const* petSpell)

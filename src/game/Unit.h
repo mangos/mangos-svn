@@ -32,6 +32,7 @@
 #include "FollowerRefManager.h"
 #include "Utilities/EventProcessor.h"
 #include "MotionMaster.h"
+#include "Database/DBCStructure.h"
 #include <list>
 
 enum SpellInterruptFlags
@@ -40,7 +41,7 @@ enum SpellInterruptFlags
     SPELL_INTERRUPT_FLAG_DAMAGE       = 0x02,
     SPELL_INTERRUPT_FLAG_INTERRUPT    = 0x04,
     SPELL_INTERRUPT_FLAG_AUTOATTACK   = 0x08,
-    //SPELL_INTERRUPT_FLAG_TURNING      = 0x10              // unknown, not turning
+    //SPELL_INTERRUPT_FLAG_TURNING      = 0x10              // not turning - maybe _complete_ interrupt on direct damage?
 };
 
 enum SpellChannelInterruptFlags
@@ -790,6 +791,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool IsHostileToPlayers() const;
         bool IsFriendlyTo(Unit const* unit) const;
         bool IsNeutralToAll() const;
+        bool IsContestedGuard() const { return getFactionTemplateEntry()?getFactionTemplateEntry()->IsContestedGuardFaction():false; }
         bool IsPvP() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); }
         void SetPvP(bool state) { if(state) SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); else RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); }
         uint32 GetCreatureType() const;
@@ -1157,6 +1159,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void SetLastManaUse(uint32 spellCastTime) { m_lastManaUse = spellCastTime; }
         bool IsUnderLastManaUseEffect() const;
+
+        void SetContestedPvP(Player *attackedPlayer = NULL);
 
         void MeleeDamageBonus(Unit *pVictim, uint32 *damage, WeaponAttackType attType, SpellEntry const *spellProto = NULL);
         uint32 GetCastingTimeForBonus( SpellEntry const *spellProto, DamageEffectType damagetype, uint32 CastingTime );

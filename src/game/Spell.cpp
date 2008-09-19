@@ -164,7 +164,6 @@ bool SpellCastTargets::read ( WorldPacket * data, Unit *caster )
         m_unitTargetGUID = caster->GetGUID();
         return true;
     }
-
     // TARGET_FLAG_UNK2 is used for non-combat pets, maybe other?
     if( m_targetMask & (TARGET_FLAG_UNIT|TARGET_FLAG_UNK2) )
         if(!readGUID(*data, m_unitTargetGUID))
@@ -985,15 +984,19 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
                     unit->SetInCombatWith(m_caster);
                     m_caster->SetInCombatWith(unit);
 
-                    if(unit->isCharmedOwnedByPlayerOrPlayer())
-                        m_caster->addUnitState(UNIT_STAT_ATTACK_PLAYER);
-
+                    if(Player *attackedPlayer = unit->GetCharmerOrOwnerPlayerOrPlayerItself())
+                    {
+                        m_caster->SetContestedPvP(attackedPlayer);
+                    }
                     unit->AddThreat(m_caster, 0.0f);
                 }
             }
         }
         else
         {
+            // assisting case, healing and resurrection
+            if(unit->hasUnitState(UNIT_STAT_ATTACK_PLAYER))
+                m_caster->SetContestedPvP();
             if( unit->isInCombat() && !(m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_NO_INITIAL_AGGRO) )
             {
                 m_caster->SetInCombatState(unit->GetCombatTimer() > 0);

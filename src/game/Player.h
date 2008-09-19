@@ -379,7 +379,7 @@ enum PlayerFlags
     PLAYER_FLAGS_GHOST          = 0x00000010,
     PLAYER_FLAGS_RESTING        = 0x00000020,
     PLAYER_FLAGS_FFA_PVP        = 0x00000080,
-    PLAYER_FLAGS_UNK            = 0x00000100,               // show PvP in tooltip
+    PLAYER_FLAGS_CONTESTED_PVP  = 0x00000100,               // Player has been involved in a PvP combat and will be attacked by contested guards
     PLAYER_FLAGS_IN_PVP         = 0x00000200,
     PLAYER_FLAGS_HIDE_HELM      = 0x00000400,
     PLAYER_FLAGS_HIDE_CLOAK     = 0x00000800,
@@ -1477,6 +1477,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void UpdateAfkReport(time_t currTime);
         void UpdatePvPFlag(time_t currTime);
+        void UpdateContestedPvP(uint32 currTime);
+        void SetContestedPvPTimer(uint32 newTime) {m_contestedPvPTimer = newTime;}
 
         /** todo: -maybe move UpdateDuelFlag+DuelComplete to independent DuelHandler.. **/
         DuelInfo *duel;
@@ -2032,6 +2034,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         std::set<uint32> m_bgAfkReporter;
         uint8 m_bgAfkReportedCount;
         time_t m_bgAfkReportedTimer;
+        uint32 m_contestedPvPTimer;
 
         uint32 m_bgTeam;                                    // what side the player will be added to
 
