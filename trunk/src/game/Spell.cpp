@@ -314,7 +314,10 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
     if(m_originalCasterGUID==m_caster->GetGUID())
         m_originalCaster = m_caster;
     else
+    {
         m_originalCaster = ObjectAccessor::GetUnit(*m_caster,m_originalCasterGUID);
+        if(!m_originalCaster->IsInWorld()) m_originalCaster = NULL;
+    }
 
     for(int i=0; i <3; ++i)
         m_currentBasePoints[i] = m_spellInfo->EffectBasePoints[i];
@@ -4814,7 +4817,10 @@ void Spell::UpdatePointers()
     if(m_originalCasterGUID==m_caster->GetGUID())
         m_originalCaster = m_caster;
     else
+    {
         m_originalCaster = ObjectAccessor::GetUnit(*m_caster,m_originalCasterGUID);
+        if(!m_originalCaster->IsInWorld()) m_originalCaster = NULL;
+    }
 
     m_targets.Update(m_caster);
 }
