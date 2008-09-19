@@ -129,7 +129,7 @@ void WorldSession::SendUpdateTrade()
     data << (uint32) TRADE_SLOT_COUNT;                      // trade slots count/number?, = next field in most cases
     data << (uint32) TRADE_SLOT_COUNT;                      // trade slots count/number?, = prev field in most cases
     data << (uint32) _player->pTrader->tradeGold;           // trader gold
-    data << (uint32) 0;                                     // unknown
+    data << (uint32) 0;                                     // spell casted on lowest slot item
 
     for(uint8 i = 0; i < TRADE_SLOT_COUNT; i++)
     {

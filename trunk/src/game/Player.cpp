@@ -416,6 +416,7 @@ Player::Player (WorldSession *session): Unit()
 
     m_miniPet = 0;
     m_bgAfkReportedTimer = 0;
+    m_contestedPvPTimer = 0;
 
     m_declinedname = NULL;
 }
@@ -942,6 +943,8 @@ void Player::Update( uint32 p_time )
     time_t now = time (NULL);
 
     UpdatePvPFlag(now);
+    
+    UpdateContestedPvP(p_time);
 
     UpdateDuelFlag(now);
 
@@ -1907,7 +1910,9 @@ void Player::SetGameMaster(bool on)
         setFaction(35);
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
 
-        RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
+        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP | PLAYER_FLAGS_CONTESTED_PVP);
+        clearUnitState(UNIT_STAT_ATTACK_PLAYER);
+        m_contestedPvPTimer = 0;
 
         getHostilRefManager().setOnlineOfflineState(false);
         CombatStop();
@@ -15450,6 +15455,20 @@ void Player::UpdateAfkReport(time_t currTime)
         m_bgAfkReportedCount = 0;
         m_bgAfkReportedTimer = currTime+5*MINUTE;
     }
+}
+
+void Player::UpdateContestedPvP(uint32 diff)
+{
+    if(!m_contestedPvPTimer||isInCombat())
+        return;
+    if(m_contestedPvPTimer <= diff)
+    {
+        clearUnitState(UNIT_STAT_ATTACK_PLAYER);
+        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP);
+        m_contestedPvPTimer = 0;
+    }
+    else
+        m_contestedPvPTimer -= diff;
 }
 
 void Player::UpdatePvPFlag(time_t currTime)
