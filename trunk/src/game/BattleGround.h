@@ -350,7 +350,7 @@ class BattleGround
         void BlockMovement(Player *plr);
 
         void SendMessageToAll(char const* text);
-        void SendMessageToAll(uint32 entry);
+        void SendMessageToAll(int32 entry);
 
         /* Raid Group */
         Group *GetBgRaid(uint32 TeamID) const { return TeamID == ALLIANCE ? m_BgRaids[BG_TEAM_ALLIANCE] : m_BgRaids[BG_TEAM_HORDE]; }
@@ -409,7 +409,7 @@ class BattleGround
 
         void DoorOpen(uint32 type);
         void DoorClose(uint32 type);
-        const char *GetMangosString(uint32 entry);
+        const char *GetMangosString(int32 entry);
 
     protected:
         //this method is called, when BG cannot spawn its own spirit guide, or something is wrong, It correctly ends BattleGround

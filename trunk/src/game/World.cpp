@@ -854,7 +854,6 @@ void World::SetInitialWorldSettings()
     objmgr.PackInstances();
 
     sLog.outString( "Loading Localization strings..." );
-    objmgr.LoadMangosStringLocales();
     objmgr.LoadCreatureLocales();
     objmgr.LoadGameObjectLocales();
     objmgr.LoadItemLocales();

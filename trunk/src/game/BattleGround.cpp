@@ -1064,7 +1064,7 @@ void BattleGround::SendMessageToAll(char const* text)
     SendPacketToAll(&data);
 }
 
-void BattleGround::SendMessageToAll(uint32 entry)
+void BattleGround::SendMessageToAll(int32 entry)
 {
     char const* text = GetMangosString(entry);
     WorldPacket data;
@@ -1079,7 +1079,7 @@ void BattleGround::EndNow()
 }
 
 // Battleground messages are localized using the dbc lang, they are not client language dependent
-const char *BattleGround::GetMangosString(uint32 entry)
+const char *BattleGround::GetMangosString(int32 entry)
 {
     // FIXME: now we have different DBC locales and need localized message for each target client
     return objmgr.GetMangosStringForDBCLocale(entry);

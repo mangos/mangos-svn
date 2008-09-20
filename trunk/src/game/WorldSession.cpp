@@ -429,7 +429,7 @@ void WorldSession::SendNotification(const char *format,...)
     }
 }
 
-const char * WorldSession::GetMangosString( uint32 entry )
+const char * WorldSession::GetMangosString( int32 entry )
 {
     return objmgr.GetMangosString(entry,GetSessionDbLocaleIndex());
 }

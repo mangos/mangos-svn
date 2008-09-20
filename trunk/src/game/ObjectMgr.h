@@ -115,10 +115,8 @@ typedef HM_NAMESPACE::hash_map<uint64/*(instance,guid) pair*/,time_t> RespawnTim
 
 struct MangosStringLocale
 {
-    std::vector<std::string> Content;
+    std::vector<std::string> Content;                       // 0 -> default, i -> i-1 locale index
 };
-
-typedef std::map<uint32,std::string> MangosStringMap;
 
 typedef HM_NAMESPACE::hash_map<uint32,CreatureData> CreatureDataMap;
 typedef HM_NAMESPACE::hash_map<uint32,GameObjectData> GameObjectDataMap;
@@ -463,8 +461,8 @@ class ObjectMgr
         void LoadEventScripts();
         void LoadSpellScripts();
 
-        bool LoadMangosStrings();
-        void LoadMangosStringLocales();
+        bool LoadMangosStrings(DatabaseType& db, char const* table, bool positive_entries);
+        bool LoadMangosStrings() { return LoadMangosStrings(WorldDatabase,"mangos_string",true); }
         void LoadPetCreateSpells();
         void LoadCreatureLocales();
         void LoadCreatureTemplates();
@@ -612,25 +610,14 @@ class ObjectMgr
         GameObjectData& NewGOData(uint32 guid) { return mGameObjectDataMap[guid]; }
         void DeleteGOData(uint32 guid);
 
-        char const* GetMangosStringDefault(uint32 entry) const
-        {
-            MangosStringMap::const_iterator itr = mMangosStringMap.find(entry);
-            if(itr==mMangosStringMap.end())
-            {
-                sLog.outErrorDb("Entry %u not found in `mangos_string` table.",entry);
-                return "<error>";
-            }
-
-            return itr->second.c_str();
-        }
-        MangosStringLocale const* GetMangosStringLocale(uint32 entry) const
+        MangosStringLocale const* GetMangosStringLocale(int32 entry) const
         {
             MangosStringLocaleMap::const_iterator itr = mMangosStringLocaleMap.find(entry);
             if(itr==mMangosStringLocaleMap.end()) return NULL;
             return &itr->second;
         }
-        const char *GetMangosString(uint32 entry, int locale_idx) const;
-        const char *GetMangosStringForDBCLocale(uint32 entry) const { return GetMangosString(entry,DBCLocaleIndex); }
+        const char *GetMangosString(int32 entry, int locale_idx) const;
+        const char *GetMangosStringForDBCLocale(int32 entry) const { return GetMangosString(entry,DBCLocaleIndex); }
         void SetDBCLocaleIndex(uint32 lang) { DBCLocaleIndex = GetIndexForLocale(LocaleConstant(lang)); }
 
         void AddCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid, uint32 instance);
@@ -769,7 +756,6 @@ class ObjectMgr
         QuestLocaleMap mQuestLocaleMap;
         NpcTextLocaleMap mNpcTextLocaleMap;
         PageTextLocaleMap mPageTextLocaleMap;
-        MangosStringMap mMangosStringMap;
         MangosStringLocaleMap mMangosStringLocaleMap;
         RespawnTimes mCreatureRespawnTimes;
         RespawnTimes mGORespawnTimes;
@@ -788,3 +774,6 @@ class ObjectMgr
 
 #define objmgr MaNGOS::Singleton<ObjectMgr>::Instance()
 #endif
+
+// scripting access functions
+bool MANGOS_DLL_SPEC LoadMangosStrings(DatabaseType& db, char const* table);
