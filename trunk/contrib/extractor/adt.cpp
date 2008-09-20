@@ -25,6 +25,9 @@ Cell * cell;
 uint32 wmo_count;
 mcell *mcells;
 
+int holetab_h[4] = {0x1111, 0x2222, 0x4444, 0x8888};
+int holetab_v[4] = {0x000F, 0x00F0, 0x0F00, 0xF000};
+
 bool LoadADT(char* filename)
 {
     size_t size;
@@ -183,6 +186,15 @@ struct MapChunkHeader {
     uint32 effectId;
 };
 
+bool isHole(int holes, int i, int j)
+{
+    int testi = i/2;
+    int testj = j/4;
+    if(testi>3) testi = 3;
+    if(testj>3) testj = 3;
+	return (holes & holetab_h[testi] & holetab_v[testj])!=0;
+}
+
 inline
 void LoadMapChunk(MPQFile & mf, chunk*_chunk)
 {
@@ -226,9 +238,19 @@ void LoadMapChunk(MPQFile & mf, chunk*_chunk)
                     mf.read(&h,4);
                     float z=h+ybase;
                     if (j%2)
-                        _chunk->v8[i][j/2] = z;
+                    {
+                        if(isHole(header.holes,i,j))
+                            _chunk->v8[i][j/2] = -1000;
+                        else
+                            _chunk->v8[i][j/2] = z;
+                    }
                     else
-                        _chunk->v9[i][j/2] = z;
+                    {
+                        if(isHole(header.holes,i,j))
+                            _chunk->v9[i][j/2] = -1000;
+                        else
+                            _chunk->v9[i][j/2] = z;
+                    }
 
                     if(z>zmax)zmax=z;
                     //if(z<zmin)zmin=z;
@@ -398,7 +420,7 @@ void TransformData()
     delete mcells;
 }
 
-const char MAP_MAGIC[] = "MAP_1.03";
+const char MAP_MAGIC[] = "MAP_2.00";
 
 bool ConvertADT(char * filename,char * filename2)
 {

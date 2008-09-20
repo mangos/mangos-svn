@@ -1,13 +1,14 @@
 #ifndef _MODELCONTAINERVIEW_H
 #define _MODELCONTAINERVIEW_H
 
+#include <G3D/G3DAll.h>
+#include <G3D/System.h>
 #include "ModelContainer.h"
 #include "DebugCmdLogger.h"
 #include "vmapmanager.h"
 
 
 
-#include <G3DAll.h>
 
 namespace VMAP
 {
@@ -17,13 +18,23 @@ namespace VMAP
 	//==========================================
 
 	class ModelContainerView : 
-		public G3D::GApplet
+		public G3D::GApp
 	{
 	private:
+        SkyRef              iSky;
+        LightingRef         iLighting;
+        SkyParameters       iSkyParameters;
+
 		VARAreaRef iVARAreaRef;
 		Table<std::string , VAR*> iTriVarTable;
 		Table<std::string , Array<int> > iTriIndexTable;
-		//Array<int> iLineIndexArray;
+
+		VARAreaRef iVARAreaRef2;
+        VAR iTriDebugVar;
+        Array<Vector3> iVTriDebugArray;
+        Array<int> iTriDebugArray;
+
+        //Array<int> iLineIndexArray;
 
 		GApp* i_App;
 		CommandFileRW iCommandFileRW;
@@ -43,16 +54,17 @@ namespace VMAP
 		Vector3 convertPositionToMangosRep(float x, float y, float z) const;
 
 	public:
+		ModelContainerView(const G3D::GApp::Settings& settings);
 
-		ModelContainerView(GApp* pApp);
 		~ModelContainerView(void);
 
 		void addModelContainer(const std::string& pName,const ModelContainer* pModelContainer);
 		void removeModelContainer(const std::string& pName, const ModelContainer* pModelContainer);
 		void setViewPosition(const Vector3& pPosition);
 
-		void doGraphics();
-		void init();
+		void onGraphics(RenderDevice* rd, Array<PosedModelRef> &posed3D, Array<PosedModel2DRef> &posed2D);
+        virtual void onInit();
+        void init();
 		void cleanup();
 		void onUserInput(UserInput* ui);
 
@@ -72,34 +84,6 @@ namespace VMAP
 
 	//==========================================
 	//==========================================
-
-	class ViewApp :  public G3D::GApp {
-	private:
-		ModelContainerView *iView;
-	public:
-		ViewApp(const GAppSettings& settings): GApp(settings) {}; 
-
-		static void ViewApp::startup() {
-			GAppSettings settings;
-			settings.window.width = 1024;
-			settings.window.height = 768;
-
-			ViewApp* app = new ViewApp(settings);
-			app->setDebugMode(true); 
-			app->debugController.setActive(true);
-			app->iView = new ModelContainerView(app);
-			app->run();
-		}
-
-		void ViewApp::main() { iView->run(); }
-	};
-
-	//==========================================
-
-	//==========================================
-
-
-
 }
 
 #endif

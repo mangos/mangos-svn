@@ -28,8 +28,10 @@ namespace VMAP
 
     VMapManager::VMapManager()
     {
+#ifdef _VMAP_LOG_DEBUG
         iCommandLogger.setFileName("vmapcmd.log");
         iCommandLogger.setResetFile();
+#endif
     }
 
     //=========================================================
@@ -208,9 +210,11 @@ namespace VMAP
             {
                 result = VMAP_LOAD_RESULT_OK;
                 // just for debugging
+#ifdef _VMAP_LOG_DEBUG
                 Command c = Command();
                 c.fillLoadTileCmd(x, y, pMapId);
                 iCommandLogger.appendCmd(c);
+#endif
             }
             else
             {
@@ -277,8 +281,26 @@ namespace VMAP
         FILE* df = fopen(filenameBuffer, "rb");
         if(df)
         {
+            char lineBuffer[FILENAMEBUFFER_SIZE];
+            if (fgets(lineBuffer, FILENAMEBUFFER_SIZE-1, df) != 0)
+            {
+                std::string name = std::string(lineBuffer);
+                chomp(name);
+                if(name.length() >1)
+                {
+                    sprintf(filenameBuffer, "%s%s", pBasePath.c_str(), name.c_str());
+                    FILE* df2 = fopen(filenameBuffer, "rb");
+                    if(df2)
+                    {
+                        char magic[8];
+                        fread(magic,1,8,df2);
+                        if(!strncmp(VMAP_MAGIC,magic,8))
+                            result = true;
+                        fclose(df2);
+                    }
+                }
+            }
             fclose(df);
-            result = true;
         }
         delete[] filenameBuffer;
         return result;
@@ -312,9 +334,11 @@ namespace VMAP
     {
         _unloadMap(pMapId, x, y);
 
+#ifdef _VMAP_LOG_DEBUG
         Command c = Command();
         c.fillUnloadTileCmd(pMapId, x,y);
         iCommandLogger.appendCmd(c);
+#endif
     }
 
     //=========================================================
@@ -357,9 +381,11 @@ namespace VMAP
                 iInstanceMapTrees.remove(pMapId);
                 delete instanceTree;
             }
+#ifdef _VMAP_LOG_DEBUG
             Command c = Command();
             c.fillUnloadTileCmd(pMapId);
             iCommandLogger.appendCmd(c);
+#endif
         }
     }
     //==========================================================
@@ -375,10 +401,12 @@ namespace VMAP
             {
                 MapTree* mapTree = iInstanceMapTrees.get(pMapId);
                 result = mapTree->isInLineOfSight(pos1, pos2);
+#ifdef _VMAP_LOG_DEBUG
                 Command c = Command();
                                                             // save the orig vectors
                 c.fillTestVisCmd(pMapId,Vector3(x1,y1,z1),Vector3(x2,y2,z2),result);
                 iCommandLogger.appendCmd(c);
+#endif
             }
         }
         return(result);
@@ -407,9 +435,11 @@ namespace VMAP
                 rx = resultPos.x;
                 ry = resultPos.y;
                 rz = resultPos.z;
+#ifdef _VMAP_LOG_DEBUG
                 Command c = Command();
                 c.fillTestObjectHitCmd(pMapId, pos1, pos2, resultPos, result);
                 iCommandLogger.appendCmd(c);
+#endif
             }
         }
         return result;
@@ -433,9 +463,11 @@ namespace VMAP
             {
                 height = VMAP_INVALID_HEIGHT_VALUE;         //no height
             }
+#ifdef _VMAP_LOG_DEBUG
             Command c = Command();
             c.fillTestHeightCmd(pMapId,Vector3(x,y,z),height);
             iCommandLogger.appendCmd(c);
+#endif
         }
         return(height);
     }
@@ -450,23 +482,30 @@ namespace VMAP
         std::string cmd = std::string(pCommand);
         if(cmd == "startlog")
         {
+#ifdef _VMAP_LOG_DEBUG
+
             iCommandLogger.enableWriting(true);
+#endif
             result = true;
         }
         else if(cmd == "stoplog")
         {
+#ifdef _VMAP_LOG_DEBUG
             iCommandLogger.appendCmd(Command());            // Write stop command
             iCommandLogger.enableWriting(false);
+#endif
             result = true;
         }
         else if(cmd.find_first_of("pos ") == 0)
         {
             float x,y,z;
             sscanf(pCommand, "pos %f,%f,%f",&x,&y,&z);
+#ifdef _VMAP_LOG_DEBUG
             Command c = Command();
             c.fillSetPosCmd(convertPositionToInternalRep(x,y,z));
             iCommandLogger.appendCmd(c);
             iCommandLogger.enableWriting(false);
+#endif
             result = true;
         }
         return result;
@@ -511,7 +550,6 @@ namespace VMAP
     #endif
     #endif
 
-    typedef AABSPTree<ModelContainer*>::RayIntersectionIterator IT;
     //=========================================================
     /**
     return dist to hit or inf() if no hit
@@ -519,41 +557,22 @@ namespace VMAP
 
     float MapTree::getIntersectionTime(const Ray& pRay, float pMaxDist, bool pStopAtFirstHit)
     {
-        double  firstDistance = inf();
-
-        const IT end = iTree->endRayIntersection();
-        IT obj = iTree->beginRayIntersection(pRay, pMaxDist);
-
-        for ( ;obj != end; ++obj)                           // (preincrement is *much* faster than postincrement!)
+        float firstDistance = inf();
+        IntersectionCallBack<ModelContainer> intersectionCallBack;
+        float t = pMaxDist;
+        iTree->intersectRay(pRay, intersectionCallBack, t, pStopAtFirstHit, false);
+#ifdef _DEBUG_VMAPS
         {
-            /*
-            Call your accurate intersection test here.  It is guaranteed
-            that the ray hits the bounding box of obj.  (*obj) has type T,
-            so you can call methods directly using the "->" operator.
-            */
-            ModelContainer *model = (ModelContainer *) (*obj);
-
-            float t = model->getIntersectionTime(pRay, pStopAtFirstHit, pMaxDist);
-
-            // just for visual debugging with an external debug class
-            #ifdef _DEBUG_VMAPS
-            if(gCount3 == gCount1)
+            if(t < pMaxDist)
             {
-                AABox testBox;
-                testBox = model->getAABoxBounds();
-                gBoxArray.append(testBox);
+                myfound = true;
+                p4 = pRay.origin + pRay.direction*t;
             }
-            ++gCount3;
-            #endif
-            if(t > 0 && t < inf())
-            {
-                obj.markBreakNode();
-                if(firstDistance > t && pMaxDist >= t)
-                {
-                    firstDistance = t;
-                    if(pStopAtFirstHit) break;
-                }
-            }
+        }
+#endif
+        if(t > 0 && t < inf() && pMaxDist > t)
+        {
+            firstDistance = t;
         }
         return firstDistance;
     }
@@ -565,7 +584,8 @@ namespace VMAP
         float maxDist = abs((pos2 - pos1).magnitude());
                                                             // direction with length of 1
         Ray ray = Ray::fromOriginAndDirection(pos1, (pos2 - pos1)/maxDist);
-        if(getIntersectionTime(ray, maxDist, true) < inf())
+        float resultDist = getIntersectionTime(ray, maxDist, true);
+        if(resultDist < maxDist)
         {
             result = false;
         }
@@ -584,7 +604,7 @@ namespace VMAP
         Vector3 dir = (pPos2 - pPos1)/maxDist;              // direction with length of 1
         Ray ray = Ray::fromOriginAndDirection(pPos1, dir);
         float dist = getIntersectionTime(ray, maxDist, false);
-        if(dist < inf())
+        if(dist < maxDist)
         {
             pResultHitPos = pPos1 + dir * dist;
             if(pModifyDist < 0)
@@ -630,6 +650,12 @@ namespace VMAP
 
     //=========================================================
 
+    bool MapTree::PrepareTree()
+    {
+        iTree->balance();
+        return true;
+    }
+
     bool MapTree::loadMap(const std::string& pDirFileName, unsigned int pMapTileIdent)
     {
         bool result = true;
@@ -662,7 +688,7 @@ namespace VMAP
                             result = mc->readFile(fname.c_str());
                             if(result)
                             {
-                                addModelConatiner(name, mc);
+                                addModelContainer(name, mc);
                                 newModelLoaded = true;
                             }
                         }
@@ -743,7 +769,7 @@ namespace VMAP
     //=========================================================
     //=========================================================
 
-    void MapTree::addModelConatiner(const std::string& pName, ManagedModelContainer *pMc)
+    void MapTree::addModelContainer(const std::string& pName, ManagedModelContainer *pMc)
     {
         iLoadedModelContainer.set(pName, pMc);
         iTree->insert(pMc);

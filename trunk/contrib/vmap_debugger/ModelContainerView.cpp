@@ -6,8 +6,8 @@ namespace VMAP
     char* gLogFile = NULL;
     //==========================================
 
-    ModelContainerView::ModelContainerView(GApp* pApp) :  GApplet(pApp) {
-        i_App = pApp;
+    ModelContainerView::ModelContainerView(const G3D::GApp::Settings& settings) : GApp(settings) {
+        i_App = this;
 
         iCommandFileRW.setFileName(gLogFile);
         iCurrCmdIndex = 0;
@@ -15,6 +15,7 @@ namespace VMAP
         iDrawLine = false;
 
         iVARAreaRef = VARArea::create(1024*1024*60);
+        iVARAreaRef2 = VARArea::create(1024*1024*2);
         iInstanceId = -1;
         iPosSent = false;
 
@@ -124,25 +125,54 @@ namespace VMAP
 
     Vector3 p1,p2,p3,p4,p5,p6,p7;
     Array<AABox>gBoxArray;
+    Array<G3D::Triangle>gTriArray;
     int gCount1 = 0, gCount2 = 0 , gCount3 = 0, gCount4 = 0;
     bool myfound=false;
 
     //===================================================
 
-    void ModelContainerView::doGraphics() {
-        i_App->renderDevice->clear();
-        RenderDevice *rd = i_App->renderDevice;
+    void ModelContainerView::onInit() {
+        // Called before the application loop beings.  Load data here and
+        // not in the constructor so that common exceptions will be
+        // automatically caught.
+        iSky = Sky::fromFile("../../data/sky/");
 
-        rd->setProjectionAndCameraMatrix(i_App->debugCamera);
+        iSkyParameters = SkyParameters(G3D::toSeconds(11, 00, 00, AM));
+        iLighting = Lighting::fromSky(iSky, iSkyParameters, Color3::white());
 
-        LightingParameters lighting(GameTime(toSeconds(10, 00, AM)));
-        //i_SkyRef->render(rd,lighting);
-        rd->setAmbientLightColor(Color4(Color3::blue()));
+        // This simple demo has no shadowing, so make all lights unshadowed
+        iLighting->lightArray.append(iLighting->shadowedLightArray);
+        iLighting->shadowedLightArray.clear();
+
+        // Example debug GUI:
+        //debugPane->addCheckBox("Use explicit checking", &explicitCheck);
+        debugWindow->setVisible(true);
+
+        toneMap->setEnabled(false);
+    }
+
+    void ModelContainerView::onGraphics(RenderDevice* rd, Array<PosedModelRef> &posed3D, Array<PosedModel2DRef> &posed2D) {
+        Array<PosedModel::Ref>        opaque, transparent;
+        LightingRef   localLighting = toneMap->prepareLighting(iLighting);
+        SkyParameters localSky      = toneMap->prepareSkyParameters(iSkyParameters);
+
+
+        toneMap->beginFrame(rd);
+        rd->setProjectionAndCameraMatrix(defaultCamera);
+
+        rd->setColorClearValue(Color3::black());
+        rd->clear();
+        //iSky->render(rd, localSky);
+
+        // Setup lighting
         rd->enableLighting();
+        //rd->setLight(0, localLighting->lightArray[0]);
+        //rd->setAmbientLightColor(localLighting->ambientAverage());
 
-        GLight light =GLight::directional(i_App->debugController.getPosition() + i_App->debugController.getLookVector()*2,Color3::white());
+        GLight light =GLight::directional(defaultController.pointer()->position() + defaultController.pointer()->lookVector()*2,Color3::white());
         rd->setLight(0,light);
 
+        rd->setColor(Color3::blue());
 
         Array<std::string > keys = iTriVarTable.getKeys();
         Array<std::string>::ConstIterator i = keys.begin();
@@ -156,24 +186,55 @@ namespace VMAP
             rd->endIndexedPrimitives();
             ++i;
         }
-        i_App->renderDevice->disableLighting();
-
         for(int i=0; i<gBoxArray.size(); ++i) {
             AABox b = gBoxArray[i];
-            Draw::box(b,rd,Color3::red());
+            Draw::box(b,rd,Color4(Color3::red(),0.9f));
         }
-
+        //-------
+        //triangles
+        {
+            if(iTriDebugArray.size() > 0)
+            {
+                rd->setColor(Color3::red());
+                rd->beginIndexedPrimitives();
+                rd->setVertexArray(iTriDebugVar);
+                rd->sendIndices(RenderDevice::LINES, iTriDebugArray);
+                rd->endIndexedPrimitives();
+            }
+        }
+        //--------
         if(iDrawLine) {
             Draw::lineSegment(LineSegment::fromTwoPoints(iPos1, iPos2), rd, iColor, 3);
 
             if(myfound) {
-                Draw::lineSegment(LineSegment::fromTwoPoints(p1, p2), rd, iColor, 3);
-                Draw::lineSegment(LineSegment::fromTwoPoints(p2, p3), rd, iColor, 3);
-                Draw::lineSegment(LineSegment::fromTwoPoints(p3, p1), rd, iColor, 3);
+                //Draw::lineSegment(LineSegment::fromTwoPoints(p1, p2), rd, iColor, 3);
+                //Draw::lineSegment(LineSegment::fromTwoPoints(p2, p3), rd, iColor, 3);
+                //Draw::lineSegment(LineSegment::fromTwoPoints(p3, p1), rd, iColor, 3);
                 Draw::sphere(Sphere(p4,0.5),rd, iColor);
-                Draw::sphere(Sphere(p5,0.5),rd, Color3::green());
+                //Draw::sphere(Sphere(p5,0.5),rd, Color3::green());
             }
         }
+
+
+        // Always render the posed models passed in or the Developer Window and
+        // other Widget features will not appear.
+        if (posed3D.size() > 0) {
+            Vector3 lookVector = renderDevice->getCameraToWorldMatrix().lookVector();
+            PosedModel::sort(posed3D, lookVector, opaque, transparent);
+
+            for (int i = 0; i < opaque.size(); ++i) {
+                opaque[i]->render(renderDevice);
+            }
+
+            for (int i = 0; i < transparent.size(); ++i) {
+                transparent[i]->render(renderDevice);
+            }
+        }
+
+        rd->disableLighting();
+
+        toneMap->endFrame(rd);
+        PosedModel2D::sortAndRender(rd, posed2D);
     }
 
     //===================================================
@@ -343,7 +404,8 @@ namespace VMAP
                         }
                     }
                     iPosSent = true;
-                    i_App->debugController.setPosition(Vector3(c.getVector(0).x,c.getVector(0).y+3, c.getVector(0).z));
+                    defaultCamera.setPosition(Vector3(c.getVector(0).x,c.getVector(0).y+3, c.getVector(0).z));
+                    defaultController.pointer()->setPosition(Vector3(c.getVector(0).x,c.getVector(0).y+3, c.getVector(0).z));
                     printf("set pos to %f, %f, %f\n",c.getVector(0).x, c.getVector(0).y, c.getVector(0).z );
                     cmdfound = true;
                 } else if(c.getType() == TEST_VIS) {
@@ -357,7 +419,28 @@ namespace VMAP
                         iColor = Color3::red();
                     }
                     cmdfound = true;
+/*
+                    {
+                        // draw debug-lines
+                        int count = 0;
+                        for(int i=0; i<gTriArray.size(); ++i) {
+                            Triangle &t = gTriArray[i];
 
+                            iVTriDebugArray.append(t.vertex(0));
+                            iVTriDebugArray.append(t.vertex(1));
+                            iVTriDebugArray.append(t.vertex(2));
+
+                            iTriDebugArray.append(count+0);
+                            iTriDebugArray.append(count+1);
+                            iTriDebugArray.append(count+1);
+                            iTriDebugArray.append(count+2);
+                            iTriDebugArray.append(count+2);
+                            iTriDebugArray.append(count+0);
+                            count+=3;
+                        }
+                        iTriDebugVar = VAR(iVTriDebugArray ,iVARAreaRef2);
+                    }
+                    */
                 }
                 ++iCurrCmdIndex;
             }
@@ -386,53 +469,50 @@ namespace VMAP
 
 
     void ModelContainerView::onUserInput(UserInput* ui) {
+        GApp::onUserInput(ui);
 
-        if (ui->keyPressed(SDLK_ESCAPE)) {
-            // Even when we aren't in debug mode, quit on escape.
-            endApplet = true;
-            i_App->endProgram = true;
-        }
-
-        if(ui->keyPressed(SDLK_l)) { //load
+        if(ui->keyPressed(GKey::fromString("l"))) { //load
             iCmdArray = Array<Command>();
             iCommandFileRW.getNewCommands(iCmdArray);
             iCurrCmdIndex = 0;
             processCommand();
         }
 
-        if(ui->keyPressed(SDLK_r)) { //restart
+        if(ui->keyPressed(GKey::fromString("r"))) { //restart
             iCurrCmdIndex = 0;
         }
 
-        if(ui->keyPressed(SDLK_1)) { //inc count1
+        if(ui->keyPressed(GKey::fromString("1"))) { //inc count1
             gCount1++;
         }
 
-        if(ui->keyPressed(SDLK_h)) { //inc count1
-            i_App->debugController.getPosition();
-            Vector3 pos = i_App->debugController.getPosition();
+        if(ui->keyPressed(GKey::fromString("h"))) { //inc count1
+#if 0
+            i_App->defaultController.getPosition();
+            Vector3 pos = i_App->defaultController.getPosition();
             Vector3 pos2 = convertPositionToMangosRep(pos.x, pos.y, pos.z);
             //Vector3 pos3 = iVMapManager->convertPositionToInternalRep(pos2.x, pos2.y, pos2.z);
             //pos3 = iVMapManager->convertPositionToInternalRep(pos2.x, pos2.y, pos2.z);
 
             float hight = iVMapManager->getHeight(iInstanceId, pos2.x, pos2.y, pos2.z);
             printf("Hight = %f\n",hight);
+#endif
         }
 
 
-        if(ui->keyPressed(SDLK_2)) { //dec count1
+        if(ui->keyPressed(GKey::fromString("2"))) { //dec count1
             gCount1--;
             if(gCount1 < 0) 
                 gCount1 = 0;
         }
 
-        if(ui->keyPressed(SDLK_z)) { //zero pos
-            i_App->debugController.setPosition(Vector3(0,0,0));
+        if(ui->keyPressed(GKey::fromString("z"))) { //zero pos
+            i_App->defaultCamera.setPosition(Vector3(0,0,0));
             printf("set pos to 0, 0, 0\n");
         }
 
 
-        if(ui->keyPressed(SDLK_c)) { //restart
+        if(ui->keyPressed(GKey::fromString("c"))) { //restart
             if(iCurrCmdIndex > 0) {
                 if(iCmdArray[iCurrCmdIndex-1].getType() == TEST_VIS) {
                     Vector3 p1 = iCmdArray[iCurrCmdIndex-1].getVector(0);
@@ -448,7 +528,7 @@ namespace VMAP
         }
 
 
-        if(ui->keyPressed(SDL_LEFT_MOUSE_KEY)) {
+        if(ui->keyPressed(GKey::LEFT_MOUSE)) {
             if(		iCurrCmdIndex>0) {
                 --iCurrCmdIndex;
                 printf("restart last command\n");
@@ -456,28 +536,34 @@ namespace VMAP
             }
         }
 
-        GApplet::onUserInput(ui);
-
-        if(ui->keyPressed(SDL_RIGHT_MOUSE_KEY)) {
+        if(ui->keyPressed(GKey::MIDDLE_MOUSE)) {
             processCommand();
         }
+
     }
     //==========================================
 
     void ModelContainerView::setViewPosition(const Vector3& pPosition) {
-        i_App->debugController.setPosition(pPosition);
-        i_App->debugCamera.setPosition(pPosition);
+        //i_App->defaultController.setPosition(pPosition);
+        i_App->defaultCamera.setPosition(pPosition);
     }
 
     //==========================================
     //==========================================
 }
-
+G3D_START_AT_MAIN();
 int main(int argc, char** argv) {
     if(argc == 3) {
         VMAP::gDataDir = argv[1];
         VMAP::gLogFile = argv[2];
-        VMAP::ViewApp::startup();
+
+        G3D::GApp::Settings settings;
+        settings.window.width = 1024;
+        settings.window.height = 768;
+        //settings.useDeveloperTools = true;
+
+        VMAP::ModelContainerView modelContainerView(settings);
+        modelContainerView.run();
     } else {
         printf("%s <data dir> <vmapcmd.log file>\n",argv[0]);
     }

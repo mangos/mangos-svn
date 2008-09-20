@@ -1,6 +1,6 @@
-Here you find my visual debugging tool. With that you can check it yourself. Compile it 
-yourself or just use my precompiled version. The precompiled version should not need any 
-additional libraries (I hope). If you try to compile it yourself you need G3D library 6.10 and 
+Here you find a visual debugging tool. With that you can check it yourself. You need to compile it
+yourself or just use the precompiled version. The precompiled version should not need any 
+additional libraries. If you try to compile it yourself you need G3D library 7.00 and 
 SDL 1.2.8 or higher.
 
 There is NO “how to compile support”.... You will manage it, if you need to...
@@ -20,18 +20,19 @@ The little program is a real hack, but is fits is purpose.
 How to use it:
 
 [b]Logging[b]
-If mangos is compiled in debug mode it will write the vmapcmd.log file. The file does only 
-contain the information witch vmaps are loaded. I addition to that the file need the 
+You will need to set _VMAP_LOG_DEBUG when compiling core in debug mode to get this log.
+If mangos is compiled in debug mode it will then write the vmapcmd.log file. The file does only 
+contain the information which vmaps are loaded. I addition to that the file need the 
 information where your character currently in standing in the maps. This position information 
 has to be inserted manually. To do that I modified the .announce command to send the 
 position of the current character to the log file (modification is in the attached patch).
 
 The line of sight query is only stored in the log file if you enable this kind of logging. This is 
-done by performing the modified .gmoff command. Enabling line of sight and moving your 
+done by performing the modified .gm off command. Enabling line of sight and moving your 
 character a bit will log the queries and there results. Don’t do this for log, it will produce lots 
 of data, which is hard to analyze later.
 
-The modified command .gmon will stop the logging of the line of sight calculation.
+The modified command .gm on will stop the logging of the line of sight calculation.
 
 What do you have to do for logging?
 1.	Apply the patch to mangos to modify your .announce, .gmoff and .gmon commands
@@ -56,12 +57,12 @@ The result is displayed at the console:
 
 l – (small L) Load the next block off logging data into the command queue and process the 
 first command from the queue. When the end is reached a message “end reached” is display at 
-the console. If you reached the you can press l again. Sending .gmon sets an end mark to the 
+the console. If you reached the you can press l again. Sending .gm on sets an end mark to the 
 file. You have to load the next logging block after each .gmon command.
 
 r – Reload the last command block
 
-mouse right click – process the next command from the queue
+mouse middle click – process the next command from the queue
 
 mouse left click – reprocess the last command from the queue
 
@@ -82,9 +83,9 @@ run: vmapdebugger.exe <your mangos data dir> vmapcmd.log
 Wait until the block screen is open and arrange the console and the screen, so you can see 
 both
 Press: l  (small L not one)
-click right
-click right
-click right
+click middle
+click middle
+click middle
 
 Now you should see the wire frame model of scholo and the green line of sight line in the 
 display. The green line means the test was performed and you are seen. A red line means you 

@@ -28,7 +28,7 @@ namespace VMAP
         if(iChilds[pNo] != -1)
             return(&pValueArray[iChilds[pNo]]);
         else
-            return(0);
+            return(NULL);
     }
 
     //=================================================================

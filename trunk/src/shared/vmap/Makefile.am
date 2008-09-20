@@ -40,7 +40,6 @@ libmangosvmaps_a_SOURCES = \
 	ModelContainer.cpp \
 	ModelContainer.h \
 	NodeValueAccess.h \
-	RayIntersectionIterator.h \
 	ShortBox.h \
 	ShortVector.h \
 	SubModel.cpp \
@@ -53,4 +52,5 @@ libmangosvmaps_a_SOURCES = \
 	VMapFactory.cpp \
 	VMapFactory.h \
 	VMapManager.cpp \
-	VMapManager.h
+	VMapManager.h \
+	VMapTools.h

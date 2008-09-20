@@ -702,10 +702,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shared\vmap\RayIntersectionIterator.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\shared\vmap\ShortBox.h"
 				>
 			</File>
@@ -757,6 +753,10 @@
 				RelativePath="..\..\src\shared\vmap\VMapManager.h"
 				>
 			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\VMapTools.h"
+				>
+			</File>
 		</Filter>
 		<File
 			RelativePath="..\..\src\shared\Common.cpp"
@@ -783,7 +783,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Extract SVN revision"
-					CommandLine="cd &quot;$(SolutionDir)\..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&quot;"
+					CommandLine="cd &quot;$(SolutionDir)\..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&quot;&#x0D;&#x0A;"
 					AdditionalDependencies=".svn/entries"
 					Outputs="svn_revision.h"
 				/>
@@ -794,7 +794,7 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Extract SVN revision"
-					CommandLine="cd &quot;$(SolutionDir)\..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&quot;"
+					CommandLine="cd &quot;$(SolutionDir)\..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&quot;&#x0D;&#x0A;"
 					AdditionalDependencies=".svn/entries"
 					Outputs="svn_revision.h"
 				/>

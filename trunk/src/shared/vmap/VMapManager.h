@@ -23,8 +23,9 @@
 #include "AABSPTree.h"
 #include "ManagedModelContainer.h"
 #include "IVMapManager.h"
+#ifdef _VMAP_LOG_DEBUG
 #include "DebugCmdLogger.h"
-
+#endif
 #include <G3D/Table.h>
 
 //===========================================================
@@ -88,8 +89,6 @@ namespace VMAP
         private:
             float getIntersectionTime(const G3D::Ray& pRay, float pMaxDist, bool pStopAtFirstHit);
             bool isAlreadyLoaded(const std::string& pName) { return(iLoadedModelContainer.containsKey(pName)); }
-            RayIntersectionIterator<G3D::AABSPTree<ModelContainer*>::Node, ModelContainer*> beginRayIntersection(const G3D::Ray& ray, bool skipAABoxTests = false) const;
-            RayIntersectionIterator<G3D::AABSPTree<ModelContainer*>::Node, ModelContainer*> endRayIntersection() const;
             void setLoadedMapTile(unsigned int pTileIdent) { iLoadedMapTiles.set(pTileIdent, true); }
             void removeLoadedMapTile(unsigned int pTileIdent) { iLoadedMapTiles.remove(pTileIdent); }
             bool hasLoadedMapTiles() { return(iLoadedMapTiles.size() > 0); }
@@ -106,13 +105,14 @@ namespace VMAP
             bool getObjectHitPos(const G3D::Vector3& pos1, const G3D::Vector3& pos2, G3D::Vector3& pResultHitPos, float pModifyDist);
             float getHeight(const G3D::Vector3& pPos);
 
+            bool PrepareTree();
             bool loadMap(const std::string& pDirFileName, unsigned int pMapTileIdent);
-            void addModelConatiner(const std::string& pName, ManagedModelContainer *pMc);
+            void addModelContainer(const std::string& pName, ManagedModelContainer *pMc);
             void unloadMap(const std::string& dirFileName, unsigned int pMapTileIdent, bool pForce=false);
 
             void getModelContainer(G3D::Array<ModelContainer *>& pArray ) { iTree->getMembers(pArray); }
             const void addDirFile(const std::string& pDirName, const FilesInDir& pFilesInDir) { iLoadedDirFiles.set(pDirName, pFilesInDir); }
-            int size() { return(iTree->size()); }
+            size_t size() { return(iTree->size()); }
     };
 
     //===========================================================
@@ -132,7 +132,9 @@ namespace VMAP
             G3D::Table<unsigned int , bool> iMapsSplitIntoTiles;
             G3D::Table<unsigned int , bool> iIgnoreMapIds;
 
+#ifdef _VMAP_LOG_DEBUG
             CommandFileRW iCommandLogger;
+#endif
         private:
             bool _loadMap(const char* pBasePath, unsigned int pMapId, int x, int y, bool pForceTileLoad=false);
             void _unloadMap(unsigned int  pMapId, int x, int y);

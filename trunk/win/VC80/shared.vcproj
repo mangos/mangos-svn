@@ -693,10 +693,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shared\vmap\RayIntersectionIterator.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\shared\vmap\ShortBox.h"
 				>
 			</File>
@@ -746,6 +742,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\shared\vmap\VMapManager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\VMapTools.h"
 				>
 			</File>
 		</Filter>

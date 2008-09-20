@@ -50,9 +50,9 @@ namespace VMAP
             {
 
                 // Swap x and y the raw data uses the axis differently
-                ixMatrix = G3D::Matrix3::fromAxisAngle(G3D::Vector3::UNIT_Y,-(G3D_PI*iDir.x/180.0));
-                iyMatrix = G3D::Matrix3::fromAxisAngle(G3D::Vector3::UNIT_X,-(G3D_PI*iDir.y/180.0));
-                izMatrix = G3D::Matrix3::fromAxisAngle(G3D::Vector3::UNIT_Z,-(G3D_PI*iDir.z/180.0));
+                ixMatrix = G3D::Matrix3::fromAxisAngle(G3D::Vector3::unitY(),-(G3D::pi()*iDir.x/180.0));
+                iyMatrix = G3D::Matrix3::fromAxisAngle(G3D::Vector3::unitX(),-(G3D::pi()*iDir.y/180.0));
+                izMatrix = G3D::Matrix3::fromAxisAngle(G3D::Vector3::unitZ(),-(G3D::pi()*iDir.z/180.0));
 
             }
             G3D::Vector3 transform(const G3D::Vector3& pIn) const;
