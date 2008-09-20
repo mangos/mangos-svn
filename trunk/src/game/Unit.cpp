@@ -2209,7 +2209,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool ex
 
     if(pVictim->IsImmunedToDamage(meleeSchoolMask,true))    // use charges
     {
-        SendAttackStateUpdate (HITINFO_MISS, pVictim, 1, meleeSchoolMask, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
+        SendAttackStateUpdate (HITINFO_NORMALSWING, pVictim, 1, meleeSchoolMask, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
 
         // not recent extra attack only at any non extra attack (miss case)
         if(!extra && extraAttacks)
