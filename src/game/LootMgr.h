@@ -127,13 +127,15 @@ typedef std::set<uint32> LootIdSet;
 class LootStore
 {
     public:
-        explicit LootStore(char const* name) : m_name(name) {}
+        explicit LootStore(char const* name, char const* entryName) : m_name(name), m_entryName(entryName) {}
         virtual ~LootStore() { Clear(); }
 
         void Verify() const;
 
-        void LoadAndCollectLootIds(LootIdSet& set);
-        void RemoveLootRefsAndReport(LootIdSet& set, char const* keyname) const;
+        void LoadAndCollectLootIds(LootIdSet& ids_set);
+        void CheckLootRefs(LootIdSet* ref_set = NULL) const;// check existence reference and remove it from ref_set
+        void ReportUnusedIds(LootIdSet const& ids_set) const;
+        void ReportNotExistedId(uint32 id) const;
 
         bool HaveLootFor(uint32 loot_id) const { return m_LootTemplates.find(loot_id) != m_LootTemplates.end(); }
         bool HaveQuestLootFor(uint32 loot_id) const;
@@ -142,12 +144,14 @@ class LootStore
         LootTemplate const* GetLootFor(uint32 loot_id) const;
 
         char const* GetName() const { return m_name; }
+        char const* GetEntryName() const { return m_entryName; }
     protected:
         void LoadLootTable();
         void Clear();
     private:
         LootTemplateMap m_LootTemplates;
         char const* m_name;
+        char const* m_entryName;
 };
 
 class LootTemplate
@@ -168,7 +172,7 @@ class LootTemplate
 
         // Checks integrity of the template
         void Verify(LootStore const& store, uint32 Id) const;
-        void RemoveLootRefs(LootTemplateMap const& store, LootIdSet& set) const;
+        void CheckLootRefs(LootTemplateMap const& store, LootIdSet* ref_set) const;
     private:
         LootStoreItemList Entries;                          // not grouped only
         LootGroups        Groups;                           // groups have own (optimised) processing, grouped entries go there
@@ -306,6 +310,7 @@ void LoadLootTemplates_Skinning();
 void LoadLootTemplates_Disenchant();
 void LoadLootTemplates_Prospecting();
 void LoadLootTemplates_QuestMail();
+void LoadLootTemplates_Reference();
 
 inline void LoadLootTables()
 {
@@ -318,6 +323,7 @@ inline void LoadLootTables()
     LoadLootTemplates_Disenchant();
     LoadLootTemplates_Prospecting();
     LoadLootTemplates_QuestMail();
+    LoadLootTemplates_Reference();
 }
 
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li);

@@ -224,6 +224,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "quest_end_scripts",           SEC_ADMINISTRATOR, &ChatHandler::HandleReloadQuestEndScriptsCommand,         "", NULL },
         { "quest_start_scripts",         SEC_ADMINISTRATOR, &ChatHandler::HandleReloadQuestStartScriptsCommand,       "", NULL },
         { "quest_template",              SEC_ADMINISTRATOR, &ChatHandler::HandleReloadQuestTemplateCommand,           "", NULL },
+        { "reference_loot_template",     SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesReferenceCommand,  "", NULL },
         { "reserved_name",               SEC_ADMINISTRATOR, &ChatHandler::HandleReloadReservedNameCommand,            "", NULL },
         { "skill_discovery_template",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSkillDiscoveryTemplateCommand,  "", NULL },
         { "skill_extra_item_template",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSkillExtraItemTemplateCommand,  "", NULL },

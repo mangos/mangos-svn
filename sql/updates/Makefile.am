@@ -191,6 +191,7 @@ pkgdata_DATA = \
 	6609_mangos_mangos_string.sql \
 	6613_mangos_mangos_string.sql \
 	6627_mangos_creature_movement.sql \
+	6640_mangos_reference_loot_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -362,4 +363,5 @@ EXTRA_DIST = \
 	6609_mangos_mangos_string.sql \
 	6613_mangos_mangos_string.sql \
 	6627_mangos_creature_movement.sql \
+	6640_mangos_reference_loot_template.sql \
 	README
