@@ -173,6 +173,7 @@ class ChatHandler
         bool HandleReloadLootTemplatesItemCommand(const char* args);
         bool HandleReloadLootTemplatesPickpocketingCommand(const char* args);
         bool HandleReloadLootTemplatesProspectingCommand(const char* args);
+        bool HandleReloadLootTemplatesReferenceCommand(const char* args);
         bool HandleReloadLootTemplatesQuestMailCommand(const char* args);
         bool HandleReloadLootTemplatesSkinningCommand(const char* args);
         bool HandleReloadMangosStringCommand(const char* args);

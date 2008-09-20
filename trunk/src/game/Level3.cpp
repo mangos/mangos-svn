@@ -227,6 +227,7 @@ bool ChatHandler::HandleReloadLootTemplatesCreatureCommand(const char*)
 {
     sLog.outString( "Re-Loading Loot Tables... (`creature_loot_template`)" );
     LoadLootTemplates_Creature();
+    LootTemplates_Creature.CheckLootRefs();
     SendGlobalSysMessage("DB table `creature_loot_template` reloaded.");
     return true;
 }
@@ -235,6 +236,7 @@ bool ChatHandler::HandleReloadLootTemplatesDisenchantCommand(const char*)
 {
     sLog.outString( "Re-Loading Loot Tables... (`disenchant_loot_template`)" );
     LoadLootTemplates_Disenchant();
+    LootTemplates_Disenchant.CheckLootRefs();
     SendGlobalSysMessage("DB table `disenchant_loot_template` reloaded.");
     return true;
 }
@@ -243,6 +245,7 @@ bool ChatHandler::HandleReloadLootTemplatesFishingCommand(const char*)
 {
     sLog.outString( "Re-Loading Loot Tables... (`fishing_loot_template`)" );
     LoadLootTemplates_Fishing();
+    LootTemplates_Fishing.CheckLootRefs();
     SendGlobalSysMessage("DB table `fishing_loot_template` reloaded.");
     return true;
 }
@@ -251,6 +254,7 @@ bool ChatHandler::HandleReloadLootTemplatesGameobjectCommand(const char*)
 {
     sLog.outString( "Re-Loading Loot Tables... (`gameobject_loot_template`)" );
     LoadLootTemplates_Gameobject();
+    LootTemplates_Gameobject.CheckLootRefs();
     SendGlobalSysMessage("DB table `gameobject_loot_template` reloaded.");
     return true;
 }
@@ -259,6 +263,7 @@ bool ChatHandler::HandleReloadLootTemplatesItemCommand(const char*)
 {
     sLog.outString( "Re-Loading Loot Tables... (`item_loot_template`)" );
     LoadLootTemplates_Item();
+    LootTemplates_Item.CheckLootRefs();
     SendGlobalSysMessage("DB table `item_loot_template` reloaded.");
     return true;
 }
@@ -267,6 +272,7 @@ bool ChatHandler::HandleReloadLootTemplatesPickpocketingCommand(const char*)
 {
     sLog.outString( "Re-Loading Loot Tables... (`pickpocketing_loot_template`)" );
     LoadLootTemplates_Pickpocketing();
+    LootTemplates_Pickpocketing.CheckLootRefs();
     SendGlobalSysMessage("DB table `pickpocketing_loot_template` reloaded.");
     return true;
 }
@@ -275,6 +281,7 @@ bool ChatHandler::HandleReloadLootTemplatesProspectingCommand(const char*)
 {
     sLog.outString( "Re-Loading Loot Tables... (`prospecting_loot_template`)" );
     LoadLootTemplates_Prospecting();
+    LootTemplates_Prospecting.CheckLootRefs();
     SendGlobalSysMessage("DB table `prospecting_loot_template` reloaded.");
     return true;
 }
@@ -283,7 +290,16 @@ bool ChatHandler::HandleReloadLootTemplatesQuestMailCommand(const char*)
 {
     sLog.outString( "Re-Loading Loot Tables... (`quest_mail_loot_template`)" );
     LoadLootTemplates_QuestMail();
+    LootTemplates_QuestMail.CheckLootRefs();
     SendGlobalSysMessage("DB table `quest_mail_loot_template` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLootTemplatesReferenceCommand(const char*)
+{
+    sLog.outString( "Re-Loading Loot Tables... (`reference_loot_template`)" );
+    LoadLootTemplates_Reference();
+    SendGlobalSysMessage("DB table `reference_loot_template` reloaded.");
     return true;
 }
 
@@ -291,6 +307,7 @@ bool ChatHandler::HandleReloadLootTemplatesSkinningCommand(const char*)
 {
     sLog.outString( "Re-Loading Loot Tables... (`skinning_loot_template`)" );
     LoadLootTemplates_Skinning();
+    LootTemplates_Skinning.CheckLootRefs();
     SendGlobalSysMessage("DB table `skinning_loot_template` reloaded.");
     return true;
 }
