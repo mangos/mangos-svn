@@ -28,7 +28,7 @@
 
 #include "ShortBox.h"
 #include "TreeNode.h"
-#include "RayIntersectionIterator.h"
+#include "VMapTools.h"
 #include "SubModel.h"
 #include "BaseModel.h"
 
@@ -50,8 +50,10 @@ namespace VMAP
         private:
             unsigned int iNSubModel;
             SubModel *iSubModel;
-            //Vector3 iDirection;
             G3D::AABox iBox;
+
+            ModelContainer (const ModelContainer& c): BaseModel(c) {}
+            ModelContainer& operator=(const ModelContainer& c) {}
 
         public:
             ModelContainer() : BaseModel() { iNSubModel =0; iSubModel = 0; };
@@ -63,17 +65,11 @@ namespace VMAP
 
             ~ModelContainer(void);
 
-            RayIntersectionIterator<TreeNode, SubModel> beginRayIntersection(const G3D::Ray& ray, double pMaxTime, bool skipAABoxTests = false) const;
-
-            RayIntersectionIterator<TreeNode, SubModel> endRayIntersection() const;
-
             inline const void setSubModel(const SubModel& pSubModel, int pPos) { iSubModel[pPos] = pSubModel; }
 
             inline const SubModel& getSubModel(int pPos) const { return iSubModel[pPos]; }
 
             inline unsigned int getNSubModel() const { return(iNSubModel); }
-
-            G3D::RealTime getIntersectionTime(const G3D::Ray&, bool pExitAtFirst, float pMaxDist) const;
 
             void countSubModelsAndNodesAndTriangles(G3D::AABSPTree<SubModel *>::Node& pNode, int& nSubModels, int& nNodes, int& nTriangles);
 
@@ -90,16 +86,23 @@ namespace VMAP
             bool readFile(const char *filename);
 
             size_t getMemUsage();
+            size_t hashCode() { return (getBasePosition() * getNTriangles()).hashCode(); }
+
+            void intersect(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit, G3D::Vector3& pOutLocation, G3D::Vector3& pOutNormal) const;
+            bool intersect(const G3D::Ray& pRay, float& pMaxDist) const;
+
+            template<typename RayCallback>
+            void intersectRay(const G3D::Ray& ray, RayCallback& intersectCallback, float& distance, bool pStopAtFirstHit, bool intersectCallbackIsFast = false);
+
+            bool operator==(const ModelContainer& pMc2) const;
     };
 
     //=====================================================
 
     //=====================================================
 
-    unsigned int hashCode(const ModelContainer& pMc);
-    bool operator==(const ModelContainer& pMc1, const ModelContainer& pMc2);
+    size_t hashCode(const ModelContainer& pMc);
     void getBounds(const ModelContainer& pMc, G3D::AABox& pAABox);
     void getBounds(const ModelContainer* pMc, G3D::AABox& pAABox);
-
 }
 #endif

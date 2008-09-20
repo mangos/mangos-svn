@@ -36,21 +36,6 @@ namespace VMAP
         return pSm.getNTriangles();
     }
 
-    bool operator==(const SubModel& pSm1, const SubModel& pSm2)
-    {
-        bool result = false;
-
-        if(pSm1.getNNodes() == pSm2.getNNodes() &&
-            pSm1.getNTriangles() == pSm2.getNTriangles() &&
-            pSm1.getBasePosition() == pSm2.getBasePosition() &&
-            pSm1.getNodesPos() == pSm2.getNodesPos() &&
-            pSm1.getTrianglesPos() == pSm2.getTrianglesPos())
-        {
-            result = true;
-        }
-        return result;
-    }
-
     void getBounds(const SubModel& pSm, G3D::AABox& pAABox)
     {
         ShortBox box = pSm.getReletiveBounds();
@@ -85,6 +70,22 @@ namespace VMAP
         }
     }
 
+    //==========================================================
+
+    bool SubModel::operator==(const SubModel& pSm2) const
+    {
+        bool result = false;
+
+        if(getNNodes() == pSm2.getNNodes() &&
+            getNTriangles() == pSm2.getNTriangles() &&
+            getBasePosition() == pSm2.getBasePosition() &&
+            getNodesPos() == pSm2.getNodesPos() &&
+            getTrianglesPos() == pSm2.getTrianglesPos())
+        {
+            result = true;
+        }
+        return result;
+    }
     //==========================================================
 
     enum BIN_POSITIONS
@@ -147,8 +148,8 @@ namespace VMAP
 
         for(int i=0;i<pNode.valueArray.size(); i++)
         {
-            AABSPTree<Triangle>::Handle h= pNode.valueArray[i];
-            Triangle t = h.value;
+            G3D::_AABSPTree::Handle<Triangle>* h= pNode.valueArray[i];
+            Triangle t = h->value;
             TriangleBox triangleBox = TriangleBox(t.vertex(0),t.vertex(1), t.vertex(2));
             lo = lo.min(triangleBox.getBounds().getLo().getVector3());
             hi = hi.max(triangleBox.getBounds().getHi().getVector3());
@@ -200,135 +201,48 @@ namespace VMAP
     }
 
     //==========================================================
-
-    RayIntersectionIterator<TreeNode, TriangleBox> SubModel::beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests) const
-    {
-        NodeValueAccess<TreeNode, TriangleBox> vna = NodeValueAccess<TreeNode, TriangleBox>(getTreeNodes(), getTriangles());
-        return RayIntersectionIterator<TreeNode, TriangleBox>(vna, ray, &getTreeNode(0), pMaxTime, skipAABoxTests);
-    }
-
-    RayIntersectionIterator<TreeNode, TriangleBox> SubModel::endRayIntersection() const
-    {
-        return RayIntersectionIterator<TreeNode, TriangleBox>();
-    }
-
-    //==========================================================================
-
-    typedef RayIntersectionIterator<TreeNode, TriangleBox> IT;
-
-    inline RealTime testIntersectionWithTriangle(const IT& pIterater,const Triangle& pTriangle, const Ray& pRay)
-    {
-        static const double epsilon = 0.00001;
-
-        RealTime t = pRay.intersectionTime(pTriangle);
-        /*
-        Often methods like "distanceUntilIntersection" can be made more
-        efficient by providing them with the time at which to start and
-        to give up looking for an intersection; that is,
-        obj.minDistance and iMin(firstDistance, obj.maxDistance).
-        */
-        if ((t >= inf()) ||
-            (t > pIterater.maxDistance + epsilon) ||
-            (t < pIterater.minDistance - epsilon))
-        {
-            t = inf();
-        }
-        return(t);
-    }
-    //==========================================================
-    #ifdef _DEBUG_VMAPS
-    #ifndef gBoxArray
+#ifdef _DEBUG_VMAPS
+#ifndef gBoxArray
     extern Vector3 p1,p2,p3,p4,p5,p6,p7;
     extern Array<AABox>gBoxArray;
+    extern Array<G3D::Triangle>gTriArray;
     extern int gCount1, gCount2, gCount3, gCount4;
     extern bool myfound;
-    #endif
-    #endif
+#endif
+#endif
 
-    RealTime SubModel::getIntersectionTime(const Ray& pRay, bool pExitAtFirst, float pMaxDist) const
+    //==========================================================
+    void SubModel::intersect(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit, G3D::Vector3& pOutLocation, G3D::Vector3& pOutNormal) const
     {
-        TriangleBox const *firstObject;
-        double  firstDistance = inf();
-
-        #ifdef _DEBUG_VMAPS
-        int debugCount =0;
-        #endif
-        Ray relativeRay = Ray::fromOriginAndDirection(pRay.origin - getBasePosition(), pRay.direction);
-
-        const IT end = endRayIntersection();
-        IT obj = beginRayIntersection(relativeRay,pMaxDist,false);
-
-        Triangle testT;
-        for ( ;obj != end; ++obj)                           // (preincrement is *much* faster than postincrement!)
-        {
-            /*
-            Call your accurate intersection test here.  It is guaranteed
-            that the ray hits the bounding box of obj.  (*obj) has type T,
-            so you can call methods directly using the "->" operator.
-            */
-            const TriangleBox *tri = &(*obj);
-
-            testT = Triangle(tri->vertex(0).getVector3(),tri->vertex(1).getVector3(),tri->vertex(2).getVector3());
-            double t = testIntersectionWithTriangle(obj,testT, relativeRay);
-            #ifdef _DEBUG_VMAPS
-            if(debugCount == 5)
-            {
-                firstObject = tri;
-                firstDistance = 1;
-            }
-            ++debugCount;
-            #endif
-            if(t != inf())
-            {
-                /*
-                Tell the iterator that we've found at least one
-                intersection.  It will finish looking at all
-                objects in this node and then terminate.
-                */
-                obj.markBreakNode();
-                if(firstDistance > t && pMaxDist >= t)
-                {
-                    firstDistance = t;
-                    firstObject   = tri;
-                    if(pExitAtFirst) break;
-                }
-            }
-            else
-            {
-                // This might the wrong side of the triangle... Turn it and test again
-                testT = Triangle(tri->vertex(2).getVector3(),tri->vertex(1).getVector3(),tri->vertex(0).getVector3());
-                t = testIntersectionWithTriangle(obj, testT,relativeRay);
-                if(t != inf())
-                {
-                    obj.markBreakNode();
-                    if(firstDistance > t && pMaxDist >= t)
-                    {
-                        firstDistance = t;
-                        firstObject   = tri;
-                        if(pExitAtFirst) break;
-                    }
-                }
-            }
-        }
-        #ifdef _DEBUG_VMAPS
-        if(firstDistance < inf())
-        {
-            myfound = true;
-            p1 = firstObject->vertex(0).getVector3()+ getBasePosition();
-            p2 = firstObject->vertex(1).getVector3()+ getBasePosition();
-            p3 = firstObject->vertex(2).getVector3()+ getBasePosition();
-            p4 = relativeRay.origin + getBasePosition();
-            p5 =  relativeRay.intersection(testT.plane()) + getBasePosition();
-            float dist1 = (p5-p4).magnitude();
-            double dist2 = relativeRay.intersectionTime(testT);
-            float dist3 = relativeRay.direction.magnitude();
-            double dist4 = relativeRay.intersectionTime(testT);
-        }
-        #endif
-
-        return(firstDistance);
+            NodeValueAccess<TreeNode, TriangleBox> vna = NodeValueAccess<TreeNode, TriangleBox>(getTreeNodes(), getTriangles());
+            IntersectionCallBack<TriangleBox> intersectCallback;
+            Ray relativeRay = Ray::fromOriginAndDirection(pRay.origin - getBasePosition(), pRay.direction);
+#ifdef _DEBUG_VMAPS
+            //p6=getBasePosition();
+            //gBoxArray.push_back(getAABoxBounds());
+#endif
+            getTreeNode(0).intersectRay(relativeRay, intersectCallback, pMaxDist, vna, pStopAtFirstHit, false);
     }
 
+    //==========================================================
+
+    bool SubModel::intersect(const G3D::Ray& pRay, float& pMaxDist) const
+    {
+        return BaseModel::intersect(getAABoxBounds(), pRay, pMaxDist);
+    }
+
+    //==========================================================
+
+    template<typename RayCallback>
+    void SubModel::intersectRay(const Ray& pRay, RayCallback& pIntersectCallback, float& pMaxDist, bool pStopAtFirstHit, bool intersectCallbackIsFast)
+    {
+        if(intersect(pRay, pMaxDist))
+        {
+            NodeValueAccess<TreeNode, TriangleBox> vna = NodeValueAccess<TreeNode, TriangleBox>(getTreeNodes(), getTriangles());
+            IntersectionCallBack<TriangleBox> intersectCallback;
+             getTreeNode(0).intersectRay(pRay, intersectCallback, pMaxDist, vna, pStopAtFirstHit, false);
+        }
+    }
     //==========================================================
 
 }

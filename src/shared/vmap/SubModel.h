@@ -25,7 +25,7 @@
 #include "ShortVector.h"
 #include "ShortBox.h"
 #include "TreeNode.h"
-#include "RayIntersectionIterator.h"
+#include "VMapTools.h"
 #include "BaseModel.h"
 
 namespace VMAP
@@ -55,13 +55,7 @@ namespace VMAP
             //Gets a 50 byte binary block
             void initFromBinBlock(void *pBinBlock);
 
-            RayIntersectionIterator<TreeNode, TriangleBox> beginRayIntersection(const G3D::Ray& ray, double pMaxTime, bool skipAABoxTests = false) const;
-
-            RayIntersectionIterator<TreeNode, TriangleBox> endRayIntersection() const;
-
             void fillRenderArray(G3D::Array<TriangleBox> &pArray, const TreeNode* pTreeNode);
-
-            G3D::RealTime getIntersectionTime(const G3D::Ray& pRay, bool pExitAtFirst, float pMaxDist) const;
 
             void countNodesAndTriangles(G3D::AABSPTree<G3D::Triangle>::Node& pNode, int &pNNodes, int &pNTriabgles);
 
@@ -89,10 +83,18 @@ namespace VMAP
 
             inline unsigned int getNodesPos() const { return(iNodesPos); }
             inline unsigned int getTrianglesPos() const { return(iTrianglesPos); }
+
+            //unsigned int hashCode() { return (getBasePosition() * getNTriangles()).hashCode(); }
+
+            void intersect(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit, G3D::Vector3& pOutLocation, G3D::Vector3& pOutNormal) const;
+            bool intersect(const G3D::Ray& pRay, float& pMaxDist) const;
+            template<typename RayCallback>
+            void intersectRay(const G3D::Ray& ray, RayCallback& intersectCallback, float& distance, bool pStopAtFirstHit, bool intersectCallbackIsFast = false);
+            bool operator==(const SubModel& pSm2) const;
+            unsigned int hashCode() const { return BaseModel::getNTriangles(); }
     };
 
     unsigned int hashCode(const SubModel& pSm);
-    bool operator==(const SubModel& pSm1, const SubModel& pSm2);
     void getBounds(const SubModel& pSm, G3D::AABox& pAABox);
     void getBounds(const SubModel* pSm, G3D::AABox& pAABox);
     //====================================

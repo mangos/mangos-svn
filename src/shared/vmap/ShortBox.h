@@ -21,6 +21,8 @@
 
 #include <G3D/Vector3.h>
 #include <G3D/AABox.h>
+#include <G3D/Triangle.h>
+#include <G3D/Ray.h>
 
 #include "ShortVector.h"
 
@@ -57,6 +59,15 @@ namespace VMAP
     };
 
     //=====================================================================
+#ifdef _DEBUG_VMAPS
+#ifndef gBoxArray
+    extern G3D::Vector3 p1,p2,p3,p4,p5,p6,p7;
+    extern G3D::Array<G3D::AABox>gBoxArray;
+    extern G3D::Array<G3D::Triangle>gTriArray;
+    extern int gCount1, gCount2, gCount3, gCount4;
+    extern bool myfound;
+#endif
+#endif
 
     static const G3D::Vector3 dummyZeroPosition = G3D::Vector3(0,0,0);
 
@@ -107,6 +118,29 @@ namespace VMAP
             inline bool operator!=(const TriangleBox& t) const
             {
                 return !((_vertex[0] == t._vertex[0]) && (_vertex[1] == t._vertex[1]) &&(_vertex[2] == t._vertex[2]));
+            }
+
+            inline void intersect(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHitDummy, G3D::Vector3& pOutLocationDummy, G3D::Vector3& pOutNormalDummy) const
+            {
+                static const double epsilon = 0.00001;
+                G3D::Triangle testT(vertex(0).getVector3(),vertex(1).getVector3(),vertex(2).getVector3());
+                float t = pRay.intersectionTime(testT);
+                if ((t < pMaxDist) || t < (pMaxDist + epsilon))
+                    pMaxDist = t;
+                else
+                {
+                    testT = G3D::Triangle(vertex(2).getVector3(),vertex(1).getVector3(),vertex(0).getVector3());
+
+#ifdef _DEBUG_VMAPS
+                    {
+                        G3D::Triangle myt(testT.vertex(0)+p6, testT.vertex(1)+p6,testT.vertex(2)+p6);
+                        gTriArray.push_back(myt);
+                    }
+#endif
+                    t = pRay.intersectionTime(testT);
+                    if ((t < pMaxDist) || t < (pMaxDist + epsilon))
+                        pMaxDist = t;
+                }
             }
     };
 

@@ -47,6 +47,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4018"
 				Optimization="0"
 				AdditionalIncludeDirectories="libmpq"
 				PreprocessorDefinitions="WIN32;_DEBUG;_WINDOWS"
@@ -144,6 +145,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/wd4018"
 				Optimization="3"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="libmpq"

@@ -90,6 +90,9 @@ namespace VMAP
             inline TreeNode* getTreeNodes() const{ return(iTreeNodes); }
 
             inline size_t getMemUsage() { return(iNTriangles * sizeof(TriangleBox) + iNNodes * sizeof(TreeNode) + sizeof(BaseModel)); }
+
+            void intersect(const G3D::AABox& pBox, const G3D::Ray& pRay, float& pMaxDist, G3D::Vector3& pOutLocation, G3D::Vector3& pOutNormal) const;
+            bool intersect(const G3D::AABox& pBox, const G3D::Ray& pRay, float& pMaxDist) const;
     };
 
 }

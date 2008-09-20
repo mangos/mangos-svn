@@ -26,8 +26,8 @@ bool Model::open()
     memcpy(&header, f.getBuffer(), sizeof(ModelHeader));
     if(header.nBoundingTriangles > 0) {
 
-        animated = isAnimated(f);
 #if 0
+        animated = isAnimated(f);
         if(animated)
         {
             f.close();

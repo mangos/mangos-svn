@@ -157,9 +157,6 @@
 				RelativePath="..\..\..\src\shared\vmap\NodeValueAccess.h">
 			</File>
 			<File
-				RelativePath="..\..\..\src\shared\vmap\RayIntersectionIterator.h">
-			</File>
-			<File
 				RelativePath="..\..\..\src\shared\vmap\ShortBox.h">
 			</File>
 			<File
@@ -182,6 +179,9 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\shared\vmap\TreeNode.h">
+			</File>
+			<File
+				RelativePath="..\..\..\src\shared\vmap\VMapTools.h">
 			</File>
 		</Filter>
 		<Filter

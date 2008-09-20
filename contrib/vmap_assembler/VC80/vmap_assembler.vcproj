@@ -45,6 +45,7 @@
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
+				EnableEnhancedInstructionSet="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
@@ -121,6 +122,7 @@
 				AdditionalIncludeDirectories="..\..\..\dep\include\g3dlite;..\..\..\src\shared\vmap;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
+				EnableEnhancedInstructionSet="1"
 				UsePrecompiledHeader="0"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
@@ -236,10 +238,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\shared\vmap\RayIntersectionIterator.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\..\src\shared\vmap\ShortBox.h"
 				>
 			</File>
@@ -269,6 +267,10 @@
 			</File>
 			<File
 				RelativePath="..\..\..\src\shared\vmap\TreeNode.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\shared\vmap\VMapTools.h"
 				>
 			</File>
 		</Filter>
