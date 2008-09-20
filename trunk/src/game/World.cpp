@@ -705,6 +705,10 @@ void World::LoadConfigSettings(bool reload)
 
     m_configs[CONFIG_THREAT_RADIUS] = sConfig.GetIntDefault("ThreatRadius", 100);
 
+    // always use declined names in the russian client
+    m_configs[CONFIG_DECLINED_NAMES_USED] = (m_configs[CONFIG_REALM_ZONE] == REALM_ZONE_RUSSIAN) ? true : 
+        sConfig.GetBoolDefault("DeclinedNames", false);
+
     m_VisibleUnitGreyDistance = sConfig.GetFloatDefault("Visibility.Distance.Grey.Unit", 1);
     if(m_VisibleUnitGreyDistance >  MAX_VISIBILITY_DISTANCE)
     {

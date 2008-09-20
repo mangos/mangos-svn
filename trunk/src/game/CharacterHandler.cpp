@@ -74,8 +74,8 @@ bool LoginQueryHolder::Initialize()
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSOCIALLIST,      "SELECT friend,flags,note FROM character_social WHERE guid = '%u' LIMIT 255", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADHOMEBIND,        "SELECT map,zone,position_x,position_y,position_z FROM character_homebind WHERE guid = '%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS,  "SELECT spell,item,time FROM character_spell_cooldown WHERE guid = '%u'", GUID_LOPART(m_guid));
-    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES,   "SELECT genitive, dative, accusative, instrumental, prepositional FROM character_declinedname WHERE guid = '%u'",GUID_LOPART(m_guid));
-
+    if(sWorld.getConfig(CONFIG_DECLINED_NAMES_USED))
+        res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES,   "SELECT genitive, dative, accusative, instrumental, prepositional FROM character_declinedname WHERE guid = '%u'",GUID_LOPART(m_guid)); 
     // in other case still be dummy query
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGUILD,           "SELECT guildid,rank FROM guild_member WHERE guid = '%u'", GUID_LOPART(m_guid));
 
@@ -150,12 +150,24 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & /*recv_data*/ )
 {
     /// get all the data necessary for loading all characters (along with their pets) on the account
     CharacterDatabase.AsyncPQuery(&chrHandler, &CharacterHandler::HandleCharEnumCallback, GetAccountId(),
+         !sWorld.getConfig(CONFIG_DECLINED_NAMES_USED) ?
+    //   ------- Query Without Declined Names --------
     //          0                1                2                      3                      4                      5               6                     7                     8
         "SELECT characters.data, characters.name, characters.position_x, characters.position_y, characters.position_z, characters.map, characters.totaltime, characters.leveltime, characters.at_login, "
     //   9                    10                     11
         "character_pet.entry, character_pet.modelid, character_pet.level "
         "FROM characters LEFT JOIN character_pet ON characters.guid=character_pet.owner AND character_pet.slot='0' "
-        "WHERE characters.account = '%u' ORDER BY characters.guid", GetAccountId());
+        "WHERE characters.account = '%u' ORDER BY characters.guid"
+        :
+    //   --------- Query With Declined Names ---------
+    //          0                1                2                      3                      4                      5               6                     7                     8
+        "SELECT characters.data, characters.name, characters.position_x, characters.position_y, characters.position_z, characters.map, characters.totaltime, characters.leveltime, characters.at_login, "
+    //   9                    10                     11                   12
+        "character_pet.entry, character_pet.modelid, character_pet.level, genitive "
+        "FROM characters LEFT JOIN character_pet ON characters.guid = character_pet.owner AND character_pet.slot='0' "
+        "LEFT JOIN character_declinedname ON characters.guid = character_declinedname.guid "
+        "WHERE characters.account = '%u' ORDER BY characters.guid",
+        GetAccountId());
 }
 
 void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
@@ -969,7 +981,7 @@ void WorldSession::HandleDeclinedPlayerNameOpcode(WorldPacket& recv_data)
         WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
         data << (uint32)1;
         data << guid;
-        SendPacket(&data);    
+        SendPacket(&data);
         return;
     }
 
