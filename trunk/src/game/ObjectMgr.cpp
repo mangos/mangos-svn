@@ -6194,7 +6194,11 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, bool posi
     for(MangosStringLocaleMap::iterator itr = mMangosStringLocaleMap.begin(); itr != mMangosStringLocaleMap.end();)
     {
         if(itr->first > 0 && positive_entries || itr->first < 0 && !positive_entries)
-            itr = mMangosStringLocaleMap.erase(itr);
+        {
+            MangosStringLocaleMap::iterator itr2 = itr;
+            ++itr;
+            mMangosStringLocaleMap.erase(itr2);
+        }
         else
             ++itr;
     }
