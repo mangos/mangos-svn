@@ -614,7 +614,7 @@ void Pet::RegenerateFocus()
     if (curValue >= maxValue) 
         return;
 
-    float addvalue = 25 * sWorld.getRate(RATE_POWER_FOCUS);
+    float addvalue = 24 * sWorld.getRate(RATE_POWER_FOCUS);
 
     AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
     for(AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
