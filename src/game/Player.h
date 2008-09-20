@@ -1479,6 +1479,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdatePvPFlag(time_t currTime);
         void UpdateContestedPvP(uint32 currTime);
         void SetContestedPvPTimer(uint32 newTime) {m_contestedPvPTimer = newTime;}
+        void ResetContestedPvP()
+        {
+            clearUnitState(UNIT_STAT_ATTACK_PLAYER);
+            RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP);
+            m_contestedPvPTimer = 0;
+        }
 
         /** todo: -maybe move UpdateDuelFlag+DuelComplete to independent DuelHandler.. **/
         DuelInfo *duel;

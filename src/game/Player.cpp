@@ -1591,6 +1591,8 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             CombatStop();
 
+            ResetContestedPvP();
+
             // remove player from battleground on far teleport (when changing maps)
             if(BattleGround const* bg = GetBattleGround())
             {
@@ -1912,9 +1914,8 @@ void Player::SetGameMaster(bool on)
         setFaction(35);
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
 
-        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP | PLAYER_FLAGS_CONTESTED_PVP);
-        clearUnitState(UNIT_STAT_ATTACK_PLAYER);
-        m_contestedPvPTimer = 0;
+        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+        ResetContestedPvP();
 
         getHostilRefManager().setOnlineOfflineState(false);
         CombatStop();
@@ -15458,9 +15459,7 @@ void Player::UpdateContestedPvP(uint32 diff)
         return;
     if(m_contestedPvPTimer <= diff)
     {
-        clearUnitState(UNIT_STAT_ATTACK_PLAYER);
-        RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP);
-        m_contestedPvPTimer = 0;
+        ResetContestedPvP();
     }
     else
         m_contestedPvPTimer -= diff;
