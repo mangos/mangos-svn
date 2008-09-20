@@ -315,7 +315,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
     else
     {
         m_originalCaster = ObjectAccessor::GetUnit(*m_caster,m_originalCasterGUID);
-        if(!m_originalCaster->IsInWorld()) m_originalCaster = NULL;
+        if(m_originalCaster && !m_originalCaster->IsInWorld()) m_originalCaster = NULL;
     }
 
     for(int i=0; i <3; ++i)
@@ -4822,7 +4822,7 @@ void Spell::UpdatePointers()
     else
     {
         m_originalCaster = ObjectAccessor::GetUnit(*m_caster,m_originalCasterGUID);
-        if(!m_originalCaster->IsInWorld()) m_originalCaster = NULL;
+        if(m_originalCaster && !m_originalCaster->IsInWorld()) m_originalCaster = NULL;
     }
 
     m_targets.Update(m_caster);
