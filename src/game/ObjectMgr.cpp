@@ -6188,11 +6188,19 @@ void ObjectMgr::LoadGameObjectForQuests()
     sLog.outString( ">> Loaded %u GameObject for quests", count );
 }
 
-bool ObjectMgr::LoadMangosStrings()
+bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, bool positive_entries)
 {
-    mMangosStringMap.clear();                               // need for reload case
+    // cleanup affected map part for reloading case
+    for(MangosStringLocaleMap::iterator itr = mMangosStringLocaleMap.begin(); itr != mMangosStringLocaleMap.end();)
+    {
+        if(itr->first > 0 && positive_entries || itr->first < 0 && !positive_entries)
+            itr = mMangosStringLocaleMap.erase(itr);
+        else
+            ++itr;
+    }
 
-    QueryResult *result = WorldDatabase.Query("SELECT entry,content_default FROM mangos_string");
+    QueryResult *result = db.PQuery("SELECT entry,content_default,content_loc1,content_loc2,content_loc3,content_loc4,content_loc5,content_loc6,content_loc7,content_loc8 FROM %s",table);
+
     if(!result)
     {
         barGoLink bar(1);
@@ -6200,70 +6208,65 @@ bool ObjectMgr::LoadMangosStrings()
         bar.step();
 
         sLog.outString("");
-        sLog.outErrorDb(">> Loaded 0 mangos strings. DB table `mangos_string` is empty. Cannot continue.");
+        if(positive_entries)                                // error only in case internal strings
+            sLog.outErrorDb(">> Loaded 0 mangos strings. DB table `%s` is empty. Cannot continue.",table);
+        else
+            sLog.outString(">> Loaded 0 mangos strings. DB table `%s` is empty.",table);
         return false;
     }
 
     barGoLink bar(result->GetRowCount());
-    uint32 count = 0;
-    do
-    {
-        Field *fields = result->Fetch();
-        bar.step();
-
-        uint32 entry = fields[0].GetUInt32();
-        std::string str = fields[1].GetCppString();
-        mMangosStringMap[entry] = str;
-        ++count;
-
-    } while (result->NextRow());
-
-    delete result;
-
-    sLog.outString();
-    sLog.outString( ">> Loaded %u MaNGOS strings", count );
-    return true;
-}
-
-void ObjectMgr::LoadMangosStringLocales()
-{
-    QueryResult *result = WorldDatabase.Query("SELECT entry,content_loc1,content_loc2,content_loc3,content_loc4,content_loc5,content_loc6,content_loc7,content_loc8 FROM mangos_string WHERE "
-        "NOT(content_loc1 IS NULL AND content_loc2 IS NULL AND content_loc3 IS NULL AND content_loc4 IS NULL AND content_loc5 IS NULL AND content_loc6 IS NULL AND content_loc7 IS NULL AND content_loc8 IS NULL)");
-
-    if(!result)
-    {
-        barGoLink bar(1);
-
-        bar.step();
-
-        sLog.outString("");
-        sLog.outString(">> Loaded 0 MaNGOS locale strings. DB table `mangos_string` contains no localization.");
-        return;
-    }
-
-    barGoLink bar(result->GetRowCount());
 
     do
     {
         Field *fields = result->Fetch();
         bar.step();
 
-        uint32 entry = fields[0].GetUInt32();
+        int32 entry = fields[0].GetInt32();
+
+        if(entry==0)
+        {
+            sLog.outString("Table `%s` contain reserved entry 0, ignored.",table);
+            continue;
+        }
+        else if(entry < 0)
+        {
+            if(positive_entries)
+            {
+                sLog.outString("Table `%s` contain unexpected negative entry %i, ignored.",table,entry);
+                continue;
+            }
+        }
+        else
+        {
+            if(!positive_entries)
+            {
+                sLog.outString("Table `%s` contain unexpected positive entry %i, ignored.",table,entry);
+                continue;
+            }
+        }
 
         MangosStringLocale& data = mMangosStringLocaleMap[entry];
 
+        if(data.Content.size() < 1)
+            data.Content.resize(1);
+
+        // 0 -> default, idx in to idx+1 
+        data.Content[0] = fields[1].GetCppString();
+
         for(int i = 1; i < MAX_LOCALE; ++i)
         {
-            std::string str = fields[i].GetCppString();
+            std::string str = fields[i+1].GetCppString();
             if(!str.empty())
             {
                 int idx = GetOrNewIndexForLocale(LocaleConstant(i));
                 if(idx >= 0)
                 {
-                    if(data.Content.size() <= idx)
-                        data.Content.resize(idx+1);
+                    // 0 -> default, idx in to idx+1 
+                    if(data.Content.size() <= idx+1)
+                        data.Content.resize(idx+2);
 
-                    data.Content[idx] = str;
+                    data.Content[idx+1] = str;
                 }
             }
         }
@@ -6272,18 +6275,27 @@ void ObjectMgr::LoadMangosStringLocales()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u MaNGOS locale strings", mMangosStringLocaleMap.size() );
+    sLog.outString( ">> Loaded %u MaNGOS strings from table %s", mMangosStringLocaleMap.size(),table);
+    return true;
 }
 
-const char *ObjectMgr::GetMangosString(uint32 entry, int locale_idx) const
+const char *ObjectMgr::GetMangosString(int32 entry, int locale_idx) const
 {
-    if (locale_idx >= 0)
+    // locale_idx==-1 -> default, locale_idx >= 0 in to idx+1 
+    // Content[0] always exist if exist MangosStringLocale
+    if(MangosStringLocale const *msl = GetMangosStringLocale(entry))
     {
-        if(MangosStringLocale const *msl = GetMangosStringLocale(entry))
-            if(msl->Content.size() > locale_idx && !msl->Content[locale_idx].empty())
-                return msl->Content[locale_idx].c_str();
+        if(msl->Content.size() > locale_idx+1 && !msl->Content[locale_idx+1].empty())
+            return msl->Content[locale_idx+1].c_str();
+        else
+            return msl->Content[0].c_str();
     }
-    return GetMangosStringDefault(entry);
+
+    if(entry > 0)
+        sLog.outErrorDb("Entry %i not found in `mangos_string` table.",entry);
+    else
+        sLog.outErrorDb("Mangos string entry %i not found in DB.",entry);
+    return "<error>";
 }
 
 void ObjectMgr::LoadFishingBaseSkillLevel()
@@ -6564,4 +6576,10 @@ SkillRangeType GetSkillRangeType(SkillLineEntry const *pSkill, bool racial)
         case SKILL_CATEGORY_NOT_DISPLAYED:                  //only GENEREC(DND)
             return SKILL_RANGE_NONE;
     }
+}
+
+bool LoadMangosStrings(DatabaseType& db, char const* table)
+{
+    // for scripting localized strings allowed use _only_ negative entries
+    return objmgr.LoadMangosStrings(db,table,false);
 }

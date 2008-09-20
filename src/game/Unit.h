@@ -791,7 +791,13 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool IsHostileToPlayers() const;
         bool IsFriendlyTo(Unit const* unit) const;
         bool IsNeutralToAll() const;
-        bool IsContestedGuard() const { return getFactionTemplateEntry()?getFactionTemplateEntry()->IsContestedGuardFaction():false; }
+        bool IsContestedGuard() const
+        {
+            if(FactionTemplateEntry const* entry = getFactionTemplateEntry())
+                return entry->IsContestedGuardFaction();
+
+            return false;
+        }
         bool IsPvP() const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); }
         void SetPvP(bool state) { if(state) SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); else RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); }
         uint32 GetCreatureType() const;

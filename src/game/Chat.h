@@ -71,12 +71,12 @@ class ChatHandler
 
         static char* LineFromMessage(char*& pos) { char* start = strtok(pos,"\n"); pos = NULL; return start; }
 
-        const char *GetMangosString(uint32 entry);
+        const char *GetMangosString(int32 entry);
 
         void SendSysMessage(          const char *str);
-        void SendSysMessage(          uint32     entry);
+        void SendSysMessage(          int32     entry);
         void PSendSysMessage(         const char *format, ...) ATTR_PRINTF(2,3);
-        void PSendSysMessage(         uint32     entry, ...  );
+        void PSendSysMessage(         int32     entry, ...  );
 
         int ParseCommands(const char* text);
 
@@ -172,9 +172,9 @@ class ChatHandler
         bool HandleReloadLootTemplatesGameobjectCommand(const char* args);
         bool HandleReloadLootTemplatesItemCommand(const char* args);
         bool HandleReloadLootTemplatesPickpocketingCommand(const char* args);
-        bool HandleReloadLootTemplatesSkinningCommand(const char* args);
         bool HandleReloadLootTemplatesProspectingCommand(const char* args);
         bool HandleReloadLootTemplatesQuestMailCommand(const char* args);
+        bool HandleReloadLootTemplatesSkinningCommand(const char* args);
         bool HandleReloadMangosStringCommand(const char* args);
         bool HandleReloadQuestAreaTriggersCommand(const char* args);
         bool HandleReloadQuestEndScriptsCommand(const char* args);
