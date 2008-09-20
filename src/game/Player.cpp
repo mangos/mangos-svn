@@ -1297,9 +1297,11 @@ void Player::BuildEnumData( QueryResult * result, WorldPacket * p_data )
         char_flags |= CHARACTER_FLAG_GHOST;
     if(HasAtLoginFlag(AT_LOGIN_RENAME))
         char_flags |= CHARACTER_FLAG_RENAME;
-    if(m_declinedname)
+    // always send the flag if declined names aren't used
+    // to let the client select a default method of declining the name
+    if(!sWorld.getConfig(CONFIG_DECLINED_NAMES_USED) || (result && result->Fetch()[12].GetCppString() != ""))
         char_flags |= CHARACTER_FLAG_DECLINED;
-       
+
     *p_data << (uint32)char_flags;                          // character flags
 
     *p_data << (uint8)1;                                    // unknown
@@ -13241,14 +13243,7 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
     if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) )
         m_deathState = DEAD;
     
-    _LoadDeclinedNames(LoadDeclinedNameFromDB(GetGUIDLow()));
-
     return true;
-}
-
-QueryResult* Player::LoadDeclinedNameFromDB(uint32 guid)
-{
-    return CharacterDatabase.PQuery("SELECT genitive, dative, accusative, instrumental, prepositional FROM character_declinedname WHERE guid = '%u'",guid);
 }
 
 void Player::_LoadDeclinedNames(QueryResult* result)

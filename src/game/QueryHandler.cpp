@@ -19,6 +19,7 @@
 #include "Common.h"
 #include "Language.h"
 #include "Database/DatabaseEnv.h"
+#include "Database/DatabaseImpl.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Opcodes.h"
@@ -56,40 +57,70 @@ void WorldSession::SendNameQueryOpcode(Player *p)
     SendPacket(&data);
 }
 
-void WorldSession::SendNameQueryOpcodeFromDB(uint64 guid)
+class NameQueryHandler
 {
-    std::string name;
-    uint32 field;
-    if(!objmgr.GetPlayerNameByGUID(guid, name))
+public:
+    void SendNameQueryOpcodeFromDBCallBack(QueryResult *result, uint32 accountId)
     {
-        name = GetMangosString(LANG_NON_EXIST_CHARACTER);
-        field = 0;
-    }
-    else
-        field = Player::GetUInt32ValueFromDB(UNIT_FIELD_BYTES_0, guid);
-                                                            // guess size
-    WorldPacket data( SMSG_NAME_QUERY_RESPONSE, (8+1+4+4+4+10) );
-    data << guid;
-    data << name;
-    data << (uint8)0;
-    data << (uint32)(field & 0xFF);
-    data << (uint32)((field >> 16) & 0xFF);
-    data << (uint32)((field >> 8) & 0xFF);
+        if(!result)
+            return;
 
-    DeclinedName* names = NULL;
-    QueryResult *result = Player::LoadDeclinedNameFromDB(GUID_LOPART(guid));
-    if(result)
-    {
-        data << (uint8)1;                                   // is declined
+        WorldSession * session = sWorld.FindSession(accountId);
+        if(!session)
+        {
+            delete result;
+            return;
+        }
+
         Field *fields = result->Fetch();
-        for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
-            data << fields[i].GetCppString();
+        uint32 guid      = fields[0].GetUInt32();
+        std::string name = fields[1].GetCppString();
+        uint32 field     = 0;
+        if(name == "")
+            name         = session->GetMangosString(LANG_NON_EXIST_CHARACTER);
+        else
+            field        = fields[2].GetUInt32();
+
+                                                            // guess size
+        WorldPacket data( SMSG_NAME_QUERY_RESPONSE, (8+1+4+4+4+10) );
+        data << guid;
+        data << name;
+        data << (uint8)0;
+        data << (uint32)(field & 0xFF);
+        data << (uint32)((field >> 16) & 0xFF);
+        data << (uint32)((field >> 8) & 0xFF);
+
+        // if the first declined name field (3) is empty, the rest must be too
+        if(sWorld.getConfig(CONFIG_DECLINED_NAMES_USED) && fields[3].GetCppString() != "")
+        {
+            data << (uint8)1;                                   // is declined
+            for(int i = 3; i < MAX_DECLINED_NAME_CASES+3; ++i)
+                data << fields[i].GetCppString();
+        }
+        else
+            data << (uint8)0;                                   // is declined
+        
+        session->SendPacket( &data );
         delete result;
     }
-    else
-        data << (uint8)0;                                   // is declined
+} nameQueryHandler;
 
-    SendPacket( &data );
+void WorldSession::SendNameQueryOpcodeFromDB(uint64 guid)
+{
+    CharacterDatabase.AsyncPQuery(&nameQueryHandler, &NameQueryHandler::SendNameQueryOpcodeFromDBCallBack, GetAccountId(),
+        !sWorld.getConfig(CONFIG_DECLINED_NAMES_USED) ?
+    //   ------- Query Without Declined Names --------
+    //          0                1     2
+        "SELECT characters.guid, name, SUBSTRING(data, LENGTH(SUBSTRING_INDEX(data, ' ', '%u'))+2, LENGTH(SUBSTRING_INDEX(data, ' ', '%u')) - LENGTH(SUBSTRING_INDEX(data, ' ', '%u'))-1) "
+        "FROM characters WHERE guid = '%u'"
+        :
+    //   --------- Query With Declined Names ---------
+    //          0                1     2
+        "SELECT characters.guid, name, SUBSTRING(data, LENGTH(SUBSTRING_INDEX(data, ' ', '%u'))+2, LENGTH(SUBSTRING_INDEX(data, ' ', '%u')) - LENGTH(SUBSTRING_INDEX(data, ' ', '%u'))-1), "
+    //   3         4       5           6             7
+        "genitive, dative, accusative, instrumental, prepositional "
+        "FROM characters LEFT JOIN character_declinedname ON characters.guid = character_declinedname.guid WHERE characters.guid = '%u'",
+        UNIT_FIELD_BYTES_0, UNIT_FIELD_BYTES_0+1, UNIT_FIELD_BYTES_0, GUID_LOPART(guid));
 }
 
 void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )

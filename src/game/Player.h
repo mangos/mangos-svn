@@ -2006,7 +2006,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         WorldLocation& GetTeleportDest() { return m_teleport_dest; }
 
         DeclinedName const* GetDeclinedNames() const { return m_declinedname; }
-        static QueryResult* LoadDeclinedNameFromDB(uint32 guid);
 
     protected:
 
