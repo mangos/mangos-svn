@@ -54,8 +54,8 @@ bool normalizePlayerName(std::string& name)
     if(name.empty())
         return false;
 
-    wchar_t wstr_buf[MAX_PLAYER_NAME+1];
-    size_t wstr_len = MAX_PLAYER_NAME;
+    wchar_t wstr_buf[MAX_INTERNAL_PLAYER_NAME+1];
+    size_t wstr_len = MAX_INTERNAL_PLAYER_NAME;
 
     if(!Utf8toWStr(name,&wstr_buf[0],wstr_len))
         return false;

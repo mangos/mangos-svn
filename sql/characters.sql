@@ -252,11 +252,11 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `character_declinedname`;
 CREATE TABLE `character_declinedname` (
   `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `genitive` varchar(12) NOT NULL default '',
-  `dative` varchar(12) NOT NULL default '',
-  `accusative` varchar(12) NOT NULL default '',
-  `instrumental` varchar(12) NOT NULL default '',
-  `prepositional` varchar(12) NOT NULL default '',
+  `genitive` varchar(15) NOT NULL default '',
+  `dative` varchar(15) NOT NULL default '',
+  `accusative` varchar(15) NOT NULL default '',
+  `instrumental` varchar(15) NOT NULL default '',
+  `prepositional` varchar(15) NOT NULL default '',
   PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
 
@@ -695,6 +695,7 @@ UNLOCK TABLES;
 -- ----------------------------
 -- Table structure for group_instance
 -- ----------------------------
+DROP TABLE IF EXISTS `group_instance`;
 CREATE TABLE `group_instance` (
   `leaderGuid` int(11) unsigned NOT NULL default '0',
   `instance` int(11) unsigned NOT NULL default '0',
@@ -978,6 +979,7 @@ UNLOCK TABLES;
 -- ----------------------------
 -- Table structure for instance_reset
 -- ----------------------------
+DROP TABLE IF EXISTS `instance_reset`;
 CREATE TABLE `instance_reset` (
   `mapid` int(11) unsigned NOT NULL default '0',
   `resettime` bigint(40) NOT NULL default '0',
