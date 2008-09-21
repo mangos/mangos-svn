@@ -118,17 +118,11 @@ ObjectMgr::~ObjectMgr()
 
     // free only if loaded
     for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
-    {
         delete[] playerClassInfo[class_].levelInfo;
-    }
 
     for (int race = 0; race < MAX_RACES; ++race)
-    {
         for (int class_ = 0; class_ < MAX_CLASSES; ++class_)
-        {
             delete[] playerInfo[race][class_].levelInfo;
-        }
-    }
 
     // free group and guild objects
     for (GroupSet::iterator itr = mGroupSet.begin(); itr != mGroupSet.end(); ++itr)
@@ -142,84 +136,72 @@ ObjectMgr::~ObjectMgr()
 
 Group * ObjectMgr::GetGroupByLeader(const uint64 &guid) const
 {
-    GroupSet::const_iterator itr;
-    for (itr = mGroupSet.begin(); itr != mGroupSet.end(); ++itr)
-    {
+    for(GroupSet::const_iterator itr = mGroupSet.begin(); itr != mGroupSet.end(); ++itr)
         if ((*itr)->GetLeaderGUID() == guid)
-        {
             return *itr;
-        }
-    }
 
     return NULL;
 }
 
 Guild * ObjectMgr::GetGuildById(const uint32 GuildId) const
 {
-    GuildSet::const_iterator itr;
-    for (itr = mGuildSet.begin(); itr != mGuildSet.end(); itr++)
-    {
+    for(GuildSet::const_iterator itr = mGuildSet.begin(); itr != mGuildSet.end(); itr++)
         if ((*itr)->GetId() == GuildId)
-        {
             return *itr;
-        }
-    }
 
     return NULL;
 }
 
 Guild * ObjectMgr::GetGuildByName(std::string guildname) const
 {
-    GuildSet::const_iterator itr;
-    for (itr = mGuildSet.begin(); itr != mGuildSet.end(); itr++)
-    {
+    for(GuildSet::const_iterator itr = mGuildSet.begin(); itr != mGuildSet.end(); itr++)
         if ((*itr)->GetName() == guildname)
-        {
             return *itr;
-        }
-    }
 
     return NULL;
 }
 
 std::string ObjectMgr::GetGuildNameById(const uint32 GuildId) const
 {
-    GuildSet::const_iterator itr;
-    for (itr = mGuildSet.begin(); itr != mGuildSet.end(); itr++)
-    {
+    for(GuildSet::const_iterator itr = mGuildSet.begin(); itr != mGuildSet.end(); itr++)
         if ((*itr)->GetId() == GuildId)
-        {
             return (*itr)->GetName();
-        }
-    }
 
     return "";
 }
 
-ArenaTeam * ObjectMgr::GetArenaTeamById(const uint32 ArenaTeamId) const
+Guild* ObjectMgr::GetGuildByLeader(const uint64 &guid) const
 {
-    ArenaTeamSet::const_iterator itr;
-    for (itr = mArenaTeamSet.begin(); itr != mArenaTeamSet.end(); itr++)
-    {
-        if ((*itr)->GetId() == ArenaTeamId)
-        {
+    for(GuildSet::const_iterator itr = mGuildSet.begin(); itr != mGuildSet.end(); ++itr)
+        if( (*itr)->GetLeader() == guid)
             return *itr;
-        }
-    }
 
     return NULL;
 }
 
-ArenaTeam * ObjectMgr::GetArenaTeamByName(std::string arenateamname) const
+ArenaTeam* ObjectMgr::GetArenaTeamById(const uint32 ArenaTeamId) const
 {
-    ArenaTeamSet::const_iterator itr;
-    for (itr = mArenaTeamSet.begin(); itr != mArenaTeamSet.end(); itr++)
-    {
-        if ((*itr)->GetName() == arenateamname)
-        {
+    for(ArenaTeamSet::const_iterator itr = mArenaTeamSet.begin(); itr != mArenaTeamSet.end(); itr++)
+        if ((*itr)->GetId() == ArenaTeamId)
             return *itr;
-        }
-    }
+
+    return NULL;
+}
+
+ArenaTeam* ObjectMgr::GetArenaTeamByName(std::string arenateamname) const
+{
+    for(ArenaTeamSet::const_iterator itr = mArenaTeamSet.begin(); itr != mArenaTeamSet.end(); itr++)
+        if ((*itr)->GetName() == arenateamname)
+            return *itr;
+
+    return NULL;
+}
+
+ArenaTeam* ObjectMgr::GetArenaTeamByCapitan(uint64 const& guid) const
+{
+    for(ArenaTeamSet::const_iterator itr = mArenaTeamSet.begin(); itr != mArenaTeamSet.end(); itr++)
+        if ((*itr)->GetCaptain() == guid)
+            return *itr;
 
     return NULL;
 }

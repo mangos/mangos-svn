@@ -267,6 +267,7 @@ class ObjectMgr
         void AddGroup(Group* group) { mGroupSet.insert( group ); }
         void RemoveGroup(Group* group) { mGroupSet.erase( group ); }
 
+        Guild* GetGuildByLeader(uint64 const&guid) const;
         Guild* GetGuildById(const uint32 GuildId) const;
         Guild* GetGuildByName(std::string guildname) const;
         std::string GetGuildNameById(const uint32 GuildId) const;
@@ -275,6 +276,7 @@ class ObjectMgr
 
         ArenaTeam* GetArenaTeamById(const uint32 ArenaTeamId) const;
         ArenaTeam* GetArenaTeamByName(std::string ArenaTeamName) const;
+        ArenaTeam* GetArenaTeamByCapitan(uint64 const& guid) const;
         void AddArenaTeam(ArenaTeam* arenateam) { mArenaTeamSet.insert( arenateam ); }
         void RemoveArenaTeam(ArenaTeam* arenateam) { mArenaTeamSet.erase( arenateam ); }
 
