@@ -83,7 +83,7 @@ public:
 
                                                             // guess size
         WorldPacket data( SMSG_NAME_QUERY_RESPONSE, (8+1+4+4+4+10) );
-        data << guid;
+        data << MAKE_NEW_GUID(guid, 0, HIGHGUID_PLAYER);
         data << name;
         data << (uint8)0;
         data << (uint32)(field & 0xFF);
