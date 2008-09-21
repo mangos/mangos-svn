@@ -1004,7 +1004,7 @@ void LootTemplate::CheckLootRefs(LootTemplateMap const& store, LootIdSet* ref_se
 
 void LoadLootTemplates_Creature()
 {
-    LootIdSet ids_set;
+    LootIdSet ids_set, ids_setUsed;
     LootTemplates_Creature.LoadAndCollectLootIds(ids_set);
 
     // remove real entries and check existence loot
@@ -1017,10 +1017,12 @@ void LoadLootTemplates_Creature()
                 if(!ids_set.count(lootid))
                     LootTemplates_Creature.ReportNotExistedId(lootid);
                 else
-                    ids_set.erase(lootid);
+                    ids_setUsed.insert(lootid);
             }
         }
     }
+    for(LootIdSet::const_iterator itr = ids_setUsed.begin(); itr != ids_setUsed.end(); ++itr)
+        ids_set.erase(*itr);
 
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Creature.ReportUnusedIds(ids_set);
@@ -1028,7 +1030,7 @@ void LoadLootTemplates_Creature()
 
 void LoadLootTemplates_Disenchant()
 {
-    LootIdSet ids_set;
+    LootIdSet ids_set, ids_setUsed;
     LootTemplates_Disenchant.LoadAndCollectLootIds(ids_set);
 
     // remove real entries and check existence loot
@@ -1041,11 +1043,12 @@ void LoadLootTemplates_Disenchant()
                 if(!ids_set.count(lootid))
                     LootTemplates_Disenchant.ReportNotExistedId(lootid);
                 else
-                    ids_set.erase(lootid);
+                    ids_setUsed.insert(lootid);
             }
         }
     }
-
+    for(LootIdSet::const_iterator itr = ids_setUsed.begin(); itr != ids_setUsed.end(); ++itr)
+        ids_set.erase(*itr);
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Disenchant.ReportUnusedIds(ids_set);
 }
@@ -1069,7 +1072,7 @@ void LoadLootTemplates_Fishing()
 
 void LoadLootTemplates_Gameobject()
 {
-    LootIdSet ids_set;
+    LootIdSet ids_set, ids_setUsed;
     LootTemplates_Gameobject.LoadAndCollectLootIds(ids_set);
 
     // remove real entries and check existence loot
@@ -1082,10 +1085,12 @@ void LoadLootTemplates_Gameobject()
                 if(!ids_set.count(lootid))
                     LootTemplates_Gameobject.ReportNotExistedId(lootid);
                 else
-                    ids_set.erase(lootid);
+                    ids_setUsed.insert(lootid);
             }
         }
     }
+    for(LootIdSet::const_iterator itr = ids_setUsed.begin(); itr != ids_setUsed.end(); ++itr)
+        ids_set.erase(*itr);
 
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Gameobject.ReportUnusedIds(ids_set);
@@ -1108,7 +1113,7 @@ void LoadLootTemplates_Item()
 
 void LoadLootTemplates_Pickpocketing()
 {
-    LootIdSet ids_set;
+    LootIdSet ids_set, ids_setUsed;
     LootTemplates_Pickpocketing.LoadAndCollectLootIds(ids_set);
 
     // remove real entries and check existence loot
@@ -1121,10 +1126,12 @@ void LoadLootTemplates_Pickpocketing()
                 if(!ids_set.count(lootid))
                     LootTemplates_Pickpocketing.ReportNotExistedId(lootid);
                 else
-                    ids_set.erase(lootid);
+                    ids_setUsed.insert(lootid);
             }
         }
     }
+    for(LootIdSet::const_iterator itr = ids_setUsed.begin(); itr != ids_setUsed.end(); ++itr)
+        ids_set.erase(*itr);
 
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Pickpocketing.ReportUnusedIds(ids_set);
@@ -1162,7 +1169,7 @@ void LoadLootTemplates_QuestMail()
 
 void LoadLootTemplates_Skinning()
 {
-    LootIdSet ids_set;
+    LootIdSet ids_set, ids_setUsed;
     LootTemplates_Skinning.LoadAndCollectLootIds(ids_set);
 
     // remove real entries and check existence loot
@@ -1175,10 +1182,12 @@ void LoadLootTemplates_Skinning()
                 if(!ids_set.count(lootid))
                     LootTemplates_Skinning.ReportNotExistedId(lootid);
                 else
-                    ids_set.erase(lootid);
+                    ids_setUsed.insert(lootid);
             }
         }
     }
+    for(LootIdSet::const_iterator itr = ids_setUsed.begin(); itr != ids_setUsed.end(); ++itr)
+        ids_set.erase(*itr);
 
     // output error for any still listed (not referenced from appropriate table) ids
     LootTemplates_Skinning.ReportUnusedIds(ids_set);
