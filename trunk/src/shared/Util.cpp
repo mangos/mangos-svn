@@ -337,30 +337,32 @@ std::wstring GetMainPartOfName(std::wstring wname, uint32 declension)
     if(wname.size() < 1 || !isCyrillicCharacter(wname[0]) || declension > 5)
         return wname;
 
-    static wchar_t const aEnd[]    = { wchar_t(1), wchar_t(0x0430),wchar_t(0x0000)};
-    static wchar_t const oEnd[]    = { wchar_t(1), wchar_t(0x043E),wchar_t(0x0000)};
-    static wchar_t const yaEnd[]   = { wchar_t(1), wchar_t(0x044F),wchar_t(0x0000)};
-    static wchar_t const ieEnd[]   = { wchar_t(1), wchar_t(0x0435),wchar_t(0x0000)};
-    static wchar_t const iEnd[]    = { wchar_t(1), wchar_t(0x0438),wchar_t(0x0000)};
-    static wchar_t const yeruEnd[] = { wchar_t(1), wchar_t(0x044B),wchar_t(0x0000)};
-    static wchar_t const uEnd[]    = { wchar_t(1), wchar_t(0x0443),wchar_t(0x0000)};
-    static wchar_t const yuEnd[]   = { wchar_t(1), wchar_t(0x044E),wchar_t(0x0000)};
-    static wchar_t const ojEnd[]   = { wchar_t(2), wchar_t(0x043E),wchar_t(0x0439),wchar_t(0x0000)};
-    static wchar_t const iejEnd[]  = { wchar_t(2), wchar_t(0x0435),wchar_t(0x0439),wchar_t(0x0000)};
-    static wchar_t const iojEnd[]  = { wchar_t(2), wchar_t(0x0451),wchar_t(0x0439),wchar_t(0x0000)};
-    static wchar_t const omEnd[]   = { wchar_t(2), wchar_t(0x043E),wchar_t(0x043C),wchar_t(0x0000)};
-    static wchar_t const iomEnd[]  = { wchar_t(2), wchar_t(0x0451),wchar_t(0x043C),wchar_t(0x0000)};
-    static wchar_t const iemEnd[]  = { wchar_t(2), wchar_t(0x0435),wchar_t(0x043C),wchar_t(0x0000)};
-    static wchar_t const softEnd[] = { wchar_t(1), wchar_t(0x044C),wchar_t(0x0000)};
-    static wchar_t const jEnd[]    = { wchar_t(1), wchar_t(0x0439),wchar_t(0x0000)};
+    // Important: end length must be <= MAX_INTERNAL_PLAYER_NAME-MAX_PLAYER_NAME (3 currently)
+
+    static wchar_t const a_End[]    = { wchar_t(1), wchar_t(0x0430),wchar_t(0x0000)};
+    static wchar_t const o_End[]    = { wchar_t(1), wchar_t(0x043E),wchar_t(0x0000)};
+    static wchar_t const ya_End[]   = { wchar_t(1), wchar_t(0x044F),wchar_t(0x0000)};
+    static wchar_t const ie_End[]   = { wchar_t(1), wchar_t(0x0435),wchar_t(0x0000)};
+    static wchar_t const i_End[]    = { wchar_t(1), wchar_t(0x0438),wchar_t(0x0000)};
+    static wchar_t const yeru_End[] = { wchar_t(1), wchar_t(0x044B),wchar_t(0x0000)};
+    static wchar_t const u_End[]    = { wchar_t(1), wchar_t(0x0443),wchar_t(0x0000)};
+    static wchar_t const yu_End[]   = { wchar_t(1), wchar_t(0x044E),wchar_t(0x0000)};
+    static wchar_t const oj_End[]   = { wchar_t(2), wchar_t(0x043E),wchar_t(0x0439),wchar_t(0x0000)};
+    static wchar_t const ie_j_End[] = { wchar_t(2), wchar_t(0x0435),wchar_t(0x0439),wchar_t(0x0000)};
+    static wchar_t const io_j_End[] = { wchar_t(2), wchar_t(0x0451),wchar_t(0x0439),wchar_t(0x0000)};
+    static wchar_t const o_m_End[]  = { wchar_t(2), wchar_t(0x043E),wchar_t(0x043C),wchar_t(0x0000)};
+    static wchar_t const io_m_End[] = { wchar_t(2), wchar_t(0x0451),wchar_t(0x043C),wchar_t(0x0000)};
+    static wchar_t const ie_m_End[] = { wchar_t(2), wchar_t(0x0435),wchar_t(0x043C),wchar_t(0x0000)};
+    static wchar_t const soft_End[] = { wchar_t(1), wchar_t(0x044C),wchar_t(0x0000)};
+    static wchar_t const j_End[]    = { wchar_t(1), wchar_t(0x0439),wchar_t(0x0000)};
 
     static wchar_t const* const dropEnds[6][8] = {
-        { &aEnd[1], &oEnd[1],  &yaEnd[1],  &ieEnd[1], &softEnd[1], &jEnd[1],  NULL,      NULL },
-        { &aEnd[1], &yaEnd[1], &yeruEnd[1],&iEnd[1],  NULL,        NULL,      NULL,      NULL },
-        { &ieEnd[1],&uEnd[1],  &yuEnd[1],  &iEnd[1],  NULL,        NULL,      NULL,      NULL },
-        { &uEnd[1], &yuEnd[1], &oEnd[1],   &ieEnd[1], &softEnd[1], &yaEnd[1], NULL,      NULL },
-        { &ojEnd[1],&iojEnd[1],&iejEnd[1], &omEnd[1], &iomEnd[1],  &iemEnd[1],&yuEnd[1], NULL },
-        { &ieEnd[1],&iEnd[1],  NULL,       NULL,      NULL,        NULL,      NULL,      NULL }
+        { &a_End[1],  &o_End[1],    &ya_End[1],   &ie_End[1],  &soft_End[1], &j_End[1],    NULL,       NULL },
+        { &a_End[1],  &ya_End[1],   &yeru_End[1], &i_End[1],   NULL,         NULL,         NULL,       NULL },
+        { &ie_End[1], &u_End[1],    &yu_End[1],   &i_End[1],   NULL,         NULL,         NULL,       NULL },
+        { &u_End[1],  &yu_End[1],   &o_End[1],    &ie_End[1],  &soft_End[1], &ya_End[1],   &a_End[1],  NULL },
+        { &oj_End[1], &io_j_End[1], &ie_j_End[1], &o_m_End[1], &io_m_End[1], &ie_m_End[1], &yu_End[1], NULL },
+        { &ie_End[1], &i_End[1],    NULL,         NULL,        NULL,         NULL,         NULL,       NULL }
     };
 
     for(wchar_t const * const* itr = &dropEnds[declension][0]; *itr; ++itr)
