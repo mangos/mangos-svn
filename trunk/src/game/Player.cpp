@@ -14630,7 +14630,7 @@ void Player::ConvertInstancesToGroup(Player *player, Group *group, uint64 player
     bool has_binds = false;
     bool has_solo = false;
 
-    if(player) { player_guid = player->GetGUID(); group = player->GetGroup(); }
+    if(player) { player_guid = player->GetGUID(); if(!group) group = player->GetGroup(); }
     assert(player_guid);
 
     // copy all binds to the group, when changing leader it's assumed the character
