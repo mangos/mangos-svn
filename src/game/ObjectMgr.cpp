@@ -5714,10 +5714,17 @@ void ObjectMgr::LoadWeatherZoneChances()
 
 void ObjectMgr::SaveCreatureRespawnTime(uint32 loguid, uint32 instance, time_t t)
 {
+    ObjectMgr::GuardType g(mCreatureRespawnTimesLock);
     mCreatureRespawnTimes[MAKE_PAIR64(loguid,instance)] = t;
     WorldDatabase.PExecute("DELETE FROM creature_respawn WHERE guid = '%u' AND instance = '%u'", loguid, instance);
     if(t)
         WorldDatabase.PExecute("INSERT INTO creature_respawn VALUES ( '%u', '" I64FMTD "', '%u' )", loguid, uint64(t), instance);
+}
+
+time_t GetCreatureRespawnTime(uint32 loguid, uint32 instance)
+{ 
+    ObjectMgr::GuardType g(mCreatureRespawnTimesLock); 
+    return mCreatureRespawnTimes[MAKE_PAIR64(loguid,instance)];
 }
 
 void ObjectMgr::DeleteCreatureData(uint32 guid)

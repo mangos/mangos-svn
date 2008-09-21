@@ -110,7 +110,6 @@ enum Field::DataTypes QueryResultPostgre::ConvertNativeType(Oid  pOid ) const
         case INT2VECTOROID:                                 // Int
         case INT4OID:                                       // Int
         case OIDOID:                                        // Int
-        case BITOID:                                        // UInt
         case CHAROID:                                       // UInt
         case INT8OID:                                       // LongLong
             return Field::DB_TYPE_INTEGER;
@@ -123,12 +122,10 @@ enum Field::DataTypes QueryResultPostgre::ConvertNativeType(Oid  pOid ) const
         case BYTEAOID:  ByteArray;
 */
         case LSEGOID:
-        case MACADDROID:
         case OIDVECTOROID:
         case PATHOID:
         case POINTOID:
         case POLYGONOID:
-        case REFCURSOROID:
         case REGPROCOID:
         case TIDOID:
         case TINTERVALOID:
