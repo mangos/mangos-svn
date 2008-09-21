@@ -399,7 +399,7 @@ void BattleGround::EndBattleGround(uint32 winner)
             RewardMark(plr,ITEM_LOSER_COUNT);
         }
 
-        plr->CombatStop();
+        plr->CombatStopWithPets(true);
 
         BlockMovement(plr);
 
