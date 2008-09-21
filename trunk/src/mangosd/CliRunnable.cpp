@@ -723,6 +723,9 @@ void CliSetGM(char *command,pPrintf zprintf)
     ///- Escape the account name to allow quotes in names
     loginDatabase.escape_string(safe_account_name);
 
+    ///- Convert Account name to Upper Format
+    accmgr.normilizeString(safe_account_name);
+
     ///- Try to find the account, then update the GM level
     // No SQL injection (account name is escaped)
     QueryResult *result = loginDatabase.PQuery("SELECT id FROM account WHERE username = '%s'",safe_account_name.c_str());
@@ -1060,7 +1063,11 @@ void CliSetTBC(char *command,pPrintf zprintf)
     if(!consoleToUtf8(szAcc,safe_account_name))             // convert from console encoding to utf8
         return;
 
+    ///- Escape the account name to allow quotes in names
     loginDatabase.escape_string(safe_account_name);
+
+    ///- Convert Account name to Upper Format
+    accmgr.normilizeString(safe_account_name);
 
     // No SQL injection (account name is escaped)
     QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM account WHERE username = '%s'",safe_account_name.c_str());

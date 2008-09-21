@@ -626,7 +626,7 @@ class ObjectMgr
         void AddCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid, uint32 instance);
         void DeleteCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid);
 
-        time_t GetCreatureRespawnTime(uint32 loguid, uint32 instance) { return mCreatureRespawnTimes[MAKE_PAIR64(loguid,instance)]; }
+        time_t GetCreatureRespawnTime(uint32 loguid, uint32 instance);
         void SaveCreatureRespawnTime(uint32 loguid, uint32 instance, time_t t);
         time_t GetGORespawnTime(uint32 loguid, uint32 instance);
         void SaveGORespawnTime(uint32 loguid, uint32 instance, time_t t);
@@ -764,7 +764,8 @@ class ObjectMgr
         RespawnTimes mGORespawnTimes;
         typedef ZThread::FastMutex LockType;
         typedef ZThread::Guard< LockType > GuardType;
-        LockType mGORespawnTimesLock;        
+        LockType mGORespawnTimesLock;
+        LockType mCreatureRespawnTimesLock;
 
         typedef std::vector<uint32> GuildBankTabPriceMap;
         GuildBankTabPriceMap mGuildBankTabPrice;

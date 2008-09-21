@@ -10579,7 +10579,7 @@ UNLOCK TABLES;
 --
 
 DROP TABLE IF EXISTS `reference_loot_template`;
-CREATE TABLE `creature_loot_template` (
+CREATE TABLE `reference_loot_template` (
   `entry` mediumint(8) unsigned NOT NULL default '0',
   `item` mediumint(8) unsigned NOT NULL default '0',
   `ChanceOrQuestChance` float NOT NULL default '100',
