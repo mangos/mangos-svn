@@ -25,6 +25,7 @@
 #include <list>
 #include <map>
 #include "Utilities/HashMap.h"
+#include "Database/DatabaseEnv.h"
 
 struct InstanceTemplate;
 struct MapEntry;
@@ -133,6 +134,9 @@ class MANGOS_DLL_DECL InstanceSaveManager : public MaNGOS::Singleton<InstanceSav
         typedef std::multimap<time_t /*resetTime*/, InstResetEvent> ResetTimeQueue;
         typedef std::vector<time_t /*resetTime*/> ResetTimeVector;
 
+        void CleanupInstances();
+        void PackInstances();
+
         void LoadResetTimes();
         time_t GetResetTimeFor(uint32 mapid) { return m_resetTimeByMapId[mapid]; }
         void ScheduleReset(bool add, time_t time, InstResetEvent event);
@@ -154,6 +158,7 @@ class MANGOS_DLL_DECL InstanceSaveManager : public MaNGOS::Singleton<InstanceSav
         void _ResetOrWarnAll(uint32 mapid, bool warn, uint32 timeleft);
         void _ResetInstance(uint32 mapid, uint32 instanceId);
         void _ResetSave(InstanceSaveHashMap::iterator &itr);
+        void _DelHelper(DatabaseType &db, const char *fields, const char *table, const char *queryTail,...);
         // used during global instance resets
         bool lock_instLists;
         // fast lookup by instance id

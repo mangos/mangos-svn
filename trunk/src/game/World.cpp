@@ -848,10 +848,10 @@ void World::SetInitialWorldSettings()
 
     ///- Clean up and pack instances
     sLog.outString( "Cleaning up instances..." );
-    objmgr.CleanupInstances();                              // must be called before `creature_respawn`/`gameobject_respawn` tables
+    sInstanceSaveManager.CleanupInstances();                              // must be called before `creature_respawn`/`gameobject_respawn` tables
 
     sLog.outString( "Packing instances..." );
-    objmgr.PackInstances();
+    sInstanceSaveManager.PackInstances();
 
     sLog.outString( "Loading Localization strings..." );
     objmgr.LoadCreatureLocales();

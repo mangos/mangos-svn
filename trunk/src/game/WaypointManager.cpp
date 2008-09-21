@@ -46,7 +46,7 @@ void WaypointManager::Load()
     uint32 total_nodes = 0;
     uint32 total_behaviors = 0;
 
-    QueryResult *result = WorldDatabase.PQuery("SELECT id, COUNT(point) FROM creature_movement GROUP BY id");
+    QueryResult *result = WorldDatabase.Query("SELECT id, COUNT(point) FROM creature_movement GROUP BY id");
     if(result)
     {
         total_paths = result->GetRowCount();
@@ -64,7 +64,7 @@ void WaypointManager::Load()
         delete result;
     }
 
-    result = WorldDatabase.PQuery("SELECT position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, text1, text2, text3, text4, text5, id, point FROM creature_movement");
+    result = WorldDatabase.Query("SELECT position_x, position_y, position_z, orientation, model1, model2, waittime, emote, spell, text1, text2, text3, text4, text5, id, point FROM creature_movement");
     if(result)
     {
         barGoLink bar( result->GetRowCount() );
