@@ -495,10 +495,6 @@ class ObjectMgr
         void LoadItemTexts();
         void LoadPageTexts();
 
-        // instance system
-        void CleanupInstances();
-        void PackInstances();
-
         //load first auction items, because of check if item exists, when loading
         void LoadAuctionItems();
         void LoadAuctions();

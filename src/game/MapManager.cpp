@@ -300,7 +300,7 @@ void MapManager::UnloadAll()
 
 void MapManager::InitMaxInstanceId()
 {
-    i_MaxInstanceId = sMapStore.GetNumRows();
+    i_MaxInstanceId = 0;
 
     QueryResult *result = CharacterDatabase.Query( "SELECT MAX(id) FROM instance" );
     if( result )

@@ -18,7 +18,6 @@
 
 #include "InstanceSaveMgr.h"
 #include "Common.h"
-#include "Database/DatabaseEnv.h"
 #include "Database/SQLStorage.h"
 
 #include "Player.h"
@@ -40,6 +39,7 @@
 #include "World.h"
 #include "Group.h"
 #include "InstanceData.h"
+#include "ProgressBar.h"
 
 INSTANTIATE_SINGLETON_1( InstanceSaveManager );
 
@@ -214,6 +214,154 @@ bool InstanceSave::UnloadIfEmpty()
         return true;
 }
 
+void InstanceSaveManager::_DelHelper(DatabaseType &db, const char *fields, const char *table, const char *queryTail,...)
+{
+    Tokens fieldTokens = StrSplit(fields, ", ");
+    assert(fieldTokens.size() != 0);
+
+    va_list ap;
+    char szQueryTail [MAX_QUERY_LEN];
+    va_start(ap, queryTail);
+    int res = vsnprintf( szQueryTail, MAX_QUERY_LEN, queryTail, ap );
+    va_end(ap);
+
+    QueryResult *result = db.PQuery("SELECT %s FROM %s %s", fields, table, szQueryTail);
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            std::ostringstream ss;
+            for(size_t i = 0; i < fieldTokens.size(); i++)
+            {
+                std::string fieldValue = fields[i].GetCppString();
+                db.escape_string(fieldValue);
+                ss << (i != 0 ? " AND " : "") << fieldTokens[i] << " = '" << fieldValue << "'";
+            }
+            db.DirectPExecute("DELETE FROM %s WHERE %s", table, ss.str().c_str());
+        } while (result->NextRow());
+        delete result;
+    }
+}
+
+void InstanceSaveManager::CleanupInstances()
+{
+    uint64 now = (uint64)time(NULL);
+
+    barGoLink bar(2);
+    bar.step();
+
+    // load reset times and clean expired instances
+    sInstanceSaveManager.LoadResetTimes();
+
+    // clean character/group - instance binds with invalid group/characters
+    _DelHelper(CharacterDatabase, "character_instance.guid, instance", "character_instance", "LEFT JOIN characters ON character_instance.guid = characters.guid WHERE characters.guid IS NULL");
+    _DelHelper(CharacterDatabase, "group_instance.leaderGuid, instance", "group_instance", "LEFT JOIN characters ON group_instance.leaderGuid = characters.guid LEFT JOIN groups ON group_instance.leaderGuid = groups.leaderGuid WHERE characters.guid IS NULL OR groups.leaderGuid IS NULL");
+
+    // clean instances that do not have any players or groups bound to them
+    _DelHelper(CharacterDatabase, "id, map, difficulty", "instance", "LEFT JOIN character_instance ON character_instance.instance = id LEFT JOIN group_instance ON group_instance.instance = id WHERE character_instance.instance IS NULL AND group_instance.instance IS NULL");
+
+    // clean invalid instance references in other tables
+    _DelHelper(CharacterDatabase, "character_instance.guid, instance", "character_instance", "LEFT JOIN instance ON character_instance.instance = instance.id WHERE instance.id IS NULL");
+    _DelHelper(CharacterDatabase, "group_instance.leaderGuid, instance", "group_instance", "LEFT JOIN instance ON group_instance.instance = instance.id WHERE instance.id IS NULL");
+
+    // creature_respawn and gameobject_respawn are in another database
+    // first, obtain total instance set
+    std::set< uint32 > InstanceSet;
+    QueryResult *result = CharacterDatabase.PQuery("SELECT id FROM instance");
+    if( result )
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            InstanceSet.insert(fields[0].GetUInt32());
+        }
+        while (result->NextRow());
+        delete result;
+    }
+
+    // creature_respawn
+    result = WorldDatabase.PQuery("SELECT DISTINCT(instance) FROM creature_respawn WHERE instance <> 0");
+    if( result )
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            if(InstanceSet.find(fields[0].GetUInt32()) == InstanceSet.end())
+                WorldDatabase.DirectPExecute("DELETE FROM creature_respawn WHERE instance = '%u'", fields[0].GetUInt32());
+        }
+        while (result->NextRow());
+        delete result;
+    }
+
+    // gameobject_respawn
+    result = WorldDatabase.PQuery("SELECT DISTINCT(instance) FROM gameobject_respawn WHERE instance <> 0");
+    if( result )
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            if(InstanceSet.find(fields[0].GetUInt32()) == InstanceSet.end())
+                WorldDatabase.DirectPExecute("DELETE FROM gameobject_respawn WHERE instance = '%u'", fields[0].GetUInt32());
+        }
+        while (result->NextRow());
+        delete result;
+    }
+
+    bar.step();
+    sLog.outString();
+    sLog.outString( ">> Initialized %u instances", (uint32)InstanceSet.size());
+}
+
+void InstanceSaveManager::PackInstances()
+{
+    // this routine renumbers player instance associations in such a way so they start from 1 and go up
+    // TODO: this can be done a LOT more efficiently
+
+    // obtain set of all associations
+    std::set< uint32 > InstanceSet;
+
+    // all valid ids are in the instance table
+    // any associations to ids not in this table are assumed to be
+    // cleaned already in CleanupInstances
+    QueryResult *result = CharacterDatabase.PQuery("SELECT id FROM instance");
+    if( result )
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            InstanceSet.insert(fields[0].GetUInt32());
+        }
+        while (result->NextRow());
+        delete result;
+    }
+
+    barGoLink bar( InstanceSet.size() + 1);
+    bar.step();
+
+    uint32 InstanceNumber = 1;
+    // we do assume std::set is sorted properly on integer value
+    for (std::set< uint32 >::iterator i = InstanceSet.begin(); i != InstanceSet.end(); i++)
+    {
+        if (*i != InstanceNumber)
+        {
+            // remap instance id
+            WorldDatabase.PExecute("UPDATE creature_respawn SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
+            WorldDatabase.PExecute("UPDATE gameobject_respawn SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
+            CharacterDatabase.PExecute("UPDATE corpse SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
+            CharacterDatabase.PExecute("UPDATE character_instance SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
+            CharacterDatabase.PExecute("UPDATE instance SET id = '%u' WHERE id = '%u'", InstanceNumber, *i);
+            CharacterDatabase.PExecute("UPDATE group_instance SET instance = '%u' WHERE instance = '%u'", InstanceNumber, *i);
+        }
+
+        ++InstanceNumber;
+        bar.step();
+    }
+
+    sLog.outString();
+    sLog.outString( ">> Instance numbers remapped, next instance id is %u", InstanceNumber );
+}
+
 void InstanceSaveManager::LoadResetTimes()
 {
     time_t now = time(NULL);
@@ -270,7 +418,7 @@ void InstanceSaveManager::LoadResetTimes()
     // load the global respawn times for raid/heroic instances
     uint32 diff = sWorld.getConfig(CONFIG_INSTANCE_RESET_TIME_HOUR) * HOUR;
     m_resetTimeByMapId.resize(sMapStore.GetNumRows()+1);
-    result = CharacterDatabase.PQuery("SELECT mapid, resettime FROM instance_reset");
+    result = CharacterDatabase.Query("SELECT mapid, resettime FROM instance_reset");
     if(result)
     {
         do
@@ -297,7 +445,7 @@ void InstanceSaveManager::LoadResetTimes()
 
     // clean expired instances, references to them will be deleted in CleanupInstances
     // must be done before calculating new reset times
-    CharacterDatabase.DirectPExecute("DELETE FROM instance USING instance LEFT JOIN instance_reset ON mapid = map WHERE (instance.resettime < '"I64FMTD"' AND instance.resettime > '0') OR (NOT instance_reset.resettime IS NULL AND instance_reset.resettime < '"I64FMTD"')",  (uint64)now, (uint64)now);
+    _DelHelper(CharacterDatabase, "id, map, difficulty", "instance", "LEFT JOIN instance_reset ON mapid = map WHERE (instance.resettime < '"I64FMTD"' AND instance.resettime > '0') OR (NOT instance_reset.resettime IS NULL AND instance_reset.resettime < '"I64FMTD"')",  (uint64)now, (uint64)now);
 
     // calculate new global reset times for expired instances and those that have never been reset yet
     // add the global reset times to the priority queue
@@ -317,7 +465,7 @@ void InstanceSaveManager::LoadResetTimes()
         {
             // initialize the reset time
             t = today + period + diff;
-            CharacterDatabase.PExecute("INSERT INTO instance_reset VALUES ('%u','"I64FMTD"')", i, (uint64)t);
+            CharacterDatabase.DirectPExecute("INSERT INTO instance_reset VALUES ('%u','"I64FMTD"')", i, (uint64)t);
         }
 
         if(t < now)
@@ -326,7 +474,7 @@ void InstanceSaveManager::LoadResetTimes()
             // calculate the next reset time
             t = (t / DAY) * DAY;
             t += ((today - t) / period + 1) * period + diff;
-            CharacterDatabase.PExecute("UPDATE instance_reset SET resettime = '"I64FMTD"' WHERE mapid = '%u'", (uint64)t, i);
+            CharacterDatabase.DirectPExecute("UPDATE instance_reset SET resettime = '"I64FMTD"' WHERE mapid = '%u'", (uint64)t, i);
         }
 
         m_resetTimeByMapId[temp->map] = t;
