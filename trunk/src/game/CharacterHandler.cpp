@@ -363,6 +363,24 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
     uint32 accountId = 0;
     std::string name;
 
+    // is guild leader
+    if(objmgr.GetGuildByLeader(guid))
+    {
+        WorldPacket data(SMSG_CHAR_DELETE, 1);
+        data << (uint8)CHAR_DELETE_FAILED_GUILD_LEADER;
+        SendPacket( &data );
+        return;
+    }
+
+    // is arena team captain
+    if(objmgr.GetArenaTeamByCapitan(guid))
+    {
+        WorldPacket data(SMSG_CHAR_DELETE, 1);
+        data << (uint8)CHAR_DELETE_FAILED_ARENA_CAPTAIN;
+        SendPacket( &data );
+        return;
+    }
+
     QueryResult *result = CharacterDatabase.PQuery("SELECT account,name FROM characters WHERE guid='%u'", GUID_LOPART(guid));
     if(result)
     {
