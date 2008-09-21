@@ -994,6 +994,13 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
         }
         else
         {
+            // for delayed spells ignore negative spells (after duel end) for friendly targets
+            if(m_spellInfo->speed > 0.0f && !IsPositiveSpell(m_spellInfo->Id))
+            {
+                m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_EVADE);
+                return;
+            }
+
             // assisting case, healing and resurrection
             if(unit->hasUnitState(UNIT_STAT_ATTACK_PLAYER))
                 m_caster->SetContestedPvP();

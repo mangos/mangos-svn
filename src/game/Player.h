@@ -1003,6 +1003,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RemoveGuardians();
         bool HasGuardianWithEntry(uint32 entry);
         void AddGuardian(Pet* pet) { m_guardianPets.insert(pet->GetGUID()); }
+        GuardianPetList const& GetGuardians() const { return m_guardianPets; }
         void Uncharm();
 
         void Say(const std::string text, const uint32 language);

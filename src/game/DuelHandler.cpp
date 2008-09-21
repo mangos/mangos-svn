@@ -72,9 +72,10 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
     // player surrendered in a duel using /forfeit
     if(GetPlayer()->duel->startTime != 0)
     {
-        GetPlayer()->CombatStop();
-        if( GetPlayer()->duel->opponent )
-            GetPlayer()->duel->opponent->CombatStop();
+        GetPlayer()->CombatStopWithPets(true);
+        if(GetPlayer()->duel->opponent)
+            GetPlayer()->duel->opponent->CombatStopWithPets(true);
+
         GetPlayer()->CastSpell(GetPlayer(), 7267, true);    // beg
         GetPlayer()->DuelComplete(DUEL_WON);
         return;

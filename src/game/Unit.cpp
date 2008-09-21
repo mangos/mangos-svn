@@ -745,18 +745,8 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
 
             assert(he->duel);
 
-            CombatStop();                                   // for case killed by pet
-            if (IsNonMeleeSpellCasted(true))
-                InterruptNonMeleeSpells(true);
-            if(he->duel->opponent!=this)
-            {
-                he->duel->opponent->CombatStop();
-                if(he->duel->opponent->IsNonMeleeSpellCasted(true))
-                    he->duel->opponent->InterruptNonMeleeSpells(true);
-            }
-            he->CombatStop();
-            if(he->IsNonMeleeSpellCasted(true))
-                he->InterruptNonMeleeSpells(true);
+            he->duel->opponent->CombatStopWithPets(true);
+            he->CombatStopWithPets(true);
 
             he->DuelComplete(DUEL_INTERUPTED);
         }
@@ -909,10 +899,9 @@ uint32 Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDa
             assert(he->duel);
 
             he->SetHealth(1);
-            CombatStop();                                   // for case killed by pet
-            if(he->duel->opponent!=this)
-                he->duel->opponent->CombatStop();
-            he->CombatStop();
+
+            he->duel->opponent->CombatStopWithPets(true);
+            he->CombatStopWithPets(true);
 
             he->CastSpell(he, 7267, true);                  // beg
             he->DuelComplete(DUEL_WON);
@@ -6913,13 +6902,32 @@ bool Unit::AttackStop()
     return true;
 }
 
-void Unit::CombatStop()
+void Unit::CombatStop(bool cast)
 {
+    if(cast& IsNonMeleeSpellCasted(false))
+        InterruptNonMeleeSpells(false);
+
     AttackStop(); 
     RemoveAllAttackers(); 
     if( GetTypeId()==TYPEID_PLAYER )
         ((Player*)this)->SendAttackSwingCancelAttack();     // melee and ranged forced attack cancel
     ClearInCombat();
+}
+
+void Unit::CombatStopWithPets(bool cast)
+{
+    CombatStop(cast);
+    if(Pet* pet = GetPet())
+        pet->CombatStop(cast);
+    if(Unit* charm = GetCharm())
+        charm->CombatStop(cast);
+    if(GetTypeId()==TYPEID_PLAYER)
+    {
+        GuardianPetList const& guardians = ((Player*)this)->GetGuardians();
+        for(GuardianPetList::const_iterator itr = guardians.begin(); itr != guardians.end(); ++itr)
+            if(Unit* guardian = Unit::GetUnit(*this,*itr))
+                guardian->CombatStop(cast);
+    }
 }
 
 bool Unit::isAttackingPlayer() const
