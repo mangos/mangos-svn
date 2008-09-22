@@ -1450,7 +1450,7 @@ void World::ScriptsProcess()
                     sLog.outError("SCRIPT_COMMAND_TALK call for non-creature (TypeId: %u), skipping.",source->GetTypeId());
                     break;
                 }
-                if(step.script->datalong > 2)
+                if(step.script->datalong > 3)
                 {
                     sLog.outError("SCRIPT_COMMAND_TALK invalid chat type (%u), skipping.",step.script->datalong);
                     break;
@@ -1458,13 +1458,13 @@ void World::ScriptsProcess()
 
                 uint64 unit_target = target!=NULL ? target->GetGUID() : 0;
 
-                //datalong 0=normal say, datalong 1=whisper, datalong 2=yell
+                //datalong 0=normal say, 1=whisper, 2=yell, 3=emote text
                 switch(step.script->datalong)
                 {
-                    case 0:                                 // SAY
+                    case 0:                                 // Say
                         ((Creature *)source)->Say(step.script->datatext.c_str(), 0, unit_target);
                         break;
-                    case 1:                                 // WHISPER
+                    case 1:                                 // Whisper
                         if(!unit_target)
                         {
                             sLog.outError("SCRIPT_COMMAND_TALK attempt to whisper (%u) NULL, skipping.",step.script->datalong);
@@ -1472,8 +1472,11 @@ void World::ScriptsProcess()
                         }
                         ((Creature *)source)->Whisper(unit_target, step.script->datatext.c_str());
                         break;
-                    case 2:                                 // YELL
+                    case 2:                                 // Yell
                         ((Creature *)source)->Yell(step.script->datatext.c_str(), 0, unit_target);
+                        break;
+                    case 3:                                 // Emote text
+                        ((Creature *)source)->TextEmote(step.script->datatext.c_str(), unit_target);
                         break;
                     default:
                         break;                              // must be already checked at load
@@ -1898,6 +1901,42 @@ void World::ScriptsProcess()
                 }
 
                 ((Unit*)cmdTarget)->RemoveAurasDueToSpell(step.script->datalong);
+                break;
+            }
+
+            case SCRIPT_COMMAND_CAST_SPELL:
+            {
+                if(!source)
+                {
+                    sLog.outError("SCRIPT_COMMAND_CAST_SPELL must have source caster.");
+                    break;
+                }
+
+                if(!source->isType(TYPEMASK_UNIT))
+                {
+                    sLog.outError("SCRIPT_COMMAND_CAST_SPELL source caster isn't unit (TypeId: %u), skipping.",source->GetTypeId());
+                    break;
+                }
+
+                Object* cmdTarget = step.script->datalong2 ? source : target;
+
+                if(!cmdTarget)
+                {
+                    sLog.outError("SCRIPT_COMMAND_CAST_SPELL call for NULL %s.",step.script->datalong2 ? "source" : "target");
+                    break;
+                }
+
+                if(!cmdTarget->isType(TYPEMASK_UNIT))
+                {
+                    sLog.outError("SCRIPT_COMMAND_CAST_SPELL %s isn't unit (TypeId: %u), skipping.",step.script->datalong2 ? "source" : "target",cmdTarget->GetTypeId());
+                    break;
+                }
+
+                Unit* spellTarget = (Unit*)cmdTarget;
+
+                //TODO: when GO cast implemented, code below must be updated accordingly to also allow GO spell cast
+                ((Unit*)source)->CastSpell(spellTarget,step.script->datalong,false);
+
                 break;
             }
 
