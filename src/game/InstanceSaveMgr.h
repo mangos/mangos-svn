@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -146,7 +146,7 @@ class MANGOS_DLL_DECL InstanceSaveManager : public MaNGOS::Singleton<InstanceSav
         InstanceSave* AddInstanceSave(uint32 mapId, uint32 instanceId, uint8 difficulty, time_t resetTime, bool canReset, bool load = false);
         void RemoveInstanceSave(uint32 InstanceId);
         static void DeleteInstanceFromDB(uint32 instanceid);
-        
+
         InstanceSave *GetInstanceSave(uint32 InstanceId);
 
         /* statistics */

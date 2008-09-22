@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -119,7 +119,7 @@ enum LevelRequirementVsMode
 typedef HM_NAMESPACE::hash_map<Creature*, CreatureMover> CreatureMoveList;
 
 #define MAX_HEIGHT            100000.0f                     // can be use for find ground height at surface
-#define INVALID_HEIGHT       -100000.0f                     // for check, must be equal to VMAP_INVALID_HEIGHT, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE 
+#define INVALID_HEIGHT       -100000.0f                     // for check, must be equal to VMAP_INVALID_HEIGHT, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE
 #define MIN_UNLOAD_DELAY      1                             // immediate unload
 
 class MANGOS_DLL_SPEC Map : public GridRefManager<NGridType>, public MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>

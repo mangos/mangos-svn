@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -47,7 +47,7 @@ RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
     const float range = rand_norm()*wander_distance;
     const float distanceX = range * cos(angle);
     const float distanceY = range * sin(angle);
-    
+
     nx = X + distanceX;
     ny = Y + distanceY;
     dist = distanceX*distanceX + distanceY*distanceY;
@@ -103,7 +103,7 @@ RandomMovementGenerator<Creature>::Initialize(Creature &creature)
 {
     if(!creature.isAlive())
         return;
-    
+
     if (creature.canFly())
         creature.SetUnitMovementFlags(MOVEMENTFLAG_FLYING2);
     else
@@ -133,7 +133,7 @@ RandomMovementGenerator<Creature>::Update(Creature &creature, const uint32 &diff
 
     if(i_destinationHolder.HasArrived() && !creature.IsStopped() && !creature.canFly())
         creature.clearUnitState(UNIT_STAT_ROAMING);
-        
+
     if(!i_destinationHolder.HasArrived() && creature.IsStopped())
         creature.addUnitState(UNIT_STAT_ROAMING);
 

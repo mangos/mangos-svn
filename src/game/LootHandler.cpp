@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -252,7 +252,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
 
     sLog.outDebug("WORLD: CMSG_LOOT_RELEASE");
 
-    // cheaters can modify lguid to prevent correct apply loot release code and re-loot 
+    // cheaters can modify lguid to prevent correct apply loot release code and re-loot
     // use internal stored guid
     //uint64   lguid;
     //recv_data >> lguid;
@@ -396,7 +396,7 @@ void WorldSession::DoLootRelease( uint64 lguid )
 
         loot = &pCreature->loot;
 
-        // update next looter 
+        // update next looter
         if(Player *recipient = pCreature->GetLootRecipient())
             if(Group* group = recipient->GetGroup())
                 if (group->GetLooterGuid() == player->GetGUID())
@@ -436,7 +436,7 @@ void WorldSession::HandleLootMasterGiveOpcode( WorldPacket & recv_data )
     if(!target)
         return;
 
-    sLog.outDebug("WorldSession::HandleLootMasterGiveOpcode (CMSG_LOOT_MASTER_GIVE, 0x02A3) Target = [%s].", target->GetName()); 
+    sLog.outDebug("WorldSession::HandleLootMasterGiveOpcode (CMSG_LOOT_MASTER_GIVE, 0x02A3) Target = [%s].", target->GetName());
 
     if(_player->GetLootGUID() != lootguid)
         return;

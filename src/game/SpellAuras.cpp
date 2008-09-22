@@ -317,7 +317,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem) :
 m_procCharges(0), m_spellmod(NULL), m_effIndex(eff), m_caster_guid(0), m_target(target),
 m_timeCla(1000), m_castItemGuid(castItem?castItem->GetGUID():0), m_auraSlot(MAX_AURAS),
-m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false), 
+m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false),
 m_isPersistent(false), m_updated(false), m_removeMode(AURA_REMOVE_BY_DEFAULT), m_isRemovedOnShapeLost(true), m_in_use(false),
 m_periodicTimer(0), m_PeriodicEventId(0), m_AuraDRGroup(DIMINISHING_NONE)
 {
@@ -331,7 +331,7 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_AuraDRGroup(DIMINISHING_NONE)
 
     m_isPassive = IsPassiveSpell(GetId());
     m_positive = IsPositiveEffect(GetId(), m_effIndex);
-    
+
     m_applyTime = time(NULL);
 
     int32 damage;
@@ -558,7 +558,7 @@ void Aura::Update(uint32 diff)
             m_target->RemoveAura(GetId(),GetEffIndex());
             return;
         }
-            
+
         // Get spell range
         float radius;
         SpellModOp mod;
@@ -730,7 +730,7 @@ void AreaAura::Update(uint32 diff)
         Aura::Update(diff);
 
         // remove aura if out-of-range from caster (after teleport for example)
-        // or caster is isolated or caster no longer has the aura 
+        // or caster is isolated or caster no longer has the aura
         // or caster is (no longer) friendly
         bool needFriendly = (m_areaAuraType == AREA_AURA_ENEMY ? false : true);
         if( !caster || caster->hasUnitState(UNIT_STAT_ISOLATED) ||
@@ -904,7 +904,7 @@ void Aura::_AddAura()
 
     // passive auras (except totem auras) do not get placed in the slots
     // area auras with SPELL_AURA_NONE are not shown on target
-    if((!m_isPassive || (caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem())) && 
+    if((!m_isPassive || (caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem())) &&
         (m_spellProto->Effect[GetEffIndex()] != SPELL_EFFECT_APPLY_AREA_AURA_ENEMY || m_target != caster))
     {
         if(!samespell)                                      // new slot need
@@ -937,7 +937,7 @@ void Aura::_AddAura()
             // Not update fields for not first spell's aura, all data already in fields
             if(!secondaura)
             {
-                if(slot < MAX_AURAS)                        // slot found 
+                if(slot < MAX_AURAS)                        // slot found
                 {
                     SetAura(slot, false);
                     SetAuraFlag(slot, true);
@@ -1216,7 +1216,7 @@ void Aura::TriggerSpell()
 {
     Unit* caster = GetCaster();
     Unit* target = GetTriggerTarget();
-    
+
     if(!caster || !target)
         return;
 
@@ -1414,7 +1414,7 @@ void Aura::TriggerSpell()
                     {
                         // move loot to player inventory and despawn target
                         if(caster->GetTypeId() ==TYPEID_PLAYER &&
-                                target->GetTypeId() == TYPEID_UNIT && 
+                                target->GetTypeId() == TYPEID_UNIT &&
                                 ((Creature*)target)->GetCreatureInfo()->type == CREATURE_TYPE_GAS_CLOUD)
                         {
                             Player* player = (Player*)caster;
@@ -1623,7 +1623,7 @@ void Aura::TriggerSpell()
 //                    // Shadow Inferno
 //                    case 39645: break;
                     // Tear of Azzinoth Summon Channel - it's not really supposed to do anything,and this only prevents the console spam
-                    case 39857: trigger_spell_id = 39856; break;        
+                    case 39857: trigger_spell_id = 39856; break;
 //                    // Soulgrinder Ritual Visual (Smashed)
 //                    case 39974: break;
 //                    // Simon Game Pre-game timer
@@ -1723,7 +1723,7 @@ void Aura::TriggerSpell()
             {
                 switch(auraId)
                 {
-                    // Cat Form 
+                    // Cat Form
                     // trigger_spell_id not set and unknown effect triggered in this case, ignoring for while
                     case 768:
                         return;
@@ -1796,7 +1796,7 @@ void Aura::TriggerSpell()
                         for(Unit::AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
                         {
                             SpellEntry const* spell = itr->second->GetSpellProto();
-                            if( spell->SpellFamilyName == SPELLFAMILY_SHAMAN && 
+                            if( spell->SpellFamilyName == SPELLFAMILY_SHAMAN &&
                                 spell->SpellFamilyFlags & 0x0000000000000400L)
                                 return;
                         }
@@ -2046,7 +2046,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 m_target->RemoveAurasDueToSpell(spellId);
                 return;
             }
-            // Restless Strength 
+            // Restless Strength
             if( GetId()==24661 )
             {
                 uint32 spellId = 24662;
@@ -2245,7 +2245,7 @@ void Aura::HandleAuraPeriodicDummy(bool apply, bool Real)
     if(!Real)
         return;
 
-    SpellEntry const*spell = GetSpellProto(); 
+    SpellEntry const*spell = GetSpellProto();
     switch( spell->SpellFamilyName)
     {
         case SPELLFAMILY_ROGUE:
@@ -2468,7 +2468,7 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         case FORM_FLIGHT:
         case FORM_MOONKIN:
             // remove movement affects
-            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);           
+            m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
             m_target->RemoveSpellsCausingAura(SPELL_AURA_MOD_DECREASE_SPEED);
 
             // and polymorphic affects
@@ -2810,7 +2810,7 @@ void Aura::HandleChannelDeathItem(bool apply, bool Real)
             return;
 
         // Soul Shard only from non-grey units
-        if( spellInfo->EffectItemType[m_effIndex] == 6265 && 
+        if( spellInfo->EffectItemType[m_effIndex] == 6265 &&
             (victim->getLevel() <= MaNGOS::XP::GetGrayLevel(caster->getLevel()) ||
              victim->GetTypeId()==TYPEID_UNIT && !((Player*)caster)->isAllowedToLoot((Creature*)victim)) )
             return;
@@ -3485,7 +3485,7 @@ void Aura::HandleAuraModSilence(bool apply, bool Real)
 
                 // Search Mana Tap auras on caster
                 int32 energy = 0;
-                Unit::AuraList const& m_dummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);        
+                Unit::AuraList const& m_dummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
                 for(Unit::AuraList::const_iterator i = m_dummyAuras.begin(); i != m_dummyAuras.end(); ++i)
                     if ((*i)->GetId() == 28734)
                         ++energy;
@@ -3526,7 +3526,7 @@ void Aura::HandleModThreat(bool apply, bool Real)
     int multiplier = 0;
     switch (GetId())
     {
-        // Arcane Shroud 
+        // Arcane Shroud
         case 26400:
             level_diff = m_target->getLevel() - 60;
             multiplier = 2;
@@ -3751,7 +3751,7 @@ void Aura::HandleModMechanicImmunity(bool apply, bool Real)
             }
         }
     }
-    
+
     // The Beast Within and Bestial Wrath - immunity
     if(GetId() == 19574 || GetId() == 34471)
     {
@@ -3898,8 +3898,8 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
         switch (GetId())
         {
             case 28200:                         // Ascendance (Talisman of Ascendance trinket)
-                m_procCharges = 6; 
-                UpdateAuraCharges(); 
+                m_procCharges = 6;
+                UpdateAuraCharges();
                 break;
             default: break;
         }
@@ -4067,7 +4067,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                 {
                     uint8 cp = ((Player*)caster)->GetComboPoints();
 
-                    // Idol of Feral Shadows. Cant be handled as SpellMod in SpellAura:Dummy due its dependency from CPs    
+                    // Idol of Feral Shadows. Cant be handled as SpellMod in SpellAura:Dummy due its dependency from CPs
                     Unit::AuraList const& dummyAuras = caster->GetAurasByType(SPELL_AURA_DUMMY);
                     for(Unit::AuraList::const_iterator itr = dummyAuras.begin(); itr != dummyAuras.end(); ++itr)
                     {
@@ -4082,7 +4082,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
                     m_modifier.m_amount += int32(caster->GetTotalAttackPowerValue(BASE_ATTACK) * cp / 100);
                 }
                 return;
-            } 
+            }
             break;
         }
         case SPELLFAMILY_ROGUE:
@@ -4761,7 +4761,7 @@ void Aura::HandleModSpellCritChanceShool(bool apply, bool Real)
 
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
-    
+
     for(int school = SPELL_SCHOOL_NORMAL; school < MAX_SPELL_SCHOOL; ++school)
         if (m_modifier.m_miscvalue & (1<<school))
             ((Player*)m_target)->UpdateSpellCritChance(school);
@@ -5521,8 +5521,8 @@ void Aura::PeriodicTick()
                         break;
                     case 38772:
                     {
-                        uint32 percent = 
-                            GetEffIndex() < 2 && GetSpellProto()->Effect[GetEffIndex()]==SPELL_EFFECT_DUMMY ? 
+                        uint32 percent =
+                            GetEffIndex() < 2 && GetSpellProto()->Effect[GetEffIndex()]==SPELL_EFFECT_DUMMY ?
                             pCaster->CalculateSpellDamage(GetSpellProto(),GetEffIndex()+1,GetSpellProto()->EffectBasePoints[GetEffIndex()+1],m_target) :
                             100;
                         if(m_target->GetHealth()*100 >= m_target->GetMaxHealth()*percent )
@@ -5552,7 +5552,7 @@ void Aura::PeriodicTick()
 
                 // Calculate armor mitigation if it is a physical spell
                 // But not for bleed mechanic spells
-                if ( GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_NORMAL && 
+                if ( GetSpellSchoolMask(GetSpellProto()) & SPELL_SCHOOL_MASK_NORMAL &&
                      GetEffectMechanic(GetSpellProto(), m_effIndex) != MECHANIC_BLEED)
                 {
                     uint32 pdamageReductedArmor = pCaster->CalcArmorReducedDamage(m_target, pdamage);
@@ -5861,7 +5861,7 @@ void Aura::PeriodicTick()
 
             // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
             if (power == POWER_MANA && m_target->GetTypeId() == TYPEID_PLAYER)
-                drain_amount -= ((Player*)m_target)->GetSpellCritDamageReduction(drain_amount); 
+                drain_amount -= ((Player*)m_target)->GetSpellCritDamageReduction(drain_amount);
 
             m_target->ModifyPower(power, -drain_amount);
 
@@ -5975,7 +5975,7 @@ void Aura::PeriodicTick()
 
             // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
             if (powerType == POWER_MANA && m_target->GetTypeId() == TYPEID_PLAYER)
-                pdamage -= ((Player*)m_target)->GetSpellCritDamageReduction(pdamage); 
+                pdamage -= ((Player*)m_target)->GetSpellCritDamageReduction(pdamage);
 
             uint32 gain = uint32(-m_target->ModifyPower(powerType, -pdamage));
 
@@ -6249,7 +6249,7 @@ void Aura::HandlePreventFleeing(bool apply, bool Real)
 {
     if(!Real)
         return;
-    
+
     Unit::AuraList const& fearAuras = m_target->GetAurasByType(SPELL_AURA_MOD_FEAR);
     if( !fearAuras.empty() )
     {

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -51,10 +51,10 @@ class HashMapHolder
         typedef ZThread::FastMutex LockType;
         typedef MaNGOS::GeneralLock<LockType > Guard;
 
-        static void Insert(T* o) 
-        { 
-            Guard guard(i_lock); 
-            m_objectMap[o->GetGUID()] = o; 
+        static void Insert(T* o)
+        {
+            Guard guard(i_lock);
+            m_objectMap[o->GetGUID()] = o;
         }
 
         static void Remove(T* o)

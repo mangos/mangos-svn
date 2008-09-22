@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -523,7 +523,7 @@ void World::LoadConfigSettings(bool reload)
     m_configs[CONFIG_STRICT_PET_NAMES]     = sConfig.GetIntDefault("StrictPetNames",     0);
 
     m_configs[CONFIG_CHARACTERS_CREATING_DISABLED] = sConfig.GetIntDefault("CharactersCreatingDisabled", 0);
-    
+
     m_configs[CONFIG_CHARACTERS_PER_REALM] = sConfig.GetIntDefault("CharactersPerRealm", 10);
     if(m_configs[CONFIG_CHARACTERS_PER_REALM] < 1 || m_configs[CONFIG_CHARACTERS_PER_REALM] > 10)
     {
@@ -708,7 +708,7 @@ void World::LoadConfigSettings(bool reload)
     m_configs[CONFIG_THREAT_RADIUS] = sConfig.GetIntDefault("ThreatRadius", 100);
 
     // always use declined names in the russian client
-    m_configs[CONFIG_DECLINED_NAMES_USED] = (m_configs[CONFIG_REALM_ZONE] == REALM_ZONE_RUSSIAN) ? true : 
+    m_configs[CONFIG_DECLINED_NAMES_USED] = (m_configs[CONFIG_REALM_ZONE] == REALM_ZONE_RUSSIAN) ? true :
         sConfig.GetBoolDefault("DeclinedNames", false);
 
     m_VisibleUnitGreyDistance = sConfig.GetFloatDefault("Visibility.Distance.Grey.Unit", 1);
@@ -1124,7 +1124,7 @@ void World::DetectDBCLang()
         }
     }
 
-    if( default_locale != m_lang_confid && m_lang_confid < MAX_LOCALE && 
+    if( default_locale != m_lang_confid && m_lang_confid < MAX_LOCALE &&
         (m_availableDbcLocaleMask & (1 << m_lang_confid)) )
     {
         default_locale = m_lang_confid;

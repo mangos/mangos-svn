@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -117,7 +117,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,4+4+(player_name.size()+1)+(guild_name.size()+1)+4+4+4+(4*zones_count)+4+(1*str_count));
 
     sLog.outDebug("Minlvl %u, maxlvl %u, name %s, guild %s, racemask %u, classmask %u, zones %u, strings %u", level_min, level_max, player_name.c_str(), guild_name.c_str(), racemask, classmask, zones_count, str_count);
-    
+
     std::wstring str[4];                                    // 4 is client limit
     for(uint32 i = 0; i < str_count; i++)
     {
@@ -126,12 +126,12 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 
         std::string temp;
         recv_data >> temp;                                  // user entered string, it used as universal search pattern(guild+player name)?
-        
+
         if(!Utf8toWStr(temp,str[i]))
             continue;
-        
+
         wstrToLower(str[i]);
-        
+
         sLog.outDebug("String %u: %s", i, str[i].c_str());
     }
 
@@ -508,7 +508,7 @@ void WorldSession::HandleGMSurveySubmit( WorldPacket & recv_data)
     uint32 x;
     recv_data >> x;                                         // answer range? (6 = 0-5?)
     sLog.outDebug("SURVEY: X = %u", x);
-    
+
     uint8 result[10];
     memset(result, 0, sizeof(result));
     for( int i = 0; i < 10; ++i)
@@ -1638,7 +1638,7 @@ void WorldSession::HandleDungeonDifficultyOpcode( WorldPacket & recv_data )
 
     if(mode == _player->GetDifficulty())
         return;
-    
+
     if(mode > DIFFICULTY_HEROIC)
     {
         sLog.outError("WorldSession::HandleDungeonDifficultyOpcode: player %d sent an invalid instance mode %d!", _player->GetGUIDLow(), mode);

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -81,7 +81,7 @@ class WaypointManager
         void _clearPath(WaypointPath &path);
 
         typedef HM_NAMESPACE::hash_map<uint32, WaypointPath> WaypointPathMap;
-        WaypointPathMap m_pathMap; 
+        WaypointPathMap m_pathMap;
 };
 
 #define WaypointMgr MaNGOS::Singleton<WaypointManager>::Instance()

@@ -207,7 +207,7 @@ void Map::DeleteStateMachine()
 }
 
 Map::Map(uint32 id, time_t expiry, uint32 InstanceId, uint8 SpawnMode)
-  : i_id(id), i_gridExpiry(expiry), i_mapEntry (sMapStore.LookupEntry(id)), 
+  : i_id(id), i_gridExpiry(expiry), i_mapEntry (sMapStore.LookupEntry(id)),
  i_InstanceId(InstanceId), i_spawnMode(SpawnMode), m_unloadTimer(0)
 {
     for(unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
@@ -921,7 +921,7 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps) const
         float fact_x = lx - lx_int;
         float fact_y = ly - ly_int;
         // Use the simplified bilinear equation, as described in [url="http://en.wikipedia.org/wiki/Bilinear_interpolation"]http://en.wikipedia.org/wiki/Bilinear_interpolation[/url]
-        float _mapheight = b[0] + (b[1]*fact_x) + (b[2]*fact_y) + (b[3]*fact_x*fact_y);        
+        float _mapheight = b[0] + (b[1]*fact_x) + (b[2]*fact_y) + (b[3]*fact_x*fact_y);
 
         // look from a bit higher pos to find the floor, ignore under surface case
         if(z + 2.0f > _mapheight)
@@ -1477,7 +1477,7 @@ bool InstanceMap::Add(Player *player)
             }
             else
             {
-                // set up a solo bind or continue using it 
+                // set up a solo bind or continue using it
                 if(!playerBind)
                     player->BindToInstance(mapSave, false);
                 else

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -145,7 +145,7 @@ enum BG_AB_BattleGroundNodes
 
     BG_AB_SPIRIT_ALIANCE        = 5,
     BG_AB_SPIRIT_HORDE          = 6,
-    
+
     BG_AB_ALL_NODES_COUNT       = 7,                        // all nodes (dynamic and static)
 };
 

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -75,7 +75,7 @@ bool LoginQueryHolder::Initialize()
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADHOMEBIND,        "SELECT map,zone,position_x,position_y,position_z FROM character_homebind WHERE guid = '%u'", GUID_LOPART(m_guid));
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS,  "SELECT spell,item,time FROM character_spell_cooldown WHERE guid = '%u'", GUID_LOPART(m_guid));
     if(sWorld.getConfig(CONFIG_DECLINED_NAMES_USED))
-        res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES,   "SELECT genitive, dative, accusative, instrumental, prepositional FROM character_declinedname WHERE guid = '%u'",GUID_LOPART(m_guid)); 
+        res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES,   "SELECT genitive, dative, accusative, instrumental, prepositional FROM character_declinedname WHERE guid = '%u'",GUID_LOPART(m_guid));
     // in other case still be dummy query
     res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGUILD,           "SELECT guildid,rank FROM guild_member WHERE guid = '%u'", GUID_LOPART(m_guid));
 
@@ -987,7 +987,7 @@ void WorldSession::HandleDeclinedPlayerNameOpcode(WorldPacket& recv_data)
         WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
         data << (uint32)1;
         data << guid;
-        SendPacket(&data);    
+        SendPacket(&data);
         return;
     }
 
@@ -997,7 +997,7 @@ void WorldSession::HandleDeclinedPlayerNameOpcode(WorldPacket& recv_data)
         WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
         data << (uint32)1;
         data << guid;
-        SendPacket(&data);    
+        SendPacket(&data);
         return;
     }
 
@@ -1006,7 +1006,7 @@ void WorldSession::HandleDeclinedPlayerNameOpcode(WorldPacket& recv_data)
         WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
         data << (uint32)1;
         data << guid;
-        SendPacket(&data);    
+        SendPacket(&data);
         return;
     }
 
@@ -1032,7 +1032,7 @@ void WorldSession::HandleDeclinedPlayerNameOpcode(WorldPacket& recv_data)
             WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
             data << (uint32)1;
             data << guid;
-            SendPacket(&data);    
+            SendPacket(&data);
             return;
         }
     }
@@ -1042,7 +1042,7 @@ void WorldSession::HandleDeclinedPlayerNameOpcode(WorldPacket& recv_data)
         WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
         data << (uint32)1;
         data << guid;
-        SendPacket(&data);    
+        SendPacket(&data);
         return;
     }
 
@@ -1051,12 +1051,12 @@ void WorldSession::HandleDeclinedPlayerNameOpcode(WorldPacket& recv_data)
 
     CharacterDatabase.BeginTransaction();
     CharacterDatabase.PExecute("DELETE FROM character_declinedname WHERE guid = '%u'", GUID_LOPART(guid));
-    CharacterDatabase.PExecute("INSERT INTO character_declinedname (guid, genitive, dative, accusative, instrumental, prepositional) VALUES ('%u','%s','%s','%s','%s','%s')", 
+    CharacterDatabase.PExecute("INSERT INTO character_declinedname (guid, genitive, dative, accusative, instrumental, prepositional) VALUES ('%u','%s','%s','%s','%s','%s')",
         GUID_LOPART(guid), declinedname.name[0].c_str(),declinedname.name[1].c_str(),declinedname.name[2].c_str(),declinedname.name[3].c_str(),declinedname.name[4].c_str());
     CharacterDatabase.CommitTransaction();
 
     WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
     data << (uint32)0;                                      // OK
     data << guid;
-    SendPacket(&data);    
+    SendPacket(&data);
 }

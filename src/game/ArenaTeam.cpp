@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -456,7 +456,7 @@ uint8 ArenaTeam::GetSlot() const
     if(slot >= MAX_ARENA_SLOT)
     {
         sLog.outError("Unknown arena team type %u for arena team %u", uint32(GetType()), GetId());
-        return 0;                                           // better return existed slot to prevent untelated data curruption 
+        return 0;                                           // better return existed slot to prevent untelated data curruption
     }
 
     return slot;
@@ -479,7 +479,7 @@ uint8 ArenaTeam::GetSlotByType( uint32 type )
         case ARENA_TEAM_2v2: return 0;
         case ARENA_TEAM_3v3: return 1;
         case ARENA_TEAM_5v5: return 2;
-        default: 
+        default:
             break;
     }
     return 0xFF;

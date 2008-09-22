@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -691,7 +691,7 @@ bool ChatHandler::HandleModifyRepCommand(const char * args)
             std::wstring wrank;
             if(!Utf8toWStr(rank,wrank))
                 continue;
-            
+
             wstrToLower(wrank);
 
             if(wrank.substr(0,wrankStr.size())==wrankStr)
@@ -2338,7 +2338,7 @@ bool ChatHandler::HandleWpAddCommand(const char* args)
     sLog.outDebug("DEBUG: HandleWpAddCommand - point == 0");
 
     Player* player = m_session->GetPlayer();
-    WaypointMgr.AddLastNode(lowguid, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), 0, 0); 
+    WaypointMgr.AddLastNode(lowguid, player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(), player->GetOrientation(), 0, 0);
 
     // update movement type
     if(target)

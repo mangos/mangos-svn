@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -149,7 +149,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player)
     const MapEntry *entry = sMapStore.LookupEntry(mapid);
     if(!entry) return false;
     const char *mapName = entry->name[player->GetSession()->GetSessionDbcLocale()];
-    
+
     if(entry->map_type == MAP_INSTANCE || entry->map_type == MAP_RAID)
     {
         if (entry->map_type == MAP_RAID)
@@ -171,7 +171,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player)
         }
 
         //The player has a heroic mode and tries to enter into instance which has no a heroic mode
-        if (!entry->SupportsHeroicMode() && player->GetDifficulty() == DIFFICULTY_HEROIC)  
+        if (!entry->SupportsHeroicMode() && player->GetDifficulty() == DIFFICULTY_HEROIC)
         {
             player->SendTransferAborted(mapid, TRANSFER_ABORT_DIFFICULTY2);      //Send aborted message
             return false;
@@ -183,7 +183,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player)
             {
                 // let enter in ghost mode in instance that connected to inner instance with corpse
                 uint32 instance_map = corpse->GetMapId();
-                do 
+                do
                 {
                     if(instance_map==mapid)
                         break;

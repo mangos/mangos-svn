@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -283,10 +283,10 @@ bool ChatHandler::HandleGPSCommand(const char* args)
         zone_x, zone_y, ground_z, floor_z, have_map, have_vmap );
 
     sLog.outDebug("Player %s GPS call for %s '%s' (%s: %u):",
-        m_session->GetPlayer()->GetName(), 
+        m_session->GetPlayer()->GetName(),
         (obj->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), obj->GetName(),
         (obj->GetTypeId() == TYPEID_PLAYER ? "GUID" : "Entry"), (obj->GetTypeId() == TYPEID_PLAYER ? obj->GetGUIDLow(): obj->GetEntry()) );
-    sLog.outDebug(GetMangosString(LANG_MAP_POSITION), 
+    sLog.outDebug(GetMangosString(LANG_MAP_POSITION),
         obj->GetMapId(), (mapEntry ? mapEntry->name[sWorld.GetDefaultDbcLocale()] : "<unknown>" ),
         zone_id, (zoneEntry ? zoneEntry->area_name[sWorld.GetDefaultDbcLocale()] : "<unknown>" ),
         area_id, (areaEntry ? areaEntry->area_name[sWorld.GetDefaultDbcLocale()] : "<unknown>" ),

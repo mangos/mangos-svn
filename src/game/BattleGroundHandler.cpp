@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -604,7 +604,7 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
 void WorldSession::HandleBattleGroundReportAFK( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 8);
-    
+
     uint64 playerGuid;
     recv_data >> playerGuid;
     Player *reportedPlayer = objmgr.GetPlayer(playerGuid);

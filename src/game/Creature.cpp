@@ -1125,13 +1125,13 @@ void Creature::SaveToDB(uint32 mapid, uint8 spawnMask)
     data.posZ = GetPositionZ();
     data.orientation = GetOrientation();
     data.spawntimesecs = m_respawnDelay;
-    // prevent add data integrity problems 
+    // prevent add data integrity problems
     data.spawndist = GetDefaultMovementType()==IDLE_MOTION_TYPE ? 0 : m_respawnradius;
     data.currentwaypoint = 0;
     data.curhealth = GetHealth();
     data.curmana = GetPower(POWER_MANA);
     data.is_dead = m_isDeadByDefault;
-    // prevent add data integrity problems 
+    // prevent add data integrity problems
     data.movementType = !m_respawnradius && GetDefaultMovementType()==RANDOM_MOTION_TYPE
         ? IDLE_MOTION_TYPE : GetDefaultMovementType();
     data.spawnMask = spawnMask;

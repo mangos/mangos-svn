@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -217,7 +217,7 @@ enum SkillRangeType
 {
     SKILL_RANGE_LANGUAGE,                                   // 300..300
     SKILL_RANGE_LEVEL,                                      // 1..max skill for level
-    SKILL_RANGE_MONO,                                       // 1..1, grey monolite bar 
+    SKILL_RANGE_MONO,                                       // 1..1, grey monolite bar
     SKILL_RANGE_RANK,                                       // 1..skill for known rank
     SKILL_RANGE_NONE,                                       // 0..0 always
 };

@@ -510,7 +510,7 @@ void Pet::setDeathState(DeathState s)                       // overwrite virtual
 
              //lose happiness when died and not in BG/Arena
             MapEntry const* mapEntry = sMapStore.LookupEntry(GetMapId());
-            if(!mapEntry || (mapEntry->map_type != MAP_ARENA && mapEntry->map_type != MAP_BATTLEGROUND))                                          
+            if(!mapEntry || (mapEntry->map_type != MAP_ARENA && mapEntry->map_type != MAP_BATTLEGROUND))
                 ModifyPower(POWER_HAPPINESS, -HAPPINESS_LEVEL_SIZE);
 
             SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
@@ -611,7 +611,7 @@ void Pet::RegenerateFocus()
     uint32 curValue = GetPower(POWER_FOCUS);
     uint32 maxValue = GetMaxPower(POWER_FOCUS);
 
-    if (curValue >= maxValue) 
+    if (curValue >= maxValue)
         return;
 
     float addvalue = 24 * sWorld.getRate(RATE_POWER_FOCUS);
@@ -1014,7 +1014,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
             scale = cFamily->minScale;
         else
             scale = cFamily->minScale + (getLevel() - cFamily->minScaleLevel) / cFamily->maxScaleLevel * (cFamily->maxScale - cFamily->minScale);
-        
+
         SetFloatValue(OBJECT_FIELD_SCALE_X, scale);
     }
     m_bonusdamage = 0;

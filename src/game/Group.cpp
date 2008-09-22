@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1289,7 +1289,7 @@ void Group::ResetInstances(uint8 method, Player* SendMsgTo)
 
     // we assume that when the difficulty changes, all instances that can be reset will be
     uint8 dif = GetDifficulty();
-     
+
     for(BoundInstancesMap::iterator itr = m_boundInstances[dif].begin(); itr != m_boundInstances[dif].end();)
     {
         InstanceSave *p = itr->second.save;
@@ -1327,7 +1327,7 @@ void Group::ResetInstances(uint8 method, Player* SendMsgTo)
             // do not reset the instance, just unbind if others are permanently bound to it
             if(p->CanReset()) p->DeleteFromDB();
             else CharacterDatabase.PExecute("DELETE FROM group_instance WHERE instance = '%u'", p->GetInstanceId());
-            // i don't know for sure if hash_map iterators 
+            // i don't know for sure if hash_map iterators
             m_boundInstances[dif].erase(itr);
             itr = m_boundInstances[dif].begin();
             // this unloads the instance save unless online players are bound to it

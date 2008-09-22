@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -99,7 +99,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "shutdown",       SEC_ADMINISTRATOR,  &ChatHandler::HandleShutDownCommand,            "", NULL },
         { NULL,             0,                  NULL,                                           "", NULL }
     };
-    
+
     static ChatCommand modifyCommandTable[] =
     {
         { "hp",             SEC_MODERATOR,      &ChatHandler::HandleModifyHPCommand,            "", NULL },
