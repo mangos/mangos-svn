@@ -122,7 +122,7 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
             // For players if the instanceId is set, it's assumed they are already in a map,
             // hence the map must be loaded. For Creatures, GameObjects etc the map must exist
             // prior to calling GetMap, they are not allowed to create maps for themselves.
-            sLog.outError("GetInstance: object %s(%d), typeId %d should be in map %d,%d but that's not loaded yet.", obj->GetName(), obj->GetGUIDLow(), obj->GetTypeId(), obj->GetMapId(), obj->GetInstanceId());
+            sLog.outError("GetInstance: object %s(%d), typeId %d, in world %d, should be in map %d,%d but that's not loaded yet.", obj->GetName(), obj->GetGUIDLow(), obj->GetTypeId(), obj->IsInWorld(), obj->GetMapId(), obj->GetInstanceId());
             assert(false);
         }
         return(map);
