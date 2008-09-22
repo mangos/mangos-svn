@@ -3582,7 +3582,7 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
         tmp.command = fields[2].GetUInt32();
         tmp.datalong = fields[3].GetUInt32();
         tmp.datalong2 = fields[4].GetUInt32();
-        tmp.datatext = fields[5].GetString();
+        tmp.datatext = fields[5].GetCppString();
         tmp.x = fields[6].GetFloat();
         tmp.y = fields[7].GetFloat();
         tmp.z = fields[8].GetFloat();
