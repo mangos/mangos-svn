@@ -7375,8 +7375,7 @@ void Player::SendUpdateWorldState(uint32 Field, uint32 Value)
     WorldPacket data(SMSG_UPDATE_WORLD_STATE, 8);
     data << Field;
     data << Value;
-    SendMessageToSet(&data, true);
-    //GetSession()->SendPacket(&data);
+    GetSession()->SendPacket(&data);
 }
 
 void Player::SendInitWorldStates()

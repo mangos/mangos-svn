@@ -265,7 +265,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModRangedAttackPowerOfStatPercent,     //212 SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_STAT_PERCENT
     &Aura::HandleNoImmediateEffect,                         //213 SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT implemented in Player::RewardRage
     &Aura::HandleNULL,                                      //214 Tamed Pet Passive
-    &Aura::HandleNULL,                                      //215 Arena Prep.
+    &Aura::HandleArenaPreparation,                          //215 SPELL_AURA_ARENA_PREPARATION
     &Aura::HandleModCastingSpeed,                           //216 SPELL_AURA_HASTE_SPELLS
     &Aura::HandleUnused,                                    //217                                   unused
     &Aura::HandleAuraModRangedHaste,                        //218 SPELL_AURA_HASTE_RANGED
@@ -6291,4 +6291,15 @@ void Aura::HandleManaShield(bool apply, bool Real)
             m_modifier.m_amount += (int32)DoneActualBenefit;
         }
     }
+}
+
+void Aura::HandleArenaPreparation(bool apply, bool Real)
+{
+    if(!Real)
+        return;
+
+    if(apply)
+        m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PREPARATION);
+    else
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PREPARATION);
 }
