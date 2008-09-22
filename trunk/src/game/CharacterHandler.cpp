@@ -711,6 +711,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     if(sWorld.IsFFAPvPRealm() && !pCurrChar->isGameMaster() && !pCurrChar->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_RESTING) )
         pCurrChar->SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
 
+    if(pCurrChar->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_CONTESTED_PVP))
+        pCurrChar->SetContestedPvP();
+
     // Apply at_login requests
     if(pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_SPELLS))
     {
