@@ -234,9 +234,9 @@ AC_CONFIG_FILES([
    src/shared/SystemConfig.h
    src/game/Makefile
    src/realmd/Makefile
-   src/realmd/realmd.conf
+   src/realmd/realmd.conf.dist
    src/mangosd/Makefile
-   src/mangosd/mangosd.conf
+   src/mangosd/mangosd.conf.dist
    src/bindings/Makefile
    src/bindings/universal/Makefile
 ])
