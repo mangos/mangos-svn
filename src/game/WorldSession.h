@@ -116,6 +116,7 @@ class MANGOS_DLL_SPEC WorldSession
         //void SendTestCreatureQueryOpcode( uint32 entry, uint64 guid, uint32 testvalue );
         void SendNameQueryOpcode(Player* p);
         void SendNameQueryOpcodeFromDB(uint64 guid);
+        static void SendNameQueryOpcodeFromDBCallBack(QueryResult *result, uint32 accountId);
 
         void SendTrainerList( uint64 guid );
         void SendTrainerList( uint64 guid,std::string strTitle );
