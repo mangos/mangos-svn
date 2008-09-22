@@ -386,6 +386,13 @@ LogColors = ""
 #                   (included in client by default, with active official localization or custom localization fonts in clientdir/Fonts).
 #                 3 basic latin characters + server timezone specific
 #
+#    CharactersCreatingDisabled
+#        Disable characters creating for specific team or any (non-player accounts not affected)
+#        Default: 0 - enabled
+#                 1 - disabled only for Alliance
+#                 2 - disabled only for Horde
+#                 3 - disabled for both teams
+#
 #    CharactersPerAccount
 #        Limit numbers of characters per account (at all realms).
 #        Note: this setting limit character creating at _current_ realm base at characters amount at all realms
@@ -510,6 +517,7 @@ DeclinedNames = 0
 StrictPlayerNames = 0
 StrictCharterNames = 0
 StrictPetNames = 0
+CharactersCreatingDisabled = 0
 CharactersPerAccount = 50
 CharactersPerRealm = 10
 SkipCinematics = 0
@@ -777,7 +785,7 @@ GM.LogTrade = 1
 #    Visibility.Distance.Grey.Unit
 #        Visibility grey distance for creatures/players (fast changing objects)
 #        addition to appropriate object type Visibility.Distance.* use in case visibility removing to
-#        object (except corpse around distences) If ‚ is distance and G is grey distance then object
+#        object (except corpse around distences) If ï¿½ is distance and G is grey distance then object
 #        make visible if distance to it <= D but make non visible if distance > D+G
 #        Default: 1 (yard)
 #

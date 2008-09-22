@@ -187,6 +187,28 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     WorldPacket data(SMSG_CHAR_CREATE, 1);                  // returned with diff.values in all cases
 
+    if(GetSecurity() == SEC_PLAYER)
+    {
+        if(uint32 mask = sWorld.getConfig(CONFIG_CHARACTERS_CREATING_DISABLED))
+        {
+            bool disabled = false;
+
+            uint32 team = Player::TeamForRace(race_);
+            switch(team)
+            {
+                case ALLIANCE: disabled = mask & (1<<0); break;
+                case HORDE:    disabled = mask & (1<<1); break;
+            }
+
+            if(disabled)
+            {
+                data << (uint8)CHAR_CREATE_DISABLED;
+                SendPacket( &data );
+                return;
+            }
+        }
+    }
+
     if (!sChrClassesStore.LookupEntry(class_)||
         !sChrRacesStore.LookupEntry(race_))
     {
