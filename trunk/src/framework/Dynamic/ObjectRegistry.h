@@ -31,20 +31,8 @@
 template<class T, class Key = std::string>
 class MANGOS_DLL_DECL ObjectRegistry
 {
-    typedef std::map<Key, T *> RegistryMapType;
-    RegistryMapType i_registeredObjects;
-    friend class MaNGOS::OperatorNew<ObjectRegistry<T, Key> >;
-
-    // protected for friend use since it should be a singleton
-    ObjectRegistry() {}
-    ~ObjectRegistry()
-    {
-        for(typename RegistryMapType::iterator iter=i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
-            delete iter->second;
-        i_registeredObjects.clear();
-    }
-
     public:
+        typedef std::map<Key, T *> RegistryMapType;
 
         /// Returns a registry item
         const T* GetRegistryItem(Key key) const
@@ -87,7 +75,7 @@ class MANGOS_DLL_DECL ObjectRegistry
             return (i_registeredObjects.find(key) != i_registeredObjects.end());
         }
 
-        /// Return a list of registered items
+        /// Inefficiently return a vector of registered items
         unsigned int GetRegisteredItems(std::vector<Key> &l) const
         {
             unsigned int sz = l.size();
@@ -95,6 +83,25 @@ class MANGOS_DLL_DECL ObjectRegistry
             for(typename RegistryMapType::const_iterator iter = i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
                 l[sz++] = iter->first;
             return i_registeredObjects.size();
+        }
+
+        /// Return the map of registered items
+        RegistryMapType const &GetRegisteredItems() const
+        {
+            return i_registeredObjects;
+        }
+
+    private:
+        RegistryMapType i_registeredObjects;
+        friend class MaNGOS::OperatorNew<ObjectRegistry<T, Key> >;
+
+        // protected for friend use since it should be a singleton
+        ObjectRegistry() {}
+        ~ObjectRegistry()
+        {
+            for(typename RegistryMapType::iterator iter=i_registeredObjects.begin(); iter != i_registeredObjects.end(); ++iter)
+                delete iter->second;
+            i_registeredObjects.clear();
         }
 };
 #endif
