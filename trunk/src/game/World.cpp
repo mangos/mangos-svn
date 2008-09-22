@@ -2076,7 +2076,7 @@ uint8 World::BanAccount(std::string type, std::string nameOrIP, std::string dura
     std::string safe_author=author;
     loginDatabase.escape_string(safe_author);
 
-    if(!normalizePlayerName(nameOrIP))
+    if(type != "ip" && !normalizePlayerName(nameOrIP))
         return BAN_NOTFOUND;                                // Nobody to ban
 
     uint32 duration_secs = TimeStringToSecs(duration);
