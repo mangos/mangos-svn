@@ -66,11 +66,11 @@ namespace FactorySelector
         if(!ai_factory)
         {
             int best_val = -1;
-            std::vector<std::string> l;
-            ai_registry.GetRegisteredItems(l);
-            for( std::vector<std::string>::iterator iter = l.begin(); iter != l.end(); ++iter)
+            typedef CreatureAIRegistry::RegistryMapType RMT;
+            RMT const &l = ai_registry.GetRegisteredItems();
+            for( RMT::const_iterator iter = l.begin(); iter != l.end(); ++iter)
             {
-                const CreatureAICreator *factory = ai_registry.GetRegistryItem((*iter).c_str());
+                const CreatureAICreator *factory = iter->second;
                 const SelectableAI *p = dynamic_cast<const SelectableAI *>(factory);
                 assert( p != NULL );
                 int val = p->Permit(creature);
