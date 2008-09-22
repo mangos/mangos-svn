@@ -3593,7 +3593,7 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
         {
             case SCRIPT_COMMAND_TALK:
             {
-                if(tmp.datalong > 2)
+                if(tmp.datalong > 3)
                 {
                     sLog.outErrorDb("Table `%s` has invalid talk type (datalong = %u) in SCRIPT_COMMAND_TALK for script id %u",tablename,tmp.datalong,tmp.id);
                     continue;
@@ -3722,6 +3722,17 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
                     continue;
                 }
 
+                break;
+            }
+
+            case SCRIPT_COMMAND_REMOVE_AURA:
+            case SCRIPT_COMMAND_CAST_SPELL:
+            {
+                if(!sSpellStore.LookupEntry(tmp.datalong))
+                {
+                    sLog.outErrorDb("Table `%s` using non-existent spell (id: %u) in SCRIPT_COMMAND_REMOVE_AURA or SCRIPT_COMMAND_CAST_SPELL for script id %u",tablename,tmp.datalong,tmp.id);
+                    continue;
+                }
                 break;
             }
         }
