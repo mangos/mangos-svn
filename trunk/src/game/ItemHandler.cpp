@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -76,14 +76,14 @@ void WorldSession::HandleAutoEquipItemSlotOpcode( WorldPacket & recv_data )
     uint64 itemguid;
     uint8 dstslot;
     recv_data >> itemguid >> dstslot;
-    
+
     // cheating attempt, client should never send opcode in that case
     if(!Player::IsEquipmentPos(INVENTORY_SLOT_BAG_0, dstslot))
         return;
 
     Item* item = _player->GetItemByGuid(itemguid);
     uint16 dstpos = dstslot | (INVENTORY_SLOT_BAG_0 << 8);
-    
+
     if(!item || item->GetPos() == dstpos)
         return;
 

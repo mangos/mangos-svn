@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -286,7 +286,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
             break;
         default:
                                                             // Wands
-            if (m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_REQ_WAND) 
+            if (m_spellInfo->AttributesEx3 & SPELL_ATTR_EX3_REQ_WAND)
                 m_attackType = RANGED_ATTACK;
             else
                 m_attackType = BASE_ATTACK;
@@ -390,7 +390,7 @@ void Spell::FillTargetMap()
 
         // targets for TARGET_SCRIPT_COORDINATES (A) and TARGET_SCRIPT  filled in Spell::canCast call
         if( m_spellInfo->EffectImplicitTargetA[i] == TARGET_SCRIPT_COORDINATES ||
-            m_spellInfo->EffectImplicitTargetA[i] == TARGET_SCRIPT || 
+            m_spellInfo->EffectImplicitTargetA[i] == TARGET_SCRIPT ||
             m_spellInfo->EffectImplicitTargetB[i] == TARGET_SCRIPT && m_spellInfo->EffectImplicitTargetA[i] != TARGET_SELF )
             continue;
 
@@ -948,7 +948,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
 
     // Recheck immune (only for delayed spells)
     if( m_spellInfo->speed && (
-        unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo),true) || 
+        unit->IsImmunedToDamage(GetSpellSchoolMask(m_spellInfo),true) ||
         unit->IsImmunedToSpell(m_spellInfo,true) ))
     {
         m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
@@ -977,7 +977,7 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
                 {
                     if(!unit->IsStandState() && !unit->hasUnitState(UNIT_STAT_STUNDED))
                         unit->SetStandState(PLAYER_STATE_NONE);
-                    
+
                     if(!unit->isInCombat() && unit->GetTypeId() != TYPEID_PLAYER && ((Creature*)unit)->AI())
                         ((Creature*)unit)->AI()->AttackStart(m_caster);
 
@@ -3417,7 +3417,7 @@ uint8 Spell::CanCast(bool strict)
                 if(creatureScriptTarget)
                 {
                     // store coordinates for TARGET_SCRIPT_COORDINATES
-                    if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT_COORDINATES || 
+                    if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT_COORDINATES ||
                         m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT_COORDINATES )
                     {
                         m_targets.setDestination(creatureScriptTarget->GetPositionX(),creatureScriptTarget->GetPositionY(),creatureScriptTarget->GetPositionZ());
@@ -3432,7 +3432,7 @@ uint8 Spell::CanCast(bool strict)
                 else if(goScriptTarget)
                 {
                     // store coordinates for TARGET_SCRIPT_COORDINATES
-                    if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT_COORDINATES || 
+                    if (m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT_COORDINATES ||
                         m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT_COORDINATES )
                     {
                         m_targets.setDestination(goScriptTarget->GetPositionX(),goScriptTarget->GetPositionY(),goScriptTarget->GetPositionZ());
@@ -3792,7 +3792,7 @@ uint8 Spell::CanCast(bool strict)
 
                 break;
             }
-            // This is generic summon effect now and don't make this check for summon types similar 
+            // This is generic summon effect now and don't make this check for summon types similar
             // SPELL_EFFECT_SUMMON_CRITTER, SPELL_EFFECT_SUMMON_WILD or SPELL_EFFECT_SUMMON_GUARDIAN.
             // These won't show up in m_caster->GetPetGUID()
             case SPELL_EFFECT_SUMMON:
@@ -3979,7 +3979,7 @@ uint8 Spell::CanCast(bool strict)
             {
                 if (!m_targets.getUnitTarget())
                     return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-                
+
                 if (m_caster->GetTypeId()!=TYPEID_PLAYER || m_CastItem)
                     break;
 
@@ -4354,7 +4354,7 @@ int32 Spell::CalculatePowerCost()
     // Apply cost mod by spell
     if(Player* modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, powerCost, this);
-    
+
     if(m_spellInfo->Attributes & SPELL_ATTR_LEVEL_DAMAGE_CALCULATION)
         powerCost = int32(powerCost/ (1.117f* m_spellInfo->spellLevel / m_caster->getLevel() -0.1327f));
 

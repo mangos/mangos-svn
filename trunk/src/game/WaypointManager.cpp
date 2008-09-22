@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -101,7 +101,7 @@ void WaypointManager::Load()
                 }
                 WorldDatabase.PExecute("UPDATE creature_movement SET position_x = '%f', position_y = '%f', position_z = '%f' WHERE id = '%u' AND point = '%u'", node.x, node.y, node.z, id, point);
             }
-            
+
             WaypointBehavior be;
             be.model1           = fields[4].GetUInt32();
             be.model2           = fields[5].GetUInt32();
@@ -256,7 +256,7 @@ void WaypointManager::SetNodeText(uint32 id, uint32 point, const char *text_fiel
     WaypointPathMap::iterator itr = m_pathMap.find(id);
     if(itr != m_pathMap.end() && point <= itr->second.size())
     {
-        WaypointNode &node = itr->second[point-1]; 
+        WaypointNode &node = itr->second[point-1];
         if(!node.behavior) node.behavior = new WaypointBehavior();
 
         if(field == "text1") node.behavior->text[0] = text ? text : "";

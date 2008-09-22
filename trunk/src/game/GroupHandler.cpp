@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -205,7 +205,7 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & /*recv_data*/ )
         group->Create(group->GetLeaderGUID(), group->GetLeaderName());
         objmgr.AddGroup(group);
     }
-    
+
     // everything's fine, do it
     if(!group->AddMember(GetPlayer()->GetGUID(), GetPlayer()->GetName()))
         return;

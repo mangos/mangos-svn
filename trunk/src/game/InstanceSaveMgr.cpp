@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -96,7 +96,7 @@ InstanceSave* InstanceSaveManager::AddInstanceSave(uint32 mapId, uint32 instance
         else
         {
             resetTime = time(NULL) + 2 * HOUR;
-            // normally this will be removed soon after in InstanceMap::Add, prevent error 
+            // normally this will be removed soon after in InstanceMap::Add, prevent error
             ScheduleReset(true, resetTime, InstResetEvent(0, mapId, instanceId));
         }
     }
@@ -105,7 +105,7 @@ InstanceSave* InstanceSaveManager::AddInstanceSave(uint32 mapId, uint32 instance
 
     save = new InstanceSave(mapId, instanceId, difficulty, resetTime, canReset);
     if(!load) save->SaveToDB();
-    
+
     m_instanceSaveById[instanceId] = save;
     return save;
 }
@@ -139,7 +139,7 @@ void InstanceSaveManager::RemoveInstanceSave(uint32 InstanceId)
     }
 }
 
-InstanceSave::InstanceSave(uint16 MapId, uint32 InstanceId, uint8 difficulty, 
+InstanceSave::InstanceSave(uint16 MapId, uint32 InstanceId, uint8 difficulty,
                            time_t resetTime, bool canReset)
 : m_mapid(MapId), m_instanceid(InstanceId), m_resetTime(resetTime),
   m_difficulty(difficulty), m_canReset(canReset)
@@ -570,7 +570,7 @@ void InstanceSaveManager::_ResetInstance(uint32 mapid, uint32 instanceId)
     InstanceSaveHashMap::iterator itr = m_instanceSaveById.find(instanceId);
     if(itr != m_instanceSaveById.end()) _ResetSave(itr);
     DeleteInstanceFromDB(instanceId);                       // even if save not loaded
-    
+
     Map* iMap = ((MapInstanced*)map)->FindMap(instanceId);
     if(iMap && iMap->IsDungeon()) ((InstanceMap*)iMap)->Reset(INSTANCE_RESET_RESPAWN_DELAY);
     else objmgr.DeleteRespawnTimeForInstance(instanceId);   // even if map is not loaded

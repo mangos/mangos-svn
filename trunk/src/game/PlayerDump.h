@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -48,9 +48,9 @@ enum DumpTableType
 {
     DTT_CHARACTER,      //                                  // characters
 
-    DTT_CHAR_TABLE,     //                                  // character_action, character_aura, character_homebind, 
-                                                            // character_queststatus, character_reputation, 
-                                                            // character_spell, character_spell_cooldown, character_ticket, 
+    DTT_CHAR_TABLE,     //                                  // character_action, character_aura, character_homebind,
+                                                            // character_queststatus, character_reputation,
+                                                            // character_spell, character_spell_cooldown, character_ticket,
                                                             // character_tutorial
 
     DTT_INVENTORY,      //    -> item guids collection      // character_inventory

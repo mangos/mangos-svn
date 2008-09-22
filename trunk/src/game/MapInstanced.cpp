@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -201,7 +201,7 @@ InstanceMap* MapInstanced::CreateInstance(uint32 InstanceId, InstanceSave *save,
     if(!entry->SupportsHeroicMode()) difficulty = DIFFICULTY_NORMAL;
 
     sLog.outDebug("MapInstanced::CreateInstance: %smap instance %d for %d created with difficulty %s", save?"":"new ", InstanceId, GetId(), difficulty?"heroic":"normal");
- 
+
     InstanceMap *map = new InstanceMap(GetId(), GetGridExpiry(), InstanceId, difficulty);
     assert(map->IsDungeon());
 
@@ -218,7 +218,7 @@ BattleGroundMap* MapInstanced::CreateBattleGround(uint32 InstanceId)
     Guard guard(*this);
 
     sLog.outDebug("MapInstanced::CreateBattleGround: map bg %d for %d created.", InstanceId, GetId());
- 
+
     BattleGroundMap *map = new BattleGroundMap(GetId(), GetGridExpiry(), InstanceId);
     assert(map->IsBattleGroundOrArena());
 

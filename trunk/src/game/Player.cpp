@@ -338,7 +338,7 @@ Player::Player (WorldSession *session): Unit()
     m_restTime = 0;
     m_deathTimer = 0;
     m_deathExpireTime = 0;
- 
+
     m_swingErrorMsg = 0;
 
     m_DetectInvTimer = 1000;
@@ -640,7 +640,7 @@ bool Player::Create( uint32 guidlow, std::string name, uint8 race, uint8 class_,
         ItemPosCountVec sDest;
         // store in main bag to simplify second pass (special bags can be not equipped yet at this moment)
         msg = CanStoreNewItem( INVENTORY_SLOT_BAG_0, NULL_SLOT, sDest, titem_id, titem_amount );
-        if( msg == EQUIP_ERR_OK ) 
+        if( msg == EQUIP_ERR_OK )
         {
             StoreNewItem( sDest, titem_id, true, Item::GenerateItemRandomPropertyId(titem_id) );
             continue;                                       // stored, to next
@@ -908,7 +908,7 @@ void Player::SetDrunkValue(uint16 newDrunkenValue, uint32 itemId)
     data << GetGUID();
     data << uint32(newDrunkenState);
     data << uint32(itemId);
-    
+
     SendMessageToSet(&data, true);
 }
 
@@ -943,7 +943,7 @@ void Player::Update( uint32 p_time )
     time_t now = time (NULL);
 
     UpdatePvPFlag(now);
-    
+
     UpdateContestedPvP(p_time);
 
     UpdateDuelFlag(now);
@@ -1583,7 +1583,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         }
 
         // If the map is not created, assume it is possible to enter it.
-        // It will be created in the WorldPortAck. 
+        // It will be created in the WorldPortAck.
         Map *map = MapManager::Instance().FindMap(mapid);
         if (!map ||  map->CanEnter(this))
         {
@@ -1596,7 +1596,7 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             // remove player from battleground on far teleport (when changing maps)
             if(BattleGround const* bg = GetBattleGround())
             {
-                // Note: at battleground join battleground id set before teleport 
+                // Note: at battleground join battleground id set before teleport
                 // and we already will found "current" battleground
                 // just need check that this is targeted map or leave
                 if(bg->GetMapId() != mapid)
@@ -2292,7 +2292,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     // cleanup unit flags (will be re-applied if need at aura load).
     RemoveFlag( UNIT_FIELD_FLAGS,
-        UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_ATTACKABLE_1 | 
+        UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_NOT_ATTACKABLE_1 |
         UNIT_FLAG_PET_IN_COMBAT  | UNIT_FLAG_SILENCED     | UNIT_FLAG_PACIFIED         |
         UNIT_FLAG_DISABLE_ROTATE | UNIT_FLAG_IN_COMBAT    | UNIT_FLAG_DISARMED         |
         UNIT_FLAG_CONFUSED       | UNIT_FLAG_FLEEING      | UNIT_FLAG_NOT_SELECTABLE   |
@@ -2556,11 +2556,11 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
                     uint32 rankSpellId = talentInfo->RankID[i];
                     if(!rankSpellId || rankSpellId==spell_id)
                         continue;
-                    
+
                     // skip unknown ranks
                     if(!HasSpell(rankSpellId))
                         continue;
-                    
+
                     removeSpell(rankSpellId);
                 }
             }
@@ -2732,7 +2732,7 @@ bool Player::addSpell(uint32 spell_id, bool active, bool learning, bool loading,
             if(HasSkill(pSkill->id))
                 continue;
 
-            if(_spell_idx->second->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL || 
+            if(_spell_idx->second->learnOnGetSkill == ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL ||
                 // poison special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
                 pSkill->id==SKILL_POISONS && _spell_idx->second->max_value==0 ||
                 // lockpicking special case, not have ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL
@@ -2947,7 +2947,7 @@ void Player::RemoveArenaSpellCooldowns()
         ++next;
         SpellEntry const * entry = sSpellStore.LookupEntry(itr->first);
         // check if spellentry is present and if the cooldown is less than 15 mins
-        if( entry && 
+        if( entry &&
             entry->RecoveryTime <= 15 * MINUTE * 1000 &&
             entry->CategoryRecoveryTime <= 15 * MINUTE * 1000 )
         {
@@ -3825,7 +3825,7 @@ void Player::CreateCorpse()
     // we don't SaveToDB for players in battlegrounds so don't do it for corpses either
     const MapEntry *entry = sMapStore.LookupEntry(corpse->GetMapId());
     assert(entry);
-    if(entry->map_type != MAP_BATTLEGROUND) 
+    if(entry->map_type != MAP_BATTLEGROUND)
         corpse->SaveToDB();
 
     // register for player, but not show
@@ -5515,8 +5515,8 @@ uint32 Player::GetDefaultReputationFlags(const FactionEntry *factionEntry) const
     uint32 classMask = getClassMask();
     for (int i=0; i < 4; i++)
     {
-        if( (factionEntry->BaseRepRaceMask[i] & raceMask) && 
-            (factionEntry->BaseRepClassMask[i]==0 || 
+        if( (factionEntry->BaseRepRaceMask[i] & raceMask) &&
+            (factionEntry->BaseRepClassMask[i]==0 ||
             (factionEntry->BaseRepClassMask[i] & classMask) ) )
             return factionEntry->ReputationFlags[i];
     }
@@ -5532,8 +5532,8 @@ int32 Player::GetBaseReputation(const FactionEntry *factionEntry) const
     uint32 classMask = getClassMask();
     for (int i=0; i < 4; i++)
     {
-        if( (factionEntry->BaseRepRaceMask[i] & raceMask) && 
-            (factionEntry->BaseRepClassMask[i]==0 || 
+        if( (factionEntry->BaseRepRaceMask[i] & raceMask) &&
+            (factionEntry->BaseRepClassMask[i]==0 ||
             (factionEntry->BaseRepClassMask[i] & classMask) ) )
             return factionEntry->BaseRepValue[i];
     }
@@ -10033,11 +10033,11 @@ void Player::SetVisibleItemSlot(uint8 slot, Item *pItem)
     // PLAYER_VISIBLE_ITEM_i_CREATOR    // Size: 2
     // PLAYER_VISIBLE_ITEM_i_0          // Size: 12
     //    entry                         //      Size: 1
-    //    inspected enchantments        //      Size: 6 
-    //    ?                             //      Size: 5 
+    //    inspected enchantments        //      Size: 6
+    //    ?                             //      Size: 5
     // PLAYER_VISIBLE_ITEM_i_PROPERTIES // Size: 1 (property,suffix factor)
     // PLAYER_VISIBLE_ITEM_i_PAD        // Size: 1
-    //                                  //     = 16 
+    //                                  //     = 16
 
     if(pItem)
     {
@@ -10460,7 +10460,7 @@ void Player::DestroyConjuredItems( bool update )
     {
         Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if( pItem && pItem->GetProto() &&
-            (pItem->GetProto()->Class == ITEM_CLASS_CONSUMABLE) && 
+            (pItem->GetProto()->Class == ITEM_CLASS_CONSUMABLE) &&
             (pItem->GetProto()->Flags & ITEM_FLAGS_CONJURED) )
             DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
     }
@@ -10478,7 +10478,7 @@ void Player::DestroyConjuredItems( bool update )
                 {
                     Item* pItem = pBag->GetItemByPos(j);
                     if( pItem && pItem->GetProto() &&
-                        (pItem->GetProto()->Class == ITEM_CLASS_CONSUMABLE) && 
+                        (pItem->GetProto()->Class == ITEM_CLASS_CONSUMABLE) &&
                         (pItem->GetProto()->Flags & ITEM_FLAGS_CONJURED) )
                         DestroyItem( i, j, update);
                 }
@@ -10491,7 +10491,7 @@ void Player::DestroyConjuredItems( bool update )
     {
         Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if( pItem && pItem->GetProto() &&
-            (pItem->GetProto()->Class == ITEM_CLASS_CONSUMABLE) && 
+            (pItem->GetProto()->Class == ITEM_CLASS_CONSUMABLE) &&
             (pItem->GetProto()->Flags & ITEM_FLAGS_CONJURED) )
             DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
     }
@@ -10957,7 +10957,7 @@ void Player::SendEquipError( uint8 msg, Item* pItem, Item *pItem2 )
         if(msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I)
         {
             uint32 level = 0;
-            
+
             if(pItem)
                 if(ItemPrototype const* proto =  pItem->GetProto())
                     level = proto->RequiredLevel;
@@ -11091,7 +11091,7 @@ void Player::RemoveEnchantmentDurations(Item *item)
     }
 }
 
- 
+
 void Player::RemoveAllEnchantments(EnchantmentSlot slot)
 {
     // remove enchantments from equipped items first to clean up the m_enchantDuration list
@@ -13242,7 +13242,7 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
 
     if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) )
         m_deathState = DEAD;
-    
+
     return true;
 }
 
@@ -13461,7 +13461,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     // since the player may not be bound to the map yet, make sure subsequent
     // getmap calls won't create new maps
     SetInstanceId(map->GetInstanceId());
-    
+
     SaveRecallPosition();
 
     if (transGUID != 0)
@@ -14561,7 +14561,7 @@ void Player::SendRaidInfo()
     for(i = 0; i < TOTAL_DIFFICULTIES; i++)
         for (BoundInstancesMap::iterator itr = m_boundInstances[i].begin(); itr != m_boundInstances[i].end(); itr++)
             if(itr->second.perm) counter++;
-    
+
     data << counter;
     for(i = 0; i < TOTAL_DIFFICULTIES; i++)
     {
@@ -16159,10 +16159,10 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes, uint32 mount_i
         return false;
     }
 
-    // not let cheating with start flight in time of logout process || if casting not finished || while in combat || if not use Spell's with EffectSendTaxi 
-    if(GetSession()->isLogingOut() || 
+    // not let cheating with start flight in time of logout process || if casting not finished || while in combat || if not use Spell's with EffectSendTaxi
+    if(GetSession()->isLogingOut() ||
         (!m_currentSpells[CURRENT_GENERIC_SPELL] ||
-        m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Effect[0] != SPELL_EFFECT_SEND_TAXI)&& 
+        m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Effect[0] != SPELL_EFFECT_SEND_TAXI)&&
         IsNonMeleeSpellCasted(false) ||
         isInCombat())
     {
@@ -16672,7 +16672,7 @@ void Player::SendCooldownEvent(SpellEntry const *spellInfo)
 {
     if ( !(spellInfo->Attributes & SPELL_ATTR_DISABLED_WHILE_ACTIVE) )
         return;
-    
+
     // Get spell cooldwn
     int32 cooldown = GetSpellRecoveryTime(spellInfo);
     // Apply spellmods

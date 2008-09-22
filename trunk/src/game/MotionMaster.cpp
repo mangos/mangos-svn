@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -150,7 +150,7 @@ MotionMaster::MoveTargetedHome()
     }
     else if(i_owner->GetTypeId()==TYPEID_UNIT && ((Creature*)i_owner)->GetCharmerOrOwnerGUID())
     {
-        sLog.outError("Pet or controlled creature (Entry: %u GUID: %u) attempt targeted home", 
+        sLog.outError("Pet or controlled creature (Entry: %u GUID: %u) attempt targeted home",
             i_owner->GetEntry(), i_owner->GetGUIDLow() );
     }
     else
@@ -169,7 +169,7 @@ MotionMaster::MoveConfused()
     }
     else
     {
-        DEBUG_LOG("Creature (Entry: %u GUID: %u) move confused", 
+        DEBUG_LOG("Creature (Entry: %u GUID: %u) move confused",
             i_owner->GetEntry(), i_owner->GetGUIDLow() );
         Mutate(new ConfusedMovementGenerator<Creature>());
     }
@@ -185,14 +185,14 @@ MotionMaster::MoveChase(Unit* target, float dist, float angle)
     i_owner->clearUnitState(UNIT_STAT_FOLLOW);
     if(i_owner->GetTypeId()==TYPEID_PLAYER)
     {
-        DEBUG_LOG("Player (GUID: %u) chase to %s (GUID: %u)", 
+        DEBUG_LOG("Player (GUID: %u) chase to %s (GUID: %u)",
             target->GetTypeId()==TYPEID_PLAYER ? "player" : "creature",
             target->GetTypeId()==TYPEID_PLAYER ? i_owner->GetGUIDLow() : ((Creature*)i_owner)->GetDBTableGUIDLow() );
         Mutate(new TargetedMovementGenerator<Player>(*target,dist,angle));
     }
     else
     {
-        DEBUG_LOG("Creature (Entry: %u GUID: %u) chase to %s (GUID: %u)", 
+        DEBUG_LOG("Creature (Entry: %u GUID: %u) chase to %s (GUID: %u)",
             i_owner->GetEntry(), i_owner->GetGUIDLow(),
             target->GetTypeId()==TYPEID_PLAYER ? "player" : "creature",
             target->GetTypeId()==TYPEID_PLAYER ? target->GetGUIDLow() : ((Creature*)target)->GetDBTableGUIDLow() );
@@ -219,7 +219,7 @@ MotionMaster::MoveFollow(Unit* target, float dist, float angle)
     }
     else
     {
-        DEBUG_LOG("Creature (Entry: %u GUID: %u) follow to %s (GUID: %u)", 
+        DEBUG_LOG("Creature (Entry: %u GUID: %u) follow to %s (GUID: %u)",
             i_owner->GetEntry(), i_owner->GetGUIDLow(),
             target->GetTypeId()==TYPEID_PLAYER ? "player" : "creature",
             target->GetTypeId()==TYPEID_PLAYER ? target->GetGUIDLow() : ((Creature*)target)->GetDBTableGUIDLow() );
@@ -237,7 +237,7 @@ MotionMaster::MovePoint(uint32 id, float x, float y, float z)
     }
     else
     {
-        DEBUG_LOG("Creature (Entry: %u GUID: %u) targeted point (ID: %u X: %f Y: %f Z: %f)", 
+        DEBUG_LOG("Creature (Entry: %u GUID: %u) targeted point (ID: %u X: %f Y: %f Z: %f)",
             i_owner->GetEntry(), i_owner->GetGUIDLow(), id, x, y, z );
         Mutate(new PointMovementGenerator<Creature>(id,x,y,z));
     }
@@ -258,7 +258,7 @@ MotionMaster::MoveFleeing(Unit* enemy)
     }
     else
     {
-        DEBUG_LOG("Creature (Entry: %u GUID: %u) flee from %s (GUID: %u)", 
+        DEBUG_LOG("Creature (Entry: %u GUID: %u) flee from %s (GUID: %u)",
             i_owner->GetEntry(), i_owner->GetGUIDLow(),
             enemy->GetTypeId()==TYPEID_PLAYER ? "player" : "creature",
             enemy->GetTypeId()==TYPEID_PLAYER ? enemy->GetGUIDLow() : ((Creature*)enemy)->GetDBTableGUIDLow() );
@@ -277,7 +277,7 @@ MotionMaster::MoveTaxiFlight(uint32 path, uint32 pathnode)
     }
     else
     {
-        sLog.outError("Creature (Entry: %u GUID: %u) attempt taxi to (Path %u node %u)", 
+        sLog.outError("Creature (Entry: %u GUID: %u) attempt taxi to (Path %u node %u)",
             i_owner->GetEntry(), i_owner->GetGUIDLow(), path, pathnode );
     }
 }
@@ -291,7 +291,7 @@ MotionMaster::MoveDistract(uint32 timer)
     }
     else
     {
-        DEBUG_LOG("Creature (Entry: %u GUID: %u) (timer: %u)", 
+        DEBUG_LOG("Creature (Entry: %u GUID: %u) (timer: %u)",
             i_owner->GetEntry(), i_owner->GetGUIDLow(), timer);
     }
 

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1947,7 +1947,7 @@ void SpellMgr::LoadSpellPetAuras()
 
             if(i == 3)
             {
-                sLog.outError("Spell %u listed in `spell_pet_auras` does not have dummy aura or dummy effect", spell); 
+                sLog.outError("Spell %u listed in `spell_pet_auras` does not have dummy aura or dummy effect", spell);
                 continue;
             }
 
@@ -1957,11 +1957,11 @@ void SpellMgr::LoadSpellPetAuras()
                 sLog.outErrorDb("Aura %u listed in `spell_pet_auras` does not exist", aura);
                 continue;
             }
-            
+
             PetAura pa(pet, aura, spellInfo->EffectImplicitTargetA[i] == TARGET_PET, spellInfo->EffectBasePoints[i] + spellInfo->EffectBaseDice[i]);
             mSpellPetAuraMap[spell] = pa;
         }
-        
+
         ++count;
     } while( result->NextRow() );
 

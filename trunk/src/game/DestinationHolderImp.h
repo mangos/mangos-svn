@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -90,15 +90,15 @@ DestinationHolder<TRAVELLER>::StartTravel(TRAVELLER &traveller, bool sendMove)
     float dist;
     //Should be for Creature Flying and Swimming.
     if(traveller.GetTraveller().hasUnitState(UNIT_STAT_IN_FLIGHT))
-        dist = sqrt((dx*dx) + (dy*dy) + (dz*dz)); 
+        dist = sqrt((dx*dx) + (dy*dy) + (dz*dz));
     else                                                    //Walking on the ground
-        dist = sqrt((dx*dx) + (dy*dy)); 
+        dist = sqrt((dx*dx) + (dy*dy));
     float speed = traveller.Speed();
 
     speed *=  0.001f;                                       // speed is in seconds so convert from second to millisecond
     i_totalTravelTime = static_cast<uint32>(dist/speed);
     i_timeElapsed = 0;
-    if(sendMove) 
+    if(sendMove)
         traveller.MoveTo(i_destX, i_destY, i_destZ, i_totalTravelTime);
     return i_totalTravelTime;
 }
@@ -135,7 +135,7 @@ DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, uint32 diff,
         ResetUpdate();
         if(!i_destSet) return true;
         float x,y,z;
-        
+
         if(!traveller.GetTraveller().hasUnitState(UNIT_STAT_MOVING | UNIT_STAT_IN_FLIGHT))
             return true;
 
@@ -146,7 +146,7 @@ DestinationHolder<TRAVELLER>::UpdateTraveller(TRAVELLER &traveller, uint32 diff,
 
         if( x == -431602080 )
             return false;
-        
+
         if( traveller.GetTraveller().GetPositionX() != x || traveller.GetTraveller().GetPositionY() != y )
         {
             float ori = traveller.GetTraveller().GetAngle(x, y);

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -4508,7 +4508,7 @@ bool ChatHandler::HandleCompleteQuest(const char* args)
         SetSentErrorMessage(true);
         return false;
     }
-    
+
     // Add quest items for quests that require items
     for(uint8 x = 0; x < QUEST_OBJECTIVES_COUNT; ++x)
     {
@@ -4567,7 +4567,7 @@ bool ChatHandler::HandleCompleteQuest(const char* args)
     int32 ReqOrRewMoney = pQuest->GetRewOrReqMoney();
     if(ReqOrRewMoney < 0)
         player->ModifyMoney(-ReqOrRewMoney);
-        
+
     player->CompleteQuest(entry);
     return true;
 }
@@ -5244,7 +5244,7 @@ bool ChatHandler::HandleCastTargetCommand(const char* args)
     return true;
 }
 
-/* 
+/*
 ComeToMe command REQUIRED for 3rd party scripting library to have access to PointMovementGenerator
 Without this function 3rd party scripting library will get linking errors (unresolved external)
 when attempting to use the PointMovementGenerator
@@ -5419,7 +5419,7 @@ bool ChatHandler::HandleInstanceSaveDataCommand(const char * /*args*/)
         SetSentErrorMessage(true);
         return false;
     }
-   
+
     ((InstanceMap*)map)->GetInstanceData()->SaveToDB();
     return true;
 }

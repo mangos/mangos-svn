@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -721,7 +721,7 @@ bool GameObject::isVisibleForInState(Player const* u, bool inVisibleList) const
     }
 
     // check distance
-    return IsWithinDistInMap(u,World::GetMaxVisibleDistanceForObject() + 
+    return IsWithinDistInMap(u,World::GetMaxVisibleDistanceForObject() +
         (inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f) );
 }
 
@@ -938,7 +938,7 @@ void GameObject::Use(Unit* user)
             if(user->GetTypeId()==TYPEID_PLAYER)
             {
                 Player* player = (Player*)user;
-    
+
                 // show page
                 if(info->goober.pageId)
                 {

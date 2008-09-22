@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -245,7 +245,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     /* handle special cases */
     if (MovementFlags & MOVEMENTFLAG_ONTRANSPORT)
     {
-        // transports size limited 
+        // transports size limited
         // (also received at zeppelin leave by some reason with t_* as absolute in continent coordinates, can be safely skipped)
         if( movementInfo.t_x > 50 || movementInfo.t_y > 50 || movementInfo.t_z > 50 )
             return;

@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -533,13 +533,13 @@ class PetAura
         {
             auras.clear();
         }
-        
+
         PetAura(uint16 petEntry, uint16 aura, bool _removeOnChangePet, int _damage) :
         removeOnChangePet(_removeOnChangePet), damage(_damage)
         {
             auras[petEntry] = aura;
         }
-        
+
         uint16 GetAura(uint16 petEntry) const
         {
             std::map<uint16, uint16>::const_iterator itr = auras.find(petEntry);

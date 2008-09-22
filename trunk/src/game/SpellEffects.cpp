@@ -302,11 +302,11 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
             {
                 //Gore
                 if(m_spellInfo->SpellIconID == 2269 )
-                {    
+                {
                     damage+= rand()%2 ? damage : 0;
                 }
 
-                switch(m_spellInfo->Id)                     // better way to check unknown 
+                switch(m_spellInfo->Id)                     // better way to check unknown
                 {
                     // Meteor like spells (divided damage to targets)
                     case 24340: case 26558: case 28884:     // Meteor
@@ -420,7 +420,7 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                                 }
                                 break;
                             }
-                            case 5148:                      //Improved Starfire - Ivory Idol of the Moongoddes Aura 
+                            case 5148:                      //Improved Starfire - Ivory Idol of the Moongoddes Aura
                             {
                                 damage += (*i)->GetModifier()->m_amount;
                                 break;
@@ -458,7 +458,7 @@ void Spell::EffectSchoolDMG(uint32 effect_idx)
                         for(Unit::AuraList::const_iterator itr = auras.begin(); itr!=auras.end() && combo;)
                         {
                             // Deadly poison (only attacker applied)
-                            if( (*itr)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_ROGUE && ((*itr)->GetSpellProto()->SpellFamilyFlags & 0x10000) && 
+                            if( (*itr)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_ROGUE && ((*itr)->GetSpellProto()->SpellFamilyFlags & 0x10000) &&
                                 (*itr)->GetSpellProto()->SpellVisual==5100 && (*itr)->GetCasterGUID()==m_caster->GetGUID() )
                             {
                                 --combo;
@@ -1050,7 +1050,7 @@ void Spell::EffectDummy(uint32 i)
                         uint32 classspell = itr->first;
                         SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
 
-                        if( spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && 
+                        if( spellInfo->SpellFamilyName == SPELLFAMILY_MAGE &&
                             (GetSpellSchoolMask(spellInfo) & SPELL_SCHOOL_MASK_FROST) &&
                             spellInfo->Id != 11958 && GetSpellRecoveryTime(spellInfo) > 0 )
                         {
@@ -1121,7 +1121,7 @@ void Spell::EffectDummy(uint32 i)
                     }
 
                     m_caster->CastCustomSpell(m_caster,31818,&mana,NULL,NULL,true,NULL);
-                    
+
                     // Mana Feed
                     int32 manaFeedVal = m_caster->CalculateSpellDamage(m_spellInfo,1, m_spellInfo->EffectBasePoints[1],m_caster);
                     manaFeedVal = manaFeedVal * mana / 100;
@@ -1660,7 +1660,7 @@ void Spell::EffectTriggerSpell(uint32 i)
             Unit::AuraMap& Auras = m_caster->GetAuras();
             for(Unit::AuraMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
             {
-                // remove all harmful spells on you... 
+                // remove all harmful spells on you...
                 if( // ignore positive and passive auras
                     !iter->second->IsPositive() && !iter->second->IsPassive()    &&
                     // ignore physical auras
@@ -2071,8 +2071,8 @@ void Spell::EffectPowerDrain(uint32 i)
     // resilience reduce mana draining effect at spell crit damage reduction (added in 2.4)
     uint32 power = damage;
     if ( drain_power == POWER_MANA && unitTarget->GetTypeId() == TYPEID_PLAYER )
-        power -= ((Player*)unitTarget)->GetSpellCritDamageReduction(power); 
-    
+        power -= ((Player*)unitTarget)->GetSpellCritDamageReduction(power);
+
     int32 new_damage;
     if(curPower < power)
         new_damage = curPower;
@@ -2252,7 +2252,7 @@ void Spell::EffectHeal( uint32 /*i*/ )
             int32 tickheal = caster->SpellHealingBonus(targetAura->GetSpellProto(), targetAura->GetModifier()->m_amount, DOT, unitTarget);
             int32 tickcount = GetSpellDuration(targetAura->GetSpellProto()) / targetAura->GetSpellProto()->EffectAmplitude[idx];
             unitTarget->RemoveAurasDueToSpell(targetAura->GetId());
-            
+
             addhealth += tickheal * tickcount;
         }
         else
@@ -3257,7 +3257,7 @@ void Spell::EffectDispel(uint32 i)
             WorldPacket data(SMSG_DISPEL_FAILED, 8+8+4+4*fail_list.size());
             data << uint64(m_caster->GetGUID());            // Caster GUID
             data << uint64(unitTarget->GetGUID());          // Victim GUID
-            data << uint32(m_spellInfo->Id);                // Dispell spell id 
+            data << uint32(m_spellInfo->Id);                // Dispell spell id
             for (std::list< uint32 >::iterator j = fail_list.begin(); j != fail_list.end(); ++j)
                 data << uint32(*j);                         // Spell Id
             m_caster->SendMessageToSet(&data, true);
@@ -4207,7 +4207,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     // + weapon damage with applied weapon% dmg to base weapon damage in call
     bonus += int32(m_caster->CalculateDamage(m_attackType, normalized)*weaponDamagePercentMod);
 
-    // total damage 
+    // total damage
     bonus = int32(bonus*totalDamagePercentMod);
 
     // prevent negative damage
@@ -4249,7 +4249,7 @@ void Spell::EffectWeaponDmg(uint32 i)
         if(m_caster->GetTypeId()==TYPEID_PLAYER)
             ((Player*)m_caster)->AddComboPoints(unitTarget, 1);
     }
-    // Mangle (Cat): CP 
+    // Mangle (Cat): CP
     if(m_spellInfo->SpellFamilyName==SPELLFAMILY_DRUID && (m_spellInfo->SpellFamilyFlags==0x0000040000000000LL))
     {
         if(m_caster->GetTypeId()==TYPEID_PLAYER)
@@ -4494,12 +4494,12 @@ void Spell::EffectScriptEffect(uint32 effIndex)
             DoCreateItem( effIndex, itemtype );
             return;
         }
-        // Brittle Armor - need remove one 24575 Brittle Armor aura 
+        // Brittle Armor - need remove one 24575 Brittle Armor aura
         case 24590:
             unitTarget->RemoveSingleAuraFromStack(24575, 0);
             unitTarget->RemoveSingleAuraFromStack(24575, 1);
             return;
-        // Mercurial Shield - need remove one 26464 Mercurial Shield aura 
+        // Mercurial Shield - need remove one 26464 Mercurial Shield aura
         case 26465:
             unitTarget->RemoveSingleAuraFromStack(26464, 0);
             return;
@@ -4587,7 +4587,7 @@ void Spell::EffectScriptEffect(uint32 effIndex)
             unitTarget->HandleEmoteCommand(EMOTE_STATE_DANCE);
             break;
         }
-        
+
         // Dreaming Glory
         case 28698:
         {
@@ -4618,7 +4618,7 @@ void Spell::EffectScriptEffect(uint32 effIndex)
             unitTarget->CastSpell(unitTarget, spellid+urand(0, 4), true);
             break;
         }
-        
+
         // Nightmare Vine
         case 28720:
         {
@@ -4948,7 +4948,7 @@ static ScriptInfo generateActivateCommand()
 {
     ScriptInfo si;
     si.command = SCRIPT_COMMAND_ACTIVATE_OBJECT;
-    return si; 
+    return si;
 }
 
 void Spell::EffectActivateObject(uint32 effect_idx)
@@ -4994,7 +4994,7 @@ void Spell::EffectSummonTotem(uint32 i)
     if (m_caster->GetTypeId()==TYPEID_PLAYER)
         team = ((Player*)m_caster)->GetTeam();
 
-    Totem* pTotem = new Totem; 
+    Totem* pTotem = new Totem;
 
     if(!pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), m_caster->GetMap(), m_spellInfo->EffectMiscValue[i], team ))
     {
@@ -5437,7 +5437,7 @@ void Spell::EffectCharge(uint32 /*i*/)
 
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->CreatureRelocation((Creature*)m_caster,x,y,z,m_caster->GetOrientation());
- 
+
     // not all charge effects used in negative spells
     if ( !IsPositiveSpell(m_spellInfo->Id))
         m_caster->Attack(unitTarget,true);
@@ -5461,7 +5461,7 @@ void Spell::EffectSummonCritter(uint32 i)
         player->RemoveMiniPet();
         return;
     }
-    
+
     // despawn old pet before summon new
     if(old_critter)
         player->RemoveMiniPet();
@@ -5981,7 +5981,7 @@ void Spell::EffectStealBeneficialBuff(uint32 i)
         Aura *aur = (*itr).second;
         if (aur && (1<<aur->GetSpellProto()->Dispel) & dispelMask)
         {
-            // Need check for passive? this 
+            // Need check for passive? this
             if (aur->IsPositive() && !aur->IsPassive())
                 steal_list.push_back(aur);
         }

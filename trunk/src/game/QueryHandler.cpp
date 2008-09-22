@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -53,7 +53,7 @@ void WorldSession::SendNameQueryOpcode(Player *p)
     }
     else
         data << uint8(0);                                   // is not declined
-    
+
     SendPacket(&data);
 }
 
@@ -114,7 +114,7 @@ void WorldSession::SendNameQueryOpcodeFromDBCallBack(QueryResult *result, uint32
     }
     else
         data << (uint8)0;                                   // is declined
-    
+
     session->SendPacket( &data );
     delete result;
 }

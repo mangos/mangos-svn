@@ -44,7 +44,7 @@ PetAI::PetAI(Creature &c) : i_pet(c), i_victimGuid(0), i_tracker(TIME_INTERVAL_L
 
 void PetAI::MoveInLineOfSight(Unit *u)
 {
-    if( !i_pet.getVictim() && i_pet.GetCharmInfo() && 
+    if( !i_pet.getVictim() && i_pet.GetCharmInfo() &&
         i_pet.GetCharmInfo()->HasReactState(REACT_AGGRESSIVE) &&
         u->isTargetableForAttack() && i_pet.IsHostileTo( u ) &&
         u->isInAccessablePlaceFor(&i_pet))

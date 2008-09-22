@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -354,7 +354,7 @@ void ObjectMgr::SendAuctionSalePendingMail( AuctionEntry * auction )
 
         std::ostringstream msgAuctionSalePendingBody;
         uint32 auctionCut = GetAuctionCut(auction->location, auction->bid);
-        
+
         time_t distrTime = time(NULL) + HOUR;
 
         msgAuctionSalePendingBody.width(16);
@@ -2718,7 +2718,7 @@ void ObjectMgr::LoadQuests()
         "RewOrReqMoney, RewMoneyMaxLevel, RewSpell, RewSpellCast, RewMailTemplateId, RewMailDelaySecs, PointMapId, PointX, PointY, PointOpt,"
     //   108            109            110            111           112              113            114                115                116                117
         "DetailsEmote1, DetailsEmote2, DetailsEmote3, DetailsEmote4,IncompleteEmote, CompleteEmote, OfferRewardEmote1, OfferRewardEmote2, OfferRewardEmote3, OfferRewardEmote4,"
-    //   118          119 
+    //   118          119
         "StartScript, CompleteScript"
         " FROM quest_template");
     if(result == NULL)
@@ -5613,8 +5613,8 @@ void ObjectMgr::SaveCreatureRespawnTime(uint32 loguid, uint32 instance, time_t t
 }
 
 time_t ObjectMgr::GetCreatureRespawnTime(uint32 loguid, uint32 instance)
-{ 
-    ObjectMgr::GuardType g(mCreatureRespawnTimesLock); 
+{
+    ObjectMgr::GuardType g(mCreatureRespawnTimesLock);
     return mCreatureRespawnTimes[MAKE_PAIR64(loguid,instance)];
 }
 
@@ -6135,7 +6135,7 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, bool posi
         if(data.Content.size() < 1)
             data.Content.resize(1);
 
-        // 0 -> default, idx in to idx+1 
+        // 0 -> default, idx in to idx+1
         data.Content[0] = fields[1].GetCppString();
 
         for(int i = 1; i < MAX_LOCALE; ++i)
@@ -6146,7 +6146,7 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, bool posi
                 int idx = GetOrNewIndexForLocale(LocaleConstant(i));
                 if(idx >= 0)
                 {
-                    // 0 -> default, idx in to idx+1 
+                    // 0 -> default, idx in to idx+1
                     if(data.Content.size() <= idx+1)
                         data.Content.resize(idx+2);
 
@@ -6165,7 +6165,7 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, bool posi
 
 const char *ObjectMgr::GetMangosString(int32 entry, int locale_idx) const
 {
-    // locale_idx==-1 -> default, locale_idx >= 0 in to idx+1 
+    // locale_idx==-1 -> default, locale_idx >= 0 in to idx+1
     // Content[0] always exist if exist MangosStringLocale
     if(MangosStringLocale const *msl = GetMangosStringLocale(entry))
     {
