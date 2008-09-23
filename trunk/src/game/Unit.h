@@ -1155,10 +1155,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void ModifyAuraState(AuraState flag, bool apply);
         bool HasAuraState(AuraState flag) const { return HasFlag(UNIT_FIELD_AURASTATE, 1<<(flag-1)); }
         void UnsummonAllTotems();
-        int32 SpellBaseDamageBonus(int32 SchoolMask);
-        int32 SpellBaseHealingBonus(int32 SchoolMask);
-        int32 SpellBaseDamageBonusForVictim(int32 SchoolMask, Unit *pVictim);
-        int32 SpellBaseHealingBonusForVictim(int32 SchoolMask, Unit *pVictim);
+        int32 SpellBaseDamageBonus(SpellSchoolMask schoolMask);
+        int32 SpellBaseHealingBonus(SpellSchoolMask schoolMask);
+        int32 SpellBaseDamageBonusForVictim(SpellSchoolMask schoolMask, Unit *pVictim);
+        int32 SpellBaseHealingBonusForVictim(SpellSchoolMask schoolMask, Unit *pVictim);
         uint32 SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 damage, DamageEffectType damagetype);
         uint32 SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, DamageEffectType damagetype, Unit *pVictim);
         bool   isSpellCrit(Unit *pVictim, SpellEntry const *spellProto, SpellSchoolMask schoolMask, WeaponAttackType attackType);
