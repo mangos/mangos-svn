@@ -632,7 +632,7 @@ enum SpellEffects
     SPELL_EFFECT_PROSPECTING               = 127,
     SPELL_EFFECT_APPLY_AREA_AURA_FRIEND    = 128,
     SPELL_EFFECT_APPLY_AREA_AURA_ENEMY     = 129,
-    SPELL_EFFECT_130                       = 130,
+    SPELL_EFFECT_REDIRECT_THREAT           = 130,
     SPELL_EFFECT_131                       = 131,
     SPELL_EFFECT_132                       = 132,
     SPELL_EFFECT_UNLEARN_SPECIALIZATION    = 133,
