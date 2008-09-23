@@ -277,9 +277,7 @@ void OnSignal(int s)
     switch (s)
     {
         case SIGINT:
-        case SIGQUIT:
         case SIGTERM:
-        case SIGABRT:
             stopEvent = true;
             break;
         #ifdef _WIN32
@@ -315,9 +313,7 @@ bool StartDB(std::string &dbstring)
 void HookSignals()
 {
     signal(SIGINT, OnSignal);
-    signal(SIGQUIT, OnSignal);
     signal(SIGTERM, OnSignal);
-    signal(SIGABRT, OnSignal);
     #ifdef _WIN32
     signal(SIGBREAK, OnSignal);
     #endif
@@ -327,9 +323,7 @@ void HookSignals()
 void UnhookSignals()
 {
     signal(SIGINT, 0);
-    signal(SIGQUIT, 0);
     signal(SIGTERM, 0);
-    signal(SIGABRT, 0);
     #ifdef _WIN32
     signal(SIGBREAK, 0);
     #endif
