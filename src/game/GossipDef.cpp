@@ -406,6 +406,8 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
                 Details=ql->Details[loc_idx];
             if (ql->Objectives.size() > loc_idx && !ql->Objectives[loc_idx].empty())
                 Objectives=ql->Objectives[loc_idx];
+            if (ql->EndText.size() > loc_idx && !ql->EndText[loc_idx].empty())
+                EndText=ql->EndText[loc_idx];
         }
     }
 
@@ -492,6 +494,8 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
                 Details=ql->Details[loc_idx];
             if (ql->Objectives.size() > loc_idx && !ql->Objectives[loc_idx].empty())
                 Objectives=ql->Objectives[loc_idx];
+            if (ql->EndText.size() > loc_idx && !ql->EndText[loc_idx].empty())
+                EndText=ql->EndText[loc_idx];
 
             for (int i=0;i<QUEST_OBJECTIVES_COUNT;i++)
                 if (ql->ObjectiveText[i].size() > loc_idx && !ql->ObjectiveText[i][loc_idx].empty())
