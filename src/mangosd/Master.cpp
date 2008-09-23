@@ -462,9 +462,7 @@ void Master::_OnSignal(int s)
     switch (s)
     {
         case SIGINT:
-        case SIGQUIT:
         case SIGTERM:
-        case SIGABRT:
         #ifdef _WIN32
         case SIGBREAK:
         #endif
@@ -479,9 +477,7 @@ void Master::_OnSignal(int s)
 void Master::_HookSignals()
 {
     signal(SIGINT, _OnSignal);
-    signal(SIGQUIT, _OnSignal);
     signal(SIGTERM, _OnSignal);
-    signal(SIGABRT, _OnSignal);
     #ifdef _WIN32
     signal(SIGBREAK, _OnSignal);
     #endif
@@ -491,9 +487,7 @@ void Master::_HookSignals()
 void Master::_UnhookSignals()
 {
     signal(SIGINT, 0);
-    signal(SIGQUIT, 0);
     signal(SIGTERM, 0);
-    signal(SIGABRT, 0);
     #ifdef _WIN32
     signal(SIGBREAK, 0);
     #endif

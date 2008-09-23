@@ -143,7 +143,6 @@ editing at the points marked **** EDIT HERE IF NECESSARY **** below.
 #define MANGOS_IMPORT __cdecl
 #define MANGOS_SCRIPT_EXT ".dll"
 #define MANGOS_SCRIPT_NAME "MaNGOSScript"
-#define SIGQUIT 3
 #else
 #define MANGOS_LIBRARY_HANDLE void*
 #define MANGOS_EXPORT export
