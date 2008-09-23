@@ -5872,6 +5872,13 @@ bool Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     target = this;
                     break;
             }
+            switch(auraSpellInfo->Id)
+            {
+                // Persistent Shield (Scarab Brooch)
+                case 26467:
+                    basepoints0 = int32(damage * 0.15f);
+                    break;
+            }
             break;
         }
         case SPELLFAMILY_WARRIOR:
