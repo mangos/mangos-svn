@@ -193,6 +193,7 @@ pkgdata_DATA = \
 	6627_mangos_creature_movement.sql \
 	6640_mangos_reference_loot_template.sql \
 	6642_characters_declinedname.sql \
+	6668_mangos_spell_proc_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -366,4 +367,5 @@ EXTRA_DIST = \
 	6627_mangos_creature_movement.sql \
 	6640_mangos_reference_loot_template.sql \
 	6642_characters_declinedname.sql \
+	6668_mangos_spell_proc_event.sql \
 	README
