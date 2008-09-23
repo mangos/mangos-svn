@@ -277,14 +277,14 @@ bool Utf8FitTo(std::string str, std::wstring search);
 #if PLATFORM == PLATFORM_WINDOWS
 #define UTF8PRINTF(OUT,FRM,RESERR)                      \
 {                                                       \
-    static char temp_buf[1000];                         \
+    char temp_buf[5000];                                \
     va_list ap;                                         \
     va_start(ap, FRM);                                  \
-    size_t temp_len = vsnprintf(temp_buf,1000,FRM,ap);  \
+    size_t temp_len = vsnprintf(temp_buf,5000,FRM,ap);  \
     va_end(ap);                                         \
                                                         \
-    static wchar_t wtemp_buf[1000];                     \
-    size_t wtemp_len = 1000-1;                          \
+    wchar_t wtemp_buf[5000];                            \
+    size_t wtemp_len = 5000-1;                          \
     if(!Utf8toWStr(temp_buf,temp_len,wtemp_buf,wtemp_len)) \
         return RESERR;                                  \
     CharToOemBuffW(&wtemp_buf[0],&temp_buf[0],wtemp_len+1);\

@@ -705,7 +705,24 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastSpell(unitTarget,spell_id,true,NULL);
                     return;
                 }
-                case 14185:                                         //Preparation Rogue
+                case 13567:                                 // Dummy Trigger
+                {
+                    // can be used for different aura triggreing, so select by aura
+                    if(!m_triggeredByAuraSpell || !unitTarget)
+                        return;
+
+                    switch(m_triggeredByAuraSpell->Id)
+                    {
+                        case 26467:                         // Persistent Shield
+                            m_caster->CastCustomSpell(unitTarget, 26470, &damage, NULL, NULL, true);
+                            break;
+                        default:
+                            sLog.outError("EffectDummy: Non-handled case for spell 13567 for triggered aura %u",m_triggeredByAuraSpell->Id);
+                            break;
+                    }
+                    return;
+                }
+                case 14185:                                 // Preparation Rogue
                 {
                     if(m_caster->GetTypeId()!=TYPEID_PLAYER)
                         return;
