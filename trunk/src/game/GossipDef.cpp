@@ -365,10 +365,22 @@ void PlayerMenu::SendQuestGiverQuestList( QEmote eEmote, std::string Title, uint
         uint32 questID = qmi.m_qId;
         Quest const *pQuest = objmgr.GetQuestTemplate(questID);
 
+        std::string title = pQuest ? pQuest->GetTitle() : "";
+
+        int loc_idx = pSession->GetSessionDbLocaleIndex();
+        if (loc_idx >= 0)
+        {
+            if(QuestLocale const *ql = objmgr.GetQuestLocale(questID))
+            {
+                if (ql->Title.size() > loc_idx && !ql->Title[loc_idx].empty())
+                    title=ql->Title[loc_idx];
+            }
+        }
+
         data << uint32(questID);
         data << uint32(qmi.m_qIcon);
         data << uint32(pQuest ? pQuest->GetQuestLevel() : 0);
-        data << ( pQuest ? pQuest->GetTitle() : "" );
+        data << title;
     }
     pSession->SendPacket( &data );
     //uint32 fqid=pQuestMenu->GetItem(0).m_qId;
