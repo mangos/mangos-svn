@@ -33,7 +33,11 @@
 void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug( "WORLD: got MSG_MOVE_WORLDPORT_ACK." );
+    HandleMoveWorldportAckOpcode();
+}
 
+void WorldSession::HandleMoveWorldportAckOpcode()
+{
     // get the teleport destination
     WorldLocation &loc = GetPlayer()->GetTeleportDest();
 

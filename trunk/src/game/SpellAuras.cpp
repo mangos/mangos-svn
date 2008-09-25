@@ -3897,7 +3897,7 @@ void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
         // some spell have charges by functionality not have its in spell data
         switch (GetId())
         {
-            case 28200:                         // Ascendance (Talisman of Ascendance trinket)
+            case 28200:                                     // Ascendance (Talisman of Ascendance trinket)
                 m_procCharges = 6;
                 UpdateAuraCharges();
                 break;
