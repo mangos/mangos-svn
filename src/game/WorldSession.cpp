@@ -224,7 +224,7 @@ void WorldSession::LogoutPlayer(bool Save)
 {
     // finish pending transfers before starting the logout
     while(_player && _player->IsBeingTeleported())
-        HandleMoveWorldportAckOpcode(*(WorldPacket *)NULL);
+        HandleMoveWorldportAckOpcode();
 
     m_playerLogout = true;
 
