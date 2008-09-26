@@ -468,6 +468,14 @@ enum UnitFlags
     UNIT_FLAG_SHEATHE          = 0x40000000
 };
 
+// Value masks for UNIT_FIELD_FLAGS_2
+enum UnitFlags2
+{
+    UNIT_FLAG2_FEIGN_DEATH    = 0x00000001,
+    UNIT_FLAG2_COMPREHEND_LANG= 0x00000008,
+    UNIT_FLAG2_FORCE_MOVE     = 0x00000040
+};
+
 /// Non Player Character flags
 enum NPCFlags
 {

@@ -483,10 +483,12 @@ enum Language
     LANG_GUTTERSPEAK    = 33,
     LANG_DRAENEI        = 35,
     LANG_ZOMBIE         = 36,
+    LANG_GNOMISH_BINARY = 37,
+    LANG_GOBLIN_BINARY  = 38,
     LANG_ADDON          = 0xFFFFFFFF                        // used by addons, in 2.4.0 not exit, replaced by messagetype?
 };
 
-#define LANGUAGES_COUNT   17
+#define LANGUAGES_COUNT   19
 
 enum Team
 {

@@ -291,10 +291,10 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModSpellHealingPercentFromAttackPower,     //238 SPELL_AURA_MOD_SPELL_HEALING_OF_ATTACK_POWER implemented in Unit::SpellBaseHealingBonus
     &Aura::HandleAuraModScale,                              //239 SPELL_AURA_MOD_SCALE_2 only in Noggenfogger Elixir (16595) before 2.3.0 aura 61
     &Aura::HandleAuraModExpertise,                          //240 SPELL_AURA_MOD_EXPERTISE
-    &Aura::HandleNULL,                                      //241 Brewfest Racing Ram
+    &Aura::HandleForceMoveForward,                          //241 Forces the player to move forward
     &Aura::HandleUnused,                                    //242 SPELL_AURA_MOD_SPELL_DAMAGE_FROM_HEALING
     &Aura::HandleUnused,                                    //243 used by two test spells
-    &Aura::HandleUnused,                                    //244 used by only one test spell
+    &Aura::HandleComprehendLanguage,                        //244 Comprehend language
     &Aura::HandleUnused,                                    //245 SPELL_AURA_MOD_DURATION_OF_MAGIC_EFFECTS
     &Aura::HandleUnused,                                    //246 unused
     &Aura::HandleUnused,                                    //247 unused
@@ -3119,7 +3119,8 @@ void Aura::HandleFeignDeath(bool apply, bool Real)
         */
                                                             // blizz like 2.0.x
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN6);
-        m_target->SetFlag(UNIT_FIELD_FLAGS_2, 0x00000001);  // blizz like 2.0.x
+                                                            // blizz like 2.0.x
+        m_target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
                                                             // blizz like 2.0.x
         m_target->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
 
@@ -3143,7 +3144,7 @@ void Aura::HandleFeignDeath(bool apply, bool Real)
                                                             // blizz like 2.0.x
         m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN6);
                                                             // blizz like 2.0.x
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS_2, 0x00000001);
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FEIGN_DEATH);
                                                             // blizz like 2.0.x
         m_target->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_DEAD);
 
@@ -4579,6 +4580,14 @@ void Aura::HandleModManaRegen(bool apply, bool Real)
     ((Player*)m_target)->UpdateManaRegen();
 }
 
+void Aura::HandleComprehendLanguage(bool apply, bool Real)
+{
+    if(apply)
+        m_target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_COMPREHEND_LANG);
+    else
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_COMPREHEND_LANG);
+}
+
 void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 {
     // Special case with temporary increase max/current health
@@ -5305,6 +5314,16 @@ void Aura::HandleModRating(bool apply, bool Real)
     for (uint32 rating = 0; rating < MAX_COMBAT_RATING; ++rating)
         if (m_modifier.m_miscvalue & (1 << rating))
             ((Player*)m_target)->ApplyRatingMod(CombatRating(rating), m_modifier.m_amount, apply);
+}
+
+void Aura::HandleForceMoveForward(bool apply, bool Real)
+{
+    if(!Real || m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+    if(apply)
+        m_target->SetFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FORCE_MOVE);
+    else
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS_2, UNIT_FLAG2_FORCE_MOVE);
 }
 
 void Aura::HandleAuraModExpertise(bool apply, bool Real)

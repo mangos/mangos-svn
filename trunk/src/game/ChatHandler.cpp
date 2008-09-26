@@ -56,10 +56,29 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
     // prevent talking at unknown language (cheating)
     LanguageDesc const* langDesc = GetLanguageDescByID(lang);
-    if(!langDesc || langDesc->skill_id != 0 && !_player->HasSkill(langDesc->skill_id))
+    if(!langDesc)
     {
         SendNotification("Unknown language");
         return;
+    }
+    if(langDesc->skill_id != 0 && !_player->HasSkill(langDesc->skill_id))
+    {
+        // also check SPELL_AURA_COMPREHEND_LANGUAGE (client offers option to speak in that language)
+        Unit::AuraList const& langAuras = _player->GetAurasByType(SPELL_AURA_COMPREHEND_LANGUAGE);
+        bool foundAura = false;
+        for(Unit::AuraList::const_iterator i = langAuras.begin();i != langAuras.end(); ++i)
+        {
+            if((*i)->GetModifier()->m_miscvalue == lang)
+            {
+                foundAura = true;
+                break;
+            }
+        }
+        if(!foundAura)
+        {
+            SendNotification("You don't know that language");
+            return;
+        }
     }
 
     if(lang == LANG_ADDON)

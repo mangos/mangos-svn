@@ -1012,6 +1012,27 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastSpell(m_caster,45088,true);
                     return;
                 }
+                case 50243:                                 // Teach Language
+                {
+                    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+                        return;
+
+                    // spell has a 1/3 chance to trigger one of the below
+                    if(roll_chance_i(66))
+                        return;
+                    if(((Player*)m_caster)->GetTeam() == ALLIANCE)
+                    {
+                        // 1000001 - gnomish binary
+                        m_caster->CastSpell(m_caster, 50242, true);
+                    }
+                    else
+                    {
+                        // 01001000 - goblin binary
+                        m_caster->CastSpell(m_caster, 50246, true);
+                    }
+
+                    return;
+                }
                 case 51582:                                 //Rocket Boots Engaged (Rocket Boots Xtreme and Rocket Boots Xtreme Lite)
                 {
                     if(m_caster->GetTypeId() != TYPEID_PLAYER)
