@@ -368,4 +368,5 @@ EXTRA_DIST = \
 	6640_mangos_reference_loot_template.sql \
 	6642_characters_declinedname.sql \
 	6668_mangos_spell_proc_event.sql \
+	6673_mangos_areatrigger_scripts.sql \
 	README
