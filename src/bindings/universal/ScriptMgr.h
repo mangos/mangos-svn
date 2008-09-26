@@ -58,7 +58,7 @@ struct Script
     bool (*pChooseReward        )(Player *player, Creature *_Creature, Quest const*_Quest, uint32 opt );
     bool (*pItemHello           )(Player *player, Item *_Item, Quest const*_Quest );
     bool (*pGOHello             )(Player *player, GameObject *_GO );
-    bool (*pAreaTrigger         )(Player *player, Quest const*_Quest, uint32 triggerID );
+    bool (*pAreaTrigger         )(Player *player, AreaTriggerEntry* at);
     bool (*pItemQuestAccept     )(Player *player, Item *_Item, Quest const*_Quest );
     bool (*pGOQuestAccept       )(Player *player, GameObject *_GO, Quest const*_Quest );
     bool (*pGOChooseReward      )(Player *player, GameObject *_GO, Quest const*_Quest, uint32 opt );

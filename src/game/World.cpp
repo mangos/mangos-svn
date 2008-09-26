@@ -953,6 +953,10 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Tavern Area Triggers..." );
     objmgr.LoadTavernAreaTriggers();
+    
+    sLog.outString( "Loading AreaTrigger script names..." );
+    objmgr.LoadAreaTriggerScripts();
+
 
     sLog.outString( "Loading Graveyard-zone links...");
     objmgr.LoadGraveyardZones();

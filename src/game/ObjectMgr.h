@@ -249,6 +249,8 @@ class ObjectMgr
 
         typedef HM_NAMESPACE::hash_map<uint32, AreaTrigger> AreaTriggerMap;
 
+        typedef HM_NAMESPACE::hash_map<uint32, std::string> AreaTriggerScriptMap;
+
         typedef HM_NAMESPACE::hash_map<uint32, ReputationOnKillEntry> RepOnKillMap;
 
         typedef HM_NAMESPACE::hash_map<uint32, WeatherZoneChances> WeatherZoneMap;
@@ -421,6 +423,8 @@ class ObjectMgr
 
         AreaTrigger const* GetGoBackTrigger(uint32 Map) const;
 
+        const char* GetAreaTriggerScriptName(uint32 id);
+
         ReputationOnKillEntry const* GetReputationOnKilEntry(uint32 id) const
         {
             RepOnKillMap::const_iterator itr = mRepOnKill.find(id);
@@ -488,6 +492,7 @@ class ObjectMgr
 
         void LoadAreaTriggerTeleports();
         void LoadQuestAreaTriggers();
+        void LoadAreaTriggerScripts();
         void LoadTavernAreaTriggers();
         void LoadBattleMastersEntry();
         void LoadGameObjectForQuests();
@@ -704,6 +709,7 @@ class ObjectMgr
         GameObjectForQuestSet mGameObjectForQuestSet;
         GossipTextMap       mGossipText;
         AreaTriggerMap      mAreaTriggers;
+        AreaTriggerScriptMap  mAreaTriggerScripts;
 
         RepOnKillMap        mRepOnKill;
 
@@ -777,3 +783,4 @@ class ObjectMgr
 
 // scripting access functions
 bool MANGOS_DLL_SPEC LoadMangosStrings(DatabaseType& db, char const* table);
+MANGOS_DLL_SPEC const char* GetAreaTriggerScriptNameById(uint32 id);

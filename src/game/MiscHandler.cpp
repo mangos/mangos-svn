@@ -971,17 +971,17 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         }
     }
 
+    if(Script->scriptAreaTrigger(GetPlayer(), atEntry))
+        return;
+
     uint32 quest_id = objmgr.GetQuestForAreaTrigger( Trigger_ID );
     if( quest_id && GetPlayer()->isAlive() && GetPlayer()->IsActiveQuest(quest_id) )
     {
         Quest const* pQuest = objmgr.GetQuestTemplate(quest_id);
         if( pQuest )
         {
-            if( !Script->scriptAreaTrigger( GetPlayer(), pQuest, Trigger_ID ) )
-            {
-                if(GetPlayer()->GetQuestStatus(quest_id) == QUEST_STATUS_INCOMPLETE)
-                    GetPlayer()->AreaExploredOrEventHappens( quest_id );
-            }
+            if(GetPlayer()->GetQuestStatus(quest_id) == QUEST_STATUS_INCOMPLETE)
+                GetPlayer()->AreaExploredOrEventHappens( quest_id );
         }
     }
 

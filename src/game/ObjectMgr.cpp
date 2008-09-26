@@ -4393,6 +4393,49 @@ void ObjectMgr::LoadTavernAreaTriggers()
     sLog.outString( ">> Loaded %u tavern triggers", count );
 }
 
+void ObjectMgr::LoadAreaTriggerScripts()
+{
+    mAreaTriggerScripts.clear();                            // need for reload case
+    QueryResult *result = WorldDatabase.Query("SELECT entry, ScriptName FROM areatrigger_scripts");
+
+    uint32 count = 0;
+
+    if( !result )
+    {
+        barGoLink bar( 1 );
+        bar.step();
+
+        sLog.outString();
+        sLog.outString( ">> Loaded %u areatrigger scripts", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        ++count;
+        bar.step();
+
+        Field *fields = result->Fetch();
+
+        uint32 Trigger_ID      = fields[0].GetUInt32();
+        std::string scriptName = fields[1].GetCppString();
+
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
+        if(!atEntry)
+        {
+            sLog.outErrorDb("Area trigger (ID:%u) does not exist in `AreaTrigger.dbc`.",Trigger_ID);
+            continue;
+        }
+        mAreaTriggerScripts[Trigger_ID] = scriptName;
+    } while( result->NextRow() );
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u areatrigger scripts", count );
+}
 uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
 {
     bool found = false;
@@ -6264,6 +6307,14 @@ bool ObjectMgr::CheckDeclinedNames( std::wstring mainpart, DeclinedName const& n
     return true;
 }
 
+const char* ObjectMgr::GetAreaTriggerScriptName(uint32 id)
+{
+    AreaTriggerScriptMap::const_iterator i = mAreaTriggerScripts.find(id);
+    if(i!= mAreaTriggerScripts.end())
+        return i->second.c_str();
+    return "";
+}
+
 // Checks if player meets the condition
 bool PlayerCondition::Meets(Player const * player) const
 {
@@ -6461,6 +6512,12 @@ SkillRangeType GetSkillRangeType(SkillLineEntry const *pSkill, bool racial)
             return SKILL_RANGE_NONE;
     }
 }
+
+const char* GetAreaTriggerScriptNameById(uint32 id)
+{
+    return objmgr.GetAreaTriggerScriptName(id);
+}
+
 
 bool LoadMangosStrings(DatabaseType& db, char const* table)
 {

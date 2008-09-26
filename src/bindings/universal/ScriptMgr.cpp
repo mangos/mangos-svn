@@ -22,6 +22,7 @@
 #include "../../game/GameObject.h"
 #include "../../game/Player.h"
 #include "../../game/Map.h"
+#include "../../game/ObjectMgr.h"
 
 //uint8 loglevel = 0;
 int nrscripts;
@@ -65,6 +66,8 @@ void ScriptsInit()
 
 Script* GetScriptByName(std::string Name)
 {
+    if(Name.empty())
+        return NULL;
     for(int i=0;i<MAX_SCRIPTS;i++)
     {
         if( m_scripts[i] && m_scripts[i]->Name == Name )
@@ -230,16 +233,14 @@ bool GOChooseReward( Player *player, GameObject *_GO, Quest *_Quest, uint32 opt 
 }
 
 MANGOS_DLL_EXPORT
-bool AreaTrigger      ( Player *player, Quest *_Quest, uint32 triggerID )
+bool AreaTrigger      ( Player *player, AreaTriggerEntry* atEntry )
 {
     Script *tmpscript = NULL;
 
-    // TODO: load a script name for the areatriggers
-    //tmpscript = GetScriptByName();
+    tmpscript = GetScriptByName(GetAreaTriggerScriptNameById(atEntry->id));
     if(!tmpscript || !tmpscript->pAreaTrigger) return false;
 
-    player->PlayerTalkClass->ClearMenus();
-    return tmpscript->pAreaTrigger(player,_Quest,triggerID);
+    return tmpscript->pAreaTrigger(player, atEntry);
 }
 
 MANGOS_DLL_EXPORT
