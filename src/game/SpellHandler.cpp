@@ -342,8 +342,12 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
     uint32 spellId;
     recvPacket >> spellId;
 
-    // not allow remove non positive spells
-    if(!IsPositiveSpell(spellId))
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
+    if (!spellInfo)
+        return;
+
+    // not allow remove non positive spells and spells with attr SPELL_ATTR_CANT_CANCEL
+    if(!IsPositiveSpell(spellId) || (spellInfo->Attributes & SPELL_ATTR_CANT_CANCEL))
         return;
 
     _player->RemoveAurasDueToSpellByCancel(spellId);
