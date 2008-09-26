@@ -190,6 +190,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleSpiritOfRedemption(bool apply, bool Real);
         void HandleAuraHealingPct(bool apply, bool Real);
         void HandleModManaRegen(bool apply, bool Real);
+        void HandleComprehendLanguage(bool apply, bool Real);
         void HandleAuraHealing(bool apply, bool Real);
         void HandleShieldBlockValue(bool apply, bool Real);
         void HandleModSpellCritChanceShool(bool apply, bool Real);
@@ -202,6 +203,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraModPacifyAndSilence(bool Apply, bool Real);
         void HandleAuraModIncreaseMaxHealth(bool apply, bool Real);
         void HandleAuraModExpertise(bool apply, bool Real);
+        void HandleForceMoveForward(bool apply, bool Real);
         void HandleAuraModResistenceOfStatPercent(bool apply, bool Real);
         void HandleAuraPowerBurn(bool apply, bool Real);
         void HandleSchoolAbsorb(bool apply, bool Real);
