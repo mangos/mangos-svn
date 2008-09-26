@@ -16,8 +16,20 @@
 
 ## Process this file with automake to produce Makefile.in
 
-## Sub-directories to parse
-SUBDIRS = tools framework shared realmd game bindings mangosd
+## CPP flags for includes, defines, etc.
+AM_CPPFLAGS = -I$(srcdir)
+
+## Build world list daemon as standalone program
+bin_PROGRAMS = gensvnrevision
+gensvnrevision_SOURCES = \
+	gensvnrevision.cpp
+
+## Link world daemon against the shared library
+gensvnrevision_LDADD = 
+gensvnrevision_LDFLAGS = -L$(libdir)
 
 ## Additional files to include when running 'make dist'
-#  Nothing yet.
+#  Include world daemon configuration
+#EXTRA_DIST = 
+
+## Additional files to install

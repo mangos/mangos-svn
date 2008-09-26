@@ -35,8 +35,8 @@ namespace ByteConverter
         convert<T - 2>(val + 1);
     }
 
-    template<> inline void convert<0>(char *val) {}
-    template<> inline void convert<1>(char *val) {}         // ignore central byte
+    template<> inline void convert<0>(char *) {}
+    template<> inline void convert<1>(char *) {}            // ignore central byte
 
     template<typename T> inline void apply(T *val)
     {
@@ -47,7 +47,7 @@ namespace ByteConverter
 #if MANGOS_ENDIAN == MANGOS_BIGENDIAN
 template<typename T> inline void EndianConvert(T& val) { ByteConverter::apply<T>(&val); }
 #else
-template<typename T> inline void EndianConvert(T& val) { }
+template<typename T> inline void EndianConvert(T&) { }
 #endif
 
 template<typename T> inline void EndianConvert(T*) { }

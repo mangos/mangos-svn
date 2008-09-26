@@ -23,9 +23,19 @@
 
 int main(int argc, char **argv)
 {
-    FILE* EntriesFile = fopen(".svn/entries", "r");
+    std::string path;
+
+    if(argc >= 1 && argv[1] )
+    {
+        path = argv[1];
+        if(path.size() > 0 && (path[path.size()-1]!='/' || path[path.size()-1]!='\\'))
+            path += '/';
+    }
+
+
+    FILE* EntriesFile = fopen((path+".svn/entries").c_str(), "r");
     if(!EntriesFile)
-        EntriesFile = fopen("_svn/entries", "r");
+        EntriesFile = fopen((path+"_svn/entries").c_str(), "r");
 
     std::ostringstream newData;
 

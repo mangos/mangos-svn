@@ -453,7 +453,6 @@ void Log::outBasic( const char * str, ... )
 {
     if( !str )
         return;
-    va_list ap;
 
     if( m_logLevel > 0 )
     {
@@ -473,6 +472,7 @@ void Log::outBasic( const char * str, ... )
 
     if(logfile && m_logFileLevel > 0)
     {
+        va_list ap;
         outTimestamp(logfile);
         va_start(ap, str);
         vfprintf(logfile, str, ap);
@@ -487,7 +487,7 @@ void Log::outDetail( const char * str, ... )
 {
     if( !str )
         return;
-    va_list ap;
+
     if( m_logLevel > 1 )
     {
 
@@ -506,6 +506,7 @@ void Log::outDetail( const char * str, ... )
     }
     if(logfile && m_logFileLevel > 1)
     {
+        va_list ap;
         outTimestamp(logfile);
         va_start(ap, str);
         vfprintf(logfile, str, ap);
@@ -578,7 +579,7 @@ void Log::outCommand( const char * str, ... )
 {
     if( !str )
         return;
-    va_list ap;
+
     if( m_logLevel > 1 )
     {
         if(m_colored)
@@ -596,6 +597,7 @@ void Log::outCommand( const char * str, ... )
     }
     if(logfile && m_logFileLevel > 1)
     {
+        va_list ap;
         outTimestamp(logfile);
         va_start(ap, str);
         vfprintf(logfile, str, ap);
@@ -605,6 +607,7 @@ void Log::outCommand( const char * str, ... )
     }
     if(gmLogfile)
     {
+        va_list ap;
         outTimestamp(gmLogfile);
         va_start(ap, str);
         vfprintf(gmLogfile, str, ap);

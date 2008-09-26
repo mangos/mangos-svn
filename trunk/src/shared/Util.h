@@ -172,7 +172,7 @@ inline bool isEastAsianCharacter(wchar_t wchar)
 
 inline bool isNumericOrSpace(wchar_t wchar)
 {
-    return (wchar >= L'0' && wchar <=L'9' || wchar == L' ');
+    return (wchar >= L'0' && wchar <=L'9') || wchar == L' ';
 }
 
 inline bool isBasicLatinString(std::wstring wstr, bool numericOrSpace)

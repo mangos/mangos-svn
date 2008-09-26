@@ -18,6 +18,13 @@
 
 #include "ProgressBar.h"
 
+char const* const barGoLink::empty = " ";
+#ifdef _WIN32
+char const* const barGoLink::full  = "\x3D";
+#else
+char const* const barGoLink::full  = "*";
+#endif
+
 barGoLink::~barGoLink()
 {
     printf( "\n" );
@@ -30,12 +37,6 @@ barGoLink::barGoLink( int row_count )
     rec_pos   = 0;
     indic_len = 50;
     num_rec   = row_count;
-    empty     = " ";
-    #ifdef _WIN32
-    full      = "\x3D";
-    #else
-    full      = "*";
-    #endif
     #ifdef _WIN32
     printf( "\x3D" );
     #else
