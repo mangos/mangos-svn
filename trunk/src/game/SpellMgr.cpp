@@ -323,7 +323,6 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                     {
                         case 13139:                         // net-o-matic special effect
                         case 23445:                         // evil twin
-                        case 39824:                         // Human Illusion (prevent cancel)
                             return false;
                         default:
                             break;
@@ -396,8 +395,6 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                     {
                         case 36897:                         // Transporter Malfunction (race mutation to horde)
                         case 36899:                         // Transporter Malfunction (race mutation to alliance)
-                        case 35480: case 35481:             // Human Illusion (prevent cancel)
-                        case 35482: case 35483:             // Human Illusion (prevent cancel)
                             return false;
                     }
                     break;
