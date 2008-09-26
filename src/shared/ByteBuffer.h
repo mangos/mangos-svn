@@ -294,8 +294,8 @@ class ByteBuffer
             {
                 if(guid & 0xFF)
                 {
-                    _storage[mask_position] |= (1<<i);
-                    *this << ((uint8)(guid & 0xFF));
+                    _storage[mask_position] |= uint8(1<<i);
+                    *this << uint8(guid & 0xFF);
                 }
 
                 guid >>= 8;

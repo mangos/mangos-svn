@@ -45,13 +45,13 @@ class Field
         {
             return mValue ? mValue : "";                    // std::string s = 0 have undefine result in C++
         }
-        float GetFloat() const { return mValue ? static_cast<float>(atof(mValue)) : 0; }
+        float GetFloat() const { return mValue ? static_cast<float>(atof(mValue)) : 0.0f; }
         bool GetBool() const { return mValue ? atoi(mValue) > 0 : false; }
-        int32 GetInt32() const { return mValue ? static_cast<int32>(atol(mValue)) : 0; }
-        uint8 GetUInt8() const { return mValue ? static_cast<uint8>(atol(mValue)) : 0; }
-        uint16 GetUInt16() const { return mValue ? static_cast<uint16>(atol(mValue)) : 0; }
-        int16 GetInt16() const { return mValue ? static_cast<int16>(atol(mValue)) : 0; }
-        uint32 GetUInt32() const { return mValue ? static_cast<uint32>(atol(mValue)) : 0; }
+        int32 GetInt32() const { return mValue ? static_cast<int32>(atol(mValue)) : int32(0); }
+        uint8 GetUInt8() const { return mValue ? static_cast<uint8>(atol(mValue)) : uint8(0); }
+        uint16 GetUInt16() const { return mValue ? static_cast<uint16>(atol(mValue)) : uint16(0); }
+        int16 GetInt16() const { return mValue ? static_cast<int16>(atol(mValue)) : int16(0); }
+        uint32 GetUInt32() const { return mValue ? static_cast<uint32>(atol(mValue)) : uint32(0); }
         uint64 GetUInt64() const
         {
             if(mValue)

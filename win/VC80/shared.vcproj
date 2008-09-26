@@ -774,8 +774,8 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Extract SVN revision"
-					CommandLine="cd &quot;$(SolutionDir)\..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&quot;"
-					AdditionalDependencies=".svn/entries"
+					CommandLine="cd &quot;$(SolutionDir)..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&quot; &quot;..\..&quot;"
+					AdditionalDependencies="$(SolutionDir)../.svn/entries"
 					Outputs="svn_revision.h"
 				/>
 			</FileConfiguration>
@@ -785,8 +785,8 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Extract SVN revision"
-					CommandLine="cd &quot;$(SolutionDir)\..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&quot;"
-					AdditionalDependencies=".svn/entries"
+					CommandLine="cd &quot;$(SolutionDir)..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&quot; &quot;..\..&quot;"
+					AdditionalDependencies="$(SolutionDir)../.svn/entries"
 					Outputs="svn_revision.h"
 				/>
 			</FileConfiguration>
@@ -796,8 +796,8 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Extract SVN revision"
-					CommandLine="cd &quot;$(SolutionDir)\..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&quot;"
-					AdditionalDependencies=".svn/entries"
+					CommandLine="cd &quot;$(SolutionDir)..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&quot; &quot;..\..&quot;"
+					AdditionalDependencies="$(SolutionDir)../.svn/entries"
 					Outputs="svn_revision.h"
 				/>
 			</FileConfiguration>
@@ -807,8 +807,8 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Extract SVN revision"
-					CommandLine="cd &quot;$(SolutionDir)\..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&quot;"
-					AdditionalDependencies=".svn/entries"
+					CommandLine="cd &quot;$(SolutionDir)..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&quot; &quot;..\..&quot;"
+					AdditionalDependencies="$(SolutionDir)../.svn/entries"
 					Outputs="svn_revision.h"
 				/>
 			</FileConfiguration>

@@ -38,13 +38,6 @@ AC_PROG_CXX
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 
-## Check how we will deal with SVN revisions.
-AC_ARG_ENABLE([svn-extract], AC_HELP_STRING([--enable-svn-extract], [Extract SVN revision from source tree (default: yes) ]), [], [enable_svn_extract=yes])
-
-AC_PATH_PROG([SVN], [svn])
-
-AM_CONDITIONAL([EXTRACT_SVN], [test -f $srcdir/.svn/entries -a -n "$SVN" -a X$enable_svn_extract = Xyes])
-
 # Check for doxygen
 AC_ARG_ENABLE(doxygen, AC_HELP_STRING([--enable-doxygen], [turn on generating documentation]))
 
@@ -235,6 +228,8 @@ AC_CONFIG_FILES([
    sql/tools/Makefile
    sql/updates/Makefile
    src/Makefile
+   src/tools/Makefile
+   src/tools/gensvnrevision/Makefile
    src/framework/Makefile
    src/shared/Makefile
    src/shared/Auth/Makefile

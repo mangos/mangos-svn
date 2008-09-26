@@ -23,8 +23,8 @@
 
 class MANGOS_DLL_SPEC barGoLink
 {
-    char const * empty;
-    char const * full;
+    static char const * const empty;
+    static char const * const full;
 
     int rec_no;
     int rec_pos;
