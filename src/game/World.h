@@ -398,7 +398,7 @@ class World
         void SetInitialWorldSettings();
         void LoadConfigSettings(bool reload = false);
 
-        void SendWorldText(int32 string_id, ...) ATTR_PRINTF(2,3);
+        void SendWorldText(int32 string_id, ...); 
         void SendGlobalMessage(WorldPacket *packet, WorldSession *self = 0, uint32 team = 0);
         void SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self = 0, uint32 team = 0);
         void SendZoneText(uint32 zone, const char *text, WorldSession *self = 0, uint32 team = 0);

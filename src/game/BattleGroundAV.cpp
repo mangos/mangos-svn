@@ -48,7 +48,7 @@ void BattleGroundAV::AddPlayer(Player *plr)
     m_PlayerScores[plr->GetGUID()] = sc;
 }
 
-void BattleGroundAV::RemovePlayer(Player *plr,uint64 guid)
+void BattleGroundAV::RemovePlayer(Player* /*plr*/,uint64 /*guid*/)
 {
 
 }

@@ -53,7 +53,7 @@ namespace VMAP
             G3D::AABox iBox;
 
             ModelContainer (const ModelContainer& c): BaseModel(c) {}
-            ModelContainer& operator=(const ModelContainer& c) {}
+            ModelContainer& operator=(const ModelContainer& ) {}
 
         public:
             ModelContainer() : BaseModel() { iNSubModel =0; iSubModel = 0; };

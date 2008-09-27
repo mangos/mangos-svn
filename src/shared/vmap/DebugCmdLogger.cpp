@@ -23,7 +23,11 @@ using namespace G3D;
 namespace VMAP
 {
 
-    bool CommandFileRW::appendCmd(const Command& pCommand)
+    bool CommandFileRW::appendCmd(const Command& 
+#ifdef _DEBUG
+        pCommand
+#endif
+        )
     {
         #ifdef _DEBUG
         bool result = false;
@@ -49,7 +53,11 @@ namespace VMAP
 
     //=========================================================
 
-    bool CommandFileRW::appendCmds(const Array<Command>& pCmdArray)
+    bool CommandFileRW::appendCmds(const Array<Command>& 
+#ifdef _DEBUG
+        pCmdArray
+#endif
+        )
     {
         #ifdef _DEBUG
         bool result = false;

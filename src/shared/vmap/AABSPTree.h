@@ -118,7 +118,7 @@ namespace G3D {
 } // namespace G3D
 
 template <class Handle>
-struct GHashCode<typename G3D::_internal::Indirector<Handle> >
+struct GHashCode< G3D::_internal::Indirector<Handle> >
 {
     size_t operator()(const G3D::_internal::Indirector<Handle>& key) const { return key.hashCode(); }
 };
@@ -328,7 +328,7 @@ public:
 
 	    Comparator(Vector3::Axis a, float l) : sortAxis(a), sortLocation(l) {}
 
-	    inline int operator()(_AABSPTree::Handle<T>* ignore, const _AABSPTree::Handle<T>* handle) const {
+	    inline int operator()(_AABSPTree::Handle<T>* /*ignore*/, const _AABSPTree::Handle<T>* handle) const {
             const AABox& box = handle->bounds;
             debugAssert(ignore == NULL);
 

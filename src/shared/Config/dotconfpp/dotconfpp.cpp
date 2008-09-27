@@ -154,7 +154,8 @@ int DOTCONFDocument::cleanupLine(char * line)
                 words.push_back(word);
             }
             start = bg;
-            while(isspace(*++line));
+            while(isspace(*++line)) {}
+
             continue;
         }
         *bg++ = *line++;

@@ -208,10 +208,6 @@ char* DBCFile::AutoProduceStrings(const char* format, char* dataTable)
     if(strlen(format)!=fieldCount)
         return NULL;
 
-    //get struct size and index pos
-    int32 i;
-    uint32 recordsize=GetFormatRecordSize(format,&i);
-
     char* stringPool= new char[stringSize];
     memcpy(stringPool,stringTable,stringSize);
 

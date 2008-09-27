@@ -951,7 +951,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint64 GetCharmerOrOwnerOrOwnGUID() const
         {
             if(uint64 guid = GetCharmerOrOwnerGUID())
-                return GetCharmerOrOwnerGUID();
+                return guid;
             return GetGUID();
         }
         bool isCharmedOwnedByPlayerOrPlayer() const { return IS_PLAYER_GUID(GetCharmerOrOwnerOrOwnGUID()); }

@@ -333,7 +333,7 @@ namespace VMAP
 #endif
 #endif
 
-    void ModelContainer::intersect(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit, G3D::Vector3& pOutLocation, G3D::Vector3& pOutNormal) const
+    void ModelContainer::intersect(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHit, G3D::Vector3& /*pOutLocation*/, G3D::Vector3& /*pOutNormal*/) const
     {
         IntersectionCallBack<SubModel> intersectCallback;
         NodeValueAccess<TreeNode, SubModel> vna = NodeValueAccess<TreeNode, SubModel>(getTreeNodes(), iSubModel);
