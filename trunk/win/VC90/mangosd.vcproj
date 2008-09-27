@@ -489,6 +489,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\mangosd\mangosd.rc"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\shared\WheatyExceptionReport.cpp"
 			>
 		</File>

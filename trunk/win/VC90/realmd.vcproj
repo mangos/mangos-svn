@@ -441,6 +441,10 @@
 			>
 		</File>
 		<File
+			RelativePath="..\..\src\realmd\realmd.rc"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\shared\WheatyExceptionReport.cpp"
 			>
 		</File>
