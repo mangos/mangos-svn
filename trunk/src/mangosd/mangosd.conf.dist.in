@@ -816,7 +816,22 @@ Visibility.Distance.Grey.Object = 10
 #        Health and power regeneration and rage income from damage.
 #        Default: 1
 #
-#    Rate.Drop.Items
+#    Rate.Skill.Discovery
+#         Skill Discovery Rates
+#         Default: 1
+#
+#    Rate.Drop.Item.Poor
+#    Rate.Drop.Item.Normal
+#    Rate.Drop.Item.Uncommon
+#    Rate.Drop.Item.Rare
+#    Rate.Drop.Item.Epic
+#    Rate.Drop.Item.Legendary
+#    Rate.Drop.Item.Artifact
+#    Rate.Drop.Item.Referenced
+#    Rate.Drop.Money
+#         Drop rates (items by qualify and money)
+#         Default: 1
+#
 #    Rate.Drop.Money
 #         Drop rates
 #         Default: 1
@@ -920,7 +935,15 @@ Rate.Rage.Income = 1
 Rate.Rage.Loss = 1
 Rate.Focus = 1
 Rate.Loyalty = 1
-Rate.Drop.Items = 1
+Rate.Skill.Discovery = 1
+Rate.Drop.Item.Poor = 1
+Rate.Drop.Item.Normal = 1
+Rate.Drop.Item.Uncommon = 1
+Rate.Drop.Item.Rare = 1
+Rate.Drop.Item.Epic = 1
+Rate.Drop.Item.Legendary = 1
+Rate.Drop.Item.Artifact = 1
+Rate.Drop.Item.Referenced = 1
 Rate.Drop.Money = 1
 Rate.XP.Kill    = 1
 Rate.XP.Quest   = 1
