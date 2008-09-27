@@ -61,7 +61,7 @@ namespace VMAP
 
     //==========================================================
 
-    void BaseModel::intersect(const G3D::AABox& pBox, const G3D::Ray& pRay, float& pMaxDist, G3D::Vector3& pOutLocation, G3D::Vector3& pOutNormal) const
+    void BaseModel::intersect(const G3D::AABox& pBox, const G3D::Ray& pRay, float& pMaxDist, G3D::Vector3& pOutLocation, G3D::Vector3& /*pOutNormal*/) const
     {
         bool isInside = false;
 

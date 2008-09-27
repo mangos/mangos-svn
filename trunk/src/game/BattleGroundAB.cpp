@@ -407,7 +407,7 @@ void BattleGroundAB::_NodeDeOccupied(uint8 node)
             if( !plr )
                 continue;
             if( !ClosestGrave )
-                ClosestGrave = GetClosestGraveYard(plr->GetPositionX(), plr->GetPositionY(), plr->GetPositionZ(), plr->GetMapId(), plr->GetTeam());
+                ClosestGrave = GetClosestGraveYard(plr->GetPositionX(), plr->GetPositionY(), plr->GetPositionZ(), plr->GetTeam());
 
             plr->TeleportTo(GetMapId(), ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, plr->GetOrientation());
         }
@@ -420,7 +420,7 @@ void BattleGroundAB::_NodeDeOccupied(uint8 node)
 }
 
 /* Invoked if a player used a banner as a gameobject */
-void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* target_obj)
+void BattleGroundAB::EventPlayerClickedOnFlag(Player *source, GameObject* /*target_obj*/)
 {
     if( GetStatus() != STATUS_IN_PROGRESS )
         return;
@@ -591,7 +591,7 @@ void BattleGroundAB::ResetBGSubclass()
             DelCreature(i);
 }
 
-WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team)
+WorldSafeLocsEntry const* BattleGroundAB::GetClosestGraveYard(float x, float y, float /*z*/, uint32 team)
 {
     uint8 teamIndex = GetTeamIndexByTeamId(team);
 

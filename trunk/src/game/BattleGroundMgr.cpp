@@ -333,7 +333,7 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
             else
                 ++itr2;
         }
-        bg2->StartBattleGround(0);
+        bg2->StartBattleGround();
     }
 }
 

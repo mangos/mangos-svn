@@ -449,17 +449,17 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         {
             switch(GetGoType())
             {
-                case GAMEOBJECT_TYPE_DOOR: return GetGOInfo()->door.lockId;
-                case GAMEOBJECT_TYPE_BUTTON: return GetGOInfo()->button.lockId;
+                case GAMEOBJECT_TYPE_DOOR:       return GetGOInfo()->door.lockId;
+                case GAMEOBJECT_TYPE_BUTTON:     return GetGOInfo()->button.lockId;
                 case GAMEOBJECT_TYPE_QUESTGIVER: return GetGOInfo()->questgiver.lockId;
-                case GAMEOBJECT_TYPE_CHEST: return GetGOInfo()->chest.lockId;
-                case GAMEOBJECT_TYPE_TRAP: return GetGOInfo()->trap.lockId;
-                case GAMEOBJECT_TYPE_GOOBER: return GetGOInfo()->goober.lockId;
+                case GAMEOBJECT_TYPE_CHEST:      return GetGOInfo()->chest.lockId;
+                case GAMEOBJECT_TYPE_TRAP:       return GetGOInfo()->trap.lockId;
+                case GAMEOBJECT_TYPE_GOOBER:     return GetGOInfo()->goober.lockId;
                 case GAMEOBJECT_TYPE_AREADAMAGE: return GetGOInfo()->areadamage.lockId;
-                case GAMEOBJECT_TYPE_CAMERA: return GetGOInfo()->camera.lockId;
-                case GAMEOBJECT_TYPE_FLAGSTAND: return GetGOInfo()->flagstand.lockId;
-                case GAMEOBJECT_TYPE_FISHINGHOLE: return GetGOInfo()->fishinghole.lockId;
-                case GAMEOBJECT_TYPE_FLAGDROP: return GetGOInfo()->flagdrop.lockId;
+                case GAMEOBJECT_TYPE_CAMERA:     return GetGOInfo()->camera.lockId;
+                case GAMEOBJECT_TYPE_FLAGSTAND:  return GetGOInfo()->flagstand.lockId;
+                case GAMEOBJECT_TYPE_FISHINGHOLE:return GetGOInfo()->fishinghole.lockId;
+                case GAMEOBJECT_TYPE_FLAGDROP:   return GetGOInfo()->flagdrop.lockId;
                 default: return 0;
             }
         }
@@ -483,8 +483,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         bool isSpawned() const
         {
             return m_respawnDelayTime == 0 ||
-                m_respawnTime > 0 && !m_spawnedByDefault ||
-                m_respawnTime == 0 && m_spawnedByDefault;
+                (m_respawnTime > 0 && !m_spawnedByDefault) ||
+                (m_respawnTime == 0 && m_spawnedByDefault);
         }
         bool isSpawnedByDefault() const { return m_spawnedByDefault; }
         uint32 GetRespawnDelay() const { return m_respawnDelayTime; }
@@ -552,6 +552,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
                 case GAMEOBJECT_TYPE_GOOBER:        autoCloseTime = GetGOInfo()->goober.autoCloseTime; break;
                 case GAMEOBJECT_TYPE_TRANSPORT:     autoCloseTime = GetGOInfo()->transport.autoCloseTime; break;
                 case GAMEOBJECT_TYPE_AREADAMAGE:    autoCloseTime = GetGOInfo()->areadamage.autoCloseTime; break;
+                default: break;
             }
             return autoCloseTime / 0x10000;
         }

@@ -369,8 +369,6 @@ void BattleGround::EndBattleGround(uint32 winner)
     SetStatus(STATUS_WAIT_LEAVE);
     m_EndTime = 0;
 
-    uint32 mark = 0;
-
     for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
         Player *plr = objmgr.GetPlayer(itr->first);
@@ -678,7 +676,7 @@ void BattleGround::Reset()
     this->ResetBGSubclass();
 }
 
-void BattleGround::StartBattleGround(time_t diff)
+void BattleGround::StartBattleGround()
 {
     ///this method should spawn spirit guides and so on
     SetStartTime(0);

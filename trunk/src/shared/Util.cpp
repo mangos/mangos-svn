@@ -124,7 +124,7 @@ std::string secsToTimeString(uint32 timeInSecs, bool shortText, bool hoursOnly)
     {
         if(minutes)
             ss << minutes << (shortText ? "m" : " Minute(s) ");
-        if(secs || !days && !hours && !minutes)
+        if(secs || (!days && !hours && !minutes) )
             ss << secs << (shortText ? "s" : " Second(s).");
     }
 

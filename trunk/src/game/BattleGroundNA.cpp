@@ -98,7 +98,7 @@ void BattleGroundNA::AddPlayer(Player *plr)
     m_PlayerScores[plr->GetGUID()] = sc;
 }
 
-void BattleGroundNA::RemovePlayer(Player *plr, uint64 guid)
+void BattleGroundNA::RemovePlayer(Player* /*plr*/, uint64 /*guid*/)
 {
 
 }

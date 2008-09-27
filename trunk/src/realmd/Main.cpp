@@ -145,7 +145,8 @@ extern int main(int argc, char **argv)
         sLog.outError("          strange behavior.");
         sLog.outError("*****************************************************************************");
         clock_t pause = 3000 + clock();
-        while (pause > clock());
+
+        while (pause > clock()) {}
     }
 
     sLog.outString( "%s (realm-daemon)", _FULLVERSION );

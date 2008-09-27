@@ -242,7 +242,7 @@ class BattleGroundAB : public BattleGround
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         virtual bool SetupBattleGround();
         virtual void ResetBGSubclass();
-        virtual WorldSafeLocsEntry const* GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team);
+        virtual WorldSafeLocsEntry const* GetClosestGraveYard(float x, float y, float z, uint32 team);
 
         /* Scorekeeping */
         virtual void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);

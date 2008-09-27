@@ -120,7 +120,7 @@ namespace VMAP
                 return !((_vertex[0] == t._vertex[0]) && (_vertex[1] == t._vertex[1]) &&(_vertex[2] == t._vertex[2]));
             }
 
-            inline void intersect(const G3D::Ray& pRay, float& pMaxDist, bool pStopAtFirstHitDummy, G3D::Vector3& pOutLocationDummy, G3D::Vector3& pOutNormalDummy) const
+            inline void intersect(const G3D::Ray& pRay, float& pMaxDist, bool /*pStopAtFirstHitDummy*/, G3D::Vector3& /*pOutLocationDummy*/, G3D::Vector3& /*pOutNormalDummy*/) const
             {
                 static const double epsilon = 0.00001;
                 G3D::Triangle testT(vertex(0).getVector3(),vertex(1).getVector3(),vertex(2).getVector3());
