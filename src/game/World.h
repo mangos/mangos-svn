@@ -83,7 +83,7 @@ enum WorldConfigs
     CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL,
     CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP,
     CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD,
-    CONFIG_ALLOW_TWO_SIDE_INTERACTION_TRADE,
+    CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION,
     CONFIG_ALLOW_TWO_SIDE_INTERACTION_MAIL,
     CONFIG_ALLOW_TWO_SIDE_WHO_LIST,
     CONFIG_ALLOW_TWO_SIDE_ADD_FRIEND,
@@ -101,6 +101,8 @@ enum WorldConfigs
     CONFIG_INSTANCE_IGNORE_LEVEL,
     CONFIG_INSTANCE_IGNORE_RAID,
     CONFIG_BATTLEGROUND_CAST_DESERTER,
+    CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE,
+    CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_PLAYERONLY,
     CONFIG_INSTANCE_RESET_TIME_HOUR,
     CONFIG_INSTANCE_UNLOAD_DELAY,
     CONFIG_CAST_UNSTUCK,
@@ -396,7 +398,7 @@ class World
         void SetInitialWorldSettings();
         void LoadConfigSettings(bool reload = false);
 
-        void SendWorldText(const char *text, WorldSession *self = 0);
+        void SendWorldText(int32 string_id, ...) ATTR_PRINTF(2,3);
         void SendGlobalMessage(WorldPacket *packet, WorldSession *self = 0, uint32 team = 0);
         void SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self = 0, uint32 team = 0);
         void SendZoneText(uint32 zone, const char *text, WorldSession *self = 0, uint32 team = 0);

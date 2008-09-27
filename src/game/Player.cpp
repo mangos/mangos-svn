@@ -17502,6 +17502,25 @@ bool Player::GetBGAccessByLevel(uint32 bgTypeId) const
     return true;
 }
 
+uint32 Player::GetMinLevelForBattleGroundQueueId(uint32 queue_id)
+{
+    if(queue_id < 1)
+        return 0;
+
+    if(queue_id >=6)
+        queue_id = 6;
+
+    return 10*(queue_id+1);
+}
+
+uint32 Player::GetMaxLevelForBattleGroundQueueId(uint32 queue_id)
+{
+    if(queue_id >=6)
+        return 255;                                         // hardcoded max level
+
+    return 10*(queue_id+2)-1;
+}
+
 uint32 Player::GetBattleGroundQueueIdFromLevel() const
 {
     uint32 level = getLevel();

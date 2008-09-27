@@ -603,6 +603,9 @@ enum MangosStrings
     LANG_PLAYER_AFK                     = 708,
     LANG_PLAYER_DND_DEFAULT             = 709,
     LANG_PLAYER_AFK_DEFAULT             = 710,
+
+    LANG_BG_QUEUE_ANNOUNCE_SELF         = 711,
+    LANG_BG_QUEUE_ANNOUNCE_WORLD        = 712,
 };
 #endif
 

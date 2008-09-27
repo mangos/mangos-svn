@@ -195,6 +195,7 @@ pkgdata_DATA = \
 	6642_characters_declinedname.sql \
 	6668_mangos_spell_proc_event.sql \
 	6676_mangos_spell_proc_event.sql \
+	6681_mangos_mangos_string.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -371,4 +372,5 @@ EXTRA_DIST = \
 	6668_mangos_spell_proc_event.sql \
 	6673_mangos_areatrigger_scripts.sql \
 	6676_mangos_spell_proc_event.sql \
+	6681_mangos_mangos_string.sql \
 	README

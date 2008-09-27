@@ -54,7 +54,7 @@ void WorldSession::HandleAuctionHelloOpcode( WorldPacket & recv_data )
 
 static uint8 AuctioneerFactionToLocation(uint32 faction)
 {
-    if(sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_TRADE))
+    if(sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION))
         return 7;                                           // neutral
 
     FactionTemplateEntry const* u_entry = sFactionTemplateStore.LookupEntry(faction);

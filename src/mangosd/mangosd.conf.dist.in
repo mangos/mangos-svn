@@ -437,6 +437,16 @@ LogColors = ""
 #        Default: 1 (true)
 #                 0 (false)
 #
+#    Battleground.QueueAnnouncer.Enable
+#        Enable queue announcer posting to chat
+#        Default: 1 (true)
+#                 0 (false)
+#
+#    Battleground.QueueAnnouncer.PlayerOnly
+#        Enable queue announcer posting to chat
+#        Default: 0 (false)
+#                 1 (true)
+#
 #    CastUnstuck
 #        Allow cast or not Unstuck spell at .start or client Help option use
 #        Default: 1 (true)
@@ -527,6 +537,8 @@ MaxArenaPoints = 5000
 StartPlayerLevel = 1
 ActivateWeather = 1
 Battleground.CastDeserter = 1
+Battleground.QueueAnnouncer.Enable = 1
+Battleground.QueueAnnouncer.PlayerOnly = 0
 CastUnstuck = 1
 Instance.IgnoreLevel = 0
 Instance.IgnoreRaid = 0
@@ -555,10 +567,10 @@ Motd = "Welcome to the Massive Network Game Object Server."
 #    AllowTwoSide.Interaction.Channel
 #    AllowTwoSide.Interaction.Group
 #    AllowTwoSide.Interaction.Guild
-#    AllowTwoSide.Interaction.Trade
+#    AllowTwoSide.Interaction.Auction
 #    AllowTwoSide.Interaction.Mail
-#        Allow or not common :chat(say,yell);channel(chat)group(join)guild(join);trade for players from 
-#        different teams.
+#        Allow or not common :chat(say,yell);channel(chat)group(join)guild(join);merge all auction houses for players from 
+#        different teams, send mail to different team.
 #        Default: 0 (Not allowed)
 #                 1 (Allowed)
 #
@@ -585,7 +597,7 @@ AllowTwoSide.Interaction.Chat = 0
 AllowTwoSide.Interaction.Channel = 0
 AllowTwoSide.Interaction.Group = 0
 AllowTwoSide.Interaction.Guild = 0
-AllowTwoSide.Interaction.Trade = 0
+AllowTwoSide.Interaction.Auction = 0
 AllowTwoSide.Interaction.Mail = 0
 AllowTwoSide.WhoList = 0
 AllowTwoSide.AddFriend = 0

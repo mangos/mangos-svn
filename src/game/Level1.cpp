@@ -120,18 +120,7 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
     if(!*args)
         return false;
 
-    std::string str = GetMangosString(LANG_SYSTEMMESSAGE);
-    str += args;
-    sWorld.SendWorldText(str.c_str(), NULL);
-
-    #ifdef _DEBUG_VMAPS
-    VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
-    float x,y,z;
-    m_session->GetPlayer()->GetPosition(x,y,z);
-    char buffer[100];
-    sprintf(buffer, "pos %f,%f,%f",x,y,z);
-    vMapManager->processCommand(buffer);
-    #endif
+    sWorld.SendWorldText(LANG_SYSTEMMESSAGE,args);
     return true;
 }
 

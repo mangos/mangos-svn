@@ -33,6 +33,7 @@
 #include "ObjectMgr.h"
 #include "ProgressBar.h"
 #include "World.h"
+#include "Chat.h"
 
 INSTANTIATE_SINGLETON_1( BattleGroundMgr );
 
@@ -79,12 +80,38 @@ void BattleGroundQueue::AddPlayer(Player *plr, uint32 bgTypeId)
     else
         ++m_QueuedPlayers[queue_id].Horde;
 
-    /* temporary BG queue status message
-    std::ostringstream str;
-    str << "Battleground queue invited status: horde: " << m_QueuedPlayers[queue_id].Horde << ", aliance: " << m_QueuedPlayers[queue_id].Alliance;
-    plr->Say(str.str(), LANG_UNIVERSAL);*/
-
     this->Update(bgTypeId, queue_id);
+
+    if( sWorld.getConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE) )
+    {
+        BattleGround* bg = sBattleGroundMgr.GetBattleGround(bgTypeId);
+        char const* bgName = bg->GetName();
+
+        uint32 q_min_level = Player::GetMinLevelForBattleGroundQueueId(queue_id);
+        uint32 q_max_level = Player::GetMaxLevelForBattleGroundQueueId(queue_id);
+
+        // replace hardcoded max level by player max level for nice output
+        if(q_max_level > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+            q_max_level = sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL);
+
+        int8 MinPlayers = bg->GetMinPlayersPerTeam();
+
+        uint8 qHorde = m_QueuedPlayers[queue_id].Horde;
+        uint8 qAlliance = m_QueuedPlayers[queue_id].Alliance;
+
+        // Show queue status to player only (when joining queue)
+        if(sWorld.getConfig(CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_PLAYERONLY))
+        {
+            ChatHandler(plr).PSendSysMessage(LANG_BG_QUEUE_ANNOUNCE_SELF, 
+                bgName, q_min_level, q_max_level, qAlliance, MinPlayers - qAlliance, qHorde, MinPlayers - qHorde);
+        }
+        // System message
+        else
+        {
+            sWorld.SendWorldText(LANG_BG_QUEUE_ANNOUNCE_WORLD,
+                bgName, q_min_level, q_max_level, qAlliance, MinPlayers - qAlliance, qHorde, MinPlayers - qHorde);
+        }
+    }
 }
 
 void BattleGroundQueue::RemovePlayer(uint64 guid, bool decreaseInvitedCount)
