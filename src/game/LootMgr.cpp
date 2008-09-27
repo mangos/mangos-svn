@@ -22,8 +22,17 @@
 #include "ProgressBar.h"
 #include "World.h"
 #include "Util.h"
+#include "SharedDefines.h"
 
-using std::remove_copy_if;
+static Rates const qualifyToRate[MAX_ITEM_QUALITY] = {
+    RATE_DROP_ITEM_POOR,                                    // ITEM_QUALITY_POOR
+    RATE_DROP_ITEM_NORMAL,                                  // ITEM_QUALITY_NORMAL
+    RATE_DROP_ITEM_UNCOMMON,                                // ITEM_QUALITY_UNCOMMON
+    RATE_DROP_ITEM_RARE,                                    // ITEM_QUALITY_RARE
+    RATE_DROP_ITEM_EPIC,                                    // ITEM_QUALITY_EPIC
+    RATE_DROP_ITEM_LEGENDARY,                               // ITEM_QUALITY_LEGENDARY
+    RATE_DROP_ITEM_ARTIFACT,                                // ITEM_QUALITY_ARTIFACT
+};
 
 LootStore LootTemplates_Creature(     "creature_loot_template",     "creature entry");
 LootStore LootTemplates_Disenchant(   "disenchant_loot_template",   "item disenchant id");
@@ -218,10 +227,20 @@ void LootStore::ReportNotExistedId(uint32 id) const
 //
 
 // Checks if the entry (quest, non-quest, reference) takes it's chance (at loot generation)
-// RATE_DROP_ITEMS is used for all types of entries
+// RATE_DROP_ITEMS is no longer used for all types of entries
 bool LootStoreItem::Roll() const
 {
-    return roll_chance_f(chance*sWorld.getRate(RATE_DROP_ITEMS));
+    if(chance>=100.f)
+        return true;
+
+    if(mincountOrRef < 0)                                   // reference case
+        return roll_chance_f(chance*sWorld.getRate(RATE_DROP_ITEM_REFERENCED));
+
+    ItemPrototype const *pProto = objmgr.GetItemPrototype(itemid);
+
+    float qualifyModifier = pProto ? sWorld.getRate(qualifyToRate[pProto->Quality]) : 1.0f;
+
+    return roll_chance_f(chance*qualifyModifier);
 }
 
 // Checks correctness of values
@@ -749,9 +768,14 @@ LootStoreItem const * LootTemplate::LootGroup::Roll() const
     {
         float Roll = rand_chance();
 
-        for (uint32 i=0; i<ExplicitlyChanced.size(); ++i)
+        for (uint32 i=0; i<ExplicitlyChanced.size(); ++i)    //check each explicitly chanced entry in the template and modify its chance based on quality.
         {
-            Roll -= ExplicitlyChanced[i].chance;
+            if(ExplicitlyChanced[i].chance>=100.f)
+                return &ExplicitlyChanced[i];
+
+            ItemPrototype const *pProto = objmgr.GetItemPrototype(ExplicitlyChanced[i].itemid);
+            float qualityMultiplier = pProto ? sWorld.getRate(qualifyToRate[pProto->Quality]) : 1.0f;
+            Roll -= ExplicitlyChanced[i].chance * qualityMultiplier;
             if (Roll < 0)
                 return &ExplicitlyChanced[i];
         }
