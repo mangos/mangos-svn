@@ -51,11 +51,7 @@ class HashMapHolder
         typedef ZThread::FastMutex LockType;
         typedef MaNGOS::GeneralLock<LockType > Guard;
 
-        static void Insert(T* o)
-        {
-            Guard guard(i_lock);
-            m_objectMap[o->GetGUID()] = o;
-        }
+        static void Insert(T* o) { m_objectMap[o->GetGUID()] = o; }
 
         static void Remove(T* o)
         {
@@ -67,7 +63,6 @@ class HashMapHolder
 
         static T* Find(uint64 guid)
         {
-            Guard guard(i_lock);
             typename MapType::iterator itr = m_objectMap.find(guid);
             return (itr != m_objectMap.end()) ? itr->second : NULL;
         }

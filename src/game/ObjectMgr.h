@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,8 +39,6 @@
 #include "ObjectDefines.h"
 #include "Policies/Singleton.h"
 #include "Database/SQLStorage.h"
-#include "zthread/FastMutex.h"
-#include "zthread/Guard.h"
 
 #include <string>
 #include <map>
@@ -627,9 +625,9 @@ class ObjectMgr
         void AddCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid, uint32 instance);
         void DeleteCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid);
 
-        time_t GetCreatureRespawnTime(uint32 loguid, uint32 instance);
+        time_t GetCreatureRespawnTime(uint32 loguid, uint32 instance) { return mCreatureRespawnTimes[MAKE_PAIR64(loguid,instance)]; }
         void SaveCreatureRespawnTime(uint32 loguid, uint32 instance, time_t t);
-        time_t GetGORespawnTime(uint32 loguid, uint32 instance);
+        time_t GetGORespawnTime(uint32 loguid, uint32 instance) { return mGORespawnTimes[MAKE_PAIR64(loguid,instance)]; }
         void SaveGORespawnTime(uint32 loguid, uint32 instance, time_t t);
         void DeleteRespawnTimeForInstance(uint32 instance);
 
@@ -764,10 +762,6 @@ class ObjectMgr
         MangosStringLocaleMap mMangosStringLocaleMap;
         RespawnTimes mCreatureRespawnTimes;
         RespawnTimes mGORespawnTimes;
-        typedef ZThread::FastMutex LockType;
-        typedef ZThread::Guard< LockType > GuardType;
-        LockType mGORespawnTimesLock;
-        LockType mCreatureRespawnTimesLock;
 
         typedef std::vector<uint32> GuildBankTabPriceMap;
         GuildBankTabPriceMap mGuildBankTabPrice;
