@@ -521,11 +521,10 @@ void World::LoadConfigSettings(bool reload)
     m_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHANNEL] = sConfig.GetBoolDefault("AllowTwoSide.Interaction.Channel",false);
     m_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP]   = sConfig.GetBoolDefault("AllowTwoSide.Interaction.Group",false);
     m_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD]   = sConfig.GetBoolDefault("AllowTwoSide.Interaction.Guild",false);
-    m_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_TRADE]   = sConfig.GetBoolDefault("AllowTwoSide.Interaction.Trade",false);
+    m_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_AUCTION]   = sConfig.GetBoolDefault("AllowTwoSide.Interaction.Auction",false);
     m_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_MAIL]    = sConfig.GetBoolDefault("AllowTwoSide.Interaction.Mail",false);
     m_configs[CONFIG_ALLOW_TWO_SIDE_WHO_LIST] = sConfig.GetBoolDefault("AllowTwoSide.WhoList", false);
     m_configs[CONFIG_ALLOW_TWO_SIDE_ADD_FRIEND] = sConfig.GetBoolDefault("AllowTwoSide.AddFriend", false);
-
     m_configs[CONFIG_STRICT_PLAYER_NAMES]  = sConfig.GetIntDefault("StrictPlayerNames",  0);
     m_configs[CONFIG_STRICT_CHARTER_NAMES] = sConfig.GetIntDefault("StrictCharterNames", 0);
     m_configs[CONFIG_STRICT_PET_NAMES]     = sConfig.GetIntDefault("StrictPetNames",     0);
@@ -585,7 +584,11 @@ void World::LoadConfigSettings(bool reload)
 
     m_configs[CONFIG_INSTANCE_IGNORE_LEVEL] = sConfig.GetBoolDefault("Instance.IgnoreLevel", false);
     m_configs[CONFIG_INSTANCE_IGNORE_RAID]  = sConfig.GetBoolDefault("Instance.IgnoreRaid", false);
-    m_configs[CONFIG_BATTLEGROUND_CAST_DESERTER] = sConfig.GetBoolDefault("Battleground.CastDeserter", true);
+
+    m_configs[CONFIG_BATTLEGROUND_CAST_DESERTER]              = sConfig.GetBoolDefault("Battleground.CastDeserter", true);
+    m_configs[CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_ENABLE]     = sConfig.GetBoolDefault("Battleground.QueueAnnouncer.Enable", true);
+    m_configs[CONFIG_BATTLEGROUND_QUEUE_ANNOUNCER_PLAYERONLY] = sConfig.GetBoolDefault("Battleground.QueueAnnouncer.PlayerOnly", false);
+
     m_configs[CONFIG_CAST_UNSTUCK] = sConfig.GetBoolDefault("CastUnstuck", true);
     m_configs[CONFIG_INSTANCE_RESET_TIME_HOUR]  = sConfig.GetIntDefault("Instance.ResetTimeHour", 4);
     m_configs[CONFIG_INSTANCE_UNLOAD_DELAY] = sConfig.GetIntDefault("Instance.UnloadDelay", 1800000);
@@ -1984,21 +1987,57 @@ void World::SendGlobalMessage(WorldPacket *packet, WorldSession *self, uint32 te
 }
 
 /// Send a System Message to all players (except self if mentioned)
-void World::SendWorldText(const char* text, WorldSession *self)
+void World::SendWorldText(int32 string_id, ...)
 {
-    WorldPacket data;
+    std::vector<std::vector<WorldPacket*> > data_cache;     // 0 = default, i => i-1 locale index
 
-    // need copy to prevent corruption by strtok call in LineFromMessage original string
-    char* buf = strdup(text);
-    char* pos = buf;
-
-    while(char* line = ChatHandler::LineFromMessage(pos))
+    for(SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
     {
-        ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, line, NULL);
-        SendGlobalMessage(&data, self);
+        if(!itr->second || !itr->second->GetPlayer() || !itr->second->GetPlayer()->IsInWorld() )
+            continue;
+
+        uint32 loc_idx = itr->second->GetSessionDbLocaleIndex();
+        uint32 cache_idx = loc_idx+1;
+
+        std::vector<WorldPacket*>* data_list;
+
+        // create if not cached yet
+        if(data_cache.size() < cache_idx+1 || data_cache[cache_idx].empty())
+        {
+            if(data_cache.size() < cache_idx+1)
+                data_cache.resize(cache_idx+1);
+
+            data_list = &data_cache[cache_idx];
+
+            char const* text = objmgr.GetMangosString(string_id,loc_idx);
+
+            char buf[1000];
+
+            va_list argptr;
+            va_start( argptr, string_id );
+            vsnprintf( buf,1000, text, argptr );
+            va_end( argptr );
+
+            char* pos = &buf[0];
+
+            while(char* line = ChatHandler::LineFromMessage(pos))
+            {
+                WorldPacket* data = new WorldPacket();
+                ChatHandler::FillMessageData(data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, line, NULL);
+                data_list->push_back(data);
+            }
+        }
+        else
+            data_list = &data_cache[cache_idx];
+
+        for(int i = 0; i < data_list->size(); ++i)
+            itr->second->SendPacket((*data_list)[i]);
     }
 
-    free(buf);
+    // free memory
+    for(int i = 0; i < data_cache.size(); ++i)
+        for(int j = 0; j < data_cache[i].size(); ++j)
+            delete data_cache[i][j];
 }
 
 /// Send a packet to all players (or players selected team) in the zone (except self if mentioned)

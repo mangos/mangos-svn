@@ -219,7 +219,7 @@ void CliLoadScripts(char*command,pPrintf zprintf)
     if(!LoadScriptingModule(del))                           // Error report is already done by LoadScriptingModule
         return;
 
-    sWorld.SendWorldText("|cffff0000[System Message]:|rScripts reloaded", NULL);
+    sWorld.SendWorldText(LANG_SCRIPTS_RELOADED);
 }
 
 /// Delete a user account and all associated characters in this realm
@@ -307,15 +307,12 @@ void CliCharDelete(char*command,pPrintf zprintf)
 /// Broadcast a message to the World
 void CliBroadcast(char *text,pPrintf zprintf)
 {
-    std::string str = objmgr.GetMangosStringForDBCLocale(LANG_SYSTEMMESSAGE);
-
     std::string textUtf8;
     if(!consoleToUtf8(text,textUtf8))                       // convert from console encoding to utf8
         return;
 
-    str += textUtf8;
-    sWorld.SendWorldText(str.c_str(), NULL);
-    zprintf("Broadcasting to the world: %s\r\n",str.c_str());
+    sWorld.SendWorldText(LANG_SYSTEMMESSAGE,textUtf8.c_str());
+    zprintf("Broadcasting to the world: %s\r\n",textUtf8.c_str());
 }
 
 /// Print the list of commands and associated description
@@ -1091,10 +1088,10 @@ void CliSave(char*,pPrintf zprintf)
 {
     ///- Save players
     ObjectAccessor::Instance().SaveAllPlayers();
-    zprintf( "All Players Saved \r\n" );
+    zprintf( objmgr.GetMangosStringForDBCLocale(LANG_PLAYERS_SAVED) );
 
     ///- Send a message
-    sWorld.SendWorldText("Players saved!", NULL);
+    sWorld.SendWorldText(LANG_PLAYERS_SAVED);
 }
 
 /// Send a message to a player in game

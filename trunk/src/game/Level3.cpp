@@ -555,8 +555,7 @@ bool ChatHandler::HandleLoadScriptsCommand(const char* args)
 {
     if(!LoadScriptingModule(args)) return true;
 
-    sWorld.SendWorldText(GetMangosString(LANG_SCRIPTS_RELOADED), NULL);
-
+    sWorld.SendWorldText(LANG_SCRIPTS_RELOADED);
     return true;
 }
 
@@ -4269,12 +4268,12 @@ bool ChatHandler::HandleResetAllCommand(const char * args)
     if(casename=="spells")
     {
         atLogin = AT_LOGIN_RESET_SPELLS;
-        sWorld.SendWorldText(GetMangosString(LANG_RESETALL_SPELLS));
+        sWorld.SendWorldText(LANG_RESETALL_SPELLS);
     }
     else if(casename=="talents")
     {
         atLogin = AT_LOGIN_RESET_TALENTS;
-        sWorld.SendWorldText(GetMangosString(LANG_RESETALL_TALENTS));
+        sWorld.SendWorldText(LANG_RESETALL_TALENTS);
     }
     else
     {

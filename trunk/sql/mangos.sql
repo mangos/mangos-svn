@@ -2076,6 +2076,8 @@ LOCK TABLES `mangos_string` WRITE;
 INSERT INTO `mangos_string` VALUES
 (1,'You should select a character or a creature.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (2,'You should select a creature.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(3,'|cffff0000[System Message]: %s|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(4,'|cffff0000[Event Message]: %s|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (5,'There is no help for that command',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (6,'There is no such command',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (7,'There is no such subcommand',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
@@ -2103,8 +2105,6 @@ INSERT INTO `mangos_string` VALUES
 (29,'Your account is now unlocked.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (30,', rank ',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (31,' [known]',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(3,'|cffff0000[System Message]:|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(4,'|cffff0000[Event Message]: %s|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (32,' [learn]',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (33,' [passive]',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (34,' [talent]',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
@@ -2561,7 +2561,9 @@ INSERT INTO `mangos_string` VALUES
 (707,'%s wishes to not be disturbed and cannot receive whisper messages: %s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (708,'%s is Away from Keyboard: %s',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (709,'Do not Disturb',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(710,'Away from Keyboard',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
+(710,'Away from Keyboard',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(711,'Queue status for %s (Lvl: %u to %u)\nQueued alliances: %u (Need at least %u more)\nQueued hordes: %u (Need at least %u more)',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
+(712,'|cffff0000[BG Queue Announcer]:|r %s -- [%u-%u] A: %u (Need: %u), H: %u (Needs %u)|r',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 /*!40000 ALTER TABLE `mangos_string` ENABLE KEYS */;
 UNLOCK TABLES;
 
