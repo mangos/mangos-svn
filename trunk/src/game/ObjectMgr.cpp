@@ -5648,17 +5648,10 @@ void ObjectMgr::LoadWeatherZoneChances()
 
 void ObjectMgr::SaveCreatureRespawnTime(uint32 loguid, uint32 instance, time_t t)
 {
-    ObjectMgr::GuardType g(mCreatureRespawnTimesLock);
     mCreatureRespawnTimes[MAKE_PAIR64(loguid,instance)] = t;
     WorldDatabase.PExecute("DELETE FROM creature_respawn WHERE guid = '%u' AND instance = '%u'", loguid, instance);
     if(t)
         WorldDatabase.PExecute("INSERT INTO creature_respawn VALUES ( '%u', '" I64FMTD "', '%u' )", loguid, uint64(t), instance);
-}
-
-time_t ObjectMgr::GetCreatureRespawnTime(uint32 loguid, uint32 instance)
-{
-    ObjectMgr::GuardType g(mCreatureRespawnTimesLock);
-    return mCreatureRespawnTimes[MAKE_PAIR64(loguid,instance)];
 }
 
 void ObjectMgr::DeleteCreatureData(uint32 guid)
@@ -5673,17 +5666,10 @@ void ObjectMgr::DeleteCreatureData(uint32 guid)
 
 void ObjectMgr::SaveGORespawnTime(uint32 loguid, uint32 instance, time_t t)
 {
-    ObjectMgr::GuardType g(mGORespawnTimesLock);
     mGORespawnTimes[MAKE_PAIR64(loguid,instance)] = t;
     WorldDatabase.PExecute("DELETE FROM gameobject_respawn WHERE guid = '%u' AND instance = '%u'", loguid, instance);
     if(t)
         WorldDatabase.PExecute("INSERT INTO gameobject_respawn VALUES ( '%u', '" I64FMTD "', '%u' )", loguid, uint64(t), instance);
-}
-
-time_t ObjectMgr::GetGORespawnTime(uint32 loguid, uint32 instance)
-{
-    ObjectMgr::GuardType g(mGORespawnTimesLock);
-    return mGORespawnTimes[MAKE_PAIR64(loguid,instance)];
 }
 
 void ObjectMgr::DeleteRespawnTimeForInstance(uint32 instance)
