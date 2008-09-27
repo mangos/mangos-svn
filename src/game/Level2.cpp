@@ -1013,10 +1013,11 @@ bool ChatHandler::HandleTurnObjectCommand(const char* args)
     if(!lowguid)
         return false;
 
-    /* FIXME: impossible without entry
-    GameObject* obj = GetObjectGlobalyWithGuidOrNearWithDbGuid(lowguid,entry);
-    */
     GameObject* obj = NULL;
+
+    // by DB guid
+    if (GameObjectData const* go_data = objmgr.GetGOData(lowguid))
+        obj = GetObjectGlobalyWithGuidOrNearWithDbGuid(lowguid,go_data->id);
 
     if(!obj)
     {
@@ -1041,11 +1042,16 @@ bool ChatHandler::HandleTurnObjectCommand(const char* args)
     float rot2 = sin(o/2);
     float rot3 = cos(o/2);
 
+    Map* map = MapManager::Instance().GetMap(obj->GetMapId(),obj);
+    map->Remove(obj,false);
+
     obj->Relocate(obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), o);
 
     obj->SetFloatValue(GAMEOBJECT_FACING, o);
     obj->SetFloatValue(GAMEOBJECT_ROTATION+2, rot2);
     obj->SetFloatValue(GAMEOBJECT_ROTATION+3, rot3);
+
+    map->Add(obj);
 
     obj->SaveToDB();
     obj->Refresh();
