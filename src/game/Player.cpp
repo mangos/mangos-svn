@@ -1409,7 +1409,7 @@ bool Player::ToggleDND()
     return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND);
 }
 
-uint8 Player::chatTag()
+uint8 Player::chatTag() const
 {
     // it's bitmask
     // 0x8 - ??
@@ -5219,9 +5219,14 @@ void Player::SendMessageToSet(WorldPacket *data, bool self)
     MapManager::Instance().GetMap(GetMapId(), this)->MessageBroadcast(this, data, self);
 }
 
-void Player::SendMessageToOwnTeamSet(WorldPacket *data, bool self)
+void Player::SendMessageToSetInRange(WorldPacket *data, float dist, bool self)
 {
-    MapManager::Instance().GetMap(GetMapId(), this)->MessageBroadcast(this, data, self,true);
+    MapManager::Instance().GetMap(GetMapId(), this)->MessageDistBroadcast(this, data, dist, self);
+}
+
+void Player::SendMessageToSetInRange(WorldPacket *data, float dist, bool self, bool own_team_only)
+{
+    MapManager::Instance().GetMap(GetMapId(), this)->MessageDistBroadcast(this, data, dist, self,own_team_only);
 }
 
 void Player::SendDirectMessage(WorldPacket *data)
@@ -15620,55 +15625,44 @@ void Player::Uncharm()
     charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
 }
 
+void Player::BuildPlayerChat(WorldPacket *data, uint8 msgtype, std::string text, uint32 language) const
+{
+    bool pre = (msgtype==CHAT_MSG_EMOTE);
+
+    *data << (uint8)msgtype;
+    *data << (uint32)language;
+    *data << (uint64)GetGUID();
+    *data << (uint32)language;                               //language 2.1.0 ?
+    *data << (uint64)GetGUID();
+    *data << (uint32)(text.length()+1+(pre?3:0));
+    if(pre)
+        data->append("%s ",3);
+    *data << text;
+    *data << (uint8)chatTag();
+}
+
 void Player::Say(const std::string text, const uint32 language)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
-    data << (uint8)CHAT_MSG_SAY;
-    data << (uint32)language;
-    data << (uint64)GetGUID();
-    data << (uint32)language;                               //language 2.1.0 ?
-    data << (uint64)GetGUID();
-    data << (uint32)(text.length()+1);
-    data << text;
-    data << (uint8)chatTag();
-
-    SendMessageToSet(&data, true);
+    BuildPlayerChat(&data, CHAT_MSG_SAY, text, language);
+    SendMessageToSetInRange(&data,sWorld.getConfig(CONFIG_LISTEN_RANGE_SAY),true);
 }
 
 void Player::Yell(const std::string text, const uint32 language)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
-    data << (uint8)CHAT_MSG_YELL;
-    data << (uint32)language;
-    data << (uint64)GetGUID();
-    data << (uint32)language;                               //language 2.1.0 ?
-    data << (uint64)GetGUID();
-    data << (uint32)(text.length()+1);
-    data << text;
-    data << (uint8)chatTag();
-
-    SendMessageToSet(&data, true);
+    BuildPlayerChat(&data, CHAT_MSG_YELL, text, language);
+    SendMessageToSetInRange(&data,sWorld.getConfig(CONFIG_LISTEN_RANGE_YELL),true);
 }
 
 void Player::TextEmote(const std::string text)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
-    data << (uint8)CHAT_MSG_EMOTE;
-    data << (uint32)LANG_UNIVERSAL;
-    data << (uint64)GetGUID();
-    data << (uint32)0;
-    data << (uint64)GetGUID();
-    data << (uint32)(text.length()+1);
-    data << text;
-    data << (uint8)chatTag();
-
-    if(sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT))
-        SendMessageToSet(&data, true);
-    else
-        SendMessageToOwnTeamSet(&data,true);
+    BuildPlayerChat(&data, CHAT_MSG_EMOTE, text, LANG_UNIVERSAL);
+    SendMessageToSetInRange(&data,sWorld.getConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE),true, !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT) );
 }
 
-void Player::Whisper(const uint64 receiver, const std::string text, uint32 language)
+void Player::Whisper(std::string text, uint32 language,uint64 receiver)
 {
     if (language != LANG_ADDON)                             // if not addon data
         language = LANG_UNIVERSAL;                          // whispers should always be readable
@@ -15679,25 +15673,11 @@ void Player::Whisper(const uint64 receiver, const std::string text, uint32 langu
     if(!rPlayer->isDND() || isGameMaster())
     {
         WorldPacket data(SMSG_MESSAGECHAT, 200);
-        data << (uint8)CHAT_MSG_WHISPER;
-        data << (uint32)language;
-        data << (uint64)GetGUID();
-        data << (uint32)0;
-        data << (uint64)GetGUID();
-        data << (uint32)(text.length()+1);
-        data << text;
-        data << (uint8)chatTag();
+        BuildPlayerChat(&data, CHAT_MSG_WHISPER, text, language);
         rPlayer->GetSession()->SendPacket(&data);
 
         data.Initialize(SMSG_MESSAGECHAT, 200);
-        data << (uint8)CHAT_MSG_REPLY;
-        data << (uint32)language;
-        data << (uint64)rPlayer->GetGUID();
-        data << (uint32)0;
-        data << (uint64)rPlayer->GetGUID();
-        data << (uint32)(text.length()+1);
-        data << text;
-        data << (uint8)rPlayer->chatTag();
+        rPlayer->BuildPlayerChat(&data, CHAT_MSG_REPLY, text, language);
         GetSession()->SendPacket(&data);
     }
     else

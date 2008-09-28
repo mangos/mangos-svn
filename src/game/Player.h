@@ -936,9 +936,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool ToggleAFK();
         bool ToggleDND();
-        bool isAFK() { return this->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK); };
-        bool isDND() { return this->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND); };
-        uint8 chatTag();
+        bool isAFK() const { return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK); };
+        bool isDND() const { return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND); };
+        uint8 chatTag() const;
         std::string afkMsg;
         std::string dndMsg;
 
@@ -1006,10 +1006,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         GuardianPetList const& GetGuardians() const { return m_guardianPets; }
         void Uncharm();
 
-        void Say(const std::string text, const uint32 language);
-        void Yell(const std::string text, const uint32 language);
-        void TextEmote(const std::string text);
-        void Whisper(const uint64 receiver, const std::string text, const uint32 language);
+        void Say(std::string text, const uint32 language);
+        void Yell(std::string text, const uint32 language);
+        void TextEmote(std::string text);
+        void Whisper(std::string text, const uint32 language,uint64 receiver);
+        void BuildPlayerChat(WorldPacket *data, uint8 msgtype, std::string text, uint32 language) const;
 
         /*********************************************************/
         /***                    STORAGE SYSTEM                 ***/
@@ -1613,7 +1614,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateUnderwaterState( Map * m, float x, float y, float z );
 
         void SendMessageToSet(WorldPacket *data, bool self);// overwrite Object::SendMessageToSet
-        void SendMessageToOwnTeamSet(WorldPacket *data, bool self);
+        void SendMessageToSetInRange(WorldPacket *data, float fist, bool self);
+                                                            // overwrite Object::SendMessageToSetInRange
+        void SendMessageToSetInRange(WorldPacket *data, float dist, bool self, bool own_team_only);
 
         static void DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmChars = true);
 

@@ -92,17 +92,37 @@ namespace MaNGOS
         Player &i_player;
         WorldPacket *i_message;
         bool i_toSelf;
-        bool i_ownTeamOnly;
-        MessageDeliverer(Player &pl, WorldPacket *msg, bool to_self, bool ownTeamOnly) : i_player(pl), i_message(msg), i_toSelf(to_self), i_ownTeamOnly(ownTeamOnly) {}
+        MessageDeliverer(Player &pl, WorldPacket *msg, bool to_self) : i_player(pl), i_message(msg), i_toSelf(to_self) {}
         void Visit(PlayerMapType &m);
         template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
     };
 
     struct MANGOS_DLL_DECL ObjectMessageDeliverer
     {
-        Object &i_object;
         WorldPacket *i_message;
-        ObjectMessageDeliverer(Object &obj, WorldPacket *msg) : i_object(obj), i_message(msg) {}
+        explicit ObjectMessageDeliverer(WorldPacket *msg) : i_message(msg) {}
+        void Visit(PlayerMapType &m);
+        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
+    };
+
+    struct MANGOS_DLL_DECL MessageDistDeliverer
+    {
+        Player &i_player;
+        WorldPacket *i_message;
+        bool i_toSelf;
+        bool i_ownTeamOnly;
+        float i_dist;
+        MessageDistDeliverer(Player &pl, WorldPacket *msg, bool to_self, bool ownTeamOnly, float dist) : i_player(pl), i_message(msg), i_toSelf(to_self), i_ownTeamOnly(ownTeamOnly), i_dist(dist) {}
+        void Visit(PlayerMapType &m);
+        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
+    };
+
+    struct MANGOS_DLL_DECL ObjectMessageDistDeliverer
+    {
+        WorldObject &i_object;
+        WorldPacket *i_message;
+        float i_dist;
+        ObjectMessageDistDeliverer(WorldObject &obj, WorldPacket *msg, float dist) : i_object(obj), i_message(msg), i_dist(dist) {}
         void Visit(PlayerMapType &m);
         template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
     };
@@ -403,6 +423,22 @@ namespace MaNGOS
         PlayerSearcher(Player* & result, Check & check) : i_object(result),i_check(check) {}
 
         void Visit(PlayerMapType &m);
+
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+    };
+
+    template<class Do>
+    struct MANGOS_DLL_DECL PlayerWorker
+    {
+        Do& i_do;
+
+        explicit PlayerWorker(Do& _do) : i_do(_do) {}
+
+        void Visit(PlayerMapType &m)
+        {
+            for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
+                i_do(itr->getSource());
+        }
 
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };

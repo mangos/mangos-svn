@@ -212,7 +212,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 }
             }
 
-            GetPlayer()->Whisper(player->GetGUID(), msg, lang);
+            GetPlayer()->Whisper(msg, lang,player->GetGUID());
         } break;
 
         case CHAT_MSG_PARTY:
@@ -554,7 +554,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
             data << (uint8)0x00;
         }
 
-        GetPlayer()->SendMessageToSet( &data, true );
+        GetPlayer()->SendMessageToSetInRange(&data,sWorld.getConfig(CONFIG_LISTEN_RANGE_TEXTEMOTE),true);
 
         //Send scripted event call
         if (pCreature && Script)
