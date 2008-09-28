@@ -4155,7 +4155,34 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
             }
             break;
         }
-
+        case SPELLFAMILY_PALADIN:
+        {
+            // Consecration
+            if (m_spellProto->SpellFamilyFlags & 0x0000000000000020LL)
+            {
+                if (apply && !loading)
+                {
+                    if(Unit* caster = GetCaster())
+                    {
+                        Unit::AuraList const& classScripts = caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+                        for(Unit::AuraList::const_iterator k = classScripts.begin(); k != classScripts.end(); ++k)
+                        {
+                            int32 tickcount = GetSpellDuration(m_spellProto) / m_spellProto->EffectAmplitude[m_effIndex];
+                            switch((*k)->GetModifier()->m_miscvalue)
+                            {
+                                case 5147:                  // Improved Consecration - Libram of the Eternal Rest
+                                {
+                                    m_modifier.m_amount += (*k)->GetModifier()->m_amount / tickcount;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+                return;
+            }
+            break;
+        }
         default:
             break;
     }
