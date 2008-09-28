@@ -61,7 +61,7 @@ BindIP = "0.0.0.0"
 #                 number (bitmask value of selected processors)
 #
 #    ProcessPriority
-#        Process proirity setting (Used only at Windows)
+#        Process priority setting (Used only at Windows)
 #        Default: 1 (HIGH)
 #                 0 (Normal)
 #
@@ -272,7 +272,7 @@ AddonChannel = 1
 #                 "" - Empty name for disable
 #
 #    LogColors
-#        Color for messages (format "normal_color details_color debug_color error_color)
+#        Color for messages (format "normal_color details_color debug_color error_color")
 #        Colors: 0 - BLACK, 1 - RED, 2 - GREEN,  3 - BROWN, 4 - BLUE, 5 - MAGENTA, 6 -  CYAN, 7 - GREY, 
 #                8 - YELLOW, 9 - LRED, 10 - LGREEN, 11 - LBLUE, 12 - LMAGENTA, 13 - LCYAN, 14 - WHITE
 #        Default: "" - none colors
@@ -856,7 +856,7 @@ Visibility.Distance.Grey.Object = 10
 #    Rate.Drop.Item.Artifact
 #    Rate.Drop.Item.Referenced
 #    Rate.Drop.Money
-#         Drop rates (items by qualify and money)
+#         Drop rates (items by quality and money)
 #         Default: 1
 #
 #    Rate.Drop.Money
