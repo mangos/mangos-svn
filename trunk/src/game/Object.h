@@ -406,15 +406,21 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         bool HasInArc( const float arcangle, const WorldObject* obj ) const;
 
         virtual void SendMessageToSet(WorldPacket *data, bool self);
+        virtual void SendMessageToSetInRange(WorldPacket *data, float dist, bool self);
         void BuildHeartBeatMsg( WorldPacket *data ) const;
         void BuildTeleportAckMsg( WorldPacket *data, float x, float y, float z, float ang) const;
         bool IsBeingTeleported() { return mSemaphoreTeleport; }
         void SetSemaphoreTeleport(bool semphsetting) { mSemaphoreTeleport = semphsetting; }
 
-        void MonsterSay(const char* text, const uint32 language, const uint64 TargetGuid);
-        void MonsterYell(const char* text, const uint32 language, const uint64 TargetGuid);
-        void MonsterTextEmote(const char* text, const uint64 TargetGuid, bool IsBossEmote = false);
-        void MonsterWhisper(const uint64 receiver, const char* text, bool IsBossWhisper = false);
+        void MonsterSay(const char* text, uint32 language, uint64 TargetGuid);
+        void MonsterYell(const char* text, uint32 language, uint64 TargetGuid);
+        void MonsterTextEmote(const char* text, uint64 TargetGuid, bool IsBossEmote = false);
+        void MonsterWhisper(const char* text, uint64 receiver, bool IsBossWhisper = false);
+        void MonsterSay(int32 textId, uint32 language, uint64 TargetGuid);
+        void MonsterYell(int32 textId, uint32 language, uint64 TargetGuid);
+        void MonsterTextEmote(int32 textId, uint64 TargetGuid, bool IsBossEmote = false);
+        void MonsterWhisper(int32 textId, uint64 receiver, bool IsBossWhisper = false);
+        void BuildMonsterChat(WorldPacket *data, uint8 msgtype, char const* text, uint32 language, char const* name, uint64 TargetGuid) const;
 
         void SendObjectDeSpawnAnim(uint64 guid);
 

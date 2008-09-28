@@ -719,8 +719,13 @@ void World::LoadConfigSettings(bool reload)
     m_configs[CONFIG_THREAT_RADIUS] = sConfig.GetIntDefault("ThreatRadius", 100);
 
     // always use declined names in the russian client
-    m_configs[CONFIG_DECLINED_NAMES_USED] = (m_configs[CONFIG_REALM_ZONE] == REALM_ZONE_RUSSIAN) ? true :
-        sConfig.GetBoolDefault("DeclinedNames", false);
+    m_configs[CONFIG_DECLINED_NAMES_USED] = 
+        (m_configs[CONFIG_REALM_ZONE] == REALM_ZONE_RUSSIAN) ? true : sConfig.GetBoolDefault("DeclinedNames", false);
+
+    m_configs[CONFIG_LISTEN_RANGE_SAY]       = sConfig.GetIntDefault("ListenRange.Say", 40);
+    m_configs[CONFIG_LISTEN_RANGE_TEXTEMOTE] = sConfig.GetIntDefault("ListenRange.TextEmote", 40);
+    m_configs[CONFIG_LISTEN_RANGE_YELL]      = sConfig.GetIntDefault("ListenRange.Yell", 300);
+
 
     m_VisibleUnitGreyDistance = sConfig.GetFloatDefault("Visibility.Distance.Grey.Unit", 1);
     if(m_VisibleUnitGreyDistance >  MAX_VISIBILITY_DISTANCE)
@@ -1473,13 +1478,13 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                uint64 unit_target = target!=NULL ? target->GetGUID() : 0;
+                uint64 unit_target = target ? target->GetGUID() : 0;
 
                 //datalong 0=normal say, 1=whisper, 2=yell, 3=emote text
                 switch(step.script->datalong)
                 {
                     case 0:                                 // Say
-                        ((Creature *)source)->Say(step.script->datatext.c_str(), 0, unit_target);
+                        ((Creature *)source)->Say(step.script->datatext.c_str(), LANG_UNIVERSAL, unit_target);
                         break;
                     case 1:                                 // Whisper
                         if(!unit_target)
@@ -1487,10 +1492,10 @@ void World::ScriptsProcess()
                             sLog.outError("SCRIPT_COMMAND_TALK attempt to whisper (%u) NULL, skipping.",step.script->datalong);
                             break;
                         }
-                        ((Creature *)source)->Whisper(unit_target, step.script->datatext.c_str());
+                        ((Creature *)source)->Whisper(step.script->datatext.c_str(),unit_target);
                         break;
                     case 2:                                 // Yell
-                        ((Creature *)source)->Yell(step.script->datatext.c_str(), 0, unit_target);
+                        ((Creature *)source)->Yell(step.script->datatext.c_str(), LANG_UNIVERSAL, unit_target);
                         break;
                     case 3:                                 // Emote text
                         ((Creature *)source)->TextEmote(step.script->datatext.c_str(), unit_target);

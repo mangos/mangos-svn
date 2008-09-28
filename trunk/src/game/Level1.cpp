@@ -98,18 +98,20 @@ bool ChatHandler::HandleNpcWhisperCommand(const char* args)
     if(!*args)
         return false;
 
-    char* receiver = strtok((char*)args, " ");
+    char* receiver_str = strtok((char*)args, " ");
     char* text = strtok(NULL, "");
 
     uint64 guid = m_session->GetPlayer()->GetSelection();
     Creature* pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(), guid);
 
-    if(!pCreature || !receiver || !text)
+    if(!pCreature || !receiver_str || !text)
     {
         return false;
     }
 
-    pCreature->Whisper(atol(receiver), text);
+    uint64 receiver_guid= atol(receiver_str);
+
+    pCreature->Whisper(text,receiver_guid);
 
     return true;
 }

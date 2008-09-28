@@ -142,8 +142,7 @@ MessageDeliverer::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        if( (iter->getSource() != &i_player || i_toSelf)
-            && (!i_ownTeamOnly || iter->getSource()->GetTeam() == i_player.GetTeam()) )
+        if( i_toSelf || iter->getSource() != &i_player)
         {
             if(WorldSession* session = iter->getSource()->GetSession())
                 session->SendPacket(i_message);
@@ -158,6 +157,34 @@ ObjectMessageDeliverer::Visit(PlayerMapType &m)
     {
         if(WorldSession* session = iter->getSource()->GetSession())
             session->SendPacket(i_message);
+    }
+}
+
+void
+MessageDistDeliverer::Visit(PlayerMapType &m)
+{
+    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+        if( (i_toSelf || iter->getSource() != &i_player ) &&
+            (!i_ownTeamOnly || iter->getSource()->GetTeam() == i_player.GetTeam() ) &&
+            (!i_dist || iter->getSource()->GetDistance(&i_player) <= i_dist) )
+        {
+            if(WorldSession* session = iter->getSource()->GetSession())
+                session->SendPacket(i_message);
+        }
+    }
+}
+
+void
+ObjectMessageDistDeliverer::Visit(PlayerMapType &m)
+{
+    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+    {
+        if( !i_dist || iter->getSource()->GetDistance(&i_object) <= i_dist )
+        {
+            if(WorldSession* session = iter->getSource()->GetSession())
+                session->SendPacket(i_message);
+        }
     }
 }
 
