@@ -733,10 +733,10 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest const *pQuest, uint64 npcGUID
     else
         data << uint32(0x00);
 
+    data << uint32(0x00);                                   // unknown
+
     // Required Money
     data << uint32(pQuest->GetRewOrReqMoney() < 0 ? -pQuest->GetRewOrReqMoney() : 0);
-
-    data << uint32(0x00);                                   // unknown
 
     data << uint32( pQuest->GetReqItemsCount() );
     ItemPrototype const *pItem;
