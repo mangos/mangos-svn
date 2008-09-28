@@ -24,7 +24,7 @@
 #include "Util.h"
 #include "SharedDefines.h"
 
-static Rates const qualifyToRate[MAX_ITEM_QUALITY] = {
+static Rates const qualityToRate[MAX_ITEM_QUALITY] = {
     RATE_DROP_ITEM_POOR,                                    // ITEM_QUALITY_POOR
     RATE_DROP_ITEM_NORMAL,                                  // ITEM_QUALITY_NORMAL
     RATE_DROP_ITEM_UNCOMMON,                                // ITEM_QUALITY_UNCOMMON
@@ -238,9 +238,9 @@ bool LootStoreItem::Roll() const
 
     ItemPrototype const *pProto = objmgr.GetItemPrototype(itemid);
 
-    float qualifyModifier = pProto ? sWorld.getRate(qualifyToRate[pProto->Quality]) : 1.0f;
+    float qualityModifier = pProto ? sWorld.getRate(qualityToRate[pProto->Quality]) : 1.0f;
 
-    return roll_chance_f(chance*qualifyModifier);
+    return roll_chance_f(chance*qualityModifier);
 }
 
 // Checks correctness of values
@@ -774,7 +774,7 @@ LootStoreItem const * LootTemplate::LootGroup::Roll() const
                 return &ExplicitlyChanced[i];
 
             ItemPrototype const *pProto = objmgr.GetItemPrototype(ExplicitlyChanced[i].itemid);
-            float qualityMultiplier = pProto ? sWorld.getRate(qualifyToRate[pProto->Quality]) : 1.0f;
+            float qualityMultiplier = pProto ? sWorld.getRate(qualityToRate[pProto->Quality]) : 1.0f;
             Roll -= ExplicitlyChanced[i].chance * qualityMultiplier;
             if (Roll < 0)
                 return &ExplicitlyChanced[i];

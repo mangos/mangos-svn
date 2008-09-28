@@ -77,7 +77,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies=".\g3dlite__$(PlatformName)_$(ConfigurationName)\g3dlite.lib"
+				AdditionalDependencies=".\g3dlite__$(PlatformName)_$(ConfigurationName)\g3dlite.lib user32.lib"
 				OutputFile=".\shared__$(PlatformName)_$(ConfigurationName)\shared.lib"
 				SuppressStartupBanner="true"
 			/>
@@ -155,7 +155,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies=".\g3dlite__$(PlatformName)_$(ConfigurationName)\g3dlite.lib"
+				AdditionalDependencies=".\g3dlite__$(PlatformName)_$(ConfigurationName)\g3dlite.lib user32.lib"
 				OutputFile=".\shared__$(PlatformName)_$(ConfigurationName)\shared.lib"
 				SuppressStartupBanner="true"
 			/>
@@ -237,7 +237,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies=".\g3dlite__$(PlatformName)_$(ConfigurationName)\g3dlite.lib"
+				AdditionalDependencies=".\g3dlite__$(PlatformName)_$(ConfigurationName)\g3dlite.lib user32.lib"
 				OutputFile=".\shared__$(PlatformName)_$(ConfigurationName)\shared.lib"
 				SuppressStartupBanner="true"
 			/>
@@ -317,7 +317,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies=".\g3dlite__$(PlatformName)_$(ConfigurationName)\g3dlite.lib"
+				AdditionalDependencies=".\g3dlite__$(PlatformName)_$(ConfigurationName)\g3dlite.lib user32.lib"
 				OutputFile=".\shared__$(PlatformName)_$(ConfigurationName)\shared.lib"
 				SuppressStartupBanner="true"
 			/>
