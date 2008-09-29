@@ -8526,7 +8526,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
     }
 
     // Visible units, always are visible for all units, except for units under invisibility
-    if (m_Visibility == VISIBILITY_ON && u->GetVisibility()!= VISIBILITY_GROUP_INVISIBILITY)
+    if (m_Visibility == VISIBILITY_ON && u->m_invisibilityMask==0)
         return true;
 
     // GMs see any players, not higher GMs and all units
@@ -8542,43 +8542,62 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
     if (m_Visibility == VISIBILITY_OFF)
         return false;
 
-    // Invisible units, always are visible for units under same invisibility type
-    if(m_invisibilityMask & u->m_invisibilityMask)
-        return true;
-
-    // Invisible units, always are visible for unit that can detect this invisibility (have appropriate level for detect)
-    if(u->canDetectInvisibilityOf(this))
-        return true;
-
-    // Units that can detect invisibility always are visible for units that can be detected
-    if(canDetectInvisibilityOf(u))
-        return true;
-
-    // Stealth/invisible not hostile units, not visible (except Player-with-Player case)
-    if (!u->IsHostileTo(this))
+    // raw invisibility
+    bool invisible = (m_invisibilityMask != 0 || u->m_invisibilityMask !=0);
+    
+    // detectable invisibility case
+    if( invisible && (
+        // Invisible units, always are visible for units under same invisibility type
+        (m_invisibilityMask & u->m_invisibilityMask)!=0 ||
+        // Invisible units, always are visible for unit that can detect this invisibility (have appropriate level for detect)
+        u->canDetectInvisibilityOf(this) ||
+        // Units that can detect invisibility always are visible for units that can be detected
+        canDetectInvisibilityOf(u) ))
     {
-        // player see other player with stealth/invisibility only if he in same group or raid or same team (raid/team case dependent from conf setting)
-        if(GetTypeId()==TYPEID_PLAYER && u->GetTypeId()==TYPEID_PLAYER)
-        {
-            if(((Player*)this)->IsGroupVisibleFor(((Player*)u)))
-                return true;
-
-            // else apply same rules as for hostile case (detecting check)
-        }
+        invisible = false;
     }
-    else
+
+    // special cases for always overwrite invisibility/stealth
+    if(invisible || m_Visibility == VISIBILITY_GROUP_STEALTH)
     {
-        // Hunter mark functionality
-        AuraList const& auras = GetAurasByType(SPELL_AURA_MOD_STALKED);
-        for(AuraList::const_iterator iter = auras.begin(); iter != auras.end(); ++iter)
-            if((*iter)->GetCasterGUID()==u->GetGUID())
-                return true;
+        // non-hostile case
+        if (!u->IsHostileTo(this))
+        {
+            // player see other player with stealth/invisibility only if he in same group or raid or same team (raid/team case dependent from conf setting)
+            if(GetTypeId()==TYPEID_PLAYER && u->GetTypeId()==TYPEID_PLAYER)
+            {
+                if(((Player*)this)->IsGroupVisibleFor(((Player*)u)))
+                    return true;
+
+                // else apply same rules as for hostile case (detecting check for stealth)
+            }
+        }
+        // hostile case
+        else
+        {
+            // Hunter mark functionality
+            AuraList const& auras = GetAurasByType(SPELL_AURA_MOD_STALKED);
+            for(AuraList::const_iterator iter = auras.begin(); iter != auras.end(); ++iter)
+                if((*iter)->GetCasterGUID()==u->GetGUID())
+                    return true;
+
+            // else apply detecting check for stealth
+        }
+
+        // none other cases for detect invisibility, so invisible
+        if(invisible)
+            return false;
+
+        // else apply stealth detecting check
     }
 
     // unit got in stealth in this moment and must ignore old detected state
-    // invisibility not have chance for detection
-    if (m_Visibility == VISIBILITY_ON || m_Visibility == VISIBILITY_GROUP_NO_DETECT || m_Visibility == VISIBILITY_GROUP_INVISIBILITY)
+    if (m_Visibility == VISIBILITY_GROUP_NO_DETECT)
         return false;
+
+    // GM invisibility checks early, invisibility if any detectable, so if not stealth then visible
+    if (m_Visibility != VISIBILITY_GROUP_STEALTH)
+        return true;
 
     // NOW ONLY STEALTH CASE
 
