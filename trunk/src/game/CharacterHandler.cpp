@@ -963,7 +963,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     // we have to check character at_login_flag & AT_LOGIN_RENAME also (fake packets hehe)
 
     CharacterDatabase.escape_string(newname);
-    CharacterDatabase.PExecute("UPDATE characters set name = '%s', at_login = at_login & ~ '%u' WHERE guid ='%u'", newname.c_str(), uint32(AT_LOGIN_RENAME),GUID_LOPART(guid));
+    CharacterDatabase.PExecute("UPDATE characters set name = '%s', at_login = at_login & ~ %u WHERE guid ='%u'", newname.c_str(), uint32(AT_LOGIN_RENAME),GUID_LOPART(guid));
     CharacterDatabase.PExecute("DELETE FROM character_declinedname WHERE guid ='%u'", GUID_LOPART(guid));
 
     std::string IP_str = _socket ? _socket->GetRemoteAddress().c_str() : "-";
