@@ -7363,6 +7363,16 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             {
                 CastingTime = damagetype == DOT ? 5000 : 500; // self damage seems to be so
             }
+            // Unstable Affliction - 180%
+            else if (spellProto->Id == 31117 && spellProto->SpellIconID == 232)
+            {
+                CastingTime = 6300;
+            }
+            // Corruption 93%
+            else if ((spellProto->SpellFamilyFlags & 0x2LL) && spellProto->SpellIconID == 313)
+            {
+                DotFactor = 0.93f;
+            }
             break;
         case SPELLFAMILY_PALADIN:
             // Consecration - 95% of Holy Damage
@@ -7455,6 +7465,11 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             else if (spellProto->SpellFamilyFlags == 0 && spellProto->SpellIconID == 566)
             {
                 CastingTime = 0;
+            }
+            // Holy Nova - 14%
+            else if ((spellProto->SpellFamilyFlags & 0x400000LL) && spellProto->SpellIconID == 1874) 
+            {
+                CastingTime = 500;
             }
             break;
         case SPELLFAMILY_DRUID:
@@ -7791,14 +7806,19 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
                     CastingTime = damagetype == DOT ? 3500 : 1010;
                 }
                 break;
+            case SPELLFAMILY_PRIEST:
+                // Holy Nova - 14%
+                if ((spellProto->SpellFamilyFlags & 0x8000000LL) && spellProto->SpellIconID == 1874) 
+                    CastingTime = 500;
+                break;
             case SPELLFAMILY_PALADIN:
                 // Seal and Judgement of Light
                 if ( spellProto->SpellFamilyFlags & 0x100040000LL )
                     CastingTime = 0;
                 break;
             case SPELLFAMILY_WARRIOR:
-            case SPELLFAMILY_HUNTER:
             case SPELLFAMILY_ROGUE:
+            case SPELLFAMILY_HUNTER:
                 CastingTime = 0;
                 break;
         }
