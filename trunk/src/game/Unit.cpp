@@ -7388,7 +7388,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                 CastingTime = 2555;
             }
             // Seal of Vengeance - 17% per Fully Stacked Tick - 5 Applications
-            else if ((spellProto->SpellFamilyFlags & 0x80000000000LL) && spellProto->SpellIconID == 2040)
+            else if ((spellProto->SpellFamilyFlags & 0x80000000000LL) && spellProto->SpellIconID == 2292)
             {
                 DotFactor = 0.17f;
                 CastingTime = 3500;
