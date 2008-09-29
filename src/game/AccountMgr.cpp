@@ -92,9 +92,13 @@ AccountOpResult AccountMgr::DeleteAccount(uint32 accid)
         delete result;
     }
 
+    // table realm specific but common for all characters of account for realm
+    CharacterDatabase.PExecute("DELETE FROM character_tutorial WHERE account = '%u'",accid);
+
     loginDatabase.BeginTransaction();
 
-    bool res =  loginDatabase.PExecute("DELETE FROM account WHERE id='%d'", accid) &&
+    bool res =  
+        loginDatabase.PExecute("DELETE FROM account WHERE id='%d'", accid) &&
         loginDatabase.PExecute("DELETE FROM realmcharacters WHERE acctid='%d'", accid);
 
     loginDatabase.CommitTransaction();
