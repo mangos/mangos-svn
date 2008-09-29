@@ -50,13 +50,13 @@ enum MAIL_ERRORS
     MAIL_ERR_MAIL_AND_CHAT_SUSPENDED   = 17
 };
 
-enum MailCheckedState
+enum MailCheckMask
 {
-    NOT_READ            = 0,
-    READ                = 1,
-    AUCTION_CHECKED     = 4,
-    COD_PAYMENT_CHECKED = 8,
-    RETURNED_CHECKED    = 16
+    MAIL_CHECK_MASK_NONE        = 0,
+    MAIL_CHECK_MASK_READ        = 1,
+    MAIL_CHECK_MASK_AUCTION     = 4,
+    MAIL_CHECK_MASK_COD_PAYMENT = 8,
+    MAIL_CHECK_MASK_RETURNED    = 16
 };
 
 enum MailMessageType
@@ -68,7 +68,7 @@ enum MailMessageType
     MAIL_ITEM           = 5,                                // client send CMSG_ITEM_QUERY on this mailmessagetype
 };
 
-enum Mail_state
+enum MailState
 {
     MAIL_STATE_UNCHANGED = 1,
     MAIL_STATE_CHANGED   = 2,
@@ -175,7 +175,7 @@ struct Mail
     uint32 money;
     uint32 COD;
     uint32 checked;
-    Mail_state state;
+    MailState state;
 
     void AddItem(uint32 itemGuidLow, uint32 item_template)
     {

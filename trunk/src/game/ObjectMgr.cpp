@@ -330,7 +330,7 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
             objmgr.RemoveAItem(pItem->GetGUIDLow());        // we have to remove the item, before we delete it !!
 
         // will delete item or place to receiver mail list
-        WorldSession::SendMailTo(bidder, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->bidder, msgAuctionWonSubject.str(), itemTextId, &mi, 0, 0, AUCTION_CHECKED);
+        WorldSession::SendMailTo(bidder, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->bidder, msgAuctionWonSubject.str(), itemTextId, &mi, 0, 0, MAIL_CHECK_MASK_AUCTION);
     }
     // receiver not exist
     else
@@ -367,7 +367,7 @@ void ObjectMgr::SendAuctionSalePendingMail( AuctionEntry * auction )
 
         uint32 itemTextId = this->CreateItemText( msgAuctionSalePendingBody.str() );
 
-        WorldSession::SendMailTo(owner, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->owner, msgAuctionSalePendingSubject.str(), itemTextId, NULL, 0, 0, AUCTION_CHECKED);
+        WorldSession::SendMailTo(owner, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->owner, msgAuctionSalePendingSubject.str(), itemTextId, NULL, 0, 0, MAIL_CHECK_MASK_AUCTION);
     }
 }
 
@@ -407,7 +407,7 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
             owner->GetSession()->SendAuctionOwnerNotification( auction );
         }
 
-        WorldSession::SendMailTo(owner, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->owner, msgAuctionSuccessfulSubject.str(), itemTextId, NULL, profit, 0, AUCTION_CHECKED, HOUR);
+        WorldSession::SendMailTo(owner, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->owner, msgAuctionSuccessfulSubject.str(), itemTextId, NULL, profit, 0, MAIL_CHECK_MASK_AUCTION, HOUR);
     }
 }
 
@@ -443,7 +443,7 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
         mi.AddItem(auction->item_guidlow, auction->item_template, pItem);
 
         // will delete item or place to receiver mail list
-        WorldSession::SendMailTo(owner, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, GUID_LOPART(owner_guid), subject.str(), 0, &mi, 0, 0, NOT_READ);
+        WorldSession::SendMailTo(owner, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, GUID_LOPART(owner_guid), subject.str(), 0, &mi, 0, 0, MAIL_CHECK_MASK_NONE);
 
     }
     // owner not found
@@ -4257,7 +4257,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
                 delete resultItems;
             }
             //if it is mail from AH, it shouldn't be returned, but deleted
-            if (m->messageType != MAIL_NORMAL || (m->checked & (AUCTION_CHECKED | COD_PAYMENT_CHECKED | RETURNED_CHECKED)))
+            if (m->messageType != MAIL_NORMAL || (m->checked & (MAIL_CHECK_MASK_AUCTION | MAIL_CHECK_MASK_COD_PAYMENT | MAIL_CHECK_MASK_RETURNED)))
             {
                 // mail open and then not returned
                 for(std::vector<MailItemInfo>::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
@@ -4266,7 +4266,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
             else
             {
                 //mail will be returned:
-                CharacterDatabase.PExecute("UPDATE mail SET sender = '%u', receiver = '%u', expire_time = '" I64FMTD "', deliver_time = '" I64FMTD "',cod = '0', checked = '%u' WHERE id = '%u'", m->receiver, m->sender, (uint64)(basetime + 30*DAY), (uint64)basetime, RETURNED_CHECKED, m->messageID);
+                CharacterDatabase.PExecute("UPDATE mail SET sender = '%u', receiver = '%u', expire_time = '" I64FMTD "', deliver_time = '" I64FMTD "',cod = '0', checked = '%u' WHERE id = '%u'", m->receiver, m->sender, (uint64)(basetime + 30*DAY), (uint64)basetime, MAIL_CHECK_MASK_RETURNED, m->messageID);
                 delete m;
                 continue;
             }

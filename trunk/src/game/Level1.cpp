@@ -1844,7 +1844,7 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
 
     Player *receiver = objmgr.GetPlayer(receiver_guid);
 
-    WorldSession::SendMailTo(receiver,messagetype, stationery, sender_guidlo, GUID_LOPART(receiver_guid), subject, itemTextId, NULL, 0, 0, NOT_READ);
+    WorldSession::SendMailTo(receiver,messagetype, stationery, sender_guidlo, GUID_LOPART(receiver_guid), subject, itemTextId, NULL, 0, 0, MAIL_CHECK_MASK_NONE);
 
     PSendSysMessage(LANG_MAIL_SENT, name.c_str());
     return true;

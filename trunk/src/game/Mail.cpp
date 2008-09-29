@@ -252,7 +252,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     uint32 deliver_delay = needItemDelay ? sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY) : 0;
 
     // will delete item or place to receiver mail list
-    WorldSession::SendMailTo(receive, MAIL_NORMAL, MAIL_STATIONERY_NORMAL, pl->GetGUIDLow(), GUID_LOPART(rc), subject, itemTextId, &mi, money, COD, NOT_READ, deliver_delay);
+    WorldSession::SendMailTo(receive, MAIL_NORMAL, MAIL_STATIONERY_NORMAL, pl->GetGUIDLow(), GUID_LOPART(rc), subject, itemTextId, &mi, money, COD, MAIL_CHECK_MASK_NONE, deliver_delay);
 
     CharacterDatabase.BeginTransaction();
     pl->SaveInventoryAndGoldToDB();
@@ -274,7 +274,7 @@ void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
     {
         if (pl->unReadMails)
             --pl->unReadMails;
-        m->checked = m->checked | READ;
+        m->checked = m->checked | MAIL_CHECK_MASK_READ;
         // m->expire_time = time(NULL) + (30 * DAY);  // Expire time do not change at reading mail
         pl->m_mailsUpdated = true;
         m->state = MAIL_STATE_CHANGED;
@@ -390,7 +390,7 @@ void WorldSession::SendReturnToSender(uint8 messageType, uint32 sender_acc, uint
     uint32 deliver_delay = needItemDelay ? sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY) : 0;
 
     // will delete item or place to receiver mail list
-    WorldSession::SendMailTo(receiver, MAIL_NORMAL, MAIL_STATIONERY_NORMAL, sender_guid, receiver_guid, subject, itemTextId, mi, money, 0, RETURNED_CHECKED,deliver_delay,mailTemplateId);
+    WorldSession::SendMailTo(receiver, MAIL_NORMAL, MAIL_STATIONERY_NORMAL, sender_guid, receiver_guid, subject, itemTextId, mi, money, 0, MAIL_CHECK_MASK_RETURNED,deliver_delay,mailTemplateId);
 }
 
 //called when player takes item attached in mail
@@ -461,7 +461,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
             // check player existanse
             if(receive || sender_accId)
             {
-                WorldSession::SendMailTo(receive, MAIL_NORMAL, MAIL_STATIONERY_NORMAL, m->receiver, m->sender, m->subject, 0, NULL, m->COD, 0, COD_PAYMENT_CHECKED);
+                WorldSession::SendMailTo(receive, MAIL_NORMAL, MAIL_STATIONERY_NORMAL, m->receiver, m->sender, m->subject, 0, NULL, m->COD, 0, MAIL_CHECK_MASK_COD_PAYMENT);
             }
 
             pl->ModifyMoney( -int32(m->COD) );
@@ -717,7 +717,7 @@ void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & /*recv_data*/ )
         {
             Mail *m = (*itr);
             // not checked yet, already must be delivered
-            if((m->checked = NOT_READ) && (m->deliver_time <= time(NULL)))
+            if((m->checked & MAIL_CHECK_MASK_READ)==0 && (m->deliver_time <= time(NULL)))
             {
                 ++count;
 
