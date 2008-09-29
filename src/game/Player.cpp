@@ -2432,7 +2432,7 @@ void Player::UpdateNextMailTimeAndUnreads()
             if(!m_nextMailDelivereTime || m_nextMailDelivereTime > (*itr)->deliver_time)
                 m_nextMailDelivereTime = (*itr)->deliver_time;
         }
-        if(((*itr)->state & READ) == 0)
+        else if(((*itr)->checked & MAIL_CHECK_MASK_READ) == 0)
             ++unReadMails;
     }
 }
@@ -12138,7 +12138,7 @@ void Player::RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver
             }
         }
 
-        WorldSession::SendMailTo(this, mailType, MAIL_STATIONERY_NORMAL, senderGuidOrEntry, GetGUIDLow(), "", 0, &mi, 0, 0, NOT_READ,pQuest->GetRewMailDelaySecs(),pQuest->GetRewMailTemplateId());
+        WorldSession::SendMailTo(this, mailType, MAIL_STATIONERY_NORMAL, senderGuidOrEntry, GetGUIDLow(), "", 0, &mi, 0, 0, MAIL_CHECK_MASK_NONE,pQuest->GetRewMailDelaySecs(),pQuest->GetRewMailTemplateId());
     }
 
     if(pQuest->IsDaily())
@@ -14070,7 +14070,7 @@ void Player::_LoadInventory(QueryResult *result, uint32 timediff)
 
             std::string subject = GetSession()->GetMangosString(LANG_NOT_EQUIPPED_ITEM);
 
-            WorldSession::SendMailTo(this, MAIL_NORMAL, MAIL_STATIONERY_GM, GetGUIDLow(), GetGUIDLow(), subject, 0, &mi, 0, 0, NOT_READ);
+            WorldSession::SendMailTo(this, MAIL_NORMAL, MAIL_STATIONERY_GM, GetGUIDLow(), GetGUIDLow(), subject, 0, &mi, 0, 0, MAIL_CHECK_MASK_NONE);
         }
     }
     //if(isAlive())
@@ -14122,7 +14122,7 @@ void Player::_LoadMailedItems(Mail *mail)
 void Player::_LoadMailInit(QueryResult *resultUnread, QueryResult *resultDelivery)
 {
     //set a count of unread mails
-    //QueryResult *resultMails = CharacterDatabase.PQuery("SELECT COUNT(id) FROM mail WHERE receiver = '%u' AND checked = 0 AND deliver_time <= '" I64FMTD "'", GUID_LOPART(playerGuid),(uint64)cTime);
+    //QueryResult *resultMails = CharacterDatabase.PQuery("SELECT COUNT(id) FROM mail WHERE receiver = '%u' AND (checked & 1)=0 AND deliver_time <= '" I64FMTD "'", GUID_LOPART(playerGuid),(uint64)cTime);
     if (resultUnread)
     {
         Field *fieldMail = resultUnread->Fetch();
@@ -14131,7 +14131,7 @@ void Player::_LoadMailInit(QueryResult *resultUnread, QueryResult *resultDeliver
     }
 
     // store nearest delivery time (it > 0 and if it < current then at next player update SendNewMaill will be called)
-    //resultMails = CharacterDatabase.PQuery("SELECT MIN(deliver_time) FROM mail WHERE receiver = '%u' AND checked = 0", GUID_LOPART(playerGuid));
+    //resultMails = CharacterDatabase.PQuery("SELECT MIN(deliver_time) FROM mail WHERE receiver = '%u' AND (checked & 1)=0", GUID_LOPART(playerGuid));
     if (resultDelivery)
     {
         Field *fieldMail = resultDelivery->Fetch();

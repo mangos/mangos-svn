@@ -172,7 +172,7 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry *auction, uint32 newPri
         if (oldBidder)
             oldBidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, _player->GetGUID(), newPrice, objmgr.GetAuctionOutBid(auction->bid), auction->item_template);
 
-        WorldSession::SendMailTo(oldBidder, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->bidder, msgAuctionOutbiddedSubject.str(), 0, NULL, auction->bid, 0, NOT_READ);
+        WorldSession::SendMailTo(oldBidder, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->bidder, msgAuctionOutbiddedSubject.str(), 0, NULL, auction->bid, 0, MAIL_CHECK_MASK_NONE);
     }
 }
 
@@ -192,7 +192,7 @@ void WorldSession::SendAuctionCancelledToBidderMail( AuctionEntry* auction )
         std::ostringstream msgAuctionCancelledSubject;
         msgAuctionCancelledSubject << auction->item_template << ":0:" << AUCTION_CANCELLED_TO_BIDDER;
 
-        WorldSession::SendMailTo(bidder, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->bidder, msgAuctionCancelledSubject.str(), 0, NULL, auction->bid, 0, NOT_READ);
+        WorldSession::SendMailTo(bidder, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->bidder, msgAuctionCancelledSubject.str(), 0, NULL, auction->bid, 0, MAIL_CHECK_MASK_NONE);
     }
 }
 
@@ -493,7 +493,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
             mi.AddItem(auction->item_guidlow, auction->item_template, pItem);
 
             // item will deleted or added to received mail list
-            WorldSession::SendMailTo(pl, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, pl->GetGUIDLow(), msgAuctionCanceledOwner.str(), 0, &mi, 0, 0, NOT_READ);
+            WorldSession::SendMailTo(pl, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, pl->GetGUIDLow(), msgAuctionCanceledOwner.str(), 0, &mi, 0, 0, MAIL_CHECK_MASK_NONE);
         }
         else
         {
