@@ -802,7 +802,7 @@ enum PlayerLoginQueryIndex
     PLAYER_LOGIN_QUERY_LOADSPELLS               = 4,
     PLAYER_LOGIN_QUERY_LOADQUESTSTATUS          = 5,
     PLAYER_LOGIN_QUERY_LOADDAILYQUESTSTATUS     = 6,
-    PLAYER_LOGIN_QUERY_LOADTUTORIALS            = 7,
+    PLAYER_LOGIN_QUERY_LOADTUTORIALS            = 7,        // common for all characters for some account at specific realm
     PLAYER_LOGIN_QUERY_LOADREPUTATION           = 8,
     PLAYER_LOGIN_QUERY_LOADINVENTORY            = 9,
     PLAYER_LOGIN_QUERY_LOADACTIONS              = 10,

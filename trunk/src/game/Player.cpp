@@ -3575,7 +3575,6 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     CharacterDatabase.PExecute("DELETE FROM character_spell WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_spell_cooldown WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_ticket WHERE guid = '%u'",guid);
-    CharacterDatabase.PExecute("DELETE FROM character_tutorial WHERE guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM item_instance WHERE owner_guid = '%u'",guid);
     CharacterDatabase.PExecute("DELETE FROM character_social WHERE guid = '%u' OR friend='%u'",guid,guid);
     CharacterDatabase.PExecute("DELETE FROM mail WHERE receiver = '%u'",guid);
@@ -14421,7 +14420,7 @@ void Player::_LoadSpells(QueryResult *result)
 
 void Player::_LoadTutorials(QueryResult *result)
 {
-    //QueryResult *result = CharacterDatabase.PQuery("SELECT tut0,tut1,tut2,tut3,tut4,tut5,tut6,tut7 FROM character_tutorial WHERE guid = '%u'",GetGUIDLow());
+    //QueryResult *result = CharacterDatabase.PQuery("SELECT tut0,tut1,tut2,tut3,tut4,tut5,tut6,tut7 FROM character_tutorial WHERE account = '%u' AND realmid = '%u'", GetAccountId(), realmid);
 
     if(result)
     {
@@ -15164,7 +15163,7 @@ void Player::_SaveTutorials()
 
     uint32 Rows=0;
     // it's better than rebuilding indexes multiple times
-    QueryResult *result = CharacterDatabase.PQuery("SELECT count(*) AS r FROM character_tutorial WHERE guid = '%u'", GetGUIDLow() );
+    QueryResult *result = CharacterDatabase.PQuery("SELECT count(*) AS r FROM character_tutorial WHERE account = '%u' AND realmid = '%u'", GetSession()->GetAccountId(), realmID );
     if(result)
     {
         Rows = result->Fetch()[0].GetUInt32();
@@ -15173,12 +15172,12 @@ void Player::_SaveTutorials()
 
     if (Rows)
     {
-        CharacterDatabase.PExecute("UPDATE character_tutorial SET tut0='%u', tut1='%u', tut2='%u', tut3='%u', tut4='%u', tut5='%u', tut6='%u', tut7='%u' WHERE guid = '%u'",
-            m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7], GetGUIDLow() );
+        CharacterDatabase.PExecute("UPDATE character_tutorial SET tut0='%u', tut1='%u', tut2='%u', tut3='%u', tut4='%u', tut5='%u', tut6='%u', tut7='%u' WHERE account = '%u' AND realmid = '%u'",
+            m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7], GetSession()->GetAccountId(), realmID );
     }
     else
     {
-        CharacterDatabase.PExecute("INSERT INTO character_tutorial (guid,tut0,tut1,tut2,tut3,tut4,tut5,tut6,tut7) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
+        CharacterDatabase.PExecute("INSERT INTO character_tutorial (account,realmid,tut0,tut1,tut2,tut3,tut4,tut5,tut6,tut7) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", GetSession()->GetAccountId(), realmID, m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
     };
 
     m_TutorialsChanged = false;
