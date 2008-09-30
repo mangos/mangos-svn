@@ -264,6 +264,7 @@ class ChatHandler
         bool HandleAddWeaponCommand(const char* args);
         bool HandleAllowMovementCommand(const char* args);
         bool HandleGoCommand(const char* args);
+
         bool HandleLearnCommand(const char* args);
         bool HandleLearnAllCommand(const char* args);
         bool HandleLearnAllGMCommand(const char* args);
@@ -274,6 +275,22 @@ class ChatHandler
         bool HandleLearnAllMyClassCommand(const char* args);
         bool HandleLearnAllMySpellsCommand(const char* args);
         bool HandleLearnAllMyTalentsCommand(const char* args);
+
+        bool HandleLookupAreaCommand(const char* args);
+        bool HandleLookupCreatureCommand(const char* args);
+        bool HandleLookupEventCommand(const char* args);
+        bool HandleLookupFactionCommand(const char * args);
+        bool HandleLookupItemCommand(const char * args);
+        bool HandleLookupItemSetCommand(const char * args);
+        bool HandleLookupObjectCommand(const char* args);
+        bool HandleLookupPlayerIpCommand(const char* args);
+        bool HandleLookupPlayerAccountCommand(const char* args);
+        bool HandleLookupPlayerEmailCommand(const char* args);
+        bool HandleLookupQuestCommand(const char* args);
+        bool HandleLookupSkillCommand(const char* args);
+        bool HandleLookupSpellCommand(const char* args);
+        bool HandleLookupTeleCommand(const char * args);
+
         bool HandleCooldownCommand(const char* args);
         bool HandleUnLearnCommand(const char* args);
         bool HandleGetDistanceCommand(const char* args);
@@ -299,8 +316,7 @@ class ChatHandler
         bool HandleHideAreaCommand(const char* args);
         bool HandleAddItemCommand(const char* args);
         bool HandleAddItemSetCommand(const char* args);
-        bool HandleLookupItemCommand(const char * args);
-        bool HandleLookupItemSetCommand(const char * args);
+
         bool HandleGuildCreateCommand(const char* args);
         bool HandleGuildInviteCommand(const char* args);
         bool HandleGuildUninviteCommand(const char* args);
@@ -314,7 +330,6 @@ class ChatHandler
         bool HandleAddTeleCommand(const char * args);
         bool HandleDelTeleCommand(const char * args);
         bool HandleListAurasCommand(const char * args);
-        bool HandleLookupTeleCommand(const char * args);
 
         bool HandleResetHonorCommand(const char * args);
         bool HandleResetLevelCommand(const char * args);
@@ -332,14 +347,6 @@ class ChatHandler
         bool HandleListItemCommand(const char* args);
         bool HandleListObjectCommand(const char* args);
         bool HandleNearObjectCommand(const char* args);
-        bool HandleLookupAreaCommand(const char* args);
-        bool HandleLookupCreatureCommand(const char* args);
-        bool HandleLookupEventCommand(const char* args);
-        bool HandleLookupFactionCommand(const char * args);
-        bool HandleLookupObjectCommand(const char* args);
-        bool HandleLookupQuestCommand(const char* args);
-        bool HandleLookupSkillCommand(const char* args);
-        bool HandleLookupSpellCommand(const char* args);
         bool HandlePasswordCommand(const char* args);
         bool HandleLockAccountCommand(const char* args);
         bool HandleRespawnCommand(const char* args);
@@ -394,6 +401,7 @@ class ChatHandler
         // Utility methods for commands
         void ShowTicket(uint64 guid, char const* text, char const* time);
         uint32 GetTicketIDByNum(uint32 num);
+        bool LookupPlayerSearchCommand(QueryResult* result, int32 limit);
 
         void SetSentErrorMessage(bool val){ sentErrorMessage = val;};
     private:
