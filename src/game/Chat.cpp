@@ -264,6 +264,14 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  NULL,                                           "", NULL }
     };
 
+    static ChatCommand lookupPlayerCommandTable[] =
+    {
+        { "ip",            SEC_GAMEMASTER,     &ChatHandler::HandleLookupPlayerIpCommand,       "", NULL },
+        { "account",       SEC_GAMEMASTER,     &ChatHandler::HandleLookupPlayerAccountCommand,  "", NULL },
+        { "email",         SEC_GAMEMASTER,     &ChatHandler::HandleLookupPlayerEmailCommand,    "", NULL },
+        { NULL,            0,                  NULL,                                            "", NULL }
+    };
+
     static ChatCommand lookupCommandTable[] =
     {
         { "area",           SEC_MODERATOR,      &ChatHandler::HandleLookupAreaCommand,          "", NULL },
@@ -274,6 +282,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "itemset",        SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupItemSetCommand,       "", NULL },
         { "object",         SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupObjectCommand,        "", NULL },
         { "quest",          SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupQuestCommand,         "", NULL },
+        { "player",         SEC_GAMEMASTER,     NULL,                                           "", lookupPlayerCommandTable },
         { "skill",          SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupSkillCommand,         "", NULL },
         { "spell",          SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupSpellCommand,         "", NULL },
         { "tele",           SEC_MODERATOR,      &ChatHandler::HandleLookupTeleCommand,          "", NULL },

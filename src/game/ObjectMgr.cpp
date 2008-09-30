@@ -6128,6 +6128,8 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, bool posi
         return false;
     }
 
+    uint32 count = 0;
+
     barGoLink bar(result->GetRowCount());
 
     do
@@ -6162,7 +6164,10 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, bool posi
         MangosStringLocale& data = mMangosStringLocaleMap[entry];
 
         if(data.Content.size() < 1)
+        {
             data.Content.resize(1);
+            ++count;
+        }
 
         // 0 -> default, idx in to idx+1
         data.Content[0] = fields[1].GetCppString();
@@ -6188,7 +6193,7 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, bool posi
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u MaNGOS strings from table %s", mMangosStringLocaleMap.size(),table);
+    sLog.outString( ">> Loaded %u MaNGOS strings from table %s", count,table);
     return true;
 }
 

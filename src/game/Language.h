@@ -300,6 +300,9 @@ enum MangosStrings
     LANG_REP_EXALTED                    = 325,
     LANG_COMMAND_FACTION_NOREP_ERROR    = 326,
     LANG_FACTION_NOREPUTATION           = 327,
+    LANG_LOOKUP_PLAYER_ACCOUNT          = 328,
+    LANG_LOOKUP_PLAYER_CHARACTER        = 329,
+    LANG_NO_PLAYERS_FOUND               = 330,
 
     // Room for more level 2
 
