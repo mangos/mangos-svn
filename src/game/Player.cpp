@@ -15626,16 +15626,12 @@ void Player::Uncharm()
 
 void Player::BuildPlayerChat(WorldPacket *data, uint8 msgtype, std::string text, uint32 language) const
 {
-    bool pre = (msgtype==CHAT_MSG_EMOTE);
-
     *data << (uint8)msgtype;
     *data << (uint32)language;
     *data << (uint64)GetGUID();
     *data << (uint32)language;                               //language 2.1.0 ?
     *data << (uint64)GetGUID();
-    *data << (uint32)(text.length()+1+(pre?3:0));
-    if(pre)
-        data->append("%s ",3);
+    *data << (uint32)(text.length()+1);
     *data << text;
     *data << (uint8)chatTag();
 }
