@@ -26,6 +26,7 @@ class WorldSession;
 class Creature;
 class Player;
 class Unit;
+struct GameTele;
 
 struct LanguageDesc
 {
@@ -164,6 +165,7 @@ class ChatHandler
         bool HandleReloadCreatureQuestInvRelationsCommand(const char* args);
         bool HandleReloadGameGraveyardZoneCommand(const char* args);
         bool HandleReloadGameObjectScriptsCommand(const char* args);
+        bool HandleReloadGameTeleCommand(const char* args);
         bool HandleReloadGOQuestRelationsCommand(const char* args);
         bool HandleReloadGOQuestInvRelationsCommand(const char* args);
         bool HandleReloadLootTemplatesCreatureCommand(const char* args);
@@ -393,6 +395,7 @@ class ChatHandler
         char*     extractKeyFromLink(char* text, char const* linkType, char** something1 = NULL);
         char*     extractKeyFromLink(char* text, char const* const* linkTypes, int* found_idx, char** something1 = NULL);
         uint32    extractSpellIdFromLink(char* text);
+        GameTele const* extractGameTeleFromLink(char* text);
 
         GameObject* GetObjectGlobalyWithGuidOrNearWithDbGuid(uint32 lowguid,uint32 entry);
 

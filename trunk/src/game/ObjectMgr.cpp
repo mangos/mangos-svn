@@ -6163,11 +6163,14 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, bool posi
 
         MangosStringLocale& data = mMangosStringLocaleMap[entry];
 
-        if(data.Content.size() < 1)
+        if(data.Content.size() > 0)
         {
-            data.Content.resize(1);
-            ++count;
+            sLog.outString("Table `%s` contain data for already loaded entry  %i (from another table?), ignored.",table,entry);
+            continue;
         }
+
+        data.Content.resize(1);
+        ++count;
 
         // 0 -> default, idx in to idx+1
         data.Content[0] = fields[1].GetCppString();
@@ -6193,7 +6196,11 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, bool posi
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u MaNGOS strings from table %s", count,table);
+    if(positive_entries)
+        sLog.outString( ">> Loaded %u MaNGOS strings from table %s", count,table);
+    else
+        sLog.outString( ">> Loaded %u string templates from %s", count,table);
+
     return true;
 }
 
@@ -6504,14 +6511,141 @@ SkillRangeType GetSkillRangeType(SkillLineEntry const *pSkill, bool racial)
     }
 }
 
+void ObjectMgr::LoadGameTele()
+{
+    m_GameTeleMap.clear();                                  // for relaod case
+
+    uint32 count = 0;
+    QueryResult *result = WorldDatabase.Query("SELECT id, position_x, position_y, position_z, orientation, map, name FROM game_tele");
+
+    if( !result )
+    {
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outErrorDb(">> Loaded `game_tele`, table is empty!");
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        bar.step();
+
+        Field *fields = result->Fetch();
+
+        uint32 id         = fields[0].GetUInt32();
+
+        GameTele gt;
+
+        gt.position_x     = fields[1].GetFloat();
+        gt.position_y     = fields[2].GetFloat();
+        gt.position_z     = fields[3].GetFloat();
+        gt.orientation    = fields[4].GetFloat();
+        gt.mapId          = fields[5].GetUInt32();
+        gt.name           = fields[6].GetCppString();
+
+        if(!MapManager::IsValidMapCoord(gt.mapId,gt.position_x,gt.position_y,gt.position_z,gt.orientation))
+        {
+            sLog.outErrorDb("Wrong position for id %u (name: %s) in `game_tele` table, ignoring.",id,gt.name.c_str());
+            continue;
+        }
+
+        if(!Utf8toWStr(gt.name,gt.wnameLow))
+        {
+            sLog.outErrorDb("Wrong UTF8 name for id %u in `game_tele` table, ignoring.",id);
+            continue;
+        }
+
+        wstrToLower( gt.wnameLow );
+
+        m_GameTeleMap[id] = gt;
+
+        ++count;
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u game tele's", count );
+}
+
+GameTele const* ObjectMgr::GetGameTele(std::string name) const
+{
+    // explicit name case
+    std::wstring wname;
+    if(!Utf8toWStr(name,wname))
+        return false;
+
+    // converting string that we try to find to lower case
+    wstrToLower( wname );
+
+    for(GameTeleMap::const_iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
+        if(itr->second.wnameLow == wname)
+            return &itr->second;
+
+    return NULL;
+}
+
+bool ObjectMgr::AddGameTele(GameTele& tele)
+{
+    // find max id
+    uint32 new_id = 0;
+    for(GameTeleMap::const_iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
+        if(itr->first > new_id)
+            new_id = itr->first;
+    
+    // use next
+    ++new_id;
+
+    if(!Utf8toWStr(tele.name,tele.wnameLow))
+        return false;
+
+    wstrToLower( tele.wnameLow );
+
+    m_GameTeleMap[new_id] = tele;
+
+    return WorldDatabase.PExecuteLog("INSERT INTO game_tele (id,position_x,position_y,position_z,orientation,map,name) VALUES (%u,%f,%f,%f,%f,%d,'%s')",
+        new_id,tele.position_x,tele.position_y,tele.position_z,tele.orientation,tele.mapId,tele.name.c_str());
+}
+
+bool ObjectMgr::DeleteGameTele(std::string name)
+{
+    // explicit name case
+    std::wstring wname;
+    if(!Utf8toWStr(name,wname))
+        return false;
+
+    // converting string that we try to find to lower case
+    wstrToLower( wname );
+
+    for(GameTeleMap::const_iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
+    {
+        if(itr->second.wnameLow == wname)
+        {
+            WorldDatabase.PExecuteLog("DELETE FROM game_tele WHERE name = '%s'",itr->second.name.c_str());
+            m_GameTeleMap.erase(itr);
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+// Functions for scripting access
 const char* GetAreaTriggerScriptNameById(uint32 id)
 {
     return objmgr.GetAreaTriggerScriptName(id);
 }
-
 
 bool LoadMangosStrings(DatabaseType& db, char const* table)
 {
     // for scripting localized strings allowed use _only_ negative entries
     return objmgr.LoadMangosStrings(db,table,false);
 }
+
