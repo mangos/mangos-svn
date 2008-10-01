@@ -11552,19 +11552,19 @@ void Player::PrepareQuestMenu( uint64 guid )
             return;
     }
 
-    QuestMenu *qm = PlayerTalkClass->GetQuestMenu();
-    qm->ClearMenu();
+    QuestMenu &qm = PlayerTalkClass->GetQuestMenu();
+    qm.ClearMenu();
 
     for(QuestRelations::const_iterator i = pObjectQIR->lower_bound(pObject->GetEntry()); i != pObjectQIR->upper_bound(pObject->GetEntry()); ++i)
     {
         uint32 quest_id = i->second;
         QuestStatus status = GetQuestStatus( quest_id );
         if ( status == QUEST_STATUS_COMPLETE && !GetQuestRewardStatus( quest_id ) )
-            qm->AddMenuItem(quest_id, DIALOG_STATUS_REWARD_REP);
+            qm.AddMenuItem(quest_id, DIALOG_STATUS_REWARD_REP);
         else if ( status == QUEST_STATUS_INCOMPLETE )
-            qm->AddMenuItem(quest_id, DIALOG_STATUS_INCOMPLETE);
+            qm.AddMenuItem(quest_id, DIALOG_STATUS_INCOMPLETE);
         else if (status == QUEST_STATUS_AVAILABLE )
-            qm->AddMenuItem(quest_id, DIALOG_STATUS_CHAT);
+            qm.AddMenuItem(quest_id, DIALOG_STATUS_CHAT);
     }
 
     for(QuestRelations::const_iterator i = pObjectQR->lower_bound(pObject->GetEntry()); i != pObjectQR->upper_bound(pObject->GetEntry()); ++i)
@@ -11576,23 +11576,27 @@ void Player::PrepareQuestMenu( uint64 guid )
         QuestStatus status = GetQuestStatus( quest_id );
 
         if (pQuest->IsAutoComplete() && CanTakeQuest(pQuest, false))
-            qm->AddMenuItem(quest_id, DIALOG_STATUS_REWARD_REP);
+            qm.AddMenuItem(quest_id, DIALOG_STATUS_REWARD_REP);
         else if ( status == QUEST_STATUS_NONE && CanTakeQuest( pQuest, false ) )
-            qm->AddMenuItem(quest_id, DIALOG_STATUS_AVAILABLE);
+            qm.AddMenuItem(quest_id, DIALOG_STATUS_AVAILABLE);
     }
 }
 
 void Player::SendPreparedQuest( uint64 guid )
 {
-    QuestMenu* pQuestMenu = PlayerTalkClass->GetQuestMenu();
-    if( !pQuestMenu || pQuestMenu->MenuItemCount() < 1 )
+    QuestMenu& questMenu = PlayerTalkClass->GetQuestMenu();
+    if( questMenu.Empty() )
         return;
 
-    uint32 status = pQuestMenu->GetItem(0).m_qIcon;
-    if ( pQuestMenu->MenuItemCount() == 1 )
+    QuestMenuItem const& qmi0 = questMenu.GetItem( 0 );
+
+    uint32 status = qmi0.m_qIcon;
+
+    // single element case
+    if ( questMenu.MenuItemCount() == 1 )
     {
         // Auto open -- maybe also should verify there is no greeting
-        uint32 quest_id = pQuestMenu->GetItem(0).m_qId;
+        uint32 quest_id = qmi0.m_qId;
         Quest const* pQuest = objmgr.GetQuestTemplate(quest_id);
         if ( pQuest )
         {
@@ -11607,6 +11611,7 @@ void Player::SendPreparedQuest( uint64 guid )
                 PlayerTalkClass->SendQuestGiverQuestDetails( pQuest, guid, true );
         }
     }
+    // multiply entries
     else
     {
         QEmote qe;
