@@ -17145,6 +17145,10 @@ void Player::SendInitialPacketsBeforeAddToMap()
     data << uint32(secsToTimeBitFields(sWorld.GetGameTime()));
     data << (float)0.01666667f;                             // game speed
     GetSession()->SendPacket( &data );
+
+    // set fly flag if in fly form or taxi flight to prevent visually drop at ground in showup moment
+    if(HasAuraType(SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED) || isInFlight())
+        SetUnitMovementFlags(GetUnitMovementFlags() | MOVEMENTFLAG_FLYING2);
 }
 
 void Player::SendInitialPacketsAfterAddToMap()
