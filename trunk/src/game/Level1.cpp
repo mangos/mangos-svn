@@ -1703,7 +1703,7 @@ bool ChatHandler::HandleLookupTeleCommand(const char * args)
 
     std::string namepart = str;
     WorldDatabase.escape_string(namepart);
-    QueryResult *result = WorldDatabase.PQuery("SELECT name FROM game_tele WHERE name "_LIKE_" '""%%%s%%""'",namepart.c_str());
+    QueryResult *result = WorldDatabase.PQuery("SELECT name FROM game_tele WHERE name "_LIKE_" "_CONCAT3_("'%%'","'%s'","'%%'"),namepart.c_str());
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_TELE_NOREQUEST);
