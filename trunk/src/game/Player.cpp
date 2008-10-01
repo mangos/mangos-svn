@@ -18114,15 +18114,12 @@ void Player::UpdateUnderwaterState( Map* m, float x, float y, float z )
         m_isunderwater |= 0x80;
 }
 
-bool ItemPosCount::isContainedIn(ItemPosCountVec &vec)
+bool ItemPosCount::isContainedIn(ItemPosCountVec const& vec) const
 {
     for(ItemPosCountVec::const_iterator itr = vec.begin(); itr != vec.end();++itr)
-    {
-        if(itr->pos == this->pos/* && itr->count == this.count*/)
-        {
+        if(itr->pos == this->pos)
             return true;
-        }
-    }
+
     return false;
 }
 

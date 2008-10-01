@@ -61,10 +61,9 @@ bool ChatHandler::HandleReloadCommand(const char* arg)
 bool ChatHandler::HandleReloadAllCommand(const char*)
 {
     HandleReloadAreaTriggerTeleportCommand("");
-    //HandleReloadAreaTriggerTavernCommand(""); -- reloaded in HandleReloadAreaTriggerTavernCommand
-    //HandleReloadQuestAreaTriggersCommand(""); -- reloaded in HandleReloadAllQuestCommand
     HandleReloadSkillFishingBaseLevelCommand("");
 
+    HandleReloadAllAreaCommand("");
     HandleReloadAllLootCommand("");
     HandleReloadAllQuestCommand("");
     HandleReloadAllSpellCommand("");
@@ -79,8 +78,9 @@ bool ChatHandler::HandleReloadAllCommand(const char*)
 
 bool ChatHandler::HandleReloadAllAreaCommand(const char*)
 {
+    //HandleReloadQuestAreaTriggersCommand(""); -- reloaded in HandleReloadAllQuestCommand
     HandleReloadAreaTriggerTeleportCommand("");
-    //HandleReloadAreaTriggerTavernCommand(""); -- reloaded in HandleReloadAreaTriggerTavernCommand
+    HandleReloadAreaTriggerTavernCommand("");
     HandleReloadGameGraveyardZoneCommand("");
     return true;
 }
