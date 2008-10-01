@@ -4758,7 +4758,7 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     Field *fields = NULL;
     if(Type == "ip")
     {
-        result = loginDatabase.PQuery("SELECT ip FROM ip_banned WHERE ip "_LIKE_" '""%%%s%%""'",Filter.c_str());
+        result = loginDatabase.PQuery("SELECT ip FROM ip_banned WHERE ip "_LIKE_" "_CONCAT3_("'%%'","'%s'","'%%'"),Filter.c_str());
         if(!result)
         {
             PSendSysMessage(LANG_BANLIST_NOIP);
@@ -4777,7 +4777,7 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     //lookup accountid
     if(Type == "account")
     {
-        result = loginDatabase.PQuery("SELECT id FROM account WHERE username "_LIKE_" '""%%%s%%""' ",Filter.c_str());
+        result = loginDatabase.PQuery("SELECT id FROM account WHERE username "_LIKE_" "_CONCAT3_("'%%'","'%s'","'%%'"),Filter.c_str());
         if (!result)
         {
             PSendSysMessage(LANG_BANLIST_NOACCOUNT);
@@ -4787,7 +4787,7 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     }
     else if(Type == "characters")
     {
-        result = CharacterDatabase.PQuery("SELECT account FROM characters, WHERE name "_LIKE_" '""%%%s%%""' ",Filter.c_str());
+        result = CharacterDatabase.PQuery("SELECT account FROM characters, WHERE name "_LIKE_" "_CONCAT3_("'%%'","'%s'","'%%'"),Filter.c_str());
         if (!result)
         {
             PSendSysMessage(LANG_BANLIST_NOCHARACTER);
