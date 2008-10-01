@@ -13778,13 +13778,6 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         }
     }
 
-    //Unmount Player from previous mount, so speed bug with mount is no more...
-    if(IsMounted())
-    {
-        Unmount();
-        RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
-    }
-
     _LoadDeclinedNames(holder->GetResult(PLAYER_LOGIN_QUERY_LOADDECLINEDNAMES));
 
     return true;
@@ -17163,9 +17156,9 @@ void Player::SendInitialPacketsAfterAddToMap()
     // same auras state lost at far teleport, send it one more time in this case also
     static const AuraType auratypes[] =
     {
-        SPELL_AURA_MOD_FEAR,     SPELL_AURA_TRANSFORM, SPELL_AURA_WATER_WALK,
-        SPELL_AURA_FEATHER_FALL, SPELL_AURA_HOVER,     SPELL_AURA_SAFE_FALL,
-        SPELL_AURA_FLY,          SPELL_AURA_NONE
+        SPELL_AURA_MOD_FEAR,     SPELL_AURA_TRANSFORM,                 SPELL_AURA_WATER_WALK,
+        SPELL_AURA_FEATHER_FALL, SPELL_AURA_HOVER,                     SPELL_AURA_SAFE_FALL,
+        SPELL_AURA_FLY,          SPELL_AURA_MOD_INCREASE_FLIGHT_SPEED, SPELL_AURA_NONE
     };
     for(AuraType const* itr = &auratypes[0]; itr && itr[0] != SPELL_AURA_NONE; ++itr)
     {
