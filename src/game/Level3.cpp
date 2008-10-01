@@ -73,6 +73,7 @@ bool ChatHandler::HandleReloadAllCommand(const char*)
     HandleReloadCommandCommand("");
     HandleReloadReservedNameCommand("");
     HandleReloadMangosStringCommand("");
+    HandleReloadGameTeleCommand("");
     return true;
 }
 
@@ -80,6 +81,7 @@ bool ChatHandler::HandleReloadAllAreaCommand(const char*)
 {
     HandleReloadAreaTriggerTeleportCommand("");
     //HandleReloadAreaTriggerTavernCommand(""); -- reloaded in HandleReloadAreaTriggerTavernCommand
+    HandleReloadGameGraveyardZoneCommand("");
     return true;
 }
 
@@ -547,6 +549,17 @@ bool ChatHandler::HandleReloadGameGraveyardZoneCommand(const char* /*arg*/)
     objmgr.LoadGraveyardZones();
 
     SendGlobalSysMessage("DB table `game_graveyard_zone` reloaded.");
+
+    return true;
+}
+
+bool ChatHandler::HandleReloadGameTeleCommand(const char* /*arg*/)
+{
+    sLog.outString( "Re-Loading Game Tele coordinates...");
+
+    objmgr.LoadGameTele();
+
+    SendGlobalSysMessage("DB table `game_tele` reloaded.");
 
     return true;
 }
@@ -3869,28 +3882,29 @@ bool ChatHandler::HandleAddTeleCommand(const char * args)
 {
     if(!*args)
         return false;
-    QueryResult *result;
+
     Player *player=m_session->GetPlayer();
-    if (!player) return false;
+    if (!player)
+        return false;
 
     std::string name = args;
-    WorldDatabase.escape_string(name);
-    result = WorldDatabase.PQuery("SELECT id FROM game_tele WHERE name = '%s'",name.c_str());
-    if (result)
+
+    if(objmgr.GetGameTele(name))
     {
         SendSysMessage(LANG_COMMAND_TP_ALREADYEXIST);
-        delete result;
         SetSentErrorMessage(true);
         return false;
     }
 
-    float x = player->GetPositionX();
-    float y = player->GetPositionY();
-    float z = player->GetPositionZ();
-    float ort = player->GetOrientation();
-    int mapid = player->GetMapId();
+    GameTele tele;
+    tele.position_x  = player->GetPositionX();
+    tele.position_y  = player->GetPositionY();
+    tele.position_z  = player->GetPositionZ();
+    tele.orientation = player->GetOrientation();
+    tele.mapId       = player->GetMapId();
+    tele.name        = name;
 
-    if(WorldDatabase.PExecuteLog("INSERT INTO game_tele (position_x,position_y,position_z,orientation,map,name) VALUES (%f,%f,%f,%f,%d,'%s')",x,y,z,ort,mapid,name.c_str()))
+    if(objmgr.AddGameTele(tele))
     {
         SendSysMessage(LANG_COMMAND_TP_ADDED);
     }
@@ -3910,27 +3924,15 @@ bool ChatHandler::HandleDelTeleCommand(const char * args)
         return false;
 
     std::string name = args;
-    WorldDatabase.escape_string(name);
 
-    QueryResult *result=WorldDatabase.PQuery("SELECT id FROM game_tele WHERE name = '%s'",name.c_str());
-    if (!result)
+    if(!objmgr.DeleteGameTele(name))
     {
         SendSysMessage(LANG_COMMAND_TELE_NOTFOUND);
         SetSentErrorMessage(true);
         return false;
     }
-    delete result;
 
-    if(WorldDatabase.PExecuteLog("DELETE FROM game_tele WHERE name = '%s'",name.c_str()))
-    {
-        SendSysMessage(LANG_COMMAND_TP_DELETED);
-    }
-    else
-    {
-        SendSysMessage(LANG_COMMAND_TP_DELETEERR);
-        SetSentErrorMessage(true);
-        return false;
-    }
+    SendSysMessage(LANG_COMMAND_TP_DELETED);
     return true;
 }
 

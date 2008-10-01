@@ -60,6 +60,19 @@ class Path;
 class TransportPath;
 class Item;
 
+struct GameTele
+{
+    float  position_x;
+    float  position_y;
+    float  position_z;
+    float  orientation;
+    uint32 mapId;
+    std::string name;
+    std::wstring wnameLow;
+};
+
+typedef HM_NAMESPACE::hash_map<uint32, GameTele > GameTeleMap;
+
 struct ScriptInfo
 {
     uint32 id;
@@ -512,6 +525,7 @@ class ObjectMgr
         void LoadReputationOnKill();
 
         void LoadWeatherZoneChances();
+        void LoadGameTele();
 
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint32 level);
@@ -664,6 +678,17 @@ class ObjectMgr
 
             return mConditions[condition_id].Meets(player);
         }
+
+        GameTele const* GetGameTele(uint32 id) const
+        {
+            GameTeleMap::const_iterator itr = m_GameTeleMap.find(id);
+            if(itr==m_GameTeleMap.end()) return NULL;
+            return &itr->second;
+        }
+        GameTele const* GetGameTele(std::string name) const;
+        GameTeleMap const& GetGameTeleMap() const { return m_GameTeleMap; }
+        bool AddGameTele(GameTele& data);
+        bool DeleteGameTele(std::string name);
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
@@ -720,6 +745,8 @@ class ObjectMgr
         ReservedNamesMap    m_ReservedNames;
 
         GraveYardMap        mGraveYardMap;
+
+        GameTeleMap         m_GameTeleMap;
 
         typedef             std::vector<LocaleConstant> LocalForIndex;
         LocalForIndex        m_LocalForIndex;

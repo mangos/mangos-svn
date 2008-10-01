@@ -212,6 +212,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "disenchant_loot_template",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesDisenchantCommand, "", NULL },
         { "fishing_loot_template",       SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesFishingCommand,    "", NULL },
         { "game_graveyard_zone",         SEC_ADMINISTRATOR, &ChatHandler::HandleReloadGameGraveyardZoneCommand,       "", NULL },
+        { "game_tele",                   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadGameTeleCommand,                "", NULL },
         { "gameobject_involvedrelation", SEC_ADMINISTRATOR, &ChatHandler::HandleReloadGOQuestInvRelationsCommand,     "", NULL },
         { "gameobject_loot_template",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesGameobjectCommand, "", NULL },
         { "gameobject_questrelation",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadGOQuestRelationsCommand,        "", NULL },
@@ -1110,3 +1111,17 @@ uint32 ChatHandler::extractSpellIdFromLink(char* text)
     return talentEntry->RankID[rank];
 }
 
+GameTele const* ChatHandler::extractGameTeleFromLink(char* text)
+{
+    // id, or string, or [name] Shift-click form |color|Htele:id|h[name]|h|r
+    char* cId = extractKeyFromLink(text,"Htele");
+    if(!cId)
+        return false;
+
+    // id case (explicit or from shift link)
+    if(cId[0] >= '0' || cId[0] >= '9')
+        if(uint32 id = atoi(cId))
+            return objmgr.GetGameTele(id);
+
+    return objmgr.GetGameTele(cId);
+}

@@ -1039,6 +1039,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading BattleMasters..." );
     objmgr.LoadBattleMastersEntry();
 
+    sLog.outString( "Loading GameTeleports..." );
+    objmgr.LoadGameTele();
+
     sLog.outString( "Loading Waypoints..." );
     WaypointMgr.Load();
 

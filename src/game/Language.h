@@ -153,8 +153,8 @@ enum MangosStrings
     LANG_COMMAND_TELE_TABLEEMPTY        = 163,
     LANG_COMMAND_TELE_NOTFOUND          = 164,
     LANG_COMMAND_TELE_PARAMETER         = 165,
-    LANG_COMMAND_TELE_NOREQUEST         = 166,
-    LANG_COMMAND_TELE_NOLOCATION        = 167,
+    LANG_COMMAND_TELE_NOLOCATION        = 166,
+    //                                    167               // not used
     LANG_COMMAND_TELE_LOCATION          = 168,
 
     LANG_MAIL_SENT                      = 169,
@@ -378,7 +378,7 @@ enum MangosStrings
     LANG_COMMAND_TP_ADDED               = 463,
     LANG_COMMAND_TP_ADDEDERR            = 464,
     LANG_COMMAND_TP_DELETED             = 465,
-    LANG_COMMAND_TP_DELETEERR           = 466,
+    //                                    466,              // not used
 
     LANG_COMMAND_TARGET_LISTAURAS       = 467,
     LANG_COMMAND_TARGET_AURADETAIL      = 468,
