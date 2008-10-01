@@ -756,14 +756,14 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
 
             if(!gso->Option.empty() && cantalking )
             {                                               //note for future dev: should have database fields for BoxMessage & BoxMoney
-                pm->GetGossipMenu()->AddMenuItem((uint8)gso->Icon,gso->Option, gossipid,gso->Action,"",0,false);
+                pm->GetGossipMenu().AddMenuItem((uint8)gso->Icon,gso->Option, gossipid,gso->Action,"",0,false);
                 ingso=gso;
             }
         }
     }
 
     ///some gossips aren't handled in normal way ... so we need to do it this way .. TODO: handle it in normal way ;-)
-    if(pm->GetGossipMenu()->MenuItemCount()==0 && !pm->GetQuestMenu()->MenuItemCount())
+    if(pm->Empty())
     {
         if(HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_TRAINER))
         {
@@ -782,10 +782,10 @@ void Creature::sendPreparedGossip(Player* player)
     if(!player)
         return;
 
-    GossipMenu* gossipmenu = player->PlayerTalkClass->GetGossipMenu();
+    GossipMenu& gossipmenu = player->PlayerTalkClass->GetGossipMenu();
 
     // in case empty gossip menu open quest menu if any
-    if (gossipmenu->MenuItemCount() == 0 && GetNpcTextId() == 0)
+    if (gossipmenu.Empty() && GetNpcTextId() == 0)
     {
         player->SendPreparedQuest(GetGUID());
         return;
@@ -798,8 +798,12 @@ void Creature::sendPreparedGossip(Player* player)
 
 void Creature::OnGossipSelect(Player* player, uint32 option)
 {
-    GossipMenu* gossipmenu = player->PlayerTalkClass->GetGossipMenu();
-    uint32 action=gossipmenu->GetItem(option).m_gAction;
+    GossipMenu& gossipmenu = player->PlayerTalkClass->GetGossipMenu();
+
+    if(option >= gossipmenu.MenuItemCount())
+        return;
+
+    uint32 action=gossipmenu.GetItem(option).m_gAction;
     uint32 zoneid=GetZoneId();
     uint64 guid=GetGUID();
     GossipOption const *gossip=GetGossipOption( action );
