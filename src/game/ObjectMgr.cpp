@@ -6623,7 +6623,7 @@ bool ObjectMgr::DeleteGameTele(std::string name)
     // converting string that we try to find to lower case
     wstrToLower( wname );
 
-    for(GameTeleMap::const_iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
+    for(GameTeleMap::iterator itr = m_GameTeleMap.begin(); itr != m_GameTeleMap.end(); ++itr)
     {
         if(itr->second.wnameLow == wname)
         {
