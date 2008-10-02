@@ -3286,11 +3286,6 @@ void Player::InitVisibleBits()
     for(uint16 i = PLAYER_QUEST_LOG_1_1; i < PLAYER_QUEST_LOG_25_2; i+=4)
         updateVisualBits.SetBit(i);
 
-    for(uint16 i = 0; i < INVENTORY_SLOT_BAG_END; i++)
-    {
-        updateVisualBits.SetBit((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + i*2));
-        updateVisualBits.SetBit((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (i*2) + 1));
-    }
     //Players visible items are not inventory stuff
     //431) = 884 (0x374) = main weapon
     for(uint16 i = 0; i < EQUIPMENT_SLOT_END; i++)
