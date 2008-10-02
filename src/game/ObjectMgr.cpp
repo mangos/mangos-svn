@@ -5539,10 +5539,10 @@ void ObjectMgr::LoadReputationOnKill()
         repOnKill.repfaction1          = fields[1].GetUInt32();
         repOnKill.repfaction2          = fields[2].GetUInt32();
         repOnKill.is_teamaward1        = fields[3].GetBool();
-        repOnKill.reputration_max_cap1 = fields[4].GetUInt32();
+        repOnKill.reputation_max_cap1  = fields[4].GetUInt32();
         repOnKill.repvalue1            = fields[5].GetInt32();
         repOnKill.is_teamaward2        = fields[6].GetBool();
-        repOnKill.reputration_max_cap2 = fields[7].GetUInt32();
+        repOnKill.reputation_max_cap2  = fields[7].GetUInt32();
         repOnKill.repvalue2            = fields[8].GetInt32();
         repOnKill.team_dependent       = fields[9].GetUInt8();
 
