@@ -5790,7 +5790,7 @@ void Player::RewardReputation(Unit *pVictim, float rate)
         donerep1 = int32(donerep1*rate);
         FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(Rep->repfaction1);
         uint32 current_reputation_rank1 = GetReputationRank(factionEntry1);
-        if(factionEntry1 && current_reputation_rank1 <= Rep->reputration_max_cap1)
+        if(factionEntry1 && current_reputation_rank1 <= Rep->reputation_max_cap1)
             ModifyFactionReputation(factionEntry1, donerep1);
 
         // Wiki: Team factions value divided by 2
@@ -5808,7 +5808,7 @@ void Player::RewardReputation(Unit *pVictim, float rate)
         donerep2 = int32(donerep2*rate);
         FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(Rep->repfaction2);
         uint32 current_reputation_rank2 = GetReputationRank(factionEntry2);
-        if(factionEntry2 && current_reputation_rank2 <= Rep->reputration_max_cap2)
+        if(factionEntry2 && current_reputation_rank2 <= Rep->reputation_max_cap2)
             ModifyFactionReputation(factionEntry2, donerep2);
 
         // Wiki: Team factions value divided by 2
