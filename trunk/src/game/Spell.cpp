@@ -523,6 +523,7 @@ void Spell::FillTargetMap()
                 }
                 case SPELL_EFFECT_RESURRECT:
                 case SPELL_EFFECT_PARRY:
+                case SPELL_EFFECT_BLOCK:
                 case SPELL_EFFECT_CREATE_ITEM:
                 case SPELL_EFFECT_TRIGGER_SPELL:
                 case SPELL_EFFECT_TRIGGER_MISSILE:
