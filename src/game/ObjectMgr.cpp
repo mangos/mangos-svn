@@ -134,16 +134,11 @@ ObjectMgr::~ObjectMgr()
         delete itr->second;
 
     for (CacheVendorItemMap::iterator itr = m_mCacheVendorItemMap.begin(); itr != m_mCacheVendorItemMap.end(); ++itr)
-    {
-        for (std::vector<PVendorItem>::iterator itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
+        for (VendorItemList::iterator itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
             delete (*itr2);
-    }
 
     for (CacheTrainerSpellMap::iterator itr = m_mCacheTrainerSpellMap.begin(); itr != m_mCacheTrainerSpellMap.end(); ++itr)
-    {
-        for (std::vector<PTrainerSpellCache>::iterator itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
-            delete (*itr2);
-    }       
+        itr->second.Clear();
 }
 
 Group * ObjectMgr::GetGroupByLeader(const uint64 &guid) const
@@ -6643,10 +6638,7 @@ void ObjectMgr::LoadTrainerSpell()
 {
     // For reload case 
     for (CacheTrainerSpellMap::iterator itr = m_mCacheTrainerSpellMap.begin(); itr != m_mCacheTrainerSpellMap.end(); ++itr)
-    {
-        for (std::vector<PTrainerSpellCache>::iterator itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
-            delete (*itr2);
-    }       
+        itr->second.Clear();
     m_mCacheTrainerSpellMap.clear();
 
     QueryResult *result = WorldDatabase.PQuery("SELECT entry, spell,spellcost,reqskill,reqskillvalue,reqlevel FROM npc_trainer");
@@ -6693,14 +6685,23 @@ void ObjectMgr::LoadTrainerSpell()
             continue;
         }
 
-        PTrainerSpellCache pTrainerSpell = new TrainerSpellCache();
+        TrainerSpell* pTrainerSpell = new TrainerSpell();
         pTrainerSpell->spell         = spell;
         pTrainerSpell->spellcost     = fields[2].GetUInt32();
         pTrainerSpell->reqskill      = fields[3].GetUInt32();
         pTrainerSpell->reqskillvalue = fields[4].GetUInt32();
         pTrainerSpell->reqlevel      = fields[5].GetUInt32();
 
-        m_mCacheTrainerSpellMap[entry].push_back(pTrainerSpell);
+        if(!pTrainerSpell->reqlevel)
+            pTrainerSpell->reqlevel = spellinfo->spellLevel;
+
+
+        TrainerSpellData& data = m_mCacheTrainerSpellMap[entry];
+
+        if(SpellMgr::IsProfessionSpell(spell))
+            data.trainerType = 2;
+
+        data.spellList.push_back(pTrainerSpell);
         ++count;
 
     } while (result->NextRow());
@@ -6715,7 +6716,7 @@ void ObjectMgr::LoadVendors()
     // For reload case 
     for (CacheVendorItemMap::iterator itr = m_mCacheVendorItemMap.begin(); itr != m_mCacheVendorItemMap.end(); ++itr)
     {
-        for (std::vector<PVendorItem>::iterator itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
+        for (VendorItemList::iterator itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
             delete (*itr2);
     }
     m_mCacheVendorItemMap.clear();
@@ -6762,13 +6763,21 @@ void ObjectMgr::LoadVendors()
             continue;
         }
 
-        PVendorItem pVendorItem = new VendorItem();
+        VendorItemList& vList = m_mCacheVendorItemMap[entry];
+
+        if(vList.size() >= MAX_VENDOR_ITEMS)
+        {
+            sLog.outErrorDb( "Table `npc_vendor` has too many items (%u >= %i) for vendor (Entry: %u), ignore", vList.size(), MAX_VENDOR_ITEMS, entry);
+            continue;
+        }
+
+        VendorItem* pVendorItem = new VendorItem();
         pVendorItem->item         = item_id;
         pVendorItem->maxcount     = fields[2].GetUInt32();
         pVendorItem->incrtime     = fields[3].GetUInt32();
         pVendorItem->ExtendedCost = ExtendedCost;
 
-        m_mCacheVendorItemMap[entry].push_back(pVendorItem);
+        vList.push_back(pVendorItem);
         ++count;
 
     } while (result->NextRow());

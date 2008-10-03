@@ -46,12 +46,28 @@
 // apply implementation of the singletons
 #include "Policies/SingletonImp.h"
 
+void TrainerSpellData::Clear()
+{
+    for (TrainerSpellList::iterator itr = spellList.begin(); itr != spellList.end(); ++itr)
+        delete (*itr);
+    spellList.empty();
+}
+
+TrainerSpell const* TrainerSpellData::Find(uint32 spell_id) const
+{
+    for(TrainerSpellList::const_iterator itr = spellList.begin(); itr != spellList.end(); ++itr)
+        if((*itr)->spell == spell_id)
+            return *itr;
+
+    return NULL;
+}
+
 Creature::Creature() :
 Unit(), i_AI(NULL),
 lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupLeaderGUID(0),
-m_itemsLoaded(false), m_trainerSpellsLoaded(false), m_trainer_type(0), m_lootMoney(0), m_lootRecipient(0),
+m_itemsLoaded(false), m_lootMoney(0), m_lootRecipient(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0f),
-m_gossipOptionLoaded(false),m_NPCTextId(0), m_emoteState(0), m_isPet(false), m_isTotem(false),
+m_gossipOptionLoaded(false),m_emoteState(0), m_isPet(false), m_isTotem(false),
 m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0),
 m_AlreadyCallAssistence(false), m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false),
 m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),m_creatureInfo(NULL)
@@ -71,7 +87,6 @@ Creature::~Creature()
 {
     CleanupsBeforeDelete();
 
-    m_trainer_spells.clear();
     m_vendor_items.clear();
 
     delete i_AI;
@@ -90,39 +105,6 @@ void Creature::RemoveFromWorld()
     ///- Remove the creature from the accessor
     if(IsInWorld()) ObjectAccessor::Instance().RemoveObject(this);
     Unit::RemoveFromWorld();
-}
-
-void Creature::LoadTrainerSpells()
-{
-    if (m_trainerSpellsLoaded)
-        return;
-
-    m_trainer_spells.clear();
-    m_trainer_type = 0;
-
-    CacheTrainerSpellMap::iterator _iter = objmgr.m_mCacheTrainerSpellMap.find(GetEntry());
-    if(_iter == objmgr.m_mCacheTrainerSpellMap.end())
-        return;
-
-    for(std::vector<PTrainerSpellCache>::iterator _iter_spell = _iter->second.begin(); 
-        _iter_spell != _iter->second.end(); ++_iter_spell)
-    {
-
-        uint32 spellid = (*_iter_spell)->spell;
-        SpellEntry const *spellinfo = sSpellStore.LookupEntry(spellid);
-        if(SpellMgr::IsProfessionSpell(spellid))
-            m_trainer_type = 2;
-
-        TrainerSpell tspell;
-        tspell.spell        = spellinfo;
-
-        tspell.spellcost    = (*_iter_spell)->spellcost;
-        tspell.reqskill     = (*_iter_spell)->reqskill;
-        tspell.reqskillvalue= (*_iter_spell)->reqskillvalue;
-        tspell.reqlevel     = (*_iter_spell)->reqlevel;
-        m_trainer_spells.push_back(tspell);
-    }
-    m_trainerSpellsLoaded = true;
 }
 
 void Creature::RemoveCorpse()
@@ -531,7 +513,10 @@ bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
     if(!isTrainer())
         return false;
 
-    if(m_trainer_spells.empty())
+    TrainerSpellData const* trainer_spells = GetTrainerSpells();
+
+
+    if(!trainer_spells || trainer_spells->spellList.empty())
     {
         sLog.outErrorDb("Creature %u (Entry: %u) have UNIT_NPC_FLAG_TRAINER but have empty trainer spell list.",
             GetGUIDLow(),GetEntry());
@@ -699,9 +684,6 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                         }
                         break;
                     case GOSSIP_OPTION_TRAINER:
-                        // Lazy loading at first access
-                        LoadTrainerSpells();
-
                         if(!isCanTrainingOf(pPlayer,false))
                             cantalking=false;
                         break;
@@ -748,7 +730,6 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
     {
         if(HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_TRAINER))
         {
-            LoadTrainerSpells();                            // Lazy loading at first access
             isCanTrainingOf(pPlayer,true);                  // output error message if need
         }
         if(HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_BATTLEMASTER))
@@ -953,17 +934,10 @@ uint32 Creature::GetGossipTextId(uint32 action, uint32 zoneid)
 
 uint32 Creature::GetNpcTextId()
 {
-    // already loaded and cached
-    if(m_NPCTextId)
-        return m_NPCTextId;
+    if(uint32 pos = objmgr.GetNpcGossip(m_DBTableGuid))
+        return pos;
 
-    CacheNpcTextIdMap::iterator _ipos = objmgr.m_mCacheNpcTextIdMap.find(m_DBTableGuid);
-    if(_ipos != objmgr.m_mCacheNpcTextIdMap.end())
-        m_NPCTextId = _ipos->second;
-    else
-        m_NPCTextId = DEFAULT_GOSSIP_MESSAGE;
-
-    return m_NPCTextId;
+    return DEFAULT_GOSSIP_MESSAGE;
 }
 
 GossipOption const* Creature::GetGossipOption( uint32 id ) const
@@ -1380,20 +1354,13 @@ void Creature::LoadGoods()
 
     m_vendor_items.clear();
 
-    CacheVendorItemMap::iterator _ipos = objmgr.m_mCacheVendorItemMap.find(GetEntry());
-    if(_ipos == objmgr.m_mCacheVendorItemMap.end())
+    VendorItemList const* vList = objmgr.GetNpcVendorItemList(GetEntry());
+    if(!vList)
         return;
 
-    for (std::vector<PVendorItem>::iterator _item_iter = _ipos->second.begin(); _item_iter != _ipos->second.end(); ++_item_iter)
-    {
-
-        if (GetItemCount() >= MAX_VENDOR_ITEMS)
-        {
-            sLog.outErrorDb( "Vendor %u has too many items (%u >= %i). Check the DB!", GetEntry(), GetItemCount(), MAX_VENDOR_ITEMS );
-            break;
-        }
+    for (VendorItemList::const_iterator _item_iter = vList->begin(); _item_iter != vList->end(); ++_item_iter)
         AddItem( (*_item_iter)->item, (*_item_iter)->maxcount, (*_item_iter)->incrtime, (*_item_iter)->ExtendedCost);
-    }
+
     m_itemsLoaded = true;
 }
 
@@ -1953,4 +1920,9 @@ uint32 Creature::getLevelForTarget( Unit const* target ) const
 char const* Creature::GetScriptName() const
 {
     return ObjectMgr::GetCreatureTemplate(GetEntry())->ScriptName;
+}
+
+TrainerSpellData const* Creature::GetTrainerSpells() const
+{
+    return objmgr.GetNpcTrainerSpells(GetEntry());
 }

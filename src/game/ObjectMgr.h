@@ -229,25 +229,18 @@ struct PlayerCondition
 typedef HM_NAMESPACE::hash_map<uint32, uint32> CacheNpcTextIdMap;
 
 // Vendors
-typedef struct _tagVendorItem
+struct VendorItem
 {
     uint32 item;
     uint32 maxcount;
     uint32 incrtime;
     uint32 ExtendedCost;
-}VendorItem, *PVendorItem;
-typedef HM_NAMESPACE::hash_map<uint32, std::vector<PVendorItem> > CacheVendorItemMap;
+};
+typedef std::vector<VendorItem*> VendorItemList;
 
-// Trainers
-typedef struct _tagTrainerSpell
-{
-    uint32 spell;
-    uint32 spellcost;
-    uint32 reqskill;
-    uint32 reqskillvalue;
-    uint32 reqlevel;
-}TrainerSpellCache, *PTrainerSpellCache;
-typedef HM_NAMESPACE::hash_map<uint32, std::vector<PTrainerSpellCache> > CacheTrainerSpellMap;
+typedef HM_NAMESPACE::hash_map<uint32, VendorItemList> CacheVendorItemMap;
+
+typedef HM_NAMESPACE::hash_map<uint32, TrainerSpellData> CacheTrainerSpellMap;
 
 enum SkillRangeType
 {
@@ -574,10 +567,6 @@ class ObjectMgr
         uint32 GenerateItemTextID();
         uint32 GeneratePetNumber();
 
-        CacheNpcTextIdMap m_mCacheNpcTextIdMap;
-        CacheVendorItemMap m_mCacheVendorItemMap;
-        CacheTrainerSpellMap m_mCacheTrainerSpellMap;
-
         uint32 CreateItemText(std::string text);
         std::string GetItemText( uint32 id )
         {
@@ -722,6 +711,33 @@ class ObjectMgr
         GameTeleMap const& GetGameTeleMap() const { return m_GameTeleMap; }
         bool AddGameTele(GameTele& data);
         bool DeleteGameTele(std::string name);
+
+        uint32 GetNpcGossip(uint32 entry) const
+        {
+            CacheNpcTextIdMap::const_iterator iter = m_mCacheNpcTextIdMap.find(entry);
+            if(iter == m_mCacheNpcTextIdMap.end())
+                return 0;
+            
+            return iter->second;
+        }
+
+        TrainerSpellData const* GetNpcTrainerSpells(uint32 entry) const
+        {
+            CacheTrainerSpellMap::const_iterator  iter = m_mCacheTrainerSpellMap.find(entry);
+            if(iter == m_mCacheTrainerSpellMap.end())
+                return NULL;
+
+            return &iter->second;
+        }
+
+        VendorItemList const* GetNpcVendorItemList(uint32 entry) const
+        {
+            CacheVendorItemMap::const_iterator  iter = m_mCacheVendorItemMap.find(entry);
+            if(iter == m_mCacheVendorItemMap.end())
+                return NULL;
+
+            return &iter->second;
+        }
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
@@ -830,6 +846,9 @@ class ObjectMgr
         typedef std::vector<PlayerCondition> ConditionStore;
         ConditionStore mConditions;
 
+        CacheNpcTextIdMap m_mCacheNpcTextIdMap;
+        CacheVendorItemMap m_mCacheVendorItemMap;
+        CacheTrainerSpellMap m_mCacheTrainerSpellMap;
 };
 
 #define objmgr MaNGOS::Singleton<ObjectMgr>::Instance()
