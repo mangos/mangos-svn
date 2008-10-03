@@ -193,8 +193,9 @@ ChatCommand * ChatHandler::getCommandTable()
     static ChatCommand reloadCommandTable[] =
     {
         { "all",            SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllCommand,           "", NULL },
-        { "all_quest",      SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllQuestCommand,      "", NULL },
         { "all_loot",       SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllLootCommand,       "", NULL },
+        { "all_npc",        SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllNpcCommand,        "", NULL },
+        { "all_quest",      SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllQuestCommand,      "", NULL },
         { "all_scripts",    SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllScriptsCommand,    "", NULL },
         { "all_spell",      SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllSpellCommand,      "", NULL },
         { "all_item",       SEC_ADMINISTRATOR,  &ChatHandler::HandleReloadAllItemCommand,       "", NULL },
@@ -220,6 +221,9 @@ ChatCommand * ChatHandler::getCommandTable()
         { "item_enchantment_template",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadItemEnchantementsCommand,       "", NULL },
         { "item_loot_template",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesItemCommand,       "", NULL },
         { "mangos_string",               SEC_ADMINISTRATOR, &ChatHandler::HandleReloadMangosStringCommand,            "", NULL },
+        { "npc_gossip",                  SEC_ADMINISTRATOR, &ChatHandler::HandleReloadNpcGossipCommand,               "", NULL },
+        { "npc_trainer",                 SEC_ADMINISTRATOR, &ChatHandler::HandleReloadNpcTrainerCommand,              "", NULL },
+        { "npc_vendor",                  SEC_ADMINISTRATOR, &ChatHandler::HandleReloadNpcVendorCommand,               "", NULL },
         { "page_text",                   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadPageTextsCommand,               "", NULL },
         { "pickpocketing_loot_template", SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesPickpocketingCommand,"",NULL},
         { "prospecting_loot_template",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesProspectingCommand,"", NULL },
