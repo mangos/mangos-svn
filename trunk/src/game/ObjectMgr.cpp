@@ -132,6 +132,18 @@ ObjectMgr::~ObjectMgr()
 
     for(ItemMap::iterator itr = mAitems.begin(); itr != mAitems.end(); ++itr)
         delete itr->second;
+
+    for (CacheVendorItemMap::iterator itr = m_mCacheVendorItemMap.begin(); itr != m_mCacheVendorItemMap.end(); ++itr)
+    {
+        for (std::vector<PVendorItem>::iterator itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
+            delete (*itr2);
+    }
+
+    for (CacheTrainerSpellMap::iterator itr = m_mCacheTrainerSpellMap.begin(); itr != m_mCacheTrainerSpellMap.end(); ++itr)
+    {
+        for (std::vector<PTrainerSpellCache>::iterator itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
+            delete (*itr2);
+    }       
 }
 
 Group * ObjectMgr::GetGroupByLeader(const uint64 &guid) const
@@ -6649,3 +6661,182 @@ bool LoadMangosStrings(DatabaseType& db, char const* table)
     return objmgr.LoadMangosStrings(db,table,false);
 }
 
+void ObjectMgr::LoadTrainerSpell()
+{
+    
+    m_mCacheTrainerSpellMap.clear();
+
+    QueryResult *result = WorldDatabase.PQuery("SELECT entry, spell,spellcost,reqskill,reqskillvalue,reqlevel FROM npc_trainer");
+
+    if( !result )
+    {
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outErrorDb(">> Loaded `npc_trainer`, table is empty!");
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    uint32 count = 0,entry,spell;
+    do
+    {
+        bar.step();
+
+        Field* fields = result->Fetch();
+
+        entry  = fields[0].GetUInt32();
+        spell  = fields[1].GetUInt32();
+
+        SpellEntry const *spellinfo = sSpellStore.LookupEntry(spell);
+        if(!spellinfo)
+        {
+            sLog.outErrorDb("`npc_trainer`. Trainer (Entry: %u ) has non existing spell %u, ignore", entry,spell);
+            continue;
+        }
+
+        if(!SpellMgr::IsSpellValid(spellinfo))
+        {
+            sLog.outErrorDb("`npc_trainer`. Trainer (Entry: %u) has broken learning spell %u, ignore", entry, spell);
+            continue;
+        }
+
+        if(!objmgr.GetCreatureTemplate(entry))
+        {
+            sLog.outErrorDb("`npc_trainer`. Creature  with (Entry: %u) not exist, ignore", entry);
+            continue;
+        }
+
+        PTrainerSpellCache pTrainerSpell = new TrainerSpellCache();
+        pTrainerSpell->spell         = spell;
+        pTrainerSpell->spellcost     = fields[2].GetUInt32();
+        pTrainerSpell->reqskill      = fields[3].GetUInt32();
+        pTrainerSpell->reqskillvalue = fields[4].GetUInt32();
+        pTrainerSpell->reqlevel      = fields[5].GetUInt32();
+
+        m_mCacheTrainerSpellMap[entry].push_back(pTrainerSpell);
+        ++count;
+
+    } while (result->NextRow());
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded Trainers %d", count );
+}
+
+void ObjectMgr::LoadVendors()
+{
+
+    m_mCacheVendorItemMap.clear();
+
+    QueryResult *result = WorldDatabase.PQuery("SELECT entry, item, maxcount, incrtime, ExtendedCost FROM npc_vendor");
+    if( !result )
+    {
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outErrorDb(">> Loaded `npc_vendor`, table is empty!");
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    uint32 count = 0;
+    uint32 entry, item_id, ExtendedCost;
+    do
+    {
+        bar.step();
+        Field* fields = result->Fetch();
+
+        entry = fields[0].GetUInt32();
+        if(!objmgr.GetCreatureTemplate(entry))
+        {
+            sLog.outErrorDb("`npc_vendor`. Creature  with (Entry: %u) not exist, ignore", entry);
+            continue;
+        }
+
+        item_id  = fields[1].GetUInt32();
+        if(!objmgr.GetItemPrototype(item_id))
+        {
+            sLog.outErrorDb("`npc_vendor`. Vendor (Entry: %u) have in item list non-existed item (%u), ignore",entry,item_id);
+            continue;
+        }
+
+        ExtendedCost = fields[4].GetUInt32();
+        if(ExtendedCost && !sItemExtendedCostStore.LookupEntry(ExtendedCost))
+        {
+            sLog.outErrorDb("`npc_vendor`. Item (Entry: %u) has wrong ExtendedCost (%u) for vendor (%u), ignore",item_id,ExtendedCost,entry);
+            continue;
+        }
+
+        PVendorItem pVendorItem = new VendorItem();
+        pVendorItem->item         = item_id;
+        pVendorItem->maxcount     = fields[2].GetUInt32();
+        pVendorItem->incrtime     = fields[3].GetUInt32();
+        pVendorItem->ExtendedCost = ExtendedCost;
+
+        m_mCacheVendorItemMap[entry].push_back(pVendorItem);
+        ++count;
+
+    } while (result->NextRow());
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %d Vendors ", count );
+}
+
+void ObjectMgr::LoadNpcTextId()
+{
+
+    m_mCacheNpcTextIdMap.clear();
+
+    QueryResult* result = WorldDatabase.PQuery("SELECT npc_guid, textid FROM npc_gossip");
+    if( !result )
+    {
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outErrorDb(">> Loaded `npc_gossip`, table is empty!");
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    uint32 count = 0;
+    uint32 guid,textid;
+    do
+    {
+        bar.step();
+
+        Field* fields = result->Fetch();
+
+        guid   = fields[0].GetUInt32();
+        textid = fields[1].GetUInt32();
+
+        if (!objmgr.GetCreatureData(guid))
+        {
+            sLog.outErrorDb("`npc_gossip`. Creature (GUID: %u) not found in table `creature`, ignore. ",guid);
+            continue;
+        }
+        if (!objmgr.GetGossipText(textid))
+        {
+            sLog.outErrorDb("`npc_gossip`. Creature (GUID: %u) have wrong Textid(%u), ignore. ", guid, textid);
+            continue;
+        }
+
+        m_mCacheNpcTextIdMap[guid] = textid ;
+        ++count;
+
+    } while (result->NextRow());
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %d NpcTextId ", count );
+}
