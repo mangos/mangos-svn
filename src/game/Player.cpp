@@ -356,6 +356,7 @@ Player::Player (WorldSession *session): Unit()
     m_WeaponProficiency = 0;
     m_ArmorProficiency = 0;
     m_canParry = false;
+    m_canBlock = false;
     m_canDualWield = false;
     m_ammoDPS = 0.0f;
 
@@ -616,8 +617,6 @@ bool Player::Create( uint32 guidlow, std::string name, uint8 race, uint8 class_,
         for(int i=0; i<4 ;i++)
             ++action_itr[i];
     }
-
-    UpdateBlockPercentage();
 
     for (PlayerCreateInfoItems::const_iterator item_id_itr = info->item.begin(); item_id_itr!=info->item.end(); ++item_id_itr++)
     {
@@ -2248,12 +2247,8 @@ void Player::InitStatsForLevel(bool reapplyMods)
     for (uint8 i = 0; i < 7; ++i)
         SetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1+i, 0.0f);
 
-    // Base parry percents
-    SetFloatValue(PLAYER_PARRY_PERCENTAGE, 5.0f);
-
-    //Base block percentage
-    SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5.0f);
-
+    SetFloatValue(PLAYER_PARRY_PERCENTAGE, 0.0f);
+    SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 0.0f);
     SetUInt32Value(PLAYER_SHIELD_BLOCK, 0);
 
     // Dodge percentage
@@ -4871,9 +4866,7 @@ void Player::UpdateSkillsToMaxSkillsForLevel()
             SetUInt32Value(PLAYER_SKILL_VALUE_INDEX(i),MAKE_SKILL_VALUE(max,max));
 
         if(pskill == SKILL_DEFENSE)
-        {
-            UpdateBlockPercentage();
-        }
+            UpdateDefenseBonusesMod();
     }
 }
 
@@ -18109,6 +18102,24 @@ void Player::UpdateUnderwaterState( Map* m, float x, float y, float z )
         m_isunderwater |= 0x80;
 }
 
+void Player::SetCanParry( bool value )
+{
+    if(m_canParry==value)
+        return; 
+
+    m_canParry = value;
+    UpdateParryPercentage();
+}
+
+void Player::SetCanBlock( bool value )
+{
+    if(m_canBlock==value)
+        return; 
+
+    m_canBlock = value;
+    UpdateBlockPercentage();
+}
+
 bool ItemPosCount::isContainedIn(ItemPosCountVec const& vec) const
 {
     for(ItemPosCountVec::const_iterator itr = vec.begin(); itr != vec.end();++itr)
@@ -18117,4 +18128,3 @@ bool ItemPosCount::isContainedIn(ItemPosCountVec const& vec) const
 
     return false;
 }
-
