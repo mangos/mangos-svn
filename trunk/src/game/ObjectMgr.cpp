@@ -6641,7 +6641,12 @@ bool ObjectMgr::DeleteGameTele(std::string name)
 
 void ObjectMgr::LoadTrainerSpell()
 {
-    
+    // For reload case 
+    for (CacheTrainerSpellMap::iterator itr = m_mCacheTrainerSpellMap.begin(); itr != m_mCacheTrainerSpellMap.end(); ++itr)
+    {
+        for (std::vector<PTrainerSpellCache>::iterator itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
+            delete (*itr2);
+    }       
     m_mCacheTrainerSpellMap.clear();
 
     QueryResult *result = WorldDatabase.PQuery("SELECT entry, spell,spellcost,reqskill,reqskillvalue,reqlevel FROM npc_trainer");
@@ -6707,7 +6712,12 @@ void ObjectMgr::LoadTrainerSpell()
 
 void ObjectMgr::LoadVendors()
 {
-
+    // For reload case 
+    for (CacheVendorItemMap::iterator itr = m_mCacheVendorItemMap.begin(); itr != m_mCacheVendorItemMap.end(); ++itr)
+    {
+        for (std::vector<PVendorItem>::iterator itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
+            delete (*itr2);
+    }
     m_mCacheVendorItemMap.clear();
 
     QueryResult *result = WorldDatabase.PQuery("SELECT entry, item, maxcount, incrtime, ExtendedCost FROM npc_vendor");
@@ -6829,9 +6839,9 @@ bool LoadMangosStrings(DatabaseType& db, char const* table,int32 start_value, in
 {
     if(start_value >= 0 || start_value <= end_value)        // start/end reversed for negative values
     {
-        sLog.outError("Table '%s' attempt loaded with invalid range (%d - %d), use (%d - %d) instead.",table,start_value,end_value,-1,MININT32);
+        sLog.outError("Table '%s' attempt loaded with invalid range (%d - %d), use (%d - %d) instead.",table,start_value,end_value,-1,std::numeric_limits<int32>::min());
         start_value = -1;
-        end_value = MININT32;
+        end_value = std::numeric_limits<int32>::min();
     }
 
     // for scripting localized strings allowed use _only_ negative entries

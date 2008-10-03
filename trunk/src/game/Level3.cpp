@@ -65,6 +65,7 @@ bool ChatHandler::HandleReloadAllCommand(const char*)
 
     HandleReloadAllAreaCommand("");
     HandleReloadAllLootCommand("");
+    HandleReloadAllNpcCommand("");
     HandleReloadAllQuestCommand("");
     HandleReloadAllSpellCommand("");
     HandleReloadAllItemCommand("");
@@ -85,6 +86,22 @@ bool ChatHandler::HandleReloadAllAreaCommand(const char*)
     return true;
 }
 
+bool ChatHandler::HandleReloadAllLootCommand(const char*)
+{
+    sLog.outString( "Re-Loading Loot Tables..." );
+    LoadLootTables();
+    SendGlobalSysMessage("DB tables `*_loot_template` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadAllNpcCommand(const char* /*args*/)
+{
+    HandleReloadNpcGossipCommand("a");
+    HandleReloadNpcTrainerCommand("a");
+    HandleReloadNpcVendorCommand("a");
+    return true;
+}
+
 bool ChatHandler::HandleReloadAllQuestCommand(const char* /*args*/)
 {
     HandleReloadQuestAreaTriggersCommand("a");
@@ -93,14 +110,6 @@ bool ChatHandler::HandleReloadAllQuestCommand(const char* /*args*/)
     sLog.outString( "Re-Loading Quests Relations..." );
     objmgr.LoadQuestRelations();
     SendGlobalSysMessage("DB tables `*_questrelation` and `*_involvedrelation` reloaded.");
-    return true;
-}
-
-bool ChatHandler::HandleReloadAllLootCommand(const char*)
-{
-    sLog.outString( "Re-Loading Loot Tables..." );
-    LoadLootTables();
-    SendGlobalSysMessage("DB tables `*_loot_template` reloaded.");
     return true;
 }
 
@@ -319,6 +328,30 @@ bool ChatHandler::HandleReloadMangosStringCommand(const char*)
     sLog.outString( "Re-Loading mangos_string Table!" );
     objmgr.LoadMangosStrings();
     SendGlobalSysMessage("DB table `mangos_string` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadNpcGossipCommand(const char*)
+{
+    sLog.outString( "Re-Loading `npc_gossip` Table!" );
+    objmgr.LoadNpcTextId();
+    SendGlobalSysMessage("DB table `npc_gossip` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadNpcTrainerCommand(const char*)
+{
+    sLog.outString( "Re-Loading `npc_trainer` Table!" );
+    objmgr.LoadTrainerSpell();
+    SendGlobalSysMessage("DB table `npc_trainer` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadNpcVendorCommand(const char*)
+{
+    sLog.outString( "Re-Loading `npc_vendor` Table!" );
+    objmgr.LoadVendors();
+    SendGlobalSysMessage("DB table `npc_vendor` reloaded.");
     return true;
 }
 

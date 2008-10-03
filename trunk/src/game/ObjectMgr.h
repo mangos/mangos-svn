@@ -42,6 +42,7 @@
 
 #include <string>
 #include <map>
+#include <limits>
 
 extern SQLStorage sCreatureStorage;
 extern SQLStorage sCreatureDataAddonStorage;
@@ -504,7 +505,7 @@ class ObjectMgr
         void LoadSpellScripts();
 
         bool LoadMangosStrings(DatabaseType& db, char const* table, int32 min_value, int32 max_value);
-        bool LoadMangosStrings() { return LoadMangosStrings(WorldDatabase,"mangos_string",1,MAXINT32); }
+        bool LoadMangosStrings() { return LoadMangosStrings(WorldDatabase,"mangos_string",1,std::numeric_limits<int32>::max()); }
         void LoadPetCreateSpells();
         void LoadCreatureLocales();
         void LoadCreatureTemplates();
@@ -834,7 +835,7 @@ class ObjectMgr
 #define objmgr MaNGOS::Singleton<ObjectMgr>::Instance()
 
 // scripting access functions
-bool MANGOS_DLL_SPEC LoadMangosStrings(DatabaseType& db, char const* table,int32 start_value = -1, int32 end_value = MININT32);
+bool MANGOS_DLL_SPEC LoadMangosStrings(DatabaseType& db, char const* table,int32 start_value = -1, int32 end_value = std::numeric_limits<int32>::min());
 MANGOS_DLL_SPEC const char* GetAreaTriggerScriptNameById(uint32 id);
 
 #endif
