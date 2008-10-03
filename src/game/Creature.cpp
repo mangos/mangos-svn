@@ -94,53 +94,34 @@ void Creature::RemoveFromWorld()
 
 void Creature::LoadTrainerSpells()
 {
-    if(m_trainerSpellsLoaded)
+    if (m_trainerSpellsLoaded)
         return;
 
     m_trainer_spells.clear();
     m_trainer_type = 0;
 
-    Field *fields;
-    QueryResult *result = WorldDatabase.PQuery("SELECT spell,spellcost,reqskill,reqskillvalue,reqlevel FROM npc_trainer WHERE entry = '%u'", GetEntry());
-
-    if(!result)
+    CacheTrainerSpellMap::iterator _iter = objmgr.m_mCacheTrainerSpellMap.find(GetEntry());
+    if(_iter == objmgr.m_mCacheTrainerSpellMap.end())
         return;
 
-    do
+    for(std::vector<PTrainerSpellCache>::iterator _iter_spell = _iter->second.begin(); 
+        _iter_spell != _iter->second.end(); ++_iter_spell)
     {
-        fields = result->Fetch();
 
-        uint32 spellid = fields[0].GetUInt32();
+        uint32 spellid = (*_iter_spell)->spell;
         SpellEntry const *spellinfo = sSpellStore.LookupEntry(spellid);
-
-        if(!spellinfo)
-        {
-            sLog.outErrorDb("Trainer (Entry: %u ) has non existing spell %u",GetEntry(),spellid);
-            continue;
-        }
-
-        if(!SpellMgr::IsSpellValid(spellinfo))
-        {
-            sLog.outErrorDb("LoadTrainerSpells: Trainer (Entry: %u) has broken learning spell %u.", GetEntry(), spellid);
-            continue;
-        }
-
-        if(SpellMgr::IsProfessionSpell(spellinfo->Id))
+        if(SpellMgr::IsProfessionSpell(spellid))
             m_trainer_type = 2;
 
         TrainerSpell tspell;
         tspell.spell        = spellinfo;
-        tspell.spellcost    = fields[1].GetUInt32();
-        tspell.reqskill     = fields[2].GetUInt32();
-        tspell.reqskillvalue= fields[3].GetUInt32();
-        tspell.reqlevel     = fields[4].GetUInt32();
 
+        tspell.spellcost    = (*_iter_spell)->spellcost;
+        tspell.reqskill     = (*_iter_spell)->reqskill;
+        tspell.reqskillvalue= (*_iter_spell)->reqskillvalue;
+        tspell.reqlevel     = (*_iter_spell)->reqlevel;
         m_trainer_spells.push_back(tspell);
-
-    } while( result->NextRow() );
-
-    delete result;
-
+    }
     m_trainerSpellsLoaded = true;
 }
 
@@ -976,13 +957,9 @@ uint32 Creature::GetNpcTextId()
     if(m_NPCTextId)
         return m_NPCTextId;
 
-    QueryResult* result = WorldDatabase.PQuery("SELECT textid FROM npc_gossip WHERE npc_guid= '%u'", m_DBTableGuid);
-    if(result)
-    {
-        Field *fields = result->Fetch();
-        m_NPCTextId = fields[0].GetUInt32();
-        delete result;
-    }
+    CacheNpcTextIdMap::iterator _ipos = objmgr.m_mCacheNpcTextIdMap.find(m_DBTableGuid);
+    if(_ipos != objmgr.m_mCacheNpcTextIdMap.end())
+        m_NPCTextId = _ipos->second;
     else
         m_NPCTextId = DEFAULT_GOSSIP_MESSAGE;
 
@@ -1403,38 +1380,20 @@ void Creature::LoadGoods()
 
     m_vendor_items.clear();
 
-    QueryResult *result = WorldDatabase.PQuery("SELECT item, maxcount, incrtime, ExtendedCost FROM npc_vendor WHERE entry = '%u'", GetEntry());
-
-    if(!result)
+    CacheVendorItemMap::iterator _ipos = objmgr.m_mCacheVendorItemMap.find(GetEntry());
+    if(_ipos == objmgr.m_mCacheVendorItemMap.end())
         return;
 
-    do
+    for (std::vector<PVendorItem>::iterator _item_iter = _ipos->second.begin(); _item_iter != _ipos->second.end(); ++_item_iter)
     {
-        Field *fields = result->Fetch();
 
         if (GetItemCount() >= MAX_VENDOR_ITEMS)
         {
             sLog.outErrorDb( "Vendor %u has too many items (%u >= %i). Check the DB!", GetEntry(), GetItemCount(), MAX_VENDOR_ITEMS );
             break;
         }
-
-        uint32 item_id = fields[0].GetUInt32();
-        if(!sItemStorage.LookupEntry<ItemPrototype>(item_id))
-        {
-            sLog.outErrorDb("Vendor %u have in item list non-existed item %u",GetEntry(),item_id);
-            continue;
-        }
-
-        uint32 ExtendedCost = fields[3].GetUInt32();
-        if(ExtendedCost && !sItemExtendedCostStore.LookupEntry(ExtendedCost))
-            sLog.outErrorDb("Item (Entry: %u) has wrong ExtendedCost (%u) for vendor (%u)",item_id,ExtendedCost,GetEntry());
-
-        AddItem( item_id, fields[1].GetUInt32(), fields[2].GetUInt32(), ExtendedCost);
+        AddItem( (*_item_iter)->item, (*_item_iter)->maxcount, (*_item_iter)->incrtime, (*_item_iter)->ExtendedCost);
     }
-    while( result->NextRow() );
-
-    delete result;
-
     m_itemsLoaded = true;
 }
 

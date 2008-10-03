@@ -224,6 +224,30 @@ struct PlayerCondition
     }
 };
 
+// NPC gossip text id
+typedef HM_NAMESPACE::hash_map<uint32, uint32> CacheNpcTextIdMap;
+
+// Vendors
+typedef struct _tagVendorItem
+{
+    uint32 item;
+    uint32 maxcount;
+    uint32 incrtime;
+    uint32 ExtendedCost;
+}VendorItem, *PVendorItem;
+typedef HM_NAMESPACE::hash_map<uint32, std::vector<PVendorItem> > CacheVendorItemMap;
+
+// Trainers
+typedef struct _tagTrainerSpell
+{
+    uint32 spell;
+    uint32 spellcost;
+    uint32 reqskill;
+    uint32 reqskillvalue;
+    uint32 reqlevel;
+}TrainerSpellCache, *PTrainerSpellCache;
+typedef HM_NAMESPACE::hash_map<uint32, std::vector<PTrainerSpellCache> > CacheTrainerSpellMap;
+
 enum SkillRangeType
 {
     SKILL_RANGE_LANGUAGE,                                   // 300..300
@@ -527,6 +551,10 @@ class ObjectMgr
         void LoadWeatherZoneChances();
         void LoadGameTele();
 
+        void LoadNpcTextId();
+        void LoadVendors();
+        void LoadTrainerSpell();
+
         std::string GeneratePetName(uint32 entry);
         uint32 GetBaseXP(uint32 level);
 
@@ -544,6 +572,10 @@ class ObjectMgr
         uint32 GenerateMailID();
         uint32 GenerateItemTextID();
         uint32 GeneratePetNumber();
+
+        CacheNpcTextIdMap m_mCacheNpcTextIdMap;
+        CacheVendorItemMap m_mCacheVendorItemMap;
+        CacheTrainerSpellMap m_mCacheTrainerSpellMap;
 
         uint32 CreateItemText(std::string text);
         std::string GetItemText( uint32 id )

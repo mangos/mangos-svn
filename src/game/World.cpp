@@ -1042,6 +1042,15 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading GameTeleports..." );
     objmgr.LoadGameTele();
 
+    sLog.outString( "Loading Npc Text Id..." );
+    objmgr.LoadNpcTextId();                                 // must be after load Creature and NpcText
+
+    sLog.outString( "Loading vendors..." );
+    objmgr.LoadVendors();                                   // must be after load CreatureTemplate and ItemTemplate
+
+    sLog.outString( "Loading trainers..." );
+    objmgr.LoadTrainerSpell();                              // must be after load CreatureTemplate
+
     sLog.outString( "Loading Waypoints..." );
     WaypointMgr.Load();
 
