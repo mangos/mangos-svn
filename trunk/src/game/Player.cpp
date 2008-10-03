@@ -3395,18 +3395,18 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
         return TRAINER_SPELL_RED;
 
     // known spell
-    if(HasSpell(trainer_spell->spell->Id))
+    if(HasSpell(trainer_spell->spell))
         return TRAINER_SPELL_GRAY;
 
     // check race/class requirement
-    if(!IsSpellFitByClassAndRace(trainer_spell->spell->Id))
+    if(!IsSpellFitByClassAndRace(trainer_spell->spell))
         return TRAINER_SPELL_RED;
 
     // check level requirement
-    if(getLevel() < ( trainer_spell->reqlevel ? trainer_spell->reqlevel : trainer_spell->spell->spellLevel))
+    if(getLevel() < trainer_spell->reqlevel)
         return TRAINER_SPELL_RED;
 
-    if(SpellChainNode const* spell_chain = spellmgr.GetSpellChainNode(trainer_spell->spell->Id))
+    if(SpellChainNode const* spell_chain = spellmgr.GetSpellChainNode(trainer_spell->spell))
     {
         // check prev.rank requirement
         if(spell_chain->prev && !HasSpell(spell_chain->prev))
@@ -3421,14 +3421,17 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     if(trainer_spell->reqskill && GetBaseSkillValue(trainer_spell->reqskill) < trainer_spell->reqskillvalue)
         return TRAINER_SPELL_RED;
 
-    // secondary prof. or not prof. spell
-    uint32 skill = trainer_spell->spell->EffectMiscValue[1];
+    // exist, already checked at loading
+    SpellEntry const* spell = sSpellStore.LookupEntry(trainer_spell->spell);
 
-    if(trainer_spell->spell->Effect[1] != SPELL_EFFECT_SKILL || !IsPrimaryProfessionSkill(skill))
+    // secondary prof. or not prof. spell
+    uint32 skill = spell->EffectMiscValue[1];
+
+    if(spell->Effect[1] != SPELL_EFFECT_SKILL || !IsPrimaryProfessionSkill(skill))
         return TRAINER_SPELL_GREEN;
 
     // check primary prof. limit
-    if(spellmgr.IsPrimaryProfessionFirstRankSpell(trainer_spell->spell->Id) && GetFreePrimaryProffesionPoints() == 0)
+    if(spellmgr.IsPrimaryProfessionFirstRankSpell(spell->Id) && GetFreePrimaryProffesionPoints() == 0)
         return TRAINER_SPELL_RED;
 
     return TRAINER_SPELL_GREEN;
