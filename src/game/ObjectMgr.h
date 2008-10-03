@@ -503,8 +503,8 @@ class ObjectMgr
         void LoadEventScripts();
         void LoadSpellScripts();
 
-        bool LoadMangosStrings(DatabaseType& db, char const* table, bool positive_entries);
-        bool LoadMangosStrings() { return LoadMangosStrings(WorldDatabase,"mangos_string",true); }
+        bool LoadMangosStrings(DatabaseType& db, char const* table, int32 min_value, int32 max_value);
+        bool LoadMangosStrings() { return LoadMangosStrings(WorldDatabase,"mangos_string",1,MAXINT32); }
         void LoadPetCreateSpells();
         void LoadCreatureLocales();
         void LoadCreatureTemplates();
@@ -832,8 +832,9 @@ class ObjectMgr
 };
 
 #define objmgr MaNGOS::Singleton<ObjectMgr>::Instance()
-#endif
 
 // scripting access functions
-bool MANGOS_DLL_SPEC LoadMangosStrings(DatabaseType& db, char const* table);
+bool MANGOS_DLL_SPEC LoadMangosStrings(DatabaseType& db, char const* table,int32 start_value = -1, int32 end_value = MININT32);
 MANGOS_DLL_SPEC const char* GetAreaTriggerScriptNameById(uint32 id);
+
+#endif
