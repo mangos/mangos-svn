@@ -1502,7 +1502,7 @@ void Creature::Respawn()
 
     if(getDeathState()==DEAD)
     {
-        if (m_DBTableGuid);
+        if (m_DBTableGuid)
             objmgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),0);
         m_respawnTime = time(NULL);                         // respawn at next tick
     }
