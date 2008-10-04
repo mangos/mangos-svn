@@ -70,6 +70,40 @@ bool normalizePlayerName(std::string& name)
     return true;
 }
 
+LanguageDesc lang_description[LANGUAGES_COUNT] =
+{
+    { LANG_ADDON,           0, 0                       },
+    { LANG_UNIVERSAL,       0, 0                       },
+    { LANG_ORCISH,        669, SKILL_LANG_ORCISH       },
+    { LANG_DARNASSIAN,    671, SKILL_LANG_DARNASSIAN   },
+    { LANG_TAURAHE,       670, SKILL_LANG_TAURAHE      },
+    { LANG_DWARVISH,      672, SKILL_LANG_DWARVEN      },
+    { LANG_COMMON,        668, SKILL_LANG_COMMON       },
+    { LANG_DEMONIC,       815, SKILL_LANG_DEMON_TONGUE },
+    { LANG_TITAN,         816, SKILL_LANG_TITAN        },
+    { LANG_THALASSIAN,    813, SKILL_LANG_THALASSIAN   },
+    { LANG_DRACONIC,      814, SKILL_LANG_DRACONIC     },
+    { LANG_KALIMAG,       817, SKILL_LANG_OLD_TONGUE   },
+    { LANG_GNOMISH,      7340, SKILL_LANG_GNOMISH      },
+    { LANG_TROLL,        7341, SKILL_LANG_TROLL        },
+    { LANG_GUTTERSPEAK, 17737, SKILL_LANG_GUTTERSPEAK  },
+    { LANG_DRAENEI,     29932, SKILL_LANG_DRAENEI      },
+    { LANG_ZOMBIE,          0, 0                       },
+    { LANG_GNOMISH_BINARY,  0, 0                       },
+    { LANG_GOBLIN_BINARY,   0, 0                       }
+};
+
+LanguageDesc const* GetLanguageDescByID(uint32 lang)
+{
+    for(int i = 0; i < LANGUAGES_COUNT; ++i)
+    {
+        if(uint32(lang_description[i].lang_id) == lang)
+            return &lang_description[i];
+    }
+
+    return NULL;
+}
+
 ObjectMgr::ObjectMgr()
 {
     m_hiCharGuid        = 1;
@@ -6148,14 +6182,14 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
 
         if(entry==0)
         {
-            sLog.outString("Table `%s` contain reserved entry 0, ignored.",table);
+            sLog.outErrorDb("Table `%s` contain reserved entry 0, ignored.",table);
             continue;
         }
         else if(entry < min_value || entry > max_value)
         {
             int32 start = min_value > 0 ? min_value : max_value;
             int32 end   = min_value > 0 ? max_value : min_value;
-            sLog.outString("Table `%s` contain entry %i out of allowed range (%d - %d), ignored.",table,entry,start,end);
+            sLog.outErrorDb("Table `%s` contain entry %i out of allowed range (%d - %d), ignored.",table,entry,start,end);
             continue;
         }
 
@@ -6163,7 +6197,7 @@ bool ObjectMgr::LoadMangosStrings(DatabaseType& db, char const* table, int32 min
 
         if(data.Content.size() > 0)
         {
-            sLog.outString("Table `%s` contain data for already loaded entry  %i (from another table?), ignored.",table,entry);
+            sLog.outErrorDb("Table `%s` contain data for already loaded entry  %i (from another table?), ignored.",table,entry);
             continue;
         }
 
@@ -6848,7 +6882,7 @@ bool LoadMangosStrings(DatabaseType& db, char const* table,int32 start_value, in
 {
     if(start_value >= 0 || start_value <= end_value)        // start/end reversed for negative values
     {
-        sLog.outError("Table '%s' attempt loaded with invalid range (%d - %d), use (%d - %d) instead.",table,start_value,end_value,-1,std::numeric_limits<int32>::min());
+        sLog.outErrorDb("Table '%s' attempt loaded with invalid range (%d - %d), use (%d - %d) instead.",table,start_value,end_value,-1,std::numeric_limits<int32>::min());
         start_value = -1;
         end_value = std::numeric_limits<int32>::min();
     }
