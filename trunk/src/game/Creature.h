@@ -591,7 +591,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 m_regenTimer;
         MovementGeneratorType m_defaultMovementType;
         Cell m_currentCell;                                 // store current cell where creature listed
-        uint32 m_DBTableGuid;
+        uint32 m_DBTableGuid;                               ///< For new or temporary creatures is 0 for saved it is lowguid
         uint32 m_equipmentId;
 
         bool m_AlreadyCallAssistence;

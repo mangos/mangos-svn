@@ -498,7 +498,8 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask)
     if (!goI)
         return;
     
-    m_DBTableGuid = GetGUIDLow();
+    if (!m_DBTableGuid)
+        m_DBTableGuid = GetGUIDLow();
     // update in loaded data (changing data only in this place)
     GameObjectData& data = objmgr.NewGOData(m_DBTableGuid);
 
