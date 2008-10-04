@@ -1050,7 +1050,8 @@ void Creature::SaveToDB()
 void Creature::SaveToDB(uint32 mapid, uint8 spawnMask)
 {
     // update in loaded data
-    m_DBTableGuid = GetGUIDLow();
+    if (!m_DBTableGuid)
+        m_DBTableGuid = GetGUIDLow();
     CreatureData& data = objmgr.NewOrExistCreatureData(m_DBTableGuid);
 
     uint32 displayId = GetNativeDisplayId();
