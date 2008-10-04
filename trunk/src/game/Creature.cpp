@@ -70,7 +70,7 @@ m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_resp
 m_gossipOptionLoaded(false),m_emoteState(0), m_isPet(false), m_isTotem(false),
 m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0),
 m_AlreadyCallAssistence(false), m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false),
-m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),m_creatureInfo(NULL)
+m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),m_creatureInfo(NULL), m_DBTableGuid(0)
 {
     m_valuesCount = UNIT_END;
 
@@ -503,6 +503,7 @@ bool Creature::Create (uint32 guidlow, Map *map, uint32 Entry, uint32 team, cons
                 m_corpseDelay = sWorld.getConfig(CONFIG_CORPSE_DECAY_NORMAL);
                 break;
         }
+        LoadCreaturesAddon();
     }
 
     return bResult;
@@ -934,6 +935,9 @@ uint32 Creature::GetGossipTextId(uint32 action, uint32 zoneid)
 
 uint32 Creature::GetNpcTextId()
 {
+    if (!m_DBTableGuid)
+        return DEFAULT_GOSSIP_MESSAGE;
+
     if(uint32 pos = objmgr.GetNpcGossip(m_DBTableGuid))
         return pos;
 
@@ -1046,6 +1050,7 @@ void Creature::SaveToDB()
 void Creature::SaveToDB(uint32 mapid, uint8 spawnMask)
 {
     // update in loaded data
+    m_DBTableGuid = GetGUIDLow();
     CreatureData& data = objmgr.NewOrExistCreatureData(m_DBTableGuid);
 
     uint32 displayId = GetNativeDisplayId();
@@ -1237,7 +1242,6 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
 
     Object::_Create(guidlow, Entry, HIGHGUID_UNIT);
 
-    m_DBTableGuid = guidlow;
     if(!UpdateEntry(Entry, team, data))
         return false;
 
@@ -1263,7 +1267,7 @@ bool Creature::LoadFromDB(uint32 guid, Map *map)
         return false;
     }
 
-    uint32 stored_guid = guid;
+    m_DBTableGuid = guid;
     if (map->GetInstanceId() != 0) guid = objmgr.GenerateLowGuid(HIGHGUID_UNIT);
 
     uint16 team = 0;
@@ -1277,9 +1281,6 @@ bool Creature::LoadFromDB(uint32 guid, Map *map)
         sLog.outError("ERROR: Creature (guidlow %d, entry %d) not loaded. Suggested coordinates isn't valid (X: %f Y: %f)",GetGUIDLow(),GetEntry(),GetPositionX(),GetPositionY());
         return false;
     }
-
-    m_DBTableGuid = stored_guid;
-    LoadCreaturesAddon();
 
     m_respawnradius = data->spawndist;
 
@@ -1388,6 +1389,12 @@ bool Creature::hasInvolvedQuest(uint32 quest_id) const
 
 void Creature::DeleteFromDB()
 {
+    if (!m_DBTableGuid)
+    {
+        sLog.outDebug("Trying to delete not saved creature!");
+        return;
+    }
+
     objmgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),0);
     objmgr.DeleteCreatureData(m_DBTableGuid);
 
@@ -1494,7 +1501,8 @@ void Creature::Respawn()
 
     if(getDeathState()==DEAD)
     {
-        objmgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),0);
+        if (m_DBTableGuid);
+            objmgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),0);
         m_respawnTime = time(NULL);                         // respawn at next tick
     }
 }
@@ -1682,7 +1690,7 @@ void Creature::CallAssistence()
 
 void Creature::SaveRespawnTime()
 {
-    if(isPet())
+    if(isPet() || !m_DBTableGuid)
         return;
 
     if(m_respawnTime > time(NULL))                          // dead (no corpse)
@@ -1718,8 +1726,11 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
 
 CreatureDataAddon const* Creature::GetCreatureAddon() const
 {
-    if(CreatureDataAddon const* addon = ObjectMgr::GetCreatureAddon(m_DBTableGuid))
-        return addon;
+    if (m_DBTableGuid)
+    {
+        if(CreatureDataAddon const* addon = ObjectMgr::GetCreatureAddon(m_DBTableGuid))
+            return addon;
+    }
 
     // dependent from heroic mode entry
     return ObjectMgr::GetCreatureTemplateAddon(GetCreatureInfo()->Entry);
