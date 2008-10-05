@@ -18131,3 +18131,14 @@ bool ItemPosCount::isContainedIn(ItemPosCountVec const& vec) const
 
     return false;
 }
+
+bool Player::isAllowUseBattleGroundObject()
+{
+    return ( //InBattleGround() &&                            // in battleground - not need, check in other cases
+             !IsMounted() &&                                  // not mounted
+             !HasStealthAura() &&                             // not stealthed
+             !HasInvisibilityAura() &&                        // not invisible
+             !HasAura(SPELL_RECENTLY_DROPPED_FLAG, 0) &&      // can't pickup
+             isAlive()                                        // live player
+           );
+}
