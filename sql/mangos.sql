@@ -10460,6 +10460,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `quest_template`;
 CREATE TABLE `quest_template` (
   `entry` mediumint(8) unsigned NOT NULL default '0',
+  `Method` tinyint(3) unsigned NOT NULL default '2',
   `ZoneOrSort` smallint(6) NOT NULL default '0',
   `SkillOrClass` smallint(6) NOT NULL default '0',
   `MinLevel` tinyint(3) unsigned NOT NULL default '0',
