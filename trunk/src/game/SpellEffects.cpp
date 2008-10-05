@@ -1010,67 +1010,64 @@ void Spell::EffectDummy(uint32 i)
                 }
                 case 37573:                                 //Temporal Phase Modulator
                 {
-                    if ( unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT )
-                    {
-                       //INSERT INTO spell_script_target VALUES (37573,1,20021)
+                    if(!unitTarget)
+                        return;
 
-                        uint32 health = unitTarget->GetHealth();
-                        const uint32 entry_list[6] = {21821, 21820, 21817};
-                        float x,y,z,o;
+                    TemporarySummon* tempSummon = dynamic_cast<TemporarySummon*>(unitTarget);
+                    if(!tempSummon)
+                        return;
 
-                        x = unitTarget->GetPositionX();
-                        y = unitTarget->GetPositionY();
-                        z = unitTarget->GetPositionZ();
-                        o = unitTarget->GetOrientation();
+                    uint32 health = tempSummon->GetHealth();
+                    const uint32 entry_list[6] = {21821, 21820, 21817};
 
-                        ((TemporarySummon*)unitTarget)->UnSummon();
+                    float x = tempSummon->GetPositionX();
+                    float y = tempSummon->GetPositionY();
+                    float z = tempSummon->GetPositionZ();
+                    float o = tempSummon->GetOrientation();
 
-                        Creature* pCreature = m_caster->SummonCreature(entry_list[urand(0, 2)], x, y, z, o,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,180000);
-                        if (!pCreature)
-                            return;
+                    tempSummon->UnSummon();
 
-                        pCreature->SetHealth(health);
+                    Creature* pCreature = m_caster->SummonCreature(entry_list[urand(0, 2)], x, y, z, o,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,180000);
+                    if (!pCreature)
+                        return;
 
-                        // attack only creatures/players/pets
-                        if( m_caster->isType(TYPEMASK_UNIT) )
-                        {
-                            Unit* unitSummoner = (Unit *)m_caster;
-                            if (pCreature->AI())
-                                pCreature->AI()->AttackStart(unitSummoner);
-                        }
-                    }
+                    pCreature->SetHealth(health);
+
+                    if(pCreature->AI())
+                        pCreature->AI()->AttackStart(m_caster);
+
                     return;
                 }
                 case 34665:                                 //Administer Antidote
                 {
-                    if ( unitTarget && unitTarget->GetTypeId() == TYPEID_UNIT && m_caster && m_caster->GetTypeId() == TYPEID_PLAYER )
-                    {
-                        //INSERT INTO spell_script_target VALUES (34665,1, 16880)
-                        uint32 health = unitTarget->GetHealth();
-                        float x,y,z,o;
+                    if(!unitTarget || m_caster->GetTypeId() != TYPEID_PLAYER )
+                        return;
 
-                        x = unitTarget->GetPositionX();
-                        y = unitTarget->GetPositionY();
-                        z = unitTarget->GetPositionZ();
-                        o = unitTarget->GetOrientation();
+                    if(!unitTarget)
+                        return;
 
-                        ((TemporarySummon*)unitTarget)->UnSummon();
+                    TemporarySummon* tempSummon = dynamic_cast<TemporarySummon*>(unitTarget);
+                    if(!tempSummon)
+                        return;
 
-                        Creature* pCreature = m_caster->SummonCreature(16992, x, y, z, o,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,180000);
-                        if (!pCreature)
-                            return;
+                    uint32 health = tempSummon->GetHealth();
 
-                        pCreature->SetHealth(health);
-                        ((Player*)m_caster)->KilledMonster(16992,pCreature->GetGUID());
+                    float x = tempSummon->GetPositionX();
+                    float y = tempSummon->GetPositionY();
+                    float z = tempSummon->GetPositionZ();
+                    float o = tempSummon->GetOrientation();
+                    tempSummon->UnSummon();
 
-                        // attack only creatures/players/pets
-                        if( m_caster->isType(TYPEMASK_UNIT) )
-                        {
-                            Unit* unitSummoner = (Unit *)m_caster;
-                            if (pCreature->AI())
-                                pCreature->AI()->AttackStart(unitSummoner);
-                        }
-                    }
+                    Creature* pCreature = m_caster->SummonCreature(16992, x, y, z, o,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,180000);
+                    if (!pCreature)
+                        return;
+
+                    pCreature->SetHealth(health);
+                    ((Player*)m_caster)->KilledMonster(16992,pCreature->GetGUID());
+
+                    if (pCreature->AI())
+                        pCreature->AI()->AttackStart(m_caster);
+
                     return;
                 }
                 case 44997:                                 // Converting Sentry
