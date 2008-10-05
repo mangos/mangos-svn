@@ -62,10 +62,31 @@ TrainerSpell const* TrainerSpellData::Find(uint32 spell_id) const
     return NULL;
 }
 
+bool VendorItemData::RemoveItem( uint32 item_id )
+{
+    for(VendorItemList::iterator i = m_items.begin(); i != m_items.end(); ++i )
+    {
+        if((*i)->item==item_id)
+        {
+            m_items.erase(i);
+            return true;
+        }
+    }
+    return false;
+}
+
+VendorItem const* VendorItemData::FindItem(uint32 item_id) const
+{
+    for(VendorItemList::const_iterator i = m_items.begin(); i != m_items.end(); ++i )
+        if((*i)->item==item_id)
+            return *i;
+    return NULL;
+}
+
 Creature::Creature() :
 Unit(), i_AI(NULL),
 lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupLeaderGUID(0),
-m_itemsLoaded(false), m_lootMoney(0), m_lootRecipient(0),
+m_lootMoney(0), m_lootRecipient(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0f),
 m_gossipOptionLoaded(false),m_emoteState(0), m_isPet(false), m_isTotem(false),
 m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0),
@@ -87,7 +108,7 @@ Creature::~Creature()
 {
     CleanupsBeforeDelete();
 
-    m_vendor_items.clear();
+    m_vendorItemCounts.clear();
 
     delete i_AI;
     i_AI = NULL;
@@ -674,16 +695,16 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                             cantalking=false;
                         break;
                     case GOSSIP_OPTION_VENDOR:
-                        // load vendor items if not yet
-                        LoadGoods();
-
-                        if(!GetItemCount())
+                    {
+                        VendorItemData const* vItems = GetVendorItems();
+                        if(!vItems || vItems->Empty())
                         {
                             sLog.outErrorDb("Creature %u (Entry: %u) have UNIT_NPC_FLAG_VENDOR but have empty trading item list.",
                                 GetGUIDLow(),GetEntry());
                             cantalking=false;
                         }
                         break;
+                    }
                     case GOSSIP_OPTION_TRAINER:
                         if(!isCanTrainingOf(pPlayer,false))
                             cantalking=false;
@@ -1348,24 +1369,6 @@ void Creature::LoadEquipment(uint32 equip_entry, bool force)
     }
 }
 
-void Creature::LoadGoods()
-{
-    // already loaded;
-    if(m_itemsLoaded)
-        return;
-
-    m_vendor_items.clear();
-
-    VendorItemList const* vList = objmgr.GetNpcVendorItemList(GetEntry());
-    if(!vList)
-        return;
-
-    for (VendorItemList::const_iterator _item_iter = vList->begin(); _item_iter != vList->end(); ++_item_iter)
-        AddItem( (*_item_iter)->item, (*_item_iter)->maxcount, (*_item_iter)->incrtime, (*_item_iter)->ExtendedCost);
-
-    m_itemsLoaded = true;
-}
-
 bool Creature::hasQuest(uint32 quest_id) const
 {
     QuestRelations const& qr = objmgr.mCreatureQuestRelations;
@@ -1932,6 +1935,84 @@ uint32 Creature::getLevelForTarget( Unit const* target ) const
 char const* Creature::GetScriptName() const
 {
     return ObjectMgr::GetCreatureTemplate(GetEntry())->ScriptName;
+}
+
+
+VendorItemData const* Creature::GetVendorItems() const
+{
+    return objmgr.GetNpcVendorItemList(GetEntry());
+}
+
+uint32 Creature::GetVendorItemCurrentCount(VendorItem const* vItem)
+{
+    if(!vItem->maxcount)
+        return vItem->maxcount;
+
+    VendorItemCounts::iterator itr = m_vendorItemCounts.begin();
+    for(; itr != m_vendorItemCounts.end(); ++itr)
+        if(itr->itemId==vItem->item)
+            break;
+
+    if(itr == m_vendorItemCounts.end())
+        return vItem->maxcount;
+
+    VendorItemCount* vCount = &*itr;
+
+    time_t ptime = time(NULL);
+
+    if( vCount->lastIncrementTime + vItem->incrtime <= ptime )
+    {
+        ItemPrototype const* pProto = objmgr.GetItemPrototype(vItem->item);
+
+        uint32 diff = uint32((ptime - vCount->lastIncrementTime)/vItem->incrtime);
+        if((vCount->count + diff * pProto->BuyCount) >= vItem->maxcount )
+        {
+            m_vendorItemCounts.erase(itr);        
+            return vItem->maxcount;
+        }
+
+        vCount->count += diff * pProto->BuyCount;
+        vCount->lastIncrementTime = ptime;
+    }
+
+    return vCount->count;
+}
+
+uint32 Creature::UpdateVendorItemCurrentCount(VendorItem const* vItem, uint32 used_count)
+{
+    if(!vItem->maxcount)
+        return 0;
+
+    VendorItemCounts::iterator itr = m_vendorItemCounts.begin();
+    for(; itr != m_vendorItemCounts.end(); ++itr)
+        if(itr->itemId==vItem->item)
+            break;
+
+    if(itr == m_vendorItemCounts.end())
+    {
+        uint32 new_count = vItem->maxcount > used_count ? vItem->maxcount-used_count : 0;
+        m_vendorItemCounts.push_back(VendorItemCount(vItem->item,new_count));
+        return new_count;
+    }
+
+    VendorItemCount* vCount = &*itr;
+
+    time_t ptime = time(NULL);
+
+    if( vCount->lastIncrementTime + vItem->incrtime <= ptime )
+    {
+        ItemPrototype const* pProto = objmgr.GetItemPrototype(vItem->item);
+
+        uint32 diff = uint32((ptime - vCount->lastIncrementTime)/vItem->incrtime);
+        if((vCount->count + diff * pProto->BuyCount) < vItem->maxcount )
+            vCount->count += diff * pProto->BuyCount;
+        else
+            vCount->count = vItem->maxcount;
+    }
+
+    vCount->count = vCount->count > used_count ? vCount->count-used_count : 0;
+    vCount->lastIncrementTime = ptime;
+    return vCount->count;
 }
 
 TrainerSpellData const* Creature::GetTrainerSpells() const

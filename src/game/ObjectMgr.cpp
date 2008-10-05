@@ -168,8 +168,7 @@ ObjectMgr::~ObjectMgr()
         delete itr->second;
 
     for (CacheVendorItemMap::iterator itr = m_mCacheVendorItemMap.begin(); itr != m_mCacheVendorItemMap.end(); ++itr)
-        for (VendorItemList::iterator itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
-            delete (*itr2);
+        itr->second.Clear();
 
     for (CacheTrainerSpellMap::iterator itr = m_mCacheTrainerSpellMap.begin(); itr != m_mCacheTrainerSpellMap.end(); ++itr)
         itr->second.Clear();
@@ -6695,19 +6694,27 @@ void ObjectMgr::LoadTrainerSpell()
 
     barGoLink bar( result->GetRowCount() );
 
-    uint32 count = 0,entry,spell;
+    uint32 count = 0;
     do
     {
         bar.step();
 
         Field* fields = result->Fetch();
 
-        entry  = fields[0].GetUInt32();
-        spell  = fields[1].GetUInt32();
+        uint32 entry  = fields[0].GetUInt32();
+        uint32 spell  = fields[1].GetUInt32();
 
-        if(!GetCreatureTemplate(entry))
+        CreatureInfo const* cInfo = GetCreatureTemplate(entry);
+
+        if(!cInfo)
         {
             sLog.outErrorDb("Table `npc_trainer` have entry for not existed creature template (Entry: %u), ignore", entry);
+            continue;
+        }
+
+        if(!(cInfo->npcflag & UNIT_NPC_FLAG_TRAINER))
+        {
+            sLog.outErrorDb("Table `npc_trainer` have data for not creature template (Entry: %u) without trainer flag, ignore", entry);
             continue;
         }
 
@@ -6754,10 +6761,7 @@ void ObjectMgr::LoadVendors()
 {
     // For reload case 
     for (CacheVendorItemMap::iterator itr = m_mCacheVendorItemMap.begin(); itr != m_mCacheVendorItemMap.end(); ++itr)
-    {
-        for (VendorItemList::iterator itr2 = itr->second.begin(); itr2 != itr->second.end(); ++itr2)
-            delete (*itr2);
-    }
+        itr->second.Clear();
     m_mCacheVendorItemMap.clear();
 
     QueryResult *result = WorldDatabase.PQuery("SELECT entry, item, maxcount, incrtime, ExtendedCost FROM npc_vendor");
@@ -6775,48 +6779,23 @@ void ObjectMgr::LoadVendors()
     barGoLink bar( result->GetRowCount() );
 
     uint32 count = 0;
-    uint32 entry, item_id, ExtendedCost;
     do
     {
         bar.step();
         Field* fields = result->Fetch();
 
-        entry = fields[0].GetUInt32();
-        if(!GetCreatureTemplate(entry))
-        {
-            sLog.outErrorDb("Table `npc_vendor` have data for not existed creature template (Entry: %u), ignore", entry);
+        uint32 entry        = fields[0].GetUInt32();
+        uint32 item_id      = fields[1].GetUInt32();
+        uint32 maxcount     = fields[2].GetUInt32();
+        uint32 incrtime     = fields[3].GetUInt32();
+        uint32 ExtendedCost = fields[4].GetUInt32();
+
+        if(!IsVendorItemValid(entry,item_id,maxcount,incrtime,ExtendedCost))
             continue;
-        }
 
-        item_id  = fields[1].GetUInt32();
-        if(!GetItemPrototype(item_id))
-        {
-            sLog.outErrorDb("Table `npc_vendor` for Vendor (Entry: %u) have in item list non-existed item (%u), ignore",entry,item_id);
-            continue;
-        }
+        VendorItemData& vList = m_mCacheVendorItemMap[entry];
 
-        ExtendedCost = fields[4].GetUInt32();
-        if(ExtendedCost && !sItemExtendedCostStore.LookupEntry(ExtendedCost))
-        {
-            sLog.outErrorDb("Table `npc_vendor` have Item (Entry: %u) with wrong ExtendedCost (%u) for vendor (%u), ignore",item_id,ExtendedCost,entry);
-            continue;
-        }
-
-        VendorItemList& vList = m_mCacheVendorItemMap[entry];
-
-        if(vList.size() >= MAX_VENDOR_ITEMS)
-        {
-            sLog.outErrorDb( "Table `npc_vendor` has too many items (%u >= %i) for vendor (Entry: %u), ignore", vList.size(), MAX_VENDOR_ITEMS, entry);
-            continue;
-        }
-
-        VendorItem* pVendorItem = new VendorItem();
-        pVendorItem->item         = item_id;
-        pVendorItem->maxcount     = fields[2].GetUInt32();
-        pVendorItem->incrtime     = fields[3].GetUInt32();
-        pVendorItem->ExtendedCost = ExtendedCost;
-
-        vList.push_back(pVendorItem);
+        vList.AddItem(item_id,maxcount,incrtime,ExtendedCost);
         ++count;
 
     } while (result->NextRow());
@@ -6875,6 +6854,109 @@ void ObjectMgr::LoadNpcTextId()
 
     sLog.outString();
     sLog.outString( ">> Loaded %d NpcTextId ", count );
+}
+
+void ObjectMgr::AddVendorItem( uint32 entry,uint32 item, uint32 maxcount, uint32 incrtime, uint32 extendedcost )
+{
+    VendorItemData& vList = m_mCacheVendorItemMap[entry];
+    vList.AddItem(item,maxcount,incrtime,extendedcost);
+
+    WorldDatabase.PExecuteLog("INSERT INTO npc_vendor (entry,item,maxcount,incrtime,extendedcost) VALUES('%u','%u','%u','%u','%u')",entry, item, maxcount,incrtime,extendedcost);
+}
+
+bool ObjectMgr::RemoveVendorItem( uint32 entry,uint32 item )
+{
+    CacheVendorItemMap::iterator  iter = m_mCacheVendorItemMap.find(entry);
+    if(iter == m_mCacheVendorItemMap.end())
+        return false;
+
+    if(!iter->second.FindItem(item))
+        return false;
+
+    iter->second.RemoveItem(item);
+    WorldDatabase.PExecuteLog("DELETE FROM npc_vendor WHERE entry='%u' AND item='%u'",entry, item);
+    return true;
+}
+
+bool ObjectMgr::IsVendorItemValid( uint32 vendor_entry, uint32 item_id, uint32 maxcount, uint32 incrtime, uint32 ExtendedCost, Player* pl ) const
+{
+    CreatureInfo const* cInfo = GetCreatureTemplate(vendor_entry);
+    if(!cInfo)
+    {
+        if(pl)
+            ChatHandler(pl).SendSysMessage(LANG_COMMAND_VENDORSELECTION);
+        else
+            sLog.outErrorDb("Table `npc_vendor` have data for not existed creature template (Entry: %u), ignore", vendor_entry);
+        return false;
+    }
+
+    if(!(cInfo->npcflag & UNIT_NPC_FLAG_VENDOR))
+    {
+        if(pl)
+            ChatHandler(pl).SendSysMessage(LANG_COMMAND_VENDORSELECTION);
+        else
+            sLog.outErrorDb("Table `npc_vendor` have data for not creature template (Entry: %u) without vendor flag, ignore", vendor_entry);
+        return false;
+    }
+
+    if(!GetItemPrototype(item_id))
+    {
+        if(pl)
+            ChatHandler(pl).PSendSysMessage(LANG_ITEM_NOT_FOUND, item_id);
+        else
+            sLog.outErrorDb("Table `npc_vendor` for Vendor (Entry: %u) have in item list non-existed item (%u), ignore",vendor_entry,item_id);
+        return false;
+    }
+
+    if(ExtendedCost && !sItemExtendedCostStore.LookupEntry(ExtendedCost))
+    {
+        if(pl)
+            ChatHandler(pl).PSendSysMessage(LANG_EXTENDED_COST_NOT_EXIST,ExtendedCost);
+        else
+            sLog.outErrorDb("Table `npc_vendor` have Item (Entry: %u) with wrong ExtendedCost (%u) for vendor (%u), ignore",item_id,ExtendedCost,vendor_entry);
+        return false;
+    }
+
+    if(maxcount > 0 && incrtime == 0)
+    {
+        if(pl)
+            ChatHandler(pl).PSendSysMessage("MaxCount!=0 (%u) but IncrTime==0", maxcount);
+        else
+            sLog.outErrorDb( "Table `npc_vendor` has `maxcount` (%u) for item %u of vendor (Entry: %u) but `incrtime`=0, ignore", maxcount, item_id, vendor_entry);
+        return false;
+    }
+    else if(maxcount==0 && incrtime > 0)
+    {
+        if(pl)
+            ChatHandler(pl).PSendSysMessage("MaxCount==0 but IncrTime<>=0");
+        else
+            sLog.outErrorDb( "Table `npc_vendor` has `maxcount`=0 for item %u of vendor (Entry: %u) but `incrtime`<>0, ignore", item_id, vendor_entry);
+        return false;
+    }
+
+    VendorItemData const* vItems = GetNpcVendorItemList(vendor_entry);
+    if(!vItems)
+        return true;                                        // later checks for non-empty lists
+
+    if(vItems->FindItem(item_id))
+    {
+        if(pl)
+            ChatHandler(pl).PSendSysMessage(LANG_ITEM_ALREADY_IN_LIST,item_id);
+        else
+            sLog.outErrorDb( "Table `npc_vendor` has duplicate items %u for vendor (Entry: %u), ignore", item_id, vendor_entry);
+        return false;
+    }
+
+    if(vItems->GetItemCount() >= MAX_VENDOR_ITEMS)
+    {
+        if(pl)
+            ChatHandler(pl).SendSysMessage(LANG_COMMAND_ADDVENDORITEMITEMS);
+        else
+            sLog.outErrorDb( "Table `npc_vendor` has too many items (%u >= %i) for vendor (Entry: %u), ignore", vItems->GetItemCount(), MAX_VENDOR_ITEMS, vendor_entry);
+        return false;
+    }
+
+    return true;
 }
 
 // Functions for scripting access
