@@ -1884,26 +1884,29 @@ time_t Creature::GetRespawnTimeEx() const
 
 void Creature::GetRespawnCoord( float &x, float &y, float &z, float* ori, float* dist ) const
 {
-    if(CreatureData const* data = objmgr.GetCreatureData(GetDBTableGUIDLow()))
+    if (m_DBTableGuid)
     {
-        x = data->posX;
-        y = data->posY;
-        z = data->posZ;
-        if(ori)
-            *ori = data->orientation;
-        if(dist)
-            *dist = data->spawndist;
+        if (CreatureData const* data = objmgr.GetCreatureData(GetDBTableGUIDLow()))
+        {
+            x = data->posX;
+            y = data->posY;
+            z = data->posZ;
+            if(ori)
+                *ori = data->orientation;
+            if(dist)
+                *dist = data->spawndist;
+
+            return;
+        }
     }
-    else
-    {
-        x = GetPositionX();
-        y = GetPositionY();
-        z = GetPositionZ();
-        if(ori)
-            *ori = GetOrientation();
-        if(dist)
-            *dist = 0;
-    }
+
+    x = GetPositionX();
+    y = GetPositionY();
+    z = GetPositionZ();
+    if(ori)
+        *ori = GetOrientation();
+    if(dist)
+        *dist = 0;
 }
 
 void Creature::AllLootRemovedFromCorpse()
