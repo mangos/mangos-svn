@@ -1554,10 +1554,13 @@ bool Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             }
         }
 
-        SetSemaphoreTeleport(false);
-
         if(!GetSession()->PlayerLogout())
+        {
+            // don't reset teleport semaphore while logging out, otherwise m_teleport_dest won't be used in Player::SaveToDB
+            SetSemaphoreTeleport(false);
+
             UpdateZone(GetZoneId());
+        }
 
         // new zone
         if(old_zone != GetZoneId())
