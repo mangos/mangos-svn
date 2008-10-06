@@ -50,6 +50,11 @@ RandomMovementGenerator<Creature>::_setRandomLocation(Creature &creature)
 
     nx = X + distanceX;
     ny = Y + distanceY;
+
+    // prevent invalid coordinates generation 
+    MaNGOS::NormalizeMapCoord(nx);
+    MaNGOS::NormalizeMapCoord(ny);
+
     dist = distanceX*distanceX + distanceY*distanceY;
 
     if (is_air_ok) // 3D system above ground and above water (flying mode)
