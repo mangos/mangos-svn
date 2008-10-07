@@ -147,9 +147,11 @@ bool ChatHandler::HandleGMmodeCommand(const char* args)
 {
     if(!*args)
     {
-        SendSysMessage(LANG_USE_BOL);
-        SetSentErrorMessage(true);
-        return false;
+        if(m_session->GetPlayer()->isGameMaster())
+            m_session->SendNotification(LANG_GM_ON);
+        else
+            m_session->SendNotification(LANG_GM_OFF);
+        return true;
     }
 
     std::string argstr = (char*)args;
@@ -157,7 +159,7 @@ bool ChatHandler::HandleGMmodeCommand(const char* args)
     if (argstr == "on")
     {
         m_session->GetPlayer()->SetGameMaster(true);
-        m_session->SendNotification("GM mode is ON");
+        m_session->SendNotification(LANG_GM_ON);
         #ifdef _DEBUG_VMAPS
         VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
         vMapManager->processCommand("stoplog");
@@ -168,7 +170,7 @@ bool ChatHandler::HandleGMmodeCommand(const char* args)
     if (argstr == "off")
     {
         m_session->GetPlayer()->SetGameMaster(false);
-        m_session->SendNotification("GM mode is OFF");
+        m_session->SendNotification(LANG_GM_OFF);
         #ifdef _DEBUG_VMAPS
         VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
         vMapManager->processCommand("startlog");
@@ -180,6 +182,40 @@ bool ChatHandler::HandleGMmodeCommand(const char* args)
     SetSentErrorMessage(true);
     return false;
 }
+
+// Enables or disables hiding of the staff badge
+bool ChatHandler::HandleGMChatCommand(const char* args)
+{
+    if(!*args)
+    {
+        if(m_session->GetPlayer()->isGMChat())
+            m_session->SendNotification(LANG_GM_CHAT_ON);
+        else
+            m_session->SendNotification(LANG_GM_CHAT_OFF);
+        return true;
+    }
+
+    std::string argstr = (char*)args;
+
+    if (argstr == "on")
+    {
+        m_session->GetPlayer()->SetGMChat(true);
+        m_session->SendNotification(LANG_GM_CHAT_ON);
+        return true;
+    }
+
+    if (argstr == "off")
+    {
+        m_session->GetPlayer()->SetGMChat(false);
+        m_session->SendNotification(LANG_GM_CHAT_OFF);
+        return true;
+    }
+
+    SendSysMessage(LANG_USE_BOL);
+    SetSentErrorMessage(true);
+    return false;
+}
+
 
 //Enable\Dissable Invisible mode
 bool ChatHandler::HandleVisibleCommand(const char* args)
@@ -195,13 +231,13 @@ bool ChatHandler::HandleVisibleCommand(const char* args)
     if (argstr == "on")
     {
         m_session->GetPlayer()->SetGMVisible(true);
-        m_session->SendNotification(GetMangosString(LANG_INVISIBLE_VISIBLE));
+        m_session->SendNotification(LANG_INVISIBLE_VISIBLE);
         return true;
     }
 
     if (argstr == "off")
     {
-        m_session->SendNotification(GetMangosString(LANG_INVISIBLE_INVISIBLE));
+        m_session->SendNotification(LANG_INVISIBLE_INVISIBLE);
         m_session->GetPlayer()->SetGMVisible(false);
         return true;
     }
