@@ -9284,7 +9284,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
         {
             // May be here should be more stronger checks; STUNNED checked
             // ROOT, CONFUSED, DISTRACTED, FLEEING this needs to be checked.
-            if (hasUnitState(UNIT_STAT_STUNNED))
+            if (not_loading && hasUnitState(UNIT_STAT_STUNNED))
                 return EQUIP_ERR_YOU_ARE_STUNNED;
 
             if(pItem->IsBindedNotWith(GetGUID()))
