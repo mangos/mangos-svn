@@ -265,8 +265,8 @@ Player::Player (WorldSession *session): Unit()
     if(GetSession()->GetSecurity() >= SEC_GAMEMASTER)
         SetAcceptTicket(true);
 
-    // players always and GM if set in config accept whispers by default
-    if(GetSession()->GetSecurity() == SEC_PLAYER || sWorld.getConfig(CONFIG_GM_WISPERING_TO))
+    // players always accept 
+    if(GetSession()->GetSecurity() == SEC_PLAYER)
         SetAcceptWhispers(true);
 
     m_curSelection = 0;
@@ -1415,7 +1415,7 @@ uint8 Player::chatTag() const
     // 0x4 - gm
     // 0x2 - dnd
     // 0x1 - afk
-    if(isGameMaster())
+    if(isGMChat())
         return 4;
     else if(isDND())
         return 3;
@@ -13766,16 +13766,45 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     {
         switch(sWorld.getConfig(CONFIG_GM_LOGIN_STATE))
         {
-            case 0:                                         // disable
-                break;
-            case 1:                                         // enable
-                SetGameMaster(true);
-                break;
+            default:
+            case 0:                      break;             // disable
+            case 1: SetGameMaster(true); break;             // enable
             case 2:                                         // save state
-                if(gmstate)
+                if(gmstate & PLAYER_EXTRA_GM_ON)
                     SetGameMaster(true);
                 break;
+        }
+
+        switch(sWorld.getConfig(CONFIG_GM_ACCEPT_TICKETS))
+        {
             default:
+            case 0:                        break;           // disable
+            case 1: SetAcceptTicket(true); break;           // enable
+            case 2:                                         // save state
+            if(gmstate & PLAYER_EXTRA_GM_ACCEPT_TICKETS)
+                SetAcceptTicket(true);
+            break;
+        }
+
+        switch(sWorld.getConfig(CONFIG_GM_CHAT))
+        {
+            default:
+            case 0:                  break;                 // disable
+            case 1: SetGMChat(true); break;                 // enable
+            case 2:                                         // save state
+                if(gmstate & PLAYER_EXTRA_GM_CHAT)
+                    SetGMChat(true);
+                break;
+        }
+
+        switch(sWorld.getConfig(CONFIG_GM_WISPERING_TO))
+        {
+            default:
+            case 0:                          break;         // disable
+            case 1: SetAcceptWhispers(true); break;         // enable
+            case 2:                                         // save state
+                if(gmstate & PLAYER_EXTRA_ACCEPT_WHISPERS)
+                    SetAcceptWhispers(true);
                 break;
         }
     }
@@ -14843,7 +14872,7 @@ void Player::SaveToDB()
         ss << "0";
 
     ss << ", ";
-    ss << (isGameMaster()? 1 : 0);
+    ss << m_ExtraFlags;
 
     ss << ", ";
     ss << uint32(m_stableSlots);                            // to prevent save uint8 as char

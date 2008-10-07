@@ -75,7 +75,7 @@ enum MangosStrings
     LANG_LEVEL_MINREQUIRED              = 49,
     LANG_LEVEL_MINREQUIRED_AND_ITEM     = 50,
     LANG_NPC_TAINER_HELLO               = 51,
-    // Room for more level 0
+    // Room for more level 0              52-99 not used
 
     // level 1 chat
     LANG_GLOBAL_NOTIFY                  = 100,
@@ -159,7 +159,7 @@ enum MangosStrings
 
     LANG_MAIL_SENT                      = 169,
     LANG_SOUND_NOT_EXIST                = 170,
-    // Room for more level 1
+    // Room for more level 1              171-199 not used
 
     // level 2 chat
     LANG_NO_SELECTION                   = 200,
@@ -304,8 +304,11 @@ enum MangosStrings
     LANG_LOOKUP_PLAYER_CHARACTER        = 329,
     LANG_NO_PLAYERS_FOUND               = 330,
     LANG_EXTENDED_COST_NOT_EXIST        = 331,
-
-    // Room for more level 2
+    LANG_GM_ON                          = 332,
+    LANG_GM_OFF                         = 333,
+    LANG_GM_CHAT_ON                     = 334,
+    LANG_GM_CHAT_OFF                    = 335,
+    // Room for more level 2              336-399 not used
 
     // level 3 chat
     LANG_SCRIPTS_RELOADED               = 400,
@@ -610,60 +613,31 @@ enum MangosStrings
 
     LANG_BG_QUEUE_ANNOUNCE_SELF         = 711,
     LANG_BG_QUEUE_ANNOUNCE_WORLD        = 712,
+
+    LANG_YOUR_ARENA_LEVEL_REQ_ERROR     = 713,
+    LANG_HIS_ARENA_LEVEL_REQ_ERROR      = 714,
+    LANG_YOUR_BG_LEVEL_REQ_ERROR        = 715,
+    LANG_YOUR_ARENA_TEAM_FULL           = 716,
+    // Room for BG/ARENA                  717-799 not used
+
+    // in game strings
+    LANG_PET_INVALID_NAME               = 800,
+    LANG_NOT_ENOUGH_GOLD                = 801,
+    LANG_NOT_FREE_TRADE_SLOTS           = 802,
+    LANG_NOT_PARTNER_FREE_TRADE_SLOTS   = 803,
+    LANG_YOU_NOT_HAVE_PERMISSION        = 804,
+    LANG_UNKNOWN_LANGUAGE               = 805,
+    LANG_NOT_LEARNED_LANGUAGE           = 806,
+    LANG_NEED_CHARACTER_NAME            = 807,
+    LANG_PLAYER_NOT_EXIST_OR_OFFLINE    = 808,
+    LANG_ACCOUNT_FOR_PLAYER_NOT_FOUND   = 809,
+    // Room for in-game strings           810-999 not used
+
+    // FREE IDS                           1000-9999
+
+    // Use for not-in-svn patches         10000-10999
+    // Use for custom patches             11000-11999
+
+    // NOT RESERVED IDS                   12000-
 };
 #endif
-
-/*  NOT USED VALUES
-// alliance ranks
-#define LANG_ALI_PRIVATE                 "Private "
-#define LANG_ALI_CORPORAL                "Corporal "
-#define LANG_ALI_SERGEANT                "Sergeant "
-#define LANG_ALI_MASTER_SERGEANT         "Master Sergeant "
-#define LANG_ALI_SERGEANT_MAJOR          "Sergeant Major "
-#define LANG_ALI_KNIGHT                  "Knight "
-#define LANG_ALI_KNIGHT_LIEUTENANT       "Knight-Lieutenant "
-#define LANG_ALI_KNIGHT_CAPTAIN          "Knight-Captain "
-#define LANG_ALI_KNIGHT_CHAMPION         "Knight-Champion "
-#define LANG_ALI_LIEUTENANT_COMMANDER    "Lieutenant Commander "
-#define LANG_ALI_COMMANDER               "Commander "
-#define LANG_ALI_MARSHAL                 "Marshal "
-#define LANG_ALI_FIELD_MARSHAL           "Field Marshal "
-#define LANG_ALI_GRAND_MARSHAL           "Grand Marshal "
-#define LANG_ALI_GAME_MASTER             "Game Master "
-
-// horde ranks
-#define LANG_HRD_SCOUT                   "Scout "
-#define LANG_HRD_GRUNT                   "Grunt "
-#define LANG_HRD_SERGEANT                "Sergeant "
-#define LANG_HRD_SENIOR_SERGEANT         "Senior Sergeant "
-#define LANG_HRD_FIRST_SERGEANT          "First Sergeant "
-#define LANG_HRD_STONE_GUARD             "Stone Guard "
-#define LANG_HRD_BLOOD_GUARD             "Blood Guard "
-#define LANG_HRD_LEGIONNARE              "Legionnaire "
-#define LANG_HRD_CENTURION               "Centurion "
-#define LANG_HRD_CHAMPION                "Champion "
-#define LANG_HRD_LIEUTENANT_GENERAL      "Lieutenant General "
-#define LANG_HRD_GENERAL                 "General "
-#define LANG_HRD_WARLORD                 "Warlord "
-#define LANG_HRD_HIGH_WARLORD            "High Warlord "
-#define LANG_HRD_GAME_MASTER             "Game Master "
-
-#define LANG_NO_RANK                     "No rank "
-#define LANG_RANK                        "%s (Rank %u)"
-#define LANG_HONOR_TODAY                 "Today: [Honorable kills: |c0000ff00%u|r] [Dishonorable kills: |c00ff0000%u|r]"
-#define LANG_HONOR_YESTERDAY             "Yesterday: [Kills: |c0000ff00%u|r] [Honor: %u]"
-#define LANG_HONOR_THIS_WEEK             "This week: [Kills: |c0000ff00%u|r] [Honor: %u]"
-#define LANG_HONOR_LAST_WEEK             "Last week: [Kills: |c0000ff00%u|r] [Honor: %u] [Standing: %u]"
-#define LANG_HONOR_LIFE                  "Lifetime: [Honorable kills: |c0000ff00%u|r] [Dishonorable kills: |c00ff0000%u|r] [Highest rank %u: %s]"
-
-// level 2
-#define LANG_ADD_OBJ                     "AddObject at Chat.cpp" //log
-#define LANG_DEMORPHED                   "Demorphed %s"     //log
-
-// level 3
-#define LANG_SPAWNING_SPIRIT_HEAL        "Spawning spirit healers\n"
-#define LANG_NO_SPIRIT_HEAL_DB           "No spirit healers in database, exiting."
-
-#define LANG_ADD_OBJ_LV3                 "AddObject at Level3.cpp line 1176"
-
-*/

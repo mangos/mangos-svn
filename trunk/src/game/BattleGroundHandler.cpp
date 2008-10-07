@@ -29,6 +29,7 @@
 #include "BattleGroundMgr.h"
 #include "BattleGroundWS.h"
 #include "BattleGround.h"
+#include "Language.h"
 
 void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
 {
@@ -53,7 +54,7 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
     if(!_player->GetBGAccessByLevel(bgTypeId))
     {
                                                             // temp, must be gossip message...
-        SendNotification("You don't meet Battleground level requirements");
+        SendNotification(LANG_YOUR_BG_LEVEL_REQ_ERROR);
         return;
     }
 
