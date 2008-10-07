@@ -9282,6 +9282,11 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
         ItemPrototype const *pProto = pItem->GetProto();
         if( pProto )
         {
+            // May be here should be more stronger checks; STUNNED checked
+            // ROOT, CONFUSED, DISTRACTED, FLEEING this needs to be checked.
+            if (hasUnitState(UNIT_STAT_STUNNED))
+                return EQUIP_ERR_YOU_ARE_STUNNED;
+
             if(pItem->IsBindedNotWith(GetGUID()))
                 return EQUIP_ERR_DONT_OWN_THAT_ITEM;
 
@@ -9305,6 +9310,9 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
 
             if(isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer != 0)
                 return EQUIP_ERR_CANT_DO_RIGHT_NOW;         // maybe exist better err
+
+            if(IsNonMeleeSpellCasted(false))
+                return EQUIP_ERR_CANT_DO_RIGHT_NOW;
 
             uint8 eslot = FindEquipSlot( pProto, slot, swap );
             if( eslot == NULL_SLOT )

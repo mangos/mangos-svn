@@ -461,7 +461,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if( GetPlayer()->hasUnitState(UNIT_STAT_STUNDED) )
+    if( GetPlayer()->hasUnitState(UNIT_STAT_STUNNED) )
     {
         SendTradeStatus(TRADE_STATUS_YOU_STUNNED);
         return;
@@ -507,7 +507,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if( pOther->hasUnitState(UNIT_STAT_STUNDED) )
+    if( pOther->hasUnitState(UNIT_STAT_STUNNED) )
     {
         SendTradeStatus(TRADE_STATUS_TARGET_STUNNED);
         return;
