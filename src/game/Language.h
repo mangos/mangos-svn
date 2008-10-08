@@ -75,7 +75,9 @@ enum MangosStrings
     LANG_LEVEL_MINREQUIRED              = 49,
     LANG_LEVEL_MINREQUIRED_AND_ITEM     = 50,
     LANG_NPC_TAINER_HELLO               = 51,
-    // Room for more level 0              52-99 not used
+    LANG_COMMAND_INVALID_ITEM_COUNT     = 52,
+    LANG_COMMAND_MAIL_ITEMS_LIMIT       = 53,
+    // Room for more level 0              54-99 not used
 
     // level 1 chat
     LANG_GLOBAL_NOTIFY                  = 100,
