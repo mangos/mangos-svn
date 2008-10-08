@@ -5,7 +5,7 @@ INSERT INTO mangos_string VALUES
 (334,'GM Chat Badge is ON',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (335,'GM Chat Badge is OFF',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
-DELETE FROM mangos_string WHERE entry IN (713);
+DELETE FROM mangos_string WHERE entry IN (713,714,715,716);
 INSERT INTO mangos_string VALUES
 (713,'You must be level %u to join an arena team!',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (714,'%s is not high enough level to join your team',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
@@ -13,7 +13,7 @@ INSERT INTO mangos_string VALUES
 (716,'Your arena team is full, %s cannot join it.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL);
 
 
-DELETE FROM mangos_string WHERE entry IN (800);
+DELETE FROM mangos_string WHERE entry IN (800,801,802,803,804,805,806,807,808,809);
 INSERT INTO mangos_string VALUES
 (800,'Invalid name',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (801,'You do not have enough gold',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
