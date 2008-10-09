@@ -2580,7 +2580,6 @@ INSERT INTO `mangos_string` VALUES
 (714,'%s is not high enough level to join your team',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (715,'You don\'t meet Battleground level requirements',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (716,'Your arena team is full, %s cannot join it.',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
-(800,'Invalid name',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (801,'You do not have enough gold',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (802,'You do not have enough free slots',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
 (803,'Your partner does not have enough free bag slots',NULL,NULL,NULL,NULL,NULL,NULL,NULL,NULL),
