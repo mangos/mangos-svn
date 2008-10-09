@@ -981,35 +981,35 @@ void WorldSession::HandleDeclinedPlayerNameOpcode(WorldPacket& recv_data)
 {
     uint64 guid;
 
-    CHECK_PACKET_SIZE(recv_data, 8+6);
+    CHECK_PACKET_SIZE(recv_data, 8);
     recv_data >> guid;
 
     // not accept declined names for unsupported languages
     std::string name;
-    if(!objmgr.GetPlayerNameByGUID(guid,name))
+    if(!objmgr.GetPlayerNameByGUID(guid, name))
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
-        data << (uint32)1;
-        data << guid;
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+        data << uint32(1);
+        data << uint64(guid);
         SendPacket(&data);
         return;
     }
 
     std::wstring wname;
-    if(!Utf8toWStr(name,wname))
+    if(!Utf8toWStr(name, wname))
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
-        data << (uint32)1;
-        data << guid;
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+        data << uint32(1);
+        data << uint64(guid);
         SendPacket(&data);
         return;
     }
 
     if(!isCyrillicCharacter(wname[0]))                      // name already stored as only single alphabet using
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
-        data << (uint32)1;
-        data << guid;
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+        data << uint32(1);
+        data << uint64(guid);
         SendPacket(&data);
         return;
     }
@@ -1017,35 +1017,37 @@ void WorldSession::HandleDeclinedPlayerNameOpcode(WorldPacket& recv_data)
     std::string name2;
     DeclinedName declinedname;
 
+    CHECK_PACKET_SIZE(recv_data, recv_data.rpos() + 1);
     recv_data >> name2;
 
-    if(name2!=name)                                         // character have different name
+    if(name2 != name)                                       // character have different name
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
-        data << (uint32)1;
-        data << guid;
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+        data << uint32(1);
+        data << uint64(guid);
         SendPacket(&data);
         return;
     }
 
     for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
     {
+        CHECK_PACKET_SIZE(recv_data, recv_data.rpos() + 1);
         recv_data >> declinedname.name[i];
         if(!normalizePlayerName(declinedname.name[i]))
         {
-            WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
-            data << (uint32)1;
-            data << guid;
+            WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+            data << uint32(1);
+            data << uint64(guid);
             SendPacket(&data);
             return;
         }
     }
 
-    if(!ObjectMgr::CheckDeclinedNames(GetMainPartOfName(wname,0),declinedname))
+    if(!ObjectMgr::CheckDeclinedNames(GetMainPartOfName(wname, 0), declinedname))
     {
-        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
-        data << (uint32)1;
-        data << guid;
+        WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+        data << uint32(1);
+        data << uint64(guid);
         SendPacket(&data);
         return;
     }
@@ -1056,11 +1058,11 @@ void WorldSession::HandleDeclinedPlayerNameOpcode(WorldPacket& recv_data)
     CharacterDatabase.BeginTransaction();
     CharacterDatabase.PExecute("DELETE FROM character_declinedname WHERE guid = '%u'", GUID_LOPART(guid));
     CharacterDatabase.PExecute("INSERT INTO character_declinedname (guid, genitive, dative, accusative, instrumental, prepositional) VALUES ('%u','%s','%s','%s','%s','%s')",
-        GUID_LOPART(guid), declinedname.name[0].c_str(),declinedname.name[1].c_str(),declinedname.name[2].c_str(),declinedname.name[3].c_str(),declinedname.name[4].c_str());
+        GUID_LOPART(guid), declinedname.name[0].c_str(), declinedname.name[1].c_str(), declinedname.name[2].c_str(), declinedname.name[3].c_str(), declinedname.name[4].c_str());
     CharacterDatabase.CommitTransaction();
 
-    WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT,4+8);
-    data << (uint32)0;                                      // OK
-    data << guid;
+    WorldPacket data(SMSG_SET_PLAYER_DECLINED_NAMES_RESULT, 4+8);
+    data << uint32(0);                                      // OK
+    data << uint64(guid);
     SendPacket(&data);
 }

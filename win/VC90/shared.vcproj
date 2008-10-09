@@ -445,6 +445,10 @@
 				Name="DataStores"
 				>
 				<File
+					RelativePath="..\..\src\shared\Database\DBCEnums.h"
+					>
+				</File>
+				<File
 					RelativePath="..\..\src\shared\Database\dbcfile.cpp"
 					>
 				</File>

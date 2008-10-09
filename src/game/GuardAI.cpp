@@ -151,4 +151,3 @@ void GuardAI::JustDied(Unit *killer)
     if(Player* pkiller = killer->GetCharmerOrOwnerPlayerOrPlayerItself())
         i_creature.SendZoneUnderAttackMessage(pkiller);
 }
-

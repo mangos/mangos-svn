@@ -228,7 +228,6 @@ struct PlayerCondition
 // NPC gossip text id
 typedef HM_NAMESPACE::hash_map<uint32, uint32> CacheNpcTextIdMap;
 
-
 typedef HM_NAMESPACE::hash_map<uint32, VendorItemData> CacheVendorItemMap;
 typedef HM_NAMESPACE::hash_map<uint32, TrainerSpellData> CacheTrainerSpellMap;
 

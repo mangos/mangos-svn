@@ -133,7 +133,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, Map *map, float x, float
     SetUInt32Value(GAMEOBJECT_FACTION, goinfo->faction);
     SetUInt32Value(GAMEOBJECT_FLAGS, goinfo->flags);
 
-    SetUInt32Value(OBJECT_FIELD_ENTRY, goinfo->id);
+    SetEntry(goinfo->id);
 
     SetUInt32Value(GAMEOBJECT_DISPLAYID, goinfo->displayId);
 
@@ -497,7 +497,7 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask)
 
     if (!goI)
         return;
-    
+
     if (!m_DBTableGuid)
         m_DBTableGuid = GetGUIDLow();
     // update in loaded data (changing data only in this place)
@@ -523,7 +523,7 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask)
     std::ostringstream ss;
     ss << "INSERT INTO gameobject VALUES ( "
         << m_DBTableGuid << ", "
-        << GetUInt32Value (OBJECT_FIELD_ENTRY) << ", "
+        << GetEntry() << ", "
         << mapid << ", "
         << (uint32)spawnMask << ", "
         << GetFloatValue(GAMEOBJECT_POS_X) << ", "
@@ -535,8 +535,8 @@ void GameObject::SaveToDB(uint32 mapid, uint8 spawnMask)
         << GetFloatValue(GAMEOBJECT_ROTATION+2) << ", "
         << GetFloatValue(GAMEOBJECT_ROTATION+3) << ", "
         << m_respawnDelayTime << ", "
-        << GetGoAnimProgress() << ", "
-        << GetGoState() << ")";
+        << (uint32)GetGoAnimProgress() << ", "
+        << (uint32)GetGoState() << ")";
 
     WorldDatabase.BeginTransaction();
     WorldDatabase.PExecuteLog("DELETE FROM gameobject WHERE guid = '%u'", m_DBTableGuid);
@@ -1184,7 +1184,7 @@ void GameObject::Use(Unit* user)
 
             Player* player = (Player*)user;
 
-            if( player->isAllowUseBattleGroundObject() )     
+            if( player->isAllowUseBattleGroundObject() )
             {
                 // in battleground check
                 BattleGround *bg = player->GetBattleGround();

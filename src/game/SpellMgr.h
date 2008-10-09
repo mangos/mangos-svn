@@ -222,7 +222,11 @@ enum SpellFamilyNames
     SPELLFAMILY_PALADIN     = 10,
     SPELLFAMILY_SHAMAN      = 11,
     SPELLFAMILY_UNK2        = 12,
-    SPELLFAMILY_POTION      = 13
+    SPELLFAMILY_POTION      = 13,
+    // 14 - unused
+    SPELLFAMILY_DEATHKNIGHT = 15,
+    // 16 - unused
+    SPELLFAMILY_UNK3        = 17
 };
 
 //Some SpellFamilyFlags

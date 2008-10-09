@@ -327,7 +327,7 @@ PlayerSocial *SocialMgr::LoadFromDB(QueryResult *result, uint32 guid)
             continue;
 
         social->m_playerSocialMap[friend_guid] = FriendInfo(flags, note);
-        
+
         if(flags & SOCIAL_FLAG_IGNORED)
             ignoreCounter++;
         else

@@ -88,7 +88,7 @@ bool Map::ExistVMap(uint32 mapid,int x,int y)
     {
         if(vmgr->isMapLoadingEnabled())
         {
-                                                            // x and y are swaped !! => fixed now
+                                                            // x and y are swapped !! => fixed now
             bool exists = vmgr->existsMap((sWorld.GetDataPath()+ "vmaps").c_str(),  mapid, x,y);
             if(!exists)
             {
@@ -104,7 +104,7 @@ bool Map::ExistVMap(uint32 mapid,int x,int y)
 
 void Map::LoadVMap(int x,int y)
 {
-                                                            // x and y are swaped !!
+                                                            // x and y are swapped !!
     int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld.GetDataPath()+ "vmaps").c_str(),  GetId(), x,y);
     switch(vmapLoadResult)
     {
@@ -142,7 +142,7 @@ void Map::LoadMap(uint32 mapid, uint32 instanceid, int x,int y)
         return;
     }
 
-    //map already load, delete it before reloading (Is it neccessary? Do we really need the abilty the reload maps during runtime?)
+    //map already load, delete it before reloading (Is it necessary? Do we really need the ability the reload maps during runtime?)
     if(GridMaps[x][y])
     {
         sLog.outDetail("Unloading already loaded map %u before reloading.",mapid);
@@ -311,7 +311,7 @@ void Map::RemoveFromGrid(Creature* obj, NGridType *grid, Cell const& cell)
 template<class T>
 void Map::DeleteFromWorld(T* obj)
 {
-    // Note: In case resurrectable corpse and pet its removed from gloabal lists in own destructors
+    // Note: In case resurrectable corpse and pet its removed from global lists in own destructor
     delete obj;
 }
 
@@ -584,7 +584,6 @@ void InstanceMap::Update(const uint32& t_diff)
     if(i_data)
         i_data->Update(t_diff);
 }
-
 
 void Map::Remove(Player *player, bool remove)
 {

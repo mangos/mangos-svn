@@ -72,7 +72,6 @@ class DBCStorage
 
         bool Load(char const* fn)
         {
-
             DBCFile dbc;
             // Check if load was sucessful, only then continue
             if(!dbc.Load(fn, fmt))

@@ -5188,7 +5188,6 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
     // code block for underwater state update
     UpdateUnderwaterState(m, x, y, z);
 
-
     CheckExploreSystem();
 
     // group update
@@ -11097,7 +11096,6 @@ void Player::RemoveEnchantmentDurations(Item *item)
     }
 }
 
-
 void Player::RemoveAllEnchantments(EnchantmentSlot slot)
 {
     // remove enchantments from equipped items first to clean up the m_enchantDuration list
@@ -11927,7 +11925,7 @@ void Player::AddQuest( Quest const *pQuest, Object *questGiver )
     uint32 quest_id = pQuest->GetQuestId();
 
     // if not exist then created with set uState==NEW and rewarded=false
-    QuestStatusData& questStatusData =  mQuestStatus[quest_id];
+    QuestStatusData& questStatusData = mQuestStatus[quest_id];
     if (questStatusData.uState != QUEST_NEW)
         questStatusData.uState = QUEST_CHANGED;
 
@@ -15603,7 +15601,6 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
     }
 }
 
-
 void Player::RemoveMiniPet()
 {
     if(Pet* pet = GetMiniPet())
@@ -16289,7 +16286,7 @@ void Player::ProhibitSpellScholl(SpellSchoolMask idSchoolMask, uint32 unTimeMs )
                                                             // last check 2.0.10
     WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+m_spells.size()*8);
     data << GetGUID();
-    data << uint8(0x0);
+    data << uint8(0x0);                                     // flags (0x1, 0x2)
     time_t curTime = time(NULL);
     for(PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {

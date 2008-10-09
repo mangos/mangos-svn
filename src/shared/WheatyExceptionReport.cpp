@@ -374,7 +374,6 @@ void WheatyExceptionReport::printTracesForAllThreads()
   CloseHandle( hThreadSnap );
 }
 
-
 //===========================================================================
 // Open the report file, and write the desired information to it.  Called by
 // WheatyUnhandledExceptionFilter
@@ -601,7 +600,7 @@ struct CSymbolInfoPackage : public SYMBOL_INFO_PACKAGE
 //============================================================
 void WheatyExceptionReport::WriteStackDetails(
 PCONTEXT pContext,
-bool bWriteVariables, HANDLE pThreadHandle)                                      // true if local/params should be output
+bool bWriteVariables, HANDLE pThreadHandle)                 // true if local/params should be output
 {
     _tprintf( _T("\r\nCall stack:\r\n") );
 

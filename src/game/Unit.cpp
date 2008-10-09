@@ -348,6 +348,11 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 ty
         case 1:                                             // stop packet
             SendMessageToSet( &data, true );
             return;
+        case 2:                                             // not used currently
+            data << float(0);
+            data << float(0);
+            data << float(0);
+            break;
         case 3:                                             // not used currently
             data << uint64(0);                              // probably target guid
             break;
@@ -1894,7 +1899,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
                 float basetime = float(pVictim->getAttackTimer(BASE_ATTACK));
 
                 // after parry nearest next attack time will reduced at %40 from full attack time.
-                // The delay cannot be reduced to less than 20% of your weapon's base swing delay.
+                // The delay cannot be reduced to less than 20% of your weapon base swing delay.
                 if (pVictim->haveOffhandWeapon() && offtime < basetime)
                 {
                     float percent20 = pVictim->GetAttackTime(OFF_ATTACK)*0.20;
@@ -7238,6 +7243,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
                     TakenTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f; break;
         }
     }
+
     // .. taken pct: dummy auras
     AuraList const& mDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
     for(AuraList::const_iterator i = mDummyAuras.begin(); i != mDummyAuras.end(); ++i)
@@ -7706,7 +7712,6 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     // These Spells are doing fixed amount of healing (TODO found less hack-like check)
     if(spellProto->Id == 15290 || spellProto->Id == 39373 || spellProto->Id == 33778 || spellProto->Id == 379 || spellProto->Id == 38395)
         return healamount;
-
 
     int32 AdvertisedBenefit = SpellBaseHealingBonus(GetSpellSchoolMask(spellProto));
     uint32 CastingTime = GetSpellCastTime(spellProto);
@@ -10301,7 +10306,7 @@ void Unit::SendPetSpellCooldown (uint32 spellid, time_t cooltime)
 
     WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+4+4);
     data << uint64(GetGUID());
-    data << uint8(0x0);
+    data << uint8(0x0);                                     // flags (0x1, 0x2)
     data << uint32(spellid);
     data << uint32(cooltime);
 

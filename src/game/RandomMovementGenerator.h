@@ -23,7 +23,6 @@
 #include "DestinationHolder.h"
 #include "Traveller.h"
 
-
 template<class T>
 class MANGOS_DLL_SPEC RandomMovementGenerator
 : public MovementGeneratorMedium< T, RandomMovementGenerator<T> >

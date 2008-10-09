@@ -54,7 +54,6 @@
 #include "Util.h"
 #include "TemporarySummon.h"
 
-
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
     &Spell::EffectNULL,                                     //  0
@@ -1075,7 +1074,7 @@ void Spell::EffectDummy(uint32 i)
                     //Converted Sentry Credit
                     m_caster->CastSpell(m_caster, 45009, true);
                     return;
-                }                
+                }
                 case 45030:                                 // Impale Emissary
                 {
                     // Emissary of Hate Credit
@@ -4366,13 +4365,13 @@ void Spell::EffectWeaponDmg(uint32 i)
         if(m_caster->GetTypeId()==TYPEID_PLAYER)
             ((Player*)m_caster)->AddComboPoints(unitTarget, 1);
     }
+
     // Mangle (Cat): CP
     if(m_spellInfo->SpellFamilyName==SPELLFAMILY_DRUID && (m_spellInfo->SpellFamilyFlags==0x0000040000000000LL))
     {
         if(m_caster->GetTypeId()==TYPEID_PLAYER)
             ((Player*)m_caster)->AddComboPoints(unitTarget,1);
     }
-
 
     // take ammo
     if(m_attackType == RANGED_ATTACK && m_caster->GetTypeId() == TYPEID_PLAYER)

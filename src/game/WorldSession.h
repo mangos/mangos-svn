@@ -28,6 +28,7 @@
 class MailItemsInfo;
 struct ItemPrototype;
 struct AuctionEntry;
+struct DeclinedName;
 
 class Creature;
 class Item;
@@ -80,6 +81,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendPacket(WorldPacket const* packet);
         void SendNotification(const char *format,...) ATTR_PRINTF(2,3);
         void SendNotification(int32 string_id,...);
+        void SendPetNameInvalid(uint32 error, std::string name, DeclinedName *declinedName);
         void SendLfgResult(uint32 type, uint32 entry, uint8 lfg_type);
         void SendPartyResult(PartyOperation operation, std::string member, PartyResult res);
         void SendAreaTriggerMessage(const char* Text, ...) ATTR_PRINTF(2,3);
@@ -527,7 +529,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandlePetCancelAuraOpcode( WorldPacket& recvPacket );
         void HandlePetUnlearnOpcode( WorldPacket& recvPacket );
         void HandlePetSpellAutocastOpcode( WorldPacket& recvPacket );
-        void HandleAddDynamicTargetObsoleteOpcode( WorldPacket& recvPacket );
+        void HandlePetCastSpellOpcode( WorldPacket& recvPacket );
 
         void HandleSetActionBar(WorldPacket& recv_data);
 
@@ -618,6 +620,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         // logging helper
         void logUnexpectedOpcode(WorldPacket *packet, const char * reason);
+
         Player *_player;
         WorldSocket *_socket;
 

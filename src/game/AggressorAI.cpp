@@ -46,7 +46,7 @@ AggressorAI::MoveInLineOfSight(Unit *u)
     // Ignore Z for flying creatures
     if( !i_creature.canFly() && i_creature.GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE )
         return;
-    
+
     if( !i_creature.getVictim() && !i_creature.hasUnitState(UNIT_STAT_STUNNED) && u->isTargetableForAttack() &&
         ( i_creature.IsHostileTo( u ) /*|| u->getVictim() && i_creature.IsFriendlyTo( u->getVictim() )*/ ) &&
         u->isInAccessablePlaceFor(&i_creature) )

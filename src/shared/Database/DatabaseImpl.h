@@ -120,7 +120,6 @@ Database::AsyncPQuery(void (*method)(QueryResult*, ParamType1), ParamType1 param
     return AsyncQuery(method, param1, szQuery);
 }
 
-
 template<class Class>
 bool
 Database::DelayQueryHolder(Class *object, void (Class::*method)(QueryResult*, SqlQueryHolder*), SqlQueryHolder *holder)

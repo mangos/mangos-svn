@@ -230,7 +230,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     uint32 unk2;
     uint32 BuiltNumberClient;
     uint32 id, security;
-    bool tbc = false;
+    uint8 expansion = 0;
     std::string account;
     Sha1Hash sha1;
     BigNumber v, s, g, N, x, I;
@@ -275,7 +275,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     Field* fields = result->Fetch();
 
-    tbc = fields[8].GetUInt8() && sWorld.getConfig(CONFIG_EXPANSION) > 0;
+    expansion = (sWorld.getConfig(CONFIG_EXPANSION) > 0) ? fields[8].GetUInt8() : 0;
 
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
@@ -404,11 +404,11 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     packet << uint32(0);                                    // unknown random value...
     packet << uint8(0);                                     // can be 0 and 2
     packet << uint32(0);                                    // const 0
-    packet << uint8(tbc ? 1 : 0);                           // 0 - normal, 1 - TBC, must be set in database manually for each account
+    packet << uint8(expansion);                             // 0 - classic, 1 - TBC, 2 - WotLK, must be set in database manually for each account
     SendPacket(&packet);
 
     ///- Create a new WorldSession for the player and add it to the World
-    _session = new WorldSession(id, this,security,tbc,mutetime,locale);
+    _session = new WorldSession(id, this,security,expansion,mutetime,locale);
     sWorld.AddSession(_session);
 
     if(sLog.IsOutDebug())                                   // optimize disabled debug output

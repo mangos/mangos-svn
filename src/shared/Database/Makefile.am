@@ -41,6 +41,7 @@ libmangosdatabase_a_SOURCES = \
 	DatabasePostgre.h \
 	DatabaseSqlite.cpp \
 	DatabaseSqlite.h \
+	DBCEnums.h \
 	Field.cpp \
 	Field.h \
 	MySQLDelayThread.h \

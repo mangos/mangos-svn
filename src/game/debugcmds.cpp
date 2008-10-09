@@ -30,6 +30,7 @@
 #include "GossipDef.h"
 #include "Language.h"
 #include "MapManager.h"
+#include <fstream>
 
 bool ChatHandler::HandleDebugInArcCommand(const char* /*args*/)
 {
@@ -130,64 +131,66 @@ bool ChatHandler::HandleSendOpcodeCommand(const char* args)
     if (!unit || (unit->GetTypeId() != TYPEID_PLAYER))
         unit = m_session->GetPlayer();
 
-    FILE *file = fopen("opcode.txt", "r");
-    if(!file)
+    std::ifstream ifs("opcode.txt");
+    if(ifs.bad())
         return false;
 
-    uint32 type;
-
-    uint32 val1;
-    uint64 val2;
-    float val3;
-    char val4[101];
-
-    uint32 opcode = 0;
-    fscanf(file, "%u", &opcode);
-    if(!opcode)
-    {
-        fclose(file);
-        return false;
-    }
+    uint32 opcode;
+    ifs >> opcode;
 
     WorldPacket data(opcode, 0);
 
-    while(fscanf(file, "%u", &type) != EOF)
+    while(!ifs.eof())
     {
-        switch(type)
+        std::string type;
+        ifs >> type;
+
+        if(type == "uint8")
         {
-            case 0:                                         // uint8
-                fscanf(file, "%u", &val1);
-                data << uint8(val1);
-                break;
-            case 1:                                         // uint16
-                fscanf(file, "%u", &val1);
-                data << uint16(val1);
-                break;
-            case 2:                                         // uint32
-                fscanf(file, "%u", &val1);
-                data << uint32(val1);
-                break;
-            case 3:                                         // uint64
-                fscanf(file, I64FMTD, &val2);
-                data << uint64(val2);
-                break;
-            case 4:                                         // float
-                fscanf(file, "%f", &val3);
-                data << float(val3);
-                break;
-            case 5:                                         // string
-                fscanf(file, "%s", val4, 101);
-                data << val4;
-                break;
-            case 6:                                         // packed guid
-                data.append(unit->GetPackGUID());
-                break;
-            default:
-                fclose(file);
-                return false;
+            uint8 val1;
+            ifs >> val1;
+            data << val1;
+        }
+        else if(type == "uint16")
+        {
+            uint16 val2;
+            ifs >> val2;
+            data << val2;
+        }
+        else if(type == "uint32")
+        {
+            uint32 val3;
+            ifs >> val3;
+            data << val3;
+        }
+        else if(type == "uint64")
+        {
+            uint64 val4;
+            ifs >> val4;
+            data << val4;
+        }
+        else if(type == "float")
+        {
+            float val5;
+            ifs >> val5;
+            data << val5;
+        }
+        else if(type == "string")
+        {
+            std::string val6;
+            ifs >> val6;
+            data << val6;
+        }
+        else if(type == "pguid")
+        {
+            data.append(unit->GetPackGUID());
+        }
+        else
+        {
+            sLog.outDebug("Sending opcode: unknown type %s", type.c_str());
         }
     }
-    fclose(file);
+    ifs.close();
     sLog.outDebug("Sending opcode %u", data.GetOpcode());
     data.hexlike();
     ((Player*)unit)->GetSession()->SendPacket(&data);

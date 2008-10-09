@@ -322,6 +322,8 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
             data << pProto->Damage[i].DamageMax;
             data << pProto->Damage[i].DamageType;
         }
+
+        // resistances (7)
         data << pProto->Armor;
         data << pProto->HolyRes;
         data << pProto->FireRes;
@@ -329,10 +331,11 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->FrostRes;
         data << pProto->ShadowRes;
         data << pProto->ArcaneRes;
+
         data << pProto->Delay;
         data << pProto->Ammo_type;
+        data << pProto->RangedModRange;
 
-        data << (float)pProto->RangedModRange;
         for(int s = 0; s < 5; s++)
         {
             // send DBC data for cooldowns in same way as it used in Spell::SendSpellCooldown
@@ -1028,16 +1031,16 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
 
     CharacterDatabase.BeginTransaction();
     CharacterDatabase.PExecute("INSERT INTO character_gifts VALUES ('%u', '%u', '%u', '%u')", GUID_LOPART(item->GetOwnerGUID()), item->GetGUIDLow(), item->GetEntry(), item->GetUInt32Value(ITEM_FIELD_FLAGS));
-    item->SetUInt32Value(OBJECT_FIELD_ENTRY, gift->GetUInt32Value(OBJECT_FIELD_ENTRY));
+    item->SetEntry(gift->GetEntry());
 
     switch (item->GetEntry())
     {
-        case 5042:  item->SetUInt32Value(OBJECT_FIELD_ENTRY,  5043); break;
-        case 5048:  item->SetUInt32Value(OBJECT_FIELD_ENTRY,  5044); break;
-        case 17303: item->SetUInt32Value(OBJECT_FIELD_ENTRY, 17302); break;
-        case 17304: item->SetUInt32Value(OBJECT_FIELD_ENTRY, 17305); break;
-        case 17307: item->SetUInt32Value(OBJECT_FIELD_ENTRY, 17308); break;
-        case 21830: item->SetUInt32Value(OBJECT_FIELD_ENTRY, 21831); break;
+        case 5042:  item->SetEntry( 5043); break;
+        case 5048:  item->SetEntry( 5044); break;
+        case 17303: item->SetEntry(17302); break;
+        case 17304: item->SetEntry(17305); break;
+        case 17307: item->SetEntry(17308); break;
+        case 21830: item->SetEntry(21831); break;
     }
     item->SetUInt64Value(ITEM_FIELD_GIFTCREATOR, _player->GetGUID());
     item->SetUInt32Value(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED);
