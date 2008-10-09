@@ -3116,6 +3116,7 @@ void Spell::EffectSummonType(uint32 i)
             break;
         case SUMMON_TYPE_CRITTER:
         case SUMMON_TYPE_CRITTER2:
+        case SUMMON_TYPE_CRITTER3:
             EffectSummonCritter(i);
             break;
         case SUMMON_TYPE_TOTEM_SLOT1:
@@ -3130,7 +3131,6 @@ void Spell::EffectSummonType(uint32 i)
         case SUMMON_TYPE_UNKNOWN3:
         case SUMMON_TYPE_UNKNOWN4:
         case SUMMON_TYPE_UNKNOWN5:
-        case SUMMON_TYPE_UNKNOWN6:
             break;
         default:
             sLog.outError("EffectSummonType: Unhandled summon type %u", m_spellInfo->EffectMiscValueB[i]);
