@@ -74,7 +74,7 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player const* owner)
 
     Object::_Create( guidlow, 0, HIGHGUID_CONTAINER );
 
-    SetUInt32Value(OBJECT_FIELD_ENTRY, itemid);
+    SetEntry(itemid);
     SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
 
     SetUInt64Value(ITEM_FIELD_OWNER, owner ? owner->GetGUID() : 0);
@@ -88,7 +88,7 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player const* owner)
     // Setting the number of Slots the Container has
     SetUInt32Value(CONTAINER_FIELD_NUM_SLOTS, itemProto->ContainerSlots);
 
-    // Cleanning 20 slots
+    // Cleaning 20 slots
     for (uint8 i = 0; i < MAX_BAG_SIZE; i++)
     {
         SetUInt64Value(CONTAINER_FIELD_SLOT_1 + (i*2), 0);

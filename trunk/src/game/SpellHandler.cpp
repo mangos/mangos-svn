@@ -52,6 +52,12 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    if(pItem->GetGUID() != item_guid)
+    {
+        pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
+        return;
+    }
+
     sLog.outDetail("WORLD: CMSG_USE_ITEM packet, bagIndex: %u, slot: %u, spell_count: %u , cast_count: %u, Item: %u, data length = %i", bagIndex, slot, spell_count, cast_count, pItem->GetEntry(), recvPacket.size());
 
     ItemPrototype const *proto = pItem->GetProto();
@@ -235,7 +241,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
             uint32 flags = fields[1].GetUInt32();
 
             pItem->SetUInt64Value(ITEM_FIELD_GIFTCREATOR, 0);
-            pItem->SetUInt32Value(OBJECT_FIELD_ENTRY, entry);
+            pItem->SetEntry(entry);
             pItem->SetUInt32Value(ITEM_FIELD_FLAGS, flags);
             pItem->SetState(ITEM_CHANGED, pUser);
             delete result;
@@ -316,7 +322,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     }
 
     Spell *spell = new Spell(_player, spellInfo, false);
-    spell->m_cast_count = cast_count;                       //set count of casts
+    spell->m_cast_count = cast_count;                       // set count of casts
     spell->prepare(&targets);
 }
 

@@ -85,7 +85,6 @@ bool LoadADT(char* filename)
                         WMOInstance inst(wmo, mf);
                         wmois.push_back(inst);
                     }
-
                 }*/
                 break;
             }
@@ -120,6 +119,7 @@ bool LoadADT(char* filename)
             case 0x4d444446:                                // MDDF
             case 0x4d46424f:                                // MFBO new in BC
             case 0x4d48324f:                                // MH2O new in WotLK
+            case 0x4D545846:                                // MTXF new in WotLK
                 break;
             default:
             {
@@ -295,7 +295,6 @@ void LoadMapChunk(MPQFile & mf, chunk*_chunk)
                     _chunk->flag |=1;
                 if(chunkflags & 16)
                     _chunk->flag |=2;
-
             }
             break;
         }

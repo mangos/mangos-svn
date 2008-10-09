@@ -858,7 +858,6 @@ void Group::SendUpdate()
             data << (uint64)m_looterGuid;                   // looter guid
             data << (uint8)m_lootThreshold;                 // loot threshold
             data << (uint8)m_difficulty;                    // Heroic Mod Group
-
         }
         player->GetSession()->SendPacket( &data );
     }

@@ -164,8 +164,9 @@ bool SpellCastTargets::read ( WorldPacket * data, Unit *caster )
         m_unitTargetGUID = caster->GetGUID();
         return true;
     }
+
     // TARGET_FLAG_UNK2 is used for non-combat pets, maybe other?
-    if( m_targetMask & (TARGET_FLAG_UNIT|TARGET_FLAG_UNK2) )
+    if( m_targetMask & ( TARGET_FLAG_UNIT | TARGET_FLAG_UNK2 ))
         if(!readGUID(*data, m_unitTargetGUID))
             return false;
 
@@ -3187,7 +3188,6 @@ uint8 Spell::CanCast(bool strict)
         // target state requirements (not allowed state), apply to self also
         if(m_spellInfo->TargetAuraStateNot && target->HasAuraState(AuraState(m_spellInfo->TargetAuraStateNot)))
             return SPELL_FAILED_TARGET_AURASTATE;
-
 
         if(target != m_caster)
         {

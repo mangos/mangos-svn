@@ -135,6 +135,7 @@ class MANGOS_DLL_SPEC Object
         uint32 GetGUIDHigh() const { return GUID_HIPART(GetUInt64Value(0)); }
         const ByteBuffer& GetPackGUID() const { return m_PackGUID; }
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
+        void SetEntry(uint32 entry) { SetUInt32Value(OBJECT_FIELD_ENTRY, entry); }
 
         uint8 GetTypeId() const { return m_objectTypeId; }
         bool isType(uint16 mask) const { return (mask & m_objectType); }

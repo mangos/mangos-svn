@@ -781,7 +781,6 @@ bool ChatHandler::HandleUnLearnCommand(const char* args)
     if (!*args)
         return false;
 
-
     // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
     uint32 min_id = extractSpellIdFromLink((char*)args);
     if(!min_id)
@@ -5190,7 +5189,6 @@ bool ChatHandler::HandleCastDistCommand(const char* args)
 {
     if(!*args)
         return false;
-
 
     // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r or Htalent form
     uint32 spell = extractSpellIdFromLink((char*)args);

@@ -373,7 +373,7 @@ void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
 
 void WorldSession::HandlePetRename( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,8+1+1+1+1+1+1+1);
+    CHECK_PACKET_SIZE(recv_data, 8+1);
 
     sLog.outDetail( "HandlePetRename. CMSG_PET_RENAME\n" );
 
@@ -385,6 +385,7 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
 
     recv_data >> petguid;
     recv_data >> name;
+    CHECK_PACKET_SIZE(recv_data, recv_data.rpos() + 1);
     recv_data >> isdeclined;
 
     Pet* pet = ObjectAccessor::GetPet(petguid);
@@ -394,11 +395,18 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
         pet->GetOwnerGUID() != _player->GetGUID() || !pet->GetCharmInfo() )
         return;
 
-    if((!ObjectMgr::IsValidPetName(name)) || (objmgr.IsReservedName(name)))
+    if(!ObjectMgr::IsValidPetName(name))
     {
-        SendNotification(LANG_PET_INVALID_NAME);
+        SendPetNameInvalid(PET_NAME_INVALID, name, NULL);
         return;
     }
+
+    if(objmgr.IsReservedName(name))
+    {
+        SendPetNameInvalid(PET_NAME_RESERVED, name, NULL);
+        return;
+    }
+
     pet->SetName(name);
 
     Unit *owner = pet->GetOwner();
@@ -410,13 +418,16 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     if(isdeclined)
     {
         for(int i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+        {
+            CHECK_PACKET_SIZE(recv_data, recv_data.rpos() + 1);
             recv_data >> declinedname.name[i];
+        }
 
         std::wstring wname;
-        Utf8toWStr(name,wname);
+        Utf8toWStr(name, wname);
         if(!ObjectMgr::CheckDeclinedNames(GetMainPartOfName(wname,0),declinedname))
         {
-            SendNotification(LANG_PET_INVALID_NAME);
+            SendPetNameInvalid(PET_NAME_DECLENSION_DOESNT_MATCH_BASE_NAME, name, &declinedname);
             return;
         }
     }
@@ -428,11 +439,11 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
             CharacterDatabase.escape_string(declinedname.name[i]);
         CharacterDatabase.PExecute("DELETE FROM character_pet_declinedname WHERE owner = '%u' AND id = '%u'", _player->GetGUIDLow(), pet->GetCharmInfo()->GetPetNumber());
         CharacterDatabase.PExecute("INSERT INTO character_pet_declinedname (id, owner, genitive, dative, accusative, instrumental, prepositional) VALUES ('%u','%u','%s','%s','%s','%s','%s')",
-            pet->GetCharmInfo()->GetPetNumber(), _player->GetGUIDLow(), declinedname.name[0].c_str(),declinedname.name[1].c_str(),declinedname.name[2].c_str(),declinedname.name[3].c_str(),declinedname.name[4].c_str());
+            pet->GetCharmInfo()->GetPetNumber(), _player->GetGUIDLow(), declinedname.name[0].c_str(), declinedname.name[1].c_str(), declinedname.name[2].c_str(), declinedname.name[3].c_str(), declinedname.name[4].c_str());
     }
 
     CharacterDatabase.escape_string(name);
-    CharacterDatabase.PExecute("UPDATE character_pet SET name = '%s', renamed = '1' WHERE owner = '%u' AND id = '%u'", name.c_str(),_player->GetGUIDLow(),pet->GetCharmInfo()->GetPetNumber() );
+    CharacterDatabase.PExecute("UPDATE character_pet SET name = '%s', renamed = '1' WHERE owner = '%u' AND id = '%u'", name.c_str(), _player->GetGUIDLow(), pet->GetCharmInfo()->GetPetNumber());
     CharacterDatabase.CommitTransaction();
 
     pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, time(NULL));
@@ -440,14 +451,14 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
 
 void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,8);
+    CHECK_PACKET_SIZE(recv_data, 8);
 
     uint64 guid;
     recv_data >> guid;                                      //pet guid
     sLog.outDetail( "HandlePetAbandon. CMSG_PET_ABANDON pet guid is %u", GUID_LOPART(guid) );
 
     // pet/charmed
-    Creature* pet=ObjectAccessor::GetCreatureOrPet(*_player, guid);
+    Creature* pet = ObjectAccessor::GetCreatureOrPet(*_player, guid);
     if(pet)
     {
         if(pet->isPet())
@@ -575,7 +586,7 @@ void WorldSession::HandlePetSpellAutocastOpcode( WorldPacket& recvPacket )
     }
 }
 
-void WorldSession::HandleAddDynamicTargetObsoleteOpcode( WorldPacket& recvPacket )
+void WorldSession::HandlePetCastSpellOpcode( WorldPacket& recvPacket )
 {
     sLog.outDetail("WORLD: CMSG_PET_CAST_SPELL");
 
@@ -595,7 +606,7 @@ void WorldSession::HandleAddDynamicTargetObsoleteOpcode( WorldPacket& recvPacket
 
     if(!pet || (pet != _player->GetPet() && pet!= _player->GetCharm()))
     {
-        sLog.outError( "HandleAddDynamicTargetObsoleteOpcode.Pet %u isn't pet of player %s .\n", uint32(GUID_LOPART(guid)),GetPlayer()->GetName() );
+        sLog.outError( "HandlePetCastSpellOpcode: Pet %u isn't pet of player %s .\n", uint32(GUID_LOPART(guid)),GetPlayer()->GetName() );
         return;
     }
 
@@ -646,4 +657,20 @@ void WorldSession::HandleAddDynamicTargetObsoleteOpcode( WorldPacket& recvPacket
         spell->finish(false);
         delete spell;
     }
+}
+
+void WorldSession::SendPetNameInvalid(uint32 error, std::string name, DeclinedName *declinedName)
+{
+    WorldPacket data(SMSG_PET_NAME_INVALID, 4 + name.size() + 1 + 1);
+    data << uint32(error);
+    data << name;
+    if(declinedName)
+    {
+        data << uint8(1);
+        for(uint32 i = 0; i < MAX_DECLINED_NAME_CASES; ++i)
+            data << declinedName->name[i];
+    }
+    else
+        data << uint8(0);
+    SendPacket(&data);
 }

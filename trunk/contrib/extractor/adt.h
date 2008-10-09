@@ -51,4 +51,3 @@ class MPQFile;
 void LoadMapChunk(MPQFile &,chunk*);
 bool LoadWMO(char* filename);
 #endif
-

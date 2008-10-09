@@ -19,6 +19,7 @@
 #ifndef DBCSTRUCTURE_H
 #define DBCSTRUCTURE_H
 
+#include "DBCEnums.h"
 #include "Platform/Define.h"
 
 #include <map>
@@ -33,42 +34,6 @@
 #else
 #pragma pack(push,1)
 #endif
-
-enum AreaTeams
-{
-    AREATEAM_NONE  = 0,
-    AREATEAM_ALLY  = 2,
-    AREATEAM_HORDE = 4
-};
-
-enum AreaFlags
-{
-    AREA_FLAG_SNOW             = 0x00000001,                // snow (only Dun Morogh, Naxxramas, Razorfen Downs and Winterspring)
-    AREA_FLAG_UNK1             = 0x00000002,                // unknown, (only Naxxramas and Razorfen Downs)
-    AREA_FLAG_UNK2             = 0x00000004,                // Only used on development map
-    AREA_FLAG_SLAVE_CAPITAL    = 0x00000008,                // slave capital city flag?
-    AREA_FLAG_UNK3             = 0x00000010,                // unknown
-    AREA_FLAG_SLAVE_CAPITAL2   = 0x00000020,                // slave capital city flag?
-    AREA_FLAG_UNK4             = 0x00000040,                // many zones have this flag
-    AREA_FLAG_ARENA            = 0x00000080,                // arena, both instanced and world arenas
-    AREA_FLAG_CAPITAL          = 0x00000100,                // main capital city flag
-    AREA_FLAG_CITY             = 0x00000200,                // only for one zone named "City" (where it located?)
-    AREA_FLAG_OUTLAND          = 0x00000400,                // outland zones? (only Eye of the Storm not have this flag, but have 0x00004000 flag)
-    AREA_FLAG_SANCTUARY        = 0x00000800,                // sanctuary area (PvP disabled)
-    AREA_FLAG_NEED_FLY         = 0x00001000,                // only Netherwing Ledge, Socrethar's Seat, Tempest Keep, The Arcatraz, The Botanica, The Mechanar, Sorrow Wing Point, Dragonspine Ridge, Netherwing Mines, Dragonmaw Base Camp, Dragonmaw Skyway
-    AREA_FLAG_UNUSED1          = 0x00002000,                // not used now (no area/zones with this flag set in 2.4.2)
-    AREA_FLAG_OUTLAND2         = 0x00004000,                // outland zones? (only Circle of Blood Arena not have this flag, but have 0x00000400 flag)
-    AREA_FLAG_PVP              = 0x00008000,                // pvp objective area? (Death's Door also has this flag although it's no pvp object area)
-    AREA_FLAG_ARENA_INSTANCE   = 0x00010000,                // used by instanced arenas only
-    AREA_FLAG_UNUSED2          = 0x00020000,                // not used now (no area/zones with this flag set in 2.4.2)
-    AREA_FLAG_UNK5             = 0x00040000,                // just used for Amani Pass, Hatchet Hills
-    AREA_FLAG_LOWLEVEL         = 0x00100000                 // used for some starting areas with area_level <=15
-};
-
-enum FactionTemplateFlags
-{
-    FACTION_TEMPLATE_FLAG_CONTESTED_GUARD   =   0x00001000, // faction will attack players that were involved in PvP combats
-};
 
 struct AreaTableEntry
 {
@@ -194,8 +159,7 @@ struct CreatureFamilyEntry
     uint32    minScaleLevel;                                // 2 0/1      
     float     maxScale;                                     // 3
     uint32    maxScaleLevel;                                // 4 0/60
-    uint32    skillLine;                                    // 5
-    uint32    skillLine2;                                   // 6
+    uint32    skillLine[2];                                 // 5-6
     uint32    petFoodMask;                                  // 7
     char*     Name[16];                                     // 8-23
                                                             // 24 string flags, unused
@@ -239,15 +203,6 @@ struct FactionEntry
                                                             // 35 string flags, unused
     //char*     description[16];                            // 36-51 unused
                                                             // 52 string flags, unused
-};
-
-enum FactionMasks
-{
-    FACTION_MASK_PLAYER   = 1,                              // any player
-    FACTION_MASK_ALLIANCE = 2,                              // player or creature from alliance team
-    FACTION_MASK_HORDE    = 4,                              // player or creature from horde team
-    FACTION_MASK_MONSTER  = 8                               // aggressive creature from monster team
-                                                            // if none flags set then non-aggressive creature
 };
 
 struct FactionTemplateEntry
@@ -298,6 +253,7 @@ struct GemPropertiesEntry
 };
 
 #define GT_MAX_LEVEL    100
+
 struct GtCombatRatingsEntry
 {
     float    ratio;
@@ -428,15 +384,6 @@ struct MailTemplateEntry
     //char*       content[16];                              // 18-33
 };
 
-enum MapTypes
-{
-    MAP_COMMON          = 0,
-    MAP_INSTANCE        = 1,
-    MAP_RAID            = 2,
-    MAP_BATTLEGROUND    = 3,
-    MAP_ARENA           = 4
-};
-
 struct MapEntry
 {
     uint32      MapID;                                      // 0
@@ -539,12 +486,6 @@ struct SkillLineEntry
     //char*     description[16];                            // 20-35, not used
                                                             // 36 string flags, not used
     uint32    spellIcon;                                    // 37
-};
-
-enum AbilytyLearnType
-{
-    ABILITY_LEARNED_ON_GET_PROFESSION_SKILL     = 1,
-    ABILITY_LEARNED_ON_GET_RACE_OR_CLASS_SKILL  = 2
 };
 
 struct SkillLineAbilityEntry
@@ -754,17 +695,6 @@ struct SpellDurationEntry
     int32     Duration[3];
 };
 
-enum ItemEnchantmentType
-{
-    ITEM_ENCHANTMENT_TYPE_NONE         = 0,
-    ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL = 1,
-    ITEM_ENCHANTMENT_TYPE_DAMAGE       = 2,
-    ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL  = 3,
-    ITEM_ENCHANTMENT_TYPE_RESISTANCE   = 4,
-    ITEM_ENCHANTMENT_TYPE_STAT         = 5,
-    ITEM_ENCHANTMENT_TYPE_TOTEM        = 6
-};
-
 struct SpellItemEnchantmentEntry
 {
     uint32      ID;                                         // 0
@@ -822,14 +752,6 @@ struct TalentTabEntry
     //char*   internalname;                                 // 22
 };
 
-struct TaxiPathEntry
-{
-    uint32    ID;
-    uint32    from;
-    uint32    to;
-    uint32    price;
-};
-
 struct TaxiNodesEntry
 {
     uint32    ID;                                           // 0
@@ -843,15 +765,24 @@ struct TaxiNodesEntry
     uint32    alliance_mount_type;                          // 24
 };
 
-enum TotemCategoryType
+struct TaxiPathEntry
 {
-    TOTEM_CATEGORY_TYPE_KNIFE   = 1,
-    TOTEM_CATEGORY_TYPE_TOTEM   = 2,
-    TOTEM_CATEGORY_TYPE_ROD     = 3,
-    TOTEM_CATEGORY_TYPE_PICK    = 21,
-    TOTEM_CATEGORY_TYPE_STONE   = 22,
-    TOTEM_CATEGORY_TYPE_HAMMER  = 23,
-    TOTEM_CATEGORY_TYPE_SPANNER = 24
+    uint32    ID;
+    uint32    from;
+    uint32    to;
+    uint32    price;
+};
+
+struct TaxiPathNodeEntry
+{
+    uint32    path;
+    uint32    index;
+    uint32    mapid;
+    float     x;
+    float     y;
+    float     z;
+    uint32    actionFlag;
+    uint32    delay;
 };
 
 struct TotemCategoryEntry

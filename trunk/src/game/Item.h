@@ -226,7 +226,6 @@ class MANGOS_DLL_SPEC Item : public Object
         bool IsLimitedToAnotherMapOrZone( uint32 cur_mapId, uint32 cur_zoneId) const;
         bool GemsFitSockets() const;
 
-        uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
         uint32 GetCount() const { return GetUInt32Value (ITEM_FIELD_STACK_COUNT); }
         void SetCount(uint32 value) { SetUInt32Value (ITEM_FIELD_STACK_COUNT, value); }
         uint32 GetMaxStackCount() const { return GetProto()->Stackable; }

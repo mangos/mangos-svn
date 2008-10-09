@@ -96,7 +96,7 @@ Unit(), i_AI(NULL),
 lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupLeaderGUID(0),
 m_lootMoney(0), m_lootRecipient(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0f),
-m_gossipOptionLoaded(false),m_emoteState(0), m_isPet(false), m_isTotem(false),
+m_gossipOptionLoaded(false), m_emoteState(0), m_isPet(false), m_isTotem(false),
 m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_equipmentId(0),
 m_AlreadyCallAssistence(false), m_regenHealth(true), m_AI_locked(false), m_isDeadByDefault(false),
 m_meleeDamageSchoolMask(SPELL_SCHOOL_MASK_NORMAL),m_creatureInfo(NULL), m_DBTableGuid(0)
@@ -181,7 +181,7 @@ bool Creature::InitEntry(uint32 Entry, uint32 team, const CreatureData *data )
         }
     }
 
-    SetUInt32Value(OBJECT_FIELD_ENTRY, Entry);              // normal entry always
+    SetEntry(Entry);                                        // normal entry always
     m_creatureInfo = cinfo;                                 // map mode related always
 
     if (cinfo->DisplayID_A == 0 || cinfo->DisplayID_H == 0) // Cancel load if no model defined
@@ -316,7 +316,7 @@ void Creature::Update(uint32 diff)
                 lootForPickPocketed = false;
                 lootForBody         = false;
 
-                if(m_originalEntry != GetUInt32Value(OBJECT_FIELD_ENTRY))
+                if(m_originalEntry != GetEntry())
                     UpdateEntry(m_originalEntry);
 
                 CreatureInfo const *cinfo = GetCreatureInfo();
@@ -349,7 +349,7 @@ void Creature::Update(uint32 diff)
             if( m_deathTimer <= diff )
             {
                 RemoveCorpse();
-                DEBUG_LOG("Removing corpse... %u ", GetUInt32Value(OBJECT_FIELD_ENTRY));
+                DEBUG_LOG("Removing corpse... %u ", GetEntry());
             }
             else
             {
@@ -380,7 +380,7 @@ void Creature::Update(uint32 diff)
                 if( m_deathTimer <= diff )
                 {
                     RemoveCorpse();
-                    DEBUG_LOG("Removing alive corpse... %u ", GetUInt32Value(OBJECT_FIELD_ENTRY));
+                    DEBUG_LOG("Removing alive corpse... %u ", GetEntry());
                 }
                 else
                 {
@@ -544,7 +544,6 @@ bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
         return false;
 
     TrainerSpellData const* trainer_spells = GetTrainerSpells();
-
 
     if(!trainer_spells || trainer_spells->spellList.empty())
     {
@@ -1353,7 +1352,7 @@ void Creature::LoadEquipment(uint32 equip_entry, bool force)
     {
         if (force)
         {
-            for (uint8 i=0;i<3;i++)
+            for (uint8 i = 0; i < 3; i++)
             {
                 SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + i, 0);
                 SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + (i * 2), 0);
@@ -1369,7 +1368,7 @@ void Creature::LoadEquipment(uint32 equip_entry, bool force)
         return;
 
     m_equipmentId = equip_entry;
-    for (uint8 i=0;i<3;i++)
+    for (uint8 i = 0; i < 3; i++)
     {
         SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + i, einfo->equipmodel[i]);
         SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + (i * 2), einfo->equipinfo[i]);
@@ -1947,7 +1946,6 @@ char const* Creature::GetScriptName() const
 {
     return ObjectMgr::GetCreatureTemplate(GetEntry())->ScriptName;
 }
-
 
 VendorItemData const* Creature::GetVendorItems() const
 {

@@ -484,7 +484,6 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
 
         // will delete item or place to receiver mail list
         WorldSession::SendMailTo(owner, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, GUID_LOPART(owner_guid), subject.str(), 0, &mi, 0, 0, MAIL_CHECK_MASK_NONE);
-
     }
     // owner not found
     else
@@ -4481,6 +4480,7 @@ void ObjectMgr::LoadAreaTriggerScripts()
     sLog.outString();
     sLog.outString( ">> Loaded %u areatrigger scripts", count );
 }
+
 uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
 {
     bool found = false;

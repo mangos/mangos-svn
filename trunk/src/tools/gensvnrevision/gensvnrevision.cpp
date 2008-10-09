@@ -32,7 +32,6 @@ int main(int argc, char **argv)
             path += '/';
     }
 
-
     FILE* EntriesFile = fopen((path+".svn/entries").c_str(), "r");
     if(!EntriesFile)
         EntriesFile = fopen((path+"_svn/entries").c_str(), "r");

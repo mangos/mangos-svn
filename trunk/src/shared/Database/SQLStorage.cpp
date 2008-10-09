@@ -113,7 +113,7 @@ void SQLStorage::Load ()
         RecordCount = 0;
         sLog.outError("Error in %s table, probably sql file format was updated (there should be %d fields in sql).\n",table,iNumFields);
         delete result;
-        exit(1);                                            // Stop server at loading broken or non-compatiable table.
+        exit(1);                                            // Stop server at loading broken or non-compatible table.
     }
 
     //get struct size

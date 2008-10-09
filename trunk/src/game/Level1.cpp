@@ -216,7 +216,6 @@ bool ChatHandler::HandleGMChatCommand(const char* args)
     return false;
 }
 
-
 //Enable\Dissable Invisible mode
 bool ChatHandler::HandleVisibleCommand(const char* args)
 {

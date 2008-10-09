@@ -249,4 +249,3 @@ void MapInstanced::DestroyInstance(InstancedMaps::iterator &itr)
     delete itr->second;
     m_InstancedMaps.erase(itr++);
 }
-

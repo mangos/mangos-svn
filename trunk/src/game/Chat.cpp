@@ -1039,7 +1039,7 @@ static char const* const spellTalentKeys[] = {
 uint32 ChatHandler::extractSpellIdFromLink(char* text)
 {
     // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
-    // number or [name] Shift-click form |color|Htalent:telen_id,rank|h[name]|h|r
+    // number or [name] Shift-click form |color|Htalent:talent_id,rank|h[name]|h|r
     int type = 0;
     char* rankS = NULL;
     char* idS = extractKeyFromLink(text,spellTalentKeys,&type,&rankS);

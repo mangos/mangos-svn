@@ -623,7 +623,7 @@ enum MangosStrings
     // Room for BG/ARENA                  717-799 not used
 
     // in game strings
-    LANG_PET_INVALID_NAME               = 800,
+    //                                  = 800, not used
     LANG_NOT_ENOUGH_GOLD                = 801,
     LANG_NOT_FREE_TRADE_SLOTS           = 802,
     LANG_NOT_PARTNER_FREE_TRADE_SLOTS   = 803,

@@ -87,8 +87,8 @@ bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
         sLog.outError("auction to item, that doesn't exist !!!!");
         return false;
     }
-    data << auction->Id;
-    data << pItem->GetUInt32Value(OBJECT_FIELD_ENTRY);
+    data << (uint32) auction->Id;
+    data << (uint32) pItem->GetEntry();
 
     for (uint8 i = 0; i < MAX_INSPECTED_ENCHANTMENT_SLOT; i++)
     {

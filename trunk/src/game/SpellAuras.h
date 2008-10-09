@@ -251,7 +251,7 @@ class MANGOS_DLL_SPEC Aura
         {
             uint8 slot = GetAuraSlot();
 
-            // only aura inslot with charges and without stack limitation
+            // only aura in slot with charges and without stack limitation
             if (slot < MAX_AURAS && m_procCharges >= 1 && GetSpellProto()->StackAmount==0)
                 SetAuraApplication(slot, m_procCharges - 1);
         }

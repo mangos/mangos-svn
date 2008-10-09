@@ -158,7 +158,6 @@ WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint32 &di
                                 break;
 
                         creature.Say(behavior->text[rand() % i].c_str(), 0, 0);
-
                     }
                     else
                         creature.Say(behavior->text[0].c_str(), 0, 0);

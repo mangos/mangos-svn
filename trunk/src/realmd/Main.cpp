@@ -328,7 +328,6 @@ void UnhookSignals()
     #ifdef _WIN32
     signal(SIGBREAK, 0);
     #endif
-
 }
 
 /// @}

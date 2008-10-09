@@ -926,7 +926,7 @@ void CliTele(char*command,pPrintf zprintf)
     std::string name = charName;
     if(!consoleToUtf8(charName,name))                       // convert from console encoding to utf8
         return;
-    
+
     if(!normalizePlayerName(name))
         return;
 
