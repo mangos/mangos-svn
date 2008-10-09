@@ -695,6 +695,7 @@ bool ChatHandler::ShowHelpForSubCommands(ChatCommand *table, char const* cmd, ch
             continue;
 
         if( !hasStringAbbr(table[i].Name, subcmd) )
+            continue;
 
         (list += "\n    ") += table[i].Name;
     }
