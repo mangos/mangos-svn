@@ -39,11 +39,30 @@ PlayerSocial::~PlayerSocial()
     m_playerSocialMap.clear();
 }
 
+uint32 PlayerSocial::GetNumberOfSocialsWithFlag(SocialFlag flag)
+{
+    uint32 counter = 0;
+    for(PlayerSocialMap::iterator itr = m_playerSocialMap.begin(); itr != m_playerSocialMap.end(); ++itr)
+    {
+        if(itr->second.Flags & flag)
+            counter++;
+    }
+    return counter;
+}
+
 bool PlayerSocial::AddToSocialList(uint32 friend_guid, bool ignore)
 {
-    // client limit
-    if(m_playerSocialMap.size() >= 50)
-        return false;
+    // check client limits
+    if(ignore)
+    {
+        if(GetNumberOfSocialsWithFlag(SOCIAL_FLAG_IGNORED) >= SOCIALMGR_IGNORE_LIMIT)
+            return false;
+    }
+    else
+    {
+        if(GetNumberOfSocialsWithFlag(SOCIAL_FLAG_FRIEND) >= SOCIALMGR_FRIEND_LIMIT)
+            return false;
+    }
 
     uint32 flag = SOCIAL_FLAG_FRIEND;
     if(ignore)
@@ -291,6 +310,9 @@ PlayerSocial *SocialMgr::LoadFromDB(QueryResult *result, uint32 guid)
     uint32 flags = 0;
     std::string note = "";
 
+    // used to speed up check below. Using GetNumberOfSocialsWithFlag will cause unneeded iteration
+    uint32 friendCounter=0, ignoreCounter=0;
+
     do
     {
         Field *fields  = result->Fetch();
@@ -299,11 +321,17 @@ PlayerSocial *SocialMgr::LoadFromDB(QueryResult *result, uint32 guid)
         flags = fields[1].GetUInt32();
         note = fields[2].GetCppString();
 
-        social->m_playerSocialMap[friend_guid] = FriendInfo(flags, note);
+        if((flags & SOCIAL_FLAG_IGNORED) && ignoreCounter >= SOCIALMGR_IGNORE_LIMIT)
+            continue;
+        if((flags & SOCIAL_FLAG_FRIEND) && friendCounter >= SOCIALMGR_FRIEND_LIMIT)
+            continue;
 
-        // client limit
-        if(social->m_playerSocialMap.size() >= 50)
-            break;
+        social->m_playerSocialMap[friend_guid] = FriendInfo(flags, note);
+        
+        if(flags & SOCIAL_FLAG_IGNORED)
+            ignoreCounter++;
+        else
+            friendCounter++;
     }
     while( result->NextRow() );
     delete result;
