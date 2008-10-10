@@ -43,5 +43,6 @@ class WorldSocketMgr
 };
 
 #define sWorldSocketMgr MaNGOS::Singleton<WorldSocketMgr>::Instance()
+
 #endif
 /// @}

@@ -40,12 +40,16 @@
 #include "SocialMgr.h"
 
 /// WorldSession constructor
-WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec, bool tbc, time_t mute_time, LocaleConstant locale) :
+WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec, uint8 expansion, time_t mute_time, LocaleConstant locale) :
 LookingForGroup_auto_join(false), LookingForGroup_auto_add(false), m_muteTime(mute_time),
-_player(NULL), _socket(sock),_security(sec), _accountId(id), m_isTBC(tbc),
+_player(NULL), m_socket(sock),_security(sec), _accountId(id), m_expansion(expansion),
 m_sessionDbcLocale(sWorld.GetAvailableDbcLocale(locale)), m_sessionDbLocaleIndex(objmgr.GetIndexForLocale(locale)),
 _logoutTime(0), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false), m_latency(0)
 {
+    if (sock)
+    {
+        m_remoteaddress = sock->GetRemoteAddress();
+    }
 }
 
 /// WorldSession destructor
@@ -56,10 +60,11 @@ WorldSession::~WorldSession()
         LogoutPlayer(true);
 
     /// - If have unclosed socket, close it
-    if(_socket)
-        _socket->CloseSocket();
-
-    _socket = NULL;
+    if (m_socket)
+    {
+        m_socket->CloseSocket();
+        m_socket = NULL;
+    }
 
     ///- empty incoming packet queue
     while(!_recvQueue.empty())
@@ -84,15 +89,16 @@ char const* WorldSession::GetPlayerName() const
 /// Set the WorldSocket associated with this session
 void WorldSession::SetSocket(WorldSocket *sock)
 {
-    _socket = sock;
+    m_socket = sock;
 }
 
 /// Send a packet to the client
 void WorldSession::SendPacket(WorldPacket const* packet)
 {
-    if (!_socket)
+    if (!m_socket)
         return;
-    #ifdef MANGOS_DEBUG
+
+#ifdef MANGOS_DEBUG
     // Code for network use statistic
     static uint64 sendPacketCount = 0;
     static uint64 sendPacketBytes = 0;
@@ -124,9 +130,9 @@ void WorldSession::SendPacket(WorldPacket const* packet)
         sendLastPacketCount = 1;
         sendLastPacketBytes = packet->wpos();               // wpos is real written size
     }
-    #endif                                                  // !MANGOS_DEBUG
+#endif                                                      // !MANGOS_DEBUG
 
-    _socket->SendPacket(packet);
+    m_socket->SendPacket(packet);
 }
 
 /// Add an incoming packet to the queue
@@ -210,10 +216,10 @@ bool WorldSession::Update(uint32 /*diff*/)
 
     ///- If necessary, log the player out
     time_t currTime = time(NULL);
-    if (!_socket || (ShouldLogOut(currTime) && !m_playerLoading))
+    if (!m_socket || (ShouldLogOut(currTime) && !m_playerLoading))
         LogoutPlayer(true);
 
-    if (!_socket)
+    if (!m_socket)
         return false;                                       //Will remove this session from the world session map
 
     return true;
@@ -343,7 +349,7 @@ void WorldSession::LogoutPlayer(bool Save)
 
         // remove player from the group if he is:
         // a) in group; b) not in raid group; c) logging out normally (not being kicked or disconnected)
-        if(_player->GetGroup() && !_player->GetGroup()->isRaidGroup() && _socket)
+        if(_player->GetGroup() && !_player->GetGroup()->isRaidGroup() && m_socket)
             _player->RemoveFromGroup();
 
         ///- Remove the player from the world
@@ -385,12 +391,12 @@ void WorldSession::LogoutPlayer(bool Save)
 /// Kick a player out of the World
 void WorldSession::KickPlayer()
 {
-    if(!_socket)
+    if(!m_socket)
         return;
 
     // player will be logout and session will removed in next update tick
-    _socket->CloseSocket();
-    _socket = NULL;
+    m_socket->CloseSocket();
+    m_socket = NULL;
 }
 
 /// Cancel channeling handler
