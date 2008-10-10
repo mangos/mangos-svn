@@ -177,7 +177,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     std::string name;
     uint8 race_,class_;
-    bool pTbc = this->IsTBC() && sWorld.getConfig(CONFIG_EXPANSION) > 0;
+
     recv_data >> name;
 
     // recheck with known string size
@@ -210,8 +210,10 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         }
     }
 
-    if (!sChrClassesStore.LookupEntry(class_)||
-        !sChrRacesStore.LookupEntry(race_))
+    ChrClassesEntry const* classEntry = sChrClassesStore.LookupEntry(class_);
+    ChrRacesEntry const* raceEntry = sChrRacesStore.LookupEntry(race_);
+
+    if( !classEntry || !raceEntry )
     {
         data << (uint8)CHAR_CREATE_FAILED;
         SendPacket( &data );
@@ -220,10 +222,20 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     }
 
     // prevent character creating Expansion race without Expansion account
-    if (!pTbc&&(race_>RACE_TROLL))
+    if (raceEntry->addon > Expansion())
     {
         data << (uint8)CHAR_CREATE_EXPANSION;
-        sLog.outError("No Expansion Account:[%d] but tried to Create TBC character",GetAccountId());
+        sLog.outError("Not Expansion 1 account:[%d] but tried to Create character with expansion 1 race (%u)",GetAccountId(),race_);
+        SendPacket( &data );
+        return;
+    }
+
+    // prevent character creating Expansion class without Expansion account
+    // TODO: use possible addon field in ChrClassesEntry in next dbc version
+    if (Expansion() < 2 && class_ == CLASS_DEATH_KNIGHT)
+    {
+        data << (uint8)CHAR_CREATE_EXPANSION;
+        sLog.outError("Not Expansion 2 account:[%d] but tried to Create character with expansion 2 class (%u)",GetAccountId(),class_);
         SendPacket( &data );
         return;
     }
@@ -367,7 +379,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     data << (uint8)CHAR_CREATE_SUCCESS;
     SendPacket( &data );
 
-    std::string IP_str = _socket ? _socket->GetRemoteAddress().c_str() : "-";
+    std::string IP_str = GetRemoteAddress();
     sLog.outBasic("Account: %d (IP: %s) Create Character:[%s]",GetAccountId(),IP_str.c_str(),name.c_str());
     sLog.outChar("Account: %d (IP: %s) Create Character:[%s]",GetAccountId(),IP_str.c_str(),name.c_str());
 }
@@ -417,7 +429,7 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
     if(accountId != GetAccountId())
         return;
 
-    std::string IP_str = _socket ? _socket->GetRemoteAddress().c_str() : "-";
+    std::string IP_str = GetRemoteAddress();
     sLog.outBasic("Account: %d (IP: %s) Delete Character:[%s] (guid:%u)",GetAccountId(),IP_str.c_str(),name.c_str(),GUID_LOPART(guid));
     sLog.outChar("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)",GetAccountId(),IP_str.c_str(),name.c_str(),GUID_LOPART(guid));
 
@@ -735,7 +747,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     if(pCurrChar->isGameMaster())
         SendNotification(LANG_GM_ON);
 
-    std::string IP_str = _socket ? _socket->GetRemoteAddress().c_str() : "-";
+    std::string IP_str = GetRemoteAddress();
     sLog.outChar("Account: %d (IP: %s) Login Character:[%s] (guid:%u)",GetAccountId(),IP_str.c_str(),pCurrChar->GetName() ,pCurrChar->GetGUID());
 
     m_playerLoading = false;
@@ -967,7 +979,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     CharacterDatabase.PExecute("UPDATE characters set name = '%s', at_login = at_login & ~ %u WHERE guid ='%u'", newname.c_str(), uint32(AT_LOGIN_RENAME),GUID_LOPART(guid));
     CharacterDatabase.PExecute("DELETE FROM character_declinedname WHERE guid ='%u'", GUID_LOPART(guid));
 
-    std::string IP_str = _socket ? _socket->GetRemoteAddress().c_str() : "-";
+    std::string IP_str = GetRemoteAddress();
     sLog.outChar("Account: %d (IP: %s) Character:[%s] (guid:%u) Changed name to: %s",GetAccountId(),IP_str.c_str(),oldname.c_str(),GUID_LOPART(guid),newname.c_str());
 
     WorldPacket data(SMSG_CHAR_RENAME,1+8+(newname.size()+1));

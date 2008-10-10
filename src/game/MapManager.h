@@ -25,6 +25,7 @@
 #include "Common.h"
 #include "Map.h"
 #include "GridStates.h"
+
 class Transport;
 
 class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex> >

@@ -230,7 +230,6 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     uint32 unk2;
     uint32 BuiltNumberClient;
     uint32 id, security;
-    uint8 expansion = 0;
     std::string account;
     Sha1Hash sha1;
     BigNumber v, s, g, N, x, I;
@@ -260,8 +259,8 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     std::string safe_account = account;                     // Duplicate, else will screw the SHA hash verification below
     loginDatabase.escape_string(safe_account);
     //No SQL injection, username escaped.
-    //                                                 0   1        2           3        4       5              6  7  8    9         10
-    QueryResult *result = loginDatabase.PQuery("SELECT id, gmlevel, sessionkey, last_ip, locked, sha_pass_hash, v, s, tbc, mutetime, locale FROM account WHERE username = '%s'", safe_account.c_str());
+    //                                                 0   1        2           3        4       5              6  7  8          9         10
+    QueryResult *result = loginDatabase.PQuery("SELECT id, gmlevel, sessionkey, last_ip, locked, sha_pass_hash, v, s, expansion, mutetime, locale FROM account WHERE username = '%s'", safe_account.c_str());
 
     ///- Stop if the account is not found
     if ( !result )
@@ -275,7 +274,10 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     Field* fields = result->Fetch();
 
-    expansion = (sWorld.getConfig(CONFIG_EXPANSION) > 0) ? fields[8].GetUInt8() : 0;
+    uint8 expansion = fields[8].GetUInt8();
+    uint32 world_expansion = sWorld.getConfig(CONFIG_EXPANSION);
+    if(expansion > world_expansion)
+        expansion = world_expansion;
 
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);

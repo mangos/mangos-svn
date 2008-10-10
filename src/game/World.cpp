@@ -21,6 +21,8 @@
 */
 
 #include "Common.h"
+#include "WorldSocket.h"
+
 #include "Database/DatabaseEnv.h"
 #include "Config/ConfigEnv.h"
 #include "SystemConfig.h"
@@ -50,7 +52,6 @@
 #include "GlobalEvents.h"
 #include "GameEvent.h"
 #include "Database/DatabaseImpl.h"
-#include "WorldSocket.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "InstanceSaveMgr.h"
