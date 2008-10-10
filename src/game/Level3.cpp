@@ -69,6 +69,7 @@ bool ChatHandler::HandleReloadAllCommand(const char*)
     HandleReloadAllQuestCommand("");
     HandleReloadAllSpellCommand("");
     HandleReloadAllItemCommand("");
+    HandleReloadAllLocalesCommand("");
 
     HandleReloadCommandCommand("");
     HandleReloadReservedNameCommand("");
@@ -152,6 +153,17 @@ bool ChatHandler::HandleReloadAllItemCommand(const char*)
 {
     HandleReloadPageTextsCommand("a");
     HandleReloadItemEnchantementsCommand("a");
+    return true;
+}
+
+bool ChatHandler::HandleReloadAllLocalesCommand(const char* args)
+{
+    HandleReloadLocalesCreatureCommand("a");
+    HandleReloadLocalesGameobjectCommand("a");
+    HandleReloadLocalesItemCommand("a");
+    HandleReloadLocalesNpcTextCommand("a");
+    HandleReloadLocalesPageTextCommand("a");
+    HandleReloadLocalesQuestCommand("a");
     return true;
 }
 
@@ -594,6 +606,54 @@ bool ChatHandler::HandleReloadGameTeleCommand(const char* /*arg*/)
 
     SendGlobalSysMessage("DB table `game_tele` reloaded.");
 
+    return true;
+}
+
+bool ChatHandler::HandleReloadLocalesCreatureCommand(const char* /*arg*/)
+{
+    sLog.outString( "Re-Loading Locales Creature ...");
+    objmgr.LoadCreatureLocales();
+    SendGlobalSysMessage("DB table `locales_creature` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLocalesGameobjectCommand(const char* /*arg*/)
+{
+    sLog.outString( "Re-Loading Locales Gameobject ... ");
+    objmgr.LoadGameObjectLocales();
+    SendGlobalSysMessage("DB table `locales_gameobject` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLocalesItemCommand(const char* /*arg*/)
+{
+    sLog.outString( "Re-Loading Locales Item ... ");
+    objmgr.LoadItemLocales();
+    SendGlobalSysMessage("DB table `locales_item` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLocalesNpcTextCommand(const char* /*arg*/)
+{
+    sLog.outString( "Re-Loading Locales NPC Text ... ");
+    objmgr.LoadNpcTextLocales();
+    SendGlobalSysMessage("DB table `locales_npc_text` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLocalesPageTextCommand(const char* /*arg*/)
+{
+    sLog.outString( "Re-Loading Locales Page Text ... ");
+    objmgr.LoadPageTextLocales();
+    SendGlobalSysMessage("DB table `locales_page_text` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLocalesQuestCommand(const char* /*arg*/)
+{
+    sLog.outString( "Re-Loading Locales Quest ... ");
+    objmgr.LoadQuestLocales();
+    SendGlobalSysMessage("DB table `locales_quest` reloaded.");
     return true;
 }
 
