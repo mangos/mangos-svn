@@ -574,6 +574,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\InstanceSaveMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\InstanceSaveMgr.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\ItemHandler.cpp"
 				>
 			</File>
@@ -607,14 +615,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\MapInstanced.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\InstanceSaveMgr.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\InstanceSaveMgr.h"
 				>
 			</File>
 			<File
