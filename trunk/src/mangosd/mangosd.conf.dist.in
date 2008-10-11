@@ -795,7 +795,7 @@ Channel.SilentlyGMJoin = 0
 
 GM.LoginState     = 2
 GM.AcceptTickets  = 2
-GM.ChatLoginState = 2
+GM.Chat           = 2
 GM.WhisperingTo   = 2
 GM.InGMList = 0
 GM.InWhoList = 0
