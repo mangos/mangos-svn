@@ -1,0 +1,39 @@
+For integration with mangos build projects ACE files in this directory 
+
+1) copied from ACE_wrappers/ace of original ACE 5.6.6 distribution to dep/ace ... 
+
+ACE_wrappers/ace/*                 as dep/include/ace/*
+ACE_wrappers/ace/os_include/*      as dep/include/ace/os_include/*
+ACE_wrappers/ace/os_include/*/*    as dep/include/ace/os_include/*/*
+ACE_wrappers/COPYING               as dep/include/ace/COPYING
+ACE_wrappers/NEWS                  as dep/include/ace/NEWS
+ACE_wrappers/THANKS                as dep/include/ace/THANKS
+ACE_wrappers/VERSION               as dep/include/ace/VERSION
+
+2) created file dep/include/ace/config.h
+
+3) In project files
+
+dep/include/ace/ACE_vc71.vcproj
+dep/include/ace/ACE_vc8.vcproj
+dep/include/ace/ACE_vc9.vcproj
+
+line
+			OutputDirectory="..\lib"
+replaced by 
+			OutputDirectory="..\..\lib\$(PlatformName)_$(ConfigurationName)"
+
+line
+				ImportLibrary="..\lib\ACE.lib"
+replaced by 
+				ImportLibrary="$(OutDir)\ACE.lib"
+
+line
+				ImportLibrary="..\lib\ACEd.lib"
+replaced by 
+				ImportLibrary="$(OutDir)\ACEd.lib"
+
+line
+				RelativePath="..\VERSION">
+replaced by 
+				RelativePath="VERSION">
