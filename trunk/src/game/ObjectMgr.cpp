@@ -608,31 +608,31 @@ void ObjectMgr::LoadCreatureTemplates()
 
             if(cInfo->npcflag != heroicInfo->npcflag)
             {
-                sLog.outErrorDb("Creature (Entry: %u) listed in `creature_template_substitution` has different `npcflag` in heroic mode.",i);
+                sLog.outErrorDb("Creature (Entry: %u) has different `npcflag` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
                 continue;
             }
 
             if(cInfo->classNum != heroicInfo->classNum)
             {
-                sLog.outErrorDb("Creature (Entry: %u) listed in `creature_template_substitution` has different `classNum` in heroic mode.",i);
+                sLog.outErrorDb("Creature (Entry: %u) has different `classNum` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
                 continue;
             }
 
             if(cInfo->race != heroicInfo->race)
             {
-                sLog.outErrorDb("Creature (Entry: %u) listed in `creature_template_substitution` has different `race` in heroic mode.",i);
+                sLog.outErrorDb("Creature (Entry: %u) has different `race` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
                 continue;
             }
 
             if(cInfo->trainer_type != heroicInfo->trainer_type)
             {
-                sLog.outErrorDb("Creature (Entry: %u) listed in `creature_template_substitution` has different `trainer_type` in heroic mode.",i);
+                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_type` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
                 continue;
             }
 
             if(cInfo->trainer_spell != heroicInfo->trainer_spell)
             {
-                sLog.outErrorDb("Creature (Entry: %u) listed in `creature_template_substitution` has different `trainer_spell` in heroic mode.",i);
+                sLog.outErrorDb("Creature (Entry: %u) has different `trainer_spell` in heroic mode (Entry: %u).",i,cInfo->HeroicEntry);
                 continue;
             }
 
@@ -954,7 +954,7 @@ void ObjectMgr::LoadCreatures()
 
         if(heroicCreatures.find(data.id)!=heroicCreatures.end())
         {
-            sLog.outErrorDb("Table `creature` have creature (GUID: %u) that listed as heroic template in `creature_template_substitution`, skipped.",guid,data.id );
+            sLog.outErrorDb("Table `creature` have creature (GUID: %u) that listed as heroic template in `creature_template`, skipped.",guid,data.id );
             continue;
         }
 
