@@ -298,6 +298,10 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
         case 28441:                                         // not positive dummy spell
         case 37675:                                         // Chaos Blast
             return false;
+       case 38637:                                          // Nether Exhaustion (red)
+       case 38638:                                          // Nether Exhaustion (green)
+       case 38639:                                          // Nether Exhaustion (blue)
+           return false;
     }
 
     switch(spellproto->Effect[effIndex])
