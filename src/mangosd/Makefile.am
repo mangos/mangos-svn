@@ -51,8 +51,8 @@ install-data-hook:
 	  if test -f $(DESTDIR)$(sysconfdir)/$$dest; then \
         echo "$@ will not overwrite existing $(DESTDIR)$(sysconfdir)/$$dest"; \
       else \
-	    echo " $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(sysconfdir)/$$dest"; \
-	    $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(sysconfdir)/$$dest; \
+	    echo " $(INSTALL_DATA) $$p $(DESTDIR)$(sysconfdir)/$$dest"; \
+	    $(INSTALL_DATA) $$p $(DESTDIR)$(sysconfdir)/$$dest; \
 	  fi; \
 	done
 
