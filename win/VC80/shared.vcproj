@@ -46,7 +46,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include_win;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -126,7 +126,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include_win;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared"
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -206,7 +206,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include_win;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -288,7 +288,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include_win;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared"
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -535,8 +535,8 @@
 			<File
 				RelativePath="..\..\src\shared\MemoryLeaks.h"
 				>
-			</File>			
-			<File			
+			</File>
+			<File
 				RelativePath="..\..\dep\include\mersennetwister\MersenneTwister.h"
 				>
 			</File>
@@ -755,7 +755,7 @@
 		</Filter>
 		<File
 			RelativePath="..\..\src\shared\Common.cpp"
-                        >
+			>
 		</File>
 		<File
 			RelativePath="..\..\src\shared\Common.h"
