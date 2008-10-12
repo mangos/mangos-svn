@@ -1,22 +1,23 @@
-For integration with mangos build projects ACE files in this directory 
+ACE files in this directory for integration ACE DLL creating with mangos build for Windows platform.
+This part of ACE distribution sources required for DLL build created in way:
 
-1) copied from ACE_wrappers/ace of original ACE 5.6.6 distribution to dep/ace ... 
+1) copied from ACE_wrappers/ace of original ACE 5.6.6 distribution to dep/include_win/ace ... 
 
-ACE_wrappers/ace/*                 as dep/include/ace/*
-ACE_wrappers/ace/os_include/*      as dep/include/ace/os_include/*
-ACE_wrappers/ace/os_include/*/*    as dep/include/ace/os_include/*/*
-ACE_wrappers/COPYING               as dep/include/ace/COPYING
-ACE_wrappers/NEWS                  as dep/include/ace/NEWS
-ACE_wrappers/THANKS                as dep/include/ace/THANKS
-ACE_wrappers/VERSION               as dep/include/ace/VERSION
+ACE_wrappers/ace/*                 as dep/include_win/ace/*
+ACE_wrappers/ace/os_include/*      as dep/include_win/ace/os_include/*
+ACE_wrappers/ace/os_include/*/*    as dep/include_win/ace/os_include/*/*
+ACE_wrappers/COPYING               as dep/include_win/ace/COPYING
+ACE_wrappers/NEWS                  as dep/include_win/ace/NEWS
+ACE_wrappers/THANKS                as dep/include_win/ace/THANKS
+ACE_wrappers/VERSION               as dep/include_win/ace/VERSION
 
-2) created file dep/include/ace/config.h
+2) created file dep/include_win/ace/config.h
 
 3) In project files
 
-dep/include/ace/ACE_vc71.vcproj
-dep/include/ace/ACE_vc8.vcproj
-dep/include/ace/ACE_vc9.vcproj
+dep/include_win/ace/ACE_vc71.vcproj
+dep/include_win/ace/ACE_vc8.vcproj
+dep/include_win/ace/ACE_vc9.vcproj
 
 line
 			OutputDirectory="..\lib"
