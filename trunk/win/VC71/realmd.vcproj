@@ -23,7 +23,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include_win;..\..\src\framework;..\..\src\shared;..\..\src\realmd"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="VERSION=&quot;0.12.0-SVN&quot;,WIN32,NDEBUG,_CONSOLE"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -53,8 +53,8 @@
 				ProgramDatabaseFile="..\..\bin\$(PlatformName)_$(ConfigurationName)\realmd.pdb"
 				GenerateMapFile="TRUE"
 				MapFileName="..\..\bin\$(PlatformName)_$(ConfigurationName)\realmd.map"
-				LargeAddressAware="2"
-				SubSystem="1"/>
+				SubSystem="1"
+				LargeAddressAware="2"/>
 			<Tool
 				Name="VCMIDLTool"
 				TypeLibraryName=".\realmd__$(PlatformName)_$(ConfigurationName)\realmd.tlb"/>
@@ -90,7 +90,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include_win;..\..\src\framework;..\..\src\shared;..\..\src\realmd"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="VERSION=&quot;0.12.0-SVN&quot;;WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE"
 				IgnoreStandardIncludePath="FALSE"
 				BasicRuntimeChecks="3"
@@ -163,14 +163,13 @@
 			RelativePath="..\..\src\realmd\Main.cpp">
 		</File>
 		<File
+			RelativePath="..\..\src\realmd\realmd.rc">
+		</File>
+		<File
 			RelativePath="..\..\src\realmd\RealmList.cpp">
 		</File>
 		<File
 			RelativePath="..\..\src\realmd\RealmList.h">
-		</File>
-		<File
-			RelativePath="..\..\src\realmd\realmd.rc"
-			>
 		</File>
 		<File
 			RelativePath="..\..\src\shared\WheatyExceptionReport.cpp">

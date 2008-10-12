@@ -45,7 +45,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include"
+				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_WINDOWS;_USRDLL;SCRIPT"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -129,7 +129,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include"
+				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_WINDOWS;_USRDLL;SCRIPT"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -212,7 +212,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include"
+				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SCRIPT"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="1"
@@ -295,7 +295,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
-				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include"
+				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include;..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SCRIPT"
 				RuntimeLibrary="0"
 				EnableEnhancedInstructionSet="0"

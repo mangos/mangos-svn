@@ -22,7 +22,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include_win;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\src\mangosd"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\mangosd;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="VERSION=&quot;0.12.0-SVN&quot;;WIN32;NDEBUG;_CONSOLE;ENABLE_CLI"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -91,7 +91,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include_win;..\..\src\framework;..\..\src\shared;..\..\src\game;..\..\src\mangosd"
+				AdditionalIncludeDirectories="..\..\dep\include,..\..\src\framework,..\..\src\shared,..\..\src\game,..\..\src\mangosd;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="VERSION=&quot;0.12.0-SVN&quot;;WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE;ENABLE_CLI"
 				IgnoreStandardIncludePath="FALSE"
 				BasicRuntimeChecks="3"
@@ -189,6 +189,9 @@
 			RelativePath="..\..\src\mangosd\Main.cpp">
 		</File>
 		<File
+			RelativePath="..\..\src\mangosd\mangosd.rc">
+		</File>
+		<File
 			RelativePath="..\..\src\mangosd\Master.cpp">
 		</File>
 		<File
@@ -199,10 +202,6 @@
 		</File>
 		<File
 			RelativePath="..\..\src\mangosd\RASocket.h">
-		</File>
-		<File
-			RelativePath="..\..\src\mangosd\mangosd.rc"
-			>
 		</File>
 		<File
 			RelativePath="..\..\src\shared\WheatyExceptionReport.cpp">
