@@ -19,5 +19,9 @@
 ## Sub-directories to parse
 SUBDIRS = include lib src
 
+if MANGOS_BUILD_ACE
+SUBDIRS += ACE_wrappers
+endif
+
 ## Additional files to include when running 'make dist'
 #  Nothing yet.

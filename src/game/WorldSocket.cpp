@@ -295,8 +295,7 @@ int WorldSocket::handle_output (ACE_HANDLE)
 
     if (send_len == 0)
         return this->cancel_wakeup_output (Guard);
-  
-// TODO SO_NOSIGPIPE on platforms that support it
+
 #ifdef MSG_NOSIGNAL
     ssize_t n = this->peer ().send (m_OutBuffer->rd_ptr (), send_len, MSG_NOSIGNAL);
 #else
@@ -880,8 +879,7 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
                             address.c_str (),
                             safe_account.c_str ());
 
-    // TODO protect here probably ?
-    // Althought atm the socket is singlethreaded
+    // NOTE ATM the socket is singlethreaded, have this in mind ...
     ACE_NEW_RETURN (m_Session, WorldSession (id, this, security, expansion, mutetime, locale), -1);
 
     m_Crypt.SetKey (&K);
@@ -890,7 +888,6 @@ int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
     // In case needed sometime the second arg is in microseconds 1 000 000 = 1 sec
     ACE_OS::sleep (ACE_Time_Value (0, 10000));
 
-    // TODO error handling
     sWorld.AddSession (this->m_Session);
 
     // Create and send the Addon packet

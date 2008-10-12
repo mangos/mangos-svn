@@ -17,7 +17,7 @@
 ## Process this file with automake to produce Makefile.in
 
 ## CPP flags for includes, defines, etc.
-AM_CPPFLAGS = $(MYSQL_INCLUDES) $(POSTGRE_INCLUDES) -I$(top_builddir)/src/shared -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared -I$(srcdir)
+AM_CPPFLAGS = $(MANGOS_INCLUDES) -I$(top_builddir)/src/shared -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared -I$(srcdir)
 
 ## Build realm list daemon as standalone program
 bin_PROGRAMS = mangos-realmd
@@ -31,7 +31,7 @@ mangos_realmd_SOURCES = \
 
 ## Link realm list daemon against the shared library
 mangos_realmd_LDADD = ../shared/Database/libmangosdatabase.a ../shared/Config/libmangosconfig.a ../shared/Auth/libmangosauth.a ../shared/libmangosshared.a ../framework/libmangosframework.a ../../dep/src/sockets/libmangossockets.a ../../dep/src/zthread/libZThread.la
-mangos_realmd_LDFLAGS = -L../../dep/src/sockets -L../../dep/src/zthread $(MYSQL_LIBS) $(POSTGRE_LIBS) -L$(libdir) $(ZLIB) $(COMPATLIB) $(SSLLIB)
+mangos_realmd_LDFLAGS = -L../../dep/src/sockets -L../../dep/src/zthread -L$(libdir) $(MANGOS_LIBS)
 
 ## Additional files to include when running 'make dist'
 #  Include realm list daemon configuration
@@ -48,8 +48,8 @@ install-data-hook:
 	  if test -f $(DESTDIR)$(sysconfdir)/$$dest; then \
         echo "$@ will not overwrite existing $(DESTDIR)$(sysconfdir)/$$dest"; \
       else \
-	    echo " $(INSTALL_DATA) $$p $(DESTDIR)$(sysconfdir)/$$dest"; \
-	    $(INSTALL_DATA) $$p $(DESTDIR)$(sysconfdir)/$$dest; \
+	    echo " $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(sysconfdir)/$$dest"; \
+	    $(INSTALL_DATA) $(srcdir)/$$p $(DESTDIR)$(sysconfdir)/$$dest; \
 	  fi; \
 	done
 

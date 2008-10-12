@@ -19,7 +19,7 @@
 ## Sub-directories to parse
 
 ## CPP flags for includes, defines, etc.
-AM_CPPFLAGS = -I$(srcdir)
+AM_CPPFLAGS = $(MANGOS_INCLUDES) -I$(srcdir)
 
 ## Build MaNGOS framework library as convenience library.
 #  libMaNGOSScript shared library will later be reused by world server daemon.
