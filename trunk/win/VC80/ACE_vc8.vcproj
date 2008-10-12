@@ -2,7 +2,7 @@
 <VisualStudioProject
 	ProjectType="Visual C++"
 	Version="8,00"
-	Name="ACEWraper"
+	Name="ACE_Wrappers"
 	ProjectGUID="{AD537C9A-FECA-1BAD-6757-8A6348EA12C8}"
 	RootNamespace="ACE"
 	Keyword="Win32Proj"
@@ -81,6 +81,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(TargetDir)\ACEd.pdb"
 				SubSystem="2"
 				ImportLibrary="$(OutDir)\ACEd.lib"
 				TargetMachine="1"
@@ -174,6 +175,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(TargetDir)\ACEd.pdb"
 				SubSystem="2"
 				ImportLibrary="$(OutDir)\ACEd.lib"
 				TargetMachine="17"
@@ -263,6 +265,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(TargetDir)\ACE.pdb"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -355,6 +358,7 @@
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories=""
 				GenerateDebugInformation="true"
+				ProgramDatabaseFile="$(TargetDir)\ACE.pdb"
 				SubSystem="2"
 				OptimizeReferences="2"
 				EnableCOMDATFolding="2"
@@ -2864,11 +2868,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\ACE_wrappers\ace\OS_Errno.h"
+				RelativePath="..\..\dep\ACE_wrappers\ace\os_include\os_errno.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\ACE_wrappers\ace\os_include\os_errno.h"
+				RelativePath="..\..\dep\ACE_wrappers\ace\OS_Errno.h"
 				>
 			</File>
 			<File
@@ -3248,11 +3252,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\ACE_wrappers\ace\OS_String.h"
+				RelativePath="..\..\dep\ACE_wrappers\ace\os_include\os_string.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\ACE_wrappers\ace\os_include\os_string.h"
+				RelativePath="..\..\dep\ACE_wrappers\ace\OS_String.h"
 				>
 			</File>
 			<File
@@ -3296,11 +3300,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\ACE_wrappers\ace\os_include\sys\os_time.h"
+				RelativePath="..\..\dep\ACE_wrappers\ace\os_include\os_time.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\ACE_wrappers\ace\os_include\os_time.h"
+				RelativePath="..\..\dep\ACE_wrappers\ace\os_include\sys\os_time.h"
 				>
 			</File>
 			<File
