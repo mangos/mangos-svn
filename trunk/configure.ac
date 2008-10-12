@@ -10,6 +10,8 @@
 
 ## Process this file with autoconf to produce a configure script.
 
+# TODO: create m4 directory and put the checks there, because this file got realy poluted ( by Derex )
+
 ## Prelude, basic settings for Autoconf
 #  PACKAGE:            mangos
 #  VERSION:            0.12.0 (trunk)
@@ -20,8 +22,37 @@ AC_CONFIG_SRCDIR([src/shared/Base.cpp])
 ## Prelude, basic settings for Automake
 #  Turn on all warnings and error messages, and enforce GNU
 #  standards for the package.
-AM_INIT_AUTOMAKE([-Wall -Werror])
+AM_INIT_AUTOMAKE([-Wall -Werror gnu tar-pax])
 AM_MAINTAINER_MODE
+
+## Prevent the configure script from continuing any further if
+# configuration is being performed in the top-level directory.
+# The idea is to prevent this ,because some maintainers tend 
+# to break parallel build trees (a.k.a. VPATH builds).
+if test "$srcdir" = "." && test "$enable_maintainer_mode" != "yes"; then
+  AC_MSG_ERROR(
+     [
+      Please configure and build in a directory other than the
+      top-level source directory. This is needed because a lot
+      of maintainers tend to break parallel build trees 
+      (a.k.a. VPATH builds). This is kinda real ensurance they 
+      will not do it (by enforcing everybody to do VPATH builds).
+
+      For example, try the following from the top-level source
+      directory:
+
+          mkdir objdir
+          cd objdir
+          ../configure
+          make
+
+      This will create a build space in the directory `objdir' and
+      start a build in that directory.
+
+      If however you realy want to disable this error,
+      use --enable-maintainer-mode switch.
+     ])
+fi
 
 ## Disable building of static libraries by default
 AC_DISABLE_STATIC
@@ -35,6 +66,7 @@ AC_DISABLE_STATIC
 #  - a working linker for creating static and shared libraries.
 AC_PROG_CC
 AC_PROG_CXX
+AM_PROG_CC_C_O
 AC_PROG_LIBTOOL
 AC_PROG_INSTALL
 
@@ -197,18 +229,55 @@ AC_TYPE_SIGNAL
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS([atexit ftime gethostbyaddr gethostbyname gethostname gettimeofday memmove memset pow realpath select socket sqrt strchr strdup strerror strstr])
 
+## Check what to do with ACE library
+AC_LANG_PUSH([C++])
+AC_CHECK_HEADER([ace/Reactor.h], [have_ace_headers=yes], [have_ace_headers=no])
+AC_CHECK_LIB([ACE], [main], [have_ace_lib=yes], [have_ace_lib=no])
+AC_LANG_POP([C++])
+
+AC_MSG_CHECKING([whether to build ACE])
+if test X$have_ace_headers = Xyes -a X$have_ace_lib = Xyes;
+then
+  need_to_build_ace=no
+  AC_MSG_RESULT([no])
+else
+  if test X$have_ace_headers = Xno -a X$have_ace_lib = Xno; then
+    need_to_build_ace=yes
+    AC_MSG_RESULT([yes])
+  else
+    if test X$have_ace_headers = Xyes; then
+       AC_MSG_ERROR([looks like you have ACE headers, but you do not have ACE libs installed])
+    else
+       need_to_build_ace=yes
+       AC_MSG_RESULT([yes, over-install])
+    fi
+  fi
+fi
+
+if test X$need_to_build_ace = Xyes; then
+   MANGOS_INCLUDES="-I\$(top_srcdir)/dep/ACE_wrappers -I\$(top_builddir)/dep/ACE_wrappers $MANGOS_INCLUDES"
+   MANGOS_LIBS="\$(top_builddir)/dep/ACE_wrappers/ace/libACE.la $MANGOS_LIBS"
+else
+   MANGOS_LIBS="-lACE $MANGOS_LIBS"
+fi
+
+AM_CONDITIONAL([MANGOS_BUILD_ACE], [test X$need_to_build_ace = Xyes])
+
+
+## Unify all additional includes/libs in one variable.
+# TODO this looks kinda ugly, but when we add m4 folder I will make it look very pritey ( by Derex ).
+MANGOS_INCLUDES="$POSTGRE_INCLUDES $MYSQL_INCLUDES $MANGOS_INCLUDES"
+MANGOS_LIBS="$POSTGRE_LIBS $MYSQL_LIBS $ZLIB $COMPATLIB $SSLLIB $MANGOS_LIBS"
+
 ## Export defined variables
-AC_SUBST(ZLIB)
-AC_SUBST(COMPATLIB)
-AC_SUBST(SSLLIB)
-AC_SUBST(MYSQL_INCLUDES)
-AC_SUBST(MYSQL_LIBS)
-AC_SUBST(POSTGRE_INCLUDES)
-AC_SUBST(POSTGRE_LIBS)
 AC_SUBST(DOXYGEN)
 AC_SUBST(MANGOSD_DEBUG_INFO)
 AC_SUBST(MANGOSD_ENABLE_CLI)
 AC_SUBST(MANGOSD_ENABLE_RA)
+
+## Additional CPPFLAGS and LDFLAGS.
+AC_SUBST(MANGOS_INCLUDES)
+AC_SUBST(MANGOS_LIBS)
 
 ## Set output files.
 AC_CONFIG_HEADERS([config.h])
@@ -245,6 +314,17 @@ AC_CONFIG_FILES([
    src/bindings/Makefile
    src/bindings/universal/Makefile
 ])
+
+## Configure ACE, if needed
+if test X$need_to_build_ace = Xyes; then
+  AC_CONFIG_SUBDIRS([dep/ACE_wrappers])
+fi
+
+AC_CONFIG_COMMANDS([default],[
+  echo ""
+  echo "Configuration of MaNGOS $PACKAGE_VERSION is now complete."
+  echo ""
+ ],[PACKAGE_VERSION=$PACKAGE_VERSION])
 
 ## Disabled Makefiles, until they are ready for a successful make and
 #  make dist run.
