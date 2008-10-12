@@ -21,7 +21,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include_win;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
@@ -77,7 +77,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include_win;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared;..\..\dep\ACE_wrappers"
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -261,7 +261,7 @@
 			<File
 				RelativePath="..\..\dep\include\mersennetwister\MersenneTwister.h">
 			</File>
-			<File			
+			<File
 				RelativePath="..\..\src\shared\Mthread.cpp">
 			</File>
 			<File
@@ -441,20 +441,22 @@
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Extract SVN revision"
-					CommandLine="cd &quot;$(SolutionDir)..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&quot; &quot;..\..&quot;"
+					CommandLine="cd &quot;$(SolutionDir)..\src\shared&quot;
+&quot;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&quot; &quot;..\..&quot;
+"
 					AdditionalDependencies="$(SolutionDir)../.svn/entries"
-					Outputs="svn_revision.h"
-				/>
+					Outputs="svn_revision.h"/>
 			</FileConfiguration>
 			<FileConfiguration
 				Name="Debug|Win32">
 				<Tool
 					Name="VCCustomBuildTool"
 					Description="Extract SVN revision"
-					CommandLine="cd &quot;$(SolutionDir)..\src\shared&quot;&#x0D;&#x0A;&quot;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&quot; &quot;..\..&quot;"
+					CommandLine="cd &quot;$(SolutionDir)..\src\shared&quot;
+&quot;$(TargetDir)\..\gensvnrevision__$(PlatformName)_$(ConfigurationName)\gensvnrevision.exe&quot; &quot;..\..&quot;
+"
 					AdditionalDependencies="$(SolutionDir)../.svn/entries"
-					Outputs="svn_revision.h"
-				/>
+					Outputs="svn_revision.h"/>
 			</FileConfiguration>
 		</File>
 		<File

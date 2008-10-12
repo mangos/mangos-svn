@@ -19,7 +19,7 @@
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
-#include "WorldSocket.h"
+#include "SharedDefines.h"
 #include "WorldSession.h"
 #include "Opcodes.h"
 #include "Log.h"
@@ -379,7 +379,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     data << (uint8)CHAR_CREATE_SUCCESS;
     SendPacket( &data );
 
-    std::string IP_str = GetRemoteAddress();
+    std::string IP_str = GetRemoteAddress().c_str();
     sLog.outBasic("Account: %d (IP: %s) Create Character:[%s]",GetAccountId(),IP_str.c_str(),name.c_str());
     sLog.outChar("Account: %d (IP: %s) Create Character:[%s]",GetAccountId(),IP_str.c_str(),name.c_str());
 }
