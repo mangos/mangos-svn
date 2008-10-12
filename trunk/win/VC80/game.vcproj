@@ -46,7 +46,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\shared\vmap"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include_win;..\..\src\framework;..\..\src\shared;..\..\src\shared\vmap"
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;"
 				StringPooling="false"
 				MinimalRebuild="false"
@@ -127,7 +127,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\shared\vmap"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include_win;..\..\src\framework;..\..\src\shared;..\..\src\shared\vmap"
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;"
 				StringPooling="false"
 				MinimalRebuild="false"
@@ -207,7 +207,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\shared\vmap"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include_win;..\..\src\framework;..\..\src\shared;..\..\src\shared\vmap"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -288,7 +288,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/MP"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\shared\vmap"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include_win;..\..\src\framework;..\..\src\shared;..\..\src\shared\vmap"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -567,6 +567,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\InstanceSaveMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\InstanceSaveMgr.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\ItemHandler.cpp"
 				>
 			</File>
@@ -600,14 +608,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\MapInstanced.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\InstanceSaveMgr.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\InstanceSaveMgr.h"
 				>
 			</File>
 			<File
