@@ -51,14 +51,14 @@
 
 struct ServerPktHeader
 {
-    ACE_UINT16 size;
-    ACE_UINT16 cmd;
+    uint16 size;
+    uint16 cmd;
 };
 
 struct ClientPktHeader
 {
-    ACE_UINT16 size;
-    ACE_UINT32 cmd;
+    uint16 size;
+    uint32 cmd;
 };
 
 #if defined( __GNUC__ )
@@ -260,12 +260,12 @@ int WorldSocket::handle_input (ACE_HANDLE)
             if ((errno == EWOULDBLOCK) ||
                 (errno == EAGAIN))
             {
-                //return 0;
                 return this->Update (); // interesting line ,isnt it ?
             }
 
             DEBUG_LOG ("WorldSocket::handle_input: Peer error closing connection errno = %s", ACE_OS::strerror (errno));
 
+            errno = ECONNRESET;
             return -1;
         }
         case 0:
@@ -273,15 +273,15 @@ int WorldSocket::handle_input (ACE_HANDLE)
             DEBUG_LOG ("WorldSocket::handle_input: Peer has closed connection\n");
 
             errno = ECONNRESET;
-
             return -1;
         }
         case 1:
             return 1;
+        default:
+            return this->Update (); // another interesting line ;)
     }
 
-    //return 0;
-    return this->Update (); // another interesting line ;)
+    ACE_NOTREACHED(return -1);
 }
 
 int WorldSocket::handle_output (ACE_HANDLE)
@@ -370,12 +370,7 @@ int WorldSocket::handle_input_header (void)
 {
     ACE_ASSERT (m_RecvWPct == NULL);
 
-    if (m_Header.length () != sizeof (ClientPktHeader))
-    {
-        sLog.outError ("WorldSocket::handle_input_header: internal error: invalid header");
-        errno = EINVAL;
-        return -1;
-    }
+    ACE_ASSERT (m_Header.length () == sizeof (ClientPktHeader));
 
     m_Crypt.DecryptRecv ((ACE_UINT8*) m_Header.rd_ptr (), sizeof (ClientPktHeader));
 
@@ -389,10 +384,10 @@ int WorldSocket::handle_input_header (void)
 
     if ((header.size < 4) ||
         (header.size > 10240) ||
-        (header.cmd <= 0) ||
+        (header.cmd < 0) ||
         (header.cmd > 10240)
         )
-        {
+    {
         sLog.outError ("WorldSocket::handle_input_header: client sent mailformed packet size = %d , cmd = %d",
                         header.size,
                         header.cmd);
@@ -646,6 +641,7 @@ int WorldSocket::ProcessIncoming (WorldPacket* new_pct)
 
 int WorldSocket::HandleAuthSession (WorldPacket& recvPacket)
 {
+    // NOTE: ATM the socket is singlethreaded, have this in mind ...
     uint8 digest[20];
     uint32 clientSeed;
     uint32 unk2;
