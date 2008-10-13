@@ -20,12 +20,7 @@
 #define MANGOSSERVER_COMMON_H
 
 // config.h needs to be included 1st
-// TODO this thingy looks like hack ,but its not, need to
-// make separate header however, because It makes mess here.
 #ifdef HAVE_CONFIG_H
-// Remove Some things that we will define 
-// This is in case including another config.h 
-// before trinity config.h 
 #ifdef PACKAGE
 #undef PACKAGE
 #endif //PACKAGE
@@ -83,10 +78,6 @@
 
 // must be the first thing to include for it to work
 #include "MemoryLeaks.h"
-
-#ifdef HAVE_CONFIG_H
-# include <config.h>
-#endif
 
 #include "Utilities/HashMap.h"
 #include <stdio.h>
