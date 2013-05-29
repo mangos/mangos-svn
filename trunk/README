@@ -1,6 +1,7 @@
 = MaNGOS -- README =
 
 Copyright (C) 2005-2008 MaNGOS project <http://www.mangosproject.org/>
+Copyright (C) 2008-2013 MaNGOS project <http://www.getmangos.co.uk/>
 
   MaNGOS is free software; you can redistribute it and/or modify
   it under the terms of the GNU General Public License as published by
@@ -28,7 +29,7 @@ Copyright (C) 2005-2008 MaNGOS project <http://www.mangosproject.org/>
 
 Comments are welcome.
 
-	- theluda <theluda@googlemail.com>
+	- The MaNGOS Team <admin@getmangos.co.uk>
 
 == Welcome to MaNGOS ==
 
@@ -37,7 +38,7 @@ implementation for a MMORPG server system. Please see the file COPYING for
 license details.
 
 For further information on the MaNGOS project, please visit our project web
-site at <http://www.mangosproject.org/>
+site at <http://www.getmangos.co.uk/>
 
 Documenation on various development related topics can be found in the doc/
 subdirectory, including Doxygen-generated API documentation.
